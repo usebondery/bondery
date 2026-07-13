@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Füge ein Foto für diesen Kontakt hinzu",
+  "Cancel": "Abbrechen",
+  "ConfirmPhoto": "Foto bestätigen",
+  "DragImageHere": "Bild hierher ziehen oder klicken zum Auswählen",
+  "InvalidFile": "Ungültige Datei",
+  "PhotoUpdateError": "Kontaktfoto konnte nicht aktualisiert werden",
+  "PhotoUpdateSuccess": "Kontaktfoto erfolgreich aktualisiert",
+  "PleaseWait": "Bitte warten",
+  "TitleModal": "Kontaktfoto hochladen",
+  "UpdateError": "Fehler",
+  "UpdateProfilePhoto": "Kontaktfoto aktualisieren",
+  "UpdateSuccess": "Erfolg",
+  "UploadingPhoto": "Wird hochgeladen..."
+}

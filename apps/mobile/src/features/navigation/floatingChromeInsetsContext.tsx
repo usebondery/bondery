@@ -1,11 +1,4 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 
@@ -14,16 +7,13 @@ interface FloatingChromeInsetsContextValue {
   setMeasuredBottomInset: (height: number) => void;
 }
 
-const FloatingChromeInsetsContext =
-  createContext<FloatingChromeInsetsContextValue | null>(null);
+const FloatingChromeInsetsContext = createContext<FloatingChromeInsetsContextValue | null>(null);
 
 export function FloatingChromeInsetsProvider({ children }: { children: ReactNode }) {
   const [measuredBottomInset, setMeasuredBottomInsetState] = useState(0);
 
   const setMeasuredBottomInset = useCallback((height: number) => {
-    setMeasuredBottomInsetState((current) =>
-      current === height ? current : height,
-    );
+    setMeasuredBottomInsetState((current) => (current === height ? current : height));
   }, []);
 
   const value = useMemo(
@@ -45,8 +35,7 @@ export function FloatingChromeInsetsProvider({ children }: { children: ReactNode
 export function useFloatingChromeBottomInset(): number {
   const context = useContext(FloatingChromeInsetsContext);
   const insets = useSafeAreaInsets();
-  const fallback =
-    MOBILE_LAYOUT.floatingTabBar.contentInset + Math.max(insets.bottom, 8);
+  const fallback = MOBILE_LAYOUT.floatingTabBar.contentInset + Math.max(insets.bottom, 8);
 
   if (!context || context.measuredBottomInset <= 0) {
     return fallback;

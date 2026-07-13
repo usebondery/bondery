@@ -1,6 +1,6 @@
 // Validates doc link registry, local files, anchors, and in-app usage.
 import { execSync } from "node:child_process";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -15,16 +15,18 @@ const SCAN_DIRS = [
 ];
 
 const BANNED_PATTERNS = [
-  { pattern: /\$\{HELP_DOCS_URL\}\//, label: "${HELP_DOCS_URL}/…" },
-  { pattern: /\$\{WEBSITE_URL\}\/docs\//, label: "${WEBSITE_URL}/docs/…" },
-  { pattern: /\/docs\/concepts\//, label: '"/docs/concepts/…"' },
+  { label: "$" + "{HELP_DOCS_URL}/…", pattern: /\$\{HELP_DOCS_URL\}\// },
+  { label: "$" + "{WEBSITE_URL}/docs/…", pattern: /\$\{WEBSITE_URL\}\/docs\// },
+  { label: '"/docs/concepts/…"', pattern: /\/docs\/concepts\// },
 ];
 
 function walk(dir, acc = []) {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      if (entry === "node_modules" || entry === ".next") continue;
+      if (entry === "node_modules" || entry === ".next") {
+        continue;
+      }
       walk(full, acc);
     } else if (/\.(tsx?|jsx?)$/.test(entry)) {
       acc.push(full);
@@ -37,9 +39,10 @@ function loadRegistry() {
   const source = readFileSync(GENERATED_FILE, "utf8");
   const entries = new Map();
   const lineRe = /^\s+"([^"]+)":\s*\{\s*path:\s*"([^"]*)"(?:,\s*hash:\s*"([^"]*)")?\s*\},?\s*$/gm;
-  let match;
-  while ((match = lineRe.exec(source)) !== null) {
-    entries.set(match[1], { path: match[2], hash: match[3] });
+  let match = lineRe.exec(source);
+  while (match !== null) {
+    entries.set(match[1], { hash: match[3], path: match[2] });
+    match = lineRe.exec(source);
   }
   if (entries.size === 0) {
     throw new Error(`Could not parse DOC_LINKS from ${GENERATED_FILE}`);
@@ -48,7 +51,9 @@ function loadRegistry() {
 }
 
 function resolveDocFile(docPath) {
-  if (!docPath) return join(DOCS_DIR, "README.md");
+  if (!docPath) {
+    return join(DOCS_DIR, "README.md");
+  }
   return join(DOCS_DIR, `${docPath}.md`);
 }
 
@@ -65,7 +70,9 @@ function main() {
     try {
       const content = readFileSync(filePath, "utf8");
       if (entry.hash && !content.includes(`{#${entry.hash}}`)) {
-        errors.push(`Missing anchor {#${entry.hash}} in ${relative(REPO_ROOT, filePath)} (docId: ${id})`);
+        errors.push(
+          `Missing anchor {#${entry.hash}} in ${relative(REPO_ROOT, filePath)} (docId: ${id})`,
+        );
       }
     } catch {
       errors.push(`Missing doc file ${relative(REPO_ROOT, filePath)} (docId: ${id})`);
@@ -94,7 +101,9 @@ function main() {
     for (const match of content.matchAll(/\bhelpDoc=\{([^}]+)\}/g)) {
       const expr = match[1];
       for (const idMatch of expr.matchAll(/"([^"]+)"/g)) {
-        if (idMatch[1].includes(".")) usedIds.add(idMatch[1]);
+        if (idMatch[1].includes(".")) {
+          usedIds.add(idMatch[1]);
+        }
       }
     }
     for (const match of content.matchAll(/\bdocHref\(\s*"([^"]+)"\s*\)/g)) {

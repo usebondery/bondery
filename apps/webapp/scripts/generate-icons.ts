@@ -1,51 +1,48 @@
-import { generateIcons } from "@bondery/branding/icon-generator";
-import { join, dirname } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { generateIcons } from "@bondery/branding/icon-generator";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const icons = [
   {
-    name: "favicon.ico",
-    size: 48,
     format: "ico" as const,
+    name: "favicon.ico",
     outDir: "../src/app",
+    size: 48,
   },
   {
+    format: "png" as const,
     name: "icon.png",
-    size: 512,
-    format: "png" as const,
     outDir: "../src/app/icons",
+    size: 512,
   },
   {
+    format: "png" as const,
     name: "apple-icon.png",
-    size: 180,
-    format: "png" as const,
     outDir: "../src/app/icons",
+    size: 180,
   },
-  { name: "logo.svg", format: "svg" as const, outDir: "../public" },
+  { format: "svg" as const, name: "logo.svg", outDir: "../public" },
   {
+    format: "png" as const,
     name: "pwa-192.png",
-    size: 192,
-    format: "png" as const,
     outDir: "../public/icons",
+    size: 192,
   },
   {
-    name: "pwa-512.png",
-    size: 512,
     format: "png" as const,
+    name: "pwa-512.png",
     outDir: "../public/icons",
+    size: 512,
   },
 ];
 
-const svgPath = join(
-  __dirname,
-  "../../../packages/branding/src/assets/icon.svg",
-);
+const svgPath = join(__dirname, "../../../packages/branding/src/assets/icon.svg");
 
 generateIcons({
-  svgPath,
-  icons,
   baseDir: __dirname,
+  icons,
+  svgPath,
 });

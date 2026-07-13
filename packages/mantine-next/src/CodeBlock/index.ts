@@ -1,7 +1,7 @@
 export {
   CodeBlock,
-  type CodeBlockProps,
-  type CodeBlockSnippet,
-  type CodeBlockSingleProps,
   type CodeBlockMultiProps,
+  type CodeBlockProps,
+  type CodeBlockSingleProps,
+  type CodeBlockSnippet,
 } from "#CodeBlock/CodeBlock.js";

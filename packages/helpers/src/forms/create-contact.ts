@@ -1,5 +1,5 @@
-import { z } from "zod";
 import { createContactInputSchema } from "@bondery/schemas";
+import { z } from "zod";
 import { parseFullName } from "#name/index.js";
 
 export const createContactFromFullNameSchema = createContactInputSchema.transform((value, ctx) => {
@@ -15,8 +15,8 @@ export const createContactFromFullNameSchema = createContactInputSchema.transfor
 
   return {
     firstName: parsed.firstName,
-    middleName: parsed.middleName,
     lastName: parsed.lastName,
+    middleName: parsed.middleName,
   };
 });
 

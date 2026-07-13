@@ -5,15 +5,12 @@ import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { useScreenChromeInsets } from "./useScreenChromeInsets";
 
 interface TabRootScreenHeaderProps {
-  titleRow: ReactNode;
   accessory?: ReactNode;
+  titleRow: ReactNode;
 }
 
 /** Tab-root screen header with fixed title row height and optional accessory below. */
-export function TabRootScreenHeader({
-  titleRow,
-  accessory,
-}: TabRootScreenHeaderProps) {
+export function TabRootScreenHeader({ titleRow, accessory }: TabRootScreenHeaderProps) {
   const colors = useMobileThemeColors();
   const paddingTop = useScreenChromeInsets("tabRoot");
 
@@ -22,8 +19,8 @@ export function TabRootScreenHeader({
       style={[
         styles.header,
         {
-          paddingTop,
           backgroundColor: colors.appBackground,
+          paddingTop,
         },
       ]}
     >
@@ -34,16 +31,16 @@ export function TabRootScreenHeader({
 }
 
 const styles = StyleSheet.create({
+  accessory: {
+    marginTop: MOBILE_LAYOUT.screenChrome.accessoryTopMargin,
+  },
   header: {
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
     paddingBottom: 8,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
   },
   titleRowSlot: {
     height: MOBILE_LAYOUT.screenChrome.titleRowHeight,
     justifyContent: "center",
     overflow: "hidden",
-  },
-  accessory: {
-    marginTop: MOBILE_LAYOUT.screenChrome.accessoryTopMargin,
   },
 });

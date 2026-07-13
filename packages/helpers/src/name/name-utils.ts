@@ -127,16 +127,16 @@ export function extractNameParts(lastNameInput: string): {
   const words = lastNameInput.trim().split(/\s+/).filter(Boolean);
 
   if (words.length === 0) {
-    return { middleName: null, lastName: "" };
+    return { lastName: "", middleName: null };
   }
 
   if (words.length === 1) {
-    return { middleName: null, lastName: words[0] };
+    return { lastName: words[0], middleName: null };
   }
 
   return {
-    middleName: words[words.length - 2],
     lastName: words[words.length - 1],
+    middleName: words[words.length - 2],
   };
 }
 
@@ -170,7 +170,9 @@ export function normalizeNameCase(name: string): string {
  * @returns Cleaned name string (may be empty if the input was only emojis/titles).
  */
 export function cleanPersonName(rawName: string | null | undefined): string {
-  if (!rawName || typeof rawName !== "string") return "";
+  if (!rawName || typeof rawName !== "string") {
+    return "";
+  }
   return stripNameTitles(stripEmojis(rawName.trim()));
 }
 
@@ -192,20 +194,20 @@ export function parseFullName(fullName: string): {
   const tokens = cleaned.split(/\s+/).filter(Boolean);
 
   if (tokens.length === 0) {
-    return { firstName: "", middleName: null, lastName: null };
+    return { firstName: "", lastName: null, middleName: null };
   }
 
   if (tokens.length === 1) {
-    return { firstName: tokens[0], middleName: null, lastName: null };
+    return { firstName: tokens[0], lastName: null, middleName: null };
   }
 
   if (tokens.length === 2) {
-    return { firstName: tokens[0], middleName: null, lastName: tokens[1] };
+    return { firstName: tokens[0], lastName: tokens[1], middleName: null };
   }
 
   return {
     firstName: tokens[0],
-    middleName: tokens.slice(1, -1).join(" "),
     lastName: tokens[tokens.length - 1],
+    middleName: tokens.slice(1, -1).join(" "),
   };
 }

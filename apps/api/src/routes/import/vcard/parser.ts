@@ -1,12 +1,12 @@
-import { parseVCards, vCardToContactDraft } from "@bondery/vcard";
+import { formatAddressLabel } from "@bondery/helpers";
 import type { VCardPreparedContact } from "@bondery/schemas";
-import type { UploadFile } from "../../../lib/queries.js";
+import { parseVCards, vCardToContactDraft } from "@bondery/vcard";
+import type { UploadFile } from "../../../lib/data/select-fragments.js";
 import {
-  validateStreetAddress,
   cachedGeocodeLinkedInLocation,
   getTimezoneForCoordinates,
-} from "../../../lib/mapy.js";
-import { formatAddressLabel } from "@bondery/helpers";
+  validateStreetAddress,
+} from "../../../lib/integrations/mapy.js";
 
 type PreparedAddress = VCardPreparedContact["addresses"][0];
 
@@ -60,32 +60,32 @@ export async function parseVCardUpload(files: UploadFile[]): Promise<VCardPrepar
       }
 
       contacts.push({
-        tempId: crypto.randomUUID(),
-        firstName,
-        middleName,
-        lastName: lastName ?? "",
-        headline: normalizeString(draft.headline),
-        phones: draft.phones,
-        emails: draft.emails,
         addresses: draft.addresses.map((addr) => ({
           ...addr,
-          addressStateCode: null,
           addressCountryCode: null,
           addressFormatted: null,
+          addressStateCode: null,
           geocodeSource: null,
-          validity: "unverifiable" as const,
           timezone: null,
+          validity: "unverifiable" as const,
         })),
-        linkedin: normalizeString(draft.linkedin),
-        instagram: normalizeString(draft.instagram),
-        whatsapp: normalizeString(draft.whatsapp),
-        facebook: normalizeString(draft.facebook),
-        signal: normalizeString(draft.signal),
-        website: normalizeString(draft.website),
         avatarUri: normalizeString(draft.avatarUri),
+        emails: draft.emails,
+        facebook: normalizeString(draft.facebook),
+        firstName,
+        headline: normalizeString(draft.headline),
         importantDates: draft.importantDates,
-        isValid: hasName,
+        instagram: normalizeString(draft.instagram),
         issues,
+        isValid: hasName,
+        lastName: lastName ?? "",
+        linkedin: normalizeString(draft.linkedin),
+        middleName,
+        phones: draft.phones,
+        signal: normalizeString(draft.signal),
+        tempId: crypto.randomUUID(),
+        website: normalizeString(draft.website),
+        whatsapp: normalizeString(draft.whatsapp),
       });
     }
   }
@@ -93,7 +93,7 @@ export async function parseVCardUpload(files: UploadFile[]): Promise<VCardPrepar
   // ── Geocode & validate all addresses ────────────────────────────────────────
   type AddressJob = { contactIndex: number; addressIndex: number };
   const jobs: AddressJob[] = contacts.flatMap((c, ci) =>
-    c.addresses.map((_, ai) => ({ contactIndex: ci, addressIndex: ai })),
+    c.addresses.map((_, ai) => ({ addressIndex: ai, contactIndex: ci })),
   );
 
   for (let i = 0; i < jobs.length; i += GEOCODE_BATCH_SIZE) {
@@ -146,26 +146,26 @@ async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
         addressLine1: streetResult.name,
         addressLine2: addr.addressLine2 ?? undefined,
         city: streetResult.city ?? undefined,
+        countryCode: streetResult.countryCode ?? undefined,
         postalCode: streetResult.postalCode ?? undefined,
         state: streetResult.state ?? undefined,
-        countryCode: streetResult.countryCode ?? undefined,
       });
 
       return {
         ...addr,
-        addressLine1: streetResult.name || street,
-        addressPostalCode: streetResult.postalCode ?? addr.addressPostalCode,
         addressCity: streetResult.city ?? city,
-        addressState: streetResult.state ?? state,
-        addressStateCode: streetResult.stateCode,
         addressCountry: streetResult.country ?? country,
         addressCountryCode: streetResult.countryCode,
         addressFormatted,
+        addressLine1: streetResult.name || street,
+        addressPostalCode: streetResult.postalCode ?? addr.addressPostalCode,
+        addressState: streetResult.state ?? state,
+        addressStateCode: streetResult.stateCode,
+        geocodeSource: "mapy.com",
         latitude: streetResult.lat,
         longitude: streetResult.lon,
-        geocodeSource: "mapy.com",
-        validity: "valid",
         timezone,
+        validity: "valid",
       };
     }
 
@@ -184,25 +184,29 @@ async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
     const seen = new Set<string>();
     for (const candidate of candidates) {
       const key = candidate.trim().toLowerCase();
-      if (seen.has(key)) continue;
+      if (seen.has(key)) {
+        continue;
+      }
       seen.add(key);
 
       const result = await cachedGeocodeLinkedInLocation(candidate);
-      if (!result) continue;
+      if (!result) {
+        continue;
+      }
 
       return {
         ...addr,
-        latitude: addr.latitude ?? result.geo.lat,
-        longitude: addr.longitude ?? result.geo.lon,
         addressCity: city ?? result.geo.city,
-        addressState: state ?? result.geo.state,
-        addressStateCode: result.geo.stateCode,
         addressCountry: country ?? result.geo.country,
         addressCountryCode: result.geo.countryCode,
         addressFormatted: result.geo.formattedLabel,
+        addressState: state ?? result.geo.state,
+        addressStateCode: result.geo.stateCode,
         geocodeSource: "mapy.com",
-        validity: "unverifiable",
+        latitude: addr.latitude ?? result.geo.lat,
+        longitude: addr.longitude ?? result.geo.lon,
         timezone: result.timezone,
+        validity: "unverifiable",
       };
     }
   }

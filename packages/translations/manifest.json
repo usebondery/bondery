@@ -1,0 +1,334 @@
+{
+  "namespaces": {
+    "AboutPage": {
+      "path": "features/pages/AboutPage.json",
+      "platforms": ["web"]
+    },
+    "AddPeopleToGroupSelectionModal": {
+      "path": "features/modals/AddPeopleToGroupSelectionModal.json",
+      "platforms": ["web"]
+    },
+    "AppNavigation": {
+      "path": "platform/web/AppNavigation.json",
+      "platforms": ["web"]
+    },
+    "ChatPage": {
+      "path": "features/pages/ChatPage.json",
+      "platforms": ["web"]
+    },
+    "Checkout": {
+      "path": "features/pages/Checkout.json",
+      "platforms": ["web"]
+    },
+    "CommandPalette": {
+      "path": "platform/web/CommandPalette.json",
+      "platforms": ["web"]
+    },
+    "ContactActionMenu": {
+      "path": "features/sections/ContactActionMenu.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactAddress": {
+      "path": "features/sections/ContactAddress.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactIdentityFields": {
+      "path": "features/sections/ContactIdentityFields.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactImportantDates": {
+      "path": "features/sections/ContactImportantDates.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactInfo": {
+      "path": "features/sections/ContactInfo.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactPage": {
+      "path": "features/pages/ContactPage.json",
+      "platforms": ["web"]
+    },
+    "ContactPhotoUpload": {
+      "path": "features/sections/ContactPhotoUpload.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactPreferenceSection": {
+      "path": "features/sections/ContactPreferenceSection.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ContactsTable": {
+      "path": "features/sections/ContactsTable.json",
+      "platforms": ["web", "mobile"]
+    },
+    "common": {
+      "path": "common.json",
+      "platforms": ["web", "mobile", "website", "extension"]
+    },
+    "EnrichFromLinkedIn": {
+      "path": "features/sections/EnrichFromLinkedIn.json",
+      "platforms": ["web", "mobile"]
+    },
+    "EnrichRecommendationCard": {
+      "path": "features/sections/EnrichRecommendationCard.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ExtensionPopup": {
+      "path": "platform/extension/ExtensionPopup.json",
+      "platforms": ["extension"]
+    },
+    "ExtensionSocialButtons": {
+      "path": "platform/extension/ExtensionSocialButtons.json",
+      "platforms": ["extension"]
+    },
+    "ExtensionVersionCheck": {
+      "path": "features/sections/ExtensionVersionCheck.json",
+      "platforms": ["web", "mobile", "extension"]
+    },
+    "FeedbackPage": {
+      "path": "features/pages/FeedbackPage.json",
+      "platforms": ["web"]
+    },
+    "FixContactsPage": {
+      "path": "features/pages/FixContactsPage.json",
+      "platforms": ["web"]
+    },
+    "GroupDetailPage": {
+      "path": "features/pages/GroupDetailPage.json",
+      "platforms": ["web"]
+    },
+    "GroupsPage": {
+      "path": "features/pages/GroupsPage.json",
+      "platforms": ["web"]
+    },
+    "glossary": {
+      "path": "glossary.json",
+      "platforms": ["web", "mobile", "website", "extension"]
+    },
+    "HomePage": {
+      "path": "features/pages/HomePage.json",
+      "platforms": ["web"]
+    },
+    "InteractionsPage": {
+      "path": "features/pages/InteractionsPage.json",
+      "platforms": ["web"]
+    },
+    "InteractionTypes": {
+      "path": "features/sections/InteractionTypes.json",
+      "platforms": ["web", "mobile"]
+    },
+    "KeepInTouch": {
+      "path": "features/pages/KeepInTouch.json",
+      "platforms": ["web"]
+    },
+    "Languages": {
+      "path": "features/sections/Languages.json",
+      "platforms": ["web", "mobile"]
+    },
+    "LinkedInData": {
+      "path": "features/sections/LinkedInData.json",
+      "platforms": ["web", "mobile"]
+    },
+    "LoginPage": {
+      "path": "features/pages/LoginPage.json",
+      "platforms": ["web", "mobile"]
+    },
+    "MapCommon": {
+      "path": "features/sections/MapCommon.json",
+      "platforms": ["web", "mobile"]
+    },
+    "MapPage": {
+      "path": "features/pages/MapPage.json",
+      "platforms": ["web"]
+    },
+    "MergeWithModal": {
+      "path": "features/modals/MergeWithModal.json",
+      "platforms": ["web"]
+    },
+    "MobileAuth": {
+      "path": "platform/mobile/Auth.json",
+      "platforms": ["mobile"]
+    },
+    "MobileColorPicker": {
+      "path": "platform/mobile/ColorPicker.json",
+      "platforms": ["mobile"]
+    },
+    "MobileContactDetail": {
+      "path": "platform/mobile/ContactDetail.json",
+      "platforms": ["mobile"]
+    },
+    "MobileContactIdentity": {
+      "path": "platform/mobile/ContactIdentity.json",
+      "platforms": ["mobile"]
+    },
+    "MobileContacts": {
+      "path": "platform/mobile/Contacts.json",
+      "platforms": ["mobile"]
+    },
+    "MobileCreateContact": {
+      "path": "platform/mobile/CreateContact.json",
+      "platforms": ["mobile"]
+    },
+    "MobileEmojiPicker": {
+      "path": "platform/mobile/EmojiPicker.json",
+      "platforms": ["mobile"]
+    },
+    "MobileGroups": {
+      "path": "platform/mobile/Groups.json",
+      "platforms": ["mobile"]
+    },
+    "MobileNavigation": {
+      "path": "platform/mobile/Navigation.json",
+      "platforms": ["mobile"]
+    },
+    "MobileSettings": {
+      "path": "platform/mobile/Settings.json",
+      "platforms": ["mobile"]
+    },
+    "MobileShareContactEmail": {
+      "path": "platform/mobile/ShareContactEmail.json",
+      "platforms": ["mobile"]
+    },
+    "MobileTags": {
+      "path": "platform/mobile/Tags.json",
+      "platforms": ["mobile"]
+    },
+    "NotesEditor": {
+      "path": "features/sections/NotesEditor.json",
+      "platforms": ["web", "mobile"]
+    },
+    "NotesSlashCommands": {
+      "path": "features/sections/NotesSlashCommands.json",
+      "platforms": ["web", "mobile"]
+    },
+    "NotFoundPage": {
+      "path": "features/pages/NotFoundPage.json",
+      "platforms": ["web"]
+    },
+    "OAuthConsent": {
+      "path": "features/pages/OAuthConsent.json",
+      "platforms": ["web"]
+    },
+    "Onboarding": {
+      "path": "features/pages/Onboarding.json",
+      "platforms": ["web"]
+    },
+    "PageHeader": {
+      "path": "platform/web/PageHeader.json",
+      "platforms": ["web"]
+    },
+    "PeoplePage": {
+      "path": "features/pages/PeoplePage.json",
+      "platforms": ["web"]
+    },
+    "PeopleSearchSpotlight": {
+      "path": "platform/web/PeopleSearchSpotlight.json",
+      "platforms": ["web"]
+    },
+    "PersonRelationships": {
+      "path": "features/sections/PersonRelationships.json",
+      "platforms": ["web", "mobile"]
+    },
+    "PersonTabs": {
+      "path": "features/sections/PersonTabs.json",
+      "platforms": ["web", "mobile"]
+    },
+    "SettingsPage": {
+      "path": "features/pages/SettingsPage.json",
+      "platforms": ["web", "mobile"]
+    },
+    "ShareContactModal": {
+      "path": "features/modals/ShareContactModal.json",
+      "platforms": ["web"]
+    },
+    "SingleContactPage": {
+      "path": "features/pages/SingleContactPage.json",
+      "platforms": ["web"]
+    },
+    "Socials": {
+      "path": "features/sections/Socials.json",
+      "platforms": ["web", "mobile"]
+    },
+    "StatsPage": {
+      "path": "features/pages/StatsPage.json",
+      "platforms": ["web"]
+    },
+    "TagsInput": {
+      "path": "features/sections/TagsInput.json",
+      "platforms": ["web", "mobile"]
+    },
+    "TagsSettings": {
+      "path": "features/sections/TagsSettings.json",
+      "platforms": ["web", "mobile"]
+    },
+    "UnavailablePage": {
+      "path": "features/pages/UnavailablePage.json",
+      "platforms": ["web"]
+    },
+    "validation": {
+      "path": "validation.json",
+      "platforms": ["web", "mobile", "extension"]
+    }
+  },
+  "preload": {
+    "extension.shell": [
+      "common",
+      "validation",
+      "glossary",
+      "ExtensionPopup",
+      "ExtensionSocialButtons"
+    ],
+    "mobile.auth": ["LoginPage", "MobileAuth"],
+    "mobile.contactDetail": [
+      "MobileContactDetail",
+      "MobileContactIdentity",
+      "ContactInfo",
+      "ContactImportantDates",
+      "ContactAddress",
+      "Socials",
+      "TagsInput",
+      "EnrichFromLinkedIn"
+    ],
+    "mobile.contactsTab": ["MobileContacts", "MobileGroups", "MobileTags"],
+    "mobile.createContact": ["MobileCreateContact"],
+    "mobile.settingsTab": ["MobileSettings", "Languages", "TagsSettings", "SettingsPage"],
+    "mobile.shareContact": ["MobileShareContactEmail", "ShareContactModal"],
+    "mobile.shell": ["common", "validation", "glossary", "MobileNavigation"],
+    "web.admin": ["StatsPage"],
+    "web.chat": ["ChatPage"],
+    "web.checkout": ["Checkout"],
+    "web.feedback": ["FeedbackPage"],
+    "web.fix": ["FixContactsPage", "MergeWithModal", "EnrichRecommendationCard"],
+    "web.groups": ["GroupsPage", "GroupDetailPage"],
+    "web.home": ["HomePage"],
+    "web.interactions": ["InteractionsPage", "InteractionTypes"],
+    "web.keepInTouch": ["KeepInTouch"],
+    "web.login": ["LoginPage"],
+    "web.map": ["MapPage", "MapCommon"],
+    "web.oauth": ["OAuthConsent"],
+    "web.onboarding": ["Onboarding"],
+    "web.people": ["PeoplePage", "ContactsTable", "PeopleSearchSpotlight"],
+    "web.person": [
+      "SingleContactPage",
+      "ContactInfo",
+      "ContactIdentityFields",
+      "Socials",
+      "NotesEditor",
+      "InteractionTypes",
+      "ContactImportantDates",
+      "ContactAddress",
+      "PersonRelationships",
+      "ContactActionMenu",
+      "EnrichFromLinkedIn"
+    ],
+    "web.settings": ["SettingsPage", "TagsSettings", "Languages"],
+    "web.shell": [
+      "common",
+      "validation",
+      "glossary",
+      "AppNavigation",
+      "CommandPalette",
+      "PageHeader"
+    ],
+    "web.unavailable": ["UnavailablePage"]
+  }
+}

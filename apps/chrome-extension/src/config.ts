@@ -12,15 +12,14 @@
  */
 
 export const config = {
+  /** API base URL */
+  apiUrl: import.meta.env.WXT_API_URL,
   /** Webapp base URL (used for app navigation and redirects) */
   appUrl: import.meta.env.WXT_WEBAPP_URL,
 
-  /** API base URL */
-  apiUrl: import.meta.env.WXT_API_URL,
+  /** OAuth 2.1 client ID registered in Supabase Dashboard */
+  oauthClientId: import.meta.env.WXT_SUPABASE_OAUTH_CLIENT_ID,
 
   /** Supabase project URL (for OAuth token endpoints) */
   supabaseUrl: import.meta.env.WXT_SUPABASE_URL,
-
-  /** OAuth 2.1 client ID registered in Supabase Dashboard */
-  oauthClientId: import.meta.env.WXT_SUPABASE_OAUTH_CLIENT_ID,
 } as const;

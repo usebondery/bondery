@@ -1,29 +1,13 @@
-import type {
-  Contact,
-  ContactAddressEntry,
-  EmailEntry,
-  PhoneEntry,
-} from "@bondery/schemas";
-import {
-  abbreviateLocationCountry,
-  formatAddressLabel,
-} from "@bondery/helpers/address";
+import { abbreviateLocationCountry, formatAddressLabel } from "@bondery/helpers/address";
+import { formatContactName } from "@bondery/helpers/contact";
 import { combinePhoneNumber, formatPhoneNumber } from "@bondery/helpers/phone";
+import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { MS_PER_DAY } from "../../lib/config";
+import i18n from "../../lib/i18n/i18n";
 import { AVATAR_COLOR_PALETTE_HEX } from "../../theme/colors";
 import { formatImportantDate, isYearlessDate, resolveDateLocale } from "./importantDateUtils";
-import i18n from "../../lib/i18n/i18n";
 
-export function formatContactName(contact: Contact): string {
-  const firstName = contact.firstName?.trim() || "";
-  const middleName = contact.middleName?.trim() || "";
-  const lastName = contact.lastName?.trim() || "";
-
-  return (
-    [firstName, middleName, lastName].filter(Boolean).join(" ").trim() ||
-    "Unknown"
-  );
-}
+export { formatContactName };
 
 export function getContactInitial(contact: Contact): string {
   const fullName = formatContactName(contact);
@@ -39,14 +23,13 @@ export function getContactInitials(contact: Contact): string {
   return first + last || first || "#";
 }
 
-function getAvatarHash(
-  first: string | null | undefined,
-  last: string | null | undefined,
-): number {
+function getAvatarHash(first: string | null | undefined, last: string | null | undefined): number {
   const a = (first || "").trim().toLowerCase();
   const b = (last || "").trim().toLowerCase();
   const normalized = `${a} ${b}`.trim();
-  if (!normalized) return 0;
+  if (!normalized) {
+    return 0;
+  }
   let hash = 0;
   for (let i = 0; i < normalized.length; i++) {
     hash = (hash << 5) - hash + normalized.charCodeAt(i);
@@ -94,8 +77,7 @@ function parseEmails(emails: Contact["emails"]): EmailEntry[] {
 
 export function getPrimaryPhone(contact: Contact): string | null {
   const phone =
-    parsePhones(contact.phones).find((entry) => entry.preferred) ||
-    parsePhones(contact.phones)[0];
+    parsePhones(contact.phones).find((entry) => entry.preferred) || parsePhones(contact.phones)[0];
 
   return phone?.value || null;
 }
@@ -140,13 +122,23 @@ export function daysSince(dateStr: string): number {
 
 export function formatRelativeDate(dateStr: string): string {
   const diffDays = daysSince(dateStr);
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays} days ago`;
+  if (diffDays === 0) {
+    return "Today";
+  }
+  if (diffDays === 1) {
+    return "Yesterday";
+  }
+  if (diffDays < 7) {
+    return `${diffDays} days ago`;
+  }
   const weeks = Math.floor(diffDays / 7);
-  if (diffDays < 30) return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+  if (diffDays < 30) {
+    return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
+  }
   const months = Math.floor(diffDays / 30);
-  if (diffDays < 365) return `${months} month${months > 1 ? "s" : ""} ago`;
+  if (diffDays < 365) {
+    return `${months} month${months > 1 ? "s" : ""} ago`;
+  }
   const years = Math.floor(diffDays / 365);
   return `${years} year${years > 1 ? "s" : ""} ago`;
 }
@@ -159,8 +151,8 @@ export function formatAbsoluteDate(dateStr: string): string {
   }
 
   return new Date(dateStr).toLocaleDateString(locale, {
-    month: "short",
     day: "numeric",
+    month: "short",
     year: "numeric",
   });
 }
@@ -169,20 +161,28 @@ export function formatAbsoluteDate(dateStr: string): string {
 export function formatRelativeEditedAt(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const diffMin = Math.floor(diffMs / 60_000);
-  if (diffMin < 1) return "Edited just now";
-  if (diffMin < 60) return `Edited ${diffMin}m ago`;
+  if (diffMin < 1) {
+    return "Edited just now";
+  }
+  if (diffMin < 60) {
+    return `Edited ${diffMin}m ago`;
+  }
   const diffH = Math.floor(diffMin / 60);
-  if (diffH < 24) return `Edited ${diffH}h ago`;
+  if (diffH < 24) {
+    return `Edited ${diffH}h ago`;
+  }
 
   const relative = formatRelativeDate(dateStr);
-  if (relative === "Today") return "Edited today";
-  if (relative === "Yesterday") return "Edited yesterday";
+  if (relative === "Today") {
+    return "Edited today";
+  }
+  if (relative === "Yesterday") {
+    return "Edited yesterday";
+  }
   return `Edited ${relative}`;
 }
 
-function parseAddresses(
-  addresses: Contact["addresses"],
-): ContactAddressEntry[] {
+function parseAddresses(addresses: Contact["addresses"]): ContactAddressEntry[] {
   if (!Array.isArray(addresses)) {
     return [];
   }
@@ -216,9 +216,9 @@ export function formatDisplayAddress(address: ContactAddressEntry): string {
     addressLine1: address.addressLine1,
     addressLine2: address.addressLine2,
     city: address.addressCity,
+    countryCode: address.addressCountryCode,
     postalCode: address.addressPostalCode,
     state: address.addressState,
-    countryCode: address.addressCountryCode,
   });
 
   if (formatted) {
@@ -229,10 +229,10 @@ export function formatDisplayAddress(address: ContactAddressEntry): string {
 }
 
 export interface AddressCardLines {
-  streetLine: string;
   cityLine: string;
-  countryName: string | null;
   countryCode: string | null;
+  countryName: string | null;
+  streetLine: string;
 }
 
 function getCountryDisplayName(countryCode: string | null | undefined): string | null {
@@ -257,11 +257,10 @@ export function formatAddressCardLines(address: ContactAddressEntry): AddressCar
 
   const city = address.addressCity?.trim() ?? "";
   const postalCode = address.addressPostalCode?.trim() ?? "";
-  let cityLine = [city, postalCode].filter(Boolean).join(" ");
+  const cityLine = [city, postalCode].filter(Boolean).join(" ");
 
   const countryCode = address.addressCountryCode?.trim() || null;
-  const countryName =
-    address.addressCountry?.trim() || getCountryDisplayName(countryCode) || null;
+  const countryName = address.addressCountry?.trim() || getCountryDisplayName(countryCode) || null;
 
   if (!streetLine && !cityLine) {
     const fallback = formatDisplayAddress(address);
@@ -271,10 +270,10 @@ export function formatAddressCardLines(address: ContactAddressEntry): AddressCar
   }
 
   return {
-    streetLine,
     cityLine,
-    countryName,
     countryCode,
+    countryName,
+    streetLine,
   };
 }
 
@@ -284,13 +283,9 @@ export function formatContactLocation(contact: Contact): string | null {
 }
 
 export function parseContactPhones(contact: Contact): PhoneEntry[] {
-  return parsePhones(contact.phones).filter(
-    (phone) => phone.value.trim().length > 0,
-  );
+  return parsePhones(contact.phones).filter((phone) => phone.value.trim().length > 0);
 }
 
 export function parseContactEmails(contact: Contact): EmailEntry[] {
-  return parseEmails(contact.emails).filter(
-    (email) => email.value.trim().length > 0,
-  );
+  return parseEmails(contact.emails).filter((email) => email.value.trim().length > 0);
 }

@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import * as SplashScreen from "expo-splash-screen";
 import type { Session } from "@supabase/supabase-js";
+import * as SplashScreen from "expo-splash-screen";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { supabase } from "../supabase/client";
 import { AuthContext, type AuthContextValue } from "./useAuth";
 
@@ -82,9 +82,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      session,
-      isLoadingSession,
       isAuthenticated: !isLoadingSession && session !== null,
+      isLoadingSession,
+      session,
     }),
     [isLoadingSession, session],
   );

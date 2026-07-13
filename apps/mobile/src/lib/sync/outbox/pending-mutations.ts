@@ -1,15 +1,12 @@
-import type { SQLiteDatabase } from "expo-sqlite";
 import type { SyncMutation } from "@bondery/schemas/sync";
-import { getSyncDatabase } from "../db";
+import type { SQLiteDatabase } from "expo-sqlite";
 import { SYNC_META_KEYS } from "../constants";
-import { normalizeSyncDatetime } from "../sync-datetime";
+import { getSyncDatabase } from "../db";
 import { generateUuid, isValidUuid } from "../ids";
+import { normalizeSyncDatetime } from "../sync-datetime";
 
 function getMeta(db: SQLiteDatabase, key: string): string | null {
-  const row = db.getFirstSync<{ value: string }>(
-    "SELECT value FROM sync_meta WHERE key = ?",
-    key,
-  );
+  const row = db.getFirstSync<{ value: string }>("SELECT value FROM sync_meta WHERE key = ?", key);
   return row?.value ?? null;
 }
 
@@ -51,7 +48,7 @@ export function enqueuePendingMutation(mutation: SyncMutation): void {
     mutation.id,
     mutation.clientSequence,
     mutation.type,
-    "entityId" in mutation ? mutation.entityId ?? null : null,
+    "entityId" in mutation ? (mutation.entityId ?? null) : null,
     normalizeSyncDatetime(mutation.baseUpdatedAt) ?? null,
     JSON.stringify(mutation.payload ?? {}),
     new Date().toISOString(),
@@ -80,8 +77,8 @@ export function listPendingMutations(limit = 50): SyncMutation[] {
     const payload = JSON.parse(row.payload_json) as Record<string, unknown>;
     const baseUpdatedAt = normalizeSyncDatetime(row.base_updated_at);
     const base = {
-      id: row.id,
       clientSequence: row.client_sequence,
+      id: row.id,
       ...(baseUpdatedAt ? { baseUpdatedAt } : {}),
       payload,
     };
@@ -89,8 +86,8 @@ export function listPendingMutations(limit = 50): SyncMutation[] {
     if (row.entity_id) {
       return {
         ...base,
-        type: row.mutation_type,
         entityId: row.entity_id,
+        type: row.mutation_type,
       } as SyncMutation;
     }
 
@@ -138,9 +135,11 @@ export function countConflictMutations(): number {
 
 export function listRejectedMutations(): Array<{ id: string; errorMessage: string | null }> {
   const db = getSyncDatabase();
-  return db.getAllSync<{ id: string; error_message: string | null }>(
-    "SELECT id, error_message FROM pending_mutations WHERE status = 'rejected'",
-  ).map((row) => ({ id: row.id, errorMessage: row.error_message }));
+  return db
+    .getAllSync<{ id: string; error_message: string | null }>(
+      "SELECT id, error_message FROM pending_mutations WHERE status = 'rejected'",
+    )
+    .map((row) => ({ errorMessage: row.error_message, id: row.id }));
 }
 
 export function setLastServerSequence(value: number): void {

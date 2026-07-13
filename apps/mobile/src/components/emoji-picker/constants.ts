@@ -4,17 +4,17 @@ import { MOBILE_HIT_SLOP, MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/t
 export const EMOJI_PICKER_GRID_COLUMNS = 7;
 
 export const EMOJI_PICKER_LAYOUT = {
-  gridColumns: EMOJI_PICKER_GRID_COLUMNS,
-  gridGap: 4,
-  gridHorizontalPadding: MOBILE_LAYOUT.spacing.horizontal,
   cellBorderWidth: 2,
+  cellHitSlop: MOBILE_HIT_SLOP.compact,
   /** Matches web `EditGroupModal` emoji picker width. */
   compactTriggerWidth: 80,
-  /** Same as `MobileTextInput` default size. */
-  triggerEmojiFontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
+  gridColumns: EMOJI_PICKER_GRID_COLUMNS,
   /** Slightly larger than trigger text for legibility in the grid. */
   gridEmojiFontSize: MOBILE_TYPOGRAPHY.fontSize.cardTitle,
-  cellHitSlop: MOBILE_HIT_SLOP.compact,
+  gridGap: 4,
+  gridHorizontalPadding: MOBILE_LAYOUT.spacing.horizontal,
+  /** Same as `MobileTextInput` default size. */
+  triggerEmojiFontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
 } as const;
 
 export type EmojiGridRow = {

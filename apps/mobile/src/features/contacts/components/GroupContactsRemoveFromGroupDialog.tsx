@@ -1,18 +1,15 @@
 import { IconUsersMinus } from "@tabler/icons-react-native";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
-import { groupsDomain } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { removeContactsFromGroup } from "../../../lib/domains/groups";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { useContactsSelection } from "../contactsSelectionStore";
 import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
-import {
-  useContactsEffectiveSelectedCount,
-  useContactsSelection,
-} from "../contactsSelectionStore";
 
 interface GroupContactsRemoveFromGroupDialogProps {
-  groupId: string;
   debouncedQuery: string;
+  groupId: string;
   onMembersReloaded: () => Promise<void>;
 }
 
@@ -21,10 +18,10 @@ export function GroupContactsRemoveFromGroupDialog({
   debouncedQuery,
   onMembersReloaded,
 }: GroupContactsRemoveFromGroupDialogProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const effectiveSelectedCount = useContactsEffectiveSelectedCount();
   const isRemoveFromGroupConfirmOpen = useContactsSelection(
     (state) => state.isRemoveFromGroupConfirmOpen,
   );
@@ -38,25 +35,23 @@ export function GroupContactsRemoveFromGroupDialog({
   const handleConfirmRemoveFromGroup = () => {
     void (async () => {
       const selectionState = useContactsSelection.getState();
-      const personIds = resolveContactsSelectionPersonIds(
-        selectionState,
-        debouncedQuery,
-        { groupId },
-      );
+      const personIds = resolveContactsSelectionPersonIds(selectionState, debouncedQuery, {
+        groupId,
+      });
 
       setIsRemovingFromGroup(true);
 
       try {
-        groupsDomain.removeMembers(groupId, personIds);
+        removeContactsFromGroup(groupId, personIds);
 
         exitSelectionMode();
         setRemoveFromGroupConfirmOpen(false);
         await onMembersReloaded();
       } catch {
         showToast({
+          description: tMobileContacts("RemoveFromGroupFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.Contacts.RemoveFromGroupFailed"),
         });
       } finally {
         setIsRemovingFromGroup(false);
@@ -66,32 +61,28 @@ export function GroupContactsRemoveFromGroupDialog({
 
   return (
     <ActionSheetPopup
-      open={isRemoveFromGroupConfirmOpen}
-      title={t("MobileApp.Contacts.RemoveFromGroupConfirmTitle").replace(
-        "{count}",
-        String(effectiveSelectedCount),
-      )}
-      isBusy={isRemovingFromGroup}
-      onOpenChange={setRemoveFromGroupConfirmOpen}
-      onClose={() => setRemoveFromGroupConfirmOpen(false)}
       actions={[
         {
-          label: t("MobileApp.Common.Cancel"),
-          onPress: () => setRemoveFromGroupConfirmOpen(false),
           disabled: isRemovingFromGroup,
+          label: t("actions.cancel"),
+          onPress: () => setRemoveFromGroupConfirmOpen(false),
           tone: "neutral",
           variant: "outline",
         },
         {
-          label: t("MobileApp.Contacts.RemoveFromGroup"),
-          icon: <IconUsersMinus size={16} color={colors.textOnPrimary} />,
-          onPress: handleConfirmRemoveFromGroup,
-          loading: isRemovingFromGroup,
           disabled: isRemovingFromGroup,
+          icon: <IconUsersMinus color={colors.textOnPrimary} size={16} />,
+          label: tMobileContacts("RemoveFromGroup"),
+          loading: isRemovingFromGroup,
+          onPress: handleConfirmRemoveFromGroup,
           tone: "danger",
           variant: "filled",
         },
       ]}
+      isBusy={isRemovingFromGroup}
+      onClose={() => setRemoveFromGroupConfirmOpen(false)}
+      onOpenChange={setRemoveFromGroupConfirmOpen}
+      open={isRemoveFromGroupConfirmOpen}
     />
   );
 }

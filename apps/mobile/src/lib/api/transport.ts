@@ -1,6 +1,7 @@
+import { buildApiErrorFromResponse } from "@bondery/helpers/api";
 import { API_URL } from "../config";
 import { supabase } from "../supabase/client";
-import { resolveApiErrorMessage, resolveFetchFailureMessage } from "./parseApiErrorBody";
+import { resolveFetchFailureMessage } from "./parseApiErrorBody";
 
 export async function getBearerHeaders(): Promise<Record<string, string>> {
   if (!supabase) {
@@ -56,13 +57,10 @@ export async function throwApiResponseError(params: {
     await invalidateSessionOnUnauthorized();
   }
 
-  throw new Error(
-    resolveApiErrorMessage({
-      status: params.status,
-      bodyText: params.bodyText,
-      contentType: params.contentType,
-    }),
-  );
+  throw buildApiErrorFromResponse({
+    bodyText: params.bodyText,
+    status: params.status,
+  });
 }
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
@@ -71,8 +69,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   }
 
   const authHeaders = await getBearerHeaders();
-  const hasJsonBody =
-    init?.body !== undefined && init?.body !== null && init?.body !== "";
+  const hasJsonBody = init?.body !== undefined && init?.body !== null && init?.body !== "";
 
   const headers: Record<string, string> = {
     ...(authHeaders as Record<string, string>),
@@ -91,9 +88,9 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   if (!response.ok) {
     const text = await response.text();
     await throwApiResponseError({
-      status: response.status,
       bodyText: text,
       contentType: response.headers.get("content-type"),
+      status: response.status,
     });
   }
 

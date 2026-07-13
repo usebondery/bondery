@@ -25,9 +25,15 @@ export function checkExtensionAuth(timeoutMs = 2000): Promise<ExtensionAuthState
     };
 
     const onMessage = (event: MessageEvent) => {
-      if (event.source !== window) return;
-      if (event.data?.type !== AUTH_STATUS_RESPONSE_TYPE) return;
-      if (event.data?.requestId !== requestId) return;
+      if (event.source !== window) {
+        return;
+      }
+      if (event.data?.type !== AUTH_STATUS_RESPONSE_TYPE) {
+        return;
+      }
+      if (event.data?.requestId !== requestId) {
+        return;
+      }
 
       cleanup();
       resolve(event.data.payload?.isAuthenticated ? "authenticated" : "not_authenticated");
@@ -42,8 +48,8 @@ export function checkExtensionAuth(timeoutMs = 2000): Promise<ExtensionAuthState
 
     window.postMessage(
       {
-        type: AUTH_STATUS_REQUEST_TYPE,
         requestId,
+        type: AUTH_STATUS_REQUEST_TYPE,
       },
       window.location.origin,
     );

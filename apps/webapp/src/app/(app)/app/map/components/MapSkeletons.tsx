@@ -1,6 +1,6 @@
-import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
-import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
-import { PeopleTableSkeleton } from "@/app/(app)/app/people/components/PeopleSkeletons";
+import { Box, Paper, SimpleGrid, Skeleton } from "@mantine/core";
+import { PeopleTableSkeleton } from "@/app/(app)/app/people/components/chrome/PeopleSkeletons";
+import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**
  * Full-page skeleton for the Map page.
@@ -18,7 +18,7 @@ export function MapPageSkeleton() {
         <PeopleTableSkeleton columns={["name", "location", "headline"]} />
 
         {/* Right: map area placeholder */}
-        <Paper withBorder shadow="sm" radius="md" style={{ minHeight: 400 }}>
+        <Paper radius="md" shadow="sm" style={{ minHeight: 400 }} withBorder>
           <Skeleton height="100%" radius="md" style={{ minHeight: 400 }} />
         </Paper>
       </SimpleGrid>

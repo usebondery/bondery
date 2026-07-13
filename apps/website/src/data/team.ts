@@ -19,20 +19,20 @@ export type TeamMember = {
  * the `author` field in PostMeta, instead of hardcoding a string.
  */
 export const sveetya: TeamMember = {
-  name: "Sveetya",
-  image: "/images/team/marek.jpg",
-  role: "Engineering",
   description: "Built the foundation.",
+  image: "/images/team/marek.jpg",
   linkedin: "https://linkedin.com/in/mareksvitek",
+  name: "Sveetya",
+  role: "Engineering",
   x: "https://x.com/sveetya",
 };
 
 export const martin: TeamMember = {
-  name: "Martin",
-  image: "/images/team/martin.jpg",
-  role: "Engineering",
   description: "Driving development.",
+  image: "/images/team/martin.jpg",
   linkedin: "https://www.linkedin.com/in/martin-aschermann-6235791a9",
+  name: "Martin",
+  role: "Engineering",
 };
 
 /**

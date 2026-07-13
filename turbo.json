@@ -1,151 +1,6 @@
 {
   "$schema": "https://v2-10-1.turborepo.dev/schema.json",
-  "ui": "stream",
-  "tasks": {
-    "build": {
-      "passThroughEnv": [
-        "SYSTEMROOT",
-        "WINDIR",
-        "COMSPEC",
-        "PATHEXT",
-        "PATH",
-        "TEMP",
-        "TMP",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "USERPROFILE",
-        "HOMEDRIVE",
-        "HOMEPATH"
-      ],
-      "env": [
-        "NODE_ENV",
-        "PRIVATE_MAPS_KEY",
-        "PUBLIC_MAPS_URL",
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "PUBLIC_SUPABASE_URL",
-        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-        "PRIVATE_SUPABASE_SECRET_KEY",
-        "PRIVATE_EMAIL_HOST",
-        "PRIVATE_EMAIL_PORT",
-        "PRIVATE_EMAIL_USER",
-        "PRIVATE_EMAIL_PASS",
-        "PRIVATE_EMAIL_ADDRESS",
-        "SUPABASE_SECRET_KEY",
-        "GITHUB_CLIENT_ID",
-        "GITHUB_CLIENT_SECRET",
-        "NEXT_PUBLIC_WEBAPP_URL",
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_WEBSITE_URL",
-        "PRIVATE_CHROME_EXTENSION_ID",
-        "PRIVATE_CHROME_PUBLISHER_ID",
-        "PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON",
-        "PRIVATE_CHROME_PRIVATE_SIGNING_KEY",
-        "PRIVATE_CHROME_PUBLIC_SIGNING_KEY",
-        "POSTHOG_API_SECRET",
-        "POSTHOG_PROJECT_ID",
-        "PRIVATE_ANTHROPIC_API_KEY",
-        "PRIVATE_API_KEY_PEPPER",
-        "PRIVATE_POLAR_ACCESS_TOKEN",
-        "PRIVATE_POLAR_WEBHOOK_SECRET",
-        "PRIVATE_REDIS_URL",
-        "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
-        "POLAR_PRODUCT_ID",
-        "PUBLIC_POLAR_ENVIRONMENT",
-        "DO_NOT_TRACK"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "apps/chrome-extension/.env.production.local",
-        "apps/web/.env.production.local",
-        "apps/webapp/.env.production.local",
-        "apps/website/.env.production.local",
-        "apps/api/.env.production.local"
-      ],
-      "dependsOn": ["^build"],
-      "outputs": [".next/**", "!.next/cache/**", "dist/**", "public/**"]
-    },
-
-    "check-types": {
-      "dependsOn": ["^check-types"]
-    },
-    "lint": {
-      "dependsOn": ["^lint"],
-      "passThroughEnv": [
-        "SYSTEMROOT",
-        "WINDIR",
-        "COMSPEC",
-        "PATHEXT",
-        "PATH",
-        "TEMP",
-        "TMP",
-        "APPDATA",
-        "LOCALAPPDATA",
-        "USERPROFILE",
-        "HOMEDRIVE",
-        "HOMEPATH"
-      ]
-    },
-    "dev": {
-      "dependsOn": ["^build"],
-      "persistent": true,
-      "cache": true,
-      "env": [
-        "NEXT_PUBLIC_WEBAPP_URL",
-        "PRIVATE_MAPS_KEY",
-        "PUBLIC_MAPS_URL",
-        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-        "NEXT_PUBLIC_SUPABASE_URL",
-        "PUBLIC_SUPABASE_URL",
-        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-        "PRIVATE_SUPABASE_SECRET_KEY",
-        "PRIVATE_EMAIL_HOST",
-        "PRIVATE_EMAIL_PORT",
-        "PRIVATE_EMAIL_USER",
-        "PRIVATE_EMAIL_PASS",
-        "PRIVATE_EMAIL_ADDRESS",
-        "SUPABASE_SECRET_KEY",
-        "GITHUB_CLIENT_ID",
-        "GITHUB_CLIENT_SECRET",
-        "NEXT_PUBLIC_WEBAPP_URL",
-        "NEXT_PUBLIC_API_URL",
-        "NEXT_PUBLIC_WEBSITE_URL",
-        "POSTHOG_API_SECRET",
-        "POSTHOG_PROJECT_ID",
-        "PRIVATE_ANTHROPIC_API_KEY",
-        "PRIVATE_API_KEY_PEPPER",
-        "PRIVATE_POLAR_ACCESS_TOKEN",
-        "PRIVATE_POLAR_WEBHOOK_SECRET",
-        "PRIVATE_REDIS_URL",
-        "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
-        "POLAR_PRODUCT_ID",
-        "PUBLIC_POLAR_ENVIRONMENT",
-        "DO_NOT_TRACK"
-      ],
-      "inputs": [
-        "$TURBO_DEFAULT$",
-        "apps/chrome-extension/.env.development.local",
-        "apps/web/.env.development.local",
-        "apps/webapp/.env.development.local",
-        "apps/website/.env.development.local",
-        "apps/api/.env.development.local"
-      ]
-    },
-    "preview": {
-      "dependsOn": ["^build"],
-      "persistent": true,
-      "cache": false
-    },
-    "api#generate-openapi": {
-      "dependsOn": [],
-      "outputs": ["openapi.yaml"],
-      "cache": true
-    },
-    "start": {
-      "persistent": true,
-      "cache": false
-    }
-  },
+  "concurrency": "20",
   "globalPassThroughEnv": [
     "PATH",
     "PATHEXT",
@@ -195,6 +50,159 @@
     "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
     "POLAR_PRODUCT_ID",
     "PUBLIC_POLAR_ENVIRONMENT",
-    "DO_NOT_TRACK"
-  ]
+    "DO_NOT_TRACK",
+    "PORT",
+    "LOG_LEVEL",
+    "SYNC_WAKE_ENABLED",
+    "GITHUB_ACTIONS",
+    "METRO_MAX_WORKERS",
+    "NGROK",
+    "POSTHOG_KEY",
+    "POSTHOG_HOST",
+    "PRIVATE_DISCORD_WEBHOOK_URL",
+    "REDDIT_CLIENT_ID",
+    "REDDIT_CLIENT_SECRET",
+    "REDDIT_USERNAME",
+    "REDDIT_PASSWORD"
+  ],
+  "tasks": {
+    "api#generate-openapi": {
+      "cache": true,
+      "dependsOn": [],
+      "outputs": ["openapi.yaml"]
+    },
+    "build": {
+      "dependsOn": ["^build"],
+      "env": [
+        "NODE_ENV",
+        "PRIVATE_MAPS_KEY",
+        "PUBLIC_MAPS_URL",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "PRIVATE_SUPABASE_SECRET_KEY",
+        "PRIVATE_EMAIL_HOST",
+        "PRIVATE_EMAIL_PORT",
+        "PRIVATE_EMAIL_USER",
+        "PRIVATE_EMAIL_PASS",
+        "PRIVATE_EMAIL_ADDRESS",
+        "SUPABASE_SECRET_KEY",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "NEXT_PUBLIC_WEBAPP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_WEBSITE_URL",
+        "PRIVATE_CHROME_EXTENSION_ID",
+        "PRIVATE_CHROME_PUBLISHER_ID",
+        "PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON",
+        "PRIVATE_CHROME_PRIVATE_SIGNING_KEY",
+        "PRIVATE_CHROME_PUBLIC_SIGNING_KEY",
+        "POSTHOG_API_SECRET",
+        "POSTHOG_PROJECT_ID",
+        "PRIVATE_ANTHROPIC_API_KEY",
+        "PRIVATE_API_KEY_PEPPER",
+        "PRIVATE_POLAR_ACCESS_TOKEN",
+        "PRIVATE_POLAR_WEBHOOK_SECRET",
+        "PRIVATE_REDIS_URL",
+        "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
+        "POLAR_PRODUCT_ID",
+        "PUBLIC_POLAR_ENVIRONMENT",
+        "DO_NOT_TRACK"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/api/.env.production.local"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
+      ]
+    },
+
+    "check-types": {
+      "dependsOn": ["transit"],
+      "outputs": [".cache/tsconfig.tsbuildinfo"]
+    },
+    "compile": {
+      "dependsOn": ["^compile"],
+      "outputs": ["dist/**"]
+    },
+    "dev": {
+      "cache": false,
+      "env": [
+        "NEXT_PUBLIC_WEBAPP_URL",
+        "PRIVATE_MAPS_KEY",
+        "PUBLIC_MAPS_URL",
+        "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_URL",
+        "PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+        "PRIVATE_SUPABASE_SECRET_KEY",
+        "PRIVATE_EMAIL_HOST",
+        "PRIVATE_EMAIL_PORT",
+        "PRIVATE_EMAIL_USER",
+        "PRIVATE_EMAIL_PASS",
+        "PRIVATE_EMAIL_ADDRESS",
+        "SUPABASE_SECRET_KEY",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "NEXT_PUBLIC_WEBAPP_URL",
+        "NEXT_PUBLIC_API_URL",
+        "NEXT_PUBLIC_WEBSITE_URL",
+        "POSTHOG_API_SECRET",
+        "POSTHOG_PROJECT_ID",
+        "PRIVATE_ANTHROPIC_API_KEY",
+        "PRIVATE_API_KEY_PEPPER",
+        "PRIVATE_POLAR_ACCESS_TOKEN",
+        "PRIVATE_POLAR_WEBHOOK_SECRET",
+        "PRIVATE_REDIS_URL",
+        "PRIVATE_SUPABASE_JWT_SIGNING_JWK",
+        "POLAR_PRODUCT_ID",
+        "PUBLIC_POLAR_ENVIRONMENT",
+        "DO_NOT_TRACK"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.development.local",
+        "apps/webapp/.env.development.local",
+        "apps/website/.env.development.local",
+        "apps/api/.env.development.local"
+      ],
+      "persistent": true
+    },
+    "preview": {
+      "cache": false,
+      "dependsOn": ["^compile"],
+      "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true
+    },
+    "transit": {
+      "dependsOn": ["^transit"]
+    }
+  },
+  "ui": "tui"
 }

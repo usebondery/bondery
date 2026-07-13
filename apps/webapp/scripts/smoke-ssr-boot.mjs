@@ -22,8 +22,8 @@ const stderrChunks = [];
 
 const child = spawn("npx", ["next", "start", "--port", String(port)], {
   cwd: webappRoot,
-  stdio: ["ignore", "pipe", "pipe"],
   shell: true,
+  stdio: ["ignore", "pipe", "pipe"],
 });
 
 child.stderr?.on("data", (chunk) => {

@@ -4,20 +4,20 @@ import { Group, Select, Text } from "@mantine/core";
 import type { CSSProperties } from "react";
 
 export interface TypePickerOption {
-  value: string;
-  label: string;
-  emoji: string;
   disabled?: boolean;
+  emoji: string;
+  label: string;
+  value: string;
 }
 
 interface TypePickerProps {
-  value: string;
-  data: TypePickerOption[];
-  onChange: (value: string) => void;
-  disabled?: boolean;
   ariaLabel?: string;
+  data: TypePickerOption[];
+  disabled?: boolean;
+  onChange: (value: string) => void;
   size?: "xs" | "sm" | "md" | "lg" | "xl";
   style?: CSSProperties;
+  value: string;
 }
 
 /**
@@ -36,14 +36,15 @@ export function TypePicker({
 
   return (
     <Select
-      value={value}
-      onChange={(nextValue) => onChange(nextValue || value)}
+      aria-label={ariaLabel}
       data={data.map((option) => ({
-        value: option.value,
-        label: option.label,
         disabled: option.disabled,
+        label: option.label,
+        value: option.value,
       }))}
+      disabled={disabled}
       leftSection={<span>{selectedOption?.emoji || ""}</span>}
+      onChange={(nextValue) => onChange(nextValue || value)}
       renderOption={({ option }) => {
         const match = data.find((entry) => entry.value === option.value);
         return (
@@ -53,10 +54,9 @@ export function TypePicker({
           </Group>
         );
       }}
-      disabled={disabled}
       size={size}
       style={style}
-      aria-label={ariaLabel}
+      value={value}
     />
   );
 }

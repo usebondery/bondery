@@ -1,4 +1,8 @@
-import type { ReactNode } from "react";
+import {
+  CONTACT_SOCIAL_BRAND_COLORS,
+  CONTACT_SOCIAL_FIELD_KEYS,
+  type ContactSocialFieldKey,
+} from "@bondery/helpers";
 import {
   IconBrandFacebook,
   IconBrandInstagram,
@@ -7,65 +11,63 @@ import {
   IconPlus,
   IconWorld,
 } from "@tabler/icons-react-native";
-import {
-  CONTACT_SOCIAL_BRAND_COLORS,
-  CONTACT_SOCIAL_FIELD_KEYS,
-  type ContactSocialFieldKey,
-} from "@bondery/helpers";
+import type { ReactNode } from "react";
 import { SignalBrandIcon } from "./SignalBrandIcon";
 
 export interface ContactSocialPlatformConfig {
-  key: ContactSocialFieldKey;
-  color: string;
-  placeholderKey: string;
   accessibilityLabelKey: string;
+  color: string;
+  key: ContactSocialFieldKey;
+  placeholderKey: string;
   renderIcon: (color: string) => ReactNode;
 }
 
-export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] = CONTACT_SOCIAL_FIELD_KEYS.map(
-  (key) => {
+export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] =
+  CONTACT_SOCIAL_FIELD_KEYS.map((key) => {
     const color = CONTACT_SOCIAL_BRAND_COLORS[key];
 
-    const configs: Record<ContactSocialFieldKey, Omit<ContactSocialPlatformConfig, "key" | "color">> = {
-      linkedin: {
-        placeholderKey: "Socials.LinkedInPlaceholder",
-        accessibilityLabelKey: "Socials.OpenInLinkedIn",
-        renderIcon: (iconColor) => <IconBrandLinkedin size={20} stroke={iconColor} />,
-      },
-      instagram: {
-        placeholderKey: "Socials.InstagramPlaceholder",
-        accessibilityLabelKey: "Socials.OpenInInstagram",
-        renderIcon: (iconColor) => <IconBrandInstagram size={20} stroke={iconColor} />,
-      },
+    const configs: Record<
+      ContactSocialFieldKey,
+      Omit<ContactSocialPlatformConfig, "key" | "color">
+    > = {
       facebook: {
-        placeholderKey: "Socials.FacebookPlaceholder",
         accessibilityLabelKey: "Socials.OpenInFacebook",
+        placeholderKey: "Socials.FacebookPlaceholder",
         renderIcon: (iconColor) => <IconBrandFacebook size={20} stroke={iconColor} />,
       },
-      whatsapp: {
-        placeholderKey: "Socials.WhatsAppPlaceholder",
-        accessibilityLabelKey: "Socials.OpenInWhatsApp",
-        renderIcon: (iconColor) => <IconBrandWhatsapp size={20} stroke={iconColor} />,
+      instagram: {
+        accessibilityLabelKey: "Socials.OpenInInstagram",
+        placeholderKey: "Socials.InstagramPlaceholder",
+        renderIcon: (iconColor) => <IconBrandInstagram size={20} stroke={iconColor} />,
+      },
+      linkedin: {
+        accessibilityLabelKey: "Socials.OpenInLinkedIn",
+        placeholderKey: "Socials.LinkedInPlaceholder",
+        renderIcon: (iconColor) => <IconBrandLinkedin size={20} stroke={iconColor} />,
       },
       signal: {
-        placeholderKey: "Socials.SignalPlaceholder",
         accessibilityLabelKey: "Socials.OpenInSignal",
-        renderIcon: (iconColor) => <SignalBrandIcon size={20} color={iconColor} />,
+        placeholderKey: "Socials.SignalPlaceholder",
+        renderIcon: (iconColor) => <SignalBrandIcon color={iconColor} size={20} />,
       },
       website: {
-        placeholderKey: "Socials.WebsitePlaceholder",
         accessibilityLabelKey: "Socials.OpenWebsite",
+        placeholderKey: "Socials.WebsitePlaceholder",
         renderIcon: (iconColor) => <IconWorld size={20} stroke={iconColor} />,
+      },
+      whatsapp: {
+        accessibilityLabelKey: "Socials.OpenInWhatsApp",
+        placeholderKey: "Socials.WhatsAppPlaceholder",
+        renderIcon: (iconColor) => <IconBrandWhatsapp size={20} stroke={iconColor} />,
       },
     };
 
     return {
-      key,
       color,
+      key,
       ...configs[key],
     };
-  },
-);
+  });
 
 export function getContactSocialPlatform(key: ContactSocialFieldKey): ContactSocialPlatformConfig {
   const platform = CONTACT_SOCIAL_PLATFORMS.find((item) => item.key === key);

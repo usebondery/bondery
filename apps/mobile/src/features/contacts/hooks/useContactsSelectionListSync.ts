@@ -1,11 +1,11 @@
-import { useCallback, useEffect } from "react";
 import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect } from "react";
 import { useContactsSelection } from "../contactsSelectionStore";
 
 interface UseContactsSelectionListSyncOptions {
   contactIds: string[];
-  totalCount: number;
   myselfContactId?: string;
+  totalCount: number;
 }
 
 /**

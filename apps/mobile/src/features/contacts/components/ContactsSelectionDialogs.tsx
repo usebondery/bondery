@@ -1,20 +1,17 @@
 import { IconTrash } from "@tabler/icons-react-native";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
-import { contactsDomain } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { deleteContacts } from "../../../lib/domains/contacts";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { useContactsSelection } from "../contactsSelectionStore";
 import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
-import {
-  useContactsEffectiveSelectedCount,
-  useContactsSelection,
-} from "../contactsSelectionStore";
 
 interface ContactsSelectionDialogsProps {
   debouncedQuery: string;
-  onContactsReloaded: () => Promise<void>;
   /** When set, delete targets these loaded group members instead of the global contact filter. */
   loadedGroupMembers?: { id: string }[];
+  onContactsReloaded: () => Promise<void>;
 }
 
 export function ContactsSelectionDialogs({
@@ -22,10 +19,10 @@ export function ContactsSelectionDialogs({
   onContactsReloaded,
   loadedGroupMembers,
 }: ContactsSelectionDialogsProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const effectiveSelectedCount = useContactsEffectiveSelectedCount();
   const isDeleteConfirmOpen = useContactsSelection((state) => state.isDeleteConfirmOpen);
   const isDeleting = useContactsSelection((state) => state.isDeleting);
   const setDeleteConfirmOpen = useContactsSelection((state) => state.setDeleteConfirmOpen);
@@ -44,16 +41,16 @@ export function ContactsSelectionDialogs({
           debouncedQuery,
           loadedGroupMembers ? { loadedGroupMembers } : undefined,
         );
-        contactsDomain.deleteMany(personIds);
+        deleteContacts(personIds);
 
         exitSelectionMode();
         setDeleteConfirmOpen(false);
         await onContactsReloaded();
       } catch {
         showToast({
+          description: tMobileContacts("DeleteFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.Contacts.DeleteFailed"),
         });
       } finally {
         setIsDeleting(false);
@@ -63,32 +60,28 @@ export function ContactsSelectionDialogs({
 
   return (
     <ActionSheetPopup
-      open={isDeleteConfirmOpen}
-      title={t("MobileApp.Contacts.DeleteContactsConfirmTitle").replace(
-        "{count}",
-        String(effectiveSelectedCount),
-      )}
-      isBusy={isDeleting}
-      onOpenChange={setDeleteConfirmOpen}
-      onClose={() => setDeleteConfirmOpen(false)}
       actions={[
         {
-          label: t("MobileApp.Common.Cancel"),
-          onPress: () => setDeleteConfirmOpen(false),
           disabled: isDeleting,
+          label: t("actions.cancel"),
+          onPress: () => setDeleteConfirmOpen(false),
           tone: "neutral",
           variant: "outline",
         },
         {
-          label: t("MobileApp.Common.Delete"),
-          icon: <IconTrash size={16} color={colors.textOnPrimary} />,
-          onPress: handleConfirmDeleteSelected,
-          loading: isDeleting,
           disabled: isDeleting,
+          icon: <IconTrash color={colors.textOnPrimary} size={16} />,
+          label: t("actions.delete"),
+          loading: isDeleting,
+          onPress: handleConfirmDeleteSelected,
           tone: "danger",
           variant: "filled",
         },
       ]}
+      isBusy={isDeleting}
+      onClose={() => setDeleteConfirmOpen(false)}
+      onOpenChange={setDeleteConfirmOpen}
+      open={isDeleteConfirmOpen}
     />
   );
 }

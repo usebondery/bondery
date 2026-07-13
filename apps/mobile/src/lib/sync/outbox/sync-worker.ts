@@ -1,9 +1,12 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { SyncPushResponse, SyncMutation } from "@bondery/schemas/sync";
+import type { SyncMutation, SyncPushResponse } from "@bondery/schemas/sync";
 import { API_URL } from "../../config";
 import { supabase } from "../../supabase/client";
 import { syncRequestHeaders } from "../constants";
 import { applyPushResultToLocal } from "../mutations/apply-push-result";
+import { notifySyncSubscribers, pullOnce } from "../pull-manager";
+import { sanitizePushMutation } from "../sanitize-push-mutation";
+import { logSyncPushError, logSyncPushRequest, logSyncPushResponse } from "../sync-logger";
 import {
   ensureDeviceId,
   listPendingMutations,
@@ -12,13 +15,6 @@ import {
   markMutationRejected,
   setLastServerSequence,
 } from "./pending-mutations";
-import { notifySyncSubscribers, pullOnce } from "../pull-manager";
-import {
-  logSyncPushError,
-  logSyncPushRequest,
-  logSyncPushResponse,
-} from "../sync-logger";
-import { sanitizePushMutation } from "../sanitize-push-mutation";
 
 let drainScheduled = false;
 let draining = false;
@@ -38,22 +34,30 @@ function notifySyncError(message: string): void {
 }
 
 async function getBearerToken(): Promise<string | null> {
-  if (!supabase) return null;
+  if (!supabase) {
+    return null;
+  }
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 }
 
 export async function drainPendingMutations(): Promise<void> {
-  if (draining) return;
+  if (draining) {
+    return;
+  }
   draining = true;
 
   try {
     const token = await getBearerToken();
-    if (!token) return;
+    if (!token) {
+      return;
+    }
 
     const deviceId = await ensureDeviceId();
     const pending = listPendingMutations();
-    if (pending.length === 0) return;
+    if (pending.length === 0) {
+      return;
+    }
 
     const mutations: SyncMutation[] = [];
     for (const mutation of pending) {
@@ -73,23 +77,24 @@ export async function drainPendingMutations(): Promise<void> {
       );
     }
 
-    if (mutations.length === 0) return;
+    if (mutations.length === 0) {
+      return;
+    }
 
     logSyncPushRequest(deviceId, mutations);
 
     const response = await fetch(`${API_URL}${API_ROUTES.SYNC_PUSH}`, {
-      method: "POST",
+      body: JSON.stringify({ deviceId, mutations }),
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
         ...syncRequestHeaders(),
       },
-      body: JSON.stringify({ deviceId, mutations }),
+      method: "POST",
     });
 
     if (response.status === 426) {
-      const message =
-        "This app version is out of date. Please update Bondery to continue syncing.";
+      const message = "This app version is out of date. Please update Bondery to continue syncing.";
       logSyncPushError(message, { status: 426 });
       notifySyncError(message);
       return;
@@ -135,7 +140,9 @@ export async function drainPendingMutations(): Promise<void> {
 }
 
 export function scheduleSyncDrain(): void {
-  if (drainScheduled) return;
+  if (drainScheduled) {
+    return;
+  }
   drainScheduled = true;
 
   queueMicrotask(() => {

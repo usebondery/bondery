@@ -4,18 +4,18 @@ export const MAX_CONTACT_CHANNELS = 5;
 
 export function createDraftPhone(preferred = false): PhoneEntry {
   return {
-    prefix: "+1",
-    value: "",
-    type: "home",
     preferred,
+    prefix: "+1",
+    type: "home",
+    value: "",
   };
 }
 
 export function createDraftEmail(preferred = false): EmailEntry {
   return {
-    value: "",
-    type: "home",
     preferred,
+    type: "home",
+    value: "",
   };
 }
 
@@ -23,10 +23,10 @@ export function normalizePhonesForSave(phones: PhoneEntry[]): PhoneEntry[] {
   const phonesToSave = phones
     .filter((phone) => phone.value.trim() !== "")
     .map((phone) => ({
-      prefix: phone.prefix?.trim() || "+1",
-      value: phone.value.trim(),
-      type: phone.type === "work" ? ("work" as const) : ("home" as const),
       preferred: phone.preferred === true,
+      prefix: phone.prefix?.trim() || "+1",
+      type: phone.type === "work" ? ("work" as const) : ("home" as const),
+      value: phone.value.trim(),
     }));
 
   if (phonesToSave.length > 0 && !phonesToSave.some((phone) => phone.preferred)) {
@@ -40,9 +40,9 @@ export function normalizeEmailsForSave(emails: EmailEntry[]): EmailEntry[] {
   const emailsToSave = emails
     .filter((email) => email.value.trim() !== "")
     .map((email) => ({
-      value: email.value.trim(),
-      type: email.type === "work" ? ("work" as const) : ("home" as const),
       preferred: email.preferred === true,
+      type: email.type === "work" ? ("work" as const) : ("home" as const),
+      value: email.value.trim(),
     }));
 
   if (emailsToSave.length > 0 && !emailsToSave.some((email) => email.preferred)) {

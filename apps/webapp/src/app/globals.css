@@ -27,17 +27,16 @@
   --sidebar-avatar-size: 26px; /* Mantine Avatar size="sm" */
   --sidebar-icon-pl: calc(
     (
-        var(--sidebar-collapsed-width) - 2 * var(--mantine-spacing-md) -
-          var(--sidebar-nav-icon-size)
-      ) /
-      2
+      var(--sidebar-collapsed-width) -
+      2 *
+      var(--mantine-spacing-md) -
+      var(--sidebar-nav-icon-size)
+    ) /
+    2
   );
   --sidebar-avatar-pl: calc(
-    (
-        var(--sidebar-collapsed-width) - 2 * var(--mantine-spacing-md) -
-          var(--sidebar-avatar-size)
-      ) /
-      2
+    (var(--sidebar-collapsed-width) - 2 * var(--mantine-spacing-md) - var(--sidebar-avatar-size)) /
+    2
   );
 }
 

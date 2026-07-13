@@ -15,7 +15,9 @@
  * @returns Markdown string
  */
 export function htmlToMarkdown(html: string): string {
-  if (!html || html === "<p></p>") return "";
+  if (!html || html === "<p></p>") {
+    return "";
+  }
 
   let md = html;
 
@@ -67,7 +69,7 @@ export function htmlToMarkdown(html: string): string {
       const content = stripTags(item.replace(/<li[^>]*>|<\/li>/g, "")).trim();
       return `- [${checked ? "x" : " "}] ${content}`;
     });
-    return rows.join("\n") + "\n\n";
+    return `${rows.join("\n")}\n\n`;
   });
 
   // Ordered lists
@@ -77,7 +79,7 @@ export function htmlToMarkdown(html: string): string {
       const content = stripTags(item.replace(/<li[^>]*>|<\/li>/g, "")).trim();
       return `${i + 1}. ${content}`;
     });
-    return rows.join("\n") + "\n\n";
+    return `${rows.join("\n")}\n\n`;
   });
 
   // Unordered lists
@@ -87,18 +89,16 @@ export function htmlToMarkdown(html: string): string {
       const content = stripTags(item.replace(/<li[^>]*>|<\/li>/g, "")).trim();
       return `- ${content}`;
     });
-    return rows.join("\n") + "\n\n";
+    return `${rows.join("\n")}\n\n`;
   });
 
   // Blockquotes
   md = md.replace(/<blockquote[^>]*>(.*?)<\/blockquote>/gs, (_, inner) => {
     const text = stripTags(inner).trim();
-    return (
-      text
-        .split("\n")
-        .map((l) => `> ${l}`)
-        .join("\n") + "\n\n"
-    );
+    return `${text
+      .split("\n")
+      .map((l) => `> ${l}`)
+      .join("\n")}\n\n`;
   });
 
   // Horizontal rules

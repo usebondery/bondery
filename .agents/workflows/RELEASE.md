@@ -58,7 +58,7 @@ Complete all of the following **before** pushing anything to the `release` branc
    ```bash
    npm run generate-types
    ```
-   > Requires the local Supabase instance to be running (`npm run dev:supabase`).
+   > Requires the local Supabase instance to be running (`npm run start -w apps/supabase-db`).
 6. **Build all packages and apps** (`turbo build`) and verify there are no errors.
 7. **Commit** everything to `main`.
 

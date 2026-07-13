@@ -14,19 +14,21 @@ type Violation = { file: string; rule: string; detail: string };
 
 const FORBIDDEN_RUNTIME_IMPORTS: Array<{ pattern: RegExp; rule: string; detail: string }> = [
   {
+    detail: "Use @bondery/schemas for types/schemas; OpenAPI fixtures are API-only",
     pattern: /import\s+(?!type\s)\{[^}]*\}\s*from\s*["']@bondery\/schemas\/openapi(?:\/|["'])/,
     rule: "no-openapi-runtime-import",
-    detail: "Use @bondery/schemas for types/schemas; OpenAPI fixtures are API-only",
   },
   {
-    pattern: /import\s+(?!type\s)\{[^}]*registerOpenApiComponentSchemas[^}]*\}\s*from\s*["']@bondery\/schemas["']/,
-    rule: "no-openapi-registry-import",
     detail: "registerOpenApiComponentSchemas is API-only",
+    pattern:
+      /import\s+(?!type\s)\{[^}]*registerOpenApiComponentSchemas[^}]*\}\s*from\s*["']@bondery\/schemas["']/,
+    rule: "no-openapi-registry-import",
   },
   {
-    pattern: /import\s+(?!type\s)\{[^}]*\bEXAMPLE_[A-Z0-9_]+\b[^}]*\}\s*from\s*["']@bondery\/schemas["']/,
-    rule: "no-example-from-root-barrel",
     detail: "EXAMPLE_* fixtures must not be imported from the root schemas barrel",
+    pattern:
+      /import\s+(?!type\s)\{[^}]*\bEXAMPLE_[A-Z0-9_]+\b[^}]*\}\s*from\s*["']@bondery\/schemas["']/,
+    rule: "no-example-from-root-barrel",
   },
 ];
 
@@ -34,7 +36,9 @@ function walk(dir: string, acc: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
     if (statSync(full).isDirectory()) {
-      if (entry === "node_modules" || entry === ".next") continue;
+      if (entry === "node_modules" || entry === ".next") {
+        continue;
+      }
       walk(full, acc);
     } else if (/\.(tsx?|jsx?)$/.test(entry)) {
       acc.push(full);
@@ -54,7 +58,7 @@ function checkFile(absPath: string): Violation[] {
 
   for (const { pattern, rule, detail } of FORBIDDEN_RUNTIME_IMPORTS) {
     if (pattern.test(content)) {
-      violations.push({ file: rel, rule, detail });
+      violations.push({ detail, file: rel, rule });
     }
   }
 

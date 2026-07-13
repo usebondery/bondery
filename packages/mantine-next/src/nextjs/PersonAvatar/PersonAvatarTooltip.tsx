@@ -1,8 +1,8 @@
 "use client";
 
+import type { ContactPreview } from "@bondery/schemas";
 import { Tooltip } from "@mantine/core";
 import type { ReactNode } from "react";
-import type { ContactPreview } from "@bondery/schemas";
 import { PersonCard } from "#nextjs/PersonCard/index.js";
 
 type PersonAvatarTooltipIdentity = ContactPreview & {
@@ -12,8 +12,8 @@ type PersonAvatarTooltipIdentity = ContactPreview & {
 };
 
 interface PersonAvatarTooltipProps {
-  person: PersonAvatarTooltipIdentity;
   children: ReactNode;
+  person: PersonAvatarTooltipIdentity;
 }
 
 /**
@@ -23,12 +23,11 @@ interface PersonAvatarTooltipProps {
 export function PersonAvatarTooltip({ person, children }: PersonAvatarTooltipProps) {
   return (
     <Tooltip
-      withArrow
-      openDelay={120}
       closeDelay={50}
-      offset={8}
-      position="top"
       label={<PersonCard person={person} size="md" />}
+      offset={8}
+      openDelay={120}
+      position="top"
       styles={{
         tooltip: {
           backgroundColor: "transparent",
@@ -37,6 +36,7 @@ export function PersonAvatarTooltip({ person, children }: PersonAvatarTooltipPro
           padding: 0,
         },
       }}
+      withArrow
     >
       {children}
     </Tooltip>

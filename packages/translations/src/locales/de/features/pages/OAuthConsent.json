@@ -1,0 +1,17 @@
+{
+  "Approve": "Genehmigen",
+  "Deny": "Ablehnen",
+  "Description": "{clientName} möchte auf dein Bondery-Konto zugreifen.",
+  "ErrorTitle": "Autorisierungsfehler",
+  "InvalidRequest": "Ungültige Autorisierungsanfrage.",
+  "MissingAuthorizationId": "Autorisierungsanfrage fehlt. Bitte versuch es erneut über die Anwendung.",
+  "RequestedPermissions": "Angeforderte Berechtigungen",
+  "Scopes": {
+    "email": "Deine E-Mail-Adresse anzeigen",
+    "openid": "Deine Identität bestätigen",
+    "phone": "Deine Telefonnummer anzeigen",
+    "profile": "Deine Profilinformationen anzeigen"
+  },
+  "Title": "Anwendung autorisieren",
+  "UnexpectedError": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuch es erneut."
+}

@@ -1,5 +1,5 @@
-import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
-import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
+﻿import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**
  * Skeleton for a single Keep in Touch contact row.
@@ -7,18 +7,18 @@ import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleto
  */
 function KeepInTouchRowSkeleton({ opacity = 1 }: { opacity?: number }) {
   return (
-    <Paper withBorder p="md" radius="md" style={{ opacity }}>
-      <Group justify="space-between" gap="sm">
+    <Paper p="md" radius="md" style={{ opacity }} withBorder>
+      <Group gap="sm" justify="space-between">
         <Group gap="xs">
-          <Skeleton height={32} width={32} radius="xl" />
+          <Skeleton height={32} radius="xl" width={32} />
           <Stack gap={4}>
-            <Skeleton height={14} width={130} radius="sm" />
-            <Skeleton height={12} width={90} radius="sm" />
+            <Skeleton height={14} radius="sm" width={130} />
+            <Skeleton height={12} radius="sm" width={90} />
           </Stack>
         </Group>
         <Group gap="sm">
-          <Skeleton height={24} width={80} radius="xl" />
-          <Skeleton height={36} width={100} radius="sm" />
+          <Skeleton height={24} radius="xl" width={80} />
+          <Skeleton height={36} radius="sm" width={100} />
         </Group>
       </Group>
     </Paper>
@@ -39,12 +39,11 @@ export function KeepInTouchPageSkeleton() {
         gap="xs"
         style={{
           maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
-          WebkitMaskImage:
-            "linear-gradient(to bottom, black 55%, transparent 100%)",
+          WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
         }}
       >
-        {[1, 1, 0.9, 0.75, 0.55, 0.35].map((opacity, i) => (
-          <KeepInTouchRowSkeleton key={i} opacity={opacity} />
+        {Array.from({ length: 6 }, (_, slot) => slot).map((slot) => (
+          <KeepInTouchRowSkeleton key={slot} opacity={[1, 1, 0.9, 0.75, 0.55, 0.35][slot] ?? 1} />
         ))}
       </Stack>
     </Box>

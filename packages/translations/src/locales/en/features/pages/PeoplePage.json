@@ -1,0 +1,49 @@
+{
+  "AddContactModal": {
+    "AddToBondery": "Add to Bondery",
+    "Cancel": "Cancel",
+    "CreateFailed": "Failed to create contact. Please try again.",
+    "ErrorTitle": "Error",
+    "FullNameInput": "Full name",
+    "InvalidName": "Please add a valid name",
+    "LinkedInInput": "LinkedIn",
+    "LinkedInPlaceholder": "linkedin.com/in/username or just username",
+    "LoadingDescription": "Please wait while we create the new contact",
+    "LoadingTitle": "Creating contact...",
+    "NameRequired": "Please add a name",
+    "NameTooLong": "Name must be {max} characters or less",
+    "SuccessDescription": "Contact created successfully",
+    "SuccessTitle": "Success",
+    "Title": "Create person"
+  },
+  "AddPerson": "Create person",
+  "DeleteContact": {
+    "ErrorDescription": "Failed to delete contact. Please try again.",
+    "LoadingDescription": "Please wait while we delete this contact",
+    "LoadingTitle": "Deleting contact...",
+    "Message": "Are you sure you want to delete {name}? This person's data, mentions, and related information will be deleted. And this action cannot be restored.",
+    "SuccessDescription": "Contact deleted successfully",
+    "Title": "Delete {name}?"
+  },
+  "DeleteContacts": {
+    "ErrorDescription": "Failed to delete contacts. Please try again.",
+    "LoadingDescription": "Please wait while we delete selected contacts",
+    "LoadingTitle": "Deleting contacts...",
+    "Message_one": "Are you sure you want to delete {count} selected contact? This action cannot be undone.",
+    "Message_other": "Are you sure you want to delete {count} selected contacts? This action cannot be undone.",
+    "MessageAllMatching": "Are you sure you want to delete all matching contacts? This action cannot be undone.",
+    "SuccessDescription": "{count} contact(s) deleted successfully",
+    "Title_one": "Delete {count} contact?",
+    "Title_other": "Delete {count} contacts?",
+    "TitleAllMatching": "Delete all matching contacts?"
+  },
+  "HeaderDescription": "Overview of all your contacts.",
+  "ImportContacts": "Import contacts",
+  "LoadMoreBatch": "Load another 50 contacts",
+  "LoadMoreError": "Failed to load more contacts. Please try again.",
+  "NoContactsFound": "You haven't added any contacts yet.",
+  "NoContactsMatchSearch": "No such contact found.",
+  "SearchPlaceholder": "Search by name...",
+  "ThisContactFallback": "this contact",
+  "Title": "People"
+}

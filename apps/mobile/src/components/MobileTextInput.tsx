@@ -1,18 +1,11 @@
+import { forwardRef, memo, type ReactNode, useCallback, useEffect, useState } from "react";
 import {
-  forwardRef,
-  memo,
-  useCallback,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import {
+  type StyleProp,
   StyleSheet,
   Text,
   TextInput,
-  View,
-  type StyleProp,
   type TextInputProps,
+  View,
   type ViewStyle,
 } from "react-native";
 import Animated, {
@@ -53,13 +46,15 @@ const WRAPPER_LAYOUT_KEYS = new Set<keyof ViewStyle>([
 function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
   const flat = StyleSheet.flatten(containerStyle);
   if (!flat) {
-    return { wrapperStyle: undefined, innerContainerStyle: undefined, fillsWrapper: false };
+    return { fillsWrapper: false, innerContainerStyle: undefined, wrapperStyle: undefined };
   }
 
   const wrapperStyle: ViewStyle = {};
   const innerContainerStyle: ViewStyle = {};
 
-  for (const [key, value] of Object.entries(flat) as Array<[keyof ViewStyle, ViewStyle[keyof ViewStyle]]>) {
+  for (const [key, value] of Object.entries(flat) as Array<
+    [keyof ViewStyle, ViewStyle[keyof ViewStyle]]
+  >) {
     if (WRAPPER_LAYOUT_KEYS.has(key)) {
       wrapperStyle[key] = value;
     } else {
@@ -73,7 +68,7 @@ function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
     wrapperStyle.width === "100%" ||
     wrapperStyle.alignSelf === "stretch";
 
-  return { wrapperStyle, innerContainerStyle, fillsWrapper };
+  return { fillsWrapper, innerContainerStyle, wrapperStyle };
 }
 
 export type MobileTextInputProps = TextInputProps & {
@@ -176,9 +171,7 @@ export const MobileTextInput = memo(
       shouldShowMaxLengthCounter || trailingAccessory ? (
         <View style={styles.trailingSection}>
           {shouldShowMaxLengthCounter ? (
-            <Text
-              style={[styles.maxLengthCounter, { color: colors.textMuted }]}
-            >
+            <Text style={[styles.maxLengthCounter, { color: colors.textMuted }]}>
               {currentLength}/{maxLength}
             </Text>
           ) : null}
@@ -188,36 +181,30 @@ export const MobileTextInput = memo(
         </View>
       ) : null;
 
-    const { wrapperStyle, innerContainerStyle, fillsWrapper } =
-      splitContainerStyle(containerStyle);
+    const { wrapperStyle, innerContainerStyle, fillsWrapper } = splitContainerStyle(containerStyle);
 
     return (
       <View style={[styles.wrapper, wrapperStyle]}>
         <Animated.View
           style={[
             styles.container,
-            size === "compact"
-              ? styles.containerCompact
-              : styles.containerDefault,
+            size === "compact" ? styles.containerCompact : styles.containerDefault,
             { backgroundColor: fieldBackgroundColor },
             fillsWrapper ? styles.containerFill : null,
             animatedContainerStyle,
             innerContainerStyle,
           ]}
         >
-          {leadingIcon ? (
-            <View style={styles.leadingIcon}>{leadingIcon}</View>
-          ) : null}
+          {leadingIcon ? <View style={styles.leadingIcon}>{leadingIcon}</View> : null}
 
           <TextInput
             ref={ref}
             {...rest}
-            value={value}
             defaultValue={defaultValue}
-            maxLength={maxLength}
             editable={editable}
-            onFocus={handleFocus}
+            maxLength={maxLength}
             onBlur={handleBlur}
+            onFocus={handleFocus}
             placeholderTextColor={placeholderTextColor ?? colors.textMuted}
             style={[
               styles.input,
@@ -225,19 +212,16 @@ export const MobileTextInput = memo(
               { color: colors.textPrimary },
               style,
             ]}
+            value={value}
           />
 
           {trailingContent}
         </Animated.View>
 
         {errorMessage ? (
-          <Text style={[styles.errorMessage, { color: colors.dangerText }]}>
-            {errorMessage}
-          </Text>
+          <Text style={[styles.errorMessage, { color: colors.dangerText }]}>{errorMessage}</Text>
         ) : description ? (
-          <Text style={[styles.description, { color: colors.textMuted }]}>
-            {description}
-          </Text>
+          <Text style={[styles.description, { color: colors.textMuted }]}>{description}</Text>
         ) : null}
       </View>
     );
@@ -245,59 +229,59 @@ export const MobileTextInput = memo(
 );
 
 const styles = StyleSheet.create({
-  wrapper: {
-    gap: 4,
-  },
   container: {
-    borderWidth: 1,
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    flexDirection: "row",
     alignItems: "center",
+    borderRadius: MOBILE_LAYOUT.borderRadius.control,
+    borderWidth: 1,
+    flexDirection: "row",
     gap: 8,
-  },
-  containerDefault: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 12,
   },
   containerCompact: {
     minHeight: MOBILE_LAYOUT.inputCompact,
     paddingHorizontal: 10,
   },
+  containerDefault: {
+    minHeight: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 12,
+  },
   containerFill: {
-    flex: 1,
     alignSelf: "stretch",
-  },
-  leadingIcon: {
-    flexShrink: 0,
-  },
-  trailingSection: {
-    flexDirection: "row",
-    alignItems: "center",
-    flexShrink: 0,
-    gap: 8,
-  },
-  trailingAccessory: {
-    flexShrink: 0,
-  },
-  maxLengthCounter: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
-    fontVariant: ["tabular-nums"],
-  },
-  errorMessage: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+    flex: 1,
   },
   description: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+  },
+  errorMessage: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
   },
   input: {
     flex: 1,
     paddingVertical: 0,
   },
-  inputDefault: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
-  },
   inputCompact: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     paddingVertical: 8,
+  },
+  inputDefault: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
+  },
+  leadingIcon: {
+    flexShrink: 0,
+  },
+  maxLengthCounter: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+    fontVariant: ["tabular-nums"],
+  },
+  trailingAccessory: {
+    flexShrink: 0,
+  },
+  trailingSection: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexShrink: 0,
+    gap: 8,
+  },
+  wrapper: {
+    gap: 4,
   },
 });

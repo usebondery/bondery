@@ -1,7 +1,6 @@
 "use client";
 
 import { Card, Text } from "@mantine/core";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
 import {
   CartesianGrid,
   Legend,
@@ -12,137 +11,110 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import type { ActiveUsersData } from "../getStatsData";
+import type { ActiveUsersData } from "@/lib/api/resources/stats";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface ActiveUsersChartProps {
   data: ActiveUsersData;
 }
 
-interface AxisTickProps {
-  x?: number;
-  y?: number;
-  payload?: {
-    value?: string | number;
-  };
-  index?: number;
-}
-
 export function ActiveUsersChart({ data }: ActiveUsersChartProps) {
-  const t = useTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   const chartData = data.timeline.map((point, index) => ({
     ...point,
     dateLabel: new Date(point.date).toLocaleDateString(undefined, {
-      month: "short",
       day: "numeric",
+      month: "short",
     }),
     showTick: index % 14 === 0 || index === data.timeline.length - 1,
   }));
 
   return (
-    <Card withBorder padding="lg">
+    <Card padding="lg" withBorder>
       <Text fw={500} mb="xs">
         {t("ActiveUsers")}
       </Text>
-      <Text size="xs" c="dimmed" mb="md">
+      <Text c="dimmed" mb="md" size="xs">
         {t("ActiveUsersDescription")}
       </Text>
-      <div style={{ width: "100%", height: 320 }}>
+      <div style={{ height: 320, width: "100%" }}>
         <ResponsiveContainer>
-          <LineChart
-            data={chartData}
-            margin={{ top: 8, right: 20, left: 0, bottom: 8 }}
-          >
-            <CartesianGrid
-              strokeDasharray="4 4"
-              stroke="var(--mantine-color-dark-4)"
-            />
+          <LineChart data={chartData} margin={{ bottom: 8, left: 0, right: 20, top: 8 }}>
+            <CartesianGrid stroke="var(--mantine-color-dark-4)" strokeDasharray="4 4" />
             <XAxis
+              axisLine={false}
               dataKey="dateLabel"
-              tickLine={false}
-              axisLine={false}
               minTickGap={24}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              tick={
-                (({ x = 0, y = 0, payload, index }: AxisTickProps) => {
-                  const point = chartData[index ?? 0];
-                  if (!point?.showTick) return <g />;
-                  return (
-                    <text
-                      x={x}
-                      y={y + 12}
-                      textAnchor="middle"
-                      fill="var(--mantine-color-gray-5)"
-                    >
-                      {payload?.value}
-                    </text>
-                  );
-                }) as any
-              }
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              width={34}
-              allowDecimals={false}
-            />
-            <Tooltip
-              formatter={(value, name) => [
-                Number(value).toLocaleString(),
-                name === "mau"
-                  ? t("MAU")
-                  : name === "wau"
-                    ? t("WAU")
-                    : t("DAU"),
-              ]}
-              labelFormatter={(_label, payload) => {
-                const rawDate = payload?.[0]?.payload?.date;
-                return rawDate ? new Date(rawDate).toLocaleDateString() : "";
+              tick={({ x = 0, y = 0, payload, index }) => {
+                const point = chartData[index ?? 0];
+                if (!point?.showTick) {
+                  return <g />;
+                }
+                const tickX = typeof x === "number" ? x : Number(x);
+                const tickY = typeof y === "number" ? y : Number(y);
+                return (
+                  <text
+                    fill="var(--mantine-color-gray-5)"
+                    textAnchor="middle"
+                    x={tickX}
+                    y={tickY + 12}
+                  >
+                    {payload?.value}
+                  </text>
+                );
               }}
+            />
+            <YAxis allowDecimals={false} axisLine={false} tickLine={false} width={34} />
+            <Tooltip
               contentStyle={{
                 backgroundColor: "var(--mantine-color-dark-6)",
                 border: "1px solid var(--mantine-color-dark-4)",
                 borderRadius: 8,
               }}
+              formatter={(value, name) => [
+                Number(value).toLocaleString(),
+                name === "mau" ? t("MAU") : name === "wau" ? t("WAU") : t("DAU"),
+              ]}
               itemStyle={{ color: "var(--mantine-color-gray-1)" }}
+              labelFormatter={(_label, payload) => {
+                const rawDate = payload?.[0]?.payload?.date;
+                return rawDate ? new Date(rawDate).toLocaleDateString() : "";
+              }}
               labelStyle={{ color: "var(--mantine-color-gray-3)" }}
             />
             <Legend
-              verticalAlign="top"
               align="right"
-              iconType="circle"
-              wrapperStyle={{ paddingBottom: 16 }}
               formatter={(value) =>
-                value === "mau"
-                  ? t("MAU")
-                  : value === "wau"
-                    ? t("WAU")
-                    : t("DAU")
+                value === "mau" ? t("MAU") : value === "wau" ? t("WAU") : t("DAU")
               }
+              iconType="circle"
+              verticalAlign="top"
+              wrapperStyle={{ paddingBottom: 16 }}
             />
             <Line
-              type="monotone"
+              activeDot={{ r: 4 }}
               dataKey="mau"
+              dot={false}
               stroke="var(--mantine-color-grape-5)"
               strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
+              type="monotone"
             />
             <Line
-              type="monotone"
+              activeDot={{ r: 4 }}
               dataKey="wau"
+              dot={false}
               stroke="var(--mantine-color-teal-5)"
               strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
+              type="monotone"
             />
             <Line
-              type="monotone"
+              activeDot={{ r: 4 }}
               dataKey="dau"
+              dot={false}
               stroke="var(--mantine-color-blue-5)"
               strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4 }}
+              type="monotone"
             />
           </LineChart>
         </ResponsiveContainer>

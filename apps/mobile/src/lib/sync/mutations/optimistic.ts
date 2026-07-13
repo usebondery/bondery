@@ -210,7 +210,7 @@ function applyOptimisticContactUpdate(
 
   if (patch.importantDates !== undefined) {
     db.runSync("DELETE FROM people_important_dates WHERE person_id = ?", personId);
-    patch.importantDates?.forEach((entry, index) => {
+    patch.importantDates?.forEach((entry, _index) => {
       db.runSync(
         `INSERT INTO people_important_dates (
           id, person_id, user_id, type, date, note, notify_days_before, created_at, updated_at
@@ -237,8 +237,14 @@ function applyOptimisticContactUpdate(
   ];
 
   for (const [platform, handle] of socialFields) {
-    if (handle === undefined) continue;
-    db.runSync("DELETE FROM people_socials WHERE person_id = ? AND platform = ?", personId, platform);
+    if (handle === undefined) {
+      continue;
+    }
+    db.runSync(
+      "DELETE FROM people_socials WHERE person_id = ? AND platform = ?",
+      personId,
+      platform,
+    );
     if (handle?.trim()) {
       db.runSync(
         `INSERT INTO people_socials (id, person_id, user_id, platform, handle, created_at, updated_at)
@@ -283,7 +289,9 @@ function applyOptimisticContactRemoveTag(personId: string, tagId: string): void 
   db.runSync("DELETE FROM people_tags WHERE person_id = ? AND tag_id = ?", personId, tagId);
 }
 
-function applyOptimisticGroupCreate(mutation: Extract<SyncMutation, { type: "group.create" }>): void {
+function applyOptimisticGroupCreate(
+  mutation: Extract<SyncMutation, { type: "group.create" }>,
+): void {
   const db = getSyncDatabase();
   const id = mutation.payload.id ?? mutation.id;
   const ts = nowIso();

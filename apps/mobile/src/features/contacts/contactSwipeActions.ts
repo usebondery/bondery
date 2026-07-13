@@ -19,8 +19,8 @@ export function executeContactSwipeAction(
 
     if (!email) {
       showToast({
-        type: "neutral",
         headline: messages.missingEmail,
+        type: "neutral",
       });
       return;
     }
@@ -33,8 +33,8 @@ export function executeContactSwipeAction(
 
   if (!phone) {
     showToast({
-      type: "neutral",
       headline: messages.missingPhone,
+      type: "neutral",
     });
     return;
   }

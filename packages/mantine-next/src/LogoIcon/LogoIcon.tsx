@@ -6,5 +6,5 @@ export interface LogoIconProps extends Omit<SVGProps<SVGSVGElement>, "width" | "
 }
 
 export function LogoIcon({ size = 24, ...props }: LogoIconProps) {
-  return <BonderyIcon width={size} height={size} {...props} />;
+  return <BonderyIcon height={size} width={size} {...props} />;
 }

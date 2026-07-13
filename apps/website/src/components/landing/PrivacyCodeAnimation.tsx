@@ -2,14 +2,14 @@
 
 import { Card, useMantineTheme } from "@mantine/core";
 import { useHover, useMediaQuery } from "@mantine/hooks";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
 const CODE_LINES = [
-  { label: "encryption", value: "AES-256", secret: "*******" },
-  { label: "location", value: '"EU"', secret: "**" },
-  { label: "tracking", value: "false", secret: "*****" },
-  { label: "owner", value: '"YOU"', secret: "***" },
+  { label: "encryption", secret: "*******", value: "AES-256" },
+  { label: "location", secret: "**", value: '"EU"' },
+  { label: "tracking", secret: "*****", value: "false" },
+  { label: "owner", secret: "***", value: '"YOU"' },
 ];
 
 export function PrivacyCodeAnimation() {
@@ -37,17 +37,17 @@ export function PrivacyCodeAnimation() {
 
   return (
     <Card
-      ref={ref}
+      className="bg-gray-900 text-green-400 font-mono text-sm leading-relaxed overflow-hidden relative shadow-xl border border-gray-800"
       padding="xl"
       radius="lg"
-      className="bg-gray-900 text-green-400 font-mono text-sm leading-relaxed overflow-hidden relative shadow-xl border border-gray-800"
+      ref={ref}
       style={{
-        width: "100%",
-        maxWidth: 500,
         aspectRatio: "4/3",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",
+        maxWidth: 500,
+        width: "100%",
       }}
     >
       {/* Subtle background grid or glow */}
@@ -63,9 +63,9 @@ export function PrivacyCodeAnimation() {
       {/* Scanline effect */}
       <motion.div
         animate={{ top: ["0%", "100%"] }}
-        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
         className="absolute left-0 right-0 h-1 bg-green-500/20 blur-sm pointer-events-none"
         style={{ width: "100%" }}
+        transition={{ duration: 3, ease: "linear", repeat: Infinity }}
       />
 
       <div className="relative z-10 space-y-2">
@@ -82,9 +82,9 @@ export function PrivacyCodeAnimation() {
         </div>
 
         {CODE_LINES.map((line) => (
-          <div key={line.label} className="pl-4 flex">
+          <div className="pl-4 flex" key={line.label}>
             <span className="text-blue-300 mr-2">{line.label}:</span>
-            <CodeValue value={line.value} secret={line.secret} revealed={isRevealed} />
+            <CodeValue revealed={isRevealed} secret={line.secret} value={line.value} />
             <span className="text-gray-500">,</span>
           </div>
         ))}
@@ -94,11 +94,11 @@ export function PrivacyCodeAnimation() {
 
       {/* Status Badge */}
       <motion.div
-        className="absolute bottom-4 right-4 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2"
         animate={{
           backgroundColor: isRevealed ? "rgba(34, 197, 94, 0.2)" : "rgba(239, 68, 68, 0.2)",
           color: isRevealed ? "#4ade80" : "#f87171",
         }}
+        className="absolute bottom-4 right-4 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-2"
       >
         <div
           className={`w-2 h-2 rounded-full ${isRevealed ? "bg-green-400" : "bg-red-400"} animate-pulse`}
@@ -125,23 +125,23 @@ function CodeValue({
       <AnimatePresence mode="wait">
         {revealed ? (
           <motion.span
-            key="value"
-            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.2 }}
             className="text-green-300 font-bold"
+            exit={{ opacity: 0, y: -5 }}
+            initial={{ opacity: 0, y: 5 }}
+            key="value"
+            transition={{ duration: 0.2 }}
           >
             {value}
           </motion.span>
         ) : (
           <motion.span
-            key="secret"
-            initial={{ opacity: 0, y: 5 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -5 }}
-            transition={{ duration: 0.2 }}
             className="text-gray-600 tracking-widest"
+            exit={{ opacity: 0, y: -5 }}
+            initial={{ opacity: 0, y: 5 }}
+            key="secret"
+            transition={{ duration: 0.2 }}
           >
             {secret}
           </motion.span>

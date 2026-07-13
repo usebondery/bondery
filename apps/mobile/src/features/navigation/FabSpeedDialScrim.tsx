@@ -7,20 +7,20 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useMobileNavigationTranslations } from "@/lib/i18n/generated/hooks";
 import { FAB_SPEED_DIAL_MOTION } from "../../theme/animations";
 import { MOBILE_Z_INDEX } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 
 interface FabSpeedDialScrimProps {
-  visible: boolean;
   /** Height of the dimmed region — everything above the chrome pill. */
   height: number;
   onDismiss: () => void;
+  visible: boolean;
 }
 
 export function FabSpeedDialScrim({ visible, height, onDismiss }: FabSpeedDialScrimProps) {
-  const t = useMobileTranslations();
+  const tMobileNavigation = useMobileNavigationTranslations();
   const colors = useMobileThemeColors();
   const opacity = useSharedValue(0);
   const [mounted, setMounted] = useState(visible);
@@ -36,11 +36,15 @@ export function FabSpeedDialScrim({ visible, height, onDismiss }: FabSpeedDialSc
       return;
     }
 
-    opacity.value = withTiming(0, { duration: FAB_SPEED_DIAL_MOTION.closeDurationMs }, (finished) => {
-      if (finished) {
-        runOnJS(setMounted)(false);
-      }
-    });
+    opacity.value = withTiming(
+      0,
+      { duration: FAB_SPEED_DIAL_MOTION.closeDurationMs },
+      (finished) => {
+        if (finished) {
+          runOnJS(setMounted)(false);
+        }
+      },
+    );
   }, [mounted, opacity, visible]);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -57,11 +61,11 @@ export function FabSpeedDialScrim({ visible, height, onDismiss }: FabSpeedDialSc
 
   return (
     <Pressable
-      style={[styles.scrim, { height }]}
+      accessibilityLabel={tMobileNavigation("CloseAddMenu")}
       accessibilityRole="button"
-      accessibilityLabel={t("MobileApp.Navigation.CloseAddMenu")}
       onPress={onDismiss}
       pointerEvents={visible ? "auto" : "none"}
+      style={[styles.scrim, { height }]}
     >
       <Animated.View
         pointerEvents="none"
@@ -73,11 +77,11 @@ export function FabSpeedDialScrim({ visible, height, onDismiss }: FabSpeedDialSc
 
 const styles = StyleSheet.create({
   scrim: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    zIndex: MOBILE_Z_INDEX.fabScrim,
     elevation: MOBILE_Z_INDEX.fabScrim,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    top: 0,
+    zIndex: MOBILE_Z_INDEX.fabScrim,
   },
 });

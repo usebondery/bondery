@@ -1,29 +1,56 @@
 "use client";
 
+import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { UpdateSettingsPatch } from "@/lib/api/domains/settings";
 import {
   completeOnboarding,
   deleteAccount,
   dismissGettingStarted,
+  getSettings,
   submitFeedback,
   updateImportFollowup,
   updateSettings,
+  uploadMePhoto,
 } from "@/lib/api/domains/settings";
-import { settingsKeys } from "@/lib/query/keys";
+import { refreshAppShell } from "@/lib/app/refreshAppShell";
 import { invalidateSettings } from "@/lib/query/invalidation";
-import { createClientFetcher } from "@/lib/query/fetchers/createClientFetcher";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { UpdateSettingsPatch } from "@/lib/api/domains/settings";
-async function fetchSettingsClient() {
-  const fetch = createClientFetcher();
-  return fetch<{ data?: Record<string, unknown> }>(API_ROUTES.ME_SETTINGS);
+import { settingsKeys } from "@/lib/query/keys";
+
+const SETTINGS_STALE_TIME_MS = 15 * 60_000;
+
+const SESSION_AFFECTING_KEYS = [
+  "colorScheme",
+  "name",
+  "middlename",
+  "surname",
+  "language",
+  "timezone",
+  "timeFormat",
+] as const;
+
+function settingsPatchAffectsSession(patch: UpdateSettingsPatch): boolean {
+  return SESSION_AFFECTING_KEYS.some(
+    (key) => key in patch && patch[key as keyof UpdateSettingsPatch] !== undefined,
+  );
+}
+
+function sessionPatchFromSettingsUpdate(
+  patch: UpdateSettingsPatch,
+): Parameters<typeof refreshAppShell>[0] | undefined {
+  if ("colorScheme" in patch && patch.colorScheme !== undefined) {
+    return { colorScheme: patch.colorScheme };
+  }
+  return undefined;
 }
 
 export function useSettingsQuery(enabled = true) {
   return useQuery({
-    queryKey: settingsKeys.me(),
-    queryFn: fetchSettingsClient,
     enabled,
+    queryFn: getSettings,
+    queryKey: settingsKeys.me(),
+    refetchOnWindowFocus: false,
+    staleTime: SETTINGS_STALE_TIME_MS,
   });
 }
 
@@ -31,8 +58,22 @@ export function useUpdateSettingsMutation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (patch: UpdateSettingsPatch) => updateSettings(patch),
+    onSuccess: async (_data, patch) => {
+      await invalidateSettings(queryClient);
+      if (settingsPatchAffectsSession(patch)) {
+        refreshAppShell(sessionPatchFromSettingsUpdate(patch));
+      }
+    },
+  });
+}
+
+export function useUploadMePhotoMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: uploadMePhoto,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
+      refreshAppShell();
     },
   });
 }
@@ -49,6 +90,7 @@ export function useCompleteOnboardingMutation() {
     mutationFn: completeOnboarding,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
+      refreshAppShell();
     },
   });
 }
@@ -59,6 +101,29 @@ export function useUpdateImportFollowupMutation() {
     mutationFn: updateImportFollowup,
     onSuccess: async () => {
       await invalidateSettings(queryClient);
+    },
+  });
+}
+
+export type FinishOnboardingInput =
+  | {
+      status: "awaiting_export" | "dismissed";
+      platform?: ImportFollowupPlatform;
+    }
+  | undefined;
+
+export function useFinishOnboardingMutation() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (followup?: FinishOnboardingInput) => {
+      if (followup) {
+        await updateImportFollowup(followup);
+      }
+      await completeOnboarding();
+    },
+    onSuccess: async () => {
+      await invalidateSettings(queryClient);
+      refreshAppShell();
     },
   });
 }

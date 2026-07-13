@@ -2,15 +2,21 @@
 
 Client cache on top of [`lib/api`](../api/README.md). Components use **hooks** and **domain APIs** — not raw `clientApiJson` in `app/`.
 
-## Three-layer data access
+## Domain-first reads
 
 | Layer | Location | Responsibility |
 |-------|----------|----------------|
-| **Domain** | `lib/api/domains/*` | HTTP verbs, request bodies, typed responses — no React |
-| **Fetchers** | `lib/query/fetchers/*` | Path builders, normalizers, `createXQueryFn` for TanStack Query |
+| **Resources** | `lib/api/resources/*` | Path builders + response parsers (no transport, no React) |
+| **Client domain** | `lib/api/domains/*` | `clientApiJson` reads and all writes |
+| **Server domain** | `lib/api/domains/server/*` | `serverApiJson` reads + `next.tags` (import `server-only`) |
+| **Prefetch** | `lib/query/prefetch/*` | Thin RSC helpers wrapping `prefetchQuery` + server domains |
 | **Hooks** | `lib/query/hooks/*` | `useQuery` / `useMutation`, query keys, cache invalidation |
 
-App components use **hooks** (client) or **fetchers via RSC prefetch** (server). Do not call `clientApiJson` directly in `app/`.
+**Reads:** hooks call `lib/api/domains/*`; loaders call `lib/api/domains/server/*` or `lib/query/prefetch/*`.
+
+**New reads:** add `resources/` + client domain + server domain — not `createXQueryFn` factories.
+
+Layout loads **session** via `getAppSession()` → `GET /api/me/session` (shell identity + routing). **Settings** (`useSettingsQuery`) are for Home and Settings only — prefetch in those loaders, never for shell identity. After identity-changing mutations, call `refreshAppShell()`. Theme: see [`lib/theme/README.md`](../theme/README.md).
 
 ## Invalidate-first policy
 
@@ -39,23 +45,20 @@ Keep **local state** while typing. On save: show loader → domain mutation → 
 - `clientApiJson` → `applyTransportErrorPolicy` → `endSession` (401) or `/app/unavailable` (502/503/504/network)
 - This module only configures cache defaults and skips retries for classified transport errors
 
-See bondery-specific `references/api-usage.md` § Session teardown and § API unavailable handling.
+See bondery-specific `references/api/api-usage.md` § Session teardown and § API unavailable handling.
 
-## Fetchers
+## Adding a resource
 
-Use `createClientFetcher()` in client hooks and `serverQueryFns.ts` (server-only) for RSC prefetch. Share path builders + normalizers per resource. Query keys use entity params only (`id`, `sort`, `q`, `limit`, `offset`) — not avatar query strings.
+1. `lib/api/resources/<name>.ts` — `build*` paths + `parse*` / `normalize*`
+2. `lib/api/domains/<name>.ts` — client read functions + mutations
+3. `lib/api/domains/server/<name>.ts` — server read functions with cache tags
+4. `lib/query/keys.ts` — key factory
+5. `lib/query/hooks/use<Name>.ts` — `queryFn: () => getX(...)` with invalidation on mutations
+6. `lib/query/prefetch/<name>.ts` — optional loader helper (import via `@/lib/query/prefetch` barrel)
+7. RSC page: `prefetchQuery` + `HydrationBoundary`
 
-## Adding a domain
+`lib/query/contactsListParams.ts` parses URL search/sort into canonical contacts list filter params.
 
-1. `lib/api/domains/<name>.ts` — mutation/read functions
-2. `lib/query/fetchers/<name>.ts` — normalizers + `createXQueryFn`
-3. `lib/query/keys.ts` — key factory
-4. `lib/query/hooks/use<Name>.ts` — `useQuery` / `useMutation` with invalidation
-5. RSC page: `prefetchQuery` + `HydrationBoundary`
+## Document titles
 
-## Regression
-
-```bash
-npm run check-query-patterns        # warn-only during migration
-npm run check-query-patterns:strict # enforced in check-types after Phase 10
-```
+Server `generateMetadata` for all routes; client `DocumentTitleProvider` for entity routes only. See [`lib/metadata/README.md`](../metadata/README.md).

@@ -2,14 +2,16 @@
  * One-off: remove runtime OpenAPI fixture imports from entity modules (SSR TDZ fix).
  * Examples remain in openapi/fixtures for API docs generation scripts.
  */
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
-import { join, dirname } from "node:path";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const entitiesDir = join(dirname(fileURLToPath(import.meta.url)), "..", "src", "entities");
 
 for (const file of readdirSync(entitiesDir)) {
-  if (!file.endsWith(".ts") || file === "index.ts") continue;
+  if (!file.endsWith(".ts") || file === "index.ts") {
+    continue;
+  }
   const path = join(entitiesDir, file);
   let src = readFileSync(path, "utf8");
   const before = src;

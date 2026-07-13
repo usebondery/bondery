@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef } from "react";
 import {
-  FlatList,
-  StyleSheet,
-  Text,
-  View,
   type AccessibilityActionEvent,
+  FlatList,
   type ListRenderItemInfo,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { WHEEL_PICKER_ITEM_HEIGHT, WHEEL_PICKER_VISIBLE_ROWS } from "../../../lib/config";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
@@ -17,11 +17,11 @@ const PICKER_HEIGHT = WHEEL_PICKER_ITEM_HEIGHT * WHEEL_PICKER_VISIBLE_ROWS;
 const PADDING_ITEMS = Math.floor(WHEEL_PICKER_VISIBLE_ROWS / 2);
 
 interface RotatingWheelColumnProps {
-  items: string[];
-  selectedIndex: number;
-  onIndexChange: (index: number) => void;
   accessibilityLabel: string;
   disabled?: boolean;
+  items: string[];
+  onIndexChange: (index: number) => void;
+  selectedIndex: number;
 }
 
 export function RotatingWheelColumn({
@@ -42,8 +42,8 @@ export function RotatingWheelColumn({
 
   const scrollToIndex = useCallback((index: number, animated = false) => {
     listRef.current?.scrollToOffset({
-      offset: index * WHEEL_PICKER_ITEM_HEIGHT,
       animated,
+      offset: index * WHEEL_PICKER_ITEM_HEIGHT,
     });
   }, []);
 
@@ -110,12 +110,12 @@ export function RotatingWheelColumn({
       <View style={[styles.item, { height: WHEEL_PICKER_ITEM_HEIGHT }]}>
         {!isPadding ? (
           <Text
+            numberOfLines={1}
             style={[
               styles.itemText,
               { color: isSelected ? colors.textPrimary : colors.textMuted },
               isSelected && styles.itemTextSelected,
             ]}
-            numberOfLines={1}
           >
             {item}
           </Text>
@@ -130,45 +130,45 @@ export function RotatingWheelColumn({
 
   return (
     <View
-      style={[styles.container, { height: PICKER_HEIGHT }]}
+      accessibilityActions={[
+        { label: "Increment", name: "increment" },
+        { label: "Decrement", name: "decrement" },
+      ]}
       accessibilityLabel={accessibilityLabel}
       accessibilityRole="adjustable"
-      accessibilityActions={[
-        { name: "increment", label: "Increment" },
-        { name: "decrement", label: "Decrement" },
-      ]}
       onAccessibilityAction={handleAccessibilityAction}
+      style={[styles.container, { height: PICKER_HEIGHT }]}
     >
       <View
         pointerEvents="none"
         style={[
           styles.selectionIndicator,
           {
-            top: PADDING_ITEMS * WHEEL_PICKER_ITEM_HEIGHT,
-            height: WHEEL_PICKER_ITEM_HEIGHT,
-            borderColor: colors.border,
             backgroundColor: colors.surfacePressed,
+            borderColor: colors.border,
+            height: WHEEL_PICKER_ITEM_HEIGHT,
+            top: PADDING_ITEMS * WHEEL_PICKER_ITEM_HEIGHT,
           },
         ]}
       />
       <FlatList
-        ref={listRef}
         data={paddedData}
-        keyExtractor={(_, index) => `${accessibilityLabel}-${index}`}
-        renderItem={renderItem}
-        showsVerticalScrollIndicator={false}
-        snapToInterval={WHEEL_PICKER_ITEM_HEIGHT}
         decelerationRate="fast"
-        nestedScrollEnabled
-        scrollEnabled={!disabled}
-        onScrollBeginDrag={handleScrollBegin}
-        onMomentumScrollEnd={handleScrollEnd}
-        onScrollEndDrag={handleScrollEnd}
         getItemLayout={(_, index) => ({
+          index,
           length: WHEEL_PICKER_ITEM_HEIGHT,
           offset: WHEEL_PICKER_ITEM_HEIGHT * index,
-          index,
         })}
+        keyExtractor={(_, index) => `${accessibilityLabel}-${index}`}
+        nestedScrollEnabled
+        onMomentumScrollEnd={handleScrollEnd}
+        onScrollBeginDrag={handleScrollBegin}
+        onScrollEndDrag={handleScrollEnd}
+        ref={listRef}
+        renderItem={renderItem}
+        scrollEnabled={!disabled}
+        showsVerticalScrollIndicator={false}
+        snapToInterval={WHEEL_PICKER_ITEM_HEIGHT}
       />
     </View>
   );
@@ -178,14 +178,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     overflow: "hidden",
-  },
-  selectionIndicator: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    borderRadius: 8,
-    borderWidth: 1,
-    zIndex: 1,
   },
   item: {
     alignItems: "center",
@@ -198,5 +190,13 @@ const styles = StyleSheet.create({
   },
   itemTextSelected: {
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+  },
+  selectionIndicator: {
+    borderRadius: 8,
+    borderWidth: 1,
+    left: 0,
+    position: "absolute",
+    right: 0,
+    zIndex: 1,
   },
 });

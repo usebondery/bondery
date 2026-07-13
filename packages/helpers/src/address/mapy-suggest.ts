@@ -9,21 +9,21 @@
 import { formatAddressLabel, formatPlaceLabel } from "#address/address-utils.js";
 
 export interface MapSuggestionRegionalEntry {
-  type?: string;
-  name?: string;
   isoCode?: string;
+  name?: string;
+  type?: string;
 }
 
 export interface MapSuggestionItem {
   label: string;
   name: string;
-  type: string;
-  zip: string | null;
   position: {
     lat: number | null;
     lon: number | null;
   };
   regionalStructure: MapSuggestionRegionalEntry[];
+  type: string;
+  zip: string | null;
 }
 
 function isValidCoordinate(lat: number, lon: number): boolean {
@@ -87,7 +87,9 @@ function normalizeCoordinates(
 function buildLabelFromRawItem(raw: unknown): string {
   const item = raw as Record<string, unknown>;
   const name = String(item?.name || "").trim();
-  if (!name) return "";
+  if (!name) {
+    return "";
+  }
 
   const regional: unknown[] = Array.isArray(item?.regionalStructure) ? item.regionalStructure : [];
 
@@ -117,9 +119,9 @@ function buildLabelFromRawItem(raw: unknown): string {
     return formatAddressLabel({
       addressLine1: name,
       city,
+      countryCode,
       postalCode: zip,
       state,
-      countryCode,
     });
   }
 
@@ -127,7 +129,7 @@ function buildLabelFromRawItem(raw: unknown): string {
     return formatAddressLabel({ addressLine1: name, city, countryCode });
   }
 
-  return formatPlaceLabel({ city: city ?? name, state, countryCode });
+  return formatPlaceLabel({ city: city ?? name, countryCode, state });
 }
 
 /**
@@ -170,19 +172,19 @@ export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
   return {
     label: displayLabel || String(item?.name || ""),
     name: String(item?.name || item?.label || ""),
-    type: String(item?.type || "regional.address"),
-    zip: item?.zip ? String(item.zip) : null,
     position: {
       lat: Number.isFinite(lat) ? lat : null,
       lon: Number.isFinite(lon) ? lon : null,
     },
     regionalStructure: Array.isArray(item?.regionalStructure)
       ? (item.regionalStructure as Array<Record<string, unknown>>).map((entry) => ({
-          type: entry?.type ? String(entry.type) : undefined,
-          name: entry?.name ? String(entry.name) : undefined,
           isoCode: entry?.isoCode ? String(entry.isoCode) : undefined,
+          name: entry?.name ? String(entry.name) : undefined,
+          type: entry?.type ? String(entry.type) : undefined,
         }))
       : [],
+    type: String(item?.type || "regional.address"),
+    zip: item?.zip ? String(item.zip) : null,
   };
 }
 
@@ -190,6 +192,8 @@ export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
  * Parses an array of raw Mapy.com suggest items, filtering out empty labels.
  */
 export function parseMapSuggestions(rawItems: unknown[]): MapSuggestionItem[] {
-  if (!Array.isArray(rawItems)) return [];
+  if (!Array.isArray(rawItems)) {
+    return [];
+  }
   return rawItems.map(parseMapSuggestionItem).filter((item) => item.label.length > 0);
 }

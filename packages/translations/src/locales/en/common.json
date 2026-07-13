@@ -1,0 +1,92 @@
+{
+  "a11y": {
+    "back": "Back",
+    "info": "Info"
+  },
+  "actions": {
+    "back": "Back",
+    "call": "Call",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "deselect": "Deselect",
+    "done": "Done",
+    "email": "Email",
+    "message": "Message",
+    "retry": "Retry",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "select": "Select"
+  },
+  "app": {
+    "description": "Build bonds that last forever."
+  },
+  "confirm": {
+    "noCancel": "No, cancel",
+    "yesDelete": "Yes, delete"
+  },
+  "errors": {
+    "api": {
+      "account": "Account photo invalid format.",
+      "account_invalid": "Account invalid.",
+      "admin_required": "Admin required.",
+      "api": "Api key session mint failed.",
+      "auth_required": "Please sign in to continue.",
+      "bad_gateway": "Bad gateway.",
+      "bad_request": "Bad request.",
+      "billing": "Billing user lookup failed.",
+      "chat": "Chat session failed to update session.",
+      "checkout": "Checkout not configured.",
+      "conflict": "That action conflicts with existing data.",
+      "contact": "Contact update failed.",
+      "contact_failed": "Contact failed.",
+      "contact_invalid": "Contact invalid.",
+      "email": "Email service not configured.",
+      "extension": "Extension username required.",
+      "extension_outdated": "Extension outdated.",
+      "failed": "Failed to render or send feedback email .",
+      "group": "Group remove members invalid body.",
+      "group_failed": "Group failed.",
+      "import": "Import vcard failed.",
+      "import_failed": "Import failed.",
+      "important": "Important date duplicate.",
+      "interaction": "Interaction update failed.",
+      "interaction_failed": "Interaction failed.",
+      "internal": "Something went wrong on our end. Please try again.",
+      "invalid": "Invalid api key.",
+      "jwt": "Jwt signing misconfigured.",
+      "merge": "Merge recommendation not found.",
+      "not_found": "We couldn't find what you're looking for.",
+      "onboarding": "Onboarding failed to update import follow up.",
+      "rate": "You're doing that too often. Please wait a moment and try again.",
+      "relationship": "Relationship self forbidden.",
+      "relationship_failed": "Relationship failed.",
+      "relationship_invalid": "Relationship invalid.",
+      "service": "Service auth required.",
+      "service_unavailable": "The service is temporarily unavailable. Please try again shortly.",
+      "settings": "Settings no fields.",
+      "sqlite": "Sqlite schema mismatch.",
+      "sync": "Sync protocol mismatch.",
+      "sync_conflict": "This contact was updated on another device. Refresh and try again.",
+      "sync_failed": "Sync failed.",
+      "tag": "Tag upsert failed.",
+      "tag_failed": "Tag failed.",
+      "user": "User lookup failed.",
+      "validation_error": "Some of the information you entered isn't valid.",
+      "webhook": "Webhook not configured."
+    },
+    "apiTemporarilyUnavailable": "The API is temporarily unavailable. Please try again.",
+    "apiUnreachable": "Can't reach the Bondery server. Try again in a moment.",
+    "connection": "Check your connection and try again.",
+    "requestFailed": "Request failed. Please try again.",
+    "serverGeneric": "Something went wrong on the server. Please try again.",
+    "unknown": "Something went wrong."
+  },
+  "feedback": {
+    "deleting": "Deleting...",
+    "duplicating": "Duplicating...",
+    "errorTitle": "Error",
+    "noResults": "No results",
+    "savedTitle": "Saved",
+    "successTitle": "Success"
+  }
+}

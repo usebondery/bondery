@@ -2,15 +2,23 @@
  * Contact tag management routes
  */
 
-import type { FastifyInstance, FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
+import type { Tag } from "@bondery/schemas";
+import {
+  contactTagBodySchema,
+  contactTagListResponseSchema,
+  messageResponseSchema,
+  tagResponseSchema,
+} from "@bondery/schemas";
+import { uuidParamSchema } from "@bondery/schemas/http";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
-import { getAuth } from "../../../lib/auth.js";
-import { withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { TAG_SELECT } from "../../../lib/queries.js";
-import { contactTagBodySchema, contactTagListResponseSchema, messageResponseSchema } from "@bondery/schemas";
-import { uuidParamSchema } from "@bondery/schemas/http";
+import { addContactTag, removeContactTag } from "../../../domains/contacts/tags.js";
+import { TAG_SELECT } from "../../../lib/data/select-fragments.js";
+import { getAuth } from "../../../lib/platform/auth/strategies.js";
+import { internal } from "../../../lib/platform/errors/http-errors.js";
+import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
+import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 
 const contactTagIdParamsSchema = z.object({
   id: z.string(),
@@ -27,36 +35,26 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(contactTagListResponseSchema, "Contact tags"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client } = getAuth(request);
+    async (request) => {
+      const { client, user } = getAuth(request);
       const { id: personId } = request.params;
 
       const { data: memberships, error: membershipsError } = await client
         .from("people_tags")
-        .select("tag_id")
-        .eq("person_id", personId);
+        .select(`tags!inner(${TAG_SELECT})`)
+        .eq("person_id", personId)
+        .eq("user_id", user.id)
+        .order("label", { ascending: true, foreignTable: "tags" });
 
       if (membershipsError) {
-        return reply.status(500).send({ error: membershipsError.message });
+        throw internal("internal_server_error", membershipsError.message);
       }
 
-      const tagIds = (memberships || []).map((m: { tag_id: string }) => m.tag_id);
+      const tags = (memberships ?? [])
+        .map((membership) => (membership as { tags: Tag | null }).tags)
+        .filter((tag): tag is Tag => tag != null);
 
-      if (tagIds.length === 0) {
-        return { tags: [] };
-      }
-
-      const { data: tags, error: tagsError } = await client
-        .from("tags")
-        .select(TAG_SELECT)
-        .in("id", tagIds)
-        .order("label", { ascending: true });
-
-      if (tagsError) {
-        return reply.status(500).send({ error: tagsError.message });
-      }
-
-      return { tags: tags || [] };
+      return { tags };
     },
   );
 
@@ -64,32 +62,19 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
     "/:id/tags",
     {
       schema: {
+        body: contactTagBodySchema,
         description: "Add a tag to a contact.",
         params: uuidParamSchema,
-        body: contactTagBodySchema,
-        response: withOkResponse(messageResponseSchema, "Tag added to contact"),
+        response: withOkResponse(tagResponseSchema, "Tag added to contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id: personId } = request.params;
-      const { tagId } = request.body;
-
-      const { error } = await client.from("people_tags").upsert(
-        {
-          person_id: personId,
-          tag_id: tagId,
-          user_id: user.id,
-        },
-        { onConflict: "person_id,tag_id" },
-      );
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      return { message: "Tag added to contact" };
-    },
+    withDomainRoute(
+      { body: contactTagBodySchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await addContactTag(ctx, params.id, body.tagId);
+        return { tag: data.tag };
+      },
+    ),
   );
 
   fastify.delete(
@@ -101,21 +86,9 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(messageResponseSchema, "Tag removed from contact"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client } = getAuth(request);
-      const { id: personId, tagId } = request.params;
-
-      const { error } = await client
-        .from("people_tags")
-        .delete()
-        .eq("person_id", personId)
-        .eq("tag_id", tagId);
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
+    withDomainRoute({ params: contactTagIdParamsSchema }, async (ctx, { params }) => {
+      await removeContactTag(ctx, params.id, params.tagId);
       return { message: "Tag removed from contact" };
-    },
+    }),
   );
 }

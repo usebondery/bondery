@@ -1,7 +1,7 @@
 import { startTransition } from "react";
 import { create } from "zustand";
 
-const BULK_SELECTION_TRANSITION_THRESHOLD = 20;
+const _BULK_SELECTION_TRANSITION_THRESHOLD = 20;
 
 export type DragSelectionIntent = "select" | "deselect";
 
@@ -15,7 +15,10 @@ function createExcludedWithMyself(myselfContactId: string | undefined): Set<stri
   return excluded;
 }
 
-function countExcludedSelectable(excludedIds: Set<string>, myselfContactId: string | undefined): number {
+function countExcludedSelectable(
+  excludedIds: Set<string>,
+  myselfContactId: string | undefined,
+): number {
   if (!myselfContactId) {
     return excludedIds.size;
   }
@@ -25,51 +28,51 @@ function countExcludedSelectable(excludedIds: Set<string>, myselfContactId: stri
 
 function createEmptySelectionState() {
   return {
-    selectedIds: new Set<string>(),
-    isAllTotalSelected: false,
     excludedIds: new Set<string>(),
+    isAllTotalSelected: false,
+    selectedIds: new Set<string>(),
   };
 }
 
 export interface ContactsSelectionState {
-  isSelectionSessionActive: boolean;
-  selectedIds: Set<string>;
-  isAllTotalSelected: boolean;
+  applyDragSelection: (contactIds: string[], intent: DragSelectionIntent) => void;
+  deselectAllInSession: (options?: { useTransition?: boolean }) => void;
+
+  enterSelectionSession: (contactId: string) => void;
   excludedIds: Set<string>;
-  myselfContactId: string | undefined;
-  totalCount: number;
-  loadedContactCount: number;
+  exitSelectionMode: (options?: { useTransition?: boolean }) => void;
+  getEffectiveSelectedCount: () => number;
+  getExcludedIds: () => string[];
+  getSelectedContactIds: () => string[];
+  getSelectionMode: () => boolean;
+  isAddingToGroups: boolean;
+  isAddToGroupsSheetOpen: boolean;
+  isAllTotalSelected: boolean;
+  isDeleteConfirmOpen: boolean;
   isDeleting: boolean;
   isOverflowSheetOpen: boolean;
-  isDeleteConfirmOpen: boolean;
-  isAddToGroupsSheetOpen: boolean;
-  isAddingToGroups: boolean;
   isRemoveFromGroupConfirmOpen: boolean;
   isRemovingFromGroup: boolean;
 
-  setMyselfContactId: (contactId: string | undefined) => void;
-  setTotalCount: (count: number) => void;
-  setLoadedContactCount: (count: number) => void;
-  setIsDeleting: (deleting: boolean) => void;
-  setOverflowSheetOpen: (open: boolean) => void;
-  setDeleteConfirmOpen: (open: boolean) => void;
-  setAddToGroupsSheetOpen: (open: boolean) => void;
-  setIsAddingToGroups: (adding: boolean) => void;
-  setRemoveFromGroupConfirmOpen: (open: boolean) => void;
-  setIsRemovingFromGroup: (removing: boolean) => void;
-
   isSelected: (contactId: string) => boolean;
-  getSelectionMode: () => boolean;
-  getEffectiveSelectedCount: () => number;
-  getSelectedContactIds: () => string[];
-  getExcludedIds: () => string[];
-
-  enterSelectionSession: (contactId: string) => void;
-  toggleContact: (contactId: string) => void;
+  isSelectionSessionActive: boolean;
+  loadedContactCount: number;
+  myselfContactId: string | undefined;
+  pruneMyselfFromSelection: () => void;
+  pruneSelectionToKnownContactIds: (knownContactIds: Set<string>) => void;
   selectAllTotal: () => void;
-  deselectAllInSession: (options?: { useTransition?: boolean }) => void;
-  exitSelectionMode: (options?: { useTransition?: boolean }) => void;
-  applyDragSelection: (contactIds: string[], intent: DragSelectionIntent) => void;
+  selectedIds: Set<string>;
+  setAddToGroupsSheetOpen: (open: boolean) => void;
+  setDeleteConfirmOpen: (open: boolean) => void;
+  setIsAddingToGroups: (adding: boolean) => void;
+  setIsDeleting: (deleting: boolean) => void;
+  setIsRemovingFromGroup: (removing: boolean) => void;
+  setLoadedContactCount: (count: number) => void;
+
+  setMyselfContactId: (contactId: string | undefined) => void;
+  setOverflowSheetOpen: (open: boolean) => void;
+  setRemoveFromGroupConfirmOpen: (open: boolean) => void;
+  setTotalCount: (count: number) => void;
   syncDragSelectionRange: (params: {
     rangeContactIds: string[];
     selectInRange: boolean;
@@ -79,193 +82,11 @@ export interface ContactsSelectionState {
       excludedIds: Set<string>;
     };
   }) => void;
-  pruneMyselfFromSelection: () => void;
-  pruneSelectionToKnownContactIds: (knownContactIds: Set<string>) => void;
+  toggleContact: (contactId: string) => void;
+  totalCount: number;
 }
 
 export const useContactsSelection = create<ContactsSelectionState>((set, get) => ({
-  isSelectionSessionActive: false,
-  selectedIds: new Set(),
-  isAllTotalSelected: false,
-  excludedIds: new Set(),
-  myselfContactId: undefined,
-  totalCount: 0,
-  loadedContactCount: 0,
-  isDeleting: false,
-  isOverflowSheetOpen: false,
-  isDeleteConfirmOpen: false,
-  isAddToGroupsSheetOpen: false,
-  isAddingToGroups: false,
-  isRemoveFromGroupConfirmOpen: false,
-  isRemovingFromGroup: false,
-
-  setMyselfContactId: (contactId) => set({ myselfContactId: contactId }),
-
-  setTotalCount: (count) => set({ totalCount: count }),
-
-  setLoadedContactCount: (count) => set({ loadedContactCount: count }),
-
-  setIsDeleting: (isDeleting) => set({ isDeleting }),
-
-  setOverflowSheetOpen: (open) => set({ isOverflowSheetOpen: open }),
-
-  setDeleteConfirmOpen: (open) => set({ isDeleteConfirmOpen: open }),
-
-  setAddToGroupsSheetOpen: (open) => set({ isAddToGroupsSheetOpen: open }),
-
-  setIsAddingToGroups: (isAddingToGroups) => set({ isAddingToGroups }),
-
-  setRemoveFromGroupConfirmOpen: (open) => set({ isRemoveFromGroupConfirmOpen: open }),
-
-  setIsRemovingFromGroup: (isRemovingFromGroup) => set({ isRemovingFromGroup }),
-
-  isSelected: (contactId) => {
-    const state = get();
-
-    if (contactId === state.myselfContactId) {
-      return false;
-    }
-
-    if (state.isAllTotalSelected) {
-      return !state.excludedIds.has(contactId);
-    }
-
-    return state.selectedIds.has(contactId);
-  },
-
-  getSelectionMode: () => get().isSelectionSessionActive,
-
-  getEffectiveSelectedCount: () => {
-    const state = get();
-
-    if (state.isAllTotalSelected) {
-      return Math.max(0, state.totalCount - countExcludedSelectable(state.excludedIds, state.myselfContactId));
-    }
-
-    if (!state.myselfContactId) {
-      return state.selectedIds.size;
-    }
-
-    return Array.from(state.selectedIds).filter((id) => id !== state.myselfContactId).length;
-  },
-
-  getSelectedContactIds: () => {
-    const state = get();
-    const myselfId = state.myselfContactId;
-
-    return Array.from(state.selectedIds).filter((id) => id !== myselfId);
-  },
-
-  getExcludedIds: () => Array.from(get().excludedIds),
-
-  enterSelectionSession: (contactId) => {
-    const state = get();
-
-    if (contactId === state.myselfContactId) {
-      return;
-    }
-
-    set({
-      isSelectionSessionActive: true,
-      isAllTotalSelected: false,
-      excludedIds: new Set(),
-      selectedIds: new Set([contactId]),
-    });
-  },
-
-  toggleContact: (contactId) => {
-    const state = get();
-
-    if (contactId === state.myselfContactId) {
-      return;
-    }
-
-    if (state.isAllTotalSelected) {
-      set((current) => {
-        const nextExcluded = new Set(current.excludedIds);
-
-        if (nextExcluded.has(contactId)) {
-          nextExcluded.delete(contactId);
-        } else {
-          nextExcluded.add(contactId);
-        }
-
-        const selectableExclusions = countExcludedSelectable(nextExcluded, current.myselfContactId);
-
-        if (selectableExclusions >= current.totalCount) {
-          return {
-            ...createEmptySelectionState(),
-            isSelectionSessionActive: current.isSelectionSessionActive,
-          };
-        }
-
-        return { excludedIds: nextExcluded };
-      });
-      return;
-    }
-
-    set((current) => {
-      const nextSelected = new Set(current.selectedIds);
-
-      if (nextSelected.has(contactId)) {
-        nextSelected.delete(contactId);
-      } else {
-        nextSelected.add(contactId);
-      }
-
-      return { selectedIds: nextSelected };
-    });
-  },
-
-  selectAllTotal: () => {
-    const state = get();
-
-    set({
-      isSelectionSessionActive: true,
-      isAllTotalSelected: true,
-      excludedIds: createExcludedWithMyself(state.myselfContactId),
-      selectedIds: new Set(),
-    });
-  },
-
-  deselectAllInSession: (options) => {
-    const applyDeselect = () => {
-      set((current) => ({
-        ...createEmptySelectionState(),
-        isSelectionSessionActive: current.isSelectionSessionActive,
-      }));
-    };
-
-    if (options?.useTransition) {
-      startTransition(applyDeselect);
-      return;
-    }
-
-    applyDeselect();
-  },
-
-  exitSelectionMode: (options) => {
-    const applyExit = () => {
-      set({
-        ...createEmptySelectionState(),
-        isSelectionSessionActive: false,
-        isOverflowSheetOpen: false,
-        isDeleteConfirmOpen: false,
-        isAddToGroupsSheetOpen: false,
-        isAddingToGroups: false,
-        isRemoveFromGroupConfirmOpen: false,
-        isRemovingFromGroup: false,
-      });
-    };
-
-    if (options?.useTransition) {
-      startTransition(applyExit);
-      return;
-    }
-
-    applyExit();
-  },
-
   applyDragSelection: (contactIds, intent) => {
     if (contactIds.length === 0) {
       return;
@@ -319,6 +140,183 @@ export const useContactsSelection = create<ContactsSelectionState>((set, get) =>
     });
   },
 
+  deselectAllInSession: (options) => {
+    const applyDeselect = () => {
+      set((current) => ({
+        ...createEmptySelectionState(),
+        isSelectionSessionActive: current.isSelectionSessionActive,
+      }));
+    };
+
+    if (options?.useTransition) {
+      startTransition(applyDeselect);
+      return;
+    }
+
+    applyDeselect();
+  },
+
+  enterSelectionSession: (contactId) => {
+    const state = get();
+
+    if (contactId === state.myselfContactId) {
+      return;
+    }
+
+    set({
+      excludedIds: new Set(),
+      isAllTotalSelected: false,
+      isSelectionSessionActive: true,
+      selectedIds: new Set([contactId]),
+    });
+  },
+  excludedIds: new Set(),
+
+  exitSelectionMode: (options) => {
+    const applyExit = () => {
+      set({
+        ...createEmptySelectionState(),
+        isAddingToGroups: false,
+        isAddToGroupsSheetOpen: false,
+        isDeleteConfirmOpen: false,
+        isOverflowSheetOpen: false,
+        isRemoveFromGroupConfirmOpen: false,
+        isRemovingFromGroup: false,
+        isSelectionSessionActive: false,
+      });
+    };
+
+    if (options?.useTransition) {
+      startTransition(applyExit);
+      return;
+    }
+
+    applyExit();
+  },
+
+  getEffectiveSelectedCount: () => {
+    const state = get();
+
+    if (state.isAllTotalSelected) {
+      return Math.max(
+        0,
+        state.totalCount - countExcludedSelectable(state.excludedIds, state.myselfContactId),
+      );
+    }
+
+    if (!state.myselfContactId) {
+      return state.selectedIds.size;
+    }
+
+    return Array.from(state.selectedIds).filter((id) => id !== state.myselfContactId).length;
+  },
+
+  getExcludedIds: () => Array.from(get().excludedIds),
+
+  getSelectedContactIds: () => {
+    const state = get();
+    const myselfId = state.myselfContactId;
+
+    return Array.from(state.selectedIds).filter((id) => id !== myselfId);
+  },
+
+  getSelectionMode: () => get().isSelectionSessionActive,
+  isAddingToGroups: false,
+  isAddToGroupsSheetOpen: false,
+  isAllTotalSelected: false,
+  isDeleteConfirmOpen: false,
+  isDeleting: false,
+  isOverflowSheetOpen: false,
+  isRemoveFromGroupConfirmOpen: false,
+  isRemovingFromGroup: false,
+
+  isSelected: (contactId) => {
+    const state = get();
+
+    if (contactId === state.myselfContactId) {
+      return false;
+    }
+
+    if (state.isAllTotalSelected) {
+      return !state.excludedIds.has(contactId);
+    }
+
+    return state.selectedIds.has(contactId);
+  },
+  isSelectionSessionActive: false,
+  loadedContactCount: 0,
+  myselfContactId: undefined,
+
+  pruneMyselfFromSelection: () => {
+    const { myselfContactId, selectedIds } = get();
+
+    if (!myselfContactId || !selectedIds.has(myselfContactId)) {
+      return;
+    }
+
+    set((current) => {
+      const next = new Set(current.selectedIds);
+      next.delete(myselfContactId);
+      return { selectedIds: next };
+    });
+  },
+
+  pruneSelectionToKnownContactIds: (knownContactIds) => {
+    set((current) => {
+      if (current.isAllTotalSelected) {
+        const nextExcluded = new Set(
+          Array.from(current.excludedIds).filter(
+            (id) => knownContactIds.has(id) || id === current.myselfContactId,
+          ),
+        );
+
+        return { excludedIds: nextExcluded };
+      }
+
+      const nextSelected = new Set(
+        Array.from(current.selectedIds).filter((id) => knownContactIds.has(id)),
+      );
+
+      if (nextSelected.size === current.selectedIds.size) {
+        return current;
+      }
+
+      return { selectedIds: nextSelected };
+    });
+  },
+
+  selectAllTotal: () => {
+    const state = get();
+
+    set({
+      excludedIds: createExcludedWithMyself(state.myselfContactId),
+      isAllTotalSelected: true,
+      isSelectionSessionActive: true,
+      selectedIds: new Set(),
+    });
+  },
+  selectedIds: new Set(),
+
+  setAddToGroupsSheetOpen: (open) => set({ isAddToGroupsSheetOpen: open }),
+
+  setDeleteConfirmOpen: (open) => set({ isDeleteConfirmOpen: open }),
+
+  setIsAddingToGroups: (isAddingToGroups) => set({ isAddingToGroups }),
+
+  setIsDeleting: (isDeleting) => set({ isDeleting }),
+
+  setIsRemovingFromGroup: (isRemovingFromGroup) => set({ isRemovingFromGroup }),
+
+  setLoadedContactCount: (count) => set({ loadedContactCount: count }),
+
+  setMyselfContactId: (contactId) => set({ myselfContactId: contactId }),
+
+  setOverflowSheetOpen: (open) => set({ isOverflowSheetOpen: open }),
+
+  setRemoveFromGroupConfirmOpen: (open) => set({ isRemoveFromGroupConfirmOpen: open }),
+
+  setTotalCount: (count) => set({ totalCount: count }),
+
   syncDragSelectionRange: ({ rangeContactIds, selectInRange, baseline }) => {
     const state = get();
     const myselfId = state.myselfContactId;
@@ -346,9 +344,9 @@ export const useContactsSelection = create<ContactsSelectionState>((set, get) =>
       }
 
       set({
-        isSelectionSessionActive: true,
-        isAllTotalSelected: true,
         excludedIds: nextExcluded,
+        isAllTotalSelected: true,
+        isSelectionSessionActive: true,
         selectedIds: new Set(),
       });
       return;
@@ -365,48 +363,57 @@ export const useContactsSelection = create<ContactsSelectionState>((set, get) =>
     }
 
     set({
-      isSelectionSessionActive: nextSelected.size > 0,
-      isAllTotalSelected: false,
       excludedIds: new Set(),
+      isAllTotalSelected: false,
+      isSelectionSessionActive: nextSelected.size > 0,
       selectedIds: nextSelected,
     });
   },
 
-  pruneMyselfFromSelection: () => {
-    const { myselfContactId, selectedIds } = get();
+  toggleContact: (contactId) => {
+    const state = get();
 
-    if (!myselfContactId || !selectedIds.has(myselfContactId)) {
+    if (contactId === state.myselfContactId) {
+      return;
+    }
+
+    if (state.isAllTotalSelected) {
+      set((current) => {
+        const nextExcluded = new Set(current.excludedIds);
+
+        if (nextExcluded.has(contactId)) {
+          nextExcluded.delete(contactId);
+        } else {
+          nextExcluded.add(contactId);
+        }
+
+        const selectableExclusions = countExcludedSelectable(nextExcluded, current.myselfContactId);
+
+        if (selectableExclusions >= current.totalCount) {
+          return {
+            ...createEmptySelectionState(),
+            isSelectionSessionActive: current.isSelectionSessionActive,
+          };
+        }
+
+        return { excludedIds: nextExcluded };
+      });
       return;
     }
 
     set((current) => {
-      const next = new Set(current.selectedIds);
-      next.delete(myselfContactId);
-      return { selectedIds: next };
-    });
-  },
+      const nextSelected = new Set(current.selectedIds);
 
-  pruneSelectionToKnownContactIds: (knownContactIds) => {
-    set((current) => {
-      if (current.isAllTotalSelected) {
-        const nextExcluded = new Set(
-          Array.from(current.excludedIds).filter((id) => knownContactIds.has(id) || id === current.myselfContactId),
-        );
-
-        return { excludedIds: nextExcluded };
-      }
-
-      const nextSelected = new Set(
-        Array.from(current.selectedIds).filter((id) => knownContactIds.has(id)),
-      );
-
-      if (nextSelected.size === current.selectedIds.size) {
-        return current;
+      if (nextSelected.has(contactId)) {
+        nextSelected.delete(contactId);
+      } else {
+        nextSelected.add(contactId);
       }
 
       return { selectedIds: nextSelected };
     });
   },
+  totalCount: 0,
 }));
 
 /** Row-level subscription: re-renders only when this contact's selected state changes. */

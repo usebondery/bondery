@@ -21,16 +21,16 @@ export function Logo({ size, iconSize, href = "/" }: LogoProps) {
 
   return (
     <Link
-      href={href}
       aria-label="Bondery homepage"
-      style={{ textDecoration: "none", color: "inherit" }}
+      href={href}
+      style={{ color: "inherit", textDecoration: "none" }}
     >
-      <Flex align="center" gap="xs" darkHidden>
-        <BonderyLogotypeBlack width={logoSize * 3} height={logoSize} />
+      <Flex align="center" darkHidden gap="xs">
+        <BonderyLogotypeBlack height={logoSize} width={logoSize * 3} />
       </Flex>
 
       <Flex align="center" gap="xs" lightHidden>
-        <BonderyLogotypeWhite width={logoSize * 3} height={logoSize} />
+        <BonderyLogotypeWhite height={logoSize} width={logoSize * 3} />
       </Flex>
     </Link>
   );

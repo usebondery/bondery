@@ -1,5 +1,5 @@
-import { PostHog } from "posthog-node";
 import { after } from "next/server";
+import { PostHog } from "posthog-node";
 
 /**
  * Singleton PostHog Node client for server-side event capture.
@@ -8,9 +8,9 @@ import { after } from "next/server";
  */
 const posthogClient = process.env.POSTHOG_KEY
   ? new PostHog(process.env.POSTHOG_KEY, {
-      host: process.env.POSTHOG_HOST ?? "https://eu.i.posthog.com",
       flushAt: 1,
       flushInterval: 0,
+      host: process.env.POSTHOG_HOST ?? "https://eu.i.posthog.com",
     })
   : null;
 
@@ -27,7 +27,9 @@ export function captureServerEvent(
   event: string,
   properties?: Record<string, unknown>,
 ) {
-  if (!posthogClient) return;
+  if (!posthogClient) {
+    return;
+  }
 
   posthogClient.capture({ distinctId, event, properties });
 

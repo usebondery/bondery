@@ -1,6 +1,5 @@
 import { CONTACTS_PAGE_SIZE } from "../../lib/config";
-import { contactsDomain } from "../../lib/domains/contacts";
-import { groupsDomain } from "../../lib/domains/groups";
+import { listGroupMembers, readContactsList } from "../../lib/sync/hooks/useSyncQuery";
 import { buildGroupSelectionMemberPersonIds } from "./buildGroupSelectionMemberPersonIds";
 import type { ContactsSelectionState } from "./contactsSelectionStore";
 
@@ -26,17 +25,17 @@ export function resolveContactsSelectionPersonIds(
 
   while (true) {
     const page = options?.groupId
-      ? groupsDomain.listMembers({
+      ? listGroupMembers({
           groupId: options.groupId,
-          query: debouncedQuery,
           limit: CONTACTS_PAGE_SIZE,
           offset,
+          query: debouncedQuery,
         })
-      : contactsDomain.list({
-          query: debouncedQuery,
+      : readContactsList({
+          excludeMyself: true,
           limit: CONTACTS_PAGE_SIZE,
           offset,
-          excludeMyself: true,
+          query: debouncedQuery,
         });
 
     for (const contact of page.contacts) {

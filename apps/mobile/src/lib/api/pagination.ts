@@ -23,12 +23,12 @@ export function normalizePaginatedList<T, K extends string>(
   return {
     items,
     pagination: {
+      hasMore: false,
       limit: fallbackLimit,
       offset: 0,
-      totalCount,
-      hasMore: false,
-      sort: null,
       search: null,
+      sort: null,
+      totalCount,
     },
   };
 }

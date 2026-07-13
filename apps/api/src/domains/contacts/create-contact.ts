@@ -1,10 +1,15 @@
-import type { Contact, CreateContactInput as CreateContactPayload, TablesInsert } from "@bondery/schemas";
-import { loadEnrichedContact } from "../../lib/contact-enrichment.js";
-import { upsertContactSocials } from "../../lib/socials.js";
+import type {
+  Contact,
+  CreateContactInput as CreateContactPayload,
+  TablesInsert,
+} from "@bondery/schemas";
+import { loadEnrichedContact } from "../../lib/contacts/enrichment.js";
+import { upsertContactSocials } from "../../lib/contacts/socials.js";
+import { internal } from "../../lib/platform/errors/http-errors.js";
 import { buildContactSnapshotChanges } from "../../lib/sync/build-changes.js";
 import { emitSyncBatch } from "../../lib/sync/emit-change.js";
+import { type DomainContext, syncEmitMetaFromContext } from "../_shared/context.js";
 import { withPersonTxid } from "../_shared/with-txid.js";
-import { DomainError, syncEmitMetaFromContext, type DomainContext } from "../_shared/context.js";
 
 export interface CreateContactDomainInput extends CreateContactPayload {
   id?: string;
@@ -17,10 +22,10 @@ export async function createContact(
   const { client, user, log } = ctx;
 
   const insertData: TablesInsert<"people"> = {
-    user_id: user.id,
     first_name: input.firstName.trim(),
     last_interaction: new Date().toISOString(),
     myself: false,
+    user_id: user.id,
   };
 
   if (input.id) {
@@ -42,49 +47,32 @@ export async function createContact(
     .single();
 
   if (error) {
-    throw new DomainError(error.message, 500);
+    throw internal("contact_failed", error.message);
   }
 
   if (input.linkedin && input.linkedin.trim().length > 0) {
     try {
-      await upsertContactSocials(
-        client,
-        user.id,
-        newContact.id,
-        "linkedin",
-        input.linkedin,
-      );
+      await upsertContactSocials(client, user.id, newContact.id, "linkedin", input.linkedin);
     } catch (socialError) {
-      const message =
-        socialError instanceof Error ? socialError.message : "Social upsert failed";
-      throw new DomainError(message, 500);
+      const message = socialError instanceof Error ? socialError.message : "Social upsert failed";
+      throw internal("contact_failed", message);
     }
   }
 
-  const contact = await loadEnrichedContact(
-    client,
-    user.id,
-    newContact.id,
-    undefined,
-    log,
-  );
+  const contact = await loadEnrichedContact(client, user.id, newContact.id, undefined, log);
 
   if (!contact) {
-    throw new DomainError("Contact was created but could not be reloaded", 500);
+    throw internal("contact_contact_was_created_but_could_not_be_rel");
   }
 
-  const { txid } = await withPersonTxid(
-    client,
-    user.id,
-    async () => ({ personId: newContact.id }),
-  );
+  const { txid } = await withPersonTxid(client, user.id, async () => ({ personId: newContact.id }));
 
   const changes = await buildContactSnapshotChanges(client, user.id, newContact.id);
   const serverSequence = await emitSyncBatch(user.id, changes, syncEmitMetaFromContext(ctx));
 
   return {
     data: { contact, personId: newContact.id },
-    txid,
     serverSequence: serverSequence ?? 0,
+    txid,
   };
 }

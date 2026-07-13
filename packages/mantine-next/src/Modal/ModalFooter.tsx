@@ -1,30 +1,30 @@
-import { Button, Group, Stack } from "@mantine/core";
 import type { MantineSpacing } from "@mantine/core";
+import { Button, Group, Stack } from "@mantine/core";
 import { IconCheck, IconTrash } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 export interface ModalFooterProps {
-  mt?: MantineSpacing;
-  dangerLabel?: string;
-  onDanger?: () => void;
-  dangerDisabled?: boolean;
-  dangerLeftSection?: ReactNode;
-  backLabel?: string;
-  onBack?: () => void;
-  backDisabled?: boolean;
-  backLeftSection?: ReactNode;
-  cancelLabel?: string;
-  onCancel?: () => void;
-  cancelDisabled?: boolean;
-  actionLabel?: string;
-  onAction?: () => void;
-  actionType?: "button" | "submit";
   actionColor?: string;
-  actionVariant?: "filled" | "light" | "outline" | "subtle" | "default";
-  actionLeftSection?: ReactNode;
-  actionRightSection?: ReactNode;
-  actionLoading?: boolean;
   actionDisabled?: boolean;
+  actionLabel?: string;
+  actionLeftSection?: ReactNode;
+  actionLoading?: boolean;
+  actionRightSection?: ReactNode;
+  actionType?: "button" | "submit";
+  actionVariant?: "filled" | "light" | "outline" | "subtle" | "default";
+  backDisabled?: boolean;
+  backLabel?: string;
+  backLeftSection?: ReactNode;
+  cancelDisabled?: boolean;
+  cancelLabel?: string;
+  dangerDisabled?: boolean;
+  dangerLabel?: string;
+  dangerLeftSection?: ReactNode;
+  mt?: MantineSpacing;
+  onAction?: () => void;
+  onBack?: () => void;
+  onCancel?: () => void;
+  onDanger?: () => void;
 }
 
 export function ModalFooter({
@@ -58,22 +58,23 @@ export function ModalFooter({
   const singleAction = showAction && !showCancel && !showBack && !showDanger;
   const resolvedActionLeftSection = singleAction
     ? actionLeftSection
-    : actionLeftSection || (!actionRightSection && showAction ? <IconCheck size={16} /> : undefined);
+    : actionLeftSection ||
+      (!actionRightSection && showAction ? <IconCheck size={16} /> : undefined);
   const resolvedDangerLeftSection = dangerLeftSection ?? <IconTrash size={16} />;
 
   if (singleAction) {
     return (
       <Stack mt={mt}>
         <Button
-          type={actionType}
           color={actionColor}
-          variant={actionVariant}
-          leftSection={resolvedActionLeftSection}
-          rightSection={actionRightSection}
-          onClick={onAction}
-          loading={actionLoading}
           disabled={actionDisabled}
           fullWidth
+          leftSection={resolvedActionLeftSection}
+          loading={actionLoading}
+          onClick={onAction}
+          rightSection={actionRightSection}
+          type={actionType}
+          variant={actionVariant}
         >
           {actionLabel}
         </Button>
@@ -86,22 +87,22 @@ export function ModalFooter({
       <Group gap="sm">
         {showDanger ? (
           <Button
-            type="button"
-            variant="light"
             color="red"
+            disabled={dangerDisabled}
             leftSection={resolvedDangerLeftSection}
             onClick={onDanger}
-            disabled={dangerDisabled}
+            type="button"
+            variant="light"
           >
             {dangerLabel}
           </Button>
         ) : null}
         {showBack ? (
           <Button
-            variant="default"
+            disabled={backDisabled}
             leftSection={backLeftSection}
             onClick={onBack}
-            disabled={backDisabled}
+            variant="default"
           >
             {backLabel}
           </Button>
@@ -110,31 +111,27 @@ export function ModalFooter({
     ) : null;
 
   return (
-    <Group
-      justify={showDanger || showBack ? "space-between" : "flex-end"}
-      align="center"
-      mt={mt}
-    >
+    <Group align="center" justify={showDanger || showBack ? "space-between" : "flex-end"} mt={mt}>
       {leftSlot}
 
       {showRightCluster ? (
         <Group>
           {showCancel ? (
-            <Button variant="default" onClick={onCancel} disabled={cancelDisabled}>
+            <Button disabled={cancelDisabled} onClick={onCancel} variant="default">
               {cancelLabel}
             </Button>
           ) : null}
 
           {showAction ? (
             <Button
-              type={actionType}
               color={actionColor}
-              variant={actionVariant}
-              leftSection={resolvedActionLeftSection}
-              rightSection={actionRightSection}
-              onClick={onAction}
-              loading={actionLoading}
               disabled={actionDisabled}
+              leftSection={resolvedActionLeftSection}
+              loading={actionLoading}
+              onClick={onAction}
+              rightSection={actionRightSection}
+              type={actionType}
+              variant={actionVariant}
             >
               {actionLabel}
             </Button>

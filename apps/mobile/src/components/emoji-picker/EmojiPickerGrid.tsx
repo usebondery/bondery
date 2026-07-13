@@ -1,18 +1,12 @@
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
-import {
-  forwardRef,
-  useCallback,
-  useImperativeHandle,
-  useMemo,
-  useRef,
-} from "react";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LIST_SCROLL, UI_TIMING_MS } from "../../lib/config";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { EMOJI_PICKER_LAYOUT, getEmojiPickerCellSize } from "./constants";
 import { EmojiPickerCell } from "./EmojiPickerCell";
-import { buildEmojiFlatRows, findEmojiFlatIndex, type EmojiFlatRow } from "./emojiFlatList";
+import { buildEmojiFlatRows, type EmojiFlatRow, findEmojiFlatIndex } from "./emojiFlatList";
 import type { EmojiPickerSection } from "./useEmojiPickerFilter";
 
 export type EmojiPickerGridRef = {
@@ -20,18 +14,15 @@ export type EmojiPickerGridRef = {
 };
 
 interface EmojiPickerGridProps {
-  sections: EmojiPickerSection[];
-  value: string;
   emptySearchLabel: string;
   getCategoryLabel: (categoryKey: string) => string;
   onSelect: (emoji: string) => void;
+  sections: EmojiPickerSection[];
+  value: string;
 }
 
 export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridProps>(
-  function EmojiPickerGrid(
-    { sections, value, emptySearchLabel, getCategoryLabel, onSelect },
-    ref,
-  ) {
+  function EmojiPickerGrid({ sections, value, emptySearchLabel, getCategoryLabel, onSelect }, ref) {
     const colors = useMobileThemeColors();
     const { width: windowWidth } = useWindowDimensions();
     const cellSize = getEmojiPickerCellSize(windowWidth);
@@ -54,10 +45,10 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
         const attemptScroll = () => {
           void listRef.current
             ?.scrollToIndex({
-              index,
               animated: true,
-              viewPosition: 0.25,
+              index,
               viewOffset: 8,
+              viewPosition: 0.25,
             })
             .catch(() => {
               if (
@@ -96,10 +87,10 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
           <View style={[styles.row, { gap: EMOJI_PICKER_LAYOUT.gridGap }]}>
             {item.items.map((emojiItem) => (
               <EmojiPickerCell
-                key={emojiItem.emoji}
-                item={emojiItem}
                 cellSize={cellSize}
                 isSelected={value === emojiItem.emoji}
+                item={emojiItem}
+                key={emojiItem.emoji}
                 onPress={onSelect}
               />
             ))}
@@ -112,7 +103,9 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
     const listEmpty = useMemo(
       () => (
         <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{emptySearchLabel}</Text>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            {emptySearchLabel}
+          </Text>
         </View>
       ),
       [colors.textSecondary, emptySearchLabel],
@@ -120,46 +113,27 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
 
     return (
       <FlashList
-        ref={listRef}
-        style={styles.list}
+        automaticallyAdjustKeyboardInsets
+        contentContainerStyle={styles.listContent}
         data={flatRows}
         extraData={value}
-        keyExtractor={(item) => item.key}
         getItemType={(item) => item.type}
-        renderItem={renderFlatItem}
         keyboardShouldPersistTaps="handled"
-        automaticallyAdjustKeyboardInsets
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
+        keyExtractor={(item) => item.key}
         ListEmptyComponent={listEmpty}
+        ref={listRef}
+        renderItem={renderFlatItem}
+        showsVerticalScrollIndicator={false}
+        style={styles.list}
       />
     );
   },
 );
 
 const styles = StyleSheet.create({
-  list: {
-    flex: 1,
-  },
-  listContent: {
-    paddingHorizontal: EMOJI_PICKER_LAYOUT.gridHorizontalPadding,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  sectionHeader: {
-    width: "100%",
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-    paddingTop: 8,
-    paddingBottom: 4,
-    paddingHorizontal: 4,
-  },
   emptyContainer: {
-    flex: 1,
     alignItems: "center",
+    flex: 1,
     justifyContent: "center",
     paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
     paddingVertical: 20,
@@ -167,5 +141,24 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     textAlign: "center",
+  },
+  list: {
+    flex: 1,
+  },
+  listContent: {
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: EMOJI_PICKER_LAYOUT.gridHorizontalPadding,
+  },
+  row: {
+    alignItems: "center",
+    flexDirection: "row",
+  },
+  sectionHeader: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+    paddingBottom: 4,
+    paddingHorizontal: 4,
+    paddingTop: 8,
+    width: "100%",
   },
 });

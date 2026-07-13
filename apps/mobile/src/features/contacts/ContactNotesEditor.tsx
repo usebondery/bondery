@@ -1,19 +1,3 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useFocusEffect, useRouter } from "expo-router";
-import type {
-  EnrichedMarkdownTextInputInstance,
-  StyleState,
-} from "react-native-enriched-markdown";
-import { EnrichedMarkdownTextInput } from "react-native-enriched-markdown";
-import type { Contact } from "@bondery/schemas";
-import { contactNotesUpdateSchema } from "@bondery/schemas";
 import {
   collapsePersonMentionsFromEditor,
   expandPersonMentionsForEditor,
@@ -21,18 +5,22 @@ import {
   htmlToMarkdown,
   markdownToHtml,
 } from "@bondery/helpers/notes";
-import { contactsDomain } from "../../lib/domains/contacts";
-import { useContact, useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
+import type { Contact } from "@bondery/schemas";
+import { contactNotesUpdateSchema } from "@bondery/schemas";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from "react-native";
+import type { EnrichedMarkdownTextInputInstance, StyleState } from "react-native-enriched-markdown";
+import { EnrichedMarkdownTextInput } from "react-native-enriched-markdown";
 import { StackNavBar } from "../../components/chrome";
+import { updateContact } from "../../lib/domains/contacts";
+import { useContact, useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
+import { useAppToast } from "../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { useAppToast } from "../../lib/toast/useAppToast";
-import { formatContactName, formatRelativeEditedAt } from "./contactUtils";
+import { EditorCommandPalette, type EditorPaletteMode } from "./components/EditorCommandPalette";
 import { NotesFormattingToolbar } from "./components/NotesFormattingToolbar";
-import {
-  EditorCommandPalette,
-  type EditorPaletteMode,
-} from "./components/EditorCommandPalette";
+import { formatContactName, formatRelativeEditedAt } from "./contactUtils";
 import { useMentionableContacts } from "./hooks/useMentionableContacts";
 import {
   removeSlashTokenFromMarkdown,
@@ -49,10 +37,7 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const AUTOSAVE_DELAY_MS = 1500;
 
-export function ContactNotesEditor({
-  id,
-  isMyselfMode = false,
-}: ContactNotesEditorProps) {
+export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProps) {
   const router = useRouter();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
@@ -123,7 +108,7 @@ export function ContactNotesEditor({
   useEffect(() => {
     if (!resolvedContact) {
       if (!isMyselfMode && !id) {
-        showToast({ type: "error", headline: "Failed to load notes" });
+        showToast({ headline: "Failed to load notes", type: "error" });
         setLoading(false);
       }
       return;
@@ -139,19 +124,21 @@ export function ContactNotesEditor({
 
   const saveNotes = useCallback(
     async (markdown: string) => {
-      if (!contactId || isSavingRef.current) return;
+      if (!contactId || isSavingRef.current) {
+        return;
+      }
       isSavingRef.current = true;
       setSaveStatus("saving");
       try {
         const collapsed = collapsePersonMentionsFromEditor(markdown);
         const html = markdownToHtml(collapsed) || null;
         const payload = contactNotesUpdateSchema.parse({ notes: html });
-        const updated = contactsDomain.update(contactId, payload);
+        const updated = updateContact(contactId, payload);
         setNotesUpdatedAt(updated.notesUpdatedAt ?? null);
         setSaveStatus("saved");
       } catch {
         setSaveStatus("error");
-        showToast({ type: "error", headline: "Failed to save notes" });
+        showToast({ headline: "Failed to save notes", type: "error" });
       } finally {
         isSavingRef.current = false;
       }
@@ -162,7 +149,9 @@ export function ContactNotesEditor({
   const scheduleAutosave = useCallback(
     (markdown: string) => {
       pendingMarkdown.current = markdown;
-      if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (saveTimer.current) {
+        clearTimeout(saveTimer.current);
+      }
       setSaveStatus("idle");
       saveTimer.current = setTimeout(() => {
         if (pendingMarkdown.current !== null) {
@@ -202,10 +191,7 @@ export function ContactNotesEditor({
     }
 
     const markdown = await editor.getMarkdown();
-    const withoutSlash = removeSlashTokenFromMarkdown(
-      markdown,
-      slashState.query,
-    );
+    const withoutSlash = removeSlashTokenFromMarkdown(markdown, slashState.query);
     if (withoutSlash !== markdown) {
       editor.setValue(withoutSlash);
     }
@@ -241,10 +227,7 @@ export function ContactNotesEditor({
       return;
     }
 
-    const { displayText, url } = formatPersonMentionLink(
-      formatContactName(contact),
-      contact.id,
-    );
+    const { displayText, url } = formatPersonMentionLink(formatContactName(contact), contact.id);
     editor.insertMention(displayText, url);
   }, []);
 
@@ -269,27 +252,33 @@ export function ContactNotesEditor({
   }, []);
 
   const navSubtitle = useMemo(() => {
-    if (saveStatus === "saving") return "Saving…";
-    if (saveStatus === "error") return "Save failed";
-    if (notesUpdatedAt) return formatRelativeEditedAt(notesUpdatedAt);
+    if (saveStatus === "saving") {
+      return "Saving…";
+    }
+    if (saveStatus === "error") {
+      return "Save failed";
+    }
+    if (notesUpdatedAt) {
+      return formatRelativeEditedAt(notesUpdatedAt);
+    }
     return undefined;
   }, [saveStatus, notesUpdatedAt]);
 
   const markdownStyle = useMemo(
     () => ({
-      paragraph: { color: colors.textPrimary, fontSize: 16, lineHeight: 24 },
-      strong: { color: colors.textPrimary },
+      code: { backgroundColor: colors.surfacePressed },
       em: { color: colors.textPrimary },
       link: { color: colors.primary },
-      code: { backgroundColor: colors.surfacePressed },
-      list: { color: colors.textPrimary, fontSize: 16 },
       linkVariants: {
         "^bp://person/": {
+          backgroundColor: `${colors.primary}18`,
           color: colors.primary,
-          backgroundColor: colors.primary + "18",
           underline: false,
         },
       },
+      list: { color: colors.textPrimary, fontSize: 16 },
+      paragraph: { color: colors.textPrimary, fontSize: 16, lineHeight: 24 },
+      strong: { color: colors.textPrimary },
     }),
     [colors],
   );
@@ -298,22 +287,18 @@ export function ContactNotesEditor({
 
   const titleRow = (
     <View style={styles.titleCol}>
-      <Text
-        style={[styles.navTitle, { color: colors.textPrimary }]}
-        numberOfLines={1}
-      >
+      <Text numberOfLines={1} style={[styles.navTitle, { color: colors.textPrimary }]}>
         {contactName || "Notes"}
       </Text>
       {navSubtitle ? (
         <Text
+          numberOfLines={1}
           style={[
             styles.navSubtitle,
             {
-              color:
-                saveStatus === "error" ? colors.dangerText : colors.textMuted,
+              color: saveStatus === "error" ? colors.dangerText : colors.textMuted,
             },
           ]}
-          numberOfLines={1}
         >
           {navSubtitle}
         </Text>
@@ -327,47 +312,44 @@ export function ContactNotesEditor({
 
       {showEditor ? (
         <KeyboardAvoidingView
-          style={styles.flex}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={styles.flex}
         >
           <EnrichedMarkdownTextInput
-            ref={editorRef}
-            style={[styles.editor, { color: colors.textPrimary }]}
-            defaultValue={editorDefaultValue}
-            placeholder="Write notes…"
-            placeholderTextColor={colors.textMuted}
             autoFocus
-            multiline
-            scrollEnabled
             cursorColor={colors.primary}
-            selectionColor={colors.primary + "44"}
+            defaultValue={editorDefaultValue}
             markdownStyle={markdownStyle}
             mentionIndicators={["@"]}
+            multiline
             onChangeMarkdown={scheduleAutosave}
-            onChangeText={handleChangeText}
+            onChangeMention={handleChangeMention}
             onChangeSelection={handleChangeSelection}
             onChangeState={setStyleState}
-            onStartMention={handleStartMention}
-            onChangeMention={handleChangeMention}
+            onChangeText={handleChangeText}
             onEndMention={handleEndMention}
+            onStartMention={handleStartMention}
+            placeholder="Write notes…"
+            placeholderTextColor={colors.textMuted}
+            ref={editorRef}
+            scrollEnabled
+            selectionColor={`${colors.primary}44`}
+            style={[styles.editor, { color: colors.textPrimary }]}
           />
           {paletteMode !== "closed" ? (
             <EditorCommandPalette
-              mode={paletteMode}
-              slashQuery={slashState?.query ?? ""}
               mentionContacts={mentionResults}
               mentionLoading={mentionContactsLoading}
+              mode={paletteMode}
               onDismiss={dismissPalette}
+              onMentionSelect={handleMentionSelect}
               onSlashCommandSelect={(command) => {
                 void handleSlashCommandSelect(command);
               }}
-              onMentionSelect={handleMentionSelect}
+              slashQuery={slashState?.query ?? ""}
             />
           ) : (
-            <NotesFormattingToolbar
-              editorRef={editorRef}
-              styleState={styleState}
-            />
+            <NotesFormattingToolbar editorRef={editorRef} styleState={styleState} />
           )}
         </KeyboardAvoidingView>
       ) : null}
@@ -376,33 +358,33 @@ export function ContactNotesEditor({
 }
 
 const styles = StyleSheet.create({
-  screen: {
+  editor: {
     flex: 1,
+    fontSize: 16,
+    lineHeight: 24,
+    paddingBottom: 8,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    textAlignVertical: "top",
   },
   flex: {
     flex: 1,
   },
-  titleCol: {
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 1,
+  navSubtitle: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
+    textAlign: "center",
   },
   navTitle: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
     textAlign: "center",
   },
-  navSubtitle: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
-    textAlign: "center",
-  },
-  editor: {
+  screen: {
     flex: 1,
-    fontSize: 16,
-    lineHeight: 24,
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-    textAlignVertical: "top",
+  },
+  titleCol: {
+    alignItems: "center",
+    gap: 1,
+    justifyContent: "center",
   },
 });

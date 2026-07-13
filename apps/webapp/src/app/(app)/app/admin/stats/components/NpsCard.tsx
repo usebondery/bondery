@@ -1,16 +1,16 @@
 "use client";
 
-import { Card, Text, Group, SimpleGrid, RingProgress, Stack, ThemeIcon } from "@mantine/core";
-import { IconMoodSmile, IconMoodNeutral, IconMoodSad } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import type { NpsData } from "../getStatsData";
+import { Card, Group, RingProgress, SimpleGrid, Stack, Text, ThemeIcon } from "@mantine/core";
+import { IconMoodNeutral, IconMoodSad, IconMoodSmile } from "@tabler/icons-react";
+import type { NpsData } from "@/lib/api/resources/stats";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface NpsCardProps {
   data: NpsData;
 }
 
 export function NpsCard({ data }: NpsCardProps) {
-  const t = useTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   const total = data.promoters + data.passives + data.detractors;
   const promoterPct = total > 0 ? Math.round((data.promoters / total) * 100) : 0;
@@ -18,7 +18,7 @@ export function NpsCard({ data }: NpsCardProps) {
   const detractorPct = total > 0 ? Math.round((data.detractors / total) * 100) : 0;
 
   return (
-    <Card withBorder padding="lg">
+    <Card padding="lg" withBorder>
       <Text fw={500} mb="md">
         {t("NPS")}
       </Text>
@@ -26,28 +26,27 @@ export function NpsCard({ data }: NpsCardProps) {
       <Group align="flex-start" gap="xl">
         <Stack align="center" gap={4}>
           <RingProgress
-            size={120}
-            thickness={12}
-            roundCaps
-            sections={[
-              { value: promoterPct, color: "teal" },
-              { value: passivePct, color: "yellow" },
-              { value: detractorPct, color: "red" },
-            ]}
             label={
-              <Text ta="center" fw={700} size="lg">
+              <Text fw={700} size="lg" ta="center">
                 {data.score !== null ? data.score : "–"}
               </Text>
             }
+            roundCaps
+            sections={[
+              { color: "teal", value: promoterPct },
+              { color: "yellow", value: passivePct },
+              { color: "red", value: detractorPct },
+            ]}
+            size={120}
           />
-          <Text size="xs" c="dimmed">
+          <Text c="dimmed" size="xs">
             {t("NPSScore")}
           </Text>
         </Stack>
 
         <SimpleGrid cols={1} spacing="xs">
           <Group gap="xs">
-            <ThemeIcon variant="light" color="teal" size="sm">
+            <ThemeIcon color="teal" size="sm" variant="light">
               <IconMoodSmile size={14} />
             </ThemeIcon>
             <Text size="sm">
@@ -55,7 +54,7 @@ export function NpsCard({ data }: NpsCardProps) {
             </Text>
           </Group>
           <Group gap="xs">
-            <ThemeIcon variant="light" color="yellow" size="sm">
+            <ThemeIcon color="yellow" size="sm" variant="light">
               <IconMoodNeutral size={14} />
             </ThemeIcon>
             <Text size="sm">
@@ -63,14 +62,14 @@ export function NpsCard({ data }: NpsCardProps) {
             </Text>
           </Group>
           <Group gap="xs">
-            <ThemeIcon variant="light" color="red" size="sm">
+            <ThemeIcon color="red" size="sm" variant="light">
               <IconMoodSad size={14} />
             </ThemeIcon>
             <Text size="sm">
               {t("Detractors")}: {data.detractors} ({detractorPct}%)
             </Text>
           </Group>
-          <Text size="xs" c="dimmed" mt="xs">
+          <Text c="dimmed" mt="xs" size="xs">
             {t("Responses")}: {data.responses}
           </Text>
         </SimpleGrid>

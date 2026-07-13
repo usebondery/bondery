@@ -1,14 +1,14 @@
 export interface IconConfig {
-  name: string;
-  size?: number;
   format: "png" | "ico" | "svg";
+  name: string;
   outDir: string;
+  size?: number;
 }
 
 export interface GenerateIconsOptions {
-  svgPath: string;
-  icons: IconConfig[];
   baseDir: string;
+  icons: IconConfig[];
+  svgPath: string;
 }
 
 export declare function generateIcons(options: GenerateIconsOptions): Promise<void>;

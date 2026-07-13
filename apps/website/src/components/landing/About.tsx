@@ -1,34 +1,32 @@
+import about from "@bondery/translations/locales/en/features/pages/AboutPage.json";
 import { Box, Container, Grid, GridCol, Image, Stack, Text, Title } from "@mantine/core";
-import { en } from "@bondery/translations";
 import { Team } from "@/components/landing/Team";
-
-const about = en.AboutPage;
 
 export function About() {
   return (
-    <Container size="lg" py="xl" mt="xl">
+    <Container mt="xl" py="xl" size="lg">
       <Stack gap="xl">
         <Box>
           <Stack gap="md">
             <Title order={1} ta="center">
               {about.PeopleTitle}
             </Title>
-            <Text ta="center" c="dimmed" size="lg" maw={760} mx="auto">
+            <Text c="dimmed" maw={760} mx="auto" size="lg" ta="center">
               {about.PeopleSubtitle}
             </Text>
           </Stack>
         </Box>
 
         <Box>
-          <Grid gap="xl" align="center">
+          <Grid align="center" gap="xl">
             <GridCol span={{ base: 12, md: 6 }}>
               <Image
-                src="/images/team/medtech-hackathon.jpg"
-                fallbackSrc="/images/team/martin.jpg"
                 alt={about.FoundersPhotoAlt}
-                radius="md"
+                fallbackSrc="/images/team/martin.jpg"
                 fit="cover"
                 h={360}
+                radius="md"
+                src="/images/team/medtech-hackathon.jpg"
               />
             </GridCol>
             <GridCol span={{ base: 12, md: 6 }}>

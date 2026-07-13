@@ -7,20 +7,20 @@ export function Hero() {
   return (
     <Box className="min-h-[calc(100vh-60px)] flex items-center ">
       <Container
-        size="md"
-        py={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 3)" }}
         mt={{ base: "md", md: 0 }}
+        py={{ base: "xl", md: "calc(var(--mantine-spacing-xl) * 3)" }}
+        size="md"
       >
-        <Stack gap="lg" align="center">
-          <Badge variant="light" size="lg" w="fit-content">
+        <Stack align="center" gap="lg">
+          <Badge size="lg" variant="light" w="fit-content">
             Open-source personal CRM
           </Badge>
 
           {/* Title */}
           <Title
+            className="text-5xl md:text-6xl font-extrabold leading-tight "
             order={1}
             ta="center"
-            className="text-5xl md:text-6xl font-extrabold leading-tight "
           >
             Better than a spreadsheet.
             <br />
@@ -28,27 +28,27 @@ export function Hero() {
           </Title>
 
           {/* Description */}
-          <Text size="lg" c="var(--mantine-color-text)" maw={540} ta="center">
+          <Text c="var(--mantine-color-text)" maw={540} size="lg" ta="center">
             A personal CRM for anyone who wants to stay genuinely connected with the people they
             care about.
           </Text>
 
           {/* CTA Buttons */}
-          <Flex mt="md" gap="md" wrap="wrap" align="stretch" justify="center" w="100%">
+          <Flex align="stretch" gap="md" justify="center" mt="md" w="100%" wrap="wrap">
             <ButtonLink
-              href={`${WEBAPP_URL}/login`}
-              size="lg"
-              leftSection={<IconTopologyStar size={20} />}
               className="w-full! md:w-auto!"
+              href={`${WEBAPP_URL}/login`}
+              leftSection={<IconTopologyStar size={20} />}
+              size="lg"
             >
               Get started
             </ButtonLink>
             <ButtonLink
+              className="w-full! md:w-auto!"
               href="#features"
+              leftSection={<IconArrowDown size={20} />}
               size="lg"
               variant="default"
-              leftSection={<IconArrowDown size={20} />}
-              className="w-full! md:w-auto!"
             >
               Learn more
             </ButtonLink>

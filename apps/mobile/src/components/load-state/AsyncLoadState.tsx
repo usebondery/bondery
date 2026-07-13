@@ -1,16 +1,16 @@
 import type { ReactNode } from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { useMobileSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { LoadErrorCard } from "./LoadErrorCard";
 
 export interface AsyncLoadStateProps {
-  isLoading: boolean;
-  errorTitle?: string | null;
-  errorDescription?: string | null;
-  onRetry?: () => void;
   children: ReactNode;
+  errorDescription?: string | null;
+  errorTitle?: string | null;
+  isLoading: boolean;
   loadingMinHeight?: number;
+  onRetry?: () => void;
 }
 
 export function AsyncLoadState({
@@ -21,26 +21,22 @@ export function AsyncLoadState({
   children,
   loadingMinHeight = 80,
 }: AsyncLoadStateProps) {
-  const t = useMobileTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
   const colors = useMobileThemeColors();
-  const resolvedErrorTitle = errorTitle ?? t("MobileApp.Settings.LoadErrorTitle");
+  const resolvedErrorTitle = errorTitle ?? tMobileSettings("LoadErrorTitle");
   const hasError = Boolean(errorDescription);
 
   if (isLoading) {
     return (
       <View style={[styles.centered, { minHeight: loadingMinHeight }]}>
-        <ActivityIndicator size="small" color={colors.primary} />
+        <ActivityIndicator color={colors.primary} size="small" />
       </View>
     );
   }
 
-  if (hasError) {
+  if (hasError && errorDescription) {
     return (
-      <LoadErrorCard
-        title={resolvedErrorTitle}
-        description={errorDescription!}
-        onRetry={onRetry}
-      />
+      <LoadErrorCard description={errorDescription} onRetry={onRetry} title={resolvedErrorTitle} />
     );
   }
 

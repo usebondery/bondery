@@ -36,9 +36,9 @@
   color: #79c0ff;
 }
 
-[data-mantine-color-scheme="dark"] .hljs-meta .hljs-string,
 [data-mantine-color-scheme="dark"] .hljs-regexp,
-[data-mantine-color-scheme="dark"] .hljs-string {
+[data-mantine-color-scheme="dark"] .hljs-string,
+[data-mantine-color-scheme="dark"] .hljs-meta .hljs-string {
   color: #a5d6ff;
 }
 

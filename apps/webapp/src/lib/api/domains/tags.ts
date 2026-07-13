@@ -1,12 +1,44 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+
 import type { ContactPreview, Tag, TagWithCount, UpdateTagInput } from "@bondery/schemas";
-import { clientApiFetch, clientApiJson, applyTransportResponsePolicy } from "@/lib/api/client";
+
+import { applyTransportResponsePolicy, clientApiFetch, clientApiJson } from "@/lib/api/client";
+
 import {
+  buildTagDetailPath,
   buildTagMembersPath,
   buildTagsListPath,
+  parseTagDetail,
+  parseTagMembers,
+  parseTagsList,
   type TagMembersParams,
+  type TagMembersResult,
   type TagsListParams,
-} from "@/lib/query/fetchers/tags";
+} from "@/lib/api/resources/tags";
+
+export type { TagMembersParams, TagMembersResult, TagsListParams } from "@/lib/api/resources/tags";
+
+export async function getTagsList(params?: TagsListParams): Promise<TagWithCount[]> {
+  const raw = await clientApiJson<{ tags?: TagWithCount[] }>(buildTagsListPath(params));
+
+  return parseTagsList(raw);
+}
+
+export async function getTagDetail(id: string): Promise<Tag> {
+  const raw = await clientApiJson<{ tag?: Tag }>(buildTagDetailPath(id));
+
+  return parseTagDetail(raw);
+}
+
+export async function getTagMembers(
+  tagId: string,
+
+  params?: TagMembersParams,
+): Promise<TagMembersResult> {
+  const raw = await clientApiJson<Record<string, unknown>>(buildTagMembersPath(tagId, params));
+
+  return parseTagMembers(raw, params?.limit ?? 50);
+}
 
 export async function listTags(params?: TagsListParams) {
   return clientApiJson<{ tags?: TagWithCount[] }>(buildTagsListPath(params));
@@ -24,33 +56,38 @@ export async function getTag(id: string) {
 
 export async function createTag(body: Record<string, unknown>) {
   return clientApiJson<{ tag: TagWithCount }>(API_ROUTES.TAGS, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
+
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
   });
 }
 
 export async function updateTag(id: string, patch: UpdateTagInput) {
   return clientApiJson(`${API_ROUTES.TAGS}/${id}`, {
-    method: "PATCH",
-    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(patch),
+
+    headers: { "Content-Type": "application/json" },
+    method: "PATCH",
   });
 }
 
 export async function deleteTag(id: string) {
   const response = await clientApiFetch(`${API_ROUTES.TAGS}/${id}`, { method: "DELETE" });
+
   if (!response.ok) {
     applyTransportResponsePolicy(response);
+
     throw new Error("Failed to delete tag");
   }
 }
 
 export async function addTagToContact(contactId: string, tagId: string) {
-  await clientApiJson(`${API_ROUTES.CONTACTS}/${contactId}/tags`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  return clientApiJson<{ tag: Tag }>(`${API_ROUTES.CONTACTS}/${contactId}/tags`, {
     body: JSON.stringify({ tagId }),
+
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
   });
 }
 
@@ -61,17 +98,19 @@ export async function removeTagFromContact(contactId: string, tagId: string) {
 }
 
 export async function addContactsToTag(tagId: string, contactIds: string[]) {
-  await clientApiJson(`${API_ROUTES.TAGS}/${tagId}/contacts`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
+  return clientApiJson<{ addedCount: number }>(`${API_ROUTES.TAGS}/${tagId}/contacts`, {
     body: JSON.stringify({ personIds: contactIds }),
+
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
   });
 }
 
 export async function removeContactsFromTag(tagId: string, contactIds: string[]) {
-  await clientApiJson(`${API_ROUTES.TAGS}/${tagId}/contacts`, {
-    method: "DELETE",
-    headers: { "Content-Type": "application/json" },
+  return clientApiJson<{ removedCount: number }>(`${API_ROUTES.TAGS}/${tagId}/contacts`, {
     body: JSON.stringify({ personIds: contactIds }),
+
+    headers: { "Content-Type": "application/json" },
+    method: "DELETE",
   });
 }

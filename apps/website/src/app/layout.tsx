@@ -1,111 +1,59 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { METADATA_TITLE_DIVIDER, WEBAPP_NAME } from "@bondery/helpers";
 import { bonderyTheme } from "@bondery/mantine-next";
-import { Notifications } from "@mantine/notifications";
-import { Lexend } from "next/font/google";
 import {
   ColorSchemeScript,
   MantineProvider,
   mantineHtmlProps,
   v8CssVariablesResolver,
 } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
+import { Lexend } from "next/font/google";
 import { Footer, Header } from "@/components/landing";
-import Script from "next/script";
 import { WEBSITE_URL } from "@/lib/config";
-import { METADATA_TITLE_DIVIDER, SOCIAL_LINKS, SUPPORT_EMAIL, WEBAPP_NAME } from "@bondery/helpers";
-import { headers } from "next/headers";
-
-const ogTitle = "Bondery: Build bonds that last forever";
-const ogDescription =
-  "Bondery is an open-source PRM (Personal Relationship Manager) to help you track relationships, remember details, and stay connected with your network.";
+import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/seo/copy";
+import { JsonLd } from "@/lib/seo/json-ld";
+import { getCspNonce } from "@/lib/seo/nonce";
+import {
+  buildOrganizationSchema,
+  buildSoftwareApplicationSchema,
+  buildWebsiteSchema,
+} from "@/lib/seo/schemas/site";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(WEBSITE_URL),
-  title: {
-    default: ogTitle,
-    template: `%s ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`,
-  },
-  description: ogDescription,
   alternates: {
     canonical: "/",
   },
+  description: SITE_DESCRIPTION,
+  metadataBase: new URL(WEBSITE_URL),
   openGraph: {
-    title: ogTitle,
-    description: ogDescription,
-    url: "/",
-    siteName: "Bondery",
-    locale: "en_US",
-    type: "website",
+    description: SITE_DESCRIPTION,
     images: [
       {
+        alt: SITE_TITLE,
+        height: 630,
         url: "/opengraph-image",
         width: 1200,
-        height: 630,
-        alt: "Bondery: Build bonds that last forever",
       },
     ],
+    locale: "en_US",
+    siteName: "Bondery",
+    title: SITE_TITLE,
+    type: "website",
+    url: "/",
+  },
+  title: {
+    default: SITE_TITLE,
+    template: `%s ${METADATA_TITLE_DIVIDER} ${WEBAPP_NAME}`,
   },
   twitter: {
     card: "summary_large_image",
-    title: ogTitle,
-    description: ogDescription,
+    description: SITE_DESCRIPTION,
     images: ["/twitter-image"],
+    title: SITE_TITLE,
   },
 };
-
-const organizationSchema = {
-  "@context": "https://schema.org",
-  "@type": "Organization",
-  "@id": `${WEBSITE_URL}#organization`,
-  name: "Bondery",
-  description: ogDescription,
-  url: WEBSITE_URL,
-  logo: `${WEBSITE_URL}/logo.svg`,
-  sameAs: [SOCIAL_LINKS.github, SOCIAL_LINKS.linkedin, SOCIAL_LINKS.reddit, SOCIAL_LINKS.x],
-  contactPoint: [
-    {
-      "@type": "ContactPoint",
-      contactType: "customer support",
-      email: SUPPORT_EMAIL,
-      availableLanguage: ["en"],
-    },
-  ],
-} as const;
-
-const websiteSchema = {
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "@id": `${WEBSITE_URL}#website`,
-  name: "Bondery",
-  description: ogDescription,
-  url: WEBSITE_URL,
-  inLanguage: "en-US",
-  publisher: {
-    "@id": `${WEBSITE_URL}#organization`,
-  },
-} as const;
-
-const softwareApplicationSchema = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "@id": `${WEBSITE_URL}#software-application`,
-  name: "Bondery",
-  description: ogDescription,
-  applicationCategory: "SocialNetworkingApplication",
-  applicationSubCategory: "Personal Relationship Manager",
-  operatingSystem: "Web",
-  url: WEBSITE_URL,
-  inLanguage: "en-US",
-  publisher: {
-    "@id": `${WEBSITE_URL}#organization`,
-  },
-  offers: {
-    "@type": "Offer",
-    price: "0",
-    priceCurrency: "USD",
-    category: "Free",
-  },
-} as const;
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -117,36 +65,25 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const nonce = await getCspNonce();
 
   return (
     <html lang="en" {...mantineHtmlProps} className={lexend.variable}>
       <head>
-        <ColorSchemeScript nonce={nonce} defaultColorScheme="auto" />
+        <ColorSchemeScript defaultColorScheme="auto" nonce={nonce} />
       </head>
       <body>
-        <Script
-          id="schema-organization"
-          type="application/ld+json"
-          nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
-        />
-        <Script
-          id="schema-website"
-          type="application/ld+json"
-          nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
-        />
-        <Script
+        <JsonLd data={buildOrganizationSchema()} id="schema-organization" nonce={nonce} />
+        <JsonLd data={buildWebsiteSchema()} id="schema-website" nonce={nonce} />
+        <JsonLd
+          data={buildSoftwareApplicationSchema()}
           id="schema-software-application"
-          type="application/ld+json"
           nonce={nonce}
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareApplicationSchema) }}
         />
         <MantineProvider
+          cssVariablesResolver={v8CssVariablesResolver}
           defaultColorScheme="dark"
           theme={bonderyTheme}
-          cssVariablesResolver={v8CssVariablesResolver}
         >
           <Notifications autoClose={6000} position="top-center" />
           <Header />

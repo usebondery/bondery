@@ -1,14 +1,14 @@
+import type { GroupWithCount } from "@bondery/schemas";
 import { IconCheck } from "@tabler/icons-react-native";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import type { GroupWithCount } from "@bondery/schemas";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface GroupSelectRowProps {
+  disabled?: boolean;
   group: GroupWithCount;
   isSelected: boolean;
   onToggle: () => void;
-  disabled?: boolean;
 }
 
 export function GroupSelectRow({
@@ -35,7 +35,7 @@ export function GroupSelectRow({
       ]}
     >
       {group.emoji ? <Text style={styles.groupEmoji}>{group.emoji}</Text> : null}
-      <Text style={[styles.optionLabel, { color: colors.textPrimary }]} numberOfLines={2}>
+      <Text numberOfLines={2} style={[styles.optionLabel, { color: colors.textPrimary }]}>
         {group.label}
       </Text>
       <View style={[styles.groupCountBadge, { backgroundColor: colors.borderStrong }]}>
@@ -44,7 +44,7 @@ export function GroupSelectRow({
         </Text>
       </View>
       {isSelected ? (
-        <IconCheck size={14} color={colors.primary} />
+        <IconCheck color={colors.primary} size={14} />
       ) : (
         <View style={styles.checkSpacer} />
       )}
@@ -53,35 +53,35 @@ export function GroupSelectRow({
 }
 
 const styles = StyleSheet.create({
-  optionRow: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
+  checkSpacer: {
+    width: 14,
   },
-  optionLabel: {
-    flex: 1,
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  groupEmoji: {
-    fontSize: 18,
-    width: 24,
-    textAlign: "center",
+  groupCount: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.sectionLabel,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
   },
   groupCountBadge: {
     borderRadius: 10,
     paddingHorizontal: 6,
     paddingVertical: 1,
   },
-  groupCount: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.sectionLabel,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
+  groupEmoji: {
+    fontSize: 18,
+    textAlign: "center",
+    width: 24,
   },
-  checkSpacer: {
-    width: 14,
+  optionLabel: {
+    flex: 1,
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+  },
+  optionRow: {
+    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 10,
+    minHeight: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
 });

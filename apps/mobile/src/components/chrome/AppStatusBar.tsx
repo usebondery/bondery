@@ -11,9 +11,9 @@ export function AppStatusBar() {
 
   return (
     <StatusBar
+      animated
       style={resolvedTheme === "dark" ? "light" : "dark"}
       translucent={Platform.OS === "android"}
-      animated
     />
   );
 }

@@ -1,15 +1,18 @@
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { IconMailForward, IconShare, IconTrash } from "@tabler/icons-react-native";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import type { OverflowMenuItemConfig } from "../../../components/OverflowMenuItem";
-import { IconMailForward, IconShare, IconTrash } from "@tabler/icons-react-native";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface ContactDetailOverflowMenuProps {
-  isMyselfMode: boolean;
   isBusy?: boolean;
+  isMyselfMode: boolean;
+  onDelete: () => void;
   onShare: () => void;
   onShareViaEmail: () => void;
-  onDelete: () => void;
 }
 
 export function ContactDetailOverflowMenu({
@@ -19,39 +22,34 @@ export function ContactDetailOverflowMenu({
   onShareViaEmail,
   onDelete,
 }: ContactDetailOverflowMenuProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
   const items: OverflowMenuItemConfig[] = [
     {
-      id: "share",
       icon: <IconShare size={18} stroke={colors.iconPrimary} />,
-      label: t("MobileApp.ContactDetail.ShareContact"),
+      id: "share",
+      label: tMobileContactDetail("ShareContact"),
       onPress: onShare,
     },
     {
-      id: "share-email",
       icon: <IconMailForward size={18} stroke={colors.iconPrimary} />,
-      label: t("MobileApp.ContactDetail.ShareContactViaEmail"),
+      id: "share-email",
+      label: tMobileContactDetail("ShareContactViaEmail"),
       onPress: onShareViaEmail,
     },
   ];
 
   if (!isMyselfMode) {
     items.push({
-      id: "delete",
       icon: <IconTrash size={18} stroke={colors.dangerAccent} />,
-      label: t("MobileApp.ContactDetail.DeleteContact"),
-      tone: "danger",
+      id: "delete",
+      label: tMobileContactDetail("DeleteContact"),
       onPress: onDelete,
+      tone: "danger",
     });
   }
 
-  return (
-    <OverflowMenu
-      items={items}
-      accessibilityLabel="Contact actions"
-      disabled={isBusy}
-    />
-  );
+  return <OverflowMenu accessibilityLabel="Contact actions" disabled={isBusy} items={items} />;
 }

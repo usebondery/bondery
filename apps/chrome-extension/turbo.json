@@ -1,0 +1,16 @@
+{
+  "$schema": "https://v2-10-1.turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "dependsOn": ["^compile"],
+      "persistent": true,
+      "with": [
+        "@bondery/schemas#dev",
+        "@bondery/helpers#dev",
+        "@bondery/mantine-next#dev",
+        "@bondery/branding#dev"
+      ]
+    }
+  }
+}

@@ -2,22 +2,36 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   experimental: {
-    proxyClientMaxBodySize: "50mb",
+    optimizePackageImports: [
+      "@tabler/icons-react",
+      "@bondery/mantine-next",
+      "@mantine/core",
+      "@mantine/dates",
+      "@mantine/dropzone",
+      "@mantine/form",
+      "@mantine/hooks",
+      "@mantine/modals",
+      "@mantine/notifications",
+      "@mantine/nprogress",
+      "@mantine/spotlight",
+      "@mantine/tiptap",
+    ],
+    proxyClientMaxBodySize: "20mb",
+    useTypeScriptCli: true,
   },
   async headers() {
     return [
       {
-        // Prevent browsers from caching a stale service worker script
-        source: "/sw.js",
         headers: [
           {
             key: "Cache-Control",
             value: "no-cache, no-store, must-revalidate",
           },
         ],
+        // Prevent browsers from caching a stale service worker script
+        source: "/sw.js",
       },
       {
-        source: "/:path*",
         headers: [
           {
             key: "Strict-Transport-Security",
@@ -32,6 +46,7 @@ const nextConfig: NextConfig = {
             value: "same-origin",
           },
         ],
+        source: "/:path*",
       },
     ];
   },

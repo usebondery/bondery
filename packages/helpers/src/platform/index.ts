@@ -1,7 +1,7 @@
 export { SOCIAL_PLATFORM_URL_DETAILS } from "#globals/social-platform-urls.js";
-export { parseInstagramUsername } from "#instagram/parseInstagramUsername.js";
 export type {
-  ParseInstagramUsernameInput,
   ParsedInstagramName,
+  ParseInstagramUsernameInput,
 } from "#instagram/parseInstagramUsername.js";
-export { linkedinCompanyUrl, extractLinkedinId } from "#platform/linkedin-utils.js";
+export { parseInstagramUsername } from "#instagram/parseInstagramUsername.js";
+export { extractLinkedinId, linkedinCompanyUrl } from "#platform/linkedin-utils.js";

@@ -1,5 +1,5 @@
-import { useEffect } from "react";
 import { Stack } from "expo-router";
+import { useEffect } from "react";
 import { SyncErrorToasts } from "../../src/components/SyncErrorToasts";
 import { fetchSettings } from "../../src/lib/api/online-only";
 import type { MobilePreferencesState } from "../../src/lib/preferences/useMobilePreferences";
@@ -20,9 +20,9 @@ function PreferencesHydration() {
           return;
         }
         hydrateFromServer({
+          groupSortOrder: response.data.groupSortOrder,
           leftSwipeAction: response.data.leftSwipeAction,
           rightSwipeAction: response.data.rightSwipeAction,
-          groupSortOrder: response.data.groupSortOrder,
           tagSortOrder: response.data.tagSortOrder,
         });
       } catch {

@@ -23,6 +23,9 @@
 # production
 /build
 
+# i18next-cli ephemeral locale mirror (canonical files stay nested under src/locales)
+packages/translations/.i18next-cli-mirror/
+
 # misc
 .DS_Store
 *.pem
@@ -39,6 +42,7 @@ yarn-error.log*
 # env files
 .env.production.local
 .env.development.local
+.env
 
 # vercel
 .vercel
@@ -47,6 +51,7 @@ yarn-error.log*
 
 # typescript
 *.tsbuildinfo
+.cache/
 next-env.d.ts
 
 # turborepo

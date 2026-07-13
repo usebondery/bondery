@@ -1,7 +1,7 @@
 "use client";
 
-import { Avatar, AvatarGroup, Stack, Tooltip } from "@mantine/core";
 import type { ContactPreview } from "@bondery/schemas";
+import { Avatar, AvatarGroup, Stack, Tooltip } from "@mantine/core";
 import { PersonAvatar } from "#nextjs/PersonAvatar/index.js";
 
 type PersonAvatarGroupIdentity = ContactPreview & {
@@ -10,12 +10,12 @@ type PersonAvatarGroupIdentity = ContactPreview & {
 };
 
 interface PersonAvatarGroupProps {
-  people: PersonAvatarGroupIdentity[];
-  totalCount?: number;
-  size?: "xs" | "sm" | "md" | "lg" | "xl" | number;
-  maxDisplayCount?: number;
   isClickable?: boolean;
+  maxDisplayCount?: number;
   moreTooltipTemplate?: string;
+  people: PersonAvatarGroupIdentity[];
+  size?: "xs" | "sm" | "md" | "lg" | "xl" | number;
+  totalCount?: number;
   wrap?: boolean;
   wrapRowSize?: number;
 }
@@ -43,8 +43,8 @@ export function PersonAvatarGroup({
     | { type: "person"; person: PersonAvatarGroupIdentity }
     | { type: "overflow"; remainingCount: number }
   > = [
-    ...visiblePeople.map((person) => ({ type: "person" as const, person })),
-    ...(remainingCount > 0 ? [{ type: "overflow" as const, remainingCount }] : []),
+    ...visiblePeople.map((person) => ({ person, type: "person" as const })),
+    ...(remainingCount > 0 ? [{ remainingCount, type: "overflow" as const }] : []),
   ];
 
   const renderItem = (
@@ -55,10 +55,10 @@ export function PersonAvatarGroup({
     if (item.type === "person") {
       return (
         <PersonAvatar
+          isClickable={isClickable}
           key={item.person.id}
           person={item.person}
           size={size}
-          isClickable={isClickable}
         />
       );
     }
@@ -66,10 +66,10 @@ export function PersonAvatarGroup({
     return (
       <Tooltip
         key="overflow"
-        withArrow
         label={moreTooltipTemplate.replace("{count}", String(item.remainingCount))}
+        withArrow
       >
-        <Avatar size={size} radius="xl" color="gray" style={{ cursor: "default" }}>
+        <Avatar color="gray" radius="xl" size={size} style={{ cursor: "default" }}>
           +{item.remainingCount}
         </Avatar>
       </Tooltip>
@@ -86,7 +86,9 @@ export function PersonAvatarGroup({
       <Stack gap="0">
         {rows.map((row, rowIndex) => (
           <AvatarGroup
-            key={`row-${rowIndex}`}
+            key={row
+              .map((item) => (item.type === "person" ? item.person.id : "overflow"))
+              .join("-")}
             spacing="sm"
             style={
               rowIndex === 1 ? { marginTop: "calc(var(--mantine-spacing-sm) * -1)" } : undefined

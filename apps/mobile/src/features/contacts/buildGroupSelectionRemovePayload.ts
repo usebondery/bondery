@@ -10,8 +10,8 @@ export function buildGroupSelectionRemovePayload(
 ): RemoveGroupMembersRequest {
   if (state.isAllTotalSelected) {
     return {
-      memberFilter: { search: debouncedQuery || undefined, sort: "nameAsc" },
       excludePersonIds: state.getExcludedIds(),
+      memberFilter: { search: debouncedQuery || undefined, sort: "nameAsc" },
     };
   }
 

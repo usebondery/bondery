@@ -30,6 +30,23 @@ OpenAPI example validation runs in CI only:
 
 `http/index.ts` may inline small request/response samples; it must not import `schema-examples` or `requests` fixture barrels.
 
+## Types vs schemas (module split)
+
+Each domain module uses a **subfolder** under `packages/schemas/src` (for example `entities/contact/`, `sync/pull/`, `geocode/`):
+
+- `types.ts` — public interfaces (no `zod` import)
+- `schema.ts` — Zod validators (`satisfies z.ZodType<T>` on chainable schemas)
+- `contract.ts` — compile-time equality locks (internal, not exported)
+- `index.ts` — barrel: `export type { … } from "./types.js"` and `export { …Schema } from "./schema.js"`
+
+Do **not** add `export type X = z.infer<…>` to any file except `*.contract.ts`.
+
+`import type { Contact } from "@bondery/schemas"` must resolve only through `types.ts`, not through schema modules.
+
+After adding a new public subfolder barrel, run `npm run sync-exports` from the repo root.
+
 ## Why this matters
 
 Importing the full OpenAPI fixture barrel from entity modules created a circular module graph when Turbopack bundled `@bondery/schemas` with Zod for SSR, causing `Cannot access '…' before initialization` at runtime. The root barrel must stay web-safe: do not re-export `#http/index.js` or OpenAPI fixture barrels from `src/index.ts`.
+
+Exporting `z.infer` types from the same modules as Zod schemas forces every consumer to materialize massive `z.ZodObject<…>` type graphs and slows TypeScript across the monorepo (especially webapp).

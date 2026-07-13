@@ -1,23 +1,6 @@
-import {
-  Avatar,
-  Card,
-  CloseButton,
-  createTheme,
-  MantineTheme,
-  Modal,
-  PillsInput,
-  Progress,
-  Textarea,
-  TextInput,
-  Title,
-} from "@mantine/core";
+import { createTheme } from "@mantine/core";
 
 export const bonderyTheme = createTheme({
-  cursorType: "pointer",
-  primaryColor: "branding-primary",
-  defaultRadius: "md",
-  fontFamily: "Lexend, sans-serif",
-
   colors: {
     "branding-primary": [
       "#faedff",
@@ -33,54 +16,21 @@ export const bonderyTheme = createTheme({
     ],
   },
   components: {
-    Menu: {
+    ActionIcon: {
+      classNames: { root: "button-scale-effect" },
+    },
+    Avatar: {
       defaultProps: {
-        shadow: "md",
+        radius: "md",
       },
     },
     Button: {
       classNames: { root: "button-scale-effect" },
     },
-    Select: {
+    Card: {
       defaultProps: {
-        variant: "filled",
-      },
-    },
-    Input: {
-      defaultProps: {
-        variant: "filled",
-      },
-    },
-    Progress: {
-      defaultProps: {
-        radius: "xl",
-        transitionDuration: 500,
-      },
-    },
-    CloseButton: {
-      classNames: { root: "button-scale-effect" },
-    },
-    List: {
-      defaultProps: {
-        withPadding: false,
-        spacing: "0",
-        mt: "0",
-        type: "unordered",
-      },
-    },
-    TextInput: {
-      defaultProps: {
-        variant: "filled",
-      },
-    },
-    PillsInput: {
-      defaultProps: {
-        variant: "filled",
-      },
-    },
-    Textarea: {
-      defaultProps: {
-        variant: "filled",
+        radius: "var(--mantine-radius-default)",
+        shadodow: "sm",
       },
     },
     Checkbox: {
@@ -92,31 +42,25 @@ export const bonderyTheme = createTheme({
         size: "md",
       },
     },
-    Card: {
-      defaultProps: {
-        radius: "var(--mantine-radius-default)",
-        shadodow: "sm",
-      },
-    },
-
-    Paper: {
-      defaultProps: {
-        radius: "md",
-        withBorder: true,
-        shadow: "sm",
-      },
-    },
-    ActionIcon: {
+    CloseButton: {
       classNames: { root: "button-scale-effect" },
     },
-    Title: {
+    Input: {
       defaultProps: {
-        c: "var(--mantine-color-default-color)",
+        variant: "filled",
       },
     },
-    Avatar: {
+    List: {
       defaultProps: {
-        radius: "md",
+        mt: "0",
+        spacing: "0",
+        type: "unordered",
+        withPadding: false,
+      },
+    },
+    Menu: {
+      defaultProps: {
+        shadow: "md",
       },
     },
     NavLink: {
@@ -127,7 +71,62 @@ export const bonderyTheme = createTheme({
         },
       },
     },
+
+    Paper: {
+      defaultProps: {
+        radius: "md",
+        shadow: "sm",
+        withBorder: true,
+      },
+    },
+    PillsInput: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    Progress: {
+      defaultProps: {
+        radius: "xl",
+        transitionDuration: 500,
+      },
+    },
+    ScrollArea: {
+      defaultProps: {
+        offsetScrollbars: true,
+        scrollbarSize: 12,
+      },
+    },
+    ScrollAreaAutosize: {
+      defaultProps: {
+        offsetScrollbars: true,
+        scrollbarSize: 12,
+      },
+    },
+    Select: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    Textarea: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    TextInput: {
+      defaultProps: {
+        variant: "filled",
+      },
+    },
+    Title: {
+      defaultProps: {
+        c: "var(--mantine-color-default-color)",
+      },
+    },
   },
+  cursorType: "pointer",
+  defaultRadius: "md",
+  fontFamily: "Lexend, sans-serif",
+  primaryColor: "branding-primary",
 });
 
 export const primaryColor = "#a34bcb";

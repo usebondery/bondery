@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Kterou platformu jste požádali?",
+    "Description": "Přeneste svou síť do Bondery z LinkedIn, Instagramu, nebo je přidejte ručně.",
+    "Finish": "Začít používat",
+    "Instagram": "Import z Instagramu",
+    "InstagramDescription": "Nahrajte export vašich Instagram sledujících/sledovaných.",
+    "LinkedIn": "Import z LinkedIn",
+    "LinkedInDescription": "Nahrajte exportovaný soubor vašich LinkedIn kontaktů.",
+    "ManualAdd": "Vytvořit ručně",
+    "SkipImport": "Přeskočit import",
+    "SuccessDescription": "{imported} importováno, {updated} aktualizováno, {skipped} přeskočeno.",
+    "SuccessTitle": "Import dokončen!",
+    "Title": "Importujte kontakty",
+    "WaitingForExport": "Čekám na export"
+  },
+  "Intent": {
+    "both": "Oboje",
+    "Description": "Použijeme to k personalizaci Bondery pro vás.",
+    "personal": "Přátelé a rodina",
+    "professional": "Profesní",
+    "Title": "Jak budete Bondery používat?"
+  },
+  "Loading": {
+    "Message": "Připravujeme vše pro vás…"
+  },
+  "MetadataTitle": "Úvodní nastavení",
+  "Welcome": {
+    "LetsGo": "Pojďme na to",
+    "Subtitle": "Těší nás. Pojďme nastavit váš osobní CRM.",
+    "TitleGeneric": "Vítejte v Bondery! 😊",
+    "TitleWithName": "Vítejte, {name}! 😊"
+  }
+}

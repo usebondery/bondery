@@ -1,26 +1,26 @@
-import { Group, MantineSize, SegmentedControl, Stack, Text } from "@mantine/core";
+import { Group, SegmentedControl, Stack, Text } from "@mantine/core";
 import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
 export type ThemePreference = "light" | "dark" | "auto";
 
 interface ThemePickerLabels {
-  light: string;
   dark: string;
+  light: string;
   system: string;
   title: ReactNode;
 }
 
 export interface ThemePickerProps {
-  value: ThemePreference;
-  onChange: (value: ThemePreference) => void;
-  labels?: Partial<ThemePickerLabels>;
   className?: string;
+  labels?: Partial<ThemePickerLabels>;
+  onChange: (value: ThemePreference) => void;
+  value: ThemePreference;
 }
 
 const defaultLabels: ThemePickerLabels = {
-  light: "Light",
   dark: "Dark",
+  light: "Light",
   system: "System",
   title: "Theme",
 };
@@ -37,22 +37,15 @@ export function ThemePicker({ value, onChange, labels, className }: ThemePickerP
   };
 
   return (
-    <Stack gap={4} className={className}>
-      <Text size="sm" fw={500}>
+    <Stack className={className} gap={4}>
+      <Text fw={500} size="sm">
         {resolvedLabels.title}
       </Text>
       <SegmentedControl
-        w="full"
-        value={value}
-        onChange={(nextValue) => {
-          if (nextValue === "light" || nextValue === "dark" || nextValue === "auto") {
-            onChange(nextValue);
-          }
-        }}
         data={[
           {
             label: (
-              <Group gap={6} wrap="nowrap" justify="center">
+              <Group gap={6} justify="center" wrap="nowrap">
                 <IconSun size={14} />
                 <Text size="sm">{resolvedLabels.light}</Text>
               </Group>
@@ -61,7 +54,7 @@ export function ThemePicker({ value, onChange, labels, className }: ThemePickerP
           },
           {
             label: (
-              <Group gap={6} wrap="nowrap" justify="center">
+              <Group gap={6} justify="center" wrap="nowrap">
                 <IconMoon size={14} />
                 <Text size="sm">{resolvedLabels.dark}</Text>
               </Group>
@@ -70,7 +63,7 @@ export function ThemePicker({ value, onChange, labels, className }: ThemePickerP
           },
           {
             label: (
-              <Group gap={6} wrap="nowrap" justify="center">
+              <Group gap={6} justify="center" wrap="nowrap">
                 <IconSettings size={14} />
                 <Text size="sm">{resolvedLabels.system}</Text>
               </Group>
@@ -78,6 +71,12 @@ export function ThemePicker({ value, onChange, labels, className }: ThemePickerP
             value: "auto",
           },
         ]}
+        onChange={(nextValue) => {
+          if (nextValue === "light" || nextValue === "dark" || nextValue === "auto") {
+            onChange(nextValue);
+          }
+        }}
+        value={value}
       />
     </Stack>
   );

@@ -1,0 +1,92 @@
+{
+  "a11y": {
+    "back": "Zpět",
+    "info": "Informace"
+  },
+  "actions": {
+    "back": "Zpět",
+    "call": "Volat",
+    "cancel": "Zrušit",
+    "delete": "Smazat",
+    "deselect": "Odebrat výběr",
+    "done": "Hotovo",
+    "email": "E-mail",
+    "message": "Zpráva",
+    "retry": "Zkusit znovu",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "select": "Vybrat"
+  },
+  "app": {
+    "description": "Budujte vazby, které vydrží navždy."
+  },
+  "confirm": {
+    "noCancel": "Ne, zrušit",
+    "yesDelete": "Ano, smazat"
+  },
+  "errors": {
+    "api": {
+      "account": "Account photo invalid format.",
+      "account_invalid": "Account invalid.",
+      "admin_required": "Admin required.",
+      "api": "Api key session mint failed.",
+      "auth_required": "Pro pokračování se prosím přihlaste.",
+      "bad_gateway": "Bad gateway.",
+      "bad_request": "Bad request.",
+      "billing": "Billing user lookup failed.",
+      "chat": "Chat session failed to update session.",
+      "checkout": "Checkout not configured.",
+      "conflict": "Tato akce je v konfliktu s existujícími daty.",
+      "contact": "Contact update failed.",
+      "contact_failed": "Contact failed.",
+      "contact_invalid": "Contact invalid.",
+      "email": "Email service not configured.",
+      "extension": "Extension username required.",
+      "extension_outdated": "Extension outdated.",
+      "failed": "Failed to render or send feedback email .",
+      "group": "Group remove members invalid body.",
+      "group_failed": "Group failed.",
+      "import": "Import vcard failed.",
+      "import_failed": "Import failed.",
+      "important": "Important date duplicate.",
+      "interaction": "Interaction update failed.",
+      "interaction_failed": "Interaction failed.",
+      "internal": "Něco se pokazilo na naší straně. Zkuste to prosím znovu.",
+      "invalid": "Invalid api key.",
+      "jwt": "Jwt signing misconfigured.",
+      "merge": "Merge recommendation not found.",
+      "not_found": "Požadovanou položku se nepodařilo najít.",
+      "onboarding": "Onboarding failed to update import follow up.",
+      "rate": "To děláte příliš často. Chvíli počkejte a zkuste to znovu.",
+      "relationship": "Relationship self forbidden.",
+      "relationship_failed": "Relationship failed.",
+      "relationship_invalid": "Relationship invalid.",
+      "service": "Service auth required.",
+      "service_unavailable": "Služba je dočasně nedostupná. Zkuste to prosím později.",
+      "settings": "Settings no fields.",
+      "sqlite": "Sqlite schema mismatch.",
+      "sync": "Sync protocol mismatch.",
+      "sync_conflict": "Tento kontakt byl upraven na jiném zařízení. Obnovte data a zkuste to znovu.",
+      "sync_failed": "Sync failed.",
+      "tag": "Tag upsert failed.",
+      "tag_failed": "Tag failed.",
+      "user": "User lookup failed.",
+      "validation_error": "Některé zadané údaje nejsou platné.",
+      "webhook": "Webhook not configured."
+    },
+    "apiTemporarilyUnavailable": "API je dočasně nedostupné. Zkuste to prosím znovu.",
+    "apiUnreachable": "Server Bondery není dostupný. Zkuste to za chvíli znovu.",
+    "connection": "Zkontrolujte připojení a zkuste to znovu.",
+    "requestFailed": "Požadavek selhal. Zkuste to prosím znovu.",
+    "serverGeneric": "Na serveru se něco pokazilo. Zkuste to prosím znovu.",
+    "unknown": "Něco se pokazilo."
+  },
+  "feedback": {
+    "deleting": "Mazání...",
+    "duplicating": "Duplikování...",
+    "errorTitle": "Chyba",
+    "noResults": "Žádné výsledky",
+    "savedTitle": "Saved",
+    "successTitle": "Úspěch"
+  }
+}

@@ -1,6 +1,5 @@
+import { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
 import { headers } from "next/headers";
-import * as translations from "@bondery/translations";
-import type { SupportedLocale } from "@bondery/translations";
 
 /**
  * Get locale from browser's Accept-Language header
@@ -21,10 +20,10 @@ export async function getLocaleFromHeaders(): Promise<SupportedLocale> {
     .sort((a, b) => b.priority - a.priority);
 
   for (const { code } of languages) {
-    if (code in translations) {
+    if ((SUPPORTED_LOCALES as readonly string[]).includes(code)) {
       return code as SupportedLocale;
     }
   }
 
-  return "en";
+  return DEFAULT_LOCALE;
 }

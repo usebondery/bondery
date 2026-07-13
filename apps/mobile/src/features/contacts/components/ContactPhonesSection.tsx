@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import type { PhoneEntry } from "@bondery/schemas";
 import {
   IconCopy,
   IconMessage,
@@ -9,25 +8,22 @@ import {
   IconStar,
   IconTrash,
 } from "@tabler/icons-react-native";
-import type { PhoneEntry } from "@bondery/schemas";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useMemo, useState } from "react";
+import { Text, View } from "react-native";
+import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { copyPhoneToClipboard, openPhoneCall, openPhoneSms } from "../contactChannelActions";
 import {
-  copyPhoneToClipboard,
-  openPhoneCall,
-  openPhoneSms,
-} from "../contactChannelActions";
-import {
-  MAX_CONTACT_CHANNELS,
   applyPreferredPhone,
   createDraftPhone,
+  MAX_CONTACT_CHANNELS,
 } from "../contactChannelConstants";
 import { formatDisplayPhone } from "../contactUtils";
 import { ContactChannelRow } from "./ContactChannelRow";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
-import { EditPhoneSheet } from "./EditPhoneSheet";
 import { contactDetailStyles } from "./contactDetailStyles";
+import { EditPhoneSheet } from "./EditPhoneSheet";
 
 type SheetState =
   | { open: false }
@@ -35,34 +31,35 @@ type SheetState =
   | { open: true; mode: "edit"; index: number; entry: PhoneEntry };
 
 interface ContactPhonesSectionProps {
-  phones: PhoneEntry[];
   onSavePhones: (phones: PhoneEntry[]) => Promise<void>;
+  phones: PhoneEntry[];
 }
 
 export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSectionProps) {
+  const t = useCommonTranslations();
+  const tContactInfo = useContactInfoTranslations();
   const colors = useMobileThemeColors();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canAdd = phones.length < MAX_CONTACT_CHANNELS;
-  const errorTitle = t("MobileApp.Common.ErrorTitle");
+  const errorTitle = t("feedback.errorTitle");
 
   function openAddSheet() {
     if (!canAdd) {
       showToast({
+        headline: tContactInfo("MaxPhonesReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
         type: "error",
-        headline: t("ContactInfo.MaxPhonesReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
       });
       return;
     }
 
-    setSheet({ open: true, mode: "add" });
+    setSheet({ mode: "add", open: true });
   }
 
   function openEditSheet(index: number) {
-    setSheet({ open: true, mode: "edit", index, entry: phones[index] });
+    setSheet({ entry: phones[index], index, mode: "edit", open: true });
   }
 
   async function persistPhones(nextPhones: PhoneEntry[]) {
@@ -73,9 +70,9 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
       setSheet({ open: false });
     } catch {
       showToast({
-        type: "error",
+        description: tContactInfo("PhonesUpdateError"),
         headline: errorTitle,
-        description: t("ContactInfo.PhonesUpdateError"),
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);
@@ -83,7 +80,9 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
   }
 
   function handleSaveEntry(entry: PhoneEntry) {
-    if (!sheet.open) return;
+    if (!sheet.open) {
+      return;
+    }
 
     let nextPhones: PhoneEntry[];
 
@@ -99,7 +98,9 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
   }
 
   function handleDeleteEntry() {
-    if (!sheet.open || sheet.mode !== "edit") return;
+    if (!sheet.open || sheet.mode !== "edit") {
+      return;
+    }
 
     const nextPhones = phones.filter((_, index) => index !== sheet.index);
     void persistPhones(nextPhones);
@@ -122,27 +123,28 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
 
   const copyMessages = useMemo(
     () => ({
-      successTitle: t("ContactInfo.CopySuccessTitle"),
-      successDescription: t("ContactInfo.PhoneCopiedMessage"),
       errorTitle,
+      successDescription: tContactInfo("PhoneCopiedMessage"),
+      successTitle: tContactInfo("CopySuccessTitle"),
     }),
-    [errorTitle, t],
+    [errorTitle, tContactInfo],
   );
 
   return (
     <View style={contactDetailStyles.section}>
       <ContactDetailSectionHeader
-        titleKey="ContactInfo.PhoneNumbers"
         action={
           canAdd
             ? {
-                label: t("ContactInfo.Add"),
-                accessibilityLabel: t("ContactInfo.AddPhone"),
+                accessibilityLabel: tContactInfo("AddPhone"),
                 icon: <IconPhonePlus size={16} stroke={colors.primary} />,
+                label: tContactInfo("Add"),
                 onPress: openAddSheet,
               }
             : undefined
         }
+        titleKey="PhoneNumbers"
+        titleNamespace="ContactInfo"
       />
 
       {phones.length === 0 ? (
@@ -153,93 +155,98 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
             { backgroundColor: colors.surfaceMuted, borderColor: colors.border },
           ]}
         >
-          <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>{t("ContactInfo.NoPhones")}</Text>
+          <Text style={[contactDetailStyles.emptyText, { color: colors.textMuted }]}>
+            {tContactInfo("NoPhones")}
+          </Text>
         </View>
       ) : (
-        phones.map((phone, index) => {
-          const typeLabel = phone.type === "work" ? t("ContactInfo.TypeWork") : t("ContactInfo.TypeHome");
+        phones.map((phone) => {
+          const typeLabel =
+            phone.type === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome");
           const displayPhone = formatDisplayPhone(phone);
-          const accessibilityLabel = `${typeLabel} phone, ${displayPhone}${phone.preferred ? `, ${t("ContactInfo.Preferred")}` : ""}`;
+          const accessibilityLabel = `${typeLabel} phone, ${displayPhone}${phone.preferred ? `, ${tContactInfo("Preferred")}` : ""}`;
 
           return (
             <ContactChannelRow
-              key={`${phone.prefix}-${phone.value}-${index}`}
-              primaryLabel={displayPhone}
-              type={phone.type}
-              isPreferred={phone.preferred}
-              channelIcon={<IconPhone size={16} stroke={colors.iconSecondary} />}
-              menuAccessibilityLabel={t("ContactInfo.PhoneNumbers")}
-              accessibilityLabel={accessibilityLabel}
               accessibilityHint="Tap to message. Double tap to call. Long press to copy."
-              onPress={() => openPhoneSms(phone, showToast, errorTitle)}
-              onDoublePress={() => openPhoneCall(phone, showToast, errorTitle)}
-              onLongPress={() => {
-                void copyPhoneToClipboard(phone, showToast, copyMessages);
-              }}
+              accessibilityLabel={accessibilityLabel}
+              channelIcon={<IconPhone size={16} stroke={colors.iconSecondary} />}
+              isPreferred={phone.preferred}
+              key={`${phone.prefix}-${phone.value}`}
+              menuAccessibilityLabel={tContactInfo("PhoneNumbers")}
               menuItems={[
                 {
-                  id: "sms",
-                  label: t("ContactInfo.SendSmsAction"),
-                  hint: t("ContactInfo.MenuHintPress"),
-                  icon: <IconMessage size={18} stroke={colors.iconPrimary} />,
                   disabled: !phone.value.trim(),
+                  hint: tContactInfo("MenuHintPress"),
+                  icon: <IconMessage size={18} stroke={colors.iconPrimary} />,
+                  id: "sms",
+                  label: tContactInfo("SendSmsAction"),
                   onPress: () => openPhoneSms(phone, showToast, errorTitle),
                 },
                 {
-                  id: "call",
-                  label: t("ContactInfo.CallAction"),
-                  hint: t("ContactInfo.MenuHintDoublePress"),
-                  icon: <IconPhone size={18} stroke={colors.iconPrimary} />,
                   disabled: !phone.value.trim(),
+                  hint: tContactInfo("MenuHintDoublePress"),
+                  icon: <IconPhone size={18} stroke={colors.iconPrimary} />,
+                  id: "call",
+                  label: tContactInfo("CallAction"),
                   onPress: () => openPhoneCall(phone, showToast, errorTitle),
                 },
                 {
-                  id: "copy",
-                  label: t("ContactInfo.CopyAction"),
-                  hint: t("ContactInfo.MenuHintHold"),
-                  icon: <IconCopy size={18} stroke={colors.iconPrimary} />,
                   disabled: !phone.value.trim(),
+                  hint: tContactInfo("MenuHintHold"),
+                  icon: <IconCopy size={18} stroke={colors.iconPrimary} />,
+                  id: "copy",
+                  label: tContactInfo("CopyAction"),
                   onPress: () => {
                     void copyPhoneToClipboard(phone, showToast, copyMessages);
                   },
                 },
                 {
-                  id: "edit",
-                  label: t("ContactInfo.EditAction"),
                   icon: <IconPencil size={18} stroke={colors.iconPrimary} />,
+                  id: "edit",
+                  label: tContactInfo("EditAction"),
                   onPress: () => openEditSheet(index),
                 },
                 {
-                  id: "preferred",
-                  label: t("ContactInfo.SetAsPreferred"),
-                  icon: <IconStar size={18} stroke={colors.iconPrimary} />,
                   disabled: phone.preferred,
+                  icon: <IconStar size={18} stroke={colors.iconPrimary} />,
+                  id: "preferred",
+                  label: tContactInfo("SetAsPreferred"),
                   onPress: () => handleSetPreferred(index),
                 },
                 {
-                  id: "delete",
-                  label: t("ContactInfo.DeleteAction"),
                   icon: <IconTrash size={18} stroke={colors.dangerAccent} />,
-                  tone: "danger",
+                  id: "delete",
+                  label: tContactInfo("DeleteAction"),
                   onPress: () => handleDeleteAtIndex(index),
+                  tone: "danger",
                 },
               ]}
+              onDoublePress={() => openPhoneCall(phone, showToast, errorTitle)}
+              onLongPress={() => {
+                void copyPhoneToClipboard(phone, showToast, copyMessages);
+              }}
+              onPress={() => openPhoneSms(phone, showToast, errorTitle)}
+              primaryLabel={displayPhone}
+              type={phone.type}
             />
           );
         })
       )}
 
       <EditPhoneSheet
-        open={sheet.open}
-        mode={sheet.open ? sheet.mode : "add"}
         initialEntry={sheetEntry}
         isSubmitting={isSubmitting}
-        onOpenChange={(open) => {
-          if (!open) setSheet({ open: false });
-        }}
+        mode={sheet.open ? sheet.mode : "add"}
         onCancel={() => setSheet({ open: false })}
-        onSave={handleSaveEntry}
         onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        onOpenChange={(open) => {
+          if (!open) {
+            setSheet({ open: false });
+          }
+        }}
+        onSave={handleSaveEntry}
+        open={sheet.open}
       />
     </View>
   );

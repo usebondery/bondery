@@ -1,13 +1,14 @@
 import type { DomainSupabaseClient } from "../../domains/_shared/context.js";
 import { DomainError } from "../../domains/_shared/context.js";
-import { loadEnrichedContact } from "../contact-enrichment.js";
+import { loadEnrichedContact } from "../contacts/enrichment.js";
+import { internal } from "../platform/errors/http-errors.js";
 
 export class SyncConflictError extends DomainError {
   constructor(
     message: string,
     readonly serverContact: NonNullable<Awaited<ReturnType<typeof loadEnrichedContact>>>,
   ) {
-    super(message, 409, "SYNC_CONFLICT");
+    super(message, 409, "sync_conflict");
     this.name = "SyncConflictError";
   }
 }
@@ -26,11 +27,11 @@ export async function checkContactUpdateConflict(
     .maybeSingle();
 
   if (error) {
-    throw new DomainError(error.message, 500);
+    throw internal("sync_failed", error.message);
   }
 
   if (!data) {
-    throw new DomainError("Contact not found", 404);
+    throw new DomainError("Contact not found", 404, "contact_not_found");
   }
 
   const serverUpdatedAt = data.updated_at;
@@ -48,7 +49,7 @@ export async function checkContactUpdateConflict(
   if (serverMs > baseMs) {
     const serverContact = await loadEnrichedContact(client, userId, personId);
     if (!serverContact) {
-      throw new DomainError("Contact not found", 404);
+      throw new DomainError("Contact not found", 404, "contact_not_found");
     }
     throw new SyncConflictError("Contact was modified on another device", serverContact);
   }

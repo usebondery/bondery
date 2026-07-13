@@ -1,7 +1,11 @@
 import type { Contact } from "@bondery/schemas";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { contactsDomain } from "../../../lib/domains/contacts";
 import { CONTACTS_PAGE_SIZE } from "../../../lib/config";
+import {
+  getContact,
+  getMyselfContact,
+  readContactsList,
+} from "../../../lib/sync/hooks/useSyncQuery";
 import { useSync } from "../../../lib/sync/SyncProvider";
 import { formatContactName } from "../contactUtils";
 
@@ -36,10 +40,10 @@ function mergeContacts(primary: Contact | null, others: Contact[]): Contact[] {
 }
 
 function fetchContactsPage(offset: number): Contact[] {
-  const response = contactsDomain.list({
-    query: "",
+  const response = readContactsList({
     limit: CONTACTS_PAGE_SIZE,
     offset,
+    query: "",
   });
 
   return response.contacts;
@@ -64,6 +68,7 @@ export function useMentionableContacts({
   const { revision } = useSync();
 
   useEffect(() => {
+    void revision;
     let cancelled = false;
     backgroundLoadStartedRef.current = false;
 
@@ -91,10 +96,8 @@ export function useMentionableContacts({
 
       try {
         const fetchedSubject =
-          !subjectContact && Boolean(contactId) && !isMyselfMode
-            ? contactsDomain.get(contactId as string)
-            : null;
-        const fetchedMyself = contactsDomain.getMyself();
+          !subjectContact && contactId && !isMyselfMode ? getContact(contactId as string) : null;
+        const fetchedMyself = getMyselfContact();
         const firstPage = fetchContactsPage(0);
 
         if (cancelled) {
@@ -102,18 +105,16 @@ export function useMentionableContacts({
         }
 
         const resolvedSubject = isMyselfMode
-          ? fetchedMyself ?? subjectContact
-          : subjectContact ?? fetchedSubject ?? null;
+          ? (fetchedMyself ?? subjectContact)
+          : (subjectContact ?? fetchedSubject ?? null);
 
         const myselfContact =
           !isMyselfMode && fetchedMyself?.id !== resolvedSubject?.id
-            ? fetchedMyself ?? null
+            ? (fetchedMyself ?? null)
             : null;
 
         setMyselfContactId(
-          isMyselfMode
-            ? resolvedSubject?.id ?? null
-            : fetchedMyself?.id ?? null,
+          isMyselfMode ? (resolvedSubject?.id ?? null) : (fetchedMyself?.id ?? null),
         );
 
         const merged = mergeContacts(resolvedSubject, [
@@ -150,10 +151,7 @@ export function useMentionableContacts({
     return map;
   }, [contacts]);
 
-  const getContactName = useCallback(
-    (id: string) => contactNameById.get(id),
-    [contactNameById],
-  );
+  const getContactName = useCallback((id: string) => contactNameById.get(id), [contactNameById]);
 
   const filterContacts = useCallback(
     (query: string) => filterMentionContacts(contacts, query),
@@ -161,11 +159,11 @@ export function useMentionableContacts({
   );
 
   return {
+    contactNameById,
     contacts,
+    filterContacts,
+    getContactName,
     loading,
     myselfContactId,
-    contactNameById,
-    getContactName,
-    filterContacts,
   };
 }

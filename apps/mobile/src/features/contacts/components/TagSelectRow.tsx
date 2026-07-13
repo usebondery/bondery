@@ -1,23 +1,18 @@
+import type { TagWithCount } from "@bondery/schemas";
 import { IconCheck } from "@tabler/icons-react-native";
 import { Pressable, StyleSheet, View } from "react-native";
-import type { TagWithCount } from "@bondery/schemas";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { TagChip } from "./TagChip";
 
 interface TagSelectRowProps {
-  tag: TagWithCount;
+  disabled?: boolean;
   isSelected: boolean;
   onToggle: () => void;
-  disabled?: boolean;
+  tag: TagWithCount;
 }
 
-export function TagSelectRow({
-  tag,
-  isSelected,
-  onToggle,
-  disabled = false,
-}: TagSelectRowProps) {
+export function TagSelectRow({ tag, isSelected, onToggle, disabled = false }: TagSelectRowProps) {
   const colors = useMobileThemeColors();
 
   return (
@@ -35,9 +30,9 @@ export function TagSelectRow({
         },
       ]}
     >
-      <TagChip tag={tag} isClickable={false} />
+      <TagChip isClickable={false} tag={tag} />
       {isSelected ? (
-        <IconCheck size={14} color={colors.primary} />
+        <IconCheck color={colors.primary} size={14} />
       ) : (
         <View style={styles.checkSpacer} />
       )}
@@ -46,17 +41,17 @@ export function TagSelectRow({
 }
 
 const styles = StyleSheet.create({
+  checkSpacer: {
+    width: 14,
+  },
   optionRow: {
+    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "space-between",
     minHeight: MOBILE_LAYOUT.touchTarget,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-  },
-  checkSpacer: {
-    width: 14,
   },
 });

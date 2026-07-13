@@ -1,10 +1,15 @@
+import type { Group, GroupWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import type { Group, GroupWithCount } from "@bondery/schemas";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+  useMobileGroupsTranslations,
+  useMobileSettingsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { LoadErrorCard } from "../../../components/load-state";
-import { groupsDomain } from "../../../lib/domains/groups";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { addContactsToGroup } from "../../../lib/domains/groups";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -18,12 +23,12 @@ import { GroupEditSheet } from "./GroupEditSheet";
 interface ContactGroupsSectionProps {
   contactId: string;
   contactName: string;
+  error: string | null;
   groups: GroupWithCount[];
   loading: boolean;
-  error: string | null;
-  onRetry: () => void;
   onGroupAdded: (group: Group) => void;
   onGroupsReplaced: (groups: Group[]) => void;
+  onRetry: () => void;
 }
 
 function GroupsLoadingSkeleton() {
@@ -31,16 +36,16 @@ function GroupsLoadingSkeleton() {
 
   return (
     <ScrollView
+      contentContainerStyle={styles.groupsRow}
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.groupsRow}
     >
-      {[72, 96, 84].map((width, index) => (
+      {[72, 96, 84].map((width) => (
         <View
-          key={index}
+          key={width}
           style={[
             styles.skeletonChip,
-            { width, backgroundColor: colors.surfaceMuted, borderColor: colors.border },
+            { backgroundColor: colors.surfaceMuted, borderColor: colors.border, width },
           ]}
         />
       ))}
@@ -58,7 +63,10 @@ export function ContactGroupsSection({
   onGroupAdded,
   onGroupsReplaced,
 }: ContactGroupsSectionProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const navigateToGroup = useNavigateToGroup();
@@ -72,7 +80,7 @@ export function ContactGroupsSection({
     [groupLastOpenedAt, groupSortOrder, groups],
   );
 
-  const editAccessibilityLabel = t("MobileApp.ContactDetail.GroupsEditAccessibility").replace(
+  const editAccessibilityLabel = tMobileContactDetail("GroupsEditAccessibility").replace(
     "{name}",
     contactName,
   );
@@ -80,81 +88,82 @@ export function ContactGroupsSection({
   const handleGroupCreated = useCallback(
     (group: Group) => {
       try {
-        groupsDomain.addMembers(group.id, [contactId]);
+        addContactsToGroup(group.id, [contactId]);
         onGroupAdded(group);
       } catch {
         showToast({
+          description: tMobileGroups("CreateFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.Groups.CreateFailed"),
         });
       }
     },
-    [contactId, onGroupAdded, showToast, t],
+    [contactId, onGroupAdded, showToast, tMobileGroups, t],
   );
 
   return (
     <View style={styles.section}>
       <ContactDetailSectionHeader
-        titleKey="MobileApp.Contacts.Groups"
         action={
           loading || error
             ? undefined
             : {
-                label: t("MobileApp.ContactDetail.GroupsEdit"),
                 accessibilityLabel: editAccessibilityLabel,
                 icon: <IconPencil size={16} stroke={colors.primary} />,
+                label: tMobileContactDetail("GroupsEdit"),
                 onPress: () => setEditSheetOpen(true),
               }
         }
+        titleKey="Groups"
+        titleNamespace="MobileContacts"
       />
 
       {loading ? (
         <GroupsLoadingSkeleton />
       ) : error ? (
         <LoadErrorCard
-          title={t("MobileApp.Settings.GroupsLoadErrorTitle")}
           description={error}
           onRetry={onRetry}
+          title={tMobileSettings("GroupsLoadErrorTitle")}
         />
       ) : (
         <ContactsGroupsHeader
-          layout="chipRow"
           groups={sortedGroups}
-          onGroupPress={(group) => navigateToGroup(group)}
+          layout="chipRow"
           onCreatePress={() => setCreateGroupOpen(true)}
+          onGroupPress={(group) => navigateToGroup(group)}
         />
       )}
 
       <GroupEditSheet
         mode="create"
-        open={isCreateGroupOpen}
-        onOpenChange={setCreateGroupOpen}
         onCreated={handleGroupCreated}
+        onOpenChange={setCreateGroupOpen}
+        open={isCreateGroupOpen}
       />
 
       <ContactEditGroupsSheet
-        open={isEditSheetOpen}
-        onOpenChange={setEditSheetOpen}
         contactId={contactId}
         contactName={contactName}
         onGroupsReplaced={onGroupsReplaced}
+        onOpenChange={setEditSheetOpen}
+        open={isEditSheetOpen}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
-    gap: 8,
-  },
   groupsRow: {
     gap: 8,
   },
+  section: {
+    gap: 8,
+    marginBottom: 24,
+  },
   skeletonChip: {
-    height: 36,
     borderRadius: 20,
     borderWidth: 1,
+    height: 36,
   },
 });

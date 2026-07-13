@@ -1,22 +1,20 @@
 "use client";
 
-import { ActionIcon, Center, type ActionIconProps } from "@mantine/core";
-import Link from "#nextjs/NextLink.js";
+import { ActionIcon, type ActionIconProps, Center } from "@mantine/core";
 import {
+  type CSSProperties,
   cloneElement,
   isValidElement,
-  type CSSProperties,
   type ReactElement,
   type ReactNode,
 } from "react";
+import Link from "#nextjs/NextLink.js";
 
-export type ActionIconLinkProps = Omit<
-  ActionIconProps,
-  "component" | "href" | "children"
-> & {
+export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
   ariaLabel: string;
   icon: ReactNode;
+  onClick?: () => void;
   target?: "_blank" | "_self" | "_parent" | "_top";
   rel?: string;
 };
@@ -31,14 +29,15 @@ export function ActionIconLink({
   href,
   ariaLabel,
   icon,
+  onClick,
   target,
   rel,
   ...actionIconProps
 }: ActionIconLinkProps) {
   const iconStyle: CSSProperties = {
-    width: "100%",
-    height: "100%",
     display: "block",
+    height: "100%",
+    width: "100%",
   };
 
   const normalizedIcon = isValidElement(icon)
@@ -51,14 +50,14 @@ export function ActionIconLink({
     : icon;
 
   const renderedIcon = (
-    <Center style={{ width: "100%", height: "100%" }}>
+    <Center style={{ height: "100%", width: "100%" }}>
       <span
         style={{
-          width: "60%",
-          height: "60%",
-          display: "inline-flex",
           alignItems: "center",
+          display: "inline-flex",
+          height: "60%",
           justifyContent: "center",
+          width: "60%",
         }}
       >
         {normalizedIcon}
@@ -68,7 +67,7 @@ export function ActionIconLink({
 
   if (!href) {
     return (
-      <ActionIcon aria-label={ariaLabel} {...actionIconProps}>
+      <ActionIcon aria-label={ariaLabel} onClick={onClick} {...actionIconProps}>
         {renderedIcon}
       </ActionIcon>
     );
@@ -76,11 +75,9 @@ export function ActionIconLink({
 
   return (
     <ActionIcon
-      component={Link as any}
-      href={href}
-      target={target}
-      rel={rel}
       aria-label={ariaLabel}
+      onClick={onClick}
+      renderRoot={(props) => <Link href={href} rel={rel} target={target} {...props} />}
       {...actionIconProps}
     >
       {renderedIcon}

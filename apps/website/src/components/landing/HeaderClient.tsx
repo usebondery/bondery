@@ -1,18 +1,18 @@
 "use client";
 
-import { Box, Flex, Group, Paper, ActionIcon, Drawer, Stack, Burger } from "@mantine/core";
+import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
+import { AnchorLink, ButtonLink } from "@bondery/mantine-next";
+import { ActionIcon, Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
-import { AnchorLink, ButtonLink } from "@bondery/mantine-next";
 import { Logo } from "@/components/Logo";
-import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 import { WEBAPP_URL } from "@/lib/config";
 
 const navLinks = [
-  { label: "Features", href: "/#features" },
-  { label: "Pricing", href: "/#pricing" },
-  { label: "Blog", href: WEBSITE_ROUTES.BLOG },
-  { label: "Docs", href: WEBSITE_ROUTES.DOCS },
+  { href: "/#features", label: "Features" },
+  { href: "/#pricing", label: "Pricing" },
+  { href: WEBSITE_ROUTES.BLOG, label: "Blog" },
+  { href: WEBSITE_ROUTES.DOCS, label: "Docs" },
 ];
 
 type HeaderClientProps = {
@@ -23,18 +23,18 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
 
   return (
-    <Box component="header" className="sticky top-6 z-50 ">
+    <Box className="sticky top-6 z-50 " component="header">
       <Paper
+        className="rounded-full!"
         maw={1440}
         mx="auto"
+        px={"xs"}
+        py={"md"}
+        shadow="md"
         w={{
           base: "calc(100% - var(--mantine-spacing-xs) * 2)",
           md: "calc(100% - var(--mantine-spacing-xl) * 2)",
         }}
-        shadow="md"
-        py={"md"}
-        px={"xs"}
-        className="rounded-full!"
       >
         <Flex align="center" px="md" visibleFrom="sm">
           <Box style={{ flex: 1 }}>
@@ -42,13 +42,13 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
           </Box>
 
           <Group
-            component="nav"
             aria-label="Primary navigation"
+            component="nav"
             gap="xl"
             style={{ flex: "0 0 auto" }}
           >
             {navLinks.map((link) => (
-              <AnchorLink key={link.label} href={link.href} c="var(--mantine-color-default-color)">
+              <AnchorLink c="var(--mantine-color-default-color)" href={link.href} key={link.label}>
                 {link.label}
               </AnchorLink>
             ))}
@@ -57,39 +57,39 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
           <Flex align="center" gap="md" justify="flex-end" style={{ flex: 1 }}>
             <ButtonLink
               href={SOCIAL_LINKS.github}
+              leftSection={<IconBrandGithub size={20} />}
               target="_blank"
               variant="default"
-              leftSection={<IconBrandGithub size={20} />}
             >
               {initialStars.toLocaleString()}
             </ButtonLink>
 
             <ButtonLink
               href={`${WEBAPP_URL}/login`}
-              size="md"
-              radius={"xl"}
               leftSection={<IconTopologyStar size={20} />}
+              radius={"xl"}
+              size="md"
             >
               Login or Sign up
             </ButtonLink>
           </Flex>
         </Flex>
 
-        <Flex justify="space-between" align="center" px="md" hiddenFrom="sm">
+        <Flex align="center" hiddenFrom="sm" justify="space-between" px="md">
           <Logo size={32} />
           <Burger
-            opened={drawerOpened}
-            onClick={toggleDrawer}
             aria-label={drawerOpened ? "Close navigation menu" : "Open navigation menu"}
+            onClick={toggleDrawer}
+            opened={drawerOpened}
           />
         </Flex>
       </Paper>
 
       <Drawer.Root
-        opened={drawerOpened}
-        onClose={closeDrawer}
-        position="right"
         hiddenFrom="sm"
+        onClose={closeDrawer}
+        opened={drawerOpened}
+        position="right"
         size="xs"
       >
         <Drawer.Overlay />
@@ -97,24 +97,24 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
           <Drawer.Header>
             <Drawer.Title>Navigation</Drawer.Title>
             <ActionIcon
-              variant="default"
-              size="xl"
               aria-label="Close menu"
-              onClick={closeDrawer}
               mt={"md"}
+              onClick={closeDrawer}
+              size="xl"
+              variant="default"
             >
               <IconX size={24} />
             </ActionIcon>
           </Drawer.Header>
           <Drawer.Body>
-            <Flex component="nav" aria-label="Mobile navigation" direction="column" gap="lg">
+            <Flex aria-label="Mobile navigation" component="nav" direction="column" gap="lg">
               {navLinks.map((link) => (
                 <AnchorLink
-                  key={link.label}
-                  href={link.href}
                   c="var(--mantine-color-default-color)"
-                  size="lg"
+                  href={link.href}
+                  key={link.label}
                   onClick={closeDrawer}
+                  size="lg"
                 >
                   {link.label}
                 </AnchorLink>
@@ -122,20 +122,20 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
 
               <Stack gap="xs">
                 <ButtonLink
+                  fullWidth
                   href={SOCIAL_LINKS.github}
+                  leftSection={<IconBrandGithub size={20} />}
                   target="_blank"
                   variant="default"
-                  leftSection={<IconBrandGithub size={20} />}
-                  fullWidth
                 >
                   {initialStars.toLocaleString()}
                 </ButtonLink>
 
                 <ButtonLink
-                  href={`${WEBAPP_URL}/login`}
-                  size="md"
-                  leftSection={<IconTopologyStar size={20} />}
                   fullWidth
+                  href={`${WEBAPP_URL}/login`}
+                  leftSection={<IconTopologyStar size={20} />}
+                  size="md"
                 >
                   Login or Sign up
                 </ButtonLink>

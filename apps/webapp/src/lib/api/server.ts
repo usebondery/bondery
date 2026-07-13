@@ -1,15 +1,14 @@
-import { API_URL } from "@/lib/config";
-import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import {
   applyServerTransportErrorPolicy,
   applyServerTransportResponsePolicy,
 } from "@/lib/api/applyServerTransportPolicy";
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
+import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
+import { API_URL } from "@/lib/platform/config";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
-import { getApiErrorFallbacksOnServer } from "@/lib/i18n/getApiErrorFallbacks.server";
 
-export { ApiError } from "./ApiError";
+export { ApiError } from "@bondery/helpers/api";
 export {
   applyServerTransportErrorPolicy,
   applyServerTransportResponsePolicy,
@@ -21,7 +20,7 @@ export type ServerApiFetchOptions = {
   cache?: RequestCache;
   /**
    * Default true for RSC. When true, 401/outage signals redirect via transport policy.
-   * Set false for BFF routes and routing probes (getAppBootstrap).
+   * Set false for BFF routes and routing probes (getAppSession).
    */
   transportPolicy?: boolean;
 };
@@ -90,8 +89,7 @@ export async function serverApiJson<T>(
 ): Promise<T> {
   try {
     const response = await serverApiFetch(path, init, options);
-    const fallbacks = await getApiErrorFallbacksOnServer();
-    return await parseApiJsonResponse<T>(response, fallbacks);
+    return await parseApiJsonResponse<T>(response);
   } catch (error) {
     if (options.transportPolicy !== false) {
       await applyServerTransportErrorPolicy(error);

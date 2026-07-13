@@ -1,0 +1,22 @@
+{
+  "AddError": "Tag konnte nicht hinzugefügt werden",
+  "AddNewTagTooltip": "Neuen Tag erstellen",
+  "AddSuccess": "Tag erfolgreich hinzugefügt",
+  "AddTagTooltip": "Tag hinzufügen",
+  "CreateError": "Tag konnte nicht erstellt werden",
+  "CreateNewTagEmpty": "Neuen Tag erstellen",
+  "CreateNewTagOption": "Neuen Tag \"{label}\" erstellen",
+  "CreateTagCancel": "Abbrechen",
+  "CreateTagConfirm": "Erstellen & hinzufügen",
+  "CreateTagMessage": "Der Tag \"{name}\" existiert noch nicht. Möchtest du ihn erstellen und diesem Kontakt hinzufügen?",
+  "CreateTagTitle": "Neuen Tag erstellen?",
+  "Label": "Tags",
+  "NoTagsFound": "Keine Tags gefunden",
+  "Placeholder": "Tags hinzufügen...",
+  "RemoveError": "Tag konnte nicht entfernt werden",
+  "RemoveTagTooltip": "Tag entfernen",
+  "SearchPlaceholder": "Tag suchen oder erstellen...",
+  "TagAlreadyAddedMessage": "Der Tag \"{name}\" wurde diesem Kontakt bereits hinzugefügt.",
+  "TagAlreadyAddedTitle": "Tag bereits hinzugefügt",
+  "TagAlreadyAppliedTooltip": "Tag bereits zugewiesen"
+}

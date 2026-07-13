@@ -1,59 +1,13 @@
 import type { Metadata } from "next";
-import { Stack, Title, Text, Alert, SimpleGrid } from "@mantine/core";
-import { IconChartBar } from "@tabler/icons-react";
-import { getWebTranslations as getTranslations } from "@/lib/i18n/getWebTranslations";
-import { PageWrapper } from "../../components/PageWrapper";
-import { getStatsData } from "./getStatsData";
-import { ActiveUsersChart } from "./components/ActiveUsersCards";
-import { FunnelChart } from "./components/FunnelChart";
-import { NpsCard } from "./components/NpsCard";
-import { TotalUsersChart } from "./components/TotalUsersChart";
-import { GithubStarsCard } from "./components/GithubStarsCard";
+import { getStatsPageTranslations } from "@/lib/i18n/generated/hooks.server";
+import { staticPageTitle } from "@/lib/metadata/pageTitles";
+import { StatsLoader } from "./StatsLoader";
 
 export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("StatsPage");
-  return { title: t("Title") };
+  const t = await getStatsPageTranslations();
+  return staticPageTitle(t("Title"));
 }
 
-export default async function StatsPage() {
-  const t = await getTranslations("StatsPage");
-
-  const { activeUsers, funnel, nps, totalUsers, githubStars } = await getStatsData();
-
-  // If all sections failed it's likely a 403
-  if (!activeUsers && !funnel && !nps && !totalUsers && !githubStars) {
-    return (
-      <PageWrapper>
-        <Alert color="red" icon={<IconChartBar size={16} />}>
-          {t("Forbidden")}
-        </Alert>
-      </PageWrapper>
-    );
-  }
-
-  return (
-    <PageWrapper>
-      <Stack gap="xl">
-        <div>
-          <Title order={2}>{t("Title")}</Title>
-          <Text c="dimmed" size="sm">
-            {t("Description")}
-          </Text>
-        </div>
-
-        {(totalUsers || githubStars) && (
-          <SimpleGrid cols={{ base: 1, sm: githubStars ? 2 : 1 }}>
-            {totalUsers && <TotalUsersChart data={totalUsers} />}
-            {githubStars && <GithubStarsCard data={githubStars} />}
-          </SimpleGrid>
-        )}
-
-        {activeUsers && <ActiveUsersChart data={activeUsers} />}
-
-        {funnel && <FunnelChart data={funnel} />}
-
-        {nps && <NpsCard data={nps} />}
-      </Stack>
-    </PageWrapper>
-  );
+export default function StatsPage() {
+  return <StatsLoader />;
 }

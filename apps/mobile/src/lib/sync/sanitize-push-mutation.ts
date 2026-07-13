@@ -1,6 +1,6 @@
 import type { SyncMutation } from "@bondery/schemas/sync";
-import { normalizeSyncDatetime } from "./sync-datetime";
 import { isValidUuid } from "./ids";
+import { normalizeSyncDatetime } from "./sync-datetime";
 
 export function sanitizePushMutation(mutation: SyncMutation): SyncMutation | null {
   if (!isValidUuid(mutation.id)) {

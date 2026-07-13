@@ -1,8 +1,5 @@
 import type { ContactsFlatRow } from "./contactsFlatList";
-import {
-  CONTACTS_LIST_ROW_HEIGHT,
-  CONTACTS_SECTION_HEADER_HEIGHT,
-} from "./contactsFlatList";
+import { CONTACTS_LIST_ROW_HEIGHT, CONTACTS_SECTION_HEADER_HEIGHT } from "./contactsFlatList";
 
 export type FlatRowLayoutEntry = {
   index: number;
@@ -11,7 +8,10 @@ export type FlatRowLayoutEntry = {
   row: ContactsFlatRow;
 };
 
-export function isSelectableFlatRow(row: ContactsFlatRow, myselfContactId: string | undefined): boolean {
+export function isSelectableFlatRow(
+  row: ContactsFlatRow,
+  myselfContactId: string | undefined,
+): boolean {
   if (row.type !== "contact") {
     return false;
   }
@@ -25,7 +25,7 @@ export function buildFlatRowOffsetIndex(flatRows: ContactsFlatRow[]): FlatRowLay
   return flatRows.map((row, index) => {
     const height =
       row.type === "section-header" ? CONTACTS_SECTION_HEADER_HEIGHT : CONTACTS_LIST_ROW_HEIGHT;
-    const entry: FlatRowLayoutEntry = { index, offsetY, height, row };
+    const entry: FlatRowLayoutEntry = { height, index, offsetY, row };
     offsetY += height;
     return entry;
   });

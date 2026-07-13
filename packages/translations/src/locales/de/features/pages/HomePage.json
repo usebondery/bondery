@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Interaktion erfassen",
+  "AddPerson": "Person erstellen",
+  "ExtensionNudge": {
+    "Description": "Importiere Kontakte direkt von LinkedIn- und Instagram-Profilen und halte dein Netzwerk mühelos auf dem neuesten Stand.",
+    "InstallButton": "Erweiterung installieren",
+    "Title": "Hol mehr aus Bondery mit unserer Chrome-Erweiterung"
+  },
+  "HeaderDescription": "Auf der Startseite bekommst du einen schnellen Überblick über dein Netzwerk, Erinnerungen und aktuelle Interaktionen.",
+  "NoRecentlyAdded": "Noch keine Personen hinzugefügt.",
+  "NoRecentlyInteracted": "Noch keine aktuellen Interaktionen.",
+  "NotificationInDays": "In {count} Tagen",
+  "NotificationSent": "Bereits gesendet",
+  "NotificationToday": "Heute",
+  "NotificationTomorrow": "Morgen",
+  "NotificationTooltipInDays": "Du wirst in {count} Tagen benachrichtigt",
+  "NotificationTooltipSentAt": "Benachrichtigung wurde bereits am {sentAt} gesendet",
+  "NotificationTooltipToday": "Du wirst heute benachrichtigt",
+  "NotificationTooltipTomorrow": "Du wirst morgen benachrichtigt",
+  "NoUpcomingReminders": "Keine anstehenden Erinnerungen in den nächsten 30 Tagen.",
+  "ProgressRail": {
+    "AwaitingExport": "Dein {platform}-Export ist unterwegs. Exporte kommen in der Regel in 5–15 Minuten an.",
+    "ChoosePlatform": "Wähle eine Plattform zum Importieren",
+    "Dismiss": "Ausblenden",
+    "HaveZipFile": "Ich habe die Datei",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} von {total} erledigt",
+    "SkipImport": "Import überspringen",
+    "Tasks": {
+      "AddContacts": "Erste Kontakte hinzufügen",
+      "ImportContacts": "Kontakte importieren",
+      "LogInteraction": "Erste Interaktion erfassen",
+      "SetReminder": "Erinnerung einrichten"
+    },
+    "Title": "Erste Schritte"
+  },
+  "RecentlyAddedTitle": "Kürzlich hinzugefügt",
+  "RecentlyAddedTooltip": "Die 5 zuletzt hinzugefügten Personen in deinem Netzwerk.",
+  "RecentlyInteractedTitle": "Kürzlich interagiert",
+  "RecentlyInteractedTooltip": "Die 5 Personen, mit denen du zuletzt interagiert hast.",
+  "Stats": {
+    "InteractionsTitle": "Interaktionen diesen Monat",
+    "InteractionsTooltip": "Die Anzahl der Interaktionen, die du im Monat {month} erfasst hast.",
+    "NewContactsTitle": "Neue Kontakte dieses Jahr",
+    "NewContactsTooltip": "Wie viele Personen in diesem Jahr ({year}) zu deinem Netzwerk hinzugefügt wurden.",
+    "TotalContactsTitle": "Kontakte gesamt",
+    "TotalContactsTooltip": "Die Anzahl der Personen in deinem Netzwerk auf Bondery."
+  },
+  "TimelinePreviewTitle": "Interaktionen",
+  "TimelinePreviewTooltip": "Deine 5 letzten Interaktionen. Klicke, um alle Interaktionen zu sehen.",
+  "Title": "Start",
+  "UnknownPerson": "Unbekannte Person",
+  "UpcomingRemindersMonthInfo": "Es werden Erinnerungen mit Benachrichtigungen angezeigt, die in den nächsten 30 Tagen fällig sind.",
+  "UpcomingRemindersTitle": "Anstehende Erinnerungen",
+  "UpcomingRemindersTooltip": "Das sind deine anstehenden Erinnerungen, die in den nächsten 30 Tagen fällig sind."
+}

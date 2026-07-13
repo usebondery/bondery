@@ -1,30 +1,30 @@
 import { IconSearch } from "@tabler/icons-react-native";
 import { Sheet } from "@tamagui/sheet";
-import { useEffect, useRef, type ReactNode } from "react";
-import { StyleSheet, View, type TextInput } from "react-native";
+import { type ReactNode, useEffect, useRef } from "react";
+import { StyleSheet, type TextInput, View } from "react-native";
 import { SHEET_SNAP_POINTS, UI_TIMING_MS } from "../lib/config";
 import { MOBILE_LAYOUT } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import { MobileTextInput } from "./MobileTextInput";
 
 export interface SearchActionSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  query: string;
-  onQueryChange: (query: string) => void;
-  searchPlaceholder: string;
-  /** Rendered to the right of the search field (e.g. random emoji, filter action). */
-  searchRightAction?: ReactNode;
-  searchEditable?: boolean;
-  /** Title / subtitle block above the search row. */
-  header?: ReactNode;
-  /** Sticky footer below scrollable content (e.g. Cancel / Save). */
-  footer?: ReactNode;
   children: ReactNode;
   /** When false, blocks overlay dismiss and bottom snap while open. */
   dismissible?: boolean;
   /** Uses `surfaceElevated` instead of `surface` for the sheet frame. */
   elevated?: boolean;
+  /** Sticky footer below scrollable content (e.g. Cancel / Save). */
+  footer?: ReactNode;
+  /** Title / subtitle block above the search row. */
+  header?: ReactNode;
+  onOpenChange: (open: boolean) => void;
+  onQueryChange: (query: string) => void;
+  open: boolean;
+  query: string;
+  searchEditable?: boolean;
+  searchPlaceholder: string;
+  /** Rendered to the right of the search field (e.g. random emoji, filter action). */
+  searchRightAction?: ReactNode;
 }
 
 /**
@@ -75,25 +75,25 @@ export function SearchActionSheet({
 
   return (
     <Sheet
-      native
+      disableDrag={!dismissible}
+      dismissOnOverlayPress={dismissible}
+      dismissOnSnapToBottom={dismissible}
       modal
-      open={open}
+      moveOnKeyboardChange
+      native
       onOpenChange={handleOpenChange}
+      open={open}
       snapPoints={[SHEET_SNAP_POINTS.selectSearch]}
       snapPointsMode="percent"
-      moveOnKeyboardChange
-      dismissOnSnapToBottom={dismissible}
-      dismissOnOverlayPress={dismissible}
-      disableDrag={!dismissible}
     >
       <Sheet.Overlay backgroundColor={colors.overlay} />
       <Sheet.Frame
         backgroundColor={frameBackgroundColor}
         borderTopLeftRadius={MOBILE_LAYOUT.borderRadius.control * 2}
         borderTopRightRadius={MOBILE_LAYOUT.borderRadius.control * 2}
-        paddingTop={10}
-        paddingBottom={16}
         flex={1}
+        paddingBottom={16}
+        paddingTop={10}
       >
         <Sheet.Handle backgroundColor={colors.borderStrong} marginBottom={10} />
 
@@ -102,19 +102,19 @@ export function SearchActionSheet({
         <View style={styles.searchRow}>
           <View style={styles.searchInputSlot}>
             <MobileTextInput
-              ref={searchInputRef}
-              value={query}
+              autoCapitalize="none"
+              autoCorrect={false}
+              backgroundColor={colors.inputBackground}
+              clearButtonMode="while-editing"
+              editable={searchEditable}
+              leadingIcon={<IconSearch color={colors.iconSecondary} size={16} />}
               onChangeText={onQueryChange}
               placeholder={searchPlaceholder}
-              autoCorrect={false}
-              autoCapitalize="none"
-              clearButtonMode="while-editing"
+              ref={searchInputRef}
               returnKeyType="search"
               size="compact"
               unfocusedBorderColor={colors.borderStrong}
-              backgroundColor={colors.inputBackground}
-              leadingIcon={<IconSearch size={16} color={colors.iconSecondary} />}
-              editable={searchEditable}
+              value={query}
             />
           </View>
 
@@ -132,16 +132,17 @@ export function SearchActionSheet({
 }
 
 const styles = StyleSheet.create({
-  header: {
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: 8,
+  body: {
+    flex: 1,
+    minHeight: 0,
   },
-  searchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: MOBILE_LAYOUT.spacing.contentTop / 2,
+  footer: {
     paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: 10,
+    paddingTop: 10,
+  },
+  header: {
+    paddingBottom: 8,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
   },
   searchInputSlot: {
     flex: 1,
@@ -150,12 +151,11 @@ const styles = StyleSheet.create({
   searchRightAction: {
     flexShrink: 0,
   },
-  body: {
-    flex: 1,
-    minHeight: 0,
-  },
-  footer: {
+  searchRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: MOBILE_LAYOUT.spacing.contentTop / 2,
+    paddingBottom: 10,
     paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingTop: 10,
   },
 });

@@ -6,13 +6,13 @@ import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface ContactSocialButtonProps {
-  color: string;
-  icon: ReactNode;
-  accessibilityLabel: string;
   accessibilityHint?: string;
+  accessibilityLabel: string;
+  color: string;
   dashed?: boolean;
-  onPress: () => void;
+  icon: ReactNode;
   onLongPress?: () => void;
+  onPress: () => void;
 }
 
 /**
@@ -31,13 +31,12 @@ export function ContactSocialButton({
 
   return (
     <Tappable
-      variant="subtle"
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
       accessibilityHint={accessibilityHint}
-      onPress={onPress}
-      onLongPress={onLongPress}
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
       delayLongPress={UI_TIMING_MS.longPressDelay}
+      onLongPress={onLongPress}
+      onPress={onPress}
       style={[
         styles.button,
         {
@@ -46,6 +45,7 @@ export function ContactSocialButton({
           borderStyle: dashed ? "dashed" : "solid",
         },
       ]}
+      variant="subtle"
     >
       {icon}
     </Tappable>
@@ -54,11 +54,11 @@ export function ContactSocialButton({
 
 const styles = StyleSheet.create({
   button: {
-    width: MOBILE_LAYOUT.touchTarget,
-    height: MOBILE_LAYOUT.touchTarget,
+    alignItems: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.pill,
     borderWidth: 1,
-    alignItems: "center",
+    height: MOBILE_LAYOUT.touchTarget,
     justifyContent: "center",
+    width: MOBILE_LAYOUT.touchTarget,
   },
 });

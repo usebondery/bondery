@@ -1,6 +1,6 @@
+import type { ContactAddressType, ContactType } from "@bondery/schemas";
 import type { ReactNode } from "react";
 import { Pressable, Text, View } from "react-native";
-import type { ContactAddressType, ContactType } from "@bondery/schemas";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import type { OverflowMenuItemConfig } from "../../../components/OverflowMenuItem";
 import { useSingleDoubleTap } from "../../../lib/gestures/useSingleDoubleTap";
@@ -9,19 +9,19 @@ import { ContactChannelBadges } from "./ContactChannelBadges";
 import { contactDetailStyles } from "./contactDetailStyles";
 
 interface ContactChannelRowProps {
-  primaryLabel: string;
-  labelContent?: ReactNode;
-  type: ContactType | ContactAddressType;
-  typeNamespace?: "ContactInfo" | "ContactAddress";
-  isPreferred: boolean;
-  channelIcon: ReactNode;
-  menuItems: OverflowMenuItemConfig[];
-  menuAccessibilityLabel: string;
-  accessibilityLabel: string;
   accessibilityHint: string;
-  onPress: () => void;
+  accessibilityLabel: string;
+  channelIcon: ReactNode;
+  isPreferred: boolean;
+  labelContent?: ReactNode;
+  menuAccessibilityLabel: string;
+  menuItems: OverflowMenuItemConfig[];
   onDoublePress?: () => void;
   onLongPress: () => void;
+  onPress: () => void;
+  primaryLabel: string;
+  type: ContactType | ContactAddressType;
+  typeNamespace?: "ContactInfo" | "ContactAddress";
 }
 
 export function ContactChannelRow({
@@ -41,9 +41,9 @@ export function ContactChannelRow({
 }: ContactChannelRowProps) {
   const colors = useMobileThemeColors();
   const handlePress = useSingleDoubleTap({
-    onSinglePress: onPress,
-    onDoublePress,
     enabled: Boolean(onDoublePress),
+    onDoublePress,
+    onSinglePress: onPress,
   });
 
   return (
@@ -57,11 +57,11 @@ export function ContactChannelRow({
         <View style={contactDetailStyles.cardLeadingIcon}>{channelIcon}</View>
 
         <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={accessibilityLabel}
           accessibilityHint={accessibilityHint}
-          onPress={handlePress}
+          accessibilityLabel={accessibilityLabel}
+          accessibilityRole="button"
           onLongPress={onLongPress}
+          onPress={handlePress}
           style={contactDetailStyles.cardPressable}
         >
           <View style={contactDetailStyles.cardLeft}>
@@ -70,13 +70,17 @@ export function ContactChannelRow({
                 {primaryLabel}
               </Text>
             )}
-            <ContactChannelBadges type={type} typeNamespace={typeNamespace} isPreferred={isPreferred} />
+            <ContactChannelBadges
+              isPreferred={isPreferred}
+              type={type}
+              typeNamespace={typeNamespace}
+            />
           </View>
         </Pressable>
 
         <OverflowMenu
-          items={menuItems}
           accessibilityLabel={menuAccessibilityLabel}
+          items={menuItems}
           triggerVariant="row"
         />
       </View>

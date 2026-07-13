@@ -1,17 +1,18 @@
 "use client";
 
+import type { LooseTranslateFn } from "@bondery/translations";
 import { useCallback } from "react";
-import type { SocialActionKey } from "@/lib/socialActionTooltips";
-import { useWebTranslations as useTranslations } from "./useWebTranslations";
+import type { SocialActionKey } from "@/lib/contacts/socialActionTooltips";
+import { useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 
 const TOOLTIP_KEY: Record<SocialActionKey, string> = {
-  phone: "TooltipCall",
   email: "TooltipEmail",
-  linkedin: "TooltipLinkedIn",
-  instagram: "TooltipInstagram",
-  whatsapp: "TooltipWhatsApp",
   facebook: "TooltipFacebook",
+  instagram: "TooltipInstagram",
+  linkedin: "TooltipLinkedIn",
+  phone: "TooltipCall",
   signal: "TooltipSignal",
+  whatsapp: "TooltipWhatsApp",
 };
 
 function normalizeFirstName(firstName: string | null | undefined): string {
@@ -20,14 +21,15 @@ function normalizeFirstName(firstName: string | null | undefined): string {
 }
 
 export function useSocialActionTooltips() {
-  const t = useTranslations("Socials");
+  const t = useSocialsTranslations();
+  const tLoose = t as LooseTranslateFn;
 
   const getSocialActionTooltip = useCallback(
     (action: SocialActionKey, firstName: string) => {
       const name = normalizeFirstName(firstName);
-      return t(TOOLTIP_KEY[action] as Parameters<typeof t>[0], { name });
+      return tLoose(TOOLTIP_KEY[action], { name });
     },
-    [t],
+    [tLoose],
   );
 
   const getSocialActionLabel = useCallback(
@@ -54,5 +56,5 @@ export function useSocialActionTooltips() {
     [t],
   );
 
-  return { getSocialActionTooltip, getSocialActionLabel };
+  return { getSocialActionLabel, getSocialActionTooltip };
 }

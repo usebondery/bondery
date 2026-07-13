@@ -1,6 +1,6 @@
 import type { Ref } from "react";
+import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
 import type { TextInput } from "react-native";
-import { Controller, type Control, type FieldPath, type FieldValues } from "react-hook-form";
 import { MobileTextInput, type MobileTextInputProps } from "../MobileTextInput";
 
 type SheetTextFieldProps<TFieldValues extends FieldValues> = {
@@ -31,13 +31,26 @@ export function SheetTextField<TFieldValues extends FieldValues>({
         const showError = showErrorWhenTouched
           ? fieldState.invalid && fieldState.isTouched
           : fieldState.invalid;
-        const resolvedError = externalErrorMessage || (showError ? fieldState.error?.message : undefined);
+        const resolvedError =
+          externalErrorMessage || (showError ? fieldState.error?.message : undefined);
         return (
           <MobileTextInput
             {...inputProps}
+            error={showError || Boolean(externalErrorMessage)}
+            errorMessage={resolvedError}
+            onBlur={() => {
+              field.onBlur();
+              onFieldBlur?.((field.value ?? "") as string);
+            }}
+            onChangeText={(value) => {
+              field.onChange(value);
+              onFieldChange?.(value);
+            }}
             ref={(node) => {
               field.ref(node);
-              if (!inputRef) return;
+              if (!inputRef) {
+                return;
+              }
               if (typeof inputRef === "function") {
                 inputRef(node);
                 return;
@@ -45,16 +58,6 @@ export function SheetTextField<TFieldValues extends FieldValues>({
               inputRef.current = node;
             }}
             value={(field.value ?? "") as string}
-            onChangeText={(value) => {
-              field.onChange(value);
-              onFieldChange?.(value);
-            }}
-            onBlur={() => {
-              field.onBlur();
-              onFieldBlur?.((field.value ?? "") as string);
-            }}
-            error={showError || Boolean(externalErrorMessage)}
-            errorMessage={resolvedError}
           />
         );
       }}

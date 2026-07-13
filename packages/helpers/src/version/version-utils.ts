@@ -13,8 +13,12 @@ export function compareVersions(a: string, b: string): -1 | 0 | 1 {
   for (let i = 0; i < length; i++) {
     const segA = partsA[i] ?? 0;
     const segB = partsB[i] ?? 0;
-    if (segA < segB) return -1;
-    if (segA > segB) return 1;
+    if (segA < segB) {
+      return -1;
+    }
+    if (segA > segB) {
+      return 1;
+    }
   }
 
   return 0;

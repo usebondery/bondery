@@ -1,32 +1,22 @@
-import {
-  Column,
-  Container,
-  Heading,
-  Img,
-  Link,
-  Row,
-  Section,
-  Text,
-} from "react-email";
-import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
-import * as React from "react";
+import { Column, Container, Heading, Img, Link, Row, Section, Text } from "react-email";
+import { EmailWrapper } from "#shared/EmailWrapper.js";
 
 export interface ReminderDigestEmailItem {
+  date: string;
+  note: string | null;
+  notifyDaysBefore: 1 | 3 | 7;
+  notifyOn: string;
+  personAvatar: string | null;
   personId: string;
   personName: string;
-  personAvatar: string | null;
   type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
-  date: string;
-  notifyOn: string;
-  notifyDaysBefore: 1 | 3 | 7;
-  note: string | null;
 }
 
 export interface ReminderDigestEmailProps {
-  userId: string;
-  targetDate: string;
   reminders: ReminderDigestEmailItem[];
+  targetDate: string;
+  userId: string;
 }
 
 function getInitials(name: string) {
@@ -46,10 +36,10 @@ function formatDateLabel(dateValue: string) {
   }
 
   return parsedDate.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
     day: "numeric",
+    month: "short",
     timeZone: "UTC",
+    year: "numeric",
   });
 }
 
@@ -60,8 +50,8 @@ function formatTargetDate(dateValue: string) {
   }
 
   return parsedDate.toLocaleDateString("en-US", {
-    month: "long",
     day: "numeric",
+    month: "long",
     timeZone: "UTC",
   });
 }
@@ -75,16 +65,10 @@ function getDaysRemaining(targetDate: string, date: string) {
   }
 
   const millisecondsInDay = 24 * 60 * 60 * 1000;
-  return Math.max(
-    0,
-    Math.round((event.getTime() - target.getTime()) / millisecondsInDay),
-  );
+  return Math.max(0, Math.round((event.getTime() - target.getTime()) / millisecondsInDay));
 }
 
-export default function ReminderDigestEmail({
-  targetDate,
-  reminders,
-}: ReminderDigestEmailProps) {
+export default function ReminderDigestEmail({ targetDate, reminders }: ReminderDigestEmailProps) {
   const previewText = `You have ${reminders.length} reminder${reminders.length === 1 ? "" : "s"} for ${targetDate}`;
   const headingDate = formatTargetDate(targetDate);
 
@@ -112,35 +96,35 @@ export default function ReminderDigestEmail({
 
           return (
             <Section
-              key={`${reminder.personId}-${reminder.type}-${reminder.date}`}
               className="mb-3 border border-gray-200 bg-white"
+              key={`${reminder.personId}-${reminder.type}-${reminder.date}`}
               style={{ borderRadius: "12px", overflow: "hidden" }}
             >
               <Row>
-                <Column align="center" width="72" className="bg-brand py-3">
+                <Column align="center" className="bg-brand py-3" width="72">
                   {reminder.personAvatar ? (
                     <Img
-                      src={reminder.personAvatar}
                       alt={`${reminder.personName} avatar`}
-                      width="40"
-                      height="40"
                       className="border border-white"
+                      height="40"
+                      src={reminder.personAvatar}
                       style={{
                         borderRadius: "9999px",
-                        width: "40px",
                         height: "40px",
                         objectFit: "cover",
+                        width: "40px",
                       }}
+                      width="40"
                     />
                   ) : (
                     <Text
                       className="m-0 border border-white bg-white text-xs font-bold text-brand"
                       style={{
                         borderRadius: "9999px",
-                        width: "40px",
                         height: "40px",
                         lineHeight: "40px",
                         textAlign: "center",
+                        width: "40px",
                       }}
                     >
                       {personInitials}
@@ -149,19 +133,17 @@ export default function ReminderDigestEmail({
                 </Column>
                 <Column className="px-3 py-2">
                   <Link
-                    href={personUrl}
                     className="mt-0 mb-1 text-sm font-bold text-gray-900 underline"
+                    href={personUrl}
                   >
                     {reminder.personName}
                   </Link>
                   <Text className="m-0 text-sm text-gray-700">
-                    {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming
-                    up in <strong>{remainingLabel}</strong> on {dateLabel}.
+                    {dateMeta.emoji} <strong>{dateMeta.label}</strong> is coming up in{" "}
+                    <strong>{remainingLabel}</strong> on {dateLabel}.
                   </Text>
                   {reminder.note ? (
-                    <Text className="mt-1 mb-0 text-xs text-gray-600">
-                      {reminder.note}
-                    </Text>
+                    <Text className="mt-1 mb-0 text-xs text-gray-600">{reminder.note}</Text>
                   ) : null}
                 </Column>
               </Row>

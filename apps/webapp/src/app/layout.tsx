@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import "./globals.css";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
@@ -11,30 +10,16 @@ import "@mantine/code-highlight/styles.css";
 import "@/components/code-highlight-hljs.css";
 import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
-import { bonderyTheme } from "@bondery/mantine-next";
-import { Notifications } from "@mantine/notifications";
+import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
 import { Lexend } from "next/font/google";
-import {
-  ColorSchemeScript,
-  MantineProvider,
-  mantineHtmlProps,
-  v8CssVariablesResolver,
-} from "@mantine/core";
 import { headers } from "next/headers";
-import { WEBAPP_NAME } from "@bondery/helpers";
+import { WebappMantineProvider } from "@/components/shell/WebappMantineProvider";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
-import { loadTranslation } from "@bondery/translations/i18n";
+import { rootMetadata } from "@/lib/metadata/rootMetadata";
+import { computeColorScheme } from "@/lib/theme/computeColorScheme";
+import { resolveSsrColorScheme } from "@/lib/theme/resolveSsrColorScheme";
 
-export async function generateMetadata(): Promise<Metadata> {
-  const { locale } = await resolveLocaleSettings();
-  const translations = loadTranslation(locale);
-  const common = translations.WebAppCommon as Record<string, string>;
-
-  return {
-    title: WEBAPP_NAME,
-    description: common.AppDescription,
-  };
-}
+export const metadata = rootMetadata;
 
 const lexend = Lexend({
   subsets: ["latin"],
@@ -46,22 +31,31 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const headersList = await headers();
+  const nonce = headersList.get("x-nonce") ?? undefined;
+  const [{ locale }, colorScheme] = await Promise.all([
+    resolveLocaleSettings(),
+    resolveSsrColorScheme(),
+  ]);
+  const prefersDark = headersList.get("sec-ch-prefers-color-scheme") === "dark";
+  const computedColorScheme = computeColorScheme(colorScheme, prefersDark);
 
   return (
-    <html lang="en" {...mantineHtmlProps} className={lexend.variable}>
+    <html
+      lang={locale}
+      {...mantineHtmlProps}
+      className={lexend.variable}
+      data-mantine-color-scheme={computedColorScheme}
+    >
       <head>
-        <ColorSchemeScript nonce={nonce} defaultColorScheme="auto" />
+        <ColorSchemeScript
+          defaultColorScheme={colorScheme}
+          forceColorScheme={colorScheme !== "auto" ? computedColorScheme : undefined}
+          nonce={nonce}
+        />
       </head>
       <body>
-        <MantineProvider
-          defaultColorScheme="auto"
-          theme={bonderyTheme}
-          cssVariablesResolver={v8CssVariablesResolver}
-        >
-          <Notifications autoClose={6000} position="top-center" />
-          {children}
-        </MantineProvider>
+        <WebappMantineProvider defaultColorScheme={colorScheme}>{children}</WebappMantineProvider>
       </body>
     </html>
   );

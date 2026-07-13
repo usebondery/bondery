@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useTranslation } from "react-i18next";
-import { useWatch } from "react-hook-form";
+import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
+import type { ImportantDate, ImportantDateType } from "@bondery/schemas";
+import { type ImportantDateSheetInput, importantDateSheetSchema } from "@bondery/schemas";
 import {
   IconBell,
   IconCalendarPlus,
@@ -9,17 +8,22 @@ import {
   IconChevronDown,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
-import type { ImportantDate, ImportantDateType } from "@bondery/schemas";
+import { useEffect, useMemo, useState } from "react";
+import { useWatch } from "react-hook-form";
+import { useTranslation } from "react-i18next";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import {
-  importantDateSheetSchema,
-  type ImportantDateSheetInput,
-} from "@bondery/schemas";
-import { ActionSheetPopup, type ActionSheetPopupAction } from "../../../components/ActionSheetPopup";
+  useCommonTranslations,
+  useContactImportantDatesTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
+import {
+  ActionSheetPopup,
+  type ActionSheetPopupAction,
+} from "../../../components/ActionSheetPopup";
 import { SheetSelectField, SheetTextField } from "../../../components/form";
 import { INPUT_MAX_LENGTHS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -33,16 +37,16 @@ import { ImportantDateWheelPickerSheet } from "./ImportantDateWheelPickerSheet";
 type SheetMode = "add" | "edit";
 
 interface EditImportantDateSheetProps {
-  open: boolean;
-  mode: SheetMode;
-  initialEntry: ImportantDate | null;
-  existingDates: ImportantDate[];
   contactFirstName: string;
+  existingDates: ImportantDate[];
+  initialEntry: ImportantDate | null;
   isSubmitting: boolean;
-  onOpenChange: (open: boolean) => void;
+  mode: SheetMode;
   onCancel: () => void;
-  onSave: (entry: ImportantDate) => void;
   onDelete?: () => void;
+  onOpenChange: (open: boolean) => void;
+  onSave: (entry: ImportantDate) => void;
+  open: boolean;
 }
 
 const IMPORTANT_DATE_TYPES: ImportantDateType[] = [
@@ -55,16 +59,16 @@ const IMPORTANT_DATE_TYPES: ImportantDateType[] = [
 
 function createDraftDate(): ImportantDate {
   return {
+    createdAt: "",
+    date: "",
     id: "",
-    userId: "",
+    note: null,
+    notifyDaysBefore: null,
+    notifyOn: null,
     personId: "",
     type: "other",
-    date: "",
-    note: null,
-    notifyOn: null,
-    notifyDaysBefore: null,
-    createdAt: "",
     updatedAt: "",
+    userId: "",
   };
 }
 
@@ -105,7 +109,9 @@ export function EditImportantDateSheet({
   onSave,
   onDelete,
 }: EditImportantDateSheetProps) {
-  const t = useMobileTranslations();
+  const tContactImportantDates = useContactImportantDatesTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const { i18n } = useTranslation();
   const colors = useMobileThemeColors();
   const dateLocale = resolveDateLocale(i18n.language);
@@ -115,20 +121,20 @@ export function EditImportantDateSheet({
     setValue,
     formState: { isValid },
   } = useSheetForm({
-    open,
-    schema: importantDateSheetSchema,
     getDefaultValues: (): ImportantDateSheetInput => {
       const entry = initialEntry ?? createDraftDate();
       return {
-        type: entry.type ?? "other",
         date: resolveInitialDateIso(entry, mode),
         note: entry.note ?? "",
         notifyDaysBefore: entry.notifyDaysBefore
           ? (String(entry.notifyDaysBefore) as ImportantDateSheetInput["notifyDaysBefore"])
           : "none",
+        type: entry.type ?? "other",
       };
     },
     mode: "onChange",
+    open,
+    schema: importantDateSheetSchema,
   });
   const [isWheelOpen, setWheelOpen] = useState(false);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -169,26 +175,26 @@ export function EditImportantDateSheet({
       }).map((value) => {
         const meta = IMPORTANT_DATE_TYPE_META[value];
         return {
-          value,
           label: `${meta.emoji} ${t(`ContactImportantDates.Types.${value}`)}`,
+          value,
         };
       }),
-    [t, usedTypes],
+    [usedTypes, t],
   );
 
   const notifyOptions = useMemo(
     () =>
       (["none", "1", "3", "7"] as const).map((value) => ({
-        value,
         label:
           value === "none"
-            ? t("ContactImportantDates.NotifyNone")
+            ? tContactImportantDates("NotifyNone")
             : value === "1"
-              ? t("ContactImportantDates.NotifyDayBefore", { count: 1 })
-              : t("ContactImportantDates.NotifyDaysBefore", { count: Number(value) }),
-        leftSection: <NotifyBellIcon muted={value === "none"} color={colors.iconSecondary} />,
+              ? tContactImportantDates("NotifyDayBefore")
+              : tContactImportantDates("NotifyDaysBefore"),
+        leftSection: <NotifyBellIcon color={colors.iconSecondary} muted={value === "none"} />,
+        value,
       })),
-    [colors.iconSecondary, t],
+    [colors.iconSecondary, tContactImportantDates],
   );
 
   const canSubmit = isValid && !isSubmitting;
@@ -201,19 +207,25 @@ export function EditImportantDateSheet({
 
     onSave({
       ...(initialEntry ?? createDraftDate()),
-      type: values.type,
       date: values.date,
       note: values.note,
       notifyDaysBefore: values.notifyDaysBefore,
+      type: values.type,
     });
   });
 
   const primaryAction: ActionSheetPopupAction = {
-    label: mode === "add" ? t("ContactImportantDates.AddAction") : t("MobileApp.ContactIdentity.SaveChanges"),
-    icon: mode === "add" ? <IconCalendarPlus size={16} stroke={colors.textOnPrimary} /> : <IconCheck size={16} stroke={colors.textOnPrimary} />,
-    onPress: () => void onSubmit(),
     disabled: !canSubmit,
+    icon:
+      mode === "add" ? (
+        <IconCalendarPlus size={16} stroke={colors.textOnPrimary} />
+      ) : (
+        <IconCheck size={16} stroke={colors.textOnPrimary} />
+      ),
+    label:
+      mode === "add" ? tContactImportantDates("AddAction") : tMobileContactIdentity("SaveChanges"),
     loading: isSubmitting,
+    onPress: () => void onSubmit(),
     tone: "primary",
     variant: "filled",
   };
@@ -222,10 +234,10 @@ export function EditImportantDateSheet({
     mode === "edit" && onDelete && !isDeleteConfirmOpen
       ? [
           {
-            label: t("ContactImportantDates.DeleteAction"),
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
-            onPress: () => setDeleteConfirmOpen(true),
             disabled: isSubmitting,
+            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            label: tContactImportantDates("DeleteAction"),
+            onPress: () => setDeleteConfirmOpen(true),
             tone: "danger",
             variant: "outline",
           },
@@ -234,90 +246,90 @@ export function EditImportantDateSheet({
       : [primaryAction];
 
   const sheetTitle = isDeleteConfirmOpen
-    ? t("MobileApp.ContactIdentity.DeleteDateConfirmTitle").replace(
+    ? tMobileContactIdentity("DeleteDateConfirmTitle").replace(
         "{type}",
         t(`ContactImportantDates.Types.${type}`),
       )
     : mode === "add"
-      ? t("ContactImportantDates.AddAction")
+      ? tContactImportantDates("AddAction")
       : t(`ContactImportantDates.Types.${type}`);
 
   return (
     <>
       <ActionSheetPopup
-        open={open && !isWheelOpen}
-        title={sheetTitle}
         actions={
           isDeleteConfirmOpen
             ? [
                 {
-                  label: t("MobileApp.Common.Cancel"),
-                  onPress: () => setDeleteConfirmOpen(false),
                   disabled: isSubmitting,
+                  label: t("actions.cancel"),
+                  onPress: () => setDeleteConfirmOpen(false),
                   tone: "neutral",
                   variant: "outline",
                 },
                 {
-                  label: t("MobileApp.Common.Delete"),
-                  icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-                  onPress: () => onDelete?.(),
-                  loading: isSubmitting,
                   disabled: isSubmitting,
+                  icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
+                  label: t("actions.delete"),
+                  loading: isSubmitting,
+                  onPress: () => onDelete?.(),
                   tone: "danger",
                   variant: "filled",
                 },
               ]
             : actions
         }
-        onOpenChange={onOpenChange}
-        onClose={onCancel}
         isBusy={isSubmitting}
+        onClose={onCancel}
+        onOpenChange={onOpenChange}
+        open={open && !isWheelOpen}
+        title={sheetTitle}
       >
         {isDeleteConfirmOpen ? (
           <Text style={[styles.confirmBody, { color: colors.textSecondary }]}>
-            {t("MobileApp.ContactIdentity.DeleteDateConfirmBody").replace(
-              "{name}",
-              contactFirstName,
-            )}
+            {tMobileContactIdentity("DeleteDateConfirmBody").replace("{name}", contactFirstName)}
           </Text>
         ) : (
           <>
             <SheetSelectField
               control={control}
+              label={tContactImportantDates("TypePlaceholder")}
               name="type"
-              label={t("ContactImportantDates.TypePlaceholder")}
               options={typeOptions}
             />
 
             <Pressable
+              accessibilityLabel={dateLabel}
+              accessibilityRole="button"
+              disabled={isSubmitting}
+              onPress={() => setWheelOpen(true)}
               style={[
                 styles.dateTrigger,
-                { borderColor: colors.borderStrong, backgroundColor: colors.inputBackground },
+                { backgroundColor: colors.inputBackground, borderColor: colors.borderStrong },
               ]}
-              onPress={() => setWheelOpen(true)}
-              disabled={isSubmitting}
-              accessibilityRole="button"
-              accessibilityLabel={dateLabel}
             >
-              <Text style={[styles.dateTriggerLabel, { color: colors.textPrimary }]} numberOfLines={1}>
+              <Text
+                numberOfLines={1}
+                style={[styles.dateTriggerLabel, { color: colors.textPrimary }]}
+              >
                 {dateLabel}
               </Text>
               <IconChevronDown size={18} stroke={colors.iconSecondary} />
             </Pressable>
 
             <SheetTextField
+              accessibilityLabel={tContactImportantDates("NotePlaceholder")}
               control={control}
-              name="note"
-              accessibilityLabel={t("ContactImportantDates.NotePlaceholder")}
-              placeholder={t("ContactImportantDates.NotePlaceholder")}
-              maxLength={INPUT_MAX_LENGTHS.dateName}
               editable={!isSubmitting}
+              maxLength={INPUT_MAX_LENGTHS.dateName}
+              name="note"
+              placeholder={tContactImportantDates("NotePlaceholder")}
             />
 
             <SheetSelectField
               control={control}
+              label={tMobileContactIdentity("RemindMeLabel")}
               name="notifyDaysBefore"
-              label={t("MobileApp.ContactIdentity.RemindMeLabel")}
               options={notifyOptions}
             />
           </>
@@ -325,50 +337,48 @@ export function EditImportantDateSheet({
       </ActionSheetPopup>
 
       <ImportantDateWheelPickerSheet
-        open={isWheelOpen}
-        initialIso={dateIso}
         defaultWithoutYear={defaultWithoutYearForType(type)}
-        onOpenChange={setWheelOpen}
+        initialIso={dateIso}
         onCancel={() => setWheelOpen(false)}
-        onConfirm={(iso) =>
-          setValue("date", iso, { shouldDirty: true, shouldValidate: true })
-        }
+        onConfirm={(iso) => setValue("date", iso, { shouldDirty: true, shouldValidate: true })}
+        onOpenChange={setWheelOpen}
+        open={isWheelOpen}
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  confirmBody: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    lineHeight: 22,
+  },
   dateTrigger: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
+    alignItems: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.control,
     borderWidth: 1,
-    paddingHorizontal: 12,
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     gap: 8,
+    justifyContent: "space-between",
+    minHeight: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 12,
   },
   dateTriggerLabel: {
     flex: 1,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
   },
-  confirmBody: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    lineHeight: 22,
+  mutedBellSlash: {
+    borderRadius: 1,
+    height: 1.5,
+    position: "absolute",
+    transform: [{ rotate: "-45deg" }],
+    width: 18,
   },
   mutedBellWrap: {
-    width: 16,
-    height: 16,
     alignItems: "center",
+    height: 16,
     justifyContent: "center",
-  },
-  mutedBellSlash: {
-    position: "absolute",
-    width: 18,
-    height: 1.5,
-    borderRadius: 1,
-    transform: [{ rotate: "-45deg" }],
+    width: 16,
   },
 });

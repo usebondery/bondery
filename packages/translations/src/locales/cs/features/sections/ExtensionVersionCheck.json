@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Server odmítl požadavek, protože vaše rozšíření je zastaralé. Prosím aktualizujte.",
+  "ApiRejectedTitle": "Verze je příliš stará",
+  "UpdateButton": "Aktualizovat",
+  "UpdateRequiredDescription": "Vaše rozšíření Bondery je zastaralé a nemusí správně fungovat. Pro pokračování prosím aktualizujte.",
+  "UpdateRequiredTitle": "Vyžadována aktualizace",
+  "WebappNotificationDescription": "Vaše rozšíření Bondery Chrome potřebuje aktualizaci, aby správně fungovalo.",
+  "WebappNotificationTitle": "Dostupná aktualizace rozšíření"
+}

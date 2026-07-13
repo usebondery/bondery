@@ -1,8 +1,8 @@
 "use client";
 
+import type { ContactPreview } from "@bondery/schemas";
 import { Avatar, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCompass } from "@tabler/icons-react";
-import type { ContactPreview } from "@bondery/schemas";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
 type PersonCardIdentity = ContactPreview & {
@@ -25,37 +25,37 @@ export function PersonCard({ person, size = "md" }: PersonCardProps) {
 
   return (
     <Paper
-      withBorder
-      shadow="md"
-      radius="md"
-      p="sm"
       bg="white"
-      style={{ minWidth: 300, borderColor: "var(--mantine-color-gray-3)" }}
+      p="sm"
+      radius="md"
+      shadow="md"
+      style={{ borderColor: "var(--mantine-color-gray-3)", minWidth: 300 }}
+      withBorder
     >
-      <Group gap="sm" wrap="nowrap" align="center">
+      <Group align="center" gap="sm" wrap="nowrap">
         <Avatar
-          src={person.avatar || undefined}
-          size={size}
-          radius="xl"
           color={getAvatarColorFromName(person.firstName, person.lastName)}
           name={fullName}
+          radius="xl"
+          size={size}
+          src={person.avatar || undefined}
         />
         <Stack gap={2} style={{ minWidth: 0 }}>
-          <Text size="sm" fw={700} truncate c="dark.8">
+          <Text c="dark.8" fw={700} size="sm" truncate>
             {fullName}
           </Text>
           {person.headline ? (
-            <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+            <Group gap={4} style={{ minWidth: 0 }} wrap="nowrap">
               <IconBriefcase size={12} stroke={1.5} style={{ flexShrink: 0 }} />
-              <Text size="xs" c="gray.7" truncate>
+              <Text c="gray.7" size="xs" truncate>
                 {person.headline}
               </Text>
             </Group>
           ) : null}
           {person.location ? (
-            <Group gap={4} wrap="nowrap" style={{ minWidth: 0 }}>
+            <Group gap={4} style={{ minWidth: 0 }} wrap="nowrap">
               <IconCompass size={12} stroke={1.5} style={{ flexShrink: 0 }} />
-              <Text size="xs" c="gray.7" truncate>
+              <Text c="gray.7" size="xs" truncate>
                 {person.location}
               </Text>
             </Group>

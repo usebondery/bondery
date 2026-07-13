@@ -1,6 +1,6 @@
-import { createTamagui } from "@tamagui/core";
 import { createAnimations } from "@tamagui/animations-reanimated";
 import { defaultConfig } from "@tamagui/config/v4";
+import { createTamagui } from "@tamagui/core";
 import { UI_TIMING_MS } from "../lib/config";
 import {
   PRIMARY_BUTTON_BACKGROUND,
@@ -10,24 +10,24 @@ import {
 } from "./colors";
 
 const animations = createAnimations({
-  /** Fast spring — press/release, popovers, opacity feedback */
-  quick: {
-    type: "spring",
-    damping: 20,
-    mass: 1.2,
-    stiffness: 250,
-  },
   /** Softer spring — larger enter/exit motion */
   medium: {
-    type: "spring",
     damping: 10,
     mass: 0.9,
     stiffness: 100,
+    type: "spring",
+  },
+  /** Fast spring — press/release, popovers, opacity feedback */
+  quick: {
+    damping: 20,
+    mass: 1.2,
+    stiffness: 250,
+    type: "spring",
   },
   /** Fixed duration — input-adjacent timing, subtle fades */
   timing200: {
-    type: "timing",
     duration: UI_TIMING_MS.inputFocusTransition,
+    type: "timing",
   },
 });
 
@@ -52,8 +52,8 @@ const tamaguiConfig = createTamagui({
   animations,
   themes: {
     ...defaultConfig.themes,
-    light: lightTheme,
     dark: darkTheme,
+    light: lightTheme,
   },
 });
 

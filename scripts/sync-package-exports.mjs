@@ -6,7 +6,7 @@
  * Run after adding new public subpaths: npm run sync-exports
  */
 import { readdir, readFile, stat, writeFile } from "node:fs/promises";
-import { dirname, join, posix, relative } from "node:path";
+import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
@@ -25,28 +25,31 @@ const HASH_IMPORTS = {
 };
 
 const COMPILED_ENTRY = (srcPath, distPath) => ({
-  types: srcPath,
+  default: distPath,
   import: distPath,
   node: distPath,
-  default: distPath,
+  types: srcPath,
 });
 
 const PACKAGE_CONFIGS = {
+  "packages/branding/package.json": { srcDir: "src" },
+  "packages/emails/package.json": { srcDir: "src" },
+  "packages/helpers/package.json": { srcDir: "src" },
+  "packages/mantine-next/package.json": { srcDir: "src" },
   "packages/schemas/package.json": {
-    srcDir: "src",
     extraExports: {
       "./database": {
-        types: "./src/supabase.types.ts",
         default: "./dist/supabase.types.js",
+        types: "./src/supabase.types.ts",
+      },
+      "./locale/supported-locales.json": {
+        default: "./dist/locale/supported-locales.json",
       },
     },
+    srcDir: "src",
   },
-  "packages/helpers/package.json": { srcDir: "src" },
+  "packages/translations/package.json": { jsonWildcard: true, srcDir: "src" },
   "packages/vcard/package.json": { srcDir: "src" },
-  "packages/emails/package.json": { srcDir: "src" },
-  "packages/branding/package.json": { srcDir: "src" },
-  "packages/mantine-next/package.json": { srcDir: "src" },
-  "packages/translations/package.json": { srcDir: "src", jsonWildcard: true },
 };
 
 async function collectModuleSubpaths(srcDir) {
@@ -62,8 +65,12 @@ async function collectModuleSubpaths(srcDir) {
         await walk(full, rel);
         continue;
       }
-      if (!/\.tsx?$/.test(entry.name)) continue;
-      if (entry.name === "index.ts" || entry.name === "index.tsx") continue;
+      if (!/\.tsx?$/.test(entry.name)) {
+        continue;
+      }
+      if (entry.name === "index.ts" || entry.name === "index.tsx") {
+        continue;
+      }
       const subpath = `./${rel.replace(/\\/g, "/").replace(/\.tsx?$/, "")}`;
       modules.add(subpath);
     }
@@ -80,7 +87,9 @@ async function collectBarrelSubpaths(srcDir) {
   async function walk(dir, prefix = "") {
     const entries = await readdir(dir, { withFileTypes: true });
     for (const entry of entries) {
-      if (!entry.isDirectory()) continue;
+      if (!entry.isDirectory()) {
+        continue;
+      }
       const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
       const full = join(dir, entry.name);
       const children = await readdir(full);
@@ -104,7 +113,7 @@ function tsToDist(srcPath) {
 
 async function buildExports(pkgRel, config) {
   const pkgDir = dirname(join(root, pkgRel));
-  const srcRoot = join(pkgDir, config.srcDir);
+  const _srcRoot = join(pkgDir, config.srcDir);
   const exports = {
     ".": COMPILED_ENTRY("./src/index.ts", "./dist/index.js"),
     "./*": COMPILED_ENTRY("./src/*.ts", "./dist/*.js"),
@@ -113,8 +122,8 @@ async function buildExports(pkgRel, config) {
   const srcDirRel = pkgRel.replace(/package\.json$/, config.srcDir);
   const barrels = await collectBarrelSubpaths(srcDirRel);
   for (const subpath of barrels) {
-    const indexTs = `${subpath}/index.ts`;
-    const indexTsx = `${subpath}/index.tsx`;
+    const _indexTs = `${subpath}/index.ts`;
+    const _indexTsx = `${subpath}/index.tsx`;
     let srcPath = `./src${subpath.slice(1)}/index.ts`;
     try {
       await stat(join(pkgDir, "src", subpath.slice(2), "index.tsx"));
@@ -140,7 +149,9 @@ async function buildExports(pkgRel, config) {
 
   if (config.extraExports) {
     for (const [subpath, paths] of Object.entries(config.extraExports)) {
-      exports[subpath] = COMPILED_ENTRY(paths.types, paths.default);
+      exports[subpath] = paths.types
+        ? COMPILED_ENTRY(paths.types, paths.default)
+        : { default: paths.default };
     }
   }
 
@@ -150,16 +161,16 @@ async function buildExports(pkgRel, config) {
 
   if (pkgRel === "packages/branding/package.json") {
     exports["./icon-generator"] = {
-      types: "./scripts/icon-generator.d.ts",
       default: "./scripts/generate-icons.ts",
+      types: "./scripts/icon-generator.d.ts",
     };
   }
 
   if (pkgRel === "packages/mantine-next/package.json") {
     exports["./styles"] = {
-      types: "./src/styles.d.ts",
-      style: "./src/styles.css",
       default: "./src/styles.css",
+      style: "./src/styles.css",
+      types: "./src/styles.d.ts",
     };
   }
 

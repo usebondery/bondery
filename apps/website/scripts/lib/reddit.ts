@@ -7,8 +7,8 @@ const DEFAULT_SUBREDDIT = "bondery";
 export interface RedditConfig {
   clientId: string;
   clientSecret: string;
-  username: string;
   password: string;
+  username: string;
 }
 
 /**
@@ -19,17 +19,17 @@ async function getAccessToken(config: RedditConfig, userAgent: string): Promise<
   const credentials = Buffer.from(`${config.clientId}:${config.clientSecret}`).toString("base64");
 
   const response = await fetch(REDDIT_TOKEN_URL, {
-    method: "POST",
+    body: new URLSearchParams({
+      grant_type: "password",
+      password: config.password,
+      username: config.username,
+    }),
     headers: {
       Authorization: `Basic ${credentials}`,
       "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent": userAgent,
     },
-    body: new URLSearchParams({
-      grant_type: "password",
-      username: config.username,
-      password: config.password,
-    }),
+    method: "POST",
   });
 
   if (response.status === 401 || response.status === 403) {
@@ -80,12 +80,12 @@ export async function postRedditAnnouncement(
     console.log(
       JSON.stringify(
         {
+          flair_id: flairId,
+          flair_text: post.announce?.redditFlair,
+          kind: "link",
           subreddit,
           title,
           url: postUrl,
-          kind: "link",
-          flair_id: flairId,
-          flair_text: post.announce?.redditFlair,
         },
         null,
         2,
@@ -98,12 +98,12 @@ export async function postRedditAnnouncement(
 
   const body = new URLSearchParams({
     kind: "link",
+    nsfw: "false",
+    resubmit: "false",
+    spoiler: "false",
     sr: subreddit,
     title,
     url: postUrl,
-    resubmit: "false",
-    nsfw: "false",
-    spoiler: "false",
   });
 
   if (flairId) {
@@ -114,13 +114,13 @@ export async function postRedditAnnouncement(
   }
 
   const response = await fetch(REDDIT_SUBMIT_URL, {
-    method: "POST",
+    body,
     headers: {
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/x-www-form-urlencoded",
       "User-Agent": userAgent,
     },
-    body,
+    method: "POST",
   });
 
   if (response.status === 429) {

@@ -1,18 +1,25 @@
 "use client";
 
+import { Input, Popover, Text } from "@mantine/core";
 import { useState } from "react";
-import { Popover, Button, Text, Stack } from "@mantine/core";
 import { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownContent.js";
 
 interface EmojiPickerProps {
-  value: string;
-  onChange: (emoji: string) => void;
+  disabled?: boolean;
   error?: string;
+  onChange: (emoji: string) => void;
   /** Debounce delay in ms for the emoji search input. Defaults to 200 (local filter). */
   searchDebounceMs?: number;
+  value: string;
 }
 
-export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiPickerProps) {
+export function EmojiPicker({
+  value,
+  onChange,
+  error,
+  searchDebounceMs,
+  disabled = false,
+}: EmojiPickerProps) {
   const [opened, setOpened] = useState(false);
 
   const handleSelect = (emoji: string) => {
@@ -21,40 +28,69 @@ export function EmojiPicker({ value, onChange, error, searchDebounceMs }: EmojiP
   };
 
   return (
-    <Stack gap={4}>
-      <Text size="sm" fw={500}>
-        Emoji <span style={{ color: "var(--mantine-color-red-6)" }}>*</span>
-      </Text>
-      <Popover opened={opened} onChange={setOpened} position="bottom-start" width={320} shadow="md">
+    <Input.Wrapper
+      error={error}
+      label="Emoji"
+      required
+      styles={{
+        label: disabled ? { color: "var(--mantine-color-disabled-color)" } : undefined,
+      }}
+      withAsterisk
+    >
+      <Popover
+        onChange={(nextOpened) => {
+          if (!disabled) {
+            setOpened(nextOpened);
+          }
+        }}
+        opened={disabled ? false : opened}
+        position="bottom-start"
+        shadow="md"
+        width={320}
+      >
         <Popover.Target>
-          <Button
-            className={`emoji-picker-trigger button-scale-effect ${opened ? "button-scale-effect-active" : ""}`}
-            onClick={() => setOpened((o) => !o)}
-            variant="light"
+          <Input
+            classNames={{
+              input: `emoji-picker-trigger button-scale-effect ${opened && !disabled ? "button-scale-effect-active" : ""}`,
+            }}
+            component="button"
+            disabled={disabled}
+            onClick={() => {
+              if (!disabled) {
+                setOpened((current) => !current);
+              }
+            }}
+            pointer={!disabled}
+            styles={{
+              input: {
+                alignItems: "center",
+                display: "flex",
+                justifyContent: "center",
+                textAlign: "center",
+              },
+            }}
+            type="button"
           >
             {value ? (
-              <Text size="xl">{value}</Text>
+              <Text inherit lh={1} size="xl">
+                {value}
+              </Text>
             ) : (
-              <Text size="sm" c="dimmed">
+              <Text c="dimmed" inherit lh={1} size="sm">
                 Select emoji
               </Text>
             )}
-          </Button>
+          </Input>
         </Popover.Target>
 
         <Popover.Dropdown>
           <EmojiPickerDropdownContent
-            value={value}
             onSelect={handleSelect}
             searchDebounceMs={searchDebounceMs}
+            value={value}
           />
         </Popover.Dropdown>
       </Popover>
-      {error && (
-        <Text size="xs" c="red">
-          {error}
-        </Text>
-      )}
-    </Stack>
+    </Input.Wrapper>
   );
 }

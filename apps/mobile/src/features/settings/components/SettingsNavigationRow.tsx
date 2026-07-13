@@ -1,21 +1,21 @@
+import { IconChevronRight, IconExternalLink } from "@tabler/icons-react-native";
 import type { ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { IconChevronRight, IconExternalLink } from "@tabler/icons-react-native";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 type RowDestination = "internal" | "external";
 
 interface SettingsNavigationRowProps {
+  destination?: RowDestination;
+  disabled?: boolean;
+  externalLabel?: string;
   icon: ReactNode;
   label: string;
-  destination?: RowDestination;
-  externalLabel?: string;
+  labelColor?: string;
+  onPress: () => void;
   showDivider?: boolean;
   showTrailing?: boolean;
-  labelColor?: string;
-  disabled?: boolean;
-  onPress: () => void;
 }
 
 export function SettingsNavigationRow({
@@ -34,8 +34,12 @@ export function SettingsNavigationRow({
 
   return (
     <Pressable
-      onPress={onPress}
+      accessibilityLabel={
+        destination === "external" && externalLabel ? `${label}. ${externalLabel}` : label
+      }
+      accessibilityRole="button"
       disabled={disabled}
+      onPress={onPress}
       style={({ pressed }) => [
         styles.row,
         {
@@ -45,8 +49,6 @@ export function SettingsNavigationRow({
         showDivider && styles.rowDivider,
         showDivider && { borderBottomColor: colors.border },
       ]}
-      accessibilityRole="button"
-      accessibilityLabel={destination === "external" && externalLabel ? `${label}. ${externalLabel}` : label}
     >
       <View style={styles.iconWrap}>{icon}</View>
 
@@ -66,29 +68,29 @@ export function SettingsNavigationRow({
 }
 
 const styles = StyleSheet.create({
-  row: {
-    minHeight: 52,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 14,
-    gap: 10,
-  },
-  rowDivider: {
-    borderBottomWidth: 1,
-  },
   iconWrap: {
-    width: 24,
     alignItems: "center",
     justifyContent: "center",
+    width: 24,
   },
   label: {
     flex: 1,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
   },
+  row: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    minHeight: 52,
+    paddingHorizontal: 14,
+  },
+  rowDivider: {
+    borderBottomWidth: 1,
+  },
   trailingWrap: {
-    width: 22,
     alignItems: "center",
     justifyContent: "center",
+    width: 22,
   },
 });

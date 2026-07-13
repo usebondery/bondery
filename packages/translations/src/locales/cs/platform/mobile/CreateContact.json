@@ -1,0 +1,12 @@
+{
+  "Create": "Přidat do Bondery",
+  "ErrorDescription": "Při vytváření osoby došlo k chybě.",
+  "ErrorTitle": "Osobu se nepodařilo vytvořit",
+  "FullNameLabel": "Celé jméno",
+  "FullNamePlaceholder": "např. Jana Nováková",
+  "InvalidName": "Zadejte prosím platné jméno",
+  "NameRequired": "Zadejte prosím jméno",
+  "SuccessDescription": "Nová osoba byla přidána mezi kontakty.",
+  "SuccessTitle": "Osoba vytvořena",
+  "Title": "Vytvořit osobu"
+}

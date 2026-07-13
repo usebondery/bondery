@@ -1,14 +1,17 @@
-import { StyleSheet, View } from "react-native";
 import { IconCamera, IconTrash } from "@tabler/icons-react-native";
+import { StyleSheet, View } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { MobileIconButton } from "../../../components/MobileIconButton";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface AvatarPhotoOverlayControlsProps {
-  showRemove: boolean;
   disabled?: boolean;
   onChangePhoto: () => void;
   onRemovePhoto: () => void;
+  showRemove: boolean;
 }
 
 export function AvatarPhotoOverlayControls({
@@ -17,27 +20,28 @@ export function AvatarPhotoOverlayControls({
   onChangePhoto,
   onRemovePhoto,
 }: AvatarPhotoOverlayControlsProps) {
-  const t = useMobileTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
   return (
     <>
       <View style={avatarPhotoOverlayStyles.topLeft}>
         <MobileIconButton
-          icon={<IconCamera size={16} stroke={colors.iconPrimary} />}
-          accessibilityLabel={t("MobileApp.ContactIdentity.ChangePhoto")}
-          onPress={onChangePhoto}
+          accessibilityLabel={tMobileContactIdentity("ChangePhoto")}
           disabled={disabled}
+          icon={<IconCamera size={16} stroke={colors.iconPrimary} />}
+          onPress={onChangePhoto}
         />
       </View>
 
       {showRemove ? (
         <View style={avatarPhotoOverlayStyles.topRight}>
           <MobileIconButton
-            icon={<IconTrash size={16} stroke={colors.dangerAccent} />}
-            accessibilityLabel={t("MobileApp.ContactIdentity.RemovePhoto")}
-            onPress={onRemovePhoto}
+            accessibilityLabel={tMobileContactIdentity("RemovePhoto")}
             disabled={disabled}
+            icon={<IconTrash size={16} stroke={colors.dangerAccent} />}
+            onPress={onRemovePhoto}
             tone="danger"
           />
         </View>
@@ -50,22 +54,22 @@ const OVERLAY_OFFSET = -4;
 
 export const avatarPhotoOverlayStyles = StyleSheet.create({
   avatarFrame: {
+    alignItems: "center",
+    height: 96,
+    justifyContent: "center",
     position: "relative",
     width: 96,
-    height: 96,
-    alignItems: "center",
-    justifyContent: "center",
   },
   topLeft: {
+    left: OVERLAY_OFFSET,
     position: "absolute",
     top: OVERLAY_OFFSET,
-    left: OVERLAY_OFFSET,
     zIndex: 2,
   },
   topRight: {
     position: "absolute",
-    top: OVERLAY_OFFSET,
     right: OVERLAY_OFFSET,
+    top: OVERLAY_OFFSET,
     zIndex: 2,
   },
 });

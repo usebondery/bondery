@@ -1,29 +1,43 @@
 "use client";
 
-import { Text, Stack, Combobox, useCombobox, Input, ScrollArea, Group } from "@mantine/core";
+import {
+  APP_LANGUAGES_DATA,
+  type AppLanguageData,
+  formatLanguageDisplayLabel,
+  getAppLanguageExonymKey,
+  type LanguageData,
+} from "@bondery/helpers/locale";
+import { DEFAULT_LOCALE } from "@bondery/translations";
+import { Combobox, Group, Input, ScrollArea, Stack, Text, useCombobox } from "@mantine/core";
 import { IconLanguage } from "@tabler/icons-react";
-import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { APP_LANGUAGES_DATA, WORLD_LANGUAGES_DATA, formatLanguageDisplayLabel, type LanguageData } from "@bondery/helpers/locale";
+import { useEffect, useState } from "react";
+import { useLanguagesTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+
+type PickerLanguage = AppLanguageData | LanguageData;
+
+function isWorldLanguage(language: PickerLanguage): language is LanguageData {
+  return "label" in language;
+}
 
 interface LanguagePickerProps {
-  value?: string;
-  initialValue?: string;
-  onChange?: (value: string) => void;
-  onBlur?: (value: string) => void;
-  label?: ReactNode;
   description?: ReactNode;
-  placeholder?: string;
-  languages?: LanguageData[];
-  getLocalizedLabel?: (language: LanguageData) => string;
-  loading?: boolean;
   disabled?: boolean;
+  /** Override exonym resolution; app locales default to the `Languages` namespace. */
+  getLocalizedLabel?: (language: PickerLanguage) => string;
+  initialValue?: string;
+  label?: ReactNode;
+  languages?: PickerLanguage[];
+  loading?: boolean;
+  onBlur?: (value: string) => void;
+  onChange?: (value: string) => void;
+  placeholder?: string;
+  value?: string;
 }
 
 export function LanguagePicker({
   value,
-  initialValue = "en",
+  initialValue = DEFAULT_LOCALE,
   onChange,
   onBlur,
   label,
@@ -37,9 +51,9 @@ export function LanguagePicker({
   const currentValue = value ?? initialValue;
   const [language, setLanguage] = useState(currentValue);
   const [searchValue, setSearchValue] = useState("");
-  const t = useTranslations("SettingsPage.Profile");
+  const t = useSettingsPageTranslations("Profile");
+  const tLanguages = useLanguagesTranslations();
 
-  // Update language when value or initialValue changes
   useEffect(() => {
     setLanguage(currentValue);
   }, [currentValue]);
@@ -48,7 +62,6 @@ export function LanguagePicker({
     onDropdownClose: () => {
       combobox.resetSelectedOption();
       setSearchValue("");
-      // Don't call onBlur here as it will be called with the old value
     },
     onDropdownOpen: () => {
       combobox.focusSearchInput();
@@ -57,12 +70,13 @@ export function LanguagePicker({
   });
 
   const handleChange = (val: string | null) => {
-    if (!val) return;
+    if (!val) {
+      return;
+    }
 
     setLanguage(val);
     onChange?.(val);
     combobox.closeDropdown();
-    // Call onBlur with the new value after a short delay to ensure the change is processed
     setTimeout(() => {
       onBlur?.(val);
     }, 100);
@@ -70,32 +84,37 @@ export function LanguagePicker({
 
   const selectedLanguage = languages.find((lang) => lang.value === language);
 
-  const getExonym = (lang: LanguageData) => getLocalizedLabel?.(lang) ?? lang.label;
+  const getExonym = (lang: PickerLanguage): string => {
+    if (getLocalizedLabel) {
+      return getLocalizedLabel(lang);
+    }
+    if (isWorldLanguage(lang)) {
+      return lang.label;
+    }
+    return tLanguages(getAppLanguageExonymKey(lang.value) as never);
+  };
 
-  const getDisplayLabel = (lang: LanguageData) =>
+  const getDisplayLabel = (lang: PickerLanguage) =>
     formatLanguageDisplayLabel(getExonym(lang), lang.nativeName);
 
   return (
     <Stack gap={4}>
       {label && (
-        <Text size="sm" fw={500}>
+        <Text fw={500} size="sm">
           {label}
         </Text>
       )}
       {description && (
-        <Text size="xs" c="dimmed">
+        <Text c="dimmed" size="xs">
           {description}
         </Text>
       )}
-      <Combobox store={combobox} onOptionSubmit={handleChange}>
+      <Combobox onOptionSubmit={handleChange} store={combobox}>
         <Combobox.Target>
           <Input
             component="button"
-            type="button"
-            pointer
             disabled={disabled || loading}
             leftSection={<IconLanguage size={16} />}
-            rightSection={<Combobox.Chevron />}
             onClick={() => {
               if (disabled || loading) {
                 return;
@@ -103,6 +122,8 @@ export function LanguagePicker({
 
               combobox.toggleDropdown();
             }}
+            pointer
+            rightSection={<Combobox.Chevron />}
             rightSectionPointerEvents="none"
             styles={{
               input: {
@@ -111,11 +132,12 @@ export function LanguagePicker({
                   : undefined,
               },
             }}
+            type="button"
           >
             {selectedLanguage ? (
               <Group gap="xs" wrap="nowrap">
                 <span className={`fi fi-${selectedLanguage.flag}`} style={{ flexShrink: 0 }} />
-                <Text size="sm" fw={400}>
+                <Text fw={400} size="sm">
                   {getDisplayLabel(selectedLanguage)}
                 </Text>
               </Group>
@@ -133,10 +155,10 @@ export function LanguagePicker({
           }}
         >
           <Combobox.Search
-            value={searchValue}
             className="transform-none"
             onChange={(event) => setSearchValue(event.currentTarget.value)}
             placeholder={placeholder || t("LanguageSearch")}
+            value={searchValue}
           />
           <Combobox.Options>
             <ScrollArea.Autosize className="max-h-60">
@@ -147,15 +169,14 @@ export function LanguagePicker({
 
                   return (
                     exonym.includes(query) ||
-                    lang.label.toLowerCase().includes(query) ||
-                    lang.nativeName.toLowerCase().includes(query)
+                    lang.nativeName.toLowerCase().includes(query) ||
+                    (isWorldLanguage(lang) && lang.label.toLowerCase().includes(query))
                   );
                 })
                 .map((lang) => {
                   const isSelected = lang.value === language;
                   return (
                     <Combobox.Option
-                      value={lang.value}
                       key={lang.value}
                       style={{
                         backgroundColor: isSelected
@@ -163,13 +184,14 @@ export function LanguagePicker({
                           : undefined,
                         color: isSelected ? "white" : undefined,
                       }}
+                      value={lang.value}
                     >
                       <Group gap="xs" wrap="nowrap">
                         <span
                           className={`fi fi-${lang.flag}`}
-                          style={{ width: 20, flexShrink: 0 }}
+                          style={{ flexShrink: 0, width: 20 }}
                         />
-                        <Text component="span" size="sm" fw={400}>
+                        <Text component="span" fw={400} size="sm">
                           {getDisplayLabel(lang)}
                         </Text>
                       </Group>

@@ -1,39 +1,40 @@
 "use client";
 
 import { useMemo } from "react";
-import { useWebTranslations as useTranslations } from "./useWebTranslations";
-import type { ContactInfoLabels } from "@/app/(app)/app/person/[person_id]/components/ContactInfoSection";
+import type { ContactInfoLabels } from "@/lib/contacts/contact-info-labels";
+import { useContactInfoTranslations, useValidationTranslations } from "@/lib/i18n/generated/hooks";
 
 export function useContactInfoLabels(): ContactInfoLabels {
-  const t = useTranslations("ContactInfo");
+  const t = useContactInfoTranslations();
+  const tVal = useValidationTranslations("email");
 
   return useMemo(
     () => ({
-      title: t("Title"),
-      typeHome: t("TypeHome"),
-      typeWork: t("TypeWork"),
-      phoneNumbers: t("PhoneNumbers"),
-      phonePlaceholder: t("PhonePlaceholder"),
-      typeLabel: t("TypeLabel"),
+      addEmail: t("AddEmail"),
+      addPhone: t("AddPhone"),
       callAction: t("CallAction"),
-      sendSmsAction: t("SendSmsAction"),
       copyAction: t("CopyAction"),
       copySuccessTitle: t("CopySuccessTitle"),
-      phoneCopiedMessage: t("PhoneCopiedMessage"),
-      emailCopiedMessage: t("EmailCopiedMessage"),
-      invalidEmailTitle: t("InvalidEmailTitle"),
-      invalidEmailMessage: t("InvalidEmailMessage"),
-      setAsPreferred: t("SetAsPreferred"),
       deleteAction: t("DeleteAction"),
-      addPhone: t("AddPhone"),
-      emailAddresses: t("EmailAddresses"),
-      emailPlaceholder: t("EmailPlaceholder"),
-      sendEmailAction: t("SendEmailAction"),
-      addEmail: t("AddEmail"),
-      phonePrefixAriaLabel: t("PhonePrefixAccessibilityLabel"),
-      phoneActionsAriaLabel: t("PhoneActionsAriaLabel"),
       emailActionsAriaLabel: t("EmailActionsAriaLabel"),
+      emailAddresses: t("EmailAddresses"),
+      emailCopiedMessage: t("EmailCopiedMessage"),
+      emailPlaceholder: t("EmailPlaceholder"),
+      invalidEmailMessage: tVal("invalid"),
+      invalidEmailTitle: tVal("invalidTitle"),
+      phoneActionsAriaLabel: t("PhoneActionsAriaLabel"),
+      phoneCopiedMessage: t("PhoneCopiedMessage"),
+      phoneNumbers: t("PhoneNumbers"),
+      phonePlaceholder: t("PhonePlaceholder"),
+      phonePrefixAriaLabel: t("PhonePrefixAccessibilityLabel"),
+      sendEmailAction: t("SendEmailAction"),
+      sendSmsAction: t("SendSmsAction"),
+      setAsPreferred: t("SetAsPreferred"),
+      title: t("Title"),
+      typeHome: t("TypeHome"),
+      typeLabel: t("TypeLabel"),
+      typeWork: t("TypeWork"),
     }),
-    [t],
+    [t, tVal],
   );
 }

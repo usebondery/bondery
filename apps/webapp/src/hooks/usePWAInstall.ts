@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -12,18 +12,18 @@ const PWA_INSTALLED_KEY = "bondery_pwa_installed";
 interface UsePWAInstallResult {
   /** True only on desktop Chromium when browser has queued an install prompt */
   canInstall: boolean;
+  /** Triggers the native browser install prompt */
+  install: () => Promise<void>;
   /** True when running in a Chromium-based desktop browser (Chrome, Edge, Brave, Opera, etc.) */
   isChromiumDesktop: boolean;
-  /** True when the app is running as an installed PWA (standalone display mode) */
-  isPWAInstalled: boolean;
   /**
    * True when the PWA was previously installed but the user is currently on the
    * regular browser tab (not in standalone mode). Detected via localStorage flag
    * that is persisted when the `appinstalled` event fires or when running standalone.
    */
   isInstalledFromBrowser: boolean;
-  /** Triggers the native browser install prompt */
-  install: () => Promise<void>;
+  /** True when the app is running as an installed PWA (standalone display mode) */
+  isPWAInstalled: boolean;
 }
 
 /**
@@ -91,12 +91,14 @@ export function usePWAInstall(): UsePWAInstallResult {
   }, []);
 
   const install = async () => {
-    if (!deferredPrompt.current) return;
+    if (!deferredPrompt.current) {
+      return;
+    }
     await deferredPrompt.current.prompt();
     await deferredPrompt.current.userChoice;
     deferredPrompt.current = null;
     setCanInstall(false);
   };
 
-  return { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install };
+  return { canInstall, install, isChromiumDesktop, isInstalledFromBrowser, isPWAInstalled };
 }

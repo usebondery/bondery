@@ -1,18 +1,15 @@
 "use client";
 
-import { Box, Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
 import { PersonChip } from "@bondery/mantine-next";
+import { Box, Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
 import {
   IconBrandLinkedin,
   IconPlayerPause,
-  IconPlayerPlay,
   IconPlayerPlayFilled,
   IconTrash,
 } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { useBatchEnrichFromLinkedIn } from "@/lib/extension/useBatchEnrichFromLinkedIn";
-import { getQueryClient } from "@/lib/query/client";
-import { invalidateAfterEnrichBatch } from "@/lib/query/invalidation";
+import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
+import { useEnrichRecommendationCardTranslations } from "@/lib/i18n/generated/hooks";
 
 interface EnrichRecommendationCardProps {
   eligibleCount: number;
@@ -30,7 +27,7 @@ export function EnrichRecommendationCard({
   eligibleCount,
   queueStatus,
 }: EnrichRecommendationCardProps) {
-  const t = useTranslations("EnrichRecommendationCard");
+  const t = useEnrichRecommendationCardTranslations();
   const {
     start,
     resume,
@@ -64,58 +61,57 @@ export function EnrichRecommendationCard({
 
   const handleDiscard = async () => {
     await discard();
-    await invalidateAfterEnrichBatch(getQueryClient());
   };
 
   return (
     <Paper
-      withBorder
-      radius="md"
       p="md"
+      radius="md"
       style={{ borderLeft: "2px solid var(--mantine-color-blue-6)" }}
+      withBorder
     >
       <Stack gap="sm">
-        <Group justify="space-between" align="center" wrap="nowrap">
+        <Group align="center" justify="space-between" wrap="nowrap">
           <Group align="center" wrap="nowrap">
-            <Tooltip label={t("Tooltip")} multiline maw={280} withArrow>
-              <Group gap={4} align="center" wrap="nowrap" style={{ cursor: "default" }}>
-                <IconBrandLinkedin size={14} color="var(--mantine-color-blue-6)" />
-                <Text size="sm" fw={600} c="blue.6">
+            <Tooltip label={t("Tooltip")} maw={280} multiline withArrow>
+              <Group align="center" gap={4} style={{ cursor: "default" }} wrap="nowrap">
+                <IconBrandLinkedin color="var(--mantine-color-blue-6)" size={14} />
+                <Text c="blue.6" fw={600} size="sm">
                   {t("Badge")}
                 </Text>
               </Group>
             </Tooltip>
-            <Text size="sm" fw={500}>
+            <Text fw={500} size="sm">
               {isRunning
                 ? failed > 0
                   ? t("ProgressLabelWithFailed", { completed, failed, totalEligible })
                   : t("ProgressLabel", { completed, totalEligible })
-                : hasInterruptedRun
+                : hasInterruptedRun && effectiveQueueStatus
                   ? t("ResumeLabel", {
-                      completed: effectiveQueueStatus!.completed,
-                      pending: effectiveQueueStatus!.pending,
+                      completed: effectiveQueueStatus.completed,
+                      pending: effectiveQueueStatus.pending,
                     })
                   : t("EligibleLabel", { count: eligibleCount })}
             </Text>
           </Group>
 
           {isRunning && currentPerson && (
-            <Group gap="xs" align="center" wrap="nowrap">
-              <Text size="xs" c="dimmed" style={{ whiteSpace: "nowrap" }}>
+            <Group align="center" gap="xs" wrap="nowrap">
+              <Text c="dimmed" size="xs" style={{ whiteSpace: "nowrap" }}>
                 {t("CurrentlyEnriching")}
               </Text>
-              <PersonChip person={currentPerson} size="sm" isClickable openInNewTab />
+              <PersonChip isClickable openInNewTab person={currentPerson} size="sm" />
             </Group>
           )}
 
           {isRunning ? (
-            <Tooltip label={t("PausingTooltip")} withArrow disabled={!isPausing}>
+            <Tooltip disabled={!isPausing} label={t("PausingTooltip")} withArrow>
               <Box component="span" display="inline-block">
                 <Button
-                  variant="default"
+                  disabled={isPausing}
                   leftSection={<IconPlayerPause size={16} />}
                   onClick={pause}
-                  disabled={isPausing}
+                  variant="default"
                 >
                   {t("Pause")}
                 </Button>
@@ -124,9 +120,9 @@ export function EnrichRecommendationCard({
           ) : hasInterruptedRun ? (
             <Group gap="xs" wrap="nowrap">
               <Button
-                variant="default"
                 leftSection={<IconTrash size={16} />}
                 onClick={handleDiscard}
+                variant="default"
               >
                 {t("SkipRemaining")}
               </Button>
@@ -142,10 +138,9 @@ export function EnrichRecommendationCard({
             <Button
               color="blue"
               leftSection={
-                isLoading ? <Loader size={14} color="white" /> : <IconBrandLinkedin size={16} />
+                isLoading ? <Loader color="white" size={14} /> : <IconBrandLinkedin size={16} />
               }
               onClick={start}
-              disabled={isLoading}
             >
               {t("EnrichAll")}
             </Button>
@@ -153,7 +148,7 @@ export function EnrichRecommendationCard({
         </Group>
 
         {isRunning && totalEligible > 0 && (
-          <Progress value={((completed + failed) / totalEligible) * 100} size="md" color="blue" />
+          <Progress color="blue" size="md" value={((completed + failed) / totalEligible) * 100} />
         )}
       </Stack>
     </Paper>

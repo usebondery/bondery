@@ -1,10 +1,10 @@
 import {
   buildSyncWsUrl,
   parseSyncWsServerMessage,
-  syncWsTicketResponseSchema,
   type SyncWsBatchMessage,
+  syncWsTicketResponseSchema,
 } from "@bondery/schemas/sync";
-import { API_URL } from "@/lib/config";
+import { API_URL } from "@/lib/platform/config";
 
 const MIN_RECONNECT_MS = 1_000;
 const MAX_RECONNECT_MS = 30_000;
@@ -33,7 +33,7 @@ async function fetchWsTicket(): Promise<string> {
 }
 
 function sendPong(socket: WebSocket): void {
-  socket.send(JSON.stringify({ v: 1, type: "pong" }));
+  socket.send(JSON.stringify({ type: "pong", v: 1 }));
 }
 
 export function startSyncWakeWebClient(onBatch: SyncWakeBatchHandler): SyncWakeWebClient {
@@ -45,7 +45,9 @@ export function startSyncWakeWebClient(onBatch: SyncWakeBatchHandler): SyncWakeW
   let reconnectDelay = MIN_RECONNECT_MS;
 
   const connect = async () => {
-    if (stopped) return;
+    if (stopped) {
+      return;
+    }
 
     try {
       const ticket = await fetchWsTicket();
@@ -90,7 +92,9 @@ export function startSyncWakeWebClient(onBatch: SyncWakeBatchHandler): SyncWakeW
   };
 
   const scheduleReconnect = () => {
-    if (reconnectTimer || stopped) return;
+    if (reconnectTimer || stopped) {
+      return;
+    }
     const jitter = Math.floor(Math.random() * 250);
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;

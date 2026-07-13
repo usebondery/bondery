@@ -1,0 +1,49 @@
+{
+  "AddContactModal": {
+    "AddToBondery": "Přidat do Bondery",
+    "Cancel": "Zrušit",
+    "CreateFailed": "Nepodařilo se vytvořit kontakt. Zkuste to prosím znovu.",
+    "ErrorTitle": "Chyba",
+    "FullNameInput": "Celé jméno",
+    "InvalidName": "Přidejte prosím platné jméno",
+    "LinkedInInput": "LinkedIn",
+    "LinkedInPlaceholder": "linkedin.com/in/uzivatelske-jmeno nebo jen uzivatelske-jmeno",
+    "LoadingDescription": "Počkejte prosím, než vytvoříme nový kontakt",
+    "LoadingTitle": "Vytváření kontaktu...",
+    "NameRequired": "Přidejte prosím jméno",
+    "NameTooLong": "Jméno musí mít nejvýše {max} znaků",
+    "SuccessDescription": "Kontakt byl úspěšně vytvořen",
+    "SuccessTitle": "Úspěch",
+    "Title": "Přidat osobu"
+  },
+  "AddPerson": "Přidat osobu",
+  "DeleteContact": {
+    "ErrorDescription": "Nepodařilo se smazat kontakt. Zkuste to prosím znovu.",
+    "LoadingDescription": "Počkejte prosím, než smažeme tento kontakt",
+    "LoadingTitle": "Mazání kontaktu...",
+    "Message": "Opravdu chcete smazat {name}? Data této osoby, zmínky a související informace budou smazány. Tuto akci nelze vrátit zpět.",
+    "SuccessDescription": "Kontakt byl úspěšně smazán",
+    "Title": "Smazat {name}?"
+  },
+  "DeleteContacts": {
+    "ErrorDescription": "Nepodařilo se smazat kontakty. Zkuste to prosím znovu.",
+    "LoadingDescription": "Počkejte prosím, než smažeme vybrané kontakty",
+    "LoadingTitle": "Mazání kontaktů...",
+    "Message_one": "Opravdu chcete smazat {count} vybraný kontakt? Tuto akci nelze vrátit zpět.",
+    "Message_other": "Opravdu chcete smazat {count} vybraných kontaktů? Tuto akci nelze vrátit zpět.",
+    "MessageAllMatching": "Opravdu chcete smazat všechny odpovídající kontakty? Tuto akci nelze vrátit zpět.",
+    "SuccessDescription": "{count} kontakt(ů) bylo úspěšně smazáno",
+    "Title_one": "Smazat {count} kontakt?",
+    "Title_other": "Smazat {count} kontaktů?",
+    "TitleAllMatching": "Smazat všechny odpovídající kontakty?"
+  },
+  "HeaderDescription": "V Lidech můžete spravovat kontakty, upravovat detaily a spouštět hromadné akce.",
+  "ImportContacts": "Importovat kontakty",
+  "LoadMoreBatch": "Načíst dalších 50 kontaktů",
+  "LoadMoreError": "Nepodařilo se načíst další kontakty. Zkuste to prosím znovu.",
+  "NoContactsFound": "Zatím jste nepřidali žádné kontakty.",
+  "NoContactsMatchSearch": "Žádný takový kontakt nenalezen.",
+  "SearchPlaceholder": "Hledat podle jména...",
+  "ThisContactFallback": "tento kontakt",
+  "Title": "Lidé"
+}

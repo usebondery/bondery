@@ -1,19 +1,22 @@
+import "server-only";
+
+import type { SupportedLocale } from "@bondery/translations";
+import { DEFAULT_LOCALE } from "@bondery/translations";
 import { cache } from "react";
-import { getAppBootstrap } from "@/lib/app/getAppBootstrap";
+import { getAppSession } from "@/lib/app/getAppSession";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getLocaleFromHeaders } from "./getLocaleFromHeaders";
-import type { SupportedLocale } from "@bondery/translations";
 
 export interface LocaleSettings {
   locale: SupportedLocale;
-  timezone: string;
   timeFormat: "24h" | "12h";
+  timezone: string;
 }
 
 const FALLBACK: LocaleSettings = {
-  locale: "en",
-  timezone: "UTC",
+  locale: DEFAULT_LOCALE,
   timeFormat: "24h",
+  timezone: "UTC",
 };
 
 /**
@@ -22,7 +25,7 @@ const FALLBACK: LocaleSettings = {
  * Strategy:
  * - If no session: derive locale from the browser's Accept-Language header,
  *   use UTC / 24h defaults (locale is cosmetic on unauthenticated routes).
- * - If session exists: use the user's saved settings from getAppBootstrap(),
+ * - If session exists: use the user's saved session from getAppSession(),
  *   which is cache()-deduplicated so the API call runs at most once per render.
  *
  * IMPORTANT: this function uses getSession() (cookie read, no network) to check
@@ -38,18 +41,18 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
 
     if (!session) {
       const locale = await getLocaleFromHeaders();
-      return { locale, timezone: "UTC", timeFormat: "24h" };
+      return { locale, timeFormat: "24h", timezone: "UTC" };
     }
 
-    const bootstrap = await getAppBootstrap();
-    if (bootstrap.status !== "ok") {
+    const appSession = await getAppSession();
+    if (appSession.status !== "ok") {
       return FALLBACK;
     }
 
     return {
-      locale: bootstrap.settings.locale,
-      timezone: bootstrap.settings.timezone,
-      timeFormat: bootstrap.settings.timeFormat,
+      locale: appSession.session.locale,
+      timeFormat: appSession.session.timeFormat,
+      timezone: appSession.session.timezone,
     };
   } catch {
     return FALLBACK;

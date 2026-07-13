@@ -2,20 +2,20 @@ import { IconCheck, IconChevronDown } from "@tabler/icons-react-native";
 import { Select } from "@tamagui/select";
 import { Sheet } from "@tamagui/sheet";
 import { XStack } from "@tamagui/stacks";
-import { useMemo, useState, type ReactNode } from "react";
+import { type ReactNode, useMemo, useState } from "react";
 import {
   FlatList,
+  type ListRenderItemInfo,
   Pressable,
+  type StyleProp,
   StyleSheet,
   Text,
   View,
-  type ListRenderItemInfo,
-  type StyleProp,
   type ViewStyle,
 } from "react-native";
+import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { SHEET_SNAP_POINTS } from "../../../lib/config";
 import { TAMAGUI_TRANSITION } from "../../../theme/animations";
-import { SearchActionSheet } from "../../../components/SearchActionSheet";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
@@ -29,22 +29,24 @@ export type SettingsSelectOption<TValue extends string> = {
 };
 
 interface SettingsSelectProps<TValue extends string> {
-  label: string;
-  value: TValue;
-  placeholder?: string;
-  options: Array<SettingsSelectOption<TValue>>;
-  onValueChange: (value: TValue) => void;
-  searchable?: boolean;
-  searchPlaceholder?: string;
-  emptySearchLabel?: string;
   /** Overrides `label` for screen readers when the visible label differs. */
   accessibilityLabel?: string;
+  emptySearchLabel?: string;
+  label: string;
   /** Always shown in the trigger before the selected value. */
   leadingIcon?: ReactNode;
+  onValueChange: (value: TValue) => void;
+  options: Array<SettingsSelectOption<TValue>>;
+  placeholder?: string;
+  searchable?: boolean;
+  searchPlaceholder?: string;
   triggerStyle?: StyleProp<ViewStyle>;
+  value: TValue;
 }
 
-function getOptionLeadingVisual<TValue extends string>(option: SettingsSelectOption<TValue>): ReactNode {
+function getOptionLeadingVisual<TValue extends string>(
+  option: SettingsSelectOption<TValue>,
+): ReactNode {
   return option.icon ?? option.leftSection;
 }
 
@@ -96,17 +98,15 @@ function SettingsSelectOptionRow<TValue extends string>({
     >
       {leadingVisual ? <View style={styles.leftSectionSlot}>{leadingVisual}</View> : null}
 
-      <Text style={[styles.optionLabel, { color: textColor }]} numberOfLines={2}>
+      <Text numberOfLines={2} style={[styles.optionLabel, { color: textColor }]}>
         {option.label}
       </Text>
 
-      {option.rightSection ? <View style={styles.rightSectionSlot}>{option.rightSection}</View> : null}
+      {option.rightSection ? (
+        <View style={styles.rightSectionSlot}>{option.rightSection}</View>
+      ) : null}
 
-      {isSelected ? (
-        <IconCheck size={14} color={textColor} />
-      ) : (
-        <View style={styles.checkSpacer} />
-      )}
+      {isSelected ? <IconCheck color={textColor} size={14} /> : <View style={styles.checkSpacer} />}
     </Pressable>
   );
 }
@@ -124,12 +124,13 @@ function SettingsSelectTriggerContent<TValue extends string>({
   textColor: string;
   leadingIcon?: ReactNode;
 }) {
-  const leadingVisual = leadingIcon ?? (selectedOption ? getOptionLeadingVisual(selectedOption) : null);
+  const leadingVisual =
+    leadingIcon ?? (selectedOption ? getOptionLeadingVisual(selectedOption) : null);
 
   return (
     <>
       {leadingVisual ? <View style={styles.leftSectionSlot}>{leadingVisual}</View> : null}
-      <Text style={[styles.triggerLabel, { color: textColor }]} numberOfLines={1}>
+      <Text numberOfLines={1} style={[styles.triggerLabel, { color: textColor }]}>
         {selectedOption?.label ?? placeholder ?? label}
       </Text>
       {selectedOption?.rightSection ? (
@@ -195,21 +196,21 @@ export function SettingsSelect<TValue extends string>({
   if (searchable) {
     const renderItem = ({ item }: ListRenderItemInfo<SettingsSelectOption<TValue>>) => (
       <SettingsSelectOptionRow
-        option={item}
-        isSelected={item.value === value}
-        textColor={triggerTextColor}
-        borderColor={optionBorderColor}
         backgroundColor={optionBackgroundColor}
-        pressedBackgroundColor={optionPressBackgroundColor}
+        borderColor={optionBorderColor}
+        isSelected={item.value === value}
         onPress={() => handleSelect(item.value)}
+        option={item}
+        pressedBackgroundColor={optionPressBackgroundColor}
+        textColor={triggerTextColor}
       />
     );
 
     return (
       <>
         <Pressable
-          accessibilityRole="button"
           accessibilityLabel={triggerAccessibilityLabel}
+          accessibilityRole="button"
           onPress={() => setOpen(true)}
           style={[
             styles.trigger,
@@ -222,40 +223,40 @@ export function SettingsSelect<TValue extends string>({
         >
           <View style={styles.triggerContent}>
             <SettingsSelectTriggerContent
-              selectedOption={selectedOption}
-              placeholder={placeholder}
               label={label}
-              textColor={triggerTextColor}
               leadingIcon={leadingIcon}
+              placeholder={placeholder}
+              selectedOption={selectedOption}
+              textColor={triggerTextColor}
             />
           </View>
-          <IconChevronDown size={16} color={iconColor} />
+          <IconChevronDown color={iconColor} size={16} />
         </Pressable>
 
         <SearchActionSheet
-          open={open}
-          onOpenChange={handleOpenChange}
-          query={query}
-          onQueryChange={setQuery}
-          searchPlaceholder={searchPlaceholder ?? label}
           elevated
+          onOpenChange={handleOpenChange}
+          onQueryChange={setQuery}
+          open={open}
+          query={query}
+          searchPlaceholder={searchPlaceholder ?? label}
         >
           <FlatList
-            style={styles.searchList}
-            data={filteredOptions}
-            keyExtractor={(item) => item.value}
-            renderItem={renderItem}
-            keyboardShouldPersistTaps="handled"
             automaticallyAdjustKeyboardInsets
-            initialNumToRender={24}
-            maxToRenderPerBatch={24}
-            windowSize={8}
             contentContainerStyle={styles.listContent}
+            data={filteredOptions}
+            initialNumToRender={24}
+            keyboardShouldPersistTaps="handled"
+            keyExtractor={(item) => item.value}
             ListEmptyComponent={
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 {emptySearchLabel}
               </Text>
             }
+            maxToRenderPerBatch={24}
+            renderItem={renderItem}
+            style={styles.searchList}
+            windowSize={8}
           />
         </SearchActionSheet>
       </>
@@ -264,51 +265,51 @@ export function SettingsSelect<TValue extends string>({
 
   return (
     <Select
-      value={value}
       onValueChange={(nextValue) => onValueChange(nextValue as TValue)}
       renderValue={(selectedValue) => optionLabelMap[selectedValue] ?? placeholder ?? ""}
+      value={value}
     >
       <Select.Trigger
-        width="100%"
-        minHeight={MOBILE_LAYOUT.touchTarget}
+        backgroundColor={triggerBackgroundColor}
+        borderColor={triggerBorderColor}
         borderRadius={MOBILE_LAYOUT.borderRadius.control}
         borderWidth={1}
-        borderColor={triggerBorderColor}
-        backgroundColor={triggerBackgroundColor}
-        justifyContent="space-between"
-        transition={TAMAGUI_TRANSITION.quick}
-        hoverStyle={{ backgroundColor: triggerBackgroundColor, borderColor: triggerBorderColor }}
         focusStyle={{ backgroundColor: triggerBackgroundColor, borderColor: triggerBorderColor }}
+        hoverStyle={{ backgroundColor: triggerBackgroundColor, borderColor: triggerBorderColor }}
+        justifyContent="space-between"
+        minHeight={MOBILE_LAYOUT.touchTarget}
         pressStyle={{
           backgroundColor: triggerBackgroundColor,
           borderColor: triggerBorderColor,
           transition: TAMAGUI_TRANSITION.quick,
         }}
+        transition={TAMAGUI_TRANSITION.quick}
+        width="100%"
       >
-        <XStack alignItems="center" flex={1} minWidth={0} gap="$2">
+        <XStack alignItems="center" flex={1} gap="$2" minWidth={0}>
           <SettingsSelectTriggerContent
-            selectedOption={selectedOption}
-            placeholder={placeholder}
             label={label}
-            textColor={triggerTextColor}
             leadingIcon={leadingIcon}
+            placeholder={placeholder}
+            selectedOption={selectedOption}
+            textColor={triggerTextColor}
           />
         </XStack>
 
         <Select.Icon>
-          <IconChevronDown size={16} color={iconColor} />
+          <IconChevronDown color={iconColor} size={16} />
         </Select.Icon>
       </Select.Trigger>
 
-      <Select.Adapt when={true} platform="touch">
+      <Select.Adapt platform="touch" when={true}>
         <Sheet
-          native
+          dismissOnOverlayPress
+          dismissOnSnapToBottom
           modal
+          moveOnKeyboardChange
+          native
           snapPoints={[SHEET_SNAP_POINTS.selectSimple]}
           snapPointsMode="percent"
-          moveOnKeyboardChange
-          dismissOnSnapToBottom
-          dismissOnOverlayPress
         >
           <Sheet.Overlay backgroundColor={sheetOverlayColor} />
 
@@ -316,15 +317,15 @@ export function SettingsSelect<TValue extends string>({
             backgroundColor={sheetFrameBackgroundColor}
             borderTopLeftRadius={20}
             borderTopRightRadius={20}
-            paddingTop={10}
             paddingBottom={16}
+            paddingTop={10}
           >
             <Sheet.Handle backgroundColor={sheetHandleColor} marginBottom={10} />
 
             <Sheet.ScrollView
+              automaticallyAdjustKeyboardInsets
               backgroundColor={sheetFrameBackgroundColor}
               contentContainerStyle={{ paddingBottom: 20 }}
-              automaticallyAdjustKeyboardInsets
               keyboardDismissMode="interactive"
             >
               <Select.Adapt.Contents />
@@ -335,30 +336,30 @@ export function SettingsSelect<TValue extends string>({
 
       <Select.Content>
         <Select.Viewport
-          minWidth={220}
+          backgroundColor={optionBackgroundColor}
+          borderColor={triggerBorderColor}
           borderRadius={12}
           borderWidth={1}
-          borderColor={triggerBorderColor}
-          backgroundColor={optionBackgroundColor}
+          minWidth={220}
           overflow="hidden"
         >
           <Select.Group>
             {options.map((option, index) => (
               <Select.Item
+                backgroundColor={optionBackgroundColor}
+                borderBottomColor={optionBorderColor}
+                borderBottomWidth={index < options.length - 1 ? 1 : 0}
+                hoverStyle={{ backgroundColor: optionHoverBackgroundColor }}
                 index={index}
                 key={option.value}
-                value={option.value}
-                backgroundColor={optionBackgroundColor}
-                borderBottomWidth={index < options.length - 1 ? 1 : 0}
-                borderBottomColor={optionBorderColor}
-                transition={TAMAGUI_TRANSITION.quick}
-                hoverStyle={{ backgroundColor: optionHoverBackgroundColor }}
                 pressStyle={{
                   backgroundColor: optionPressBackgroundColor,
                   transition: TAMAGUI_TRANSITION.quick,
                 }}
+                transition={TAMAGUI_TRANSITION.quick}
+                value={option.value}
               >
-                <XStack alignItems="center" flex={1} minWidth={0} gap="$2">
+                <XStack alignItems="center" flex={1} gap="$2" minWidth={0}>
                   {getOptionLeadingVisual(option) ? (
                     <View style={styles.leftSectionSlot}>{getOptionLeadingVisual(option)}</View>
                   ) : null}
@@ -373,7 +374,7 @@ export function SettingsSelect<TValue extends string>({
                 </XStack>
 
                 <Select.ItemIndicator marginLeft="auto">
-                  <IconCheck size={14} color={triggerTextColor} />
+                  <IconCheck color={triggerTextColor} size={14} />
                 </Select.ItemIndicator>
               </Select.Item>
             ))}
@@ -385,66 +386,66 @@ export function SettingsSelect<TValue extends string>({
 }
 
 const styles = StyleSheet.create({
-  trigger: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8,
+  checkSpacer: {
+    width: 14,
   },
-  triggerContent: {
-    flex: 1,
-    minWidth: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  triggerLabel: {
-    flex: 1,
+  emptyText: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
+    paddingHorizontal: 16,
+    paddingVertical: 20,
   },
   leftSectionSlot: {
+    alignItems: "center",
     flexShrink: 0,
     justifyContent: "center",
-    alignItems: "center",
     minWidth: 20,
-  },
-  rightSectionSlot: {
-    flexShrink: 0,
-    justifyContent: "center",
-    alignItems: "center",
-    minWidth: 20,
-  },
-  searchList: {
-    flex: 1,
   },
   listContent: {
     paddingBottom: 24,
-  },
-  optionRow: {
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   optionLabel: {
     flex: 1,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
   },
-  checkSpacer: {
-    width: 14,
-  },
-  emptyText: {
+  optionRow: {
+    alignItems: "center",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: "row",
+    gap: 8,
+    minHeight: MOBILE_LAYOUT.touchTarget,
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingVertical: 10,
+  },
+  rightSectionSlot: {
+    alignItems: "center",
+    flexShrink: 0,
+    justifyContent: "center",
+    minWidth: 20,
+  },
+  searchList: {
+    flex: 1,
+  },
+  trigger: {
+    alignItems: "center",
+    borderRadius: MOBILE_LAYOUT.borderRadius.control,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "space-between",
+    minHeight: MOBILE_LAYOUT.touchTarget,
+    paddingHorizontal: 12,
+  },
+  triggerContent: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: 8,
+    minWidth: 0,
+  },
+  triggerLabel: {
+    flex: 1,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
   },
 });

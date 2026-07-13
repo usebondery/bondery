@@ -5,11 +5,7 @@ export function shouldSchedulePullOnWake(input: {
   sourceDeviceId?: string;
   myDeviceId?: string;
 }): boolean {
-  if (
-    input.sourceDeviceId &&
-    input.myDeviceId &&
-    input.sourceDeviceId === input.myDeviceId
-  ) {
+  if (input.sourceDeviceId && input.myDeviceId && input.sourceDeviceId === input.myDeviceId) {
     return false;
   }
 

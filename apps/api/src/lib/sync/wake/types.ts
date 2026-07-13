@@ -9,9 +9,9 @@ export interface SyncWakeBus {
 }
 
 export interface SyncWakeSocket {
-  send(data: string): void;
   close(code?: number, reason?: string): void;
   readonly readyState: number;
+  send(data: string): void;
 }
 
 export const WS_OPEN = 1;

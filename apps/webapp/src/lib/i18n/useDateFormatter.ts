@@ -1,12 +1,12 @@
 "use client";
 
 import { useMemo } from "react";
-import { useUserLocale } from "@/app/(app)/app/components/UserLocaleProvider";
+import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 import {
+  type DateFormatterLike,
   formatLastUsedAt,
   formatRelativeTime,
-  type DateFormatterLike,
-} from "@/lib/formatRelativeTime";
+} from "@/lib/i18n/formatRelativeTime";
 
 function getIntlLocale(locale: string, timeFormat: "12h" | "24h"): string {
   return timeFormat === "12h" ? `${locale}-u-hc-h12` : `${locale}-u-hc-h23`;

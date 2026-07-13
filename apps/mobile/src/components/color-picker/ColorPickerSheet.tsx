@@ -1,33 +1,31 @@
 import { IconCopy, IconX } from "@tabler/icons-react-native";
 import { Sheet } from "@tamagui/sheet";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
-import ColorPicker, { Panel3 } from "reanimated-color-picker";
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import type { ColorFormatsObject } from "reanimated-color-picker";
-import { SHEET_SNAP_POINTS } from "../../lib/config";
+import ColorPicker, { Panel3 } from "reanimated-color-picker";
 import { copyToClipboard } from "../../lib/clipboard/copyToClipboard";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import { SHEET_SNAP_POINTS } from "../../lib/config";
+import {
+  useCommonTranslations,
+  useContactInfoTranslations,
+  useMobileColorPickerTranslations,
+  useMobileGroupsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
 import { MOBILE_HIT_SLOP, MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { MobileTextInput } from "../MobileTextInput";
 import { ColorSwatchGrid } from "./ColorSwatchGrid";
-import { COLOR_PICKER_LAYOUT, DEFAULT_GROUP_COLOR } from "./constants";
 import { getContrastBorderColor, normalizeHex } from "./colorUtils";
+import { COLOR_PICKER_LAYOUT, DEFAULT_GROUP_COLOR } from "./constants";
 
 interface ColorPickerSheetProps {
-  open: boolean;
-  value: string;
   onOpenChange: (open: boolean) => void;
   onSelect: (hex: string) => void;
+  open: boolean;
   showToast: (options: ShowAppToastInput) => void;
+  value: string;
 }
 
 export function ColorPickerSheet({
@@ -37,7 +35,10 @@ export function ColorPickerSheet({
   onSelect,
   showToast,
 }: ColorPickerSheetProps) {
-  const t = useMobileTranslations();
+  const tContactInfo = useContactInfoTranslations();
+  const tMobileColorPicker = useMobileColorPickerTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { width: windowWidth } = useWindowDimensions();
 
@@ -123,7 +124,7 @@ export function ColorPickerSheet({
     const normalized = normalizeHex(hexInput);
 
     if (!normalized) {
-      setHexError(t("MobileApp.ColorPicker.InvalidHex"));
+      setHexError(tMobileColorPicker("InvalidHex"));
       return;
     }
 
@@ -131,7 +132,7 @@ export function ColorPickerSheet({
     setDraftColor(normalized);
     setHexInput(normalized);
     onSelect(normalized);
-  }, [hexInput, onSelect, t]);
+  }, [hexInput, onSelect, tMobileColorPicker]);
 
   const handleCopyHex = useCallback(async () => {
     const normalized = normalizeHex(draftColor);
@@ -141,12 +142,12 @@ export function ColorPickerSheet({
     }
 
     await copyToClipboard(normalized, showToast, {
-      successHeadline: t("ContactInfo.CopySuccessTitle"),
-      successDescription: t("MobileApp.ColorPicker.ColorCopiedMessage"),
-      errorHeadline: t("MobileApp.Common.ErrorTitle"),
-      errorDescription: t("MobileApp.ColorPicker.CopyFailedMessage"),
+      errorDescription: tMobileColorPicker("CopyFailedMessage"),
+      errorHeadline: t("feedback.errorTitle"),
+      successDescription: tMobileColorPicker("ColorCopiedMessage"),
+      successHeadline: tContactInfo("CopySuccessTitle"),
     });
-  }, [draftColor, showToast, t]);
+  }, [draftColor, showToast, t, tMobileColorPicker, tContactInfo]);
 
   const colorPreview = (
     <View
@@ -162,32 +163,32 @@ export function ColorPickerSheet({
 
   return (
     <Sheet
-      native
+      dismissOnOverlayPress
+      dismissOnSnapToBottom
       modal
-      open={open}
+      moveOnKeyboardChange
+      native
       onOpenChange={handleOpenChange}
+      open={open}
       snapPoints={[SHEET_SNAP_POINTS.selectSearch]}
       snapPointsMode="percent"
-      moveOnKeyboardChange
-      dismissOnSnapToBottom
-      dismissOnOverlayPress
     >
       <Sheet.Overlay backgroundColor={colors.overlay} />
       <Sheet.Frame
         backgroundColor={colors.surface}
         borderTopLeftRadius={MOBILE_LAYOUT.borderRadius.control * 2}
         borderTopRightRadius={MOBILE_LAYOUT.borderRadius.control * 2}
-        paddingTop={10}
-        paddingBottom={20}
         flex={1}
+        paddingBottom={20}
+        paddingTop={10}
       >
         <Sheet.Handle backgroundColor={colors.borderStrong} marginBottom={10} />
 
         <View style={styles.sheetContent}>
           <View style={styles.closeRow}>
             <Pressable
-              accessibilityRole="button"
               accessibilityLabel="Close"
+              accessibilityRole="button"
               hitSlop={MOBILE_HIT_SLOP.icon}
               onPress={handleClose}
               style={({ pressed }) => [styles.closeButton, pressed && { opacity: 0.7 }]}
@@ -197,46 +198,46 @@ export function ColorPickerSheet({
           </View>
 
           <ScrollView
+            contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContent}
           >
             <View style={styles.hexRow}>
               <View style={styles.hexInputSlot}>
                 <MobileTextInput
-                  value={hexInput}
+                  accessibilityLabel={`${tMobileGroups("EditColorLabel")} ${draftColor}`}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  enterKeyHint="done"
+                  error={hexError != null}
+                  leadingIcon={colorPreview}
+                  onBlur={commitHexInput}
                   onChangeText={(text) => {
                     setHexInput(text);
                     if (hexError) {
                       setHexError(null);
                     }
                   }}
-                  placeholder={t("MobileApp.ColorPicker.HexPlaceholder")}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  returnKeyType="done"
-                  enterKeyHint="done"
                   onSubmitEditing={commitHexInput}
-                  onBlur={commitHexInput}
-                  error={hexError != null}
-                  leadingIcon={colorPreview}
-                  accessibilityLabel={`${t("MobileApp.Groups.EditColorLabel")} ${draftColor}`}
+                  placeholder={tMobileColorPicker("HexPlaceholder")}
+                  returnKeyType="done"
+                  value={hexInput}
                 />
               </View>
 
               <Pressable
+                accessibilityLabel={tMobileColorPicker("CopyAccessibilityLabel")}
                 accessibilityRole="button"
-                accessibilityLabel={t("MobileApp.ColorPicker.CopyAccessibilityLabel")}
                 onPress={() => void handleCopyHex()}
                 style={({ pressed }) => [
                   styles.copyButton,
                   {
-                    borderColor: colors.borderStrong,
                     backgroundColor: pressed ? colors.surfacePressed : colors.inputBackground,
+                    borderColor: colors.borderStrong,
                   },
                 ]}
               >
-                <IconCopy size={18} color={colors.iconSecondary} />
+                <IconCopy color={colors.iconSecondary} size={18} />
               </Pressable>
             </View>
 
@@ -245,25 +246,25 @@ export function ColorPickerSheet({
             ) : null}
 
             <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              {t("MobileApp.ColorPicker.SwatchesLabel")}
+              {tMobileColorPicker("SwatchesLabel")}
             </Text>
 
-            <ColorSwatchGrid value={draftColor} onSelect={handleSwatchSelect} />
+            <ColorSwatchGrid onSelect={handleSwatchSelect} value={draftColor} />
 
             <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              {t("MobileApp.ColorPicker.CustomColorLabel")}
+              {tMobileColorPicker("CustomColorLabel")}
             </Text>
 
             <ColorPicker
-              value={draftColor}
               onChangeJS={handleWheelChange}
               onCompleteJS={handleWheelComplete}
+              value={draftColor}
             >
               <Panel3
                 style={{
-                  width: wheelSize,
-                  height: wheelSize,
                   alignSelf: "center",
+                  height: wheelSize,
+                  width: wheelSize,
                 }}
               />
             </ColorPicker>
@@ -275,56 +276,56 @@ export function ColorPickerSheet({
 }
 
 const styles = StyleSheet.create({
-  sheetContent: {
-    flex: 1,
-    minHeight: 0,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+  closeButton: {
+    alignItems: "center",
+    height: MOBILE_LAYOUT.iconButton,
+    justifyContent: "center",
+    width: MOBILE_LAYOUT.iconButton,
   },
   closeRow: {
     flexDirection: "row",
     justifyContent: "flex-end",
     marginBottom: 4,
   },
-  closeButton: {
-    width: MOBILE_LAYOUT.iconButton,
-    height: MOBILE_LAYOUT.iconButton,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  scrollContent: {
-    gap: 12,
-    paddingBottom: 8,
-  },
-  hexRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-  },
-  hexInputSlot: {
-    flex: 1,
-    minWidth: 0,
-  },
-  inputPreviewSwatch: {
-    width: 20,
-    height: 20,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
   copyButton: {
-    width: MOBILE_LAYOUT.touchTarget,
-    height: MOBILE_LAYOUT.touchTarget,
+    alignItems: "center",
     borderRadius: MOBILE_LAYOUT.borderRadius.control,
     borderWidth: 1,
-    alignItems: "center",
+    height: MOBILE_LAYOUT.touchTarget,
     justifyContent: "center",
+    width: MOBILE_LAYOUT.touchTarget,
   },
   hexError: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     marginTop: -4,
   },
+  hexInputSlot: {
+    flex: 1,
+    minWidth: 0,
+  },
+  hexRow: {
+    alignItems: "flex-start",
+    flexDirection: "row",
+    gap: 8,
+  },
+  inputPreviewSwatch: {
+    borderRadius: 6,
+    borderWidth: 1,
+    height: 20,
+    width: 20,
+  },
+  scrollContent: {
+    gap: 12,
+    paddingBottom: 8,
+  },
   sectionLabel: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
     marginTop: 4,
+  },
+  sheetContent: {
+    flex: 1,
+    minHeight: 0,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
   },
 });

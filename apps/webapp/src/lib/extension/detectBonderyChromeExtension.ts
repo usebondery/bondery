@@ -57,8 +57,8 @@ export function detectBonderyChromeExtension(timeoutMs = 1200): Promise<Extensio
 
     window.postMessage(
       {
-        type: EXTENSION_PING_TYPE,
         requestId,
+        type: EXTENSION_PING_TYPE,
       },
       "*",
     );

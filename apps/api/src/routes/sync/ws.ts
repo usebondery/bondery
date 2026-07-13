@@ -1,9 +1,8 @@
-import type { WebSocket } from "ws";
-import websocket from "@fastify/websocket";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
 import { parseSyncWsClientMessage } from "@bondery/schemas/sync";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { createAdminClient } from "../../lib/supabase.js";
+import websocket from "@fastify/websocket";
+import type { WebSocket } from "ws";
+import { createAdminClient } from "../../lib/data/supabase.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { getLastServerSequence } from "../../lib/sync/idempotency.js";
 import {
   getSyncWakeRuntime,
@@ -13,24 +12,22 @@ import {
 
 function toSyncWakeSocket(socket: WebSocket): SyncWakeSocket {
   return {
-    send: (data) => socket.send(data),
     close: (code, reason) => socket.close(code, reason),
     get readyState() {
       return socket.readyState;
     },
+    send: (data) => socket.send(data),
   };
 }
 
 function isAllowedOrigin(origin: string | undefined, allowedOrigins: string[]): boolean {
-  if (!origin) return true;
+  if (!origin) {
+    return true;
+  }
   return allowedOrigins.some((allowed) => allowed === origin);
 }
 
 export const syncWsRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
-  fastify.addHook("onRoute", (routeOptions) => {
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
-  });
-
   await fastify.register(websocket);
 
   const allowedOrigins = [

@@ -1,11 +1,11 @@
-import { createElement, type ReactNode } from "react";
 import { IconCheck } from "@tabler/icons-react";
+import { createElement, type ReactNode } from "react";
 
 export interface SuccessNotificationTemplateProps {
-  title: string;
   description: string;
   icon?: ReactNode;
   radius?: string | number;
+  title: string;
 }
 
 /**
@@ -23,11 +23,11 @@ export function successNotificationTemplate({
   icon = createElement(IconCheck, { size: 18 }),
 }: SuccessNotificationTemplateProps) {
   return {
-    title,
-    loading: false,
-    radius,
-    message: description,
     color: "green",
     icon,
+    loading: false,
+    message: description,
+    radius,
+    title,
   };
 }

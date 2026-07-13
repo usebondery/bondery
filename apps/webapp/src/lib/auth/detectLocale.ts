@@ -1,4 +1,8 @@
 import { TIMEZONES_DATA } from "@bondery/helpers/locale";
+import { setClientCookie } from "@/lib/cookies/client";
+import { LOCALE_PREFS_COOKIE } from "@/lib/cookies/constants";
+
+export { LOCALE_PREFS_COOKIE };
 
 /**
  * ISO 3166-1 alpha-2 country codes (lowercase) that conventionally use
@@ -40,7 +44,9 @@ const TWELVE_HOUR_COUNTRIES = new Set([
  */
 function detectTimeFormat(timezone: string): "12h" | "24h" {
   const entry = TIMEZONES_DATA.find((tz) => tz.value === timezone);
-  if (!entry || !entry.flag) return "24h";
+  if (!entry?.flag) {
+    return "24h";
+  }
   return TWELVE_HOUR_COUNTRIES.has(entry.flag) ? "12h" : "24h";
 }
 
@@ -90,22 +96,21 @@ export function detectBrowserLocale(): {
     const timezone = normalizeTimezone(rawTimezone);
     const timeFormat = detectTimeFormat(timezone);
 
-    return { timezone, timeFormat };
+    return { timeFormat, timezone };
   } catch {
-    return { timezone: "UTC", timeFormat: "24h" };
+    return { timeFormat: "24h", timezone: "UTC" };
   }
 }
-
-/** Cookie name used to pass detected locale preferences through the OAuth redirect */
-export const LOCALE_PREFS_COOKIE = "locale_prefs";
 
 /**
  * Sets a short-lived cookie with the user's detected locale preferences.
  * This cookie is read by the auth callback route to apply the preferences
  * to the new user's settings row.
  */
-export function setLocalePreferencesCookie(): void {
+export async function setLocalePreferencesCookie(): Promise<void> {
   const prefs = detectBrowserLocale();
   const maxAge = 600; // 10 minutes — enough time to complete OAuth flow
-  document.cookie = `${LOCALE_PREFS_COOKIE}=${encodeURIComponent(JSON.stringify(prefs))};path=/;max-age=${maxAge};SameSite=Lax`;
+  await setClientCookie(LOCALE_PREFS_COOKIE, encodeURIComponent(JSON.stringify(prefs)), {
+    maxAge,
+  });
 }

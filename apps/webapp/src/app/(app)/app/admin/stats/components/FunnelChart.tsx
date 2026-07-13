@@ -1,39 +1,39 @@
 "use client";
 
-import { Card, Text, Stack, Group, Box, SimpleGrid } from "@mantine/core";
+import { Box, Card, Group, SimpleGrid, Stack, Text } from "@mantine/core";
 import { IconArrowNarrowDown } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import type { FunnelPeriod } from "../getStatsData";
+import type { FunnelPeriod } from "@/lib/api/resources/stats";
+import { useStatsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface FunnelStepProps {
-  label: string;
+  color: string;
   count: number;
+  label: string;
   /** Width as a percentage of the top-of-funnel step (0–100) */
   widthPct: number;
-  color: string;
 }
 
 function FunnelStep({ label, count, widthPct, color }: FunnelStepProps) {
   return (
-    <Group gap="md" align="center" wrap="nowrap">
+    <Group align="center" gap="md" wrap="nowrap">
       <Box
         bg={`var(--mantine-color-${color}-6)`}
         style={{
-          width: `${widthPct}%`,
-          minWidth: 8,
-          height: 40,
+          alignItems: "center",
           borderRadius: 4,
           display: "flex",
-          alignItems: "center",
+          height: 40,
+          minWidth: 8,
           paddingInline: 12,
           transition: "width 0.4s ease",
+          width: `${widthPct}%`,
         }}
       >
-        <Text fw={700} size="sm" c="white" style={{ whiteSpace: "nowrap" }}>
+        <Text c="white" fw={700} size="sm" style={{ whiteSpace: "nowrap" }}>
           {count.toLocaleString()}
         </Text>
       </Box>
-      <Text size="sm" fw={500} style={{ whiteSpace: "nowrap" }}>
+      <Text fw={500} size="sm" style={{ whiteSpace: "nowrap" }}>
         {label}
       </Text>
     </Group>
@@ -46,7 +46,7 @@ interface ConversionRowProps {
 
 function ConversionRow({ label }: ConversionRowProps) {
   return (
-    <Group gap={6} c="dimmed" pl={4}>
+    <Group c="dimmed" gap={6} pl={4}>
       <IconArrowNarrowDown size={14} />
       <Text size="xs">{label}</Text>
     </Group>
@@ -57,22 +57,15 @@ interface FunnelChartProps {
   data: FunnelPeriod[];
 }
 
-function periodTitle(t: ReturnType<typeof useTranslations>, periodKey: string, fallback: string) {
-  if (periodKey === "last_14_days") return t("FunnelLast14Days");
-  if (periodKey === "days_14_to_28_ago") return t("Funnel14To28DaysAgo");
-  if (periodKey === "last_30_days") return t("FunnelLast30Days");
-  return fallback;
-}
-
 export function FunnelChart({ data }: FunnelChartProps) {
-  const t = useTranslations("StatsPage");
+  const t = useStatsPageTranslations();
 
   return (
-    <Card withBorder padding="lg">
+    <Card padding="lg" withBorder>
       <Text fw={500} mb="xs">
         {t("Funnel")}
       </Text>
-      <Text size="xs" c="dimmed" mb="xl">
+      <Text c="dimmed" mb="xl" size="xs">
         {t("FunnelDescription")}
       </Text>
 
@@ -83,17 +76,23 @@ export function FunnelChart({ data }: FunnelChartProps) {
           const interactionsWidthPct = Math.round((period.interactions / max) * 100);
 
           return (
-            <Card key={period.periodKey} withBorder padding="md">
-              <Text fw={600} size="sm" mb="sm">
-                {periodTitle(t, period.periodKey, period.periodLabel)}
+            <Card key={period.periodKey} padding="md" withBorder>
+              <Text fw={600} mb="sm" size="sm">
+                {period.periodKey === "last_14_days"
+                  ? t("FunnelLast14Days")
+                  : period.periodKey === "days_14_to_28_ago"
+                    ? t("Funnel14To28DaysAgo")
+                    : period.periodKey === "last_30_days"
+                      ? t("FunnelLast30Days")
+                      : period.periodLabel}
               </Text>
 
               <Stack gap={4} px="xs">
                 <FunnelStep
-                  label={t("Signups")}
-                  count={period.signups}
-                  widthPct={100}
                   color="indigo"
+                  count={period.signups}
+                  label={t("Signups")}
+                  widthPct={100}
                 />
                 <ConversionRow
                   label={t("FunnelSignupsToContacts", {
@@ -101,10 +100,10 @@ export function FunnelChart({ data }: FunnelChartProps) {
                   })}
                 />
                 <FunnelStep
-                  label={t("FunnelActivated")}
-                  count={period.contacts}
-                  widthPct={Math.max(contactsWidthPct, 2)}
                   color="teal"
+                  count={period.contacts}
+                  label={t("FunnelActivated")}
+                  widthPct={Math.max(contactsWidthPct, 2)}
                 />
                 <ConversionRow
                   label={t("FunnelContactsToInteractions", {
@@ -112,10 +111,10 @@ export function FunnelChart({ data }: FunnelChartProps) {
                   })}
                 />
                 <FunnelStep
-                  label={t("Interactions")}
-                  count={period.interactions}
-                  widthPct={Math.max(interactionsWidthPct, 2)}
                   color="orange"
+                  count={period.interactions}
+                  label={t("Interactions")}
+                  widthPct={Math.max(interactionsWidthPct, 2)}
                 />
               </Stack>
             </Card>

@@ -3,13 +3,6 @@
  * Handles creation, retrieval, and deletion of relationships between contacts.
  */
 
-import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../../lib/auth.js";
-import { withCreatedResponse, withOkResponse } from "../../../lib/openapi-route-responses.js";
-import { conflictResponse } from "@bondery/schemas/http/responses";
-import { resolveContactAvatarUrl } from "../../../lib/supabase.js";
 import type { RelationshipType } from "@bondery/schemas";
 import {
   contactRelationshipResponseSchema,
@@ -18,12 +11,25 @@ import {
   messageResponseSchema,
   updateContactRelationshipInputSchema,
 } from "@bondery/schemas";
-import { extractAvatarOptions } from "../../../lib/queries.js";
 import {
   avatarTransformQuerySchema,
   contactRelationshipIdParamSchema,
   uuidParamSchema,
 } from "@bondery/schemas/http";
+import { conflictResponse } from "@bondery/schemas/http/responses";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import {
+  createRelationship,
+  deleteRelationship,
+  updateRelationship,
+} from "../../../domains/contacts/relationships.js";
+import { extractAvatarOptions } from "../../../lib/data/select-fragments.js";
+import { resolveContactAvatarUrl } from "../../../lib/data/supabase.js";
+import { getAuth } from "../../../lib/platform/auth/strategies.js";
+import { internal, notFound } from "../../../lib/platform/errors/http-errors.js";
+import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js";
+import { withCreatedResponse, withOkResponse } from "../../../lib/platform/openapi/responses.js";
+import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 
 // ── Constants ────────────────────────────────────────────────────
 
@@ -53,7 +59,7 @@ const RELATIONSHIP_TYPES: RelationshipType[] = [
 
 // ── Helpers ──────────────────────────────────────────────────────
 
-function isRelationshipType(value: string): value is RelationshipType {
+function _isRelationshipType(value: string): value is RelationshipType {
   return RELATIONSHIP_TYPES.includes(value as RelationshipType);
 }
 
@@ -66,10 +72,10 @@ function toContactPreview(
   avatarUrl: string | null,
 ) {
   return {
-    id: person.id,
-    firstName: person.first_name,
-    lastName: person.last_name,
     avatar: avatarUrl,
+    firstName: person.first_name,
+    id: person.id,
+    lastName: person.last_name,
   };
 }
 
@@ -89,7 +95,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(contactRelationshipsResponseSchema, "Contact relationships"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
+    async (request) => {
       const { client, user } = getAuth(request);
       const avatarOpts = extractAvatarOptions(request.query);
       const { id: personId } = request.params;
@@ -102,7 +108,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         .single();
 
       if (personError || !person) {
-        return reply.status(404).send({ error: "Contact not found" });
+        throw notFound("Contact not found", "not_found");
       }
 
       const { data: rows, error: rowsError } = await client
@@ -112,7 +118,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         .order("created_at", { ascending: true });
 
       if (rowsError) {
-        return reply.status(500).send({ error: rowsError.message });
+        throw internal("internal_server_error", rowsError.message);
       }
 
       const relationships = rows || [];
@@ -136,7 +142,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         .eq("user_id", user.id);
 
       if (peopleError) {
-        return reply.status(500).send({ error: peopleError.message });
+        throw internal("internal_server_error", peopleError.message);
       }
 
       const peopleById = new Map((peopleRows || []).map((personRow) => [personRow.id, personRow]));
@@ -151,43 +157,43 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
           }
 
           return {
-            id: relationship.id,
-            userId: relationship.user_id,
-            sourcePersonId: relationship.source_person_id,
-            targetPersonId: relationship.target_person_id,
-            relationshipType: relationship.relationship_type as RelationshipType,
             createdAt: relationship.created_at,
-            updatedAt: relationship.updated_at,
+            id: relationship.id,
+            relationshipType: relationship.relationship_type as RelationshipType,
             sourcePerson: toContactPreview(
               sourcePerson,
               resolveContactAvatarUrl(
                 client,
                 user.id,
                 {
-                  id: sourcePerson.id,
                   hasAvatar: sourcePerson.has_avatar,
+                  id: sourcePerson.id,
                   updatedAt: sourcePerson.updated_at,
                 },
                 avatarOpts,
               ),
             ),
+            sourcePersonId: relationship.source_person_id,
             targetPerson: toContactPreview(
               targetPerson,
               resolveContactAvatarUrl(
                 client,
                 user.id,
                 {
-                  id: targetPerson.id,
                   hasAvatar: targetPerson.has_avatar,
+                  id: targetPerson.id,
                   updatedAt: targetPerson.updated_at,
                 },
                 avatarOpts,
               ),
             ),
+            targetPersonId: relationship.target_person_id,
+            updatedAt: relationship.updated_at,
+            userId: relationship.user_id,
           };
         })
-        .filter((relationship): relationship is NonNullable<typeof relationship> =>
-          relationship != null,
+        .filter(
+          (relationship): relationship is NonNullable<typeof relationship> => relationship != null,
         );
 
       return { relationships: formattedRelationships };
@@ -201,74 +207,27 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     "/:id/relationships",
     {
       schema: {
+        body: createContactRelationshipInputSchema,
         description: "Create a relationship between two contacts.",
         params: uuidParamSchema,
-        body: createContactRelationshipInputSchema,
         response: {
           ...withCreatedResponse(contactRelationshipResponseSchema, "Relationship created"),
           ...conflictResponse,
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id: sourcePersonId } = request.params;
-      const { relatedPersonId, relationshipType } = request.body;
-      const normalizedRelatedPersonId = relatedPersonId.trim();
-
-      if (sourcePersonId === normalizedRelatedPersonId) {
-        return reply.status(400).send({ error: "A contact cannot be related to itself" });
-      }
-
-      const { data: peopleRows, error: peopleError } = await client
-        .from("people")
-        .select("id")
-        .in("id", [sourcePersonId, normalizedRelatedPersonId])
-        .eq("user_id", user.id);
-
-      if (peopleError) {
-        return reply.status(500).send({ error: peopleError.message });
-      }
-
-      if (!peopleRows || peopleRows.length !== 2) {
-        return reply.status(404).send({ error: "One or both contacts were not found" });
-      }
-
-      const { data: insertedRelationship, error: insertError } = await client
-        .from("people_relationships")
-        .insert({
-          user_id: user.id,
-          source_person_id: sourcePersonId,
-          target_person_id: normalizedRelatedPersonId,
-          relationship_type: relationshipType,
-        })
-        .select(RELATIONSHIP_SELECT)
-        .single();
-
-      if (insertError) {
-        if (insertError.code === "23505") {
-          return reply.status(409).send({ error: "Relationship already exists" });
-        }
-
-        if (insertError.code === "23514") {
-          return reply.status(400).send({ error: "Invalid relationship data" });
-        }
-
-        return reply.status(500).send({ error: insertError.message });
-      }
-
-      return reply.status(201).send({
-        relationship: {
-          id: insertedRelationship.id,
-          userId: insertedRelationship.user_id,
-          sourcePersonId: insertedRelationship.source_person_id,
-          targetPersonId: insertedRelationship.target_person_id,
-          relationshipType: insertedRelationship.relationship_type as RelationshipType,
-          createdAt: insertedRelationship.created_at,
-          updatedAt: insertedRelationship.updated_at,
-        },
-      });
-    },
+    withDomainRoute(
+      { body: createContactRelationshipInputSchema, params: uuidParamSchema },
+      async (ctx, { body, params }, reply) => {
+        const { data } = await createRelationship(
+          ctx,
+          params.id,
+          body.relatedPersonId,
+          body.relationshipType,
+        );
+        return reply.status(201).send({ relationship: data.relationship });
+      },
+    ),
   );
 
   /**
@@ -278,94 +237,28 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     "/:id/relationships/:relationshipId",
     {
       schema: {
+        body: updateContactRelationshipInputSchema,
         description: "Update a relationship for a contact.",
         params: contactRelationshipIdParamSchema,
-        body: updateContactRelationshipInputSchema,
         response: {
           ...withOkResponse(contactRelationshipResponseSchema, "Relationship updated"),
           ...conflictResponse,
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id: personId, relationshipId } = request.params;
-      const { relatedPersonId, relationshipType } = request.body;
-      const normalizedRelatedPersonId = relatedPersonId.trim();
-
-      if (personId === normalizedRelatedPersonId) {
-        return reply.status(400).send({ error: "A contact cannot be related to itself" });
-      }
-
-      const { data: existingRelationship, error: existingRelationshipError } = await client
-        .from("people_relationships")
-        .select("id, source_person_id, target_person_id")
-        .eq("id", relationshipId)
-        .eq("user_id", user.id)
-        .single();
-
-      if (existingRelationshipError || !existingRelationship) {
-        return reply.status(404).send({ error: "Relationship not found" });
-      }
-
-      if (
-        existingRelationship.source_person_id !== personId &&
-        existingRelationship.target_person_id !== personId
-      ) {
-        return reply.status(404).send({ error: "Relationship not found" });
-      }
-
-      const { data: peopleRows, error: peopleError } = await client
-        .from("people")
-        .select("id")
-        .in("id", [personId, normalizedRelatedPersonId])
-        .eq("user_id", user.id);
-
-      if (peopleError) {
-        return reply.status(500).send({ error: peopleError.message });
-      }
-
-      if (!peopleRows || peopleRows.length !== 2) {
-        return reply.status(404).send({ error: "One or both contacts were not found" });
-      }
-
-      const { data: updatedRelationship, error: updateError } = await client
-        .from("people_relationships")
-        .update({
-          source_person_id: personId,
-          target_person_id: normalizedRelatedPersonId,
-          relationship_type: relationshipType,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", relationshipId)
-        .eq("user_id", user.id)
-        .select(RELATIONSHIP_SELECT)
-        .single();
-
-      if (updateError) {
-        if (updateError.code === "23505") {
-          return reply.status(409).send({ error: "Relationship already exists" });
-        }
-
-        if (updateError.code === "23514") {
-          return reply.status(400).send({ error: "Invalid relationship data" });
-        }
-
-        return reply.status(500).send({ error: updateError.message });
-      }
-
-      return {
-        relationship: {
-          id: updatedRelationship.id,
-          userId: updatedRelationship.user_id,
-          sourcePersonId: updatedRelationship.source_person_id,
-          targetPersonId: updatedRelationship.target_person_id,
-          relationshipType: updatedRelationship.relationship_type as RelationshipType,
-          createdAt: updatedRelationship.created_at,
-          updatedAt: updatedRelationship.updated_at,
-        },
-      };
-    },
+    withDomainRoute(
+      { body: updateContactRelationshipInputSchema, params: contactRelationshipIdParamSchema },
+      async (ctx, { body, params }) => {
+        const { data } = await updateRelationship(
+          ctx,
+          params.id,
+          params.relationshipId,
+          body.relatedPersonId,
+          body.relationshipType,
+        );
+        return { relationship: data.relationship };
+      },
+    ),
   );
 
   /**
@@ -380,41 +273,9 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         response: withOkResponse(messageResponseSchema, "Relationship deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id: personId, relationshipId } = request.params;
-
-      const { data: existingRelationship, error: existingRelationshipError } = await client
-        .from("people_relationships")
-        .select("id, source_person_id, target_person_id")
-        .eq("id", relationshipId)
-        .eq("user_id", user.id)
-        .single();
-
-      if (existingRelationshipError || !existingRelationship) {
-        return reply.status(404).send({ error: "Relationship not found" });
-      }
-
-      if (
-        existingRelationship.source_person_id !== personId &&
-        existingRelationship.target_person_id !== personId
-      ) {
-        return reply.status(404).send({ error: "Relationship not found" });
-      }
-
-      const { data: deletedRelationship, error: deleteError } = await client
-        .from("people_relationships")
-        .delete()
-        .eq("id", relationshipId)
-        .eq("user_id", user.id)
-        .select("id")
-        .single();
-
-      if (deleteError || !deletedRelationship) {
-        return reply.status(404).send({ error: "Relationship not found" });
-      }
-
+    withDomainRoute({ params: contactRelationshipIdParamSchema }, async (ctx, { params }) => {
+      await deleteRelationship(ctx, params.id, params.relationshipId);
       return { message: "Relationship deleted successfully" };
-    },
+    }),
   );
 }

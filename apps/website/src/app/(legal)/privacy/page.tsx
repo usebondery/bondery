@@ -1,22 +1,22 @@
-import type { Metadata } from "next";
 import { formatMetadataTitle } from "@bondery/helpers";
+import type { Metadata } from "next";
 import { Privacy } from "@/components/legal";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy",
-  description: "Learn how Bondery collects, uses, and protects your data.",
   alternates: {
     canonical: "/privacy",
   },
+  description: "Learn how Bondery collects, uses, and protects your data.",
   openGraph: {
-    title: formatMetadataTitle("Privacy Policy"),
     description: "Learn how Bondery collects, uses, and protects your data.",
-    url: "/privacy",
+    title: formatMetadataTitle("Privacy Policy"),
     type: "website",
+    url: "/privacy",
   },
+  title: "Privacy Policy",
   twitter: {
-    title: formatMetadataTitle("Privacy Policy"),
     description: "Learn how Bondery collects, uses, and protects your data.",
+    title: formatMetadataTitle("Privacy Policy"),
   },
 };
 

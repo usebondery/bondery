@@ -9,8 +9,8 @@ function normalizeSupabaseBaseUrl(url: string): string {
 
 function supabaseRequestHeaders(publishableKey: string): Record<string, string> {
   return {
-    apikey: publishableKey,
     Authorization: `Bearer ${publishableKey}`,
+    apikey: publishableKey,
   };
 }
 
@@ -47,18 +47,18 @@ async function probeHttp(
     const latencyMs = Date.now() - started;
     if (!okStatuses.includes(response.status)) {
       return {
-        ok: false,
-        latencyMs,
         error: `http_${response.status}`,
+        latencyMs,
+        ok: false,
       };
     }
 
-    return { ok: true, latencyMs };
+    return { latencyMs, ok: true };
   } catch (error) {
     return {
-      ok: false,
-      latencyMs: Date.now() - started,
       error: classifyProbeError(error),
+      latencyMs: Date.now() - started,
+      ok: false,
     };
   } finally {
     clearTimeout(timer);
@@ -71,8 +71,8 @@ export async function probeSupabaseAuth(
 ): Promise<ServiceProbeResult> {
   const baseUrl = normalizeSupabaseBaseUrl(supabaseUrl);
   return probeHttp(`${baseUrl}/auth/v1/health`, {
-    method: "GET",
     headers: supabaseRequestHeaders(publishableKey),
+    method: "GET",
   });
 }
 
@@ -82,8 +82,8 @@ export async function probeSupabaseDatabase(
 ): Promise<ServiceProbeResult> {
   const baseUrl = normalizeSupabaseBaseUrl(supabaseUrl);
   return probeHttp(`${baseUrl}/rest-admin/v1/ready`, {
-    method: "GET",
     headers: supabaseRequestHeaders(publishableKey),
+    method: "GET",
   });
 }
 
@@ -98,17 +98,17 @@ export async function probeSupabaseStorage(
 
   try {
     const response = await fetch(`${baseUrl}/storage/v1/health`, {
-      method: "GET",
       headers: supabaseRequestHeaders(publishableKey),
+      method: "GET",
       signal: controller.signal,
     });
 
     const latencyMs = Date.now() - started;
     if (!response.ok) {
       return {
-        ok: false,
-        latencyMs,
         error: `http_${response.status}`,
+        latencyMs,
+        ok: false,
       };
     }
 
@@ -116,25 +116,25 @@ export async function probeSupabaseStorage(
       const payload = (await response.json()) as { healthy?: boolean };
       if (payload.healthy === false) {
         return {
-          ok: false,
-          latencyMs,
           error: "unhealthy",
+          latencyMs,
+          ok: false,
         };
       }
     } catch {
       return {
-        ok: false,
-        latencyMs,
         error: "invalid_response",
+        latencyMs,
+        ok: false,
       };
     }
 
-    return { ok: true, latencyMs };
+    return { latencyMs, ok: true };
   } catch (error) {
     return {
-      ok: false,
-      latencyMs: Date.now() - started,
       error: classifyProbeError(error),
+      latencyMs: Date.now() - started,
+      ok: false,
     };
   } finally {
     clearTimeout(timer);
@@ -144,15 +144,15 @@ export async function probeSupabaseStorage(
 export async function probeRedis(redisUrl: string): Promise<ServiceProbeResult> {
   const trimmed = redisUrl.trim();
   if (!trimmed) {
-    return { ok: true, configured: false };
+    return { configured: false, ok: true };
   }
 
   const started = Date.now();
   const client = new Redis(trimmed, {
     connectTimeout: DEFAULT_PROBE_TIMEOUT_MS,
-    maxRetriesPerRequest: 0,
     enableReadyCheck: true,
     lazyConnect: true,
+    maxRetriesPerRequest: 0,
   });
 
   try {
@@ -162,20 +162,20 @@ export async function probeRedis(redisUrl: string): Promise<ServiceProbeResult> 
 
     if (pong !== "PONG") {
       return {
-        ok: false,
         configured: true,
-        latencyMs,
         error: "unexpected_response",
+        latencyMs,
+        ok: false,
       };
     }
 
-    return { ok: true, configured: true, latencyMs };
+    return { configured: true, latencyMs, ok: true };
   } catch (error) {
     return {
-      ok: false,
       configured: true,
-      latencyMs: Date.now() - started,
       error: classifyProbeError(error),
+      latencyMs: Date.now() - started,
+      ok: false,
     };
   } finally {
     client.disconnect();
@@ -188,8 +188,8 @@ export function probeConfigured(
 ): ServiceProbeResult {
   const required = options?.required ?? false;
   return {
-    ok: configured || !required,
     configured,
+    ok: configured || !required,
     ...(configured || required ? {} : { error: "not_configured" }),
   };
 }

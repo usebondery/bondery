@@ -11,14 +11,14 @@ export type ContactAddressTypeOption = {
 };
 
 export const CONTACT_CHANNEL_TYPE_OPTIONS: readonly ContactChannelTypeOption[] = [
-  { value: "home", emoji: "🏠" },
-  { value: "work", emoji: "💼" },
+  { emoji: "🏠", value: "home" },
+  { emoji: "💼", value: "work" },
 ] as const;
 
 export const CONTACT_ADDRESS_TYPE_OPTIONS: readonly ContactAddressTypeOption[] = [
-  { value: "home", emoji: "🏠" },
-  { value: "work", emoji: "💼" },
-  { value: "other", emoji: "📍" },
+  { emoji: "🏠", value: "home" },
+  { emoji: "💼", value: "work" },
+  { emoji: "📍", value: "other" },
 ] as const;
 
 export function getContactChannelTypeEmoji(type: ContactType): string {

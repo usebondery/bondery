@@ -1,0 +1,18 @@
+{
+  "ActionsGroup": "Akce",
+  "AddPerson": "Přidat osobu",
+  "AddPersonDescription": "Vytvořte nový kontakt ve vaší síti",
+  "ContactUs": "Kontaktujte nás",
+  "ContactUsDescription": "Spojte se s týmem Bondery",
+  "Documentation": "Dokumentace",
+  "DocumentationDescription": "Přečtěte si dokumentaci Bondery",
+  "FindPerson": "Najít osobu",
+  "FindPersonDescription": "Vyhledejte ve své síti podle jména",
+  "GoToDescription": "Přejít na {label}",
+  "HelpGroup": "Nápověda",
+  "LogInteraction": "Zaznamenat interakci",
+  "LogInteractionDescription": "Zaznamenejte nové setkání, hovor nebo zprávu",
+  "NavigateGroup": "Navigace",
+  "NothingFound": "Žádné akce nenalezeny",
+  "SearchPlaceholder": "Hledat akce nebo navigovat…"
+}

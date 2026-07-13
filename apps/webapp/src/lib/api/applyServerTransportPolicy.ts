@@ -1,16 +1,16 @@
+import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
-import {
-  isApiUnavailableError,
-  isApiUnavailableResponseStatus,
-} from "@/lib/api/availability";
+import { isApiUnavailableError, isApiUnavailableResponseStatus } from "@/lib/api/availability";
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import {
-  isUnauthorizedApiError,
-  isUnauthorizedResponseStatus,
-} from "@/lib/auth/unauthorized";
+  buildUnavailableUrl,
+  getRequestReturnPath,
+  getRequestReturnPathForLogin,
+  parseReturnIntent,
+} from "@/lib/auth/returnIntent";
+import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 
 async function getPathname(): Promise<string> {
   const headersList = await headers();
@@ -38,7 +38,20 @@ async function applyUnauthorizedPolicy(errorToRethrow?: unknown): Promise<never>
     }
     redirect(WEBSITE_ROUTES.LOGIN);
   }
-  return handleServerUnauthorizedSession();
+
+  const headersList = await headers();
+
+  if (isOnUnavailableRoute(pathname)) {
+    const search = headersList.get("x-search") ?? "";
+    const forwardedRedirect = parseReturnIntent(
+      new URLSearchParams(search.startsWith("?") ? search.slice(1) : search),
+    );
+    if (forwardedRedirect) {
+      return handleServerUnauthorizedSession(forwardedRedirect);
+    }
+  }
+
+  return handleServerUnauthorizedSession(getRequestReturnPathForLogin(headersList));
 }
 
 async function applyUnavailablePolicy(error: unknown): Promise<never> {
@@ -51,7 +64,8 @@ async function applyUnavailablePolicy(error: unknown): Promise<never> {
     return applyUnauthorizedPolicy(error);
   }
 
-  redirect(WEBAPP_ROUTES.UNAVAILABLE);
+  const headersList = await headers();
+  redirect(buildUnavailableUrl(getRequestReturnPath(headersList)));
 }
 
 /** Apply global session/outage policy for thrown transport errors (server RSC). */
@@ -88,5 +102,6 @@ export async function applyServerTransportResponsePolicy(response: Response): Pr
     return;
   }
 
-  redirect(WEBAPP_ROUTES.UNAVAILABLE);
+  const headersList = await headers();
+  redirect(buildUnavailableUrl(getRequestReturnPath(headersList)));
 }

@@ -1,22 +1,22 @@
 export interface ExampleName {
   firstName: string;
-  middleName: string;
   lastName: string;
+  middleName: string;
 }
 
 const EXAMPLE_NAMES: ExampleName[] = [
-  { firstName: "Edgar", middleName: "Allan", lastName: "Poe" },
-  { firstName: "Harry", middleName: "James", lastName: "Potter" },
-  { firstName: "John", middleName: "Ronald Reuel", lastName: "Tolkien" },
-  { firstName: "Marie", middleName: "Salomea", lastName: "Curie" },
-  { firstName: "Neil", middleName: "Alden", lastName: "Armstrong" },
-  { firstName: "Vincent", middleName: "Willem van", lastName: "Gogh" },
-  { firstName: "Ludwig", middleName: "van", lastName: "Beethoven" },
-  { firstName: "Ludwig", middleName: "von", lastName: "Mises" },
+  { firstName: "Edgar", lastName: "Poe", middleName: "Allan" },
+  { firstName: "Harry", lastName: "Potter", middleName: "James" },
+  { firstName: "John", lastName: "Tolkien", middleName: "Ronald Reuel" },
+  { firstName: "Marie", lastName: "Curie", middleName: "Salomea" },
+  { firstName: "Neil", lastName: "Armstrong", middleName: "Alden" },
+  { firstName: "Vincent", lastName: "Gogh", middleName: "Willem van" },
+  { firstName: "Ludwig", lastName: "Beethoven", middleName: "van" },
+  { firstName: "Ludwig", lastName: "Mises", middleName: "von" },
   {
     firstName: "Friedrich",
-    middleName: "August von",
     lastName: "Hayek",
+    middleName: "August von",
   },
 ];
 

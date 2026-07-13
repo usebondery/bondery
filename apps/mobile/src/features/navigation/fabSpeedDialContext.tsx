@@ -1,11 +1,11 @@
 import {
   createContext,
+  type ReactNode,
   useCallback,
   useContext,
   useMemo,
   useRef,
   useState,
-  type ReactNode,
 } from "react";
 import { FAB_SPEED_DIAL_MOTION } from "../../theme/animations";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
@@ -13,21 +13,21 @@ import type { FabSpeedDialAction, FabSpeedDialMenuItemLayout } from "./fabSpeedD
 
 interface FabSpeedDialContextValue {
   actions: FabSpeedDialAction[];
+  closeMenu: () => void;
+  closeOverflowSheet: () => void;
+  getMenuItemLayouts: () => FabSpeedDialMenuItemLayout[];
+  highlightedActionId: string | null;
   isOpen: boolean;
   isOverflowSheetOpen: boolean;
-  highlightedActionId: string | null;
-  usesInlineMenu: boolean;
-  openMenu: () => void;
-  closeMenu: () => void;
-  toggleMenu: () => void;
-  openOverflowSheet: () => void;
-  closeOverflowSheet: () => void;
-  setHighlightedActionId: (id: string | null) => void;
-  registerMenuItemLayout: (layout: FabSpeedDialMenuItemLayout) => void;
-  getMenuItemLayouts: () => FabSpeedDialMenuItemLayout[];
-  runAction: (id: string) => void;
   notifyScrolled: () => void;
+  openMenu: () => void;
+  openOverflowSheet: () => void;
+  registerMenuItemLayout: (layout: FabSpeedDialMenuItemLayout) => void;
+  runAction: (id: string) => void;
+  setHighlightedActionId: (id: string | null) => void;
+  toggleMenu: () => void;
   tryDismissFromScrim: () => void;
+  usesInlineMenu: boolean;
 }
 
 const FabSpeedDialContext = createContext<FabSpeedDialContextValue | null>(null);
@@ -148,21 +148,21 @@ export function FabSpeedDialProvider({ actions, children }: FabSpeedDialProvider
   const value = useMemo(
     () => ({
       actions,
+      closeMenu,
+      closeOverflowSheet,
+      getMenuItemLayouts,
+      highlightedActionId,
       isOpen,
       isOverflowSheetOpen,
-      highlightedActionId,
-      usesInlineMenu,
-      openMenu,
-      closeMenu,
-      toggleMenu,
-      openOverflowSheet,
-      closeOverflowSheet,
-      setHighlightedActionId,
-      registerMenuItemLayout,
-      getMenuItemLayouts,
-      runAction,
       notifyScrolled,
+      openMenu,
+      openOverflowSheet,
+      registerMenuItemLayout,
+      runAction,
+      setHighlightedActionId,
+      toggleMenu,
       tryDismissFromScrim,
+      usesInlineMenu,
     }),
     [
       actions,
@@ -180,6 +180,7 @@ export function FabSpeedDialProvider({ actions, children }: FabSpeedDialProvider
       toggleMenu,
       tryDismissFromScrim,
       usesInlineMenu,
+      setHighlightedActionId,
     ],
   );
 

@@ -6,7 +6,7 @@ export function buildGeocodeSuggestQuery(
   search: string,
   mode: "address" | "place" = "address",
 ): string {
-  const params = new URLSearchParams({ search: search.trim(), mode });
+  const params = new URLSearchParams({ mode, search: search.trim() });
   return params.toString();
 }
 

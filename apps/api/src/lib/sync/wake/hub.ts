@@ -1,10 +1,10 @@
-import type { FastifyBaseLogger } from "fastify";
 import type { SyncWsServerMessage } from "@bondery/schemas/sync";
 import {
   toSyncWsBatchMessage,
   toSyncWsHelloMessage,
   toSyncWsPingMessage,
 } from "@bondery/schemas/sync";
+import type { FastifyBaseLogger } from "fastify";
 import type { SyncWakeEvent, SyncWakeSocket } from "./types.js";
 import { WS_OPEN } from "./types.js";
 
@@ -27,7 +27,7 @@ export class SyncConnectionHub {
 
   register(userId: string, socket: SyncWakeSocket): void {
     this.enforceConnectionLimit(userId);
-    const entry: SocketEntry = { socket, userId, awaitingPong: false };
+    const entry: SocketEntry = { awaitingPong: false, socket, userId };
     let set = this.socketsByUser.get(userId);
     if (!set) {
       set = new Set();
@@ -47,7 +47,10 @@ export class SyncConnectionHub {
           if (set.size === 0) {
             this.socketsByUser.delete(userId);
           }
-          this.log?.info({ event: "sync.ws.disconnect", userId }, "sync wake websocket disconnected");
+          this.log?.info(
+            { event: "sync.ws.disconnect", userId },
+            "sync wake websocket disconnected",
+          );
           return;
         }
       }
@@ -77,7 +80,9 @@ export class SyncConnectionHub {
 
   broadcastToUser(userId: string, message: SyncWsServerMessage): void {
     const set = this.socketsByUser.get(userId);
-    if (!set) return;
+    if (!set) {
+      return;
+    }
 
     const payload = JSON.stringify(message);
     for (const entry of [...set]) {
@@ -104,7 +109,9 @@ export class SyncConnectionHub {
 
   private enforceConnectionLimit(userId: string): void {
     const set = this.socketsByUser.get(userId);
-    if (!set || set.size < MAX_SOCKETS_PER_USER) return;
+    if (!set || set.size < MAX_SOCKETS_PER_USER) {
+      return;
+    }
 
     const oldest = set.values().next().value as SocketEntry | undefined;
     if (oldest) {

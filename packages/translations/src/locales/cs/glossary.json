@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "contact",
+    "contactPlural": "contacts",
+    "group": "group",
+    "interaction": "interaction",
+    "interactionPlural": "interactions",
+    "network": "network",
+    "person": "osoba",
+    "person_one": "{count} osoba",
+    "person_other": "{count} lidí",
+    "tag": "tag"
+  },
+  "features": {
+    "aiAssistant": "AI asistent",
+    "fixAndMerge": "Opravit a sloučit",
+    "keepInTouch": "Udržovat kontakt"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

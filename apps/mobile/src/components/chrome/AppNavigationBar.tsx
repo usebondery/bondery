@@ -15,7 +15,5 @@ export function AppNavigationBar() {
     return null;
   }
 
-  return (
-    <NavigationBar style={resolvedTheme === "dark" ? "dark" : "light"} />
-  );
+  return <NavigationBar style={resolvedTheme === "dark" ? "dark" : "light"} />;
 }

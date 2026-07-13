@@ -1,13 +1,13 @@
-import type { Metadata } from "next";
-import { notFound } from "next/navigation";
-import { Container, Flex, Stack, Text, Title } from "@mantine/core";
 import { formatMetadataTitle } from "@bondery/helpers";
 import { PersonChip } from "@bondery/mantine-next";
-import { WEBSITE_URL } from "@/lib/config";
-import Script from "next/script";
-import { headers } from "next/headers";
-import { getAllSlugs, getPostMeta, getPostComponent } from "../../_lib";
+import { Container, Flex, Stack, Text, Title } from "@mantine/core";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTeamMember } from "@/data/team";
+import { JsonLd } from "@/lib/seo/json-ld";
+import { getCspNonce } from "@/lib/seo/nonce";
+import { buildBlogPostingSchema } from "@/lib/seo/schemas/blog-posting";
+import { getAllSlugs, getPostComponent, getPostMeta } from "../../_lib";
 import { getPostReadingTime } from "../../_lib/server-utils";
 
 type Props = {
@@ -21,31 +21,33 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category, slug } = await params;
   const meta = getPostMeta(category, slug);
-  if (!meta) return {};
+  if (!meta) {
+    return {};
+  }
 
   const modifiedTime = meta.modifiedDate ?? meta.date;
 
   return {
-    title: meta.title,
-    description: meta.description,
-    authors: meta.author ? [{ name: meta.author }] : undefined,
-    keywords: meta.tags,
     alternates: {
       canonical: `/blog/${category}/${slug}`,
     },
+    authors: meta.author ? [{ name: meta.author }] : undefined,
+    description: meta.description,
+    keywords: meta.tags,
     openGraph: {
-      title: formatMetadataTitle(meta.title),
-      description: meta.description,
-      url: `/blog/${category}/${slug}`,
-      type: "article",
-      publishedTime: meta.date,
-      modifiedTime,
       authors: meta.author ? [meta.author] : undefined,
-      tags: meta.tags,
-    },
-    twitter: {
-      title: formatMetadataTitle(meta.title),
       description: meta.description,
+      modifiedTime,
+      publishedTime: meta.date,
+      tags: meta.tags,
+      title: formatMetadataTitle(meta.title),
+      type: "article",
+      url: `/blog/${category}/${slug}`,
+    },
+    title: meta.title,
+    twitter: {
+      description: meta.description,
+      title: formatMetadataTitle(meta.title),
     },
   };
 }
@@ -53,68 +55,49 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function BlogPostPage({ params }: Props) {
   const { category, slug } = await params;
   const meta = getPostMeta(category, slug);
-  if (!meta) notFound();
+  if (!meta) {
+    notFound();
+  }
 
   const Content = getPostComponent(category, slug);
-  if (!Content) notFound();
+  if (!Content) {
+    notFound();
+  }
 
-  const nonce = (await headers()).get("x-nonce") ?? undefined;
+  const nonce = await getCspNonce();
   const readingTime = getPostReadingTime(category, slug);
 
   const authorChip = meta.author
     ? (() => {
         const member = getTeamMember(meta.author);
-        if (!member) return null;
+        if (!member) {
+          return null;
+        }
         return {
-          id: member.name.toLowerCase(),
-          firstName: member.name,
-          lastName: null as string | null,
           avatar: member.image as string | null,
+          firstName: member.name,
+          id: member.name.toLowerCase(),
+          lastName: null as string | null,
         };
       })()
     : null;
 
   const formattedDate = new Date(meta.date).toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
     day: "numeric",
+    month: "long",
+    year: "numeric",
   });
-
-  const blogPostingSchema = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: meta.title,
-    description: meta.description,
-    datePublished: meta.date,
-    dateModified: meta.modifiedDate ?? meta.date,
-    url: `${WEBSITE_URL}/blog/${category}/${slug}`,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": `${WEBSITE_URL}/blog/${category}/${slug}`,
-    },
-    publisher: {
-      "@id": `${WEBSITE_URL}#organization`,
-    },
-    ...(meta.author && {
-      author: {
-        "@type": "Person",
-        name: meta.author,
-      },
-    }),
-    ...(meta.tags && { keywords: meta.tags.join(", ") }),
-  };
 
   return (
     <>
-      <Script
+      <JsonLd
+        data={buildBlogPostingSchema(meta, category, slug)}
         id={`schema-blog-posting-${slug}`}
-        type="application/ld+json"
         nonce={nonce}
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogPostingSchema) }}
       />
-      <Container size="sm" pt={60} pb="xl">
+      <Container pb="xl" pt={60} size="sm">
         <Stack gap="xl">
-          <Stack gap="xs" align="center">
+          <Stack align="center" gap="xs">
             <Title order={1} ta="center">
               {meta.title}
             </Title>
@@ -129,7 +112,7 @@ export default async function BlogPostPage({ params }: Props) {
                 {readingTime} min read
               </Text>
             </Flex>
-            {authorChip && <PersonChip person={authorChip} isClickable href="/contact#team" />}
+            {authorChip && <PersonChip href="/contact#team" isClickable person={authorChip} />}
           </Stack>
 
           <article>

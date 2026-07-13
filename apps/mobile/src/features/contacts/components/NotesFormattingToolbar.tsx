@@ -1,10 +1,5 @@
+import { IconBold, IconItalic, IconStrikethrough, IconUnderline } from "@tabler/icons-react-native";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import {
-  IconBold,
-  IconItalic,
-  IconStrikethrough,
-  IconUnderline,
-} from "@tabler/icons-react-native";
 import type { EnrichedMarkdownTextInputInstance, StyleState } from "react-native-enriched-markdown";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -14,10 +9,7 @@ interface NotesFormattingToolbarProps {
   styleState: StyleState | null;
 }
 
-export function NotesFormattingToolbar({
-  editorRef,
-  styleState,
-}: NotesFormattingToolbarProps) {
+export function NotesFormattingToolbar({ editorRef, styleState }: NotesFormattingToolbarProps) {
   const colors = useMobileThemeColors();
 
   function ToolbarButton({
@@ -33,22 +25,18 @@ export function NotesFormattingToolbar({
   }) {
     return (
       <Pressable
-        style={[
-          styles.button,
-          isActive && { backgroundColor: colors.primary + "22" },
-        ]}
-        onPress={onPress}
-        accessibilityRole="button"
         accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
         accessibilityState={{ selected: isActive }}
+        onPress={onPress}
+        style={[styles.button, isActive && { backgroundColor: `${colors.primary}22` }]}
       >
         {icon}
       </Pressable>
     );
   }
 
-  const iconColor = (active?: boolean) =>
-    active ? colors.primary : colors.iconPrimary;
+  const iconColor = (active?: boolean) => (active ? colors.primary : colors.iconPrimary);
   const iconSize = 20;
 
   return (
@@ -59,45 +47,33 @@ export function NotesFormattingToolbar({
       ]}
     >
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.row}
+        horizontal
         keyboardShouldPersistTaps="always"
+        showsHorizontalScrollIndicator={false}
       >
         <ToolbarButton
-          icon={
-            <IconBold
-              size={iconSize}
-              stroke={iconColor(styleState?.bold.isActive)}
-            />
-          }
+          accessibilityLabel="Bold"
+          icon={<IconBold size={iconSize} stroke={iconColor(styleState?.bold.isActive)} />}
           isActive={styleState?.bold.isActive}
           onPress={() => editorRef.current?.toggleBold()}
-          accessibilityLabel="Bold"
         />
         <ToolbarButton
-          icon={
-            <IconItalic
-              size={iconSize}
-              stroke={iconColor(styleState?.italic.isActive)}
-            />
-          }
+          accessibilityLabel="Italic"
+          icon={<IconItalic size={iconSize} stroke={iconColor(styleState?.italic.isActive)} />}
           isActive={styleState?.italic.isActive}
           onPress={() => editorRef.current?.toggleItalic()}
-          accessibilityLabel="Italic"
         />
         <ToolbarButton
+          accessibilityLabel="Underline"
           icon={
-            <IconUnderline
-              size={iconSize}
-              stroke={iconColor(styleState?.underline?.isActive)}
-            />
+            <IconUnderline size={iconSize} stroke={iconColor(styleState?.underline?.isActive)} />
           }
           isActive={styleState?.underline?.isActive}
           onPress={() => editorRef.current?.toggleUnderline()}
-          accessibilityLabel="Underline"
         />
         <ToolbarButton
+          accessibilityLabel="Strikethrough"
           icon={
             <IconStrikethrough
               size={iconSize}
@@ -106,7 +82,6 @@ export function NotesFormattingToolbar({
           }
           isActive={styleState?.strikethrough.isActive}
           onPress={() => editorRef.current?.toggleStrikethrough()}
-          accessibilityLabel="Strikethrough"
         />
       </ScrollView>
     </View>
@@ -116,21 +91,21 @@ export function NotesFormattingToolbar({
 const BUTTON_SIZE = MOBILE_LAYOUT.touchTarget;
 
 const styles = StyleSheet.create({
+  button: {
+    alignItems: "center",
+    borderRadius: 8,
+    height: BUTTON_SIZE,
+    justifyContent: "center",
+    width: BUTTON_SIZE,
+  },
   container: {
     borderTopWidth: 1,
   },
   row: {
-    flexDirection: "row",
     alignItems: "center",
+    flexDirection: "row",
+    gap: 2,
     paddingHorizontal: 8,
     paddingVertical: 4,
-    gap: 2,
-  },
-  button: {
-    width: BUTTON_SIZE,
-    height: BUTTON_SIZE,
-    alignItems: "center",
-    justifyContent: "center",
-    borderRadius: 8,
   },
 });

@@ -1,22 +1,22 @@
-import type { Metadata } from "next";
 import { formatMetadataTitle } from "@bondery/helpers";
+import type { Metadata } from "next";
 import { Contact, Team } from "@/components/landing";
 
 export const metadata: Metadata = {
-  title: "Contact",
-  description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
   alternates: {
     canonical: "/contact",
   },
+  description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
   openGraph: {
-    title: formatMetadataTitle("Contact"),
     description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
-    url: "/contact",
+    title: formatMetadataTitle("Contact"),
     type: "website",
+    url: "/contact",
   },
+  title: "Contact",
   twitter: {
-    title: formatMetadataTitle("Contact"),
     description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
+    title: formatMetadataTitle("Contact"),
   },
 };
 

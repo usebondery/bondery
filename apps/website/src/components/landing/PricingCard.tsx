@@ -29,24 +29,24 @@ type PricingCardProps = {
 export function PricingCard({ title, description, features, action, oldPrice }: PricingCardProps) {
   return (
     <Card
+      h="100%"
+      maw={380}
+      miw={{ base: "100%", sm: 350 }}
       radius="lg"
       shadow="lg"
-      miw={{ base: "100%", sm: 350 }}
-      maw={380}
-      h="100%"
-      withBorder
       style={{
         backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
         display: "flex",
         flexDirection: "column",
       }}
+      withBorder
     >
       <Flex align="end" gap="xs" mb="sm">
-        <Title order={2} fw="bold" fz="2rem">
+        <Title fw="bold" fz="2rem" order={2}>
           {title}
         </Title>
         {oldPrice && (
-          <Text c="dimmed" fz="sm" td="line-through" mb={6}>
+          <Text c="dimmed" fz="sm" mb={6} td="line-through">
             {oldPrice}
           </Text>
         )}
@@ -59,11 +59,11 @@ export function PricingCard({ title, description, features, action, oldPrice }: 
 
       <Stack style={{ flex: 1 }}>
         {features.map((feature) => (
-          <Group key={feature.title} gap="xs" align="start">
-            <ThemeIcon variant="default" size="xl">
+          <Group align="start" gap="xs" key={feature.title}>
+            <ThemeIcon size="xl" variant="default">
               {feature.icon}
             </ThemeIcon>
-            <Stack gap={0} flex={1}>
+            <Stack flex={1} gap={0}>
               <Text fw={500}>{feature.title}</Text>
               <Text c="dimmed" fz="sm">
                 {feature.description}

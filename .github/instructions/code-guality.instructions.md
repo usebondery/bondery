@@ -36,7 +36,10 @@ applyTo: "**"
 
 ## Localization
 
-- All texts should be stored in a separate file for easier localization and management. The dictionaries file is located at /translations. Only CZ and EN are supported for now. Import the texts from there rather than hardcoding them in components.
+- User-facing copy lives in `@bondery/translations` under `packages/translations/src/locales/{locale}/**`. Each JSON file is a namespace (filename without `.json`).
+- Webapp: `useWebTranslations(namespace, keyPrefix?)`, `useCommonTranslations()`, `useValidationTranslations(keyPrefix?)`. Preload route namespaces in layout server components via `preloadWebNamespaces`.
+- Mobile: `useMobileTranslations(namespace?, keyPrefix?)` with `defaultNS: "common"`. Preload tab/screen groups via `preloadMobileNamespaces`.
+- Do not use legacy patterns: monolith `en.json` imports, `WebAppCommon`, `MobileApp.*`, dotted `useTranslations("Page.Section")`, `loadTranslation`, or `translationsByLocale`.
 
 ## Types and documentation
 

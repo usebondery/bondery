@@ -1,34 +1,58 @@
 import { spawn } from "node:child_process";
-import { copyFileSync, readdirSync, watch } from "node:fs";
-import { join } from "node:path";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, watch } from "node:fs";
+import { join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
-const srcDir = "src";
-const distDir = "dist";
+const packageRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
+const repoRoot = resolve(packageRoot, "../..");
 
-function copyJsonFiles() {
-  for (const file of readdirSync(srcDir)) {
-    if (file.endsWith(".json")) {
-      copyFileSync(join(srcDir, file), join(distDir, file));
+const srcLocales = join("src", "locales");
+const distLocales = join("dist", "locales");
+
+function copyRecursive(src, dest) {
+  if (!existsSync(src)) {
+    return;
+  }
+  mkdirSync(dest, { recursive: true });
+  for (const entry of readdirSync(src, { withFileTypes: true })) {
+    const srcPath = join(src, entry.name);
+    const destPath = join(dest, entry.name);
+    if (entry.isDirectory()) {
+      copyRecursive(srcPath, destPath);
+    } else if (entry.name.endsWith(".json")) {
+      copyFileSync(srcPath, destPath);
     }
   }
 }
 
-copyJsonFiles();
+function syncArtifacts() {
+  copyRecursive(srcLocales, distLocales);
+  if (existsSync("manifest.json")) {
+    mkdirSync("dist", { recursive: true });
+    copyFileSync("manifest.json", join("dist", "manifest.json"));
+  }
+}
 
-for (const file of readdirSync(srcDir)) {
-  if (!file.endsWith(".json")) continue;
+syncArtifacts();
 
-  watch(join(srcDir, file), (eventType) => {
+if (existsSync(srcLocales)) {
+  watch(srcLocales, { recursive: true }, (eventType) => {
     if (eventType === "change") {
-      copyJsonFiles();
+      syncArtifacts();
     }
   });
 }
 
-const tsc = spawn("tsc", ["--watch", "--preserveWatchOutput"], {
+spawn(process.execPath, [join(packageRoot, "scripts/generate-resource-map.mjs")], {
+  cwd: packageRoot,
   stdio: "inherit",
-  shell: true,
 });
+
+const tsc = spawn(
+  process.execPath,
+  [join(repoRoot, "node_modules/typescript/bin/tsc"), "--watch", "--preserveWatchOutput"],
+  { cwd: packageRoot, stdio: "inherit" },
+);
 
 tsc.on("exit", (code) => {
   process.exit(code ?? 0);

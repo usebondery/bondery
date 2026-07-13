@@ -1,39 +1,42 @@
 "use client";
 
-import { useMemo } from "react";
-import { Text, Button, Stack, Group, Paper, SimpleGrid } from "@mantine/core";
-import { notifications } from "@mantine/notifications";
-import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
-import { PageHeader } from "@/app/(app)/app/components/PageHeader";
-import { PageWrapper } from "@/app/(app)/app/components/PageWrapper";
-import type { GroupWithCount } from "@bondery/schemas";
-import { openAddGroupModal } from "./components/AddGroupModal";
-import { openEditGroupModal } from "./components/EditGroupModal";
-import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
-import { SortMenu, type SortOption } from "./components/SortMenu";
-import { GroupCard } from "./components/GroupCard";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { openStandardConfirmModal } from "../components/modals/openStandardConfirmModal";
+import type { GroupWithCount } from "@bondery/schemas";
+import { Button, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
+import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useMemo } from "react";
+import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
+import { PageHeader } from "@/components/shell/PageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
 import { captureEvent } from "@/lib/analytics/client";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { optimisticGroupDocumentTitle } from "@/lib/metadata/optimisticTitles";
+import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
 import {
   useDeleteGroupMutation,
   useDuplicateGroupMutation,
   useGroupsListQuery,
 } from "@/lib/query/hooks/useGroups";
+import { openAddGroupModal } from "./components/AddGroupModal";
+import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
+import { openEditGroupModal } from "./components/EditGroupModal";
+import { GroupCard } from "./components/GroupCard";
+import { SortMenu, type SortOption } from "./components/SortMenu";
 
 const LIST_PARAMS = { previewLimit: 3 };
 
 export function GroupsClient() {
-  const t = useTranslations("GroupsPage");
-  const tCommon = useTranslations("WebAppCommon");
+  const t = useGroupsPageTranslations();
+  const tCommon = useCommonTranslations();
   const router = useRouter();
+  const { navigateWithTitle } = useNavigateWithTitle();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const { data } = useGroupsListQuery(LIST_PARAMS);
@@ -66,22 +69,25 @@ export function GroupsClient() {
         return groups.sort((a, b) => b.label.localeCompare(a.label));
       case "count-asc":
         return groups.sort((a, b) => a.contactCount - b.contactCount);
-      case "count-desc":
       default:
         return groups.sort((a, b) => b.contactCount - a.contactCount);
     }
   }, [initialGroups, sortBy]);
 
   const handleCardClick = (groupId: string) => {
-    router.push(`/app/group/${groupId}`);
+    const group = initialGroups.find((item) => item.id === groupId);
+    if (!group) {
+      return;
+    }
+    navigateWithTitle(`/app/group/${group.id}`, optimisticGroupDocumentTitle(group.label));
   };
 
   const handleEditGroup = (group: GroupWithCount) => {
     openEditGroupModal({
       groupId: group.id,
-      initialLabel: group.label,
-      initialEmoji: group.emoji || "",
       initialColor: group.color || "",
+      initialEmoji: group.emoji || "",
+      initialLabel: group.label,
     });
   };
 
@@ -94,27 +100,20 @@ export function GroupsClient() {
 
   const handleDeleteGroup = (groupId: string) => {
     const group = initialGroups.find((g) => g.id === groupId);
-    if (!group) return;
+    if (!group) {
+      return;
+    }
 
     openStandardConfirmModal({
-      title: (
-        <ModalTitle
-          text={t("DeleteGroup.Title")}
-          icon={<IconTrash size={20} />}
-          isDangerous={true}
-        />
-      ),
-      message: (
-        <Text size="sm">{t("DeleteGroup.Message", { label: group.label })}</Text>
-      ),
-      confirmLabel: tCommon("Delete"),
-      cancelLabel: tCommon("Cancel"),
+      cancelLabel: tCommon("actions.cancel"),
       confirmColor: "red",
+      confirmLabel: tCommon("actions.delete"),
+      message: <Text size="sm">{t("DeleteGroup.Message", { label: group.label })}</Text>,
       onConfirm: async () => {
         const loadingNotification = notifications.show({
           ...loadingNotificationTemplate({
-            title: tCommon("Deleting"),
             description: t("DeleteGroup.LoadingDescription", { label: group.label }),
+            title: tCommon("feedback.deleting"),
           }),
         });
 
@@ -125,56 +124,61 @@ export function GroupsClient() {
 
           notifications.update({
             ...successNotificationTemplate({
-              title: tCommon("SuccessTitle"),
               description: t("DeleteGroup.SuccessDescription"),
+              title: tCommon("feedback.successTitle"),
             }),
             id: loadingNotification,
           });
-        } catch (error) {
-          console.error("Error deleting group:", error);
+        } catch {
           notifications.update({
             ...errorNotificationTemplate({
-              title: tCommon("ErrorTitle"),
               description: t("DeleteGroup.ErrorDescription"),
+              title: tCommon("feedback.errorTitle"),
             }),
             id: loadingNotification,
           });
         }
       },
+      title: (
+        <ModalTitle
+          icon={<IconTrash size={20} />}
+          isDangerous={true}
+          text={t("DeleteGroup.Title")}
+        />
+      ),
     });
   };
 
   const handleDuplicateGroup = async (group: GroupWithCount) => {
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: tCommon("Duplicating"),
         description: t("DuplicateGroup.LoadingDescription", { label: group.label }),
+        title: tCommon("feedback.duplicating"),
       }),
     });
 
     try {
       await duplicateGroupMutation.mutateAsync({
-        sourceGroupId: group.id,
         input: {
-          label: `${group.label}${t("DuplicateGroup.CopySuffix")}`,
-          emoji: group.emoji || "",
           color: group.color || "#1971C2",
+          emoji: group.emoji || "",
+          label: t("DuplicateGroup.DuplicatedName", { name: group.label }),
         },
+        sourceGroupId: group.id,
       });
 
       notifications.update({
         ...successNotificationTemplate({
-          title: tCommon("SuccessTitle"),
           description: t("DuplicateGroup.SuccessDescription"),
+          title: tCommon("feedback.successTitle"),
         }),
         id: loadingNotification,
       });
-    } catch (error) {
-      console.error("Error duplicating group:", error);
+    } catch {
       notifications.update({
         ...errorNotificationTemplate({
-          title: tCommon("ErrorTitle"),
           description: t("DuplicateGroup.ErrorDescription"),
+          title: tCommon("feedback.errorTitle"),
         }),
         id: loadingNotification,
       });
@@ -185,48 +189,48 @@ export function GroupsClient() {
     <PageWrapper>
       <Stack gap="xl">
         <PageHeader
-          icon={IconUsersGroup}
-          title={t("Title")}
-          helpDoc="concepts.groups"
-          helpLabel={t("HeaderDescription")}
           action={
             <Button
-              size="md"
               leftSection={<IconUsersPlus size={16} />}
               onClick={() => openAddGroupModal()}
+              size="md"
             >
               {t("CreateNewGroup")}
             </Button>
           }
+          helpDoc="concepts.groups"
+          helpLabel={t("HeaderDescription")}
+          icon={IconUsersGroup}
+          title={t("Title")}
         />
 
-        <Paper withBorder shadow="sm" radius="md" p="md">
+        <Paper p="md" radius="md" shadow="sm" withBorder>
           <Stack>
             <Group justify="space-between">
               <Group gap="md">
-                <Text size="sm" c="dimmed">
+                <Text c="dimmed" size="sm">
                   {totalCount} {totalCount === 1 ? "group" : "groups"}
                 </Text>
               </Group>
-              <SortMenu sortBy={sortBy} setSortBy={handleSortChange} />
+              <SortMenu setSortBy={handleSortChange} sortBy={sortBy} />
             </Group>
 
             {sortedGroups.length > 0 ? (
-              <SimpleGrid cols={{ base: 1, sm: 2, lg: 3, xl: 4 }} spacing="md" mt="md">
+              <SimpleGrid cols={{ base: 1, lg: 3, sm: 2, xl: 4 }} mt="md" spacing="md">
                 {sortedGroups.map((group) => (
                   <GroupCard
-                    key={group.id}
                     group={group}
-                    onClick={handleCardClick}
+                    key={group.id}
                     onAddPeople={handleAddPeopleToGroup}
-                    onEdit={handleEditGroup}
-                    onDuplicate={handleDuplicateGroup}
+                    onClick={handleCardClick}
                     onDelete={handleDeleteGroup}
+                    onDuplicate={handleDuplicateGroup}
+                    onEdit={handleEditGroup}
                   />
                 ))}
               </SimpleGrid>
             ) : (
-              <Text ta="center" c="dimmed" py="xl">
+              <Text c="dimmed" py="xl" ta="center">
                 {t("Empty")}
               </Text>
             )}

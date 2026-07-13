@@ -1,10 +1,15 @@
+import type { Tag, TagWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
 import { useCallback, useMemo, useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import type { Tag, TagWithCount } from "@bondery/schemas";
+import {
+  useCommonTranslations,
+  useMobileContactDetailTranslations,
+  useMobileSettingsTranslations,
+  useMobileTagsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { LoadErrorCard } from "../../../components/load-state";
-import { contactsDomain } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { addTagToContact } from "../../../lib/domains/contacts";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -17,12 +22,12 @@ import { TagEditSheet } from "./TagEditSheet";
 interface ContactTagsSectionProps {
   contactId: string;
   contactName: string;
-  tags: TagWithCount[];
-  loading: boolean;
   error: string | null;
+  loading: boolean;
   onRetry: () => void;
   onTagAdded: (tag: Tag) => void;
   onTagsReplaced: (tags: Tag[]) => void;
+  tags: TagWithCount[];
 }
 
 function TagsLoadingSkeleton() {
@@ -30,19 +35,19 @@ function TagsLoadingSkeleton() {
 
   return (
     <ScrollView
+      contentContainerStyle={styles.tagsRow}
       horizontal
       showsHorizontalScrollIndicator={false}
-      contentContainerStyle={styles.tagsRow}
     >
-      {[72, 96, 84].map((width, index) => (
+      {[72, 96, 84].map((width) => (
         <View
-          key={index}
+          key={width}
           style={[
             styles.skeletonChip,
             {
-              width,
               backgroundColor: colors.surfaceMuted,
               borderColor: colors.border,
+              width,
             },
           ]}
         />
@@ -61,83 +66,85 @@ export function ContactTagsSection({
   onTagAdded,
   onTagsReplaced,
 }: ContactTagsSectionProps) {
-  const t = useMobileTranslations();
+  const tMobileContactDetail = useMobileContactDetailTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const tMobileTags = useMobileTagsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const [isEditSheetOpen, setEditSheetOpen] = useState(false);
   const [isCreateTagOpen, setCreateTagOpen] = useState(false);
   const tagSortOrder = useMobilePreferences((state) => state.tagSortOrder);
 
-  const sortedTags = useMemo(
-    () => sortTags(tags, tagSortOrder),
-    [tagSortOrder, tags],
-  );
+  const sortedTags = useMemo(() => sortTags(tags, tagSortOrder), [tagSortOrder, tags]);
 
-  const editAccessibilityLabel = t(
-    "MobileApp.ContactDetail.TagsEditAccessibility",
-  ).replace("{name}", contactName);
+  const editAccessibilityLabel = tMobileContactDetail("TagsEditAccessibility").replace(
+    "{name}",
+    contactName,
+  );
 
   const handleTagCreated = useCallback(
     (tag: Tag) => {
       try {
-        contactsDomain.addTag(contactId, tag.id);
+        addTagToContact(contactId, tag.id);
         onTagAdded(tag);
       } catch {
         showToast({
+          description: tMobileTags("CreateFailed"),
+          headline: t("feedback.errorTitle"),
           type: "error",
-          headline: t("MobileApp.Common.ErrorTitle"),
-          description: t("MobileApp.Tags.CreateFailed"),
         });
       }
     },
-    [contactId, onTagAdded, showToast, t],
+    [contactId, onTagAdded, showToast, tMobileTags, t],
   );
 
   return (
     <View style={styles.section}>
       <ContactDetailSectionHeader
-        titleKey="MobileApp.TagsInput.Label"
         action={
           loading || error
             ? undefined
             : {
-                label: t("MobileApp.ContactDetail.TagsEdit"),
                 accessibilityLabel: editAccessibilityLabel,
                 icon: <IconPencil size={16} stroke={colors.primary} />,
+                label: tMobileContactDetail("TagsEdit"),
                 onPress: () => setEditSheetOpen(true),
               }
         }
+        titleKey="Label"
+        titleNamespace="TagsInput"
       />
 
       {loading ? (
         <TagsLoadingSkeleton />
       ) : error ? (
         <LoadErrorCard
-          title={t("MobileApp.Settings.TagsLoadErrorTitle")}
           description={error}
           onRetry={onRetry}
+          title={tMobileSettings("TagsLoadErrorTitle")}
         />
       ) : (
         <ContactsTagsHeader
           layout="chipRow"
-          tags={sortedTags}
           onCreatePress={() => setCreateTagOpen(true)}
+          tags={sortedTags}
         />
       )}
 
       <TagEditSheet
         mode="create"
-        open={isCreateTagOpen}
-        onOpenChange={setCreateTagOpen}
         onCreated={handleTagCreated}
+        onOpenChange={setCreateTagOpen}
+        open={isCreateTagOpen}
       />
 
       <ContactEditTagsSheet
-        open={isEditSheetOpen}
-        onOpenChange={setEditSheetOpen}
         contactId={contactId}
         contactName={contactName}
+        onOpenChange={setEditSheetOpen}
         onTagsReplaced={onTagsReplaced}
+        open={isEditSheetOpen}
       />
     </View>
   );
@@ -145,15 +152,15 @@ export function ContactTagsSection({
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: 24,
     gap: 8,
+    marginBottom: 24,
+  },
+  skeletonChip: {
+    borderRadius: 20,
+    borderWidth: 1,
+    height: 36,
   },
   tagsRow: {
     gap: 8,
-  },
-  skeletonChip: {
-    height: 36,
-    borderRadius: 20,
-    borderWidth: 1,
   },
 });

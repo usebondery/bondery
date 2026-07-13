@@ -41,22 +41,23 @@ function isEmptySchema(schema: unknown): boolean {
 export function patchOpenApiErrorSchemas(spec: OpenApiSpec): void {
   for (const methods of Object.values(spec.paths ?? {})) {
     for (const operation of Object.values(methods)) {
-      if (!operation?.responses) continue;
+      if (!operation?.responses) {
+        continue;
+      }
 
       for (const [status, response] of Object.entries(operation.responses)) {
         const statusCode = Number(status);
-        if (!Number.isInteger(statusCode) || statusCode < 400) continue;
+        if (!Number.isInteger(statusCode) || statusCode < 400) {
+          continue;
+        }
 
         const jsonContent = response.content?.["application/json"];
-        if (!jsonContent || !isEmptySchema(jsonContent.schema)) continue;
+        if (!jsonContent || !isEmptySchema(jsonContent.schema)) {
+          continue;
+        }
 
         const example = jsonContent.example;
-        if (
-          example &&
-          typeof example === "object" &&
-          example !== null &&
-          "contact" in example
-        ) {
+        if (example && typeof example === "object" && example !== null && "contact" in example) {
           jsonContent.schema = { $ref: "#/components/schemas/SyncConflictError" };
         } else {
           jsonContent.schema = { $ref: "#/components/schemas/ApiError" };

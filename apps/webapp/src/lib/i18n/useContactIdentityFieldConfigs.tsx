@@ -1,51 +1,57 @@
 "use client";
 
-import { useMemo } from "react";
 import { CONTACT_FIELD_MAX_LENGTHS } from "@bondery/schemas";
+import { useMemo } from "react";
 import { z } from "zod";
-import { useWebTranslations as useTranslations } from "./useWebTranslations";
+import {
+  useCommonTranslations,
+  useContactIdentityFieldsTranslations,
+  useValidationTranslations,
+} from "@/lib/i18n/generated/hooks";
 
 export type NameField = "firstName" | "middleName" | "lastName";
 export type ProfileField = "headline" | "location";
 
 export interface NameFieldConfig {
   field: NameField;
-  placeholder: string;
   maxLength: number;
+  placeholder: string;
   required?: boolean;
   successLabel: string;
 }
 
 export interface ProfileFieldConfig {
   field: ProfileField;
-  placeholder: string;
   maxLength: number;
+  placeholder: string;
   successLabel: string;
 }
 
 export function useContactIdentityFieldConfigs() {
-  const t = useTranslations("ContactIdentityFields");
-  const tCommon = useTranslations("WebAppCommon");
+  const t = useContactIdentityFieldsTranslations();
+  const tVal = useValidationTranslations("fields");
+  const tValRoot = useValidationTranslations();
+  const tCommon = useCommonTranslations();
 
   const nameFieldConfigs = useMemo<NameFieldConfig[]>(
     () => [
       {
         field: "firstName",
-        placeholder: t("FirstNamePlaceholder"),
         maxLength: CONTACT_FIELD_MAX_LENGTHS.firstName,
+        placeholder: t("FirstNamePlaceholder"),
         required: true,
         successLabel: t("FirstNameSuccessLabel"),
       },
       {
         field: "middleName",
-        placeholder: t("MiddleNamePlaceholder"),
         maxLength: CONTACT_FIELD_MAX_LENGTHS.middleName,
+        placeholder: t("MiddleNamePlaceholder"),
         successLabel: t("MiddleNameSuccessLabel"),
       },
       {
         field: "lastName",
-        placeholder: t("LastNamePlaceholder"),
         maxLength: CONTACT_FIELD_MAX_LENGTHS.lastName,
+        placeholder: t("LastNamePlaceholder"),
         successLabel: t("LastNameSuccessLabel"),
       },
     ],
@@ -56,14 +62,14 @@ export function useContactIdentityFieldConfigs() {
     () => [
       {
         field: "headline",
-        placeholder: t("HeadlinePlaceholder"),
         maxLength: CONTACT_FIELD_MAX_LENGTHS.headline,
+        placeholder: t("HeadlinePlaceholder"),
         successLabel: t("HeadlineSuccessLabel"),
       },
       {
         field: "location",
-        placeholder: t("LocationPlaceholder"),
         maxLength: CONTACT_FIELD_MAX_LENGTHS.location,
+        placeholder: t("LocationPlaceholder"),
         successLabel: t("LocationSuccessLabel"),
       },
     ],
@@ -76,52 +82,64 @@ export function useContactIdentityFieldConfigs() {
         firstName: z
           .string()
           .trim()
-          .min(1, { error: t("FirstNameRequired") })
+          .min(1, { error: tVal("firstName.required") })
           .max(CONTACT_FIELD_MAX_LENGTHS.firstName, {
-            error: t("FirstNameMaxLength", { max: CONTACT_FIELD_MAX_LENGTHS.firstName }),
+            error: tVal("firstName.maxLength", { max: CONTACT_FIELD_MAX_LENGTHS.firstName }),
           }),
-        middleName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.middleName, {
-          error: t("MiddleNameMaxLength", { max: CONTACT_FIELD_MAX_LENGTHS.middleName }),
-        }),
-        lastName: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.lastName, {
-          error: t("LastNameMaxLength", { max: CONTACT_FIELD_MAX_LENGTHS.lastName }),
-        }),
+        lastName: z
+          .string()
+          .trim()
+          .max(CONTACT_FIELD_MAX_LENGTHS.lastName, {
+            error: tVal("lastName.maxLength", { max: CONTACT_FIELD_MAX_LENGTHS.lastName }),
+          }),
+        middleName: z
+          .string()
+          .trim()
+          .max(CONTACT_FIELD_MAX_LENGTHS.middleName, {
+            error: tVal("middleName.maxLength", { max: CONTACT_FIELD_MAX_LENGTHS.middleName }),
+          }),
       }) satisfies Record<NameField, z.ZodType<string>>,
-    [t],
+    [tVal],
   );
 
   const profileFieldValidationSchemas = useMemo(
     () =>
       ({
-        headline: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.headline, {
-          error: t("HeadlineMaxLength", { max: CONTACT_FIELD_MAX_LENGTHS.headline }),
-        }),
-        location: z.string().trim().max(CONTACT_FIELD_MAX_LENGTHS.location, {
-          error: t("LocationMaxLength", { max: CONTACT_FIELD_MAX_LENGTHS.location }),
-        }),
+        headline: z
+          .string()
+          .trim()
+          .max(CONTACT_FIELD_MAX_LENGTHS.headline, {
+            error: tVal("headline.maxLength", { max: CONTACT_FIELD_MAX_LENGTHS.headline }),
+          }),
+        location: z
+          .string()
+          .trim()
+          .max(CONTACT_FIELD_MAX_LENGTHS.location, {
+            error: tVal("location.maxLength", { max: CONTACT_FIELD_MAX_LENGTHS.location }),
+          }),
       }) satisfies Record<ProfileField, z.ZodType<string>>,
-    [t],
+    [tVal],
   );
 
   const copy = useMemo(
     () => ({
-      savedTitle: t("SavedTitle"),
-      validationErrorTitle: t("ValidationErrorTitle"),
-      nameFieldUpdated: (label: string) => t("NameFieldUpdated", { label }),
+      contactNameFallback: t("ContactNameFallback"),
+      errorTitle: tCommon("feedback.errorTitle"),
       fieldUpdated: (label: string) => t("FieldUpdated", { label }),
       locationUpdated: t("LocationUpdated"),
+      nameFieldUpdated: (label: string) => t("NameFieldUpdated", { label }),
+      savedTitle: t("SavedTitle"),
       updateFieldFailed: (field: string) => t("UpdateFieldFailed", { field }),
-      errorTitle: tCommon("ErrorTitle"),
-      contactNameFallback: t("ContactNameFallback"),
+      validationErrorTitle: tValRoot("title"),
     }),
-    [t, tCommon],
+    [t, tCommon, tValRoot],
   );
 
   return {
-    nameFieldConfigs,
-    profileFieldConfigs,
-    nameFieldValidationSchemas,
-    profileFieldValidationSchemas,
     copy,
+    nameFieldConfigs,
+    nameFieldValidationSchemas,
+    profileFieldConfigs,
+    profileFieldValidationSchemas,
   };
 }

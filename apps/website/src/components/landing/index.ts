@@ -1,9 +1,9 @@
+export { CallToAction } from "./CallToAction";
+export { Contact } from "./Contact";
+export { Faq } from "./Faq";
+export { Features } from "./Features";
+export { Footer } from "./Footer";
 export { Header } from "./Header";
 export { Hero } from "./Hero";
-export { Features } from "./Features";
 export { Pricing } from "./Pricing";
-export { Faq } from "./Faq";
-export { CallToAction } from "./CallToAction";
-export { Footer } from "./Footer";
 export { Team } from "./Team";
-export { Contact } from "./Contact";

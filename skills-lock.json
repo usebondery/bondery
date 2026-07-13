@@ -1,86 +1,86 @@
 {
-  "version": 1,
   "skills": {
     "add-app-clip": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "b70016deb6f8ea4d713ef93c18e65441ab656ed7dca200eef23561f1786564ab",
       "skillPath": "plugins/expo/skills/add-app-clip/SKILL.md",
-      "computedHash": "b70016deb6f8ea4d713ef93c18e65441ab656ed7dca200eef23561f1786564ab"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "building-native-ui": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "1c46c05dfcd276872f9660f7795d15f7253f0f0be31c009953ba6ff8b40b3e2b",
       "skillPath": "plugins/expo/skills/building-native-ui/SKILL.md",
-      "computedHash": "1c46c05dfcd276872f9660f7795d15f7253f0f0be31c009953ba6ff8b40b3e2b"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "eas-update-insights": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "f20cd2dd96b9d8f33b3635f8c985b7159155e24658f93db878aa8c444ceda181",
       "skillPath": "plugins/expo/skills/eas-update-insights/SKILL.md",
-      "computedHash": "f20cd2dd96b9d8f33b3635f8c985b7159155e24658f93db878aa8c444ceda181"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "expo-cicd-workflows": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "03a75cb140374ee4e53a7371b00eb7a182aa41d3a16373b08892bb6059646b72",
       "skillPath": "plugins/expo/skills/expo-cicd-workflows/SKILL.md",
-      "computedHash": "03a75cb140374ee4e53a7371b00eb7a182aa41d3a16373b08892bb6059646b72"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "expo-deployment": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "2b42dcd814392b443c6dc77a6eee7547f9d35d7b2fb0ea83abc25309406b6cc9",
       "skillPath": "plugins/expo/skills/expo-deployment/SKILL.md",
-      "computedHash": "2b42dcd814392b443c6dc77a6eee7547f9d35d7b2fb0ea83abc25309406b6cc9"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "expo-dev-client": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "b186b8208e123a3404158f6d94061418a505f3c9ea565167dc80fce315841871",
       "skillPath": "plugins/expo/skills/expo-dev-client/SKILL.md",
-      "computedHash": "b186b8208e123a3404158f6d94061418a505f3c9ea565167dc80fce315841871"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "expo-module": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "4b4bf1f2288f62bfbfee2e20b0bd9c8ad321537cb4c47def9c560ae84119562b",
       "skillPath": "plugins/expo/skills/expo-module/SKILL.md",
-      "computedHash": "4b4bf1f2288f62bfbfee2e20b0bd9c8ad321537cb4c47def9c560ae84119562b"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "expo-tailwind-setup": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "6a3faa984445c88c4a034f5443ed4c3be8091ca57a1c5ec345c995c7201fcfaa",
       "skillPath": "plugins/expo/skills/expo-tailwind-setup/SKILL.md",
-      "computedHash": "6a3faa984445c88c4a034f5443ed4c3be8091ca57a1c5ec345c995c7201fcfaa"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "mantine-combobox": {
+      "computedHash": "5d06e7b312beec572d5162a215e710518c6e39ef94e35b351dd29eac733e2450",
       "source": "mantinedev/skills",
-      "sourceType": "github",
-      "computedHash": "5d06e7b312beec572d5162a215e710518c6e39ef94e35b351dd29eac733e2450"
+      "sourceType": "github"
     },
     "mantine-custom-components": {
+      "computedHash": "f61c7368715ee81aeb1bf849041e833551ba376d501105ded998553dfaa3e904",
       "source": "mantinedev/skills",
-      "sourceType": "github",
-      "computedHash": "f61c7368715ee81aeb1bf849041e833551ba376d501105ded998553dfaa3e904"
+      "sourceType": "github"
     },
     "mantine-form": {
+      "computedHash": "93c7905303402f0de3d4c688df77d4c0d21bef520c715d4ee9bf394c37d97a24",
       "source": "mantinedev/skills",
-      "sourceType": "github",
-      "computedHash": "93c7905303402f0de3d4c688df77d4c0d21bef520c715d4ee9bf394c37d97a24"
+      "sourceType": "github"
     },
     "native-data-fetching": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "d7e2f2e822b00d7546595cb7a2c0cbb8e7d7b6b8d3122a8451ad1632be946cbb",
       "skillPath": "plugins/expo/skills/native-data-fetching/SKILL.md",
-      "computedHash": "d7e2f2e822b00d7546595cb7a2c0cbb8e7d7b6b8d3122a8451ad1632be946cbb"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "upgrading-expo": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "a1c3049b7e78f66d78dbe38e4f4900980bbeffb825e1118da8e09cc6c89eea29",
       "skillPath": "plugins/expo/skills/upgrading-expo/SKILL.md",
-      "computedHash": "a1c3049b7e78f66d78dbe38e4f4900980bbeffb825e1118da8e09cc6c89eea29"
+      "source": "expo/skills",
+      "sourceType": "github"
     },
     "use-dom": {
-      "source": "expo/skills",
-      "sourceType": "github",
+      "computedHash": "690cda638c59e45661095e6e9acb12141b0a7873bec1fc4a368ef51657d57336",
       "skillPath": "plugins/expo/skills/use-dom/SKILL.md",
-      "computedHash": "690cda638c59e45661095e6e9acb12141b0a7873bec1fc4a368ef51657d57336"
+      "source": "expo/skills",
+      "sourceType": "github"
     }
-  }
+  },
+  "version": 1
 }

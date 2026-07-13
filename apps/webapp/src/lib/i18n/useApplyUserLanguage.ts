@@ -1,8 +1,8 @@
 "use client";
 
-import { useChangeLanguage } from "next-i18next/client";
 import type { SupportedLocale } from "@bondery/translations";
-import { useUserLocale } from "@/app/(app)/app/components/UserLocaleProvider";
+import { useChangeLanguage } from "next-i18next/client";
+import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 
 /**
  * Applies a user language change across client i18n, locale context, and RSC.

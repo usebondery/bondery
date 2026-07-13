@@ -1,16 +1,13 @@
+import { type ContactSocialFieldKey, createSocialUrl } from "@bondery/helpers";
+import type { Contact } from "@bondery/schemas";
 import { useMemo, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
-import { createSocialUrl, type ContactSocialFieldKey } from "@bondery/helpers";
-import type { Contact } from "@bondery/schemas";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useCommonTranslations, useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TEXT_STYLES } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { ContactSocialButton } from "./ContactSocialButton";
-import {
-  CONTACT_SOCIAL_PLATFORMS,
-  renderContactSocialAddIcon,
-} from "./contactSocialConfig";
+import { CONTACT_SOCIAL_PLATFORMS, renderContactSocialAddIcon } from "./contactSocialConfig";
 import { EditSocialSheet } from "./EditSocialSheet";
 
 interface ContactSocialSectionProps {
@@ -32,7 +29,8 @@ export function ContactSocialSection({
   contactFirstName,
   onUpdateSocial,
 }: ContactSocialSectionProps) {
-  const t = useMobileTranslations();
+  const tSocials = useSocialsTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
@@ -44,7 +42,10 @@ export function ContactSocialSection({
   );
 
   const availablePlatforms = useMemo(
-    () => CONTACT_SOCIAL_PLATFORMS.filter((platform) => !contact[platform.key]).map((platform) => platform.key),
+    () =>
+      CONTACT_SOCIAL_PLATFORMS.filter((platform) => !contact[platform.key]).map(
+        (platform) => platform.key,
+      ),
     [contact],
   );
 
@@ -52,25 +53,29 @@ export function ContactSocialSection({
 
   function openLink(platform: ContactSocialFieldKey, handle: string) {
     const url = createSocialUrl(platform, handle);
-    if (!url) return;
+    if (!url) {
+      return;
+    }
 
     Linking.openURL(url).catch(() => {
       showToast({
-        type: "error",
         headline: "Could not open link",
+        type: "error",
       });
     });
   }
 
   function openAddSheet() {
-    if (!canAdd) return;
-    setSheet({ open: true, mode: "add" });
+    if (!canAdd) {
+      return;
+    }
+    setSheet({ mode: "add", open: true });
   }
 
   function openEditSheet(platform: ContactSocialFieldKey) {
     setSheet({
-      open: true,
       mode: "edit",
+      open: true,
       platform,
       value: contact[platform] ?? "",
     });
@@ -83,17 +88,17 @@ export function ContactSocialSection({
       await onUpdateSocial(platform, value);
       setSheet({ open: false });
       showToast({
-        type: "success",
-        headline: value ? "Saved" : "Removed",
         description: value
           ? `${platform.charAt(0).toUpperCase()}${platform.slice(1)} updated`
           : `${platform.charAt(0).toUpperCase()}${platform.slice(1)} removed`,
+        headline: value ? "Saved" : "Removed",
+        type: "success",
       });
     } catch {
       showToast({
-        type: "error",
-        headline: "Could not save",
         description: `Failed to update ${platform}`,
+        headline: "Could not save",
+        type: "error",
       });
     } finally {
       setIsSubmitting(false);
@@ -105,68 +110,70 @@ export function ContactSocialSection({
 
   return (
     <View style={styles.section}>
-      <Text style={[styles.sectionTitle, MOBILE_TEXT_STYLES.sectionLabel, { color: colors.textMuted }]}>
-        {t("Socials.Title").toUpperCase()}
+      <Text
+        style={[styles.sectionTitle, MOBILE_TEXT_STYLES.sectionLabel, { color: colors.textMuted }]}
+      >
+        {tSocials("Title").toUpperCase()}
       </Text>
 
-      <View accessibilityRole="none" accessibilityLabel="Social links" style={styles.row}>
+      <View accessibilityLabel="Social links" accessibilityRole="none" style={styles.row}>
         {filledPlatforms.map((platform) => {
           const handle = contact[platform.key] as string;
           const nameSuffix = contactFirstName ? ` for ${contactFirstName}` : "";
 
           return (
             <ContactSocialButton
-              key={platform.key}
+              accessibilityHint="Long press to edit"
+              accessibilityLabel={`${t(platform.accessibilityLabelKey)}${nameSuffix}`}
               color={platform.color}
               icon={platform.renderIcon(platform.color)}
-              accessibilityLabel={`${t(platform.accessibilityLabelKey)}${nameSuffix}`}
-              accessibilityHint="Long press to edit"
-              onPress={() => openLink(platform.key, handle)}
+              key={platform.key}
               onLongPress={() => openEditSheet(platform.key)}
+              onPress={() => openLink(platform.key, handle)}
             />
           );
         })}
 
         {canAdd ? (
           <ContactSocialButton
+            accessibilityLabel="Add social link"
             color={colors.textMuted}
             dashed
             icon={renderContactSocialAddIcon(colors.textMuted)}
-            accessibilityLabel="Add social link"
             onPress={openAddSheet}
           />
         ) : null}
       </View>
 
       <EditSocialSheet
-        open={sheet.open}
-        mode={sheet.open ? sheet.mode : "add"}
-        platform={sheetPlatform}
-        initialValue={sheetInitialValue}
         availablePlatforms={availablePlatforms}
+        initialValue={sheetInitialValue}
         isSubmitting={isSubmitting}
+        mode={sheet.open ? sheet.mode : "add"}
+        onCancel={() => setSheet({ open: false })}
         onOpenChange={(open) => {
           if (!open && !isSubmitting) {
             setSheet({ open: false });
           }
         }}
-        onCancel={() => setSheet({ open: false })}
         onSave={(platform, value) => void savePlatform(platform, value)}
+        open={sheet.open}
+        platform={sheetPlatform}
       />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  section: {
-    marginBottom: 24,
-    gap: 8,
-  },
-  sectionTitle: {},
   row: {
+    alignItems: "center",
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 12,
-    alignItems: "center",
   },
+  section: {
+    gap: 8,
+    marginBottom: 24,
+  },
+  sectionTitle: {},
 });

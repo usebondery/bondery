@@ -1,15 +1,9 @@
 "use client";
 
-import {
-  isApiUnavailableError,
-  isApiUnavailableResponseStatus,
-} from "@/lib/api/availability";
+import { isApiUnavailableError, isApiUnavailableResponseStatus } from "@/lib/api/availability";
 import { handleApiUnavailable } from "@/lib/auth/handleApiUnavailable";
 import { handleUnauthorizedSession } from "@/lib/auth/handleUnauthorizedSession";
-import {
-  isUnauthorizedApiError,
-  isUnauthorizedResponseStatus,
-} from "@/lib/auth/unauthorized";
+import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 
 /** Apply global session/outage policy for thrown transport errors. */
 export function applyTransportErrorPolicy(error: unknown): void {

@@ -1,22 +1,32 @@
+export type {
+  AppLanguageData,
+  AppLanguageExonymTranslator,
+  LanguageData,
+} from "#locale/languages.js";
 export {
   APP_LANGUAGES_DATA,
+  formatAppLanguagePickerLabel,
   formatLanguageDisplayLabel,
   getAppLanguageByValue,
-  getAppLanguageExonymTranslationKey,
+  getAppLanguageExonymKey,
+  resolveAppLanguageExonym,
 } from "#locale/languages.js";
-export type { LanguageData } from "#locale/languages.js";
-
-export { WORLD_LANGUAGES_DATA, getWorldLanguageByValue } from "#locale/world-languages.js";
+export type {
+  GroupedTimezoneGroup,
+  GroupedTimezoneItem,
+  TimezoneData,
+  TimezoneSelectOption,
+} from "#locale/timezones.js";
 
 export {
-  TIMEZONES_DATA,
-  resolveToCanonicalTimezone,
-  getDeviceTimezone,
-  formatTimezoneLabel,
-  getTimezoneSelectOptions,
-  formatOffset,
-  getCurrentTimeInTimezone,
-  getGroupedTimezones,
   countryCodeToFlagEmoji,
+  formatOffset,
+  formatTimezoneLabel,
+  getCurrentTimeInTimezone,
+  getDeviceTimezone,
+  getGroupedTimezones,
+  getTimezoneSelectOptions,
+  resolveToCanonicalTimezone,
+  TIMEZONES_DATA,
 } from "#locale/timezones.js";
-export type { TimezoneData, TimezoneSelectOption, GroupedTimezoneGroup, GroupedTimezoneItem } from "#locale/timezones.js";
+export { getWorldLanguageByValue, WORLD_LANGUAGES_DATA } from "#locale/world-languages.js";

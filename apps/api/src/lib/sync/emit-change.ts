@@ -1,7 +1,7 @@
-import { createAdminClient } from "../supabase.js";
-import { allocateServerSequences } from "./idempotency.js";
-import type { SyncChange, SyncEmitMeta, SyncTableKey, SyncWakeEvent } from "@bondery/schemas/sync";
 import type { Json } from "@bondery/schemas/supabase.types";
+import type { SyncChange, SyncEmitMeta, SyncTableKey, SyncWakeEvent } from "@bondery/schemas/sync";
+import { createAdminClient } from "../data/supabase.js";
+import { allocateServerSequences } from "./idempotency.js";
 import { notifySyncWake } from "./wake/index.js";
 
 export function syncWakeEventFromChanges(
@@ -12,8 +12,8 @@ export function syncWakeEventFromChanges(
   const affectedTables = [...new Set(changes.map((change) => change.table))] as SyncTableKey[];
 
   return {
-    serverSequence,
     affectedTables,
+    serverSequence,
     ...(meta?.sourceDeviceId ? { sourceDeviceId: meta.sourceDeviceId } : {}),
   };
 }
@@ -31,13 +31,13 @@ export async function emitSyncBatch(
   const serverSequence = await allocateServerSequences(admin, userId, 1);
 
   const rows = changes.map((change, changeIndex) => ({
-    user_id: userId,
-    server_sequence: serverSequence,
     change_index: changeIndex,
-    table_name: change.table,
-    operation: change.operation,
     entity_id: change.entityId,
+    operation: change.operation,
     row_data: change.value as Json | null,
+    server_sequence: serverSequence,
+    table_name: change.table,
+    user_id: userId,
   }));
 
   const { error } = await admin.from("sync_change_log").insert(rows);

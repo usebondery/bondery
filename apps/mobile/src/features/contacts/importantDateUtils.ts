@@ -4,8 +4,8 @@ export const YEARLESS_SENTINEL = 1904;
 export interface ImportantDateWheelValue {
   day: number;
   month: number;
-  year: number;
   withoutYear: boolean;
+  year: number;
 }
 
 export function isYearlessDate(iso: string): boolean {
@@ -29,8 +29,8 @@ export function fromImportantDateIso(iso: string): ImportantDateWheelValue {
   return {
     day: dayPart || 1,
     month: monthPart || 1,
-    year: withoutYear ? new Date().getFullYear() : yearPart || new Date().getFullYear(),
     withoutYear,
+    year: withoutYear ? new Date().getFullYear() : yearPart || new Date().getFullYear(),
   };
 }
 
@@ -49,6 +49,10 @@ export function resolveDateLocale(language: string): string {
     return "cs-CZ";
   }
 
+  if (language.startsWith("de")) {
+    return "de-DE";
+  }
+
   return "en-US";
 }
 
@@ -61,8 +65,8 @@ export function formatImportantDate(iso: string, locale = "en-US"): string {
   );
 
   return date.toLocaleDateString(locale, {
-    month: "long",
     day: "numeric",
+    month: "long",
     ...(parsed.withoutYear ? {} : { year: "numeric" }),
   });
 }
@@ -87,8 +91,8 @@ export function createTodayImportantDateIso(withoutYear = false): string {
   return toImportantDateIso({
     day: now.getDate(),
     month: now.getMonth() + 1,
-    year: now.getFullYear(),
     withoutYear,
+    year: now.getFullYear(),
   });
 }
 
@@ -106,7 +110,7 @@ export function createDefaultWheelValue(
   return {
     day: now.getDate(),
     month: now.getMonth() + 1,
-    year: now.getFullYear(),
     withoutYear,
+    year: now.getFullYear(),
   };
 }

@@ -1,18 +1,18 @@
+import { copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { dirname, join } from "node:path";
 import sharp from "sharp";
-import { existsSync, mkdirSync, copyFileSync } from "fs";
-import { join, dirname } from "path";
 
 export interface IconConfig {
-  name: string;
-  size?: number;
   format: "png" | "ico" | "svg";
+  name: string;
   outDir: string;
+  size?: number;
 }
 
 export interface GenerateIconsOptions {
-  svgPath: string;
-  icons: IconConfig[];
   baseDir: string;
+  icons: IconConfig[];
+  svgPath: string;
 }
 
 /**

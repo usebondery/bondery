@@ -1,0 +1,92 @@
+{
+  "a11y": {
+    "back": "Zurück",
+    "info": "Info"
+  },
+  "actions": {
+    "back": "Zurück",
+    "call": "Anrufen",
+    "cancel": "Abbrechen",
+    "delete": "Löschen",
+    "deselect": "Abwählen",
+    "done": "Fertig",
+    "email": "E-Mail",
+    "message": "Nachricht",
+    "retry": "Erneut versuchen",
+    "save": "Speichern",
+    "saveChanges": "Änderungen speichern",
+    "select": "Auswählen"
+  },
+  "app": {
+    "description": "Baue Beziehungen, die ewig halten."
+  },
+  "confirm": {
+    "noCancel": "Nein, abbrechen",
+    "yesDelete": "Ja, löschen"
+  },
+  "errors": {
+    "api": {
+      "account": "Account photo invalid format.",
+      "account_invalid": "Account invalid.",
+      "admin_required": "Admin required.",
+      "api": "Api key session mint failed.",
+      "auth_required": "Bitte melden Sie sich an, um fortzufahren.",
+      "bad_gateway": "Bad gateway.",
+      "bad_request": "Bad request.",
+      "billing": "Billing user lookup failed.",
+      "chat": "Chat session failed to update session.",
+      "checkout": "Checkout not configured.",
+      "conflict": "Diese Aktion steht im Konflikt mit vorhandenen Daten.",
+      "contact": "Contact update failed.",
+      "contact_failed": "Contact failed.",
+      "contact_invalid": "Contact invalid.",
+      "email": "Email service not configured.",
+      "extension": "Extension username required.",
+      "extension_outdated": "Extension outdated.",
+      "failed": "Failed to render or send feedback email .",
+      "group": "Group remove members invalid body.",
+      "group_failed": "Group failed.",
+      "import": "Import vcard failed.",
+      "import_failed": "Import failed.",
+      "important": "Important date duplicate.",
+      "interaction": "Interaction update failed.",
+      "interaction_failed": "Interaction failed.",
+      "internal": "Bei uns ist etwas schiefgelaufen. Bitte versuchen Sie es erneut.",
+      "invalid": "Invalid api key.",
+      "jwt": "Jwt signing misconfigured.",
+      "merge": "Merge recommendation not found.",
+      "not_found": "Der angeforderte Eintrag wurde nicht gefunden.",
+      "onboarding": "Onboarding failed to update import follow up.",
+      "rate": "Das haben Sie zu oft versucht. Bitte warten Sie kurz und versuchen Sie es erneut.",
+      "relationship": "Relationship self forbidden.",
+      "relationship_failed": "Relationship failed.",
+      "relationship_invalid": "Relationship invalid.",
+      "service": "Service auth required.",
+      "service_unavailable": "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
+      "settings": "Settings no fields.",
+      "sqlite": "Sqlite schema mismatch.",
+      "sync": "Sync protocol mismatch.",
+      "sync_conflict": "Dieser Kontakt wurde auf einem anderen Gerät aktualisiert. Aktualisieren Sie die Daten und versuchen Sie es erneut.",
+      "sync_failed": "Sync failed.",
+      "tag": "Tag upsert failed.",
+      "tag_failed": "Tag failed.",
+      "user": "User lookup failed.",
+      "validation_error": "Einige der eingegebenen Angaben sind ungültig.",
+      "webhook": "Webhook not configured."
+    },
+    "apiTemporarilyUnavailable": "Die API ist vorübergehend nicht verfügbar. Bitte versuch es erneut.",
+    "apiUnreachable": "Der Bondery-Server ist nicht erreichbar. Versuch es gleich nochmal.",
+    "connection": "Prüf deine Verbindung und versuch es erneut.",
+    "requestFailed": "Anfrage fehlgeschlagen. Bitte versuch es erneut.",
+    "serverGeneric": "Auf dem Server ist etwas schiefgelaufen. Bitte versuch es erneut.",
+    "unknown": "Etwas ist schiefgelaufen."
+  },
+  "feedback": {
+    "deleting": "Wird gelöscht...",
+    "duplicating": "Wird dupliziert...",
+    "errorTitle": "Fehler",
+    "noResults": "Keine Ergebnisse",
+    "savedTitle": "Gespeichert",
+    "successTitle": "Erfolg"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "Approve": "Approve",
+  "Deny": "Deny",
+  "Description": "{clientName} is requesting access to your Bondery account.",
+  "ErrorTitle": "Authorization Error",
+  "InvalidRequest": "Invalid authorization request.",
+  "MissingAuthorizationId": "Missing authorization request. Please try again from the application.",
+  "RequestedPermissions": "Requested permissions",
+  "Scopes": {
+    "email": "View your email address",
+    "openid": "Verify your identity",
+    "phone": "View your phone number",
+    "profile": "View your profile information"
+  },
+  "Title": "Authorize Application",
+  "UnexpectedError": "An unexpected error occurred. Please try again."
+}

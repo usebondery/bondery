@@ -5,5 +5,5 @@ import { useAuth } from "./useAuth";
  */
 export function useAuthSession() {
   const { session, isLoadingSession } = useAuth();
-  return { session, isLoadingSession };
+  return { isLoadingSession, session };
 }

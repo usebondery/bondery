@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useMobileSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { SettingsFieldLabel } from "./SettingsFieldLabel";
@@ -11,12 +11,12 @@ interface SettingsPreviewSectionProps {
 }
 
 export function SettingsPreviewSection({ caption, children }: SettingsPreviewSectionProps) {
-  const t = useMobileTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
   const colors = useMobileThemeColors();
 
   return (
     <View style={styles.wrap}>
-      <SettingsFieldLabel>{t("MobileApp.Settings.Preview")}</SettingsFieldLabel>
+      <SettingsFieldLabel>{tMobileSettings("Preview")}</SettingsFieldLabel>
       <Text style={[styles.caption, { color: colors.textMuted }]}>{caption}</Text>
       {children}
     </View>
@@ -24,12 +24,12 @@ export function SettingsPreviewSection({ caption, children }: SettingsPreviewSec
 }
 
 const styles = StyleSheet.create({
-  wrap: {
-    gap: 12,
-  },
   caption: {
-    marginTop: -4,
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     lineHeight: 18,
+    marginTop: -4,
+  },
+  wrap: {
+    gap: 12,
   },
 });

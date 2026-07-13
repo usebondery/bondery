@@ -1,6 +1,6 @@
+import type { ComponentType } from "react";
 import { allPosts, postComponents } from "../../../../content/blog/posts";
 import type { PostCategory, PostMeta } from "./types";
-import type { ComponentType } from "react";
 
 /** Returns all posts sorted newest-first by date. */
 export function getAllPosts(): PostMeta[] {
@@ -13,7 +13,9 @@ export function getAllPosts(): PostMeta[] {
  */
 export function getPostsByCategory(category: PostCategory): PostMeta[] {
   const posts = getAllPosts();
-  if (category === "all") return posts;
+  if (category === "all") {
+    return posts;
+  }
   return posts.filter((p) => p.category === category);
 }
 

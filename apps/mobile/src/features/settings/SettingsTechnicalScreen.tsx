@@ -1,28 +1,32 @@
-import { ScrollView, StyleSheet, Text } from "react-native";
-import { useRouter } from "expo-router";
-import Constants from "expo-constants";
-import { IconBook, IconClipboardList } from "@tabler/icons-react-native";
 import { CHANGELOG_URL, HELP_DOCS_URL } from "@bondery/helpers/globals/paths";
+import { IconBook, IconClipboardList } from "@tabler/icons-react-native";
+import Constants from "expo-constants";
+import { useRouter } from "expo-router";
+import { ScrollView, StyleSheet, Text } from "react-native";
 import { StackNavBar, useScrollBottomInset } from "../../components/chrome";
 import { API_URL } from "../../lib/config";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { useAppToast } from "../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { openExternalUrl } from "./openExternalUrl";
 import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
 import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
 import { SettingsReadOnlyField } from "./components/SettingsReadOnlyField";
 import { SettingsSectionCard } from "./components/SettingsSectionCard";
 import { useApiServerStatus } from "./hooks/useApiServerStatus";
+import { openExternalUrl } from "./openExternalUrl";
 
 const OFFLINE_STATUS_DOT_COLOR = "#ca8a04";
 
 const APP_VERSION = Constants.expoConfig?.version ?? "—";
 
 export function SettingsTechnicalScreen() {
+  const tMobileSettings = useMobileSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("stack");
@@ -31,21 +35,21 @@ export function SettingsTechnicalScreen() {
   const openDocs = () => {
     void openExternalUrl(HELP_DOCS_URL, () => {
       showToast({
+        description: tMobileSettings("OpenDocsErrorDescription"),
+        headline: tMobileSettings("OpenDocsErrorHeadline"),
         type: "error",
-        headline: t("MobileApp.Settings.OpenDocsErrorHeadline"),
-        description: t("MobileApp.Settings.OpenDocsErrorDescription"),
       });
     });
   };
 
   const serverStatusDescription =
     apiServerStatus === "connected"
-      ? t("MobileApp.Settings.ServerStatusConnected")
+      ? tMobileSettings("ServerStatusConnected")
       : apiServerStatus === "offline"
-        ? t("MobileApp.Settings.ServerStatusOffline")
+        ? tMobileSettings("ServerStatusOffline")
         : apiServerStatus === "unreachable"
-          ? t("MobileApp.Settings.ServerStatusUnreachable")
-          : t("MobileApp.Settings.ServerStatusChecking");
+          ? tMobileSettings("ServerStatusUnreachable")
+          : tMobileSettings("ServerStatusChecking");
 
   const serverStatusDotColor =
     apiServerStatus === "connected"
@@ -59,68 +63,63 @@ export function SettingsTechnicalScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.Technical")}
         onBack={() => router.back()}
+        title={tMobileSettings("Technical")}
+        variant="elevated"
       />
 
       <ScrollView
+        contentContainerStyle={[styles.content, { paddingBottom: scrollBottomInset }]}
         style={[styles.screen, { backgroundColor: colors.appBackground }]}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: scrollBottomInset },
-        ]}
       >
         <SettingsSectionCard>
           <SettingsNavigationRow
-            icon={<IconClipboardList size={18} stroke={colors.iconPrimary} />}
-            label={t("MobileApp.Settings.Changelog")}
             destination="external"
-            externalLabel={t("MobileApp.Settings.External")}
+            externalLabel={tMobileSettings("External")}
+            icon={<IconClipboardList size={18} stroke={colors.iconPrimary} />}
+            label={tMobileSettings("Changelog")}
             onPress={() => {
               void openExternalUrl(CHANGELOG_URL);
             }}
           />
 
           <SettingsNavigationRow
-            icon={<IconBook size={18} stroke={colors.iconPrimary} />}
-            label={t("MobileApp.Settings.Docs")}
             destination="external"
-            externalLabel={t("MobileApp.Settings.External")}
-            showDivider={false}
+            externalLabel={tMobileSettings("External")}
+            icon={<IconBook size={18} stroke={colors.iconPrimary} />}
+            label={tMobileSettings("Docs")}
             onPress={openDocs}
+            showDivider={false}
           />
         </SettingsSectionCard>
 
-        <SettingsFieldLabel>{t("MobileApp.Settings.ApiServerUrl")}</SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("ApiServerUrl")}</SettingsFieldLabel>
         <SettingsReadOnlyField
-          value={API_URL || t("MobileApp.Settings.ApiServerNotConfigured")}
           description={serverStatusDescription}
-          statusDotColor={serverStatusDotColor}
           loading={isChecking}
           onReload={() => {
             void refresh();
           }}
-          reloadAccessibilityLabel={t("MobileApp.Settings.RecheckConnection")}
+          reloadAccessibilityLabel={tMobileSettings("RecheckConnection")}
+          statusDotColor={serverStatusDotColor}
+          value={API_URL || tMobileSettings("ApiServerNotConfigured")}
         />
 
-        <SettingsFieldLabel>{t("MobileApp.Settings.AppVersion")}</SettingsFieldLabel>
-        <Text style={[styles.versionValue, { color: colors.textPrimary }]}>
-          {APP_VERSION}
-        </Text>
+        <SettingsFieldLabel>{tMobileSettings("AppVersion")}</SettingsFieldLabel>
+        <Text style={[styles.versionValue, { color: colors.textPrimary }]}>{APP_VERSION}</Text>
       </ScrollView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+  },
   screen: {
     flex: 1,
-  },
-  content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    gap: 16,
   },
   versionValue: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,

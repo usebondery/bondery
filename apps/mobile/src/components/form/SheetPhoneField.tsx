@@ -1,11 +1,11 @@
 import {
-  Controller,
-  useWatch,
   type Control,
+  Controller,
   type FieldPath,
   type FieldValues,
+  useWatch,
 } from "react-hook-form";
-import type { StyleProp, TextInput, TextStyle } from "react-native";
+import type { StyleProp, TextStyle } from "react-native";
 import { MaskedPhoneInput } from "../../features/contacts/components/MaskedPhoneInput";
 
 type SheetPhoneFieldProps<
@@ -45,16 +45,16 @@ export function SheetPhoneField<
       name={name}
       render={({ field, fieldState }) => (
         <MaskedPhoneInput
+          autoFocus={autoFocus}
+          containerStyle={containerStyle}
+          editable={editable}
+          error={fieldState.invalid}
+          onChangeValue={field.onChange}
+          onInputRef={field.ref}
+          onSubmitEditing={onSubmitEditing}
+          placeholder={placeholder}
           prefix={prefix}
           value={(field.value ?? "") as string}
-          onChangeValue={field.onChange}
-          placeholder={placeholder}
-          editable={editable}
-          autoFocus={autoFocus}
-          error={fieldState.invalid}
-          onSubmitEditing={onSubmitEditing}
-          containerStyle={containerStyle}
-          onInputRef={field.ref}
         />
       )}
     />

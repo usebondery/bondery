@@ -1,11 +1,11 @@
-import { createElement, type ReactNode } from "react";
 import { IconLoader2 } from "@tabler/icons-react";
+import { createElement, type ReactNode } from "react";
 
 export interface LoadingNotificationTemplateProps {
-  title: string;
   description: string;
   icon?: ReactNode;
   radius?: string | number;
+  title: string;
 }
 
 /**
@@ -15,14 +15,14 @@ export function loadingNotificationTemplate({
   title,
   description,
   radius = "xl",
-  icon = createElement(IconLoader2, { size: 18, className: "animate-spin" }),
+  icon = createElement(IconLoader2, { className: "animate-spin", size: 18 }),
 }: LoadingNotificationTemplateProps) {
   return {
-    title,
-    radius,
-    message: description,
     color: "blue",
     icon,
     loading: true,
+    message: description,
+    radius,
+    title,
   };
 }

@@ -1,15 +1,15 @@
-import { z } from "zod";
 import { createdAtSchema } from "@bondery/schemas/entities/_shared";
 import {
   EXAMPLE_HEALTH_OK_RESPONSE,
   EXAMPLE_LIVENESS_STATUS_RESPONSE,
 } from "@bondery/schemas/openapi/fixtures/responses";
+import { z } from "zod";
 
 export const serviceProbeResultSchema = z.object({
-  ok: z.boolean(),
-  latencyMs: z.number().optional(),
-  error: z.string().optional(),
   configured: z.boolean().optional(),
+  error: z.string().optional(),
+  latencyMs: z.number().optional(),
+  ok: z.boolean(),
 });
 
 export const supabaseServiceStatusSchema = z.object({
@@ -19,32 +19,32 @@ export const supabaseServiceStatusSchema = z.object({
 });
 
 export const healthServicesSchema = z.object({
-  supabase: supabaseServiceStatusSchema,
+  anthropic: serviceProbeResultSchema,
+  mapy: serviceProbeResultSchema,
+  polar: serviceProbeResultSchema,
+  posthog: serviceProbeResultSchema,
   redis: serviceProbeResultSchema,
   smtp: serviceProbeResultSchema,
-  anthropic: serviceProbeResultSchema,
-  polar: serviceProbeResultSchema,
-  mapy: serviceProbeResultSchema,
-  posthog: serviceProbeResultSchema,
+  supabase: supabaseServiceStatusSchema,
 });
 
 export const healthReportSchema = z
   .object({
-    status: z.enum(["ok", "degraded", "unhealthy"]),
-    timestamp: createdAtSchema,
     cached: z.boolean(),
     cacheExpiresAt: createdAtSchema,
     services: healthServicesSchema,
+    status: z.enum(["ok", "degraded", "unhealthy"]),
+    timestamp: createdAtSchema,
   })
   .meta({ example: EXAMPLE_HEALTH_OK_RESPONSE });
 
 export const livenessStatusSchema = z
   .object({
-    status: z.literal("ok"),
-    timestamp: createdAtSchema,
     extension: z.object({
       minVersion: z.string(),
       storeUrl: z.string(),
     }),
+    status: z.literal("ok"),
+    timestamp: createdAtSchema,
   })
   .meta({ example: EXAMPLE_LIVENESS_STATUS_RESPONSE });

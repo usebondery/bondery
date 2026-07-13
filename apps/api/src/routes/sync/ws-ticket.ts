@@ -1,9 +1,8 @@
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { syncWsTicketResponseSchema } from "@bondery/schemas/sync";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
 import { getSyncWakeRuntime, initSyncWakeRuntime } from "../../lib/sync/wake/index.js";
 
 export const syncWsTicketRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
@@ -11,9 +10,7 @@ export const syncWsTicketRoutes: AppRoutePlugin = async (fastify): Promise<void>
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Sync"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   fastify.get(
     "/ws-ticket",

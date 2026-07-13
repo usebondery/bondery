@@ -10,15 +10,13 @@ interface SettingsFieldLabelProps {
 export function SettingsFieldLabel({ children }: SettingsFieldLabelProps) {
   const colors = useMobileThemeColors();
 
-  return (
-    <Text style={[styles.label, { color: colors.textSecondary }]}>{children}</Text>
-  );
+  return <Text style={[styles.label, { color: colors.textSecondary }]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({
   label: {
-    marginTop: 4,
     marginBottom: -8,
+    marginTop: 4,
     ...MOBILE_TEXT_STYLES.fieldLabel,
   },
 });

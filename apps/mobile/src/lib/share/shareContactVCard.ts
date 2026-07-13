@@ -30,9 +30,9 @@ export async function shareContactVCard(input: ShareContactVCardInput): Promise<
   file.write(content);
 
   const shareOptions = {
+    dialogTitle: input.dialogTitle,
     mimeType: VCARD_MIME_TYPE,
     UTI: "public.vcard",
-    dialogTitle: input.dialogTitle,
   };
   await Sharing.shareAsync(file.uri, shareOptions);
 }

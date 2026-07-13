@@ -1,11 +1,11 @@
+import type { Contact } from "@bondery/schemas";
+import { IconCheck } from "@tabler/icons-react-native";
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
 import Swipeable, {
-  SwipeDirection,
   type SwipeableMethods,
+  SwipeDirection,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
-import { IconCheck } from "@tabler/icons-react-native";
-import type { Contact } from "@bondery/schemas";
 import { normalizeMobileUrlForDevice, UI_TIMING_MS } from "../../../lib/config";
 import { getSwipeActionIcon, getSwipeActionLabel } from "../../../lib/preferences/swipeActionIcons";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
@@ -17,22 +17,22 @@ import { formatContactName, getAvatarColorHex, getContactInitials } from "../con
 
 interface ContactRowProps {
   contact: Contact;
-  selected: boolean;
-  selectionMode: boolean;
   isDisabled?: boolean;
   isSwipeEnabled?: boolean;
-  previewMode?: boolean;
   leftSwipeAction: SwipeAction;
+  onEnterSelection: (contactId: string) => void;
+  onExecuteAction: (contact: Contact, action: SwipeAction) => void;
+  onPress?: (contactId: string) => void;
+  onToggleSelect: (contactId: string) => void;
+  previewMode?: boolean;
   rightSwipeAction: SwipeAction;
+  selected: boolean;
+  selectionMode: boolean;
   texts: {
     call: string;
     message: string;
     email: string;
   };
-  onToggleSelect: (contactId: string) => void;
-  onEnterSelection: (contactId: string) => void;
-  onExecuteAction: (contact: Contact, action: SwipeAction) => void;
-  onPress?: (contactId: string) => void;
 }
 
 const SWIPE_ACTION_ICON_SIZE = 22;
@@ -98,8 +98,8 @@ export const ContactRow = memo(function ContactRow({
   const renderLeftActions = useCallback(
     () => (
       <View
-        style={[styles.action, styles.leftAction, { backgroundColor: colors.successSurface }]}
         accessibilityLabel={getSwipeActionLabel(rightSwipeAction, texts)}
+        style={[styles.action, styles.leftAction, { backgroundColor: colors.successSurface }]}
       >
         {getSwipeActionIcon(rightSwipeAction, colors.textPrimary, SWIPE_ACTION_ICON_SIZE)}
       </View>
@@ -110,8 +110,8 @@ export const ContactRow = memo(function ContactRow({
   const renderRightActions = useCallback(
     () => (
       <View
-        style={[styles.action, styles.rightAction, { backgroundColor: colors.warningSurface }]}
         accessibilityLabel={getSwipeActionLabel(leftSwipeAction, texts)}
+        style={[styles.action, styles.rightAction, { backgroundColor: colors.warningSurface }]}
       >
         {getSwipeActionIcon(leftSwipeAction, colors.textPrimary, SWIPE_ACTION_ICON_SIZE)}
       </View>
@@ -139,22 +139,22 @@ export const ContactRow = memo(function ContactRow({
 
   const rowContent = (
     <Tappable
-      variant="default"
-      transition={TAMAGUI_TRANSITION.quick}
-      animateOnly={["scale"]}
-      delayLongPress={selectionMode ? undefined : UI_TIMING_MS.longPressDelay}
-      onLongPress={selectionMode ? undefined : handleLongPress}
-      onPress={handlePress}
-      minHeight={56}
-      flexDirection="row"
+      accessibilityState={{ disabled: showDisabledStyle }}
       alignItems="center"
-      justifyContent="space-between"
-      paddingHorizontal={16}
-      borderBottomWidth={previewMode ? 0 : 1}
+      animateOnly={["scale"]}
       backgroundColor={isRowSelected ? colors.selectionBackground : colors.surface}
       borderBottomColor={colors.border}
+      borderBottomWidth={previewMode ? 0 : 1}
+      delayLongPress={selectionMode ? undefined : UI_TIMING_MS.longPressDelay}
+      flexDirection="row"
+      justifyContent="space-between"
+      minHeight={56}
+      onLongPress={selectionMode ? undefined : handleLongPress}
+      onPress={handlePress}
       opacity={showDisabledStyle ? DISABLED_ROW_OPACITY : 1}
-      accessibilityState={{ disabled: showDisabledStyle }}
+      paddingHorizontal={16}
+      transition={TAMAGUI_TRANSITION.quick}
+      variant="default"
     >
       <View style={styles.leftSide}>
         <View
@@ -170,11 +170,7 @@ export const ContactRow = memo(function ContactRow({
           {isRowSelected ? (
             <IconCheck size={16} stroke={colors.textPrimary} />
           ) : shouldShowAvatarImage ? (
-            <Image
-              source={{ uri: avatarUri }}
-              style={styles.avatarImage}
-              resizeMode="cover"
-            />
+            <Image resizeMode="cover" source={{ uri: avatarUri }} style={styles.avatarImage} />
           ) : (
             <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>
               {getContactInitials(contact)}
@@ -195,12 +191,12 @@ export const ContactRow = memo(function ContactRow({
   return (
     <View collapsable={false}>
       <Swipeable
-        ref={swipeableRef}
         enabled={swipeGesturesEnabled}
         friction={2}
+        onSwipeableOpen={handleSwipeableOpen}
         overshootLeft={false}
         overshootRight={false}
-        onSwipeableOpen={handleSwipeableOpen}
+        ref={swipeableRef}
         renderLeftActions={renderLeftActions}
         renderRightActions={renderRightActions}
       >
@@ -211,41 +207,41 @@ export const ContactRow = memo(function ContactRow({
 });
 
 const styles = StyleSheet.create({
-  leftSide: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    flex: 1,
-    paddingRight: 12,
-  },
-  avatar: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  action: {
     alignItems: "center",
     justifyContent: "center",
+    width: 100,
   },
-  avatarSelected: {},
-  avatarImageBackground: {},
-  avatarImage: {
-    width: "100%",
-    height: "100%",
+  avatar: {
+    alignItems: "center",
     borderRadius: 17,
+    height: 34,
+    justifyContent: "center",
+    width: 34,
   },
+  avatarImage: {
+    borderRadius: 17,
+    height: "100%",
+    width: "100%",
+  },
+  avatarImageBackground: {},
+  avatarSelected: {},
   avatarText: {
     fontSize: 12,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
   },
+  leftAction: {},
+  leftSide: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: 12,
+    paddingRight: 12,
+  },
   nameText: {
+    flexShrink: 1,
     fontSize: 16,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
-    flexShrink: 1,
   },
-  action: {
-    justifyContent: "center",
-    width: 100,
-    alignItems: "center",
-  },
-  leftAction: {},
   rightAction: {},
 });

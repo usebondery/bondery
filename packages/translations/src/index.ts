@@ -1,16 +1,34 @@
 /**
- * Bondery translations package
- *
- * Exports translation files for internationalization
+ * Bondery translations package — namespace-based i18n resources.
  */
 
-export const SUPPORTED_LOCALES = ["en", "cs"] as const;
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+import "./i18next-catalog-augment.js";
 
-// Re-export translations
-import enTranslations from "./en.json" with { type: "json" };
-import csTranslations from "./cs.json" with { type: "json" };
-
-export { enTranslations as en, csTranslations as cs };
-
-export { i18nConfig, loadTranslation, resourceLoader } from "#i18n.js";
+export {
+  ALL_NAMESPACE_NAMES,
+  coerceSupportedLocale,
+  DEFAULT_LOCALE,
+  getNamespaceManifest,
+  i18nConfig,
+  manifest,
+  type NamespaceEntry,
+  namespaceFilePath,
+  namespacesForPlatform,
+  type Platform,
+  preloadGroup,
+  SUPPORTED_LOCALES,
+  type SupportedLocale,
+  type TranslationManifest,
+} from "#config.js";
+export type {
+  BranchPrefixFor,
+  Catalog,
+  ExtensionNamespace,
+  LooseTranslateFn,
+  MobileNamespace,
+  NamespaceKey,
+  PrefixedKeys,
+  TranslateFn,
+  WebNamespace,
+} from "#i18n-types.js";
+export { loadNamespace, resourceLoader } from "#loader.js";

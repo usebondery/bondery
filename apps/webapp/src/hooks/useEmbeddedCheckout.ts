@@ -1,19 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { notifications } from "@mantine/notifications";
-import { useComputedColorScheme } from "@mantine/core";
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
-  successNotificationTemplate,
   errorNotificationTemplate,
+  successNotificationTemplate,
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { useComputedColorScheme } from "@mantine/core";
+import { notifications } from "@mantine/notifications";
 import type { PolarEmbedCheckout } from "@polar-sh/checkout/embed";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, clientApiJson } from "@/lib/api/client";
 import { isUnauthorizedApiError } from "@/lib/auth/handleUnauthorizedSession";
+import { useCheckoutTranslations } from "@/lib/i18n/generated/hooks";
+import { invalidateSubscription } from "@/lib/query/invalidation";
 import { createBrowswerSupabaseClient } from "@/lib/supabase/client";
 
 /** Maximum ms to wait for the Polar iframe onLoaded event before resetting loading state. */
@@ -28,10 +30,10 @@ interface UseEmbeddedCheckoutOptions {
 }
 
 interface UseEmbeddedCheckoutResult {
-  /** Opens the embedded Polar checkout overlay. */
-  openCheckout: () => Promise<void>;
   /** True while the session is being created or the iframe is loading. */
   isLoading: boolean;
+  /** Opens the embedded Polar checkout overlay. */
+  openCheckout: () => Promise<void>;
 }
 
 /**
@@ -51,12 +53,17 @@ export function useEmbeddedCheckout({
   onSuccess,
 }: UseEmbeddedCheckoutOptions = {}): UseEmbeddedCheckoutResult {
   const [isLoading, setIsLoading] = useState(false);
-  const checkoutRef = useRef<InstanceType<typeof PolarEmbedCheckout> | null>(
-    null,
-  );
+  const checkoutRef = useRef<InstanceType<typeof PolarEmbedCheckout> | null>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
   const colorScheme = useComputedColorScheme("light");
-  const t = useTranslations("Checkout");
+  const t = useCheckoutTranslations();
+
+  const handleCheckoutConfirmed = useCallback(() => {
+    void invalidateSubscription(queryClient);
+    onSuccess?.();
+    router.refresh();
+  }, [onSuccess, queryClient, router]);
 
   // Clean up any open checkout when the component using this hook unmounts
   useEffect(() => {
@@ -82,8 +89,8 @@ export function useEmbeddedCheckout({
       if (error instanceof ApiError && error.status === 409) {
         notifications.show(
           warningNotificationTemplate({
-            title: t("alreadySubscribedTitle"),
             description: t("alreadySubscribedMessage"),
+            title: t("alreadySubscribedTitle"),
           }),
         );
         setIsLoading(false);
@@ -97,8 +104,8 @@ export function useEmbeddedCheckout({
 
       notifications.show(
         errorNotificationTemplate({
-          title: t("errorTitle"),
           description: t("errorMessage"),
+          title: t("errorTitle"),
         }),
       );
       setIsLoading(false);
@@ -117,18 +124,18 @@ export function useEmbeddedCheckout({
 
     try {
       checkout = await PolarEmbedCheckout.create(url, {
-        theme: colorScheme === "dark" ? "dark" : "light",
         onLoaded: () => {
           clearTimeout(iframeLoadTimeout);
           setIsLoading(false);
         },
+        theme: colorScheme === "dark" ? "dark" : "light",
       });
     } catch {
       clearTimeout(iframeLoadTimeout);
       notifications.show(
         errorNotificationTemplate({
-          title: t("errorTitle"),
           description: t("errorMessage"),
+          title: t("errorTitle"),
         }),
       );
       setIsLoading(false);
@@ -158,22 +165,22 @@ export function useEmbeddedCheckout({
             table: "subscriptions",
           },
           (payload) => {
-            const newStatus = (payload.new as { status?: string } | null)
-              ?.status;
+            const newStatus = (payload.new as { status?: string } | null)?.status;
             if (newStatus === "active" || newStatus === "canceling") {
-              if (webhookTimeout) clearTimeout(webhookTimeout);
+              if (webhookTimeout) {
+                clearTimeout(webhookTimeout);
+              }
               supabase.removeChannel(channel);
               checkout.close();
 
               notifications.show(
                 successNotificationTemplate({
-                  title: t("successTitle"),
                   description: t("successMessage"),
+                  title: t("successTitle"),
                 }),
               );
 
-              onSuccess?.();
-              router.refresh();
+              handleCheckoutConfirmed();
             }
           },
         )
@@ -185,12 +192,11 @@ export function useEmbeddedCheckout({
         checkout.close();
         notifications.show(
           warningNotificationTemplate({
-            title: t("upgradePendingTitle"),
             description: t("upgradePendingMessage"),
+            title: t("upgradePendingTitle"),
           }),
         );
-        onSuccess?.();
-        router.refresh();
+        handleCheckoutConfirmed();
       }, WEBHOOK_CONFIRM_TIMEOUT_MS);
     });
 
@@ -200,7 +206,7 @@ export function useEmbeddedCheckout({
       clearTimeout(iframeLoadTimeout);
       setIsLoading(false);
     });
-  }, [colorScheme, onSuccess, t, router]);
+  }, [colorScheme, handleCheckoutConfirmed, t]);
 
-  return { openCheckout, isLoading };
+  return { isLoading, openCheckout };
 }

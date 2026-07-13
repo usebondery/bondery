@@ -5,63 +5,63 @@
  */
 
 import type { z } from "zod";
-import { OPENAPI_SCHEMA_EXAMPLES } from "./openapi-example-fixtures.js";
-import {
-  createApiKeyInputSchema,
-  apiKeyCreatedSchema,
-  apiKeyListItemSchema,
-  apiKeysListResponseSchema,
-  updateApiKeyLabelInputSchema,
-} from "#entities/api-keys.js";
+import { messageResponseSchema } from "#entities/_shared/index.js";
 import {
   createInteractionInputSchema,
   interactionResponseSchema,
   interactionsListResponseSchema,
   updateInteractionInputSchema,
-} from "#entities/activity.js";
+} from "#entities/activity/index.js";
 import {
   apiSuccessResponseSchema,
-  apiErrorResponseSchema,
   feedbackFormSchema,
   photoUploadResponseSchema,
   shareContactRequestSchema,
-} from "#entities/api.js";
+} from "#entities/api/index.js";
 import {
-  geocodeSuggestResponseSchema,
-  geocodeTimezoneResponseSchema,
-} from "#geocode/schemas.js";
+  apiKeyCreatedSchema,
+  apiKeyListItemSchema,
+  apiKeysListResponseSchema,
+  createApiKeyInputSchema,
+  updateApiKeyLabelInputSchema,
+} from "#entities/api-keys/index.js";
 import {
-  createContactApiInputSchema,
-  createContactBodySchema,
-  createContactRelationshipInputSchema,
+  chatMessagesListResponseSchema,
+  chatRequestSchema,
+  chatSessionCreatedResponseSchema,
+  chatSessionResponseSchema,
+  chatSessionsListResponseSchema,
+  updateChatSessionBodySchema,
+} from "#entities/chat/index.js";
+import {
+  bySocialLookupResponseSchema,
   contactRelationshipResponseSchema,
   contactRelationshipsResponseSchema,
   contactResponseSchema,
   contactsListResponseSchema,
+  contactsSelectableListResponseSchema,
+  createContactApiInputSchema,
+  createContactBodySchema,
+  createContactRelationshipInputSchema,
   createContactResponseSchema,
   deleteContactResponseSchema,
   deleteContactsRequestSchema,
   deleteContactsResponseSchema,
   enrichEligibleCountResponseSchema,
+  enrichQueueCountResponseSchema,
   enrichQueueInitBodySchema,
   enrichQueueInitResponseSchema,
-  enrichQueuePatchBodySchema,
   enrichQueueNextBatchResponseSchema,
+  enrichQueuePatchBodySchema,
   enrichQueueStatusCountsSchema,
+  keepInTouchCountResponseSchema,
   linkedInDataResponseSchema,
   linkedInDataUpsertResponseSchema,
   mapAddressPinsResponseSchema,
   mapPinsResponseSchema,
-  bySocialLookupResponseSchema,
   updateContactInputSchema,
   updateContactRelationshipInputSchema,
-} from "#entities/contact.js";
-import {
-  chatMessagesListResponseSchema,
-  chatRequestSchema,
-  chatSessionsListResponseSchema,
-  updateChatSessionBodySchema,
-} from "#entities/chat.js";
+} from "#entities/contact/index.js";
 import {
   addContactsToGroupRequestSchema,
   addContactsToGroupResponseSchema,
@@ -73,8 +73,7 @@ import {
   removeGroupMembersRequestSchema,
   removeGroupMembersResponseSchema,
   updateGroupSchema,
-} from "#entities/group.js";
-import { importantDatesListResponseSchema } from "#entities/important-date.js";
+} from "#entities/group/index.js";
 import {
   enrichContactRequestSchema,
   instagramImportCommitRequestSchema,
@@ -89,31 +88,53 @@ import {
   vcardImportCommitRequestSchema,
   vcardImportCommitResponseSchema,
   vcardParseResponseSchema,
-} from "#entities/import.js";
-import { mergeContactsRequestSchema, declineMergeRecommendationResponseSchema, mergeContactsResponseSchema, mergeRecommendationsResponseSchema, refreshMergeRecommendationsResponseSchema } from "#entities/merge.js";
-import { reminderDigestRequestSchema, reminderDigestResponseSchema, upcomingRemindersResponseSchema } from "#entities/reminder.js";
-import { updateAccountInputSchema, updateSettingsBodySchema, userAccountResponseSchema, userSettingsResponseSchema } from "#entities/settings.js";
+} from "#entities/import/index.js";
+import { importantDatesListResponseSchema } from "#entities/important-date/index.js";
 import {
+  declineMergeRecommendationResponseSchema,
+  mergeContactsRequestSchema,
+  mergeContactsResponseSchema,
+  mergeRecommendationsCountResponseSchema,
+  mergeRecommendationsResponseSchema,
+  refreshMergeRecommendationsResponseSchema,
+} from "#entities/merge/index.js";
+import {
+  reminderDigestRequestSchema,
+  reminderDigestResponseSchema,
+  upcomingRemindersResponseSchema,
+} from "#entities/reminder/index.js";
+import { userSessionResponseSchema } from "#entities/session/index.js";
+import {
+  updateAccountInputSchema,
+  updateSettingsBodySchema,
+  userAccountResponseSchema,
+  userSettingsResponseSchema,
+} from "#entities/settings/index.js";
+import {
+  addContactsToTagResponseSchema,
   contactTagBodySchema,
   contactTagListResponseSchema,
   createTagInputSchema,
-  tagMembersListResponseSchema,
+  removeContactsFromTagResponseSchema,
   tagMembershipRequestSchema,
+  tagMembersListResponseSchema,
   tagResponseSchema,
   tagsListResponseSchema,
   tagUpdateResponseSchema,
   updateTagSchema,
-} from "#entities/tag.js";
-import { messageResponseSchema } from "#entities/_shared.js";
-import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull.js";
-import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+} from "#entities/tag/index.js";
+import { apiErrorResponseSchema } from "#errors/api-error-response/index.js";
+import { geocodeSuggestResponseSchema, geocodeTimezoneResponseSchema } from "#geocode/schema.js";
 import {
   geocodeSuggestResponseWireSchema,
   geocodeTimezoneResponseWireSchema,
   idsRequestBodySchema,
   importantDatesReplaceBodySchema,
 } from "#http/index.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
+import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull/index.js";
+import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push/index.js";
+import { OPENAPI_SCHEMA_EXAMPLES } from "./openapi-example-fixtures.js";
 
 type ExampleEntry = {
   name: string;
@@ -129,6 +150,7 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "contactResponseSchema", schema: contactResponseSchema },
   { name: "createContactResponseSchema", schema: createContactResponseSchema },
   { name: "contactsListResponseSchema", schema: contactsListResponseSchema },
+  { name: "contactsSelectableListResponseSchema", schema: contactsSelectableListResponseSchema },
   { name: "mapPinsResponseSchema", schema: mapPinsResponseSchema },
   { name: "mapAddressPinsResponseSchema", schema: mapAddressPinsResponseSchema },
   { name: "contactRelationshipsResponseSchema", schema: contactRelationshipsResponseSchema },
@@ -138,14 +160,26 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "bySocialLookupResponseSchema", schema: bySocialLookupResponseSchema },
   { name: "linkedInDataResponseSchema", schema: linkedInDataResponseSchema },
   { name: "enrichEligibleCountResponseSchema", schema: enrichEligibleCountResponseSchema },
+  { name: "enrichQueueCountResponseSchema", schema: enrichQueueCountResponseSchema },
+  { name: "keepInTouchCountResponseSchema", schema: keepInTouchCountResponseSchema },
   { name: "enrichQueueStatusCountsSchema", schema: enrichQueueStatusCountsSchema },
   { name: "enrichQueueInitResponseSchema", schema: enrichQueueInitResponseSchema },
   { name: "enrichQueueNextBatchResponseSchema", schema: enrichQueueNextBatchResponseSchema },
   { name: "linkedInDataUpsertResponseSchema", schema: linkedInDataUpsertResponseSchema },
   { name: "mergeContactsResponseSchema", schema: mergeContactsResponseSchema },
   { name: "mergeRecommendationsResponseSchema", schema: mergeRecommendationsResponseSchema },
-  { name: "declineMergeRecommendationResponseSchema", schema: declineMergeRecommendationResponseSchema },
-  { name: "refreshMergeRecommendationsResponseSchema", schema: refreshMergeRecommendationsResponseSchema },
+  {
+    name: "mergeRecommendationsCountResponseSchema",
+    schema: mergeRecommendationsCountResponseSchema,
+  },
+  {
+    name: "declineMergeRecommendationResponseSchema",
+    schema: declineMergeRecommendationResponseSchema,
+  },
+  {
+    name: "refreshMergeRecommendationsResponseSchema",
+    schema: refreshMergeRecommendationsResponseSchema,
+  },
   { name: "groupsListResponseSchema", schema: groupsListResponseSchema },
   { name: "groupResponseSchema", schema: groupResponseSchema },
   { name: "groupContactsListResponseSchema", schema: groupContactsListResponseSchema },
@@ -155,6 +189,8 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "tagsListResponseSchema", schema: tagsListResponseSchema },
   { name: "tagResponseSchema", schema: tagResponseSchema },
   { name: "tagUpdateResponseSchema", schema: tagUpdateResponseSchema },
+  { name: "addContactsToTagResponseSchema", schema: addContactsToTagResponseSchema },
+  { name: "removeContactsFromTagResponseSchema", schema: removeContactsFromTagResponseSchema },
   { name: "tagMembersListResponseSchema", schema: tagMembersListResponseSchema },
   { name: "contactTagListResponseSchema", schema: contactTagListResponseSchema },
   { name: "interactionsListResponseSchema", schema: interactionsListResponseSchema },
@@ -172,6 +208,7 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "syncPullResponseSchema", schema: syncPullResponseSchema },
   { name: "syncBootstrapResponseSchema", schema: syncBootstrapResponseSchema },
   { name: "syncPushResponseSchema", schema: syncPushResponseSchema },
+  { name: "userSessionResponseSchema", schema: userSessionResponseSchema },
   { name: "userSettingsResponseSchema", schema: userSettingsResponseSchema },
   { name: "userAccountResponseSchema", schema: userAccountResponseSchema },
   { name: "apiKeysListResponseSchema", schema: apiKeysListResponseSchema },
@@ -179,6 +216,8 @@ const RESPONSE_SCHEMA_EXAMPLES: ExampleEntry[] = [
   { name: "apiKeyCreatedSchema", schema: apiKeyCreatedSchema },
   { name: "chatSessionsListResponseSchema", schema: chatSessionsListResponseSchema },
   { name: "chatMessagesListResponseSchema", schema: chatMessagesListResponseSchema },
+  { name: "chatSessionCreatedResponseSchema", schema: chatSessionCreatedResponseSchema },
+  { name: "chatSessionResponseSchema", schema: chatSessionResponseSchema },
   { name: "geocodeSuggestResponseSchema", schema: geocodeSuggestResponseSchema },
   { name: "geocodeTimezoneResponseSchema", schema: geocodeTimezoneResponseSchema },
   { name: "geocodeSuggestResponseWireSchema", schema: geocodeSuggestResponseWireSchema },
@@ -241,7 +280,9 @@ function validateExamples(entries: ExampleEntry[], failures: string[]) {
   for (const { name, schema } of entries) {
     const example = getExample(name, schema);
     if (example === undefined) {
-      failures.push(`${name}: missing OpenAPI example (add to openapi-example-fixtures.ts or .meta({ example }))`);
+      failures.push(
+        `${name}: missing OpenAPI example (add to openapi-example-fixtures.ts or .meta({ example }))`,
+      );
       continue;
     }
 
@@ -259,7 +300,9 @@ function run() {
   validateExamples(REQUEST_SCHEMA_EXAMPLES, failures);
 
   if (failures.length > 0) {
-    console.error("OpenAPI example validation failed:\n" + failures.map((f) => `  - ${f}`).join("\n"));
+    console.error(
+      `OpenAPI example validation failed:\n${failures.map((f) => `  - ${f}`).join("\n")}`,
+    );
     process.exit(1);
   }
 

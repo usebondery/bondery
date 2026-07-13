@@ -1,9 +1,5 @@
-import {
-  dehydrate,
-  HydrationBoundary,
-  type DehydratedState,
-} from "@tanstack/react-query";
-import type { QueryClient, QueryKey, QueryFunction } from "@tanstack/react-query";
+import type { QueryClient, QueryFunction, QueryKey } from "@tanstack/react-query";
+import { type DehydratedState, dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import { getQueryClient } from "./client";
 
 export async function prefetchQuery<T>(
@@ -11,7 +7,7 @@ export async function prefetchQuery<T>(
   queryKey: QueryKey,
   queryFn: QueryFunction<T>,
 ): Promise<void> {
-  await queryClient.prefetchQuery({ queryKey, queryFn });
+  await queryClient.prefetchQuery({ queryFn, queryKey });
 }
 
 export function dehydrateQueryClient(queryClient: QueryClient): DehydratedState {

@@ -8,9 +8,9 @@ export async function GET() {
   const body = await apiResponse.text();
 
   return new Response(body, {
-    status: apiResponse.status,
     headers: {
       "Content-Type": apiResponse.headers.get("Content-Type") ?? "application/json",
     },
+    status: apiResponse.status,
   });
 }

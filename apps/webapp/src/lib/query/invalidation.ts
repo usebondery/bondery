@@ -2,6 +2,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import {
   chatKeys,
   contactKeys,
+  enrichQueueKeys,
   groupKeys,
   interactionKeys,
   mergeRecommendationKeys,
@@ -23,10 +24,7 @@ export async function invalidateContactMapPins(queryClient: QueryClient): Promis
   await queryClient.invalidateQueries({ queryKey: [...contactKeys.all, "map-pins"] });
 }
 
-export async function invalidateContactDetail(
-  queryClient: QueryClient,
-  id: string,
-): Promise<void> {
+export async function invalidateContactDetail(queryClient: QueryClient, id: string): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: contactKeys.detail(id) });
 }
 
@@ -44,6 +42,37 @@ export async function invalidateContactImportantDates(
   await queryClient.invalidateQueries({ queryKey: contactKeys.importantDates(id) });
 }
 
+export async function invalidateContactTags(queryClient: QueryClient, id: string): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: contactKeys.tags(id) });
+}
+
+export async function invalidateContactInteractions(
+  queryClient: QueryClient,
+  id: string,
+): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: [...contactKeys.detail(id), "interactions"] });
+}
+
+export async function invalidateAllContactTags(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({
+    predicate: (query) =>
+      Array.isArray(query.queryKey) &&
+      query.queryKey[0] === contactKeys.all[0] &&
+      query.queryKey[1] === "detail" &&
+      query.queryKey.includes("tags"),
+  });
+}
+
+export async function invalidateAllContactInteractions(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({
+    predicate: (query) =>
+      Array.isArray(query.queryKey) &&
+      query.queryKey[0] === contactKeys.all[0] &&
+      query.queryKey[1] === "detail" &&
+      query.queryKey.includes("interactions"),
+  });
+}
+
 export async function invalidateSettings(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: settingsKeys.all });
 }
@@ -52,12 +81,19 @@ export async function invalidateApiKeys(queryClient: QueryClient): Promise<void>
   await queryClient.invalidateQueries({ queryKey: settingsKeys.apiKeys() });
 }
 
+export async function invalidateSubscription(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: settingsKeys.subscription() });
+}
+
 export async function invalidateTagDomain(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: tagKeys.all });
 }
 
 export async function invalidateInteractionDomain(queryClient: QueryClient): Promise<void> {
-  await queryClient.invalidateQueries({ queryKey: interactionKeys.all });
+  await Promise.all([
+    queryClient.invalidateQueries({ queryKey: interactionKeys.all }),
+    invalidateAllContactInteractions(queryClient),
+  ]);
 }
 
 export async function invalidateGroupDomain(queryClient: QueryClient): Promise<void> {
@@ -68,6 +104,22 @@ export async function invalidateMergeRecommendationDomain(queryClient: QueryClie
   await queryClient.invalidateQueries({ queryKey: mergeRecommendationKeys.all });
 }
 
+export async function invalidateEnrichQueueDomain(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: enrichQueueKeys.all });
+}
+
+/** Shell badge: merge + enrich count queries and related list/status caches. */
+export async function invalidateContactsAttention(queryClient: QueryClient): Promise<void> {
+  await Promise.all([
+    invalidateMergeRecommendationDomain(queryClient),
+    invalidateEnrichQueueDomain(queryClient),
+  ]);
+}
+
+export async function invalidateKeepInTouchCount(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: contactKeys.keepInTouchCount() });
+}
+
 export async function invalidateReminderDomain(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: reminderKeys.all });
 }
@@ -76,11 +128,19 @@ export async function invalidateChatSessions(queryClient: QueryClient): Promise<
   await queryClient.invalidateQueries({ queryKey: chatKeys.sessions() });
 }
 
+export async function invalidateChatSessionMessages(
+  queryClient: QueryClient,
+  sessionId: string,
+): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: chatKeys.messages(sessionId) });
+}
+
 /** Post-import burst: contacts, merge recommendations, and groups. */
 export async function invalidateAfterImport(queryClient: QueryClient): Promise<void> {
   await Promise.all([
     invalidateContactDomain(queryClient),
-    invalidateMergeRecommendationDomain(queryClient),
+    invalidateContactsAttention(queryClient),
+    invalidateKeepInTouchCount(queryClient),
     invalidateGroupDomain(queryClient),
     invalidateSettings(queryClient),
   ]);
@@ -90,7 +150,7 @@ export async function invalidateAfterImport(queryClient: QueryClient): Promise<v
 export async function invalidateAfterEnrichBatch(queryClient: QueryClient): Promise<void> {
   await Promise.all([
     invalidateContactDomain(queryClient),
-    invalidateMergeRecommendationDomain(queryClient),
+    invalidateContactsAttention(queryClient),
     invalidateSettings(queryClient),
   ]);
 }

@@ -1,53 +1,59 @@
-import { ScrollView, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { IconFileText, IconShieldLock } from "@tabler/icons-react-native";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import { IconFileText, IconShieldLock } from "@tabler/icons-react-native";
+import { useRouter } from "expo-router";
+import { ScrollView, StyleSheet } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { WEBSITE_URL } from "../../lib/config";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
+import {
+  useCommonTranslations,
+  useLoginPageTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { openExternalUrl } from "./openExternalUrl";
 import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
 import { SettingsSectionCard } from "./components/SettingsSectionCard";
+import { openExternalUrl } from "./openExternalUrl";
 
 export function SettingsLegalScreen() {
+  const tLoginPage = useLoginPageTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
 
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.Legal")}
         onBack={() => router.back()}
+        title={tMobileSettings("Legal")}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
         <SettingsSectionCard>
           <SettingsNavigationRow
-            icon={<IconShieldLock size={18} stroke={colors.iconPrimary} />}
-            label={t("LoginPage.PrivacyPolicy")}
             destination="external"
-            externalLabel={t("MobileApp.Settings.External")}
+            externalLabel={tMobileSettings("External")}
+            icon={<IconShieldLock size={18} stroke={colors.iconPrimary} />}
+            label={tLoginPage("PrivacyPolicy")}
             onPress={() => {
               void openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`);
             }}
           />
 
           <SettingsNavigationRow
-            icon={<IconFileText size={18} stroke={colors.iconPrimary} />}
-            label={t("LoginPage.TermsOfService")}
             destination="external"
-            externalLabel={t("MobileApp.Settings.External")}
-            showDivider={false}
+            externalLabel={tMobileSettings("External")}
+            icon={<IconFileText size={18} stroke={colors.iconPrimary} />}
+            label={tLoginPage("TermsOfService")}
             onPress={() => {
               void openExternalUrl(`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`);
             }}
+            showDivider={false}
           />
         </SettingsSectionCard>
       </ScrollView>
@@ -56,13 +62,13 @@ export function SettingsLegalScreen() {
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+  },
   screen: {
     flex: 1,
-  },
-  content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    gap: 16,
   },
 });

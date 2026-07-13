@@ -1,20 +1,20 @@
-import { Pressable, StyleSheet, View } from "react-native";
 import type { Contact } from "@bondery/schemas";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import type { SlashCommandDefinition } from "../slashCommands";
 import { MentionContactListContent } from "./MentionContactListContent";
 import { SlashCommandListContent } from "./SlashCommandListContent";
-import type { SlashCommandDefinition } from "../slashCommands";
 
 export type EditorPaletteMode = "closed" | "slash" | "mention";
 
 interface EditorCommandPaletteProps {
-  mode: "slash" | "mention";
-  slashQuery: string;
   mentionContacts: Contact[];
   mentionLoading: boolean;
+  mode: "slash" | "mention";
   onDismiss: () => void;
-  onSlashCommandSelect: (command: SlashCommandDefinition) => void;
   onMentionSelect: (contact: Contact) => void;
+  onSlashCommandSelect: (command: SlashCommandDefinition) => void;
+  slashQuery: string;
 }
 
 export function EditorCommandPalette({
@@ -27,11 +27,12 @@ export function EditorCommandPalette({
   onMentionSelect,
 }: EditorCommandPaletteProps) {
   const colors = useMobileThemeColors();
-  const accessibilityLabel =
-    mode === "slash" ? "Formatting commands" : "Mention suggestions";
+  const accessibilityLabel = mode === "slash" ? "Formatting commands" : "Mention suggestions";
 
   return (
     <View
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="menu"
       style={[
         styles.container,
         {
@@ -39,23 +40,18 @@ export function EditorCommandPalette({
           borderTopColor: colors.border,
         },
       ]}
-      accessibilityRole="menu"
-      accessibilityLabel={accessibilityLabel}
     >
       <Pressable
+        accessibilityLabel="Dismiss command menu"
+        accessibilityRole="button"
         onPress={onDismiss}
         style={styles.handleHit}
-        accessibilityRole="button"
-        accessibilityLabel="Dismiss command menu"
       >
         <View style={[styles.handle, { backgroundColor: colors.borderStrong }]} />
       </Pressable>
 
       {mode === "slash" ? (
-        <SlashCommandListContent
-          query={slashQuery}
-          onSelect={onSlashCommandSelect}
-        />
+        <SlashCommandListContent onSelect={onSlashCommandSelect} query={slashQuery} />
       ) : (
         <MentionContactListContent
           contacts={mentionContacts}
@@ -69,18 +65,18 @@ export function EditorCommandPalette({
 
 const styles = StyleSheet.create({
   container: {
-    borderTopWidth: 1,
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+    borderTopWidth: 1,
+  },
+  handle: {
+    borderRadius: 2,
+    height: 4,
+    width: 36,
   },
   handleHit: {
     alignItems: "center",
-    paddingTop: 8,
     paddingBottom: 4,
-  },
-  handle: {
-    width: 36,
-    height: 4,
-    borderRadius: 2,
+    paddingTop: 8,
   },
 });

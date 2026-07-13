@@ -1,15 +1,15 @@
 import { z } from "zod";
-import { contactIdSchema } from "#contact-id.js";
-import { interactionSchema } from "#entities/activity.js";
-import { apiErrorResponseSchema } from "#entities/api.js";
+import { contactIdSchema } from "#contact-id/index.js";
+import { paginationMetaSchema } from "#entities/_shared/index.js";
+import { interactionSchema } from "#entities/activity/index.js";
 import {
   contactSchema,
   deleteContactResponseSchema,
   deleteContactsResponseSchema,
-} from "#entities/contact.js";
-import { groupSchema } from "#entities/group.js";
-import { paginationMetaSchema } from "#entities/_shared.js";
-import { tagSchema } from "#entities/tag.js";
+} from "#entities/contact/index.js";
+import { groupSchema } from "#entities/group/index.js";
+import { tagSchema } from "#entities/tag/index.js";
+import { apiErrorResponseSchema } from "#errors/api-error-response/index.js";
 import {
   EXAMPLE_CONTACT,
   EXAMPLE_GROUP,
@@ -22,7 +22,7 @@ import {
   EXAMPLE_DELETE_CONTACT_RESPONSE,
   EXAMPLE_DELETE_CONTACTS_RESPONSE,
 } from "#openapi/fixtures/responses.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
 
 /**
  * Registers shared schemas for OpenAPI component $refs.
@@ -30,52 +30,52 @@ import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
  */
 export function registerOpenApiComponentSchemas(): void {
   z.globalRegistry.add(contactSchema, {
-    id: "Contact",
     description: "Contact read model",
     example: EXAMPLE_CONTACT,
+    id: "Contact",
   });
   z.globalRegistry.add(groupSchema, {
-    id: "Group",
     description: "Group read model",
     example: EXAMPLE_GROUP,
+    id: "Group",
   });
   z.globalRegistry.add(tagSchema, {
-    id: "Tag",
     description: "Tag read model",
     example: EXAMPLE_TAG,
+    id: "Tag",
   });
   z.globalRegistry.add(interactionSchema, {
-    id: "Interaction",
     description: "Interaction read model",
     example: EXAMPLE_INTERACTION,
+    id: "Interaction",
   });
   z.globalRegistry.add(contactIdSchema, {
-    id: "ContactId",
     description: "Contact person UUID",
+    id: "ContactId",
   });
   z.globalRegistry.add(apiErrorResponseSchema, {
-    id: "ApiError",
     description: "Error response with a human-readable message",
     example: EXAMPLE_ERROR_400,
+    id: "ApiError",
   });
   z.globalRegistry.add(syncConflictErrorResponseSchema, {
-    id: "SyncConflictError",
     description: "Contact update conflict with the current server version",
     example: EXAMPLE_SYNC_CONFLICT_ERROR,
+    id: "SyncConflictError",
   });
   z.globalRegistry.add(paginationMetaSchema, {
-    id: "PaginationMeta",
     description: "Pagination metadata",
     example: EXAMPLE_PAGINATION,
+    id: "PaginationMeta",
   });
   z.globalRegistry.add(deleteContactsResponseSchema, {
-    id: "DeleteContactsResponse",
     description: "Bulk contact delete result",
     example: EXAMPLE_DELETE_CONTACTS_RESPONSE,
+    id: "DeleteContactsResponse",
   });
   z.globalRegistry.add(deleteContactResponseSchema, {
-    id: "DeleteContactResponse",
     description: "Single contact delete result",
     example: EXAMPLE_DELETE_CONTACT_RESPONSE,
+    id: "DeleteContactResponse",
   });
 }

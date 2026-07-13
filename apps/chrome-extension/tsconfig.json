@@ -1,20 +1,21 @@
 {
-  "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ESNext",
-    "lib": ["ES2020", "DOM"],
-    "jsx": "react-jsx",
-    "outDir": "./dist",
-    "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
+    "incremental": true,
     "isolatedModules": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2020",
     "types": ["chrome", "node"]
   },
-  "include": ["src/**/*", "scripts/**/*", "wxt.config.ts"],
-  "exclude": ["node_modules", "dist", ".output", ".wxt"]
+  "exclude": ["node_modules", "dist", ".output", ".wxt"],
+  "extends": "./.wxt/tsconfig.json",
+  "include": ["src/**/*", "scripts/**/*", "wxt.config.ts"]
 }

@@ -1,0 +1,22 @@
+{
+  "AddButton": "Přidat",
+  "Description": "Údaje odešleme lidem níže. Kopii dostanete i vy.",
+  "DuplicateEmail": "Tato adresa je už přidaná",
+  "ErrorDescription": "Zkontrolujte připojení a zkuste to znovu.",
+  "ErrorHeadline": "Kontakt se nepodařilo odeslat",
+  "InvalidEmail": "Zadejte platnou e-mailovou adresu",
+  "MaxRecipients": "Můžete přidat nejvýše 10 příjemců",
+  "MaxRecipientsHint": "Maximálně 10 příjemců",
+  "MessagePlaceholder": "Poznámka (volitelná)",
+  "NoRecipients": "Přidejte alespoň jednoho příjemce",
+  "RecipientsLabel": "Komu",
+  "RecipientsPlaceholder": "E-mailová adresa příjemce",
+  "RemoveRecipient": "Odebrat {email}",
+  "SendButton": "Odeslat",
+  "SendButtonMany": "Odeslat {count} příjemcům",
+  "SendButtonOne": "Odeslat 1 příjemci",
+  "SuccessDescription": "Příjemci ho dostanou během chvíle.",
+  "SuccessHeadline": "Kontakt odeslán",
+  "Title": "Odeslat kontakt: {name}",
+  "WhatsIncluded": "Jméno, kontakty, odkazy a poznámky, které máte uložené."
+}

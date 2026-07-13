@@ -1,31 +1,32 @@
-import { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, Text, type TextInput } from "react-native";
+import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
+import type { Contact } from "@bondery/schemas";
+import { createContactInputSchema } from "@bondery/schemas";
 import { IconUserPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { createContactInputSchema } from "@bondery/schemas";
-import type { Contact } from "@bondery/schemas";
-import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
+import { useEffect, useMemo, useRef } from "react";
+import { StyleSheet, Text, type TextInput } from "react-native";
+import { useMobileCreateContactTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
-import { contactsDomain } from "../../../lib/domains/contacts";
+import { createContact } from "../../../lib/domains/contacts";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { preloadMobileNamespaces } from "../../../lib/i18n/preloadMobileNamespaces";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface CreateContactSheetProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
   onCreated: (contact: Contact) => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 /**
  * Bottom sheet for creating a contact from a single full-name field.
  */
 export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateContactSheetProps) {
-  const t = useMobileTranslations();
+  const tMobileCreateContact = useMobileCreateContactTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
@@ -36,14 +37,18 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
     handleSubmit,
     formState: { isDirty, isValid, isSubmitting },
   } = useSheetForm({
-    open,
-    schema: createContactInputSchema,
     getDefaultValues: () => ({ fullName: "" }),
     mode: "onChange",
+    open,
+    schema: createContactInputSchema,
   });
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
+
+    void preloadMobileNamespaces(["mobile.createContact"]);
 
     const timer = setTimeout(() => {
       inputRef.current?.focus();
@@ -55,7 +60,9 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
   const canSubmit = isDirty && isValid && !isSubmitting;
 
   const handleClose = () => {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      return;
+    }
     onOpenChange(false);
   };
 
@@ -63,70 +70,72 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
     const parsed = createContactFromFullNameSchema.parse({ fullName });
 
     try {
-      const contact = contactsDomain.create({
+      const contact = createContact({
         firstName: parsed.firstName,
-        middleName: parsed.middleName ?? undefined,
         lastName: parsed.lastName ?? undefined,
+        middleName: parsed.middleName ?? undefined,
       });
 
       onOpenChange(false);
       onCreated(contact);
-      router.push({ pathname: "/contact/[id]", params: { id: contact.id } });
+      router.push({ params: { id: contact.id }, pathname: "/contact/[id]" });
     } catch (createError) {
       const message =
         createError instanceof Error && createError.message.trim().length > 0
           ? createError.message
-          : t("MobileApp.CreateContact.ErrorDescription");
+          : tMobileCreateContact("ErrorDescription");
 
       showToast({
-        type: "error",
-        headline: t("MobileApp.CreateContact.ErrorTitle"),
         description: message,
+        headline: tMobileCreateContact("ErrorTitle"),
+        type: "error",
       });
     }
   });
 
   const createActionIcon = useMemo(
-    () => <IconUserPlus size={16} color={colors.textOnPrimary} />,
+    () => <IconUserPlus color={colors.textOnPrimary} size={16} />,
     [colors.textOnPrimary],
   );
 
   return (
     <ActionSheetPopup
-      open={open}
-      title={t("MobileApp.CreateContact.Title")}
       actions={[
         {
-          label: t("MobileApp.CreateContact.Create"),
-          icon: createActionIcon,
-          onPress: () => void onSubmit(),
           disabled: !canSubmit,
+          icon: createActionIcon,
+          label: tMobileCreateContact("Create"),
           loading: isSubmitting,
+          onPress: () => void onSubmit(),
           tone: "primary",
           variant: "filled",
         },
       ]}
-      onOpenChange={onOpenChange}
-      onClose={handleClose}
       isBusy={isSubmitting}
+      onClose={handleClose}
+      onOpenChange={onOpenChange}
+      open={open}
+      title={tMobileCreateContact("Title")}
     >
       <Text style={[styles.label, { color: colors.textSecondary }]}>
-        {t("MobileApp.CreateContact.FullNameLabel")}
+        {tMobileCreateContact("FullNameLabel")}
       </Text>
 
       <SheetTextField
-        control={control}
-        name="fullName"
-        inputRef={inputRef}
-        placeholder={t("MobileApp.CreateContact.FullNamePlaceholder")}
         autoCapitalize="words"
         autoCorrect={false}
-        returnKeyType="done"
-        enterKeyHint="done"
-        onSubmitEditing={() => {
-          if (canSubmit) void onSubmit();
-        }}
+        control={control}
         editable={!isSubmitting}
+        enterKeyHint="done"
+        inputRef={inputRef}
+        name="fullName"
+        onSubmitEditing={() => {
+          if (canSubmit) {
+            void onSubmit();
+          }
+        }}
+        placeholder={tMobileCreateContact("FullNamePlaceholder")}
+        returnKeyType="done"
       />
     </ActionSheetPopup>
   );

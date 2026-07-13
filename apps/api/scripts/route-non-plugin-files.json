@@ -1,0 +1,13 @@
+[
+  "register-all.ts",
+  "contacts/schemas.ts",
+  "contacts/list-routes.ts",
+  "contacts/lookup-routes.ts",
+  "contacts/map-routes.ts",
+  "contacts/detail-routes.ts",
+  "contacts/mutation-routes.ts",
+  "extension/schemas.ts",
+  "import/linkedin/parser.ts",
+  "import/instagram/parser.ts",
+  "import/vcard/parser.ts"
+]

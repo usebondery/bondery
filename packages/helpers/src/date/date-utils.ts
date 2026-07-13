@@ -17,7 +17,7 @@ function parseDateComponents(d: string): { year: number; month: number; yearOnly
   const day = Number(dayStr ?? 1);
   // day=02 is the year-only sentinel (see toPostgresDate in redirect.ts)
   const yearOnly = day === 2;
-  return { year, month, yearOnly };
+  return { month, year, yearOnly };
 }
 
 /**
@@ -27,11 +27,13 @@ function parseDateComponents(d: string): { year: number; month: number; yearOnly
  */
 function formatDate(d: string): string {
   const { year, month, yearOnly } = parseDateComponents(d);
-  if (yearOnly) return String(year);
+  if (yearOnly) {
+    return String(year);
+  }
   // Construct in local time using numeric components to avoid UTC-to-local shift
   return new Date(year, month - 1, 1).toLocaleDateString(undefined, {
-    year: "numeric",
     month: "short",
+    year: "numeric",
   });
 }
 
@@ -50,10 +52,19 @@ export function formatDateRange(
   endDate: string | null,
   presentLabel = "Present",
 ): string {
-  if (!startDate && !endDate) return "";
-  if (startDate && !endDate) return `${formatDate(startDate)} – ${presentLabel}`;
-  if (!startDate && endDate) return `– ${formatDate(endDate)}`;
-  return `${formatDate(startDate!)} – ${formatDate(endDate!)}`;
+  if (!startDate && !endDate) {
+    return "";
+  }
+  if (startDate && !endDate) {
+    return `${formatDate(startDate)} – ${presentLabel}`;
+  }
+  if (!startDate && endDate) {
+    return `– ${formatDate(endDate)}`;
+  }
+  if (startDate && endDate) {
+    return `${formatDate(startDate)} – ${formatDate(endDate)}`;
+  }
+  return "";
 }
 
 /**
@@ -66,7 +77,9 @@ export function formatDateRange(
  * @returns Formatted duration like "1 year, 2 months", "3 months", or null if startDate is missing.
  */
 export function formatDuration(startDate: string | null, endDate: string | null): string | null {
-  if (!startDate) return null;
+  if (!startDate) {
+    return null;
+  }
 
   const s = parseDateComponents(startDate);
 
@@ -89,21 +102,31 @@ export function formatDuration(startDate: string | null, endDate: string | null)
   // show whole years only to avoid misleading "11 months" from padding.
   if (s.yearOnly || endYearOnly) {
     const years = endYear - s.year;
-    if (years <= 0) return null;
+    if (years <= 0) {
+      return null;
+    }
     return `${years} year${years > 1 ? "s" : ""}`;
   }
 
   let months = (endYear - s.year) * 12 + (endMonth - s.month);
-  if (months < 0) months = 0;
+  if (months < 0) {
+    months = 0;
+  }
 
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
 
-  if (years === 0 && remainingMonths === 0) return null;
+  if (years === 0 && remainingMonths === 0) {
+    return null;
+  }
 
   const parts: string[] = [];
-  if (years > 0) parts.push(`${years} year${years > 1 ? "s" : ""}`);
-  if (remainingMonths > 0) parts.push(`${remainingMonths} month${remainingMonths > 1 ? "s" : ""}`);
+  if (years > 0) {
+    parts.push(`${years} year${years > 1 ? "s" : ""}`);
+  }
+  if (remainingMonths > 0) {
+    parts.push(`${remainingMonths} month${remainingMonths > 1 ? "s" : ""}`);
+  }
 
   return parts.join(", ");
 }

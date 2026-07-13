@@ -1,6 +1,6 @@
 import type { z } from "zod";
-import { apiErrorResponseSchema } from "#entities/api.js";
-import type { ApiErrorResponse } from "#entities/api.js";
+import { apiErrorResponseSchema } from "#errors/api-error-response/index.js";
+import type { ApiErrorResponse } from "#errors/api-error-response/types.js";
 import {
   EXAMPLE_ERROR_400,
   EXAMPLE_ERROR_401,
@@ -12,7 +12,7 @@ import {
   EXAMPLE_ERROR_503,
 } from "#openapi/fixtures/errors.js";
 import { getSchemaExample } from "#openapi/get-schema-example.js";
-import { syncConflictErrorResponseSchema } from "#sync/conflict.js";
+import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
 
 function jsonResponse<T extends z.ZodType>(
   schema: T,
@@ -21,13 +21,13 @@ function jsonResponse<T extends z.ZodType>(
 ) {
   const example = exampleOverride ?? getSchemaExample(schema);
   return {
-    description,
     content: {
       "application/json": {
         schema,
         ...(example !== undefined && { example }),
       },
     },
+    description,
   } as const;
 }
 
@@ -54,18 +54,11 @@ export const conflictResponse = {
 
 /** HTTP 409 sync conflict including the current server contact. */
 export const syncConflictResponse = {
-  409: jsonResponse(
-    syncConflictErrorResponseSchema,
-    "Contact was modified on another device",
-  ),
+  409: jsonResponse(syncConflictErrorResponseSchema, "Contact was modified on another device"),
 } as const;
 
 /** Wrap a success schema as HTTP 200 with a documented description. */
-export function okResponse<T extends z.ZodType>(
-  schema: T,
-  description: string,
-  example?: unknown,
-) {
+export function okResponse<T extends z.ZodType>(schema: T, description: string, example?: unknown) {
   return {
     200: jsonResponse(schema, description, example),
   } as const;

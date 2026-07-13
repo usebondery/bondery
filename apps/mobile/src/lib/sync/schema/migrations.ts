@@ -1,5 +1,5 @@
-import type { SQLiteDatabase } from "expo-sqlite";
 import { SQLITE_SCHEMA_VERSION } from "@bondery/schemas/sync";
+import type { SQLiteDatabase } from "expo-sqlite";
 import { SYNC_META_KEYS } from "../constants";
 
 const DOMAIN_TABLES = [
@@ -21,7 +21,9 @@ function getStoredSchemaVersion(db: SQLiteDatabase): number | null {
     "SELECT value FROM sync_meta WHERE key = ?",
     SYNC_META_KEYS.sqliteSchemaVersion,
   );
-  if (!row?.value) return null;
+  if (!row?.value) {
+    return null;
+  }
   const parsed = Number(row.value);
   return Number.isFinite(parsed) ? parsed : null;
 }
@@ -38,7 +40,7 @@ function dropDomainTablesIfExist(db: SQLiteDatabase): void {
 }
 
 /** @deprecated Use dropDomainTablesIfExist — kept for wipe on logout (tables exist). */
-function wipeDomainTables(db: SQLiteDatabase): void {
+function _wipeDomainTables(db: SQLiteDatabase): void {
   db.withTransactionSync(() => {
     for (const table of DOMAIN_TABLES) {
       try {
@@ -238,8 +240,12 @@ function createSchemaV2(db: SQLiteDatabase): void {
   db.execSync("CREATE INDEX IF NOT EXISTS people_updated_at_idx ON people (updated_at);");
   db.execSync("CREATE INDEX IF NOT EXISTS people_phones_person_idx ON people_phones (person_id);");
   db.execSync("CREATE INDEX IF NOT EXISTS people_emails_person_idx ON people_emails (person_id);");
-  db.execSync("CREATE INDEX IF NOT EXISTS people_addresses_person_idx ON people_addresses (person_id);");
-  db.execSync("CREATE INDEX IF NOT EXISTS people_socials_person_idx ON people_socials (person_id);");
+  db.execSync(
+    "CREATE INDEX IF NOT EXISTS people_addresses_person_idx ON people_addresses (person_id);",
+  );
+  db.execSync(
+    "CREATE INDEX IF NOT EXISTS people_socials_person_idx ON people_socials (person_id);",
+  );
   db.execSync("CREATE INDEX IF NOT EXISTS people_groups_group_idx ON people_groups (group_id);");
   db.execSync("CREATE INDEX IF NOT EXISTS people_groups_person_idx ON people_groups (person_id);");
   db.execSync("CREATE INDEX IF NOT EXISTS people_tags_person_idx ON people_tags (person_id);");
@@ -264,11 +270,9 @@ function tableExists(db: SQLiteDatabase, table: string): boolean {
 
 export function runSyncMigrations(db: SQLiteDatabase): void {
   const storedVersion = getStoredSchemaVersion(db);
-  const needsUpgrade =
-    storedVersion !== null && storedVersion !== SQLITE_SCHEMA_VERSION;
+  const needsUpgrade = storedVersion !== null && storedVersion !== SQLITE_SCHEMA_VERSION;
   const missingV2Tables =
-    storedVersion === SQLITE_SCHEMA_VERSION &&
-    !tableExists(db, "people_phones");
+    storedVersion === SQLITE_SCHEMA_VERSION && !tableExists(db, "people_phones");
 
   if (needsUpgrade || missingV2Tables) {
     // v1 only had `people` — DELETE FROM new tables threw and blocked createSchemaV2.

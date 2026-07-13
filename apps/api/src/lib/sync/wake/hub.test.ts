@@ -1,19 +1,19 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { SyncConnectionHub } from "./hub.js";
-import { WS_OPEN, type SyncWakeSocket } from "./types.js";
+import { type SyncWakeSocket, WS_OPEN } from "./types.js";
 
 function createMockSocket(): SyncWakeSocket & { sent: string[]; closed: boolean } {
   const socket = {
-    sent: [] as string[],
+    close() {
+      this.closed = true;
+    },
     closed: false,
     readyState: WS_OPEN,
     send(data: string) {
       this.sent.push(data);
     },
-    close() {
-      this.closed = true;
-    },
+    sent: [] as string[],
   };
   return socket;
 }
@@ -25,12 +25,14 @@ describe("SyncConnectionHub", () => {
     hub.register("user-1", socket);
 
     hub.broadcastWake("user-1", {
-      serverSequence: 3,
       affectedTables: ["people"],
+      serverSequence: 3,
     });
 
     assert.equal(socket.sent.length, 1);
-    const payload = JSON.parse(socket.sent[0]!);
+    const sent = socket.sent[0];
+    assert.ok(sent);
+    const payload = JSON.parse(sent);
     assert.equal(payload.type, "sync.batch");
     assert.equal(payload.serverSequence, 3);
   });

@@ -9,17 +9,7 @@
  */
 
 export interface EnrichBatchState {
-  /** True while the auth check is in progress but before enrichment has started. */
-  isLoading: boolean;
-  /** True while the enrichment loop is actively running. */
-  isRunning: boolean;
-  /**
-   * Total eligible contacts at the start of the run (set from init response).
-   * Used as the progress bar denominator.
-   */
-  totalEligible: number;
   completed: number;
-  failed: number;
   /** The contact currently being enriched, or null between contacts. */
   currentPerson: {
     id: string;
@@ -27,24 +17,34 @@ export interface EnrichBatchState {
     lastName: string | null;
     avatar: string | null;
   } | null;
+  failed: number;
+  /** True while the auth check is in progress but before enrichment has started. */
+  isLoading: boolean;
+  /** True from the moment Pause is clicked until the current contact finishes and the loop stops. */
+  isPausing: boolean;
+  /** True while the enrichment loop is actively running. */
+  isRunning: boolean;
   /**
    * Set when pending queue rows are detected on mount (interrupted run).
    * Drives the global resume notification. Cleared when a resume or discard occurs.
    */
   pendingQueueStatus: { pending: number; completed: number; failed: number } | null;
-  /** True from the moment Pause is clicked until the current contact finishes and the loop stops. */
-  isPausing: boolean;
+  /**
+   * Total eligible contacts at the start of the run (set from init response).
+   * Used as the progress bar denominator.
+   */
+  totalEligible: number;
 }
 
 export const defaultState: EnrichBatchState = {
-  isLoading: false,
-  isRunning: false,
-  totalEligible: 0,
   completed: 0,
-  failed: 0,
   currentPerson: null,
-  pendingQueueStatus: null,
+  failed: 0,
+  isLoading: false,
   isPausing: false,
+  isRunning: false,
+  pendingQueueStatus: null,
+  totalEligible: 0,
 };
 
 // ─── Internal store ───────────────────────────────────────────────────────────

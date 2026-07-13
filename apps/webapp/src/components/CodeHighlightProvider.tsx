@@ -19,6 +19,8 @@ interface CodeHighlightProviderProps {
 
 export function CodeHighlightProvider({ children }: CodeHighlightProviderProps) {
   return (
-    <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>{children}</CodeHighlightAdapterProvider>
+    <CodeHighlightAdapterProvider adapter={highlightJsAdapter}>
+      {children}
+    </CodeHighlightAdapterProvider>
   );
 }

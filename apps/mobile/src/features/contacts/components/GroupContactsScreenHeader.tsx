@@ -1,19 +1,19 @@
 import { IconCopy, IconEdit, IconTrash } from "@tabler/icons-react-native";
+import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import { StackNavBar, TabRootScreenHeader } from "../../../components/chrome";
 import { OverflowMenu } from "../../../components/OverflowMenu";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { useContactsSelectionMode } from "../contactsSelectionStore";
 import { ContactsSelectionHeader } from "./ContactsSelectionHeader";
 
 interface GroupContactsScreenHeaderProps {
-  label: string;
   emoji: string;
-  onBack: () => void;
-  onEditGroup: () => void;
-  onDuplicateGroup: () => void;
-  onDeleteGroup: () => void;
   isDuplicating: boolean;
+  label: string;
+  onBack: () => void;
+  onDeleteGroup: () => void;
+  onDuplicateGroup: () => void;
+  onEditGroup: () => void;
 }
 
 /** Elevated stack nav bar matching settings subpages; full-width selection toolbar when active. */
@@ -26,7 +26,8 @@ export function GroupContactsScreenHeader({
   onDeleteGroup,
   isDuplicating,
 }: GroupContactsScreenHeaderProps) {
-  const t = useMobileTranslations();
+  const tMobileGroups = useMobileGroupsTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const selectionMode = useContactsSelectionMode();
   const headerTitle = emoji ? `${emoji} ${label}` : label;
@@ -37,38 +38,37 @@ export function GroupContactsScreenHeader({
 
   return (
     <StackNavBar
-      variant="elevated"
       onBack={onBack}
-      title={headerTitle}
       right={
         <OverflowMenu
-          triggerVariant="nav"
-          accessibilityLabel={t("MobileApp.Groups.MenuAccessibilityLabel")}
+          accessibilityLabel={tMobileGroups("MenuAccessibilityLabel")}
           disabled={isDuplicating}
           items={[
             {
-              id: "edit",
               icon: <IconEdit size={20} stroke={colors.iconPrimary} />,
-              label: t("MobileApp.Groups.EditGroup"),
+              id: "edit",
+              label: tMobileGroups("EditGroup"),
               onPress: onEditGroup,
             },
             {
-              id: "duplicate",
-              icon: <IconCopy size={20} stroke={colors.iconPrimary} />,
-              label: t("MobileApp.Groups.DuplicateGroup"),
-              onPress: onDuplicateGroup,
               disabled: isDuplicating,
+              icon: <IconCopy size={20} stroke={colors.iconPrimary} />,
+              id: "duplicate",
+              label: tMobileGroups("DuplicateGroup"),
+              onPress: onDuplicateGroup,
             },
             {
-              id: "delete",
               icon: <IconTrash size={20} stroke={colors.dangerAccent} />,
-              label: t("MobileApp.Groups.DeleteGroup"),
-              tone: "danger",
+              id: "delete",
+              label: tMobileGroups("DeleteGroup"),
               onPress: onDeleteGroup,
+              tone: "danger",
             },
           ]}
+          triggerVariant="nav"
         />
       }
+      title={headerTitle}
     />
   );
 }

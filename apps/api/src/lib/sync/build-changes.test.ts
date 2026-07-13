@@ -10,9 +10,9 @@ describe("build-changes", () => {
   it("builds people delete change", () => {
     const id = "00000000-0000-4000-8000-000000000001";
     assert.deepEqual(buildPeopleDeleteChange(id), {
-      table: "people",
-      operation: "delete",
       entityId: id,
+      operation: "delete",
+      table: "people",
       value: null,
     });
   });
@@ -20,9 +20,9 @@ describe("build-changes", () => {
   it("builds group delete change", () => {
     const id = "00000000-0000-4000-8000-000000000002";
     assert.deepEqual(buildGroupDeleteChange(id), {
-      table: "groups",
-      operation: "delete",
       entityId: id,
+      operation: "delete",
+      table: "groups",
       value: null,
     });
   });
@@ -30,9 +30,9 @@ describe("build-changes", () => {
   it("builds tag delete change", () => {
     const id = "00000000-0000-4000-8000-000000000003";
     assert.deepEqual(buildTagDeleteChange(id), {
-      table: "tags",
-      operation: "delete",
       entityId: id,
+      operation: "delete",
+      table: "tags",
       value: null,
     });
   });

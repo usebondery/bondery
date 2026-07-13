@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kontakt",
+  "FieldUpdated": "{label} aktualizováno",
+  "FirstNamePlaceholder": "Jméno",
+  "FirstNameSuccessLabel": "Jméno",
+  "HeadlinePlaceholder": "Titul",
+  "HeadlineSuccessLabel": "Titul",
+  "LastNamePlaceholder": "Příjmení",
+  "LastNameSuccessLabel": "Příjmení",
+  "LocationPlaceholder": "Lokalita",
+  "LocationSuccessLabel": "Lokalita",
+  "LocationUpdated": "Lokalita aktualizována",
+  "MiddleNamePlaceholder": "Prostřední jméno",
+  "MiddleNameSuccessLabel": "Prostřední",
+  "NameFieldUpdated": "{label} jméno aktualizováno",
+  "SavedTitle": "Uloženo",
+  "UpdateFieldFailed": "Nepodařilo se aktualizovat {field}"
+}

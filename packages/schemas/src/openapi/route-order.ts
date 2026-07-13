@@ -6,6 +6,7 @@ export const AUXILIARY_FIRST_SEGMENTS = [
   "merge",
   "merge-recommendations",
   "enrich-queue",
+  "keep-in-touch",
 ] as const;
 
 export type AuxiliaryFirstSegment = (typeof AUXILIARY_FIRST_SEGMENTS)[number];
@@ -68,7 +69,10 @@ export function getPathTier(path: string): number {
     return 1;
   }
 
-  const first = afterResource[0]!;
+  const first = afterResource[0];
+  if (!first) {
+    return 1;
+  }
 
   if (AUXILIARY_FIRST_SEGMENTS.includes(first as AuxiliaryFirstSegment)) {
     return 5;

@@ -1,0 +1,54 @@
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { Stack, Text } from "@mantine/core";
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
+import { PageWrapper } from "@/components/shell/PageWrapper";
+import { getMePersonServer } from "@/lib/api/domains/server/mePerson";
+import { getSingleContactPageTranslations } from "@/lib/i18n/generated/hooks.server";
+import { getQueryClient } from "@/lib/query/client";
+import { contactKeys, settingsKeys } from "@/lib/query/keys";
+import { PersonClient } from "../person/[personId]/PersonClient";
+import { prefetchPersonPageQueries } from "../person/[personId]/prefetchPersonPageQueries";
+
+interface MyselfLoaderProps {
+  initialTab?: string;
+}
+
+export async function MyselfLoader({ initialTab }: MyselfLoaderProps) {
+  const queryClient = getQueryClient();
+
+  const t = await getSingleContactPageTranslations();
+
+  const mePerson = await queryClient.fetchQuery({
+    queryFn: () => getMePersonServer("large"),
+    queryKey: settingsKeys.mePerson("large"),
+  });
+
+  const personId = mePerson?.id ?? null;
+
+  if (!personId) {
+    return (
+      <PageWrapper>
+        <ErrorPageHeader
+          backHref={API_ROUTES.CONTACTS}
+          iconType="user"
+          title={t("ProfileNotFound")}
+        />
+
+        <Stack gap="xl">
+          <Text c="dimmed">{t("ProfileNotFoundDescription")}</Text>
+        </Stack>
+      </PageWrapper>
+    );
+  }
+
+  queryClient.setQueryData(contactKeys.detail(personId), mePerson);
+
+  await prefetchPersonPageQueries(queryClient, personId, { skipDetail: true });
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <PersonClient initialTab={initialTab} myselfMode personId={personId} />
+    </HydrationBoundary>
+  );
+}

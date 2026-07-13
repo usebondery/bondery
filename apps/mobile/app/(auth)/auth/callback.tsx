@@ -1,13 +1,17 @@
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import {
+  useCommonTranslations,
+  useMobileAuthTranslations,
+} from "../../../src/lib/i18n/generated/hooks";
 import { supabase } from "../../../src/lib/supabase/client";
-import { useMobileTranslations } from "../../../src/lib/i18n/useMobileTranslations";
 import { MOBILE_TYPOGRAPHY } from "../../../src/theme/tokens";
 import { useMobileThemeColors } from "../../../src/theme/useMobileThemeColors";
 
 export default function AuthCallbackScreen() {
-  const t = useMobileTranslations();
+  const tMobileAuth = useMobileAuthTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const params = useLocalSearchParams<{ code?: string; error?: string }>();
@@ -19,7 +23,7 @@ export default function AuthCallbackScreen() {
     const completeSignIn = async () => {
       if (!supabase) {
         if (active) {
-          setStatusError(t("MobileApp.Auth.MissingConfig"));
+          setStatusError(tMobileAuth("MissingConfig"));
         }
         return;
       }
@@ -38,7 +42,7 @@ export default function AuthCallbackScreen() {
         if (data.session) {
           router.replace("/contacts");
         } else if (active) {
-          setStatusError(t("MobileApp.Auth.MissingCode"));
+          setStatusError(tMobileAuth("MissingCode"));
         }
         return;
       }
@@ -60,30 +64,34 @@ export default function AuthCallbackScreen() {
     return () => {
       active = false;
     };
-  }, [params.code, params.error, router, t]);
+  }, [params.code, params.error, router, tMobileAuth]);
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.surface }]}> 
-      <ActivityIndicator size="large" color={colors.textPrimary} />
-      <Text style={[styles.title, { color: colors.textSecondary }]}>{t("MobileApp.Auth.CompletingLogin")}</Text>
-      {statusError ? <Text style={[styles.error, { color: colors.dangerText }]}>{statusError}</Text> : null}
+    <View style={[styles.screen, { backgroundColor: colors.surface }]}>
+      <ActivityIndicator color={colors.textPrimary} size="large" />
+      <Text style={[styles.title, { color: colors.textSecondary }]}>
+        {tMobileAuth("CompletingLogin")}
+      </Text>
+      {statusError ? (
+        <Text style={[styles.error, { color: colors.dangerText }]}>{statusError}</Text>
+      ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  error: {
+    textAlign: "center",
+  },
   screen: {
-    flex: 1,
     alignItems: "center",
-    justifyContent: "center",
+    flex: 1,
     gap: 12,
+    justifyContent: "center",
     paddingHorizontal: 16,
   },
   title: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  error: {
-    textAlign: "center",
   },
 });

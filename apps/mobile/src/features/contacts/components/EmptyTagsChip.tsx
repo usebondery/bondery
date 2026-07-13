@@ -1,18 +1,19 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { useCommonTranslations, useMobileTagsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 /** Static placeholder chip matching {@link CreateTagChip} styling — not tappable. */
 export function EmptyTagsChip() {
-  const t = useMobileTranslations();
+  const tMobileTags = useMobileTagsTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const label = t("MobileApp.Tags.NoTagsYet");
+  const label = tMobileTags("NoTagsYet");
 
   return (
     <View
-      accessibilityRole="text"
       accessibilityLabel={label}
+      accessibilityRole="text"
       style={[
         styles.chip,
         {
@@ -28,14 +29,14 @@ export function EmptyTagsChip() {
 
 const styles = StyleSheet.create({
   chip: {
-    flexDirection: "row",
     alignItems: "center",
+    borderRadius: 20,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    flexDirection: "row",
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
   },
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,

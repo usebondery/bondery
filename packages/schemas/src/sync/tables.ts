@@ -1,15 +1,15 @@
 /** Tier-1 tables replicated to mobile SQLite via pull/bootstrap. */
 export const SYNC_TABLES = {
-  people: "people",
-  people_phones: "people_phones",
-  people_emails: "people_emails",
-  people_addresses: "people_addresses",
-  people_socials: "people_socials",
   groups: "groups",
+  people: "people",
+  people_addresses: "people_addresses",
+  people_emails: "people_emails",
   people_groups: "people_groups",
-  tags: "tags",
-  people_tags: "people_tags",
   people_important_dates: "people_important_dates",
+  people_phones: "people_phones",
+  people_socials: "people_socials",
+  people_tags: "people_tags",
+  tags: "tags",
 } as const;
 
 export type SyncTableKey = keyof typeof SYNC_TABLES;

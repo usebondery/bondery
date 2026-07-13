@@ -1,49 +1,66 @@
-import { SUPPORTED_LOCALES } from "@bondery/translations";
+import {
+  APP_LOCALE_METADATA,
+  type AppLocaleMetadata,
+  type SupportedLocale,
+} from "@bondery/schemas/locale/supported-locale";
 
-export interface LanguageData {
-  value: string;
-  label: string;
+/** App UI locale picker row — exonyms come from the `Languages` translation namespace. */
+export interface AppLanguageData {
   flag: string;
   nativeName: string;
+  value: SupportedLocale;
 }
 
-/**
- * App-supported languages for user settings (web + mobile).
- * Values are kept in sync with @bondery/translations SUPPORTED_LOCALES.
- */
-export const APP_LANGUAGES_DATA: LanguageData[] = [
-  {
-    value: "en",
-    label: "English",
-    flag: "gb",
-    nativeName: "English",
-  },
-  {
-    value: "cs",
-    label: "Czech",
-    flag: "cz",
-    nativeName: "čeština",
-  },
-];
-
-/** Runtime guard: every supported locale must have picker metadata. */
-const appLanguageValues = new Set(APP_LANGUAGES_DATA.map((language) => language.value));
-for (const locale of SUPPORTED_LOCALES) {
-  if (!appLanguageValues.has(locale)) {
-    throw new Error(`Missing APP_LANGUAGES_DATA entry for supported locale: ${locale}`);
-  }
+/** World / contact language rows include a fixed English label for search and display. */
+export interface LanguageData {
+  flag: string;
+  label: string;
+  nativeName: string;
+  value: string;
 }
 
-export function getAppLanguageByValue(value: string): LanguageData | undefined {
+function toAppLanguageData(entry: AppLocaleMetadata): AppLanguageData {
+  return {
+    flag: entry.flag,
+    nativeName: entry.nativeName,
+    value: entry.code as SupportedLocale,
+  };
+}
+
+/** App-supported languages for user settings (web + mobile). Derived from supported-locales.json. */
+export const APP_LANGUAGES_DATA: AppLanguageData[] = APP_LOCALE_METADATA.map(toAppLanguageData);
+
+export function getAppLanguageByValue(value: string): AppLanguageData | undefined {
   return APP_LANGUAGES_DATA.find((language) => language.value === value);
 }
 
-/** Translation key for a localized app-language exonym, e.g. `Languages.en`. */
-export function getAppLanguageExonymTranslationKey(languageCode: string): string {
-  return `Languages.${languageCode}`;
+/** Key within the `Languages` namespace — use with `useLanguagesTranslations()`. */
+export function getAppLanguageExonymKey(languageCode: string): string {
+  return languageCode;
+}
+
+export type AppLanguageExonymTranslator = (exonymKey: string) => string;
+
+/** Localized exonym for an app UI locale from the `Languages` namespace. */
+export function resolveAppLanguageExonym(
+  translate: AppLanguageExonymTranslator,
+  language: AppLanguageData,
+): string {
+  return translate(getAppLanguageExonymKey(language.value));
+}
+
+/** Picker row label for app UI locales: localized exonym plus invariant native endonym. */
+export function formatAppLanguagePickerLabel(
+  translate: AppLanguageExonymTranslator,
+  language: AppLanguageData,
+): string {
+  return formatLanguageDisplayLabel(
+    resolveAppLanguageExonym(translate, language),
+    language.nativeName,
+  );
 }
 
 /** Picker label: localized exonym plus invariant native endonym. */
-export function formatLanguageDisplayLabel(localizedLabel: string, nativeName: string): string {
-  return `${localizedLabel} (${nativeName})`;
+export function formatLanguageDisplayLabel(localizedExonym: string, nativeName: string): string {
+  return `${localizedExonym} (${nativeName})`;
 }

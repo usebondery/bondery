@@ -5,11 +5,11 @@ import type { ReactNode } from "react";
 
 export interface DropzoneContentProps {
   acceptIcon?: ReactNode;
-  rejectIcon?: ReactNode;
-  idleIcon?: ReactNode;
-  title: string;
   description?: string;
+  idleIcon?: ReactNode;
   minHeight?: number;
+  rejectIcon?: ReactNode;
+  title: string;
 }
 
 export function DropzoneContent({
@@ -21,17 +21,17 @@ export function DropzoneContent({
   minHeight = 220,
 }: DropzoneContentProps) {
   return (
-    <Group justify="center" gap="xl" mih={minHeight} style={{ pointerEvents: "none" }}>
+    <Group gap="xl" justify="center" mih={minHeight} style={{ pointerEvents: "none" }}>
       <Dropzone.Accept>{acceptIcon}</Dropzone.Accept>
       <Dropzone.Reject>{rejectIcon}</Dropzone.Reject>
       <Dropzone.Idle>{idleIcon}</Dropzone.Idle>
 
       <div>
-        <Text size="xl" inline>
+        <Text inline size="xl">
           {title}
         </Text>
         {description ? (
-          <Text size="sm" c="dimmed" inline mt="xs">
+          <Text c="dimmed" inline mt="xs" size="sm">
             {description}
           </Text>
         ) : null}

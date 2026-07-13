@@ -4,32 +4,25 @@
  * never leaves the server.
  */
 
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import {
-  parseMapSuggestions,
-  mapSuggestionToContactAddress,
-} from "@bondery/helpers/address";
-import { getTimezoneForCoordinates } from "../../lib/mapy.js";
-import { registerApiKeyProtectedHooks } from "../../lib/api-key-access.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { GEOCODE_TIER } from "../../lib/rate-limit.js";
+import { mapSuggestionToContactAddress, parseMapSuggestions } from "@bondery/helpers/address";
 import {
   geocodeSuggestQuerySchema,
   geocodeSuggestResponseWireSchema,
   geocodeTimezoneQuerySchema,
   geocodeTimezoneResponseWireSchema,
 } from "@bondery/schemas/http";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { getTimezoneForCoordinates } from "../../lib/integrations/mapy.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { GEOCODE_TIER } from "../../lib/platform/rate-limit.js";
 
 export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Geocode"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "integration" });
   });
-  registerApiKeyProtectedHooks(fastify);
 
   fastify.get(
     "/suggest",
@@ -38,10 +31,7 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Returns mapped address/place autocomplete entries from Mapy.com",
         querystring: geocodeSuggestQuerySchema,
-        response: withOkResponse(
-          geocodeSuggestResponseWireSchema,
-          "Address suggestions",
-        ),
+        response: withOkResponse(geocodeSuggestResponseWireSchema, "Address suggestions"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -51,7 +41,10 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
       const mapsUrl = fastify.config.PUBLIC_MAPS_URL;
 
       if (!mapsKey) {
-        request.log.warn({ query: search.trim(), mode }, "Geocode suggest skipped: missing maps API key");
+        request.log.warn(
+          { mode, query: search.trim() },
+          "Geocode suggest skipped: missing maps API key",
+        );
         return reply.send({ addresses: [] });
       }
 
@@ -69,13 +62,13 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
 
       try {
         const response = await fetch(upstream.toString(), {
-          method: "GET",
           headers: { Accept: "application/json" },
+          method: "GET",
         });
 
         if (!response.ok) {
           request.log.warn(
-            { query: search.trim(), mode, status: response.status },
+            { mode, query: search.trim(), status: response.status },
             "Geocode suggest upstream request failed",
           );
           return reply.send({ addresses: [] });
@@ -95,7 +88,10 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
         );
         return reply.send({ addresses });
       } catch (error) {
-        request.log.error({ err: error, query: search.trim(), mode }, "Geocode suggest handler error");
+        request.log.error(
+          { err: error, mode, query: search.trim() },
+          "Geocode suggest handler error",
+        );
         return reply.send({ addresses: [] });
       }
     },
@@ -108,10 +104,7 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Returns the IANA timezone for a latitude/longitude pair from Mapy.com",
         querystring: geocodeTimezoneQuerySchema,
-        response: withOkResponse(
-          geocodeTimezoneResponseWireSchema,
-          "Timezone lookup result",
-        ),
+        response: withOkResponse(geocodeTimezoneResponseWireSchema, "Timezone lookup result"),
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

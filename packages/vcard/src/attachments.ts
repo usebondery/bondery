@@ -66,17 +66,23 @@ export function createMediaAttachment(input: VCardMediaAttachmentInput): VCardMe
     throw new Error("A media attachment requires either a uri or data payload.");
   }
 
-  const uri =
-    input.uri ??
-    createDataUriAttachment(input.data!, input.mediaType ?? "application/octet-stream");
+  const uri = (() => {
+    if (input.uri) {
+      return input.uri;
+    }
+    if (!input.data) {
+      throw new Error("A media attachment requires either a uri or data payload.");
+    }
+    return createDataUriAttachment(input.data, input.mediaType ?? "application/octet-stream");
+  })();
   const source = uri.startsWith("data:") ? "data-uri" : "uri";
 
   return {
-    uri,
     mediaType: input.mediaType,
     pref: input.pref,
-    types: input.types ?? [],
     source,
+    types: input.types ?? [],
+    uri,
   };
 }
 

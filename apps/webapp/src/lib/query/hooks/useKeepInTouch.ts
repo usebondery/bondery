@@ -1,25 +1,20 @@
 "use client";
 
-
-
 import { useQuery } from "@tanstack/react-query";
-
-import { createKeepInTouchQueryFn } from "@/lib/query/fetchers/keepInTouch";
-
+import { getKeepInTouchContacts, getKeepInTouchOverdueCount } from "@/lib/api/domains/keepInTouch";
 import { contactKeys } from "@/lib/query/keys";
 
-
-
 export function useKeepInTouchQuery() {
-
   return useQuery({
-
+    queryFn: getKeepInTouchContacts,
     queryKey: contactKeys.keepInTouch(),
-
-    queryFn: createKeepInTouchQueryFn(),
-
   });
-
 }
 
-
+export function useKeepInTouchCountQuery() {
+  return useQuery({
+    queryFn: getKeepInTouchOverdueCount,
+    queryKey: contactKeys.keepInTouchCount(),
+    staleTime: 2 * 60_000,
+  });
+}

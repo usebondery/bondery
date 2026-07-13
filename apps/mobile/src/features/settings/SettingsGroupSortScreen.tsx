@@ -1,33 +1,39 @@
+import type { GroupWithCount } from "@bondery/schemas";
+import { IconPlus } from "@tabler/icons-react-native";
+import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
-import { IconPlus } from "@tabler/icons-react-native";
-import type { GroupWithCount } from "@bondery/schemas";
+import { StackNavBar } from "../../components/chrome";
 import { updateSettings } from "../../lib/api/client";
-import { useGroups } from "../../lib/sync/hooks/useSyncQuery";
+import {
+  useCommonTranslations,
+  useMobileGroupsTranslations,
+  useMobileSettingsTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type {
   GroupSortOrder,
   MobilePreferencesState,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
-import { StackNavBar } from "../../components/chrome";
+import { useGroups } from "../../lib/sync/hooks/useSyncQuery";
+import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../../theme/tokens";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactsGroupsHeader } from "../contacts/components/ContactsGroupsHeader";
 import { GroupEditSheet } from "../contacts/components/GroupEditSheet";
 import { sortGroups } from "../contacts/groupSort";
-import { useMobileTranslations } from "../../lib/i18n/useMobileTranslations";
-import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../../theme/tokens";
 import { SettingsAsyncState } from "./components/SettingsAsyncState";
 import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
 import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
 import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsGroupSortScreen() {
+  const tMobileGroups = useMobileGroupsTranslations();
+  const tMobileSettings = useMobileSettingsTranslations();
+  const _t = useCommonTranslations();
   const router = useRouter();
-  const t = useMobileTranslations();
   const colors = useMobileThemeColors();
   const { data: syncedGroups, isInitialSync, refresh: refreshGroups } = useGroups();
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, _setLoadError] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<GroupWithCount | null>(null);
 
@@ -59,13 +65,13 @@ export function SettingsGroupSortScreen() {
 
   const sortOptions: Array<{ value: GroupSortOrder; label: string }> = [
     {
+      label: tMobileSettings("GroupSortRecentOpened"),
       value: "recent-opened",
-      label: t("MobileApp.Settings.GroupSortRecentOpened"),
     },
-    { value: "count-desc", label: t("MobileApp.Settings.GroupSortCountDesc") },
-    { value: "count-asc", label: t("MobileApp.Settings.GroupSortCountAsc") },
-    { value: "alpha-asc", label: t("MobileApp.Settings.GroupSortAlphaAsc") },
-    { value: "alpha-desc", label: t("MobileApp.Settings.GroupSortAlphaDesc") },
+    { label: tMobileSettings("GroupSortCountDesc"), value: "count-desc" },
+    { label: tMobileSettings("GroupSortCountAsc"), value: "count-asc" },
+    { label: tMobileSettings("GroupSortAlphaAsc"), value: "alpha-asc" },
+    { label: tMobileSettings("GroupSortAlphaDesc"), value: "alpha-desc" },
   ];
 
   const handleSortChange = (nextOrder: GroupSortOrder) => {
@@ -93,13 +99,13 @@ export function SettingsGroupSortScreen() {
 
   const previewCaption =
     syncedGroups.length === 0 && !isLoading && !loadError
-      ? t("MobileApp.Settings.PreviewHintGroupsEmpty")
-      : t("MobileApp.Settings.PreviewHintGroups");
+      ? tMobileSettings("PreviewHintGroupsEmpty")
+      : tMobileSettings("PreviewHintGroups");
 
   const createButton = (
     <Pressable
+      accessibilityLabel={tMobileGroups("CreateGroup")}
       accessibilityRole="button"
-      accessibilityLabel={t("MobileApp.Groups.CreateGroup")}
       hitSlop={MOBILE_HIT_SLOP}
       onPress={() => setCreateOpen(true)}
       style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
@@ -111,40 +117,38 @@ export function SettingsGroupSortScreen() {
   return (
     <>
       <StackNavBar
-        variant="elevated"
-        title={t("MobileApp.Settings.GroupSort")}
         onBack={() => router.back()}
         right={createButton}
+        title={tMobileSettings("GroupSort")}
+        variant="elevated"
       />
 
       <ScrollView
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
         contentContainerStyle={styles.content}
+        style={[styles.screen, { backgroundColor: colors.appBackground }]}
       >
-        <SettingsFieldLabel>
-          {t("MobileApp.Settings.GroupSortSelectLabel")}
-        </SettingsFieldLabel>
+        <SettingsFieldLabel>{tMobileSettings("GroupSortSelectLabel")}</SettingsFieldLabel>
         <SettingsSelect
-          label={t("MobileApp.Settings.GroupSortSelectLabel")}
+          label={tMobileSettings("GroupSortSelectLabel")}
+          onValueChange={handleSortChange}
           options={sortOptions}
           value={groupSortOrder}
-          onValueChange={handleSortChange}
         />
 
         <SettingsPreviewSection caption={previewCaption}>
           <SettingsAsyncState
-            isLoading={isLoading}
-            errorTitle={t("MobileApp.Settings.GroupsLoadErrorTitle")}
             errorDescription={loadError}
+            errorTitle={tMobileSettings("GroupsLoadErrorTitle")}
+            isLoading={isLoading}
             onRetry={() => {
               void reloadGroups();
             }}
           >
             <ContactsGroupsHeader
-              layout="chipRow"
               groups={previewGroups}
-              shouldShowCreateAction={false}
               isClickable={false}
+              layout="chipRow"
+              shouldShowCreateAction={false}
               showEmptyPlaceholder
             />
           </SettingsAsyncState>
@@ -152,14 +156,12 @@ export function SettingsGroupSortScreen() {
 
         {!isLoading && !loadError ? (
           <>
-            <SettingsFieldLabel>
-              {t("MobileApp.Settings.ManageGroups")}
-            </SettingsFieldLabel>
+            <SettingsFieldLabel>{tMobileSettings("ManageGroups")}</SettingsFieldLabel>
             <ContactsGroupsHeader
-              layout="wrap"
               groups={manageGroups}
-              onGroupPress={(group) => setEditingGroup(group)}
+              layout="wrap"
               onCreatePress={() => setCreateOpen(true)}
+              onGroupPress={(group) => setEditingGroup(group)}
             />
           </>
         ) : null}
@@ -167,38 +169,38 @@ export function SettingsGroupSortScreen() {
 
       <GroupEditSheet
         mode="create"
-        open={isCreateOpen}
-        onOpenChange={setCreateOpen}
         onCreated={handleGroupCreated}
+        onOpenChange={setCreateOpen}
+        open={isCreateOpen}
       />
 
       <GroupEditSheet
-        mode="edit"
-        open={editingGroup !== null}
         groupId={editingGroup?.id ?? ""}
-        initialLabel={editingGroup?.label ?? ""}
-        initialEmoji={editingGroup?.emoji ?? ""}
         initialColor={editingGroup?.color ?? ""}
+        initialEmoji={editingGroup?.emoji ?? ""}
+        initialLabel={editingGroup?.label ?? ""}
+        mode="edit"
+        onDeleted={handleGroupDeleted}
         onOpenChange={(open) => {
           if (!open) {
             setEditingGroup(null);
           }
         }}
         onSaved={handleGroupSaved}
-        onDeleted={handleGroupDeleted}
+        open={editingGroup !== null}
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  content: {
+    gap: 16,
+    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+  },
   screen: {
     flex: 1,
-  },
-  content: {
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    gap: 16,
   },
 });

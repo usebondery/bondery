@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import type { ReactNode } from "react";
+import type { DataTableLabels, SortOption } from "@bondery/mantine-next";
 import {
   IconBriefcase,
   IconClock,
@@ -11,28 +10,27 @@ import {
   IconUser,
   IconUserCircle,
 } from "@tabler/icons-react";
-import type { ColumnKey, SortOrder } from "@/app/(app)/app/components/contacts/ContactsTableV2";
-import type { DataTableLabels, SortOption } from "@bondery/mantine-next";
-import { useWebTranslations as useTranslations } from "./useWebTranslations";
+import type { ReactNode } from "react";
+import { useMemo } from "react";
+import type { ColumnKey, SortOrder } from "@/lib/contacts/table-types";
+import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 
 export function useContactsTableCopy() {
-  const t = useTranslations("ContactsTable");
+  const t = useContactsTableTranslations();
 
-  const columnDefinitions = useMemo<
-    Record<ColumnKey, { label: string; icon: ReactNode }>
-  >(
+  const columnDefinitions = useMemo<Record<ColumnKey, { label: string; icon: ReactNode }>>(
     () => ({
-      name: { label: t("ColumnName"), icon: <IconUser size={16} /> },
-      headline: { label: t("ColumnHeadline"), icon: <IconBriefcase size={16} /> },
-      location: { label: t("ColumnLocation"), icon: <IconMapPin size={16} /> },
+      avatar: { icon: null, label: "" },
+      email: { icon: <IconMail size={16} />, label: t("ColumnEmail") },
+      headline: { icon: <IconBriefcase size={16} />, label: t("ColumnHeadline") },
       lastInteraction: {
-        label: t("ColumnLastInteraction"),
         icon: <IconClock size={16} />,
+        label: t("ColumnLastInteraction"),
       },
-      social: { label: t("ColumnSocials"), icon: <IconUserCircle size={16} /> },
-      phone: { label: t("ColumnPhone"), icon: <IconPhone size={16} /> },
-      email: { label: t("ColumnEmail"), icon: <IconMail size={16} /> },
-      avatar: { label: "", icon: null },
+      location: { icon: <IconMapPin size={16} />, label: t("ColumnLocation") },
+      name: { icon: <IconUser size={16} />, label: t("ColumnName") },
+      phone: { icon: <IconPhone size={16} />, label: t("ColumnPhone") },
+      social: { icon: <IconUserCircle size={16} />, label: t("ColumnSocials") },
     }),
     [t],
   );
@@ -58,32 +56,32 @@ export function useContactsTableCopy() {
       loadMoreLabel?: string;
     },
   ): DataTableLabels => ({
-    searchPlaceholder: overrides.searchPlaceholder ?? t("SearchPlaceholder"),
-    emptyStateMessage: overrides.emptyStateMessage ?? "",
-    loadMoreLabel: overrides.loadMoreLabel,
-    selectedCountTemplate: t("SelectedCountTemplate"),
-    selectedSingularCountTemplate: t("SelectedSingularCountTemplate"),
-    totalCountTemplate: t("TotalCountTemplate"),
     actionsAriaLabel: t("ActionsAriaLabel"),
+    clearAllTotalTemplate: t("ClearAllTotalTemplate"),
     columnVisibility: {
       buttonLabel: t("VisibleColumnsButton"),
-      visibleSection: t("VisibleColumnsSection"),
       hiddenSection: t("HiddenColumnsSection"),
-      noVisible: t("NoVisibleColumns"),
       noHidden: t("NoHiddenColumns"),
+      noVisible: t("NoVisibleColumns"),
+      visibleSection: t("VisibleColumnsSection"),
     },
+    emptyStateMessage: overrides.emptyStateMessage ?? "",
+    loadMoreLabel: overrides.loadMoreLabel,
+    searchPlaceholder: overrides.searchPlaceholder ?? t("SearchPlaceholder"),
     selectAllTotalTemplate: t("SelectAllTotalTemplate"),
-    clearAllTotalTemplate: t("ClearAllTotalTemplate"),
+    selectedCountTemplate: t("SelectedCountTemplate"),
+    selectedSingularCountTemplate: t("SelectedSingularCountTemplate"),
     sort: {
       buttonLabel: t("SortButton"),
     },
+    totalCountTemplate: t("TotalCountTemplate"),
     ...overrides,
   });
 
   return {
-    t,
+    buildTableLabels,
     columnDefinitions,
     sortOptions,
-    buildTableLabels,
+    t,
   };
 }

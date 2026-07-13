@@ -1,25 +1,25 @@
-import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
-import { PageHeaderSkeleton } from "@/app/(app)/app/components/PageHeaderSkeleton";
+﻿import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
+import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**
  * Skeleton for a single GroupCard.
  * Mirrors: Paper withBorder → header (label + count badge) + avatar preview row + member count text.
  */
-function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
+export function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
   return (
-    <Paper withBorder p="md" radius="md" style={{ opacity }}>
+    <Paper p="md" radius="md" style={{ opacity }} withBorder>
       <Stack gap="sm">
         <Group justify="space-between">
-          <Skeleton height={18} width={110} radius="sm" />
-          <Skeleton height={22} width={40} radius="xl" />
+          <Skeleton height={18} radius="sm" width={110} />
+          <Skeleton height={22} radius="xl" width={40} />
         </Group>
         {/* 3 avatar previews */}
         <Group gap={-8}>
-          <Skeleton height={28} width={28} radius="xl" />
-          <Skeleton height={28} width={28} radius="xl" />
-          <Skeleton height={28} width={28} radius="xl" />
+          <Skeleton height={28} radius="xl" width={28} />
+          <Skeleton height={28} radius="xl" width={28} />
+          <Skeleton height={28} radius="xl" width={28} />
         </Group>
-        <Skeleton height={12} width={80} radius="sm" />
+        <Skeleton height={12} radius="sm" width={80} />
       </Stack>
     </Paper>
   );
@@ -30,33 +30,31 @@ function GroupCardSkeleton({ opacity = 1 }: { opacity?: number }) {
  * Mirrors: PageHeader (New Group button) + Paper (count + sort) + SimpleGrid of cards.
  */
 export function GroupsPageSkeleton() {
-  const cards = [1, 1, 0.9, 0.85, 0.75, 0.65];
+  const opacities = [1, 1, 0.9, 0.85, 0.75, 0.65];
 
   return (
     <Box p="xl">
       {/* Header: Create New Group button (~155px) */}
       <PageHeaderSkeleton primaryActionWidth={155} />
 
-      <Paper withBorder shadow="sm" radius="md" p="md">
+      <Paper p="md" radius="md" shadow="sm" withBorder>
         <Stack gap="md">
           {/* Toolbar: count + sort menu */}
           <Group justify="space-between">
-            <Skeleton height={14} width={60} radius="sm" />
-            <Skeleton height={36} width={110} radius="sm" />
+            <Skeleton height={14} radius="sm" width={60} />
+            <Skeleton height={36} radius="sm" width={110} />
           </Group>
 
           <SimpleGrid
-            cols={{ base: 1, sm: 2, md: 3 }}
+            cols={{ base: 1, md: 3, sm: 2 }}
             spacing="md"
             style={{
-              maskImage:
-                "linear-gradient(to bottom, black 55%, transparent 100%)",
-              WebkitMaskImage:
-                "linear-gradient(to bottom, black 55%, transparent 100%)",
+              maskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, black 55%, transparent 100%)",
             }}
           >
-            {cards.map((opacity, i) => (
-              <GroupCardSkeleton key={i} opacity={opacity} />
+            {Array.from({ length: opacities.length }, (_, slot) => slot).map((slot) => (
+              <GroupCardSkeleton key={slot} opacity={opacities[slot] ?? 1} />
             ))}
           </SimpleGrid>
         </Stack>

@@ -1,10 +1,8 @@
 "use client";
 
 import { type RefObject, useEffect, useMemo, useState } from "react";
-import type {
-  ColumnConfig,
-  ColumnKey,
-} from "@/app/(app)/app/components/contacts/ContactsTableV2";
+import type { ColumnConfig } from "@/components/contacts/ContactsTableV2";
+import type { ColumnKey } from "@/lib/contacts/table-types";
 
 /**
  * Column keys ordered from lowest priority (first to hide) to highest priority (last to hide).
@@ -20,18 +18,18 @@ const RESPONSIVE_HIDE_ORDER: ColumnKey[] = [
 ];
 
 interface ResponsiveBreakpoint {
-  /** Minimum container width in pixels for this rule to apply */
-  minWidth: number;
   /** Maximum number of optional (non-fixed) columns allowed at this width */
   maxOptionalColumns: number;
+  /** Minimum container width in pixels for this rule to apply */
+  minWidth: number;
 }
 
 const DEFAULT_BREAKPOINTS: ResponsiveBreakpoint[] = [
-  { minWidth: 736, maxOptionalColumns: Infinity },
-  { minWidth: 640, maxOptionalColumns: 3 },
-  { minWidth: 544, maxOptionalColumns: 2 },
-  { minWidth: 448, maxOptionalColumns: 1 },
-  { minWidth: 0, maxOptionalColumns: 0 },
+  { maxOptionalColumns: Infinity, minWidth: 736 },
+  { maxOptionalColumns: 3, minWidth: 640 },
+  { maxOptionalColumns: 2, minWidth: 544 },
+  { maxOptionalColumns: 1, minWidth: 448 },
+  { maxOptionalColumns: 0, minWidth: 0 },
 ];
 
 const DEFAULT_STORAGE_KEY = "bondery_contacts_pinned_columns";
@@ -86,15 +84,17 @@ export function useResponsiveColumns(
   // are discarded to guard against stale/corrupted storage data.
   const [pinnedKeys, setPinnedKeysState] = useState<Set<ColumnKey>>(() => {
     try {
-      const raw =
-        typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
-      if (!raw) return new Set();
+      const raw = typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+      if (!raw) {
+        return new Set();
+      }
       const parsed: unknown = JSON.parse(raw);
-      if (!Array.isArray(parsed)) return new Set();
+      if (!Array.isArray(parsed)) {
+        return new Set();
+      }
       const valid = parsed.filter(
         (k): k is ColumnKey =>
-          typeof k === "string" &&
-          (RESPONSIVE_HIDE_ORDER as string[]).includes(k),
+          typeof k === "string" && (RESPONSIVE_HIDE_ORDER as string[]).includes(k),
       );
       return new Set(valid);
     } catch {
@@ -114,13 +114,16 @@ export function useResponsiveColumns(
   // Attach ResizeObserver to the container
   useEffect(() => {
     const el = containerRef.current;
-    if (!el || typeof ResizeObserver === "undefined") return;
+    if (!el || typeof ResizeObserver === "undefined") {
+      return;
+    }
 
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0];
-      if (!entry) return;
-      const width =
-        entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
+      if (!entry) {
+        return;
+      }
+      const width = entry.contentBoxSize?.[0]?.inlineSize ?? entry.contentRect.width;
       setContainerWidth(width);
     });
 
@@ -140,27 +143,26 @@ export function useResponsiveColumns(
 
     // Candidates: user-visible, non-fixed columns that participate in responsive hiding
     const candidates = columns.filter(
-      (col) =>
-        col.visible &&
-        !col.fixed &&
-        (RESPONSIVE_HIDE_ORDER as string[]).includes(col.key),
+      (col) => col.visible && !col.fixed && (RESPONSIVE_HIDE_ORDER as string[]).includes(col.key),
     );
 
     const candidateCount = candidates.length;
     const toHideCount = Math.max(0, candidateCount - maxOptional);
 
-    if (toHideCount === 0) return new Set();
+    if (toHideCount === 0) {
+      return new Set();
+    }
 
     // Sort candidates by hide priority (lowest priority first = first to hide)
     const sorted = [...candidates].sort(
-      (a, b) =>
-        RESPONSIVE_HIDE_ORDER.indexOf(a.key) -
-        RESPONSIVE_HIDE_ORDER.indexOf(b.key),
+      (a, b) => RESPONSIVE_HIDE_ORDER.indexOf(a.key) - RESPONSIVE_HIDE_ORDER.indexOf(b.key),
     );
 
     const toHide = new Set<ColumnKey>();
     for (const col of sorted) {
-      if (toHide.size >= toHideCount) break;
+      if (toHide.size >= toHideCount) {
+        break;
+      }
       // Never auto-hide a column the user has explicitly pinned
       if (!pinnedKeys.has(col.key)) {
         toHide.add(col.key);
@@ -190,7 +192,9 @@ export function useResponsiveColumns(
     setPinnedKeysState((prev) => {
       const next = new Set(prev);
       for (const col of nextColumns) {
-        if (!(RESPONSIVE_HIDE_ORDER as string[]).includes(col.key)) continue;
+        if (!(RESPONSIVE_HIDE_ORDER as string[]).includes(col.key)) {
+          continue;
+        }
         const key = col.key;
         const before = effectiveColumns.find((c) => c.key === key);
         const wasVisible = before?.visible ?? false;

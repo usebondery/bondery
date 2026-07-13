@@ -1,6 +1,6 @@
 import { openDatabaseSync, type SQLiteDatabase } from "expo-sqlite";
-import { runSyncMigrations } from "./schema/migrations";
 import { SYNC_DB_NAME } from "./constants";
+import { runSyncMigrations } from "./schema/migrations";
 
 let dbInstance: SQLiteDatabase | null = null;
 

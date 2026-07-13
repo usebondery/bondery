@@ -1,77 +1,81 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { createContactsListQueryFn } from "@/lib/query/fetchers/contacts";
-import { createInteractionsListQueryFn } from "@/lib/query/fetchers/interactions";
-import { createUpcomingRemindersQueryFn } from "@/lib/query/fetchers/reminders";
-import { contactKeys, interactionKeys, reminderKeys } from "@/lib/query/keys";
 
-const HOME_TIMELINE_CONTACTS_LIMIT = 200;
-const HOME_TIMELINE_ACTIVITIES_LIMIT = 50;
+import { getContactsList, getContactsSelectableList } from "@/lib/api/domains/contacts";
+
+import { getInteractionsList } from "@/lib/api/domains/interactions";
+
+import { getUpcomingReminders } from "@/lib/api/domains/reminders";
+import { contactKeys, interactionKeys, reminderKeys } from "@/lib/query/keys";
+import { INTERACTIONS_TIMELINE, SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
+
 const HOME_RECENT_LIMIT = 5;
 
 export function useHomeStatsQuery() {
   const listParams = { limit: 1, offset: 0 };
+
   return useQuery({
+    queryFn: () => getContactsList(listParams),
     queryKey: contactKeys.list(listParams),
-    queryFn: createContactsListQueryFn(listParams),
+
     select: (data) => data.stats,
   });
 }
 
 export function useUpcomingRemindersQuery() {
   return useQuery({
+    queryFn: getUpcomingReminders,
     queryKey: reminderKeys.upcoming(),
-    queryFn: createUpcomingRemindersQueryFn(),
   });
 }
 
 export function useHomeTimelineQuery() {
   const contactsQuery = useQuery({
-    queryKey: contactKeys.list({ limit: HOME_TIMELINE_CONTACTS_LIMIT, offset: 0 }),
-    queryFn: createContactsListQueryFn({
-      limit: HOME_TIMELINE_CONTACTS_LIMIT,
-      offset: 0,
-    }),
+    queryFn: () => getContactsSelectableList(SELECTABLE_CONTACTS),
+    queryKey: contactKeys.selectable.list(SELECTABLE_CONTACTS),
   });
 
   const activitiesQuery = useQuery({
-    queryKey: interactionKeys.list({ limit: HOME_TIMELINE_ACTIVITIES_LIMIT, offset: 0 }),
-    queryFn: createInteractionsListQueryFn({
-      limit: HOME_TIMELINE_ACTIVITIES_LIMIT,
-      offset: 0,
-    }),
+    queryFn: () => getInteractionsList(INTERACTIONS_TIMELINE),
+    queryKey: interactionKeys.list(INTERACTIONS_TIMELINE),
   });
 
   return {
-    contacts: contactsQuery.data?.contacts ?? [],
     activities: activitiesQuery.data?.activities ?? [],
+    contacts: contactsQuery.data?.contacts ?? [],
+
     isLoading: contactsQuery.isLoading || activitiesQuery.isLoading,
   };
 }
 
 export function useRecentlyAddedContactsQuery() {
-  const listParams = { sort: "createdAtDesc" as const, limit: HOME_RECENT_LIMIT, offset: 0 };
+  const listParams = { limit: HOME_RECENT_LIMIT, offset: 0, sort: "createdAtDesc" as const };
+
   return useQuery({
+    queryFn: () => getContactsList({ ...listParams, avatarPreset: "small" }),
     queryKey: contactKeys.list(listParams),
-    queryFn: createContactsListQueryFn({ ...listParams, avatarPreset: "small" }),
+
     select: (data) => data.contacts,
   });
 }
 
 export function useRecentlyInteractedContactsQuery() {
-  const listParams = { sort: "interactionDesc" as const, limit: HOME_RECENT_LIMIT, offset: 0 };
+  const listParams = { limit: HOME_RECENT_LIMIT, offset: 0, sort: "interactionDesc" as const };
+
   return useQuery({
+    queryFn: () => getContactsList({ ...listParams, avatarPreset: "small" }),
     queryKey: contactKeys.list(listParams),
-    queryFn: createContactsListQueryFn({ ...listParams, avatarPreset: "small" }),
+
     select: (data) => data.contacts,
   });
 }
 
 export function useHasAnyInteractionQuery() {
   return useQuery({
+    queryFn: () => getInteractionsList({ limit: 1, offset: 0 }),
     queryKey: interactionKeys.list({ limit: 1, offset: 0 }),
-    queryFn: createInteractionsListQueryFn({ limit: 1, offset: 0 }),
+
     select: (data) => data.activities.length > 0,
   });
 }

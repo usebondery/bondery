@@ -1,49 +1,78 @@
 "use client";
 
-import { Box, Divider, List, Table, Text, Title } from "@mantine/core";
 import { AnchorLink } from "@bondery/mantine-next";
+import { Box, Divider, List, Table, Text, Title } from "@mantine/core";
 import type { ReactNode } from "react";
 import { LegalDocumentLayout } from "./shared/LegalDocumentLayout";
 
 // Types for data-driven sections
 interface SectionProps {
+  children: ReactNode;
   id: string;
   number: number;
   title: string;
-  children: ReactNode;
 }
 
 // Third-party providers data
 const subprocessors = [
   {
-    name: "Vercel",
-    useCase: "Website and webapp hosting",
-    privacy: "https://vercel.com/legal/privacy-policy",
-    location: "",
+    location: "EU",
+    name: "Hetzner",
+    notes:
+      "Self-managed infrastructure on Hetzner cloud servers, including in-memory caching for rate limiting and real-time sync.",
+    privacy: "https://www.hetzner.com/legal/privacy-policy",
+    useCase: "Website, webapp, and API hosting",
   },
   {
+    location: "EU",
     name: "Supabase",
-    useCase: "Authentication, database, file storage",
+    notes: "",
     privacy: "https://supabase.com/privacy",
-    location: "EU",
+    useCase: "Authentication, database, file storage",
   },
   {
+    location: "EU",
     name: "PostHog",
-    useCase: "Product analytics",
+    notes: "",
     privacy: "https://posthog.com/privacy",
-    location: "EU",
+    useCase: "Product analytics",
   },
   {
+    location: "EU",
     name: "Plunk",
-    useCase: "Emails",
+    notes: "Feedback notifications, reminder digests, and contact sharing emails.",
     privacy: "https://www.useplunk.com/legal/privacy",
-    location: "EU",
+    useCase: "Transactional email",
   },
   {
-    name: "OpenFreeMap",
-    useCase: "Maps",
-    privacy: "https://openfreemap.org/privacy",
+    location: "US",
+    name: "Anthropic",
+    notes:
+      "Used only when you send a message to the AI Assistant. Your message and any contact data retrieved to answer it are sent to Anthropic for processing and are not used to train their models.",
+    privacy: "https://www.anthropic.com/legal/privacy",
+    useCase: "AI Assistant",
+  },
+  {
     location: "",
+    name: "Polar",
+    notes: "Used when you subscribe to or manage a paid plan.",
+    privacy: "https://polar.sh/legal/privacy",
+    useCase: "Subscriptions and billing",
+  },
+  {
+    location: "EU",
+    name: "Mapy.com",
+    notes:
+      "Location strings from contacts and imports are sent to resolve coordinates and timezones.",
+    privacy: "https://licence.mapy.cz/?doc=privacy",
+    useCase: "Geocoding and timezone lookup",
+  },
+  {
+    location: "",
+    name: "OpenStreetMap",
+    notes: "Map tiles are loaded directly in your browser when you use the map view.",
+    privacy: "https://wiki.osmfoundation.org/wiki/Privacy_Policy",
+    useCase: "Map tiles",
   },
 ];
 
@@ -51,7 +80,7 @@ const subprocessors = [
 function _Section({ id, number, title, children }: SectionProps) {
   return (
     <>
-      <Title order={2} mb="md" id={id}>
+      <Title id={id} mb="md" order={2}>
         {number}. {title}
       </Title>
       {children}
@@ -63,7 +92,7 @@ function _Section({ id, number, title, children }: SectionProps) {
 function _SubSection({ title, children }: { title: string; children: ReactNode }) {
   return (
     <>
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         {title}
       </Title>
       {children}
@@ -73,9 +102,9 @@ function _SubSection({ title, children }: { title: string; children: ReactNode }
 
 function _BulletList({ items }: { items: ReactNode[] }) {
   return (
-    <List mb="lg" withPadding listStyleType="disc">
-      {items.map((item, index) => (
-        <List.Item key={index}>{item}</List.Item>
+    <List listStyleType="disc" mb="lg" withPadding>
+      {items.map((item) => (
+        <List.Item key={String(item)}>{item}</List.Item>
       ))}
     </List>
   );
@@ -83,7 +112,7 @@ function _BulletList({ items }: { items: ReactNode[] }) {
 
 export function Privacy() {
   return (
-    <LegalDocumentLayout title="Privacy Policy" lastUpdated="February 11, 2026">
+    <LegalDocumentLayout lastUpdated="July 13, 2026" title="Privacy Policy">
       <Text mb="lg">
         PixelDev s.r.o., IČ: 23476800 (&quot;PixelDev,&quot; &quot;Bondery,&quot; &quot;we,&quot;
         &quot;us,&quot; or &quot;our&quot;) respects the privacy of its users (&quot;User,&quot;
@@ -111,7 +140,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 1 */}
-      <Title order={2} mb="md" id="introduction" style={{ scrollMarginTop: 120 }}>
+      <Title id="introduction" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         1. Introduction
       </Title>
       <Text mb="md">
@@ -119,7 +148,7 @@ export function Privacy() {
         organize, track, and nurture your personal and professional relationships. Our Services
         include:
       </Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>
           <strong>Bondery Webapp</strong> – A web application for managing your contacts,
           relationships, activities, and interactions
@@ -129,7 +158,12 @@ export function Privacy() {
           contact information from social platforms
         </List.Item>
         <List.Item>
-          <strong>Bondery API</strong> – Backend services that power the webapp and extension
+          <strong>Bondery Mobile App</strong> – A native iOS and Android application for managing
+          your contacts, relationships, and activities, with offline sync support
+        </List.Item>
+        <List.Item>
+          <strong>Bondery API</strong> – Backend services that power the webapp, extension, and
+          mobile app
         </List.Item>
         <List.Item>
           <strong>Bondery Website</strong> – Our public marketing and informational website
@@ -143,7 +177,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 2 */}
-      <Title order={2} mb="md" id="data-controller" style={{ scrollMarginTop: 120 }}>
+      <Title id="data-controller" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         2. Data Controller
       </Title>
       <Text mb="md">The data controller responsible for your personal data is:</Text>
@@ -158,11 +192,11 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 3 */}
-      <Title order={2} mb="md" id="information-we-collect" style={{ scrollMarginTop: 120 }}>
+      <Title id="information-we-collect" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         3. Information We Collect
       </Title>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         a) Account Information
       </Title>
       <Text mb="lg">
@@ -171,7 +205,7 @@ export function Privacy() {
         third-party login identifiers if you choose to sign in via OAuth providers.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         b) User Profile and Preferences
       </Title>
       <Text mb="lg">
@@ -179,7 +213,7 @@ export function Privacy() {
         preferences (such as language and display settings) to personalize your experience.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         c) User-Generated Content
       </Title>
       <Text mb="md">
@@ -188,13 +222,13 @@ export function Privacy() {
         interactions. This may include names, contact details, social media handles, notes, photos,
         dates, location information, and other data you choose to enter.
       </Text>
-      <Text mb="lg" c="dimmed" fz="sm">
+      <Text c="dimmed" fz="sm" mb="lg">
         <strong>Important:</strong> You are responsible for ensuring you have the appropriate legal
         basis to store information about other individuals in your Bondery account. We act as a data
         processor for this contact data on your behalf.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         d) Browser Extension Data
       </Title>
       <Text mb="lg">
@@ -204,7 +238,7 @@ export function Privacy() {
         the Bondery button and does not automatically collect or transmit data.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         e) Technical and Log Data
       </Title>
       <Text mb="lg">
@@ -213,7 +247,7 @@ export function Privacy() {
         security and debugging purposes.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         f) Analytics Data
       </Title>
       <Text mb="lg">
@@ -223,7 +257,7 @@ export function Privacy() {
         where available.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         g) Feedback and Communications
       </Title>
       <Text mb="lg">
@@ -231,7 +265,7 @@ export function Privacy() {
         the content of your communications and your contact information for response purposes.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         h) Information We Do NOT Collect
       </Title>
       <Text mb="lg">
@@ -243,11 +277,11 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 4 */}
-      <Title order={2} mb="md" id="how-we-use-information" style={{ scrollMarginTop: 120 }}>
+      <Title id="how-we-use-information" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         4. How We Use Your Data
       </Title>
       <Text mb="md">We use the information we collect to:</Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>
           <strong>Provide our Services</strong> – Create and manage your account, store and display
           your contacts and activities, sync data across your devices
@@ -277,7 +311,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 5 */}
-      <Title order={2} mb="md" id="legal-basis" style={{ scrollMarginTop: 120 }}>
+      <Title id="legal-basis" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         5. Legal Basis for Processing
       </Title>
       <Text mb="lg">
@@ -289,15 +323,15 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 6 */}
-      <Title order={2} mb="md" id="cookies" style={{ scrollMarginTop: 120 }}>
+      <Title id="cookies" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         6. Cookies and Similar Technologies
       </Title>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         Essential Cookies/Storage
       </Title>
       <Text mb="md">We use essential cookies and local storage for:</Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>
           <strong>Authentication</strong> – Maintaining your logged-in session
         </List.Item>
@@ -309,13 +343,13 @@ export function Privacy() {
         These are necessary for the basic functioning of our Services and cannot be disabled.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         Analytics
       </Title>
       <Text mb="md">
         We may use analytics tools for product analytics. These tools may set cookies to:
       </Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>Distinguish unique users</List.Item>
         <List.Item>Track session information</List.Item>
         <List.Item>Remember opt-out preferences</List.Item>
@@ -324,10 +358,10 @@ export function Privacy() {
         You can disable analytics tracking in your account settings where available.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         We Do NOT Use
       </Title>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>Advertising or tracking cookies</List.Item>
         <List.Item>Third-party marketing cookies</List.Item>
         <List.Item>Cross-site tracking technologies</List.Item>
@@ -336,7 +370,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 7 */}
-      <Title order={2} mb="md" id="security" style={{ scrollMarginTop: 120 }}>
+      <Title id="security" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         7. Security
       </Title>
       <Text mb="md">
@@ -356,11 +390,11 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 8 */}
-      <Title order={2} mb="md" id="data-retention" style={{ scrollMarginTop: 120 }}>
+      <Title id="data-retention" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         8. Data Retention
       </Title>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         While Your Account is Active
       </Title>
       <Text mb="lg">
@@ -368,11 +402,11 @@ export function Privacy() {
         our Services.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         After Account Deletion
       </Title>
       <Text mb="md">When you delete your account:</Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>
           <strong>Your data</strong> – All your personal data, contacts, activities, and uploaded
           files are deleted immediately
@@ -386,11 +420,11 @@ export function Privacy() {
         </List.Item>
       </List>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         Exceptions
       </Title>
       <Text mb="md">We may retain certain data longer if:</Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>Required by law or legal process</List.Item>
         <List.Item>Necessary to resolve disputes or enforce our agreements</List.Item>
         <List.Item>
@@ -401,7 +435,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 9 */}
-      <Title order={2} mb="md" id="disclosure" style={{ scrollMarginTop: 120 }}>
+      <Title id="disclosure" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         9. Disclosure of Personal Information
       </Title>
       <Text mb="lg">
@@ -409,7 +443,7 @@ export function Privacy() {
         information only in the following circumstances:
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         a) Service Providers (Subprocessors)
       </Title>
       <Text mb="lg">
@@ -418,18 +452,18 @@ export function Privacy() {
         your data and use it only for the purposes we specify.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         b) Legal Requirements
       </Title>
       <Text mb="md">We may disclose your information if required to:</Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>Comply with applicable law, regulation, or legal process</List.Item>
         <List.Item>Respond to lawful requests from public authorities</List.Item>
         <List.Item>Protect our rights, privacy, safety, or property</List.Item>
         <List.Item>Enforce our Terms of Service</List.Item>
       </List>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         c) Business Transfers
       </Title>
       <Text mb="lg">
@@ -438,7 +472,7 @@ export function Privacy() {
         change and any choices you may have.
       </Text>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         d) With Your Consent
       </Title>
       <Text mb="lg">
@@ -448,7 +482,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 10 */}
-      <Title order={2} mb="md" id="international-transfers" style={{ scrollMarginTop: 120 }}>
+      <Title id="international-transfers" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         10. International Data Transfers
       </Title>
       <Text mb="md">
@@ -459,7 +493,7 @@ export function Privacy() {
         When we transfer data outside the EEA, we ensure appropriate safeguards are in place, such
         as:
       </Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>EU Standard Contractual Clauses (SCCs)</List.Item>
         <List.Item>Adequacy decisions by the European Commission</List.Item>
         <List.Item>Other legally recognized transfer mechanisms</List.Item>
@@ -468,7 +502,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 11 - Children */}
-      <Title order={2} mb="md" id="children" style={{ scrollMarginTop: 120 }}>
+      <Title id="children" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         11. Children
       </Title>
       <Text mb="lg">
@@ -480,15 +514,15 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 12 */}
-      <Title order={2} mb="md" id="your-rights" style={{ scrollMarginTop: 120 }}>
+      <Title id="your-rights" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         12. Your Privacy Rights
       </Title>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         For All Users
       </Title>
       <Text mb="md">You have the right to:</Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>
           <strong>Access</strong> your personal data
         </List.Item>
@@ -506,11 +540,11 @@ export function Privacy() {
         </List.Item>
       </List>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         For EEA/UK/Swiss Residents (GDPR Rights)
       </Title>
       <Text mb="md">In addition to the above, you have the right to:</Text>
-      <List mb="md" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="md" withPadding>
         <List.Item>
           <strong>Restrict processing</strong> of your personal data
         </List.Item>
@@ -534,7 +568,7 @@ export function Privacy() {
         </AnchorLink>
       </Box>
 
-      <Title order={3} mt="lg" mb="sm">
+      <Title mb="sm" mt="lg" order={3}>
         Exercising Your Rights
       </Title>
       <Text mb="lg">
@@ -551,7 +585,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 13 */}
-      <Title order={2} mb="md" id="contact-data-responsibilities" style={{ scrollMarginTop: 120 }}>
+      <Title id="contact-data-responsibilities" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         13. Your Responsibilities for Contact Data
       </Title>
       <Text mb="md">
@@ -562,7 +596,7 @@ export function Privacy() {
       <Text mb="md">
         <strong>You are responsible for:</strong>
       </Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>
           Ensuring you have a lawful basis to store and process information about your contacts
         </List.Item>
@@ -582,7 +616,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 14 */}
-      <Title order={2} mb="md" id="third-party-links" style={{ scrollMarginTop: 120 }}>
+      <Title id="third-party-links" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         14. Third-Party Links
       </Title>
       <Text mb="lg">
@@ -598,7 +632,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 15 */}
-      <Title order={2} mb="md" id="subprocessors" style={{ scrollMarginTop: 120 }}>
+      <Title id="subprocessors" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
         15. Third-Party Service Providers (Subprocessors)
       </Title>
       <Text mb="lg">
@@ -607,11 +641,12 @@ export function Privacy() {
         keep it confidential.
       </Text>
 
-      <Table mb="xl" withTableBorder withColumnBorders>
+      <Table mb="xl" withColumnBorders withTableBorder>
         <Table.Thead>
           <Table.Tr>
             <Table.Th>Provider</Table.Th>
             <Table.Th>Use Case</Table.Th>
+            <Table.Th>Notes</Table.Th>
             <Table.Th>Privacy Policy</Table.Th>
             <Table.Th>Location of Data</Table.Th>
           </Table.Tr>
@@ -621,12 +656,13 @@ export function Privacy() {
             <Table.Tr key={provider.name}>
               <Table.Td>{provider.name}</Table.Td>
               <Table.Td>{provider.useCase}</Table.Td>
+              <Table.Td>{provider.notes || "—"}</Table.Td>
               <Table.Td>
                 <AnchorLink href={provider.privacy} target="_blank">
                   {provider.privacy}
                 </AnchorLink>
               </Table.Td>
-              <Table.Td>{provider.location}</Table.Td>
+              <Table.Td>{provider.location || "—"}</Table.Td>
             </Table.Tr>
           ))}
         </Table.Tbody>
@@ -635,13 +671,41 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 16 */}
-      <Title order={2} mb="md" id="changes" style={{ scrollMarginTop: 120 }}>
-        16. Changes to This Privacy Policy
+      <Title id="sign-in-providers" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+        16. Sign-in Providers (Identity Providers)
+      </Title>
+      <Text mb="md">
+        If you choose to sign in with <strong>GitHub</strong> or <strong>LinkedIn</strong>,
+        authentication is handled by that provider. We receive only the information needed to create
+        and manage your Bondery account (such as your email address, name, and provider user ID). We
+        do not receive your password and do not control how these providers process your data during
+        login.
+      </Text>
+      <Text mb="lg">
+        Each provider&apos;s privacy policy applies to sign-in:{" "}
+        <AnchorLink
+          href="https://docs.github.com/en/site-policy/privacy-policies/github-privacy-statement"
+          target="_blank"
+        >
+          GitHub Privacy Statement
+        </AnchorLink>
+        ,{" "}
+        <AnchorLink href="https://www.linkedin.com/legal/privacy-policy" target="_blank">
+          LinkedIn Privacy Policy
+        </AnchorLink>
+        .
+      </Text>
+
+      <Divider my="xl" />
+
+      {/* Section 17 */}
+      <Title id="changes" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+        17. Changes to This Privacy Policy
       </Title>
       <Text mb="md">
         We may update this Privacy Policy from time to time. When we make material changes, we will:
       </Text>
-      <List mb="lg" withPadding listStyleType="disc">
+      <List listStyleType="disc" mb="lg" withPadding>
         <List.Item>Update the &quot;Last Updated&quot; date at the top of this policy</List.Item>
         <List.Item>
           Notify you via email or through our Services (for significant changes)
@@ -654,9 +718,9 @@ export function Privacy() {
 
       <Divider my="xl" />
 
-      {/* Section 17 */}
-      <Title order={2} mb="md" id="contact" style={{ scrollMarginTop: 120 }}>
-        17. Contact Us
+      {/* Section 18 */}
+      <Title id="contact" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+        18. Contact Us
       </Title>
       <Text mb="md">
         If you have any questions about this Privacy Policy or how we process your information and

@@ -4,6 +4,10 @@
 @source "@bondery/branding/**/*.{ts,tsx}";
 @source "@bondery/mantine-next/**/*.{ts,tsx}";
 
+/* Mantine imports must follow Tailwind @source; Biome expects all @import at file top. */
+/* biome-ignore lint/correctness/noInvalidPositionAtImportRule: Tailwind v4 @source scanning must be declared before Mantine CSS. */
 @import "@mantine/core/styles.css";
+/* biome-ignore lint/correctness/noInvalidPositionAtImportRule: Tailwind v4 @source scanning must be declared before Mantine CSS. */
 @import "@mantine/notifications/styles.css";
+/* biome-ignore lint/correctness/noInvalidPositionAtImportRule: Tailwind v4 @source scanning must be declared before Mantine CSS. */
 @import "@bondery/mantine-next/styles";

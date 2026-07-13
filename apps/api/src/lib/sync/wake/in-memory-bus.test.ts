@@ -8,15 +8,15 @@ describe("InMemorySyncWakeBus", () => {
     const received: Array<{ userId: string; serverSequence: number }> = [];
 
     await bus.start((userId, event) => {
-      received.push({ userId, serverSequence: event.serverSequence });
+      received.push({ serverSequence: event.serverSequence, userId });
     });
 
     await bus.publish("user-1", {
-      serverSequence: 7,
       affectedTables: ["people"],
+      serverSequence: 7,
     });
 
-    assert.deepEqual(received, [{ userId: "user-1", serverSequence: 7 }]);
+    assert.deepEqual(received, [{ serverSequence: 7, userId: "user-1" }]);
     await bus.stop();
   });
 });

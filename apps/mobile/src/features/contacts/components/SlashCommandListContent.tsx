@@ -8,8 +8,8 @@ import {
 } from "../slashCommands";
 
 interface SlashCommandListContentProps {
-  query: string;
   onSelect: (command: SlashCommandDefinition) => void;
+  query: string;
 }
 
 function SlashCommandRow({
@@ -24,23 +24,17 @@ function SlashCommandRow({
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.row,
-        pressed && { backgroundColor: colors.surfacePressed },
-      ]}
-      onPress={onPress}
-      accessibilityRole="menuitem"
       accessibilityLabel={`${command.label}, ${command.description}`}
+      accessibilityRole="menuitem"
+      onPress={onPress}
+      style={({ pressed }) => [styles.row, pressed && { backgroundColor: colors.surfacePressed }]}
     >
       <Icon size={20} stroke={colors.iconPrimary} />
       <View style={styles.textCol}>
-        <Text style={[styles.label, { color: colors.textPrimary }]} numberOfLines={1}>
+        <Text numberOfLines={1} style={[styles.label, { color: colors.textPrimary }]}>
           {command.label}
         </Text>
-        <Text
-          style={[styles.description, { color: colors.textMuted }]}
-          numberOfLines={1}
-        >
+        <Text numberOfLines={1} style={[styles.description, { color: colors.textMuted }]}>
           {command.description}
         </Text>
       </View>
@@ -56,30 +50,20 @@ export function SlashCommandListContent({ query, onSelect }: SlashCommandListCon
   if (commands.length === 0) {
     return (
       <View style={styles.empty}>
-        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-          No results
-        </Text>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>No results</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView
-      style={styles.list}
-      keyboardShouldPersistTaps="handled"
-      nestedScrollEnabled
-    >
+    <ScrollView keyboardShouldPersistTaps="handled" nestedScrollEnabled style={styles.list}>
       {sections.map((section) => (
         <View key={section.group}>
           <Text style={[styles.sectionHeader, { color: colors.textMuted }]}>
             {section.group.toUpperCase()}
           </Text>
           {section.items.map((command) => (
-            <SlashCommandRow
-              key={command.id}
-              command={command}
-              onPress={() => onSelect(command)}
-            />
+            <SlashCommandRow command={command} key={command.id} onPress={() => onSelect(command)} />
           ))}
         </View>
       ))}
@@ -88,41 +72,41 @@ export function SlashCommandListContent({ query, onSelect }: SlashCommandListCon
 }
 
 const styles = StyleSheet.create({
-  list: {
-    maxHeight: 280,
+  description: {
+    fontSize: 13,
   },
-  sectionHeader: {
-    fontSize: 11,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-    letterSpacing: 0.6,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 4,
-  },
-  row: {
-    flexDirection: "row",
+  empty: {
     alignItems: "center",
-    minHeight: 52,
-    paddingHorizontal: 12,
-    gap: 12,
+    justifyContent: "center",
+    minHeight: 44,
   },
-  textCol: {
-    flex: 1,
-    gap: 1,
+  emptyText: {
+    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
   },
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
   },
-  description: {
-    fontSize: 13,
+  list: {
+    maxHeight: 280,
   },
-  empty: {
-    minHeight: 44,
+  row: {
     alignItems: "center",
-    justifyContent: "center",
+    flexDirection: "row",
+    gap: 12,
+    minHeight: 52,
+    paddingHorizontal: 12,
   },
-  emptyText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+  sectionHeader: {
+    fontSize: 11,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
+    letterSpacing: 0.6,
+    paddingBottom: 4,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+  },
+  textCol: {
+    flex: 1,
+    gap: 1,
   },
 });

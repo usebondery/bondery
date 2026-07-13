@@ -11,8 +11,8 @@ import {
   setBootstrapCompleted,
   setLastServerSequence,
 } from "./outbox/pending-mutations";
-import { logSyncPullError, logSyncPullResponse } from "./sync-logger";
 import { shouldSchedulePullOnWake } from "./pull-wake";
+import { logSyncPullError, logSyncPullResponse } from "./sync-logger";
 
 type SyncSubscriber = () => void;
 export type SyncPullReason =
@@ -67,7 +67,9 @@ export function resetInitialSyncSnapshot(): void {
 }
 
 export function setSyncPullMode(mode: SyncPullMode): void {
-  if (pullMode === mode) return;
+  if (pullMode === mode) {
+    return;
+  }
   pullMode = mode;
 
   if (mode === "websocket_wake") {
@@ -87,10 +89,10 @@ export function onSyncWakeEvent(input: {
 }): void {
   if (
     !shouldSchedulePullOnWake({
-      serverSequence: input.serverSequence,
       lastServerSequence: getLastServerSequence(),
-      sourceDeviceId: input.sourceDeviceId,
       myDeviceId: input.myDeviceId,
+      serverSequence: input.serverSequence,
+      sourceDeviceId: input.sourceDeviceId,
     })
   ) {
     return;
@@ -128,7 +130,9 @@ export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean
 }
 
 async function getAccessToken(): Promise<string | null> {
-  if (!supabase) return null;
+  if (!supabase) {
+    return null;
+  }
   const { data } = await supabase.auth.getSession();
   return data.session?.access_token ?? null;
 }
@@ -177,8 +181,8 @@ export async function pullOnce(
   const waitMs = pullMode === "long_poll" ? LONG_POLL_WAIT_MS : 0;
 
   const query = new URLSearchParams({
-    since: String(since),
     limit: "100",
+    since: String(since),
     waitMs: String(waitMs),
   });
 
@@ -210,7 +214,9 @@ export async function pullOnce(
 }
 
 async function pullLoop(): Promise<void> {
-  if (pullLoopRunning) return;
+  if (pullLoopRunning) {
+    return;
+  }
   pullLoopRunning = true;
 
   try {
@@ -218,7 +224,9 @@ async function pullLoop(): Promise<void> {
       try {
         await pullOnce(pullAbort.signal, "long_poll");
       } catch (error) {
-        if (pullAbort.signal.aborted) break;
+        if (pullAbort.signal.aborted) {
+          break;
+        }
         logSyncPullError(error);
         await new Promise((resolve) => setTimeout(resolve, 5_000));
       }

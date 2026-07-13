@@ -1,7 +1,7 @@
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 import { checkEnvVariables } from "@bondery/helpers/env";
-import { existsSync, readFileSync } from "fs";
-import { resolve, dirname } from "path";
-import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -30,8 +30,8 @@ if (existsSync(envLocalPath)) {
 }
 
 checkEnvVariables({
-  environment: "development",
   appPath,
+  environment: "development",
   requiredVars: [
     "EXPO_PUBLIC_API_URL",
     "EXPO_PUBLIC_SUPABASE_URL",

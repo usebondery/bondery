@@ -3,41 +3,47 @@
  * Handles adding, removing, and listing contacts within a group.
  */
 
-import type { FastifyReply } from "fastify";
-import type { AppFastifyInstance } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { getAuth } from "../../lib/auth.js";
-import { searchPeopleIds, restoreRankedOrder, countSearchPeopleIds } from "../../lib/search.js";
-import { attachContactExtras } from "../../lib/contact-enrichment.js";
-import {
-  resolveContactPersonIds,
-  ResolveContactPersonIdsError,
-} from "../../lib/resolve-contact-person-ids.js";
-import {
-  resolveGroupMemberPersonIds,
-  ResolveGroupMemberPersonIdsError,
-} from "../../lib/resolve-group-member-person-ids.js";
-import { CONTACT_SELECT, extractAvatarOptions } from "../../lib/queries.js";
-import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
 import {
   addContactsToGroupRequestSchema,
   addContactsToGroupResponseSchema,
+  contactListItemSchema,
   groupContactsListResponseSchema,
   removeGroupMembersRequestSchema,
   removeGroupMembersResponseSchema,
 } from "@bondery/schemas";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
+import { peopleListQuerySchema, uuidParamSchema } from "@bondery/schemas/http";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { z } from "zod";
+import { addGroupMembers, removeGroupMembers } from "../../domains/groups/index.js";
+import { attachContactExtras } from "../../lib/contacts/enrichment.js";
+import { resolveGroupMemberPersonIds } from "../../lib/contacts/resolve-group-member-ids.js";
+import { resolveContactPersonIds } from "../../lib/contacts/resolve-person-ids.js";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
   normalizeSearch,
   parsePagination,
   resolveSort,
-} from "../../lib/pagination.js";
+} from "../../lib/data/pagination.js";
+import {
+  countSearchPeopleIds,
+  restoreRankedOrder,
+  searchPeopleIds,
+} from "../../lib/data/search.js";
+import {
+  CONTACT_SELECT,
+  type ContactWithId,
+  extractAvatarOptions,
+} from "../../lib/data/select-fragments.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import { badRequest, internal, notFound } from "../../lib/platform/errors/http-errors.js";
+import type { AppFastifyInstance } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { withDomainRoute } from "../../lib/platform/with-domain-route.js";
 
 const EXISTING_MEMBERSHIP_LOOKUP_CHUNK_SIZE = 500;
 
-async function findExistingGroupMemberIds(
+async function _findExistingGroupMemberIds(
   client: ReturnType<typeof getAuth>["client"],
   groupId: string,
   personIds: string[],
@@ -75,13 +81,10 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         description: "List paginated contacts in a group.",
         params: uuidParamSchema,
         querystring: peopleListQuerySchema,
-        response: withOkResponse(
-          groupContactsListResponseSchema,
-          "Group members",
-        ),
+        response: withOkResponse(groupContactsListResponseSchema, "Group members"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
+    async (request) => {
       const { client, user } = getAuth(request);
       const { id: groupId } = request.params;
       const query = request.query;
@@ -99,14 +102,14 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         .single();
 
       if (groupError || !group) {
-        return reply.status(404).send({ error: "Group not found" });
+        throw notFound("Group not found", "not_found");
       }
 
       // ── Fuzzy search path ──────────────────────────────────────────────
       // When a search query is active, use the search_people_ids RPC with
       // p_group_id to scope results to this group. Then fetch full rows
       // via .in() to preserve CONTACT_SELECT aliasing.
-      let contacts: any[];
+      let contacts: ContactWithId[];
       let totalCount: number;
 
       if (search) {
@@ -120,7 +123,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
             { rpcError: searchResult.error },
             "Error in fuzzy search RPC for group contacts",
           );
-          return reply.status(500).send({ error: searchResult.error });
+          throw internal("internal_server_error", searchResult.error);
         }
 
         if (countResult.error) {
@@ -128,7 +131,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
             { rpcError: countResult.error },
             "Error in fuzzy search count RPC for group contacts",
           );
-          return reply.status(500).send({ error: countResult.error });
+          throw internal("internal_server_error", countResult.error);
         }
 
         totalCount = countResult.count ?? 0;
@@ -144,11 +147,8 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
             .in("id", rankedIds);
 
           if (fetchError) {
-            fastify.log.error(
-              { fetchError },
-              "Error fetching fuzzy group search results",
-            );
-            return reply.status(500).send({ error: fetchError.message });
+            fastify.log.error({ fetchError }, "Error fetching fuzzy group search results");
+            throw internal("internal_server_error", fetchError.message);
           }
 
           contacts = restoreRankedOrder(fetchedContacts || [], rankedIds);
@@ -195,7 +195,6 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
               nullsFirst: false,
             });
             break;
-          case "nameAsc":
           default:
             contactsQuery = contactsQuery.order("first_name", {
               ascending: true,
@@ -205,22 +204,15 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
 
         contactsQuery = contactsQuery.range(offset, offset + limit - 1);
 
-        const {
-          data: contactRows,
-          error: contactsError,
-          count,
-        } = await contactsQuery;
+        const { data: contactRows, error: contactsError, count } = await contactsQuery;
 
         if (contactsError) {
-          fastify.log.error(
-            { contactsError },
-            "Failed to fetch contacts for group",
-          );
-          return reply.status(500).send({ error: contactsError.message });
+          fastify.log.error({ contactsError }, "Failed to fetch contacts for group");
+          throw internal("internal_server_error", contactsError.message);
         }
 
         // Strip the join helper field before passing contacts down the pipeline
-        contacts = (contactRows || []).map((row: any) => {
+        contacts = (contactRows || []).map((row) => {
           const { people_groups: _pg, ...contact } = row;
           return contact;
         });
@@ -230,44 +222,43 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
 
       let enrichedContacts = contacts;
       try {
-        enrichedContacts = await attachContactExtras(
-          client,
-          user.id,
-          contacts || [],
-          {
-            avatarOptions,
-          },
-        );
-      } catch (enrichError) {
+        enrichedContacts = await attachContactExtras(client, user.id, contacts || [], {
+          avatarOptions,
+        });
+      } catch (error) {
         fastify.log.error(
-          { enrichError },
+          { err: error },
           "Failed to attach contact channels/social media for group contacts",
         );
         enrichedContacts = (contacts || []).map((contact) => ({
           ...contact,
-          phones: [],
           emails: [],
-          linkedin: null,
-          instagram: null,
-          whatsapp: null,
           facebook: null,
-          website: null,
+          instagram: null,
+          linkedin: null,
+          phones: [],
           signal: null,
+          website: null,
+          whatsapp: null,
         }));
       }
 
       const pagination = buildPaginationMeta({
+        itemCount: enrichedContacts.length,
         limit,
         offset,
-        totalCount,
-        itemCount: enrichedContacts.length,
-        sort: effectiveSort,
         search,
+        sort: effectiveSort,
+        totalCount,
       });
 
       return {
         group: { id: group.id, label: group.label },
-        ...buildPaginatedResponse("contacts", enrichedContacts, pagination),
+        ...buildPaginatedResponse(
+          "contacts",
+          z.array(contactListItemSchema).parse(enrichedContacts),
+          pagination,
+        ),
       };
     },
   );
@@ -279,33 +270,20 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
     "/:id/contacts",
     {
       schema: {
+        body: addContactsToGroupRequestSchema,
         description: "Add contacts to a group by IDs or contact filter.",
         params: uuidParamSchema,
-        body: addContactsToGroupRequestSchema,
-        response: withOkResponse(
-          addContactsToGroupResponseSchema,
-          "Contacts added to group",
-        ),
+        response: withOkResponse(addContactsToGroupResponseSchema, "Contacts added to group"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id: groupId } = request.params;
-      const body = request.body;
+    withDomainRoute(
+      { body: addContactsToGroupRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const groupId = params.id;
+        const { client, user } = ctx;
 
-      const { data: group, error: groupError } = await client
-        .from("groups")
-        .select("id")
-        .eq("id", groupId)
-        .single();
+        let personIds: string[];
 
-      if (groupError || !group) {
-        return reply.status(404).send({ error: "Group not found" });
-      }
-
-      let personIds: string[];
-
-      try {
         if ("personIds" in body && Array.isArray(body.personIds)) {
           personIds = await resolveContactPersonIds(
             client,
@@ -321,73 +299,29 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
               : undefined,
           });
         } else {
-          return reply.status(400).send({
-            error:
-              "Invalid request body. Provide either 'personIds' or 'contactFilter'.",
-          });
-        }
-      } catch (error) {
-        if (error instanceof ResolveContactPersonIdsError) {
-          return reply.status(error.statusCode).send({ error: error.message });
+          throw badRequest(
+            "Invalid request body. Provide either 'personIds' or 'contactFilter'.",
+            "group_add_contacts_invalid_body",
+          );
         }
 
-        throw error;
-      }
+        if (personIds.length === 0) {
+          return {
+            addedCount: 0,
+            message: "No contacts matched the contact filter",
+            skippedCount: 0,
+          };
+        }
 
-      if (personIds.length === 0) {
+        const { data } = await addGroupMembers(ctx, groupId, personIds);
+
         return {
-          message: "No contacts matched the contact filter",
-          addedCount: 0,
-          skippedCount: 0,
+          addedCount: data.addedCount,
+          message: "Contacts added to group successfully",
+          skippedCount: data.skippedCount,
         };
-      }
-
-      let existingMemberIds: Set<string>;
-
-      try {
-        existingMemberIds = await findExistingGroupMemberIds(client, groupId, personIds);
-      } catch (lookupError) {
-        const message =
-          lookupError instanceof Error
-            ? lookupError.message
-            : "Failed to check existing group memberships";
-        return reply.status(500).send({ error: message });
-      }
-
-      const skippedCount = existingMemberIds.size;
-      const newPersonIds = personIds.filter((personId) => !existingMemberIds.has(personId));
-      const addedCount = newPersonIds.length;
-
-      if (newPersonIds.length === 0) {
-        return {
-          message: "All contacts were already in the group",
-          addedCount: 0,
-          skippedCount,
-        };
-      }
-
-      // Insert memberships (upsert to avoid duplicates)
-      const memberships = newPersonIds.map((personId) => ({
-        person_id: personId,
-        group_id: groupId,
-        user_id: user.id,
-      }));
-
-      const { error } = await client.from("people_groups").upsert(memberships, {
-        onConflict: "person_id,group_id",
-        ignoreDuplicates: true,
-      });
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      return {
-        message: "Contacts added to group successfully",
-        addedCount,
-        skippedCount,
-      };
-    },
+      },
+    ),
   );
 
   /**
@@ -398,23 +332,20 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
     "/:id/contacts",
     {
       schema: {
+        body: removeGroupMembersRequestSchema,
         description: "Remove contacts from a group by IDs or member filter.",
         params: uuidParamSchema,
-        body: removeGroupMembersRequestSchema,
-        response: withOkResponse(
-          removeGroupMembersResponseSchema,
-          "Contacts removed from group",
-        ),
+        response: withOkResponse(removeGroupMembersResponseSchema, "Contacts removed from group"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    async (request, reply) => {
-      const { client, user } = getAuth(request);
-      const { id: groupId } = request.params;
-      const body = request.body;
+    withDomainRoute(
+      { body: removeGroupMembersRequestSchema, params: uuidParamSchema },
+      async (ctx, { body, params }) => {
+        const groupId = params.id;
+        const { client, user } = ctx;
 
-      let personIds: string[];
+        let personIds: string[];
 
-      try {
         if ("personIds" in body && Array.isArray(body.personIds)) {
           personIds = await resolveGroupMemberPersonIds(
             client,
@@ -422,50 +353,35 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
             groupId,
             { personIds: body.personIds },
             {
+              emptyExplicitError: "Invalid request body. 'personIds' must be a non-empty array.",
               rejectEmptyExplicit: true,
-              emptyExplicitError:
-                "Invalid request body. 'personIds' must be a non-empty array.",
             },
           );
         } else if ("memberFilter" in body && body.memberFilter) {
           personIds = await resolveGroupMemberPersonIds(client, user.id, groupId, {
-            memberFilter: body.memberFilter as { search?: string; sort?: string },
             excludePersonIds: Array.isArray(body.excludePersonIds)
               ? body.excludePersonIds
               : undefined,
+            memberFilter: body.memberFilter as { search?: string; sort?: string },
           });
         } else {
-          return reply.status(400).send({
-            error:
-              "Invalid request body. Provide either 'personIds' or 'memberFilter'.",
-          });
-        }
-      } catch (error) {
-        if (error instanceof ResolveGroupMemberPersonIdsError) {
-          return reply.status(error.statusCode).send({ error: error.message });
+          throw badRequest(
+            "Invalid request body. Provide either 'personIds' or 'memberFilter'.",
+            "group_remove_members_invalid_body",
+          );
         }
 
-        throw error;
-      }
+        if (personIds.length === 0) {
+          return { message: "No group members matched the member filter" };
+        }
 
-      if (personIds.length === 0) {
-        return { message: "No group members matched the member filter" };
-      }
+        const { data } = await removeGroupMembers(ctx, groupId, personIds);
 
-      const { error } = await client
-        .from("people_groups")
-        .delete()
-        .eq("group_id", groupId)
-        .in("person_id", personIds);
-
-      if (error) {
-        return reply.status(500).send({ error: error.message });
-      }
-
-      return {
-        message: "Contacts removed from group successfully",
-        removedCount: personIds.length,
-      };
-    },
+        return {
+          message: "Contacts removed from group successfully",
+          removedCount: data.removedCount,
+        };
+      },
+    ),
   );
 }

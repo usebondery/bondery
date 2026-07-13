@@ -26,14 +26,18 @@ export function detectSlashCommand(plainText: string, cursor: number): SlashComm
   };
 }
 
-export function removeSlashTokenFromPlainText(plainText: string, tokenStart: number, cursor: number): {
+export function removeSlashTokenFromPlainText(
+  plainText: string,
+  tokenStart: number,
+  cursor: number,
+): {
   text: string;
   cursor: number;
 } {
   const nextText = plainText.slice(0, tokenStart) + plainText.slice(cursor);
   return {
-    text: nextText,
     cursor: tokenStart,
+    text: nextText,
   };
 }
 
@@ -61,7 +65,7 @@ export function removeSlashTokenFromMarkdown(markdown: string, query: string): s
 export function useSlashCommandDetection() {
   const [slashState, setSlashState] = useState<SlashCommandState | null>(null);
   const plainTextRef = useRef("");
-  const selectionRef = useRef({ start: 0, end: 0 });
+  const selectionRef = useRef({ end: 0, start: 0 });
 
   const updateSlashState = useCallback((text: string, cursor: number) => {
     const detected = detectSlashCommand(text, cursor);
@@ -89,11 +93,11 @@ export function useSlashCommandDetection() {
   }, []);
 
   return {
-    slashState,
+    clearSlash,
+    handleChangeSelection,
+    handleChangeText,
     plainTextRef,
     selectionRef,
-    handleChangeText,
-    handleChangeSelection,
-    clearSlash,
+    slashState,
   };
 }

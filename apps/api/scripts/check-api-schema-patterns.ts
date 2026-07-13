@@ -4,41 +4,19 @@
  * Usage: npx tsx scripts/check-api-schema-patterns.ts
  */
 
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { loadRouteNonPluginFiles } from "./load-route-non-plugin-files.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const routesRoot = join(__dirname, "..", "src", "routes");
 
-const INTERNAL_ROUTE_FILES = new Set([
-  "webhooks/polar.ts",
-  "internal/reminder-digest.ts",
-]);
+const INTERNAL_ROUTE_FILES = new Set(["webhooks/polar.ts", "internal/reminder-digest.ts"]);
 
 /** Utility modules under routes/ that are not Fastify route plugins. */
-const NON_ROUTE_FILES = new Set([
-  "contacts/addresses.ts",
-  "contacts/channels.ts",
-  "contacts/vcard.ts",
-  "contacts/share/lib.ts",
-  "contacts/merge/helpers.ts",
-  "extension/helpers.ts",
-  "import/linkedin/parser.ts",
-  "import/instagram/parser.ts",
-  "import/vcard/parser.ts",
-]);
-
-const NESTED_ROUTE_PREFIXES = [
-  "contacts/enrichment/",
-  "contacts/merge/",
-  "contacts/relationships/",
-  "contacts/important-dates/",
-  "contacts/photo/",
-  "contacts/tags/",
-  "groups/contacts.ts",
-  "extension/",
-];
+const NON_ROUTE_FILES = loadRouteNonPluginFiles();
 
 const ROUTE_METHOD_RE =
   /fastify\.(get|post|put|patch|delete)\(\s*[\s\S]*?schema:\s*\{[\s\S]*?\}\s*satisfies\s+FastifyZodOpenApiSchema/gs;
@@ -61,15 +39,13 @@ function collectRouteFiles(dir: string): string[] {
   return files;
 }
 
-function isNestedRouteFile(routeRel: string): boolean {
-  return NESTED_ROUTE_PREFIXES.some((prefix) => routeRel.startsWith(prefix));
-}
-
 const violations: string[] = [];
 
 for (const file of collectRouteFiles(routesRoot)) {
   const rel = relative(join(__dirname, "..", "src"), file).replace(/\\/g, "/");
-  if (!rel.startsWith("routes/")) continue;
+  if (!rel.startsWith("routes/")) {
+    continue;
+  }
 
   const routeRel = rel.replace(/^routes\//, "");
   if (INTERNAL_ROUTE_FILES.has(routeRel) || NON_ROUTE_FILES.has(routeRel)) {
@@ -77,10 +53,6 @@ for (const file of collectRouteFiles(routesRoot)) {
   }
 
   const content = readFileSync(file, "utf8");
-
-  if (!isNestedRouteFile(routeRel) && !content.includes("applyOpenApiRouteMeta")) {
-    violations.push(`${routeRel}: missing applyOpenApiRouteMeta in onRoute hook`);
-  }
 
   const schemaBlocks = [...content.matchAll(ROUTE_METHOD_RE)];
   for (const match of schemaBlocks) {
@@ -103,7 +75,7 @@ for (const file of collectRouteFiles(routesRoot)) {
 
 if (violations.length > 0) {
   console.error(
-    "API schema pattern check failed:\n" + violations.map((v) => `  - ${v}`).join("\n"),
+    `API schema pattern check failed:\n${violations.map((v) => `  - ${v}`).join("\n")}`,
   );
   process.exit(1);
 }

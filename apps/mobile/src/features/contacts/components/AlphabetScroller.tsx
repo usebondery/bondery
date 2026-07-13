@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
-  GestureResponderEvent,
-  LayoutChangeEvent,
+  type GestureResponderEvent,
+  type LayoutChangeEvent,
   PanResponder,
   StyleSheet,
   Text,
@@ -22,30 +22,32 @@ export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerPr
 
   const maxIndex = Math.max(letters.length - 1, 0);
 
-  const updateLetterByPosition = (locationY: number) => {
-    if (!containerHeight || letters.length === 0) {
-      return;
-    }
-
-    const rowHeight = containerHeight / letters.length;
-    const rawIndex = Math.floor(locationY / rowHeight);
-    const boundedIndex = Math.min(Math.max(rawIndex, 0), maxIndex);
-    const selectedLetter = letters[boundedIndex];
-
-    setActiveLetter((currentLetter) => {
-      if (currentLetter === selectedLetter) {
-        return currentLetter;
+  const updateLetterByPosition = useCallback(
+    (locationY: number) => {
+      if (!containerHeight || letters.length === 0) {
+        return;
       }
 
-      onLetterChange(selectedLetter);
-      return selectedLetter;
-    });
-  };
+      const rowHeight = containerHeight / letters.length;
+      const rawIndex = Math.floor(locationY / rowHeight);
+      const boundedIndex = Math.min(Math.max(rawIndex, 0), maxIndex);
+      const selectedLetter = letters[boundedIndex];
+
+      setActiveLetter((currentLetter) => {
+        if (currentLetter === selectedLetter) {
+          return currentLetter;
+        }
+
+        onLetterChange(selectedLetter);
+        return selectedLetter;
+      });
+    },
+    [containerHeight, letters, maxIndex, onLetterChange],
+  );
 
   const panResponder = useMemo(
     () =>
       PanResponder.create({
-        onStartShouldSetPanResponder: () => true,
         onMoveShouldSetPanResponder: () => true,
         onPanResponderGrant: (event: GestureResponderEvent) =>
           updateLetterByPosition(event.nativeEvent.locationY),
@@ -53,8 +55,9 @@ export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerPr
           updateLetterByPosition(event.nativeEvent.locationY),
         onPanResponderRelease: () => setActiveLetter(null),
         onPanResponderTerminate: () => setActiveLetter(null),
+        onStartShouldSetPanResponder: () => true,
       }),
-    [containerHeight, letters],
+    [updateLetterByPosition],
   );
 
   const handleContainerLayout = (event: LayoutChangeEvent) => {
@@ -68,7 +71,7 @@ export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerPr
   return (
     <View style={styles.wrapper}>
       {activeLetter ? (
-        <View style={[styles.bubble, { backgroundColor: colors.textPrimary }]}> 
+        <View style={[styles.bubble, { backgroundColor: colors.textPrimary }]}>
           <Text style={[styles.bubbleText, { color: colors.textOnPrimary }]}>{activeLetter}</Text>
         </View>
       ) : null}
@@ -95,20 +98,18 @@ export function AlphabetScroller({ letters, onLetterChange }: AlphabetScrollerPr
 }
 
 const styles = StyleSheet.create({
-  wrapper: {
-    position: "absolute",
-    right: 4,
-    top: 110,
-    bottom: 32,
-    justifyContent: "center",
+  bubble: {
     alignItems: "center",
-    zIndex: 20,
+    borderRadius: MOBILE_LAYOUT.alphabetScroller.bubble / 2,
+    height: MOBILE_LAYOUT.alphabetScroller.bubble,
+    justifyContent: "center",
+    position: "absolute",
+    right: 34,
+    width: MOBILE_LAYOUT.alphabetScroller.bubble,
   },
-  lettersContainer: {
-    borderRadius: 12,
-    paddingHorizontal: 4,
-    paddingVertical: 8,
-    gap: 1,
+  bubbleText: {
+    fontSize: 20,
+    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
   },
   letter: {
     fontSize: 10,
@@ -117,17 +118,19 @@ const styles = StyleSheet.create({
     width: 14,
   },
   letterActive: {},
-  bubble: {
-    position: "absolute",
-    right: 34,
-    width: MOBILE_LAYOUT.alphabetScroller.bubble,
-    height: MOBILE_LAYOUT.alphabetScroller.bubble,
-    borderRadius: MOBILE_LAYOUT.alphabetScroller.bubble / 2,
-    justifyContent: "center",
-    alignItems: "center",
+  lettersContainer: {
+    borderRadius: 12,
+    gap: 1,
+    paddingHorizontal: 4,
+    paddingVertical: 8,
   },
-  bubbleText: {
-    fontSize: 20,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
+  wrapper: {
+    alignItems: "center",
+    bottom: 32,
+    justifyContent: "center",
+    position: "absolute",
+    right: 4,
+    top: 110,
+    zIndex: 20,
   },
 });

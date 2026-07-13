@@ -1,38 +1,24 @@
-/**
- * Browser-side API client.
- *
- * Always call same-origin `/api/*` routes — never `API_URL` directly.
- * Route handlers inject the Supabase Bearer token before proxying to Fastify.
- */
-
-import { ApiError } from "@/lib/api/ApiError";
-import {
-  applyTransportErrorPolicy,
-  applyTransportResponsePolicy,
-} from "@/lib/api/applyTransportErrorPolicy";
+import { applyTransportErrorPolicy } from "@/lib/api/applyTransportErrorPolicy";
 import {
   handleUnauthorizedSession,
   isUnauthorizedResponseStatus,
 } from "@/lib/auth/handleUnauthorizedSession";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
-export { ApiError } from "./ApiError";
-export { applyTransportErrorPolicy, applyTransportResponsePolicy } from "./applyTransportErrorPolicy";
+export { ApiError } from "@bondery/helpers/api";
+export {
+  applyTransportErrorPolicy,
+  applyTransportResponsePolicy,
+} from "./applyTransportErrorPolicy";
 
-export async function clientApiFetch(
-  path: string,
-  init?: RequestInit,
-): Promise<Response> {
+export async function clientApiFetch(path: string, init?: RequestInit): Promise<Response> {
   return fetch(path, {
     ...init,
     credentials: init?.credentials ?? "include",
   });
 }
 
-export async function clientApiJson<T>(
-  path: string,
-  init?: RequestInit,
-): Promise<T> {
+export async function clientApiJson<T>(path: string, init?: RequestInit): Promise<T> {
   try {
     const response = await clientApiFetch(path, init);
     return await parseApiJsonResponse<T>(response);
@@ -45,10 +31,7 @@ export async function clientApiJson<T>(
 }
 
 /** Returns null on network failure or non-2xx — for prefetch / graceful degradation. */
-export async function clientApiJsonOrNull<T>(
-  path: string,
-  init?: RequestInit,
-): Promise<T | null> {
+export async function clientApiJsonOrNull<T>(path: string, init?: RequestInit): Promise<T | null> {
   try {
     const response = await clientApiFetch(path, init);
     if (isUnauthorizedResponseStatus(response.status)) {

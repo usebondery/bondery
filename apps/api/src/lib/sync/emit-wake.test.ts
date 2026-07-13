@@ -7,9 +7,9 @@ describe("syncWakeEventFromChanges", () => {
     const event = syncWakeEventFromChanges(
       12,
       [
-        { table: "people", operation: "update", entityId: "a", value: {} },
-        { table: "people_tags", operation: "insert", entityId: "b", value: {} },
-        { table: "people", operation: "update", entityId: "c", value: {} },
+        { entityId: "a", operation: "update", table: "people", value: {} },
+        { entityId: "b", operation: "insert", table: "people_tags", value: {} },
+        { entityId: "c", operation: "update", table: "people", value: {} },
       ],
       { sourceDeviceId: "device-1" },
     );
@@ -21,7 +21,7 @@ describe("syncWakeEventFromChanges", () => {
 
   it("omits sourceDeviceId when not provided", () => {
     const event = syncWakeEventFromChanges(3, [
-      { table: "tags", operation: "delete", entityId: "x", value: null },
+      { entityId: "x", operation: "delete", table: "tags", value: null },
     ]);
 
     assert.equal(event.sourceDeviceId, undefined);

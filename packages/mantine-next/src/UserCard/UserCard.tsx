@@ -2,10 +2,10 @@ import { Avatar, Group, Stack, Text } from "@mantine/core";
 import type { ReactNode } from "react";
 
 export interface UserCardProps {
-  name: string;
-  subtitle?: string;
   avatarUrl?: string | null;
+  name: string;
   rightSection?: ReactNode;
+  subtitle?: string;
 }
 
 /**
@@ -13,11 +13,11 @@ export interface UserCardProps {
  */
 export function UserCard({ name, subtitle, avatarUrl, rightSection }: UserCardProps) {
   return (
-    <Group justify="space-between" wrap="nowrap" align="center">
-      <Group wrap="nowrap" gap="md" align="center">
-        <Avatar src={avatarUrl ?? undefined} radius="xl" size="md" name={name} />
+    <Group align="center" justify="space-between" wrap="nowrap">
+      <Group align="center" gap="md" wrap="nowrap">
+        <Avatar name={name} radius="xl" size="md" src={avatarUrl ?? undefined} />
         <Stack gap={0}>
-          <Text size="sm" fw={500} truncate>
+          <Text fw={500} size="sm" truncate>
             {name}
           </Text>
           {subtitle ? (

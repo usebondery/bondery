@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
+import { useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { TabRootLargeTitle, TabRootScreenHeader } from "../../../components/chrome";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { useContactsSelectionMode } from "../contactsSelectionStore";
 import { ContactsSelectionHeader } from "./ContactsSelectionHeader";
 
@@ -9,19 +9,19 @@ interface ContactsScreenHeaderProps {
 }
 
 export function ContactsScreenHeader({ accessory }: ContactsScreenHeaderProps) {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
   const selectionMode = useContactsSelectionMode();
 
   return (
     <TabRootScreenHeader
+      accessory={accessory}
       titleRow={
         selectionMode ? (
           <ContactsSelectionHeader />
         ) : (
-          <TabRootLargeTitle>{t("MobileApp.Contacts.Title")}</TabRootLargeTitle>
+          <TabRootLargeTitle>{tMobileContacts("Title")}</TabRootLargeTitle>
         )
       }
-      accessory={accessory}
     />
   );
 }

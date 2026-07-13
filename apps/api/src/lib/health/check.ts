@@ -1,9 +1,3 @@
-import type {
-  HealthCheckConfig,
-  HealthReport,
-  HealthServices,
-  HealthStatus,
-} from "./types.js";
 import {
   probeConfigured,
   probeRedis,
@@ -11,6 +5,7 @@ import {
   probeSupabaseDatabase,
   probeSupabaseStorage,
 } from "./probes.js";
+import type { HealthCheckConfig, HealthReport, HealthServices, HealthStatus } from "./types.js";
 
 const CACHE_TTL_MS = 60_000;
 
@@ -52,12 +47,7 @@ function deriveOverallStatus(services: HealthServices): HealthStatus {
   }
 
   const optionalLive = [services.redis];
-  const optionalConfigured = [
-    services.anthropic,
-    services.polar,
-    services.mapy,
-    services.posthog,
-  ];
+  const optionalConfigured = [services.anthropic, services.polar, services.mapy, services.posthog];
 
   if (
     optionalLive.some((service) => service.configured !== false && !service.ok) ||
@@ -78,19 +68,17 @@ async function runProbes(config: HealthCheckConfig): Promise<HealthServices> {
   ]);
 
   return {
-    supabase: { auth, database, storage },
+    anthropic: probeConfigured(Boolean(config.anthropicApiKey.trim())),
+    mapy: probeConfigured(Boolean(config.mapsApiKey.trim())),
+    polar: probeConfigured(isPolarConfigured(config)),
+    posthog: probeConfigured(isPosthogConfigured(config)),
     redis,
     smtp: probeConfigured(isSmtpConfigured(config), { required: true }),
-    anthropic: probeConfigured(Boolean(config.anthropicApiKey.trim())),
-    polar: probeConfigured(isPolarConfigured(config)),
-    mapy: probeConfigured(Boolean(config.mapsApiKey.trim())),
-    posthog: probeConfigured(isPosthogConfigured(config)),
+    supabase: { auth, database, storage },
   };
 }
 
-export async function getHealthReport(
-  config: HealthCheckConfig,
-): Promise<HealthReport> {
+export async function getHealthReport(config: HealthCheckConfig): Promise<HealthReport> {
   const now = Date.now();
 
   if (cachedReport && now < cacheExpiresAt) {
@@ -105,11 +93,11 @@ export async function getHealthReport(
   cacheExpiresAt = now + CACHE_TTL_MS;
 
   const report: HealthReport = {
-    status: deriveOverallStatus(services),
-    timestamp,
     cached: false,
     cacheExpiresAt: new Date(cacheExpiresAt).toISOString(),
     services,
+    status: deriveOverallStatus(services),
+    timestamp,
   };
 
   cachedReport = report;

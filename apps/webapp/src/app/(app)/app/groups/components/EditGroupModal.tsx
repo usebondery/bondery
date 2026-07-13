@@ -1,20 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Stack,
-  TextInput,
-  Group,
-  ColorInput,
-  DEFAULT_THEME,
-  Box,
-} from "@mantine/core";
-import { useForm, schemaResolver } from "@mantine/form";
-import { updateGroupSchema } from "@bondery/schemas";
-import { modals } from "@mantine/modals";
-import { notifications } from "@mantine/notifications";
-import { IconUsersGroup, IconCheck } from "@tabler/icons-react";
-import { useWebTranslations as useTranslations } from "@/lib/i18n/useWebTranslations";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   EmojiPicker,
   errorNotificationTemplate,
@@ -23,9 +9,17 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { DEBOUNCE_MS } from "@/lib/config";
+import { updateGroupSchema } from "@bondery/schemas";
+import { Box, ColorInput, DEFAULT_THEME, Group, Stack, TextInput } from "@mantine/core";
+import { schemaResolver, useForm } from "@mantine/form";
+import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
+import { IconCheck, IconUsersGroup } from "@tabler/icons-react";
+import { useState } from "react";
+import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { createModalId, useModalDismiss } from "@/lib/modals";
+import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useUpdateGroupMutation } from "@/lib/query/hooks/useGroups";
-import { createModalId, useModalBlocking } from "@/lib/modals";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -45,25 +39,25 @@ const COLOR_SWATCHES = [
 
 interface EditGroupModalProps {
   groupId: string;
-  initialLabel: string;
-  initialEmoji: string;
   initialColor: string;
+  initialEmoji: string;
+  initialLabel: string;
 }
 
 function EditGroupModalTitle() {
-  const t = useTranslations("GroupsPage");
-  return <ModalTitle text={t("EditGroupModal.Title")} icon={<IconUsersGroup size={24} />} />;
+  const t = useGroupsPageTranslations();
+  return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("EditGroupModal.Title")} />;
 }
 
 export function openEditGroupModal(props: EditGroupModalProps) {
   const modalId = createModalId("edit-group");
 
   modals.open({
+    children: <EditGroupForm {...props} modalId={modalId} />,
     modalId,
+    size: "md",
     title: <EditGroupModalTitle />,
     trapFocus: true,
-    size: "md",
-    children: <EditGroupForm {...props} modalId={modalId} />,
   });
 }
 
@@ -74,19 +68,20 @@ function EditGroupForm({
   initialColor,
   modalId,
 }: EditGroupModalProps & { modalId: string }) {
-  const t = useTranslations("GroupsPage");
+  const tCommon = useCommonTranslations();
+  const t = useGroupsPageTranslations();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const updateGroupMutation = useUpdateGroupMutation(groupId);
-
-  useModalBlocking(modalId, isSubmitting);
+  const isBlocking = isSubmitting;
+  const { closeModal } = useModalDismiss(modalId, isBlocking);
 
   const form = useForm({
-    mode: "controlled",
     initialValues: {
-      label: initialLabel,
-      emoji: initialEmoji,
       color: initialColor,
+      emoji: initialEmoji,
+      label: initialLabel,
     },
+    mode: "controlled",
     validate: schemaResolver(updateGroupSchema, { sync: true }),
   });
 
@@ -95,35 +90,35 @@ function EditGroupForm({
 
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
-        title: t("EditGroupModal.LoadingTitle"),
         description: t("EditGroupModal.LoadingDescription"),
+        title: t("EditGroupModal.LoadingTitle"),
       }),
     });
 
     try {
       await updateGroupMutation.mutateAsync({
-        label: values.label.trim(),
-        emoji: values.emoji.trim(),
         color: values.color.trim(),
+        emoji: values.emoji.trim(),
+        label: values.label.trim(),
       });
 
       notifications.hide(loadingNotification);
 
       notifications.show(
         successNotificationTemplate({
-          title: t("EditGroupModal.SuccessTitle"),
           description: t("EditGroupModal.SuccessDescription"),
+          title: t("EditGroupModal.SuccessTitle"),
         }),
       );
 
-      modals.close(modalId);
+      closeModal();
     } catch (error) {
       notifications.hide(loadingNotification);
 
       notifications.show(
         errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
           title: t("EditGroupModal.ErrorTitle"),
-          description: error instanceof Error ? error.message : t("EditGroupModal.UpdateFailed"),
         }),
       );
     } finally {
@@ -137,44 +132,47 @@ function EditGroupForm({
         <Group align="flex-start" gap="md">
           <Box style={{ width: 80 }}>
             <EmojiPicker
-              value={form.values.emoji}
-              onChange={(emoji) => form.setFieldValue("emoji", emoji)}
+              disabled={isBlocking}
               error={form.errors.emoji as string | undefined}
+              onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
+              value={form.values.emoji}
             />
           </Box>
           <Box style={{ flex: 1 }}>
             <TextInput
+              data-autofocus
+              disabled={isBlocking}
               label={t("EditGroupModal.LabelInput")}
               placeholder={t("EditGroupModal.LabelPlaceholder")}
-              withAsterisk
               required
-              data-autofocus
+              withAsterisk
               {...form.getInputProps("label")}
             />
           </Box>
         </Group>
 
         <ColorInput
+          closeOnColorSwatchClick
+          disabled={isBlocking}
+          format="hex"
           label={t("EditGroupModal.ColorInput")}
           placeholder={t("EditGroupModal.ColorPlaceholder")}
-          withAsterisk
-          format="hex"
           swatches={COLOR_SWATCHES}
           swatchesPerRow={9}
-          closeOnColorSwatchClick
+          withAsterisk
           {...form.getInputProps("color")}
         />
 
         <ModalFooter
-          cancelLabel={t("EditGroupModal.Cancel")}
-          onCancel={() => modals.close(modalId)}
-          cancelDisabled={isSubmitting}
-          actionLabel={t("EditGroupModal.SaveChanges")}
-          actionType="submit"
-          actionLoading={isSubmitting}
           actionDisabled={isSubmitting}
+          actionLabel={t("EditGroupModal.SaveChanges")}
           actionLeftSection={<IconCheck size={16} />}
+          actionLoading={isSubmitting}
+          actionType="submit"
+          cancelDisabled={isSubmitting}
+          cancelLabel={t("EditGroupModal.Cancel")}
+          onCancel={closeModal}
         />
       </Stack>
     </form>

@@ -1,18 +1,19 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 /** Static placeholder chip matching {@link CreateGroupChip} styling — not tappable. */
 export function EmptyGroupsChip() {
-  const t = useMobileTranslations();
+  const tMobileContacts = useMobileContactsTranslations();
+  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const label = t("MobileApp.Contacts.NoGroupsYet");
+  const label = tMobileContacts("NoGroupsYet");
 
   return (
     <View
-      accessibilityRole="text"
       accessibilityLabel={label}
+      accessibilityRole="text"
       style={[
         styles.chip,
         {
@@ -28,14 +29,14 @@ export function EmptyGroupsChip() {
 
 const styles = StyleSheet.create({
   chip: {
-    flexDirection: "row",
     alignItems: "center",
+    borderRadius: 20,
+    borderStyle: "dashed",
+    borderWidth: 1,
+    flexDirection: "row",
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderStyle: "dashed",
   },
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.body,

@@ -1,22 +1,25 @@
-import { EXAMPLE_CONTACT_ID } from "#contact-id.js";
-import { EXAMPLE_MERGE_RECOMMENDATION, EXAMPLE_PAGINATION } from "#openapi/fixtures/index.js";
-import { createInteractionInputSchema, interactionParticipantSchema } from "#entities/activity.js";
-import { contactPreviewSchema, deleteContactsRequestSchema } from "#entities/contact.js";
+import { EXAMPLE_CONTACT_ID } from "#contact-id/index.js";
+import {
+  createInteractionInputSchema,
+  interactionParticipantSchema,
+} from "#entities/activity/index.js";
+import { contactPreviewSchema, deleteContactsRequestSchema } from "#entities/contact/index.js";
 import {
   createGroupSchema,
   deleteGroupsRequestSchema,
   updateGroupSchema,
-} from "#entities/group.js";
-import { importantDateSheetSchema } from "#entities/important-date.js";
-import { instagramImportCommitRequestSchema } from "#entities/import.js";
+} from "#entities/group/index.js";
+import { instagramImportCommitRequestSchema } from "#entities/import/index.js";
+import { importantDateSheetSchema } from "#entities/important-date/index.js";
 import {
   mergeContactsRequestSchema,
   mergeRecommendationSchema,
   mergeRecommendationsResponseSchema,
-} from "#entities/merge.js";
-import { subscriptionStatusSchema } from "#entities/subscription.js";
-import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "#entities/tag.js";
+} from "#entities/merge/index.js";
+import { subscriptionStatusSchema } from "#entities/subscription/index.js";
+import { createTagSchema, deleteTagsRequestSchema, updateTagSchema } from "#entities/tag/index.js";
 import { paginationQuerySchema } from "#http/index.js";
+import { EXAMPLE_MERGE_RECOMMENDATION, EXAMPLE_PAGINATION } from "#openapi/fixtures/index.js";
 
 function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
@@ -33,20 +36,20 @@ function assertEqual<T>(actual: T, expected: T, message: string) {
 function run() {
   // contactPreviewSchema shape contract
   const preview = contactPreviewSchema.parse({
-    id: "contact-1",
-    firstName: "Ada",
-    lastName: "Lovelace",
     avatar: null,
+    firstName: "Ada",
+    id: "contact-1",
     ignored: "value",
+    lastName: "Lovelace",
   });
   assertEqual(Object.keys(preview).length, 4, "contactPreviewSchema should expose only 4 fields");
   assert("id" in preview && "firstName" in preview, "contactPreviewSchema should keep core fields");
 
   // group/tag create/update contracts
   const groupCreate = createGroupSchema.parse({
-    label: "Friends",
-    emoji: "👋",
     color: "#ABCDEF",
+    emoji: "👋",
+    label: "Friends",
   });
   assertEqual(groupCreate.color, "#abcdef", "createGroupSchema should normalize hex color");
   const groupUpdate = updateGroupSchema.parse({
@@ -55,8 +58,8 @@ function run() {
   assert(groupUpdate.label === "Inner Circle", "updateGroupSchema should allow partial payloads");
 
   const tagCreate = createTagSchema.parse({
-    label: "VIP",
     color: "00FF00",
+    label: "VIP",
   });
   assertEqual(tagCreate.color, "#00ff00", "createTagSchema should normalize hex color");
   const tagUpdate = updateTagSchema.parse({
@@ -66,10 +69,10 @@ function run() {
 
   // important-date sheet transform contract
   const sheetNone = importantDateSheetSchema.parse({
-    type: "birthday",
     date: "2025-01-01",
     note: "   ",
     notifyDaysBefore: "none",
+    type: "birthday",
   });
   assertEqual(sheetNone.note, null, "importantDateSheetSchema should normalize blank note to null");
   assertEqual(
@@ -79,10 +82,10 @@ function run() {
   );
 
   const sheetThree = importantDateSheetSchema.parse({
-    type: "anniversary",
     date: "2024-12-12",
     note: "Dinner",
     notifyDaysBefore: "3",
+    type: "anniversary",
   });
   assertEqual(
     sheetThree.notifyDaysBefore,
@@ -113,11 +116,11 @@ function run() {
 
   // interaction + participant contract
   const interactionCreate = createInteractionInputSchema.parse({
+    date: "2026-01-01T12:00:00.000Z",
+    description: "Quick catch-up",
+    participantIds: ["p-1"],
     title: "Coffee",
     type: "Coffee",
-    description: "Quick catch-up",
-    date: "2026-01-01T12:00:00.000Z",
-    participantIds: ["p-1"],
   });
   assertEqual(
     interactionCreate.participantIds.length,
@@ -126,36 +129,36 @@ function run() {
   );
 
   const participant = interactionParticipantSchema.parse({
-    id: "p-1",
-    firstName: "Ada",
-    lastName: "Lovelace",
     avatar: null,
+    firstName: "Ada",
+    id: "p-1",
+    lastName: "Lovelace",
   });
   assertEqual(participant.firstName, "Ada", "interactionParticipantSchema should use camelCase");
 
   // subscription dto contract
   const subscriptionStatus = subscriptionStatusSchema.parse({
-    plan: "premium",
-    aiMessagesUsed: 2,
     aiMessageLimit: 100,
+    aiMessagesUsed: 2,
     aiMonthlyResetAt: null,
-    canUseChat: true,
-    currentPeriodEnd: null,
-    cancelAtPeriodEnd: false,
-    polarStatus: "active",
-    trialEndsAt: null,
     amount: 20,
+    cancelAtPeriodEnd: false,
+    canUseChat: true,
     currency: "USD",
+    currentPeriodEnd: null,
+    plan: "premium",
+    polarStatus: "active",
     productName: "Premium",
     recurringInterval: "month",
+    trialEndsAt: null,
   });
   assertEqual(subscriptionStatus.plan, "premium", "subscriptionStatusSchema should parse dto");
 
   // merge contracts
   const mergeRequest = mergeContactsRequestSchema.parse({
+    conflictResolutions: { firstName: "left", linkedin: "right" },
     leftPersonId: "left",
     rightPersonId: "right",
-    conflictResolutions: { firstName: "left", linkedin: "right" },
   });
   assertEqual(
     mergeRequest.conflictResolutions?.firstName,
@@ -167,8 +170,8 @@ function run() {
   assertEqual(mergeRecommendation.reasons[0], "fullName", "mergeRecommendationSchema should parse");
 
   const mergeResponse = mergeRecommendationsResponseSchema.parse({
-    recommendations: [mergeRecommendation],
     pagination: EXAMPLE_PAGINATION,
+    recommendations: [mergeRecommendation],
   });
   assertEqual(
     mergeResponse.recommendations.length,
@@ -180,19 +183,19 @@ function run() {
   const importCommit = instagramImportCommitRequestSchema.parse({
     contacts: [
       {
-        tempId: "tmp-1",
-        firstName: "Ada",
-        middleName: null,
-        lastName: "Lovelace",
-        instagramUrl: "https://instagram.com/ada",
-        instagramUsername: "ada",
         alreadyExists: false,
-        likelyPerson: true,
         connectedAt: null,
         connectedOnRaw: null,
-        sources: ["following"],
-        isValid: true,
+        firstName: "Ada",
+        instagramUrl: "https://instagram.com/ada",
+        instagramUsername: "ada",
         issues: [],
+        isValid: true,
+        lastName: "Lovelace",
+        likelyPerson: true,
+        middleName: null,
+        sources: ["following"],
+        tempId: "tmp-1",
       },
     ],
   });

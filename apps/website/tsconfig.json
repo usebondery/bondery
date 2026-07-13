@@ -1,33 +1,13 @@
 {
   "compilerOptions": {
-    "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
-    "allowJs": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "noEmit": true,
-    "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "jsx": "react-jsx",
-    "incremental": true,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+      "@/*": ["./src/*"]
+    },
+    "target": "ES2017",
+    "tsBuildInfoFile": "./.cache/tsconfig.tsbuildinfo"
   },
+  "exclude": ["node_modules"],
+  "extends": "@bondery/typescript-config/nextjs.json",
   "include": [
     "next-env.d.ts",
     "mdx.d.ts",
@@ -35,9 +15,7 @@
     "**/*.tsx",
     "**/*.mdx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
+    ".next/dev/types/**/*.ts",
+    "../../packages/translations/src/generated/i18next-cli/i18next.d.ts"
   ]
 }

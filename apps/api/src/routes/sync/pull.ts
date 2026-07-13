@@ -1,13 +1,12 @@
-import type { FastifyReply } from "fastify";
-import type { AppRoutePlugin } from "../../lib/fastify-types.js";
-import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { syncPullQuerySchema } from "@bondery/schemas/http";
 import type { SyncBatch, SyncChange, SyncPullResponse } from "@bondery/schemas/sync";
 import { syncPullResponseSchema } from "@bondery/schemas/sync";
-import { getAuth } from "../../lib/auth.js";
-import { applyOpenApiRouteMeta } from "../../lib/openapi-route-meta.js";
-import { withOkResponse } from "../../lib/openapi-route-responses.js";
-import { createAdminClient } from "../../lib/supabase.js";
+import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { createAdminClient } from "../../lib/data/supabase.js";
+import { getAuth } from "../../lib/platform/auth/strategies.js";
+import { badRequest } from "../../lib/platform/errors/http-errors.js";
+import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
+import { withOkResponse } from "../../lib/platform/openapi/responses.js";
 import { getLastServerSequence } from "../../lib/sync/idempotency.js";
 import { logSyncPull } from "../../lib/sync/metrics.js";
 import { validateSyncProtocolHeaders } from "../../lib/sync/protocol.js";
@@ -33,7 +32,7 @@ function groupRowsIntoBatches(rows: ChangeLogRow[]): SyncBatch[] {
   for (const row of rows) {
     let batch = batchMap.get(row.server_sequence);
     if (!batch) {
-      batch = { serverSequence: row.server_sequence, changes: [] };
+      batch = { changes: [], serverSequence: row.server_sequence };
       batchMap.set(row.server_sequence, batch);
     }
 
@@ -42,9 +41,9 @@ function groupRowsIntoBatches(rows: ChangeLogRow[]): SyncBatch[] {
     }
 
     const change: SyncChange = {
-      table: row.table_name,
-      operation: row.operation,
       entityId: row.entity_id,
+      operation: row.operation,
+      table: row.table_name,
       value: row.row_data,
     };
     batch.changes.push(change);
@@ -101,9 +100,7 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
     if (routeOptions.schema) {
       routeOptions.schema.tags = ["Sync"];
     }
-    applyOpenApiRouteMeta(routeOptions, { area: "session" });
   });
-  fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 
   fastify.get(
     "/pull",
@@ -115,65 +112,57 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
-    if (!validateSyncProtocolHeaders(request, reply)) {
-      return;
-    }
-
-    const { since, limit: limitParam, waitMs: waitMsParam } = request.query;
-    const limit = Math.min(
-      MAX_LIMIT,
-      Math.max(1, limitParam ?? DEFAULT_LIMIT),
-    );
-    const waitMs = Math.min(
-      MAX_WAIT_MS,
-      Math.max(0, waitMsParam ?? 0),
-    );
-
-    if (!Number.isFinite(since) || since < 0) {
-      return reply.status(400).send({ error: "since must be a non-negative integer" });
-    }
-
-    const { user } = getAuth(request);
-    const admin = createAdminClient();
-    const head = await getLastServerSequence(admin, user.id);
-
-    if (since > head) {
-      const response: SyncPullResponse = {
-        batches: [],
-        nextServerSequence: head,
-        requiresBootstrap: true,
-      };
-      return response;
-    }
-
-    const deadline = Date.now() + waitMs;
-    let rows: ChangeLogRow[] = [];
-
-    while (true) {
-      rows = await fetchChangeRows(admin, user.id, since, limit);
-      if (rows.length > 0 || waitMs === 0 || Date.now() >= deadline) {
-        break;
+      if (!validateSyncProtocolHeaders(request, reply)) {
+        return;
       }
-      await sleep(POLL_INTERVAL_MS);
-    }
 
-    const batches = groupRowsIntoBatches(rows);
-    const nextServerSequence =
-      batches.length > 0 ?
-        batches[batches.length - 1]!.serverSequence
-      : since;
+      const { since, limit: limitParam, waitMs: waitMsParam } = request.query;
+      const limit = Math.min(MAX_LIMIT, Math.max(1, limitParam ?? DEFAULT_LIMIT));
+      const waitMs = Math.min(MAX_WAIT_MS, Math.max(0, waitMsParam ?? 0));
 
-    logSyncPull(request.log, {
-      userId: user.id,
-      since,
-      batchCount: batches.length,
-      nextServerSequence,
-    });
+      if (!Number.isFinite(since) || since < 0) {
+        throw badRequest("since must be a non-negative integer", "bad_request");
+      }
 
-    return {
-      batches,
-      nextServerSequence,
-    } satisfies SyncPullResponse;
+      const { user } = getAuth(request);
+      const admin = createAdminClient();
+      const head = await getLastServerSequence(admin, user.id);
+
+      if (since > head) {
+        const response: SyncPullResponse = {
+          batches: [],
+          nextServerSequence: head,
+          requiresBootstrap: true,
+        };
+        return response;
+      }
+
+      const deadline = Date.now() + waitMs;
+      let rows: ChangeLogRow[] = [];
+
+      while (true) {
+        rows = await fetchChangeRows(admin, user.id, since, limit);
+        if (rows.length > 0 || waitMs === 0 || Date.now() >= deadline) {
+          break;
+        }
+        await sleep(POLL_INTERVAL_MS);
+      }
+
+      const batches = groupRowsIntoBatches(rows);
+      const lastBatch = batches.at(-1);
+      const nextServerSequence = lastBatch?.serverSequence ?? since;
+
+      logSyncPull(request.log, {
+        batchCount: batches.length,
+        nextServerSequence,
+        since,
+        userId: user.id,
+      });
+
+      return {
+        batches,
+        nextServerSequence,
+      } satisfies SyncPullResponse;
     },
   );
 };

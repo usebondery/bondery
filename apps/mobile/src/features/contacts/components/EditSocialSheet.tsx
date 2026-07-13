@@ -1,43 +1,50 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text, View, type TextInput } from "react-native";
-import { IconCheck, IconTrash } from "@tabler/icons-react-native";
-import {
-  extractUsername,
-  type ContactSocialFieldKey,
-} from "@bondery/helpers";
-import { socialHandleInputSchema } from "@bondery/schemas";
+import { type ContactSocialFieldKey, extractUsername } from "@bondery/helpers";
 import { normalizedSocialHandleSchema } from "@bondery/helpers/forms";
-import { ActionSheetPopup, type ActionSheetPopupAction } from "../../../components/ActionSheetPopup";
+import { socialHandleInputSchema } from "@bondery/schemas";
+import { IconCheck, IconTrash } from "@tabler/icons-react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Pressable, StyleSheet, type TextInput, View } from "react-native";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import {
+  ActionSheetPopup,
+  type ActionSheetPopupAction,
+} from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
   CONTACT_SOCIAL_PLATFORMS,
-  getContactSocialPlatform,
   type ContactSocialPlatformConfig,
+  getContactSocialPlatform,
 } from "./contactSocialConfig";
 
 type SheetMode = "add" | "edit";
 
 interface EditSocialSheetProps {
-  open: boolean;
-  mode: SheetMode;
-  platform: ContactSocialFieldKey | null;
-  initialValue: string;
   availablePlatforms: ContactSocialFieldKey[];
+  initialValue: string;
   isSubmitting: boolean;
-  onOpenChange: (open: boolean) => void;
+  mode: SheetMode;
   onCancel: () => void;
+  onOpenChange: (open: boolean) => void;
   onSave: (platform: ContactSocialFieldKey, value: string) => void;
+  open: boolean;
+  platform: ContactSocialFieldKey | null;
 }
 
 function getDisplayValue(platform: ContactSocialFieldKey, value: string): string {
-  if (!value) return "";
+  if (!value) {
+    return "";
+  }
 
-  if (platform === "linkedin" || platform === "instagram" || platform === "facebook" || platform === "whatsapp") {
+  if (
+    platform === "linkedin" ||
+    platform === "instagram" ||
+    platform === "facebook" ||
+    platform === "whatsapp"
+  ) {
     return extractUsername(platform, value);
   }
 
@@ -58,7 +65,7 @@ export function EditSocialSheet({
   onCancel,
   onSave,
 }: EditSocialSheetProps) {
-  const t = useMobileTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const inputRef = useRef<TextInput>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<ContactSocialFieldKey | null>(platform);
@@ -69,19 +76,21 @@ export function EditSocialSheet({
     reset,
     formState: { isDirty, isValid },
   } = useSheetForm({
-    open,
-    schema: socialHandleInputSchema.pick({ value: true }),
     getDefaultValues: () => ({
       value: platform ? getDisplayValue(platform, initialValue) : "",
     }),
     mode: "onChange",
+    open,
+    schema: socialHandleInputSchema.pick({ value: true }),
   });
 
   const activePlatform = selectedPlatform ?? platform;
   const platformConfig = activePlatform ? getContactSocialPlatform(activePlatform) : null;
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
 
     if (mode === "add") {
       const nextPlatform = platform ?? availablePlatforms[0] ?? null;
@@ -96,7 +105,9 @@ export function EditSocialSheet({
   }, [open, platform, initialValue, mode, availablePlatforms, reset]);
 
   useEffect(() => {
-    if (!open || !activePlatform) return;
+    if (!open || !activePlatform) {
+      return;
+    }
 
     const timer = setTimeout(() => {
       inputRef.current?.focus();
@@ -113,8 +124,7 @@ export function EditSocialSheet({
     return CONTACT_SOCIAL_PLATFORMS.filter((item) => availablePlatforms.includes(item.key));
   }, [availablePlatforms, mode, platform]);
 
-  const canSubmit =
-    Boolean(activePlatform) && isValid && (mode === "edit" ? isDirty : true);
+  const canSubmit = Boolean(activePlatform) && isValid && (mode === "edit" ? isDirty : true);
 
   const editTitle = activePlatform
     ? `Edit ${activePlatform.charAt(0).toUpperCase()}${activePlatform.slice(1)}`
@@ -123,17 +133,28 @@ export function EditSocialSheet({
   const sheetTitle = mode === "add" ? "Add social link" : editTitle;
 
   const handleBlur = (currentValue: string) => {
-    if (!activePlatform) return;
+    if (!activePlatform) {
+      return;
+    }
 
-    if (activePlatform === "linkedin" || activePlatform === "instagram" || activePlatform === "facebook") {
+    if (
+      activePlatform === "linkedin" ||
+      activePlatform === "instagram" ||
+      activePlatform === "facebook"
+    ) {
       reset({ value: extractUsername(activePlatform, currentValue) }, { keepDirty: true });
     } else if (activePlatform === "whatsapp") {
-      reset({ value: extractUsername("whatsapp", currentValue) || currentValue }, { keepDirty: true });
+      reset(
+        { value: extractUsername("whatsapp", currentValue) || currentValue },
+        { keepDirty: true },
+      );
     }
   };
 
   const onSubmit = handleSubmit(({ value: submittedValue }) => {
-    if (!activePlatform || !canSubmit) return;
+    if (!activePlatform || !canSubmit) {
+      return;
+    }
 
     const parsed = normalizedSocialHandleSchema.safeParse({
       platform: activePlatform,
@@ -149,16 +170,18 @@ export function EditSocialSheet({
   });
 
   const handleDelete = () => {
-    if (!activePlatform || isSubmitting) return;
+    if (!activePlatform || isSubmitting) {
+      return;
+    }
     onSave(activePlatform, "");
   };
 
   const primaryAction = {
-    label: mode === "add" ? "Add social" : "Save changes",
-    icon: <IconCheck size={16} color={colors.textOnPrimary} />,
-    onPress: () => void onSubmit(),
     disabled: !canSubmit,
+    icon: <IconCheck color={colors.textOnPrimary} size={16} />,
+    label: mode === "add" ? "Add social" : "Save changes",
     loading: isSubmitting,
+    onPress: () => void onSubmit(),
     tone: "primary" as const,
     variant: "filled" as const,
   };
@@ -167,10 +190,10 @@ export function EditSocialSheet({
     mode === "edit"
       ? [
           {
-            label: "Delete social",
-            icon: <IconTrash size={16} color={colors.dangerAccent} />,
-            onPress: handleDelete,
             disabled: isSubmitting,
+            icon: <IconTrash color={colors.dangerAccent} size={16} />,
+            label: "Delete social",
+            onPress: handleDelete,
             tone: "danger",
             variant: "outline",
           },
@@ -180,25 +203,25 @@ export function EditSocialSheet({
 
   return (
     <ActionSheetPopup
+      actions={actions}
+      isBusy={isSubmitting}
+      onClose={onCancel}
+      onOpenChange={onOpenChange}
       open={open}
       title={sheetTitle}
-      actions={actions}
-      onOpenChange={onOpenChange}
-      onClose={onCancel}
-      isBusy={isSubmitting}
     >
       {mode === "add" && pickerPlatforms.length > 0 ? (
         <View style={styles.platformRow}>
           {pickerPlatforms.map((item) => (
             <PlatformChip
-              key={item.key}
               config={item}
-              selected={activePlatform === item.key}
+              key={item.key}
               onPress={() => {
                 setSelectedPlatform(item.key);
                 reset({ value: "" });
                 setError(null);
               }}
+              selected={activePlatform === item.key}
             />
           ))}
         </View>
@@ -210,28 +233,28 @@ export function EditSocialSheet({
             {platformConfig.renderIcon(platformConfig.color)}
           </View>
           <SheetTextField
-            control={control}
-            name="value"
-            inputRef={inputRef}
-            containerStyle={styles.inputField}
-            onFieldChange={() => {
-              if (error) setError(null);
-            }}
-            onFieldBlur={handleBlur}
-            placeholder={t(platformConfig.placeholderKey)}
-            autoFocus
             autoCapitalize="none"
             autoCorrect={false}
-            keyboardType={
-              activePlatform === "whatsapp" || activePlatform === "signal"
-                ? "phone-pad"
-                : "default"
-            }
+            autoFocus
+            containerStyle={styles.inputField}
+            control={control}
             editable={!isSubmitting}
-            externalErrorMessage={error ?? undefined}
-            returnKeyType="done"
             enterKeyHint="done"
+            externalErrorMessage={error ?? undefined}
+            inputRef={inputRef}
+            keyboardType={
+              activePlatform === "whatsapp" || activePlatform === "signal" ? "phone-pad" : "default"
+            }
+            name="value"
+            onFieldBlur={handleBlur}
+            onFieldChange={() => {
+              if (error) {
+                setError(null);
+              }
+            }}
             onSubmitEditing={() => void onSubmit()}
+            placeholder={t(platformConfig.placeholderKey)}
+            returnKeyType="done"
           />
         </View>
       ) : null}
@@ -258,8 +281,8 @@ function PlatformChip({
       style={[
         styles.chip,
         {
-          borderColor: selected ? config.color : colors.border,
           backgroundColor: selected ? colors.selectionBackground : colors.surface,
+          borderColor: selected ? config.color : colors.border,
         },
       ]}
     >
@@ -269,33 +292,33 @@ function PlatformChip({
 }
 
 const styles = StyleSheet.create({
+  chip: {
+    alignItems: "center",
+    borderRadius: MOBILE_LAYOUT.borderRadius.pill,
+    borderWidth: 1,
+    height: MOBILE_LAYOUT.touchTarget,
+    justifyContent: "center",
+    width: MOBILE_LAYOUT.touchTarget,
+  },
+  inputField: {
+    flex: 1,
+  },
+  inputIcon: {
+    alignItems: "center",
+    borderRadius: MOBILE_LAYOUT.borderRadius.pill,
+    borderWidth: 1,
+    height: MOBILE_LAYOUT.touchTarget,
+    justifyContent: "center",
+    width: MOBILE_LAYOUT.touchTarget,
+  },
+  inputWrap: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+  },
   platformRow: {
     flexDirection: "row",
     flexWrap: "wrap",
     gap: 10,
-  },
-  chip: {
-    width: MOBILE_LAYOUT.touchTarget,
-    height: MOBILE_LAYOUT.touchTarget,
-    borderRadius: MOBILE_LAYOUT.borderRadius.pill,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  inputWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  inputIcon: {
-    width: MOBILE_LAYOUT.touchTarget,
-    height: MOBILE_LAYOUT.touchTarget,
-    borderRadius: MOBILE_LAYOUT.borderRadius.pill,
-    borderWidth: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  inputField: {
-    flex: 1,
   },
 });

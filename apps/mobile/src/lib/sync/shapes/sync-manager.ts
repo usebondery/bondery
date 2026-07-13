@@ -1,10 +1,10 @@
 export {
-  startPullSync,
-  stopPullSync,
-  resumePullSync,
-  pullOnce,
   bootstrapSync,
-  startAllShapeSync,
-  stopAllShapeSync,
+  pullOnce,
   resumeAllShapeSync,
+  resumePullSync,
+  startAllShapeSync,
+  startPullSync,
+  stopAllShapeSync,
+  stopPullSync,
 } from "../pull-manager";

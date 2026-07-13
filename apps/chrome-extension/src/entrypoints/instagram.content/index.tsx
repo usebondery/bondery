@@ -4,17 +4,22 @@
  * Injects the "Add to Bondery" button on Instagram profiles.
  * Also injects the network interceptor script into the MAIN world.
  */
-import { defineContentScript, injectScript, type ContentScriptContext } from "#imports";
-import { browser } from "wxt/browser";
+
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
-import InstagramButton from "../../instagram/InstagramButton";
-import { renderInShadowRoot } from "../../shared/renderInShadowRoot";
-import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
 import type ReactDOM from "react-dom/client";
+import { browser } from "wxt/browser";
+import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
+import { type ContentScriptContext, defineContentScript, injectScript } from "#imports";
+import {
+  INSTAGRAM_NETWORK_MESSAGE_SOURCE,
+  INSTAGRAM_NETWORK_MESSAGE_TYPE,
+  type NetworkMetaPayload,
+} from "../../features/instagram/intercept/networkInterceptor";
+import InstagramButton from "../../features/instagram/ui/InstagramButton";
+import { extLog } from "../../lib/log";
+import { renderInShadowRoot } from "../../lib/ui";
 
 export default defineContentScript({
-  matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
-  runAt: "document_start",
   cssInjectionMode: "ui",
 
   async main(ctx) {
@@ -23,7 +28,7 @@ export default defineContentScript({
       return;
     }
 
-    console.log("Bondery Extension: Initializing Instagram integration");
+    extLog.debug("Bondery Extension: Initializing Instagram integration");
 
     // Inject the network interceptor script into MAIN world immediately
     // This needs to happen at document_start to intercept all network requests
@@ -31,9 +36,9 @@ export default defineContentScript({
       await injectScript("/instagram-interceptor.js", {
         keepInDom: true,
       });
-      console.log("Bondery Extension: Network interceptor injected");
+      extLog.debug("Bondery Extension: Network interceptor injected");
     } catch (error) {
-      console.error("Bondery Extension: Failed to inject network interceptor:", error);
+      extLog.error("Bondery Extension: Failed to inject network interceptor:", error);
     }
 
     // Install network response listener for intercepted data
@@ -75,28 +80,16 @@ export default defineContentScript({
       }
     });
   },
+  matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
+  runAt: "document_start",
 });
 
 // ─── Network Interceptor Communication ───────────────────────────────────────
 
-interface InstagramNetworkProfileMeta {
-  username: string;
-  displayName: string;
-  description: string;
-  category: string;
-  photoUrl: string;
-  addressStreet: string;
-  cityName: string;
-  zip: string;
-}
-
-const INSTAGRAM_NETWORK_MESSAGE_TYPE = "BONDERY_IG_NETWORK_META";
-const INSTAGRAM_NETWORK_MESSAGE_SOURCE = "bondery-instagram-network-interceptor";
-
 let hasInstalledInstagramNetworkResponseListener = false;
-let lastInterceptedProfileMeta: InstagramNetworkProfileMeta | null = null;
+let lastInterceptedProfileMeta: NetworkMetaPayload | null = null;
 
-function getAddressPlace(meta: InstagramNetworkProfileMeta | null): string | undefined {
+function getAddressPlace(meta: NetworkMetaPayload | null): string | undefined {
   if (!meta) {
     return undefined;
   }
@@ -133,23 +126,23 @@ function installInstagramNetworkResponseListener() {
       return;
     }
 
-    const payload = data.payload as Partial<InstagramNetworkProfileMeta> | undefined;
+    const payload = data.payload as Partial<NetworkMetaPayload> | undefined;
     if (!payload?.username) {
       return;
     }
 
     lastInterceptedProfileMeta = {
-      username: payload.username,
-      displayName: payload.displayName || payload.username,
-      description: payload.description || "",
-      category: payload.category || "",
-      photoUrl: payload.photoUrl || "",
       addressStreet: payload.addressStreet || "",
+      category: payload.category || "",
       cityName: payload.cityName || "",
+      description: payload.description || "",
+      displayName: payload.displayName || payload.username,
+      photoUrl: payload.photoUrl || "",
+      username: payload.username,
       zip: payload.zip || "",
     };
 
-    console.log(
+    extLog.debug(
       "[instagram][network-intercept] Parsed profile metadata",
       lastInterceptedProfileMeta,
     );
@@ -160,7 +153,9 @@ function installInstagramNetworkResponseListener() {
 
 function getInstagramSnapshot() {
   const username = getInstagramUsername();
-  if (!username) return null;
+  if (!username) {
+    return null;
+  }
 
   const interceptedMeta =
     lastInterceptedProfileMeta?.username === username ? lastInterceptedProfileMeta : null;
@@ -179,16 +174,16 @@ function getInstagramSnapshot() {
   ) as HTMLImageElement | null;
 
   return {
-    platform: "instagram" as const,
-    handle: username,
     displayName,
     firstName: parsedName.firstName,
-    middleName: parsedName.middleName || undefined,
-    lastName: parsedName.lastName || undefined,
-    profileImageUrl: interceptedMeta?.photoUrl || img?.src || undefined,
+    handle: username,
     headline: interceptedMeta?.category || undefined,
+    lastName: parsedName.lastName || undefined,
     location: getAddressPlace(interceptedMeta),
+    middleName: parsedName.middleName || undefined,
     notes: interceptedMeta?.description || undefined,
+    platform: "instagram" as const,
+    profileImageUrl: interceptedMeta?.photoUrl || img?.src || undefined,
   };
 }
 
@@ -212,7 +207,9 @@ let currentUi: ShadowRootContentScriptUi<ReactDOM.Root> | null = null;
 let isInjecting = false;
 
 async function injectBonderyButton(ctx: ContentScriptContext) {
-  if (isInjecting) return;
+  if (isInjecting) {
+    return;
+  }
 
   const username = getInstagramUsername();
 
@@ -240,13 +237,13 @@ async function injectBonderyButton(ctx: ContentScriptContext) {
   isInjecting = true;
   try {
     currentUi = await renderInShadowRoot(ctx, {
-      name: "bondery-instagram",
-      position: "inline",
       anchor: targetSection,
       append: "last",
-      render: () => <InstagramButton username={username} getSnapshot={getInstagramSnapshot} />,
+      name: "bondery-instagram",
+      position: "inline",
+      render: () => <InstagramButton getSnapshot={getInstagramSnapshot} username={username} />,
     });
-    console.log("Bondery Extension: Button injected successfully");
+    extLog.debug("Bondery Extension: Button injected successfully");
   } finally {
     isInjecting = false;
   }

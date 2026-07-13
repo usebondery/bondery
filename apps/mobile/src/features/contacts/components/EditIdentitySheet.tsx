@@ -1,33 +1,36 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Image, StyleSheet, Text, View, type TextInput } from "react-native";
-import { IconBriefcase, IconCheck, IconTrash } from "@tabler/icons-react-native";
 import type { Contact } from "@bondery/schemas";
-import { ActionSheetPopup, type ActionSheetPopupAction } from "../../../components/ActionSheetPopup";
-import { SheetTextField } from "../../../components/form";
-import { INPUT_MAX_LENGTHS, UI_TIMING_MS } from "../../../lib/config";
-import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { updateContactIdentitySchema } from "@bondery/schemas";
+import { IconBriefcase, IconCheck, IconTrash } from "@tabler/icons-react-native";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Image, StyleSheet, Text, type TextInput, View } from "react-native";
+import {
+  useCommonTranslations,
+  useMobileContactIdentityTranslations,
+} from "@/lib/i18n/generated/hooks";
+import {
+  ActionSheetPopup,
+  type ActionSheetPopupAction,
+} from "../../../components/ActionSheetPopup";
+import { SheetTextField } from "../../../components/form";
 import { fetchSettings } from "../../../lib/api/client";
-import { contactsDomain } from "../../../lib/domains/contacts";
-import { useMobileTranslations } from "../../../lib/i18n/useMobileTranslations";
+import { INPUT_MAX_LENGTHS, UI_TIMING_MS } from "../../../lib/config";
+import { updateContact } from "../../../lib/domains/contacts";
+import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { useAppToast } from "../../../lib/toast/useAppToast";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { ScalePressable } from "../../../theme/ScalePressable";
+import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { getAvatarColorHex, getContactInitials } from "../contactUtils";
 import { useContactPhotoUpload } from "../hooks/useContactPhotoUpload";
-import {
-  AvatarPhotoOverlayControls,
-  avatarPhotoOverlayStyles,
-} from "./AvatarPhotoOverlayControls";
+import { AvatarPhotoOverlayControls, avatarPhotoOverlayStyles } from "./AvatarPhotoOverlayControls";
 
 interface EditIdentitySheetProps {
-  open: boolean;
   contact: Contact;
   isMyselfMode?: boolean;
-  onOpenChange: (open: boolean) => void;
   onClose: () => void;
   onContactUpdated: (contact: Contact) => void;
+  onOpenChange: (open: boolean) => void;
+  open: boolean;
 }
 
 export function EditIdentitySheet({
@@ -38,7 +41,8 @@ export function EditIdentitySheet({
   onClose,
   onContactUpdated,
 }: EditIdentitySheetProps) {
-  const t = useMobileTranslations();
+  const tMobileContactIdentity = useMobileContactIdentityTranslations();
+  const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
   const firstNameRef = useRef<TextInput>(null);
@@ -54,20 +58,22 @@ export function EditIdentitySheet({
     handleSubmit,
     formState: { isDirty, isValid, isSubmitting },
   } = useSheetForm({
-    open,
-    schema: updateContactIdentitySchema,
     getDefaultValues: () => ({
       firstName: contact.firstName ?? "",
-      middleName: contact.middleName ?? "",
-      lastName: contact.lastName ?? "",
       headline: contact.headline ?? "",
+      lastName: contact.lastName ?? "",
+      middleName: contact.middleName ?? "",
     }),
     mode: "onChange",
+    open,
+    schema: updateContactIdentitySchema,
   });
 
   // Reset avatar URI to the latest confirmed contact avatar each time the sheet opens.
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     setAvatarUri(contactRef.current.avatar);
   }, [open]);
 
@@ -90,7 +96,9 @@ export function EditIdentitySheet({
 
   // Auto-focus first field after the sheet animation settles.
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      return;
+    }
     const timer = setTimeout(() => {
       firstNameRef.current?.focus();
     }, UI_TIMING_MS.sheetFocusDelay);
@@ -110,36 +118,39 @@ export function EditIdentitySheet({
   );
 
   function requestClose() {
-    if (isBusy) return;
+    if (isBusy) {
+      return;
+    }
     onClose();
   }
 
   const onSubmit = handleSubmit(async (values) => {
-    if (!canSubmit || isBusy) return;
+    if (!canSubmit || isBusy) {
+      return;
+    }
     try {
-      const updated = contactsDomain.update(contact.id, values, contact.updatedAt ?? undefined);
+      const updated = updateContact(contact.id, values, contact.updatedAt ?? undefined);
       onContactUpdated(updated);
       onClose();
     } catch (err) {
       showToast({
+        description: err instanceof Error ? err.message : tMobileContactIdentity("SaveFailed"),
+        headline: t("feedback.errorTitle"),
         type: "error",
-        headline: t("MobileApp.Common.ErrorTitle"),
-        description:
-          err instanceof Error ? err.message : t("MobileApp.ContactIdentity.SaveFailed"),
       });
     }
   });
 
   const title = isMyselfMode
-    ? t("MobileApp.ContactIdentity.EditYourProfile")
-    : t("MobileApp.ContactIdentity.EditProfile");
+    ? tMobileContactIdentity("EditYourProfile")
+    : tMobileContactIdentity("EditProfile");
 
   const primaryAction: ActionSheetPopupAction = {
-    label: t("MobileApp.ContactIdentity.SaveChanges"),
-    icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
-    onPress: () => void onSubmit(),
     disabled: !canSubmit,
+    icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
+    label: tMobileContactIdentity("SaveChanges"),
     loading: isSubmitting,
+    onPress: () => void onSubmit(),
     tone: "primary",
     variant: "filled",
   };
@@ -147,9 +158,9 @@ export function EditIdentitySheet({
   return (
     <>
       <ActionSheetPopup
-        open={open}
-        title={title}
         actions={[primaryAction]}
+        isBusy={isBusy}
+        onClose={requestClose}
         onOpenChange={(nextOpen) => {
           if (!nextOpen) {
             requestClose();
@@ -157,28 +168,21 @@ export function EditIdentitySheet({
           }
           onOpenChange(nextOpen);
         }}
-        onClose={requestClose}
-        isBusy={isBusy}
+        open={open}
+        title={title}
       >
         <View style={styles.avatarSection}>
           <View style={avatarPhotoOverlayStyles.avatarFrame}>
             <ScalePressable
+              accessibilityLabel={tMobileContactIdentity("ChangePhoto")}
               accessibilityRole="button"
-              accessibilityLabel={t("MobileApp.ContactIdentity.ChangePhoto")}
-              pointerEvents={isBusy ? "none" : "auto"}
-              opacity={isBusy ? 0.6 : 1}
               onPress={() => void choosePhotoFromLibrary()}
-              style={[
-                styles.avatarCircle,
-                !avatarUri && { backgroundColor: avatarColor },
-              ]}
+              opacity={isBusy ? 0.6 : 1}
+              pointerEvents={isBusy ? "none" : "auto"}
+              style={[styles.avatarCircle, !avatarUri && { backgroundColor: avatarColor }]}
             >
               {avatarUri ? (
-                <Image
-                  source={{ uri: avatarUri }}
-                  style={styles.avatarImage}
-                  resizeMode="cover"
-                />
+                <Image resizeMode="cover" source={{ uri: avatarUri }} style={styles.avatarImage} />
               ) : (
                 <Text style={[styles.avatarInitial, { color: colors.textOnPrimary }]}>
                   {initials}
@@ -187,106 +191,106 @@ export function EditIdentitySheet({
             </ScalePressable>
 
             <AvatarPhotoOverlayControls
-              showRemove={hasAvatar}
               disabled={isBusy}
               onChangePhoto={() => void choosePhotoFromLibrary()}
               onRemovePhoto={() => setRemoveConfirmOpen(true)}
+              showRemove={hasAvatar}
             />
           </View>
         </View>
 
         <SheetTextField
+          accessibilityLabel={tMobileContactIdentity("FirstNameLabel")}
           control={control}
-          name="firstName"
+          editable={!isBusy}
           inputRef={firstNameRef}
-          accessibilityLabel={t("MobileApp.ContactIdentity.FirstNameLabel")}
-          placeholder={t("MobileApp.ContactIdentity.FirstNameLabel")}
           maxLength={INPUT_MAX_LENGTHS.firstName}
-          editable={!isBusy}
+          name="firstName"
+          placeholder={tMobileContactIdentity("FirstNameLabel")}
           returnKeyType="next"
         />
 
         <SheetTextField
+          accessibilityLabel={tMobileContactIdentity("MiddleNameLabel")}
           control={control}
-          name="middleName"
-          accessibilityLabel={t("MobileApp.ContactIdentity.MiddleNameLabel")}
-          placeholder={t("MobileApp.ContactIdentity.MiddleNameLabel")}
+          editable={!isBusy}
           maxLength={INPUT_MAX_LENGTHS.middleName}
-          editable={!isBusy}
+          name="middleName"
+          placeholder={tMobileContactIdentity("MiddleNameLabel")}
           returnKeyType="next"
         />
 
         <SheetTextField
+          accessibilityLabel={tMobileContactIdentity("LastNameLabel")}
           control={control}
-          name="lastName"
-          accessibilityLabel={t("MobileApp.ContactIdentity.LastNameLabel")}
-          placeholder={t("MobileApp.ContactIdentity.LastNameLabel")}
+          editable={!isBusy}
           maxLength={INPUT_MAX_LENGTHS.lastName}
-          editable={!isBusy}
+          name="lastName"
+          placeholder={tMobileContactIdentity("LastNameLabel")}
           returnKeyType="next"
         />
 
         <SheetTextField
+          accessibilityLabel={tMobileContactIdentity("HeadlineLabel")}
           control={control}
-          name="headline"
-          accessibilityLabel={t("MobileApp.ContactIdentity.HeadlineLabel")}
-          placeholder={t("MobileApp.ContactIdentity.HeadlineLabel")}
-          maxLength={INPUT_MAX_LENGTHS.headline}
           editable={!isBusy}
           leadingIcon={headlineLeadingIcon}
-          returnKeyType="done"
+          maxLength={INPUT_MAX_LENGTHS.headline}
+          name="headline"
           onSubmitEditing={() => void onSubmit()}
+          placeholder={tMobileContactIdentity("HeadlineLabel")}
+          returnKeyType="done"
         />
       </ActionSheetPopup>
 
       <ActionSheetPopup
-        open={isRemoveConfirmOpen}
-        title={t("MobileApp.ContactIdentity.RemovePhotoConfirmTitle")}
-        isBusy={isPhotoBusy}
-        onOpenChange={setRemoveConfirmOpen}
-        onClose={() => setRemoveConfirmOpen(false)}
         actions={[
           {
-            label: t("MobileApp.Common.Cancel"),
-            onPress: () => setRemoveConfirmOpen(false),
             disabled: isPhotoBusy,
+            label: t("actions.cancel"),
+            onPress: () => setRemoveConfirmOpen(false),
             tone: "neutral",
             variant: "outline",
           },
           {
-            label: t("MobileApp.ContactIdentity.RemovePhoto"),
-            icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
-            onPress: () => void removePhoto(),
-            loading: isPhotoBusy,
             disabled: isPhotoBusy,
+            icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
+            label: tMobileContactIdentity("RemovePhoto"),
+            loading: isPhotoBusy,
+            onPress: () => void removePhoto(),
             tone: "danger",
             variant: "filled",
           },
         ]}
+        isBusy={isPhotoBusy}
+        onClose={() => setRemoveConfirmOpen(false)}
+        onOpenChange={setRemoveConfirmOpen}
+        open={isRemoveConfirmOpen}
+        title={tMobileContactIdentity("RemovePhotoConfirmTitle")}
       />
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  avatarSection: {
-    alignItems: "center",
-    marginBottom: 4,
-  },
   avatarCircle: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
     alignItems: "center",
+    borderRadius: 48,
+    height: 96,
     justifyContent: "center",
     overflow: "hidden",
+    width: 96,
   },
   avatarImage: {
-    width: 96,
     height: 96,
+    width: 96,
   },
   avatarInitial: {
     fontSize: 32,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
+  },
+  avatarSection: {
+    alignItems: "center",
+    marginBottom: 4,
   },
 });

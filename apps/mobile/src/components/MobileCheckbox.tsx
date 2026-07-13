@@ -1,14 +1,14 @@
 import { IconCheck } from "@tabler/icons-react-native";
-import { MOBILE_LAYOUT } from "../theme/tokens";
 import { Tappable } from "../theme/Tappable";
+import { MOBILE_LAYOUT } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 
 interface MobileCheckboxProps {
-  checked: boolean;
-  onCheckedChange: (checked: boolean) => void;
-  accessibilityLabel: string;
   accessibilityHint?: string;
+  accessibilityLabel: string;
+  checked: boolean;
   disabled?: boolean;
+  onCheckedChange: (checked: boolean) => void;
 }
 
 const CHECKBOX_SIZE = 22;
@@ -24,22 +24,22 @@ export function MobileCheckbox({
 
   return (
     <Tappable
+      accessibilityHint={accessibilityHint}
+      accessibilityLabel={accessibilityLabel}
       accessibilityRole="checkbox"
       accessibilityState={{ checked, disabled }}
-      accessibilityLabel={accessibilityLabel}
-      accessibilityHint={accessibilityHint}
-      disabled={disabled}
-      onPress={() => onCheckedChange(!checked)}
-      width={CHECKBOX_SIZE}
-      height={CHECKBOX_SIZE}
+      alignItems="center"
+      backgroundColor={checked ? colors.surfacePressed : colors.inputBackground}
+      borderColor={colors.borderStrong}
       borderRadius={6}
       borderWidth={1}
-      borderColor={colors.borderStrong}
-      backgroundColor={checked ? colors.surfacePressed : colors.inputBackground}
-      alignItems="center"
+      disabled={disabled}
+      height={CHECKBOX_SIZE}
       justifyContent="center"
+      onPress={() => onCheckedChange(!checked)}
       opacity={disabled ? 0.5 : 1}
       variant="subtle"
+      width={CHECKBOX_SIZE}
     >
       {checked ? <IconCheck size={14} stroke={colors.textPrimary} /> : null}
     </Tappable>
