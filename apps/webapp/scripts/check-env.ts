@@ -1,6 +1,7 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkEnvVariables } from "@bondery/helpers/env";
+import { WEBAPP_RUNTIME_REQUIRED_ENV } from "../src/lib/platform/runtimeConfig.env.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -10,11 +11,5 @@ const environment = (process.env.NODE_ENV || "development") as "production" | "d
 checkEnvVariables({
   appPath: resolve(__dirname, ".."),
   environment,
-  requiredVars: [
-    "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_WEBAPP_URL",
-    "NEXT_PUBLIC_API_URL",
-    "NEXT_PUBLIC_WEBSITE_URL",
-  ],
+  requiredVars: [...WEBAPP_RUNTIME_REQUIRED_ENV],
 });

@@ -292,7 +292,7 @@ cp apps/webapp/.env.development.example apps/webapp/.env.development.local
 Copy-Item apps/webapp/.env.development.example apps/webapp/.env.development.local
 ```
 
-The example file is at [apps/webapp/.env.development.example](../../apps/webapp/.env.development.example). Replace `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` with the values from `npx supabase status`.
+The example file is at [apps/webapp/.env.development.example](../../apps/webapp/.env.development.example). Replace `BONDERY_PUBLIC_SUPABASE_URL` and `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` with the values from `npx supabase status`.
 
 ### Start
 

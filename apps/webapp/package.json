@@ -105,7 +105,7 @@
     "prebuild": "cross-env NODE_ENV=production npm run generate-icons",
     "predev": "cross-env NODE_ENV=development npm run generate-icons",
     "smoke-ssr": "node scripts/smoke-ssr-boot.mjs",
-    "start": "next start -H 0.0.0.0 -p ${PORT:-26632}",
+    "start": "next start",
     "test:runtime-config": "tsx --test src/lib/platform/runtimeConfig.server.test.ts",
     "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts",
     "test:theme": "tsx --test src/lib/theme/theme.test.ts"
