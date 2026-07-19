@@ -21,5 +21,5 @@
     "stop": "npx supabase stop",
     "upload:secrets": "npx supabase secrets set --env-file .env.beta --project-ref <your-project-ref>"
   },
-  "version": "1.7.0"
+  "version": "1.7.3"
 }

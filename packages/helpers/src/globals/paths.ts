@@ -69,7 +69,7 @@ export const CHROME_EXTENSION_URL =
  * Requests from extensions below this version receive HTTP 426 Upgrade Required.
  * Set to "0.0.0" to disable enforcement.
  */
-export const MIN_EXTENSION_VERSION: string = "1.7.0";
+export const MIN_EXTENSION_VERSION: string = "1.7.3";
 
 export const HELP_DOCS_URL = "https://bondery.gitbook.io";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;

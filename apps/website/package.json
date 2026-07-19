@@ -49,5 +49,5 @@
     "predev": "cross-env NODE_ENV=development npm run check-env && npm run generate-icons",
     "start": "next start"
   },
-  "version": "1.7.0"
+  "version": "1.7.3"
 }

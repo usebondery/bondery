@@ -58,5 +58,5 @@
     "test:sync": "tsx --test src/lib/data/redis.test.ts src/lib/sync/build-changes.test.ts src/lib/sync/emit-wake.test.ts src/lib/sync/wake/hub.test.ts src/lib/sync/wake/tickets.test.ts src/lib/sync/wake/in-memory-bus.test.ts"
   },
   "type": "module",
-  "version": "1.7.0"
+  "version": "1.7.3"
 }

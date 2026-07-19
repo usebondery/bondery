@@ -46,10 +46,10 @@ curl -s http://localhost:26632/api/live
 
 ```bash
 # Upgrade only webapp (API + Redis stay up)
-BONDERY_INFRA_WEBAPP_IMAGE_TAG=1.7.1 docker compose up -d --no-deps webapp
+BONDERY_INFRA_WEBAPP_IMAGE_TAG=1.7.3 docker compose up -d --no-deps webapp
 
 # Upgrade only API
-BONDERY_INFRA_API_IMAGE_TAG=1.7.1 docker compose up -d --no-deps api
+BONDERY_INFRA_API_IMAGE_TAG=1.7.3 docker compose up -d --no-deps api
 
 # Rollback: set previous pins in .env and redeploy the changed service
 ```
@@ -59,7 +59,7 @@ Update the pins in `.env.example` when releasing a tested stack pair.
 ### Image tags
 
 - **`production` (default):** floating channel — next pull/redeploy gets the latest release. Simplest for Bondery prod and most self-hosters.
-- **Semver (`1.7.0`):** pin when you want a frozen version and one-command rollback to a known tag.
+- **Semver (`1.7.3`):** pin when you want a frozen version and one-command rollback to a known tag.
 - API and webapp are published independently; keep both on the same channel (or a tested semver pair) to avoid a partial upgrade.
 
 ## Advanced: external Redis

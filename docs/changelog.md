@@ -4,9 +4,23 @@ All notable changes to this project are documented in this file. For format and 
 
 ## [Unreleased]
 
+## [1.7.3] - 20.07.2026
+
+### 🔄 Changed
+
+- Unified environment configuration on branded `BONDERY_*` names with a root `.env.local`, manifest-driven `npm run setup:dev` / `npm run env` sync, and Compose under `deploy/bondery`.
+- Self-host and CI secrets/vars aligned to the same contract (public URLs as GitHub vars; private keys remain secrets).
+- Website public URLs are passed from Server Components into client leaves (no `next.config` `env` inlining).
+- Minimum Chrome extension version bumped to 1.7.3.
+
+### 📝 Documentation
+
+- New [environment configuration](contributing/environment.md) guide; local setup and Dokploy docs updated for the env migration.
+
 ### Breaking
 
-- **Local dev ports (Dial BOND):** Bondery apps now use the `2663x` port block (`26630` website, `26631` API, `26632` webapp, `26633` extension, `26634` mobile Metro, `26639` email preview). Supabase stays on `5432x`. Re-copy `*.env.development.example` → `*.env.development.local` or see [architecture.md](contributing/architecture.md#apps).
+- **Local / deploy env rename:** Apps and Compose no longer use product `NEXT_PUBLIC_*` / legacy deploy paths under `deploy/api`. Migrate to `BONDERY_*` via [environment.md](contributing/environment.md) and `deploy/bondery/.env.example`.
+- **Local dev ports (Dial BOND):** Bondery apps use the `2663x` port block (`26630` website, `26631` API, `26632` webapp, `26633` extension, `26634` mobile Metro, `26639` email preview). Supabase stays on `5432x`.
 
 ## [1.7.0] - 07.07.2026
 
