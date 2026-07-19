@@ -6,7 +6,14 @@
   "js/ts.experimental.useTsgo": true,
   "js/ts.tsdk.path": "./node_modules/typescript",
   "remote.autoForwardPorts": true,
+  "remote.otherPortsAttributes": {
+    "onAutoForward": "ignore"
+  },
   "remote.portsAttributes": {
+    "8083": {
+      "label": "supabase-edge-inspector",
+      "requireLocalPort": true
+    },
     "26630": {
       "label": "website",
       "requireLocalPort": true
@@ -28,12 +35,64 @@
       "label": "mobile",
       "requireLocalPort": true
     },
+    "26635": {
+      "label": "storybook",
+      "requireLocalPort": true
+    },
+    "26636": {
+      "label": "redis",
+      "requireLocalPort": true
+    },
+    "26637": {
+      "label": "swagger-ui",
+      "requireLocalPort": true
+    },
+    "26638": {
+      "label": "admin",
+      "requireLocalPort": true
+    },
+    "26639": {
+      "label": "email-preview",
+      "requireLocalPort": true
+    },
+    "54320": {
+      "label": "supabase-shadow-db",
+      "requireLocalPort": true
+    },
     "54321": {
       "label": "supabase",
       "requireLocalPort": true
+    },
+    "54322": {
+      "label": "supabase-db",
+      "requireLocalPort": true
+    },
+    "54323": {
+      "label": "supabase-studio",
+      "requireLocalPort": true
+    },
+    "54324": {
+      "label": "inbucket",
+      "requireLocalPort": true
+    },
+    "54325": {
+      "label": "inbucket-smtp",
+      "requireLocalPort": true
+    },
+    "54326": {
+      "label": "inbucket-pop3",
+      "requireLocalPort": true
+    },
+    "54327": {
+      "label": "supabase-analytics",
+      "requireLocalPort": true
+    },
+    "54329": {
+      "label": "supabase-pooler",
+      "requireLocalPort": true
     }
   },
-  "remote.restoreForwardedPorts": true,
+  "remote.restoreForwardedPorts": false,
   "sherlock.previewLanguageTag": "en",
   "task.allowAutomaticTasks": "off",
   "terminal.integrated.enablePersistentSessions": false

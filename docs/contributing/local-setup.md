@@ -121,17 +121,56 @@ EXTRA_ALLOWED_ORIGINS=http://localhost:26634
 
 See [Mobile sync (Postgres changelog)](#mobile-sync-postgres-changelog). `EXTRA_ALLOWED_ORIGINS` allows Expo web dev server CORS when testing mobile web.
 
-#### Redis (rate limiting)
+#### Redis
 
-`PRIVATE_REDIS_URL` is **optional in local development**. When empty, the API uses an in-memory rate-limit store.
+Redis powers **rate limiting**, **mobile sync wake** (pub/sub), and **WebSocket ticket** storage in the API. Local Docker Redis is the **default** for development (same Docker prerequisite as Supabase).
 
-In **production**, `PRIVATE_REDIS_URL` is **required** — serverless deployments need a shared store (e.g. [Upstash](https://upstash.com/)) so rate limits apply across instances. The health probe at `GET /health` reports Redis status when configured.
+| Mode | `PRIVATE_REDIS_URL` | When to use |
+|------|---------------------|-------------|
+| **Local Docker (default)** | `redis://127.0.0.1:26636` | Normal local API work — matches production behavior |
+| **In-memory** | empty / unset | Quick feature work without starting Redis |
 
-Example (Upstash):
+In **production** (Hetzner), `PRIVATE_REDIS_URL` is **required**. The health probe at `GET /health` reports Redis status when configured.
+
+##### Quick start — local Docker Redis
+
+From the repo root (Docker must be running — same as Supabase):
+
+```bash
+npm run start -w redis
+```
+
+Verify:
+
+```bash
+npm run status -w redis
+# PING → PONG
+docker exec bondery-redis redis-cli ping
+```
+
+Wire the API in `apps/api/.env.development.local` (also the default in `.env.development.example`):
 
 ```text
-PRIVATE_REDIS_URL="rediss://:your-token@your-instance.upstash.io:6379"
+PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
 ```
+
+Port **26636** is `DEV_PORTS.REDIS` / `DEV_REDIS_URL` in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts). Stop with `npm run stop -w redis`.
+
+##### In-memory mode (no Redis)
+
+Set `PRIVATE_REDIS_URL=""` (or remove the line). The API uses in-memory rate-limit and sync-wake stores — fine for single-process webapp work when you skip starting Redis.
+
+> **Do not** leave a dead cloud URL (e.g. deleted Upstash) in `.env.development.local`. The API will try to connect on startup and fail with `ENOTFOUND` / `Connection is closed`.
+
+##### Production / self-host
+
+Use the canonical stack in [`deploy/api/`](../../deploy/api/) (API + bundled Redis). Default:
+
+```text
+PRIVATE_REDIS_URL="redis://redis:6379"
+```
+
+External Redis (Path B) and Dokploy cutover: [docs/deploy/api-container.md](../deploy/api-container.md).
 
 #### API keys (long-lived integration tokens)
 
@@ -505,20 +544,24 @@ See also [Sync architecture (mobile)](sync-architecture.md) and [apps/mobile/REA
 
 > **Before using these commands**, complete environment setup for each app in steps 2–7 above.
 
-From the repo root:
+From the repo root, start infrastructure first (separate workspaces — run sequentially or in separate terminals):
 
 ```bash
-# Start api + webapp (Supabase must be running separately)
+# 1. Infrastructure
+npm run start -w supabase-db
+npm run start -w redis
+
+# 2. App dev
 npm run dev:webapp-api
 
-# Start api + webapp + website + chrome-extension
+# Or: api + webapp + website + chrome-extension
 npm run dev:extension
 
-# Start api + mobile (Supabase must be running separately)
+# Or: api + mobile
 npm run mobile
 ```
 
-Start Supabase separately from `apps/supabase-db` (`npm run start`). These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo watch`).
+These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo watch`).
 
 ### Production builds
 

@@ -109,6 +109,20 @@ If **Site URL** is still `http://localhost:3000`, OAuth falls back there when `r
 
 Login flow should start at `https://app.usebondery.com/login`. `usebondery.com/login` redirects to the webapp using the website's own `NEXT_PUBLIC_WEBAPP_URL` (website app — unchanged).
 
+### GitHub OAuth app (Supabase provider)
+
+In **GitHub → Settings → Developer settings → OAuth Apps**, the **Authorization callback URL** must be your **Supabase** callback, not the webapp:
+
+```
+https://<project-ref>.supabase.co/auth/v1/callback
+```
+
+If it is set to `https://app.usebondery.com/auth/callback`, GitHub sends its own authorization code to the webapp first (hex string). That breaks PKCE and causes login loops. The webapp `/auth/callback` should only receive Supabase UUID codes after Supabase completes the provider exchange.
+
+### API env must match webapp Supabase project
+
+The API container needs the **same** Supabase project URL and publishable key as the webapp (API uses `NEXT_PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY`). If the webapp session is valid but `/api/me/session` returns 401, login will redirect to `/app/unavailable` — check API env vars.
+
 ## API
 
-See [api-container.md](./api-container.md) — API uses GHCR images, not Nixpacks.
+See [api-container.md](./api-container.md) — canonical production path is **Docker Compose** (`deploy/api/`: API + Redis). GHCR supplies the API image; Redis runs as a sibling service. Path B (single image + external Redis) is documented there for advanced setups.

@@ -1,10 +1,25 @@
-# API container deployment (GHCR + Dokploy)
+# API container deployment (GHCR + Compose + Dokploy)
 
-CI builds and pushes container images to GHCR; Dokploy pulls and runs them.
+CI builds and pushes the API image to GHCR. **Canonical production and self-host path** is Docker Compose: [`deploy/api/`](../../deploy/api/) (API + Redis). Dokploy should run that same stack.
 
 **Current package:** `ghcr.io/usebondery/api`
 
 > Older workflow runs may have published `ghcr.io/usebondery/bondery-api`. That is a separate GHCR package — use **`api`** going forward and retire `bondery-api` after cutover.
+
+## Deploy paths
+
+| Path | Stack | When |
+|------|--------|------|
+| **A (default)** | [`deploy/api/docker-compose.yml`](../../deploy/api/docker-compose.yml) — API + Redis | Self-hosters and Bondery production (Dokploy) |
+| **B (advanced)** | API image alone + custom `PRIVATE_REDIS_URL` | You already operate Redis (managed / shared) |
+
+- Path A default: `PRIVATE_REDIS_URL=redis://redis:6379` (compose service hostname).
+- Path B: set `PRIVATE_REDIS_URL` to your Redis; do **not** start the compose Redis service.
+- Empty `PRIVATE_REDIS_URL` is **invalid in production**.
+
+Local laptop Redis: [`apps/redis`](../../apps/redis/) (`npm run start -w redis`, port 26636) — not `deploy/api`.
+
+Quickstart: [`deploy/api/README.md`](../../deploy/api/README.md).
 
 ## Tagging model
 
@@ -13,7 +28,7 @@ Three layers — do not confuse them:
 | Layer | Example | Role |
 |-------|---------|------|
 | **Git tag** | `api-1.7.1` | Triggers the release workflow; appears in GitHub Releases |
-| **Semver image tag** | `1.7.1` | Immutable artifact — **pin production to this** |
+| **Semver image tag** | `1.7.1` | Immutable artifact — **pin production via `API_IMAGE_TAG`** |
 | **Channel image tag** | `production`, `beta`, `sha-abc1234` | Floating or traceability tags (see below) |
 
 ### Published Docker tags
@@ -23,7 +38,7 @@ Three layers — do not confuse them:
 | Integration | Push to `main` (API-related paths) | `beta`, `sha-<short-sha>` | Optional staging; rollback/debug on main |
 | Production | Git tag `api-X.Y.Z` on `release` | `X.Y.Z`, `production` | Live `api.usebondery.com` |
 
-**Production Dokploy:** pin `ghcr.io/usebondery/api:1.7.1` (semver). Use `:production` only if you want auto-deploy on every release.
+**Production Compose:** set `API_IMAGE_TAG=1.7.1` (semver). Use `production` only if you want auto-float to the latest release tag.
 
 **No minor-line tags** (e.g. `1.7`) — only full `X.Y.Z` semver.
 
@@ -117,21 +132,113 @@ git push origin api-1.7.1
 ```
 
 3. CI publishes `ghcr.io/usebondery/api:1.7.1` and `ghcr.io/usebondery/api:production`.
+4. On Dokploy Compose: bump `API_IMAGE_TAG` to the new semver and redeploy.
 
-## Dokploy — Docker provider fields
+## Path A — Compose (canonical)
 
-Use the **full image reference** in the Docker image field. If you enter only `usebondery/api:production`, Docker pulls from **Docker Hub** (`docker.io/usebondery/api`), not GHCR — that causes `repository does not exist or may require 'docker login'`.
+Self-hosters and Bondery production use the same file:
 
-### Production (public package, no registry login)
+```bash
+cd deploy/api
+cp .env.example .env
+# Fill secrets from apps/api/.env.production.example
+# API_IMAGE_TAG=<semver>   PRIVATE_REDIS_URL=redis://redis:6379
+docker compose up -d
+curl -s http://localhost:26631/health
+curl -s http://localhost:26631/status
+```
+
+| Service | Notes |
+|---------|--------|
+| `redis` | `redis:7-alpine`, AOF, volume `redis-data`, **no host ports** |
+| `api` | GHCR image, port `26631`, waits for Redis healthy |
+
+Attach reverse proxy / Traefik **only** to the `api` service (container port `26631`). Never expose Redis publicly.
+
+### Dokploy — Compose application (production)
+
+| Setting | Value |
+|---------|-------|
+| Name | `api` (or `api-compose`) |
+| Provider | **Docker Compose** |
+| Compose file | `deploy/api/docker-compose.yml` (repo) or pasted equivalent |
+| Domain | `api.usebondery.com` on service **`api`**, port **`26631`** |
+
+Environment (Dokploy env UI or `.env`):
+
+```env
+API_IMAGE_TAG=1.7.0
+PRIVATE_REDIS_URL=redis://redis:6379
+NODE_ENV=production
+API_HOST=0.0.0.0
+PORT=26631
+NEXT_PUBLIC_API_URL=https://api.usebondery.com
+NEXT_PUBLIC_WEBAPP_URL=https://app.usebondery.com
+NEXT_PUBLIC_WEBSITE_URL=https://usebondery.com
+```
+
+Plus all remaining secrets from [`apps/api/.env.production.example`](../../apps/api/.env.production.example).
+
+**Verify:**
+
+```bash
+curl https://api.usebondery.com/health
+# expect services.redis.configured=true, services.redis.ok=true
+curl https://api.usebondery.com/status
+```
+
+Future deploys: bump `API_IMAGE_TAG` and redeploy the Compose app (not a separate “Docker Image” provider).
+
+### Dokploy migration (single image → Compose)
+
+Goal: `api.usebondery.com` runs Path A — the same stack self-hosters run.
+
+#### Preflight
+
+1. Merge `deploy/api/` + docs; promote to `release` if that is your prod branch flow.
+2. Choose pin: `API_IMAGE_TAG=<current-semver>` (prefer immutable semver over floating `production`).
+3. Export all current Dokploy API env vars (`PRIVATE_*`, `NEXT_PUBLIC_*`, etc.).
+4. Schedule a short window — WebSocket / sync wake interrupt briefly during cutover.
+
+#### Cutover
+
+1. Create a **new** Dokploy Compose application (keep the old Docker Image app until verified).
+2. Point it at `deploy/api/docker-compose.yml`.
+3. Paste secrets + `PRIVATE_REDIS_URL=redis://redis:6379` + `API_IMAGE_TAG=<semver>`.
+4. Attach `api.usebondery.com` / Traefik to service **`api`** only (`26631`). Do not publish Redis.
+5. Deploy; wait until Redis is healthy and API is listening.
+6. Verify health/status (commands above); smoke webapp login + one API mutation.
+7. Stop/remove the old single-image API app so only Compose remains.
+8. Ops note: upgrades = bump `API_IMAGE_TAG` + Compose redeploy.
+
+#### Rollback
+
+1. Re-point the domain to the previous Docker Image app (prior image tag + prior `PRIVATE_REDIS_URL` if any).
+2. Stop the Compose app.
+3. Inspect Compose logs (`api`, `redis`) before retrying.
+
+#### Post-migration
+
+- Redis data is in volume `redis-data` — survives API image upgrades; back up via volume snapshot / Dokploy volume backup when available.
+- Bondery production stays on Path A; Path B remains for other operators only.
+
+## Path B — API image + external Redis
+
+Use when Redis is already managed outside this stack.
+
+### Dokploy — Docker Image fields
+
+Use the **full image reference**. If you enter only `usebondery/api:production`, Docker pulls from **Docker Hub**, not GHCR.
 
 | Field | Value |
 |-------|--------|
-| **Docker image** | `ghcr.io/usebondery/api:1.7.0` or `ghcr.io/usebondery/api:production` |
-| **Registry URL** | leave empty, or `ghcr.io` (only if your Dokploy version requires it) |
-| **Username** | leave empty |
-| **Password** | leave empty |
+| **Docker image** | `ghcr.io/usebondery/api:1.7.0` (full path) |
+| **Registry URL** | leave empty, or `ghcr.io` if required |
+| **Username / Password** | empty for public packages |
+| **Container port** | `26631` |
+| **Domain** | your API hostname |
 
-Pin **semver** (`:1.7.0`) for immutable prod; use `:production` only for floating latest release.
+Set `PRIVATE_REDIS_URL` to your Redis URL (TLS `rediss://` when required). Do not leave it empty.
 
 ### If the package is still private (temporary)
 
@@ -144,73 +251,47 @@ Pin **semver** (`:1.7.0`) for immutable prod; use `:production` only for floatin
 
 ### Legacy image (before package rename)
 
-If **`api`** does not exist on GitHub Packages yet, the last successful build may be under the old name:
-
 ```text
 ghcr.io/usebondery/bondery-api:prod
 ```
 
 Switch to `ghcr.io/usebondery/api:…` after **Release - API** succeeds with the current workflow.
 
-### Verify on the Hetzner host before Dokploy
+### Verify on the Hetzner host
 
 ```bash
 docker pull ghcr.io/usebondery/api:production
-# or
-docker pull ghcr.io/usebondery/bondery-api:prod
 ```
 
-If both fail, the tag was never pushed or the package name differs — check **Actions** and **Packages** on GitHub.
+If pull fails, check **Actions** and **Packages** on GitHub.
 
-## Dokploy — production app
-
-| Setting | Value |
-|---------|-------|
-| Name | `api` |
-| Provider | Docker Image |
-| Image | `ghcr.io/usebondery/api:1.7.0` (full path — see above) |
-| Container port | `26631` |
-| Domain | `api.usebondery.com` |
-
-```env
-NODE_ENV=production
-API_HOST=0.0.0.0
-PORT=26631
-NEXT_PUBLIC_API_URL=https://api.usebondery.com
-NEXT_PUBLIC_WEBAPP_URL=https://app.usebondery.com
-NEXT_PUBLIC_WEBSITE_URL=https://usebondery.com
-```
-
-Plus all `PRIVATE_*` from [`apps/api/.env.production.example`](../../apps/api/.env.production.example).
-
-**Verify:**
-
-```bash
-curl https://api.usebondery.com/health
-curl https://api.usebondery.com/status
-```
-
-## Dokploy — optional staging app
-
-Skip this if you only run production.
+## Dokploy — optional staging (Compose or image)
 
 | Setting | Value |
 |---------|-------|
 | Name | `api-staging` |
-| Image | `ghcr.io/usebondery/api:beta` or `:sha-<commit>` |
+| Image / tag | `API_IMAGE_TAG=beta` or `:sha-<commit>` |
 | Domain | e.g. `staging.api.usebondery.com` |
 | `NEXT_PUBLIC_API_URL` | matching staging URL |
+
+Prefer the same Compose file as production with staging env values.
 
 ## Rollback
 
 | Environment | Action |
 |-------------|--------|
-| Production | Change image to previous semver (`1.7.0`) |
+| Production (Compose) | Set `API_IMAGE_TAG` to previous semver and redeploy; or restore previous Docker Image app (see migration rollback) |
 | Staging / main | Redeploy `:sha-<commit>` |
 
 ## Local smoke test
 
 ```bash
+# Compose Path A (needs a filled .env)
+cd deploy/api && cp .env.example .env
+# add secrets, then:
+docker compose up -d
+
+# Or build the API image locally (Path B style)
 docker build -f apps/api/Dockerfile -t api:local .
 docker run --rm -p 26631:26631 --env-file apps/api/.env.production.local api:local
 ```

@@ -1,0 +1,50 @@
+# Canonical production / self-host stack: API + Redis (Path A).
+# Local dev Redis is apps/redis (port 26636) — do not use this file for laptop DX.
+#
+# Path B (external Redis): run the API image alone with PRIVATE_REDIS_URL set to your host.
+# See README.md and docs/deploy/api-container.md.
+
+services:
+  redis:
+    command: redis-server --appendonly yes --save 60 1
+    healthcheck:
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  api:
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      API_HOST: "0.0.0.0"
+      NODE_ENV: production
+      PORT: "26631"
+      PRIVATE_REDIS_URL: ${PRIVATE_REDIS_URL:-redis://redis:6379}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 20s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:26631/status').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      timeout: 5s
+    image: ghcr.io/usebondery/api:${API_IMAGE_TAG:-production}
+    ports:
+      - "26631:26631"
+    restart: unless-stopped
+
+volumes:
+  redis-data:

@@ -46,6 +46,11 @@ jobs:
       - name: Check OpenAPI spec
         run: npm run check-openapi
 
+      - name: Validate API deploy compose
+        run: |
+          cp deploy/api/.env.example deploy/api/.env
+          docker compose -f deploy/api/docker-compose.yml config >/dev/null
+
       - name: Schema contract tests
         run: npm run test:contracts
 

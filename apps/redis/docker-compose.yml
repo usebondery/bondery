@@ -1,0 +1,15 @@
+# Local Redis for API rate limiting, sync wake pub/sub, and WS tickets.
+# Port 26636 = DEV_PORTS.REDIS ("Dial BOND" block). Dev-only; no persistence.
+services:
+  redis:
+    command: redis-server --save "" --appendonly no
+    container_name: bondery-redis
+    healthcheck:
+      interval: 5s
+      retries: 3
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+    image: redis:7-alpine
+    ports:
+      - "26636:6379"
+    restart: unless-stopped

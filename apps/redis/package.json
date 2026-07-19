@@ -1,0 +1,12 @@
+{
+  "description": "Local Redis for API dev (rate limits, sync wake, WS tickets)",
+  "name": "redis",
+  "private": true,
+  "scripts": {
+    "logs": "docker compose logs -f --tail 50",
+    "start": "docker compose up -d",
+    "status": "docker compose ps",
+    "stop": "docker compose down"
+  },
+  "version": "1.7.0"
+}

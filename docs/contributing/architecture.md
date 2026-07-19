@@ -175,7 +175,7 @@ Run `npm run gen-types` after schema changes to refresh `packages/schemas/src/su
 ---
 
 {% hint style="info" %}
-**Fun fact:** Bondery local apps use consecutive ports in the `2663x` block — phone keypad **B-O-N-D** → **2-6-6-3** ("Dial BOND"). Supabase stays on the industry-standard `5432x` block. Port constants live in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts); CI enforces them with `npm run check-dev-ports`.
+**Fun fact:** Bondery local apps use consecutive ports in the `2663x` block — phone keypad **B-O-N-D** → **2-6-6-3** ("Dial BOND"). Supabase stays on the industry-standard `5432x` block. Optional local API Redis uses **26636** (`npm run start -w redis`). Port constants live in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts); CI enforces them with `npm run check-dev-ports`.
 {% endhint %}
 
 ## Shared packages

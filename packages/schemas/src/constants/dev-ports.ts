@@ -11,7 +11,7 @@ export const DEV_PORTS = {
   EMAIL_PREVIEW: 26639,
   EXTENSION: 26633,
   MOBILE: 26634,
-  /** Reserved: local Redis (optional future) */
+  /** Local API Redis (`apps/redis`) */
   REDIS: 26636,
   /** Reserved: Storybook / component docs */
   STORYBOOK: 26635,
@@ -36,12 +36,16 @@ export const SUPABASE_PORTS = {
   STUDIO: 54323,
 } as const;
 
+/** Local Redis URL when `npm run start -w redis` is running. */
+export const DEV_REDIS_URL = `redis://127.0.0.1:${DEV_PORTS.REDIS}` as const;
+
 export const DEV_URLS = {
   api: `http://localhost:${DEV_PORTS.API}`,
   emailPreview: `http://localhost:${DEV_PORTS.EMAIL_PREVIEW}`,
   extension: `http://localhost:${DEV_PORTS.EXTENSION}`,
   inbucket: `http://127.0.0.1:${SUPABASE_PORTS.INBUCKET}`,
   mobile: `http://localhost:${DEV_PORTS.MOBILE}`,
+  redis: DEV_REDIS_URL,
   supabase: `http://127.0.0.1:${SUPABASE_PORTS.GATEWAY}`,
   supabaseStudio: `http://127.0.0.1:${SUPABASE_PORTS.STUDIO}`,
   webapp: `http://localhost:${DEV_PORTS.WEBAPP}`,
