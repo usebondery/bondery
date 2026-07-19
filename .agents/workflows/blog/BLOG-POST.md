@@ -119,11 +119,11 @@ The announce script reads from `.env.local` at the repo root:
 | Variable | Required for |
 |----------|-------------|
 | `NEXT_PUBLIC_WEBSITE_URL` | Both |
-| `PRIVATE_DISCORD_WEBHOOK_URL` | Discord |
-| `REDDIT_CLIENT_ID` | Reddit |
-| `REDDIT_CLIENT_SECRET` | Reddit |
-| `REDDIT_USERNAME` | Reddit |
-| `REDDIT_PASSWORD` | Reddit |
+| `BONDERY_OPS_DISCORD_WEBHOOK_URL` | Discord |
+| `BONDERY_OPS_REDDIT_CLIENT_ID` | Reddit |
+| `BONDERY_OPS_REDDIT_CLIENT_SECRET` | Reddit |
+| `BONDERY_OPS_REDDIT_USERNAME` | Reddit |
+| `BONDERY_OPS_REDDIT_PASSWORD` | Reddit |
 
 ### What the script does
 

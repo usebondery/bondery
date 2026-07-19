@@ -34,7 +34,7 @@ async function getAccessToken(config: RedditConfig, userAgent: string): Promise<
 
   if (response.status === 401 || response.status === 403) {
     throw new Error(
-      `Reddit auth failed (${response.status}). Check REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USERNAME, REDDIT_PASSWORD.`,
+      `Reddit auth failed (${response.status}). Check BONDERY_OPS_REDDIT_CLIENT_ID, BONDERY_OPS_REDDIT_CLIENT_SECRET, BONDERY_OPS_REDDIT_USERNAME, BONDERY_OPS_REDDIT_PASSWORD.`,
     );
   }
 

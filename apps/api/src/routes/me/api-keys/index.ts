@@ -30,7 +30,7 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     }
   });
 
-  const pepper = fastify.config.PRIVATE_API_KEY_PEPPER.trim();
+  const pepper = fastify.config.BONDERY_PRIVATE_API_KEY_PEPPER.trim();
 
   fastify.get(
     "/",

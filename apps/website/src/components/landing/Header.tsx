@@ -1,4 +1,5 @@
 import { GITHUB_REPO_URL } from "@bondery/helpers";
+import { WEBAPP_URL } from "@/lib/config";
 import { HeaderClient } from "./HeaderClient";
 
 const FALLBACK_STARS = 3;
@@ -30,5 +31,5 @@ async function getGithubStars(): Promise<number> {
 
 export async function Header() {
   const initialStars = await getGithubStars();
-  return <HeaderClient initialStars={initialStars} />;
+  return <HeaderClient initialStars={initialStars} webappUrl={WEBAPP_URL} />;
 }

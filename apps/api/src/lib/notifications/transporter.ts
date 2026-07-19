@@ -26,26 +26,26 @@ export function createEmailTransporter(config: EmailConfig): Transporter {
 }
 
 export function emailConfigFromEnv(env: {
-  PRIVATE_EMAIL_HOST: string;
-  PRIVATE_EMAIL_PORT: string;
-  PRIVATE_EMAIL_USER: string;
-  PRIVATE_EMAIL_PASS: string;
-  PRIVATE_EMAIL_ADDRESS: string;
+  BONDERY_PRIVATE_EMAIL_HOST: string;
+  BONDERY_PRIVATE_EMAIL_PORT: string;
+  BONDERY_PRIVATE_EMAIL_USER: string;
+  BONDERY_PRIVATE_EMAIL_PASS: string;
+  BONDERY_PRIVATE_EMAIL_ADDRESS: string;
 }): EmailConfig {
   return {
-    fromAddress: env.PRIVATE_EMAIL_ADDRESS,
-    host: env.PRIVATE_EMAIL_HOST,
-    pass: env.PRIVATE_EMAIL_PASS,
-    port: Number(env.PRIVATE_EMAIL_PORT),
-    user: env.PRIVATE_EMAIL_USER,
+    fromAddress: env.BONDERY_PRIVATE_EMAIL_ADDRESS,
+    host: env.BONDERY_PRIVATE_EMAIL_HOST,
+    pass: env.BONDERY_PRIVATE_EMAIL_PASS,
+    port: Number(env.BONDERY_PRIVATE_EMAIL_PORT),
+    user: env.BONDERY_PRIVATE_EMAIL_USER,
   };
 }
 
 export function emailConfigFromProcessEnv(): EmailConfig | null {
-  const host = process.env.PRIVATE_EMAIL_HOST;
-  const user = process.env.PRIVATE_EMAIL_USER;
-  const pass = process.env.PRIVATE_EMAIL_PASS;
-  const fromAddress = process.env.PRIVATE_EMAIL_ADDRESS;
+  const host = process.env.BONDERY_PRIVATE_EMAIL_HOST;
+  const user = process.env.BONDERY_PRIVATE_EMAIL_USER;
+  const pass = process.env.BONDERY_PRIVATE_EMAIL_PASS;
+  const fromAddress = process.env.BONDERY_PRIVATE_EMAIL_ADDRESS;
   if (!host || !user || !pass || !fromAddress) {
     return null;
   }
@@ -53,7 +53,7 @@ export function emailConfigFromProcessEnv(): EmailConfig | null {
     fromAddress,
     host,
     pass,
-    port: Number(process.env.PRIVATE_EMAIL_PORT ?? 587),
+    port: Number(process.env.BONDERY_PRIVATE_EMAIL_PORT ?? 587),
     user,
   };
 }

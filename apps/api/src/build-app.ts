@@ -96,9 +96,13 @@ export async function buildApp(): Promise<AppFastifyInstance> {
   });
 
   await fastify.register(fastifyEnv, {
-    dotenv: {
-      path: `${process.cwd()}/.env.development.local`,
-    },
+    ...(environment === "production"
+      ? {}
+      : {
+          dotenv: {
+            path: `${process.cwd()}/.env.development.local`,
+          },
+        }),
     schema: envSchema,
   });
 
@@ -111,14 +115,14 @@ export async function buildApp(): Promise<AppFastifyInstance> {
       environment === "production" ? { includeSubDomains: true, maxAge: 31536000 } : false,
   });
 
-  const extraOrigins = fastify.config.EXTRA_ALLOWED_ORIGINS
-    ? fastify.config.EXTRA_ALLOWED_ORIGINS.split(",")
+  const extraOrigins = fastify.config.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS
+    ? fastify.config.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS.split(",")
         .map((o: string) => o.trim())
         .filter(Boolean)
     : [];
   const ALLOWED_ORIGINS = [
-    fastify.config.NEXT_PUBLIC_WEBAPP_URL,
-    fastify.config.NEXT_PUBLIC_WEBSITE_URL,
+    fastify.config.BONDERY_PUBLIC_WEBAPP_URL,
+    fastify.config.BONDERY_PUBLIC_WEBSITE_URL,
     ...extraOrigins,
   ].filter(Boolean);
 

@@ -2,10 +2,10 @@ import {
   applyServerTransportErrorPolicy,
   applyServerTransportResponsePolicy,
 } from "@/lib/api/applyServerTransportPolicy";
+import { joinApiUrl, resolveServerApiBaseUrl } from "@/lib/api/resolveServerApiUrl";
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
 import { isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
-import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 import { parseApiJsonResponse, parseApiJsonResponseOrNull } from "./parseResponse";
 
 export { ApiError } from "@bondery/helpers/api";
@@ -26,20 +26,7 @@ export type ServerApiFetchOptions = {
 };
 
 function resolveServerUrl(path: string): string {
-  const { apiBaseUrl } = buildWebappRuntimeConfigFromEnv();
-  if (path.startsWith("http://") || path.startsWith("https://")) {
-    return path;
-  }
-
-  if (path.startsWith("/api/")) {
-    return `${apiBaseUrl}${path}`;
-  }
-
-  if (path.startsWith("/")) {
-    return `${apiBaseUrl}${path}`;
-  }
-
-  return `${apiBaseUrl}/api/${path}`;
+  return joinApiUrl(resolveServerApiBaseUrl(), path);
 }
 
 async function buildServerHeaders(init: RequestInit | undefined): Promise<Headers> {

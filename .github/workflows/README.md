@@ -16,6 +16,9 @@ release/
   webapp.yml               -> release-webapp.yml    webapp-X.Y.Z tags
   extension.yml            -> release-extension.yml ext-X.Y.Z tags
 
+smoke/
+  bondery-stack.yml        -> smoke-bondery-stack.yml  tag-triggered compose smoke
+
 shared/
   prepare-dockerignore/    -> .github/actions/shared/prepare-dockerignore/
   ghcr-login/              -> .github/actions/shared/ghcr-login/

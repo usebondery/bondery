@@ -38,7 +38,7 @@ The full key is shown **once**. Store it somewhere safe (e.g. a secrets manager)
 Each account can have up to **5** API keys. Deleting a key takes effect immediately.
 
 {% hint style="info" %}
-**Local development:** API env setup (`PRIVATE_API_KEY_PEPPER`, `PRIVATE_SUPABASE_JWT_SIGNING_JWK`, local `signing_keys.json`) is documented in [Local development setup → API keys](../contributing/local-setup.md#api-keys-long-lived-integration-tokens).
+**Local development:** API env setup (`BONDERY_PRIVATE_API_KEY_PEPPER`, `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK`, local `signing_keys.json`) is documented in [Local development setup → API keys](../contributing/local-setup.md#api-keys-long-lived-integration-tokens).
 {% endhint %}
 
 ### Send the key

@@ -35,11 +35,11 @@ export const meFeedbackRoutes: AppRoutePlugin = async (fastify) => {
 
       await sendFeedbackEmail(
         {
-          address: fastify.config.PRIVATE_EMAIL_ADDRESS,
-          host: fastify.config.PRIVATE_EMAIL_HOST,
-          pass: fastify.config.PRIVATE_EMAIL_PASS,
-          port: Number(fastify.config.PRIVATE_EMAIL_PORT),
-          user: fastify.config.PRIVATE_EMAIL_USER,
+          address: fastify.config.BONDERY_PRIVATE_EMAIL_ADDRESS,
+          host: fastify.config.BONDERY_PRIVATE_EMAIL_HOST,
+          pass: fastify.config.BONDERY_PRIVATE_EMAIL_PASS,
+          port: Number(fastify.config.BONDERY_PRIVATE_EMAIL_PORT),
+          user: fastify.config.BONDERY_PRIVATE_EMAIL_USER,
         },
         {
           generalFeedback,

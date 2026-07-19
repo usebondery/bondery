@@ -1,4 +1,5 @@
 import { type WebappRuntimeConfig, webappRuntimeConfigSchema } from "@bondery/schemas";
+import { normalizeApiBaseUrl } from "@/lib/api/resolveServerApiUrl";
 import {
   WEBAPP_RUNTIME_BUILD_PLACEHOLDERS,
   WEBAPP_RUNTIME_ENV,
@@ -19,14 +20,6 @@ function requireValue(name: string, value: string | undefined): string {
   return value;
 }
 
-/**
- * Normalize API base URL to origin-only format.
- * Prevents accidental `/api/api/...` requests when configured with a trailing `/api`.
- */
-function normalizeApiBaseUrl(rawUrl: string): string {
-  return rawUrl.replace(/\/+$/, "").replace(/\/api$/, "");
-}
-
 export function buildWebappRuntimeConfigFromEnv(): WebappRuntimeConfig {
   const apiBaseUrl = normalizeApiBaseUrl(
     requireValue(WEBAPP_RUNTIME_ENV.apiUrl, runtimeEnv(WEBAPP_RUNTIME_ENV.apiUrl)),
@@ -34,7 +27,7 @@ export function buildWebappRuntimeConfigFromEnv(): WebappRuntimeConfig {
 
   const config = {
     apiBaseUrl,
-    gitSha: runtimeEnv("BONDERY_GIT_SHA") ?? runtimeEnv("GIT_SHA"),
+    gitSha: runtimeEnv("BONDERY_INFRA_GIT_SHA"),
     posthogHost: runtimeEnv(WEBAPP_RUNTIME_ENV.posthogHost),
     posthogKey: runtimeEnv(WEBAPP_RUNTIME_ENV.posthogKey),
     runtimeConfigVersion: 1,
@@ -46,7 +39,7 @@ export function buildWebappRuntimeConfigFromEnv(): WebappRuntimeConfig {
       WEBAPP_RUNTIME_ENV.supabaseUrl,
       runtimeEnv(WEBAPP_RUNTIME_ENV.supabaseUrl),
     ),
-    version: runtimeEnv("BONDERY_VERSION") ?? runtimeEnv("npm_package_version"),
+    version: runtimeEnv("BONDERY_INFRA_VERSION") ?? runtimeEnv("npm_package_version"),
     webappUrl: requireValue(WEBAPP_RUNTIME_ENV.webappUrl, runtimeEnv(WEBAPP_RUNTIME_ENV.webappUrl)),
     websiteUrl: requireValue(
       WEBAPP_RUNTIME_ENV.websiteUrl,

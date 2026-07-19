@@ -40,3 +40,17 @@ export async function signOutServerSession(): Promise<void> {
   const supabase = await createServerSupabaseClient();
   await supabase.auth.signOut();
 }
+
+/** Clears auth cookies only when a session cookie exists but fails verification. */
+export async function signOutStaleServerSession(): Promise<void> {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    return;
+  }
+
+  await supabase.auth.signOut();
+}

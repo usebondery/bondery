@@ -1,0 +1,19 @@
+# Optional: publish host ports when you are NOT using Traefik/Dokploy.
+# Copy to docker-compose.override.yml in this directory:
+#
+#   cp docker-compose.override.yml.example docker-compose.override.yml
+#
+# Then: docker compose up -d
+# Reach API at http://localhost:26631 and webapp at http://localhost:26632.
+#
+# You still need: docker network create dokploy-network
+# (services declare that network for Traefik-compatible labels; labels are inert without Traefik.)
+
+services:
+  api:
+    ports:
+      - "26631:26631"
+
+  webapp:
+    ports:
+      - "26632:26632"

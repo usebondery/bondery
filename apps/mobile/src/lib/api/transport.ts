@@ -6,7 +6,7 @@ import { resolveFetchFailureMessage } from "./parseApiErrorBody";
 export async function getBearerHeaders(): Promise<Record<string, string>> {
   if (!supabase) {
     throw new Error(
-      "Missing mobile env config. Set EXPO_PUBLIC_API_URL, EXPO_PUBLIC_SUPABASE_URL, and EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
+      "Missing mobile env config. Set BONDERY_PUBLIC_API_URL, BONDERY_PUBLIC_SUPABASE_URL, and BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY.",
     );
   }
 
@@ -65,7 +65,7 @@ export async function throwApiResponseError(params: {
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   if (!API_URL) {
-    throw new Error("EXPO_PUBLIC_API_URL is not configured");
+    throw new Error("BONDERY_PUBLIC_API_URL is not configured");
   }
 
   const authHeaders = await getBearerHeaders();

@@ -1,12 +1,12 @@
-/// <reference types="@bondery/translations/generated/i18next-cli/i18next.d" />
+/// <reference types="wxt/client-types" />
 
-// Augment ImportMetaEnv to declare WXT_ environment variables.
-// WXT/Vite injects these at build time from .env.[mode].local files.
+// Augment ImportMetaEnv to declare BONDERY_PUBLIC_ environment variables.
 interface ImportMetaEnv {
-  readonly WXT_API_URL: string;
-  readonly WXT_SUPABASE_OAUTH_CLIENT_ID: string;
-  readonly WXT_SUPABASE_URL: string;
-  readonly WXT_WEBAPP_URL: string;
+  readonly BONDERY_PUBLIC_API_URL: string;
+  readonly BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID: string;
+  readonly BONDERY_PUBLIC_SUPABASE_URL: string;
+  readonly BONDERY_PUBLIC_WEBAPP_URL: string;
+  readonly WXT_DEBUG?: string;
 }
 
 interface ImportMeta {

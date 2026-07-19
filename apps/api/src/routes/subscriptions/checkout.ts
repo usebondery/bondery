@@ -46,10 +46,10 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const { client, user } = getAuth(request);
-      const productId = fastify.config.POLAR_PRODUCT_ID;
+      const productId = fastify.config.BONDERY_PUBLIC_POLAR_PRODUCT_ID;
 
       if (!productId) {
-        request.log.error("POLAR_PRODUCT_ID is not configured");
+        request.log.error("BONDERY_PUBLIC_POLAR_PRODUCT_ID is not configured");
         throw internal("checkout_not_configured");
       }
 
@@ -73,7 +73,7 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
         const polar = getPolarClient();
         const session = await polar.checkouts.create({
           customerEmail: user.email ?? undefined,
-          embedOrigin: fastify.config.NEXT_PUBLIC_WEBAPP_URL,
+          embedOrigin: fastify.config.BONDERY_PUBLIC_WEBAPP_URL,
           externalCustomerId: user.id,
           locale: sanitizePolarLocale(settings?.language ?? null),
           products: [productId],

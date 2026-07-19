@@ -26,7 +26,7 @@ function buildEmbed(post: PostMeta, postUrl: string): DiscordEmbed {
  *
  * @param post - The PostMeta object for the blog post to announce.
  * @param postUrl - The canonical URL of the published blog post.
- * @param webhookUrl - The Discord webhook URL (from PRIVATE_DISCORD_WEBHOOK_URL secret).
+ * @param webhookUrl - The Discord webhook URL (from BONDERY_OPS_DISCORD_WEBHOOK_URL secret).
  * @param dryRun - When true, logs the payload to stdout without sending.
  *
  */

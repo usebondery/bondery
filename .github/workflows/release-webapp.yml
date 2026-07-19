@@ -40,8 +40,8 @@ jobs:
       oci_version: ${{ needs.validate.outputs.version }}
       git_sha: ${{ github.sha }}
       build_args: |
-        BONDERY_GIT_SHA=${{ github.sha }}
-        BONDERY_VERSION=${{ needs.validate.outputs.version }}
+        BONDERY_INFRA_GIT_SHA=${{ github.sha }}
+        BONDERY_INFRA_VERSION=${{ needs.validate.outputs.version }}
 
   github-release:
     needs: [validate, build-push]

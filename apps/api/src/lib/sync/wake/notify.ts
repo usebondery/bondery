@@ -29,7 +29,7 @@ function isWakeEnabled(): boolean {
 }
 
 export function createSyncWakeRuntime(log?: FastifyBaseLogger): SyncWakeRuntime {
-  const redisUrl = process.env.PRIVATE_REDIS_URL?.trim() ?? "";
+  const redisUrl = process.env.BONDERY_PRIVATE_REDIS_URL?.trim() ?? "";
   const hub = new SyncConnectionHub(log);
   const commands = getRedisCommands(redisUrl || undefined);
   const subscriber = getRedisSubscriber(redisUrl || undefined);

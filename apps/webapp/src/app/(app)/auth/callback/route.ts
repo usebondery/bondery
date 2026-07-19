@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { LOCALE_PREFS_COOKIE } from "@/lib/auth/detectLocale";
 import { parseReturnIntent, shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
+import { isSupabaseAuthCode } from "@/lib/auth/supabaseAuthCode";
 import {
   buildWebappRuntimeConfigFromEnv,
   getWebappPublicOrigin,
@@ -91,6 +92,14 @@ export async function GET(request: Request) {
     : `${webappOrigin}${WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}`;
 
   if (code) {
+    if (!isSupabaseAuthCode(code)) {
+      // biome-ignore lint/suspicious/noConsole: auth failure diagnostics in route handler
+      console.error(
+        "[auth/callback] Ignored non-Supabase OAuth code — check GitHub OAuth app callback URL points to Supabase, not the webapp",
+      );
+      return NextResponse.redirect(`${webappOrigin}${WEBAPP_ROUTES.LOGIN}`);
+    }
+
     const cookieStore = await cookies();
     const response = NextResponse.redirect(postLoginUrl);
 
@@ -110,6 +119,11 @@ export async function GET(request: Request) {
     });
 
     const { error } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      // biome-ignore lint/suspicious/noConsole: auth failure diagnostics in route handler
+      console.error(`[auth/callback] exchangeCodeForSession failed: ${error.message}`);
+    }
 
     if (!error) {
       const {

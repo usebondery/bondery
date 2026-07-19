@@ -14,25 +14,26 @@ import logger from "../platform/logger.js";
  * These will be validated by @fastify/env at startup
  */
 function getSupabaseConfig() {
-  const NEXT_PUBLIC_SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const PUBLIC_SUPABASE_PUBLISHABLE_KEY = process.env.PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-  const PRIVATE_SUPABASE_SECRET_KEY = process.env.PRIVATE_SUPABASE_SECRET_KEY;
+  const BONDERY_PUBLIC_SUPABASE_URL = process.env.BONDERY_PUBLIC_SUPABASE_URL;
+  const BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY =
+    process.env.BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const BONDERY_PRIVATE_SUPABASE_SECRET_KEY = process.env.BONDERY_PRIVATE_SUPABASE_SECRET_KEY;
 
-  if (!NEXT_PUBLIC_SUPABASE_URL) {
+  if (!BONDERY_PUBLIC_SUPABASE_URL) {
     throw new Error(
       "Missing required Supabase environment variables. " +
-        "Ensure NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, and PRIVATE_SUPABASE_SECRET_KEY are set.",
+        "Ensure BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY, and BONDERY_PRIVATE_SUPABASE_SECRET_KEY are set.",
     );
-  } else if (!PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
-    throw new Error("Missing PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variable.");
-  } else if (!PRIVATE_SUPABASE_SECRET_KEY) {
-    throw new Error("Missing PRIVATE_SUPABASE_SECRET_KEY environment variable.");
+  } else if (!BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    throw new Error("Missing BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY environment variable.");
+  } else if (!BONDERY_PRIVATE_SUPABASE_SECRET_KEY) {
+    throw new Error("Missing BONDERY_PRIVATE_SUPABASE_SECRET_KEY environment variable.");
   }
 
   return {
-    NEXT_PUBLIC_SUPABASE_URL,
-    PRIVATE_SUPABASE_SECRET_KEY,
-    PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    BONDERY_PRIVATE_SUPABASE_SECRET_KEY,
+    BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    BONDERY_PUBLIC_SUPABASE_URL,
   };
 }
 
@@ -40,16 +41,20 @@ function getSupabaseConfig() {
  * Creates an anonymous Supabase client (for public endpoints)
  */
 export function createAnonClient(): SupabaseClient<Database> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
-  return createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
+  const { BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
+    getSupabaseConfig();
+  return createClient<Database>(
+    BONDERY_PUBLIC_SUPABASE_URL,
+    BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+  );
 }
 
 /**
  * Creates an admin Supabase client (for privileged operations)
  */
 export function createAdminClient(): SupabaseClient<Database> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
-  return createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PRIVATE_SUPABASE_SECRET_KEY);
+  const { BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
+  return createClient<Database>(BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PRIVATE_SUPABASE_SECRET_KEY);
 }
 
 /**
@@ -118,8 +123,8 @@ function getAuthTokensFromCookies(request: FastifyRequest): {
   accessToken?: string;
   refreshToken?: string;
 } {
-  const { NEXT_PUBLIC_SUPABASE_URL } = getSupabaseConfig();
-  const projectRef = getSupabaseProjectRef(NEXT_PUBLIC_SUPABASE_URL);
+  const { BONDERY_PUBLIC_SUPABASE_URL } = getSupabaseConfig();
+  const projectRef = getSupabaseProjectRef(BONDERY_PUBLIC_SUPABASE_URL);
 
   // First try Fastify's parsed cookies (from browser requests)
   let cookies = request.cookies || {};
@@ -200,7 +205,8 @@ export async function createAuthenticatedClient(
   user: { id: string; email: string } | null;
   authError?: string;
 }> {
-  const { NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
+  const { BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
+    getSupabaseConfig();
   const { accessToken: cookieToken } = getAuthTokensFromCookies(request);
   const accessToken = accessTokenOverride ?? cookieToken;
 
@@ -210,15 +216,19 @@ export async function createAuthenticatedClient(
   // PKCE flow). Both are valid Supabase JWTs but the OAuth refresh token is NOT
   // interchangeable with Supabase's internal session refresh token, so setSession()
   // would fail for the extension flow.
-  const client = createClient<Database>(NEXT_PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
+  const client = createClient<Database>(
+    BONDERY_PUBLIC_SUPABASE_URL,
+    BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+      global: {
+        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      },
     },
-    global: {
-      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    },
-  });
+  );
 
   if (!accessToken) {
     return { client, user: null };

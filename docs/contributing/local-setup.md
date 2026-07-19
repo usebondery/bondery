@@ -2,6 +2,17 @@
 
 This guide walks you through setting up the full Bondery development environment on your machine. The recommended order follows the dependency chain: database first, then API, then the apps (including mobile pull sync).
 
+**Environment variables:** edit root `.env.local` once, then sync — see [Environment configuration](environment.md).
+
+```bash
+npm install
+npm run setup:dev
+# edit .env.local (OAuth / optional integrations)
+cd apps/supabase-db && npm run dev
+npm run env
+npm run dev
+```
+
 ## Prerequisites
 
 Make sure the following tools are installed before you begin:
@@ -21,9 +32,10 @@ For mobile development you also need Expo tooling (installed via root `npm insta
 git clone https://github.com/usebondery/bondery.git
 cd bondery
 npm install
+npm run setup:dev
 ```
 
-This installs dependencies for all apps and packages in the monorepo in a single pass.
+This installs dependencies for all apps and packages in the monorepo in a single pass, then creates root `.env.local` from the example.
 
 ---
 
@@ -33,19 +45,7 @@ The local Supabase instance is the foundation everything else connects to. Start
 
 ### Environment variables
 
-Copy the example file and fill in your GitHub and LinkedIn OAuth credentials. These are required for social login to work:
-
-**macOS / Linux:**
-```bash
-cp apps/supabase-db/.env.local.example apps/supabase-db/.env.local
-```
-
-**Windows (PowerShell):**
-```powershell
-Copy-Item apps/supabase-db/.env.local.example apps/supabase-db/.env.local
-```
-
-The example file is at [apps/supabase-db/.env.local.example](../../apps/supabase-db/.env.local.example). Fill in `SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID`, `SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET`, `SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID`, and `SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET` with credentials from your GitHub and LinkedIn OAuth apps.
+OAuth client ids/secrets for local Auth live in root `.env.local` (keys `BONDERY_SUPABASE_AUTH_EXTERNAL_*`). After editing, run `npm run env` so `apps/supabase-db/.env.local` is updated. See [Environment configuration](environment.md).
 
 > **No OAuth credentials yet?** The app will still start and run — email/password login will work. Social login buttons will fail until the provider credentials are filled in.
 
@@ -59,21 +59,19 @@ npm run start
 
 This starts a local Supabase stack via Docker (PostgreSQL, GoTrue auth, Storage, etc.) and applies all migrations automatically.
 
-Once running, note the output values — you will need them for the other apps:
+Then from the repo root:
 
-```
-API URL:      http://127.0.0.1:54321
-anon key:     <SUPABASE_PUBLISHABLE_KEY>
-service_role: <SUPABASE_SECRET_KEY>
+```bash
+npm run env   # pull Supabase keys (if up) → sync apps → check root
 ```
 
-You can also retrieve these at any time with:
+You can also retrieve status at any time with:
 
 ```bash
 npx supabase status --output json
 ```
 
-For API keys locally, you also need ES256 JWT signing keys configured — see [API server → API keys](#api-keys-long-lived-integration-tokens) (generate with `npx supabase gen signing-key`, not the legacy `JWT_SECRET` field).
+For API keys locally, you also need ES256 JWT signing keys configured — see [API server → API keys](#api-keys-long-lived-integration-tokens) (generate with `npx supabase gen signing-key`, not the legacy `JWT_SECRET` field). Put `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` in root `.env.local` (compact single-line JSON), then `npm run env`.
 
 ### Useful commands
 
@@ -97,40 +95,28 @@ For a fresh local DB: `npm run reset` in `apps/supabase-db`, then `npm run gen-t
 
 ### Environment variables
 
-Copy the example file and fill in your Supabase keys from step 2:
+Prefer root `.env.local` + `npm run env` (see [Environment configuration](environment.md)). That writes `apps/api/.env.development.local`.
 
-**macOS / Linux:**
-```bash
-cp apps/api/.env.development.example apps/api/.env.development.local
-```
-
-**Windows (PowerShell):**
-```powershell
-Copy-Item apps/api/.env.development.example apps/api/.env.development.local
-```
-
-The example file is at [apps/api/.env.development.example](../../apps/api/.env.development.example). Replace the Supabase `NEXT_PUBLIC_SUPABASE_URL`, `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `PRIVATE_SUPABASE_SECRET_KEY` values with the output from `npx supabase status --output json` (`API_URL`, `PUBLISHABLE_KEY`, and `SECRET_KEY`).
-
-Also set `PRIVATE_API_KEY_PEPPER` and `PRIVATE_SUPABASE_JWT_SIGNING_JWK` — see [API keys (long-lived integration tokens)](#api-keys-long-lived-integration-tokens) below.
+Also set `BONDERY_PRIVATE_API_KEY_PEPPER` and `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` in root `.env.local` — see [API keys (long-lived integration tokens)](#api-keys-long-lived-integration-tokens) below.
 
 For mobile sync, set CORS for Expo web if needed:
 
 ```text
-EXTRA_ALLOWED_ORIGINS=http://localhost:26634
+BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS=http://localhost:26634
 ```
 
-See [Mobile sync (Postgres changelog)](#mobile-sync-postgres-changelog). `EXTRA_ALLOWED_ORIGINS` allows Expo web dev server CORS when testing mobile web.
+See [Mobile sync (Postgres changelog)](#mobile-sync-postgres-changelog). `BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS` allows Expo web dev server CORS when testing mobile web.
 
 #### Redis
 
 Redis powers **rate limiting**, **mobile sync wake** (pub/sub), and **WebSocket ticket** storage in the API. Local Docker Redis is the **default** for development (same Docker prerequisite as Supabase).
 
-| Mode | `PRIVATE_REDIS_URL` | When to use |
+| Mode | `BONDERY_PRIVATE_REDIS_URL` | When to use |
 |------|---------------------|-------------|
 | **Local Docker (default)** | `redis://127.0.0.1:26636` | Normal local API work — matches production behavior |
 | **In-memory** | empty / unset | Quick feature work without starting Redis |
 
-In **production** (Hetzner), `PRIVATE_REDIS_URL` is **required**. The health probe at `GET /health` reports Redis status when configured.
+In **production** (Hetzner), `BONDERY_PRIVATE_REDIS_URL` is **required**. The health probe at `GET /health` reports Redis status when configured.
 
 ##### Quick start — local Docker Redis
 
@@ -151,26 +137,26 @@ docker exec bondery-redis redis-cli ping
 Wire the API in `apps/api/.env.development.local` (also the default in `.env.development.example`):
 
 ```text
-PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
+BONDERY_PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
 ```
 
 Port **26636** is `DEV_PORTS.REDIS` / `DEV_REDIS_URL` in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts). Stop with `npm run stop -w redis`.
 
 ##### In-memory mode (no Redis)
 
-Set `PRIVATE_REDIS_URL=""` (or remove the line). The API uses in-memory rate-limit and sync-wake stores — fine for single-process webapp work when you skip starting Redis.
+Set `BONDERY_PRIVATE_REDIS_URL=""` (or remove the line). The API uses in-memory rate-limit and sync-wake stores — fine for single-process webapp work when you skip starting Redis.
 
 > **Do not** leave a dead cloud URL (e.g. deleted Upstash) in `.env.development.local`. The API will try to connect on startup and fail with `ENOTFOUND` / `Connection is closed`.
 
 ##### Production / self-host
 
-Use the canonical stack in [`deploy/api/`](../../deploy/api/) (API + bundled Redis). Default:
+Use the canonical stack in [`deploy/bondery/`](../../deploy/bondery/) (webapp + API + bundled Redis). Default:
 
 ```text
-PRIVATE_REDIS_URL="redis://redis:6379"
+BONDERY_PRIVATE_REDIS_URL="redis://redis:6379"
 ```
 
-External Redis (Path B) and Dokploy cutover: [docs/deploy/api-container.md](../deploy/api-container.md).
+External Redis and Dokploy cutover: [docs/deploy/dokploy.md](../deploy/dokploy.md) · [docs/deploy/api-container.md](../deploy/api-container.md).
 
 #### API keys (long-lived integration tokens)
 
@@ -178,10 +164,10 @@ These variables are **required** for the API server to start. They power [long-l
 
 | Variable | Purpose |
 |---|---|
-| `PRIVATE_API_KEY_PEPPER` | Server secret mixed into API key hashes before storage. Use a random value **at least 32 characters** (e.g. `openssl rand -hex 32`). Not the key itself. |
-| `PRIVATE_SUPABASE_JWT_SIGNING_JWK` | ES256 **private** JWK (full JSON, one line). Used internally to mint short-lived user JWTs after an API key is validated so Postgres RLS still applies. Never exposed to clients. |
+| `BONDERY_PRIVATE_API_KEY_PEPPER` | Server secret mixed into API key hashes before storage. Use a random value **at least 32 characters** (e.g. `openssl rand -hex 32`). Not the key itself. |
+| `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` | ES256 **private** JWK (full JSON, one line). Used internally to mint short-lived user JWTs after an API key is validated so Postgres RLS still applies. Never exposed to clients. |
 
-**Do not confuse** `PRIVATE_SUPABASE_JWT_SIGNING_JWK` with `PRIVATE_SUPABASE_SECRET_KEY` (`sb_secret_…`). The secret key bypasses RLS; the signing JWK only lets the API act as a specific user for that request.
+**Do not confuse** `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` with `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` (`sb_secret_…`). The secret key bypasses RLS; the signing JWK only lets the API act as a specific user for that request.
 
 ##### 1. Generate an ES256 signing key
 
@@ -247,10 +233,10 @@ In `apps/api/.env.development.local`:
 
 ```text
 # Random secret, at least 32 characters — run: openssl rand -hex 32
-PRIVATE_API_KEY_PEPPER=<your-pepper>
+BONDERY_PRIVATE_API_KEY_PEPPER=<your-pepper>
 
 # Same private JWK as signing_keys.json — minified to one line (single object, not the array)
-PRIVATE_SUPABASE_JWT_SIGNING_JWK={"kty":"EC","kid":"<kid>","use":"sig","alg":"ES256","crv":"P-256","d":"<d>","x":"<x>","y":"<y>"}
+BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK={"kty":"EC","kid":"<kid>","use":"sig","alg":"ES256","crv":"P-256","d":"<d>","x":"<x>","y":"<y>"}
 ```
 
 **Two shapes, same key:**
@@ -258,11 +244,11 @@ PRIVATE_SUPABASE_JWT_SIGNING_JWK={"kty":"EC","kid":"<kid>","use":"sig","alg":"ES
 | Location | JSON shape |
 |---|---|
 | `supabase/signing_keys.json` | **Array:** `[{ … }]` |
-| `PRIVATE_SUPABASE_JWT_SIGNING_JWK` | **Single object:** `{ … }` (first element of the array) |
+| `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` | **Single object:** `{ … }` (first element of the array) |
 
 Copy the first object from `signing_keys.json` and minify it to a single line for the env value.
 
-Keep `PRIVATE_API_KEY_PEPPER` stable. If you change it after creating keys, existing keys stop working — create new keys after rotating the pepper.
+Keep `BONDERY_PRIVATE_API_KEY_PEPPER` stable. If you change it after creating keys, existing keys stop working — create new keys after rotating the pepper.
 
 Restart the API after changing either env var (`npm run dev` in `apps/api`).
 
@@ -285,11 +271,11 @@ The API returns the same message for two different failures. Check API logs whil
 
 | Log / symptom | Likely cause | Fix |
 |---|---|---|
-| No extra log; key was just created | Hash mismatch — `PRIVATE_API_KEY_PEPPER` changed since the key was created, or API was not restarted after env edits | Keep pepper stable, restart API, create a **new** key |
-| `API key hash valid but session could not be established` | JWT signing mismatch — `PRIVATE_SUPABASE_JWT_SIGNING_JWK` does not match `signing_keys.json`, or local Auth does not trust the key | Confirm `kid` in env JWK appears in `http://127.0.0.1:54321/auth/v1/.well-known/jwks.json`; restart Supabase after editing `signing_keys.json` |
-| `No suitable key or wrong key type` (often `PGRST301`) | API key hash passed, but minted JWT `kid` does not match Supabase JWKS — PostgREST cannot verify the token | Re-copy the **first object** from `apps/supabase-db/supabase/signing_keys.json` into `PRIVATE_SUPABASE_JWT_SIGNING_JWK` (one line). JWKS `kid` and `x` must match. Restart API after env change. |
+| No extra log; key was just created | Hash mismatch — `BONDERY_PRIVATE_API_KEY_PEPPER` changed since the key was created, or API was not restarted after env edits | Keep pepper stable, restart API, create a **new** key |
+| `API key hash valid but session could not be established` | JWT signing mismatch — `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` does not match `signing_keys.json`, or local Auth does not trust the key | Confirm `kid` in env JWK appears in `http://127.0.0.1:54321/auth/v1/.well-known/jwks.json`; restart Supabase after editing `signing_keys.json` |
+| `No suitable key or wrong key type` (often `PGRST301`) | API key hash passed, but minted JWT `kid` does not match Supabase JWKS — PostgREST cannot verify the token | Re-copy the **first object** from `apps/supabase-db/supabase/signing_keys.json` into `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` (one line). JWKS `kid` and `x` must match. Restart API after env change. |
 | API fails to start with JWKS kid message | Same mismatch caught at startup | Update env JWK from current `signing_keys.json`; do not use an old `supabase gen signing-key` output if you regenerated the file |
-| `getUser error` with issuer complaint | `NEXT_PUBLIC_SUPABASE_URL` uses `localhost` but local Auth issues tokens for `127.0.0.1` | Set `NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` in `apps/api/.env.development.local` (the API normalizes this for minted JWTs, but matching the example avoids surprises) |
+| `getUser error` with issuer complaint | `BONDERY_PUBLIC_SUPABASE_URL` uses `localhost` but local Auth issues tokens for `127.0.0.1` | Set `BONDERY_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` in `apps/api/.env.development.local` (the API normalizes this for minted JWTs, but matching the example avoids surprises) |
 | After `db reset` | Stale Supabase keys in `.env` | Re-copy `API_URL`, `PUBLISHABLE_KEY`, and `SECRET_KEY` from `npx supabase status --output json` into **both** `apps/api` and `apps/webapp` env files, restart services |
 
 Diagnostic script (from `apps/api`, uses `.api-key-test.local` from `scripts/bootstrap-local-api-key.ts` or pass a key as the first argument):
@@ -302,7 +288,7 @@ tsx --env-file=.env.development.local scripts/diagnose-api-key.ts
 
 Use the **same private JWK** in your deployment secrets, and **import** that key in the Supabase dashboard under **JWT Signing Keys** (standby → rotate when ready). Local `signing_keys.json` is only for the Docker stack on your machine.
 
-Do not commit `signing_keys.json`, the JWK env value, or `PRIVATE_API_KEY_PEPPER` to git.
+Do not commit `signing_keys.json`, the JWK env value, or `BONDERY_PRIVATE_API_KEY_PEPPER` to git.
 
 ### Start
 
@@ -319,19 +305,7 @@ The API server starts on **port 26631** with hot reload enabled.
 
 ### Environment variables
 
-Copy the example file and fill in your Supabase keys from step 2:
-
-**macOS / Linux:**
-```bash
-cp apps/webapp/.env.development.example apps/webapp/.env.development.local
-```
-
-**Windows (PowerShell):**
-```powershell
-Copy-Item apps/webapp/.env.development.example apps/webapp/.env.development.local
-```
-
-The example file is at [apps/webapp/.env.development.example](../../apps/webapp/.env.development.example). Replace `BONDERY_PUBLIC_SUPABASE_URL` and `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` with the values from `npx supabase status`.
+Filled by `npm run env` into `apps/webapp/.env.development.local` — see [Environment configuration](environment.md).
 
 ### Start
 
@@ -346,7 +320,7 @@ The webapp starts on **port 26632**. Open [http://localhost:26632](http://localh
 
 ## 5. Marketing website (`apps/website`)
 
-The website has no env example file — no variables are needed for local development beyond the defaults already in `next.config.ts`.
+Uses `BONDERY_PUBLIC_WEBAPP_URL` / `BONDERY_PUBLIC_WEBSITE_URL` from env sync (client-bundled via `next.config.ts`).
 
 ### Start
 
@@ -363,19 +337,7 @@ The website starts on **port 26630**. Open [http://localhost:26630](http://local
 
 ### Environment variables
 
-Copy the example file:
-
-**macOS / Linux:**
-```bash
-cp apps/chrome-extension/.env.development.example apps/chrome-extension/.env.development.local
-```
-
-**Windows (PowerShell):**
-```powershell
-Copy-Item apps/chrome-extension/.env.development.example apps/chrome-extension/.env.development.local
-```
-
-The example file is at [apps/chrome-extension/.env.development.example](../../apps/chrome-extension/.env.development.example). You will need to fill in `WXT_SUPABASE_OAUTH_CLIENT_ID` — see below.
+Filled by `npm run env`. Set `BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID` in root `.env.local` — see below and [Environment configuration](environment.md).
 
 #### Getting the OAuth client ID
 
@@ -400,7 +362,7 @@ $body = @{
 Invoke-RestMethod -Method POST -Uri "$base/auth/v1/admin/oauth/clients" -Headers ($headers + @{'Content-Type'='application/json'}) -Body $body | ConvertTo-Json -Depth 8
 ```
 
-Copy the returned `client_id` into `WXT_SUPABASE_OAUTH_CLIENT_ID` in your `.env.development.local`.
+Copy the returned `client_id` into `BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID` in your `.env.development.local`.
 
 ### Start
 
@@ -422,53 +384,11 @@ Run the mobile app against your local Supabase and API stack, including offline 
 
 ### Environment variables
 
-Copy the example file:
+Filled by `npm run env` into `apps/mobile/.env.local` (`BONDERY_PUBLIC_*`). See [Environment configuration](environment.md). Expo loads those into `app.config.ts` `extra`.
 
-**macOS / Linux:**
-```bash
-cp apps/mobile/.env.example apps/mobile/.env.local
-```
+#### Physical device on the same Wi‑Fi
 
-**Windows (PowerShell):**
-```powershell
-Copy-Item apps/mobile/.env.example apps/mobile/.env.local
-```
-
-The example is at [apps/mobile/.env.example](../../apps/mobile/.env.example). `npm run dev` runs `check-env` and reads `.env.local` before starting Metro.
-
-#### Required variables
-
-| Variable | Description |
-|---|---|
-| `EXPO_PUBLIC_API_URL` | API base URL **without** `/api` suffix (e.g. `http://127.0.0.1:26631`) |
-| `EXPO_PUBLIC_SUPABASE_URL` | Supabase project URL (local: `http://127.0.0.1:54321`) |
-| `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase anon/publishable key from `npx supabase status` |
-
-#### Optional variables
-
-| Variable | Description |
-|---|---|
-| `EXPO_PUBLIC_WEBSITE_URL` | Legal links on the login screen (default `https://usebondery.com`) |
-| `METRO_MAX_WORKERS` | Cap Metro workers if you hit `EMFILE` (try `4`, then `2`) |
-
-#### Example — emulator / simulator
-
-```text
-EXPO_PUBLIC_API_URL=http://127.0.0.1:26631
-EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
-EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
-EXPO_PUBLIC_WEBSITE_URL=http://localhost:26630
-```
-
-#### Example — physical device on the same Wi‑Fi
-
-Replace `127.0.0.1` with your machine's LAN IP (e.g. `192.168.1.42`). The phone cannot reach your laptop's loopback interface.
-
-```text
-EXPO_PUBLIC_API_URL=http://192.168.1.42:26631
-EXPO_PUBLIC_SUPABASE_URL=http://192.168.1.42:54321
-EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_<your-key>
-```
+In root `.env.local`, replace `127.0.0.1` / `localhost` with your machine's LAN IP (e.g. `192.168.1.42`) for API and Supabase URLs, then `npm run env`. The phone cannot reach your laptop's loopback interface.
 
 Also ensure Supabase and the API are reachable on the LAN and your firewall allows inbound connections on ports `26631` and `54321`.
 
@@ -514,7 +434,7 @@ npm run ios             # iOS Simulator or device
 
 If sync requests return **426**, protocol or SQLite schema versions are mismatched — rebuild the app after pulling API/mobile changes.
 
-If bootstrap or pull return **401**, confirm the mobile session token and API `PUBLIC_SUPABASE_*` keys match your local Supabase instance.
+If bootstrap or pull return **401**, confirm the mobile session token and API `BONDERY_PUBLIC_SUPABASE_*` keys match your local Supabase instance.
 
 ### Mobile useful commands
 
@@ -530,7 +450,7 @@ If bootstrap or pull return **401**, confirm the mobile session token and API `P
 
 | Issue | Fix |
 |---|---|
-| `Missing EXPO_PUBLIC_*` on start | Create `apps/mobile/.env.local` from `.env.example` |
+| `Missing BONDERY_PUBLIC_*` on start | Run `npm run env` from the repo root (or `npm run setup:dev`) |
 | Network request failed on device | Use LAN IP, not `127.0.0.1`; check firewall |
 | Empty contacts after login | API not running, or bootstrap failed — check API logs and mobile sync headers |
 | OAuth redirect fails | Supabase OAuth redirect URLs must include the Expo/dev client scheme |

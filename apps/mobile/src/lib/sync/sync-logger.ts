@@ -1,10 +1,10 @@
 import type { SyncMutation } from "@bondery/schemas/sync";
+import { SYNC_DEBUG } from "@/lib/config";
 
 const LOG_PREFIX = "[sync]";
 
-/** Set EXPO_PUBLIC_SYNC_DEBUG=1 to log every shape batch (including heartbeats). */
-const VERBOSE =
-  process.env.EXPO_PUBLIC_SYNC_DEBUG === "1" || process.env.EXPO_PUBLIC_SYNC_DEBUG === "true";
+/** Set BONDERY_PUBLIC_SYNC_DEBUG=1 to log every shape batch (including heartbeats). */
+const VERBOSE = SYNC_DEBUG;
 
 function summarizeMutations(mutations: SyncMutation[]) {
   return mutations.map((mutation) => ({

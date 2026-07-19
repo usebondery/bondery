@@ -817,6 +817,12 @@
       "node": "./dist/primitives/color/types.js",
       "types": "./src/primitives/color/types.ts"
     },
+    "./runtime-config": {
+      "default": "./dist/runtime-config.js",
+      "import": "./dist/runtime-config.js",
+      "node": "./dist/runtime-config.js",
+      "types": "./src/runtime-config.ts"
+    },
     "./supabase.types": {
       "default": "./dist/supabase.types.js",
       "import": "./dist/supabase.types.js",

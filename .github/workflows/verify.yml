@@ -40,16 +40,23 @@ jobs:
       - name: Check package imports
         run: npm run check-package-imports
 
+      - name: Check env sync (examples + turbo)
+        run: npm run env -- --check
+
       - name: Validate doc links
         run: npm run check-doc-links
 
       - name: Check OpenAPI spec
         run: npm run check-openapi
 
-      - name: Validate API deploy compose
+      - name: Validate Bondery deploy compose
         run: |
-          cp deploy/api/.env.example deploy/api/.env
-          docker compose -f deploy/api/docker-compose.yml config >/dev/null
+          cp deploy/bondery/.env.example deploy/bondery/.env
+          docker compose -f deploy/bondery/docker-compose.yml config >/dev/null
+          node deploy/bondery/scripts/check-compose.mjs
+
+      - name: Webapp runtime config tests
+        run: npm run test:runtime-config -w webapp
 
       - name: Schema contract tests
         run: npm run test:contracts

@@ -25,9 +25,10 @@ const colors = {
 };
 
 /**
- * Parses an .env file and returns key-value pairs
+ * Parses an .env file and returns key-value pairs.
+ * Strips surrounding single/double quotes from values.
  */
-function parseEnvFile(filePath: string): Record<string, string> {
+export function parseEnvFile(filePath: string): Record<string, string> {
   if (!existsSync(filePath)) {
     return {};
   }
@@ -38,10 +39,20 @@ function parseEnvFile(filePath: string): Record<string, string> {
   content.split("\n").forEach((line) => {
     const trimmedLine = line.trim();
     if (trimmedLine && !trimmedLine.startsWith("#")) {
-      const [key, ...valueParts] = trimmedLine.split("=");
-      const value = valueParts.join("=").trim();
-      if (key && value) {
-        env[key.trim()] = value;
+      const eqIndex = trimmedLine.indexOf("=");
+      if (eqIndex <= 0) {
+        return;
+      }
+      const key = trimmedLine.slice(0, eqIndex).trim();
+      let value = trimmedLine.slice(eqIndex + 1).trim();
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+      if (key) {
+        env[key] = value;
       }
     }
   });

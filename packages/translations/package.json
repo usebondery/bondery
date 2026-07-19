@@ -31,6 +31,24 @@
       "node": "./dist/config.js",
       "types": "./src/config.ts"
     },
+    "./generated/i18n/catalog-prefixes": {
+      "default": "./dist/generated/i18n/catalog-prefixes.js",
+      "import": "./dist/generated/i18n/catalog-prefixes.js",
+      "node": "./dist/generated/i18n/catalog-prefixes.js",
+      "types": "./src/generated/i18n/catalog-prefixes.ts"
+    },
+    "./generated/i18n/catalog-types": {
+      "default": "./dist/generated/i18n/catalog-types.js",
+      "import": "./dist/generated/i18n/catalog-types.js",
+      "node": "./dist/generated/i18n/catalog-types.js",
+      "types": "./src/generated/i18n/catalog-types.ts"
+    },
+    "./generated/i18n/namespaces": {
+      "default": "./dist/generated/i18n/namespaces.js",
+      "import": "./dist/generated/i18n/namespaces.js",
+      "node": "./dist/generated/i18n/namespaces.js",
+      "types": "./src/generated/i18n/namespaces.ts"
+    },
     "./generated/i18next-cli/i18next.d": {
       "default": "./dist/generated/i18next-cli/i18next.d.js",
       "import": "./dist/generated/i18next-cli/i18next.d.js",
@@ -54,6 +72,18 @@
       "import": "./dist/i18n.js",
       "node": "./dist/i18n.js",
       "types": "./src/i18n.ts"
+    },
+    "./i18n-types": {
+      "default": "./dist/i18n-types.js",
+      "import": "./dist/i18n-types.js",
+      "node": "./dist/i18n-types.js",
+      "types": "./src/i18n-types.ts"
+    },
+    "./i18next-catalog-augment": {
+      "default": "./dist/i18next-catalog-augment.js",
+      "import": "./dist/i18next-catalog-augment.js",
+      "node": "./dist/i18next-catalog-augment.js",
+      "types": "./src/i18next-catalog-augment.ts"
     },
     "./json-modules.d": {
       "default": "./dist/json-modules.d.js",

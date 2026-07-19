@@ -8,9 +8,9 @@ import {
 } from "./redis.js";
 
 describe("redis shared clients", () => {
-  it("returns undefined when PRIVATE_REDIS_URL is unset", () => {
-    const previous = process.env.PRIVATE_REDIS_URL;
-    delete process.env.PRIVATE_REDIS_URL;
+  it("returns undefined when BONDERY_PRIVATE_REDIS_URL is unset", () => {
+    const previous = process.env.BONDERY_PRIVATE_REDIS_URL;
+    delete process.env.BONDERY_PRIVATE_REDIS_URL;
     resetRedisClientsForTests();
 
     try {
@@ -18,9 +18,9 @@ describe("redis shared clients", () => {
       assert.equal(getRedisSubscriber(), undefined);
     } finally {
       if (previous === undefined) {
-        delete process.env.PRIVATE_REDIS_URL;
+        delete process.env.BONDERY_PRIVATE_REDIS_URL;
       } else {
-        process.env.PRIVATE_REDIS_URL = previous;
+        process.env.BONDERY_PRIVATE_REDIS_URL = previous;
       }
       resetRedisClientsForTests();
     }

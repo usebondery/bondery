@@ -48,10 +48,10 @@ function buildErrorResponse(_request: FastifyRequest, context: { ttl: number }) 
 }
 
 export async function registerRateLimit(fastify: AppFastifyInstance): Promise<void> {
-  const redisUrl = fastify.config.PRIVATE_REDIS_URL;
+  const redisUrl = fastify.config.BONDERY_PRIVATE_REDIS_URL;
   if (process.env.NODE_ENV === "production" && !redisUrl.trim()) {
     throw new Error(
-      "PRIVATE_REDIS_URL must be set in production. In-memory rate limiting is per-instance and ineffective on serverless deployments.",
+      "BONDERY_PRIVATE_REDIS_URL must be set in production. In-memory rate limiting is per-instance and ineffective on serverless deployments.",
     );
   }
 

@@ -70,10 +70,12 @@ export async function polarWebhookRoutes(fastify: FastifyInstance): Promise<void
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
-      const secret = fastify.config.PRIVATE_POLAR_WEBHOOK_SECRET;
+      const secret = fastify.config.BONDERY_PRIVATE_POLAR_WEBHOOK_SECRET;
 
       if (!secret) {
-        request.log.warn("PRIVATE_POLAR_WEBHOOK_SECRET is not configured — rejecting webhook");
+        request.log.warn(
+          "BONDERY_PRIVATE_POLAR_WEBHOOK_SECRET is not configured — rejecting webhook",
+        );
         throw internal("webhook_not_configured");
       }
 

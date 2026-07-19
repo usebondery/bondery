@@ -8,7 +8,7 @@ import { createAnthropic } from "@ai-sdk/anthropic";
  */
 export function getChatModel() {
   const anthropic = createAnthropic({
-    apiKey: process.env.PRIVATE_ANTHROPIC_API_KEY,
+    apiKey: process.env.BONDERY_PRIVATE_ANTHROPIC_API_KEY,
   });
 
   return anthropic("claude-haiku-4-5");

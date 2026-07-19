@@ -31,9 +31,9 @@ export const syncWsRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
   await fastify.register(websocket);
 
   const allowedOrigins = [
-    fastify.config.NEXT_PUBLIC_WEBAPP_URL,
-    fastify.config.NEXT_PUBLIC_WEBSITE_URL,
-    ...fastify.config.EXTRA_ALLOWED_ORIGINS.split(",")
+    fastify.config.BONDERY_PUBLIC_WEBAPP_URL,
+    fastify.config.BONDERY_PUBLIC_WEBSITE_URL,
+    ...fastify.config.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS.split(",")
       .map((value) => value.trim())
       .filter(Boolean),
   ].filter(Boolean);

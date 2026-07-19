@@ -1,7 +1,7 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { resolveServerSession, signOutServerSession } from "@/lib/auth/resolveServerSession";
+import { resolveServerSession, signOutStaleServerSession } from "@/lib/auth/resolveServerSession";
 import { parseReturnIntent, RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
 import { LoginClient } from "./LoginClient";
 
@@ -26,9 +26,8 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     redirect(returnPath ?? WEBAPP_ROUTES.HOME);
   }
 
-  // Drop stale JWT cookies (e.g. user deleted in Supabase) so middleware
-  // getClaims() does not treat the session as live on the next navigation.
-  await signOutServerSession();
+  // Drop stale JWT cookies (e.g. user deleted in Supabase) so they are not retried forever.
+  await signOutStaleServerSession();
 
   return (
     <Suspense fallback={null}>

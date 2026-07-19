@@ -134,7 +134,7 @@ export async function verifyJwtSigningJwkAgainstJwks(
       envKid: null,
       jwksFetchError: null,
       jwksKids: [],
-      message: "PRIVATE_SUPABASE_JWT_SIGNING_JWK must be valid JSON",
+      message: "BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must be valid JSON",
       ok: false,
     };
   }
@@ -144,7 +144,7 @@ export async function verifyJwtSigningJwkAgainstJwks(
       envKid: null,
       jwksFetchError: null,
       jwksKids: [],
-      message: "PRIVATE_SUPABASE_JWT_SIGNING_JWK must include kid",
+      message: "BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must include kid",
       ok: false,
     };
   }
@@ -185,7 +185,7 @@ export async function verifyJwtSigningJwkAgainstJwks(
       jwksFetchError: null,
       jwksKids,
       message:
-        `PRIVATE_SUPABASE_JWT_SIGNING_JWK kid "${envKid}" is not in Supabase JWKS ` +
+        `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK kid "${envKid}" is not in Supabase JWKS ` +
         `(${jwksKids.length ? jwksKids.join(", ") : "no keys"}). ` +
         "Copy the first object from apps/supabase-db/supabase/signing_keys.json into the env var.",
       ok: false,
@@ -198,7 +198,7 @@ export async function verifyJwtSigningJwkAgainstJwks(
       jwksFetchError: null,
       jwksKids,
       message:
-        `PRIVATE_SUPABASE_JWT_SIGNING_JWK kid "${envKid}" is in JWKS but the public x coordinate does not match. ` +
+        `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK kid "${envKid}" is in JWKS but the public x coordinate does not match. ` +
         "Re-copy the private JWK from signing_keys.json.",
       ok: false,
     };
@@ -222,17 +222,17 @@ export async function loadJwtSigningMaterial(jwkJson: string): Promise<JwtSignin
   try {
     jwk = JSON.parse(jwkJson) as JWK;
   } catch {
-    throw new Error("PRIVATE_SUPABASE_JWT_SIGNING_JWK must be valid JSON");
+    throw new Error("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must be valid JSON");
   }
 
   if (jwk.alg !== "ES256") {
-    throw new Error("PRIVATE_SUPABASE_JWT_SIGNING_JWK must use alg ES256");
+    throw new Error("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must use alg ES256");
   }
   if (!jwk.kid || typeof jwk.kid !== "string") {
-    throw new Error("PRIVATE_SUPABASE_JWT_SIGNING_JWK must include kid");
+    throw new Error("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must include kid");
   }
   if (!jwk.d) {
-    throw new Error("PRIVATE_SUPABASE_JWT_SIGNING_JWK must be a private key (include d)");
+    throw new Error("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must be a private key (include d)");
   }
 
   // Supabase CLI includes key_ops: ["sign","verify"], which Node's Web Crypto
@@ -240,7 +240,7 @@ export async function loadJwtSigningMaterial(jwkJson: string): Promise<JwtSignin
   const { key_ops: _keyOps, ext: _ext, use: _use, ...signingJwk } = jwk;
   const importedKey = await importJWK(signingJwk, "ES256");
   if (!(importedKey instanceof CryptoKey)) {
-    throw new Error("PRIVATE_SUPABASE_JWT_SIGNING_JWK must be an ECDSA private key");
+    throw new Error("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must be an ECDSA private key");
   }
   const material = { key: importedKey, kid: jwk.kid };
   cachedSigningMaterial = { jwkJson, material };

@@ -39,7 +39,7 @@ export async function subscriptionPortalRoutes(fastify: FastifyInstance): Promis
     },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const { client, user } = getAuth(request);
-      const settingsUrl = `${fastify.config.NEXT_PUBLIC_WEBAPP_URL}${WEBAPP_ROUTES.SETTINGS}`;
+      const settingsUrl = `${fastify.config.BONDERY_PUBLIC_WEBAPP_URL}${WEBAPP_ROUTES.SETTINGS}`;
 
       let polar: Polar;
       try {

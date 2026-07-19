@@ -19,17 +19,17 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TURBO_TELEMETRY_DISABLED: 1
-      WXT_WEBAPP_URL: ${{ secrets.WXT_WEBAPP_URL }}
-      WXT_API_URL: ${{ secrets.WXT_API_URL }}
-      WXT_SUPABASE_URL: ${{ secrets.WXT_SUPABASE_URL }}
-      WXT_SUPABASE_OAUTH_CLIENT_ID: ${{ secrets.WXT_SUPABASE_OAUTH_CLIENT_ID }}
-      PRIVATE_CHROME_EXTENSION_ID: ${{ secrets.PRIVATE_CHROME_EXTENSION_ID }}
-      PRIVATE_CHROME_PUBLISHER_ID: ${{ secrets.PRIVATE_CHROME_PUBLISHER_ID }}
-      PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
-      PRIVATE_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
-      PRIVATE_CHROME_PUBLIC_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PUBLIC_SIGNING_KEY }}
-      TURBO_TEAM: ${{ secrets.PRIVATE_TURBO_TEAM }}
-      TURBO_TOKEN: ${{ secrets.PRIVATE_TURBO_TOKEN }}
+      BONDERY_PUBLIC_WEBAPP_URL: ${{ vars.BONDERY_PUBLIC_WEBAPP_URL }}
+      BONDERY_PUBLIC_API_URL: ${{ vars.BONDERY_PUBLIC_API_URL }}
+      BONDERY_PUBLIC_SUPABASE_URL: ${{ vars.BONDERY_PUBLIC_SUPABASE_URL }}
+      BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID: ${{ vars.BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID }}
+      BONDERY_OPS_CHROME_EXTENSION_ID: ${{ vars.BONDERY_OPS_CHROME_EXTENSION_ID }}
+      BONDERY_OPS_CHROME_PUBLISHER_ID: ${{ vars.BONDERY_OPS_CHROME_PUBLISHER_ID }}
+      BONDERY_OPS_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+      BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
+      BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY: ${{ vars.BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY }}
+      TURBO_TEAM: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
 
     steps:
       - name: Checkout code
@@ -77,10 +77,10 @@ jobs:
 
       - name: Create production environment file
         run: |
-          echo "WXT_WEBAPP_URL=$WXT_WEBAPP_URL" > apps/chrome-extension/.env.production.local
-          echo "WXT_API_URL=$WXT_API_URL" >> apps/chrome-extension/.env.production.local
-          echo "WXT_SUPABASE_URL=$WXT_SUPABASE_URL" >> apps/chrome-extension/.env.production.local
-          echo "WXT_SUPABASE_OAUTH_CLIENT_ID=$WXT_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
+          echo "BONDERY_PUBLIC_WEBAPP_URL=$BONDERY_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
+          echo "BONDERY_PUBLIC_API_URL=$BONDERY_PUBLIC_API_URL" >> apps/chrome-extension/.env.production.local
+          echo "BONDERY_PUBLIC_SUPABASE_URL=$BONDERY_PUBLIC_SUPABASE_URL" >> apps/chrome-extension/.env.production.local
+          echo "BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID=$BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         env:
@@ -97,17 +97,17 @@ jobs:
           CRX_PATH="apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx"
           PUBLIC_KEY_ASSET_PATH="./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem"
 
-          printf "%b" "$PRIVATE_CHROME_PRIVATE_SIGNING_KEY" > "$PRIVATE_KEY_PATH"
-          printf "%b" "$PRIVATE_CHROME_PUBLIC_SIGNING_KEY" > "$PUBLIC_KEY_PATH"
+          printf "%b" "$BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY" > "$PRIVATE_KEY_PATH"
+          printf "%b" "$BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY" > "$PUBLIC_KEY_PATH"
 
           openssl pkey -in "$PRIVATE_KEY_PATH" -pubout -out "$DERIVED_PUBLIC_KEY_PATH"
           openssl pkey -pubin -in "$PUBLIC_KEY_PATH" -outform DER > "$PUBLIC_KEY_DER_PATH"
           openssl pkey -pubin -in "$DERIVED_PUBLIC_KEY_PATH" -outform DER > "$DERIVED_PUBLIC_KEY_DER_PATH"
 
           if cmp -s "$PUBLIC_KEY_DER_PATH" "$DERIVED_PUBLIC_KEY_DER_PATH"; then
-            echo "✅ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY match"
+            echo "✅ BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY and BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY match"
           else
-            echo "❌ PRIVATE_CHROME_PRIVATE_SIGNING_KEY and PRIVATE_CHROME_PUBLIC_SIGNING_KEY do not match"
+            echo "❌ BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY and BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY do not match"
             exit 1
           fi
 
@@ -131,14 +131,14 @@ jobs:
         id: gcp_auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ env.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+          credentials_json: ${{ env.BONDERY_OPS_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
       - name: Fetch Chrome Web Store item status
         run: |
           STATUS_RESPONSE=$(curl -sS -X GET \
-            "https://chromewebstore.googleapis.com/v2/publishers/$PRIVATE_CHROME_PUBLISHER_ID/items/$PRIVATE_CHROME_EXTENSION_ID:fetchStatus" \
+            "https://chromewebstore.googleapis.com/v2/publishers/$BONDERY_OPS_CHROME_PUBLISHER_ID/items/$BONDERY_OPS_CHROME_EXTENSION_ID:fetchStatus" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}")
 
           echo "$STATUS_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(data.error){ console.error('❌ fetchStatus failed'); console.error(input); process.exit(1);} const itemState = data.itemState || 'UNKNOWN'; const uploadState = data.uploadState || 'UNKNOWN'; console.log(`✅ fetchStatus OK | itemState=${itemState} uploadState=${uploadState}`);"
@@ -159,7 +159,7 @@ jobs:
           node -e "const fs=require('fs'); const crypto=require('crypto'); const p=process.argv[1]; const b=fs.readFileSync(p); const magic=b.subarray(0,4).toString(); const version=b.readUInt32LE(4); const sha256=crypto.createHash('sha256').update(b).digest('hex'); console.log(JSON.stringify({path:p,sizeBytes:b.length,magic,version,sha256},null,2)); if(magic!=='Cr24'){ process.exit(1);} " "$CRX_PATH"
 
           HTTP_CODE=$(curl -sS -o /tmp/cws-upload-response.json -w "%{http_code}" -X POST \
-            "https://chromewebstore.googleapis.com/upload/v2/publishers/$PRIVATE_CHROME_PUBLISHER_ID/items/$PRIVATE_CHROME_EXTENSION_ID:upload" \
+            "https://chromewebstore.googleapis.com/upload/v2/publishers/$BONDERY_OPS_CHROME_PUBLISHER_ID/items/$BONDERY_OPS_CHROME_EXTENSION_ID:upload" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}" \
             -H "X-Goog-Upload-Protocol: raw" \
             -H "X-Goog-Upload-File-Name: $CRX_FILE_NAME" \
@@ -174,7 +174,7 @@ jobs:
       - name: Publish Chrome Web Store item
         run: |
           PUBLISH_RESPONSE=$(curl -sS -X POST \
-            "https://chromewebstore.googleapis.com/v2/publishers/$PRIVATE_CHROME_PUBLISHER_ID/items/$PRIVATE_CHROME_EXTENSION_ID:publish" \
+            "https://chromewebstore.googleapis.com/v2/publishers/$BONDERY_OPS_CHROME_PUBLISHER_ID/items/$BONDERY_OPS_CHROME_EXTENSION_ID:publish" \
             -H "Authorization: Bearer ${{ steps.gcp_auth.outputs.access_token }}")
 
           echo "$PUBLISH_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); const state=String(data.state||'').toUpperCase(); const status=data.status; const okStatus = Array.isArray(status) ? status.map(String).map(s=>s.toUpperCase()).includes('OK') : String(status||'').toUpperCase()==='OK'; const okState = ['PENDING_REVIEW','PUBLISHED'].includes(state); if(!(okStatus || okState)){ console.error(input); process.exit(1);} console.log('✅ publish accepted | state=' + (state || 'UNKNOWN'));"
@@ -191,7 +191,7 @@ jobs:
 
             ### 🎉 Automatic Chrome Web Store Publishing
             This version has been automatically published to the Chrome Web Store! You can install it directly from:
-            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ env.PRIVATE_CHROME_EXTENSION_ID }})
+            [Bondery Social Integration - Chrome Web Store](https://chrome.google.com/webstore/detail/bondery-social-integration/${{ env.BONDERY_OPS_CHROME_EXTENSION_ID }})
 
             ### Manual Installation (Development/Testing)
             If you need to install manually for development or testing:

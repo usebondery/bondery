@@ -39,10 +39,10 @@ export default defineConfig({
 
       // Validate required environment variables
       const requiredEnvVars = [
-        "WXT_WEBAPP_URL",
-        "WXT_SUPABASE_URL",
-        "WXT_API_URL",
-        "WXT_SUPABASE_OAUTH_CLIENT_ID",
+        "BONDERY_PUBLIC_WEBAPP_URL",
+        "BONDERY_PUBLIC_SUPABASE_URL",
+        "BONDERY_PUBLIC_API_URL",
+        "BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID",
       ];
       const missing = requiredEnvVars.filter((key) => !process.env[key]);
 
@@ -59,10 +59,9 @@ export default defineConfig({
   manifest: ({ mode }) => {
     const _isDev = mode === "development";
 
-    // Environment variables (WXT_ prefix for Vite compatibility)
-    const webappUrl = process.env.WXT_WEBAPP_URL || DEV_URLS.webapp;
-    const apiUrl = process.env.WXT_API_URL || DEV_URLS.api;
-    const supabaseUrl = process.env.WXT_SUPABASE_URL || DEV_URLS.supabase;
+    const webappUrl = process.env.BONDERY_PUBLIC_WEBAPP_URL || DEV_URLS.webapp;
+    const apiUrl = process.env.BONDERY_PUBLIC_API_URL || DEV_URLS.api;
+    const supabaseUrl = process.env.BONDERY_PUBLIC_SUPABASE_URL || DEV_URLS.supabase;
 
     // Build host permissions dynamically
     const hostPermissions = [
@@ -141,6 +140,8 @@ export default defineConfig({
     // emits jsxDEV() calls (dev JSX transform), but React's production bundle
     // doesn't export jsxDEV — resulting in a runtime crash in the popup.
     define: {},
+    // Expose BONDERY_PUBLIC_* to import.meta.env; keep WXT_ for framework (e.g. WXT_DEBUG)
+    envPrefix: ["BONDERY_PUBLIC_", "WXT_"],
     resolve: {
       alias: {
         "@bondery/translations": path.join(repoRoot, "packages/translations/src"),

@@ -15,7 +15,7 @@ let commandsClient: Redis | null = null;
 let subscriberClient: Redis | null = null;
 
 function trimRedisUrl(redisUrl?: string): string {
-  return (redisUrl ?? process.env.PRIVATE_REDIS_URL ?? "").trim();
+  return (redisUrl ?? process.env.BONDERY_PRIVATE_REDIS_URL ?? "").trim();
 }
 
 function createRedisClient(url: string): Redis {
@@ -34,7 +34,7 @@ function ensureUrl(redisUrl?: string): string | undefined {
   }
   if (configuredUrl && configuredUrl !== trimmed) {
     throw new Error(
-      "PRIVATE_REDIS_URL changed after Redis clients were created; restart the process",
+      "BONDERY_PRIVATE_REDIS_URL changed after Redis clients were created; restart the process",
     );
   }
   configuredUrl = trimmed;

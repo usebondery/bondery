@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { checkEnvVariables } from "@bondery/helpers/env";
+import { checkEnvVariables, getRequiredVarsForTarget } from "@bondery/helpers/env";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -9,8 +9,6 @@ const __dirname = dirname(__filename);
 const appPath = resolve(__dirname, "..");
 
 // Expo uses .env.local as its primary local override file.
-// Pre-load it into process.env so checkEnvVariables can find the vars
-// (it reads .env.development.local but falls back to process.env).
 const envLocalPath = resolve(appPath, ".env.local");
 if (existsSync(envLocalPath)) {
   const content = readFileSync(envLocalPath, "utf-8");
@@ -20,7 +18,13 @@ if (existsSync(envLocalPath)) {
       const eqIndex = trimmed.indexOf("=");
       if (eqIndex > 0) {
         const key = trimmed.slice(0, eqIndex).trim();
-        const value = trimmed.slice(eqIndex + 1).trim();
+        let value = trimmed.slice(eqIndex + 1).trim();
+        if (
+          (value.startsWith('"') && value.endsWith('"')) ||
+          (value.startsWith("'") && value.endsWith("'"))
+        ) {
+          value = value.slice(1, -1);
+        }
         if (key && !(key in process.env)) {
           process.env[key] = value;
         }
@@ -32,9 +36,5 @@ if (existsSync(envLocalPath)) {
 checkEnvVariables({
   appPath,
   environment: "development",
-  requiredVars: [
-    "EXPO_PUBLIC_API_URL",
-    "EXPO_PUBLIC_SUPABASE_URL",
-    "EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
-  ],
+  requiredVars: getRequiredVarsForTarget("mobile", "development"),
 });

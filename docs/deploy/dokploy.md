@@ -1,65 +1,58 @@
-# Dokploy deployment (webapp + website)
+# Dokploy deployment (unified Compose + website)
 
-This doc covers the recommended Dokploy setup:
+Canonical production topology:
 
-- **Webapp** (`app.usebondery.com`): deploy from a **prebuilt GHCR image** (no server builds)
-- **Website** (`usebondery.com`): can stay on Nixpacks/Railpack (or migrate similarly later)
+| Host | Service | Stack |
+|------|---------|--------|
+| `app.usebondery.com` | `webapp` :26632 | [`deploy/bondery`](../../deploy/bondery/) Compose |
+| `api.usebondery.com` | `api` :26631 | same Compose file |
+| (internal) | `redis` | same Compose — **never** attach a domain |
+| `usebondery.com` | website | Nixpacks/Railpack (separate app) |
 
-## Environment variables
+Self-hosters and Bondery production use the **same** compose file. Quickstart: [`deploy/bondery/README.md`](../../deploy/bondery/README.md).
 
-### Webapp runtime config (build once, deploy many)
+## Unified Compose application
 
-The webapp exposes `GET /runtime-config.json` and injects `window.__BONDERY_RUNTIME_CONFIG__` during SSR.
-This allows the same webapp container image to be deployed across environments without rebuilding the client bundle.
+| Setting | Value |
+|---------|-------|
+| Provider | **Docker Compose** |
+| Compose path | `deploy/bondery/docker-compose.yml` |
+| Domains | Committed Traefik labels via `BONDERY_INFRA_WEBAPP_DOMAIN` / `BONDERY_INFRA_API_DOMAIN` (not Dokploy UI-only domains) |
 
-Set **literal values** on the webapp service (container env at runtime — not baked into the image):
+### Environment
 
-```env
-BONDERY_PUBLIC_SUPABASE_URL=https://slusayyjuoxwoukhjjqh.supabase.co
-BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
-BONDERY_PUBLIC_WEBAPP_URL=https://app.usebondery.com
-BONDERY_PUBLIC_WEBSITE_URL=https://usebondery.com
-BONDERY_PUBLIC_API_URL=https://api.usebondery.com
-```
-
-Optional analytics:
-
-```env
-BONDERY_PUBLIC_POSTHOG_KEY=
-BONDERY_PUBLIC_POSTHOG_HOST=
-```
-
-Use Dokploy **project** env vars for secrets consumed only at runtime (`PRIVATE_*` on API). Duplicate the public URLs on each Next.js app if needed — do not rely on `{{project.*}}` for `BONDERY_PUBLIC_*`.
-
-After changing any `BONDERY_PUBLIC_*` variable, **redeploy** the webapp container (no image rebuild required).
-
-**Migrate from old `NEXT_PUBLIC_*` names:** remove the old webapp env vars and add the `BONDERY_PUBLIC_*` equivalents (same values):
-
-| Remove (old) | Add (new) |
-|--------------|-----------|
-| `NEXT_PUBLIC_SUPABASE_URL` | `BONDERY_PUBLIC_SUPABASE_URL` |
-| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
-| `NEXT_PUBLIC_WEBAPP_URL` | `BONDERY_PUBLIC_WEBAPP_URL` |
-| `NEXT_PUBLIC_WEBSITE_URL` | `BONDERY_PUBLIC_WEBSITE_URL` |
-| `NEXT_PUBLIC_API_URL` | `BONDERY_PUBLIC_API_URL` |
-| `NEXT_PUBLIC_POSTHOG_KEY` | `BONDERY_PUBLIC_POSTHOG_KEY` |
-| `NEXT_PUBLIC_POSTHOG_HOST` | `BONDERY_PUBLIC_POSTHOG_HOST` |
-
-The container **fails on boot** if required vars are missing or still set to Docker build placeholders (e.g. `example.supabase.co`). Check logs if the service won't start after deploy.
-
-Optional build metadata (surfaced via `/runtime-config.json`):
+Copy [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example) into Dokploy env (or a compose `.env`):
 
 ```env
-BONDERY_VERSION=1.7.2
-BONDERY_GIT_SHA=abcdef123456
+BONDERY_INFRA_API_DOMAIN=api.usebondery.com
+BONDERY_INFRA_WEBAPP_DOMAIN=app.usebondery.com
+BONDERY_INFRA_WEBSITE_DOMAIN=usebondery.com
+# Optional: omit image tags to use floating :production (or pin semver for rollback)
+BONDERY_PRIVATE_REDIS_URL=redis://redis:6379
 ```
 
-### Turbo remote cache (optional)
+Plus API secrets and Supabase/`BONDERY_PUBLIC_*` from [`.env.example`](../../deploy/bondery/.env.example).
 
-```env
-TURBO_TEAM=your-vercel-team-slug
-TURBO_TOKEN=your-remote-cache-token
-```
+**Important:**
+
+- Image tags: `production` (floating channel) is the default; pin semver when you want a fixed rollback target.
+- Set hostnames only (`BONDERY_INFRA_API_DOMAIN`, `BONDERY_INFRA_WEBAPP_DOMAIN`, `BONDERY_INFRA_WEBSITE_DOMAIN`). Compose derives `https://…` URLs and Traefik `Host()` rules — do not set `BONDERY_PUBLIC_*_URL` in the stack `.env`.
+- `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` must be **compact single-line JSON** (no newlines).
+- Webapp never receives `PRIVATE_*` / `BONDERY_PRIVATE_*` — compose allowlists public vars only.
+- Compose sets `BONDERY_INFRA_INTERNAL_API_URL=http://api:26631` for server-side fetches.
+
+### Health checks
+
+| Service | Liveness | Notes |
+|---------|----------|--------|
+| `webapp` | `GET /api/live` | Do **not** use `/api/status` (proxies API) |
+| `webapp` readiness | `GET /api/ready` | Runtime config valid |
+| `api` | `GET /status` | Process up |
+| `api` deps | `GET /health` | Redis / Supabase / integrations |
+
+### Isolated Deployments
+
+Leave Dokploy **Isolated Deployments** off for the default Bondery app (one stack per host). Optional for operators running multiple Bondery instances on one Dokploy host — see Dokploy docs.
 
 ## Website (marketing)
 
@@ -70,28 +63,18 @@ TURBO_TOKEN=your-remote-cache-token
 | Start | `npx turbo start --filter=website` |
 | Container port | `3000` |
 
-## Webapp
+## Webapp runtime config
 
-| Setting | Value |
-|---------|-------|
-| Provider | Docker Image |
-| Image | `ghcr.io/usebondery/webapp:production` (floating) or `:X.Y.Z` (pin) |
-| Registry URL | `ghcr.io` (optional; leave empty if Dokploy accepts full image ref) |
-| Username | empty (public package) |
-| Password | empty (public package) |
-| Container port | `26632` |
-| Domain | `app.usebondery.com` |
+The webapp exposes `GET /runtime-config.json` and injects `window.__BONDERY_RUNTIME_CONFIG__` during SSR — build once, deploy many.
 
-**Health checks:**
+Stack Compose sets public app URLs from domains. You still set Supabase (and optional PostHog) explicitly:
 
-| Probe | Path | Purpose |
-|-------|------|---------|
-| Liveness | `GET /api/live` | Process is up (default Docker `HEALTHCHECK`) |
-| Readiness | `GET /api/ready` | Runtime config is valid (optional in Dokploy) |
+```env
+BONDERY_PUBLIC_SUPABASE_URL=https://….supabase.co
+BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+```
 
-Do not point liveness at `/api/status` — that route proxies to the API and will mark the container unhealthy when the API is down, leaving the service at `0/1` and breaking Traefik DNS routing.
-
-If GHCR packages are private, set Username to the PAT owner and Password to a fine-grained PAT with **Packages → Read**.
+After changing domain or `BONDERY_PUBLIC_*` variables, **redeploy** the affected service(s) (no image rebuild for env-only changes).
 
 ## Supabase Auth URLs
 
@@ -105,24 +88,45 @@ In **Supabase → Authentication → URL Configuration**:
 | | `https://usebondery.com/auth/callback` (optional; forwards to webapp) |
 | | Chrome extension `chromiumapp.org` URIs |
 
-If **Site URL** is still `http://localhost:3000`, OAuth falls back there when `redirectTo` is not allowed — that causes `https://localhost:3000/app` after GitHub login.
-
-Login flow should start at `https://app.usebondery.com/login`. `usebondery.com/login` redirects to the webapp using the website's own `NEXT_PUBLIC_WEBAPP_URL` (website app — unchanged).
-
 ### GitHub OAuth app (Supabase provider)
 
-In **GitHub → Settings → Developer settings → OAuth Apps**, the **Authorization callback URL** must be your **Supabase** callback, not the webapp:
+Authorization callback URL must be the **Supabase** callback:
 
 ```
 https://<project-ref>.supabase.co/auth/v1/callback
 ```
 
-If it is set to `https://app.usebondery.com/auth/callback`, GitHub sends its own authorization code to the webapp first (hex string). That breaks PKCE and causes login loops. The webapp `/auth/callback` should only receive Supabase UUID codes after Supabase completes the provider exchange.
+### One Supabase project for API + webapp
 
-### API env must match webapp Supabase project
+Set `BONDERY_PUBLIC_SUPABASE_URL` and `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` once in the stack `.env`. Compose injects those into both services under the same `BONDERY_PUBLIC_*` names. The publishable key is designed to be public — sharing it is correct and expected.
 
-The API container needs the **same** Supabase project URL and publishable key as the webapp (API uses `NEXT_PUBLIC_SUPABASE_URL` and `PUBLIC_SUPABASE_PUBLISHABLE_KEY`). If the webapp session is valid but `/api/me/session` returns 401, login will redirect to `/app/unavailable` — check API env vars.
+## Cutover (API-only Compose + separate webapp image → unified stack)
 
-## API
+### Preflight
 
-See [api-container.md](./api-container.md) — canonical production path is **Docker Compose** (`deploy/api/`: API + Redis). GHCR supplies the API image; Redis runs as a sibling service. Path B (single image + external Redis) is documented there for advanced setups.
+1. Record current image digests / env for API Compose and standalone webapp.
+2. Keep the standalone webapp Dokploy app running as rollback until verified.
+3. Redis volume continuity is optional (rate-limit / sync-wake / WS tickets only — disposable).
+
+### Steps
+
+1. Point the existing Compose app at `deploy/bondery/docker-compose.yml` (in-place preferred).
+2. Set domains and secrets from `.env.example` (image tags optional — unset falls back to `:production`).
+3. Deploy; wait until `redis` healthy and `api` `/status` OK.
+4. Confirm Traefik routes: `api.usebondery.com` → `api:26631`, `app.usebondery.com` → `webapp:26632`. Do **not** route Redis.
+5. Stop the old standalone webapp app if it conflicts on the domain.
+6. Smoke: `curl` live/ready/status/health; login; one authenticated mutation; sync/WebSocket if used.
+
+### Rollback
+
+1. Re-point `app.usebondery.com` to the preserved standalone webapp image app.
+2. Restore previous image tags or digests and redeploy.
+3. A fresh Redis volume on rollback is acceptable.
+
+### After 24–48h healthy bake
+
+1. Remove the old Dokploy webapp Docker Image application.
+
+## API with external Redis
+
+Advanced: run the API image alone with managed Redis — see [api-container.md](./api-container.md).

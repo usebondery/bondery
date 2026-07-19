@@ -42,4 +42,6 @@ EXPOSE 26631
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:26631/status').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
+# Required env is validated at process start (assertRequiredEnvAtStartup in index.ts)
+# before Fastify listens — fails with named missing vars (same list as scripts/check-env.ts).
 CMD ["node", "apps/api/dist/index.js"]

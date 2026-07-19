@@ -6,7 +6,6 @@ import { ActionIcon, Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@man
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { Logo } from "@/components/Logo";
-import { WEBAPP_URL } from "@/lib/config";
 
 const navLinks = [
   { href: "/#features", label: "Features" },
@@ -17,10 +16,12 @@ const navLinks = [
 
 type HeaderClientProps = {
   initialStars: number;
+  webappUrl: string;
 };
 
-export function HeaderClient({ initialStars }: HeaderClientProps) {
+export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
+  const loginHref = `${webappUrl}/login`;
 
   return (
     <Box className="sticky top-6 z-50 " component="header">
@@ -65,7 +66,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
             </ButtonLink>
 
             <ButtonLink
-              href={`${WEBAPP_URL}/login`}
+              href={loginHref}
               leftSection={<IconTopologyStar size={20} />}
               radius={"xl"}
               size="md"
@@ -133,7 +134,7 @@ export function HeaderClient({ initialStars }: HeaderClientProps) {
 
                 <ButtonLink
                   fullWidth
-                  href={`${WEBAPP_URL}/login`}
+                  href={loginHref}
                   leftSection={<IconTopologyStar size={20} />}
                   size="md"
                 >

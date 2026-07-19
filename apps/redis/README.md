@@ -4,7 +4,7 @@ Local Redis for API development: rate limiting, sync wake pub/sub, and WebSocket
 
 Uses port **26636** (`DEV_PORTS.REDIS` / `DEV_REDIS_URL` in `@bondery/schemas`).
 
-Production and self-host Redis live in [`deploy/api/`](../../deploy/api/) (compose Path A) — not this workspace.
+Production and self-host Redis live in [`deploy/bondery/`](../../deploy/bondery/) — not this workspace.
 
 ## Commands
 
@@ -29,9 +29,9 @@ docker exec bondery-redis redis-cli ping   # → PONG
 In `apps/api/.env.development.local` (default in `.env.development.example`):
 
 ```text
-PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
+BONDERY_PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
 ```
 
-Or set `PRIVATE_REDIS_URL=""` for in-memory fallbacks when you skip starting Redis.
+Or set `BONDERY_PRIVATE_REDIS_URL=""` for in-memory fallbacks when you skip starting Redis.
 
 Full guide: [docs/contributing/local-setup.md](../../docs/contributing/local-setup.md#redis).

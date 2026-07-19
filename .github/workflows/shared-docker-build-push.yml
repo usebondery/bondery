@@ -45,11 +45,9 @@ on:
         type: string
         default: ""
     secrets:
-      GHCR_WRITE_TOKEN:
+      BONDERY_OPS_GHCR_WRITE_TOKEN:
         required: true
-      PRIVATE_TURBO_TEAM:
-        required: false
-      PRIVATE_TURBO_TOKEN:
+      BONDERY_OPS_TURBO_TOKEN:
         required: false
 
 permissions:
@@ -68,8 +66,8 @@ jobs:
   build-push:
     runs-on: ubuntu-latest
     env:
-      TURBO_TEAM: ${{ secrets.PRIVATE_TURBO_TEAM }}
-      TURBO_TOKEN: ${{ secrets.PRIVATE_TURBO_TOKEN }}
+      TURBO_TEAM: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
+      TURBO_TOKEN: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -93,7 +91,7 @@ jobs:
         uses: ./.github/actions/shared/ghcr-login
         with:
           username: ${{ github.repository_owner }}
-          password: ${{ secrets.GHCR_WRITE_TOKEN }}
+          password: ${{ secrets.BONDERY_OPS_GHCR_WRITE_TOKEN }}
 
       - name: Docker metadata
         id: meta

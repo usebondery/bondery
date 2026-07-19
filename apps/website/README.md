@@ -43,14 +43,14 @@ The announce script posts a new blog entry to **Discord** and **Reddit** using t
 
 | Variable | Description |
 |---|---|
-| `NEXT_PUBLIC_WEBSITE_URL` | Production website URL, e.g. `https://bondery.app` |
-| `PRIVATE_DISCORD_WEBHOOK_URL` | Discord channel webhook URL |
-| `REDDIT_CLIENT_ID` | Reddit OAuth2 app client ID (script-type app) |
-| `REDDIT_CLIENT_SECRET` | Reddit OAuth2 app client secret |
-| `REDDIT_USERNAME` | Reddit account username |
-| `REDDIT_PASSWORD` | Reddit account password |
+| `BONDERY_PUBLIC_WEBSITE_URL` | Production website URL, e.g. `https://bondery.app` |
+| `BONDERY_OPS_DISCORD_WEBHOOK_URL` | Discord channel webhook URL |
+| `BONDERY_OPS_REDDIT_CLIENT_ID` | Reddit OAuth2 app client ID (script-type app) |
+| `BONDERY_OPS_REDDIT_CLIENT_SECRET` | Reddit OAuth2 app client secret |
+| `BONDERY_OPS_REDDIT_USERNAME` | Reddit account username |
+| `BONDERY_OPS_REDDIT_PASSWORD` | Reddit account password |
 
-Set these in `.env.local` for local use, or as GitHub Actions secrets for CI.
+Set product URLs in the app `.env.development.local` / production local (via `npm run env`), or as GitHub Actions secrets for CI. Announce loads env with `@next/env` `loadEnvConfig`.
 
 ### Enabling a post for announcement
 

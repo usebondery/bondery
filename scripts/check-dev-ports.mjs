@@ -19,12 +19,12 @@ const FORBIDDEN_PATTERNS = [
   { label: "port: 300x", pattern: /\bport:\s*300[0-4]\b/g },
   { label: "localtunnel --port 3001", pattern: /localtunnel\s+--port\s+3001\b/g },
   {
-    label: "EXTRA_ALLOWED_ORIGINS localhost:8081",
-    pattern: /EXTRA_ALLOWED_ORIGINS=.*localhost:8081/g,
+    label: "BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS localhost:8081",
+    pattern: /BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS=.*localhost:8081/g,
   },
   {
-    label: 'EXTRA_ALLOWED_ORIGINS "http://localhost:8081"',
-    pattern: /EXTRA_ALLOWED_ORIGINS="http:\/\/localhost:8081"/g,
+    label: 'BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS "http://localhost:8081"',
+    pattern: /BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS="http:\/\/localhost:8081"/g,
   },
 ];
 

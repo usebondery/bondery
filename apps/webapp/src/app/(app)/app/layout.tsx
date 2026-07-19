@@ -48,8 +48,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const appSession = await getAppSession();
 
   if (appSession.status === "unauthorized") {
-    await signOutServerSession();
-    redirect(buildLoginUrl(returnPathForLogin));
+    // Supabase session is valid but API rejected the token — do not sign out (config mismatch).
+    redirect(buildUnavailableUrl(returnPathForUnavailable));
   }
 
   if (appSession.status === "unavailable") {

@@ -37,8 +37,8 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
     async (request, reply) => {
       const { search, mode = "address" } = request.query;
 
-      const mapsKey = fastify.config.PRIVATE_MAPS_KEY;
-      const mapsUrl = fastify.config.PUBLIC_MAPS_URL;
+      const mapsKey = fastify.config.BONDERY_PRIVATE_MAPS_KEY;
+      const mapsUrl = fastify.config.BONDERY_PUBLIC_MAPS_URL;
 
       if (!mapsKey) {
         request.log.warn(

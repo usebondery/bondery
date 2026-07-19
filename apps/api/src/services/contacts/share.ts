@@ -262,11 +262,11 @@ export async function shareContact(
     whatsapp: has("whatsapp") ? (enriched.whatsapp ?? undefined) : undefined,
   };
 
-  const smtpHost = process.env.PRIVATE_EMAIL_HOST;
-  const smtpUser = process.env.PRIVATE_EMAIL_USER;
-  const smtpPass = process.env.PRIVATE_EMAIL_PASS;
-  const smtpAddress = process.env.PRIVATE_EMAIL_ADDRESS;
-  const smtpPort = Number(process.env.PRIVATE_EMAIL_PORT ?? 587);
+  const smtpHost = process.env.BONDERY_PRIVATE_EMAIL_HOST;
+  const smtpUser = process.env.BONDERY_PRIVATE_EMAIL_USER;
+  const smtpPass = process.env.BONDERY_PRIVATE_EMAIL_PASS;
+  const smtpAddress = process.env.BONDERY_PRIVATE_EMAIL_ADDRESS;
+  const smtpPort = Number(process.env.BONDERY_PRIVATE_EMAIL_PORT ?? 587);
 
   if (!smtpHost || !smtpUser) {
     throw internal("email_service_not_configured");

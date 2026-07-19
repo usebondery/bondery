@@ -1,0 +1,115 @@
+name: Smoke · Bondery stack
+
+# Tag-triggered stack smoke: compose config + redis + webapp health.
+# Full API auth against live Supabase remains a manual post-deploy check
+# (see docs/deploy/dokploy.md § Cutover).
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "api-*.*.*"
+      - "webapp-*.*.*"
+      - "stack-*.*.*"
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Validate compose + policy lint
+        run: |
+          cp deploy/bondery/.env.example deploy/bondery/.env
+          docker compose -f deploy/bondery/docker-compose.yml config >/dev/null
+          node deploy/bondery/scripts/check-compose.mjs
+
+      - name: Ensure dokploy-network exists
+        run: docker network create dokploy-network || true
+
+      - name: Start redis + webapp (no API — avoids live Supabase auth)
+        working-directory: deploy/bondery
+        run: |
+          cp .env.example .env.smoke
+          # Force non-placeholder public URLs (Compose .env: last assignment wins in our generator)
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path(".env.smoke")
+          text = path.read_text()
+          replacements = {
+              "BONDERY_INFRA_API_DOMAIN": "api.example-smoke.test",
+              "BONDERY_INFRA_WEBAPP_DOMAIN": "app.example-smoke.test",
+              "BONDERY_INFRA_WEBSITE_DOMAIN": "www.example-smoke.test",
+              "BONDERY_PUBLIC_SUPABASE_URL": "https://smoke.supabase.co",
+              "BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY": "sb_publishable_smoke",
+          }
+          lines = []
+          seen = set()
+          for line in text.splitlines():
+              if not line or line.lstrip().startswith("#") or "=" not in line:
+                  lines.append(line)
+                  continue
+              key, _, _ = line.partition("=")
+              key = key.strip()
+              if key in replacements:
+                  lines.append(f"{key}={replacements[key]}")
+                  seen.add(key)
+              else:
+                  lines.append(line)
+          for key, value in replacements.items():
+              if key not in seen:
+                  lines.append(f"{key}={value}")
+          path.write_text("\n".join(lines) + "\n")
+          PY
+          cp docker-compose.override.yml.example docker-compose.override.yml
+          docker compose --env-file .env.smoke up -d redis webapp
+
+      - name: Wait for webapp /api/live and /api/ready
+        working-directory: deploy/bondery
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://127.0.0.1:26632/api/live >/dev/null \
+              && curl -sf http://127.0.0.1:26632/api/ready >/dev/null; then
+              echo "webapp healthy"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose --env-file .env.smoke logs webapp || true
+          exit 1
+
+      - name: runtime-config.json must not leak internal API URL
+        run: |
+          body=$(curl -sf http://127.0.0.1:26632/runtime-config.json)
+          echo "$body" | grep -q 'api.example-smoke.test'
+          if echo "$body" | grep -q 'api:26631'; then
+            echo "INTERNAL URL LEAKED into runtime-config.json" >&2
+            exit 1
+          fi
+
+      - name: Redis restart resilience (compose redis)
+        working-directory: deploy/bondery
+        run: |
+          docker compose --env-file .env.smoke kill redis
+          docker compose --env-file .env.smoke up -d redis
+          for i in $(seq 1 20); do
+            if docker compose --env-file .env.smoke exec -T redis redis-cli ping | grep -q PONG; then
+              echo "redis recovered"
+              exit 0
+            fi
+            sleep 1
+          done
+          exit 1
+
+      - name: Tear down
+        if: always()
+        working-directory: deploy/bondery
+        run: docker compose --env-file .env.smoke down -v || true

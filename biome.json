@@ -88,7 +88,16 @@
         "noUndeclaredEnvVars": {
           "level": "error",
           "options": {
-            "allowedEnvVars": ["DEV", "WXT_.*", "CHECK_.*_STRICT", "DEBUG_RUN_ID", "NGROK"]
+            "allowedEnvVars": [
+              "DEV",
+              "WXT_.*",
+              "BONDERY_PUBLIC_.*",
+              "CHECK_.*_STRICT",
+              "DEBUG_RUN_ID",
+              "NGROK",
+              "NO_COLOR",
+              "FORCE_COLOR"
+            ]
           }
         }
       }
@@ -106,6 +115,16 @@
         "rules": {
           "suspicious": {
             "noConsole": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/helpers/src/env/manifest.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noExcessiveLinesPerFile": "off"
           }
         }
       }

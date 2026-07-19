@@ -44,17 +44,17 @@ export function sanitizePolarLocale(lang: string | null | undefined): PolarLocal
 
 /**
  * Returns a lazy-initialized Polar SDK client using the server-side access token.
- * Throws if PRIVATE_POLAR_ACCESS_TOKEN is not configured.
+ * Throws if BONDERY_PRIVATE_POLAR_ACCESS_TOKEN is not configured.
  */
 export function getPolarClient(): Polar {
   if (!_polar) {
-    const accessToken = process.env.PRIVATE_POLAR_ACCESS_TOKEN;
+    const accessToken = process.env.BONDERY_PRIVATE_POLAR_ACCESS_TOKEN;
     if (!accessToken) {
-      throw new Error("PRIVATE_POLAR_ACCESS_TOKEN is not configured");
+      throw new Error("BONDERY_PRIVATE_POLAR_ACCESS_TOKEN is not configured");
     }
     _polar = new Polar({
       accessToken,
-      server: process.env.PUBLIC_POLAR_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
+      server: process.env.BONDERY_PUBLIC_POLAR_ENVIRONMENT === "sandbox" ? "sandbox" : "production",
     });
   }
   return _polar;

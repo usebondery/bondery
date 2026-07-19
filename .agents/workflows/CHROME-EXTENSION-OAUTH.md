@@ -77,7 +77,7 @@ Invoke-RestMethod -Method POST -Uri "$base/auth/v1/admin/oauth/clients" -Headers
 Copy the returned `client_id` into `apps/chrome-extension/.env.development.local`:
 
 ```env
-WXT_SUPABASE_OAUTH_CLIENT_ID="<client_id>"
+BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID="<client_id>"
 ```
 
 ---
@@ -89,7 +89,7 @@ List the existing `redirect_uris` from the GET response in Step 3, then PUT with
 ```powershell
 $base     = 'http://127.0.0.1:54321'
 $secret   = '<sb_secret_from_supabase_status>'
-$clientId = '<WXT_SUPABASE_OAUTH_CLIENT_ID>'
+$clientId = '<BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID>'
 $headers  = @{ Authorization = "Bearer $secret"; apikey = $secret; 'Content-Type' = 'application/json' }
 $body = @{
   redirect_uris = @(

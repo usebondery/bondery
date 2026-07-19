@@ -60,4 +60,4 @@ jobs:
       oci_version: beta
       git_sha: ${{ github.sha }}
       build_args: |
-        GIT_SHA=${{ github.sha }}
+        BONDERY_INFRA_GIT_SHA=${{ github.sha }}

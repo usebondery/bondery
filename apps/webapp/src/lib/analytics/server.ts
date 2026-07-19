@@ -6,11 +6,11 @@ import { PostHog } from "posthog-node";
  * `flushAt: 1` and `flushInterval: 0` ensure events are queued immediately;
  * `after()` flushes them after the response is sent (non-blocking).
  */
-const posthogClient = process.env.POSTHOG_KEY
-  ? new PostHog(process.env.POSTHOG_KEY, {
+const posthogClient = process.env.BONDERY_PRIVATE_POSTHOG_KEY
+  ? new PostHog(process.env.BONDERY_PRIVATE_POSTHOG_KEY, {
       flushAt: 1,
       flushInterval: 0,
-      host: process.env.POSTHOG_HOST ?? "https://eu.i.posthog.com",
+      host: process.env.BONDERY_PRIVATE_POSTHOG_HOST ?? "https://eu.i.posthog.com",
     })
   : null;
 

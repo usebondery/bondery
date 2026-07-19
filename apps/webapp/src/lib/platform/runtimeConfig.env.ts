@@ -9,6 +9,9 @@ export const WEBAPP_RUNTIME_ENV = {
   websiteUrl: "BONDERY_PUBLIC_WEBSITE_URL",
 } as const;
 
+/** Server-only upstream API URL (Compose internal DNS). Never exposed in runtime-config.json. */
+export const WEBAPP_INTERNAL_API_URL_ENV = "BONDERY_INFRA_INTERNAL_API_URL";
+
 export const WEBAPP_RUNTIME_REQUIRED_ENV = [
   WEBAPP_RUNTIME_ENV.apiUrl,
   WEBAPP_RUNTIME_ENV.webappUrl,

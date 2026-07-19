@@ -115,7 +115,7 @@ Cross-device freshness uses a **thin wake channel** — not a second sync protoc
 - `SYNC_WAKE_ENABLED=false` → behavior matches pre-wake (long-poll / focus only)
 - Reconnect after deploy → `sync.hello` triggers catch-up pull without duplicate rows
 
-**Web exception:** WS connects to `NEXT_PUBLIC_API_URL` (not BFF) — browsers cannot upgrade WebSockets through Next.js proxy. Ticket is fetched via same-origin `/api/sync/ws-ticket` BFF route.
+**Web exception:** WS connects to `BONDERY_PUBLIC_API_URL` (not BFF) — browsers cannot upgrade WebSockets through Next.js proxy. Ticket is fetched via same-origin `/api/sync/ws-ticket` BFF route.
 
 ## Guardrails
 

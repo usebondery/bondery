@@ -1,5 +1,6 @@
 /**
- * Application configuration constants for website
+ * Server-only website config. Import from Server Components, route handlers, and
+ * metadata — not from `"use client"` modules. Pass values into clients as props.
  */
 
 function requireValue(name: string, value: string | undefined): string {
@@ -9,22 +10,14 @@ function requireValue(name: string, value: string | undefined): string {
   return value;
 }
 
-/**
- * Web app URL
- * Uses environment variable
- *
- */
-// Static process.env.* access — Next.js only inlines NEXT_PUBLIC_* for the client this way.
+/** Public web app origin (`BONDERY_PUBLIC_WEBAPP_URL`). */
 export const WEBAPP_URL = requireValue(
-  "NEXT_PUBLIC_WEBAPP_URL",
-  process.env.NEXT_PUBLIC_WEBAPP_URL,
+  "BONDERY_PUBLIC_WEBAPP_URL",
+  process.env.BONDERY_PUBLIC_WEBAPP_URL,
 );
 
-/**
- * Website URL
- * Uses environment variable
- * */
+/** Public marketing site origin (`BONDERY_PUBLIC_WEBSITE_URL`). */
 export const WEBSITE_URL = requireValue(
-  "NEXT_PUBLIC_WEBSITE_URL",
-  process.env.NEXT_PUBLIC_WEBSITE_URL,
+  "BONDERY_PUBLIC_WEBSITE_URL",
+  process.env.BONDERY_PUBLIC_WEBSITE_URL,
 );

@@ -31,14 +31,7 @@ Mobile MVP app for Bondery built with Expo Router and React Native.
 
 ## Environment variables
 
-Create an `.env` file in this folder:
-
-```bash
-EXPO_PUBLIC_API_URL=https://api.usebondery.com
-EXPO_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
-EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<anon-key>
-EXPO_PUBLIC_WEBSITE_URL=https://usebondery.com
-```
+Prefer root `.env.local` + `npm run env` (see [Environment configuration](../../docs/contributing/environment.md)). Mobile reads `BONDERY_PUBLIC_*` via `app.config.ts` → `extra`.
 
 ## Development
 

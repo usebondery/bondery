@@ -18,21 +18,28 @@
  *   skip-check         Announce even if post.announce.enabled is false.
  *
  * Required environment variables:
- *   NEXT_PUBLIC_WEBSITE_URL       Base URL of the website (e.g. https://bondery.app)
- *   PRIVATE_DISCORD_WEBHOOK_URL   Discord channel webhook URL (not needed with --reddit-only)
- *   REDDIT_CLIENT_ID              Reddit OAuth2 app client ID [not needed with --discord-only]
- *   REDDIT_CLIENT_SECRET          Reddit OAuth2 app client secret [not needed with --discord-only]
- *   REDDIT_USERNAME               Reddit account username [not needed with --discord-only]
- *   REDDIT_PASSWORD               Reddit account password [not needed with --discord-only]
+ *   BONDERY_PUBLIC_WEBSITE_URL        Base URL of the website (e.g. https://bondery.app)
+ *   BONDERY_OPS_DISCORD_WEBHOOK_URL   Discord channel webhook URL (not needed with reddit-only)
+ *   BONDERY_OPS_REDDIT_CLIENT_ID      Reddit OAuth2 app client ID [not needed with discord-only]
+ *   BONDERY_OPS_REDDIT_CLIENT_SECRET  Reddit OAuth2 app client secret [not needed with discord-only]
+ *   BONDERY_OPS_REDDIT_USERNAME       Reddit account username [not needed with discord-only]
+ *   BONDERY_OPS_REDDIT_PASSWORD       Reddit account password [not needed with discord-only]
  */
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { getReadingTime } from "@bondery/helpers";
+import { loadEnvConfig } from "@next/env";
 import { allPostMeta } from "../content/blog/metadata";
 import { getCategoryConfig } from "../src/app/blog/_lib/categories";
 import { postDiscordAnnouncement } from "./lib/discord";
 import { postRedditAnnouncement, type RedditConfig } from "./lib/reddit";
+
+loadEnvConfig(
+  `${path.dirname(fileURLToPath(import.meta.url))}/..`,
+  process.env.NODE_ENV !== "production",
+);
 
 // ---------------------------------------------------------------------------
 // Argument parsing
@@ -65,13 +72,18 @@ if (discordOnly && redditOnly) {
 // ---------------------------------------------------------------------------
 
 // Always required
-const alwaysRequired = ["NEXT_PUBLIC_WEBSITE_URL"];
+const alwaysRequired = ["BONDERY_PUBLIC_WEBSITE_URL"];
 // Only required when posting to Discord (not when --reddit-only)
-const discordRequired = discordOnly || !redditOnly ? ["PRIVATE_DISCORD_WEBHOOK_URL"] : [];
+const discordRequired = discordOnly || !redditOnly ? ["BONDERY_OPS_DISCORD_WEBHOOK_URL"] : [];
 // Only required when posting to Reddit (not when --discord-only)
 const redditRequired =
   redditOnly || !discordOnly
-    ? ["REDDIT_CLIENT_ID", "REDDIT_CLIENT_SECRET", "REDDIT_USERNAME", "REDDIT_PASSWORD"]
+    ? [
+        "BONDERY_OPS_REDDIT_CLIENT_ID",
+        "BONDERY_OPS_REDDIT_CLIENT_SECRET",
+        "BONDERY_OPS_REDDIT_USERNAME",
+        "BONDERY_OPS_REDDIT_PASSWORD",
+      ]
     : [];
 
 const missingEnv = [...alwaysRequired, ...discordRequired, ...redditRequired].filter(
@@ -85,13 +97,13 @@ if (missingEnv.length > 0) {
   process.exit(1);
 }
 
-const websiteUrl = process.env.NEXT_PUBLIC_WEBSITE_URL?.replace(/\/$/, "");
-const discordWebhookUrl = process.env.PRIVATE_DISCORD_WEBHOOK_URL ?? "";
+const websiteUrl = process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(/\/$/, "");
+const discordWebhookUrl = process.env.BONDERY_OPS_DISCORD_WEBHOOK_URL ?? "";
 const redditConfig: RedditConfig = {
-  clientId: process.env.REDDIT_CLIENT_ID ?? "",
-  clientSecret: process.env.REDDIT_CLIENT_SECRET ?? "",
-  password: process.env.REDDIT_PASSWORD ?? "",
-  username: process.env.REDDIT_USERNAME ?? "",
+  clientId: process.env.BONDERY_OPS_REDDIT_CLIENT_ID ?? "",
+  clientSecret: process.env.BONDERY_OPS_REDDIT_CLIENT_SECRET ?? "",
+  password: process.env.BONDERY_OPS_REDDIT_PASSWORD ?? "",
+  username: process.env.BONDERY_OPS_REDDIT_USERNAME ?? "",
 };
 
 // ---------------------------------------------------------------------------

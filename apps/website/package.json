@@ -39,7 +39,7 @@
   "name": "website",
   "private": true,
   "scripts": {
-    "announce": "tsx --env-file=../../.env.local scripts/announce.ts",
+    "announce": "tsx scripts/announce.ts",
     "build": "next build",
     "check-env": "tsx scripts/check-env.ts",
     "check-types": "node ../../scripts/tsc-native.mjs --noEmit",

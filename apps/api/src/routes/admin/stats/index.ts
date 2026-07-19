@@ -39,13 +39,18 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
-      const { POSTHOG_API_SECRET, POSTHOG_PROJECT_ID } = fastify.config;
-      if (!POSTHOG_API_SECRET || !POSTHOG_PROJECT_ID) {
+      const { BONDERY_PRIVATE_POSTHOG_API_SECRET, BONDERY_PRIVATE_POSTHOG_PROJECT_ID } =
+        fastify.config;
+      if (!BONDERY_PRIVATE_POSTHOG_API_SECRET || !BONDERY_PRIVATE_POSTHOG_PROJECT_ID) {
         throw serviceUnavailable();
       }
 
       const days = request.query.days ?? 90;
-      return fetchActiveUsersTimeline(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID, days);
+      return fetchActiveUsersTimeline(
+        BONDERY_PRIVATE_POSTHOG_API_SECRET,
+        BONDERY_PRIVATE_POSTHOG_PROJECT_ID,
+        days,
+      );
     },
   );
 
@@ -76,12 +81,16 @@ export const statsRoutes: AppRoutePlugin = async (fastify) => {
       } satisfies FastifyZodOpenApiSchema,
     },
     async () => {
-      const { POSTHOG_API_SECRET, POSTHOG_PROJECT_ID } = fastify.config;
-      if (!POSTHOG_API_SECRET || !POSTHOG_PROJECT_ID) {
+      const { BONDERY_PRIVATE_POSTHOG_API_SECRET, BONDERY_PRIVATE_POSTHOG_PROJECT_ID } =
+        fastify.config;
+      if (!BONDERY_PRIVATE_POSTHOG_API_SECRET || !BONDERY_PRIVATE_POSTHOG_PROJECT_ID) {
         throw serviceUnavailable();
       }
 
-      return fetchNpsResults(POSTHOG_API_SECRET, POSTHOG_PROJECT_ID);
+      return fetchNpsResults(
+        BONDERY_PRIVATE_POSTHOG_API_SECRET,
+        BONDERY_PRIVATE_POSTHOG_PROJECT_ID,
+      );
     },
   );
 

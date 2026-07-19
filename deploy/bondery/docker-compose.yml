@@ -1,0 +1,112 @@
+# Canonical Bondery stack (production + self-host): webapp + API + Redis.
+# Local laptop Redis is apps/redis (port 26636) — do not use this file for DX.
+#
+# Advanced external Redis: run the API image alone with BONDERY_PRIVATE_REDIS_URL set to your host.
+# See README.md and docs/deploy/api-container.md.
+#
+# Prerequisite (Traefik / Dokploy): docker network create dokploy-network
+# Host-port self-host (no Traefik): copy docker-compose.override.yml.example → docker-compose.override.yml
+#
+# Public HTTPS URLs are derived from *_DOMAIN (Traefik Host rules). Override only if you need
+# non-HTTPS or non-standard ports (uncommon behind Traefik + Let's Encrypt).
+
+services:
+  redis:
+    command: redis-server --appendonly yes --save 60 1
+    healthcheck:
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+    image: redis:7.4-alpine
+    networks:
+      - internal
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  api:
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
+      BONDERY_PUBLIC_SUPABASE_URL: ${BONDERY_PUBLIC_SUPABASE_URL:?BONDERY_PUBLIC_SUPABASE_URL must be set}
+      BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
+      BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
+      BONDERY_PRIVATE_REDIS_URL: ${BONDERY_PRIVATE_REDIS_URL:-redis://redis:6379}
+      BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 20s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:26631/status').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      timeout: 5s
+    image: ghcr.io/usebondery/api:${BONDERY_INFRA_API_IMAGE_TAG:-production}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bondery-api.rule=Host(`${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}`)
+      - traefik.http.routers.bondery-api.entrypoints=websecure
+      - traefik.http.routers.bondery-api.tls.certResolver=letsencrypt
+      - traefik.http.routers.bondery-api.service=bondery-api
+      - traefik.http.services.bondery-api.loadbalancer.server.port=26631
+    networks:
+      - dokploy-network
+      - internal
+    restart: unless-stopped
+
+  webapp:
+    environment:
+      BONDERY_INFRA_INTERNAL_API_URL: http://api:26631
+      BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
+      BONDERY_PUBLIC_POSTHOG_HOST: ${BONDERY_PUBLIC_POSTHOG_HOST:-}
+      BONDERY_PUBLIC_POSTHOG_KEY: ${BONDERY_PUBLIC_POSTHOG_KEY:-}
+      BONDERY_PRIVATE_POSTHOG_HOST: ${BONDERY_PRIVATE_POSTHOG_HOST:-}
+      BONDERY_PRIVATE_POSTHOG_KEY: ${BONDERY_PRIVATE_POSTHOG_KEY:-}
+      BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set}
+      BONDERY_PUBLIC_SUPABASE_URL: ${BONDERY_PUBLIC_SUPABASE_URL:?BONDERY_PUBLIC_SUPABASE_URL must be set}
+      BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
+      BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
+      BONDERY_INFRA_GIT_SHA: ${BONDERY_INFRA_GIT_SHA:-}
+      BONDERY_INFRA_VERSION: ${BONDERY_INFRA_VERSION:-}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 20s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:26632/api/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      timeout: 5s
+    image: ghcr.io/usebondery/webapp:${BONDERY_INFRA_WEBAPP_IMAGE_TAG:-production}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bondery-webapp.rule=Host(`${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}`)
+      - traefik.http.routers.bondery-webapp.entrypoints=websecure
+      - traefik.http.routers.bondery-webapp.tls.certResolver=letsencrypt
+      - traefik.http.routers.bondery-webapp.service=bondery-webapp
+      - traefik.http.services.bondery-webapp.loadbalancer.server.port=26632
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+
+networks:
+  dokploy-network:
+    external: true
+  internal:
+    driver: bridge
+
+volumes:
+  redis-data:

@@ -82,6 +82,6 @@ export function validateImageMagicBytes(buffer: Buffer | Uint8Array): boolean {
  */
 export const URLS = {
   login: "/login",
-  webapp: process.env.NEXT_PUBLIC_WEBAPP_URL,
-  website: process.env.NEXT_PUBLIC_WEBSITE_URL,
+  webapp: process.env.BONDERY_PUBLIC_WEBAPP_URL,
+  website: process.env.BONDERY_PUBLIC_WEBSITE_URL,
 } as const;

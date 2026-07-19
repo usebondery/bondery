@@ -92,6 +92,18 @@
       "node": "./dist/api/types.js",
       "types": "./src/api/types.ts"
     },
+    "./cli": {
+      "default": "./dist/cli/index.js",
+      "import": "./dist/cli/index.js",
+      "node": "./dist/cli/index.js",
+      "types": "./src/cli/index.ts"
+    },
+    "./cli/logger": {
+      "default": "./dist/cli/logger.js",
+      "import": "./dist/cli/logger.js",
+      "node": "./dist/cli/logger.js",
+      "types": "./src/cli/logger.ts"
+    },
     "./contact": {
       "default": "./dist/contact/index.js",
       "import": "./dist/contact/index.js",

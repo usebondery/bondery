@@ -4,6 +4,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
   // live in src/app/**/route.ts so they can import @bondery/helpers.
+  // Public URLs: server reads BONDERY_PUBLIC_*; client leaves get them as RSC props.
   experimental: {
     optimizePackageImports: [
       "@tabler/icons-react",

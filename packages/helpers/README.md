@@ -45,7 +45,7 @@ const names = createContactFromFullNameSchema.parse({ fullName: values.fullName 
 - `@bondery/helpers/text` — inline token parsing and reading-time helpers
 - `@bondery/helpers/version` — semantic version comparison
 - `@bondery/helpers/interactions` — interaction type runtime constants
-- `@bondery/helpers/env` — environment variable checks
+- `@bondery/helpers/env` — env checks + monorepo env manifest (`ENV_MANIFEST`, sync targets)
 - `@bondery/helpers/locale` — timezone grouping and formatting
 - `@bondery/helpers/socials` — social field normalization utilities
 - `@bondery/helpers/phone` — phone parsing and formatting

@@ -70,9 +70,9 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
   fastify.decorateRequest("authClient", null);
   fastify.decorateRequest("authApiKey", null);
 
-  const pepper = fastify.config.PRIVATE_API_KEY_PEPPER.trim();
-  const jwtSigningJwk = fastify.config.PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
-  const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.NEXT_PUBLIC_SUPABASE_URL);
+  const pepper = fastify.config.BONDERY_PRIVATE_API_KEY_PEPPER.trim();
+  const jwtSigningJwk = fastify.config.BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
+  const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.BONDERY_PUBLIC_SUPABASE_URL);
 
   // ── verifySession ────────────────────────────────────────────────────────
   // Extracts Supabase session from cookies / Bearer token.
@@ -198,7 +198,7 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
         return;
       }
 
-      const client = createClient(fastify.config.NEXT_PUBLIC_SUPABASE_URL, token, {
+      const client = createClient(fastify.config.BONDERY_PUBLIC_SUPABASE_URL, token, {
         auth: { autoRefreshToken: false, detectSessionInUrl: false, persistSession: false },
       });
 
@@ -248,8 +248,8 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
  * Called from buildServer onReady only — not during OpenAPI generation.
  */
 export async function verifyAuthAtStartup(fastify: AppFastifyInstance): Promise<void> {
-  const jwtSigningJwk = fastify.config.PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
-  const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.NEXT_PUBLIC_SUPABASE_URL);
+  const jwtSigningJwk = fastify.config.BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK.trim();
+  const jwtIssuerUrl = supabaseAuthIssuerUrl(fastify.config.BONDERY_PUBLIC_SUPABASE_URL);
 
   await loadJwtSigningMaterial(jwtSigningJwk);
 
@@ -264,7 +264,7 @@ export async function verifyAuthAtStartup(fastify: AppFastifyInstance): Promise<
       jwksCheck.message ?? "JWT signing JWK does not match Supabase JWKS",
     );
     throw new Error(
-      jwksCheck.message ?? "PRIVATE_SUPABASE_JWT_SIGNING_JWK does not match Supabase JWKS",
+      jwksCheck.message ?? "BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK does not match Supabase JWKS",
     );
   }
   fastify.log.info(

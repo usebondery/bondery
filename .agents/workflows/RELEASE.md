@@ -93,7 +93,22 @@ The Chrome extension must be released **before** the web app because Google requ
    ```bash
    git push origin main:release
    ```
-   The deployment workflow triggers automatically.
+3. Tag and push independent container releases (only services that changed):
+   ```bash
+   git tag api-X.Y.Z        # if API changed
+   git tag webapp-X.Y.Z     # if webapp changed
+   git push origin api-X.Y.Z webapp-X.Y.Z
+   ```
+   This builds/pushes `ghcr.io/usebondery/{api,webapp}:X.Y.Z` and floating `:production`.
+4. **Pin the tested stack pair** in [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example):
+   ```env
+   BONDERY_INFRA_API_IMAGE_TAG=X.Y.Z
+   BONDERY_INFRA_WEBAPP_IMAGE_TAG=X.Y.Z
+   ```
+   Commit that pin update on `main` (and promote to `release`) so self-hosters and production share the same known-good pair. If only one service changed, bump only that pin; leave the other at the last tested compatible version.
+5. On Dokploy Compose (`deploy/bondery`): set the same pins in the app env and redeploy **only the changed service** when possible (`docker compose up -d --no-deps webapp` or `api`).
+6. **Rollback target:** keep the previous `(BONDERY_INFRA_API_IMAGE_TAG, BONDERY_INFRA_WEBAPP_IMAGE_TAG)` pair recorded; restore those pins and redeploy the changed service(s). Do not use floating `:production` as the production/self-host pin.
+7. Manual smoke after deploy: login + one authenticated mutation (automated stack smoke runs on the release tags — see `.github/workflows/smoke-bondery-stack.yml`).
 
 ---
 

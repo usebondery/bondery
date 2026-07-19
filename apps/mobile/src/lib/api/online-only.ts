@@ -75,7 +75,7 @@ export async function fetchContactVCard(
   fallback?: Pick<Contact, "firstName" | "lastName">,
 ): Promise<{ content: string; filename: string }> {
   if (!API_URL) {
-    throw new Error("EXPO_PUBLIC_API_URL is not configured");
+    throw new Error("BONDERY_PUBLIC_API_URL is not configured");
   }
 
   const authHeaders = await getBearerHeaders();
@@ -114,7 +114,7 @@ export async function uploadContactPhoto(
   mimeType: string,
 ): Promise<{ avatarUrl: string }> {
   if (!API_URL) {
-    throw new Error("EXPO_PUBLIC_API_URL is not configured");
+    throw new Error("BONDERY_PUBLIC_API_URL is not configured");
   }
 
   const authHeaders = await getBearerHeaders();
