@@ -69,7 +69,7 @@ jobs:
       TURBO_TEAM: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
       TURBO_TOKEN: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.checkout_ref != '' && inputs.checkout_ref || github.sha }}
           fetch-depth: 0

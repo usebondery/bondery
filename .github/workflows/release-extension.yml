@@ -25,15 +25,14 @@ jobs:
       BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID: ${{ vars.BONDERY_PUBLIC_SUPABASE_OAUTH_CLIENT_ID }}
       BONDERY_OPS_CHROME_EXTENSION_ID: ${{ vars.BONDERY_OPS_CHROME_EXTENSION_ID }}
       BONDERY_OPS_CHROME_PUBLISHER_ID: ${{ vars.BONDERY_OPS_CHROME_PUBLISHER_ID }}
-      BONDERY_OPS_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
-      BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
-      BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY: ${{ vars.BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY }}
+      PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+      PRIVATE_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
       TURBO_TEAM: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
       TURBO_TOKEN: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -91,25 +90,11 @@ jobs:
         run: |
           PRIVATE_KEY_PATH="apps/chrome-extension/private-key.pem"
           PUBLIC_KEY_PATH="apps/chrome-extension/public-key.pem"
-          DERIVED_PUBLIC_KEY_PATH="apps/chrome-extension/derived-public-key.pem"
-          PUBLIC_KEY_DER_PATH="apps/chrome-extension/public-key.der"
-          DERIVED_PUBLIC_KEY_DER_PATH="apps/chrome-extension/derived-public-key.der"
           CRX_PATH="apps/chrome-extension/bondery-extension-${{ steps.release_meta.outputs.tag }}.crx"
           PUBLIC_KEY_ASSET_PATH="./bondery-extension-${{ steps.release_meta.outputs.tag }}.public-key.pem"
 
-          printf "%b" "$BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY" > "$PRIVATE_KEY_PATH"
-          printf "%b" "$BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY" > "$PUBLIC_KEY_PATH"
-
-          openssl pkey -in "$PRIVATE_KEY_PATH" -pubout -out "$DERIVED_PUBLIC_KEY_PATH"
-          openssl pkey -pubin -in "$PUBLIC_KEY_PATH" -outform DER > "$PUBLIC_KEY_DER_PATH"
-          openssl pkey -pubin -in "$DERIVED_PUBLIC_KEY_PATH" -outform DER > "$DERIVED_PUBLIC_KEY_DER_PATH"
-
-          if cmp -s "$PUBLIC_KEY_DER_PATH" "$DERIVED_PUBLIC_KEY_DER_PATH"; then
-            echo "✅ BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY and BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY match"
-          else
-            echo "❌ BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY and BONDERY_OPS_CHROME_PUBLIC_SIGNING_KEY do not match"
-            exit 1
-          fi
+          printf "%b" "$PRIVATE_CHROME_PRIVATE_SIGNING_KEY" > "$PRIVATE_KEY_PATH"
+          openssl pkey -in "$PRIVATE_KEY_PATH" -pubout -out "$PUBLIC_KEY_PATH"
 
           npx crx3@2 \
             -p "$PRIVATE_KEY_PATH" \
@@ -122,16 +107,13 @@ jobs:
 
           rm -f \
             "$PRIVATE_KEY_PATH" \
-            "$PUBLIC_KEY_PATH" \
-            "$DERIVED_PUBLIC_KEY_PATH" \
-            "$PUBLIC_KEY_DER_PATH" \
-            "$DERIVED_PUBLIC_KEY_DER_PATH"
+            "$PUBLIC_KEY_PATH"
 
       - name: Authenticate to Google Cloud
         id: gcp_auth
         uses: google-github-actions/auth@v2
         with:
-          credentials_json: ${{ env.BONDERY_OPS_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
+          credentials_json: ${{ secrets.PRIVATE_CHROME_SERVICE_ACCOUNT_KEY_JSON }}
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
