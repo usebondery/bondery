@@ -242,6 +242,21 @@ function writeTurbo(dryRun) {
 
   turbo.tasks ??= {};
 
+  const baseBuild = turbo.tasks.build ?? {};
+  const buildInherit = {
+    dependsOn: baseBuild.dependsOn ?? ["^build"],
+    inputs: baseBuild.inputs,
+    outputs: baseBuild.outputs,
+    passThroughEnv: baseBuild.passThroughEnv,
+  };
+  const baseDev = turbo.tasks.dev ?? {};
+  const devInherit = {
+    cache: baseDev.cache ?? false,
+    dependsOn: baseDev.dependsOn,
+    inputs: baseDev.inputs,
+    persistent: baseDev.persistent ?? true,
+  };
+
   for (const taskName of ["build", "dev"]) {
     const task = turbo.tasks[taskName];
     if (task && "env" in task) {
@@ -253,8 +268,11 @@ function writeTurbo(dryRun) {
     for (const taskName of ["build", "dev"]) {
       const key = `${pkg}#${taskName}`;
       const existing = turbo.tasks[key] ?? {};
+      const inherit = taskName === "build" ? buildInherit : devInherit;
       turbo.tasks[key] = {
+        ...inherit,
         ...existing,
+        dependsOn: existing.dependsOn ?? inherit.dependsOn,
         env: [...new Set(env)].toSorted(),
       };
     }

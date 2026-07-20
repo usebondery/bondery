@@ -81,6 +81,7 @@
   ],
   "tasks": {
     "api#build": {
+      "dependsOn": ["^build"],
       "env": [
         "BONDERY_PRIVATE_ANTHROPIC_API_KEY",
         "BONDERY_PRIVATE_API_KEY_PEPPER",
@@ -107,6 +108,34 @@
         "BONDERY_PUBLIC_WEBAPP_URL",
         "BONDERY_PUBLIC_WEBSITE_URL",
         "DO_NOT_TRACK"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/api/.env.production.local"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
       ]
     },
     "api#dev": {
@@ -179,6 +208,7 @@
       "outputs": [".cache/tsconfig.tsbuildinfo"]
     },
     "chrome-extension#build": {
+      "dependsOn": ["^build"],
       "env": [
         "BONDERY_OPS_CHROME_EXTENSION_ID",
         "BONDERY_OPS_CHROME_PRIVATE_SIGNING_KEY",
@@ -191,6 +221,34 @@
         "BONDERY_PUBLIC_WEBAPP_URL",
         "CI",
         "GITHUB_ACTIONS"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/api/.env.production.local"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
       ]
     },
     "chrome-extension#dev": {
@@ -224,6 +282,7 @@
       "persistent": true
     },
     "mobile#build": {
+      "dependsOn": ["^build"],
       "env": [
         "BONDERY_PUBLIC_API_URL",
         "BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
@@ -231,6 +290,34 @@
         "BONDERY_PUBLIC_SYNC_DEBUG",
         "BONDERY_PUBLIC_WEBSITE_URL",
         "METRO_MAX_WORKERS"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/api/.env.production.local"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
       ]
     },
     "mobile#dev": {
@@ -256,6 +343,7 @@
       "dependsOn": ["^transit"]
     },
     "webapp#build": {
+      "dependsOn": ["^build"],
       "env": [
         "BONDERY_INFRA_GIT_SHA",
         "BONDERY_INFRA_INTERNAL_API_URL",
@@ -270,6 +358,34 @@
         "BONDERY_PUBLIC_WEBAPP_URL",
         "BONDERY_PUBLIC_WEBSITE_URL",
         "DO_NOT_TRACK"
+      ],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/api/.env.production.local"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
       ]
     },
     "webapp#dev": {
@@ -290,7 +406,36 @@
       ]
     },
     "website#build": {
-      "env": ["BONDERY_PUBLIC_WEBAPP_URL", "BONDERY_PUBLIC_WEBSITE_URL", "DO_NOT_TRACK"]
+      "dependsOn": ["^build"],
+      "env": ["BONDERY_PUBLIC_WEBAPP_URL", "BONDERY_PUBLIC_WEBSITE_URL", "DO_NOT_TRACK"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "apps/chrome-extension/.env.production.local",
+        "apps/webapp/.env.production.local",
+        "apps/website/.env.production.local",
+        "apps/api/.env.production.local"
+      ],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        ".cache/tsconfig.tsbuildinfo",
+        "dist/**",
+        "public/**"
+      ],
+      "passThroughEnv": [
+        "SYSTEMROOT",
+        "WINDIR",
+        "COMSPEC",
+        "PATHEXT",
+        "PATH",
+        "TEMP",
+        "TMP",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "USERPROFILE",
+        "HOMEDRIVE",
+        "HOMEPATH"
+      ]
     },
     "website#dev": {
       "env": ["BONDERY_PUBLIC_WEBAPP_URL", "BONDERY_PUBLIC_WEBSITE_URL", "DO_NOT_TRACK"]

@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * Mechanical checks for deploy/bondery/docker-compose.yml:
- * - webapp must never receive PRIVATE_* or BONDERY_PRIVATE_* secrets
+ * - webapp must never receive PRIVATE_* or BONDERY_PRIVATE_* secrets (except
+ *   server-only PostHog vars listed in WEBAPP_ALLOWED_PRIVATE)
  * - api and webapp must carry Traefik Host() rules
  * - redis must not carry Traefik labels or join dokploy-network
  */
@@ -31,13 +32,20 @@ const webapp = serviceBlock("webapp");
 const api = serviceBlock("api");
 const redis = serviceBlock("redis");
 
+const WEBAPP_ALLOWED_PRIVATE = new Set([
+  "BONDERY_PRIVATE_POSTHOG_HOST",
+  "BONDERY_PRIVATE_POSTHOG_KEY",
+]);
+
 if (webapp) {
   if (/^\s*env_file:/m.test(webapp)) {
     errors.push(
       "webapp must not use env_file (would load API PRIVATE_* / BONDERY_PRIVATE_* secrets)",
     );
   }
-  const privateHits = [...webapp.matchAll(/\b(?:BONDERY_)?PRIVATE_[A-Z0-9_]+\b/g)].map((m) => m[0]);
+  const privateHits = [...webapp.matchAll(/\b(?:BONDERY_)?PRIVATE_[A-Z0-9_]+\b/g)]
+    .map((m) => m[0])
+    .filter((name) => !WEBAPP_ALLOWED_PRIVATE.has(name));
   if (privateHits.length > 0) {
     errors.push(
       `webapp must not reference PRIVATE_* / BONDERY_PRIVATE_* vars: ${[...new Set(privateHits)].join(", ")}`,
