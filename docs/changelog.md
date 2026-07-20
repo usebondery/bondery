@@ -4,6 +4,14 @@ All notable changes to this project are documented in this file. For format and 
 
 ## [Unreleased]
 
+## [1.7.4] - 20.07.2026
+
+### 🤖 CI
+
+- Restore turbo `^build` dependencies on package-scoped build tasks (fixes webapp Docker image builds).
+- Sync `package-lock.json` for the `apps/redis` workspace.
+- Allow server-only PostHog vars in webapp Compose policy lint.
+
 ## [1.7.3] - 20.07.2026
 
 ### 🔄 Changed

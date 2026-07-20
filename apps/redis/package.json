@@ -8,5 +8,5 @@
     "status": "docker compose ps",
     "stop": "docker compose down"
   },
-  "version": "1.7.3"
+  "version": "1.7.4"
 }

@@ -46,5 +46,5 @@
     "zip:firefox": "npx wxt zip -b firefox"
   },
   "type": "module",
-  "version": "1.7.3"
+  "version": "1.7.4"
 }
