@@ -52,6 +52,7 @@ services:
         ]
       timeout: 5s
     image: ghcr.io/usebondery/api:${BONDERY_INFRA_API_IMAGE_TAG:-production}
+    pull_policy: always
     labels:
       - traefik.enable=true
       - traefik.http.routers.bondery-api.rule=Host(`${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}`)
@@ -91,6 +92,7 @@ services:
         ]
       timeout: 5s
     image: ghcr.io/usebondery/webapp:${BONDERY_INFRA_WEBAPP_IMAGE_TAG:-production}
+    pull_policy: always
     labels:
       - traefik.enable=true
       - traefik.http.routers.bondery-webapp.rule=Host(`${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}`)

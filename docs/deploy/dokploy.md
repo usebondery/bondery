@@ -100,6 +100,33 @@ https://<project-ref>.supabase.co/auth/v1/callback
 
 Set `BONDERY_PUBLIC_SUPABASE_URL` and `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` once in the stack `.env`. Compose injects those into both services under the same `BONDERY_PUBLIC_*` names. The publishable key is designed to be public — sharing it is correct and expected.
 
+## Environment migration (pre-1.7.x → `BONDERY_*`)
+
+If the API container crashes with missing `NEXT_PUBLIC_*`, `PRIVATE_*`, or `PUBLIC_SUPABASE_PUBLISHABLE_KEY`, you are on an **old API image** and/or still using **legacy env names**.
+
+1. **Pin images** to `1.7.4` or newer (or redeploy after `:production` has moved past the env migration):
+   ```env
+   BONDERY_INFRA_API_IMAGE_TAG=1.7.4
+   BONDERY_INFRA_WEBAPP_IMAGE_TAG=1.7.4
+   ```
+2. **Rename Dokploy / compose `.env` keys** (values stay the same):
+
+   | Legacy | Current |
+   |--------|---------|
+   | `NEXT_PUBLIC_SUPABASE_URL` | `BONDERY_PUBLIC_SUPABASE_URL` |
+   | `PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` |
+   | `PRIVATE_SUPABASE_SECRET_KEY` | `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` |
+   | `NEXT_PUBLIC_API_URL` | *(omit — derived from `BONDERY_INFRA_API_DOMAIN`)* |
+   | `PRIVATE_API_KEY_PEPPER` | `BONDERY_PRIVATE_API_KEY_PEPPER` |
+   | `PRIVATE_SUPABASE_JWT_SIGNING_JWK` | `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` |
+   | `PRIVATE_EMAIL_HOST` | `BONDERY_PRIVATE_EMAIL_HOST` |
+   | `PRIVATE_EMAIL_USER` | `BONDERY_PRIVATE_EMAIL_USER` |
+   | `PRIVATE_EMAIL_PASS` | `BONDERY_PRIVATE_EMAIL_PASS` |
+   | `PRIVATE_EMAIL_ADDRESS` | `BONDERY_PRIVATE_EMAIL_ADDRESS` |
+   | `PRIVATE_EMAIL_PORT` | `BONDERY_PRIVATE_EMAIL_PORT` |
+
+3. Copy the full template from [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example), redeploy the stack, and pull fresh images (`docker compose pull` or Dokploy redeploy).
+
 ## Cutover (API-only Compose + separate webapp image → unified stack)
 
 ### Preflight

@@ -58,7 +58,7 @@ Update the pins in `.env.example` when releasing a tested stack pair.
 
 ### Image tags
 
-- **`production` (default):** floating channel — next pull/redeploy gets the latest release. Simplest for Bondery prod and most self-hosters.
+- **`production` (default):** floating channel — redeploy pulls the latest release image (`pull_policy: always` on `api` / `webapp`).
 - **Semver (`1.7.3`):** pin when you want a frozen version and one-command rollback to a known tag.
 - API and webapp are published independently; keep both on the same channel (or a tested semver pair) to avoid a partial upgrade.
 
