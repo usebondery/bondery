@@ -1,0 +1,42 @@
+import { SOCIAL_LINKS } from "@bondery/helpers";
+
+export { postMeta } from "./july-2026-release.meta";
+
+## What's new in v1.7.4
+
+Bondery now speaks German, the LinkedIn extension got a lot sturdier, and you can share a contact card by email. We also spent real time this month on the boring-but-critical stuff: backend infrastructure that makes Bondery easier to run, whether that's on our servers or yours. Here's everything that shipped.
+
+## Support for German
+
+Bondery is no longer English-only. The entire app — webapp, extension, and emails — is now available in German, with the interface switching automatically to match your browser or device language. If you'd rather use English, you can still switch it manually in Settings.
+
+This is also the first step toward a fully localized Bondery. More languages are on the way.
+
+## A more stable, more robust LinkedIn extension
+
+The Chrome extension is the backbone of how most people get their network into Bondery, so we put a lot of work into making it more resilient. LinkedIn changes its page structure constantly, and previous versions of the extension could break silently when that happened.
+
+- Profile scraping now handles more edge cases in LinkedIn's DOM without failing.
+- Enrichment runs more reliably in the background, with fewer timeouts and dropped jobs.
+- Errors surface clearly in the extension instead of failing silently.
+
+If you've hit sync issues with the extension before, this release should feel noticeably smoother.
+
+## Share a contact by email
+
+You can now share any contact card straight from Bondery by email, no export step required. Pick a person, hit share, and send a clean, read-only version of their card to anyone — perfect for handing off a contact to a colleague or introducing two people in your network.
+
+## Install Bondery as a desktop app
+
+Bondery works as a Progressive Web App, so you can install it straight from your browser and use it like a native desktop app — its own window, its own icon in your dock or taskbar, no tab required. Find the install option in Settings, or use your browser's built-in "Install app" prompt.
+
+## Backend infrastructure
+
+A lot of this release happened under the hood. We overhauled how Bondery's environment configuration works across the whole monorepo, unified it under a single `.env.local` and a consistent set of `BONDERY_*` variables, and rebuilt the Docker Compose setup that powers both our production deploys and self-hosted instances. None of this is visible in the product, but it makes Bondery faster to deploy, easier to configure, and much easier to self-host.
+
+## What's next
+
+We're currently working on:
+
+- **A self-hosting guide** — a proper, step-by-step walkthrough for running your own Bondery instance with Docker Compose, now that the infrastructure work has landed.
+- **The mobile app** — still in active development, with more features landing every week.
