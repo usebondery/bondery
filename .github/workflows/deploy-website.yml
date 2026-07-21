@@ -10,8 +10,6 @@ on:
     paths:
       - "apps/website/**"
       - "packages/**"
-      - "scripts/**"
-      - "docs/**"
       - "package.json"
       - "package-lock.json"
       - "turbo.json"
@@ -41,6 +39,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build website dependency packages
+        run: npx turbo build --filter=website^...
 
       - name: Website typechecks
         run: npm run check-types -w website
