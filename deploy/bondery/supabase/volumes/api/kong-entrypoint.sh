@@ -6,6 +6,18 @@
 # When opaque keys are not configured (empty env vars), expressions fall through
 # to legacy-only behavior - just passing apikey as-is.
 #
+# Kong requires unique keyauth_credentials globally. Cloud projects with only
+# sb_publishable_/sb_secret_ keys must not register the same value in both the
+# legacy (ANON_KEY/SERVICE_KEY) and opaque (PUBLISHABLE_KEY/SECRET_KEY) slots.
+if [ "$SUPABASE_ANON_KEY" = "$SUPABASE_PUBLISHABLE_KEY" ]; then
+  SUPABASE_ANON_KEY=
+  export SUPABASE_ANON_KEY
+fi
+if [ "$SUPABASE_SERVICE_KEY" = "$SUPABASE_SECRET_KEY" ]; then
+  SUPABASE_SERVICE_KEY=
+  export SUPABASE_SERVICE_KEY
+fi
+
 # Full expression logic (when opaque keys are configured):
 #   1. If Authorization header exists and is NOT an sb_ key -> pass through (user session JWT)
 #   2. If apikey matches secret key -> set service_role asymmetric JWT internal "API key"
