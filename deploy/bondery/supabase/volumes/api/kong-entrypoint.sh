@@ -3,13 +3,6 @@
 
 set -e
 
-if [ -f /runtime/jwt-derived.env ]; then
-  set -a
-  # shellcheck disable=SC1091
-  . /runtime/jwt-derived.env
-  set +a
-fi
-
 if [ -n "$SUPABASE_SECRET_KEY" ] && [ -n "$SUPABASE_PUBLISHABLE_KEY" ] \
   && [ -n "$SERVICE_ROLE_KEY_ASYMMETRIC" ] && [ -n "$ANON_KEY_ASYMMETRIC" ]; then
   export LUA_AUTH_EXPR="\$((headers.authorization ~= nil and headers.authorization:sub(1, 10) ~= 'Bearer sb_' and headers.authorization) or (headers.apikey == '$SUPABASE_SECRET_KEY' and 'Bearer $SERVICE_ROLE_KEY_ASYMMETRIC') or (headers.apikey == '$SUPABASE_PUBLISHABLE_KEY' and 'Bearer $ANON_KEY_ASYMMETRIC') or headers.apikey)"

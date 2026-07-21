@@ -150,40 +150,33 @@ if (kong) {
   if (kong.includes("BONDERY_LEGACY") || kong.includes("SUPABASE_ANON_KEY:")) {
     errors.push("kong must use sb_* keys only (no legacy SUPABASE_ANON_KEY / SERVICE_KEY slots)");
   }
-  if (!kong.includes("jwt-derived.env")) {
-    errors.push("kong must load ./supabase/volumes/runtime/jwt-derived.env");
+  if (!kong.includes("BONDERY_SUPABASE_ANON_KEY_ASYMMETRIC")) {
+    errors.push("kong must set ANON_KEY_ASYMMETRIC from BONDERY_SUPABASE_ANON_KEY_ASYMMETRIC");
   }
-  if (kong.includes("BONDERY_SUPABASE_")) {
-    errors.push("kong must not reference BONDERY_SUPABASE_* derived env vars in compose");
+  if (kong.includes("jwt-derived.env") || kong.includes("jwt-derive")) {
+    errors.push("kong must not depend on jwt-derive or jwt-derived.env");
   }
 }
 
 const auth = serviceBlock("auth", supabaseText);
-const jwtDerive = serviceBlock("jwt-derive", supabaseText);
-if (jwtDerive) {
-  if (!jwtDerive.includes("derive-jwt-env.mjs")) {
-    errors.push("jwt-derive must run derive-jwt-env.mjs");
-  }
-  if (!jwtDerive.includes("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK")) {
-    errors.push("jwt-derive must read BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK");
-  }
-  if (!/^\s*healthcheck:/m.test(jwtDerive)) {
-    errors.push("jwt-derive must define a healthcheck after writing jwt-derived.env");
-  }
-}
-
 if (auth) {
   if (!auth.includes("BONDERY_INFRA_CHROME_EXTENSION_ID")) {
     errors.push(
       "auth GOTRUE_URI_ALLOW_LIST must derive chromiumapp.org URLs from BONDERY_INFRA_CHROME_EXTENSION_ID",
     );
   }
-  if (!auth.includes("auth-entrypoint.sh")) {
-    errors.push("auth must source jwt-derived.env via auth-entrypoint.sh at runtime");
+  if (!auth.includes("GOTRUE_JWT_KEYS: ${BONDERY_SUPABASE_JWT_KEYS")) {
+    errors.push("auth must set GOTRUE_JWT_KEYS from BONDERY_SUPABASE_JWT_KEYS");
   }
-  if (auth.includes("jwt-derived.env") && auth.includes("env_file:")) {
-    errors.push("auth must not use env_file for jwt-derived.env (use entrypoint sourcing)");
-  }
+}
+
+const rest = serviceBlock("rest", supabaseText);
+if (rest && !rest.includes("PGRST_JWT_SECRET: ${BONDERY_SUPABASE_JWT_JWKS")) {
+  errors.push("rest must set PGRST_JWT_SECRET from BONDERY_SUPABASE_JWT_JWKS");
+}
+
+if (supabaseText.includes("jwt-derive:")) {
+  errors.push("docker-compose.supabase.yml must not define a jwt-derive service");
 }
 
 if (db) {

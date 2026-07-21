@@ -71,15 +71,23 @@ Operators use **`BONDERY_*` only**. Compose maps them into GoTrue / Kong / Postg
 
 Set `BONDERY_PRIVATE_SUPABASE_JWT_SECRET`, `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_*`), `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` (`sb_secret_*`), and `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` (export ES256 private JWK from Supabase Cloud on cutover).
 
-On every stack start, the **`jwt-derive`** service derives Auth JWKS + Kong asymmetric JWT env from those two secrets and writes `supabase/volumes/runtime/jwt-derived.env`. Auth loads it at **container start** via `auth-entrypoint.sh`; other Supabase services use `env_file`.
+**Once at setup** (or when rotating signing JWK / JWT secret), derive Auth JWKS + Kong asymmetric JWT env and paste into Dokploy / `.env`:
 
-**Dokploy:** `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` and `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` must be set on the **compose project** (shared env), not only on the `api` service — otherwise `jwt-derive` cannot wire Auth JWKS.
+```bash
+cd deploy/bondery
+export BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK='{"kty":"EC",...}'   # compact single-line JSON
+export BONDERY_PRIVATE_SUPABASE_JWT_SECRET='your-jwt-secret'
+node supabase/volumes/scripts/derive-jwt-env.mjs --print
+```
+
+Copy the four `BONDERY_SUPABASE_*` lines into your environment. Re-run only after key rotation.
 
 After rotating signing JWK or JWT secret:
 
 ```bash
 cd deploy/bondery
-docker compose up -d --force-recreate jwt-derive auth rest realtime storage kong
+# Re-derive (see above), update .env / Dokploy, then:
+docker compose up -d --force-recreate auth rest realtime storage kong
 ```
 
 | Operator var | Purpose |
@@ -88,6 +96,10 @@ docker compose up -d --force-recreate jwt-derive auth rest realtime storage kong
 | `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_*` opaque key |
 | `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` | `sb_secret_*` opaque key |
 | `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` | ES256 private JWK (API-key minting + Auth signing) |
+| `BONDERY_SUPABASE_JWT_KEYS` | GoTrue signing keyset (derive once via `derive-jwt-env.mjs --print`) |
+| `BONDERY_SUPABASE_JWT_JWKS` | JWKS for PostgREST / Realtime / Storage verification |
+| `BONDERY_SUPABASE_ANON_KEY_ASYMMETRIC` | ES256 anon JWT for Kong `sb_publishable_*` translation |
+| `BONDERY_SUPABASE_SERVICE_ROLE_KEY_ASYMMETRIC` | ES256 service_role JWT for Kong `sb_secret_*` translation |
 | `BONDERY_PRIVATE_POSTGRES_PASSWORD` | Postgres password |
 | `BONDERY_PRIVATE_SUPABASE_SECRET_KEY_BASE` | Realtime encrypt key (≥64 chars) |
 | `BONDERY_PRIVATE_SUPABASE_PG_META_CRYPTO_KEY` | Studio/meta crypto (≥32 chars) |

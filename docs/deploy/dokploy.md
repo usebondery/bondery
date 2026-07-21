@@ -40,6 +40,7 @@ Plus Postgres/Supabase secrets, API secrets, and OAuth vars from [`.env.example`
 - Image tags: `production` (floating channel) is the default; pin semver when you want a fixed rollback target.
 - Set hostnames only (`BONDERY_INFRA_*_DOMAIN`). Compose derives `https://…` URLs and Traefik `Host()` rules — do **not** set `BONDERY_PUBLIC_SUPABASE_URL` (or other `BONDERY_PUBLIC_*_URL`) in the stack `.env`.
 - `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` must be **compact single-line JSON** (no newlines).
+- After setting signing JWK + JWT secret, run `node deploy/bondery/supabase/volumes/scripts/derive-jwt-env.mjs --print` once and paste the four `BONDERY_SUPABASE_*` lines into Dokploy Environment.
 - Webapp never receives `PRIVATE_*` / `BONDERY_PRIVATE_*` — compose allowlists public vars only.
 - Compose sets `BONDERY_INFRA_INTERNAL_API_URL=http://api:26631` and `BONDERY_INFRA_INTERNAL_SUPABASE_URL=http://kong:8000`.
 - Studio is opt-in: `docker compose --profile studio up -d studio` (SSH only; not Traefik).
