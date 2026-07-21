@@ -1,0 +1,37 @@
+# Dependencies and build caches
+**/node_modules
+**/.turbo
+**/.next
+**/.vercel
+**/.cache
+**/dist
+!packages/**/dist
+
+# Local secrets
+**/.env
+**/.env.*
+!**/.env.*.example
+
+# Apps not needed for website image
+apps/api
+apps/mobile
+apps/webapp
+apps/chrome-extension
+apps/supabase-db
+apps/redis
+
+# Dev / test / docs
+.git
+.github
+.agents
+.cursor
+**/*.test.ts
+**/__tests__
+*.md
+!packages/**/README.md
+
+# IDE and OS
+.DS_Store
+*.log
+.vscode
+.idea

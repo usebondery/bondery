@@ -1,0 +1,137 @@
+name: Deploy - Website
+
+# Release-branch CD: push to release → build → floating :production (no semver tags).
+# Same promotion gate as product deploys (`git push origin main:release`).
+
+on:
+  push:
+    branches:
+      - release
+    paths:
+      - "apps/website/**"
+      - "packages/**"
+      - "scripts/**"
+      - "docs/**"
+      - "package.json"
+      - "package-lock.json"
+      - "turbo.json"
+      - ".dockerignore.website"
+      - ".github/actions/shared/**"
+      - ".github/workflows/deploy-website.yml"
+      - ".github/workflows/shared-docker-build-push.yml"
+      - "deploy/ops/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: latest
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Website typechecks
+        run: npm run check-types -w website
+
+  build-push:
+    needs: gate
+    uses: ./.github/workflows/shared-docker-build-push.yml
+    secrets: inherit
+    with:
+      dockerfile: apps/website/Dockerfile
+      dockerignore_file: .dockerignore.website
+      image_name: ghcr.io/usebondery/website
+      docker_tags: |
+        type=raw,value=production
+        type=sha,prefix=sha-,format=short
+      oci_title: Bondery Website
+      oci_description: Bondery marketing website (release-branch CD)
+      oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/dokploy.md
+      oci_version: production
+      git_sha: ${{ github.sha }}
+      build_args: |
+        BONDERY_INFRA_GIT_SHA=${{ github.sha }}
+
+  smoke:
+    needs: build-push
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Validate compose + policy lint
+        run: |
+          cp deploy/ops/.env.example deploy/ops/.env
+          docker compose -f deploy/ops/docker-compose.yml config >/dev/null
+          node deploy/ops/scripts/check-compose.mjs
+
+      - name: Ensure dokploy-network exists
+        run: docker network create dokploy-network || true
+
+      - name: Start website from just-built SHA tag
+        working-directory: deploy/ops
+        run: |
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          cp .env.example .env.smoke
+          printf '%s\n' \
+            'BONDERY_INFRA_WEBAPP_DOMAIN=app.example-smoke.test' \
+            'BONDERY_INFRA_WEBSITE_DOMAIN=www.example-smoke.test' \
+            > .env.smoke
+          printf '%s\n' \
+            'services:' \
+            '  website:' \
+            "    image: ghcr.io/usebondery/website:sha-${SHORT_SHA}" \
+            '    ports:' \
+            '      - "26630:26630"' \
+            > docker-compose.override.yml
+          docker compose --env-file .env.smoke pull website
+          docker compose --env-file .env.smoke up -d website
+
+      - name: Wait for website /api/live and /api/ready
+        working-directory: deploy/ops
+        run: |
+          for i in $(seq 1 40); do
+            if curl -sf http://127.0.0.1:26630/api/live >/dev/null \
+              && curl -sf http://127.0.0.1:26630/api/ready >/dev/null; then
+              echo "website healthy"
+              exit 0
+            fi
+            sleep 3
+          done
+          docker compose --env-file .env.smoke logs website || true
+          exit 1
+
+      - name: Tear down
+        if: always()
+        working-directory: deploy/ops
+        run: docker compose --env-file .env.smoke down -v || true
+
+  notify-dokploy:
+    needs: [build-push, smoke]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy redeploy webhook
+        env:
+          WEBHOOK_URL: ${{ secrets.BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$WEBHOOK_URL" ]; then
+            echo "BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK not set — skip (redeploy manually in Dokploy)."
+            exit 0
+          fi
+          curl -fsS -X POST "$WEBHOOK_URL"

@@ -87,13 +87,15 @@ The Chrome extension must be released **before** the web app because Google requ
 ### 2. Web App & Other Apps
 
 > **GATE: Only execute this step after the user has explicitly confirmed the Chrome extension is live.**
+> **Exception:** Marketing website CD is **not** extension-gated. Pushing `main` → `release` still builds/pushes `ghcr.io/usebondery/website:production` when website paths change (see [deploy-website.yml](../../.github/workflows/deploy-website.yml)). You may promote website-only changes to `release` without waiting on the Chrome Web Store.
 
 1. Verify all [prerequisites](#prerequisites-on-main) are complete.
 2. Push `main` to the `release` branch:
    ```bash
    git push origin main:release
    ```
-3. Tag and push independent container releases (only services that changed):
+   This triggers website CD when `apps/website/**` (or related paths) changed — floating `:production` updates; Dokploy `deploy/ops` pulls it. No `website-X.Y.Z` tag.
+3. Tag and push independent **product** container releases (only services that changed):
    ```bash
    git tag api-X.Y.Z        # if API changed
    git tag webapp-X.Y.Z     # if webapp changed
@@ -105,10 +107,10 @@ The Chrome extension must be released **before** the web app because Google requ
    BONDERY_INFRA_API_IMAGE_TAG=X.Y.Z
    BONDERY_INFRA_WEBAPP_IMAGE_TAG=X.Y.Z
    ```
-   Commit that pin update on `main` (and promote to `release`) so self-hosters and production share the same known-good pair. If only one service changed, bump only that pin; leave the other at the last tested compatible version.
-5. On Dokploy Compose (`deploy/bondery`): set the same pins in the app env and redeploy **only the changed service** when possible (`docker compose up -d --no-deps webapp` or `api`).
-6. **Rollback target:** keep the previous `(BONDERY_INFRA_API_IMAGE_TAG, BONDERY_INFRA_WEBAPP_IMAGE_TAG)` pair recorded; restore those pins and redeploy the changed service(s). Do not use floating `:production` as the production/self-host pin.
-7. Manual smoke after deploy: login + one authenticated mutation (automated stack smoke runs on the release tags — see `.github/workflows/smoke-bondery-stack.yml`).
+   Commit that pin update on `main` (and promote to `release`) so self-hosters and production share the same known-good pair. If only one service changed, bump only that pin; leave the other at the last tested compatible version. **Do not** pin a website image tag — marketing always uses `:production`.
+5. On Dokploy product Compose (`deploy/bondery`): set the same pins in the app env and redeploy **only the changed service** when possible (`docker compose up -d --no-deps webapp` or `api`). Website is a separate Dokploy app (`deploy/ops`).
+6. **Rollback target (product):** keep the previous `(BONDERY_INFRA_API_IMAGE_TAG, BONDERY_INFRA_WEBAPP_IMAGE_TAG)` pair recorded; restore those pins and redeploy the changed service(s). Do not use floating `:production` as the production/self-host pin for api/webapp. **Website rollback:** temporarily point ops Compose at a known `:sha-<short>` or use Dokploy's previous deployment.
+7. Manual smoke after deploy: login + one authenticated mutation (automated stack smoke runs on the release tags — see `.github/workflows/smoke-bondery-stack.yml`). Website smoke runs inside `deploy-website.yml`.
 
 ---
 

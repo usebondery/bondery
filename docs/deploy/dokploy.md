@@ -1,17 +1,17 @@
-# Dokploy deployment (unified Compose + website)
+# Dokploy deployment (product Compose + ops website)
 
-Canonical production topology:
+Canonical production topology — **two** Compose apps:
 
 | Host | Service | Stack |
 |------|---------|--------|
 | `app.usebondery.com` | `webapp` :26632 | [`deploy/bondery`](../../deploy/bondery/) Compose |
 | `api.usebondery.com` | `api` :26631 | same Compose file |
 | (internal) | `redis` | same Compose — **never** attach a domain |
-| `usebondery.com` | website | Nixpacks/Railpack (separate app) |
+| `usebondery.com` | `website` :26630 | [`deploy/ops`](../../deploy/ops/) Compose (Bondery prod only) |
 
-Self-hosters and Bondery production use the **same** compose file. Quickstart: [`deploy/bondery/README.md`](../../deploy/bondery/README.md).
+Self-hosters use **only** [`deploy/bondery`](../../deploy/bondery/) (api + webapp + redis). Marketing lives in ops and is not part of the self-host distribution. Quickstarts: [`deploy/bondery/README.md`](../../deploy/bondery/README.md) · [`deploy/ops/README.md`](../../deploy/ops/README.md).
 
-## Unified Compose application
+## Product Compose application (`deploy/bondery`)
 
 | Setting | Value |
 |---------|-------|
@@ -54,14 +54,25 @@ Plus API secrets and Supabase/`BONDERY_PUBLIC_*` from [`.env.example`](../../dep
 
 Leave Dokploy **Isolated Deployments** off for the default Bondery app (one stack per host). Optional for operators running multiple Bondery instances on one Dokploy host — see Dokploy docs.
 
-## Website (marketing)
+## Ops Compose application (`deploy/ops` — marketing website)
 
 | Setting | Value |
 |---------|-------|
-| Build path | `.` (repo root) |
-| Build | `npx turbo build --filter=website` |
-| Start | `npx turbo start --filter=website` |
-| Container port | `3000` |
+| Provider | **Docker Compose** |
+| Compose path | `deploy/ops/docker-compose.yml` |
+| Image | `ghcr.io/usebondery/website:production` (hardcoded floating channel) |
+| Domain | `BONDERY_INFRA_WEBSITE_DOMAIN` Traefik label → port `26630` |
+
+**CI:** Push to the `release` branch (path-filtered) runs [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml), which builds/pushes `:production` + `:sha-<short>`. No `website-X.Y.Z` tags. Optional Dokploy redeploy webhook: secret `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK`.
+
+```env
+BONDERY_INFRA_WEBAPP_DOMAIN=app.usebondery.com
+BONDERY_INFRA_WEBSITE_DOMAIN=usebondery.com
+```
+
+Compose derives `BONDERY_PUBLIC_*_URL` from those domains. Health: `GET /api/live` (liveness), `GET /api/ready` (env valid).
+
+**Cutover from Nixpacks:** stop the old Nixpacks/Railpack website app **before** deploying ops Compose (same Traefik Host). Details: [`deploy/ops/README.md`](../../deploy/ops/README.md).
 
 ## Webapp runtime config
 

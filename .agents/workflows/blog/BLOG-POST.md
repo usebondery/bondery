@@ -70,7 +70,13 @@ Before merging:
 
 ## 3. Deploy
 
-Merge the post into `main`. If this is part of a monthly release, deploying happens via the [release workflow](../RELEASE.md#2-web-app--other-apps) (push `main` → `release`). For standalone posts, deploy the website independently.
+1. Merge the post into `main`.
+2. Promote to production: `git push origin main:release`.
+3. If website paths changed, [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml) builds `ghcr.io/usebondery/website:production` and the ops Compose stack on Dokploy (`deploy/ops`) pulls it.
+
+Website deploy is **not** extension-gated and does **not** use `website-X.Y.Z` tags. Wait until the Deploy · Website workflow succeeds (and Dokploy has redeployed) before announcing.
+
+For monthly product releases, the same `main → release` push is step 2 of the [release workflow](../RELEASE.md#2-web-app--other-apps); website CD runs from that push when marketing files change.
 
 ---
 
@@ -147,6 +153,6 @@ When writing the blog post for a monthly release:
 1. Pull the new features and fixes from [docs/changelog.md](../../docs/changelog.md) for the version
 2. Write the post following [WRITING-GUIDE.md](WRITING-GUIDE.md) — focus on *what's new for users*, not internal changes
 3. Set `announce.enabled: true` in metadata
-4. Deploy with the release
+4. Deploy: merge to `main`, then `git push origin main:release` (website CD — see [Deploy](#3-deploy))
 5. Run `npm run announce -w apps/website -- <slug> simulate` to verify
 6. Run `npm run announce -w apps/website -- <slug>` to go live

@@ -2,6 +2,8 @@
 
 Canonical Docker Compose distribution for **self-hosters** and **Bondery production** (Dokploy).
 
+The marketing website is **not** in this stack — see [`deploy/ops`](../ops/) (Bondery production only). This folder still uses `BONDERY_INFRA_WEBSITE_DOMAIN` so api/webapp can derive `BONDERY_PUBLIC_WEBSITE_URL`.
+
 Local development Redis is **[`apps/redis`](../../apps/redis/)** (`npm run start -w redis`, port 26636) — not this folder.
 
 Docs: [docs/deploy/dokploy.md](../../docs/deploy/dokploy.md) · [docs/deploy/api-container.md](../../docs/deploy/api-container.md)

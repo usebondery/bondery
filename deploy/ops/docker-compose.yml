@@ -1,0 +1,43 @@
+# Bondery ops stack (production only): marketing website.
+# Not for self-hosters — product stack is deploy/bondery (api + webapp + redis).
+#
+# Prerequisite (Traefik / Dokploy): docker network create dokploy-network
+# Host-port smoke (no Traefik): copy docker-compose.override.yml.example → docker-compose.override.yml
+#
+# Image is always the floating :production channel (release-branch CD). Rollback via
+# :sha-<short> override or Dokploy previous deployment — no semver image pins.
+
+services:
+  website:
+    environment:
+      BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
+      BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
+      BONDERY_INFRA_GIT_SHA: ${BONDERY_INFRA_GIT_SHA:-}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 20s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:26630/api/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      timeout: 5s
+    image: ghcr.io/usebondery/website:production
+    pull_policy: always
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bondery-website.rule=Host(`${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}`)
+      - traefik.http.routers.bondery-website.entrypoints=websecure
+      - traefik.http.routers.bondery-website.tls.certResolver=letsencrypt
+      - traefik.http.routers.bondery-website.service=bondery-website
+      - traefik.http.services.bondery-website.loadbalancer.server.port=26630
+    networks:
+      - dokploy-network
+    restart: unless-stopped
+
+networks:
+  dokploy-network:
+    external: true

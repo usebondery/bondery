@@ -1,0 +1,14 @@
+# Optional: publish host ports when you are NOT using Traefik/Dokploy.
+# Copy to docker-compose.override.yml in this directory:
+#
+#   cp docker-compose.override.yml.example docker-compose.override.yml
+#
+# Then: docker compose up -d
+# Reach website at http://localhost:26630
+#
+# You still need: docker network create dokploy-network
+
+services:
+  website:
+    ports:
+      - "26630:26630"
