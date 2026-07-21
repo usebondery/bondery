@@ -1,0 +1,346 @@
+# Vendored Supabase self-host fragment (pinned — see versions.supabase.lock).
+# Included by docker-compose.yml. Not a standalone Dokploy entrypoint.
+#
+# Upstream: https://github.com/supabase/supabase/tree/master/docker
+# Omitted: analytics, vector, edge functions, supavisor (apps use Kong/PostgREST).
+# Studio: compose profile `studio` (off by default).
+
+services:
+  db:
+    image: supabase/postgres:17.6.1.136
+    restart: unless-stopped
+    volumes:
+      - ./supabase/volumes/db/realtime.sql:/docker-entrypoint-initdb.d/migrations/99-realtime.sql:Z
+      - ./supabase/volumes/db/webhooks.sql:/docker-entrypoint-initdb.d/init-scripts/98-webhooks.sql:Z
+      - ./supabase/volumes/db/roles.sql:/docker-entrypoint-initdb.d/init-scripts/99-roles.sql:Z
+      - ./supabase/volumes/db/jwt.sql:/docker-entrypoint-initdb.d/init-scripts/99-jwt.sql:Z
+      - supabase-db-data:/var/lib/postgresql/data:Z
+      - ./supabase/volumes/db/_supabase.sql:/docker-entrypoint-initdb.d/migrations/97-_supabase.sql:Z
+      - ./supabase/volumes/db/logs.sql:/docker-entrypoint-initdb.d/migrations/99-logs.sql:Z
+      - ./supabase/volumes/db/pooler.sql:/docker-entrypoint-initdb.d/migrations/99-pooler.sql:Z
+      - supabase-db-config:/etc/postgresql-custom
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: "5432"
+      POSTGRES_PORT: "5432"
+      PGPASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}
+      POSTGRES_PASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET:?BONDERY_PRIVATE_SUPABASE_JWT_SECRET must be set}
+      JWT_EXP: ${BONDERY_INFRA_SUPABASE_JWT_EXPIRY:-3600}
+    command:
+      [
+        "postgres",
+        "-c",
+        "config_file=/etc/postgresql/postgresql.conf",
+        "-c",
+        "log_min_messages=fatal",
+      ]
+    networks:
+      - internal
+
+  auth:
+    image: supabase/gotrue:v2.189.0
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:9999/health",
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: https://${BONDERY_INFRA_SUPABASE_DOMAIN:?BONDERY_INFRA_SUPABASE_DOMAIN must be set}/auth/v1
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${BONDERY_PRIVATE_POSTGRES_PASSWORD}@db:5432/postgres
+      GOTRUE_SITE_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
+      # ADDITIONAL_REDIRECT_URLS = app/site/mobile; extension chromiumapp.org URLs are derived from ID.
+      GOTRUE_URI_ALLOW_LIST: ${BONDERY_SUPABASE_ADDITIONAL_REDIRECT_URLS:?BONDERY_SUPABASE_ADDITIONAL_REDIRECT_URLS must be set},https://${BONDERY_INFRA_CHROME_EXTENSION_ID:?BONDERY_INFRA_CHROME_EXTENSION_ID must be set}.chromiumapp.org/,https://${BONDERY_INFRA_CHROME_EXTENSION_ID}.chromiumapp.org
+      GOTRUE_DISABLE_SIGNUP: ${BONDERY_INFRA_SUPABASE_DISABLE_SIGNUP:-false}
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: ${BONDERY_INFRA_SUPABASE_JWT_EXPIRY:-3600}
+      GOTRUE_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      GOTRUE_JWT_ISSUER: https://${BONDERY_INFRA_SUPABASE_DOMAIN}/auth/v1
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: ${BONDERY_INFRA_SUPABASE_ENABLE_EMAIL_SIGNUP:-true}
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: "false"
+      GOTRUE_MAILER_AUTOCONFIRM: ${BONDERY_INFRA_SUPABASE_ENABLE_EMAIL_AUTOCONFIRM:-false}
+      GOTRUE_SMTP_ADMIN_EMAIL: ${BONDERY_PRIVATE_EMAIL_ADDRESS:-}
+      GOTRUE_SMTP_HOST: ${BONDERY_PRIVATE_EMAIL_HOST:-}
+      GOTRUE_SMTP_PORT: ${BONDERY_PRIVATE_EMAIL_PORT:-465}
+      GOTRUE_SMTP_USER: ${BONDERY_PRIVATE_EMAIL_USER:-}
+      GOTRUE_SMTP_PASS: ${BONDERY_PRIVATE_EMAIL_PASS:-}
+      GOTRUE_SMTP_SENDER_NAME: ${BONDERY_PRIVATE_EMAIL_ADDRESS:-Bondery}
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+      GOTRUE_EXTERNAL_PHONE_ENABLED: "false"
+      GOTRUE_SMS_AUTOCONFIRM: "false"
+      GOTRUE_EXTERNAL_GITHUB_ENABLED: ${BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_ENABLED:-true}
+      GOTRUE_EXTERNAL_GITHUB_CLIENT_ID: ${BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_GITHUB_SECRET: ${BONDERY_SUPABASE_AUTH_EXTERNAL_GITHUB_SECRET:-}
+      GOTRUE_EXTERNAL_GITHUB_REDIRECT_URI: https://${BONDERY_INFRA_SUPABASE_DOMAIN}/auth/v1/callback
+      GOTRUE_EXTERNAL_LINKEDIN_OIDC_ENABLED: ${BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_ENABLED:-true}
+      GOTRUE_EXTERNAL_LINKEDIN_OIDC_CLIENT_ID: ${BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_CLIENT_ID:-}
+      GOTRUE_EXTERNAL_LINKEDIN_OIDC_SECRET: ${BONDERY_SUPABASE_AUTH_EXTERNAL_LINKEDIN_SECRET:-}
+      GOTRUE_EXTERNAL_LINKEDIN_OIDC_REDIRECT_URI: https://${BONDERY_INFRA_SUPABASE_DOMAIN}/auth/v1/callback
+    networks:
+      - internal
+
+  rest:
+    image: postgrest/postgrest:v14.12
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "postgrest", "--ready"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${BONDERY_PRIVATE_POSTGRES_PASSWORD}@db:5432/postgres
+      PGRST_DB_SCHEMAS: ${BONDERY_INFRA_SUPABASE_DB_SCHEMAS:-public,storage,graphql_public}
+      PGRST_DB_MAX_ROWS: "1500"
+      PGRST_DB_EXTRA_SEARCH_PATH: public,extensions
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_ADMIN_SERVER_PORT: 3001
+      PGRST_ADMIN_SERVER_HOST: localhost
+      PGRST_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      PGRST_APP_SETTINGS_JWT_EXP: ${BONDERY_INFRA_SUPABASE_JWT_EXPIRY:-3600}
+    command: ["postgrest"]
+    networks:
+      - internal
+
+  realtime:
+    # Container name is required — realtime builds tenant id from subdomain.
+    container_name: realtime-dev.supabase-realtime
+    image: supabase/realtime:v2.102.3
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl -sSfL --head -o /dev/null -H \"Authorization: Bearer ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY}\" http://localhost:4000/api/tenants/realtime-dev/health",
+        ]
+      timeout: 5s
+      interval: 30s
+      retries: 3
+      start_period: 10s
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: "SET search_path TO _realtime"
+      DB_ENC_KEY: ${BONDERY_PRIVATE_SUPABASE_REALTIME_DB_ENC_KEY:-supabaserealtime}
+      API_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      SECRET_KEY_BASE: ${BONDERY_PRIVATE_SUPABASE_SECRET_KEY_BASE:?BONDERY_PRIVATE_SUPABASE_SECRET_KEY_BASE must be set}
+      METRICS_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: "10000"
+      APP_NAME: realtime
+      SEED_SELF_HOST: "true"
+      RUN_JANITOR: "true"
+      DISABLE_HEALTHCHECK_LOGGING: "true"
+    networks:
+      - internal
+
+  storage:
+    image: supabase/storage-api:v1.60.4
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+      imgproxy:
+        condition: service_started
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://storage:5000/status",
+        ]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+      start_period: 10s
+    environment:
+      ANON_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set}
+      SERVICE_KEY: ${BONDERY_PRIVATE_SUPABASE_SECRET_KEY:?BONDERY_PRIVATE_SUPABASE_SECRET_KEY must be set}
+      POSTGREST_URL: http://rest:3000
+      AUTH_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      DATABASE_URL: postgres://supabase_storage_admin:${BONDERY_PRIVATE_POSTGRES_PASSWORD}@db:5432/postgres
+      STORAGE_PUBLIC_URL: https://${BONDERY_INFRA_SUPABASE_DOMAIN}
+      REQUEST_ALLOW_X_FORWARDED_PATH: "true"
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      GLOBAL_S3_BUCKET: stub
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      ENABLE_IMAGE_TRANSFORMATION: "true"
+      IMGPROXY_URL: http://imgproxy:5001
+      S3_PROTOCOL_ACCESS_KEY_ID: ${BONDERY_PRIVATE_SUPABASE_S3_ACCESS_KEY_ID:-625729a08b95bf1b7ff351a663f3a23c}
+      S3_PROTOCOL_ACCESS_KEY_SECRET: ${BONDERY_PRIVATE_SUPABASE_S3_ACCESS_KEY_SECRET:-850181e4652dd023b7a98c58ae0d2d34bd487ee0cc3254aed6eda37307425907}
+    volumes:
+      - supabase-storage-data:/var/lib/storage:z
+    networks:
+      - internal
+
+  imgproxy:
+    image: darthsim/imgproxy:v3.30.1
+    restart: unless-stopped
+    volumes:
+      - supabase-storage-data:/var/lib/storage:z
+    healthcheck:
+      test: ["CMD", "imgproxy", "health"]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    environment:
+      IMGPROXY_BIND: ":5001"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: "true"
+      IMGPROXY_AUTO_WEBP: "true"
+      IMGPROXY_MAX_SRC_RESOLUTION: 16.8
+    networks:
+      - internal
+
+  meta:
+    image: supabase/postgres-meta:v0.96.6
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: postgres
+      PG_META_DB_PASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD}
+      CRYPTO_KEY: ${BONDERY_PRIVATE_SUPABASE_PG_META_CRYPTO_KEY:?BONDERY_PRIVATE_SUPABASE_PG_META_CRYPTO_KEY must be set}
+    networks:
+      - internal
+
+  kong:
+    image: kong/kong:3.9.1
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    depends_on:
+      auth:
+        condition: service_healthy
+      rest:
+        condition: service_healthy
+    volumes:
+      - ./supabase/volumes/api/kong.yml:/home/kong/temp.yml:ro,z
+      - ./supabase/volumes/api/kong-entrypoint.sh:/home/kong/kong-entrypoint.sh:ro,z
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml
+      KONG_ROUTER_FLAVOR: expressions
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_DNS_NOT_FOUND_TTL: 1
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth,request-termination,ip-restriction,post-function
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      KONG_PROXY_ACCESS_LOG: /dev/stdout combined
+      SUPABASE_ANON_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      SUPABASE_SERVICE_KEY: ${BONDERY_PRIVATE_SUPABASE_SECRET_KEY}
+      SUPABASE_PUBLISHABLE_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      SUPABASE_SECRET_KEY: ${BONDERY_PRIVATE_SUPABASE_SECRET_KEY}
+      DASHBOARD_USERNAME: ${BONDERY_PRIVATE_SUPABASE_DASHBOARD_USERNAME:-supabase}
+      DASHBOARD_PASSWORD: ${BONDERY_PRIVATE_SUPABASE_DASHBOARD_PASSWORD:?BONDERY_PRIVATE_SUPABASE_DASHBOARD_PASSWORD must be set}
+    entrypoint: ["/bin/sh", "/home/kong/kong-entrypoint.sh"]
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.bondery-supabase.rule=Host(`${BONDERY_INFRA_SUPABASE_DOMAIN:?BONDERY_INFRA_SUPABASE_DOMAIN must be set}`)
+      - traefik.http.routers.bondery-supabase.entrypoints=websecure
+      - traefik.http.routers.bondery-supabase.tls.certResolver=letsencrypt
+      - traefik.http.routers.bondery-supabase.service=bondery-supabase
+      - traefik.http.services.bondery-supabase.loadbalancer.server.port=8000
+    networks:
+      - dokploy-network
+      - internal
+
+  studio:
+    profiles: ["studio"]
+    image: supabase/studio:2026.07.07-sha-a6a04f2
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "node -e \"fetch('http://localhost:3000/api/platform/profile').then((r) => {if (r.status !== 200) throw new Error(r.status)})\"",
+        ]
+      timeout: 10s
+      interval: 5s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      meta:
+        condition: service_started
+      kong:
+        condition: service_healthy
+    environment:
+      HOSTNAME: "0.0.0.0"
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PORT: 5432
+      POSTGRES_HOST: db
+      POSTGRES_DB: postgres
+      POSTGRES_PASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD}
+      POSTGRES_USER_READ_WRITE: postgres
+      PG_META_CRYPTO_KEY: ${BONDERY_PRIVATE_SUPABASE_PG_META_CRYPTO_KEY}
+      PGRST_DB_SCHEMAS: ${BONDERY_INFRA_SUPABASE_DB_SCHEMAS:-public,storage,graphql_public}
+      DEFAULT_ORGANIZATION_NAME: Bondery
+      DEFAULT_PROJECT_NAME: Bondery
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: https://${BONDERY_INFRA_SUPABASE_DOMAIN}
+      SUPABASE_ANON_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
+      SUPABASE_SERVICE_KEY: ${BONDERY_PRIVATE_SUPABASE_SECRET_KEY}
+      AUTH_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
+      ENABLED_FEATURES_LOGS_ALL: "false"
+    networks:
+      - internal
+
+volumes:
+  supabase-db-data:
+  supabase-db-config:
+  supabase-storage-data:

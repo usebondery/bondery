@@ -1,6 +1,6 @@
 # Bondery ops stack (marketing website)
 
-**Bondery production only** — not part of the self-host product. Self-hosters use [`deploy/bondery`](../bondery/) (api + webapp + redis).
+**Bondery production only** — not part of the self-host product. Self-hosters use [`deploy/bondery`](../bondery/) (api + webapp + redis + bundled Supabase).
 
 Docs: [docs/deploy/dokploy.md](../../docs/deploy/dokploy.md)
 

@@ -17,6 +17,9 @@
     "setup:beta": "npx tsx scripts/setup.ts --env beta",
     "setup:local": "npx tsx scripts/setup.ts --env local",
     "setup:production": "npx tsx scripts/setup.ts --env production",
+    "stack:bootstrap:greenfield": "npx tsx scripts/setup.ts --bootstrap greenfield",
+    "stack:bootstrap:import": "npx tsx scripts/setup.ts --bootstrap import",
+    "stack:migrate-storage": "npx tsx scripts/migrate-storage-from-cloud.ts",
     "start": "npx supabase start",
     "stop": "npx supabase stop",
     "upload:secrets": "npx supabase secrets set --env-file .env.beta --project-ref <your-project-ref>"

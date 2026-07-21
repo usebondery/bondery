@@ -1,5 +1,6 @@
-# Canonical Bondery stack (production + self-host): webapp + API + Redis.
+# Canonical Bondery stack (production + self-host): webapp + API + Redis + Supabase.
 # Local laptop Redis is apps/redis (port 26636) — do not use this file for DX.
+# Local laptop Supabase is apps/supabase-db (`npm run start -w supabase-db`).
 #
 # Advanced external Redis: run the API image alone with BONDERY_PRIVATE_REDIS_URL set to your host.
 # See README.md and docs/deploy/api-container.md.
@@ -9,6 +10,11 @@
 #
 # Public HTTPS URLs are derived from *_DOMAIN (Traefik Host rules). Override only if you need
 # non-HTTPS or non-standard ports (uncommon behind Traefik + Let's Encrypt).
+#
+# Dokploy entrypoint: this file (includes docker-compose.supabase.yml).
+
+include:
+  - path: docker-compose.supabase.yml
 
 services:
   redis:
@@ -28,13 +34,16 @@ services:
 
   api:
     depends_on:
+      kong:
+        condition: service_healthy
       redis:
         condition: service_healthy
     env_file:
       - .env
     environment:
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
-      BONDERY_PUBLIC_SUPABASE_URL: ${BONDERY_PUBLIC_SUPABASE_URL:?BONDERY_PUBLIC_SUPABASE_URL must be set}
+      BONDERY_PUBLIC_SUPABASE_URL: https://${BONDERY_INFRA_SUPABASE_DOMAIN:?BONDERY_INFRA_SUPABASE_DOMAIN must be set}
+      BONDERY_INFRA_INTERNAL_SUPABASE_URL: http://kong:8000
       BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
       BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
       BONDERY_PRIVATE_REDIS_URL: ${BONDERY_PRIVATE_REDIS_URL:-redis://redis:6379}
@@ -66,6 +75,9 @@ services:
     restart: unless-stopped
 
   webapp:
+    depends_on:
+      kong:
+        condition: service_healthy
     environment:
       BONDERY_INFRA_INTERNAL_API_URL: http://api:26631
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
@@ -74,7 +86,7 @@ services:
       BONDERY_PRIVATE_POSTHOG_HOST: ${BONDERY_PRIVATE_POSTHOG_HOST:-}
       BONDERY_PRIVATE_POSTHOG_KEY: ${BONDERY_PRIVATE_POSTHOG_KEY:-}
       BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY:?BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY must be set}
-      BONDERY_PUBLIC_SUPABASE_URL: ${BONDERY_PUBLIC_SUPABASE_URL:?BONDERY_PUBLIC_SUPABASE_URL must be set}
+      BONDERY_PUBLIC_SUPABASE_URL: https://${BONDERY_INFRA_SUPABASE_DOMAIN:?BONDERY_INFRA_SUPABASE_DOMAIN must be set}
       BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
       BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
       BONDERY_INFRA_GIT_SHA: ${BONDERY_INFRA_GIT_SHA:-}

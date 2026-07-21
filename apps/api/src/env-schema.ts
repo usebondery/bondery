@@ -12,6 +12,10 @@ export const envSchema = {
       default: 26631,
       type: "number",
     },
+    BONDERY_INFRA_INTERNAL_SUPABASE_URL: {
+      default: "",
+      type: "string",
+    },
     BONDERY_PRIVATE_ANTHROPIC_API_KEY: {
       default: "",
       type: "string",
@@ -116,6 +120,7 @@ declare module "fastify" {
       BONDERY_PUBLIC_SUPABASE_URL: string;
       BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY: string;
       BONDERY_PRIVATE_SUPABASE_SECRET_KEY: string;
+      BONDERY_INFRA_INTERNAL_SUPABASE_URL: string;
       BONDERY_PUBLIC_WEBAPP_URL: string;
       BONDERY_PUBLIC_WEBSITE_URL: string;
       BONDERY_PUBLIC_API_URL: string;

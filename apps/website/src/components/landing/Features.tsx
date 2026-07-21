@@ -123,7 +123,7 @@ export function Features() {
       />
 
       <FeatureSection
-        description="Your contacts are precious and should not be shared for profit. Bondery is fully open-source and hosted on EU servers, with data that stays in Europe. With self-hosting option coming soon."
+        description="Your contacts are precious and should not be shared for profit. Bondery is fully open-source and hosted on EU servers, with data that stays in Europe. Self-host with Docker Compose when you want full control."
         imagePlaceholder={<PrivacyCodeAnimation />}
         imagePosition="left"
         title="Open-source and privacy-first"

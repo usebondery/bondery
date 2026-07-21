@@ -18,6 +18,10 @@ function getSupabaseConfig() {
   const BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY =
     process.env.BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const BONDERY_PRIVATE_SUPABASE_SECRET_KEY = process.env.BONDERY_PRIVATE_SUPABASE_SECRET_KEY;
+  // Prefer compose-internal Kong when set (same pattern as BONDERY_INFRA_INTERNAL_API_URL).
+  // Public URL remains the Auth issuer / browser-facing base.
+  const clientBaseUrl =
+    process.env.BONDERY_INFRA_INTERNAL_SUPABASE_URL?.trim() || BONDERY_PUBLIC_SUPABASE_URL;
 
   if (!BONDERY_PUBLIC_SUPABASE_URL) {
     throw new Error(
@@ -34,6 +38,7 @@ function getSupabaseConfig() {
     BONDERY_PRIVATE_SUPABASE_SECRET_KEY,
     BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
     BONDERY_PUBLIC_SUPABASE_URL,
+    clientBaseUrl,
   };
 }
 
@@ -41,20 +46,16 @@ function getSupabaseConfig() {
  * Creates an anonymous Supabase client (for public endpoints)
  */
 export function createAnonClient(): SupabaseClient<Database> {
-  const { BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
-    getSupabaseConfig();
-  return createClient<Database>(
-    BONDERY_PUBLIC_SUPABASE_URL,
-    BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-  );
+  const { clientBaseUrl, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
+  return createClient<Database>(clientBaseUrl, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 }
 
 /**
  * Creates an admin Supabase client (for privileged operations)
  */
 export function createAdminClient(): SupabaseClient<Database> {
-  const { BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
-  return createClient<Database>(BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PRIVATE_SUPABASE_SECRET_KEY);
+  const { clientBaseUrl, BONDERY_PRIVATE_SUPABASE_SECRET_KEY } = getSupabaseConfig();
+  return createClient<Database>(clientBaseUrl, BONDERY_PRIVATE_SUPABASE_SECRET_KEY);
 }
 
 /**
@@ -205,8 +206,7 @@ export async function createAuthenticatedClient(
   user: { id: string; email: string } | null;
   authError?: string;
 }> {
-  const { BONDERY_PUBLIC_SUPABASE_URL, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY } =
-    getSupabaseConfig();
+  const { clientBaseUrl, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY } = getSupabaseConfig();
   const { accessToken: cookieToken } = getAuthTokensFromCookies(request);
   const accessToken = accessTokenOverride ?? cookieToken;
 
@@ -216,19 +216,15 @@ export async function createAuthenticatedClient(
   // PKCE flow). Both are valid Supabase JWTs but the OAuth refresh token is NOT
   // interchangeable with Supabase's internal session refresh token, so setSession()
   // would fail for the extension flow.
-  const client = createClient<Database>(
-    BONDERY_PUBLIC_SUPABASE_URL,
-    BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY,
-    {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-      global: {
-        headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-      },
+  const client = createClient<Database>(clientBaseUrl, BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY, {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false,
     },
-  );
+    global: {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    },
+  });
 
   if (!accessToken) {
     return { client, user: null };

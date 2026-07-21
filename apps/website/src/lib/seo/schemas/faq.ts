@@ -23,7 +23,7 @@ export const FAQ_ITEMS = [
   },
   {
     answer:
-      "Self-hosting is planned. Bondery is open source, and we will make it available for self-hosting in the future.",
+      "Yes. Bondery is open source and ships a Docker Compose stack (api, webapp, Redis, and Supabase) for self-hosting. See the self-hosting guide in the docs.",
     question: "Can I self-host Bondery?",
   },
 ] as const;

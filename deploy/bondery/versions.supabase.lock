@@ -1,0 +1,12 @@
+upstream_commit=b883b102b4fb38236a0b0b0fe605c3f8c03796ae
+upstream_ref=master@2026-07-21
+postgres_image=supabase/postgres:17.6.1.136
+gotrue_image=supabase/gotrue:v2.189.0
+postgrest_image=postgrest/postgrest:v14.12
+realtime_image=supabase/realtime:v2.102.3
+storage_image=supabase/storage-api:v1.60.4
+meta_image=supabase/postgres-meta:v0.96.6
+studio_image=supabase/studio:2026.07.07-sha-a6a04f2
+kong_image=kong/kong:3.9.1
+imgproxy_image=darthsim/imgproxy:v3.30.1
+
