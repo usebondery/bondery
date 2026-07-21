@@ -165,8 +165,8 @@ if (auth) {
       "auth GOTRUE_URI_ALLOW_LIST must derive chromiumapp.org URLs from BONDERY_INFRA_CHROME_EXTENSION_ID",
     );
   }
-  if (!auth.includes("GOTRUE_JWT_KEYS: ${BONDERY_SUPABASE_JWT_KEYS")) {
-    errors.push("auth must set GOTRUE_JWT_KEYS from BONDERY_SUPABASE_JWT_KEYS");
+  if (!auth.includes("GOTRUE_JWT_KEYS: ${BONDERY_SUPABASE_GOTRUE_JWT_KEYS")) {
+    errors.push("auth must set GOTRUE_JWT_KEYS from BONDERY_SUPABASE_GOTRUE_JWT_KEYS");
   }
 }
 

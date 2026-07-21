@@ -96,7 +96,7 @@ docker compose up -d --force-recreate auth rest realtime storage kong
 | `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_*` opaque key |
 | `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` | `sb_secret_*` opaque key |
 | `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` | ES256 private JWK (API-key minting + Auth signing) |
-| `BONDERY_SUPABASE_JWT_KEYS` | GoTrue signing keyset (derive once via `derive-jwt-env.mjs --print`) |
+| `BONDERY_SUPABASE_GOTRUE_JWT_KEYS` | GoTrue signing keyset (derive once via `derive-jwt-env.mjs --print`) |
 | `BONDERY_SUPABASE_JWT_JWKS` | JWKS for PostgREST / Realtime / Storage verification |
 | `BONDERY_SUPABASE_ANON_KEY_ASYMMETRIC` | ES256 anon JWT for Kong `sb_publishable_*` translation |
 | `BONDERY_SUPABASE_SERVICE_ROLE_KEY_ASYMMETRIC` | ES256 service_role JWT for Kong `sb_secret_*` translation |

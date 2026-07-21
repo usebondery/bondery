@@ -113,7 +113,7 @@ function envFileLine(key, value) {
 function formatEnvFile(derived) {
   return [
     "# Paste into deploy/bondery/.env or Dokploy Environment (set once; re-run after key rotation)",
-    envFileLine("BONDERY_SUPABASE_JWT_KEYS", derived.GOTRUE_JWT_KEYS),
+    envFileLine("BONDERY_SUPABASE_GOTRUE_JWT_KEYS", derived.GOTRUE_JWT_KEYS),
     envFileLine("BONDERY_SUPABASE_JWT_JWKS", derived.JWT_JWKS),
     envFileLine("BONDERY_SUPABASE_ANON_KEY_ASYMMETRIC", derived.ANON_KEY_ASYMMETRIC),
     envFileLine(
