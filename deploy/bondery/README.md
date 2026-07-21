@@ -44,6 +44,7 @@ curl -s http://localhost:8000/auth/v1/health
 | `api` | `ghcr.io/usebondery/api` | 26631 | Waits for Redis + Kong healthy |
 | `redis` | `redis:7.4-alpine` | internal | AOF + volume `redis-data` |
 | `kong` | Kong gateway | 8000 (Traefik) | Public Supabase API (`BONDERY_INFRA_SUPABASE_DOMAIN`) |
+| `jwt-derive` | `node:22-alpine` | one-shot | Derives JWKS env from signing JWK + JWT secret before Auth/Kong start |
 | `db` | `supabase/postgres:17` | internal | Named volume `supabase-db-data` |
 | `auth`, `rest`, `realtime`, `storage`, `imgproxy`, `meta` | Supabase | internal | See `docker-compose.supabase.yml` |
 | `studio` | Supabase Studio | profile `studio` | Off by default |
@@ -69,6 +70,13 @@ BONDERY_INFRA_API_IMAGE_TAG=1.7.3 docker compose up -d --no-deps api
 ```
 
 Supabase image bumps: edit `docker-compose.supabase.yml` + `versions.supabase.lock`, test on staging.
+
+After rotating `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` or `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK`:
+
+```bash
+docker compose run --rm jwt-derive
+docker compose restart auth rest realtime storage kong
+```
 
 ### Image tags (api / webapp)
 

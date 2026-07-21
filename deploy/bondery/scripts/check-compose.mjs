@@ -147,14 +147,39 @@ if (kong) {
   if (!/dokploy-network/.test(kong) || !/internal/.test(kong)) {
     errors.push("kong must join both dokploy-network and internal");
   }
+  if (kong.includes("BONDERY_LEGACY") || kong.includes("SUPABASE_ANON_KEY:")) {
+    errors.push("kong must use sb_* keys only (no legacy SUPABASE_ANON_KEY / SERVICE_KEY slots)");
+  }
+  if (!kong.includes("jwt-derived.env")) {
+    errors.push("kong must load ./supabase/volumes/runtime/jwt-derived.env");
+  }
+  if (kong.includes("BONDERY_SUPABASE_")) {
+    errors.push("kong must not reference BONDERY_SUPABASE_* derived env vars in compose");
+  }
 }
 
 const auth = serviceBlock("auth", supabaseText);
+const jwtDerive = serviceBlock("jwt-derive", supabaseText);
+if (jwtDerive) {
+  if (!jwtDerive.includes("derive-jwt-env.mjs")) {
+    errors.push("jwt-derive must run derive-jwt-env.mjs");
+  }
+  if (!jwtDerive.includes("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK")) {
+    errors.push("jwt-derive must read BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK");
+  }
+}
+
 if (auth) {
   if (!auth.includes("BONDERY_INFRA_CHROME_EXTENSION_ID")) {
     errors.push(
       "auth GOTRUE_URI_ALLOW_LIST must derive chromiumapp.org URLs from BONDERY_INFRA_CHROME_EXTENSION_ID",
     );
+  }
+  if (!auth.includes("jwt-derived.env")) {
+    errors.push("auth must load ./supabase/volumes/runtime/jwt-derived.env");
+  }
+  if (/GOTRUE_JWT_KEYS:/.test(auth)) {
+    errors.push("auth must receive GOTRUE_JWT_KEYS from jwt-derived.env, not compose environment");
   }
 }
 

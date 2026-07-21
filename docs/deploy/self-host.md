@@ -69,14 +69,24 @@ docker compose --profile studio up -d studio
 
 Operators use **`BONDERY_*` only**. Compose maps them into GoTrue / Kong / Postgres internals.
 
-Generate JWT secret + anon/service keys with [Supabase securing guide](https://supabase.com/docs/guides/self-hosting/docker#configuring-and-securing-supabase), then set:
+Set `BONDERY_PRIVATE_SUPABASE_JWT_SECRET`, `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_*`), `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` (`sb_secret_*`), and `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` (export ES256 private JWK from Supabase Cloud on cutover).
+
+On every stack start, the **`jwt-derive`** init service derives Auth JWKS + Kong asymmetric JWT env from those two secrets and writes `supabase/volumes/runtime/jwt-derived.env`. Auth, PostgREST, Realtime, Storage, and Kong load it automatically — **no manual JWKS env vars in Dokploy**.
+
+After rotating `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` or the signing JWK:
+
+```bash
+cd deploy/bondery
+docker compose run --rm jwt-derive
+docker compose restart auth rest realtime storage kong
+```
 
 | Operator var | Purpose |
 |--------------|---------|
-| `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` | HS256 secret for Auth / PostgREST / Realtime |
-| `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Anon / publishable key |
-| `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` | Service role key |
-| `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` | ES256 private JWK for API-key minting (must match Auth JWKS) |
+| `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` | HS256 secret (legacy sessions + symmetric JWKS entry) |
+| `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | `sb_publishable_*` opaque key |
+| `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` | `sb_secret_*` opaque key |
+| `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` | ES256 private JWK (API-key minting + Auth signing) |
 | `BONDERY_PRIVATE_POSTGRES_PASSWORD` | Postgres password |
 | `BONDERY_PRIVATE_SUPABASE_SECRET_KEY_BASE` | Realtime encrypt key (≥64 chars) |
 | `BONDERY_PRIVATE_SUPABASE_PG_META_CRYPTO_KEY` | Studio/meta crypto (≥32 chars) |
@@ -132,14 +142,22 @@ Copies `avatars` and `linkedin_logos` (override with `BUCKETS=`). Verify object 
 
 ## Schema migrations after go-live
 
-New SQL under `apps/supabase-db/supabase/migrations/` does **not** apply on `docker compose up`. After releasing migrations:
+**Migrations never run automatically** when you `docker compose up` or redeploy Dokploy. Compose only starts containers; SQL in `apps/supabase-db/supabase/migrations/` is applied separately.
+
+| Scenario | What to run |
+|----------|-------------|
+| **Greenfield** (empty Postgres) | `npm run stack:bootstrap:greenfield -w supabase-db` — runs `supabase db push` + vault + buckets |
+| **Cloud import** (restored dump) | **Do not** run greenfield bootstrap — schema came with the dump. Use `stack:bootstrap:import` for vault only |
+| **Each release** with new SQL | `supabase db push` against production Postgres (see below) |
+
+After releasing migrations:
 
 ```bash
-# With db published on 54322 (see override example)
+# Expose db on host port 54322 (docker-compose.override.yml), then:
 npx supabase db push --db-url "postgresql://postgres:$BONDERY_PRIVATE_POSTGRES_PASSWORD@127.0.0.1:54322/postgres"
 ```
 
-Then redeploy api/webapp if needed.
+Or from the VPS with `docker compose exec` and a one-off connection. Then redeploy api/webapp if application code changed (schema-only migrations usually need no app redeploy).
 
 ## Upgrades
 

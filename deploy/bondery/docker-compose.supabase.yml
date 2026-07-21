@@ -6,6 +6,19 @@
 # Studio: compose profile `studio` (off by default).
 
 services:
+  jwt-derive:
+    image: node:22-alpine
+    restart: "no"
+    volumes:
+      - ./supabase/volumes/scripts/derive-jwt-env.mjs:/derive.mjs:ro
+      - ./supabase/volumes/runtime:/runtime
+    environment:
+      BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK: ${BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK:?BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must be set}
+      BONDERY_PRIVATE_SUPABASE_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET:?BONDERY_PRIVATE_SUPABASE_JWT_SECRET must be set}
+    command: ["node", "/derive.mjs", "/runtime/jwt-derived.env"]
+    networks:
+      - internal
+
   db:
     image: supabase/postgres:17.6.1.136
     restart: unless-stopped
@@ -62,8 +75,12 @@ services:
       interval: 5s
       retries: 3
     depends_on:
+      jwt-derive:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
+    env_file:
+      - ./supabase/volumes/runtime/jwt-derived.env
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
@@ -110,8 +127,12 @@ services:
     image: postgrest/postgrest:v14.12
     restart: unless-stopped
     depends_on:
+      jwt-derive:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
+    env_file:
+      - ./supabase/volumes/runtime/jwt-derived.env
     healthcheck:
       test: ["CMD", "postgrest", "--ready"]
       interval: 5s
@@ -125,7 +146,6 @@ services:
       PGRST_DB_ANON_ROLE: anon
       PGRST_ADMIN_SERVER_PORT: 3001
       PGRST_ADMIN_SERVER_HOST: localhost
-      PGRST_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
       PGRST_DB_USE_LEGACY_GUCS: "false"
       PGRST_APP_SETTINGS_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET}
       PGRST_APP_SETTINGS_JWT_EXP: ${BONDERY_INFRA_SUPABASE_JWT_EXPIRY:-3600}
@@ -139,8 +159,12 @@ services:
     image: supabase/realtime:v2.102.3
     restart: unless-stopped
     depends_on:
+      jwt-derive:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
+    env_file:
+      - ./supabase/volumes/runtime/jwt-derived.env
     healthcheck:
       test:
         [
@@ -177,12 +201,16 @@ services:
     image: supabase/storage-api:v1.60.4
     restart: unless-stopped
     depends_on:
+      jwt-derive:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
       rest:
         condition: service_started
       imgproxy:
         condition: service_started
+    env_file:
+      - ./supabase/volumes/runtime/jwt-derived.env
     healthcheck:
       test:
         [
@@ -265,10 +293,14 @@ services:
       timeout: 5s
       retries: 5
     depends_on:
+      jwt-derive:
+        condition: service_completed_successfully
       auth:
         condition: service_healthy
       rest:
         condition: service_healthy
+    env_file:
+      - ./supabase/volumes/runtime/jwt-derived.env
     volumes:
       - ./supabase/volumes/api/kong.yml:/home/kong/temp.yml:ro,z
       - ./supabase/volumes/api/kong-entrypoint.sh:/home/kong/kong-entrypoint.sh:ro,z
@@ -282,9 +314,6 @@ services:
       KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
       KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
       KONG_PROXY_ACCESS_LOG: /dev/stdout combined
-      # Legacy HS256 JWT API keys (optional). Leave unset when using only sb_* keys.
-      SUPABASE_ANON_KEY: ${BONDERY_LEGACY_SUPABASE_ANON_KEY:-}
-      SUPABASE_SERVICE_KEY: ${BONDERY_LEGACY_SUPABASE_SERVICE_ROLE_KEY:-}
       SUPABASE_PUBLISHABLE_KEY: ${BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
       SUPABASE_SECRET_KEY: ${BONDERY_PRIVATE_SUPABASE_SECRET_KEY}
       DASHBOARD_USERNAME: ${BONDERY_PRIVATE_SUPABASE_DASHBOARD_USERNAME:-supabase}

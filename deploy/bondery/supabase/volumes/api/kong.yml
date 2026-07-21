@@ -8,11 +8,9 @@ consumers:
   - username: DASHBOARD
   - username: anon
     keyauth_credentials:
-      - key: $SUPABASE_ANON_KEY
       - key: $SUPABASE_PUBLISHABLE_KEY
   - username: service_role
     keyauth_credentials:
-      - key: $SUPABASE_SERVICE_KEY
       - key: $SUPABASE_SECRET_KEY
 
 ###

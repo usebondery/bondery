@@ -30,25 +30,28 @@ const c = {
   yellow: "\x1b[33m",
 };
 
-function parseEnvFile(filePath: string): Record<string, string> {
-  const content = readFileSync(filePath, "utf-8");
+function parseEnvFile(content: string): Record<string, string> {
   const env: Record<string, string> = {};
-  content.split("\n").forEach((line) => {
+  for (const line of content.split("\n")) {
     const trimmed = line.trim();
     if (!trimmed || trimmed.startsWith("#")) {
-      return;
+      continue;
     }
     const eqIdx = trimmed.indexOf("=");
     if (eqIdx === -1) {
-      return;
+      continue;
     }
     const key = trimmed.slice(0, eqIdx).trim();
     const raw = trimmed.slice(eqIdx + 1).trim();
     if (key) {
       env[key] = raw.replace(/^["']|["']$/g, "");
     }
-  });
+  }
   return env;
+}
+
+function parseEnvFileFromPath(filePath: string): Record<string, string> {
+  return parseEnvFile(readFileSync(filePath, "utf-8"));
 }
 
 function checkEnv(envFile: string, requiredVars: string[]): Record<string, string> {
@@ -63,7 +66,7 @@ function checkEnv(envFile: string, requiredVars: string[]): Record<string, strin
     process.exit(1);
   }
 
-  const vars = parseEnvFile(envFilePath);
+  const vars = parseEnvFileFromPath(envFilePath);
   const missing = requiredVars.filter((v) => !vars[v] || vars[v] === "");
 
   if (missing.length > 0) {
@@ -86,7 +89,7 @@ function loadDeployEnv(): Record<string, string> {
     console.error(`   ${c.yellow}cp deploy/bondery/.env.example deploy/bondery/.env${c.reset}\n`);
     process.exit(1);
   }
-  return parseEnvFile(envPath);
+  return parseEnvFileFromPath(envPath);
 }
 
 function requireDeployVars(vars: Record<string, string>, keys: string[]) {
@@ -168,6 +171,8 @@ function bootstrapGreenfield() {
     "BONDERY_PRIVATE_POSTGRES_PASSWORD",
     "BONDERY_PRIVATE_SUPABASE_SECRET_KEY",
     "BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY",
+    "BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK",
+    "BONDERY_PRIVATE_SUPABASE_JWT_SECRET",
   ]);
 
   const dbUrl = `postgresql://postgres:${encodeURIComponent(vars.BONDERY_PRIVATE_POSTGRES_PASSWORD)}@127.0.0.1:54322/postgres`;
@@ -219,6 +224,8 @@ function bootstrapImport() {
     "BONDERY_INFRA_SUPABASE_DOMAIN",
     "BONDERY_PRIVATE_POSTGRES_PASSWORD",
     "BONDERY_PRIVATE_SUPABASE_SECRET_KEY",
+    "BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK",
+    "BONDERY_PRIVATE_SUPABASE_JWT_SECRET",
   ]);
 
   console.log(
