@@ -167,6 +167,9 @@ if (jwtDerive) {
   if (!jwtDerive.includes("BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK")) {
     errors.push("jwt-derive must read BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK");
   }
+  if (!/^\s*healthcheck:/m.test(jwtDerive)) {
+    errors.push("jwt-derive must define a healthcheck after writing jwt-derived.env");
+  }
 }
 
 if (auth) {
@@ -175,11 +178,11 @@ if (auth) {
       "auth GOTRUE_URI_ALLOW_LIST must derive chromiumapp.org URLs from BONDERY_INFRA_CHROME_EXTENSION_ID",
     );
   }
-  if (!auth.includes("jwt-derived.env")) {
-    errors.push("auth must load ./supabase/volumes/runtime/jwt-derived.env");
+  if (!auth.includes("auth-entrypoint.sh")) {
+    errors.push("auth must source jwt-derived.env via auth-entrypoint.sh at runtime");
   }
-  if (/GOTRUE_JWT_KEYS:/.test(auth)) {
-    errors.push("auth must receive GOTRUE_JWT_KEYS from jwt-derived.env, not compose environment");
+  if (auth.includes("jwt-derived.env") && auth.includes("env_file:")) {
+    errors.push("auth must not use env_file for jwt-derived.env (use entrypoint sourcing)");
   }
 }
 

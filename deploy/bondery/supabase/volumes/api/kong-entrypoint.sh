@@ -1,6 +1,14 @@
 #!/bin/sh
 # Kong declarative config: substitute env vars; translate sb_* apikeys to ES256 JWTs.
-# ANON_KEY_ASYMMETRIC / SERVICE_ROLE_KEY_ASYMMETRIC come from jwt-derived.env via compose env_file.
+
+set -e
+
+if [ -f /runtime/jwt-derived.env ]; then
+  set -a
+  # shellcheck disable=SC1091
+  . /runtime/jwt-derived.env
+  set +a
+fi
 
 if [ -n "$SUPABASE_SECRET_KEY" ] && [ -n "$SUPABASE_PUBLISHABLE_KEY" ] \
   && [ -n "$SERVICE_ROLE_KEY_ASYMMETRIC" ] && [ -n "$ANON_KEY_ASYMMETRIC" ]; then

@@ -8,14 +8,28 @@
 services:
   jwt-derive:
     image: node:22-alpine
-    restart: "no"
+    restart: unless-stopped
+    env_file:
+      - .env
     volumes:
       - ./supabase/volumes/scripts/derive-jwt-env.mjs:/derive.mjs:ro
       - ./supabase/volumes/runtime:/runtime
     environment:
       BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK: ${BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK:?BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK must be set}
       BONDERY_PRIVATE_SUPABASE_JWT_SECRET: ${BONDERY_PRIVATE_SUPABASE_JWT_SECRET:?BONDERY_PRIVATE_SUPABASE_JWT_SECRET must be set}
-    command: ["node", "/derive.mjs", "/runtime/jwt-derived.env"]
+    command:
+      - sh
+      - -ec
+      - |
+        node /derive.mjs /runtime/jwt-derived.env
+        grep -q '"kid"' /runtime/jwt-derived.env
+        exec sleep infinity
+    healthcheck:
+      test: ["CMD-SHELL", "grep -q '\"kid\"' /runtime/jwt-derived.env"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
     networks:
       - internal
 
@@ -76,11 +90,13 @@ services:
       retries: 3
     depends_on:
       jwt-derive:
-        condition: service_completed_successfully
+        condition: service_healthy
       db:
         condition: service_healthy
-    env_file:
-      - ./supabase/volumes/runtime/jwt-derived.env
+    volumes:
+      - ./supabase/volumes/runtime:/runtime:ro
+      - ./supabase/volumes/scripts/auth-entrypoint.sh:/auth-entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/auth-entrypoint.sh"]
     environment:
       GOTRUE_API_HOST: 0.0.0.0
       GOTRUE_API_PORT: 9999
@@ -128,7 +144,7 @@ services:
     restart: unless-stopped
     depends_on:
       jwt-derive:
-        condition: service_completed_successfully
+        condition: service_healthy
       db:
         condition: service_healthy
     env_file:
@@ -160,7 +176,7 @@ services:
     restart: unless-stopped
     depends_on:
       jwt-derive:
-        condition: service_completed_successfully
+        condition: service_healthy
       db:
         condition: service_healthy
     env_file:
@@ -202,7 +218,7 @@ services:
     restart: unless-stopped
     depends_on:
       jwt-derive:
-        condition: service_completed_successfully
+        condition: service_healthy
       db:
         condition: service_healthy
       rest:
@@ -294,7 +310,7 @@ services:
       retries: 5
     depends_on:
       jwt-derive:
-        condition: service_completed_successfully
+        condition: service_healthy
       auth:
         condition: service_healthy
       rest:
@@ -304,6 +320,7 @@ services:
     volumes:
       - ./supabase/volumes/api/kong.yml:/home/kong/temp.yml:ro,z
       - ./supabase/volumes/api/kong-entrypoint.sh:/home/kong/kong-entrypoint.sh:ro,z
+      - ./supabase/volumes/runtime:/runtime:ro
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /usr/local/kong/kong.yml

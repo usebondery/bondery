@@ -149,7 +149,8 @@ function main() {
   }
 
   writeFileSync(target, output, { mode: 0o600 });
-  console.log(`Wrote ${target}`);
+  const kid = JSON.parse(signingJwk).kid;
+  console.log(`Wrote ${target} (kid=${kid})`);
 }
 
 const isMain =

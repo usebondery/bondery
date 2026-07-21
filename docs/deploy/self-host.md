@@ -71,14 +71,15 @@ Operators use **`BONDERY_*` only**. Compose maps them into GoTrue / Kong / Postg
 
 Set `BONDERY_PRIVATE_SUPABASE_JWT_SECRET`, `BONDERY_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_*`), `BONDERY_PRIVATE_SUPABASE_SECRET_KEY` (`sb_secret_*`), and `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` (export ES256 private JWK from Supabase Cloud on cutover).
 
-On every stack start, the **`jwt-derive`** init service derives Auth JWKS + Kong asymmetric JWT env from those two secrets and writes `supabase/volumes/runtime/jwt-derived.env`. Auth, PostgREST, Realtime, Storage, and Kong load it automatically — **no manual JWKS env vars in Dokploy**.
+On every stack start, the **`jwt-derive`** service derives Auth JWKS + Kong asymmetric JWT env from those two secrets and writes `supabase/volumes/runtime/jwt-derived.env`. Auth loads it at **container start** via `auth-entrypoint.sh`; other Supabase services use `env_file`.
 
-After rotating `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` or the signing JWK:
+**Dokploy:** `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK` and `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` must be set on the **compose project** (shared env), not only on the `api` service — otherwise `jwt-derive` cannot wire Auth JWKS.
+
+After rotating signing JWK or JWT secret:
 
 ```bash
 cd deploy/bondery
-docker compose run --rm jwt-derive
-docker compose restart auth rest realtime storage kong
+docker compose up -d --force-recreate jwt-derive auth rest realtime storage kong
 ```
 
 | Operator var | Purpose |

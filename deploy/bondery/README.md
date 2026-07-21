@@ -74,8 +74,7 @@ Supabase image bumps: edit `docker-compose.supabase.yml` + `versions.supabase.lo
 After rotating `BONDERY_PRIVATE_SUPABASE_JWT_SECRET` or `BONDERY_PRIVATE_SUPABASE_JWT_SIGNING_JWK`:
 
 ```bash
-docker compose run --rm jwt-derive
-docker compose restart auth rest realtime storage kong
+docker compose up -d --force-recreate jwt-derive auth rest realtime storage kong
 ```
 
 ### Image tags (api / webapp)
