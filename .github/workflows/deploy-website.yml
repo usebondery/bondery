@@ -85,6 +85,12 @@ jobs:
       - name: Ensure dokploy-network exists
         run: docker network create dokploy-network || true
 
+      - name: Log in to GHCR
+        uses: ./.github/actions/shared/ghcr-login
+        with:
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.BONDERY_OPS_GHCR_WRITE_TOKEN }}
+
       - name: Start website from just-built SHA tag
         working-directory: deploy/ops
         run: |
