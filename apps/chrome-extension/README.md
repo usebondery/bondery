@@ -42,5 +42,9 @@ export const MIN_EXTENSION_VERSION = "99.0.0";
 
 3. The extension background worker detects the 426, sets `updateRequired: true` in storage, and the popup shows the update-required screen.
 
-4. Revert `MIN_EXTENSION_VERSION` back to `"0.0.0"` when done testing.
+4. Revert `MIN_EXTENSION_VERSION` to the **current exported value** in `paths.ts` (from `pnpm run sync-version`). Do not revert to `"0.0.0"` unless you intend to disable the gate.
+
+## Beta zip (RC)
+
+GitHub prereleases for `vX.Y.Z-rc.N` attach a staging-baked zip. Disable the Chrome Web Store listing (same id), unzip, Load unpacked. Production GitHub releases do not include a zip.
 

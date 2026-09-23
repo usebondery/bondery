@@ -41,7 +41,6 @@ Override via `config: { rateLimit: TIER }` on route options.
 - `GET /extension/manifest`
 - `GET /sync/ws`, `GET /sync/ws-ticket`
 - `POST /webhooks/stripe`
-- All `/admin/stats/*` routes
 
 ## 429 response
 

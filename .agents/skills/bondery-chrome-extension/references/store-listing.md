@@ -2,7 +2,7 @@
 
 **Decision record:** [ADR 0007](../../../../docs/adr/0007-cws-listing-compositions.mdx) — keep it. This file is how to generate the PNGs.
 
-CWS publish wait (`ext-X.Y.Z`, do not deploy product until the listing is live) stays in [bondery-release extension.md](../../bondery-release/references/extension.md). This skill does not own that gate.
+CWS publish wait (`vX.Y.Z`, do not approve production-containers until the listing is live) stays in [bondery-release extension.md](../../bondery-release/references/extension.md). This skill does not own that gate.
 
 ## Where the compositions live
 

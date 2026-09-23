@@ -108,8 +108,3 @@ export const chatKeys = {
   session: (id: string) => [...chatKeys.sessions(), id] as const,
   sessions: () => [...chatKeys.all, "sessions"] as const,
 };
-
-export const statsKeys = {
-  all: ["admin-stats"] as const,
-  dashboard: () => [...statsKeys.all, "dashboard"] as const,
-};

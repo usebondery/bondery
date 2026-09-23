@@ -77,21 +77,45 @@ jobs:
               - .github/workflows/shared-docker-build-push.yml
               - deploy/ops/**
 
-  resolve_website_version:
+  resolve:
     runs-on: ubuntu-latest
     outputs:
-      version: ${{ steps.pkg.outputs.version }}
+      infra_version: ${{ steps.pkg.outputs.infra_version }}
+      is_rc: ${{ steps.pkg.outputs.is_rc }}
+      is_rc_cut: ${{ steps.pkg.outputs.is_rc_cut }}
+      npm_version: ${{ steps.pkg.outputs.npm_version }}
     steps:
       - uses: actions/checkout@v7
         with:
+          fetch-depth: 2
           persist-credentials: false
 
-      - name: Read website package version
+      - name: Resolve package channel
         id: pkg
-        run: echo "version=$(node -p "require('./apps/website/package.json').version")" >> "$GITHUB_OUTPUT"
+        run: |
+          set -euo pipefail
+          NPM_VERSION=$(node -p "require('./package.json').version")
+          echo "npm_version=${NPM_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "infra_version=${NPM_VERSION}" >> "$GITHUB_OUTPUT"
+
+          if echo "$NPM_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-rc\.[1-9][0-9]*$'; then
+            echo "is_rc=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_rc=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          PREV=""
+          if git cat-file -e "HEAD~1:package.json" 2>/dev/null; then
+            PREV=$(git show HEAD~1:package.json | node -e "let s='';process.stdin.on('data',d=>s+=d);process.stdin.on('end',()=>console.log(JSON.parse(s).version||''))")
+          fi
+          if echo "$NPM_VERSION" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+-rc\.[1-9][0-9]*$' && [ "$NPM_VERSION" != "$PREV" ]; then
+            echo "is_rc_cut=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "is_rc_cut=false" >> "$GITHUB_OUTPUT"
+          fi
 
   build_api:
-    needs: detect_changes
+    needs: [detect_changes, resolve]
     if: needs.detect_changes.outputs.api == 'true'
     uses: ./.github/workflows/shared-docker-build-push.yml
     secrets: inherit
@@ -100,20 +124,21 @@ jobs:
       dockerignore_file: .dockerignore.api
       image_name: ghcr.io/usebondery/api
       docker_tags: |
-        type=raw,value=beta
         type=sha,prefix=sha-,format=short
+        type=raw,value=beta,enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
+        type=raw,value=${{ needs.resolve.outputs.npm_version }},enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
       oci_title: Bondery API
       oci_description: Bondery API server (integration builds from main)
       oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/api-container.md
-      oci_version: beta
+      oci_version: ${{ needs.resolve.outputs.infra_version }}
       git_sha: ${{ github.sha }}
       cache_scope: api
       build_args: |
         BONDERY_INFRA_GIT_SHA=${{ github.sha }}
-        BONDERY_INFRA_VERSION=beta
+        BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.infra_version }}
 
   build_webapp:
-    needs: detect_changes
+    needs: [detect_changes, resolve]
     if: needs.detect_changes.outputs.webapp == 'true'
     uses: ./.github/workflows/shared-docker-build-push.yml
     secrets: inherit
@@ -122,20 +147,21 @@ jobs:
       dockerignore_file: .dockerignore.webapp
       image_name: ghcr.io/usebondery/webapp
       docker_tags: |
-        type=raw,value=beta
         type=sha,prefix=sha-,format=short
+        type=raw,value=beta,enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
+        type=raw,value=${{ needs.resolve.outputs.npm_version }},enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
       oci_title: Bondery Webapp
       oci_description: Bondery webapp (integration builds from main)
       oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/dokploy.md
-      oci_version: beta
+      oci_version: ${{ needs.resolve.outputs.infra_version }}
       git_sha: ${{ github.sha }}
       cache_scope: webapp
       build_args: |
         BONDERY_INFRA_GIT_SHA=${{ github.sha }}
-        BONDERY_INFRA_VERSION=beta
+        BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.infra_version }}
 
   build_website:
-    needs: [detect_changes, resolve_website_version]
+    needs: [detect_changes, resolve]
     if: needs.detect_changes.outputs.website == 'true'
     uses: ./.github/workflows/shared-docker-build-push.yml
     secrets: inherit
@@ -144,21 +170,22 @@ jobs:
       dockerignore_file: .dockerignore.website
       image_name: ghcr.io/usebondery/website
       docker_tags: |
-        type=raw,value=beta
         type=sha,prefix=sha-,format=short
+        type=raw,value=beta,enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
+        type=raw,value=${{ needs.resolve.outputs.npm_version }},enable=${{ needs.resolve.outputs.is_rc_cut == 'true' }}
       oci_title: Bondery Website
       oci_description: Bondery marketing website (main integration builds)
       oci_documentation: https://github.com/usebondery/bondery/blob/main/docs/deploy/dokploy.md
-      oci_version: beta
+      oci_version: ${{ needs.resolve.outputs.infra_version }}
       git_sha: ${{ github.sha }}
       cache_scope: website
       build_args: |
         BONDERY_INFRA_GIT_SHA=${{ github.sha }}
-        BONDERY_INFRA_VERSION=${{ needs.resolve_website_version.outputs.version }}
+        BONDERY_INFRA_VERSION=${{ needs.resolve.outputs.infra_version }}
 
   notify_beta_website:
-    needs: [build_website]
-    if: always() && needs.build_website.result == 'success'
+    needs: [resolve, build_website]
+    if: always() && needs.build_website.result == 'success' && needs.resolve.outputs.is_rc_cut == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -176,8 +203,11 @@ jobs:
           branch: main
 
   notify_beta_services:
-    needs: [build_api, build_webapp]
-    if: always() && (needs.build_api.result == 'success' || needs.build_webapp.result == 'success')
+    needs: [resolve, build_api, build_webapp]
+    if: >-
+      always() &&
+      needs.resolve.outputs.is_rc_cut == 'true' &&
+      (needs.build_api.result == 'success' || needs.build_webapp.result == 'success')
     runs-on: ubuntu-latest
     permissions:
       contents: read

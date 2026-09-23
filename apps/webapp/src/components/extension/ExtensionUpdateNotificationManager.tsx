@@ -14,9 +14,9 @@ const EXTENSION_UPDATE_ID = "extension-update";
 
 /**
  * Detects the installed Chrome extension version on mount, compares it
- * against the minimum version returned by the API extension manifest endpoint,
- * and shows a persistent red notification via `statusNotificationsStore`
- * when the extension is outdated.
+ * against `latestVersion` from the API extension manifest (current production
+ * CalVer), and shows a persistent red notification when a store update is available.
+ * `minVersion` remains the API 426 floor, not this banner.
  *
  * Mount once in the authenticated app layout.
  */
@@ -39,8 +39,9 @@ export function ExtensionUpdateNotificationManager() {
         }
 
         const data = await res.json();
-        const minVersion: string | undefined = data?.extension?.minVersion;
-        if (!minVersion) {
+        const latestVersion: string | undefined =
+          data?.extension?.latestVersion ?? data?.extension?.minVersion;
+        if (!latestVersion) {
           return;
         }
 
@@ -48,7 +49,7 @@ export function ExtensionUpdateNotificationManager() {
           return;
         }
 
-        if (isVersionBelow(detection.version, minVersion)) {
+        if (isVersionBelow(detection.version, latestVersion)) {
           function openExtensionsPage() {
             const requestId = crypto.randomUUID();
 

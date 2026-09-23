@@ -10,5 +10,5 @@
   "name": "@bondery/openapi-spec",
   "private": true,
   "type": "module",
-  "version": "1.9.1"
+  "version": "1.9.2-rc.1"
 }

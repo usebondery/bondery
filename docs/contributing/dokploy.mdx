@@ -63,7 +63,7 @@ Redeploy the **full** Compose app (Dokploy's default) so `api` `pre_start` runs 
 
 ### CI redeploy webhook
 
-After unified `vX.Y.Z` release tags, GitHub Actions fetches **production Infisical** and POSTs to `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` with `refs/heads/release`. Set the Dokploy Compose app branch to **`release`**. Leave the webhook unset in Infisical to redeploy manually.
+After unified `vX.Y.Z` release tags, GitHub Actions fetches **production Infisical** and POSTs to `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` with `refs/heads/release`. Set the Dokploy Compose app branch to **`release`**. Leave the webhook unset in Infisical to redeploy manually. Pin `BONDERY_INFRA_VERSION=X.Y.Z` (never an RC). Approve `production-containers` only after the Chrome Web Store listing is live.
 
 ### Infisical → Dokploy env sync
 
@@ -96,7 +96,7 @@ Two Compose apps share this file and `dokploy-network`. Traefik router names and
 | Production | `usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=production` (Infisical production → `website` sync) | `release` |
 | Beta | `beta.usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=beta` (Infisical staging → `website-beta` sync) | `main` |
 
-**CI:** Path-filtered PRs and pushes to `main` run `website-build` in [`.github/workflows/verify.yml`](../../.github/workflows/verify.yml) (pruned production `next build`). [`stage-images.yml`](../../.github/workflows/stage-images.yml) on `main` tags website `:beta` + `:sha-<short>` and notifies the staging website webhook. Push to `release` runs [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml) (Docker build-push → smoke → optional Dokploy webhook from Infisical production); image tags `:production` + `:sha-<short>`. Production CD stays on `deploy-website.yml`. Infisical key `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` triggers production redeploy (`refs/heads/release`).
+**CI:** Path-filtered PRs and pushes to `main` run `website-build` in [`.github/workflows/verify.yml`](../../.github/workflows/verify.yml) (pruned production `next build`). [`stage-images.yml`](../../.github/workflows/stage-images.yml) on `main` always tags `:sha-<short>`; named RC cuts also tag `:beta` + `:X.Y.Z-rc.N` and notify staging website/services webhooks. Everyday main while the package is still an RC does **not** move `:beta`. Push to `release` runs [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml) (Docker build-push → smoke → optional Dokploy webhook from Infisical production); image tags `:production` + `:sha-<short>`. Production CD stays on `deploy-website.yml`. Infisical key `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` triggers production redeploy (`refs/heads/release`).
 
 ```bash
 BONDERY_INFRA_WEBAPP_DOMAIN=app.usebondery.com
@@ -119,18 +119,25 @@ Social login and sessions are handled by the API (`/auth/*`) — the API is its 
 
 | Setting | Value |
 |---------|-------|
-| **API base (issuer)** | `https://api.usebondery.com` (`BONDERY_INFRA_API_DOMAIN`) |
-| **Webapp's own OAuth client redirect** | `https://app.usebondery.com/auth/oauth-callback` |
+| **API base (issuer)** | Production `https://api.usebondery.com`; beta `https://api.beta.usebondery.com` (`BONDERY_INFRA_API_DOMAIN`) |
+| **Webapp's own OAuth client redirect** | Production `https://app.usebondery.com/auth/oauth-callback`; beta `https://app.beta.usebondery.com/auth/oauth-callback` |
 | **Chrome extension** | OAuth 2.1 via API; redirect `https://{BONDERY_INFRA_CHROME_EXTENSION_ID}.chromiumapp.org/` |
 
 ### GitHub / LinkedIn OAuth apps
 
-Authorization callback URL must be the **API's** Better Auth callback (`basePath` is `/auth`):
+Authorization callback URL must be the **API's** Better Auth callback (`basePath` is `/auth`). Production and beta use **separate** GitHub/LinkedIn apps (Infisical production vs staging client ids). Each app must list only that environment's API host:
 
 ```
+# Production
 https://api.usebondery.com/auth/callback/github
 https://api.usebondery.com/auth/callback/linkedin
+
+# Beta
+https://api.beta.usebondery.com/auth/callback/github
+https://api.beta.usebondery.com/auth/callback/linkedin
 ```
+
+LinkedIn's developer console error `The redirect_uri does not match the registered value` means that API callback is missing from the app for the client id in that environment.
 
 (Replace host with your `BONDERY_INFRA_API_DOMAIN`.)
 

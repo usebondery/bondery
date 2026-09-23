@@ -1,0 +1,255 @@
+name: Release - RC
+
+on:
+  push:
+    tags:
+      - "v*-rc.*"
+
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      short_sha: ${{ steps.meta.outputs.short_sha }}
+      tag: ${{ steps.meta.outputs.tag }}
+      version: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate RC tag and package.json
+        id: meta
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if ! echo "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+-rc\.[1-9][0-9]*$'; then
+            echo "Invalid RC tag: $TAG"
+            echo "Expected format: vX.Y.Z-rc.N (N >= 1)"
+            exit 1
+          fi
+          VERSION="${TAG#v}"
+          ROOT_VERSION=$(node -p "require('./package.json').version")
+          if [ "$ROOT_VERSION" != "$VERSION" ]; then
+            echo "root package.json version ($ROOT_VERSION) must equal RC tag ($VERSION)"
+            exit 1
+          fi
+          SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
+
+  detect_changes:
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.set.outputs.api }}
+      webapp: ${{ steps.set.outputs.webapp }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            api:
+              - apps/api/**
+              - deploy/bondery/**
+              - packages/**
+              - scripts/**
+              - docs/**
+              - package.json
+              - pnpm-lock.yaml
+              - pnpm-workspace.yaml
+              - .nvmrc
+              - turbo.json
+              - .dockerignore.api
+              - .github/actions/shared/**
+              - .github/workflows/rc-release.yml
+              - .github/workflows/shared-promote-image-tag.yml
+            webapp:
+              - apps/webapp/**
+              - deploy/bondery/**
+              - packages/**
+              - scripts/**
+              - docs/**
+              - package.json
+              - pnpm-lock.yaml
+              - pnpm-workspace.yaml
+              - .nvmrc
+              - turbo.json
+              - .dockerignore.webapp
+              - .github/actions/shared/**
+              - .github/workflows/rc-release.yml
+              - .github/workflows/shared-promote-image-tag.yml
+
+      - name: Resolve component flags
+        id: set
+        env:
+          FILTER_API: ${{ steps.filter.outputs.api }}
+          FILTER_WEBAPP: ${{ steps.filter.outputs.webapp }}
+        run: |
+          echo "api=${FILTER_API:-false}" >> "$GITHUB_OUTPUT"
+          echo "webapp=${FILTER_WEBAPP:-false}" >> "$GITHUB_OUTPUT"
+
+  resolve_meta:
+    needs: validate
+    runs-on: ubuntu-latest
+    outputs:
+      prev_version: ${{ steps.prev.outputs.prev_version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve previous version tag
+        id: prev
+        env:
+          CURRENT: ${{ needs.validate.outputs.version }}
+        run: |
+          git fetch --tags
+          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[1-9][0-9]*)?$' | grep -v "^v${CURRENT}$" | head -1 || true)
+          if [ -n "$PREV_TAG" ]; then
+            echo "prev_version=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "prev_version=" >> "$GITHUB_OUTPUT"
+          fi
+
+  github_release_init:
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create RC GitHub prerelease (draft until zip is attached)
+        uses: softprops/action-gh-release@v3
+        with:
+          tag_name: ${{ needs.validate.outputs.tag }}
+          name: Bondery ${{ needs.validate.outputs.version }}
+          draft: true
+          prerelease: true
+          generate_release_notes: false
+          body: |
+            [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
+
+            RC publishing in progress for ${{ needs.validate.outputs.version }}.
+
+  promote_api:
+    needs: [validate, detect_changes]
+    if: needs.detect_changes.outputs.api == 'true'
+    uses: ./.github/workflows/shared-promote-image-tag.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/api
+      source_tag: sha-${{ needs.validate.outputs.short_sha }}
+      target_tag: ${{ needs.validate.outputs.version }}
+      extra_target_tags: beta
+
+  promote_webapp:
+    needs: [validate, detect_changes]
+    if: needs.detect_changes.outputs.webapp == 'true'
+    uses: ./.github/workflows/shared-promote-image-tag.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/webapp
+      source_tag: sha-${{ needs.validate.outputs.short_sha }}
+      target_tag: ${{ needs.validate.outputs.version }}
+      extra_target_tags: beta
+
+  retag_api:
+    needs: [validate, detect_changes, resolve_meta]
+    if: >-
+      needs.detect_changes.outputs.api != 'true' &&
+      needs.resolve_meta.outputs.prev_version != ''
+    uses: ./.github/workflows/shared-promote-image-tag.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/api
+      source_tag: ${{ needs.resolve_meta.outputs.prev_version }}
+      target_tag: ${{ needs.validate.outputs.version }}
+      extra_target_tags: beta
+
+  retag_webapp:
+    needs: [validate, detect_changes, resolve_meta]
+    if: >-
+      needs.detect_changes.outputs.webapp != 'true' &&
+      needs.resolve_meta.outputs.prev_version != ''
+    uses: ./.github/workflows/shared-promote-image-tag.yml
+    secrets: inherit
+    with:
+      image_name: ghcr.io/usebondery/webapp
+      source_tag: ${{ needs.resolve_meta.outputs.prev_version }}
+      target_tag: ${{ needs.validate.outputs.version }}
+      extra_target_tags: beta
+
+  release_extension:
+    needs: [validate]
+    uses: ./.github/workflows/shared-release-extension.yml
+    secrets: inherit
+    with:
+      version: ${{ needs.validate.outputs.version }}
+      flavor: staging
+      publish_cws: false
+      git_sha: ${{ needs.validate.outputs.short_sha }}
+
+  github_release_finalize:
+    needs:
+      - validate
+      - promote_api
+      - promote_webapp
+      - retag_api
+      - retag_webapp
+      - release_extension
+    if: always() && needs.validate.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        if: needs.release_extension.result == 'success'
+        with:
+          name: extension-zip
+          path: .
+
+      - name: Finalize GitHub prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.validate.outputs.tag }}
+          VERSION: ${{ needs.validate.outputs.version }}
+          EXTENSION_RESULT: ${{ needs.release_extension.result }}
+          ZIP_NAME: bondery-extension-${{ needs.validate.outputs.version }}-sha-${{ needs.validate.outputs.short_sha }}.zip
+        run: |
+          set -euo pipefail
+          BODY_FILE=$(mktemp)
+          if [ "$EXTENSION_RESULT" = "success" ]; then
+            cat > "$BODY_FILE" <<EOF
+          [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
+
+          ## Beta / RC
+
+          - Images: \`ghcr.io/usebondery/{api,webapp}:${VERSION}\` and floating \`:beta\`
+          - Staging extension zip attached (Load unpacked; disable the Chrome Web Store listing first)
+          EOF
+            if [ -f "$ZIP_NAME" ]; then
+              gh release upload "$TAG" "$ZIP_NAME" --clobber
+            else
+              echo "Expected zip $ZIP_NAME was not downloaded"
+              ls -la
+              exit 1
+            fi
+            gh release edit "$TAG" --notes-file "$BODY_FILE" --draft=false --prerelease=true
+          else
+            cat > "$BODY_FILE" <<EOF
+          [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
+
+          RC publishing did not finish. This draft stays unpublished.
+          EOF
+            gh release edit "$TAG" --notes-file "$BODY_FILE" --draft --prerelease=true
+          fi

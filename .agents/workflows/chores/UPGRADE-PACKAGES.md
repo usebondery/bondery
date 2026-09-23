@@ -121,7 +121,7 @@ Repo checks:
 | API schema change | `pnpm run generate:openapi` |
 | Supabase client bump | `pnpm run generate-types` (needs `pnpm --filter apps/supabase-db run start`) |
 | Env renames | `.env.*.example` per app |
-| Extension API break | `packages/helpers/src/globals/paths.ts` (`MIN_EXTENSION_VERSION`) |
+| Extension API break | `pnpm run sync-version` rewrites `MIN_EXTENSION_VERSION` (do not hand-edit) |
 | `@better-auth/passkey` or any vendored catalog | Run every script in `scripts/updater/` (`pnpm run update:aaguid-catalog` today) |
 
 ---

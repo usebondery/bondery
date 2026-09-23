@@ -8,7 +8,6 @@ import { randomBytes } from "node:crypto";
 import { after, before, describe, it } from "node:test";
 import { prisma } from "@bondery/db";
 import { PLATFORM_ADMIN_ROLE } from "@bondery/helpers/auth/platform-admin";
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids";
 import type { FastifyInstance } from "fastify";
 import { isPlatformAdmin } from "../lib/auth/is-platform-admin.js";
@@ -58,34 +57,6 @@ describe("platform admin", () => {
 
     assert.equal(await isPlatformAdmin(admin.id), true);
     assert.equal(await isPlatformAdmin(user.id), false);
-  });
-
-  it("verifyAdmin allows platform admin on stats routes", async () => {
-    const admin = await createTestUser(PLATFORM_ADMIN_ROLE);
-    const token = await createNativeSession(admin.id);
-
-    const response = await app.inject({
-      headers: { authorization: `Bearer ${token}` },
-      method: "GET",
-      url: `${API_ROUTES.ADMIN_STATS}/github-stars`,
-    });
-
-    assert.notEqual(response.statusCode, 403, response.body);
-  });
-
-  it("verifyAdmin rejects non-admin with admin_required", async () => {
-    const user = await createTestUser("user");
-    const token = await createNativeSession(user.id);
-
-    const response = await app.inject({
-      headers: { authorization: `Bearer ${token}` },
-      method: "GET",
-      url: `${API_ROUTES.ADMIN_STATS}/github-stars`,
-    });
-
-    assert.equal(response.statusCode, 403, response.body);
-    const body = response.json() as { error: { code: string } };
-    assert.equal(body.error.code, "admin_required");
   });
 
   it("blocks impersonate-user without impersonate permission", async () => {

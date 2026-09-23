@@ -203,27 +203,24 @@ import r200 from "../locales/de/features/pages/SingleContactPage.json" with { ty
 import r201 from "../locales/en/features/sections/Socials.json" with { type: "json" };
 import r202 from "../locales/cs/features/sections/Socials.json" with { type: "json" };
 import r203 from "../locales/de/features/sections/Socials.json" with { type: "json" };
-import r204 from "../locales/en/features/pages/StatsPage.json" with { type: "json" };
-import r205 from "../locales/cs/features/pages/StatsPage.json" with { type: "json" };
-import r206 from "../locales/de/features/pages/StatsPage.json" with { type: "json" };
-import r207 from "../locales/en/features/sections/TagsInput.json" with { type: "json" };
-import r208 from "../locales/cs/features/sections/TagsInput.json" with { type: "json" };
-import r209 from "../locales/de/features/sections/TagsInput.json" with { type: "json" };
-import r210 from "../locales/en/features/sections/TagsSettings.json" with { type: "json" };
-import r211 from "../locales/cs/features/sections/TagsSettings.json" with { type: "json" };
-import r212 from "../locales/de/features/sections/TagsSettings.json" with { type: "json" };
-import r213 from "../locales/en/platform/email/TrialEndingEmail.json" with { type: "json" };
-import r214 from "../locales/cs/platform/email/TrialEndingEmail.json" with { type: "json" };
-import r215 from "../locales/de/platform/email/TrialEndingEmail.json" with { type: "json" };
-import r216 from "../locales/en/features/pages/UnavailablePage.json" with { type: "json" };
-import r217 from "../locales/cs/features/pages/UnavailablePage.json" with { type: "json" };
-import r218 from "../locales/de/features/pages/UnavailablePage.json" with { type: "json" };
-import r219 from "../locales/en/validation.json" with { type: "json" };
-import r220 from "../locales/cs/validation.json" with { type: "json" };
-import r221 from "../locales/de/validation.json" with { type: "json" };
-import r222 from "../locales/en/platform/email/WelcomeEmail.json" with { type: "json" };
-import r223 from "../locales/cs/platform/email/WelcomeEmail.json" with { type: "json" };
-import r224 from "../locales/de/platform/email/WelcomeEmail.json" with { type: "json" };
+import r204 from "../locales/en/features/sections/TagsInput.json" with { type: "json" };
+import r205 from "../locales/cs/features/sections/TagsInput.json" with { type: "json" };
+import r206 from "../locales/de/features/sections/TagsInput.json" with { type: "json" };
+import r207 from "../locales/en/features/sections/TagsSettings.json" with { type: "json" };
+import r208 from "../locales/cs/features/sections/TagsSettings.json" with { type: "json" };
+import r209 from "../locales/de/features/sections/TagsSettings.json" with { type: "json" };
+import r210 from "../locales/en/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r211 from "../locales/cs/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r212 from "../locales/de/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r213 from "../locales/en/features/pages/UnavailablePage.json" with { type: "json" };
+import r214 from "../locales/cs/features/pages/UnavailablePage.json" with { type: "json" };
+import r215 from "../locales/de/features/pages/UnavailablePage.json" with { type: "json" };
+import r216 from "../locales/en/validation.json" with { type: "json" };
+import r217 from "../locales/cs/validation.json" with { type: "json" };
+import r218 from "../locales/de/validation.json" with { type: "json" };
+import r219 from "../locales/en/platform/email/WelcomeEmail.json" with { type: "json" };
+import r220 from "../locales/cs/platform/email/WelcomeEmail.json" with { type: "json" };
+import r221 from "../locales/de/platform/email/WelcomeEmail.json" with { type: "json" };
 
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 
@@ -568,39 +565,34 @@ export const resourcesByNamespace = {
     cs: r202,
     de: r203,
   },
-  "StatsPage": {
+  "TagsInput": {
     en: r204,
     cs: r205,
     de: r206,
   },
-  "TagsInput": {
+  "TagsSettings": {
     en: r207,
     cs: r208,
     de: r209,
   },
-  "TagsSettings": {
+  "TrialEndingEmail": {
     en: r210,
     cs: r211,
     de: r212,
   },
-  "TrialEndingEmail": {
+  "UnavailablePage": {
     en: r213,
     cs: r214,
     de: r215,
   },
-  "UnavailablePage": {
+  "validation": {
     en: r216,
     cs: r217,
     de: r218,
   },
-  "validation": {
+  "WelcomeEmail": {
     en: r219,
     cs: r220,
     de: r221,
-  },
-  "WelcomeEmail": {
-    en: r222,
-    cs: r223,
-    de: r224,
   },
 } satisfies Record<string, Record<SupportedLocale, Record<string, unknown>>>;

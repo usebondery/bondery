@@ -162,7 +162,6 @@ export type CommonCatalog = {
       api_key_not_found: string;
       api_key_route_forbidden: string;
       auth_required: string;
-      bad_gateway: string;
       bad_request: string;
       billing: string;
       billing_pending_subscription_store_failed: string;
@@ -214,8 +213,6 @@ export type CommonCatalog = {
       extension_username_required: string;
       failed: string;
       failed_to_create_checkout_session: string;
-      failed_to_fetch_funnel_stats: string;
-      failed_to_fetch_total_users_growth: string;
       failed_to_generate_vcard: string;
       failed_to_load_profile_contact: string;
       failed_to_process_webhook: string;
@@ -2643,41 +2640,6 @@ export type SocialsCatalog = {
   WhatsAppPlaceholder: string;
 };
 
-export type StatsPageCatalog = {
-  ActiveUsers: string;
-  ActiveUsersDescription: string;
-  Contacts: string;
-  DAU: string;
-  Description: string;
-  Detractors: string;
-  Forbidden: string;
-  Funnel: string;
-  Funnel14To28DaysAgo: string;
-  FunnelActivated: string;
-  FunnelContactsToInteractions: string;
-  FunnelDescription: string;
-  FunnelLast14Days: string;
-  FunnelLast30Days: string;
-  FunnelPeriod: string;
-  FunnelSignupsToContacts: string;
-  GithubStars: string;
-  GithubStarsDescription: string;
-  Interactions: string;
-  MAU: string;
-  NoData: string;
-  NPS: string;
-  NPSScore: string;
-  Passives: string;
-  PostHogNotConfigured: string;
-  Promoters: string;
-  Responses: string;
-  Signups: string;
-  Title: string;
-  TotalUsers: string;
-  TotalUsersDescription: string;
-  WAU: string;
-};
-
 export type TagsInputCatalog = {
   AddError: string;
   AddNewTagTooltip: string;
@@ -2878,7 +2840,6 @@ export interface Catalog {
   "ShareContactModal": ShareContactModalCatalog;
   "SingleContactPage": SingleContactPageCatalog;
   "Socials": SocialsCatalog;
-  "StatsPage": StatsPageCatalog;
   "TagsInput": TagsInputCatalog;
   "TagsSettings": TagsSettingsCatalog;
   "TrialEndingEmail": TrialEndingEmailCatalog;

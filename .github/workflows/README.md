@@ -8,13 +8,14 @@ GitHub requires workflow files to live directly in `.github/workflows/` (no subf
 verify.yml                 PR checks only (contract + path-filtered website-build)
 
 stage/
-  images.yml               -> stage-images.yml    main -> api/webapp/website :beta + :sha
+  images.yml               -> stage-images.yml    main -> :sha; :beta + named RC only on RC cuts
 
 deploy/
   website.yml              -> deploy-website.yml  release -> promote :sha or build -> :production
 
 release/
-  bondery.yml              -> release.yml           vX.Y.Z unified product release
+  bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc)
+  rc.yml                   -> rc-release.yml        vX.Y.Z-rc.N prerelease + staging zip; no CWS
 
 smoke/
   bondery-stack.yml        -> smoke-bondery-stack.yml  manual workflow_dispatch drill
@@ -47,7 +48,8 @@ shared/
 | `verify` | Quality gates | **PR only** (`website-build` path-filtered; `contract` always runs). Uses `concurrency` to cancel stale runs. |
 | `stage-images` | Integration images on main | Push to `main` (path-filtered matrix: api, webapp, website) |
 | `deploy-*` | Production CD (floating channel) | Push to `release` (path-filtered); website promotes `:sha` when staged on main |
-| `release-*` | Versioned production releases | Git tag `vX.Y.Z` (unified product release) |
+| `release-*` | Versioned production releases | Git tag `vX.Y.Z` (skips `-rc.`) |
+| `rc-release` | Named RC / beta | Git tag `vX.Y.Z-rc.N` |
 | `shared-*` | Reusable workflows (not triggered directly) | `workflow_call` only |
 | `sync-dokploy-env` | Infisical → Dokploy ops env sync | `workflow_dispatch` (OIDC only; no GitHub secrets) |
 
@@ -63,12 +65,12 @@ Display names use ASCII hyphens (for example `Stage - Webapp`) because GitHub re
 |---------------|----------|-------------|
 | `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` | `deploy-website.yml` (after smoke) | `deploy/ops` marketing website |
 | `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` | `release.yml` | `deploy/bondery` product stack |
-| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK` | `stage-images.yml` (branch `main`) | `bondery-beta` product stack |
-| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK` | `stage-images.yml` (branch `main`) | `bondery-beta` marketing website |
+| `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK` | `stage-images.yml` (named RC cuts on `main`) | `bondery-beta` product stack |
+| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK` | `stage-images.yml` (named RC cuts on `main`) | `bondery-beta` marketing website |
 
 Workflows fetch production secrets with `infisical-production-secrets`. Empty webhook skips redeploy (manual Dokploy).
 
-**Extension release** (`shared-release-extension.yml`): production Infisical for `BONDERY_INFRA_CHROME_EXTENSION_ID`, publisher id, and public URLs (derived from `BONDERY_INFRA_*_DOMAIN` + `BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID`). **Still on GitHub secrets:** `PRIVATE_CHROME_*` signing keys, `BONDERY_OPS_TURBO_*`. **GHCR:** `BONDERY_OPS_GHCR_WRITE_TOKEN` from Infisical production (`ghcr-login-infisical`).
+**Extension release** (`shared-release-extension.yml`): `flavor: production` (CWS; omit `manifest.key`) or `flavor: staging` (GitHub RC zip; include key). Production Infisical vs staging Infisical accordingly. **Still on GitHub secrets:** `PRIVATE_CHROME_*` signing keys (CWS CRX only), `BONDERY_OPS_TURBO_*`. **GHCR:** `BONDERY_OPS_GHCR_WRITE_TOKEN` from Infisical production (`ghcr-login-infisical`).
 
 **Turbo remote cache** (`BONDERY_OPS_TURBO_TOKEN` secret + `BONDERY_OPS_TURBO_TEAM` variable):
 
@@ -86,15 +88,17 @@ Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages 
 
 | Channel | Git trigger | Docker tags |
 |---------|-------------|-------------|
-| Stage (api/webapp/website) | `main` | `:beta`, `:sha-<short>` |
-| Release (api/webapp) | `vX.Y.Z` (unified) | Promote `:sha-<short>` → `:X.Y.Z`; `:production` after smoke |
+| Everyday `main` | push `main` (not an RC cut) | `:sha-<short>` only |
+| Named RC cut | push `main` when package.json becomes `X.Y.Z-rc.N` | `:sha-<short>`, `:X.Y.Z-rc.N`, `:beta` |
+| RC tag | `vX.Y.Z-rc.N` (`rc-release.yml`) | Promote `:sha` → `:X.Y.Z-rc.N` + `:beta` |
+| Production tag | `vX.Y.Z` (`release.yml`; skips `-rc.`) | Promote `:sha-<short>` → `:X.Y.Z`; `:production` after smoke |
 | Deploy (website) | push to `release` | Promote `:sha-<short>` → `:production` when image exists on main; else build |
 
-`:sha-<short>` is the **immutable artifact** built on `main`. `:beta` is a floating integration pointer for api, webapp, and website.
+`:sha-<short>` is the **immutable artifact** built on `main`. `:beta` is a floating pointer updated **only on named RC cuts**, not every merge. Health `version` is the baked package.json CalVer/RC — never the word `beta`.
 
 Release workflows support `retry-promote` dispatch on `release.yml` with optional `force_rebuild` when `:sha` is missing (CI recovery only).
 
-Self-hosters pin **`BONDERY_INFRA_VERSION`** — both api and webapp images use that semver tag.
+Self-hosters pin **`BONDERY_INFRA_VERSION=X.Y.Z`** — both api and webapp images. RC is not a self-host channel.
 
 ## Local Docker builds
 
@@ -128,7 +132,7 @@ If you change lockfile layout or pnpm major version, bump the BuildKit cache id 
 
 1. Populate production keys above.
 2. Machine identity `f8b9e69d-bc32-4066-ad99-8ad6ecff2d21` — **read** on **production** and **staging**.
-3. OIDC subjects cover: `release.yml`, `shared-release-extension.yml`, `deploy-website.yml`, smoke workflows, `sync-dokploy-env.yml`.
+3. OIDC subjects cover: `release.yml`, `rc-release.yml`, `shared-release-extension.yml`, `deploy-website.yml`, smoke workflows, `sync-dokploy-env.yml`.
 4. Audience: `https://github.com/usebondery`.
 5. GitHub retains only Turbo (`BONDERY_OPS_TURBO_*`) and Chrome signing (`PRIVATE_CHROME_*`) secrets.
 

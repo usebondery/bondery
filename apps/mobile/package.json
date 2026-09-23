@@ -89,5 +89,5 @@
     "ios": "expo run:ios",
     "test:sync": "tsx --test src/lib/sync/pull-wake.test.ts"
   },
-  "version": "1.9.1"
+  "version": "1.9.2-rc.1"
 }

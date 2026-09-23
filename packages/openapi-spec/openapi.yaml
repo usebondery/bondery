@@ -23,8 +23,8 @@ info:
     access. See the authentication guide.
 
 
-    Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, `/api/admin`, `/api/subscriptions`, and
-    `/api/extension` do not accept API keys.
+    Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, `/api/subscriptions`, and `/api/extension` do not
+    accept API keys.
   license:
     name: AGPL-3.0
     url: https://www.gnu.org/licenses/agpl-3.0.html
@@ -947,9 +947,6 @@ paths:
                   stripe:
                     configured: true
                     ok: true
-                  posthog:
-                    configured: true
-                    ok: true
                   postgres:
                     latencyMs: 18
                     ok: true
@@ -1004,20 +1001,6 @@ paths:
                           - ok
                         additionalProperties: false
                       postgres:
-                        type: object
-                        properties:
-                          configured:
-                            type: boolean
-                          error:
-                            type: string
-                          latencyMs:
-                            type: number
-                          ok:
-                            type: boolean
-                        required:
-                          - ok
-                        additionalProperties: false
-                      posthog:
                         type: object
                         properties:
                           configured:
@@ -1091,7 +1074,6 @@ paths:
                       - anthropic
                       - mapy
                       - postgres
-                      - posthog
                       - redis
                       - smtp
                       - storage
@@ -1124,9 +1106,6 @@ paths:
                       configured: true
                       ok: true
                     stripe:
-                      configured: true
-                      ok: true
-                    posthog:
                       configured: true
                       ok: true
                     postgres:
@@ -1240,9 +1219,6 @@ paths:
                   stripe:
                     configured: true
                     ok: true
-                  posthog:
-                    configured: true
-                    ok: true
                   postgres:
                     error: Connection refused
                     ok: false
@@ -1297,20 +1273,6 @@ paths:
                           - ok
                         additionalProperties: false
                       postgres:
-                        type: object
-                        properties:
-                          configured:
-                            type: boolean
-                          error:
-                            type: string
-                          latencyMs:
-                            type: number
-                          ok:
-                            type: boolean
-                        required:
-                          - ok
-                        additionalProperties: false
-                      posthog:
                         type: object
                         properties:
                           configured:
@@ -1384,7 +1346,6 @@ paths:
                       - anthropic
                       - mapy
                       - postgres
-                      - posthog
                       - redis
                       - smtp
                       - storage
@@ -1417,9 +1378,6 @@ paths:
                       configured: true
                       ok: true
                     stripe:
-                      configured: true
-                      ok: true
-                    posthog:
                       configured: true
                       ok: true
                     postgres:
@@ -19626,8 +19584,9 @@ paths:
     get:
       tags:
         - Extension
-      description: Public Chrome extension configuration. Returns the minimum supported extension version and store URL. Not a
-        health probe — use `GET /health/live` for liveness.
+      description: Public Chrome extension configuration. `minVersion` is the HTTP 426 floor (previous production CalVer).
+        `latestVersion` is the current production CalVer for a non-blocking update nudge. Not a health probe — use `GET
+        /health/live` for liveness.
       security: *a2
       responses:
         "200":
@@ -19636,6 +19595,7 @@ paths:
             application/json:
               example:
                 extension:
+                  latestVersion: 1.9.1
                   minVersion: 1.0.0
                   storeUrl: https://chrome.google.com/webstore/detail/bondery/example
               schema:
@@ -19644,11 +19604,17 @@ paths:
                   extension:
                     type: object
                     properties:
+                      latestVersion:
+                        type: string
+                        example: 1.9.1
                       minVersion:
                         type: string
+                        example: 1.0.0
                       storeUrl:
                         type: string
+                        example: https://chrome.google.com/webstore/detail/bondery/example
                     required:
+                      - latestVersion
                       - minVersion
                       - storeUrl
                     additionalProperties: false
@@ -19657,6 +19623,7 @@ paths:
                 additionalProperties: false
                 example:
                   extension:
+                    latestVersion: 1.9.1
                     minVersion: 1.0.0
                     storeUrl: https://chrome.google.com/webstore/detail/bondery/example
         "400":
@@ -21224,700 +21191,6 @@ paths:
                   type: service_unavailable_error
               schema:
                 $ref: "#/components/schemas/ApiError"
-  /admin/stats/active-users:
-    get:
-      tags:
-        - Stats
-      description: Returns DAU/WAU/MAU timeline from PostHog.
-      parameters:
-        - schema:
-            default: 90
-            type: integer
-            minimum: 30
-            maximum: 180
-          in: query
-          name: days
-      security: *a2
-      responses:
-        "200":
-          description: Active users timeline
-          content:
-            application/json:
-              example:
-                timeline:
-                  - date: 2026-01-15
-                    dau: 120
-                    mau: 1200
-                    wau: 450
-              schema:
-                type: object
-                properties:
-                  timeline:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        date:
-                          type: string
-                        dau:
-                          type: number
-                        mau:
-                          type: number
-                        wau:
-                          type: number
-                      required:
-                        - date
-                        - dau
-                        - mau
-                        - wau
-                      additionalProperties: false
-                required:
-                  - timeline
-                additionalProperties: false
-                example:
-                  timeline:
-                    - date: 2026-01-15
-                      dau: 120
-                      mau: 1200
-                      wau: 450
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              example:
-                error:
-                  code: validation_error
-                  doc_url: https://usebondery.com/docs/api/errors/validation_error
-                  message: body.email Invalid input
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: invalid_request_error
-                  param: body.email
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Authentication required
-          content:
-            application/json:
-              example:
-                error:
-                  code: auth_required
-                  doc_url: https://usebondery.com/docs/api/errors/auth_required
-                  message: Unauthorized - Please log in
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authentication_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              example:
-                error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
-                  message: Forbidden
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authorization_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "404":
-          description: Resource not found
-          content:
-            application/json:
-              example:
-                error:
-                  code: contact_not_found
-                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
-                  message: Contact not found
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: not_found_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "429":
-          description: Too many requests
-          content:
-            application/json:
-              example:
-                error:
-                  code: rate_limit_exceeded
-                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
-                  message: Rate limit exceeded. Retry in 42 seconds.
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: rate_limit_error
-                  retry_after: 42
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              example:
-                error:
-                  code: internal_server_error
-                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
-                  message: Internal Server Error
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: api_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "503":
-          description: Service unavailable
-          content:
-            application/json:
-              example:
-                error:
-                  code: service_unavailable
-                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
-                  message: Service unavailable
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: service_unavailable_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-  /admin/stats/funnel:
-    get:
-      tags:
-        - Stats
-      description: Returns period-based signup → contacts → interactions funnel from Postgres.
-      security: *a2
-      responses:
-        "200":
-          description: Funnel conversion stats
-          content:
-            application/json:
-              example:
-                periods:
-                  - contacts: 40
-                    contactsToInteractionsPct: 62.5
-                    interactions: 25
-                    periodKey: 2026-01
-                    periodLabel: Jan 2026
-                    signups: 50
-                    signupsToContactsPct: 80
-              schema:
-                type: object
-                properties:
-                  periods:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        contacts:
-                          type: number
-                        contactsToInteractionsPct:
-                          type: number
-                        interactions:
-                          type: number
-                        periodKey:
-                          type: string
-                        periodLabel:
-                          type: string
-                        signups:
-                          type: number
-                        signupsToContactsPct:
-                          type: number
-                      required:
-                        - contacts
-                        - contactsToInteractionsPct
-                        - interactions
-                        - periodKey
-                        - periodLabel
-                        - signups
-                        - signupsToContactsPct
-                      additionalProperties: false
-                required:
-                  - periods
-                additionalProperties: false
-                example:
-                  periods:
-                    - contacts: 40
-                      contactsToInteractionsPct: 62.5
-                      interactions: 25
-                      periodKey: 2026-01
-                      periodLabel: Jan 2026
-                      signups: 50
-                      signupsToContactsPct: 80
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              example:
-                error:
-                  code: validation_error
-                  doc_url: https://usebondery.com/docs/api/errors/validation_error
-                  message: body.email Invalid input
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: invalid_request_error
-                  param: body.email
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Authentication required
-          content:
-            application/json:
-              example:
-                error:
-                  code: auth_required
-                  doc_url: https://usebondery.com/docs/api/errors/auth_required
-                  message: Unauthorized - Please log in
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authentication_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              example:
-                error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
-                  message: Forbidden
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authorization_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "404":
-          description: Resource not found
-          content:
-            application/json:
-              example:
-                error:
-                  code: contact_not_found
-                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
-                  message: Contact not found
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: not_found_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "429":
-          description: Too many requests
-          content:
-            application/json:
-              example:
-                error:
-                  code: rate_limit_exceeded
-                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
-                  message: Rate limit exceeded. Retry in 42 seconds.
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: rate_limit_error
-                  retry_after: 42
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              example:
-                error:
-                  code: internal_server_error
-                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
-                  message: Internal Server Error
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: api_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "503":
-          description: Service unavailable
-          content:
-            application/json:
-              example:
-                error:
-                  code: service_unavailable
-                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
-                  message: Service unavailable
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: service_unavailable_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-  /admin/stats/nps:
-    get:
-      tags:
-        - Stats
-      description: Returns NPS survey results from PostHog (last 90 days).
-      security: *a2
-      responses:
-        "200":
-          description: NPS survey results
-          content:
-            application/json:
-              example:
-                detractors: 3
-                passives: 4
-                promoters: 18
-                responses: 25
-                score: 72
-              schema:
-                type: object
-                properties:
-                  detractors:
-                    type: number
-                  passives:
-                    type: number
-                  promoters:
-                    type: number
-                  responses:
-                    type: number
-                  score:
-                    nullable: true
-                    type: number
-                required:
-                  - detractors
-                  - passives
-                  - promoters
-                  - responses
-                  - score
-                additionalProperties: false
-                example:
-                  detractors: 3
-                  passives: 4
-                  promoters: 18
-                  responses: 25
-                  score: 72
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              example:
-                error:
-                  code: validation_error
-                  doc_url: https://usebondery.com/docs/api/errors/validation_error
-                  message: body.email Invalid input
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: invalid_request_error
-                  param: body.email
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Authentication required
-          content:
-            application/json:
-              example:
-                error:
-                  code: auth_required
-                  doc_url: https://usebondery.com/docs/api/errors/auth_required
-                  message: Unauthorized - Please log in
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authentication_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              example:
-                error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
-                  message: Forbidden
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authorization_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "404":
-          description: Resource not found
-          content:
-            application/json:
-              example:
-                error:
-                  code: contact_not_found
-                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
-                  message: Contact not found
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: not_found_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "429":
-          description: Too many requests
-          content:
-            application/json:
-              example:
-                error:
-                  code: rate_limit_exceeded
-                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
-                  message: Rate limit exceeded. Retry in 42 seconds.
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: rate_limit_error
-                  retry_after: 42
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              example:
-                error:
-                  code: internal_server_error
-                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
-                  message: Internal Server Error
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: api_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "503":
-          description: Service unavailable
-          content:
-            application/json:
-              example:
-                error:
-                  code: service_unavailable
-                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
-                  message: Service unavailable
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: service_unavailable_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-  /admin/stats/total-users:
-    get:
-      tags:
-        - Stats
-      description: Returns cumulative user count per day (all-time growth curve).
-      security: *a2
-      responses:
-        "200":
-          description: Total users growth timeline
-          content:
-            application/json:
-              example:
-                timeline:
-                  - date: 2026-01-15
-                    total: 1500
-              schema:
-                type: object
-                properties:
-                  timeline:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        date:
-                          type: string
-                        total:
-                          type: number
-                      required:
-                        - date
-                        - total
-                      additionalProperties: false
-                required:
-                  - timeline
-                additionalProperties: false
-                example:
-                  timeline:
-                    - date: 2026-01-15
-                      total: 1500
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              example:
-                error:
-                  code: validation_error
-                  doc_url: https://usebondery.com/docs/api/errors/validation_error
-                  message: body.email Invalid input
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: invalid_request_error
-                  param: body.email
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Authentication required
-          content:
-            application/json:
-              example:
-                error:
-                  code: auth_required
-                  doc_url: https://usebondery.com/docs/api/errors/auth_required
-                  message: Unauthorized - Please log in
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authentication_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              example:
-                error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
-                  message: Forbidden
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authorization_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "404":
-          description: Resource not found
-          content:
-            application/json:
-              example:
-                error:
-                  code: contact_not_found
-                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
-                  message: Contact not found
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: not_found_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "429":
-          description: Too many requests
-          content:
-            application/json:
-              example:
-                error:
-                  code: rate_limit_exceeded
-                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
-                  message: Rate limit exceeded. Retry in 42 seconds.
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: rate_limit_error
-                  retry_after: 42
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              example:
-                error:
-                  code: internal_server_error
-                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
-                  message: Internal Server Error
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: api_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "503":
-          description: Service unavailable
-          content:
-            application/json:
-              example:
-                error:
-                  code: service_unavailable
-                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
-                  message: Service unavailable
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: service_unavailable_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-  /admin/stats/github-stars:
-    get:
-      tags:
-        - Stats
-      description: Returns the GitHub star count for the configured repository.
-      security: *a2
-      responses:
-        "200":
-          description: GitHub star count
-          content:
-            application/json:
-              example:
-                repo: bondery/bondery
-                stars: 420
-              schema:
-                type: object
-                properties:
-                  repo:
-                    type: string
-                  stars:
-                    type: number
-                required:
-                  - repo
-                  - stars
-                additionalProperties: false
-                example:
-                  repo: bondery/bondery
-                  stars: 420
-        "400":
-          description: Invalid request
-          content:
-            application/json:
-              example:
-                error:
-                  code: validation_error
-                  doc_url: https://usebondery.com/docs/api/errors/validation_error
-                  message: body.email Invalid input
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: invalid_request_error
-                  param: body.email
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "401":
-          description: Authentication required
-          content:
-            application/json:
-              example:
-                error:
-                  code: auth_required
-                  doc_url: https://usebondery.com/docs/api/errors/auth_required
-                  message: Unauthorized - Please log in
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authentication_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "403":
-          description: Forbidden
-          content:
-            application/json:
-              example:
-                error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
-                  message: Forbidden
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: authorization_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "404":
-          description: Resource not found
-          content:
-            application/json:
-              example:
-                error:
-                  code: contact_not_found
-                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
-                  message: Contact not found
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: not_found_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "429":
-          description: Too many requests
-          content:
-            application/json:
-              example:
-                error:
-                  code: rate_limit_exceeded
-                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
-                  message: Rate limit exceeded. Retry in 42 seconds.
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: rate_limit_error
-                  retry_after: 42
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "500":
-          description: Internal server error
-          content:
-            application/json:
-              example:
-                error:
-                  code: internal_server_error
-                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
-                  message: Internal Server Error
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: api_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
-        "503":
-          description: Service unavailable
-          content:
-            application/json:
-              example:
-                error:
-                  code: service_unavailable
-                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
-                  message: Service unavailable
-                  request_id: 00000000-0000-0000-0000-000000000000
-                  type: service_unavailable_error
-              schema:
-                $ref: "#/components/schemas/ApiError"
   /webhooks/stripe:
     post:
       tags:
@@ -22072,8 +21345,6 @@ tags:
     name: Chat
   - description: Subscription and billing management
     name: Subscriptions
-  - description: Admin KPI dashboard metrics
-    name: Stats
   - description: Inbound webhooks from third-party services
     name: Webhooks
   - description: Service-to-service endpoints (not user-facing)

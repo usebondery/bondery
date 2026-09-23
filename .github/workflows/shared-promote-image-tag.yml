@@ -15,6 +15,11 @@ on:
         description: New tag to point at the same digest
         required: true
         type: string
+      extra_target_tags:
+        description: Optional extra tags (newline-separated) to point at the same digest
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -63,10 +68,19 @@ jobs:
 
       - name: Promote image tag
         env:
+          EXTRA_TARGET_TAGS: ${{ inputs.extra_target_tags }}
           IMAGE_NAME: ${{ inputs.image_name }}
           SOURCE_TAG: ${{ inputs.source_tag }}
           TARGET_TAG: ${{ inputs.target_tag }}
         run: |
+          set -euo pipefail
+          ARGS=(-t "${IMAGE_NAME}:${TARGET_TAG}")
+          while IFS= read -r tag; do
+            tag=$(echo "$tag" | tr -d '[:space:]')
+            if [ -n "$tag" ]; then
+              ARGS+=(-t "${IMAGE_NAME}:${tag}")
+            fi
+          done <<< "$EXTRA_TARGET_TAGS"
           docker buildx imagetools create \
-            -t "${IMAGE_NAME}:${TARGET_TAG}" \
+            "${ARGS[@]}" \
             "${IMAGE_NAME}:${SOURCE_TAG}"

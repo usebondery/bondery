@@ -136,7 +136,6 @@ for (const code of extractAllCodes(apiSrc)) {
 }
 
 const STATUS_OVERRIDES: Record<string, number> = {
-  BAD_GATEWAY: 502,
   EXTENSION_OUTDATED: 426,
 };
 

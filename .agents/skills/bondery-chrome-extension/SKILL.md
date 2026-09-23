@@ -27,7 +27,7 @@ Alien runtime: **WXT + Manifest V3 + host-page injection**. Not a Next.js app an
 ## Do not activate for
 
 - Fastify routes or HTTP contracts the extension happens to call → [bondery-api](../bondery-api/SKILL.md)
-- Chrome Web Store **publish wait** / `ext-X.Y.Z` sequencing → [bondery-release](../bondery-release/SKILL.md)
+- Chrome Web Store **publish wait** / production `vX.Y.Z` sequencing → [bondery-release](../bondery-release/SKILL.md)
 - Bridge / interceptor **threat model** (spoofable `postMessage`, MAIN-world privilege) → [bondery-security](../bondery-security/references/integrations-and-clients.md)
 - Popup / content-script **i18n** → [bondery-ux](../bondery-ux/SKILL.md)
 - Generic WXT or MV3 tutorials — this skill is Bondery gotchas only
@@ -41,7 +41,7 @@ Agents get these wrong:
 3. **No WXT auto-imports** — `imports: false` in `wxt.config.ts`. Write explicit imports.
 4. **Never force `NODE_ENV` in Vite `define`.** Forcing production while the React plugin still emits `jsxDEV` kills the popup.
 5. **Env is baked at WXT build time.** Production CI must not bake localhost `BONDERY_PUBLIC_API_URL` / `BONDERY_PUBLIC_WEBAPP_URL`.
-6. **`webapp.content` matches are hardcoded** to `https://app.usebondery.com/*` and `http://localhost/*`. Staging and custom domains do **not** get the bridge. `host_permissions` *are* computed from env origins; content-script matches are not.
+6. **`webapp.content` matches:** production CWS (`BONDERY_EXTENSION_FLAVOR=production`) is `https://app.usebondery.com/*` + localhost only. Staging/RC may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin (beta). `host_permissions` *are* computed from env origins.
 7. **`cssInjectionMode: "ui"` + shadow root.** Mantine root is `:host`, not `:root`.
 8. **`webExt.disabled: true`.** `pnpm exec wxt` will not launch Chrome. Load `dist/chrome-mv3-dev` unpacked yourself.
 9. **Never import `apps/chrome-extension` into the webapp, or webapp components into the extension** ([ADR 0007](../../../docs/adr/0007-cws-listing-compositions.mdx)).
@@ -72,7 +72,7 @@ Full index: [references/README.md](references/README.md).
 |--------|-------|
 | Fastify routes, resource-keyed JSON, 426 catalog | [bondery-api](../bondery-api/SKILL.md) |
 | Auth tokens, MAIN-world privilege, postMessage threat model | [bondery-security](../bondery-security/SKILL.md) |
-| `ext-X.Y.Z`, CWS live-before-product-deploy | [bondery-release](../bondery-release/SKILL.md) |
+| `vX.Y.Z` CWS, RC staging zip | [bondery-release](../bondery-release/SKILL.md) |
 | i18n / UX writing | [bondery-ux](../bondery-ux/SKILL.md) |
 | Webapp login E2E (`127.0.0.1`) | [bondery-e2e-tests](../bondery-e2e-tests/SKILL.md) |
 | Unpacked OAuth redirect URI | [CHROME-EXTENSION-OAUTH.md](../../workflows/CHROME-EXTENSION-OAUTH.md) |
@@ -85,7 +85,7 @@ Full index: [references/README.md](references/README.md).
 - [ ] Background `entrypoints/background/index.ts` still ≤ 30 lines
 - [ ] No WXT auto-imports; no `NODE_ENV` in Vite `define`
 - [ ] Content UI uses `renderInShadowRoot` + `:host` (not `:root`)
-- [ ] `webapp.content` matches still prod + localhost only unless the change is an explicit product decision
+- [ ] `webapp.content` matches: CWS production is prod + localhost only; staging may add baked beta origin
 - [ ] New `permissions` / `host_permissions` treated as a CWS review event ([extension.md](../bondery-release/references/extension.md))
 - [ ] Production bake does not inline localhost API/webapp URLs
 - [ ] No `apps/chrome-extension` ↔ webapp component imports

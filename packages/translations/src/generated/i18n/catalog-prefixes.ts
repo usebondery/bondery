@@ -136,8 +136,6 @@ export type SingleContactPagePrefix = never;
 
 export type SocialsPrefix = never;
 
-export type StatsPagePrefix = never;
-
 export type TagsInputPrefix = never;
 
 export type TagsSettingsPrefix = never;
@@ -219,7 +217,6 @@ export interface NamespacePrefixes {
   "ShareContactModal": ShareContactModalPrefix;
   "SingleContactPage": SingleContactPagePrefix;
   "Socials": SocialsPrefix;
-  "StatsPage": StatsPagePrefix;
   "TagsInput": TagsInputPrefix;
   "TagsSettings": TagsSettingsPrefix;
   "TrialEndingEmail": TrialEndingEmailPrefix;

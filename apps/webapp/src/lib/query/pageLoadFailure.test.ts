@@ -14,7 +14,7 @@ function apiError(status: number, code: string): ApiError {
 describe("isPageLoadFailure", () => {
   it("is true for hop-down statuses and network TypeError", () => {
     assert.equal(isPageLoadFailure(new TypeError("Failed to fetch")), true);
-    assert.equal(isPageLoadFailure(apiError(502, "bad_gateway")), true);
+    assert.equal(isPageLoadFailure(apiError(502, "internal_server_error")), true);
     assert.equal(isPageLoadFailure(apiError(503, "service_unavailable")), true);
     assert.equal(isPageLoadFailure(apiError(504, "gateway_timeout")), true);
   });

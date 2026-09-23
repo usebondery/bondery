@@ -33,14 +33,6 @@ Watch for exploding event definitions (sign of dynamic naming).
 
 Self-hosted CE → site matching `BONDERY_PUBLIC_PLAUSIBLE_DOMAIN` → realtime / pageviews.
 
-## Admin stats (API)
-
-With `BONDERY_PRIVATE_POSTHOG_*` set:
-
-- Hit admin stats endpoints
-- Confirm DAU/WAU/MAU and NPS responses are sensible
-- Identified-user filters should not be inflated by anonymous IDs
-
 ## Automated tests
 
 - Mock `captureEvent` when testing components that call analytics
@@ -64,4 +56,3 @@ With `BONDERY_PRIVATE_POSTHOG_*` set:
 - [ ] Network or Live Events confirms event
 - [ ] No dynamic event or property key names
 - [ ] Wrong-surface regression checked (no Plausible on webapp)
-- [ ] Admin KPI impact considered for renames/migrations

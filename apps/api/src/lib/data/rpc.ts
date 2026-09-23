@@ -152,10 +152,5 @@ export async function rpcCheckAndIncrementAiMessages(
   };
 }
 
-export async function rpcGetTotalUsersGrowth(db: RpcClient = prisma): Promise<unknown> {
-  const rows = await db.$queryRaw<unknown[]>`SELECT get_total_users_growth() AS data`;
-  return rows[0];
-}
-
 /** Default Prisma client for RPC helpers. */
 export const rpcDb: PrismaClient = prisma;

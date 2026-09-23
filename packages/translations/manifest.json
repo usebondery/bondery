@@ -272,10 +272,6 @@
       "path": "features/sections/Socials.json",
       "platforms": ["web", "mobile"]
     },
-    "StatsPage": {
-      "path": "features/pages/StatsPage.json",
-      "platforms": ["web"]
-    },
     "TagsInput": {
       "path": "features/sections/TagsInput.json",
       "platforms": ["web", "mobile"]
@@ -325,7 +321,6 @@
     "mobile.settingsTab": ["MobileSettings", "Languages", "TagsSettings", "SettingsPage"],
     "mobile.shareContact": ["MobileShareContactEmail", "ShareContactModal"],
     "mobile.shell": ["common", "validation", "glossary", "MobileNavigation"],
-    "web.admin": ["StatsPage"],
     "web.chat": ["ChatPage"],
     "web.checkout": ["Checkout"],
     "web.feedback": ["FeedbackPage"],

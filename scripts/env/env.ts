@@ -32,6 +32,8 @@ import {
   SYNC_TARGETS,
   TURBO_SYSTEM_PASSTHROUGH,
 } from "../../packages/helpers/src/env/index.ts";
+import { infraPinCalver } from "../../packages/helpers/src/version/calver.ts";
+import { readGitTags } from "../pkg/calver.mjs";
 import { writeDeployExample } from "./env-deploy-example.js";
 import { compareAscii, formatEnvFile, quoteEnvValue, sortEnvRows } from "./env-file-format.js";
 import { writeOpsExample } from "./env-ops-example.js";
@@ -164,6 +166,7 @@ function mergeEnvFile(path, newVars, dryRun) {
 
 function writeExamples(dryRun) {
   const packageVersion = readPackageVersion();
+  const infraPinVersion = infraPinCalver(packageVersion, readGitTags(repoRoot));
   const rootRows = sortEnvRows(
     ENV_MANIFEST.filter((e) => !e.omitFromRootExample).map((e) => ({
       description: e.description,
@@ -178,8 +181,8 @@ function writeExamples(dryRun) {
   }
   log.info(`${dryRun ? "Would write" : "Wrote"} ${rootPath}`);
 
-  writeDeployExample(repoRoot, dryRun, packageVersion, log);
-  writeOpsExample(repoRoot, dryRun, packageVersion, log);
+  writeDeployExample(repoRoot, dryRun, infraPinVersion, log);
+  writeOpsExample(repoRoot, dryRun, packageVersion, log, infraPinVersion);
   writePlausibleExample(repoRoot, dryRun, log);
 
   for (const target of SYNC_TARGETS) {
