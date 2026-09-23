@@ -11,6 +11,7 @@ Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/
 |----------|---------|
 | `BONDERY_PRIVATE_BETTER_AUTH_SECRETS` | Better Auth versioned signing secrets (`version:secret`, highest version first) |
 | `BONDERY_PRIVATE_POSTGRES_PASSWORD` | Postgres password (compose `db` service) |
+| `BONDERY_INFRA_POSTGRES_HOST_PORT` | Optional. Host loopback port for Compose Postgres (`127.0.0.1`). Default `5432`. A second stack on the same VPS must use another port (beta: `5433`). |
 | `BONDERY_PRIVATE_API_KEY_PEPPER` | API key hashing pepper |
 | `BONDERY_PRIVATE_REDIS_URL` | `redis://redis:6379` in the default stack. Stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*` — sessions and verification records, dual-written with Postgres). |
 
