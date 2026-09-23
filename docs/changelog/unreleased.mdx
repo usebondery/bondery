@@ -8,6 +8,7 @@ hidden: true
 ### 🔄 Changed
 
 - Webapp: Internal `/app/admin/stats` KPI dashboard. Operators should use PostHog for product analytics.
+- Self-host: Compose publishes Postgres on `127.0.0.1:5432` for SSH tunnels (not the public NIC). A second stack on the same host must set `BONDERY_INFRA_POSTGRES_HOST_PORT` (beta: `5433`).
 
 ### 🤖 CI
 
@@ -15,6 +16,7 @@ hidden: true
 
 ### Breaking
 
+- **Postgres host port:** Compose binds `127.0.0.1:5432` by default. If another process already uses that loopback port, set `BONDERY_INFRA_POSTGRES_HOST_PORT`. Production and beta on one VPS cannot share `5432` — set beta to `5433`.
 - **HogQL admin env vars:** `BONDERY_PRIVATE_POSTHOG_API_SECRET` and `BONDERY_PRIVATE_POSTHOG_PROJECT_ID` are unused. Remove them from self-host env files. Keep `BONDERY_PUBLIC_POSTHOG_KEY` and `BONDERY_PUBLIC_POSTHOG_HOST` for product capture.
 - **Admin stats API:** `/admin/stats/*` endpoints are gone.
 - **Health readiness:** `GET /health/ready` no longer reports `services.posthog`.

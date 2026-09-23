@@ -74,7 +74,7 @@ Product stack secrets and hostnames can be synced via [`.github/workflows/sync-d
 
 See [workflows README](../../.github/workflows/README.md#dokploy-env-sync-sync-dokploy-envyml).
 
-**Not synced** (keep in Dokploy UI or compose derives): `BONDERY_INFRA_GIT_SHA`, `BONDERY_INFRA_VERSION`, `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PUBLIC_STORAGE_URL`. `BONDERY_INFRA_TRAEFIK_PREFIX` syncs from Infisical (`bondery` in production, `bondery-beta` in staging).
+**Not synced** (keep in Dokploy UI or compose derives): `BONDERY_INFRA_GIT_SHA`, `BONDERY_INFRA_VERSION`, `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PUBLIC_STORAGE_URL`. `BONDERY_INFRA_TRAEFIK_PREFIX` syncs from Infisical (`bondery` in production, `bondery-beta` in staging). `BONDERY_INFRA_POSTGRES_HOST_PORT` syncs when set (omit in production for compose default `5432`; Infisical **staging** should be `5433` so beta does not bind the same loopback port).
 
 ### Isolated Deployments
 

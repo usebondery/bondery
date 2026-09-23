@@ -43,7 +43,7 @@ curl -s http://localhost:26632/health/live
 | `webapp` | `ghcr.io/usebondery/webapp` | 26632 | Liveness `/health/live` |
 | `api` | `ghcr.io/usebondery/api` | 26631 | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS |
 | `redis` | `redis:8.10` | internal | AOF + volume `redis-data` |
-| `db` | `postgis/postgis:17-3.5` | internal | Named volume `postgres-data` |
+| `db` | `postgis/postgis:17-3.5` | `127.0.0.1:5432` | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` |
 | `seaweedfs-*` | SeaweedFS | 8333 (Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`) |
 
 Compose entrypoint: **`docker-compose.yml`** includes **`docker-compose.postgres.yml`** and **`docker-compose.seaweedfs.yml`**. Dokploy points at this path only.
@@ -81,7 +81,7 @@ Product stack secrets and hostnames can be synced via [`.github/workflows/sync-d
 
 See [workflows README](../../.github/workflows/README.md#dokploy-env-sync-sync-dokploy-envyml).
 
-**Not synced** (keep in Dokploy UI or compose derives): `BONDERY_INFRA_GIT_SHA`, `BONDERY_INFRA_VERSION`, `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PUBLIC_STORAGE_URL`. `BONDERY_INFRA_TRAEFIK_PREFIX` syncs from Infisical (`bondery` in production, `bondery-beta` in staging).
+**Not synced** (keep in Dokploy UI or compose derives): `BONDERY_INFRA_GIT_SHA`, `BONDERY_INFRA_VERSION`, `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PUBLIC_STORAGE_URL`. `BONDERY_INFRA_TRAEFIK_PREFIX` syncs from Infisical (`bondery` in production, `bondery-beta` in staging). `BONDERY_INFRA_POSTGRES_HOST_PORT` syncs when set (omit in production; Infisical staging should be `5433`).
 
 ### Release smoke (local)
 
@@ -100,7 +100,7 @@ node deploy/bondery/scripts/smoke-release.mjs --service api --tag 1.7.5
 - **`beta`:** set `BONDERY_INFRA_VERSION=beta` on the staging Dokploy app so it tracks `:beta` from `main`, not the production release.
 - **Semver:** pin for frozen rollback.
 
-A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bondery-beta` in Infisical **staging** (beta sync). Infisical **production** should be `bondery` or omitted (compose default). Same router names on one Traefik overwrite production HTTPS routes.
+A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bondery-beta` in Infisical **staging** (beta sync). Infisical **production** should be `bondery` or omitted (compose default). Same router names on one Traefik overwrite production HTTPS routes. The same-host beta stack must also set `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` so it does not steal production's `127.0.0.1:5432`.
 
 ## Advanced: external Redis
 
@@ -110,7 +110,7 @@ A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bonder
 
 ## Security
 
-- Never expose Redis or Postgres to the public internet.
+- Never expose Redis or Postgres to the public internet. Compose publishes Postgres on `127.0.0.1` only; do not change that bind to `0.0.0.0`.
 - API secrets (`BONDERY_PRIVATE_*`) load only into the `api` service (`env_file`). Webapp receives an explicit allowlist.
 
 ## Resource limits (recommended)

@@ -283,6 +283,14 @@ if (db) {
   if (!/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-db/.test(db)) {
     errors.push("db must publish a unique internal alias from BONDERY_INFRA_TRAEFIK_PREFIX");
   }
+  if (!/127\.0\.0\.1:\$\{BONDERY_INFRA_POSTGRES_HOST_PORT:-5432\}:5432/.test(db)) {
+    errors.push(
+      "db must publish 127.0.0.1 and interpolate BONDERY_INFRA_POSTGRES_HOST_PORT (default 5432)",
+    );
+  }
+  if (/ports:[\s\S]*["']0\.0\.0\.0:/.test(db) || /ports:[\s\S]*["']\*:/.test(db)) {
+    errors.push("db must not publish Postgres on a public interface");
+  }
 }
 
 if (s3 && !/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage/.test(s3)) {

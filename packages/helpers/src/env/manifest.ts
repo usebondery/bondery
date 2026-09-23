@@ -104,6 +104,7 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
     "Generate:",
     "  openssl rand -base64 24 | tr -d '/+=' | head -c 32   # BONDERY_PRIVATE_POSTGRES_PASSWORD",
     "Compose builds DATABASE_URL from this password — do not set DATABASE_URL in .env.",
+    "Compose publishes Postgres on 127.0.0.1 only (SSH tunnels). Default host port 5432; a second stack on the same VPS must set BONDERY_INFRA_POSTGRES_HOST_PORT (beta: 5433).",
   ],
   "Public hostnames": [
     "Traefik Host() rules use these; Compose derives https://… URLs for the apps (no scheme here).",
@@ -485,6 +486,23 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     secret: true,
     syncable: true,
     targets: [t("db")],
+  },
+  {
+    canonical: "BONDERY_INFRA_POSTGRES_HOST_PORT",
+    deployExample: {
+      commented: true,
+      group: "Postgres",
+      include: true,
+      value: "5432",
+    },
+    description:
+      "Host loopback port for Compose Postgres (127.0.0.1). Default 5432. A second stack on the same VPS must use another port (beta: 5433). Never bind 0.0.0.0.",
+    exampleValue: "5432",
+    group: "Infra",
+    requiredIn: [],
+    secret: false,
+    targets: [],
+    turboAffectsCache: false,
   },
 
   // --- Auth (Better Auth) ---

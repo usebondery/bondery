@@ -11,6 +11,11 @@ services:
       POSTGRES_DB: bondery
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    # Host loopback only (SSH tunnels). Not on the public NIC. Same VPS as beta:
+    # set BONDERY_INFRA_POSTGRES_HOST_PORT=5433 on the beta stack or omit this
+    # mapping there — two stacks cannot both bind 127.0.0.1:5432.
+    ports:
+      - "127.0.0.1:${BONDERY_INFRA_POSTGRES_HOST_PORT:-5432}:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d bondery"]
       interval: 5s
