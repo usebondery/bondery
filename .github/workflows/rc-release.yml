@@ -212,6 +212,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
       - uses: actions/download-artifact@v4
         if: needs.release_extension.result == 'success'
         with:
@@ -221,6 +225,7 @@ jobs:
       - name: Finalize GitHub prerelease
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.validate.outputs.tag }}
           VERSION: ${{ needs.validate.outputs.version }}
           EXTENSION_RESULT: ${{ needs.release_extension.result }}
