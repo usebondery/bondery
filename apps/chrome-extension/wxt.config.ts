@@ -1,15 +1,9 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isRc, parseCalver, toChromeVersion, toNpm } from "@bondery/helpers/version/calver";
 import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants";
 import { defineConfig } from "wxt";
-// Source import: `wxt prepare` runs at pnpm postinstall, before helpers dist exists.
-import {
-  isRc,
-  parseCalver,
-  toChromeVersion,
-  toNpm,
-} from "../../packages/helpers/src/version/calver.ts";
 import { CWS_EXTENSION_PUBLIC_KEY } from "./cws-public-key";
 import { loopbackHostPermissionPatterns } from "./src/lib/auth/oauth-urls";
 

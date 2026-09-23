@@ -621,6 +621,7 @@
     "check:types": "tsc --noEmit",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput",
+    "prepare": "pnpm run build",
     "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",

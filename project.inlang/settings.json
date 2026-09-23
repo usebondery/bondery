@@ -1,14 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/project-settings",
   "baseLocale": "en",
-  "locales": [
-    "en",
-    "cs",
-    "de"
-  ],
-  "modules": [
-    "https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@6.2.3/dist/index.js"
-  ],
+  "locales": ["en", "cs", "de"],
+  "modules": ["https://cdn.jsdelivr.net/npm/@inlang/plugin-i18next@6.2.3/dist/index.js"],
   "plugin.inlang.i18next": {
     "pathPattern": {
       "AboutPage": "./packages/translations/src/locales/{locale}/features/pages/AboutPage.json",
@@ -86,9 +80,6 @@
       "validation": "./packages/translations/src/locales/{locale}/validation.json",
       "WelcomeEmail": "./packages/translations/src/locales/{locale}/platform/email/WelcomeEmail.json"
     },
-    "variableReferencePattern": [
-      "{",
-      "}"
-    ]
+    "variableReferencePattern": ["{", "}"]
   }
 }
