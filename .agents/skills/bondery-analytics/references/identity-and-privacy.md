@@ -25,7 +25,7 @@ PostHog identity resolution and Bondery privacy constraints.
 - Counts: `participant_count`, `item_count`
 - Booleans: `has_general_feedback`, `is_subscribed`, `is_first_import`
 
-Admin HogQL may query `person.properties.email` for identified-user filters — that is **person profile** data, not event payload PII.
+Do not send email or other PII as event properties. Person profile data in PostHog stays in PostHog — it is not event payload PII.
 
 ## Product analytics opt-out
 

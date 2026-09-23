@@ -489,41 +489,6 @@ export const EXAMPLE_SETTINGS_PATCH_RESPONSE = {
   success: true,
 };
 
-export const EXAMPLE_ACTIVE_USERS_RESPONSE = {
-  timeline: [{ date: EXAMPLE_DATE, dau: 120, mau: 1200, wau: 450 }],
-};
-
-export const EXAMPLE_FUNNEL_RESPONSE = {
-  periods: [
-    {
-      contacts: 40,
-      contactsToInteractionsPct: 62.5,
-      interactions: 25,
-      periodKey: "2026-01",
-      periodLabel: "Jan 2026",
-      signups: 50,
-      signupsToContactsPct: 80,
-    },
-  ],
-};
-
-export const EXAMPLE_NPS_RESPONSE = {
-  detractors: 3,
-  passives: 4,
-  promoters: 18,
-  responses: 25,
-  score: 72,
-};
-
-export const EXAMPLE_TOTAL_USERS_RESPONSE = {
-  timeline: [{ date: EXAMPLE_DATE, total: 1500 }],
-};
-
-export const EXAMPLE_GITHUB_STARS_RESPONSE = {
-  repo: "bondery/bondery",
-  stars: 420,
-};
-
 export const EXAMPLE_LIVENESS_STATUS_RESPONSE = {
   gitSha: "a1b2c3d",
   status: "ok" as const,
@@ -533,6 +498,7 @@ export const EXAMPLE_LIVENESS_STATUS_RESPONSE = {
 
 export const EXAMPLE_EXTENSION_MANIFEST_RESPONSE = {
   extension: {
+    latestVersion: "1.9.1",
     minVersion: "1.0.0",
     storeUrl: "https://chrome.google.com/webstore/detail/bondery/example",
   },
@@ -545,7 +511,6 @@ export const EXAMPLE_HEALTH_OK_RESPONSE = {
     anthropic: { configured: true, ok: true },
     mapy: { configured: true, ok: true },
     stripe: { configured: true, ok: true },
-    posthog: { configured: true, ok: true },
     postgres: { latencyMs: 18, ok: true },
     redis: { latencyMs: 2, ok: true },
     smtp: { configured: true, ok: true },

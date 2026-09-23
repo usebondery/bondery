@@ -4,9 +4,24 @@ on:
   workflow_call:
     inputs:
       version:
-        description: Extension semver (X.Y.Z)
+        description: Extension version (X.Y.Z or X.Y.Z-rc.N)
         required: true
         type: string
+      flavor:
+        description: production omits manifest.key and may publish CWS; staging includes key
+        required: false
+        type: string
+        default: production
+      publish_cws:
+        description: Upload and publish to Chrome Web Store (production only)
+        required: false
+        type: boolean
+        default: true
+      git_sha:
+        description: Optional short SHA for staging zip filename
+        required: false
+        type: string
+        default: ""
     outputs:
       zip_path:
         description: Path to extension zip artifact
@@ -35,6 +50,7 @@ jobs:
       PRIVATE_CHROME_PRIVATE_SIGNING_KEY: ${{ secrets.PRIVATE_CHROME_PRIVATE_SIGNING_KEY }}
       TURBO_TEAM: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
       TURBO_TOKEN: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
+      BONDERY_EXTENSION_FLAVOR: ${{ inputs.flavor }}
 
     steps:
       - uses: actions/checkout@v7
@@ -42,37 +58,69 @@ jobs:
           persist-credentials: false
 
       - uses: ./.github/actions/shared/infisical-production-secrets
+        if: inputs.flavor == 'production'
+
+      - uses: ./.github/actions/shared/infisical-staging-secrets
+        if: inputs.flavor == 'staging'
 
       - uses: ./.github/actions/shared/derive-public-urls
 
       - name: Verify extension CI env
-        run: node .github/scripts/check-ci-infisical.mjs extension
+        run: node .github/scripts/check-ci-infisical.mjs ${{ inputs.flavor == 'staging' && 'extension-staging' || 'extension' }}
 
       - uses: ./.github/actions/shared/setup-pnpm
 
       - name: Resolve asset paths
         id: paths
         env:
-          ASSET_SUFFIX: ${{ inputs.version }}
+          GIT_SHA: ${{ inputs.git_sha }}
+          VERSION: ${{ inputs.version }}
         run: |
+          if [ -n "$GIT_SHA" ]; then
+            ASSET_SUFFIX="${VERSION}-sha-${GIT_SHA}"
+          else
+            ASSET_SUFFIX="${VERSION}"
+          fi
+          echo "asset_suffix=${ASSET_SUFFIX}" >> "$GITHUB_OUTPUT"
           echo "zip_path=bondery-extension-${ASSET_SUFFIX}.zip" >> "$GITHUB_OUTPUT"
           echo "crx_path=apps/chrome-extension/bondery-extension-${ASSET_SUFFIX}.crx" >> "$GITHUB_OUTPUT"
           echo "public_key_path=bondery-extension-${ASSET_SUFFIX}.public-key.pem" >> "$GITHUB_OUTPUT"
 
-      - name: Create production environment file
+      - name: Create WXT environment file
         run: |
           echo "BONDERY_PUBLIC_WEBAPP_URL=$BONDERY_PUBLIC_WEBAPP_URL" > apps/chrome-extension/.env.production.local
           echo "BONDERY_PUBLIC_API_URL=$BONDERY_PUBLIC_API_URL" >> apps/chrome-extension/.env.production.local
           echo "BONDERY_PUBLIC_OAUTH_CLIENT_ID=$BONDERY_PUBLIC_OAUTH_CLIENT_ID" >> apps/chrome-extension/.env.production.local
+          echo "BONDERY_EXTENSION_FLAVOR=${{ inputs.flavor }}" >> apps/chrome-extension/.env.production.local
 
       - name: Build Chrome Extension
         env:
+          BONDERY_EXTENSION_FLAVOR: ${{ inputs.flavor }}
           NODE_ENV: production
         run: pnpm exec turbo build --filter=chrome-extension...
 
-      - name: Create signed CRX and zip
+      - name: Zip staging extension
+        if: inputs.flavor == 'staging'
         env:
-          ASSET_SUFFIX: ${{ inputs.version }}
+          ASSET_SUFFIX: ${{ steps.paths.outputs.asset_suffix }}
+        run: |
+          set -euo pipefail
+          cd apps/chrome-extension/dist/chrome-mv3
+          zip -r "../../../../bondery-extension-${ASSET_SUFFIX}.zip" .
+          cd ../../..
+
+      - name: Upload staging zip artifact
+        if: inputs.flavor == 'staging'
+        uses: actions/upload-artifact@v4
+        with:
+          name: extension-zip
+          path: ${{ steps.paths.outputs.zip_path }}
+          if-no-files-found: error
+
+      - name: Create signed CRX and zip
+        if: inputs.publish_cws
+        env:
+          ASSET_SUFFIX: ${{ steps.paths.outputs.asset_suffix }}
         run: |
           set -euo pipefail
           PRIVATE_KEY_PATH="apps/chrome-extension/private-key.pem"
@@ -105,6 +153,7 @@ jobs:
           cd ../../..
 
       - name: Authenticate to Google Cloud
+        if: inputs.publish_cws
         id: gcp_auth
         uses: google-github-actions/auth@v3
         with:
@@ -113,6 +162,7 @@ jobs:
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
 
       - name: Fetch Chrome Web Store item status
+        if: inputs.publish_cws
         run: |
           STATUS_RESPONSE=$(curl -sS -X GET \
             "https://chromewebstore.googleapis.com/v2/publishers/$BONDERY_OPS_CHROME_PUBLISHER_ID/items/$BONDERY_INFRA_CHROME_EXTENSION_ID:fetchStatus" \
@@ -121,8 +171,9 @@ jobs:
           echo "$STATUS_RESPONSE" | node -e "const fs=require('fs'); const input=fs.readFileSync(0,'utf8'); const data=JSON.parse(input); if(data.error){ console.error('❌ fetchStatus failed'); console.error(input); process.exit(1);} const itemState = data.itemState || 'UNKNOWN'; const uploadState = data.uploadState || 'UNKNOWN'; console.log(\`✅ fetchStatus OK | itemState=\${itemState} uploadState=\${uploadState}\`);"
 
       - name: Upload CRX to Chrome Web Store
+        if: inputs.publish_cws
         env:
-          ASSET_SUFFIX: ${{ inputs.version }}
+          ASSET_SUFFIX: ${{ steps.paths.outputs.asset_suffix }}
         run: |
           CRX_PATH="./apps/chrome-extension/bondery-extension-${ASSET_SUFFIX}.crx"
           CRX_FILE_NAME="bondery-extension-${{ inputs.version }}.crx"
@@ -138,6 +189,7 @@ jobs:
           node -e "const fs=require('fs'); const code=Number(process.argv[1]); const input=fs.readFileSync('/tmp/cws-upload-response.json','utf8'); if(code < 200 || code >= 300){ console.error('Upload request failed'); console.error(input); process.exit(1);} try { const data=JSON.parse(input); console.log('Upload summary:', JSON.stringify({uploadState:data.uploadState, crxVersion:data.crxVersion}, null, 2)); } catch { console.log('Upload response was not JSON'); }" "$HTTP_CODE"
 
       - name: Publish Chrome Web Store item
+        if: inputs.publish_cws
         run: |
           PUBLISH_RESPONSE=$(curl -sS -X POST \
             "https://chromewebstore.googleapis.com/v2/publishers/$BONDERY_OPS_CHROME_PUBLISHER_ID/items/$BONDERY_INFRA_CHROME_EXTENSION_ID:publish" \

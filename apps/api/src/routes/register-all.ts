@@ -15,7 +15,6 @@ import {
   openApiAreaRoutes,
   sessionRoutes,
 } from "../lib/platform/route-areas.js";
-import { statsRoutes } from "./admin/stats/index.js";
 import { chatRoutes } from "./chat/index.js";
 import { chatSessionRoutes } from "./chat/sessions.js";
 import { contactIntegrationRoutes } from "./contacts/index.js";
@@ -110,7 +109,6 @@ const ROUTE_MOUNTS: RouteMount[] = [
   },
   { area: "session", plugin: subscriptionPortalRoutes, prefix: API_ROUTES.SUBSCRIPTIONS_PORTAL },
   { area: "session", plugin: subscriptionSyncRoutes, prefix: API_ROUTES.SUBSCRIPTIONS_SYNC },
-  { area: "admin", plugin: statsRoutes, prefix: API_ROUTES.ADMIN_STATS },
   { area: "webhook", plugin: stripeWebhookRoutes, prefix: API_ROUTES.WEBHOOKS_STRIPE },
 ];
 

@@ -3,11 +3,12 @@
  */
 import { defineContentScript } from "#imports";
 import { installWebappBridge } from "../../features/webapp-bridge";
+import { webappContentMatches } from "../../lib/webapp-content-matches";
 
 export default defineContentScript({
   main() {
     installWebappBridge();
   },
-  matches: ["https://app.usebondery.com/*", "http://localhost/*"],
+  matches: webappContentMatches(),
   runAt: "document_idle",
 });

@@ -5,8 +5,11 @@ import { z } from "zod";
 export const extensionManifestSchema = z
   .object({
     extension: z.object({
-      minVersion: z.string(),
-      storeUrl: z.string(),
+      latestVersion: z.string().meta({ example: "1.9.1" }),
+      minVersion: z.string().meta({ example: "1.0.0" }),
+      storeUrl: z
+        .string()
+        .meta({ example: "https://chrome.google.com/webstore/detail/bondery/example" }),
     }),
   })
   .meta({ example: EXAMPLE_EXTENSION_MANIFEST_RESPONSE });

@@ -50,6 +50,7 @@ permissions:
 
 jobs:
   validate:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-rc.')
     uses: ./.github/workflows/shared-release-validate.yml
     with:
       release_mode: ${{ github.event_name == 'workflow_dispatch' && inputs.mode != '' && inputs.mode || 'release' }}
@@ -153,7 +154,7 @@ jobs:
           else
             echo "api=${FILTER_API:-false}" >> "$GITHUB_OUTPUT"
             echo "webapp=${FILTER_WEBAPP:-false}" >> "$GITHUB_OUTPUT"
-            echo "extension=${FILTER_EXTENSION:-false}" >> "$GITHUB_OUTPUT"
+            echo "extension=true" >> "$GITHUB_OUTPUT"
           fi
 
   resolve_meta:
@@ -178,7 +179,7 @@ jobs:
           CURRENT: ${{ needs.validate.outputs.version }}
         run: |
           git fetch --tags
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname | grep -v "^v${CURRENT}$" | head -1 || true)
+          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^v${CURRENT}$" | head -1 || true)
           if [ -n "$PREV_TAG" ]; then
             echo "prev_version=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
           else
@@ -195,12 +196,13 @@ jobs:
         with:
           tag_name: ${{ needs.validate.outputs.tag }}
           name: Bondery ${{ needs.validate.outputs.version }}
-          prerelease: true
+          draft: true
+          prerelease: false
           generate_release_notes: false
           body: |
             [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
 
-            Release publishing in progress for ${{ needs.validate.outputs.version }}. Do not pin until this pre-release is removed.
+            Release publishing in progress for ${{ needs.validate.outputs.version }}.
 
   release_api:
     needs: [validate, detect_changes, resolve_meta]
@@ -261,6 +263,8 @@ jobs:
     secrets: inherit
     with:
       version: ${{ needs.validate.outputs.version }}
+      flavor: production
+      publish_cws: true
 
   notify_dokploy:
     needs:
@@ -302,7 +306,7 @@ jobs:
       - retag_api
       - retag_webapp
       - release_extension
-    if: always()
+    if: always() && needs.validate.result == 'success'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -321,6 +325,7 @@ jobs:
           RETAG_API_RESULT: ${{ needs.retag_api.result }}
           RELEASE_WEBAPP_RESULT: ${{ needs.release_webapp.result }}
           RETAG_WEBAPP_RESULT: ${{ needs.retag_webapp.result }}
+          EXTENSION_RESULT: ${{ needs.release_extension.result }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           RETRY_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
         run: |
@@ -337,9 +342,20 @@ jobs:
             return 1
           }
 
+          extension_ok() {
+            if [ "$EXTENSION_RESULT" = "success" ]; then
+              return 0
+            fi
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$EXTENSION_RESULT" = "skipped" ]; then
+              return 0
+            fi
+            return 1
+          }
+
           BODY_FILE=$(mktemp)
           if component_ok "$RELEASE_API_RESULT" "$RETAG_API_RESULT" && \
-            component_ok "$RELEASE_WEBAPP_RESULT" "$RETAG_WEBAPP_RESULT"; then
+            component_ok "$RELEASE_WEBAPP_RESULT" "$RETAG_WEBAPP_RESULT" && \
+            extension_ok; then
             cat > "$BODY_FILE" <<EOF
           [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
 
@@ -355,7 +371,7 @@ jobs:
             if [ -n "$RETRY_NOTE" ]; then
               printf '\n%s\n' "$RETRY_NOTE" >> "$BODY_FILE"
             fi
-            gh release edit "$TAG" --notes-file "$BODY_FILE" --prerelease=false
+            gh release edit "$TAG" --notes-file "$BODY_FILE" --draft=false --prerelease=false
 
             RELEASE_ID="$(gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${TAG}" --jq .id)"
             gh api "repos/${GITHUB_REPOSITORY}/releases/${RELEASE_ID}/reactions" -f content=heart
@@ -369,21 +385,5 @@ jobs:
             if [ -n "$RETRY_NOTE" ]; then
               printf '\n%s\n' "$RETRY_NOTE" >> "$BODY_FILE"
             fi
-            gh release edit "$TAG" --notes-file "$BODY_FILE" --prerelease=true
-          fi
-
-      - name: Upload extension assets
-        if: needs.release_extension.result == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ needs.validate.outputs.tag }}
-          VERSION: ${{ needs.validate.outputs.version }}
-        run: |
-          ZIP="bondery-extension-${VERSION}.zip"
-          CRX="apps/chrome-extension/bondery-extension-${VERSION}.crx"
-          PEM="bondery-extension-${VERSION}.public-key.pem"
-          if [ -f "$ZIP" ] && [ -f "$CRX" ] && [ -f "$PEM" ]; then
-            gh release upload "$TAG" "$ZIP" "$CRX" "$PEM" --clobber
-          else
-            echo "Extension asset files not found — skip upload"
+            gh release edit "$TAG" --notes-file "$BODY_FILE" --draft
           fi

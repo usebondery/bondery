@@ -66,7 +66,7 @@ Same tier → alphabetical by path segment.
 
 Integrator dependency order in the `tags` array in [`apps/api/src/openapi/swagger-config.ts`](../../apps/api/src/openapi/swagger-config.ts). Route plugin registration order lives in [`apps/api/src/routes/register-all.ts`](../../apps/api/src/routes/register-all.ts).
 
-`Health → Contacts → Groups → Tags → Interactions → Import → Share → Geocode → Me → Sync → Extension → Chat → Subscriptions → Stats → Webhooks → Internal`
+`Health → Contacts → Groups → Tags → Interactions → Import → Share → Geocode → Me → Sync → Extension → Chat → Subscriptions → Webhooks → Internal`
 
 ### Checklist when adding routes
 
@@ -100,7 +100,7 @@ When adding a new `*ResponseSchema`:
 2. Chain `.meta({ example: EXAMPLE_* })` on the response schema export.
 3. Register the schema in [`packages/schemas/scripts/check-contracts-openapi-examples.ts`](../../packages/schemas/scripts/check-contracts-openapi-examples.ts) if it is a new export.
 
-For inline route-only schemas (e.g. admin stats), attach `.meta({ example })` on the schema in the route file and import the fixture from `@bondery/schemas`.
+For inline route-only schemas, attach `.meta({ example })` on the schema in the route file and import the fixture from `@bondery/schemas`.
 
 `pnpm run check:contracts` validates every registered example with `schema.parse(example)`. `pnpm run check:openapi-spec -w api` fails if any `2xx` or `4xx`/`5xx` `application/json` response lacks an `example` or has an empty schema, and if any `POST`/`PUT`/`PATCH` JSON request body lacks an `example`.
 
@@ -185,7 +185,7 @@ The API uses four code layers under `apps/api/src/`. Each layer has a single res
 |-------|--------|----------------|
 | Routes | `routes/` | HTTP adapter only: Zod/OpenAPI schemas, auth context (`getAuth` / `withDomainRoute`), response shaping. No business logic. |
 | Domains | `domains/` | Sync-aware CRM mutations (contacts, groups, tags, import, merge). Emit sync changes via `emitSyncBatch` / `persistSyncChanges`. |
-| Services | `services/` | App features and read queries: me, billing, chat, interactions, notifications, admin stats, `*/queries.ts` list/detail reads. |
+| Services | `services/` | App features and read queries: me, billing, chat, interactions, notifications, `*/queries.ts` list/detail reads. |
 | Lib | `lib/` | Infrastructure subsystems — see [`lib/README.md`](../../apps/api/src/lib). No `.ts` files at `lib/` root. |
 
 #### `lib/` subsystems

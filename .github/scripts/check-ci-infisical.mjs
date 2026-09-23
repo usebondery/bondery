@@ -8,7 +8,7 @@
 
  * Usage: node .github/scripts/check-ci-infisical.mjs <profile>
 
- * Profiles: extension | services-webhook | website-webhook
+ * Profiles: extension | extension-staging | services-webhook | website-webhook
 
  */
 
@@ -18,6 +18,14 @@ const profiles = {
 
     "BONDERY_OPS_CHROME_PUBLISHER_ID",
 
+    "BONDERY_PUBLIC_WEBAPP_URL",
+
+    "BONDERY_PUBLIC_API_URL",
+
+    "BONDERY_PUBLIC_OAUTH_CLIENT_ID",
+  ],
+
+  "extension-staging": [
     "BONDERY_PUBLIC_WEBAPP_URL",
 
     "BONDERY_PUBLIC_API_URL",

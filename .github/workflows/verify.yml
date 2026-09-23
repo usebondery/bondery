@@ -39,7 +39,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          fetch-depth: 0
+          fetch-tags: true
           persist-credentials: false
+
+      - name: Fetch git tags
+        run: git fetch --tags --force
 
       - uses: ./.github/actions/shared/setup-pnpm
 

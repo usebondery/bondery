@@ -63,8 +63,6 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
       const report = await getHealthReport({
         anthropicApiKey: fastify.config.BONDERY_PRIVATE_ANTHROPIC_API_KEY,
         mapsApiKey: fastify.config.BONDERY_PRIVATE_MAPS_KEY,
-        posthogApiSecret: fastify.config.BONDERY_PRIVATE_POSTHOG_API_SECRET,
-        posthogProjectId: fastify.config.BONDERY_PRIVATE_POSTHOG_PROJECT_ID,
         redisUrl: fastify.config.BONDERY_PRIVATE_REDIS_URL,
         storageS3AccessKeyId: fastify.config.BONDERY_PRIVATE_S3_ACCESS_KEY_ID,
         storageS3Endpoint: fastify.config.BONDERY_PRIVATE_S3_ENDPOINT,

@@ -3,29 +3,30 @@
 ## End-to-end order
 
 ```text
-PR → verify → merge main → stage-images (:sha for changed services)
-→ prerequisites on main (see prerequisites.md)
-→ [if extension changed] ext-X.Y.Z → STOP for Chrome Web Store
+PR → verify → merge main → stage-images (:sha; :beta only on named RC cuts)
+→ RC (optional): package X.Y.Z-rc.N → tag vX.Y.Z-rc.N → GitHub prerelease + staging zip
+→ production: drop -rc, dated changelog, sync-version
+→ merge main → :sha only
+→ git tag vX.Y.Z → CWS + promote :X.Y.Z
+→ STOP until user confirms Chrome Web Store listing is live
+→ approve production-containers → Dokploy pin BONDERY_INFRA_VERSION=X.Y.Z
 → git push origin main:release  (website CD; not extension-gated)
-→ git tag api-X.Y.Z / webapp-X.Y.Z  (only changed services)
-→ pin tested pair → Dokploy → manual smoke
 → post-release comms (monthly)
 ```
 
 ## Critical ordering rule
 
-**When the Chrome extension changed:** do not push `main:release` or `vX.Y.Z` until the user **explicitly confirms** the extension is live in the Chrome Web Store. Deploying the webapp/API before the extension is live breaks `MIN_EXTENSION_VERSION` gating.
+**When shipping a production tag:** [`release.yml`](../../../../.github/workflows/release.yml) always runs CWS. Do not approve `production-containers` or update Dokploy until the user **explicitly confirms** the extension is live in the Chrome Web Store.
 
-Agents must **stop and ask** after pushing `ext-X.Y.Z` until the user confirms CWS approval.
+RC tags (`vX.Y.Z-rc.N`) never run CWS and never touch production-containers.
 
-## Extension unchanged (common for infra-only releases)
+Agents must **stop and ask** after the production tag's CWS job until the user confirms CWS approval.
 
-If `apps/chrome-extension/**` has **no substantive source changes** since the last release (a `package.json` version bump alone does not count):
+## Extension unchanged
 
-1. Skip [extension.md](extension.md) tag and CWS wait.
-2. Proceed directly to `main:release` and product tags after prerequisites and `stage-images` on `main`.
+A `package.json` version bump still publishes the extension on `vX.Y.Z` (store listing stays current). There is no skip-CWS path on a production tag.
 
-Example: CI/CD-only or api/webapp-only releases (e.g. `1.8.0` when extension source is unchanged but monorepo versions align).
+For infra-only work that must not touch the store, do not cut `vX.Y.Z` until you intend to publish.
 
 ## Website exception
 
@@ -35,30 +36,30 @@ Marketing website CD is **not** extension-gated.
 git push origin main:release
 ```
 
-Triggers [`deploy-website.yml`](../../../../.github/workflows/deploy-website.yml) when website-related paths changed. The workflow promotes `website:sha-<short>` → `:production` when the image exists on `main`; otherwise it builds. No `website-X.Y.Z` semver tag.
+Triggers [`deploy-website.yml`](../../../../.github/workflows/deploy-website.yml) when website-related paths changed. The workflow promotes `website:sha-<short>` → `:production` when the image exists on `main`; otherwise it builds. No per-service `website-X.Y.Z` tag.
 
 You may push website-only changes to `release` without waiting on Chrome Web Store review.
 
 ## Product container tags
 
-After prerequisites and (if applicable) extension gate:
+After the production SHA is on `main`:
 
 ```bash
-git tag api-X.Y.Z        # if API changed
-git tag webapp-X.Y.Z     # if webapp changed
-git push origin api-X.Y.Z webapp-X.Y.Z
+git tag vX.Y.Z
+git push origin vX.Y.Z
 ```
 
-Tags must point at a commit that was built on `main` so `:sha-<short>` exists. See [ci-triggers.md](ci-triggers.md).
+The tag must point at a commit that was built on `main` so `:sha-<short>` exists. See [ci-triggers.md](ci-triggers.md).
 
-Tag only services that changed in this release.
+Do **not** use leftover `api-X.Y.Z` / `webapp-X.Y.Z` / `ext-X.Y.Z` tags.
 
 ## Human approval before production refs
 
 | Action | Who approves |
 |--------|----------------|
 | `git push origin main:release` | Human (agent proposes commands) |
-| `git push origin api-X.Y.Z webapp-X.Y.Z` | Human |
+| `git push origin vX.Y.Z` / `vX.Y.Z-rc.N` | Human |
+| Approve `production-containers` | Human, after CWS live |
 | Dokploy pin change + redeploy | Human |
 | `force_rebuild: true` on release workflow dispatch | Human |
 
@@ -85,7 +86,7 @@ PR green but release smoke fails on image
 
 ### Tag commit requirements
 
-1. Tag must be on `release` branch (enforced by release workflows).
+1. Production tags should be on `release` (enforced by [`shared-release-validate.yml`](../../../../.github/workflows/shared-release-validate.yml)). RC tags do **not** require `origin/release`.
 2. `ghcr.io/usebondery/api:sha-<7char>` (or webapp) must exist — `stage-images` built that SHA on `main`.
 3. Deploy-only or Dockerfile-fix commit after tag → move tag to a built SHA, or use `force_rebuild: true`.
 
@@ -99,7 +100,6 @@ PR green but release smoke fails on image
 
 - [ ] Prerequisites on `main` complete
 - [ ] `stage-images` succeeded for services being released
-- [ ] Extension path: CWS live confirmed **or** extension unchanged shortcut taken
+- [ ] Production: CWS live confirmed before `production-containers`
 - [ ] `main:release` pushed when website/full stack ready
-- [ ] Product tags pushed only for changed services
 - [ ] CI green on release workflows (use babysit if needed)

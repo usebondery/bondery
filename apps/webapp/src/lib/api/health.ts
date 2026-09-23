@@ -22,7 +22,6 @@ export type HealthReport = {
     anthropic?: ServiceProbeResult;
     stripe?: ServiceProbeResult;
     mapy?: ServiceProbeResult;
-    posthog?: ServiceProbeResult;
   };
 };
 

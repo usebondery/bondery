@@ -48,7 +48,6 @@ export const namespacesByPlatform = {
     "ShareContactModal",
     "SingleContactPage",
     "Socials",
-    "StatsPage",
     "TagsInput",
     "TagsSettings",
     "UnavailablePage",

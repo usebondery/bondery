@@ -60,12 +60,7 @@ export const secondaryAppNavLinks: AppNavLinkDef[] = [
 ];
 
 /** Routes with generateMetadata but not in the sidebar. */
-export const additionalStaticRouteTitles: AppNavLinkDef[] = [
-  {
-    href: WEBAPP_ROUTES.STATS,
-    labelKey: "Settings",
-  },
-];
+export const additionalStaticRouteTitles: AppNavLinkDef[] = [];
 
 export const allAppNavLinks: AppNavLinkDef[] = [
   ...primaryAppNavLinks,

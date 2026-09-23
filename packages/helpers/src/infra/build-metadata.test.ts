@@ -35,12 +35,12 @@ describe("readBuildMetadata", () => {
 
 describe("buildLivenessStatus", () => {
   it("returns ok status with timestamp and optional metadata", () => {
-    process.env.BONDERY_INFRA_VERSION = "beta";
+    process.env.BONDERY_INFRA_VERSION = "1.9.1-rc.1";
     process.env.BONDERY_INFRA_GIT_SHA = "deadbeef";
     const body = buildLivenessStatus();
     assert.equal(body.status, "ok");
     assert.match(body.timestamp, /^\d{4}-\d{2}-\d{2}T/);
-    assert.equal(body.version, "beta");
+    assert.equal(body.version, "1.9.1-rc.1");
     assert.equal(body.gitSha, "deadbeef");
   });
 });

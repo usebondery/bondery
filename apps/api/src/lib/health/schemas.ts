@@ -16,7 +16,6 @@ export const healthServicesSchema = z.object({
   anthropic: serviceProbeResultSchema,
   mapy: serviceProbeResultSchema,
   postgres: serviceProbeResultSchema,
-  posthog: serviceProbeResultSchema,
   redis: serviceProbeResultSchema,
   smtp: serviceProbeResultSchema,
   storage: serviceProbeResultSchema,

@@ -1,11 +1,18 @@
 #!/usr/bin/env node
-import { execSync } from "node:child_process";
 /**
  * CI guard: root package.json version must match all sync targets and deploy pin.
  */
+import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  infraPinCalver,
+  isProductionCalver,
+  parseCalver,
+  readGitTags,
+  toCoreCalver,
+} from "../pkg/calver.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -70,6 +77,10 @@ function checkReleaseChangelog(version) {
   const branch = process.env.GITHUB_HEAD_REF ?? "";
   const isReleaseBranch = branch.startsWith("chore/release-");
 
+  if (!isProductionCalver(version)) {
+    return;
+  }
+
   if (!existsSync(changelogPath)) {
     if (isReleaseBranch) {
       fail(`Release branch ${branch} requires docs/changelog/releases/${version}.mdx`);
@@ -97,10 +108,15 @@ function checkReleaseChangelog(version) {
 }
 
 const version = readRootVersion();
-if (!/^\d+\.\d+\.\d+$/.test(version)) {
-  fail(`Invalid root package.json version: ${version}`);
+try {
+  parseCalver(version);
+} catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+  fail(message);
 }
 
+const nativeVersion = toCoreCalver(version);
+const expectedInfraPin = infraPinCalver(version, readGitTags(root));
 const errors = [];
 
 const packagePaths = [
@@ -129,21 +145,26 @@ for (const rel of packagePaths) {
   }
 }
 
-if (readMobileAppConfigVersion() !== version) {
-  errors.push(`apps/mobile/app.config.ts: ${readMobileAppConfigVersion()}`);
+if (readMobileAppConfigVersion() !== nativeVersion) {
+  errors.push(
+    `apps/mobile/app.config.ts: ${readMobileAppConfigVersion()} (expected native ${nativeVersion})`,
+  );
 }
-if (readAndroidVersionName() !== version) {
-  errors.push(`apps/mobile/android/app/build.gradle versionName: ${readAndroidVersionName()}`);
+if (readAndroidVersionName() !== nativeVersion) {
+  errors.push(
+    `apps/mobile/android/app/build.gradle versionName: ${readAndroidVersionName()} (expected native ${nativeVersion})`,
+  );
 }
 
 const deployExampleVersion = readDeployExampleVersion();
-if (deployExampleVersion && deployExampleVersion !== version) {
-  errors.push(`deploy/bondery/.env.example pin: ${deployExampleVersion}`);
+if (deployExampleVersion && deployExampleVersion !== expectedInfraPin) {
+  errors.push(
+    `deploy/bondery/.env.example pin: ${deployExampleVersion} (expected last production ${expectedInfraPin})`,
+  );
 }
 
 assertNoLegacyImageTagEnv();
 
-// Delegate package.json / mobile / manifest sync check
 try {
   execSync("node scripts/pkg/sync-version.mjs --check", { cwd: root, stdio: "pipe" });
 } catch {
@@ -161,4 +182,4 @@ if (errors.length > 0) {
   process.exit(1);
 }
 
-console.log(`Version check passed (${version})`);
+console.log(`Version check passed (${version}, infra pin ${expectedInfraPin})`);

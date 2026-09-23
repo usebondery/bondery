@@ -9,7 +9,7 @@ import {
   sortDeployExampleRows,
 } from "./env-manifest.ts";
 
-export function collectDeployExampleRows(packageVersion: string) {
+export function collectDeployExampleRows(infraPinVersion: string) {
   const rows = [];
   for (const entry of ENV_MANIFEST) {
     const deploy = entry.deployExample;
@@ -19,7 +19,8 @@ export function collectDeployExampleRows(packageVersion: string) {
     const group = deploy.group ?? entry.group;
     let value = resolveExampleValue(entry, "deploy");
     if (entry.canonical === "BONDERY_INFRA_VERSION") {
-      value = packageVersion;
+      // Last production X.Y.Z only — never an RC string (self-host channel).
+      value = infraPinVersion;
     }
     rows.push({
       commented: deploy.commented ?? false,
@@ -35,10 +36,10 @@ export function collectDeployExampleRows(packageVersion: string) {
 export function writeDeployExample(
   repoRoot: string,
   dryRun: boolean,
-  packageVersion: string,
+  infraPinVersion: string,
   log: ReturnType<typeof createCliLogger>,
 ) {
-  const rows = collectDeployExampleRows(packageVersion);
+  const rows = collectDeployExampleRows(infraPinVersion);
   const deployPath = join(repoRoot, "deploy/bondery/.env.example");
   const body = formatEnvFile(rows, {
     groupGuides: DEPLOY_GROUP_GUIDES,

@@ -4,3 +4,18 @@ hidden: true
 ---
 
 ## [Unreleased]
+
+### 🔄 Changed
+
+- Webapp: Internal `/app/admin/stats` KPI dashboard. Operators should use PostHog for product analytics.
+
+### 🤖 CI
+
+- Releases: named RCs (`X.Y.Z-rc.N`, tag `vX.Y.Z-rc.N`) own `:beta` and a GitHub prerelease with a staging extension zip. Clean CalVer `vX.Y.Z` is production (CWS, no zip). Everyday merges to `main` still build `:sha-<short>` only.
+
+### Breaking
+
+- **HogQL admin env vars:** `BONDERY_PRIVATE_POSTHOG_API_SECRET` and `BONDERY_PRIVATE_POSTHOG_PROJECT_ID` are unused. Remove them from self-host env files. Keep `BONDERY_PUBLIC_POSTHOG_KEY` and `BONDERY_PUBLIC_POSTHOG_HOST` for product capture.
+- **Admin stats API:** `/admin/stats/*` endpoints are gone.
+- **Health readiness:** `GET /health/ready` no longer reports `services.posthog`.
+- **Database functions:** `get_funnel_periods` and `get_total_users_growth` are dropped on the next `release-migrate` (`functions.sql`). There is no Prisma migration.

@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { isRc, parseCalver, toChromeVersion, toNpm } from "@bondery/helpers/version/calver";
 import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants";
 import { defineConfig } from "wxt";
 import { CWS_EXTENSION_PUBLIC_KEY } from "./cws-public-key";
@@ -8,8 +9,18 @@ import { loopbackHostPermissionPatterns } from "./src/lib/auth/oauth-urls";
 
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json") as { version: string };
+const parsedVersion = parseCalver(version);
+const chromeVersion = toChromeVersion(parsedVersion);
+const versionName = isRc(parsedVersion) ? toNpm(parsedVersion) : undefined;
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
+const extensionFlavor =
+  process.env.BONDERY_EXTENSION_FLAVOR === "production"
+    ? "production"
+    : process.env.BONDERY_EXTENSION_FLAVOR === "staging"
+      ? "staging"
+      : "local";
+const includeManifestKey = extensionFlavor !== "production";
 
 // Helper to extract origin from URL for host permissions
 const getOrigin = (url: string) => {
@@ -114,12 +125,13 @@ export default defineConfig({
         128: "icons/icon128.png",
       },
       // Local unpacked ID = Chrome Web Store ID so OAuth redirect_uri matches
-      // BONDERY_INFRA_CHROME_EXTENSION_ID. Store CI zips omit this; Google adds it.
-      ...(!isCi ? { key: CWS_EXTENSION_PUBLIC_KEY } : {}),
+      // BONDERY_INFRA_CHROME_EXTENSION_ID. Staging/RC zips keep the key; CWS omits it.
+      ...(includeManifestKey ? { key: CWS_EXTENSION_PUBLIC_KEY } : {}),
       name: "Bondery Extension",
 
       permissions: ["storage", "identity", "alarms"],
-      version,
+      version: chromeVersion,
+      ...(versionName ? { version_name: versionName } : {}),
 
       // Web accessible resources for the MAIN world script injection
       web_accessible_resources: [
@@ -155,7 +167,7 @@ export default defineConfig({
     // doesn't export jsxDEV — resulting in a runtime crash in the popup.
     define: {},
     // Expose BONDERY_PUBLIC_* to import.meta.env; keep WXT_ for framework (e.g. WXT_DEBUG)
-    envPrefix: ["BONDERY_PUBLIC_", "WXT_"],
+    envPrefix: ["BONDERY_PUBLIC_", "BONDERY_EXTENSION_", "WXT_"],
     resolve: {
       alias: {
         "@bondery/translations": path.join(repoRoot, "packages/translations/src"),

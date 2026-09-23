@@ -13,7 +13,6 @@ export type HealthServices = {
   anthropic: ServiceProbeResult;
   stripe: ServiceProbeResult;
   mapy: ServiceProbeResult;
-  posthog: ServiceProbeResult;
 };
 
 export type HealthStatus = "ok" | "degraded" | "unhealthy";
@@ -38,6 +37,4 @@ export type HealthCheckConfig = {
   stripePriceIdAnnual: string;
   stripeWebhookSecret: string;
   mapsApiKey: string;
-  posthogApiSecret: string;
-  posthogProjectId: string;
 };

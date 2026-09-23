@@ -21,10 +21,6 @@ function isStripeConfigured(config: HealthCheckConfig): boolean {
   );
 }
 
-function isPosthogConfigured(config: HealthCheckConfig): boolean {
-  return Boolean(config.posthogApiSecret.trim() && config.posthogProjectId.trim());
-}
-
 function deriveOverallStatus(services: HealthServices): HealthStatus {
   const critical = [services.postgres, services.storage, services.smtp, services.redis];
 
@@ -32,7 +28,7 @@ function deriveOverallStatus(services: HealthServices): HealthStatus {
     return "unhealthy";
   }
 
-  const optionalConfigured = [services.anthropic, services.stripe, services.mapy, services.posthog];
+  const optionalConfigured = [services.anthropic, services.stripe, services.mapy];
 
   if (optionalConfigured.some((service) => service.configured && !service.ok)) {
     return "degraded";
@@ -60,7 +56,6 @@ async function runProbes(config: HealthCheckConfig): Promise<HealthServices> {
     anthropic: probeConfigured(Boolean(config.anthropicApiKey.trim())),
     mapy: probeConfigured(Boolean(config.mapsApiKey.trim())),
     postgres,
-    posthog: probeConfigured(isPosthogConfigured(config)),
     redis,
     smtp,
     storage,

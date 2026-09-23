@@ -2,9 +2,9 @@
 name: bondery-analytics
 description: >
   Bondery analytics routing and conventions for Plausible (marketing site) and
-  PostHog (product analytics, admin KPIs, future flags/replay/logs). Use when
+  PostHog (product analytics, future flags/replay/logs). Use when
   adding tracking events, wiring analytics SDKs, env vars, distinct_id/identity,
-  server vs client capture, HogQL admin stats, PostHog naming (category:object_action),
+  server vs client capture, PostHog naming (category:object_action),
   or debugging missing events.
 metadata:
   version: "1.0.0"
@@ -20,7 +20,6 @@ Router and contract enforcer for **Plausible** (marketing) and **PostHog** (prod
 - Adding or changing tracking events, funnels, or KPI instrumentation
 - Wiring Plausible (`apps/website`) or PostHog (`apps/webapp`, API, future mobile)
 - Server vs client capture, `distinct_id`, identity linking (`identify` / `reset`)
-- Admin stats / HogQL queries against PostHog
 - Analytics env vars, runtime config, CSP for analytics scripts
 - PostHog session replay, feature flags, or logs (when adopted)
 - Debugging events not appearing (ad blockers, missing env, dev vs prod)
@@ -31,7 +30,6 @@ Router and contract enforcer for **Plausible** (marketing) and **PostHog** (prod
 |-------|-------|
 | Privacy policy copy, subprocessors, consent UX | `bondery-legal` |
 | PII in API payloads, auth, tenant isolation | `bondery-security` |
-| Admin stats UI / Mantine charts | `bondery-ux` |
 | Plausible CE infra deploy (Traefik, Postgres) | `deploy/plausible/` |
 | Application error logging outside PostHog Logs | ops runbooks |
 
@@ -65,7 +63,7 @@ PostHog’s generic advice is one project for website + app. **Bondery intention
 |----------|------|---------|
 | Marketing traffic, campaigns, referrers? | Plausible | `apps/website` |
 | Feature usage, funnels, retention? | PostHog | webapp, mobile, API |
-| Admin DAU / WAU / MAU / NPS? | PostHog Query API | `apps/api` admin service |
+| Admin DAU / WAU / MAU / NPS? | PostHog product UI | operators use PostHog, not a Bondery page |
 | Feature flags, replay, logs? | PostHog (gated) | see [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
 
 ## Server vs client capture
@@ -87,7 +85,6 @@ PostHog’s generic advice is one project for website + app. **Bondery intention
 | Canonical event list | [references/event-catalog.md](references/event-catalog.md) |
 | Where / how to capture | [references/posthog-capture.md](references/posthog-capture.md) |
 | Identity, PII, internal users | [references/identity-and-privacy.md](references/identity-and-privacy.md) |
-| Admin HogQL / KPI queries | [references/posthog-admin-queries.md](references/posthog-admin-queries.md) |
 | Env vars and runtime config | [references/env-and-runtime-config.md](references/env-and-runtime-config.md) |
 | Replay, flags, logs (future) | [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
 | Prove events work | [references/verification.md](references/verification.md) |
@@ -107,8 +104,6 @@ Cross-skills: `bondery-legal`, `bondery-security`, `bondery-verification-loop`.
 | Server wrapper | `apps/webapp/src/lib/analytics/server.ts` |
 | Runtime config schema | `packages/schemas/src/runtime-config.ts` |
 | Env manifest | `packages/helpers/src/env/manifest.ts` |
-| Admin HogQL | `apps/api/src/services/admin/posthog.ts` |
-| Admin stats routes | `apps/api/src/routes/admin/stats/` |
 
 ## Adding a new product event (workflow)
 

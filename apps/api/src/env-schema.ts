@@ -38,14 +38,6 @@ export const envSchema = {
       default: "",
       type: "string",
     },
-    BONDERY_PRIVATE_POSTHOG_API_SECRET: {
-      default: "",
-      type: "string",
-    },
-    BONDERY_PRIVATE_POSTHOG_PROJECT_ID: {
-      default: "",
-      type: "string",
-    },
     BONDERY_PRIVATE_REDIS_URL: {
       default: "",
       type: "string",
@@ -158,8 +150,6 @@ declare module "fastify" {
       BONDERY_PRIVATE_EMAIL_ADDRESS: string;
       BONDERY_PRIVATE_EMAIL_REPLY_TO: string;
       BONDERY_PRIVATE_EMAIL_PORT: number;
-      BONDERY_PRIVATE_POSTHOG_API_SECRET: string;
-      BONDERY_PRIVATE_POSTHOG_PROJECT_ID: string;
       BONDERY_PUBLIC_POSTHOG_HOST: string;
       BONDERY_PUBLIC_POSTHOG_KEY: string;
       BONDERY_PRIVATE_ANTHROPIC_API_KEY: string;

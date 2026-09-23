@@ -10,7 +10,7 @@ Source of truth: `apps/chrome-extension/wxt.config.ts`. Product values are **inl
 | `BONDERY_PUBLIC_WEBAPP_URL` | App links (`config.appUrl`), `host_permissions` origin |
 | `BONDERY_PUBLIC_OAUTH_CLIENT_ID` | PKCE public client |
 
-Vite `envPrefix`: `BONDERY_PUBLIC_`, `WXT_` (framework, e.g. `WXT_DEBUG`). Do not introduce `VITE_` or unprefixed keys.
+Vite `envPrefix`: `BONDERY_PUBLIC_`, `BONDERY_EXTENSION_` (`BONDERY_EXTENSION_FLAVOR=production|staging`), `WXT_` (framework, e.g. `WXT_DEBUG`). Do not introduce `VITE_` or unprefixed keys.
 
 `hooks.build:before` warns in development if any required var is missing; **throws in production**. In production **CI** (`CI` or `GITHUB_ACTIONS`) it also throws if API/webapp URLs match `localhost` or `127.0.0.1`. A store zip with baked loopback origins is a shipped foot-gun.
 
@@ -20,9 +20,11 @@ Vite `envPrefix`: `BONDERY_PUBLIC_`, `WXT_` (framework, e.g. `WXT_DEBUG`). Do no
 
 Built from Instagram + LinkedIn URL patterns plus `loopbackHostPermissionPatterns(BONDERY_PUBLIC_WEBAPP_URL)` and, when different, the same helper for `BONDERY_PUBLIC_API_URL`. Local `localhost` origins also get the `127.0.0.1` alias (token/authorize fetches pin loopback HTTP to IPv4). Changing env origins changes the packed host list on the next build.
 
-## Content-script matches (not computed)
+## Content-script matches
 
-`entrypoints/webapp.content/index.tsx` is hardcoded to `https://app.usebondery.com/*` and `http://localhost/*`. A staging webapp URL in env does **not** attach the bridge. LinkedIn/Instagram matches are also literal in those entrypoints.
+`entrypoints/webapp.content/index.tsx` always includes `https://app.usebondery.com/*` and `http://localhost/*`. Staging/local builds may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin. **`BONDERY_EXTENSION_FLAVOR=production` never adds extra hosts**, so CWS cannot ship `app.beta` matches even if the URL is wrong.
+
+LinkedIn/Instagram matches are literal in those entrypoints.
 
 ## `permissions`
 
@@ -48,6 +50,6 @@ Do not add other hosts to this list without a security review.
 - [ ] All three `BONDERY_PUBLIC_*` present for the build you are shipping
 - [ ] Production CI bake has no localhost/127.0.0.1 API or webapp URL
 - [ ] `host_permissions` still match the origins the SW actually fetches
-- [ ] `webapp.content` matches not “fixed” from env
+- [ ] `webapp.content` matches: CWS production is prod + localhost; extra origin only when flavor is not production
 - [ ] New `permissions` / `host_permissions` called out as a CWS review event
 - [ ] Vite `define` still does not set `NODE_ENV`

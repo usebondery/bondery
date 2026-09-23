@@ -38,7 +38,7 @@ export const swaggerOpenApiConfig = {
       "`Authorization: Bearer bondery_key_…` on allowed integration routes " +
       "(contacts, groups, tags, interactions, imports, share, geocode). " +
       "Keys support `read` (GET/HEAD) or `full` access. See the authentication guide.\n\n" +
-      "Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, `/api/admin`, " +
+      "Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, " +
       "`/api/subscriptions`, and `/api/extension` do not accept API keys.",
     license: PROJECT_OPENAPI_LICENSE,
     title: "Bondery API",
@@ -87,7 +87,6 @@ export const swaggerOpenApiConfig = {
       description: "Subscription and billing management",
       name: "Subscriptions",
     },
-    { description: "Admin KPI dashboard metrics", name: "Stats" },
     {
       description: "Inbound webhooks from third-party services",
       name: "Webhooks",

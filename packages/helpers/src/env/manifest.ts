@@ -94,7 +94,7 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
   "Chrome extension OAuth": ["Generate: openssl rand -hex 16   # BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
   Email: ["SMTP settings (env_file → api only)."],
   "Image pin": [
-    "Omit BONDERY_INFRA_VERSION on production to pull :production. Set beta on the staging stack to pull :beta from main.",
+    "Omit BONDERY_INFRA_VERSION on production to pull :production, or pin X.Y.Z. Staging may pin a named RC or :beta (RC cuts only). RC is not a self-host channel.",
     "BONDERY_INFRA_TRAEFIK_PREFIX defaults to bondery. Infisical staging: bondery-beta. Infisical production: bondery or omit.",
   ],
   "Image tags": [
@@ -559,6 +559,17 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     requiredIn: ["development", "production"],
     secret: false,
     targets: [t("api"), t("chrome-extension")],
+  },
+  {
+    canonical: "BONDERY_EXTENSION_FLAVOR",
+    description:
+      "Chrome extension bake flavor. CI: production (CWS, omit manifest.key) or staging (RC zip, include key). Unset locally (treated as local).",
+    exampleValue: "",
+    group: "Auth",
+    omitFromRootExample: true,
+    requiredIn: [],
+    secret: false,
+    targets: [t("chrome-extension")],
   },
   {
     boot: { value: "test-webapp-oauth-client" },
@@ -1102,28 +1113,6 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     targets: [t("website")],
   },
   {
-    canonical: "BONDERY_PRIVATE_POSTHOG_API_SECRET",
-    deployExample: { group: "Optional API admin analytics", include: true, value: "" },
-    description: "PostHog personal API key for admin analytics queries (optional)",
-    exampleValue: "",
-    group: "Analytics",
-    requiredIn: [],
-    secret: true,
-    syncable: true,
-    targets: [t("api")],
-  },
-  {
-    canonical: "BONDERY_PRIVATE_POSTHOG_PROJECT_ID",
-    deployExample: { group: "Optional API admin analytics", include: true, value: "" },
-    description: "PostHog project id for admin analytics queries (optional)",
-    exampleValue: "",
-    group: "Analytics",
-    requiredIn: [],
-    secret: false,
-    syncable: true,
-    targets: [t("api")],
-  },
-  {
     canonical: "DO_NOT_TRACK",
     description: "Disable analytics / vendor telemetry when true",
     exampleValue: "true",
@@ -1143,7 +1132,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
       include: true,
     },
     description:
-      "Image tag for api and webapp: semver pin, `beta` for the staging stack (`:beta` from main), or omit for floating `:production`. Also surfaced in runtime config and health probes.",
+      "Image tag for api and webapp: production CalVer pin (X.Y.Z), or omit for floating `:production`. Staging Dokploy may pin a named RC (`X.Y.Z-rc.N`) or floating `:beta` (RC cuts only). RC is not a self-host channel.",
     exampleValue: "",
     group: "Infra",
     opsExample: { group: "Build metadata", include: true, value: "" },

@@ -27,7 +27,6 @@ export const OPENAPI_TAG_ORDER = [
   "Extension",
   "Chat",
   "Subscriptions",
-  "Stats",
   "Webhooks",
   "Internal",
 ] as const;

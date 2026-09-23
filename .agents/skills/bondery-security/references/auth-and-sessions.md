@@ -102,7 +102,7 @@ Deep link scheme: `bondery://` (trusted origin on API).
 
 `apps/api/src/lib/extension/version-check.ts`:
 - Unauthenticated requests without Cookie, Bearer, or extension version → 401
-- Extension below `MIN_EXTENSION_VERSION` → 426 `extension_outdated`
+- Extension below `MIN_EXTENSION_VERSION` (generated 3-part previous production CalVer) → 426 `extension_outdated`. `GET /extension/manifest` also exposes `latestVersion` for a non-blocking nudge.
 - Skips `/auth/*`, `/webhooks/*`, `/health/*`, `/extension/manifest`
 
 ## Service secret (internal)

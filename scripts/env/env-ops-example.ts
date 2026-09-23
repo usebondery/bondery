@@ -10,7 +10,7 @@ import {
   sortOpsExampleRows,
 } from "./env-manifest.ts";
 
-export function collectOpsExampleRows(packageVersion: string) {
+export function collectOpsExampleRows(packageVersion: string, infraPinVersion = packageVersion) {
   const rows = [];
   for (const entry of ENV_MANIFEST) {
     const ops = entry.opsExample;
@@ -20,7 +20,7 @@ export function collectOpsExampleRows(packageVersion: string) {
     const group = ops.group ?? entry.group;
     let value = resolveExampleValue(entry, "ops");
     if (entry.canonical === "BONDERY_INFRA_VERSION" && !ops.value) {
-      value = packageVersion;
+      value = infraPinVersion;
     }
     if (entry.canonical === "BONDERY_INFRA_WEBSITE_IMAGE_TAG" && ops.commented && !ops.value) {
       value = packageVersion;
@@ -43,8 +43,9 @@ export function writeOpsExample(
   dryRun: boolean,
   packageVersion: string,
   log: ReturnType<typeof createCliLogger>,
+  infraPinVersion = packageVersion,
 ) {
-  const rows = collectOpsExampleRows(packageVersion);
+  const rows = collectOpsExampleRows(packageVersion, infraPinVersion);
   const opsPath = join(repoRoot, "deploy/ops/.env.example");
   const body = formatEnvFile(rows, {
     groupGuides: OPS_GROUP_GUIDES,

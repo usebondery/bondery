@@ -579,6 +579,18 @@
       "node": "./dist/version/index.js",
       "types": "./src/version/index.ts"
     },
+    "./version/calver": {
+      "default": "./dist/version/calver.js",
+      "import": "./dist/version/calver.js",
+      "node": "./dist/version/calver.js",
+      "types": "./src/version/calver.ts"
+    },
+    "./version/calver.test": {
+      "default": "./dist/version/calver.test.js",
+      "import": "./dist/version/calver.test.js",
+      "node": "./dist/version/calver.test.js",
+      "types": "./src/version/calver.test.ts"
+    },
     "./version/version-utils": {
       "default": "./dist/version/version-utils.js",
       "import": "./dist/version/version-utils.js",
@@ -609,9 +621,10 @@
     "check:types": "tsc --noEmit",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput",
+    "prepare": "pnpm run build",
     "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.9.1"
+  "version": "1.9.2-rc.1"
 }

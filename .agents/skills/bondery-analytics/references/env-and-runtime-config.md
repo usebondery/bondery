@@ -11,12 +11,7 @@ Canonical analytics environment variables.
 | `BONDERY_PUBLIC_PLAUSIBLE_DOMAIN` | website | Plausible site domain |
 | `BONDERY_PUBLIC_PLAUSIBLE_HOST` | website | Plausible CE base URL |
 
-## Private (server only)
-
-| Variable | App | Purpose |
-|----------|-----|---------|
-| `BONDERY_PRIVATE_POSTHOG_API_SECRET` | api | HogQL Query API |
-| `BONDERY_PRIVATE_POSTHOG_PROJECT_ID` | api | PostHog project ID |
+Do not add private PostHog Query API keys. Operators use the PostHog product UI for DAU/WAU/MAU/NPS.
 
 ## Infra (Plausible CE deploy)
 

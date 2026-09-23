@@ -4,8 +4,9 @@ import { config } from "../../config";
 import { updateActionContextIndicator } from "./badge";
 
 /**
- * Fetches the minimum required extension version from the API extension manifest
- * and stores whether an update is required in browser.storage.local.
+ * Fetches the public extension manifest and stores a non-blocking update nudge
+ * when the installed version is below `latestVersion` (current production CalVer).
+ * HTTP 426 / `minVersion` remains the hard API floor.
  */
 export async function checkVersionCompatibility(): Promise<void> {
   try {
@@ -15,13 +16,13 @@ export async function checkVersionCompatibility(): Promise<void> {
     }
 
     const data = await response.json();
-    const minVersion = data?.extension?.minVersion;
-    if (!minVersion) {
+    const latestVersion = data?.extension?.latestVersion ?? data?.extension?.minVersion;
+    if (!latestVersion) {
       return;
     }
 
     const currentVersion = browser.runtime.getManifest().version;
-    const updateRequired = isVersionBelow(currentVersion, minVersion);
+    const updateRequired = isVersionBelow(currentVersion, latestVersion);
 
     await browser.storage.local.set({ updateRequired });
     await updateActionContextIndicator();
