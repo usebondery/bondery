@@ -51,5 +51,5 @@
     "zip:firefox": "pnpm exec wxt zip -b firefox"
   },
   "type": "module",
-  "version": "1.9.2-rc.2"
+  "version": "1.9.2"
 }
