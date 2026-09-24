@@ -6,11 +6,13 @@ import { execSync } from "node:child_process";
 
 export {
   compareVersions,
+  highestNamedRc,
   infraPinCalver,
   isProductionCalver,
   isRc,
   isVersionBelow,
   latestProductionCalver,
+  overlayProductionCalver,
   parseCalver,
   parseComparableVersion,
   previousProductionCalver,

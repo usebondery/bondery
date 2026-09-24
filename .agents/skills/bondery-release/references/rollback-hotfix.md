@@ -7,11 +7,11 @@ For urgent fixes between monthly releases:
 1. Fix the issue on `main`.
 2. Bump only the **Z** segment (e.g. `1.8.0` → `1.8.1`) via `pnpm run sync-version`.
 3. Follow [prerequisites.md](prerequisites.md) and [sequencing-and-gates.md](sequencing-and-gates.md).
-4. Tag unified release: `git tag vX.Y.Z && git push origin vX.Y.Z`.
+4. Cut a named RC (`X.Y.Z-rc.1`) so GA has a digest to promote, then tag unified release: `git tag vX.Y.Z && git push origin vX.Y.Z`.
 
 Keep hotfixes small. Prefer one logical fix per patch.
 
-**Do not** use `retry-promote` workflow dispatch for operator hotfixes — that mode is CI failure recovery only.
+**Do not** use `retry-promote` workflow dispatch for operator hotfixes — that mode is CI failure recovery only. A no-RC incident uses `source: tag-sha` or `force_rebuild: true` on that dispatch — never a silent drop-rc fallback.
 
 ## Production rollback (product stack)
 
@@ -44,7 +44,7 @@ You **cannot unpublish** a Chrome Web Store update. Submit a fixed version with 
 When a unified release job failed after `vX.Y.Z` was pushed and production never received the bad image:
 
 1. Fix the underlying issue on `main` / `release` if needed.
-2. GitHub Actions → **Release - Bondery** → `mode: retry-promote`, `version: X.Y.Z`, select failed `components`.
+2. GitHub Actions → **Release - Bondery** → `mode: retry-promote`, `version: X.Y.Z`, select failed `components`. Default `source: rc` (last named RC). Use `source: tag-sha` only for an explicit no-RC promote of the tag commit `:sha-*`. Use `force_rebuild: true` to rebuild from source.
 3. Confirm Dokploy `BONDERY_INFRA_VERSION` was **not** updated to the failed version.
 
 ## CI rollback (workflow regression)
@@ -52,7 +52,7 @@ When a unified release job failed after `vX.Y.Z` was pushed and production never
 If a workflow change breaks promote/smoke:
 
 1. Revert the workflow PR on `main`.
-2. Re-run `stage-images` or use `retry-promote` with `force_rebuild: true` if `:sha` is missing.
+2. Re-run `stage-images` or use `retry-promote` with `force_rebuild: true` if images are missing.
 3. Re-apply branch protection rules if ruleset JSON changed (`pnpm run github:rulesets -- main` or `gh api` on Windows).
 
 ## Rollback checklist

@@ -199,3 +199,60 @@ export function infraPinCalver(packageVersion: string, gitTags: readonly string[
 export function latestProductionCalver(packageVersion: string, previousProduction: string): string {
   return isProductionCalver(packageVersion) ? toNpm(packageVersion) : previousProduction;
 }
+
+/**
+ * Highest named RC (`X.Y.Z-rc.N`) for a production CalVer, by integer N
+ * (`rc.10` beats `rc.9`). `coreCalver` may be `1.9.2` or `1.9.2-rc.1`.
+ */
+export function highestNamedRc(gitTags: readonly string[], coreCalver: string): string {
+  const core = toCoreCalver(coreCalver);
+  const rcs: CalverVersion[] = [];
+  for (const tag of gitTags) {
+    try {
+      const parsed = parseCalver(tag.trim());
+      if (parsed.rc === null) {
+        continue;
+      }
+      if (toCoreCalver(parsed) !== core) {
+        continue;
+      }
+      rcs.push(parsed);
+    } catch {
+      // Ignore non-CalVer tags (`ext-1.9.0`, leftover `api-X.Y.Z`).
+    }
+  }
+  if (rcs.length === 0) {
+    throw new Error(
+      `No named RC git tag found for ${core} (need v${core}-rc.N). Cut and tag an RC before production.`,
+    );
+  }
+  rcs.sort((left, right) => compareParsed(right, left));
+  const winner = rcs[0];
+  if (!winner) {
+    throw new Error(`No named RC git tag found for ${core} (need v${core}-rc.N).`);
+  }
+  return toNpm(winner);
+}
+
+/**
+ * Prefer a production CalVer pin (compose `BONDERY_INFRA_VERSION=X.Y.Z`) over
+ * in-image `package.json`. RC pins, `beta`, and garbage never reach `parseCalver`
+ * callers that throw — they keep `packageVersion`.
+ */
+export function overlayProductionCalver(
+  packageVersion: string,
+  infraVersion: string | undefined,
+): string {
+  const pin = infraVersion?.trim();
+  if (!pin) {
+    return packageVersion;
+  }
+  try {
+    if (isProductionCalver(pin)) {
+      return toNpm(pin);
+    }
+  } catch {
+    // `beta`, `latest`, or other non-CalVer pins.
+  }
+  return packageVersion;
+}

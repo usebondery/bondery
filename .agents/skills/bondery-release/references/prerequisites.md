@@ -8,11 +8,11 @@ Complete version machinery on `main` **before** tagging. Named RCs do not need a
 |---------|---------------------|---------|------|----------------|
 | Everyday `main` | last RC or last prod | none | `:sha-<short>` only | none |
 | Beta / RC | `X.Y.Z-rc.N` (N ≥ 1) | `vX.Y.Z-rc.N` | `:X.Y.Z-rc.N` + `:beta` | **prerelease**, **with** staging zip |
-| Production | `X.Y.Z` | `vX.Y.Z` | `:X.Y.Z` + `:production` | **not** prerelease, **no** zip |
+| Production | `X.Y.Z` | `vX.Y.Z` | `:X.Y.Z` + `:production` + `:latest` | **not** prerelease, **no** zip |
 
 Spelling is SemVer `1.9.1-rc.1` (not `1.9.1.rc-1`). Forbid `rc.0`. Chrome maps RC to `manifest.version` `1.9.1.N` plus `version_name` `1.9.1-rc.1`.
 
-Production promote is always a **new SHA** after dropping `-rc`. Do not retag an RC image as `X.Y.Z`.
+Production promote retags the **highest named RC image** `:X.Y.Z-rc.N` as `:X.Y.Z`. Drop-rc is changelog / `package.json` / CWS — not a new container digest.
 
 ## 1. Bump version numbers
 
@@ -67,14 +67,14 @@ Commit prerequisites as one or more logical commits on `main` (often via a `chor
 
 1. Branch `chore/release-X.Y.Z`, set root version `X.Y.Z-rc.1`, `pnpm run sync-version`.
 2. Merge to `main` → `stage-images` → `:sha` + `:beta` + `:X.Y.Z-rc.1`.
-3. `git tag vX.Y.Z-rc.1 && git push` → GitHub prerelease + staging zip.
+3. `git tag vX.Y.Z-rc.1 && git push` → verify `:sha` / `:rc.1` / `:beta` digests + GitHub prerelease + staging zip.
 4. Beta patch: `X.Y.Z-rc.2`, repeat.
 
 **Cut production `X.Y.Z`**
 
 1. PR: `X.Y.Z-rc.N` → `X.Y.Z`, dated changelog, `sync-version` (MIN = previous prod).
-2. Merge → `:sha` only (does not move `:beta`).
-3. `git tag vX.Y.Z` → `:X.Y.Z` + `:production`, CWS, GitHub release without zip.
+2. Merge → `:sha` only (does not move `:beta`; drop-rc is not the GA container).
+3. `git tag vX.Y.Z` → promote last `:X.Y.Z-rc.N` → `:X.Y.Z` then `:production` + `:latest` after smoke/CWS, CWS CRX rebuild, GitHub release without zip.
 4. Approve `production-containers` after CWS is published.
 
 ```bash
@@ -92,4 +92,4 @@ Production releases use unified `vX.Y.Z` tags only (`release.yml`). RC tags use 
 - [ ] OpenAPI generated and committed
 - [ ] `pnpm run build` (or verification loop) passes
 - [ ] Changes merged on `main`
-- [ ] `stage-images` green on release commit for changed services
+- [ ] `stage-images` green on the **RC cut** (named `:X.Y.Z-rc.N` exists for api and webapp)

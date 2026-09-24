@@ -39,90 +39,12 @@ jobs:
             echo "root package.json version ($ROOT_VERSION) must equal RC tag ($VERSION)"
             exit 1
           fi
-          SHORT=$(echo "${GITHUB_SHA}" | cut -c1-7)
+          # Peel annotated tags to the commit SHA that stage-images tagged as :sha-<short>.
+          COMMIT_SHA=$(git rev-parse "${TAG}^{}")
+          SHORT=$(echo "$COMMIT_SHA" | cut -c1-7)
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "short_sha=$SHORT" >> "$GITHUB_OUTPUT"
-
-  detect_changes:
-    needs: validate
-    runs-on: ubuntu-latest
-    outputs:
-      api: ${{ steps.set.outputs.api }}
-      webapp: ${{ steps.set.outputs.webapp }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: dorny/paths-filter@v4
-        id: filter
-        with:
-          filters: |
-            api:
-              - apps/api/**
-              - deploy/bondery/**
-              - packages/**
-              - scripts/**
-              - docs/**
-              - package.json
-              - pnpm-lock.yaml
-              - pnpm-workspace.yaml
-              - .nvmrc
-              - turbo.json
-              - .dockerignore.api
-              - .github/actions/shared/**
-              - .github/workflows/rc-release.yml
-              - .github/workflows/shared-promote-image-tag.yml
-            webapp:
-              - apps/webapp/**
-              - deploy/bondery/**
-              - packages/**
-              - scripts/**
-              - docs/**
-              - package.json
-              - pnpm-lock.yaml
-              - pnpm-workspace.yaml
-              - .nvmrc
-              - turbo.json
-              - .dockerignore.webapp
-              - .github/actions/shared/**
-              - .github/workflows/rc-release.yml
-              - .github/workflows/shared-promote-image-tag.yml
-
-      - name: Resolve component flags
-        id: set
-        env:
-          FILTER_API: ${{ steps.filter.outputs.api }}
-          FILTER_WEBAPP: ${{ steps.filter.outputs.webapp }}
-        run: |
-          echo "api=${FILTER_API:-false}" >> "$GITHUB_OUTPUT"
-          echo "webapp=${FILTER_WEBAPP:-false}" >> "$GITHUB_OUTPUT"
-
-  resolve_meta:
-    needs: validate
-    runs-on: ubuntu-latest
-    outputs:
-      prev_version: ${{ steps.prev.outputs.prev_version }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Resolve previous version tag
-        id: prev
-        env:
-          CURRENT: ${{ needs.validate.outputs.version }}
-        run: |
-          git fetch --tags
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+(-rc\.[1-9][0-9]*)?$' | grep -v "^v${CURRENT}$" | head -1 || true)
-          if [ -n "$PREV_TAG" ]; then
-            echo "prev_version=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
-          else
-            echo "prev_version=" >> "$GITHUB_OUTPUT"
-          fi
 
   github_release_init:
     needs: validate
@@ -141,53 +63,46 @@ jobs:
 
             RC publishing in progress for ${{ needs.validate.outputs.version }}.
 
-  promote_api:
-    needs: [validate, detect_changes]
-    if: needs.detect_changes.outputs.api == 'true'
-    uses: ./.github/workflows/shared-promote-image-tag.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/api
-      source_tag: sha-${{ needs.validate.outputs.short_sha }}
-      target_tag: ${{ needs.validate.outputs.version }}
-      extra_target_tags: beta
+  verify_images:
+    needs: validate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-  promote_webapp:
-    needs: [validate, detect_changes]
-    if: needs.detect_changes.outputs.webapp == 'true'
-    uses: ./.github/workflows/shared-promote-image-tag.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/webapp
-      source_tag: sha-${{ needs.validate.outputs.short_sha }}
-      target_tag: ${{ needs.validate.outputs.version }}
-      extra_target_tags: beta
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
 
-  retag_api:
-    needs: [validate, detect_changes, resolve_meta]
-    if: >-
-      needs.detect_changes.outputs.api != 'true' &&
-      needs.resolve_meta.outputs.prev_version != ''
-    uses: ./.github/workflows/shared-promote-image-tag.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/api
-      source_tag: ${{ needs.resolve_meta.outputs.prev_version }}
-      target_tag: ${{ needs.validate.outputs.version }}
-      extra_target_tags: beta
+      - name: Log in to GHCR
+        uses: ./.github/actions/shared/ghcr-login-infisical
 
-  retag_webapp:
-    needs: [validate, detect_changes, resolve_meta]
-    if: >-
-      needs.detect_changes.outputs.webapp != 'true' &&
-      needs.resolve_meta.outputs.prev_version != ''
-    uses: ./.github/workflows/shared-promote-image-tag.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/webapp
-      source_tag: ${{ needs.resolve_meta.outputs.prev_version }}
-      target_tag: ${{ needs.validate.outputs.version }}
-      extra_target_tags: beta
+      - name: Verify sha, named RC, and beta digests match
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+          SHORT_SHA: ${{ needs.validate.outputs.short_sha }}
+        run: |
+          set -euo pipefail
+          for svc in api webapp; do
+            sha_ref="ghcr.io/usebondery/${svc}:sha-${SHORT_SHA}"
+            rc_ref="ghcr.io/usebondery/${svc}:${VERSION}"
+            beta_ref="ghcr.io/usebondery/${svc}:beta"
+            sha_digest=$(bash .github/scripts/ghcr-manifest-digest.sh "$sha_ref")
+            rc_digest=$(bash .github/scripts/ghcr-manifest-digest.sh "$rc_ref")
+            beta_digest=$(bash .github/scripts/ghcr-manifest-digest.sh "$beta_ref")
+            if [ "$sha_digest" != "$rc_digest" ] || [ "$sha_digest" != "$beta_digest" ]; then
+              echo "::error::${svc} digest mismatch (tag on wrong commit?). Do not retag."
+              echo "  ${sha_ref}  ${sha_digest}"
+              echo "  ${rc_ref}   ${rc_digest}"
+              echo "  ${beta_ref} ${beta_digest}"
+              exit 1
+            fi
+            echo "${svc}: sha / ${VERSION} / beta share index digest ${sha_digest}"
+          done
 
   release_extension:
     needs: [validate]
@@ -202,10 +117,7 @@ jobs:
   github_release_finalize:
     needs:
       - validate
-      - promote_api
-      - promote_webapp
-      - retag_api
-      - retag_webapp
+      - verify_images
       - release_extension
     if: always() && needs.validate.result == 'success'
     runs-on: ubuntu-latest
@@ -228,18 +140,20 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.validate.outputs.tag }}
           VERSION: ${{ needs.validate.outputs.version }}
+          SHORT_SHA: ${{ needs.validate.outputs.short_sha }}
           EXTENSION_RESULT: ${{ needs.release_extension.result }}
+          VERIFY_RESULT: ${{ needs.verify_images.result }}
           ZIP_NAME: bondery-extension-${{ needs.validate.outputs.version }}-sha-${{ needs.validate.outputs.short_sha }}.zip
         run: |
           set -euo pipefail
           BODY_FILE=$(mktemp)
-          if [ "$EXTENSION_RESULT" = "success" ]; then
+          if [ "$VERIFY_RESULT" = "success" ] && [ "$EXTENSION_RESULT" = "success" ]; then
             cat > "$BODY_FILE" <<EOF
           [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
 
           ## Beta / RC
 
-          - Images: \`ghcr.io/usebondery/{api,webapp}:${VERSION}\` and floating \`:beta\`
+          - Verified \`ghcr.io/usebondery/{api,webapp}:sha-${SHORT_SHA}\`, \`:${VERSION}\`, and \`:beta\` share one digest (tag did not retag images)
           - Staging extension zip attached (Load unpacked; disable the Chrome Web Store listing first)
           EOF
             if [ -f "$ZIP_NAME" ]; then

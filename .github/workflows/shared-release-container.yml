@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       source_tag:
-        description: Promote source tag (sha-short or previous semver)
+        description: Promote source tag (named RC X.Y.Z-rc.N, or sha-short for tag-sha hotfix)
         required: true
         type: string
       force_rebuild:

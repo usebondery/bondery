@@ -90,13 +90,13 @@ Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages 
 |---------|-------------|-------------|
 | Everyday `main` | push `main` (not an RC cut) | `:sha-<short>` only |
 | Named RC cut | push `main` when package.json becomes `X.Y.Z-rc.N` | `:sha-<short>`, `:X.Y.Z-rc.N`, `:beta` |
-| RC tag | `vX.Y.Z-rc.N` (`rc-release.yml`) | Promote `:sha` → `:X.Y.Z-rc.N` + `:beta` |
-| Production tag | `vX.Y.Z` (`release.yml`; skips `-rc.`) | Promote `:sha-<short>` → `:X.Y.Z`; `:production` after smoke |
-| Deploy (website) | push to `release` | Promote `:sha-<short>` → `:production` when image exists on main; else build |
+| RC tag | `vX.Y.Z-rc.N` (`rc-release.yml`) | Verify `:sha-<short>` = `:X.Y.Z-rc.N` = `:beta` (no retag) |
+| Production tag | `vX.Y.Z` (`release.yml`; skips `-rc.`) | Promote last `:X.Y.Z-rc.N` → `:X.Y.Z`; `:production` + `:latest` after smoke + CWS gate |
+| Deploy (website) | push to `release` | Promote `:sha-<short>` → `:production` + `:latest` when image exists on main; else build |
 
-`:sha-<short>` is the **immutable artifact** built on `main`. `:beta` is a floating pointer updated **only on named RC cuts**, not every merge. Health `version` is the baked package.json CalVer/RC — never the word `beta`.
+`:sha-<short>` is the **immutable artifact** built on `main`. Named RC cuts also tag `:X.Y.Z-rc.N` and `:beta` (same digest). `:beta` is a floating pointer updated **only on named RC cuts**, not every merge and not on the RC git tag. `vX.Y.Z` promotes that named RC digest; drop-rc is changelog / `package.json` / CWS. `:latest` is an alias of `:production` — pin CalVer (`BONDERY_INFRA_VERSION=X.Y.Z`), never `:latest`. Health `version` follows runtime `BONDERY_INFRA_VERSION` when it is production CalVer — never the word `beta`.
 
-Release workflows support `retry-promote` dispatch on `release.yml` with optional `force_rebuild` when `:sha` is missing (CI recovery only).
+Release workflows support `retry-promote` dispatch on `release.yml` with default `source: rc` (last named RC; missing RC fails). Use `source: tag-sha` to promote the tag commit `:sha-*`, or `force_rebuild: true` to rebuild from source.
 
 Self-hosters pin **`BONDERY_INFRA_VERSION=X.Y.Z`** — both api and webapp images. RC is not a self-host channel.
 

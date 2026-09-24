@@ -1,5 +1,6 @@
 import { createRequire } from "node:module";
 import { CHROME_EXTENSION_URL, MIN_EXTENSION_VERSION } from "@bondery/helpers";
+import { readRuntimeProductVersion } from "@bondery/helpers/infra/build-metadata";
 import { latestProductionCalver } from "@bondery/helpers/version/calver";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { AppFastifyInstance } from "../../lib/platform/fastify-types.js";
@@ -26,7 +27,10 @@ export function registerManifestRoute(fastify: AppFastifyInstance): void {
     async () => {
       return {
         extension: {
-          latestVersion: latestProductionCalver(packageVersion, MIN_EXTENSION_VERSION),
+          latestVersion: latestProductionCalver(
+            readRuntimeProductVersion(packageVersion),
+            MIN_EXTENSION_VERSION,
+          ),
           minVersion: MIN_EXTENSION_VERSION,
           storeUrl: CHROME_EXTENSION_URL,
         },

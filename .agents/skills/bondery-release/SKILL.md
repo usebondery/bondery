@@ -30,8 +30,8 @@ metadata:
 
 ## Non-negotiables
 
-1. **`:sha-<short>` must exist on `main`** before `vX.Y.Z` or `vX.Y.Z-rc.N` — merge first; [`stage-images.yml`](../../../.github/workflows/stage-images.yml) builds `:sha` on every main push. `:beta` moves only on **named RC cuts** (package.json changed to `X.Y.Z-rc.N`).
-2. **Product tags promote, they do not rebuild** — [`release.yml`](../../../.github/workflows/release.yml) / [`rc-release.yml`](../../../.github/workflows/rc-release.yml) promote `ghcr.io/usebondery/{api,webapp}:sha-<short>`. Production promote is always a **new SHA** after dropping `-rc` — do not retag an RC image as `1.9.1`.
+1. **`:sha-<short>` must exist on `main`** before `vX.Y.Z` or `vX.Y.Z-rc.N` — merge first; [`stage-images.yml`](../../../.github/workflows/stage-images.yml) builds `:sha` on every main push. Named RC cuts also tag `:X.Y.Z-rc.N` and `:beta`. `:beta` moves only on **named RC cuts**, not on the RC git tag.
+2. **Product tags name artifacts, they do not rebuild** — [`rc-release.yml`](../../../.github/workflows/rc-release.yml) **verifies** `:sha-<short>`, `:X.Y.Z-rc.N`, and `:beta` share one digest (it does not retag). [`release.yml`](../../../.github/workflows/release.yml) **promotes** the highest named `:X.Y.Z-rc.N` digest to `:X.Y.Z`, then after smoke + CWS gate `:production` and `:latest`. Drop-rc is changelog / `package.json` / CWS — not the container source. Do not use `sha-${GITHUB_SHA}` of the `vX.Y.Z` tag.
 3. **Extension gate (production):** do not approve `production-containers` or update Dokploy until the user confirms the Chrome Web Store listing is live. CWS runs on `vX.Y.Z` only — never on RC tags.
 4. **Website exception:** `git push origin main:release` is **not** extension-gated — marketing CD only ([`deploy-website.yml`](../../../.github/workflows/deploy-website.yml)).
 5. **Pin `BONDERY_INFRA_VERSION`** in Dokploy (and `.env.example` via `sync-version`) to production **`X.Y.Z` only** — never an RC string. Pins **both** api and webapp; redeploy together. RC is not a self-host channel.
@@ -66,10 +66,9 @@ Full index: [references/README.md](references/README.md).
 
 ## Release operator checklist
 
-- [ ] RC cut (`X.Y.Z-rc.N`) merged and tagged when testing on beta (`vX.Y.Z-rc.N`)
+- [ ] Target RC cut merged to `main`; `stage-images` produced `:sha-<short>` + `:X.Y.Z-rc.N` + `:beta`; `vX.Y.Z-rc.N` verify succeeded
 - [ ] Production drop-`-rc` prerequisites on `main` complete ([prerequisites.md](references/prerequisites.md))
 - [ ] Changelog dated section cut (`bondery-changelog`) for production only
-- [ ] Target commit merged to `main`; `stage-images` produced `:sha-<short>` for changed services
 - [ ] `vX.Y.Z` tagged; CWS job succeeded; **user confirmed CWS live** before approving `production-containers`
 - [ ] `main:release` pushed when website (or full stack) ready
 - [ ] `BONDERY_INFRA_VERSION` is production `X.Y.Z`; Dokploy updated; api + webapp redeployed together

@@ -80,6 +80,7 @@ jobs:
       image_name: ghcr.io/usebondery/website
       source_tag: sha-${{ needs.resolve.outputs.short_sha }}
       target_tag: production
+      extra_target_tags: latest
 
   build-push:
     needs: resolve
@@ -92,6 +93,7 @@ jobs:
       image_name: ghcr.io/usebondery/website
       docker_tags: |
         type=raw,value=production
+        type=raw,value=latest
         type=sha,prefix=sha-,format=short
       oci_title: Bondery Website
       oci_description: Bondery marketing website (release-branch CD)
