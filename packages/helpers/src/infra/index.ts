@@ -3,4 +3,5 @@ export {
   buildLivenessStatus,
   buildReadinessStatus,
   readBuildMetadata,
+  readRuntimeProductVersion,
 } from "./build-metadata.js";

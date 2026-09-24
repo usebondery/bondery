@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  highestNamedRc,
   infraPinCalver,
   isProductionCalver,
   isRc,
   latestProductionCalver,
+  overlayProductionCalver,
   parseCalver,
   previousProductionCalver,
   toChromeVersion,
@@ -80,5 +82,37 @@ describe("infraPinCalver and latestProductionCalver", () => {
   it("advertises current production CalVer, not the RC string", () => {
     assert.equal(latestProductionCalver("1.9.1", "1.9.0"), "1.9.1");
     assert.equal(latestProductionCalver("1.9.1-rc.1", "1.9.0"), "1.9.0");
+  });
+});
+
+describe("highestNamedRc", () => {
+  it("picks the highest integer N, not string sort", () => {
+    assert.equal(
+      highestNamedRc(["v1.9.2-rc.9", "v1.9.2-rc.10", "v1.9.1-rc.99", "v1.9.2"], "1.9.2"),
+      "1.9.2-rc.10",
+    );
+  });
+
+  it("accepts tags without a v prefix and coreCalver with an RC suffix", () => {
+    assert.equal(highestNamedRc(["1.9.2-rc.1", "v1.9.2-rc.2"], "1.9.2-rc.1"), "1.9.2-rc.2");
+  });
+
+  it("fails when no named RC exists for that CalVer", () => {
+    assert.throws(() => highestNamedRc(["v1.9.2", "v1.9.1-rc.1"], "1.9.2"), /No named RC/);
+  });
+});
+
+describe("overlayProductionCalver", () => {
+  it("uses a production pin over an RC package.json", () => {
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", "1.9.2"), "1.9.2");
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", " 1.9.2 "), "1.9.2");
+  });
+
+  it("keeps package.json when env is unset, RC, beta, or garbage", () => {
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", undefined), "1.9.2-rc.2");
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", ""), "1.9.2-rc.2");
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", "1.9.2-rc.1"), "1.9.2-rc.2");
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", "beta"), "1.9.2-rc.2");
+    assert.equal(overlayProductionCalver("1.9.2-rc.2", "not-a-version"), "1.9.2-rc.2");
   });
 });

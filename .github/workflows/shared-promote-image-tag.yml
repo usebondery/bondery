@@ -47,7 +47,7 @@ jobs:
         run: |
           set -euo pipefail
           if ! docker buildx imagetools inspect "${IMAGE_NAME}:${SOURCE_TAG}" >/dev/null 2>&1; then
-            echo "::error::No image at ${IMAGE_NAME}:${SOURCE_TAG} — merge to main first (stage-images) or use force_rebuild on manual release."
+            echo "::error::No image at ${IMAGE_NAME}:${SOURCE_TAG} — named RC must exist on GHCR (stage-images on the RC cut), or use force_rebuild / source=tag-sha on manual release."
             exit 1
           fi
           echo "Source image ${IMAGE_NAME}:${SOURCE_TAG} exists."

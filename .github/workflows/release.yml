@@ -33,10 +33,18 @@ on:
           - api+webapp
         default: all
       force_rebuild:
-        description: Rebuild Docker images from source instead of promoting :sha
+        description: Rebuild Docker images from source instead of promoting the last named RC
         required: false
         type: boolean
         default: false
+      source:
+        description: Promote source when not rebuild (rc = last named RC digest; tag-sha = this tag/ref :sha-*)
+        required: false
+        type: choice
+        options:
+          - rc
+          - tag-sha
+        default: rc
       note:
         description: Optional CI incident note appended to the GitHub release
         required: false
@@ -64,60 +72,10 @@ jobs:
       webapp: ${{ steps.set.outputs.webapp }}
       extension: ${{ steps.set.outputs.extension }}
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-
-      - uses: dorny/paths-filter@v4
-        if: github.event_name == 'push'
-        id: filter
-        with:
-          filters: |
-            api:
-              - apps/api/**
-              - deploy/bondery/**
-              - packages/**
-              - scripts/**
-              - docs/**
-              - package.json
-              - pnpm-lock.yaml
-              - pnpm-workspace.yaml
-              - .nvmrc
-              - turbo.json
-              - .dockerignore.api
-              - .github/actions/shared/**
-              - .github/workflows/release.yml
-              - .github/workflows/shared-release-container.yml
-            webapp:
-              - apps/webapp/**
-              - deploy/bondery/**
-              - packages/**
-              - scripts/**
-              - docs/**
-              - package.json
-              - pnpm-lock.yaml
-              - pnpm-workspace.yaml
-              - .nvmrc
-              - turbo.json
-              - .dockerignore.webapp
-              - .github/actions/shared/**
-              - .github/workflows/release.yml
-              - .github/workflows/shared-release-container.yml
-            extension:
-              - apps/chrome-extension/**
-              - packages/**
-              - package.json
-              - pnpm-lock.yaml
-              - turbo.json
-
       - name: Resolve component flags
         id: set
         env:
           COMPONENTS: ${{ github.event_name == 'workflow_dispatch' && inputs.components != '' && inputs.components || '' }}
-          FILTER_API: ${{ steps.filter.outputs.api }}
-          FILTER_WEBAPP: ${{ steps.filter.outputs.webapp }}
-          FILTER_EXTENSION: ${{ steps.filter.outputs.extension }}
         run: |
           if [ -n "$COMPONENTS" ]; then
             case "$COMPONENTS" in
@@ -152,39 +110,117 @@ jobs:
                 ;;
             esac
           else
-            echo "api=${FILTER_API:-false}" >> "$GITHUB_OUTPUT"
-            echo "webapp=${FILTER_WEBAPP:-false}" >> "$GITHUB_OUTPUT"
+            echo "api=true" >> "$GITHUB_OUTPUT"
+            echo "webapp=true" >> "$GITHUB_OUTPUT"
             echo "extension=true" >> "$GITHUB_OUTPUT"
           fi
 
   resolve_meta:
     needs: validate
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      id-token: write
     outputs:
-      short_sha: ${{ steps.sha.outputs.short }}
-      prev_version: ${{ steps.prev.outputs.prev_version }}
+      source_tag: ${{ steps.source.outputs.source_tag }}
+      source_mode: ${{ steps.source.outputs.source_mode }}
+      rc_version: ${{ steps.source.outputs.rc_version }}
+      rc_git_sha: ${{ steps.source.outputs.rc_git_sha }}
+      drop_rc_sha: ${{ steps.source.outputs.drop_rc_sha }}
+      api_digest: ${{ steps.source.outputs.api_digest }}
+      webapp_digest: ${{ steps.source.outputs.webapp_digest }}
     steps:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          fetch-tags: true
           persist-credentials: false
 
-      - name: Resolve short SHA
-        id: sha
-        run: echo "short=$(echo "${GITHUB_SHA}" | cut -c1-7)" >> "$GITHUB_OUTPUT"
+      - uses: pnpm/setup@v1
+        with:
+          install: false
 
-      - name: Resolve previous product version tag
-        id: prev
+      - name: Set up Docker Buildx
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true) }}
+        uses: docker/setup-buildx-action@v4
+
+      - name: Log in to GHCR
+        if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true) }}
+        uses: ./.github/actions/shared/ghcr-login-infisical
+
+      - name: Resolve promote source
+        id: source
         env:
-          CURRENT: ${{ needs.validate.outputs.version }}
+          VERSION: ${{ needs.validate.outputs.version }}
+          SOURCE: ${{ github.event_name == 'workflow_dispatch' && inputs.source || 'rc' }}
+          FORCE_REBUILD: ${{ github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true }}
+          DISPATCH_REF: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || '' }}
         run: |
+          set -euo pipefail
           git fetch --tags
-          PREV_TAG=$(git tag -l 'v*' --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | grep -v "^v${CURRENT}$" | head -1 || true)
-          if [ -n "$PREV_TAG" ]; then
-            echo "prev_version=${PREV_TAG#v}" >> "$GITHUB_OUTPUT"
-          else
-            echo "prev_version=" >> "$GITHUB_OUTPUT"
+          DROP_RC_SHA=$(git rev-parse "v${VERSION}^{}")
+          echo "drop_rc_sha=${DROP_RC_SHA}" >> "$GITHUB_OUTPUT"
+
+          if [ "$FORCE_REBUILD" = "true" ]; then
+            echo "source_mode=force_rebuild" >> "$GITHUB_OUTPUT"
+            echo "source_tag=force-rebuild" >> "$GITHUB_OUTPUT"
+            echo "rc_version=" >> "$GITHUB_OUTPUT"
+            echo "rc_git_sha=" >> "$GITHUB_OUTPUT"
+            echo "api_digest=" >> "$GITHUB_OUTPUT"
+            echo "webapp_digest=" >> "$GITHUB_OUTPUT"
+            echo "Incident rebuild from source; skipping RC digest resolution."
+            exit 0
           fi
+
+          if [ "$SOURCE" != "rc" ] && [ "$SOURCE" != "tag-sha" ]; then
+            echo "::error::Unknown source '${SOURCE}'. Use rc or tag-sha."
+            exit 1
+          fi
+
+          if [ "$SOURCE" = "tag-sha" ]; then
+            if [ -n "$DISPATCH_REF" ]; then
+              SHA=$(git rev-parse "${DISPATCH_REF}^{}")
+            else
+              SHA="$DROP_RC_SHA"
+            fi
+            SHORT=$(echo "$SHA" | cut -c1-7)
+            SOURCE_TAG="sha-${SHORT}"
+            echo "source_mode=tag-sha" >> "$GITHUB_OUTPUT"
+            echo "source_tag=${SOURCE_TAG}" >> "$GITHUB_OUTPUT"
+            echo "rc_version=" >> "$GITHUB_OUTPUT"
+            echo "rc_git_sha=" >> "$GITHUB_OUTPUT"
+            echo "Explicit tag-sha source ${SOURCE_TAG} (${SHA})."
+          else
+            RC_META=$(CORE_CALVER="$VERSION" node .github/scripts/resolve-highest-rc.mjs)
+            RC_VERSION=$(printf '%s\n' "$RC_META" | awk -F= '/^rc_version=/{print $2}')
+            RC_GIT_SHA=$(printf '%s\n' "$RC_META" | awk -F= '/^rc_git_sha=/{print $2}')
+            RC_SHORT=$(printf '%s\n' "$RC_META" | awk -F= '/^rc_git_sha_short=/{print $2}')
+            SOURCE_TAG="$RC_VERSION"
+            echo "source_mode=rc" >> "$GITHUB_OUTPUT"
+            echo "source_tag=${SOURCE_TAG}" >> "$GITHUB_OUTPUT"
+            echo "Named RC ${RC_VERSION} freeze SHA ${RC_GIT_SHA} (sha-${RC_SHORT})."
+
+            for svc in api webapp; do
+              rc_ref="ghcr.io/usebondery/${svc}:${RC_VERSION}"
+              sha_ref="ghcr.io/usebondery/${svc}:sha-${RC_SHORT}"
+              rc_digest=$(bash .github/scripts/ghcr-manifest-digest.sh "$rc_ref")
+              sha_digest=$(bash .github/scripts/ghcr-manifest-digest.sh "$sha_ref")
+              if [ "$rc_digest" != "$sha_digest" ]; then
+                echo "::error::${svc} digest mismatch: ${rc_ref} (${rc_digest}) != ${sha_ref} (${sha_digest}). Do not promote."
+                exit 1
+              fi
+              echo "${svc}_digest=${rc_digest}" >> "$GITHUB_OUTPUT"
+              echo "${svc} index digest ${rc_digest} (named RC matches RC-cut :sha)."
+            done
+            exit 0
+          fi
+
+          for svc in api webapp; do
+            digest=$(bash .github/scripts/ghcr-manifest-digest.sh "ghcr.io/usebondery/${svc}:${SOURCE_TAG}")
+            echo "${svc}_digest=${digest}" >> "$GITHUB_OUTPUT"
+            echo "${svc} ${SOURCE_TAG} index digest ${digest}."
+          done
 
   github_release_init:
     needs: validate
@@ -213,7 +249,7 @@ jobs:
       service: api
       version: ${{ needs.validate.outputs.version }}
       checkout_ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.validate.outputs.tag }}
-      source_tag: sha-${{ needs.resolve_meta.outputs.short_sha }}
+      source_tag: ${{ needs.resolve_meta.outputs.source_tag }}
       force_rebuild: ${{ github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true }}
       use_production_gate: ${{ needs.detect_changes.outputs.extension == 'true' }}
 
@@ -226,35 +262,9 @@ jobs:
       service: webapp
       version: ${{ needs.validate.outputs.version }}
       checkout_ref: ${{ github.event_name == 'workflow_dispatch' && github.sha || needs.validate.outputs.tag }}
-      source_tag: sha-${{ needs.resolve_meta.outputs.short_sha }}
+      source_tag: ${{ needs.resolve_meta.outputs.source_tag }}
       force_rebuild: ${{ github.event_name == 'workflow_dispatch' && inputs.force_rebuild == true }}
       use_production_gate: ${{ needs.detect_changes.outputs.extension == 'true' }}
-
-  retag_api:
-    needs: [validate, detect_changes, resolve_meta]
-    if: >-
-      github.event_name == 'push' &&
-      needs.detect_changes.outputs.api != 'true' &&
-      needs.resolve_meta.outputs.prev_version != ''
-    uses: ./.github/workflows/shared-promote-image-tag.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/api
-      source_tag: ${{ needs.resolve_meta.outputs.prev_version }}
-      target_tag: ${{ needs.validate.outputs.version }}
-
-  retag_webapp:
-    needs: [validate, detect_changes, resolve_meta]
-    if: >-
-      github.event_name == 'push' &&
-      needs.detect_changes.outputs.webapp != 'true' &&
-      needs.resolve_meta.outputs.prev_version != ''
-    uses: ./.github/workflows/shared-promote-image-tag.yml
-    secrets: inherit
-    with:
-      image_name: ghcr.io/usebondery/webapp
-      source_tag: ${{ needs.resolve_meta.outputs.prev_version }}
-      target_tag: ${{ needs.validate.outputs.version }}
 
   release_extension:
     needs: [validate, detect_changes]
@@ -271,15 +281,11 @@ jobs:
       - validate
       - release_api
       - release_webapp
-      - retag_api
-      - retag_webapp
     if: >-
       always() &&
       (
         needs.release_api.result == 'success' ||
-        needs.release_webapp.result == 'success' ||
-        needs.retag_api.result == 'success' ||
-        needs.retag_webapp.result == 'success'
+        needs.release_webapp.result == 'success'
       )
     runs-on: ubuntu-latest
     permissions:
@@ -301,10 +307,9 @@ jobs:
     needs:
       - validate
       - detect_changes
+      - resolve_meta
       - release_api
       - release_webapp
-      - retag_api
-      - retag_webapp
       - release_extension
     if: always() && needs.validate.result == 'success'
     runs-on: ubuntu-latest
@@ -322,21 +327,23 @@ jobs:
           TAG: ${{ needs.validate.outputs.tag }}
           VERSION: ${{ needs.validate.outputs.version }}
           RELEASE_API_RESULT: ${{ needs.release_api.result }}
-          RETAG_API_RESULT: ${{ needs.retag_api.result }}
           RELEASE_WEBAPP_RESULT: ${{ needs.release_webapp.result }}
-          RETAG_WEBAPP_RESULT: ${{ needs.retag_webapp.result }}
           EXTENSION_RESULT: ${{ needs.release_extension.result }}
           GITHUB_EVENT_NAME: ${{ github.event_name }}
           RETRY_NOTE: ${{ github.event_name == 'workflow_dispatch' && inputs.note || '' }}
+          RC_VERSION: ${{ needs.resolve_meta.outputs.rc_version }}
+          RC_GIT_SHA: ${{ needs.resolve_meta.outputs.rc_git_sha }}
+          DROP_RC_SHA: ${{ needs.resolve_meta.outputs.drop_rc_sha }}
+          API_DIGEST: ${{ needs.resolve_meta.outputs.api_digest }}
+          WEBAPP_DIGEST: ${{ needs.resolve_meta.outputs.webapp_digest }}
+          SOURCE_MODE: ${{ needs.resolve_meta.outputs.source_mode }}
         run: |
           component_ok() {
-            local release_result="$1"
-            local retag_result="$2"
-            if [ "$release_result" = "success" ] || [ "$retag_result" = "success" ]; then
+            local result="$1"
+            if [ "$result" = "success" ]; then
               return 0
             fi
-            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && \
-              [ "$release_result" = "skipped" ] && [ "$retag_result" = "skipped" ]; then
+            if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$result" = "skipped" ]; then
               return 0
             fi
             return 1
@@ -353,16 +360,37 @@ jobs:
           }
 
           BODY_FILE=$(mktemp)
-          if component_ok "$RELEASE_API_RESULT" "$RETAG_API_RESULT" && \
-            component_ok "$RELEASE_WEBAPP_RESULT" "$RETAG_WEBAPP_RESULT" && \
+          if component_ok "$RELEASE_API_RESULT" && \
+            component_ok "$RELEASE_WEBAPP_RESULT" && \
             extension_ok; then
             cat > "$BODY_FILE" <<EOF
           [Docs](https://usebondery.com/docs) · [Changelog](https://usebondery.com/docs/changelog)
 
           ## Images
 
-          - [ghcr.io/usebondery/api:${VERSION}](https://github.com/usebondery/bondery/pkgs/container/api)
-          - [ghcr.io/usebondery/webapp:${VERSION}](https://github.com/usebondery/bondery/pkgs/container/webapp)
+          - [ghcr.io/usebondery/api:${VERSION}](https://github.com/usebondery/bondery/pkgs/container/api) — \`${API_DIGEST}\`
+          - [ghcr.io/usebondery/webapp:${VERSION}](https://github.com/usebondery/bondery/pkgs/container/webapp) — \`${WEBAPP_DIGEST}\`
+          EOF
+            if [ "$SOURCE_MODE" = "rc" ] && [ -n "$RC_VERSION" ]; then
+              cat >> "$BODY_FILE" <<EOF
+
+          Promoted last named RC \`${RC_VERSION}\` (freeze SHA \`${RC_GIT_SHA}\`).
+          Drop-rc git tag SHA \`${DROP_RC_SHA}\` is changelog, package.json, and CWS only — not the container source.
+          EOF
+            elif [ "$SOURCE_MODE" = "tag-sha" ]; then
+              cat >> "$BODY_FILE" <<EOF
+
+          Promoted \`:sha\` of git tag SHA \`${DROP_RC_SHA}\` (explicit \`source: tag-sha\`; no named RC).
+          EOF
+            elif [ "$SOURCE_MODE" = "force_rebuild" ]; then
+              cat >> "$BODY_FILE" <<EOF
+
+          Images rebuilt from source (\`force_rebuild\`).
+          EOF
+            fi
+            cat >> "$BODY_FILE" <<EOF
+
+          Chrome extension rebuilt at GA; website rebuilt for changelog.
 
           ## What's new?
 

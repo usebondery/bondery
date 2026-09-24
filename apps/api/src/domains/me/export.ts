@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { readRuntimeProductVersion } from "@bondery/helpers/infra/build-metadata";
 import {
   BONDERY_EXPORT_DATA_SCHEMA_TYPES,
   BONDERY_EXPORT_FILE_ENTRIES,
@@ -25,7 +26,7 @@ const require = createRequire(import.meta.url);
 const apiPackage = require("../../../package.json") as { version: string };
 
 export function getBonderyApiVersion(): string {
-  return apiPackage.version;
+  return readRuntimeProductVersion(apiPackage.version);
 }
 
 export type GenerateExportZipOptions = {
