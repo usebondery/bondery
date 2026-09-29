@@ -1,4 +1,25 @@
 {
+  "AiAssistants": {
+    "CopiedButton": "Copied!",
+    "CopyButton": "Copy",
+    "Description": "Connect Claude Desktop, Cursor, and other MCP clients to your contacts. Copy the MCP URL or the mcp.json snippet into the client.",
+    "DocsHelpLabel": "Learn how to connect AI assistants with MCP.",
+    "EmptyTitle": "No AI assistants connected yet",
+    "GrantedAt": "Connected {time}",
+    "McpJsonLabel": "mcp.json",
+    "McpUrlLabel": "MCP URL",
+    "PermissionField": "Access",
+    "PermissionFullDescription": "Also create, update, and delete contacts and their data.",
+    "PermissionFullLabel": "Full access",
+    "PermissionReadDescription": "Search and read your contacts and their data.",
+    "PermissionReadLabel": "Read only",
+    "RevokeButton": "Revoke",
+    "RevokeTooltip": "Revoke assistant",
+    "RevokeConfirm": "Yes, revoke",
+    "RevokeMessage": "This assistant will not be able to get new access. You can reconnect later by approving it again.",
+    "RevokeTitle": "Revoke access for \"{name}\"?",
+    "Title": "AI assistants"
+  },
   "ApiKeys": {
     "Cancel": "Cancel",
     "CopiedButton": "Copied!",
@@ -8,6 +29,7 @@
     "CreateErrorTitle": "Could not create key",
     "CreateTitle": "Create API key",
     "DeleteButton": "Delete",
+    "RevokeTooltip": "Revoke API key",
     "DeleteMessage": "This key will stop working immediately. Any integration using it will get errors.",
     "DeleteTitle": "Delete \"{label}\"?",
     "Description": "Connect third-party tools, custom scripts, and other tools to your contacts.",
@@ -442,6 +464,7 @@
       "NameField": "Passkey name",
       "NameTemplate": "{browser} on {os}",
       "NeverUsed": "Never used",
+      "RevokeTooltip": "Revoke passkey",
       "Title": "Passkeys",
       "UnsupportedTooltip": "Passkeys aren’t available in this browser."
     },

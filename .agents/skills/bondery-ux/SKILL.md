@@ -2,9 +2,9 @@
 name: bondery-ux
 description: >
   Bondery UX patterns — empty states, loading, lists, forms, modals, i18n, keyboard shortcuts,
-  tooltips, avatars, product flows (onboarding, import, navigation resume). Use when building or reviewing
-  UI in webapp or mobile, writing user-facing copy, or choosing interaction patterns, including
-  create more, repeatable create, or stay open after create.
+  tooltips, avatars, product flows (onboarding, import, navigation resume), webapp phone/PWA shell nav.
+  Use when building or reviewing UI in webapp or mobile, writing user-facing copy, or choosing
+  interaction patterns, including create more, repeatable create, stay open after create, or PWA sidebar menu.
 metadata:
   version: "1.0.0"
   namespace: bondery
@@ -23,7 +23,9 @@ metadata:
 ## Reading order
 
 1. **common/** — cross-platform patterns (empty states, loading, lists, writing, feedback)
-2. **mobile/** or **desktop/** — platform-specific interaction patterns
+2. **desktop/** or **mobile/** — platform-specific interaction patterns
+   - **desktop/** = `apps/webapp` (laptop **and** phone/PWA)
+   - **mobile/** = Expo native app only — not the webapp PWA
 3. **product/** — Bondery-specific flows (onboarding, import, page navigation resume)
 
 Full index: [references/README.md](references/README.md).
@@ -38,6 +40,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - Keyboard shortcut display uses `Kbd` from `@bondery/mantine-next` — not `@mantine/core`
 - `avatar: null` means show initials — no phantom image requests
 - Repetitive web create modals include Create more (or pass `repeatable: false` for nested pickers) — see [create-more.md](references/desktop/create-more.md)
+- Webapp phone/PWA opens the existing sidebar via a thin `AppShellHeader` menu — never Expo tabs/FAB, never a `PageHeader` burger — see [mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md)
 
 ## Decision tree
 
@@ -50,6 +53,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 | API error display | [references/common/api-errors-display.md](references/common/api-errors-display.md) |
 | Avatars | [references/common/avatars.md](references/common/avatars.md) |
 | Web modals / command palette | [references/desktop/modals.md](references/desktop/modals.md), [global-find.md](references/desktop/global-find.md) |
+| Webapp phone / PWA shell nav | [references/desktop/mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md) |
 | Create more / stay-open after create | [references/desktop/create-more.md](references/desktop/create-more.md) |
 | Keyboard shortcut chips | [references/desktop/keyboard-shortcuts.md](references/desktop/keyboard-shortcuts.md) |
 | Tooltips (Mantine, web) | [references/desktop/tooltips.md](references/desktop/tooltips.md) |
@@ -63,7 +67,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - [ ] No hardcoded English literals in components (exceptions: logs, test IDs, brand names)
 - [ ] API errors shown via `getUserFacingError` — not server `message`
 - [ ] Empty, loading, and error states handled (not just happy path)
-- [ ] Platform-appropriate pattern (mobile sheet vs desktop modal)
+- [ ] Platform-appropriate pattern (Expo sheet vs web modal; webapp phone uses [mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md), not Expo tabs)
 - [ ] Paginated tables use server `hasMore` for load-more — not client-derived pagination
 - [ ] Keyboard shortcuts use `Kbd` + `parseShortcutKeys` from `@bondery/mantine-next`
 - [ ] Mantine Tooltip (webapp/website): do not pass `multiline`, `withArrow`, `w`, or `maw` unless overriding theme defaults — see [tooltips.md](references/desktop/tooltips.md)

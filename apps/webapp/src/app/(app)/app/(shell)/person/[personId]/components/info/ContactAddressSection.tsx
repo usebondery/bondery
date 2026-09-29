@@ -3,7 +3,7 @@
 import { buildManualContactAddress } from "@bondery/helpers/address";
 import { formatContactName } from "@bondery/helpers/contact";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
-import { errorNotificationTemplate, TypePicker } from "@bondery/mantine-next";
+import { ActionIconButton, errorNotificationTemplate, TypePicker } from "@bondery/mantine-next";
 import {
   CONTACT_LIMITS,
   type Contact,
@@ -12,7 +12,7 @@ import {
   firstZodErrorMessage,
   replaceAddressesSchema,
 } from "@bondery/schemas";
-import { ActionIcon, Card, Group, Stack, Text, Tooltip } from "@mantine/core";
+import { Card, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useMemo, useState } from "react";
@@ -271,15 +271,14 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
               <Stack gap="xs">
                 <Group align="center" gap="xs" wrap="nowrap">
                   <Tooltip label={t("AddAddressAction")}>
-                    <ActionIcon
+                    <ActionIconButton
                       aria-label={t("AddAddressAction")}
                       color="green"
                       disabled={isSaving}
+                      icon={<IconPlus />}
                       onClick={() => handleCommitDraft()}
                       variant="light"
-                    >
-                      <IconPlus size={18} />
-                    </ActionIcon>
+                    />
                   </Tooltip>
 
                   <LocationLookupInput

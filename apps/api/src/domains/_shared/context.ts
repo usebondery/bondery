@@ -11,6 +11,8 @@ export interface DomainContext {
   /** Primary data access — set by `domainContextFromRequest`. */
   db?: PrismaClient;
   log?: FastifyBaseLogger;
+  /** Fastify `request.id` (or a generated fallback on MCP/chat). */
+  requestId?: string;
   user: DomainAuthUser;
   wakeMeta?: {
     sourceDeviceId?: string;

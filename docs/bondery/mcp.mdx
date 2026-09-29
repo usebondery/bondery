@@ -1,0 +1,157 @@
+---
+title: "Connect AI assistants (MCP)"
+description: Copy your MCP URL from Settings and sign in with OAuth so Claude Desktop, Cursor, and other MCP clients can search contacts and manage CRM records.
+icon: Sparkles
+docId: bondery.mcp
+---
+
+# Connect AI assistants (MCP)
+
+[MCP](https://modelcontextprotocol.io) is how AI assistants call tools on a server you control. Bondery exposes a small set of CRM tools over HTTP. Clients authenticate with **OAuth 2.1 and PKCE**. They do not use API keys.
+
+## Copy your MCP URL
+
+1. Open **Settings → AI assistants**
+2. Copy the **MCP URL**, or the **mcp.json** snippet
+
+On hosted Bondery that URL is `https://api.usebondery.com/mcp`. On a self-hosted instance it is `{apiBaseUrl}/mcp` — the same API origin your Settings page already uses. Do not paste the hosted URL into a self-hosted client.
+
+## What the assistant can do
+
+Tool names use **create, get, update, delete, search** — the same verbs as REST, plus `search_` for free-text lookup. Collection reads that are not a search stay `get_*` with filters. History writes are `create_*`, not `log_*`.
+
+**`search_*`** requires a `search` argument and returns at most 25 matches. It never dumps your full address book. **`get_*`** reads one record by id, or a filtered collection that is not a free-text search (for example `get_interactions` with `personId`).
+
+| Tool | Access | What it does |
+|---|---|---|
+| `search_contacts` | Read only | Search contacts by name or free text (at most 25; `search` is required) |
+| `get_contact` | Read only | Read one contact you own (same JSON as `GET /contacts/:id`) |
+| `get_contact_by_social` | Read only | Look up a contact by Instagram, LinkedIn, or Facebook handle |
+| `get_contact_groups` | Read only | Groups a contact you own belongs to |
+| `get_contact_tags` | Read only | Tags on a contact you own |
+| `get_contact_linkedin` | Read only | LinkedIn bio, work history, and education already stored for a contact you own |
+| `create_contact` | Full access | Create a contact (optional phones, emails, socials, notes, …) |
+| `update_contact` | Full access | Update a contact you own, including channels and socials |
+| `delete_contact` | Full access | Delete a contact you own (host must confirm; cannot delete your own card) |
+| `get_contact_share` | Read only | Preview which fields can be included in a contact share email |
+| `create_contact_share` | Full access | Email a contact card (host must confirm; cannot be undone) |
+| `get_important_dates` | Read only | Important dates for one contact |
+| `update_important_dates` | Full access | Replace all important dates for a contact (including empty) |
+| `get_upcoming_reminders` | Read only | Upcoming important-date reminders (next month; at most 25) |
+| `get_interactions` | Read only | Get interactions (optional `personId`; offset paging, at most 25) |
+| `get_interaction` | Read only | Read one interaction you own |
+| `create_interaction` | Full access | Create an interaction with contacts you own (`participantIds`) |
+| `update_interaction` | Full access | Update an interaction you own (optional `participantIds` replace) |
+| `delete_interaction` | Full access | Delete an interaction you own (host must confirm) |
+| `search_groups` | Read only | Search groups by label (`search` required, at most 25) |
+| `get_groups` | Read only | Browse groups (at most 25) |
+| `get_group` | Read only | Read one group you own |
+| `create_group` | Full access | Create a group |
+| `update_group` | Full access | Update a group you own |
+| `delete_group` | Full access | Delete a group (not the people in it) |
+| `get_group_contacts` | Read only | Get contacts in a group (at most 25) |
+| `create_group_membership` | Full access | Add contacts you own to a group |
+| `delete_group_membership` | Full access | Remove contacts from a group |
+| `search_tags` | Read only | Search tags by label (`search` required, at most 25) |
+| `get_tags` | Read only | Browse tags (at most 25) |
+| `get_tag` | Read only | Read one tag you own |
+| `create_tag` | Full access | Create a tag |
+| `update_tag` | Full access | Update a tag you own |
+| `delete_tag` | Full access | Delete a tag (not the people who had it) |
+| `get_tag_contacts` | Read only | Get contacts with a tag (at most 25) |
+| `create_tag_membership` | Full access | Add a tag to contacts you own |
+| `delete_tag_membership` | Full access | Remove a tag from contacts |
+| `get_relationships` | Read only | Get relationships for one contact |
+| `create_relationship` | Full access | Create a relationship between two contacts you own |
+| `update_relationship` | Full access | Update a relationship you own |
+| `delete_relationship` | Full access | Delete a relationship (not the people) |
+| `get_keep_in_touch_count` | Read only | Count overdue keep-in-touch contacts |
+| `get_keep_in_touch_contacts` | Read only | List contacts with a cadence (at most 25) |
+| `update_keep_in_touch` | Full access | Set or clear cadence and/or last interaction |
+
+There is no dump of your full address book. With Full access, deletes (including people and interactions) and sending a contact share email ask the host to confirm. Clients that never retry that confirmation cannot delete or send. You cannot delete your own contact card.
+
+On the consent screen, **Read only** is `mcp:read`. **Full access** adds `mcp:write`. The default is Read only.
+
+### Prompts
+
+Assistants that support MCP prompts can start from these templates:
+
+| Prompt | What you get |
+|---|---|
+| Catch up on a contact | Who they are and your recent history |
+| Brief me before a meeting | A short briefing before you meet or call |
+| Save a new contact | Add someone you just met (Full access) |
+| Record an interaction | Save a conversation or meeting (Full access) |
+| Reach out today | Who is due for keep-in-touch |
+| Organize a contact | Add someone to groups or tags (Full access) |
+
+The HTTP server implements [MCP 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28) only. Clients that still negotiate `2025-11-25` cannot complete initialize. On initialize the server sends usage instructions to the assistant (search first, never dump the address book, Full access for writes).
+
+## REST vs MCP
+
+MCP is not a copy of the REST API. Use **API keys** (or the apps) for the full CRM; use **MCP** for assistant-sized contact work.
+
+| Capability | REST | MCP |
+|---|---|---|
+| List/search contacts | `GET /contacts` (optional search, sort, filters, up to 200) | `search_contacts` (`search` required, max 25) |
+| Get one contact | `GET /contacts/:id` | `get_contact` (same `{ contact }` JSON) |
+| Create contact | `POST /contacts` | `create_contact` (name plus optional phones, emails, socials, notes, profile) |
+| Update contact | `PATCH /contacts/:id` | `update_contact` (identity, notes, channels, socials, geo, keep-in-touch) |
+| Delete contact | `DELETE /contacts`, `DELETE /contacts/:id` | `delete_contact` (host confirms) |
+| Emails, phones, social, addresses | Nested contact routes + PATCH | Writable on `create_contact` / `update_contact`. `get_contact_by_social` for Instagram, LinkedIn, or Facebook |
+| Important dates | `GET`/`PUT /contacts/:id/important-dates`, upcoming | `get_important_dates`, `update_important_dates`, `get_upcoming_reminders` |
+| Contact groups/tags | `GET /contacts/:id/groups`, `GET /contacts/:id/tags` | `get_contact_groups`, `get_contact_tags` |
+| LinkedIn work/education | `GET /contacts/:id/linkedin-data` | `get_contact_linkedin` (read of stored bio, work, and education; enrich upsert stays REST) |
+| Groups | Dedicated REST resources | `search_groups`, `get_groups`, `get_group`, create/update/delete group, memberships |
+| Tags | Dedicated REST resources | `search_tags`, `get_tags`, `get_tag`, create/update/delete tag, memberships |
+| Relationships | Nested contact relationship routes | `get_relationships`, create/update/delete relationship |
+| Keep-in-touch | Contact fields + overdue count | `get_keep_in_touch_count`, `get_keep_in_touch_contacts`, `update_keep_in_touch` |
+| Share contact | `GET /contacts/:id/share-preview`, `POST /contacts/share` | `get_contact_share`, `create_contact_share` (host confirms send) |
+| Merge, enrich, import, export, map, photo | Dedicated REST resources | — |
+| List interactions | `GET /interactions` | `get_interactions` (optional contact, max 25) |
+| Get one interaction | `GET /interactions/:id` | `get_interaction` |
+| Update interaction | `PATCH /interactions/:id` | `update_interaction` (optional `participantIds` replace) |
+| Delete interaction | `DELETE /interactions/:id` | `delete_interaction` (host confirms) |
+| Create interaction | `POST /interactions` | `create_interaction` (`participantIds`) |
+| In-app chat, sync, billing, settings, API keys | REST | — |
+
+MCP clients never receive REST `api:access`.
+
+## Claude Desktop
+
+Add a custom connector (or `mcpServers` entry) that points at the MCP URL from Settings. When Claude starts the OAuth flow, sign in on Bondery’s login page and approve access. Use **Read only** unless the assistant needs to create or update records.
+
+Headless setups (for example Hermes on a VPS with no browser) cannot complete this OAuth flow yet. Device authorization is not available in this version.
+
+## Cursor
+
+Copy the **mcp.json** snippet from Settings (or add this to `.cursor/mcp.json` / `~/.cursor/mcp.json`):
+
+```json
+{
+  "mcpServers": {
+    "bondery": {
+      "type": "http",
+      "url": "https://api.usebondery.com/mcp"
+    }
+  }
+}
+```
+
+On a self-hosted instance, use `{apiBaseUrl}/mcp` instead of the hosted URL. If you already have other servers, merge the `bondery` entry into the existing `mcpServers` object. Cursor will open Bondery’s OAuth login and consent pages.
+
+Cursor’s current HTTP client still negotiates MCP `2025-11-25`. After you approve access, initialize will fail until Cursor speaks `2026-07-28`. Claude Desktop and other 2026 clients can call the tools in the table above.
+
+## Other MCP clients
+
+Any MCP client that supports HTTP + OAuth 2.1 with PKCE can use the same URL. Claude Desktop uses Client ID Metadata Documents (CIMD). Cursor uses RFC 7591 dynamic client registration. Both stay limited to MCP tools (`mcp:read` / `mcp:write`); they cannot call the REST API.
+
+## Revoke access
+
+Settings → AI assistants lists assistants you have approved. Revoke a row to stop new access for that assistant. Existing access tokens stay valid until they expire. Tokens are never shown. You can reconnect later by approving the client again.
+
+## Related
+
+- [API authentication](/docs/api/authentication) — API keys for REST, not MCP
+- [Import](/docs/bondery/import) and [Export](/docs/bondery/export)

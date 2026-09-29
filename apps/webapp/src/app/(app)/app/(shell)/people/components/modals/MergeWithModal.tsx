@@ -21,7 +21,9 @@ import { notifications } from "@mantine/notifications";
 import { IconArrowMerge } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { getMergeAvatarIdentity } from "@/lib/api/domains/contacts";
 import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n/generated/hooks";
+import { bothHaveDefinedAvatars, hasMergeAvatarChoice } from "@/lib/merge/hasMergeAvatarChoice";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import {
@@ -134,6 +136,13 @@ function MergeWithModal({
   const [conflictChoices, setConflictChoices] = useState<
     Partial<Record<MergeConflictField, MergeConflictChoice>>
   >(initialConflictChoices ?? {});
+  const [avatarsHaveDistinctContents, setAvatarsHaveDistinctContents] = useState(() => {
+    const left = contacts.find((contact) => contact.id === initialLeftPersonId) ?? null;
+    const right = initialRightPersonId
+      ? (contacts.find((contact) => contact.id === initialRightPersonId) ?? null)
+      : null;
+    return !bothHaveDefinedAvatars(left, right);
+  });
 
   const { closeModal, closeModalSync } = useModalDismiss(modalId, isSubmitting);
 
@@ -203,6 +212,38 @@ function MergeWithModal({
 
     return listMergeFieldConflicts(leftContact, rightContact);
   }, [leftContact, rightContact]);
+
+  const bothHaveAvatars = bothHaveDefinedAvatars(leftContact, rightContact);
+
+  useEffect(() => {
+    if (!bothHaveAvatars || !leftPersonId || !rightPersonId) {
+      setAvatarsHaveDistinctContents(true);
+      return;
+    }
+
+    let cancelled = false;
+    setAvatarsHaveDistinctContents(false);
+    const abort = new AbortController();
+    void getMergeAvatarIdentity(leftPersonId, rightPersonId, { signal: abort.signal })
+      .then((result) => {
+        if (!cancelled) {
+          setAvatarsHaveDistinctContents(!result.identical);
+        }
+      })
+      .catch((error: unknown) => {
+        if (cancelled || (error instanceof Error && error.name === "AbortError")) {
+          return;
+        }
+        if (!cancelled) {
+          setAvatarsHaveDistinctContents(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+      abort.abort();
+    };
+  }, [bothHaveAvatars, leftPersonId, rightPersonId]);
 
   const autoLastInteractionChoice = useMemo(
     () => getAutoLastInteractionChoice(leftContact?.lastInteraction, rightContact?.lastInteraction),
@@ -350,7 +391,9 @@ function MergeWithModal({
   );
 
   const showAvatarPicker =
-    Boolean(leftContact && rightContact) && (!shouldSkipPickStep || conflicts.length > 0);
+    hasMergeAvatarChoice(leftContact, rightContact) &&
+    avatarsHaveDistinctContents &&
+    (!shouldSkipPickStep || conflicts.length > 0);
 
   return (
     <Stack gap="md">

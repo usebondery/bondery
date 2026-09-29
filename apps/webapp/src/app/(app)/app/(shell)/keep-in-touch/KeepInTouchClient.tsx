@@ -2,6 +2,7 @@
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
+  ActionIconButton,
   AnchorLink,
   errorNotificationTemplate,
   PersonChip,
@@ -9,7 +10,6 @@ import {
 } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
 import {
-  ActionIcon,
   Button,
   Group,
   Menu,
@@ -334,14 +334,13 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
 
                   <Menu position="bottom-end" trigger="click-hover" withArrow>
                     <Menu.Target>
-                      <ActionIcon
+                      <ActionIconButton
                         aria-label={t("MarkAsDoneFor", { name: personName })}
                         color="green"
+                        icon={<IconCheck />}
                         loading={isLoading}
                         variant="light"
-                      >
-                        <IconCheck size={16} />
-                      </ActionIcon>
+                      />
                     </Menu.Target>
                     <Menu.Dropdown>
                       <Menu.Item

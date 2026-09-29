@@ -309,7 +309,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                   ariaLabel={t("TimelinePreviewTooltip")}
                   color="gray"
                   href={WEBAPP_ROUTES.INTERACTIONS}
-                  icon={<IconInfoCircle size={16} stroke={1.5} />}
+                  icon={<IconInfoCircle />}
                   size="sm"
                   variant="transparent"
                 />
@@ -345,7 +345,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                   <ActionIconLink
                     ariaLabel={t("UpcomingRemindersTooltip")}
                     color="gray"
-                    icon={<IconInfoCircle size={16} stroke={1.5} />}
+                    icon={<IconInfoCircle />}
                     size="sm"
                     variant="transparent"
                   />
@@ -393,7 +393,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                     ariaLabel={t("RecentlyAddedTooltip")}
                     color="gray"
                     href={`${WEBAPP_ROUTES.PEOPLE}?sort=createdAtDesc`}
-                    icon={<IconInfoCircle size={16} stroke={1.5} />}
+                    icon={<IconInfoCircle />}
                     size="sm"
                     variant="transparent"
                   />
@@ -438,7 +438,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                     ariaLabel={t("RecentlyInteractedTooltip")}
                     color="gray"
                     href={`${WEBAPP_ROUTES.PEOPLE}?sort=interactionDesc`}
-                    icon={<IconInfoCircle size={16} stroke={1.5} />}
+                    icon={<IconInfoCircle />}
                     size="sm"
                     variant="transparent"
                   />

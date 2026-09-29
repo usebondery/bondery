@@ -42,11 +42,13 @@ export const primaryAppNavLinks: AppNavLinkDef[] = [
     href: WEBAPP_ROUTES.MAP,
     labelKey: "Map",
   },
-  {
-    href: WEBAPP_ROUTES.CHAT,
-    labelKey: "Chat",
-  },
 ];
+
+/** Chat lives in the sidebar Chat panel / collapsed icon, not the Browse list. */
+export const chatAppNavLink: AppNavLinkDef = {
+  href: WEBAPP_ROUTES.CHAT,
+  labelKey: "Chat",
+};
 
 export const secondaryAppNavLinks: AppNavLinkDef[] = [
   {
@@ -64,6 +66,7 @@ export const additionalStaticRouteTitles: AppNavLinkDef[] = [];
 
 export const allAppNavLinks: AppNavLinkDef[] = [
   ...primaryAppNavLinks,
+  chatAppNavLink,
   ...secondaryAppNavLinks,
   ...additionalStaticRouteTitles,
 ];

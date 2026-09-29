@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@better-auth/expo": "1.7.6",
     "@bondery/helpers": "workspace:*",
     "@bondery/schemas": "workspace:*",
     "@bondery/translations": "workspace:*",
@@ -20,6 +21,7 @@
     "@tamagui/sheet": "^2.7.7",
     "@tamagui/stacks": "^2.7.7",
     "@tamagui/text": "^2.7.7",
+    "better-auth": "1.7.6",
     "expo": "~57.0.21",
     "expo-background-task": "~57.0.16",
     "expo-clipboard": "~57.0.1",
@@ -89,5 +91,5 @@
     "ios": "expo run:ios",
     "test:sync": "tsx --test src/lib/sync/pull-wake.test.ts"
   },
-  "version": "1.9.2"
+  "version": "1.10.0-rc.1"
 }

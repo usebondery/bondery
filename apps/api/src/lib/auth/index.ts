@@ -6,8 +6,9 @@
  *  - Passwordless sign-in email (`magicLink` plugin; hashed Redis tokens)
  *  - Bearer sessions for mobile/API clients (`bearer` plugin)
  *  - JWT/JWKS issuance for services that need a verifiable access token
- *  - Acting as its own OAuth 2.1 / OIDC provider (`oauth-provider` plugin) for
- *    all first-party clients — webapp, mobile, chrome-extension
+ *  - Acting as its own OAuth 2.1 / OIDC provider (`mcp()` — oauth-provider
+ *    superset; do not also install `oauthProvider()`) for first-party REST
+ *    clients and CIMD/DCR MCP clients
  *  - `expo` plugin for mobile deep-link + SecureStore session handling
  *
  * `databaseHooks.user.create.after` seeds `user_settings` + the "myself" `people` row,
@@ -17,15 +18,17 @@
  */
 
 import { apiKey } from "@better-auth/api-key";
+import { cimd } from "@better-auth/cimd";
+import { fetchClientMetadataResource } from "@better-auth/cimd/node";
 import { expo } from "@better-auth/expo";
 import { i18n } from "@better-auth/i18n";
-import { oauthProvider } from "@better-auth/oauth-provider";
+import { mcp } from "@better-auth/mcp";
 import { passkey } from "@better-auth/passkey";
 import { prisma } from "@bondery/db";
 import { PLATFORM_ADMIN_ROLE, PLATFORM_USER_ROLE } from "@bondery/helpers/auth/platform-admin";
 import { resolveCookieDomain } from "@bondery/helpers/auth/resolve-cookie-domain";
 import { resolveWebAuthnRp } from "@bondery/helpers/auth/resolve-webauthn-rp";
-import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids";
 import { API_KEY_PREFIX, API_KEY_START_DISPLAY_LENGTH } from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
@@ -93,13 +96,36 @@ export function resolveApiResourceAudience(): string | string[] {
 }
 
 export const API_ACCESS_SCOPE = "api:access";
-export const OAUTH_PROVIDER_SCOPES = [
-  "openid",
-  "profile",
-  "email",
-  "offline_access",
-  API_ACCESS_SCOPE,
-] as const;
+export const MCP_READ_SCOPE = "mcp:read";
+export const MCP_WRITE_SCOPE = "mcp:write";
+
+export const OIDC_SCOPES = ["openid", "profile", "email", "offline_access"] as const;
+
+export const OAUTH_PROVIDER_SCOPES = [...OIDC_SCOPES, API_ACCESS_SCOPE] as const;
+
+export const MCP_OAUTH_SCOPES = [...OIDC_SCOPES, MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
+
+/** Better Auth CIMD `clientDiscoveryId` stored on discovered clients. */
+export const CIMD_CLIENT_DISCOVERY_ID = "cimd";
+
+/**
+ * Canonical MCP protected-resource identifier (`{API}/mcp`).
+ * Same origin as REST; path `/mcp`. Loopback aliases keep `/mcp`.
+ */
+export function resolveMcpResourceIdentifier(): string {
+  const api = resolveApiResourceIdentifier();
+  return api ? `${api}${API_ROUTES.MCP}` : "";
+}
+
+export function resolveMcpResourceIdentifiers(): string[] {
+  return withLoopbackUrlAlias(resolveMcpResourceIdentifier());
+}
+
+/** JWT `aud` check for MCP: string in production, both loopback aliases locally. */
+export function resolveMcpResourceAudience(): string | string[] {
+  const identifiers = resolveMcpResourceIdentifiers();
+  return identifiers.length === 1 ? (identifiers[0] ?? "") : identifiers;
+}
 
 export function resolveTrustedOAuthClientIds(): Set<string> | undefined {
   const clientIds = [
@@ -178,9 +204,11 @@ export const auth = betterAuth({
     // App code must not read Account.accessToken/refreshToken/idToken via
     // Prisma — use auth.api.getAccessToken if a plaintext provider token is needed.
     encryptOAuthTokens: true,
-    // Prisma `Account.providerAccountId` (`account_id`). Better Auth 1.7.1 still
+    // Prisma `Account.providerAccountId` (`account_id`). Better Auth still
     // queries the logical field `accountId`; without this map, GitHub/LinkedIn
-    // callback hits PrismaClientValidationError.
+    // callback hits PrismaClientValidationError. Account.issuer was removed in
+    // Better Auth 1.7.3+; rebuild `@bondery/db` after `prisma generate` so the
+    // API's dist Prisma client no longer selects that column.
     fields: {
       accountId: "providerAccountId",
     },
@@ -325,11 +353,21 @@ export const auth = betterAuth({
       getLocale: resolveAuthLocale,
       translations: authTranslations,
     }),
-    oauthProvider({
+    mcp({
+      // Cursor's MCP client still requires RFC 7591 DCR. Claude Desktop and
+      // other CIMD clients keep working via `cimd()`. Registration is limited
+      // to MCP resources and mcp:* scopes — never REST `api:access`.
+      allowDynamicClientRegistration: true,
+      // Consent looks up DCR/CIMD `client_name` with a signed `oauth_query`
+      // (GET `/oauth2/public-client` still requires a session cookie).
+      allowPublicClientPrelogin: true,
+      allowUnauthenticatedClientRegistration: true,
       cachedTrustedClients: resolveTrustedOAuthClientIds(),
+      clientRegistrationAllowedResources: resolveMcpResourceIdentifiers(),
+      clientRegistrationAllowedScopes: [...MCP_OAUTH_SCOPES],
+      clientRegistrationDefaultResources: resolveMcpResourceIdentifiers(),
+      clientRegistrationDefaultScopes: [...MCP_OAUTH_SCOPES],
       consentPage: `${resolveWebappUrl()}/oauth/consent`,
-      // Default true: a client must be linked to this resource
-      // (oauthClientResource) to receive a token for it — see provisioning.
       enforcePerClientResources: true,
       // Deliberately NOT `/login`: that page's server-side gate checks the
       // webapp's own independent OAuth-BFF session (see
@@ -341,19 +379,40 @@ export const auth = betterAuth({
       // native AS session. `/oauth/login` is a dedicated AS-only login
       // gate that always starts fresh social sign-in.
       loginPage: `${resolveWebappUrl()}/oauth/login`,
-      // Boot-time seed only — never overwrites an admin-edited row
-      // (resourceSeedMode defaults to "insertOnly"). The actual
-      // client -> resource links are created by
-      // scripts/provision-oauth-clients.ts, which also owns the client rows.
-      resources: resolveApiResourceIdentifiers().map((identifier) => ({
-        // oauth-provider intersects requested scopes with each resource's
-        // allowedScopes. OIDC scopes must survive that intersection for
-        // the token endpoint to issue an ID token and permit UserInfo.
-        allowedScopes: [...OAUTH_PROVIDER_SCOPES],
-        identifier,
-        name: "Bondery API",
-      })),
-      scopes: [...OAUTH_PROVIDER_SCOPES],
+      // Default register is 5/min. Cursor retries DCR on every Connect; those
+      // 429s are `{ message }` not RFC 7591 `{ error }`, so the client surfaces
+      // a Zod parse failure instead of backing off.
+      rateLimit: {
+        register: { max: 30, window: 60 },
+      },
+      // mcp() defaults this to 30s (oauth-provider default is 0). Keep
+      // first-party refresh strict: a rotated refresh token is not reusable.
+      refreshTokenReuseInterval: 0,
+      // Canonical MCP resource. mcp() also appends this identifier to
+      // `resources` if missing. REST identifiers stay in `resources` with
+      // REST-only allowedScopes; first-party provisioner links only REST.
+      resource: resolveMcpResourceIdentifier(),
+      resources: [
+        ...resolveApiResourceIdentifiers().map((identifier) => ({
+          allowedScopes: [...OAUTH_PROVIDER_SCOPES],
+          identifier,
+          name: "Bondery API",
+        })),
+        ...resolveMcpResourceIdentifiers().map((identifier) => ({
+          allowedScopes: [...MCP_OAUTH_SCOPES],
+          identifier,
+          name: "Bondery MCP",
+        })),
+      ],
+      // RFC 8414 advertises the union. Per-resource allowedScopes still
+      // gate tokens. RFC 9728 PRM from mcp() lists plugin-level scopes
+      // minus OIDC (so `api:access` may appear next to mcp:* — that is
+      // discovery metadata, not a token leak).
+      scopes: [...OAUTH_PROVIDER_SCOPES, MCP_READ_SCOPE, MCP_WRITE_SCOPE],
+    }),
+    cimd({
+      fetchClientMetadataResource,
+      metadataProfile: "mcp-2026-07-28",
     }),
     apiKey({
       defaultPrefix: API_KEY_PREFIX,
@@ -401,6 +460,10 @@ export const auth = betterAuth({
   rateLimit: {
     enabled: true,
     storage: "secondary-storage",
+    // Inject tests share one client IP (Better Auth cannot read Fastify's
+    // remoteAddress), so the default per-path bucket 429s `test:auth` when
+    // files run in parallel against real Redis. Production keeps defaults.
+    ...(process.env.NODE_ENV === "test" ? { max: 10_000, window: 10 } : {}),
   },
   secondaryStorage: createBetterAuthSecondaryStorage(),
   secrets: betterAuthSecrets,

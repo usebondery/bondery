@@ -3,10 +3,12 @@ import type {
   Contact,
   GroupWithCount,
   ImportantDateType,
+  RelationshipType,
+  Tag,
 } from "@bondery/schemas";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
-import { toGroupDto } from "../../domains/_shared/prisma-helpers.js";
+import { toGroupDto, toTagDto } from "../../domains/_shared/prisma-helpers.js";
 import { attachContactExtras, loadEnrichedContact } from "../../lib/contacts/enrichment.js";
 import { findPersonIdBySocial } from "../../lib/contacts/socials.js";
 import { generateVCard } from "../../lib/contacts/vcard.js";
@@ -40,10 +42,103 @@ export async function getContact(
   );
 
   if (!enrichedContact) {
-    throw notFound("Contact not found", "not_found");
+    throw notFound("Contact not found", "contact_not_found");
   }
 
   return { contact: enrichedContact };
+}
+
+export async function listContactRelationships(
+  ctx: ContactDetailContext,
+  personId: string,
+  avatarOptions?: AvatarTransformOptions,
+) {
+  const { user } = ctx;
+  const db = domainDb(ctx as DomainContext);
+
+  const person = await db.people.findFirst({
+    select: { id: true },
+    where: { id: personId, userId: user.id },
+  });
+
+  if (!person) {
+    throw notFound("Contact not found", "contact_not_found");
+  }
+
+  const rows = await db.peopleRelationship.findMany({
+    orderBy: { createdAt: "asc" },
+    where: {
+      OR: [{ sourcePersonId: personId }, { targetPersonId: personId }],
+      userId: user.id,
+    },
+  });
+
+  if (rows.length === 0) {
+    return { relationships: [] };
+  }
+
+  const personIds = [
+    ...new Set(
+      rows.flatMap((relationship) => [relationship.sourcePersonId, relationship.targetPersonId]),
+    ),
+  ];
+
+  const peopleRows = await db.people.findMany({
+    select: {
+      firstName: true,
+      hasAvatar: true,
+      id: true,
+      lastName: true,
+      updatedAt: true,
+    },
+    where: { id: { in: personIds }, userId: user.id },
+  });
+
+  const peopleById = new Map(peopleRows.map((personRow) => [personRow.id, personRow]));
+
+  const relationships = rows.flatMap((relationship) => {
+    const sourcePerson = peopleById.get(relationship.sourcePersonId);
+    const targetPerson = peopleById.get(relationship.targetPersonId);
+    if (!sourcePerson || !targetPerson) {
+      return [];
+    }
+
+    return [
+      {
+        createdAt: relationship.createdAt.toISOString(),
+        id: relationship.id,
+        relationshipType: relationship.relationshipType as RelationshipType,
+        sourcePerson: toContactPreview(
+          user.id,
+          {
+            firstName: sourcePerson.firstName,
+            hasAvatar: sourcePerson.hasAvatar,
+            id: sourcePerson.id,
+            lastName: sourcePerson.lastName,
+            updatedAt: sourcePerson.updatedAt.toISOString(),
+          },
+          avatarOptions,
+        ),
+        sourcePersonId: relationship.sourcePersonId,
+        targetPerson: toContactPreview(
+          user.id,
+          {
+            firstName: targetPerson.firstName,
+            hasAvatar: targetPerson.hasAvatar,
+            id: targetPerson.id,
+            lastName: targetPerson.lastName,
+            updatedAt: targetPerson.updatedAt.toISOString(),
+          },
+          avatarOptions,
+        ),
+        targetPersonId: relationship.targetPersonId,
+        updatedAt: relationship.updatedAt.toISOString(),
+        userId: relationship.userId,
+      },
+    ];
+  });
+
+  return { relationships };
 }
 
 export async function findContactBySocial(ctx: ContactDetailContext, query: BySocialQuery) {
@@ -105,7 +200,7 @@ export async function getContactGroups(
   });
 
   if (!contact) {
-    throw notFound("Contact not found", "not_found");
+    throw notFound("Contact not found", "contact_not_found");
   }
 
   const memberships = await db.peopleGroup.findMany({
@@ -144,6 +239,31 @@ export async function getContactGroups(
   return { groups: groupsWithCounts };
 }
 
+export async function getContactTags(
+  db: ReturnType<typeof domainDb>,
+  userId: string,
+  personId: string,
+) {
+  const contact = await db.people.findFirst({
+    select: { id: true },
+    where: { id: personId, userId },
+  });
+
+  if (!contact) {
+    throw notFound("Contact not found", "contact_not_found");
+  }
+
+  const memberships = await db.peopleTag.findMany({
+    include: { tag: true },
+    orderBy: { tag: { label: "asc" } },
+    where: { personId, userId },
+  });
+
+  const tags: Tag[] = memberships.map((membership) => toTagDto(membership.tag));
+
+  return { tags };
+}
+
 export async function getContactVCardExport(
   ctx: ContactDetailContext,
   contactId: string,
@@ -157,7 +277,7 @@ export async function getContactVCardExport(
   });
 
   if (!contact) {
-    throw notFound("Contact not found", "not_found");
+    throw notFound("Contact not found", "contact_not_found");
   }
 
   const mappedContact = mapContactDetailRecord(contact);

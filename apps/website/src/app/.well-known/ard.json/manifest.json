@@ -25,7 +25,20 @@
       ],
       "tags": ["api", "openapi", "contacts"],
       "type": "application/yaml"
+    },
+    {
+      "description": "Bondery MCP server for searching contacts, reading a contact, creating or updating a contact, listing interactions for a contact, and logging interactions. OAuth 2.1 with PKCE; no API keys.",
+      "displayName": "Bondery MCP",
+      "kind": "server:mcp",
+      "path": "/mcp-server-card.json",
+      "representativeQueries": [
+        "search my Bondery contacts from Claude",
+        "log an interaction in Bondery from Cursor",
+        "update a contact I own in Bondery"
+      ],
+      "tags": ["mcp", "contacts", "ai"],
+      "type": "application/mcp-server-card+json"
     }
   ],
-  "updatedAt": "2026-09-02"
+  "updatedAt": "2026-09-28"
 }

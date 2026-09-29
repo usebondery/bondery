@@ -12,6 +12,24 @@ export function betterAuthAuthorizationServerMetadataPath(): string {
   return `/.well-known/oauth-authorization-server${BETTER_AUTH_BASE_PATH}`;
 }
 
+/** RFC 9728 protected-resource metadata (root document). */
+export const BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH =
+  "/.well-known/oauth-protected-resource" as const;
+
+/**
+ * RFC 9728 paths Better Auth `mcp()` serves: the root document plus the
+ * path-inserted document for `{resourcePath}` (default `/mcp`).
+ */
+export function betterAuthProtectedResourceMetadataPaths(resourcePath = "/mcp"): string[] {
+  const inserted = resourcePath.startsWith("/")
+    ? resourcePath.replace(/\/+$/, "")
+    : `/${resourcePath}`;
+  return [
+    BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH,
+    `${BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH}${inserted}`,
+  ];
+}
+
 export const WEBSITE_ROUTES = {
   ABOUT: "/about",
   APP_GROUP: "/app",
@@ -37,6 +55,7 @@ export const API_ROUTES = {
   CONTACTS_MAP_ADDRESS_PINS: "/contacts/map-address-pins",
   CONTACTS_MAP_PINS: "/contacts/map-pins",
   CONTACTS_MERGE: "/contacts/merge",
+  CONTACTS_MERGE_AVATARS: "/contacts/merge/avatars",
   CONTACTS_MERGE_RECOMMENDATIONS: "/contacts/merge-recommendations",
   CONTACTS_MERGE_RECOMMENDATIONS_COUNT: "/contacts/merge-recommendations/count",
   CONTACTS_MERGE_RECOMMENDATIONS_REFRESH: "/contacts/merge-recommendations/refresh",
@@ -49,6 +68,7 @@ export const API_ROUTES = {
   GEOCODE_TIMEZONE: "/geocode/timezone",
   GROUPS: "/groups",
   INTERACTIONS: "/interactions",
+  MCP: "/mcp",
   ME: "/me",
   ME_API_KEYS: "/me/api-keys",
   ME_EXPORT: "/me/export",
@@ -56,6 +76,7 @@ export const API_ROUTES = {
   ME_FEEDBACK: "/me/feedback",
   ME_IMPORT: "/me/import",
   ME_INITIALIZE: "/me/initialize",
+  ME_MCP_CONSENTS: "/me/mcp-consents",
   ME_ONBOARDING_COMPLETE: "/me/onboarding/complete",
   ME_ONBOARDING_IMPORT_FOLLOWUP: "/me/onboarding/import-followup",
   ME_PERSON: "/me/person",
@@ -97,7 +118,7 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.9.0";
+export const MIN_EXTENSION_VERSION: string = "1.9.2";
 
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;

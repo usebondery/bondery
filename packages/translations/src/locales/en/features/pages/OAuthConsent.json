@@ -5,14 +5,26 @@
   "Description": "{clientName} is requesting access to your Bondery account.",
   "ErrorTitle": "Authorization Error",
   "InvalidRequest": "Invalid authorization request.",
+  "LoopbackWarning": "This app is running on this computer (localhost). Continue only if you started it.",
   "MissingAuthorizationId": "Missing authorization request. Please try again from the application.",
+  "PermissionFullDescription": "Also create, update, and delete contacts and their data.",
+  "PermissionFullLabel": "Full access",
+  "PermissionLabel": "Access",
+  "PermissionReadDescription": "Search and read your contacts and their data.",
+  "PermissionReadLabel": "Read only",
   "RequestedPermissions": "Requested permissions",
   "Scopes": {
+    "api:access": "Use the Bondery API on your behalf",
     "email": "View your email address",
+    "mcp:read": "View your contacts and their data",
+    "mcp:write": "Create, update, and delete contacts and their data",
+    "offline_access": "Stay signed in until you revoke access",
     "openid": "Verify your identity",
     "phone": "View your phone number",
     "profile": "View your profile information"
   },
   "Title": "Authorize Application",
-  "UnexpectedError": "An unexpected error occurred. Please try again."
+  "UnexpectedError": "An unexpected error occurred. Please try again.",
+  "UnknownClientName": "Unknown application",
+  "WebappClientName": "Bondery"
 }

@@ -64,6 +64,11 @@ export interface MergeRecommendationsQuery extends PaginationQuery {
   declined?: string;
 }
 
+export interface MergeAvatarIdentityQuery {
+  leftPersonId: string;
+  rightPersonId: string;
+}
+
 export interface SyncPullQuery {
   limit?: number;
   since: number;

@@ -1,7 +1,8 @@
 "use client";
 
 import type { ImportantDateType } from "@bondery/schemas";
-import { ActionIcon, Card, Group, Loader, Select, TextInput, Tooltip } from "@mantine/core";
+import { ActionIconButton } from "@bondery/mantine-next";
+import { Card, Group, Loader, Select, TextInput, Tooltip } from "@mantine/core";
 import { IconBell, IconCalendarEvent, IconTrash } from "@tabler/icons-react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { getDateFormat, normalizePickerDate } from "../../utils/importantDateUtils";
@@ -144,16 +145,15 @@ export function ImportantDateRowCard({
         ) : null}
 
         {!hideDeleteIcon ? (
-          <ActionIcon
+          <ActionIconButton
             aria-label={deleteLabel}
             color="red"
             disabled={disabled}
+            icon={<IconTrash />}
             ml="auto"
             onClick={onDelete}
             variant="subtle"
-          >
-            <IconTrash size={16} />
-          </ActionIcon>
+          />
         ) : null}
       </Group>
     </Card>

@@ -1,5 +1,6 @@
 import type { CreateContactInput, UpdateContactInput } from "#entities/contact/types.js";
 import type { CreateGroupInput } from "#entities/group/types.js";
+import type { ReplaceImportantDatesInput } from "#entities/important-date/types.js";
 
 export type SyncMutationType =
   | "contact.create"
@@ -7,6 +8,7 @@ export type SyncMutationType =
   | "contact.delete"
   | "contact.addTag"
   | "contact.removeTag"
+  | "contact.replaceImportantDates"
   | "group.create"
   | "group.update"
   | "group.delete"
@@ -24,6 +26,10 @@ export type ContactDeletePayload = Record<string, never> | undefined;
 
 export interface ContactTagPayload {
   tagId: string;
+}
+
+export interface ContactReplaceImportantDatesPayload {
+  dates: ReplaceImportantDatesInput;
 }
 
 export type GroupCreatePayload = CreateGroupInput & { id?: string };
@@ -68,6 +74,11 @@ export type SyncMutation =
       entityId: string;
       payload: ContactTagPayload;
       type: "contact.removeTag";
+    })
+  | (SyncMutationBase & {
+      entityId: string;
+      payload: ContactReplaceImportantDatesPayload;
+      type: "contact.replaceImportantDates";
     })
   | (SyncMutationBase & { payload: GroupCreatePayload; type: "group.create" })
   | (SyncMutationBase & {

@@ -11,11 +11,14 @@ import type {
   contactResponseSchema,
   contactSchema,
   contactSelectableSchema,
+  contactShareFieldPreviewSchema,
+  contactSharePreviewResponseSchema,
   contactSortOrderSchema,
   contactsFilterSchema,
   contactsListResponseSchema,
   contactsListStatsSchema,
   contactsSelectableListResponseSchema,
+  contactWritableFieldsSchema,
   createContactApiInputSchema,
   createContactInputSchema,
   createContactRelationshipInputSchema,
@@ -44,6 +47,7 @@ import type {
   relationshipTypeSchema,
   shareableFieldSchema,
   updateContactIdentitySchema,
+  updateContactInputSchema,
   updateContactRelationshipInputSchema,
   workHistoryEntrySchema,
 } from "./schema.js";
@@ -59,11 +63,14 @@ import type {
   ContactRelationshipWithPeople,
   ContactResponse,
   ContactSelectable,
+  ContactShareFieldPreview,
+  ContactSharePreviewResponse,
   ContactSortOrder,
   ContactsFilter,
   ContactsListResponse,
   ContactsListStats,
   ContactsSelectableListResponse,
+  ContactWritableFields,
   CreateContactFromFullNameInput,
   CreateContactInput,
   CreateContactRelationshipInput,
@@ -92,6 +99,7 @@ import type {
   ShareableField,
   UpdateContactIdentityFormInput,
   UpdateContactIdentityInput,
+  UpdateContactInput,
   UpdateContactRelationshipInput,
   WorkHistoryEntry,
 } from "./types.js";
@@ -109,8 +117,14 @@ type _ContactRelationship = Assert<
 type _ContactRelationshipWithPeople = Assert<
   IsEqual<ContactRelationshipWithPeople, z.infer<typeof contactRelationshipWithPeopleSchema>>
 >;
+type _ContactWritableFields = Assert<
+  IsEqual<ContactWritableFields, z.infer<typeof contactWritableFieldsSchema>>
+>;
 type _CreateContactInput = Assert<
   IsEqual<CreateContactInput, z.infer<typeof createContactApiInputSchema>>
+>;
+type _UpdateContactInput = Assert<
+  IsEqual<UpdateContactInput, z.infer<typeof updateContactInputSchema>>
 >;
 type _CreateContactFromFullNameInput = Assert<
   IsEqual<CreateContactFromFullNameInput, z.infer<typeof createContactInputSchema>>
@@ -206,3 +220,9 @@ type _EnrichQueuePatchBody = Assert<
   IsEqual<EnrichQueuePatchBody, z.infer<typeof enrichQueuePatchBodySchema>>
 >;
 type _ShareableField = Assert<IsEqual<ShareableField, z.infer<typeof shareableFieldSchema>>>;
+type _ContactShareFieldPreview = Assert<
+  IsEqual<ContactShareFieldPreview, z.infer<typeof contactShareFieldPreviewSchema>>
+>;
+type _ContactSharePreviewResponse = Assert<
+  IsEqual<ContactSharePreviewResponse, z.infer<typeof contactSharePreviewResponseSchema>>
+>;

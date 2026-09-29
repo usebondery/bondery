@@ -1,4 +1,25 @@
 {
+  "AiAssistants": {
+    "CopiedButton": "Zkopírováno!",
+    "CopyButton": "Kopírovat",
+    "Description": "Připojte Claude Desktop, Cursor a další MCP klienty ke svým kontaktům. Zkopírujte adresu MCP nebo úryvek mcp.json do klienta.",
+    "DocsHelpLabel": "Jak připojit AI asistenty přes MCP.",
+    "EmptyTitle": "Zatím žádní AI asistenti",
+    "GrantedAt": "Připojeno {time}",
+    "McpJsonLabel": "mcp.json",
+    "McpUrlLabel": "Adresa MCP",
+    "PermissionField": "Přístup",
+    "PermissionFullDescription": "Může také zakládat, upravovat a mazat kontakty a jejich údaje.",
+    "PermissionFullLabel": "Plný přístup",
+    "PermissionReadDescription": "Vyhledávání a čtení vašich kontaktů a jejich údajů.",
+    "PermissionReadLabel": "Jen čtení",
+    "RevokeButton": "Odebrat přístup",
+    "RevokeTooltip": "Odebrat asistenta",
+    "RevokeConfirm": "Ano, odebrat",
+    "RevokeMessage": "Tento asistent už nedostane nový přístup. Později ho můžete znovu schválit.",
+    "RevokeTitle": "Odebrat přístup pro „{name}“?",
+    "Title": "AI asistenti"
+  },
   "ApiKeys": {
     "Cancel": "Zrušit",
     "CopiedButton": "Zkopírováno!",
@@ -8,6 +29,7 @@
     "CreateErrorTitle": "Klíč se nepodařilo vytvořit",
     "CreateTitle": "Vytvořit API klíč",
     "DeleteButton": "Smazat",
+    "RevokeTooltip": "Odebrat API klíč",
     "DeleteMessage": "Klíč okamžitě přestane fungovat. Integrace, které ho používají, budou hlásit chyby.",
     "DeleteTitle": "Smazat „{label}\"?",
     "Description": "Propojte Zapier, skripty a další nástroje se svými kontakty.",
@@ -450,6 +472,7 @@
       "NameField": "Název přístupového klíče",
       "NameTemplate": "{browser} na {os}",
       "NeverUsed": "Nikdy nepoužito",
+      "RevokeTooltip": "Odebrat přístupový klíč",
       "Title": "Přístupové klíče",
       "UnsupportedTooltip": "Přístupové klíče v tomto prohlížeči nejsou k dispozici."
     },

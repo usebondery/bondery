@@ -1,18 +1,13 @@
-import {
-  type ApiErrorType,
-  getErrorDefinition,
-  getErrorDocUrl,
-  isApiErrorCode,
-} from "@bondery/schemas/errors";
+import { type ApiErrorResponse, type ApiErrorType, isApiErrorCode } from "@bondery/schemas/errors";
 import type { FastifyError, FastifyRequest } from "fastify";
 import { RequestValidationError } from "fastify-zod-openapi";
 import { DomainError } from "../../../domains/_shared/context.js";
 import { SyncConflictError } from "../../sync/conflict.js";
-import { URLS } from "../config.js";
-import { type ErrorCode, GENERIC_500_MESSAGE } from "./codes.js";
+import { type ErrorCode, getErrorDefinition } from "./codes.js";
+import { buildApiErrorBody, toApiErrorResponse } from "./to-api-error-response.js";
 
 export interface MappedErrorResponse {
-  body: { error: Record<string, unknown> };
+  body: ApiErrorResponse;
   statusCode: number;
 }
 
@@ -20,45 +15,7 @@ function isServerError(statusCode: number): boolean {
   return statusCode >= 500;
 }
 
-function websiteBaseUrl(): string {
-  return (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
-}
-
-function buildErrorBody(params: {
-  type: ApiErrorType;
-  code: string;
-  message: string;
-  request: FastifyRequest;
-  param?: string;
-  retry_after?: number;
-  details?: Record<string, unknown>;
-}): Record<string, unknown> {
-  const code = isApiErrorCode(params.code) ? params.code : "internal_server_error";
-  const definition = isApiErrorCode(code) ? getErrorDefinition(code) : null;
-  const type = definition?.type ?? params.type;
-
-  const body: Record<string, unknown> = {
-    code,
-    doc_url: getErrorDocUrl(code, websiteBaseUrl()),
-    message: params.message,
-    request_id: params.request.id,
-    type,
-  };
-
-  if (params.param) {
-    body.param = params.param;
-  }
-  if (params.retry_after !== undefined) {
-    body.retry_after = params.retry_after;
-  }
-  if (params.details) {
-    body.details = params.details;
-  }
-
-  return body;
-}
-
-function wrap(body: Record<string, unknown>): { error: Record<string, unknown> } {
+function wrap(body: ReturnType<typeof buildApiErrorBody>): ApiErrorResponse {
   return { error: body };
 }
 
@@ -80,11 +37,11 @@ export function mapErrorToResponse(
     const param = validationParam(error.message);
     return {
       body: wrap(
-        buildErrorBody({
+        buildApiErrorBody({
           code: "validation_error",
           message: error.message,
           param,
-          request,
+          requestId: request.id,
           type: "invalid_request_error",
         }),
       ),
@@ -95,11 +52,11 @@ export function mapErrorToResponse(
   if (error instanceof SyncConflictError) {
     return {
       body: wrap(
-        buildErrorBody({
+        buildApiErrorBody({
           code: "sync_conflict",
           details: { contact: error.serverContact },
           message: error.message,
-          request,
+          requestId: request.id,
           type: "conflict_error",
         }),
       ),
@@ -118,33 +75,9 @@ export function mapErrorToResponse(
         },
         "server error",
       );
-      const { type } = codeTypeAndStatus(error.code);
-      return {
-        body: wrap(
-          buildErrorBody({
-            code: error.code,
-            message: GENERIC_500_MESSAGE,
-            request,
-            type,
-          }),
-        ),
-        statusCode: error.statusCode,
-      };
     }
-
-    const { type } = codeTypeAndStatus(error.code);
-    const details = error.details ? { ...error.details } : undefined;
     return {
-      body: wrap(
-        buildErrorBody({
-          code: error.code,
-          details,
-          message: error.message,
-          param: error.param,
-          request,
-          type: error.type ?? type,
-        }),
-      ),
+      body: toApiErrorResponse(error, request.id),
       statusCode: error.statusCode,
     };
   }
@@ -157,10 +90,10 @@ export function mapErrorToResponse(
     const { type } = codeTypeAndStatus(code as ErrorCode);
     return {
       body: wrap(
-        buildErrorBody({
+        buildApiErrorBody({
           code,
           message: error.message,
-          request,
+          requestId: request.id,
           retry_after: error.retryAfter,
           type,
         }),
@@ -180,14 +113,7 @@ export function mapErrorToResponse(
       "server error",
     );
     return {
-      body: wrap(
-        buildErrorBody({
-          code: "internal_server_error",
-          message: GENERIC_500_MESSAGE,
-          request,
-          type: "api_error",
-        }),
-      ),
+      body: toApiErrorResponse(error, request.id),
       statusCode,
     };
   }
@@ -198,10 +124,10 @@ export function mapErrorToResponse(
 
   return {
     body: wrap(
-      buildErrorBody({
+      buildApiErrorBody({
         code,
         message: error.message,
-        request,
+        requestId: request.id,
         type,
       }),
     ),

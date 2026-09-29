@@ -59,6 +59,15 @@ function checkFile(abs: string): Violation[] {
     });
   }
 
+  if (/\bfrom\s+["']@bondery\/mantine-next["']/.test(text)) {
+    violations.push({
+      detail:
+        "Import @bondery/mantine-next subpaths (e.g. /ActionIconButton, /theme). The package barrel re-exports next/link, which crashes in the extension (process is not defined)",
+      file: rel,
+      rule: "no-mantine-next-barrel",
+    });
+  }
+
   if (rel.startsWith("entrypoints/background/") && rel.endsWith("index.ts")) {
     const lines = text.split("\n").length;
     if (lines > 30) {

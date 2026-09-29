@@ -1,4 +1,5 @@
 export { prefetchApiKeys } from "./apiKeys";
+export { prefetchMcpConsents } from "./mcpConsents";
 export { fetchChatSessionMessages, prefetchChatSessions } from "./chat";
 export {
   fetchContactDetail,

@@ -11,3 +11,11 @@ export {
 export type { ContactNameFields } from "#contact/format-contact-name.js";
 export { formatContactName } from "#contact/format-contact-name.js";
 export { patchAffectsMergeRecommendations } from "#contact/merge-recommendations.js";
+export type {
+  ShareableFieldPreview,
+  ShareableFieldPreviewSource,
+} from "#contact/shareable-field-previews.js";
+export {
+  buildShareableFieldPreviews,
+  SHAREABLE_FIELDS,
+} from "#contact/shareable-field-previews.js";

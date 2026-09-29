@@ -23,8 +23,8 @@ info:
     access. See the authentication guide.
 
 
-    Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, `/api/subscriptions`, and `/api/extension` do not
-    accept API keys.
+    Endpoints under `/api/me/api-keys`, `/api/me/mcp-consents`, `/api/sync`, `/api/chat`, `/api/subscriptions`, and
+    `/api/extension` do not accept API keys. AI assistants use `POST /mcp` with an MCP OAuth token, not this REST API.
   license:
     name: AGPL-3.0
     url: https://www.gnu.org/licenses/agpl-3.0.html
@@ -2016,7 +2016,7 @@ paths:
     post:
       tags:
         - Contacts
-      description: Create a new contact.
+      description: Create a new contact. Optional phones, emails, socials, notes, and profile fields.
       requestBody:
         required: true
         content:
@@ -2024,14 +2024,197 @@ paths:
             schema:
               type: object
               properties:
+                addresses:
+                  nullable: true
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      addressCity:
+                        nullable: true
+                        type: string
+                      addressCountry:
+                        nullable: true
+                        type: string
+                      addressCountryCode:
+                        nullable: true
+                        type: string
+                      addressFormatted:
+                        nullable: true
+                        type: string
+                      addressGeocodeSource:
+                        nullable: true
+                        type: string
+                        enum:
+                          - mapy.com
+                          - manual
+                      addressGranularity:
+                        type: string
+                        enum:
+                          - address
+                          - city
+                          - state
+                          - country
+                      addressLine1:
+                        nullable: true
+                        type: string
+                      addressLine2:
+                        nullable: true
+                        type: string
+                      addressPostalCode:
+                        nullable: true
+                        type: string
+                      addressState:
+                        nullable: true
+                        type: string
+                      addressStateCode:
+                        nullable: true
+                        type: string
+                      geocodeConfidence:
+                        nullable: true
+                        type: string
+                        enum:
+                          - verified
+                          - unverifiable
+                      label:
+                        nullable: true
+                        type: string
+                      latitude:
+                        nullable: true
+                        type: number
+                      longitude:
+                        nullable: true
+                        type: number
+                      timezone:
+                        nullable: true
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                          - home
+                          - work
+                          - other
+                      value:
+                        type: string
+                    required:
+                      - addressCity
+                      - addressCountry
+                      - addressCountryCode
+                      - addressFormatted
+                      - addressGeocodeSource
+                      - addressGranularity
+                      - addressLine1
+                      - addressLine2
+                      - addressPostalCode
+                      - addressState
+                      - addressStateCode
+                      - geocodeConfidence
+                      - label
+                      - latitude
+                      - longitude
+                      - timezone
+                      - type
+                      - value
+                emails:
+                  nullable: true
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      preferred:
+                        type: boolean
+                      type:
+                        type: string
+                        enum:
+                          - home
+                          - work
+                      value:
+                        type: string
+                        minLength: 1
+                    required:
+                      - preferred
+                      - type
+                      - value
+                facebook:
+                  nullable: true
+                  type: string
                 firstName:
                   type: string
                   minLength: 1
+                gisPoint:
+                  nullable: true
+                headline:
+                  nullable: true
+                  type: string
+                instagram:
+                  nullable: true
+                  type: string
+                keepFrequencyDays:
+                  nullable: true
+                  type: number
+                language:
+                  nullable: true
+                  type: string
+                lastInteraction:
+                  nullable: true
+                  type: string
+                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 lastName:
+                  nullable: true
                   type: string
+                latitude:
+                  nullable: true
+                  type: number
                 linkedin:
+                  nullable: true
                   type: string
+                location:
+                  nullable: true
+                  type: string
+                longitude:
+                  nullable: true
+                  type: number
                 middleName:
+                  nullable: true
+                  type: string
+                notes:
+                  nullable: true
+                  type: string
+                phones:
+                  nullable: true
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      preferred:
+                        type: boolean
+                      prefix:
+                        type: string
+                        minLength: 1
+                      type:
+                        type: string
+                        enum:
+                          - home
+                          - work
+                      value:
+                        type: string
+                        minLength: 1
+                    required:
+                      - preferred
+                      - prefix
+                      - type
+                      - value
+                signal:
+                  nullable: true
+                  type: string
+                timezone:
+                  nullable: true
+                  type: string
+                website:
+                  nullable: true
+                  type: string
+                whatsapp:
+                  nullable: true
                   type: string
                 id:
                   allOf:
@@ -2041,6 +2224,12 @@ paths:
             example:
               firstName: Ada
               lastName: Lovelace
+              notes: Met at the Analytical Society dinner.
+              phones:
+                - preferred: true
+                  prefix: "+44"
+                  type: home
+                  value: "2079460958"
       security: *a1
       responses:
         "201":
@@ -3668,9 +3857,6 @@ paths:
                       - timezone
                       - type
                       - value
-                avatar:
-                  nullable: true
-                  type: string
                 emails:
                   nullable: true
                   type: array
@@ -3701,48 +3887,6 @@ paths:
                 headline:
                   nullable: true
                   type: string
-                importantDates:
-                  nullable: true
-                  maxItems: 5
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                      date:
-                        type: string
-                        pattern: ^\d{4}-\d{2}-\d{2}$
-                      type:
-                        type: string
-                        enum:
-                          - birthday
-                          - anniversary
-                          - nameday
-                          - graduation
-                          - other
-                      note:
-                        nullable: true
-                        type: string
-                        maxLength: 50
-                      notifyDaysBefore:
-                        anyOf:
-                          - type: number
-                            enum:
-                              - 1
-                          - type: number
-                            enum:
-                              - 3
-                          - type: number
-                            enum:
-                              - 7
-                          - type: string
-                            nullable: true
-                            enum:
-                              - null
-                    required:
-                      - date
-                      - type
                 instagram:
                   nullable: true
                   type: string
@@ -3756,9 +3900,6 @@ paths:
                   nullable: true
                   type: string
                   pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
-                lastInteractionActivityId:
-                  nullable: true
-                  type: string
                 lastName:
                   nullable: true
                   type: string
@@ -3777,16 +3918,9 @@ paths:
                 middleName:
                   nullable: true
                   type: string
-                myself:
-                  nullable: true
-                  type: boolean
                 notes:
                   nullable: true
                   type: string
-                notesUpdatedAt:
-                  nullable: true
-                  type: string
-                  pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                 phones:
                   nullable: true
                   type: array
@@ -3811,15 +3945,11 @@ paths:
                       - prefix
                       - type
                       - value
-                position:
-                  nullable: true
                 signal:
                   nullable: true
                   type: string
                 timezone:
                   nullable: true
-                  type: string
-                userId:
                   type: string
                 website:
                   nullable: true
@@ -4249,6 +4379,166 @@ paths:
                       additionalProperties: false
                 required:
                   - groups
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: admin_required
+                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /contacts/{id}/share-preview:
+    get:
+      tags:
+        - Contacts
+      description: Preview which fields can be included when sharing a contact by email.
+      parameters:
+        - schema:
+            $ref: "#/components/schemas/ContactId"
+          in: path
+          name: id
+          required: true
+          description: Contact person UUID
+      security: *a1
+      responses:
+        "200":
+          description: Shareable contact fields
+          content:
+            application/json:
+              example:
+                availableFields:
+                  - field: name
+                    preview: Ada Lovelace
+                  - field: emails
+                    preview: ada@example.com (work)
+                contactId: 550e8400-e29b-41d4-a716-446655440000
+                contactName: Ada Lovelace
+              schema:
+                type: object
+                properties:
+                  availableFields:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          enum:
+                            - name
+                            - avatar
+                            - headline
+                            - phones
+                            - emails
+                            - location
+                            - linkedin
+                            - instagram
+                            - facebook
+                            - website
+                            - whatsapp
+                            - signal
+                            - addresses
+                            - notes
+                            - importantDates
+                        preview:
+                          type: string
+                      required:
+                        - field
+                        - preview
+                      additionalProperties: false
+                  contactId:
+                    type: string
+                  contactName:
+                    type: string
+                required:
+                  - availableFields
+                  - contactId
+                  - contactName
                 additionalProperties: false
         "400":
           description: Invalid request
@@ -7699,6 +7989,133 @@ paths:
                     type: boolean
                 required:
                   - success
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: admin_required
+                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /contacts/merge/avatars:
+    get:
+      tags:
+        - Contacts
+      description: Check whether two contacts have identical avatar image bytes.
+      parameters:
+        - schema:
+            $ref: "#/components/schemas/ContactId"
+          in: query
+          name: leftPersonId
+          required: true
+          description: Contact person UUID
+        - schema:
+            $ref: "#/components/schemas/ContactId"
+          in: query
+          name: rightPersonId
+          required: true
+          description: Contact person UUID
+      security: *a2
+      responses:
+        "200":
+          description: Avatar identity
+          content:
+            application/json:
+              example:
+                identical: true
+              schema:
+                type: object
+                properties:
+                  identical:
+                    type: boolean
+                required:
+                  - identical
                 additionalProperties: false
         "400":
           description: Invalid request
@@ -17852,6 +18269,267 @@ paths:
                   type: service_unavailable_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+  /me/mcp-consents:
+    get:
+      tags:
+        - Me
+      description: List MCP OAuth consents for the authenticated user.
+      security: *a2
+      responses:
+        "200":
+          description: MCP consent list
+          content:
+            application/json:
+              example:
+                consents:
+                  - clientId: https://claude.ai/oauth-client.json
+                    clientName: Claude
+                    createdAt: 2026-01-15T12:00:00.000Z
+                    id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+                    scopes:
+                      - openid
+                      - profile
+                      - email
+                      - offline_access
+                      - mcp:read
+                totalCount: 1
+              schema:
+                type: object
+                properties:
+                  consents:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        clientId:
+                          type: string
+                        clientName:
+                          type: string
+                        createdAt:
+                          type: string
+                          pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                        id:
+                          type: string
+                          format: uuid
+                        scopes:
+                          type: array
+                          items:
+                            type: string
+                      required:
+                        - clientId
+                        - clientName
+                        - createdAt
+                        - id
+                        - scopes
+                      additionalProperties: false
+                  totalCount:
+                    type: number
+                required:
+                  - consents
+                  - totalCount
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: admin_required
+                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /me/mcp-consents/{id}:
+    delete:
+      tags:
+        - Me
+      description: Revoke an MCP OAuth consent.
+      parameters:
+        - schema:
+            $ref: "#/components/schemas/ContactId"
+          in: path
+          name: id
+          required: true
+          description: Contact person UUID
+      security: *a2
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: admin_required
+                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /sync/bootstrap:
     get:
       tags:
@@ -18284,14 +18962,197 @@ paths:
                           payload:
                             type: object
                             properties:
+                              addresses:
+                                nullable: true
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    addressCity:
+                                      nullable: true
+                                      type: string
+                                    addressCountry:
+                                      nullable: true
+                                      type: string
+                                    addressCountryCode:
+                                      nullable: true
+                                      type: string
+                                    addressFormatted:
+                                      nullable: true
+                                      type: string
+                                    addressGeocodeSource:
+                                      nullable: true
+                                      type: string
+                                      enum:
+                                        - mapy.com
+                                        - manual
+                                    addressGranularity:
+                                      type: string
+                                      enum:
+                                        - address
+                                        - city
+                                        - state
+                                        - country
+                                    addressLine1:
+                                      nullable: true
+                                      type: string
+                                    addressLine2:
+                                      nullable: true
+                                      type: string
+                                    addressPostalCode:
+                                      nullable: true
+                                      type: string
+                                    addressState:
+                                      nullable: true
+                                      type: string
+                                    addressStateCode:
+                                      nullable: true
+                                      type: string
+                                    geocodeConfidence:
+                                      nullable: true
+                                      type: string
+                                      enum:
+                                        - verified
+                                        - unverifiable
+                                    label:
+                                      nullable: true
+                                      type: string
+                                    latitude:
+                                      nullable: true
+                                      type: number
+                                    longitude:
+                                      nullable: true
+                                      type: number
+                                    timezone:
+                                      nullable: true
+                                      type: string
+                                    type:
+                                      type: string
+                                      enum:
+                                        - home
+                                        - work
+                                        - other
+                                    value:
+                                      type: string
+                                  required:
+                                    - addressCity
+                                    - addressCountry
+                                    - addressCountryCode
+                                    - addressFormatted
+                                    - addressGeocodeSource
+                                    - addressGranularity
+                                    - addressLine1
+                                    - addressLine2
+                                    - addressPostalCode
+                                    - addressState
+                                    - addressStateCode
+                                    - geocodeConfidence
+                                    - label
+                                    - latitude
+                                    - longitude
+                                    - timezone
+                                    - type
+                                    - value
+                              emails:
+                                nullable: true
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    preferred:
+                                      type: boolean
+                                    type:
+                                      type: string
+                                      enum:
+                                        - home
+                                        - work
+                                    value:
+                                      type: string
+                                      minLength: 1
+                                  required:
+                                    - preferred
+                                    - type
+                                    - value
+                              facebook:
+                                nullable: true
+                                type: string
                               firstName:
                                 type: string
                                 minLength: 1
+                              gisPoint:
+                                nullable: true
+                              headline:
+                                nullable: true
+                                type: string
+                              instagram:
+                                nullable: true
+                                type: string
+                              keepFrequencyDays:
+                                nullable: true
+                                type: number
+                              language:
+                                nullable: true
+                                type: string
+                              lastInteraction:
+                                nullable: true
+                                type: string
+                                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                               lastName:
+                                nullable: true
                                 type: string
+                              latitude:
+                                nullable: true
+                                type: number
                               linkedin:
+                                nullable: true
                                 type: string
+                              location:
+                                nullable: true
+                                type: string
+                              longitude:
+                                nullable: true
+                                type: number
                               middleName:
+                                nullable: true
+                                type: string
+                              notes:
+                                nullable: true
+                                type: string
+                              phones:
+                                nullable: true
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    preferred:
+                                      type: boolean
+                                    prefix:
+                                      type: string
+                                      minLength: 1
+                                    type:
+                                      type: string
+                                      enum:
+                                        - home
+                                        - work
+                                    value:
+                                      type: string
+                                      minLength: 1
+                                  required:
+                                    - preferred
+                                    - prefix
+                                    - type
+                                    - value
+                              signal:
+                                nullable: true
+                                type: string
+                              timezone:
+                                nullable: true
+                                type: string
+                              website:
+                                nullable: true
+                                type: string
+                              whatsapp:
+                                nullable: true
                                 type: string
                               id:
                                 type: string
@@ -18417,9 +19278,6 @@ paths:
                                     - timezone
                                     - type
                                     - value
-                              avatar:
-                                nullable: true
-                                type: string
                               emails:
                                 nullable: true
                                 type: array
@@ -18450,48 +19308,6 @@ paths:
                               headline:
                                 nullable: true
                                 type: string
-                              importantDates:
-                                nullable: true
-                                maxItems: 5
-                                type: array
-                                items:
-                                  type: object
-                                  properties:
-                                    id:
-                                      type: string
-                                    date:
-                                      type: string
-                                      pattern: ^\d{4}-\d{2}-\d{2}$
-                                    type:
-                                      type: string
-                                      enum:
-                                        - birthday
-                                        - anniversary
-                                        - nameday
-                                        - graduation
-                                        - other
-                                    note:
-                                      nullable: true
-                                      type: string
-                                      maxLength: 50
-                                    notifyDaysBefore:
-                                      anyOf:
-                                        - type: number
-                                          enum:
-                                            - 1
-                                        - type: number
-                                          enum:
-                                            - 3
-                                        - type: number
-                                          enum:
-                                            - 7
-                                        - type: string
-                                          nullable: true
-                                          enum:
-                                            - null
-                                  required:
-                                    - date
-                                    - type
                               instagram:
                                 nullable: true
                                 type: string
@@ -18505,9 +19321,6 @@ paths:
                                 nullable: true
                                 type: string
                                 pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
-                              lastInteractionActivityId:
-                                nullable: true
-                                type: string
                               lastName:
                                 nullable: true
                                 type: string
@@ -18526,16 +19339,9 @@ paths:
                               middleName:
                                 nullable: true
                                 type: string
-                              myself:
-                                nullable: true
-                                type: boolean
                               notes:
                                 nullable: true
                                 type: string
-                              notesUpdatedAt:
-                                nullable: true
-                                type: string
-                                pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
                               phones:
                                 nullable: true
                                 type: array
@@ -18560,15 +19366,11 @@ paths:
                                     - prefix
                                     - type
                                     - value
-                              position:
-                                nullable: true
                               signal:
                                 nullable: true
                                 type: string
                               timezone:
                                 nullable: true
-                                type: string
-                              userId:
                                 type: string
                               website:
                                 nullable: true
@@ -18676,6 +19478,78 @@ paths:
                             type: string
                             enum:
                               - contact.removeTag
+                        required:
+                          - clientSequence
+                          - id
+                          - entityId
+                          - payload
+                          - type
+                      - type: object
+                        properties:
+                          baseUpdatedAt:
+                            type: string
+                            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                          clientSequence:
+                            type: integer
+                            minimum: 0
+                            exclusiveMinimum: true
+                            maximum: 9007199254740991
+                          id:
+                            type: string
+                            format: uuid
+                          entityId:
+                            type: string
+                            format: uuid
+                          payload:
+                            type: object
+                            properties:
+                              dates:
+                                maxItems: 5
+                                type: array
+                                items:
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                    date:
+                                      type: string
+                                      pattern: ^\d{4}-\d{2}-\d{2}$
+                                    type:
+                                      type: string
+                                      enum:
+                                        - birthday
+                                        - anniversary
+                                        - nameday
+                                        - graduation
+                                        - other
+                                    note:
+                                      nullable: true
+                                      type: string
+                                      maxLength: 50
+                                    notifyDaysBefore:
+                                      anyOf:
+                                        - type: number
+                                          enum:
+                                            - 1
+                                        - type: number
+                                          enum:
+                                            - 3
+                                        - type: number
+                                          enum:
+                                            - 7
+                                        - type: string
+                                          nullable: true
+                                          enum:
+                                            - null
+                                  required:
+                                    - date
+                                    - type
+                            required:
+                              - dates
+                          type:
+                            type: string
+                            enum:
+                              - contact.replaceImportantDates
                         required:
                           - clientSequence
                           - id

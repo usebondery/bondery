@@ -179,7 +179,7 @@ function SubscriptionCardContent({
     : t("FreePlan");
 
   return (
-    <SettingsSection icon={<IconCreditCard size={20} />} title={t("Title")}>
+    <SettingsSection icon={<IconCreditCard size={20} />} id="subscription" title={t("Title")}>
       <CardSection inheritPadding py="md">
         <Stack gap="md">
           <Group align="flex-start" justify="space-between">

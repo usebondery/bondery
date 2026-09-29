@@ -1,5 +1,5 @@
-import { successNotificationTemplate } from "@bondery/mantine-next";
-import { ActionIcon, Group, Loader, Stack, Text, Textarea, Tooltip } from "@mantine/core";
+import { ActionIconButton, successNotificationTemplate } from "@bondery/mantine-next";
+import { Group, Loader, Stack, Text, Textarea, Tooltip } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { RichTextEditor } from "@mantine/tiptap";
@@ -294,9 +294,10 @@ export function ContactNotesSection({
                 openDelay={400}
                 withinPortal
               >
-                <ActionIcon
+                <ActionIconButton
                   aria-label={tNotes("CopyAction")}
                   color="gray"
+                  icon={<IconCopy />}
                   onClick={() => {
                     clipboard.copy(editableText);
                     notifications.show(
@@ -309,9 +310,7 @@ export function ContactNotesSection({
                   }}
                   size="sm"
                   variant="subtle"
-                >
-                  <IconCopy size={14} />
-                </ActionIcon>
+                />
               </Tooltip>
             </Group>
             <Textarea

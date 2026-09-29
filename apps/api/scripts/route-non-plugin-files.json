@@ -9,5 +9,18 @@
   "extension/schemas.ts",
   "import/linkedin/parser.ts",
   "import/instagram/parser.ts",
-  "import/vcard/parser.ts"
+  "import/vcard/parser.ts",
+  "mcp/tools/confirm-delete.ts",
+  "mcp/tools/contacts.ts",
+  "mcp/tools/groups.ts",
+  "mcp/tools/interactions.ts",
+  "mcp/tools/json.ts",
+  "mcp/tools/keep-in-touch.ts",
+  "mcp/tools/mcp-tool-meta.ts",
+  "mcp/tools/mcp-write-name.ts",
+  "mcp/tools/mcp-write.ts",
+  "mcp/tools/prompts.ts",
+  "mcp/tools/relationships.ts",
+  "mcp/tools/share.ts",
+  "mcp/tools/tags.ts"
 ]

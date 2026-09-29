@@ -7,6 +7,7 @@ export const AUXILIARY_FIRST_SEGMENTS = [
   "merge-recommendations",
   "enrich-queue",
   "keep-in-touch",
+  "mcp-consents",
 ] as const;
 
 export type AuxiliaryFirstSegment = (typeof AUXILIARY_FIRST_SEGMENTS)[number];

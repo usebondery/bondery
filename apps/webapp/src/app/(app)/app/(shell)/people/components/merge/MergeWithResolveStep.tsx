@@ -110,7 +110,7 @@ export function MergeWithResolveStep({
             <PersonChip isClickable person={toPersonPreview(rightContact)} prefetch={false} />
           </Center>
         </SimpleGrid>
-        {leftContact && rightContact ? (
+        {showAvatarPicker && leftContact && rightContact ? (
           <MergeAvatarConflictPicker
             choice={conflictChoices.avatar ?? "left"}
             disabled={isBlocking}

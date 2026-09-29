@@ -1,7 +1,7 @@
 "use client";
 
 import { generateId } from "@bondery/helpers/ids";
-import { errorNotificationTemplate } from "@bondery/mantine-next";
+import { ActionIconButton, errorNotificationTemplate } from "@bondery/mantine-next";
 import {
   CONTACT_FIELD_MAX_LENGTHS,
   CONTACT_LIMITS,
@@ -10,7 +10,7 @@ import {
   type ImportantDateType,
   replaceImportantDatesSchema,
 } from "@bondery/schemas";
-import { ActionIcon, Stack, Text, Tooltip } from "@mantine/core";
+import { Stack, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlus } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
@@ -330,9 +330,12 @@ export function ContactImportantDatesSection({
             hideDeleteIcon
             leftAction={
               <Tooltip label={t("AddHint")}>
-                <ActionIcon aria-label={t("AddAction")} color="green" variant="light">
-                  <IconPlus size={16} />
-                </ActionIcon>
+                <ActionIconButton
+                  aria-label={t("AddAction")}
+                  color="green"
+                  icon={<IconPlus />}
+                  variant="light"
+                />
               </Tooltip>
             }
             loading={false}

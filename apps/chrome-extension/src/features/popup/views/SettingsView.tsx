@@ -25,7 +25,7 @@ export function SettingsView({
   return (
     <Stack gap="md" h={300} p="md">
       <PopupBrandHeader
-        actionIcon={<IconArrowLeft size={18} />}
+        actionIcon={<IconArrowLeft />}
         actionTitle="Back"
         onActionClick={onBack}
       />

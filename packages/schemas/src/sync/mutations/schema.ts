@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { updatedAtSchema } from "#entities/_shared/index.js";
 import { createContactApiInputSchema, updateContactInputSchema } from "#entities/contact/index.js";
+import { replaceImportantDatesSchema } from "#entities/important-date/index.js";
 import type { SyncMutation, SyncMutationType } from "./types.js";
 
 export const syncMutationTypeSchema: z.ZodType<SyncMutationType> = z.enum([
@@ -9,6 +10,7 @@ export const syncMutationTypeSchema: z.ZodType<SyncMutationType> = z.enum([
   "contact.delete",
   "contact.addTag",
   "contact.removeTag",
+  "contact.replaceImportantDates",
   "group.create",
   "group.update",
   "group.delete",
@@ -35,6 +37,10 @@ export const contactDeletePayloadSchema = z.object({}).optional();
 
 export const contactTagPayloadSchema = z.object({
   tagId: z.string().uuid(),
+});
+
+export const contactReplaceImportantDatesPayloadSchema = z.object({
+  dates: replaceImportantDatesSchema,
 });
 
 export const groupCreatePayloadSchema = z.object({
@@ -89,6 +95,11 @@ export const syncMutationSchema = z.discriminatedUnion("type", [
     entityId: z.string().uuid(),
     payload: contactTagPayloadSchema,
     type: z.literal("contact.removeTag"),
+  }),
+  syncMutationBaseSchema.extend({
+    entityId: z.string().uuid(),
+    payload: contactReplaceImportantDatesPayloadSchema,
+    type: z.literal("contact.replaceImportantDates"),
   }),
   syncMutationBaseSchema.extend({
     payload: groupCreatePayloadSchema,

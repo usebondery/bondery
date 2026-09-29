@@ -84,7 +84,8 @@ function ApiKeyRow({
   return (
     <SettingsCredentialCard
       deleteAriaLabel={deleteAriaLabel}
-      icon={<IconKey size={18} stroke={1.5} />}
+      deleteTooltip={t("RevokeTooltip")}
+      icon={<IconKey />}
       label={
         <InlineEditableInput
           aria-label={t("LabelField")}

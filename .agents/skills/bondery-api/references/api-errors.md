@@ -14,7 +14,9 @@ Machine-readable API failures use a nested envelope:
 }
 ```
 
-Schema: `packages/schemas/src/errors/api-error-response/schema.ts`. Mapper: `apps/api/src/lib/platform/errors/map-to-response.ts`.
+Schema: `packages/schemas/src/errors/api-error-response/schema.ts`. Mapper: `apps/api/src/lib/platform/errors/to-api-error-response.ts` (`toApiErrorResponse`). REST Fastify mapping (`RequestValidationError`, sync conflict, 429) stays in `apps/api/src/lib/platform/errors/map-to-response.ts` and calls the shared builder for `DomainError` and generic 500s.
+
+MCP tool failures and in-app chat tool failures use the same nested envelope. MCP HTTP auth/protocol errors (missing bearer, `invalid_token`, `insufficient_scope`) stay JSON-RPC.
 
 ## Catalog
 

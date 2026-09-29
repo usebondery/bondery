@@ -20,7 +20,7 @@ Templates live under `packages/emails/src/templates/{account,billing,internal,no
 
 | Email | Folder | Template | Sender | Trigger |
 |-------|--------|----------|--------|---------|
-| Share contact | `notifications/` | `ShareContactEmail.tsx` | `apps/api/src/services/contacts/share.ts` | Contact share route |
+| Share contact | `notifications/` | `ShareContactEmail.tsx` | `apps/api/src/domains/contacts/share.ts` | Contact share route |
 | Reminder digest | `notifications/` | `ReminderDigestEmail.tsx` | `apps/api/src/services/notifications/reminder-digest.ts` | `apps/api/src/services/notifications/reminder-dispatch.ts` |
 | Trial ending | `billing/` | `TrialEndingEmail.tsx` | `apps/api/src/services/notifications/trial-ending.ts` | `apps/api/src/services/billing/webhook-handlers/trial-ending.ts` |
 | Account deleted | `account/` | `AccountDeletedEmail.tsx` | `apps/api/src/services/notifications/account-deleted.ts` | `apps/api/src/lib/auth/teardown-user.ts` |

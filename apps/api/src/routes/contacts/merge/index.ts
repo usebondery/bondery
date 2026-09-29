@@ -4,10 +4,12 @@
  */
 
 import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js";
+import { registerMergeAvatarIdentityRoute } from "./avatars.js";
 import { registerMergeExecuteRoute } from "./execute.js";
 import { registerRecommendationRoutes } from "./recommendations.js";
 
 export function registerMergeRoutes(fastify: AppFastifyInstance): void {
   registerRecommendationRoutes(fastify);
+  registerMergeAvatarIdentityRoute(fastify);
   registerMergeExecuteRoute(fastify);
 }

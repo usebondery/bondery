@@ -48,6 +48,15 @@ export const EXAMPLE_CREATE_CONTACT_RESPONSE = {
   txid: "tx-550e8400-e29b-41d4-a716-446655440000",
 };
 
+export const EXAMPLE_CONTACT_SHARE_PREVIEW_RESPONSE = {
+  availableFields: [
+    { field: "name" as const, preview: "Ada Lovelace" },
+    { field: "emails" as const, preview: "ada@example.com (work)" },
+  ],
+  contactId: EXAMPLE_CONTACT_ID,
+  contactName: "Ada Lovelace",
+};
+
 export const EXAMPLE_CONTACTS_LIST_RESPONSE = {
   contacts: [EXAMPLE_CONTACT_LIST_ITEM],
   pagination: EXAMPLE_PAGINATION,
@@ -127,6 +136,8 @@ export const EXAMPLE_ENRICH_ELIGIBLE_COUNT_RESPONSE = { count: 42 };
 export const EXAMPLE_ENRICH_QUEUE_COUNT_RESPONSE = { eligibleCount: 42 };
 
 export const EXAMPLE_MERGE_RECOMMENDATIONS_COUNT_RESPONSE = { activeCount: 3 };
+
+export const EXAMPLE_MERGE_AVATAR_IDENTITY_RESPONSE = { identical: true };
 
 export const EXAMPLE_KEEP_IN_TOUCH_COUNT_RESPONSE = { overdueCount: 2 };
 
@@ -415,6 +426,19 @@ export const EXAMPLE_USER_ACCOUNT_RESPONSE = {
 
 export const EXAMPLE_API_KEYS_LIST_RESPONSE = {
   apiKeys: [EXAMPLE_API_KEY_LIST_ITEM],
+  totalCount: 1,
+};
+
+export const EXAMPLE_MCP_CONSENT_LIST_ITEM = {
+  clientId: "https://claude.ai/oauth-client.json",
+  clientName: "Claude",
+  createdAt: EXAMPLE_ISO_TIMESTAMP,
+  id: EXAMPLE_USER_ID,
+  scopes: ["openid", "profile", "email", "offline_access", "mcp:read"],
+};
+
+export const EXAMPLE_MCP_CONSENTS_LIST_RESPONSE = {
+  consents: [EXAMPLE_MCP_CONSENT_LIST_ITEM],
   totalCount: 1,
 };
 

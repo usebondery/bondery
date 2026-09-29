@@ -1,6 +1,6 @@
 ﻿import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
-export type DynamicRouteKind = "person" | "group" | "myself";
+export type DynamicRouteKind = "chat" | "group" | "myself" | "person";
 
 export type DynamicRouteMatch = {
   kind: DynamicRouteKind;
@@ -9,6 +9,7 @@ export type DynamicRouteMatch = {
 
 const PERSON_PATH = `${WEBAPP_ROUTES.PERSON}/`;
 const GROUP_PATH = "/app/group/";
+const CHAT_PATH = `${WEBAPP_ROUTES.CHAT}/`;
 
 export function matchDynamicRoute(pathname: string): DynamicRouteMatch | null {
   if (pathname === WEBAPP_ROUTES.MYSELF) {
@@ -26,6 +27,13 @@ export function matchDynamicRoute(pathname: string): DynamicRouteMatch | null {
     const id = pathname.slice(GROUP_PATH.length).split("/")[0];
     if (id) {
       return { id, kind: "group" };
+    }
+  }
+
+  if (pathname.startsWith(CHAT_PATH)) {
+    const id = pathname.slice(CHAT_PATH.length).split("/")[0];
+    if (id) {
+      return { id, kind: "chat" };
     }
   }
 

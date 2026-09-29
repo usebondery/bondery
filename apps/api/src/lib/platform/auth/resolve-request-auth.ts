@@ -2,24 +2,21 @@
  * Better Auth session and OAuth JWT resolution for Fastify request auth.
  */
 
-import { oauthProviderResourceClient } from "@better-auth/oauth-provider/resource-client";
 import { prisma } from "@bondery/db";
 import type { FastifyRequest } from "fastify";
 import type { JWTPayload } from "jose";
 import {
   auth,
   resolveApiResourceAudience,
-  resolveOAuthIssuerIdentifier,
   resolveTrustedOAuthClientIds,
 } from "../../auth/index.js";
 import { toFetchHeaders } from "../../auth/request-headers.js";
+import { verifyBonderyAccessJwt } from "../../auth/verify-access-jwt.js";
 
 export type ResolvedAuthUser = {
   email: string;
   id: string;
 };
-
-const oauthResourceActions = oauthProviderResourceClient(auth).getActions();
 
 function isJwtShapedBearerToken(token: string): boolean {
   return token.split(".").length === 3;
@@ -72,12 +69,9 @@ export async function resolveOAuthBearerUser(token: string): Promise<ResolvedAut
 
   let payload: JWTPayload;
   try {
-    payload = await oauthResourceActions.verifyBearerToken(token, {
+    payload = await verifyBonderyAccessJwt(token, {
+      audience: resolveApiResourceAudience(),
       requiredScopes: ["api:access"],
-      verifyOptions: {
-        audience: resolveApiResourceAudience(),
-        issuer: resolveOAuthIssuerIdentifier(),
-      },
     });
   } catch {
     return null;

@@ -1,6 +1,7 @@
 "use client";
 
-import { ActionIcon, Box, Card, Group, Image, Text, Title } from "@mantine/core";
+import { ActionIconButton } from "@bondery/mantine-next";
+import { Box, Card, Group, Image, Text, Title } from "@mantine/core";
 import { useMediaQuery } from "@mantine/hooks";
 import { IconArrowLeft, IconArrowRight } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
@@ -148,24 +149,22 @@ export function AnimatedPeople() {
           </div>
 
           <Group gap="md" justify={isDesktop ? "flex-start" : "center"} mt="md">
-            <ActionIcon
+            <ActionIconButton
               aria-label="Previous"
+              icon={<IconArrowLeft />}
               onClick={handlePrev}
               radius="xl"
               size="xl"
               variant="default"
-            >
-              <IconArrowLeft size={18} />
-            </ActionIcon>
-            <ActionIcon
+            />
+            <ActionIconButton
               aria-label="Next"
+              icon={<IconArrowRight />}
               onClick={handleNext}
               radius="xl"
               size="xl"
               variant="default"
-            >
-              <IconArrowRight size={18} />
-            </ActionIcon>
+            />
           </Group>
         </div>
       </div>

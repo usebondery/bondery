@@ -8,13 +8,17 @@ export type {
   ContactAddressTypeOption,
   ContactChannelTypeOption,
   ContactNameFields,
+  ShareableFieldPreview,
+  ShareableFieldPreviewSource,
 } from "#contact/index.js";
 export {
+  buildShareableFieldPreviews,
   CONTACT_ADDRESS_TYPE_OPTIONS,
   CONTACT_CHANNEL_TYPE_OPTIONS,
   formatContactName,
   getContactAddressTypeEmoji,
   getContactChannelTypeEmoji,
+  SHAREABLE_FIELDS,
 } from "#contact/index.js";
 export { formatDateRange, formatDuration } from "#date/index.js";
 export { DOC_LINKS, type DocId, docHref } from "#docs/index.js";
@@ -37,8 +41,10 @@ export type { LegalEntity } from "#globals/index.js";
 export {
   API_ROUTES,
   BETTER_AUTH_BASE_PATH,
+  BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH,
   betterAuthAuthorizationServerMetadataPath,
   betterAuthPath,
+  betterAuthProtectedResourceMetadataPaths,
   CHANGELOG_URL,
   CHROME_EXTENSION_URL,
   formatLegalAddressLine,

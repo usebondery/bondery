@@ -1,9 +1,11 @@
 {
   "a11y": {
     "back": "Zpět",
+    "closeMenu": "Zavřít nabídku",
     "createMore": "Po vytvoření zůstaňte v dialogu a přidejte další",
     "info": "Informace",
-    "loading": "Načítání"
+    "loading": "Načítání",
+    "openMenu": "Otevřít nabídku"
   },
   "actions": {
     "back": "Zpět",
@@ -193,6 +195,7 @@
       "INVALID_EMAIL_OR_PASSWORD": "Neplatný e-mail nebo heslo.",
       "INVALID_PASSWORD": "Neplatné heslo.",
       "INVALID_TOKEN": "Tento přihlašovací odkaz není platný. Vyžádejte si nový.",
+      "oauth": "Přihlášení se nepovedlo. Zkuste to znovu e-mailem, přes GitHub nebo LinkedIn.",
       "PASSKEY_LIMIT_REACHED": "Dosáhli jste maximálního počtu přístupových klíčů. Smažte nepoužívaný přístupový klíč, abyste mohli přidat nový.",
       "PASSKEY_NOT_FOUND": "Žádný přístupový klíč se nenašel. Pokračujte e-mailem, přes GitHub nebo LinkedIn a poté přidejte přístupový klíč v Nastavení.",
       "PREVIOUSLY_REGISTERED": "Tento přístupový klíč už je k účtu přidaný.",

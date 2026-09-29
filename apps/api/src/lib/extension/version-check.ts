@@ -18,6 +18,7 @@ import {
 import {
   BETTER_AUTH_BASE_PATH,
   betterAuthAuthorizationServerMetadataPath,
+  betterAuthProtectedResourceMetadataPaths,
 } from "@bondery/helpers/globals/paths";
 import { getErrorDocUrl } from "@bondery/schemas/errors";
 import { URLS } from "../platform/config.js";
@@ -39,11 +40,20 @@ function isPublicInfraPath(url: string): boolean {
 
 function isPublicAuthPath(url: string): boolean {
   const path = url.split("?")[0] ?? url;
-  return (
+  if (
     path === BETTER_AUTH_BASE_PATH ||
     path.startsWith(`${BETTER_AUTH_BASE_PATH}/`) ||
     path === betterAuthAuthorizationServerMetadataPath()
-  );
+  ) {
+    return true;
+  }
+
+  // Unauthenticated MCP clients start OAuth from POST /mcp (401 + RFC 9728).
+  if (path === API_ROUTES.MCP || path.startsWith(`${API_ROUTES.MCP}/`)) {
+    return true;
+  }
+
+  return betterAuthProtectedResourceMetadataPaths().includes(path);
 }
 
 function isPublicWebhookPath(url: string): boolean {

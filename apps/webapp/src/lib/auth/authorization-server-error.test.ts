@@ -14,6 +14,7 @@ describe("isOAuthAuthorizationServerError", () => {
 
   it("leaves webapp IdP and magic-link errors on /login", () => {
     assert.equal(isOAuthAuthorizationServerError("INVALID_TOKEN"), false);
+    assert.equal(isOAuthAuthorizationServerError("internal_server_error"), false);
     assert.equal(isOAuthAuthorizationServerError("access_denied"), false);
     assert.equal(isOAuthAuthorizationServerError(null), false);
   });

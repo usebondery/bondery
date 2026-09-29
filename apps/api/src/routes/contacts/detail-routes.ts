@@ -1,6 +1,7 @@
 import {
   contactGroupsResponseSchema,
   contactResponseSchema,
+  contactSharePreviewResponseSchema,
   createContactResponseSchema,
   deleteContactResponseSchema,
   updateContactInputSchema,
@@ -11,7 +12,11 @@ import { EXAMPLE_VCARD_EXPORT } from "@bondery/schemas/openapi/fixtures/response
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { domainDb } from "../../domains/_shared/domain-db.js";
-import { deleteContact, updateContact } from "../../domains/contacts/index.js";
+import {
+  deleteContact,
+  getContactSharingPreview,
+  updateContact,
+} from "../../domains/contacts/index.js";
 import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { domainContextFromRequest } from "../../lib/platform/domain-context.js";
 import type { AppFastifyInstance } from "../../lib/platform/fastify-types.js";
@@ -99,6 +104,21 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
       const ctx = domainContextFromRequest(request);
       const { id: personId } = request.params;
       return getContactGroups(domainDb(ctx), ctx.user.id, personId);
+    },
+  );
+
+  fastify.get(
+    "/:id/share-preview",
+    {
+      schema: {
+        description: "Preview which fields can be included when sharing a contact by email.",
+        params: uuidParamSchema,
+        response: withOkResponse(contactSharePreviewResponseSchema, "Shareable contact fields"),
+      } satisfies FastifyZodOpenApiSchema,
+    },
+    async (request) => {
+      const ctx = domainContextFromRequest(request);
+      return getContactSharingPreview(ctx, request.params.id);
     },
   );
 

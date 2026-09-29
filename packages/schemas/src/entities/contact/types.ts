@@ -1,7 +1,7 @@
 import type { PaginationMeta } from "../_shared/types.js";
 import type { ContactAddressRead, ContactAddressType } from "../address/types.js";
 import type { EmailEntry, PhoneEntry } from "../channels/types.js";
-import type { ImportantDate, ImportantDateInputValidated } from "../important-date/types.js";
+import type { ImportantDate } from "../important-date/types.js";
 
 export type RelationshipType =
   | "parent"
@@ -118,11 +118,34 @@ export interface ContactRelationshipWithPeople extends ContactRelationship {
   targetPerson: ContactPreview;
 }
 
-export interface CreateContactInput {
+/** Fields create and update actually write (not photo, dates, or tenant keys). */
+export interface ContactWritableFields {
+  addresses?: ContactAddressRead[] | null;
+  emails?: EmailEntry[] | null;
+  facebook?: string | null;
+  firstName?: string;
+  gisPoint?: unknown | null;
+  headline?: string | null;
+  instagram?: string | null;
+  keepFrequencyDays?: number | null;
+  language?: string | null;
+  lastInteraction?: string | null;
+  lastName?: string | null;
+  latitude?: number | null;
+  linkedin?: string | null;
+  location?: string | null;
+  longitude?: number | null;
+  middleName?: string | null;
+  notes?: string | null;
+  phones?: PhoneEntry[] | null;
+  signal?: string | null;
+  timezone?: string | null;
+  website?: string | null;
+  whatsapp?: string | null;
+}
+
+export interface CreateContactInput extends ContactWritableFields {
   firstName: string;
-  lastName?: string;
-  linkedin?: string;
-  middleName?: string;
 }
 
 /** POST /api/contacts body (optional client-supplied id). */
@@ -149,37 +172,7 @@ export interface UpdateContactIdentityInput {
   middleName: string | null;
 }
 
-export interface UpdateContactInput {
-  addresses?: ContactAddressRead[] | null | undefined;
-  avatar?: string | null | undefined;
-  emails?: EmailEntry[] | null | undefined;
-  facebook?: string | null | undefined;
-  firstName?: string | undefined;
-  gisPoint?: unknown | null | undefined;
-  headline?: string | null | undefined;
-  importantDates?: ImportantDateInputValidated[] | null | undefined;
-  instagram?: string | null | undefined;
-  keepFrequencyDays?: number | null | undefined;
-  language?: string | null | undefined;
-  lastInteraction?: string | null | undefined;
-  lastInteractionActivityId?: string | null | undefined;
-  lastName?: string | null | undefined;
-  latitude?: number | null | undefined;
-  linkedin?: string | null | undefined;
-  location?: string | null | undefined;
-  longitude?: number | null | undefined;
-  middleName?: string | null | undefined;
-  myself?: boolean | null | undefined;
-  notes?: string | null | undefined;
-  notesUpdatedAt?: string | null | undefined;
-  phones?: PhoneEntry[] | null | undefined;
-  position?: unknown | null | undefined;
-  signal?: string | null | undefined;
-  timezone?: string | null | undefined;
-  userId?: string | undefined;
-  website?: string | null | undefined;
-  whatsapp?: string | null | undefined;
-}
+export type UpdateContactInput = ContactWritableFields;
 
 export interface ContactResponse {
   contact: Contact;
@@ -408,3 +401,14 @@ export type ShareableField =
   | "addresses"
   | "notes"
   | "importantDates";
+
+export interface ContactShareFieldPreview {
+  field: ShareableField;
+  preview: string;
+}
+
+export interface ContactSharePreviewResponse {
+  availableFields: ContactShareFieldPreview[];
+  contactId: string;
+  contactName: string;
+}

@@ -18,7 +18,6 @@ import {
 } from "@bondery/schemas/http";
 import { conflictResponse } from "@bondery/schemas/http/responses";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
-import { domainDb } from "../../../domains/_shared/domain-db.js";
 import {
   createRelationship,
   deleteRelationship,
@@ -26,11 +25,10 @@ import {
 } from "../../../domains/contacts/relationships.js";
 import { extractAvatarOptions } from "../../../lib/data/select-fragments.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
-import { notFound } from "../../../lib/platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js";
 import { withCreatedResponse, withOkResponse } from "../../../lib/platform/openapi/responses.js";
 import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
-import { resolveContactAvatarUrl } from "../../../lib/storage/avatar-urls.js";
+import { listContactRelationships } from "../../../services/contacts/queries-detail.js";
 
 const RELATIONSHIP_TYPES: RelationshipType[] = [
   "parent",
@@ -50,22 +48,6 @@ function _isRelationshipType(value: string): value is RelationshipType {
   return RELATIONSHIP_TYPES.includes(value as RelationshipType);
 }
 
-function toContactPreview(
-  person: {
-    id: string;
-    firstName: string;
-    lastName: string | null;
-  },
-  avatarUrl: string | null,
-) {
-  return {
-    avatar: avatarUrl,
-    firstName: person.firstName,
-    id: person.id,
-    lastName: person.lastName,
-  };
-}
-
 export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
   fastify.get(
     "/:id/relationships",
@@ -79,102 +61,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
     },
     async (request) => {
       const ctx = domainContextFromRequest(request);
-      const db = domainDb(ctx);
-      const { user } = ctx;
-      const avatarOpts = extractAvatarOptions(request.query);
-      const { id: personId } = request.params;
-
-      const person = await db.people.findFirst({
-        select: { id: true },
-        where: { id: personId, userId: user.id },
-      });
-
-      if (!person) {
-        throw notFound("Contact not found", "not_found");
-      }
-
-      const rows = await db.peopleRelationship.findMany({
-        orderBy: { createdAt: "asc" },
-        where: {
-          OR: [{ sourcePersonId: personId }, { targetPersonId: personId }],
-          userId: user.id,
-        },
-      });
-
-      if (rows.length === 0) {
-        return { relationships: [] };
-      }
-
-      const personIds = Array.from(
-        new Set(
-          rows.flatMap((relationship) => [
-            relationship.sourcePersonId,
-            relationship.targetPersonId,
-          ]),
-        ),
-      );
-
-      const peopleRows = await db.people.findMany({
-        select: {
-          firstName: true,
-          hasAvatar: true,
-          id: true,
-          lastName: true,
-          updatedAt: true,
-        },
-        where: { id: { in: personIds }, userId: user.id },
-      });
-
-      const peopleById = new Map(peopleRows.map((personRow) => [personRow.id, personRow]));
-
-      const formattedRelationships = rows
-        .map((relationship) => {
-          const sourcePerson = peopleById.get(relationship.sourcePersonId);
-          const targetPerson = peopleById.get(relationship.targetPersonId);
-
-          if (!sourcePerson || !targetPerson) {
-            return null;
-          }
-
-          return {
-            createdAt: relationship.createdAt.toISOString(),
-            id: relationship.id,
-            relationshipType: relationship.relationshipType as RelationshipType,
-            sourcePerson: toContactPreview(
-              sourcePerson,
-              resolveContactAvatarUrl(
-                user.id,
-                {
-                  hasAvatar: sourcePerson.hasAvatar,
-                  id: sourcePerson.id,
-                  updatedAt: sourcePerson.updatedAt.toISOString(),
-                },
-                avatarOpts,
-              ),
-            ),
-            sourcePersonId: relationship.sourcePersonId,
-            targetPerson: toContactPreview(
-              targetPerson,
-              resolveContactAvatarUrl(
-                user.id,
-                {
-                  hasAvatar: targetPerson.hasAvatar,
-                  id: targetPerson.id,
-                  updatedAt: targetPerson.updatedAt.toISOString(),
-                },
-                avatarOpts,
-              ),
-            ),
-            targetPersonId: relationship.targetPersonId,
-            updatedAt: relationship.updatedAt.toISOString(),
-            userId: relationship.userId,
-          };
-        })
-        .filter(
-          (relationship): relationship is NonNullable<typeof relationship> => relationship != null,
-        );
-
-      return { relationships: formattedRelationships };
+      return listContactRelationships(ctx, request.params.id, extractAvatarOptions(request.query));
     },
   );
 

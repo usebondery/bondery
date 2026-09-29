@@ -40,8 +40,6 @@ export const HOTKEYS = {
   FIND_PERSON: "f",
   /** Open the "Log interaction" modal */
   LOG_INTERACTION: "n",
-  /** Toggle the navigation sidebar (Ctrl+B / ⌘+B) */
-  SIDEBAR_TOGGLE: "mod+b",
 } as const;
 
 export const LIMITS = {

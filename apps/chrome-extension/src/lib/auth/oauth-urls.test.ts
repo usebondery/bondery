@@ -21,8 +21,8 @@ describe("oauthHttpBaseUrl", () => {
 describe("loopbackHostPermissionPatterns", () => {
   it("includes 127.0.0.1 when env is localhost so token fetch is privileged", () => {
     assert.deepEqual(loopbackHostPermissionPatterns("http://localhost:26631"), [
-      "http://localhost:26631/*",
-      "http://127.0.0.1:26631/*",
+      "http://localhost/*",
+      "http://127.0.0.1/*",
     ]);
   });
 

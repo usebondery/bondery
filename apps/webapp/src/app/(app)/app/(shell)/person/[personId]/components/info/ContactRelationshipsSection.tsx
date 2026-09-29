@@ -1,12 +1,12 @@
 "use client";
 
-import { PersonChip } from "@bondery/mantine-next";
+import { ActionIconButton, PersonChip } from "@bondery/mantine-next";
 import type {
   ContactPreview,
   ContactRelationshipWithPeople,
   RelationshipType,
 } from "@bondery/schemas";
-import { ActionIcon, Card, Group, Select, Stack, Text, Tooltip } from "@mantine/core";
+import { Card, Group, Select, Stack, Text, Tooltip } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { searchContacts } from "@/lib/contacts/searchContacts";
@@ -265,9 +265,12 @@ function RelationshipCardRow({
       <Group align="center" gap="sm" wrap="wrap">
         {mode === "create" ? (
           <Tooltip label={addActionLabel}>
-            <ActionIcon aria-label={addActionLabel} color="green" variant="light">
-              <IconPlus size={16} />
-            </ActionIcon>
+            <ActionIconButton
+              aria-label={addActionLabel}
+              color="green"
+              icon={<IconPlus />}
+              variant="light"
+            />
           </Tooltip>
         ) : null}
 
@@ -332,16 +335,15 @@ function RelationshipCardRow({
         />
 
         {showRightAction ? (
-          <ActionIcon
+          <ActionIconButton
             aria-label={removeActionLabel}
             color="red"
             disabled={isSubmitting}
+            icon={<IconTrash />}
             ml="auto"
             onClick={onDelete}
             variant="subtle"
-          >
-            <IconTrash size={16} />
-          </ActionIcon>
+          />
         ) : null}
       </Group>
     </Card>

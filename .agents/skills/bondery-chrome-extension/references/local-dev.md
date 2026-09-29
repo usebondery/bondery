@@ -13,7 +13,7 @@ pnpm exec wxt
 
 Load **`dist/chrome-mv3-dev`** in `chrome://extensions` (Developer mode → Load unpacked). `webExt.disabled: true` — WXT will not launch Chrome.
 
-Dev server: port **26633**, origin `DEV_URLS.extension` (`http://localhost:26633`) from `@bondery/schemas/constants`. Keep that origin stable or HMR/CSP breaks.
+Dev server: port **26633**, origin `http://127.0.0.1:26633` (`wxt.config.ts`). Chrome MV3 unpacked CSP allows `127.0.0.1` / `localhost` only; binding to IPv4 avoids `localhost` → `::1` dropping HMR `script-src`. After a CSP change, **Remove** the extension and **Load unpacked** again — Reload is not enough.
 
 Root scripts:
 

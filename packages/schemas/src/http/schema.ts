@@ -15,6 +15,7 @@ import type {
   GeocodeTimezoneResponseWire,
   ImportantDatesReplaceBody,
   InteractionsListQuery,
+  MergeAvatarIdentityQuery,
   MergeRecommendationsQuery,
   PaginationQuery,
   PeopleListQuery,
@@ -155,6 +156,12 @@ export const mergeRecommendationsQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional().default(50),
   offset: z.coerce.number().int().min(0).optional().default(0),
 }) satisfies z.ZodType<MergeRecommendationsQuery>;
+
+/** GET /api/contacts/merge/avatars query. */
+export const mergeAvatarIdentityQuerySchema = z.object({
+  leftPersonId: contactIdSchema,
+  rightPersonId: contactIdSchema,
+}) satisfies z.ZodType<MergeAvatarIdentityQuery>;
 
 /** Sync pull long-poll query. */
 export const syncPullQuerySchema = z.object({

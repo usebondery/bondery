@@ -38,8 +38,9 @@ export const swaggerOpenApiConfig = {
       "`Authorization: Bearer bondery_key_…` on allowed integration routes " +
       "(contacts, groups, tags, interactions, imports, share, geocode). " +
       "Keys support `read` (GET/HEAD) or `full` access. See the authentication guide.\n\n" +
-      "Endpoints under `/api/me/api-keys`, `/api/sync`, `/api/chat`, " +
-      "`/api/subscriptions`, and `/api/extension` do not accept API keys.",
+      "Endpoints under `/api/me/api-keys`, `/api/me/mcp-consents`, `/api/sync`, `/api/chat`, " +
+      "`/api/subscriptions`, and `/api/extension` do not accept API keys. " +
+      "AI assistants use `POST /mcp` with an MCP OAuth token, not this REST API.",
     license: PROJECT_OPENAPI_LICENSE,
     title: "Bondery API",
     version: "1.0.0",

@@ -1,6 +1,8 @@
-# Mobile UX
+# Mobile UX (Expo native)
 
-Touch-first patterns for the Expo app. Shared rules: `../common/`. Form implementation: [forms.md](./forms.md).
+Touch-first patterns for the **Expo** app (`apps/mobile`). Shared rules: `../common/`. Form implementation: [forms.md](./forms.md).
+
+Webapp on a phone or installed PWA is **not** this folder — see [../desktop/mobile-pwa-shell.md](../desktop/mobile-pwa-shell.md).
 
 | File | Topic |
 |------|--------|

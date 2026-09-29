@@ -12,12 +12,12 @@ import { uuidParamSchema } from "@bondery/schemas/http";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { domainDb } from "../../../domains/_shared/domain-db.js";
-import { toTagDto } from "../../../domains/_shared/prisma-helpers.js";
 import { addContactTag, removeContactTag } from "../../../domains/contacts/tags.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
 import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
+import { getContactTags } from "../../../services/contacts/queries.js";
 
 const contactTagIdParamsSchema = z.object({
   id: z.string(),
@@ -36,18 +36,7 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
     },
     async (request) => {
       const ctx = domainContextFromRequest(request);
-      const db = domainDb(ctx);
-      const { id: personId } = request.params;
-
-      const memberships = await db.peopleTag.findMany({
-        include: { tag: true },
-        orderBy: { tag: { label: "asc" } },
-        where: { personId, userId: ctx.user.id },
-      });
-
-      const tags = memberships.map((membership) => toTagDto(membership.tag));
-
-      return { tags };
+      return getContactTags(domainDb(ctx), ctx.user.id, request.params.id);
     },
   );
 

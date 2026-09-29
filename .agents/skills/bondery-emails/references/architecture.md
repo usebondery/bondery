@@ -9,7 +9,7 @@
 | i18n | `apps/api/src/lib/notifications/email-i18n.ts` | Locale resolution + `loadNamespace` + interpolation |
 | Render | `apps/api` | `renderEmailParts` — `@react-email/render` `render` + [`toPlainText`](https://react.email/docs/utilities/render#4-convert-to-plain-text) |
 | Transport | `apps/api/src/lib/notifications/transporter.ts` | Nodemailer → Plunk SMTP (production) |
-| Triggers | `apps/api/src/services/notifications/`, `services/contacts/share.ts`, `lib/jobs/` | Routes, webhooks, pg-boss |
+| Triggers | `apps/api/src/services/notifications/`, `domains/contacts/share.ts`, `lib/jobs/` | Routes, webhooks, pg-boss |
 
 ```text
 packages/translations (platform/email)

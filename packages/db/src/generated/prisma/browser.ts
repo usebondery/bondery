@@ -32,13 +32,9 @@ export type Session = Prisma.SessionModel
  * One row per linked OAuth identity (github / linkedin) — replaces
  * Supabase `auth.identities`.
  * 
- * Better Auth 1.7 renamed `accountId` -> `providerAccountId` and made
- * `issuer` a required field. We keep the underlying column names
- * (`account_id`) via `@map` so this is a zero-data-movement rename at the
- * Prisma layer; only `issuer` is a real backfilled column (see the
- * `add_oauth_provider_1_7` migration for the deterministic
- * `local:oauth:<providerId>` backfill used for our only two social
- * providers, github and linkedin).
+ * Better Auth 1.7 renamed `accountId` -> `providerAccountId`. We keep the
+ * underlying column names (`account_id`, `provider_id`) via `@map`. Identity
+ * is `(providerId, providerAccountId)` per Better Auth 1.7.3+.
  */
 export type Account = Prisma.AccountModel
 /**
@@ -100,10 +96,10 @@ export type PeopleEducationHistory = Prisma.PeopleEducationHistoryModel
 export type LinkedinEnrichQueue = Prisma.LinkedinEnrichQueueModel
 /**
  * Model OauthClient
- * OAuth 2.1 authorization-server tables added by `@better-auth/oauth-provider`
- * (Better Auth 1.7). Field names/shapes were extracted directly from
- * `getAuthTables(auth.options)` for our locked plugin configuration —
- * see the `add_oauth_provider_1_7` migration notes.
+ * OAuth 2.1 authorization-server tables from Better Auth `mcp()` (oauth-provider
+ * superset) + `cimd()`. Field names/shapes were extracted from
+ * `getAuthTables(auth.options)` for the locked plugin configuration —
+ * see `add_oauth_provider_1_7` and `mcp_oauth_cimd` migration notes.
  */
 export type OauthClient = Prisma.OauthClientModel
 /**

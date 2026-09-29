@@ -1,9 +1,11 @@
 {
   "a11y": {
     "back": "Zurück",
+    "closeMenu": "Menü schließen",
     "createMore": "Nach dem Erstellen im Dialog bleiben, um einen weiteren Eintrag hinzuzufügen",
     "info": "Info",
-    "loading": "Wird geladen"
+    "loading": "Wird geladen",
+    "openMenu": "Menü öffnen"
   },
   "actions": {
     "back": "Zurück",
@@ -193,6 +195,7 @@
       "INVALID_EMAIL_OR_PASSWORD": "Ungültige E-Mail oder Passwort.",
       "INVALID_PASSWORD": "Ungültiges Passwort.",
       "INVALID_TOKEN": "Dieser Anmeldelink ist ungültig. Fordere einen neuen an.",
+      "oauth": "Die Anmeldung konnte nicht abgeschlossen werden. Versuch es erneut mit E-Mail, GitHub oder LinkedIn.",
       "PASSKEY_LIMIT_REACHED": "Du hast die maximale Anzahl an Passkeys erreicht. Lösche einen ungenutzten Passkey, um einen neuen hinzuzufügen.",
       "PASSKEY_NOT_FOUND": "Kein Passkey gefunden. Fahr mit E-Mail, GitHub oder LinkedIn fort und füge danach in den Einstellungen einen Passkey hinzu.",
       "PREVIOUSLY_REGISTERED": "Dieser Passkey ist bereits mit deinem Konto verbunden.",

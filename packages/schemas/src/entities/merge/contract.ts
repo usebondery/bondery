@@ -2,6 +2,7 @@ import type { z } from "zod";
 import type { Assert, IsEqual } from "#internal/type-equality.js";
 import type {
   declineMergeRecommendationResponseSchema,
+  mergeAvatarIdentityResponseSchema,
   mergeConflictChoiceSchema,
   mergeConflictFieldSchema,
   mergeContactsRequestSchema,
@@ -14,6 +15,7 @@ import type {
 } from "./schema.js";
 import type {
   DeclineMergeRecommendationResponse,
+  MergeAvatarIdentityResponse,
   MergeConflictChoice,
   MergeConflictField,
   MergeContactsRequest,
@@ -45,6 +47,9 @@ type _MergeContactsResponse = Assert<
 >;
 type _MergeRecommendationsResponse = Assert<
   IsEqual<MergeRecommendationsResponse, z.infer<typeof mergeRecommendationsResponseSchema>>
+>;
+type _MergeAvatarIdentityResponse = Assert<
+  IsEqual<MergeAvatarIdentityResponse, z.infer<typeof mergeAvatarIdentityResponseSchema>>
 >;
 type _DeclineMergeRecommendationResponse = Assert<
   IsEqual<

@@ -1,19 +1,24 @@
 "use client";
 
-import { ActionIcon, type ActionIconProps, Center } from "@mantine/core";
+import { ActionIcon, type ActionIconProps } from "@mantine/core";
+import type { ReactNode } from "react";
 import {
-  type CSSProperties,
-  cloneElement,
-  isValidElement,
-  type ReactElement,
-  type ReactNode,
-} from "react";
+  ACTION_ICON_GRAPHIC_SCALE,
+  type ActionIconGraphic,
+  renderActionIconGraphic,
+} from "#ActionIconButton/actionIconGraphic.js";
 import Link from "#nextjs/NextLink.js";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
   href?: string;
   ariaLabel: string;
-  icon: ReactNode;
+  /**
+   * Icon graphic (Tabler icon, SVG, or `next/image` with `fill`).
+   * Do not pass `size`, `stroke`, or fixed `width`/`height` — use ActionIcon `size` instead.
+   */
+  icon: ActionIconGraphic | ReactNode;
+  /** @default {@link ACTION_ICON_GRAPHIC_SCALE} */
+  iconScale?: number;
   onClick?: () => void;
   target?: "_blank" | "_self" | "_parent" | "_top";
   rel?: string;
@@ -29,41 +34,13 @@ export function ActionIconLink({
   href,
   ariaLabel,
   icon,
+  iconScale = ACTION_ICON_GRAPHIC_SCALE,
   onClick,
   target,
   rel,
   ...actionIconProps
 }: ActionIconLinkProps) {
-  const iconStyle: CSSProperties = {
-    display: "block",
-    height: "100%",
-    width: "100%",
-  };
-
-  const normalizedIcon = isValidElement(icon)
-    ? cloneElement(icon as ReactElement<{ style?: CSSProperties }>, {
-        style: {
-          ...(icon.props as { style?: CSSProperties }).style,
-          ...iconStyle,
-        },
-      })
-    : icon;
-
-  const renderedIcon = (
-    <Center style={{ height: "100%", width: "100%" }}>
-      <span
-        style={{
-          alignItems: "center",
-          display: "inline-flex",
-          height: "60%",
-          justifyContent: "center",
-          width: "60%",
-        }}
-      >
-        {normalizedIcon}
-      </span>
-    </Center>
-  );
+  const renderedIcon = renderActionIconGraphic(icon, iconScale);
 
   if (!href) {
     return (

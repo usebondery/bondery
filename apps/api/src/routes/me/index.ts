@@ -96,7 +96,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
       });
 
       if (!contactRow) {
-        throw notFound("Myself contact not found", "not_found");
+        throw notFound("Myself contact not found", "contact_not_found");
       }
 
       const contact = mapContactListRecord(contactRow);

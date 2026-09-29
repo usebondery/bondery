@@ -1,5 +1,6 @@
 import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding/react";
-import { ActionIcon, Box, Divider, Group } from "@mantine/core";
+import { ActionIconButton } from "@bondery/mantine-next/ActionIconButton";
+import { Box, Divider, Group } from "@mantine/core";
 import type React from "react";
 
 interface PopupBrandHeaderProps {
@@ -24,9 +25,13 @@ export function PopupBrandHeader({
             <BonderyLogotypeWhite height={28} width={120} />
           </Box>
         </Group>
-        <ActionIcon color="gray" onClick={onActionClick} title={actionTitle} variant="subtle">
-          {actionIcon}
-        </ActionIcon>
+        <ActionIconButton
+          aria-label={actionTitle}
+          color="gray"
+          icon={actionIcon}
+          onClick={onActionClick}
+          variant="subtle"
+        />
       </Group>
       <Divider mt={"xs"} />
     </div>

@@ -3,6 +3,7 @@ import { makePaginatedListResponseSchema } from "../_shared/schema.js";
 import { contactSchema } from "../contact/schema.js";
 import type {
   DeclineMergeRecommendationResponse,
+  MergeAvatarIdentityResponse,
   MergeConflictChoice,
   MergeConflictField,
   MergeContactsRequest,
@@ -82,6 +83,10 @@ export const mergeRecommendationsResponseSchema = makePaginatedListResponseSchem
 export const declineMergeRecommendationResponseSchema = z.object({
   success: z.boolean(),
 }) satisfies z.ZodType<DeclineMergeRecommendationResponse>;
+
+export const mergeAvatarIdentityResponseSchema = z.object({
+  identical: z.boolean(),
+}) satisfies z.ZodType<MergeAvatarIdentityResponse>;
 
 export const mergeRecommendationsCountResponseSchema = z.object({
   activeCount: z.number().int().nonnegative(),

@@ -3,15 +3,16 @@
 import { BonderyDynamicLogotype } from "@bondery/branding/react";
 import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink, Kbd, parseShortcutKeys } from "@bondery/mantine-next";
-import { Avatar, Box, Group, Stack, Text, Tooltip } from "@mantine/core";
+import { Avatar, Box, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
 import {
   type Icon,
   IconArrowMerge,
+  IconCategory,
   IconHeartHandshake,
   IconHome,
   IconMap2,
-  IconMessageChatbot,
+  IconMessageCircle,
   IconSearch,
   IconSettings,
   IconTimelineEventText,
@@ -19,20 +20,25 @@ import {
   IconUsersGroup,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { isChatRoute } from "@/lib/chat/isChatRoute";
+import { readLastBrowsePath, rememberBrowsePath } from "@/lib/chat/lastBrowsePath";
 import { useAppNavigationTranslations } from "@/lib/i18n/generated/hooks";
 import {
   type AppNavLabelKey,
   type AppNavLinkDef,
+  chatAppNavLink,
   primaryAppNavLinks,
   secondaryAppNavLinks,
 } from "@/lib/navigation/appNavLinks";
 import { HOTKEYS } from "@/lib/platform/config";
 import { spotlight } from "./CommandPalette";
 import { NavLinkItem } from "./NavLinkItem";
+import { SidebarChatPanel } from "./SidebarChatPanel";
 
 const navIcons: Record<AppNavLabelKey, Icon> = {
-  Chat: IconMessageChatbot,
+  Chat: IconMessageCircle,
   FixAndMerge: IconArrowMerge,
   Groups: IconUsersGroup,
   Home: IconHome,
@@ -51,10 +57,15 @@ function withIcons(links: AppNavLinkDef[]): NavigationLinkDef[] {
 
 export const primaryLinkDefs = withIcons(primaryAppNavLinks);
 export const secondaryLinkDefs = withIcons(secondaryAppNavLinks);
+export const chatLinkDef: NavigationLinkDef = {
+  ...chatAppNavLink,
+  icon: navIcons.Chat,
+};
 
 export type ResolvedNavigationLink = NavigationLinkDef & { label: string };
 
 export function useAppNavigationLinks(): {
+  chatLink: ResolvedNavigationLink;
   primaryLinks: ResolvedNavigationLink[];
   secondaryLinks: ResolvedNavigationLink[];
 } {
@@ -67,16 +78,23 @@ export function useAppNavigationLinks(): {
     }));
 
   return {
+    chatLink: { ...chatLinkDef, label: t(chatLinkDef.labelKey) },
     primaryLinks: resolve(primaryLinkDefs),
     secondaryLinks: resolve(secondaryLinkDefs),
   };
 }
+
+const SIDEBAR_MODE_BROWSE = "browse";
+const SIDEBAR_MODE_CHAT = "chat";
 
 interface NavigationSidebarContentProps {
   avatarUrl: string | null;
   collapsed: boolean;
   hasActiveMergeRecommendations: boolean;
   hasOverdueKeepInTouch: boolean;
+  isMobileOverlay?: boolean;
+  onExpandSidebar: () => void;
+  onSearchActivate?: () => void;
   userName: string;
 }
 
@@ -86,34 +104,75 @@ export function NavigationSidebarContent({
   hasActiveMergeRecommendations,
   hasOverdueKeepInTouch,
   collapsed,
+  isMobileOverlay = false,
+  onExpandSidebar,
+  onSearchActivate,
 }: NavigationSidebarContentProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const t = useAppNavigationTranslations();
-  const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
+  const { chatLink, primaryLinks, secondaryLinks } = useAppNavigationLinks();
   const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
+  const [chatModePending, setChatModePending] = useState(false);
+  const isChat = isChatRoute(pathname) || chatModePending;
   const { hovered: userCardHovered, ref: userCardRef } = useHover<HTMLDivElement>();
 
+  useEffect(() => {
+    rememberBrowsePath(pathname);
+  }, [pathname]);
+
+  useEffect(() => {
+    if (isChatRoute(pathname)) {
+      setChatModePending(false);
+    }
+  }, [pathname]);
+
+  function handleModeChange(value: string) {
+    if (value === SIDEBAR_MODE_CHAT) {
+      if (!isChatRoute(pathname)) {
+        setChatModePending(true);
+        router.push(WEBAPP_ROUTES.CHAT);
+      }
+      return;
+    }
+
+    setChatModePending(false);
+    if (isChatRoute(pathname)) {
+      router.push(readLastBrowsePath());
+    }
+  }
+
   return (
-    <Box style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* Logo — SVG clip keeps the icon anchored when collapsing */}
-      <Group justify="flex-start" mb="md">
-        <AnchorLink href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN} underline="never">
-          <Box darkHidden>
-            <BonderyDynamicLogotype
-              height={36}
-              text={collapsed ? undefined : WEBAPP_NAME}
-              theme="light"
-            />
-          </Box>
-          <Box lightHidden>
-            <BonderyDynamicLogotype
-              height={36}
-              text={collapsed ? undefined : WEBAPP_NAME}
-              theme="dark"
-            />
-          </Box>
-        </AnchorLink>
-      </Group>
+    <Box
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        ...(isMobileOverlay ? { paddingBottom: "env(safe-area-inset-bottom, 0px)" } : {}),
+      }}
+    >
+      {/* Logo — SVG clip keeps the icon anchored when collapsing. Overlay chrome
+          already has the logotype in AppShellHeader. */}
+      {!isMobileOverlay && (
+        <Group justify="flex-start" mb="md">
+          <AnchorLink href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN} underline="never">
+            <Box darkHidden>
+              <BonderyDynamicLogotype
+                height={36}
+                text={collapsed ? undefined : WEBAPP_NAME}
+                theme="light"
+              />
+            </Box>
+            <Box lightHidden>
+              <BonderyDynamicLogotype
+                height={36}
+                text={collapsed ? undefined : WEBAPP_NAME}
+                theme="dark"
+              />
+            </Box>
+          </AnchorLink>
+        </Group>
+      )}
 
       {/* Search / command palette trigger */}
       <Box mb="xs">
@@ -123,28 +182,123 @@ export function NavigationSidebarContent({
           dimLabel
           icon={IconSearch}
           label={t("Search")}
-          onClick={() => spotlight.open()}
-          rightSection={<Kbd keys={parseShortcutKeys(HOTKEYS.COMMAND_PALETTE)} size="xs" />}
+          onClick={() => {
+            if (onSearchActivate) {
+              onSearchActivate();
+              return;
+            }
+            spotlight.open();
+          }}
+          rightSection={
+            isMobileOverlay ? undefined : (
+              <Kbd keys={parseShortcutKeys(HOTKEYS.COMMAND_PALETTE)} size="xs" />
+            )
+          }
         />
       </Box>
 
-      {/* Primary navigation links */}
-      <Stack gap="xs">
-        {primaryLinks.map((link) => (
-          <NavLinkItem
-            active={pathname === link.href}
-            collapsed={collapsed}
-            href={link.href}
-            icon={link.icon}
-            key={link.href}
-            label={link.label}
-            showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+      {!isMobileOverlay && !collapsed && (
+        <Box mb="xs">
+          <SegmentedControl
+            data={[
+              {
+                label: (
+                  <Group gap={4} justify="center" wrap="nowrap">
+                    <IconCategory size={14} />
+                    <span>{t("Browse")}</span>
+                  </Group>
+                ),
+                value: SIDEBAR_MODE_BROWSE,
+              },
+              {
+                label: (
+                  <Group gap={4} justify="center" wrap="nowrap">
+                    <IconMessageCircle size={14} />
+                    <span>{t("ChatMode")}</span>
+                  </Group>
+                ),
+                value: SIDEBAR_MODE_CHAT,
+              },
+            ]}
+            fullWidth
+            onChange={handleModeChange}
+            size="sm"
+            styles={{
+              label: { overflow: "hidden" },
+            }}
+            value={isChat ? SIDEBAR_MODE_CHAT : SIDEBAR_MODE_BROWSE}
           />
-        ))}
-      </Stack>
+        </Box>
+      )}
+
+      {isMobileOverlay ? (
+        <Stack gap="xs">
+          <NavLinkItem
+            active={isChatRoute(pathname)}
+            collapsed={collapsed}
+            href={chatLink.href}
+            icon={chatLink.icon}
+            label={chatLink.label}
+          />
+          {primaryLinks.map((link) => (
+            <NavLinkItem
+              active={pathname === link.href}
+              collapsed={collapsed}
+              href={link.href}
+              icon={link.icon}
+              key={link.href}
+              label={link.label}
+              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+            />
+          ))}
+        </Stack>
+      ) : collapsed ? (
+        <Stack gap="xs">
+          <NavLinkItem
+            active={isChat}
+            collapsed={collapsed}
+            icon={chatLink.icon}
+            label={chatLink.label}
+            onClick={() => {
+              onExpandSidebar();
+              if (!isChatRoute(pathname)) {
+                setChatModePending(true);
+                router.push(chatLink.href);
+              }
+            }}
+          />
+          {primaryLinks.map((link) => (
+            <NavLinkItem
+              active={pathname === link.href}
+              collapsed={collapsed}
+              href={link.href}
+              icon={link.icon}
+              key={link.href}
+              label={link.label}
+              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+            />
+          ))}
+        </Stack>
+      ) : isChat ? (
+        <SidebarChatPanel />
+      ) : (
+        <Stack gap="xs">
+          {primaryLinks.map((link) => (
+            <NavLinkItem
+              active={pathname === link.href}
+              collapsed={collapsed}
+              href={link.href}
+              icon={link.icon}
+              key={link.href}
+              label={link.label}
+              showIndicator={link.href === WEBAPP_ROUTES.KEEP_IN_TOUCH && hasOverdueKeepInTouch}
+            />
+          ))}
+        </Stack>
+      )}
 
       {/* Secondary navigation links */}
-      <Stack gap="xs" mb="xs" mt="auto">
+      <Stack gap="xs" mb="xs" mt="auto" style={{ flexShrink: 0 }}>
         {secondaryLinks.map((link) => (
           <NavLinkItem
             active={pathname === link.href}

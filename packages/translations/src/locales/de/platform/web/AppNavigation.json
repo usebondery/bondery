@@ -1,7 +1,7 @@
 {
+  "Browse": "Durchsuchen",
   "Chat": "KI-Assistent",
-  "CollapseSidebar": "Seitenleiste einklappen",
-  "ExpandSidebar": "Seitenleiste erweitern",
+  "ChatMode": "Chats",
   "FixAndMerge": "Bereinigen & zusammenführen",
   "Groups": "Gruppen",
   "Home": "Start",
@@ -11,6 +11,7 @@
   "Myself": "Ich",
   "MyselfGreeting": "Ahoy, {name}! 😎",
   "People": "Personen",
+  "ResizeSidebar": "Seitenleiste skalieren",
   "Search": "Suchen...",
   "Settings": "Einstellungen"
 }

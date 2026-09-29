@@ -37,11 +37,12 @@ export function CommandPalette() {
   const tNav = useAppNavigationTranslations();
   const router = useRouter();
   const { navigateWithTitle } = useNavigateWithTitle();
-  const { primaryLinks, secondaryLinks } = useAppNavigationLinks();
+  const { chatLink, primaryLinks, secondaryLinks } = useAppNavigationLinks();
   const { websiteUrl } = useWebappRuntimeConfig();
 
   const navActions = [
     ...primaryLinks,
+    chatLink,
     ...secondaryLinks,
     { href: WEBAPP_ROUTES.MYSELF, icon: IconUserCircle, label: tNav("Myself") },
   ].map((link) => ({

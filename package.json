@@ -45,7 +45,7 @@
     "enableMath": false
   },
   "name": "bondery-monorepo",
-  "packageManager": "pnpm@12.4.0",
+  "packageManager": "pnpm@12.6.0",
   "private": true,
   "scripts": {
     "build": "turbo build",
@@ -111,6 +111,8 @@
     "i18n:types": "pnpm --filter @bondery/translations run i18n:types",
     "kill:dev": "node scripts/dev/kill-dev-servers.mjs",
     "lint": "biome check --write .",
+    "mcp:inspect": "node scripts/dev/mcp-inspect.mjs",
+    "mcp:inspect:cli": "npx --yes @modelcontextprotocol/inspector --cli --transport http --server-url http://localhost:26631/mcp --protocol-era modern --use-stored-auth",
     "prepare": "lefthook install --reset-hooks-path",
     "provision:oauth-clients": "pnpm --filter api run provision-oauth-clients:dev",
     "provision:platform-admins": "pnpm --filter api run provision-platform-admins:dev",
@@ -138,5 +140,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.9.2"
+  "version": "1.10.0-rc.1"
 }

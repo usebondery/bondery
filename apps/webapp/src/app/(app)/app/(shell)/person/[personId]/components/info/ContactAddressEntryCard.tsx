@@ -3,6 +3,7 @@
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
 import {
+  ActionIconButton,
   ActionIconLink,
   errorNotificationTemplate,
   successNotificationTemplate,
@@ -10,7 +11,7 @@ import {
 } from "@bondery/mantine-next";
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import type { TranslateFn } from "@bondery/translations";
-import { ActionIcon, Card, Group, Menu, Stack, Tooltip } from "@mantine/core";
+import { Card, Group, Menu, Stack, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconAdjustments,
@@ -105,7 +106,7 @@ export function ContactAddressEntryCard({
                 ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(entry.value)}`
                 : undefined
             }
-            icon={isPreferred ? <IconMapPinStar size={18} /> : <IconMapPin size={18} />}
+            icon={isPreferred ? <IconMapPinStar /> : <IconMapPin />}
             variant="light"
           />
 
@@ -170,9 +171,12 @@ export function ContactAddressEntryCard({
 
           <Menu position="bottom-end" withinPortal>
             <Menu.Target>
-              <ActionIcon aria-label={t("ActionsLabel")} disabled={isSaving} variant="subtle">
-                <IconDotsVertical size={16} />
-              </ActionIcon>
+              <ActionIconButton
+                aria-label={t("ActionsLabel")}
+                disabled={isSaving}
+                icon={<IconDotsVertical />}
+                variant="subtle"
+              />
             </Menu.Target>
             <Menu.Dropdown>
               <Tooltip

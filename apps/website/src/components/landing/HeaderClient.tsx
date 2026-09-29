@@ -1,8 +1,8 @@
 "use client";
 
 import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
-import { AnchorLink, ButtonLink } from "@bondery/mantine-next";
-import { ActionIcon, Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@mantine/core";
+import { ActionIconButton, AnchorLink, ButtonLink } from "@bondery/mantine-next";
+import { Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { Logo } from "@/components/Logo";
@@ -97,15 +97,14 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
         <Drawer.Content>
           <Drawer.Header>
             <Drawer.Title>Navigation</Drawer.Title>
-            <ActionIcon
+            <ActionIconButton
               aria-label="Close menu"
+              icon={<IconX />}
               mt={"md"}
               onClick={closeDrawer}
               size="xl"
               variant="default"
-            >
-              <IconX size={24} />
-            </ActionIcon>
+            />
           </Drawer.Header>
           <Drawer.Body>
             <Flex aria-label="Mobile navigation" component="nav" direction="column" gap="lg">

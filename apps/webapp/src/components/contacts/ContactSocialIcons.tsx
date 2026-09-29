@@ -8,11 +8,11 @@ import {
   IconBrandFacebook,
   IconBrandInstagram,
   IconBrandLinkedin,
+  IconBrandSignal,
   IconBrandWhatsapp,
   IconMail,
   IconPhone,
 } from "@tabler/icons-react";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import { SOCIAL_ACTION_ORDER, type SocialActionKey } from "@/lib/contacts/socialActionTooltips";
@@ -45,7 +45,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
             return `mailto:${preferredEmail.value}`;
           }
         })(),
-        icon: <IconMail size={18} />,
+        icon: <IconMail />,
         key: "email",
         label: getSocialActionLabel("email"),
       },
@@ -53,7 +53,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
         color: "blue",
         disabled: !contact.facebook,
         href: contact.facebook ? createSocialUrl("facebook", contact.facebook) : undefined,
-        icon: <IconBrandFacebook size={18} />,
+        icon: <IconBrandFacebook />,
         key: "facebook",
         label: getSocialActionLabel("facebook"),
       },
@@ -61,7 +61,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
         color: "pink",
         disabled: !contact.instagram,
         href: contact.instagram ? createSocialUrl("instagram", contact.instagram) : undefined,
-        icon: <IconBrandInstagram size={18} />,
+        icon: <IconBrandInstagram />,
         key: "instagram",
         label: getSocialActionLabel("instagram"),
       },
@@ -69,7 +69,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
         color: "blue",
         disabled: !contact.linkedin,
         href: contact.linkedin ? createSocialUrl("linkedin", contact.linkedin) : undefined,
-        icon: <IconBrandLinkedin size={18} />,
+        icon: <IconBrandLinkedin />,
         key: "linkedin",
         label: getSocialActionLabel("linkedin"),
       },
@@ -85,7 +85,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
             return `tel:${preferredPhone.prefix || ""}${preferredPhone.value}`;
           }
         })(),
-        icon: <IconPhone size={18} />,
+        icon: <IconPhone />,
         key: "phone",
         label: getSocialActionLabel("phone"),
       },
@@ -93,7 +93,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
         color: "indigo",
         disabled: !contact.signal,
         href: contact.signal || undefined,
-        icon: <Image alt="Signal" height={18} src="/icons/brands/signal.svg" width={18} />,
+        icon: <IconBrandSignal />,
         key: "signal",
         label: getSocialActionLabel("signal"),
       },
@@ -101,7 +101,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
         color: "green",
         disabled: !contact.whatsapp,
         href: contact.whatsapp ? createSocialUrl("whatsapp", contact.whatsapp) : undefined,
-        icon: <IconBrandWhatsapp size={18} />,
+        icon: <IconBrandWhatsapp />,
         key: "whatsapp",
         label: getSocialActionLabel("whatsapp"),
       },

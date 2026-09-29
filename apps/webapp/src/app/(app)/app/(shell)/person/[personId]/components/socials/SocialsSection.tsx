@@ -6,12 +6,12 @@ import {
   IconBrandFacebook,
   IconBrandInstagram,
   IconBrandLinkedin,
+  IconBrandSignal,
   IconBrandWhatsapp,
   IconMail,
   IconPhone,
   IconWorld,
 } from "@tabler/icons-react";
-import Image from "next/image";
 import { useCallback, useMemo } from "react";
 import {
   useCommonTranslations,
@@ -78,7 +78,7 @@ export function SocialsSection({
       {
         color: "blue",
         field: "linkedin",
-        icon: <IconBrandLinkedin size={18} />,
+        icon: <IconBrandLinkedin />,
         kind: "handle",
         label: t("FieldLinkedin"),
         placeholder: t("LinkedInPlaceholder"),
@@ -88,7 +88,7 @@ export function SocialsSection({
       {
         color: "pink",
         field: "instagram",
-        icon: <IconBrandInstagram size={18} />,
+        icon: <IconBrandInstagram />,
         kind: "handle",
         label: t("FieldInstagram"),
         placeholder: t("InstagramPlaceholder"),
@@ -98,7 +98,7 @@ export function SocialsSection({
       {
         color: "blue",
         field: "facebook",
-        icon: <IconBrandFacebook size={18} />,
+        icon: <IconBrandFacebook />,
         kind: "handle",
         label: t("FieldFacebook"),
         placeholder: t("FacebookPlaceholder"),
@@ -108,7 +108,7 @@ export function SocialsSection({
       {
         color: "green",
         field: "whatsapp",
-        icon: <IconBrandWhatsapp size={18} />,
+        icon: <IconBrandWhatsapp />,
         kind: "phone",
         label: t("FieldWhatsapp"),
         placeholder: t("WhatsAppPlaceholder"),
@@ -118,7 +118,7 @@ export function SocialsSection({
       {
         color: "cyan",
         field: "signal",
-        icon: <Image alt="Signal" height={18} src="/icons/brands/signal.svg" width={18} />,
+        icon: <IconBrandSignal />,
         kind: "phone",
         label: t("FieldSignal"),
         placeholder: t("SignalPlaceholder"),
@@ -127,7 +127,7 @@ export function SocialsSection({
       {
         color: "indigo",
         field: "website",
-        icon: <IconWorld size={18} />,
+        icon: <IconWorld />,
         kind: "handle",
         label: t("FieldWebsite"),
         placeholder: t("WebsitePlaceholder"),
@@ -210,7 +210,7 @@ export function SocialsSection({
           disabled={!preferredPhoneHref}
           field="phone"
           href={preferredPhoneHref}
-          icon={<IconPhone size={18} />}
+          icon={<IconPhone />}
           isOpen={editor.openField === "phone"}
           onCancelClose={editor.clearCloseTimeout}
           onHoverOpen={(field) => void editor.requestOpen(field)}
@@ -229,7 +229,7 @@ export function SocialsSection({
           disabled={!preferredEmailHref}
           field="email"
           href={preferredEmailHref}
-          icon={<IconMail size={18} />}
+          icon={<IconMail />}
           isOpen={editor.openField === "email"}
           onCancelClose={editor.clearCloseTimeout}
           onHoverOpen={(field) => void editor.requestOpen(field)}

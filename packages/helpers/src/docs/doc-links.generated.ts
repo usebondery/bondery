@@ -3,6 +3,7 @@ export const DOC_LINKS = {
   "api.authentication": { path: "api/authentication" },
   "bondery.chrome-extension": { path: "apps/chrome-extension" },
   "bondery.chrome-extension.enriching-contact": { path: "apps/chrome-extension", hash: "enriching-contact" },
+  "bondery.mcp": { path: "bondery/mcp" },
   "concepts.chat": { path: "concepts/chat" },
   "concepts.groups": { path: "concepts/groups" },
   "concepts.interactions": { path: "concepts/interactions" },

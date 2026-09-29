@@ -31,6 +31,24 @@
       "node": "./dist/*.js",
       "types": "./src/*.ts"
     },
+    "./ActionIconButton": {
+      "default": "./dist/ActionIconButton/index.js",
+      "import": "./dist/ActionIconButton/index.js",
+      "node": "./dist/ActionIconButton/index.js",
+      "types": "./src/ActionIconButton/index.ts"
+    },
+    "./ActionIconButton/ActionIconButton": {
+      "default": "./dist/ActionIconButton/ActionIconButton.js",
+      "import": "./dist/ActionIconButton/ActionIconButton.js",
+      "node": "./dist/ActionIconButton/ActionIconButton.js",
+      "types": "./src/ActionIconButton/ActionIconButton.tsx"
+    },
+    "./ActionIconButton/actionIconGraphic": {
+      "default": "./dist/ActionIconButton/actionIconGraphic.js",
+      "import": "./dist/ActionIconButton/actionIconGraphic.js",
+      "node": "./dist/ActionIconButton/actionIconGraphic.js",
+      "types": "./src/ActionIconButton/actionIconGraphic.tsx"
+    },
     "./CodeBlock": {
       "default": "./dist/CodeBlock/index.js",
       "import": "./dist/CodeBlock/index.js",
@@ -472,5 +490,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.9.2"
+  "version": "1.10.0-rc.1"
 }

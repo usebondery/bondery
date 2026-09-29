@@ -1,0 +1,76 @@
+---
+title: "Inspect the MCP server"
+description: Use the MCP Inspector (2026-07-28) to connect, authorize, and call Bondery MCP tools locally.
+icon: Search
+---
+
+# Inspect the MCP server
+
+[MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) is the reference client for debugging MCP servers. Use it to exercise Bondery’s Streamable HTTP endpoint (`{API}/mcp`) with the **2026-07-28** protocol. Cursor’s HTTP client still negotiates `2025-11-25` and cannot complete initialize against this server.
+
+The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants (RFC 7591 DCR, loopback callback).
+
+## Prerequisites
+
+1. API and webapp running (`pnpm run dev:webapp-api`) — OAuth login and consent live on the webapp
+2. Node 26 (Inspector requires Node ≥ 22.19)
+
+## Web Inspector
+
+From the repo root:
+
+```bash
+pnpm run mcp:inspect
+```
+
+That launches `@modelcontextprotocol/inspector` against a **writable** catalog seeded from [`scripts/dev/mcp-inspector.json`](../../scripts/dev/mcp-inspector.json) (`protocolEra: "modern"`, URL `http://localhost:26631/mcp`). Settings you change in the UI (including Tools pagination) are saved to gitignored `scripts/dev/mcp-inspector.local.json`. Open the **printed URL** (it includes a one-time session token). Do not type `localhost:6274` from memory.
+
+<Callout type="warn">
+The Inspector’s default protocol era is **legacy**. Connecting without `protocolEra: "modern"` sends a 2025-era initialize and the API returns JSON-RPC `-32022` (unsupported protocol version). The seed config pins modern so you do not have to remember the Server Settings toggle.
+</Callout>
+
+Do not pass Inspector `--config` for local debugging. That flag is **read-only** and Tools pagination fails with “Server list is read-only for this session.” `pnpm run mcp:inspect` uses `--catalog` instead.
+
+Then:
+
+1. Connect `bondery-local`. The first POST is unauthenticated; the API answers `401` with RFC 9728 `WWW-Authenticate`.
+2. Complete login and consent in the browser (loopback callback `http://localhost:6274/oauth/callback`). Grant **Read only** (`mcp:read`) or **Full access** (`mcp:write`).
+3. Use **Tools** to call `search_contacts`, `get_contact`, `get_interaction`, and the write tools if you granted Full access. Use **Prompts** for Catch up on a contact and the other templates.
+4. Use **Protocol** for the JSON-RPC transcript and **Network** for HTTP status, `Mcp-*` headers, and bodies.
+
+Tokens are stored in `~/.mcp-inspector/storage/oauth.json` (owner-only), keyed by server URL. Use **Clear OAuth state** in Connection Info if you need to sign in again.
+
+To inspect a self-hosted or hosted API, duplicate the `bondery-local` entry, change `url` to `{apiBaseUrl}/mcp`, and keep `"protocolEra": "modern"`.
+
+## CLI (after a web login)
+
+The CLI reuses the web Inspector’s stored tokens on this machine:
+
+```bash
+pnpm run mcp:inspect:cli -- --method tools/list
+pnpm run mcp:inspect:cli -- --method tools/call --tool-name search_contacts --tool-arg search=ada
+```
+
+`--use-stored-auth` is on those scripts. If the CLI reports `no_stored_token` after a web login, the web Inspector currently stores tokens under `byIssuer` and the CLI may not pick them up — use the web Inspector Tools tab, or drop `--use-stored-auth` so the CLI can open a browser (`http://127.0.0.1:6276/oauth/callback`).
+
+CI should pass `--stored-auth-only` instead, so a missing token fails immediately rather than waiting on a callback.
+
+## What to verify
+
+| Check | Where |
+|---|---|
+| Initialize negotiates `2026-07-28` | Protocol tab after connect |
+| Unauthenticated POST is JSON-RPC `401` + `WWW-Authenticate` | Network tab on the first request |
+| `mcp:read` can search contacts; write tools return `insufficient_scope` without `mcp:write` | Tools tab, then consent again with Full access |
+| Tenant isolation (foreign `personId` / `interactionId`) | `get_contact` / `get_interaction` with another user’s id → not found, not a leak |
+| Deletes and share send require host confirmation | The host must advertise `elicitation.form` in `_meta` client capabilities. First `tools/call` on `delete_*` or `create_contact_share` then returns `resultType: input_required`. Inspector 2026 / Claude retry with `inputResponses` + `requestState`. Clients that omit that capability or never retry elicitation cannot delete or send a share. |
+
+Automated coverage for the same gates lives in `pnpm run test:auth -w api` (`apps/api/src/test/mcp-integration.test.ts`). The Inspector is for interactive debugging, not a substitute for those tests.
+
+## Related
+
+- [Connect AI assistants (MCP)](../bondery/mcp.mdx) — user-facing URL and tools
+- [Authentication](./auth.mdx) — API authorization server
+- [Local development setup](./local-setup.mdx)
+- [Inspector authorization](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/authorization)
+- [Inspector protocol eras](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector/protocol-eras)

@@ -5,12 +5,14 @@ import type {
   AddressPin,
   Contact,
   ContactRelationshipWithPeople,
+  ContactSharePreviewResponse,
   ContactsFilter,
   CreateContactInput,
   GroupWithCount,
   ImportantDate,
   LinkedInDataResponse,
   MapPin,
+  MergeAvatarIdentityResponse,
   MergeContactsResponse,
   RelationshipType,
   Tag,
@@ -225,6 +227,22 @@ export async function mergeContacts(body: Record<string, unknown>): Promise<Merg
     }
     throw error;
   }
+}
+
+export async function getMergeAvatarIdentity(
+  leftPersonId: string,
+  rightPersonId: string,
+  init?: RequestInit,
+): Promise<MergeAvatarIdentityResponse> {
+  const params = new URLSearchParams({ leftPersonId, rightPersonId });
+  return clientApiJson(`${API_ROUTES.CONTACTS_MERGE_AVATARS}?${params.toString()}`, init);
+}
+
+export async function getContactSharePreview(
+  id: string,
+  init?: RequestInit,
+): Promise<ContactSharePreviewResponse> {
+  return clientApiJson(`${API_ROUTES.CONTACTS}/${id}/share-preview`, init);
 }
 
 export async function shareContact(body: Record<string, unknown>): Promise<void> {

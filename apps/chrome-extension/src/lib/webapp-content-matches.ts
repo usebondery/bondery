@@ -6,11 +6,12 @@ function originMatch(url: string | undefined): string | null {
     return null;
   }
   try {
-    const origin = new URL(url).origin;
-    if (!origin || origin === "null") {
+    const parsed = new URL(url);
+    if (!parsed.hostname) {
       return null;
     }
-    return `${origin}/*`;
+    // Chrome match patterns cannot include a port.
+    return `${parsed.protocol}//${parsed.hostname}/*`;
   } catch {
     return null;
   }

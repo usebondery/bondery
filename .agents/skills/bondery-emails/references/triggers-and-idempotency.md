@@ -7,7 +7,7 @@
 | Reminder digest | pg-boss `reminder-digest-hourly` | `services/notifications/reminder-dispatch.ts` → `reminder-digest.ts` |
 | Trial ending | Stripe `customer.subscription.trial_will_end` | `webhook-handlers/trial-ending.ts` → `sendTrialEndingEmail` |
 | Account deleted | User teardown | `lib/auth/teardown-user.ts` → `sendAccountDeletedEmail` |
-| Share contact | User API | `services/contacts/share.ts` |
+| Share contact | User API | `domains/contacts/share.ts` |
 | Feedback | User API | `routes/me/feedback/` → `sendFeedbackEmail` |
 
 ## Idempotency rules

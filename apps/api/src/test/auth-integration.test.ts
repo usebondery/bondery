@@ -1,3 +1,4 @@
+// biome-ignore-all lint/style/noExcessiveLinesPerFile: PKCE + MCP OAuth protocol share one Postgres Fastify suite
 /**
  * Real-Postgres OAuth 2.1/PKCE protocol + tenant-isolation gate.
  *
@@ -16,6 +17,11 @@ import assert from "node:assert/strict";
 import { createHash, randomBytes } from "node:crypto";
 import { after, before, describe, it } from "node:test";
 import { prisma } from "@bondery/db";
+import {
+  betterAuthAuthorizationServerMetadataPath,
+  betterAuthPath,
+  betterAuthProtectedResourceMetadataPaths,
+} from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids";
 import type { FastifyInstance } from "fastify";
 import { provisionNewUser } from "../lib/auth/provision-new-user.js";
@@ -24,10 +30,16 @@ import { loadTestEnv } from "./load-test-env.js";
 loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
-const { resolveApiResourceIdentifier, resolveOAuthIssuerIdentifier } = await import(
-  "../lib/auth/index.js"
-);
-const { resolveResourceId, provisionWebappClient } = await import(
+const {
+  CIMD_CLIENT_DISCOVERY_ID,
+  MCP_OAUTH_SCOPES,
+  resolveApiResourceIdentifier,
+  resolveBetterAuthIssuerUrl,
+  resolveMcpResourceIdentifier,
+  resolveMcpResourceIdentifiers,
+  resolveOAuthIssuerIdentifier,
+} = await import("../lib/auth/index.js");
+const { resolveResourceId, provisionWebappClient, upsertMcpResources } = await import(
   "../lib/bootstrap/provision-oauth-clients.js"
 );
 
@@ -75,7 +87,11 @@ const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 const CLIENT_ID = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID as string;
 const CLIENT_SECRET = process.env.BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET as string;
 const RESOURCE = resolveApiResourceIdentifier();
+const MCP_RESOURCE = resolveMcpResourceIdentifier();
 const OAUTH_SCOPE = "openid profile email offline_access api:access";
+const MCP_SCOPE = "openid profile email offline_access mcp:read mcp:write";
+const MCP_TEST_CLIENT_ID = "mcp-auth-spike-test-client";
+const CIMD_SCHEMA_CLIENT_ID = `cimd-schema-${generateId()}`;
 
 function authorizeUrl(params: {
   challenge: string;
@@ -116,6 +132,121 @@ function extractCodeAndState(location: string): { code: string; state: string } 
   assert.ok(code, `expected authorize redirect to carry a code, got: ${location}`);
   assert.ok(state, `expected authorize redirect to carry state, got: ${location}`);
   return { code, state };
+}
+
+function assertAuthorizationDenied(
+  response: { body: string; headers: { location?: unknown }; statusCode: number },
+  message: string,
+): void {
+  const location = typeof response.headers.location === "string" ? response.headers.location : "";
+  if (location) {
+    const url = new URL(location, "http://test.invalid");
+    assert.equal(url.searchParams.get("code"), null, `${message}: issued a code at ${location}`);
+    return;
+  }
+  assert.notEqual(response.statusCode, 200, `${message}: ${response.body}`);
+}
+
+async function upsertClientResource(clientId: string, resourceId: string): Promise<void> {
+  const existing = await prisma.oauthClientResource.findFirst({ where: { clientId, resourceId } });
+  if (existing) {
+    return;
+  }
+  await prisma.oauthClientResource.create({
+    data: { clientId, id: generateId(), resourceId },
+  });
+}
+
+/** MCP-only public test client (CIMD stand-in). Linked only to `{API}/mcp`. */
+async function provisionMcpTestClient(): Promise<void> {
+  await prisma.oauthClient.upsert({
+    create: {
+      clientId: MCP_TEST_CLIENT_ID,
+      clientSecret: null,
+      grantTypes: ["authorization_code", "refresh_token"],
+      id: generateId(),
+      name: "MCP spike test client",
+      public: true,
+      redirectUris: [REDIRECT_URI],
+      requirePKCE: true,
+      responseTypes: ["code"],
+      scopes: [...MCP_OAUTH_SCOPES],
+      skipConsent: true,
+      tokenEndpointAuthMethod: "none",
+      type: "user-agent-based",
+    },
+    update: {
+      disabled: false,
+      grantTypes: ["authorization_code", "refresh_token"],
+      public: true,
+      redirectUris: [REDIRECT_URI],
+      requirePKCE: true,
+      responseTypes: ["code"],
+      scopes: [...MCP_OAUTH_SCOPES],
+      skipConsent: true,
+      tokenEndpointAuthMethod: "none",
+    },
+    where: { clientId: MCP_TEST_CLIENT_ID },
+  });
+
+  for (const resourceId of resolveMcpResourceIdentifiers()) {
+    await upsertClientResource(MCP_TEST_CLIENT_ID, resourceId);
+  }
+}
+
+function mcpAuthorizeUrl(params: {
+  challenge: string;
+  resource?: string;
+  scope?: string;
+  state: string;
+}): string {
+  const url = new URL("http://test/auth/oauth2/authorize");
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("client_id", MCP_TEST_CLIENT_ID);
+  url.searchParams.set("redirect_uri", REDIRECT_URI);
+  url.searchParams.set("code_challenge", params.challenge);
+  url.searchParams.set("code_challenge_method", "S256");
+  url.searchParams.set("state", params.state);
+  url.searchParams.set("scope", params.scope ?? MCP_SCOPE);
+  if (params.resource !== undefined) {
+    url.searchParams.set("resource", params.resource);
+  }
+  return `${url.pathname}?${url.searchParams.toString()}`;
+}
+
+async function authorizeMcp(
+  app: FastifyInstance,
+  sessionToken: string,
+  params: { challenge: string; resource?: string; scope?: string; state: string },
+) {
+  return app.inject({
+    headers: { authorization: `Bearer ${sessionToken}` },
+    method: "GET",
+    url: mcpAuthorizeUrl(params),
+  });
+}
+
+async function exchangeMcpCode(
+  app: FastifyInstance,
+  params: { code: string; codeVerifier: string; resource?: string },
+) {
+  const body = new URLSearchParams({
+    client_id: MCP_TEST_CLIENT_ID,
+    code: params.code,
+    code_verifier: params.codeVerifier,
+    grant_type: "authorization_code",
+    redirect_uri: REDIRECT_URI,
+  });
+  if (params.resource !== undefined) {
+    body.set("resource", params.resource);
+  }
+
+  return app.inject({
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    method: "POST",
+    payload: body.toString(),
+    url: "/auth/oauth2/token",
+  });
 }
 
 async function exchangeCode(
@@ -163,20 +294,40 @@ async function refreshToken(app: FastifyInstance, refresh: string, resource?: st
 
 describe("real-database OAuth 2.1 + PKCE protocol", () => {
   let app: FastifyInstance;
+  const createdDcrClientIds: string[] = [];
   const createdUserIds: string[] = [];
 
   before(async () => {
     const resourceId = await resolveResourceId();
     await provisionWebappClient(resourceId);
+    await upsertMcpResources();
+    await provisionMcpTestClient();
     app = await createTestApp();
   });
 
   after(async () => {
     await app.close();
+    const mcpClientIds = [MCP_TEST_CLIENT_ID, CIMD_SCHEMA_CLIENT_ID, ...createdDcrClientIds];
+    await prisma.oauthAccessToken.deleteMany({
+      where: { clientId: { in: mcpClientIds } },
+    });
+    await prisma.oauthRefreshToken.deleteMany({
+      where: { clientId: { in: mcpClientIds } },
+    });
+    await prisma.oauthConsent.deleteMany({
+      where: { clientId: { in: mcpClientIds } },
+    });
+    await prisma.oauthClientResource.deleteMany({
+      where: { clientId: { in: mcpClientIds } },
+    });
+    await prisma.oauthClient.deleteMany({
+      where: { clientId: { in: mcpClientIds } },
+    });
     if (createdUserIds.length > 0) {
       await prisma.oauthAccessToken.deleteMany({ where: { userId: { in: createdUserIds } } });
       await prisma.oauthRefreshToken.deleteMany({ where: { userId: { in: createdUserIds } } });
       await prisma.oauthConsent.deleteMany({ where: { userId: { in: createdUserIds } } });
+      await prisma.people.deleteMany({ where: { userId: { in: createdUserIds } } });
       await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
     }
   });
@@ -257,21 +408,68 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
       `resource server must accept its own issued access token: ${meResponse.body}`,
     );
 
-    const replay = await exchangeCode(app, { code, codeVerifier: verifier, resource: RESOURCE });
-    assert.notEqual(
-      replay.statusCode,
-      200,
-      "a replayed authorization code must not be redeemable twice",
-    );
-
     const refreshed = await refreshToken(app, tokens.refresh_token, RESOURCE);
     assert.equal(refreshed.statusCode, 200, `refresh grant failed: ${refreshed.body}`);
     const refreshedTokens = refreshed.json() as { access_token: string };
     const refreshedPayload = decodeJwtPayload(refreshedTokens.access_token);
+    const refreshedAudience = Array.isArray(refreshedPayload.aud)
+      ? refreshedPayload.aud
+      : [refreshedPayload.aud];
+    assert.ok(
+      refreshedAudience.includes(RESOURCE),
+      `refresh grant must remain bound to the originally requested resource, got: ${JSON.stringify(refreshedPayload.aud)}`,
+    );
+
+    const replayedRefresh = await refreshToken(app, tokens.refresh_token, RESOURCE);
+    assert.notEqual(
+      replayedRefresh.statusCode,
+      200,
+      "refreshTokenReuseInterval 0 must reject a rotated refresh token immediately",
+    );
+
+    const replay = await exchangeCode(app, { code, codeVerifier: verifier, resource: RESOURCE });
+    assert.notEqual(
+      replay.statusCode,
+      200,
+      "a replayed authorization code must not be redeemable twice (RFC 9700 family invalidation)",
+    );
+
+    const mcpWithRestToken = await app.inject({
+      headers: {
+        authorization: `Bearer ${tokens.access_token}`,
+        "content-type": "application/json",
+        "mcp-protocol-version": "2026-07-28",
+      },
+      method: "POST",
+      payload: {
+        id: 1,
+        jsonrpc: "2.0",
+        method: "initialize",
+        params: {
+          capabilities: {},
+          clientInfo: { name: "auth-spike", version: "0" },
+          protocolVersion: "2025-03-26",
+        },
+      },
+      url: "/mcp",
+    });
     assert.equal(
-      refreshedPayload.aud,
-      RESOURCE,
-      "refresh grant must remain bound to the originally requested resource",
+      mcpWithRestToken.statusCode,
+      401,
+      `first-party REST JWT must be rejected on /mcp: ${mcpWithRestToken.body}`,
+    );
+    assert.ok(
+      mcpWithRestToken.headers["www-authenticate"],
+      "MCP 401 must include WWW-Authenticate (RFC 9728)",
+    );
+    assert.ok(
+      mcpWithRestToken.body.includes("jsonrpc"),
+      `MCP auth failures must be JSON-RPC, got: ${mcpWithRestToken.body}`,
+    );
+    assert.equal(
+      mcpWithRestToken.body.includes('"type":'),
+      false,
+      "MCP must not wrap auth failures in Stripe-style REST errors",
     );
   });
 
@@ -289,11 +487,7 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
     // enforcePerClientResources: the webapp client is only linked to the
     // canonical resource, so requesting an unlinked one must fail closed
     // rather than silently issuing an unscoped/opaque token.
-    assert.notEqual(
-      authorizeResponse.statusCode,
-      302,
-      "an unlinked resource must not be authorized",
-    );
+    assertAuthorizationDenied(authorizeResponse, "an unlinked resource must not be authorized");
   });
 
   it("rejects a request missing the api:access scope from calling the resource server", async () => {
@@ -490,5 +684,284 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
 
     const row = await prisma.session.findFirst({ where: { token: sessionToken } });
     assert.equal(row, null);
+  });
+
+  it("issues MCP-audience tokens without api:access and rejects them on REST", async () => {
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    const sessionToken = await createNativeSession(user.id);
+    const { challenge, verifier } = generatePkcePair();
+
+    const authorizeResponse = await authorizeMcp(app, sessionToken, {
+      challenge,
+      resource: MCP_RESOURCE,
+      state: "mcp-1",
+    });
+    assert.equal(
+      authorizeResponse.statusCode,
+      302,
+      `MCP-linked client must authorize the MCP resource: ${authorizeResponse.body}`,
+    );
+    const { code } = extractCodeAndState(authorizeResponse.headers.location as string);
+
+    const tokenResponse = await exchangeMcpCode(app, {
+      code,
+      codeVerifier: verifier,
+      resource: MCP_RESOURCE,
+    });
+    assert.equal(tokenResponse.statusCode, 200, `MCP token exchange failed: ${tokenResponse.body}`);
+    const tokens = tokenResponse.json() as { access_token: string; scope?: string };
+    const payload = decodeJwtPayload(tokens.access_token);
+    const audience = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
+    assert.ok(
+      audience.includes(MCP_RESOURCE),
+      `expected MCP audience ${MCP_RESOURCE}, got: ${JSON.stringify(payload.aud)}`,
+    );
+    assert.equal(payload.iss, resolveOAuthIssuerIdentifier());
+    const scopes =
+      typeof payload.scope === "string"
+        ? payload.scope.split(" ")
+        : typeof tokens.scope === "string"
+          ? tokens.scope.split(" ")
+          : [];
+    assert.ok(scopes.includes("mcp:read") || scopes.includes("mcp:write"));
+    assert.equal(scopes.includes("api:access"), false, "MCP tokens must never include api:access");
+    assert.equal(payload.azp, MCP_TEST_CLIENT_ID);
+
+    const restResponse = await app.inject({
+      headers: { authorization: `Bearer ${tokens.access_token}` },
+      method: "GET",
+      url: "/me/settings",
+    });
+    assert.equal(
+      restResponse.statusCode,
+      401,
+      "MCP JWT must fail REST verifyBearerToken (trusted-client filter is not a substitute)",
+    );
+
+    const mcpResponse = await app.inject({
+      headers: {
+        authorization: `Bearer ${tokens.access_token}`,
+        "content-type": "application/json",
+      },
+      method: "POST",
+      payload: {
+        id: 1,
+        jsonrpc: "2.0",
+        method: "ping",
+      },
+      url: "/mcp",
+    });
+    assert.notEqual(
+      mcpResponse.statusCode,
+      401,
+      `untrusted MCP client_id must still be accepted on /mcp (trusted-client filter off): ${mcpResponse.body}`,
+    );
+  });
+
+  it("does not issue a REST-audience token to an MCP-only client", async () => {
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    const sessionToken = await createNativeSession(user.id);
+    const { challenge } = generatePkcePair();
+
+    const authorizeResponse = await authorizeMcp(app, sessionToken, {
+      challenge,
+      resource: RESOURCE,
+      scope: OAUTH_SCOPE,
+      state: "mcp-rest-denied",
+    });
+    assertAuthorizationDenied(
+      authorizeResponse,
+      "an MCP-only client must not authorize the REST resource even if it asks",
+    );
+  });
+
+  it("keeps first-party clients linked only to REST resources", async () => {
+    const links = await prisma.oauthClientResource.findMany({
+      where: { clientId: CLIENT_ID },
+    });
+    assert.ok(links.length > 0, "webapp client must stay linked to REST");
+    assert.equal(
+      links.some((link) => link.resourceId.endsWith("/mcp")),
+      false,
+      "first-party provisioner must not attach the MCP resource",
+    );
+  });
+
+  it("advertises one RFC 8414 document with CIMD and DCR", async () => {
+    const spoofedHost = await app.inject({
+      headers: { host: "evil.example.com" },
+      method: "GET",
+      url: betterAuthAuthorizationServerMetadataPath(),
+    });
+    assert.equal(spoofedHost.statusCode, 200, spoofedHost.body);
+    const metadata = spoofedHost.json() as {
+      authorization_endpoint?: string;
+      client_id_metadata_document_supported?: boolean;
+      issuer?: string;
+      registration_endpoint?: string;
+      token_endpoint?: string;
+    };
+    assert.equal(metadata.issuer, resolveOAuthIssuerIdentifier());
+    assert.equal(String(metadata.issuer).includes("evil.example.com"), false);
+    assert.ok(
+      metadata.authorization_endpoint?.includes("/auth/oauth2/authorize"),
+      `authorization_endpoint missing: ${JSON.stringify(metadata)}`,
+    );
+    assert.ok(
+      metadata.token_endpoint?.includes("/auth/oauth2/token"),
+      `token_endpoint missing: ${JSON.stringify(metadata)}`,
+    );
+    assert.ok(
+      metadata.registration_endpoint?.includes("/auth/oauth2/register"),
+      `registration_endpoint missing: ${JSON.stringify(metadata)}`,
+    );
+    assert.equal(metadata.client_id_metadata_document_supported, true);
+    assert.ok(
+      resolveOAuthIssuerIdentifier().startsWith(resolveBetterAuthIssuerUrl()),
+      "OAuth issuer is BONDERY_PUBLIC_API_URL plus the /auth base path",
+    );
+  });
+
+  it("registers a public MCP client via DCR without REST resources", async () => {
+    const response = await app.inject({
+      headers: { "content-type": "application/json" },
+      method: "POST",
+      payload: {
+        application_type: "native",
+        client_name: "Cursor DCR probe",
+        grant_types: ["authorization_code", "refresh_token"],
+        redirect_uris: ["http://127.0.0.1:8787/callback"],
+        response_types: ["code"],
+        token_endpoint_auth_method: "none",
+      },
+      url: betterAuthPath("/oauth2/register"),
+    });
+    assert.equal(response.statusCode, 201, response.body);
+    const body = response.json() as { client_id?: string };
+    assert.equal(typeof body.client_id, "string");
+    const clientId = body.client_id as string;
+    createdDcrClientIds.push(clientId);
+    const links = await prisma.oauthClientResource.findMany({ where: { clientId } });
+    assert.ok(links.length > 0, "DCR client must be linked to the MCP resource");
+    assert.equal(
+      links.some((link) => link.resourceId.endsWith("/mcp")),
+      true,
+    );
+    assert.equal(
+      links.some((link) => !link.resourceId.endsWith("/mcp")),
+      false,
+      "DCR must not link REST resources",
+    );
+    const client = await prisma.oauthClient.findUnique({ where: { clientId } });
+    assert.equal(client?.scopes.includes("api:access"), false);
+  });
+
+  it("registers Cursor-shaped DCR with a localhost HTTP callback", async () => {
+    const response = await app.inject({
+      headers: { "content-type": "application/json" },
+      method: "POST",
+      payload: {
+        application_type: "web",
+        client_name: "Cursor",
+        grant_types: ["authorization_code", "refresh_token"],
+        redirect_uris: ["http://localhost:8787/callback"],
+        response_types: ["code"],
+        token_endpoint_auth_method: "none",
+      },
+      url: betterAuthPath("/oauth2/register"),
+    });
+    assert.equal(response.statusCode, 201, response.body);
+    const body = response.json() as { application_type?: string; client_id?: string };
+    assert.equal(typeof body.client_id, "string");
+    createdDcrClientIds.push(body.client_id as string);
+    assert.equal(body.application_type, "native");
+
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    const sessionToken = await createNativeSession(user.id);
+    const publicClient = await app.inject({
+      headers: { authorization: `Bearer ${sessionToken}` },
+      method: "GET",
+      url: `${betterAuthPath("/oauth2/public-client")}?client_id=${encodeURIComponent(body.client_id as string)}`,
+    });
+    assert.equal(publicClient.statusCode, 200, publicClient.body);
+    const publicBody = publicClient.json() as { client_name?: string };
+    assert.equal(publicBody.client_name, "Cursor");
+  });
+
+  it("rejects DCR that requests the REST resource", async () => {
+    const response = await app.inject({
+      headers: { "content-type": "application/json" },
+      method: "POST",
+      payload: {
+        application_type: "native",
+        client_name: "REST DCR probe",
+        grant_types: ["authorization_code"],
+        redirect_uris: ["http://127.0.0.1:8787/callback"],
+        resources: [RESOURCE],
+        response_types: ["code"],
+        token_endpoint_auth_method: "none",
+      },
+      url: betterAuthPath("/oauth2/register"),
+    });
+    assert.notEqual(response.statusCode, 201, response.body);
+  });
+
+  it("serves RFC 9728 protected-resource metadata for /mcp", async () => {
+    for (const path of betterAuthProtectedResourceMetadataPaths()) {
+      const response = await app.inject({ method: "GET", url: path });
+      assert.equal(response.statusCode, 200, `${path}: ${response.body}`);
+      const body = response.json() as {
+        authorization_servers?: string[];
+        resource?: string;
+        scopes_supported?: string[];
+      };
+      assert.equal(body.resource, MCP_RESOURCE, `${path} must advertise the MCP resource`);
+      assert.ok(
+        Array.isArray(body.authorization_servers) && body.authorization_servers.length === 1,
+        `${path} must point at one authorization server`,
+      );
+    }
+  });
+
+  it("stores CIMD provenance on oauth_client.clientDiscoveryId", async () => {
+    await prisma.oauthClient.create({
+      data: {
+        clientDiscoveryId: CIMD_CLIENT_DISCOVERY_ID,
+        clientId: CIMD_SCHEMA_CLIENT_ID,
+        grantTypes: ["authorization_code"],
+        id: generateId(),
+        name: "CIMD schema probe",
+        public: true,
+        redirectUris: [REDIRECT_URI],
+        responseTypes: ["code"],
+        scopes: [...MCP_OAUTH_SCOPES],
+      },
+    });
+    const row = await prisma.oauthClient.findUnique({
+      where: { clientId: CIMD_SCHEMA_CLIENT_ID },
+    });
+    assert.equal(row?.clientDiscoveryId, CIMD_CLIENT_DISCOVERY_ID);
+  });
+
+  it("aliases localhost and 127.0.0.1 for the MCP resource the same way as REST", () => {
+    const mcpIds = resolveMcpResourceIdentifiers();
+    assert.ok(MCP_RESOURCE.endsWith("/mcp"));
+    assert.ok(mcpIds.includes(MCP_RESOURCE));
+    if (RESOURCE.includes("localhost") || RESOURCE.includes("127.0.0.1")) {
+      assert.ok(
+        mcpIds.some((id) => id.includes("127.0.0.1") && id.endsWith("/mcp")),
+        `MCP loopback aliases must keep /mcp, got: ${mcpIds.join(", ")}`,
+      );
+      assert.ok(
+        mcpIds.some((id) => id.includes("localhost") && id.endsWith("/mcp")),
+        `MCP loopback aliases must keep /mcp, got: ${mcpIds.join(", ")}`,
+      );
+    } else {
+      assert.deepEqual(mcpIds, [MCP_RESOURCE]);
+      assert.ok(!RESOURCE.endsWith("/mcp"));
+    }
   });
 });

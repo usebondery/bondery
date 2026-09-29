@@ -149,7 +149,7 @@ export async function getTag(ctx: TagListContext, tagId: string) {
   });
 
   if (!row) {
-    throw notFound("Tag not found", "not_found");
+    throw notFound("Tag not found", "tag_not_found");
   }
 
   return { tag: toTagDto(row) as Tag };
@@ -169,7 +169,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
   });
 
   if (!tag) {
-    throw notFound("Tag not found", "not_found");
+    throw notFound("Tag not found", "tag_not_found");
   }
 
   const memberWhere: Prisma.PeopleWhereInput = {

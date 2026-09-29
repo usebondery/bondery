@@ -25,8 +25,9 @@ export function ChatPageSkeleton() {
       p="xl"
       style={{
         display: "flex",
+        flex: 1,
         flexDirection: "column",
-        minHeight: "calc(100vh - 60px)",
+        minHeight: "100%",
       }}
     >
       {/* Header: no action buttons */}
@@ -42,8 +43,8 @@ export function ChatPageSkeleton() {
         <SuggestedPromptsSkeleton />
       </Stack>
 
-      {/* Input bar pinned to bottom */}
-      <Paper p="sm" radius="md" style={{ bottom: 16, position: "sticky" }} withBorder>
+      {/* Input bar at the bottom of the filled shell column */}
+      <Paper p="sm" radius="md" style={{ backgroundColor: "var(--mantine-color-body)" }}>
         <Group gap="sm">
           <Skeleton height={40} radius="sm" style={{ flex: 1 }} />
           <Skeleton height={40} radius="sm" width={40} />

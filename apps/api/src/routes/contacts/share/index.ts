@@ -1,9 +1,9 @@
 import { apiSuccessResponseSchema, shareContactRequestSchema } from "@bondery/schemas";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { shareContact } from "../../../domains/contacts/index.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
-import { shareContact } from "../../../services/contacts/share.js";
 
 export const shareRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {

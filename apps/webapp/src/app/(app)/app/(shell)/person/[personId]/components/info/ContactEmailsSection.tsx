@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ActionIconButton,
   ActionIconLink,
   errorNotificationTemplate,
   successNotificationTemplate,
@@ -12,7 +13,7 @@ import {
   firstZodErrorMessage,
   replaceEmailsSchema,
 } from "@bondery/schemas";
-import { ActionIcon, Card, Group, Loader, Menu, Stack, TextInput, Tooltip } from "@mantine/core";
+import { Card, Group, Loader, Menu, Stack, TextInput, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconCopy,
@@ -162,7 +163,7 @@ export function ContactEmailsSection({
               color={email.preferred ? "orange" : "red"}
               disabled={!email.value}
               href={email.value ? `mailto:${email.value}` : undefined}
-              icon={email.preferred ? <IconMailSpark size={18} /> : <IconMail size={18} />}
+              icon={email.preferred ? <IconMailSpark /> : <IconMail />}
               variant="light"
             />
 
@@ -195,14 +196,13 @@ export function ContactEmailsSection({
 
             <Menu position="bottom-end" withinPortal>
               <Menu.Target>
-                <ActionIcon
+                <ActionIconButton
                   aria-label={text.emailActionsAriaLabel}
                   disabled={savingField === "emails"}
+                  icon={<IconDotsVertical />}
                   ml="auto"
                   variant="subtle"
-                >
-                  <IconDotsVertical size={16} />
-                </ActionIcon>
+                />
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
@@ -255,15 +255,14 @@ export function ContactEmailsSection({
         <Card p="sm" radius="md" withBorder>
           <Group align="center" gap="xs" wrap="nowrap">
             <Tooltip label={text.addEmail}>
-              <ActionIcon
+              <ActionIconButton
                 aria-label={text.addEmail}
                 color="green"
                 disabled={savingField === "emails"}
+                icon={<IconPlus />}
                 onClick={handleCommitDraftEmail}
                 variant="light"
-              >
-                <IconPlus size={18} />
-              </ActionIcon>
+              />
             </Tooltip>
 
             <TextInput

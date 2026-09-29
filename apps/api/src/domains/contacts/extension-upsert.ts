@@ -1,8 +1,11 @@
-import type { Prisma } from "@bondery/db";
 import { cleanPersonName } from "@bondery/helpers/name";
-import type { ScrapedEducationEntry, ScrapedWorkHistoryEntry } from "@bondery/schemas";
+import type {
+  ScrapedEducationEntry,
+  ScrapedWorkHistoryEntry,
+  UpdateContactInput,
+} from "@bondery/schemas";
 import { loadEnrichedContact } from "../../lib/contacts/enrichment.js";
-import { findPersonIdBySocial, upsertContactSocials } from "../../lib/contacts/socials.js";
+import { findPersonIdBySocial } from "../../lib/contacts/socials.js";
 import { resolveExtensionDefaultGroup, resolvePrimarySocial } from "../../lib/extension/helpers.js";
 import { assignContactsToDefaultImportGroup } from "../../lib/import/default-groups.js";
 import {
@@ -10,10 +13,11 @@ import {
   updateContactPhoto,
   uploadAllLinkedInLogos,
 } from "../../lib/import/linkedin-helpers.js";
-import { cachedGeocodeLinkedInLocation } from "../../lib/integrations/mapy.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
+import { createContact } from "./create-contact.js";
+import { updateContact } from "./update-contact.js";
 
 export type ExtensionUpsertInput = {
   instagram?: string;
@@ -36,18 +40,22 @@ function parseOptionalDate(value: string | null | undefined): Date | null {
   return normalized ? new Date(normalized) : null;
 }
 
-async function applyGisPointUpdate(
-  db: ReturnType<typeof domainDb>,
-  userId: string,
-  personId: string,
-  gisPointEwkt: string,
-): Promise<void> {
-  await db.$executeRaw`
-    UPDATE people
-    SET gis_point = ST_GeogFromText(${gisPointEwkt}),
-        updated_at = NOW()
-    WHERE id = ${personId}::uuid AND user_id = ${userId}::uuid
-  `;
+/** Fill headline/location/notes only when the stored field is empty. */
+export function extensionEmptyFieldPatch(
+  existing: { headline: string | null; location: string | null; notes: string | null },
+  input: { headline?: string; location?: string; notes?: string },
+): UpdateContactInput {
+  const patch: UpdateContactInput = {};
+  if (input.headline && !existing.headline) {
+    patch.headline = input.headline;
+  }
+  if (input.location && !existing.location) {
+    patch.location = input.location;
+  }
+  if (input.notes && !existing.notes) {
+    patch.notes = input.notes;
+  }
+  return patch;
 }
 
 async function upsertLinkedInHistory(
@@ -185,8 +193,7 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     throw internal("contact_failed_to_look_up_contact");
   }
 
-  const logoMap = await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);
-  void logoMap;
+  await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);
 
   if (existingContactId) {
     const existingContact = await db.people.findFirst({
@@ -194,10 +201,8 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
         hasAvatar: true,
         headline: true,
         id: true,
-        latitude: true,
         location: true,
         notes: true,
-        updatedAt: true,
       },
       where: { id: existingContactId, userId: user.id },
     });
@@ -206,54 +211,13 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
       throw internal("contact_failed_to_look_up_contact");
     }
 
+    const patch = extensionEmptyFieldPatch(existingContact, { headline, location, notes });
+    if (Object.keys(patch).length > 0) {
+      await updateContact(ctx, { patch, personId: existingContact.id });
+    }
+
     if (profileImageUrl && !existingContact.hasAvatar) {
       await updateContactPhoto(existingContact.id, user.id, profileImageUrl);
-    }
-
-    const fieldUpdates: Prisma.PeopleUpdateInput = {};
-    let gisPointEwkt: string | null = null;
-
-    if (headline && !existingContact.headline) {
-      fieldUpdates.headline = headline;
-    }
-    if (location && !existingContact.location) {
-      fieldUpdates.location = location;
-    }
-    if (notes && !existingContact.notes) {
-      fieldUpdates.notes = notes;
-    }
-
-    if (location && !existingContact.location && !existingContact.latitude) {
-      try {
-        const result = await cachedGeocodeLinkedInLocation(location);
-        if (result) {
-          const { geo, timezone: tz } = result;
-          if (geo.formattedLabel) {
-            fieldUpdates.location = geo.formattedLabel;
-          }
-          gisPointEwkt = geo.locationEwkt;
-          if (tz) {
-            fieldUpdates.timezone = tz;
-          }
-        }
-      } catch (err) {
-        log?.error(
-          { err },
-          "[extension] Geocode failed for existing contact, continuing without coordinates",
-        );
-      }
-    }
-
-    if (Object.keys(fieldUpdates).length > 0 || gisPointEwkt) {
-      fieldUpdates.updatedAt = new Date();
-      await db.people.updateMany({
-        data: fieldUpdates,
-        where: { id: existingContact.id, userId: user.id },
-      });
-
-      if (gisPointEwkt) {
-        await applyGisPointUpdate(db, user.id, existingContact.id, gisPointEwkt);
-      }
     }
 
     await upsertLinkedInHistory(
@@ -274,88 +238,37 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     return { contact, existed: true };
   }
 
-  const createData: Prisma.PeopleUncheckedCreateInput = {
-    firstName: cleanPersonName(firstName) || primarySocial.handle || "Unknown",
-    userId: user.id,
-  };
-
   const cleanedMiddleName = cleanPersonName(middleName);
   const cleanedLastName = cleanPersonName(lastName);
-  if (cleanedMiddleName) {
-    createData.middleName = cleanedMiddleName;
-  }
-  if (cleanedLastName) {
-    createData.lastName = cleanedLastName;
-  }
-  if (headline) {
-    createData.headline = headline;
-  }
-  if (location) {
-    createData.location = location;
-  }
-  if (notes) {
-    createData.notes = notes;
-  }
-
-  let createGisPointEwkt: string | null = null;
-  if (location) {
-    try {
-      const result = await cachedGeocodeLinkedInLocation(location);
-      if (result) {
-        const { geo, timezone: tz } = result;
-        if (geo.formattedLabel) {
-          createData.location = geo.formattedLabel;
-        }
-        createGisPointEwkt = geo.locationEwkt;
-        if (tz) {
-          createData.timezone = tz;
-        }
-      }
-    } catch (err) {
-      log?.error(
-        { err },
-        "[extension] Geocode failed for new contact, continuing without coordinates",
-      );
-    }
-  }
-
-  const newContact = await db.people.create({
-    data: createData,
-    select: { id: true },
+  const created = await createContact(ctx, {
+    firstName: cleanPersonName(firstName) || primarySocial.handle || "Unknown",
+    ...(cleanedLastName ? { lastName: cleanedLastName } : {}),
+    ...(cleanedMiddleName ? { middleName: cleanedMiddleName } : {}),
+    ...(headline ? { headline } : {}),
+    ...(location ? { location } : {}),
+    ...(notes ? { notes } : {}),
+    ...(primarySocial.platform === "linkedin" ? { linkedin: primarySocial.handle } : {}),
+    ...(primarySocial.platform === "instagram" ? { instagram: primarySocial.handle } : {}),
+    ...(primarySocial.platform === "facebook" ? { facebook: primarySocial.handle } : {}),
   });
-
-  if (createGisPointEwkt) {
-    await applyGisPointUpdate(db, user.id, newContact.id, createGisPointEwkt);
-  }
-
-  try {
-    await upsertContactSocials(
-      db,
-      user.id,
-      newContact.id,
-      primarySocial.platform,
-      primarySocial.handle,
-    );
-  } catch {
-    throw internal("contact_failed_to_save_socials");
-  }
+  const newContactId = created.data.personId;
 
   const extensionGroup = resolveExtensionDefaultGroup(primarySocial.platform);
   if (extensionGroup) {
     try {
-      await assignContactsToDefaultImportGroup(ctx, extensionGroup, [newContact.id]);
+      await assignContactsToDefaultImportGroup(ctx, extensionGroup, [newContactId]);
     } catch {
       throw internal("contact_failed_to_assign_default_group");
     }
   }
 
   if (profileImageUrl) {
-    await updateContactPhoto(newContact.id, user.id, profileImageUrl);
+    await updateContactPhoto(newContactId, user.id, profileImageUrl);
   }
 
   if (workHistory && workHistory.length > 0) {
     log?.info(
-      { count: workHistory.length, personId: newContact.id },
+      { count: workHistory.length, personId: newContactId },
       "[extension] Inserting work history for new contact",
     );
   }
@@ -363,14 +276,14 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
   await upsertLinkedInHistory(
     db,
     user.id,
-    newContact.id,
+    newContactId,
     linkedinBio,
     workHistory,
     educationHistory,
     log,
   );
 
-  const contact = await loadEnrichedContact(db, user.id, newContact.id, undefined, log);
+  const contact = await loadEnrichedContact(db, user.id, newContactId, undefined, log);
   if (!contact) {
     throw internal("contact_contact_was_created_but_could_not_be_loa");
   }

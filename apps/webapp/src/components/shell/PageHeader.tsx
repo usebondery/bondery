@@ -1,8 +1,8 @@
 "use client";
 
 import type { DocId } from "@bondery/helpers";
-import { ActionIconLink, HelpButton } from "@bondery/mantine-next";
-import { ActionIcon, Group, Title } from "@mantine/core";
+import { ActionIconButton, ActionIconLink, HelpButton } from "@bondery/mantine-next";
+import { Group, Title } from "@mantine/core";
 import type { Icon } from "@tabler/icons-react";
 import { IconArrowLeft } from "@tabler/icons-react";
 import type { ReactNode } from "react";
@@ -45,20 +45,19 @@ export function PageHeader({
     <Group gap="sm" justify={resolvedAction ? "space-between" : "flex-start"} mb={"xl"}>
       <Group gap="sm">
         {backOnClick ? (
-          <ActionIcon
+          <ActionIconButton
             aria-label={tCommon("a11y.back")}
+            icon={<IconArrowLeft />}
             onClick={backOnClick}
             size="xl"
             variant="default"
-          >
-            <IconArrowLeft size={20} />
-          </ActionIcon>
+          />
         ) : null}
         {!backOnClick && backHref && (
           <ActionIconLink
             ariaLabel={tCommon("a11y.back")}
             href={backHref}
-            icon={<IconArrowLeft size={20} />}
+            icon={<IconArrowLeft />}
             size="xl"
             variant="default"
           />

@@ -6,6 +6,7 @@ import {
   findPeopleTagIdWithDb,
 } from "../../lib/sync/build-changes.js";
 import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
+import { assertOwnedPersonIds } from "./assert-owned-person-ids.js";
 import { type DomainContext, DomainError, syncEmitMetaFromContext } from "./context.js";
 import { domainDb } from "./domain-db.js";
 import { toPeopleTagSyncRow, toTagDto } from "./prisma-helpers.js";
@@ -23,6 +24,8 @@ export async function upsertPeopleTagMembership(
   if (!tagRow) {
     throw new DomainError("Tag not found", 404, "tag_not_found");
   }
+
+  await assertOwnedPersonIds(ctx, [personId]);
 
   await db.peopleTag.upsert({
     create: { personId, tagId, userId: user.id },
@@ -100,6 +103,8 @@ export async function upsertPeopleTagMemberships(
   if (personIds.length === 0) {
     return { addedCount: 0, serverSequence: 0, txid: "" };
   }
+
+  await assertOwnedPersonIds(ctx, personIds);
 
   await db.peopleTag.createMany({
     data: personIds.map((personId) => ({

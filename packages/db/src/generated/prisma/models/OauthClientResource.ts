@@ -194,6 +194,7 @@ export type OauthClientResourceOrderByWithRelationInput = {
 
 export type OauthClientResourceWhereUniqueInput = Prisma.AtLeast<{
   id?: string
+  clientId_resourceId?: Prisma.OauthClientResourceClientIdResourceIdCompoundUniqueInput
   AND?: Prisma.OauthClientResourceWhereInput | Prisma.OauthClientResourceWhereInput[]
   OR?: Prisma.OauthClientResourceWhereInput[]
   NOT?: Prisma.OauthClientResourceWhereInput | Prisma.OauthClientResourceWhereInput[]
@@ -203,7 +204,7 @@ export type OauthClientResourceWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeNullableFilter<"OauthClientResource"> | Date | string | null
   client?: Prisma.XOR<Prisma.OauthClientScalarRelationFilter, Prisma.OauthClientWhereInput>
   resource?: Prisma.XOR<Prisma.OauthResourceScalarRelationFilter, Prisma.OauthResourceWhereInput>
-}, "id">
+}, "id" | "clientId_resourceId">
 
 export type OauthClientResourceOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -289,6 +290,11 @@ export type OauthClientResourceListRelationFilter = {
 
 export type OauthClientResourceOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type OauthClientResourceClientIdResourceIdCompoundUniqueInput = {
+  clientId: string
+  resourceId: string
 }
 
 export type OauthClientResourceCountOrderByAggregateInput = {

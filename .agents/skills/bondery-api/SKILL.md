@@ -3,8 +3,8 @@ name: bondery-api
 description: >
   Bondery Fastify API contracts — transport wrappers, list pagination (offset/search/sort),
   resource-keyed responses, mutations, Stripe-style errors, route registration order,
-  mobile sync, rate limits, and versioning. Use when adding or changing API routes,
-  client API calls, OpenAPI, sync protocol, or API error codes.
+  mobile sync, rate limits, versioning, and MCP tool naming. Use when adding or changing API
+  routes, client API calls, OpenAPI, sync protocol, API error codes, or MCP tools.
 metadata:
   version: "1.0.0"
   namespace: bondery
@@ -20,6 +20,7 @@ metadata:
 - Create/update mutation responses or error codes
 - Mobile offline sync (pull, outbox, materializers)
 - Rate limiting or API versioning questions
+- Adding or renaming MCP tools or prompts (`POST /mcp`)
 
 ## Non-negotiables
 
@@ -31,6 +32,7 @@ metadata:
 - Create returns `201` + full resource object — see `references/api-mutations.md`
 - Fastify routes use Zod + `fastify-zod-openapi` — not TypeBox
 - Registration order is published doc order — see `references/api-route-ordering.md`
+- MCP tool names are `{create|get|update|delete|search}_{resource}` — never `list_*` or `log_*` — see `references/mcp-tools.md`
 
 ## Decision tree
 
@@ -47,6 +49,7 @@ metadata:
 | Health / liveness / readiness probes | [references/health-probes.md](references/health-probes.md) |
 | Rate limits | [references/rate-limits.md](references/rate-limits.md) |
 | Versioning policy | [references/versioning.md](references/versioning.md) |
+| MCP tools / prompts | [references/mcp-tools.md](references/mcp-tools.md) |
 
 Full index: [references/README.md](references/README.md).
 
@@ -66,3 +69,4 @@ For client error display and i18n, see the `bondery-ux` skill (`references/commo
 - [ ] `pnpm run check:openapi` passes (includes route-order CI check)
 - [ ] `check-route-errors`, `pnpm run check:api-errors` pass at repo root
 - [ ] Auth, tenant scoping, webhooks, or uploads touched → `bondery-security` checklist satisfied
+- [ ] MCP tools follow `{create|get|update|delete|search}_{resource}` — see `references/mcp-tools.md`

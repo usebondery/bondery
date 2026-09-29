@@ -12,11 +12,10 @@ Keyboard-driven discovery for laptop and PC. Principles: [search-and-discovery.m
 | **Find person spotlight** | `f` (`HOTKEYS.FIND_PERSON`) | Server search contacts; min 3 chars |
 | **Add person** | `c` | Opens add contact modal |
 | **Log interaction** | `n` | Opens log interaction modal |
-| **Sidebar toggle** | `mod+b` | Collapse/expand nav |
 
 **Config:** `HOTKEYS` in `@/lib/platform/config`. **Display:** `Kbd` + `parseShortcutKeys` from `@bondery/mantine-next` — see [keyboard-shortcuts.md](../desktop/keyboard-shortcuts.md).
 
-**Mount:** `AppShellWrapper` renders `CommandPalette` + `PeopleSearchSpotlight` + registers `mod+b` (sidebar).
+**Mount:** `AppShellWrapper` renders `CommandPalette` + `PeopleSearchSpotlight`. Sidebar width is changed by dragging the navbar edge.
 
 **Per-page hotkeys:** `c`, `f`, `n` register on relevant route clients (`PeopleHeaderClient`, `HomeClient`, `InteractionsClient`) — not all in the shell. `mod+k` comes from Mantine Spotlight default on `CommandPalette`.
 

@@ -1,4 +1,25 @@
 {
+  "AiAssistants": {
+    "CopiedButton": "Kopiert!",
+    "CopyButton": "Kopieren",
+    "Description": "Verbinde Claude Desktop, Cursor und andere MCP-Clients mit deinen Kontakten. Kopiere die MCP-URL oder das mcp.json-Snippet in den Client.",
+    "DocsHelpLabel": "So verbindest du KI-Assistenten über MCP.",
+    "EmptyTitle": "Noch keine KI-Assistenten verbunden",
+    "GrantedAt": "Verbunden {time}",
+    "McpJsonLabel": "mcp.json",
+    "McpUrlLabel": "MCP-URL",
+    "PermissionField": "Zugriff",
+    "PermissionFullDescription": "Darf außerdem Kontakte und ihre Daten anlegen, aktualisieren und löschen.",
+    "PermissionFullLabel": "Voller Zugriff",
+    "PermissionReadDescription": "Deine Kontakte und ihre Daten suchen und lesen.",
+    "PermissionReadLabel": "Nur Lesen",
+    "RevokeButton": "Zugriff entziehen",
+    "RevokeTooltip": "Assistenten entziehen",
+    "RevokeConfirm": "Ja, entziehen",
+    "RevokeMessage": "Dieser Assistent erhält keinen neuen Zugriff mehr. Du kannst ihn später erneut genehmigen.",
+    "RevokeTitle": "Zugriff für „{name}“ entziehen?",
+    "Title": "KI-Assistenten"
+  },
   "ApiKeys": {
     "Cancel": "Abbrechen",
     "CopiedButton": "Kopiert!",
@@ -8,6 +29,7 @@
     "CreateErrorTitle": "Schlüssel konnte nicht erstellt werden",
     "CreateTitle": "API key erstellen",
     "DeleteButton": "Löschen",
+    "RevokeTooltip": "API-Schlüssel entziehen",
     "DeleteMessage": "Dieser Schlüssel funktioniert sofort nicht mehr. Alle Integrationen, die ihn verwenden, erhalten Fehler.",
     "DeleteTitle": "„{label}“ löschen?",
     "Description": "Verbinde Drittanbieter-Tools, eigene Skripte und andere Tools mit deinen Kontakten.",
@@ -442,6 +464,7 @@
       "NameField": "Passkey-Name",
       "NameTemplate": "{browser} auf {os}",
       "NeverUsed": "Nie verwendet",
+      "RevokeTooltip": "Passkey entziehen",
       "Title": "Passkeys",
       "UnsupportedTooltip": "Passkeys sind in diesem Browser nicht verfügbar."
     },

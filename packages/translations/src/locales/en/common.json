@@ -1,9 +1,11 @@
 {
   "a11y": {
     "back": "Back",
+    "closeMenu": "Close menu",
     "createMore": "After creating, stay in this dialog to add another",
     "info": "Info",
-    "loading": "Loading"
+    "loading": "Loading",
+    "openMenu": "Open menu"
   },
   "actions": {
     "back": "Back",
@@ -193,6 +195,7 @@
       "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password.",
       "INVALID_PASSWORD": "Invalid password.",
       "INVALID_TOKEN": "This sign-in link isn’t valid. Request a new one.",
+      "oauth": "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.",
       "PASSKEY_LIMIT_REACHED": "You have reached the maximum number of passkeys. Delete an unused passkey to add a new one.",
       "PASSKEY_NOT_FOUND": "No passkey found. Continue with email, GitHub, or LinkedIn, then add a passkey in Settings.",
       "PREVIOUSLY_REGISTERED": "This passkey is already added to your account.",

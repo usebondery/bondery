@@ -16,6 +16,8 @@ import {
 export const EXAMPLE_CREATE_CONTACT_REQUEST = {
   firstName: "Ada",
   lastName: "Lovelace",
+  notes: "Met at the Analytical Society dinner.",
+  phones: [{ preferred: true, prefix: "+44", type: "home" as const, value: "2079460958" }],
 };
 
 /** PATCH /api/contacts/:id body — partial update. */
@@ -106,6 +108,12 @@ export const EXAMPLE_MERGE_CONTACTS_REQUEST = {
   conflictResolutions: {
     firstName: "left" as const,
   },
+  leftPersonId: EXAMPLE_CONTACT_ID,
+  rightPersonId: EXAMPLE_CONTACT_ID_2,
+};
+
+/** GET /api/contacts/merge/avatars query. */
+export const EXAMPLE_MERGE_AVATAR_IDENTITY_QUERY = {
   leftPersonId: EXAMPLE_CONTACT_ID,
   rightPersonId: EXAMPLE_CONTACT_ID_2,
 };

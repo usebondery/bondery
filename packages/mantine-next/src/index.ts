@@ -1,4 +1,12 @@
 export {
+  ACTION_ICON_GRAPHIC_SCALE,
+  ActionIconButton,
+  type ActionIconButtonProps,
+  type ActionIconGraphic,
+  normalizeActionIconGraphicChild,
+  renderActionIconGraphic,
+} from "#ActionIconButton/index.js";
+export {
   CodeBlock,
   type CodeBlockMultiProps,
   type CodeBlockProps,

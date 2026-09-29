@@ -1,7 +1,9 @@
 import { ShareContactEmail } from "@bondery/emails";
-import type { ShareableField } from "@bondery/schemas";
-import type { DomainContext } from "../../domains/_shared/context.js";
-import { domainDb } from "../../domains/_shared/domain-db.js";
+import {
+  buildShareableFieldPreviews,
+  type ShareableFieldPreviewSource,
+} from "@bondery/helpers/contact";
+import type { ContactSharePreviewResponse, ShareableField } from "@bondery/schemas";
 import { attachContactExtras, type FullContactExtras } from "../../lib/contacts/enrichment.js";
 import { contactDetailSelect, mapContactDetailRecord } from "../../lib/data/prisma-mappers.js";
 import { emailDocumentProps } from "../../lib/notifications/email-chrome.js";
@@ -20,119 +22,69 @@ import {
 } from "../../lib/notifications/transporter.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
+import type { DomainContext } from "../_shared/context.js";
+import { domainDb } from "../_shared/domain-db.js";
 
 export type ShareContactInput = {
+  message?: string;
   personId: string;
   recipientEmails: string[];
-  message?: string;
   selectedFields: ShareableField[];
-};
-
-export type ContactSharingPreview = {
-  contactId: string;
-  contactName: string;
-  availableFields: { field: ShareableField; preview: string }[];
+  sendCopy?: boolean;
 };
 
 type ShareContext = Pick<DomainContext, "db" | "user">;
 
-/** Combined type of a contact row plus enrichment extras. */
 type EnrichedContact = FullContactExtras & {
   firstName?: string | null;
-  lastName?: string | null;
   headline?: string | null;
+  lastName?: string | null;
   location?: string | null;
   notes?: string | null;
 };
 
-const ALL_SHAREABLE_FIELDS: ShareableField[] = [
-  "name",
-  "avatar",
-  "headline",
-  "phones",
-  "emails",
-  "location",
-  "linkedin",
-  "instagram",
-  "facebook",
-  "website",
-  "whatsapp",
-  "signal",
-  "addresses",
-  "notes",
-  "importantDates",
-];
-
-function buildFieldPreview(
-  field: ShareableField,
-  enriched: EnrichedContact,
-  importantDates: { type: string; date: string }[],
-): string | null {
-  switch (field) {
-    case "name":
-      return [enriched.firstName, enriched.lastName].filter(Boolean).join(" ") || null;
-    case "avatar":
-      return enriched.avatar ? "Yes" : null;
-    case "headline":
-      return enriched.headline ?? null;
-    case "phones":
-      if (!Array.isArray(enriched.phones) || enriched.phones.length === 0) {
-        return null;
-      }
-      return enriched.phones
-        .map((p) => [p.prefix, p.value, p.type ? `(${p.type})` : ""].filter(Boolean).join(" "))
-        .join(", ");
-    case "emails":
-      if (!Array.isArray(enriched.emails) || enriched.emails.length === 0) {
-        return null;
-      }
-      return enriched.emails
-        .map((e) => [e.value, e.type ? `(${e.type})` : ""].filter(Boolean).join(" "))
-        .join(", ");
-    case "location":
-      return enriched.location ?? null;
-    case "linkedin":
-      return enriched.linkedin ?? null;
-    case "instagram":
-      return enriched.instagram ?? null;
-    case "facebook":
-      return enriched.facebook ?? null;
-    case "website":
-      return enriched.website ?? null;
-    case "whatsapp":
-      return enriched.whatsapp ?? null;
-    case "signal":
-      return enriched.signal ?? null;
-    case "addresses":
-      if (!Array.isArray(enriched.addresses) || enriched.addresses.length === 0) {
-        return null;
-      }
-      return (
-        enriched.addresses
-          .filter((a) => a.addressFormatted)
-          .map((a) => a.addressFormatted)
-          .join("; ") || null
-      );
-    case "notes":
-      if (!enriched.notes) {
-        return null;
-      }
-      return enriched.notes.length > 80 ? `${enriched.notes.substring(0, 80)}…` : enriched.notes;
-    case "importantDates":
-      return importantDates.length > 0 ? `${importantDates.length} date(s)` : null;
-    default:
-      return null;
-  }
+function unnamedContactFallback(): string {
+  return "Unnamed contact";
 }
 
-/**
- * Returns an enriched preview of a contact's shareable fields.
- * Used by the AI tool to show the user what data can be included before sharing.
- */
-export async function getContactSharingPreview(
-  ctx: ShareContext,
+export function buildContactSharePreview(
   personId: string,
-): Promise<ContactSharingPreview> {
+  source: ShareableFieldPreviewSource,
+): ContactSharePreviewResponse {
+  const contactName =
+    [source.firstName, source.lastName].filter(Boolean).join(" ") || unnamedContactFallback();
+  return {
+    availableFields: buildShareableFieldPreviews(source),
+    contactId: personId,
+    contactName,
+  };
+}
+
+function sharePreviewSource(
+  enriched: EnrichedContact,
+  importantDates: { date: string; type: string }[],
+): ShareableFieldPreviewSource {
+  return {
+    addresses: enriched.addresses,
+    avatar: enriched.avatar,
+    emails: enriched.emails,
+    facebook: enriched.facebook,
+    firstName: enriched.firstName,
+    headline: enriched.headline,
+    importantDates,
+    instagram: enriched.instagram,
+    lastName: enriched.lastName,
+    linkedin: enriched.linkedin,
+    location: enriched.location,
+    notes: enriched.notes,
+    phones: enriched.phones,
+    signal: enriched.signal,
+    website: enriched.website,
+    whatsapp: enriched.whatsapp,
+  };
+}
+
+async function loadEnrichedShareContact(ctx: ShareContext, personId: string) {
   const { user } = ctx;
   const db = domainDb(ctx as DomainContext);
 
@@ -167,15 +119,18 @@ export async function getContactSharingPreview(
     type: entry.type,
   }));
 
-  const contactName =
-    [enriched.firstName, enriched.lastName].filter(Boolean).join(" ") || "Unnamed contact";
+  return { enriched, importantDates };
+}
 
-  const availableFields = ALL_SHAREABLE_FIELDS.flatMap((field) => {
-    const preview = buildFieldPreview(field, enriched, importantDates);
-    return preview ? [{ field, preview }] : [];
-  });
-
-  return { availableFields, contactId: personId, contactName };
+/**
+ * Returns an enriched preview of a contact's shareable fields.
+ */
+export async function getContactSharingPreview(
+  ctx: ShareContext,
+  personId: string,
+): Promise<ContactSharePreviewResponse> {
+  const { enriched, importantDates } = await loadEnrichedShareContact(ctx, personId);
+  return buildContactSharePreview(personId, sharePreviewSource(enriched, importantDates));
 }
 
 /**
@@ -205,41 +160,11 @@ export async function shareContact(
       .filter(Boolean)
       .join(" ") || user.email;
 
-  const contactRow = await db.people.findFirst({
-    select: contactDetailSelect,
-    where: { id: personId, userId: user.id },
-  });
-
-  if (!contactRow) {
-    throw notFound("Contact not found", "contact_not_found");
-  }
-
-  const mappedContact = mapContactDetailRecord(contactRow);
-
-  const enriched = await attachContactExtras(db, user.id, [mappedContact], {
-    addresses: true,
-  })
-    .then(([result]) => result)
-    .catch(() => null);
-
-  if (!enriched) {
-    throw internal("contact_share_failed");
-  }
-
-  const importantDatesRaw = await db.peopleImportantDate.findMany({
-    select: { date: true, type: true },
-    where: { personId, userId: user.id },
-  });
-
-  const importantDates = importantDatesRaw.map((entry) => ({
-    date: entry.date.toISOString().slice(0, 10),
-    label: entry.type,
-    type: entry.type,
-  }));
+  const { enriched, importantDates } = await loadEnrichedShareContact(ctx, personId);
 
   const contactName =
     [enriched.firstName || "", enriched.lastName || ""].filter(Boolean).join(" ") ||
-    "Unnamed contact";
+    unnamedContactFallback();
 
   const has = (field: ShareableField) => field === "headline" || selectedFields.includes(field);
   const phones = has("phones") && Array.isArray(enriched.phones) ? enriched.phones : undefined;
@@ -248,27 +173,34 @@ export async function shareContact(
   const emailProps = {
     addresses: has("addresses")
       ? enriched.addresses
-          ?.filter((a) => a.addressFormatted)
-          .map((a) => ({ formatted: a.addressFormatted ?? undefined }))
+          ?.filter((address) => address.addressFormatted)
+          .map((address) => ({ formatted: address.addressFormatted ?? undefined }))
       : undefined,
     contactAvatarUrl: enriched.avatar ?? undefined,
     contactName,
-    emails: emails?.map((e) => ({
-      type: e.type || undefined,
-      value: e.value,
+    emails: emails?.map((email) => ({
+      type: email.type || undefined,
+      value: email.value,
     })),
     facebook: has("facebook") ? (enriched.facebook ?? undefined) : undefined,
     headline: has("headline") ? (enriched.headline ?? undefined) : undefined,
-    importantDates: has("importantDates") && importantDates.length > 0 ? importantDates : undefined,
+    importantDates:
+      has("importantDates") && importantDates.length > 0
+        ? importantDates.map((entry) => ({
+            date: entry.date,
+            label: entry.type,
+            type: entry.type,
+          }))
+        : undefined,
     instagram: has("instagram") ? (enriched.instagram ?? undefined) : undefined,
     linkedin: has("linkedin") ? (enriched.linkedin ?? undefined) : undefined,
     location: has("location") ? (enriched.location ?? undefined) : undefined,
     message: message || undefined,
     notes: has("notes") ? (enriched.notes ?? undefined) : undefined,
-    phones: phones?.map((p) => ({
-      prefix: p.prefix || undefined,
-      type: p.type || undefined,
-      value: p.value,
+    phones: phones?.map((phone) => ({
+      prefix: phone.prefix || undefined,
+      type: phone.type || undefined,
+      value: phone.value,
     })),
     recipientEmail: recipientEmails[0],
     senderAvatarUrl:

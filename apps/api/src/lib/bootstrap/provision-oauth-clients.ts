@@ -7,7 +7,12 @@
 import { createHash } from "node:crypto";
 import { prisma } from "@bondery/db";
 import { generateId } from "@bondery/helpers/ids";
-import { OAUTH_PROVIDER_SCOPES, resolveApiResourceIdentifiers } from "../auth/index.js";
+import {
+  MCP_OAUTH_SCOPES,
+  OAUTH_PROVIDER_SCOPES,
+  resolveApiResourceIdentifiers,
+  resolveMcpResourceIdentifiers,
+} from "../auth/index.js";
 import { chromeExtensionRedirectUris } from "./chrome-extension-redirect-uris.js";
 
 export function hashOAuthClientSecret(secret: string): string {
@@ -195,8 +200,41 @@ export async function resolveResourceId(): Promise<string> {
   return canonical;
 }
 
+/**
+ * Upsert MCP resource rows (canonical + loopback aliases). First-party
+ * clients are never linked here — CIMD/DCR clients pick MCP via registration
+ * default/allowed resources. Linking REST clients to MCP would leak
+ * `mcp:*` onto webapp/extension tokens.
+ */
+export async function upsertMcpResources(): Promise<string> {
+  const identifiers = resolveMcpResourceIdentifiers();
+  const canonical = identifiers[0];
+  if (!canonical) {
+    throw new Error("BONDERY_PUBLIC_API_URL is not set");
+  }
+
+  for (const identifier of identifiers) {
+    await prisma.oauthResource.upsert({
+      create: {
+        allowedScopes: [...MCP_OAUTH_SCOPES],
+        id: generateId(),
+        identifier,
+        name: "Bondery MCP",
+      },
+      update: {
+        allowedScopes: [...MCP_OAUTH_SCOPES],
+        disabled: false,
+      },
+      where: { identifier },
+    });
+  }
+
+  return canonical;
+}
+
 export async function provisionOAuthClients(): Promise<void> {
   await resolveResourceId();
+  await upsertMcpResources();
   const resourceIds = resolveApiResourceIdentifiers();
   await provisionWebappClient(resourceIds);
   await provisionExtensionClient(resourceIds);

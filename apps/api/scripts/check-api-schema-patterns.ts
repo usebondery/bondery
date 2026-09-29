@@ -17,7 +17,7 @@ const check = createCheck("check-api-schema-patterns");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const routesRoot = join(__dirname, "..", "src", "routes");
 
-const INTERNAL_ROUTE_FILES = new Set(["webhooks/stripe.ts"]);
+const INTERNAL_ROUTE_FILES = new Set(["webhooks/stripe.ts", "mcp/index.ts"]);
 
 /** Utility modules under routes/ that are not Fastify route plugins. */
 const NON_ROUTE_FILES = loadRouteNonPluginFiles();

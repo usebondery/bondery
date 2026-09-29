@@ -13,6 +13,8 @@ import { ProductAnalyticsSection } from "./ProductAnalyticsSection";
 import { SettingsSection } from "./SettingsSection";
 import { VCardImportSection } from "./VCardImportSection";
 
+const SECTION_SCROLL_MARGIN = { scrollMarginTop: "var(--mantine-spacing-md)" };
+
 export function DataManagementCard() {
   const t = useSettingsPageTranslations("DataManagement");
 
@@ -22,7 +24,7 @@ export function DataManagementCard() {
       id="data-management"
       title={t("Title")}
     >
-      <CardSection inheritPadding py="md">
+      <CardSection inheritPadding id="export" py="md" style={SECTION_SCROLL_MARGIN}>
         <Text fw={500} mb={4} size="sm">
           {t("Export.SectionTitle")}
         </Text>
@@ -36,7 +38,7 @@ export function DataManagementCard() {
 
       <Divider />
 
-      <CardSection inheritPadding py="md">
+      <CardSection inheritPadding id="import" py="md" style={SECTION_SCROLL_MARGIN}>
         <Text fw={500} mb={4} size="sm">
           {t("ImportSectionTitle")}
         </Text>
@@ -53,19 +55,19 @@ export function DataManagementCard() {
 
       <Divider />
 
-      <CardSection inheritPadding py="md">
+      <CardSection inheritPadding id="product-analytics" py="md" style={SECTION_SCROLL_MARGIN}>
         <ProductAnalyticsSection />
       </CardSection>
 
       <Divider />
 
-      <CardSection inheritPadding py="md">
+      <CardSection inheritPadding id="logout" py="md" style={SECTION_SCROLL_MARGIN}>
         <LogoutSection />
       </CardSection>
 
       <Divider />
 
-      <CardSection inheritPadding py="md">
+      <CardSection inheritPadding id="delete-account" py="md" style={SECTION_SCROLL_MARGIN}>
         <DeleteAccountSection />
       </CardSection>
     </SettingsSection>

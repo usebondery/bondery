@@ -169,7 +169,11 @@ export function PreferencesCard() {
   }
 
   return (
-    <SettingsSection icon={<IconAdjustmentsHorizontal size={20} stroke={1.5} />} title={t("Title")}>
+    <SettingsSection
+      icon={<IconAdjustmentsHorizontal size={20} stroke={1.5} />}
+      id="preferences"
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <ThemePicker
           initialValue={preferences.colorScheme}

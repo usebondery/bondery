@@ -13,6 +13,7 @@ const parsedVersion = parseCalver(version);
 const chromeVersion = toChromeVersion(parsedVersion);
 const versionName = isRc(parsedVersion) ? toNpm(parsedVersion) : undefined;
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const extensionDevOrigin = `http://127.0.0.1:${DEV_PORTS.EXTENSION}`;
 const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
 const extensionFlavor =
   process.env.BONDERY_EXTENSION_FLAVOR === "production"
@@ -36,11 +37,13 @@ export default defineConfig({
   // Target Chromium browsers
   browser: "chrome",
 
-  // Keep extension dev server origin stable (prevents CSP/HMR port mismatch)
+  // Bind HMR to 127.0.0.1. Chrome MV3 only allows localhost/127.0.0.1 in
+  // unpacked extension_pages CSP; `localhost` can resolve to ::1 and then
+  // Chrome drops the extra script-src and falls back to `script-src 'self'`.
   dev: {
     server: {
-      host: "localhost",
-      origin: DEV_URLS.extension,
+      host: "127.0.0.1",
+      origin: extensionDevOrigin,
       port: DEV_PORTS.EXTENSION,
     },
   },
@@ -76,6 +79,19 @@ export default defineConfig({
           );
         }
       }
+    },
+    "build:manifestGenerated": (wxt, manifest) => {
+      if (wxt.config.command !== "serve") {
+        return;
+      }
+      // WXT adds `http://127.0.0.1:26633`. Chrome's unpacked CSP exception is
+      // the host (any port), written as `http://127.0.0.1:*`.
+      manifest.content_security_policy = {
+        extension_pages:
+          "script-src 'self' 'wasm-unsafe-eval' http://127.0.0.1:* http://localhost:*; object-src 'self';",
+        sandbox:
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:* http://localhost:*; sandbox allow-scripts allow-forms allow-popups allow-modals; child-src 'self';",
+      };
     },
   },
 
@@ -177,6 +193,8 @@ export default defineConfig({
     server:
       mode === "development"
         ? {
+            host: "127.0.0.1",
+            origin: extensionDevOrigin,
             watch: {
               interval: 300,
               usePolling: true,

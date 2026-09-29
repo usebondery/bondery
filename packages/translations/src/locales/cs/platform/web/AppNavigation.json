@@ -1,7 +1,7 @@
 {
+  "Browse": "Procházet",
   "Chat": "AI asistent",
-  "CollapseSidebar": "Sbalit postranní panel",
-  "ExpandSidebar": "Rozbalit postranní panel",
+  "ChatMode": "Chaty",
   "FixAndMerge": "Opravit a sloučit",
   "Groups": "Skupiny",
   "Home": "Domů",
@@ -11,6 +11,7 @@
   "Myself": "Já",
   "MyselfGreeting": "Ahoj, {name}! 😎",
   "People": "Lidé",
+  "ResizeSidebar": "Změnit šířku postranního panelu",
   "Search": "Hledat...",
   "Settings": "Nastavení"
 }

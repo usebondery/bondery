@@ -1,4 +1,5 @@
-import { ActionIcon, Group, Paper, Text, ThemeIcon, Tooltip } from "@mantine/core";
+import { ActionIconButton } from "@bondery/mantine-next";
+import { Group, Paper, Text, ThemeIcon, Tooltip } from "@mantine/core";
 import { IconInfoCircle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
@@ -31,14 +32,13 @@ export function StatsCard({ title, value, tooltip, icon, color = "blue", href }:
               {title}
             </Text>
             <Tooltip label={tooltip}>
-              <ActionIcon
+              <ActionIconButton
                 aria-label={tCommon("a11y.info")}
                 color="gray"
+                icon={<IconInfoCircle />}
                 size="xs"
                 variant="transparent"
-              >
-                <IconInfoCircle size={13} stroke={1.5} />
-              </ActionIcon>
+              />
             </Tooltip>
           </Group>
           <Text fw={700} mt="xs" size="xl">

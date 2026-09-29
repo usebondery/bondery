@@ -77,3 +77,6 @@ ngrok2.yml
 ngrok3.yml
 .cursor/mcp.json
 .supabase-export/
+
+# MCP Inspector writable catalog (seeded from scripts/dev/mcp-inspector.json)
+scripts/dev/mcp-inspector.local.json

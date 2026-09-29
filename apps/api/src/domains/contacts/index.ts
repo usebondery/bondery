@@ -19,5 +19,6 @@ export {
   deleteRelationship,
   updateRelationship,
 } from "./relationships.js";
+export { getContactSharingPreview, shareContact } from "./share.js";
 export { addContactTag, removeContactTag } from "./tags.js";
 export { updateContact } from "./update-contact.js";
