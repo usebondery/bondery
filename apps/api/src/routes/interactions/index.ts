@@ -99,7 +99,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         const interaction = await loadFormattedInteraction(ctx, params.id, avatarOptions);
 
         if (!interaction) {
-          throw notFound("Interaction not found", "not_found");
+          throw notFound("Interaction not found", "interaction_not_found");
         }
 
         return { interaction };

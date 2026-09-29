@@ -3,9 +3,11 @@ export default interface Resources {
   "common": {
     "a11y": {
       "back": "Back",
+      "closeMenu": "Close menu",
       "createMore": "After creating, stay in this dialog to add another",
       "info": "Info",
-      "loading": "Loading"
+      "loading": "Loading",
+      "openMenu": "Open menu"
     },
     "actions": {
       "back": "Back",
@@ -206,7 +208,8 @@ export default interface Resources {
         "USER_NOT_FOUND": "User not found.",
         "YOU_ARE_NOT_ALLOWED_TO_REGISTER_THIS_PASSKEY": "Couldn’t add this passkey. Try again.",
         "failed_to_create_session": "Couldn’t start a session. Request a new sign-in link.",
-        "failed_to_create_user": "Couldn’t create your account. Try again, or continue with GitHub or LinkedIn."
+        "failed_to_create_user": "Couldn’t create your account. Try again, or continue with GitHub or LinkedIn.",
+        "oauth": "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn."
       },
       "connection": "Check your connection and try again.",
       "requestFailed": "Request failed. Please try again.",
@@ -397,13 +400,27 @@ export default interface Resources {
   },
   "features/pages/ChatPage": {
     "SuggestedPrompts": {
+      "AddAnniversary": "Add our anniversary on June 12 for Taylor",
+      "BirthdaysThisMonth": "Whose birthday is coming up this month?",
       "CoffeeWithBlake": "I had coffee with Blake today",
+      "ContactsInBerlin": "Show me contacts in Berlin",
       "ContactsInNewYork": "Show me contacts in New York",
       "CreateNewContact": "Create a contact for someone I just met",
       "InteractionsThisWeek": "What interactions did I log this week?",
+      "LastTalkedToSam": "When did I last talk to Sam?",
+      "LogCallYesterday": "I called Jordan yesterday",
       "NotTalkedInAWhile": "Who have I not talked to in a while?",
-      "WhoSpeaksSpanish": "Who speaks Spanish?"
+      "OverdueFollowUps": "Who should I follow up with?",
+      "PeopleInFamilyGroup": "Who is in my Family group?",
+      "SameCompanyAsAlex": "Who works at the same company as Alex?",
+      "TaggedCollegeFriends": "Who is tagged college friends?",
+      "WhoSpeaksSpanish": "Who speaks Spanish?",
+      "WhoWorksInDesign": "Who do I know that works in design?"
     },
+    "actionsButton": "Actions",
+    "ageDaysShort": "{count}d",
+    "ageHoursShort": "{count}h",
+    "ageLessThanMinuteShort": "<1m",
     "cancel": "Cancel",
     "copyMessage": "Copy message",
     "copyMessageSuccess": "Copied!",
@@ -412,11 +429,13 @@ export default interface Resources {
     "deleteSessionError": "Could not delete conversation",
     "deleteSessionSuccess": "Conversation deleted",
     "description": "Ask questions, search contacts, and log interactions using natural language.",
-    "emptyState": "Ask me anything about your contacts and interactions.",
+    "followUpPlaceholder": "Ask as followup...",
+    "heroPrompt": "How can I help you build better bonds?",
     "inputPlaceholder": "Type a message...",
-    "lessThanMinuteAgo": "Less than a minute ago",
-    "newSession": "New conversation",
+    "last30Days": "Last 30 days",
+    "newSession": "New chat",
     "noSessions": "No conversations yet",
+    "older": "Older",
     "paywallDescription": "You've used {used} of {limit} free AI messages. Upgrade to Premium for unlimited access.",
     "paywallTitle": "You've used all your free messages",
     "premiumLimitAlertDescription": "You've used all your AI messages for this period. Your limit will reset at the start of the next billing cycle.",
@@ -433,6 +452,7 @@ export default interface Resources {
     "sessions": "Conversations",
     "thinking": "Thinking...",
     "title": "AI Assistant",
+    "tryAskingMe": "Try asking me:",
     "untitledSession": "New conversation",
     "upgradeToPremium": "Upgrade to Premium"
   },
@@ -924,16 +944,28 @@ export default interface Resources {
     "Description": "{clientName} is requesting access to your Bondery account.",
     "ErrorTitle": "Authorization Error",
     "InvalidRequest": "Invalid authorization request.",
+    "LoopbackWarning": "This app is running on this computer (localhost). Continue only if you started it.",
     "MissingAuthorizationId": "Missing authorization request. Please try again from the application.",
+    "PermissionFullDescription": "Also create, update, and delete contacts and their data.",
+    "PermissionFullLabel": "Full access",
+    "PermissionLabel": "Access",
+    "PermissionReadDescription": "Search and read your contacts and their data.",
+    "PermissionReadLabel": "Read only",
     "RequestedPermissions": "Requested permissions",
     "Scopes": {
+      "api:access": "Use the Bondery API on your behalf",
       "email": "View your email address",
+      "mcp:read": "View your contacts and their data",
+      "mcp:write": "Create, update, and delete contacts and their data",
+      "offline_access": "Stay signed in until you revoke access",
       "openid": "Verify your identity",
       "phone": "View your phone number",
       "profile": "View your profile information"
     },
     "Title": "Authorize Application",
-    "UnexpectedError": "An unexpected error occurred. Please try again."
+    "UnexpectedError": "An unexpected error occurred. Please try again.",
+    "UnknownClientName": "Unknown application",
+    "WebappClientName": "Bondery"
   },
   "features/pages/Onboarding": {
     "Import": {
@@ -1019,6 +1051,27 @@ export default interface Resources {
     "Title": "People"
   },
   "features/pages/SettingsPage": {
+    "AiAssistants": {
+      "CopiedButton": "Copied!",
+      "CopyButton": "Copy",
+      "Description": "Connect Claude Desktop, Cursor, and other MCP clients to your contacts. Copy the MCP URL or the mcp.json snippet into the client.",
+      "DocsHelpLabel": "Learn how to connect AI assistants with MCP.",
+      "EmptyTitle": "No AI assistants connected yet",
+      "GrantedAt": "Connected {time}",
+      "McpJsonLabel": "mcp.json",
+      "McpUrlLabel": "MCP URL",
+      "PermissionField": "Access",
+      "PermissionFullDescription": "Also create, update, and delete contacts and their data.",
+      "PermissionFullLabel": "Full access",
+      "PermissionReadDescription": "Search and read your contacts and their data.",
+      "PermissionReadLabel": "Read only",
+      "RevokeButton": "Revoke",
+      "RevokeConfirm": "Yes, revoke",
+      "RevokeMessage": "This assistant will not be able to get new access. You can reconnect later by approving it again.",
+      "RevokeTitle": "Revoke access for \"{name}\"?",
+      "RevokeTooltip": "Revoke assistant",
+      "Title": "AI assistants"
+    },
     "ApiKeys": {
       "Cancel": "Cancel",
       "CopiedButton": "Copied!",
@@ -1053,6 +1106,7 @@ export default interface Resources {
       "PermissionReadLabel": "Read only",
       "RevealAlertDescription": "For security, we only store a hash of your key. Not even Bondery can recover the original after you close this. This is the only time you can view the full key. Copy it to a secure place before closing.",
       "RevealAlertTitle": "Save your API key",
+      "RevokeTooltip": "Revoke API key",
       "SaveButton": "Save",
       "SecretCodeLabel": "API key",
       "TestRequestLabel": "Test request",
@@ -1462,6 +1516,7 @@ export default interface Resources {
         "NameField": "Passkey name",
         "NameTemplate": "{browser} on {os}",
         "NeverUsed": "Never used",
+        "RevokeTooltip": "Revoke passkey",
         "Title": "Passkeys",
         "UnsupportedTooltip": "Passkeys aren’t available in this browser."
       },
@@ -2606,9 +2661,9 @@ export default interface Resources {
     "NoTagsYetHint": "Tags help you organize and find contacts."
   },
   "platform/web/AppNavigation": {
+    "Browse": "Browse",
     "Chat": "AI Assistant",
-    "CollapseSidebar": "Collapse sidebar",
-    "ExpandSidebar": "Expand sidebar",
+    "ChatMode": "Chats",
     "FixAndMerge": "Fix & merge",
     "Groups": "Groups",
     "Home": "Home",
@@ -2618,6 +2673,7 @@ export default interface Resources {
     "Myself": "Myself",
     "MyselfGreeting": "Ahoy, {name}! 😎",
     "People": "People",
+    "ResizeSidebar": "Resize sidebar",
     "Search": "Search...",
     "Settings": "Settings"
   },

@@ -1,11 +1,10 @@
-import { ActionIcon, type ActionIconProps } from "@mantine/core";
+import type { ActionIconProps } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
 import type { MouseEventHandler } from "react";
+import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";
 
 export interface DotsMenuButtonProps extends Omit<ActionIconProps, "children"> {
   "aria-label"?: string;
-  /** Size passed to the icon. Defaults to 16. */
-  iconSize?: number;
   onClick?: MouseEventHandler<HTMLButtonElement>;
   /** Whether the associated menu is currently open. Controls the squeeze animation. */
   opened?: boolean;
@@ -18,15 +17,14 @@ export interface DotsMenuButtonProps extends Omit<ActionIconProps, "children"> {
  *
  * Wrap with `<Menu.Target>` to use as a menu trigger.
  */
-export function DotsMenuButton({ iconSize = 16, opened = false, ...props }: DotsMenuButtonProps) {
+export function DotsMenuButton({ opened = false, ...props }: DotsMenuButtonProps) {
   return (
-    <ActionIcon
+    <ActionIconButton
       className={opened ? "button-scale-effect-active" : undefined}
+      icon={<IconDotsVertical />}
       size="md"
       variant="default"
       {...props}
-    >
-      <IconDotsVertical size={iconSize} />
-    </ActionIcon>
+    />
   );
 }

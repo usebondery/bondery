@@ -7,12 +7,12 @@ import {
   IconBrandFacebook,
   IconBrandInstagram,
   IconBrandLinkedin,
+  IconBrandSignal,
   IconBrandWhatsapp,
   IconPlus,
   IconWorld,
 } from "@tabler/icons-react-native";
 import type { ReactNode } from "react";
-import { SignalBrandIcon } from "./SignalBrandIcon";
 
 export interface ContactSocialPlatformConfig {
   accessibilityLabelKey: string;
@@ -48,7 +48,7 @@ export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] =
       signal: {
         accessibilityLabelKey: "Socials.OpenInSignal",
         placeholderKey: "Socials.SignalPlaceholder",
-        renderIcon: (iconColor) => <SignalBrandIcon color={iconColor} size={20} />,
+        renderIcon: (iconColor) => <IconBrandSignal size={20} stroke={iconColor} />,
       },
       website: {
         accessibilityLabelKey: "Socials.OpenWebsite",

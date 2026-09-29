@@ -18,7 +18,7 @@ import { IconMail, IconMailForward } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { WebappAuthClient } from "@/lib/auth/client";
-import { isLastUsedMagicLink, isMagicLinkVerifyErrorCode } from "@/lib/auth/last-login-method";
+import { isLastUsedMagicLink } from "@/lib/auth/last-login-method";
 import { stripTransientAuthErrorFromLocation } from "@/lib/auth/magic-link-urls";
 import { isWebAuthnSupported } from "@/lib/auth/passkey-support";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
@@ -71,7 +71,7 @@ export function SocialLoginCard({
   const [emailPanelOpen, setEmailPanelOpen] = useState(false);
   const [awaitingVerify, setAwaitingVerify] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
-  const shownVerifyErrorRef = useRef<string | null>(null);
+  const shownQueryErrorRef = useRef<string | null>(null);
   const form = useForm({
     initialValues: { email: "" },
     mode: "controlled",
@@ -90,13 +90,13 @@ export function SocialLoginCard({
   }, []);
 
   useEffect(() => {
-    if (!isMagicLinkVerifyErrorCode(queryError) || shownVerifyErrorRef.current === queryError) {
+    if (!queryError || shownQueryErrorRef.current === queryError) {
       return;
     }
 
-    shownVerifyErrorRef.current = queryError;
+    shownQueryErrorRef.current = queryError;
     notifications.show({
-      id: `login-magic-link-${queryError}`,
+      id: `login-query-error-${queryError}`,
       ...errorNotificationTemplate({
         description: getAuthUserFacingError({ code: queryError }, tCommon),
         title: t("AuthenticationError"),

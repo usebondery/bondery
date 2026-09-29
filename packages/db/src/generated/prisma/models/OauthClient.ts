@@ -14,10 +14,10 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model OauthClient
- * OAuth 2.1 authorization-server tables added by `@better-auth/oauth-provider`
- * (Better Auth 1.7). Field names/shapes were extracted directly from
- * `getAuthTables(auth.options)` for our locked plugin configuration —
- * see the `add_oauth_provider_1_7` migration notes.
+ * OAuth 2.1 authorization-server tables from Better Auth `mcp()` (oauth-provider
+ * superset) + `cimd()`. Field names/shapes were extracted from
+ * `getAuthTables(auth.options)` for the locked plugin configuration —
+ * see `add_oauth_provider_1_7` and `mcp_oauth_cimd` migration notes.
  */
 export type OauthClientModel = runtime.Types.Result.DefaultSelection<Prisma.$OauthClientPayload>
 
@@ -55,6 +55,8 @@ export type OauthClientMinAggregateOutputType = {
   type: string | null
   requirePKCE: boolean | null
   dpopBoundAccessTokens: boolean | null
+  clientDiscoveryId: string | null
+  applicationType: string | null
   referenceId: string | null
 }
 
@@ -86,6 +88,8 @@ export type OauthClientMaxAggregateOutputType = {
   type: string | null
   requirePKCE: boolean | null
   dpopBoundAccessTokens: boolean | null
+  clientDiscoveryId: string | null
+  applicationType: string | null
   referenceId: string | null
 }
 
@@ -123,6 +127,9 @@ export type OauthClientCountAggregateOutputType = {
   type: number
   requirePKCE: number
   dpopBoundAccessTokens: number
+  clientDiscoveryId: number
+  clientCredentialsScopes: number
+  applicationType: number
   referenceId: number
   metadata: number
   _all: number
@@ -157,6 +164,8 @@ export type OauthClientMinAggregateInputType = {
   type?: true
   requirePKCE?: true
   dpopBoundAccessTokens?: true
+  clientDiscoveryId?: true
+  applicationType?: true
   referenceId?: true
 }
 
@@ -188,6 +197,8 @@ export type OauthClientMaxAggregateInputType = {
   type?: true
   requirePKCE?: true
   dpopBoundAccessTokens?: true
+  clientDiscoveryId?: true
+  applicationType?: true
   referenceId?: true
 }
 
@@ -225,6 +236,9 @@ export type OauthClientCountAggregateInputType = {
   type?: true
   requirePKCE?: true
   dpopBoundAccessTokens?: true
+  clientDiscoveryId?: true
+  clientCredentialsScopes?: true
+  applicationType?: true
   referenceId?: true
   metadata?: true
   _all?: true
@@ -336,6 +350,9 @@ export type OauthClientGroupByOutputType = {
   type: string | null
   requirePKCE: boolean | null
   dpopBoundAccessTokens: boolean
+  clientDiscoveryId: string | null
+  clientCredentialsScopes: string[]
+  applicationType: string | null
   referenceId: string | null
   metadata: runtime.JsonValue | null
   _count: OauthClientCountAggregateOutputType | null
@@ -395,6 +412,9 @@ export type OauthClientWhereInput = {
   type?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   requirePKCE?: Prisma.BoolNullableFilter<"OauthClient"> | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFilter<"OauthClient"> | boolean
+  clientDiscoveryId?: Prisma.StringNullableFilter<"OauthClient"> | string | null
+  clientCredentialsScopes?: Prisma.StringNullableListFilter<"OauthClient">
+  applicationType?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   referenceId?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   metadata?: Prisma.JsonNullableFilter<"OauthClient">
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -438,6 +458,9 @@ export type OauthClientOrderByWithRelationInput = {
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   requirePKCE?: Prisma.SortOrderInput | Prisma.SortOrder
   dpopBoundAccessTokens?: Prisma.SortOrder
+  clientDiscoveryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientCredentialsScopes?: Prisma.SortOrder
+  applicationType?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceId?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -484,6 +507,9 @@ export type OauthClientWhereUniqueInput = Prisma.AtLeast<{
   type?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   requirePKCE?: Prisma.BoolNullableFilter<"OauthClient"> | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFilter<"OauthClient"> | boolean
+  clientDiscoveryId?: Prisma.StringNullableFilter<"OauthClient"> | string | null
+  clientCredentialsScopes?: Prisma.StringNullableListFilter<"OauthClient">
+  applicationType?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   referenceId?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   metadata?: Prisma.JsonNullableFilter<"OauthClient">
   user?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
@@ -527,6 +553,9 @@ export type OauthClientOrderByWithAggregationInput = {
   type?: Prisma.SortOrderInput | Prisma.SortOrder
   requirePKCE?: Prisma.SortOrderInput | Prisma.SortOrder
   dpopBoundAccessTokens?: Prisma.SortOrder
+  clientDiscoveryId?: Prisma.SortOrderInput | Prisma.SortOrder
+  clientCredentialsScopes?: Prisma.SortOrder
+  applicationType?: Prisma.SortOrderInput | Prisma.SortOrder
   referenceId?: Prisma.SortOrderInput | Prisma.SortOrder
   metadata?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.OauthClientCountOrderByAggregateInput
@@ -571,6 +600,9 @@ export type OauthClientScalarWhereWithAggregatesInput = {
   type?: Prisma.StringNullableWithAggregatesFilter<"OauthClient"> | string | null
   requirePKCE?: Prisma.BoolNullableWithAggregatesFilter<"OauthClient"> | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolWithAggregatesFilter<"OauthClient"> | boolean
+  clientDiscoveryId?: Prisma.StringNullableWithAggregatesFilter<"OauthClient"> | string | null
+  clientCredentialsScopes?: Prisma.StringNullableListFilter<"OauthClient">
+  applicationType?: Prisma.StringNullableWithAggregatesFilter<"OauthClient"> | string | null
   referenceId?: Prisma.StringNullableWithAggregatesFilter<"OauthClient"> | string | null
   metadata?: Prisma.JsonNullableWithAggregatesFilter<"OauthClient">
 }
@@ -608,6 +640,9 @@ export type OauthClientCreateInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserCreateNestedOneWithoutOauthClientsInput
@@ -651,6 +686,9 @@ export type OauthClientUncheckedCreateInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedCreateNestedManyWithoutClientInput
@@ -692,6 +730,9 @@ export type OauthClientUpdateInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneWithoutOauthClientsNestedInput
@@ -735,6 +776,9 @@ export type OauthClientUncheckedUpdateInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedUpdateManyWithoutClientNestedInput
@@ -777,6 +821,9 @@ export type OauthClientCreateManyInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -814,6 +861,9 @@ export type OauthClientUpdateManyMutationInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -852,6 +902,9 @@ export type OauthClientUncheckedUpdateManyInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -908,6 +961,9 @@ export type OauthClientCountOrderByAggregateInput = {
   type?: Prisma.SortOrder
   requirePKCE?: Prisma.SortOrder
   dpopBoundAccessTokens?: Prisma.SortOrder
+  clientDiscoveryId?: Prisma.SortOrder
+  clientCredentialsScopes?: Prisma.SortOrder
+  applicationType?: Prisma.SortOrder
   referenceId?: Prisma.SortOrder
   metadata?: Prisma.SortOrder
 }
@@ -940,6 +996,8 @@ export type OauthClientMaxOrderByAggregateInput = {
   type?: Prisma.SortOrder
   requirePKCE?: Prisma.SortOrder
   dpopBoundAccessTokens?: Prisma.SortOrder
+  clientDiscoveryId?: Prisma.SortOrder
+  applicationType?: Prisma.SortOrder
   referenceId?: Prisma.SortOrder
 }
 
@@ -971,6 +1029,8 @@ export type OauthClientMinOrderByAggregateInput = {
   type?: Prisma.SortOrder
   requirePKCE?: Prisma.SortOrder
   dpopBoundAccessTokens?: Prisma.SortOrder
+  clientDiscoveryId?: Prisma.SortOrder
+  applicationType?: Prisma.SortOrder
   referenceId?: Prisma.SortOrder
 }
 
@@ -1045,6 +1105,10 @@ export type OauthClientCreateresponseTypesInput = {
   set: string[]
 }
 
+export type OauthClientCreateclientCredentialsScopesInput = {
+  set: string[]
+}
+
 export type OauthClientUpdatescopesInput = {
   set?: string[]
   push?: string | string[]
@@ -1071,6 +1135,11 @@ export type OauthClientUpdategrantTypesInput = {
 }
 
 export type OauthClientUpdateresponseTypesInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type OauthClientUpdateclientCredentialsScopesInput = {
   set?: string[]
   push?: string | string[]
 }
@@ -1164,6 +1233,9 @@ export type OauthClientCreateWithoutUserInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceCreateNestedManyWithoutClientInput
@@ -1205,6 +1277,9 @@ export type OauthClientUncheckedCreateWithoutUserInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedCreateNestedManyWithoutClientInput
@@ -1276,6 +1351,9 @@ export type OauthClientScalarWhereInput = {
   type?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   requirePKCE?: Prisma.BoolNullableFilter<"OauthClient"> | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFilter<"OauthClient"> | boolean
+  clientDiscoveryId?: Prisma.StringNullableFilter<"OauthClient"> | string | null
+  clientCredentialsScopes?: Prisma.StringNullableListFilter<"OauthClient">
+  applicationType?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   referenceId?: Prisma.StringNullableFilter<"OauthClient"> | string | null
   metadata?: Prisma.JsonNullableFilter<"OauthClient">
 }
@@ -1313,6 +1391,9 @@ export type OauthClientCreateWithoutClientResourcesInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserCreateNestedOneWithoutOauthClientsInput
@@ -1355,6 +1436,9 @@ export type OauthClientUncheckedCreateWithoutClientResourcesInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   refreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutClientInput
@@ -1411,6 +1495,9 @@ export type OauthClientUpdateWithoutClientResourcesInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneWithoutOauthClientsNestedInput
@@ -1453,6 +1540,9 @@ export type OauthClientUncheckedUpdateWithoutClientResourcesInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   refreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutClientNestedInput
@@ -1493,6 +1583,9 @@ export type OauthClientCreateWithoutRefreshTokensInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserCreateNestedOneWithoutOauthClientsInput
@@ -1535,6 +1628,9 @@ export type OauthClientUncheckedCreateWithoutRefreshTokensInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedCreateNestedManyWithoutClientInput
@@ -1591,6 +1687,9 @@ export type OauthClientUpdateWithoutRefreshTokensInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneWithoutOauthClientsNestedInput
@@ -1633,6 +1732,9 @@ export type OauthClientUncheckedUpdateWithoutRefreshTokensInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedUpdateManyWithoutClientNestedInput
@@ -1673,6 +1775,9 @@ export type OauthClientCreateWithoutAccessTokensInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserCreateNestedOneWithoutOauthClientsInput
@@ -1715,6 +1820,9 @@ export type OauthClientUncheckedCreateWithoutAccessTokensInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedCreateNestedManyWithoutClientInput
@@ -1771,6 +1879,9 @@ export type OauthClientUpdateWithoutAccessTokensInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneWithoutOauthClientsNestedInput
@@ -1813,6 +1924,9 @@ export type OauthClientUncheckedUpdateWithoutAccessTokensInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedUpdateManyWithoutClientNestedInput
@@ -1853,6 +1967,9 @@ export type OauthClientCreateWithoutConsentsInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserCreateNestedOneWithoutOauthClientsInput
@@ -1895,6 +2012,9 @@ export type OauthClientUncheckedCreateWithoutConsentsInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedCreateNestedManyWithoutClientInput
@@ -1951,6 +2071,9 @@ export type OauthClientUpdateWithoutConsentsInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   user?: Prisma.UserUpdateOneWithoutOauthClientsNestedInput
@@ -1993,6 +2116,9 @@ export type OauthClientUncheckedUpdateWithoutConsentsInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedUpdateManyWithoutClientNestedInput
@@ -2033,6 +2159,9 @@ export type OauthClientCreateManyUserInput = {
   type?: string | null
   requirePKCE?: boolean | null
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: string | null
+  clientCredentialsScopes?: Prisma.OauthClientCreateclientCredentialsScopesInput | string[]
+  applicationType?: string | null
   referenceId?: string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -2070,6 +2199,9 @@ export type OauthClientUpdateWithoutUserInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUpdateManyWithoutClientNestedInput
@@ -2111,6 +2243,9 @@ export type OauthClientUncheckedUpdateWithoutUserInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   clientResources?: Prisma.OauthClientResourceUncheckedUpdateManyWithoutClientNestedInput
@@ -2152,6 +2287,9 @@ export type OauthClientUncheckedUpdateManyWithoutUserInput = {
   type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requirePKCE?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   dpopBoundAccessTokens?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  clientDiscoveryId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  clientCredentialsScopes?: Prisma.OauthClientUpdateclientCredentialsScopesInput | string[]
+  applicationType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   referenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   metadata?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
@@ -2248,6 +2386,9 @@ export type OauthClientSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   type?: boolean
   requirePKCE?: boolean
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: boolean
+  clientCredentialsScopes?: boolean
+  applicationType?: boolean
   referenceId?: boolean
   metadata?: boolean
   user?: boolean | Prisma.OauthClient$userArgs<ExtArgs>
@@ -2292,6 +2433,9 @@ export type OauthClientSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   type?: boolean
   requirePKCE?: boolean
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: boolean
+  clientCredentialsScopes?: boolean
+  applicationType?: boolean
   referenceId?: boolean
   metadata?: boolean
   user?: boolean | Prisma.OauthClient$userArgs<ExtArgs>
@@ -2331,6 +2475,9 @@ export type OauthClientSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   type?: boolean
   requirePKCE?: boolean
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: boolean
+  clientCredentialsScopes?: boolean
+  applicationType?: boolean
   referenceId?: boolean
   metadata?: boolean
   user?: boolean | Prisma.OauthClient$userArgs<ExtArgs>
@@ -2370,11 +2517,14 @@ export type OauthClientSelectScalar = {
   type?: boolean
   requirePKCE?: boolean
   dpopBoundAccessTokens?: boolean
+  clientDiscoveryId?: boolean
+  clientCredentialsScopes?: boolean
+  applicationType?: boolean
   referenceId?: boolean
   metadata?: boolean
 }
 
-export type OauthClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "clientSecret" | "disabled" | "skipConsent" | "enableEndSession" | "subjectType" | "scopes" | "userId" | "createdAt" | "updatedAt" | "name" | "uri" | "icon" | "contacts" | "tos" | "policy" | "softwareId" | "softwareVersion" | "softwareStatement" | "redirectUris" | "postLogoutRedirectUris" | "backchannelLogoutUri" | "backchannelLogoutSessionRequired" | "tokenEndpointAuthMethod" | "jwks" | "jwksUri" | "grantTypes" | "responseTypes" | "public" | "type" | "requirePKCE" | "dpopBoundAccessTokens" | "referenceId" | "metadata", ExtArgs["result"]["oauthClient"]>
+export type OauthClientOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "clientSecret" | "disabled" | "skipConsent" | "enableEndSession" | "subjectType" | "scopes" | "userId" | "createdAt" | "updatedAt" | "name" | "uri" | "icon" | "contacts" | "tos" | "policy" | "softwareId" | "softwareVersion" | "softwareStatement" | "redirectUris" | "postLogoutRedirectUris" | "backchannelLogoutUri" | "backchannelLogoutSessionRequired" | "tokenEndpointAuthMethod" | "jwks" | "jwksUri" | "grantTypes" | "responseTypes" | "public" | "type" | "requirePKCE" | "dpopBoundAccessTokens" | "clientDiscoveryId" | "clientCredentialsScopes" | "applicationType" | "referenceId" | "metadata", ExtArgs["result"]["oauthClient"]>
 export type OauthClientInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.OauthClient$userArgs<ExtArgs>
   clientResources?: boolean | Prisma.OauthClient$clientResourcesArgs<ExtArgs>
@@ -2433,6 +2583,14 @@ export type $OauthClientPayload<ExtArgs extends runtime.Types.Extensions.Interna
     type: string | null
     requirePKCE: boolean | null
     dpopBoundAccessTokens: boolean
+    /**
+     * CIMD provenance — Better Auth `getAuthTables` field `clientDiscoveryId`
+     * (`"cimd"` for Client ID Metadata Documents). First-party provisioned
+     * clients leave this null.
+     */
+    clientDiscoveryId: string | null
+    clientCredentialsScopes: string[]
+    applicationType: string | null
     referenceId: string | null
     metadata: runtime.JsonValue | null
   }, ExtArgs["result"]["oauthClient"]>
@@ -2896,6 +3054,9 @@ export interface OauthClientFieldRefs {
   readonly type: Prisma.FieldRef<"OauthClient", 'String'>
   readonly requirePKCE: Prisma.FieldRef<"OauthClient", 'Boolean'>
   readonly dpopBoundAccessTokens: Prisma.FieldRef<"OauthClient", 'Boolean'>
+  readonly clientDiscoveryId: Prisma.FieldRef<"OauthClient", 'String'>
+  readonly clientCredentialsScopes: Prisma.FieldRef<"OauthClient", 'String[]'>
+  readonly applicationType: Prisma.FieldRef<"OauthClient", 'String'>
   readonly referenceId: Prisma.FieldRef<"OauthClient", 'String'>
   readonly metadata: Prisma.FieldRef<"OauthClient", 'Json'>
 }

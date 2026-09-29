@@ -3,6 +3,7 @@ import type { SubscriptionStatus } from "@bondery/schemas";
 import { Box } from "@mantine/core";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import type { Metadata } from "next";
+import { SidebarChatPanel } from "@/components/shell/SidebarChatPanel";
 import { serverApiFetch } from "@/lib/api/server";
 import { getAppNavigationTranslations } from "@/lib/i18n/generated/hooks.server";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
@@ -12,8 +13,6 @@ import { getQueryClient } from "@/lib/query/client";
 import { settingsKeys } from "@/lib/query/keys";
 import { prefetchChatSessions, prefetchSubscription } from "@/lib/query/prefetch";
 import { ChatClient } from "./ChatClient";
-import { ChatSessionSidebar } from "./components/chrome/ChatSessionSidebar";
-import { ChatSessionsProvider } from "./hooks/ChatSessionsContext";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getAppNavigationTranslations();
@@ -41,33 +40,41 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ChatSessionsProvider>
+      <Box
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          minHeight: "100%",
+        }}
+      >
+        <Box
+          hiddenFrom="sm"
+          p="sm"
+          style={{
+            borderBottom: "1px solid var(--mantine-color-default-border)",
+            display: "flex",
+            flex: "0 1 auto",
+            flexDirection: "column",
+            maxHeight: "40%",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
+          <SidebarChatPanel />
+        </Box>
         <Box
           style={{
             display: "flex",
-            height: "calc(100dvh - 2 * var(--mantine-spacing-md))",
-            marginLeft: "calc(-1 * var(--mantine-spacing-md))",
-            marginRight: "calc(-1 * var(--mantine-spacing-md))",
-            overflow: "hidden",
-            width: "calc(100% + 2 * var(--mantine-spacing-md))",
+            flex: "1 0 auto",
+            flexDirection: "column",
+            minWidth: 0,
           }}
         >
-          <ChatSessionSidebar />
-          <Box
-            style={{
-              display: "flex",
-              flex: 1,
-              flexDirection: "column",
-              minHeight: 0,
-              minWidth: 0,
-              overflow: "hidden",
-            }}
-          >
-            {children}
-            <ChatClient />
-          </Box>
+          {children}
+          <ChatClient />
         </Box>
-      </ChatSessionsProvider>
+      </Box>
     </HydrationBoundary>
   );
 }

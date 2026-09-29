@@ -1,7 +1,7 @@
-/// OAuth 2.1 authorization-server tables added by `@better-auth/oauth-provider`
-/// (Better Auth 1.7). Field names/shapes were extracted directly from
-/// `getAuthTables(auth.options)` for our locked plugin configuration —
-/// see the `add_oauth_provider_1_7` migration notes.
+/// OAuth 2.1 authorization-server tables from Better Auth `mcp()` (oauth-provider
+/// superset) + `cimd()`. Field names/shapes were extracted from
+/// `getAuthTables(auth.options)` for the locked plugin configuration —
+/// see `add_oauth_provider_1_7` and `mcp_oauth_cimd` migration notes.
 model OauthClient {
   id                               String    @id @default(uuid()) @db.Uuid
   clientId                         String    @unique @map("client_id")
@@ -37,6 +37,12 @@ model OauthClient {
   type                             String?
   requirePKCE                      Boolean?  @map("require_pkce")
   dpopBoundAccessTokens            Boolean   @default(false) @map("dpop_bound_access_tokens")
+  /// CIMD provenance — Better Auth `getAuthTables` field `clientDiscoveryId`
+  /// (`"cimd"` for Client ID Metadata Documents). First-party provisioned
+  /// clients leave this null.
+  clientDiscoveryId                String?   @map("client_discovery_id")
+  clientCredentialsScopes          String[]  @default([]) @map("client_credentials_scopes")
+  applicationType                  String?   @map("application_type")
   referenceId                      String?   @map("reference_id")
   metadata                         Json?
 
@@ -79,6 +85,7 @@ model OauthClientResource {
   metadata   Json?
   createdAt  DateTime?     @default(now()) @map("created_at")
 
+  @@unique([clientId, resourceId])
   @@index([clientId])
   @@index([resourceId])
   @@map("oauth_client_resource")

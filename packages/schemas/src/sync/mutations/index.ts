@@ -1,6 +1,7 @@
 export {
   contactCreatePayloadSchema,
   contactDeletePayloadSchema,
+  contactReplaceImportantDatesPayloadSchema,
   contactTagPayloadSchema,
   contactUpdatePayloadSchema,
   groupCreatePayloadSchema,

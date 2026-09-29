@@ -5,6 +5,7 @@ import {
   createContact,
   deleteContact,
   removeContactTag,
+  replaceImportantDates,
   updateContact,
 } from "../../domains/contacts/index.js";
 import {
@@ -58,6 +59,23 @@ export async function applySyncMutation(
         return {
           result: {
             data: { deletedId: mutation.entityId },
+            id: mutation.id,
+            serverSequence,
+            status: "applied",
+            txid,
+          },
+          txid,
+        };
+      }
+      case "contact.replaceImportantDates": {
+        const { data, txid, serverSequence } = await replaceImportantDates(
+          ctx,
+          mutation.entityId,
+          mutation.payload.dates,
+        );
+        return {
+          result: {
+            data: { dates: data.dates },
             id: mutation.id,
             serverSequence,
             status: "applied",

@@ -52,6 +52,22 @@ export async function uploadContactAvatarFile(
   await storage.put(AVATARS_BUCKET, fileName, normalized, { contentType: "image/jpeg" });
 }
 
+export async function areContactAvatarFilesIdentical(
+  userId: string,
+  leftContactId: string,
+  rightContactId: string,
+): Promise<boolean> {
+  const storage = getStorage();
+  const [left, right] = await Promise.all([
+    storage.get(AVATARS_BUCKET, getContactAvatarStoragePath(userId, leftContactId)),
+    storage.get(AVATARS_BUCKET, getContactAvatarStoragePath(userId, rightContactId)),
+  ]);
+  if (!left || !right) {
+    return false;
+  }
+  return left.equals(right);
+}
+
 export async function deleteContactAvatarFile(userId: string, contactId: string): Promise<void> {
   const fileName = getContactAvatarStoragePath(userId, contactId);
   await getStorage().delete(AVATARS_BUCKET, fileName);

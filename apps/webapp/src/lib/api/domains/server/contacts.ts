@@ -1,10 +1,12 @@
 import "server-only";
 
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
   Activity,
   AddressPin,
   Contact,
   ContactRelationshipWithPeople,
+  ContactSharePreviewResponse,
   GroupWithCount,
   ImportantDate,
   LinkedInDataResponse,
@@ -183,4 +185,15 @@ export async function getContactGroupsServer(
     { next: { tags: ["groups", "contacts"] }, ...options },
   );
   return parseContactGroups(raw);
+}
+
+export async function getContactSharePreviewServer(
+  id: string,
+  options: ContactReadOptions = {},
+): Promise<ContactSharePreviewResponse> {
+  return serverApiJson<ContactSharePreviewResponse>(
+    `${API_ROUTES.CONTACTS}/${id}/share-preview`,
+    undefined,
+    { ...CONTACTS_TAG, ...options },
+  );
 }

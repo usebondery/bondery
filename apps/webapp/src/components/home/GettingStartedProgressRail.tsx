@@ -1,8 +1,9 @@
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { ActionIconButton } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
-import { ActionIcon, Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
+import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
@@ -122,16 +123,15 @@ export function GettingStartedProgressRail({
             </Text>
           </Stack>
 
-          <ActionIcon
+          <ActionIconButton
             aria-label={t("Dismiss")}
             color="gray"
+            icon={<IconX />}
             loading={dismissMutation.isPending}
             onClick={() => void handleDismissRail()}
             size="sm"
             variant="subtle"
-          >
-            <IconX size={16} stroke={1.5} />
-          </ActionIcon>
+          />
         </Group>
 
         <Progress radius="xl" size="sm" value={progressValue} />

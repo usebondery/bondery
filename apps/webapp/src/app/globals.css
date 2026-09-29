@@ -85,3 +85,15 @@
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+/*
+  Phone/PWA: clip X so the off-screen right overlay cannot create a horizontal
+  scrollbar. Page scroll lives in AppShellMainScrollArea; the document is
+  overflow-hidden while the shell is mounted. Use a literal breakpoint —
+  custom properties are not valid in @media queries.
+*/
+@media (max-width: 47.99em) {
+  html {
+    overflow-x: clip;
+  }
+}

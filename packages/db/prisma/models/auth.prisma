@@ -64,18 +64,13 @@ model Session {
 /// One row per linked OAuth identity (github / linkedin) — replaces
 /// Supabase `auth.identities`.
 ///
-/// Better Auth 1.7 renamed `accountId` -> `providerAccountId` and made
-/// `issuer` a required field. We keep the underlying column names
-/// (`account_id`) via `@map` so this is a zero-data-movement rename at the
-/// Prisma layer; only `issuer` is a real backfilled column (see the
-/// `add_oauth_provider_1_7` migration for the deterministic
-/// `local:oauth:<providerId>` backfill used for our only two social
-/// providers, github and linkedin).
+/// Better Auth 1.7 renamed `accountId` -> `providerAccountId`. We keep the
+/// underlying column names (`account_id`, `provider_id`) via `@map`. Identity
+/// is `(providerId, providerAccountId)` per Better Auth 1.7.3+.
 model Account {
   id                    String    @id @default(uuid()) @db.Uuid
   providerAccountId     String    @map("account_id")
   providerId            String    @map("provider_id")
-  issuer                String
   userId                String    @map("user_id") @db.Uuid
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?   @map("access_token")
@@ -88,11 +83,6 @@ model Account {
   createdAt             DateTime  @default(now()) @map("created_at")
   updatedAt             DateTime  @updatedAt @map("updated_at")
 
-  @@unique([issuer, providerAccountId])
-  // Legacy index kept through the rollback window so a reverted deploy can
-  // still rely on the pre-1.7 (providerId, accountId) uniqueness guarantee.
-  // Both indexes cover the same two physical columns (provider_id,
-  // account_id); drop this one in the follow-up contract migration.
   @@unique([providerId, providerAccountId], map: "account_provider_id_account_id_key")
   @@map("account")
 }

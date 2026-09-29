@@ -1,6 +1,6 @@
 "use client";
 
-import { bonderyTheme, PersonChip } from "@bondery/mantine-next";
+import { ActionIconButton, bonderyTheme, PersonChip } from "@bondery/mantine-next";
 import { ActionIcon, Avatar, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons-react";
 import type { MarkerCluster } from "leaflet";
@@ -211,24 +211,22 @@ function MapZoomControls() {
         zIndex: 1000,
       }}
     >
-      <ActionIcon
+      <ActionIconButton
         aria-label={t("ZoomIn")}
         disabled={currentZoom >= maxZoom}
+        icon={<IconPlus />}
         onClick={() => map.zoomIn()}
         size="lg"
         variant="default"
-      >
-        <IconPlus size={20} />
-      </ActionIcon>
-      <ActionIcon
+      />
+      <ActionIconButton
         aria-label={t("ZoomOut")}
         disabled={currentZoom <= minZoom}
+        icon={<IconMinus />}
         onClick={() => map.zoomOut()}
         size="lg"
         variant="default"
-      >
-        <IconMinus size={20} />
-      </ActionIcon>
+      />
     </ActionIcon.Group>
   );
 }

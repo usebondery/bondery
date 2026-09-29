@@ -11,7 +11,7 @@ interface SettingsSectionProps {
   helpDoc?: DocId;
   helpLabel?: string;
   icon: ReactNode;
-  id?: string;
+  id: string;
   title: string;
 }
 
@@ -31,12 +31,7 @@ export function SettingsSection({
   children,
 }: SettingsSectionProps) {
   return (
-    <Card
-      id={id}
-      shadow="sm"
-      style={id ? { scrollMarginTop: "var(--mantine-spacing-md)" } : undefined}
-      withBorder
-    >
+    <Card id={id} shadow="sm" style={{ scrollMarginTop: "var(--mantine-spacing-md)" }} withBorder>
       <CardSection inheritPadding py="md" withBorder>
         <Group gap="sm" justify="space-between" wrap="nowrap">
           <Group gap="xs" style={{ minWidth: 0 }} wrap="nowrap">

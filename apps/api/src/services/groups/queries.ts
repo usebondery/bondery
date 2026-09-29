@@ -157,7 +157,7 @@ export async function getGroup(ctx: GroupListContext, groupId: string) {
   });
 
   if (!row) {
-    throw notFound("Group not found", "not_found");
+    throw notFound("Group not found", "group_not_found");
   }
 
   return { group: toGroupDto(row) as Group };
@@ -181,7 +181,7 @@ export async function listGroupMembers(
   });
 
   if (!group) {
-    throw notFound("Group not found", "not_found");
+    throw notFound("Group not found", "group_not_found");
   }
 
   const memberWhere: Prisma.PeopleWhereInput = {

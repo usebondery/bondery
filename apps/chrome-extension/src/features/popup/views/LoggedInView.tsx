@@ -22,7 +22,7 @@ export function LoggedInView({
   return (
     <Stack gap="md" h={300} p="md">
       <PopupBrandHeader
-        actionIcon={<IconSettings size={18} />}
+        actionIcon={<IconSettings />}
         actionTitle="Settings"
         onActionClick={onOpenSettings}
       />

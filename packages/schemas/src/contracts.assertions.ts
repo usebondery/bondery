@@ -13,6 +13,7 @@ import {
 import { instagramImportCommitRequestSchema } from "#entities/import/index.js";
 import { importantDateSheetSchema } from "#entities/important-date/index.js";
 import {
+  mergeAvatarIdentityResponseSchema,
   mergeContactsRequestSchema,
   mergeRecommendationSchema,
   mergeRecommendationsResponseSchema,
@@ -168,6 +169,13 @@ function run() {
     mergeRequest.conflictResolutions?.firstName,
     "left",
     "mergeContactsRequestSchema should parse conflict map",
+  );
+
+  const mergeAvatarIdentity = mergeAvatarIdentityResponseSchema.parse({ identical: true });
+  assertEqual(
+    mergeAvatarIdentity.identical,
+    true,
+    "mergeAvatarIdentityResponseSchema should parse",
   );
 
   const mergeRecommendation = mergeRecommendationSchema.parse(EXAMPLE_MERGE_RECOMMENDATION);

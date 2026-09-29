@@ -105,6 +105,18 @@
       "node": "./dist/api/types.js",
       "types": "./src/api/types.ts"
     },
+    "./auth/oauth-providers": {
+      "default": "./dist/auth/oauth-providers.js",
+      "import": "./dist/auth/oauth-providers.js",
+      "node": "./dist/auth/oauth-providers.js",
+      "types": "./src/auth/oauth-providers.ts"
+    },
+    "./auth/oauth-providers.test": {
+      "default": "./dist/auth/oauth-providers.test.js",
+      "import": "./dist/auth/oauth-providers.test.js",
+      "node": "./dist/auth/oauth-providers.test.js",
+      "types": "./src/auth/oauth-providers.test.ts"
+    },
     "./auth/platform-admin": {
       "default": "./dist/auth/platform-admin.js",
       "import": "./dist/auth/platform-admin.js",
@@ -122,6 +134,18 @@
       "import": "./dist/auth/resolve-cookie-domain.test.js",
       "node": "./dist/auth/resolve-cookie-domain.test.js",
       "types": "./src/auth/resolve-cookie-domain.test.ts"
+    },
+    "./auth/resolve-webauthn-rp": {
+      "default": "./dist/auth/resolve-webauthn-rp.js",
+      "import": "./dist/auth/resolve-webauthn-rp.js",
+      "node": "./dist/auth/resolve-webauthn-rp.js",
+      "types": "./src/auth/resolve-webauthn-rp.ts"
+    },
+    "./auth/resolve-webauthn-rp.test": {
+      "default": "./dist/auth/resolve-webauthn-rp.test.js",
+      "import": "./dist/auth/resolve-webauthn-rp.test.js",
+      "node": "./dist/auth/resolve-webauthn-rp.test.js",
+      "types": "./src/auth/resolve-webauthn-rp.test.ts"
     },
     "./cli": {
       "default": "./dist/cli/index.js",
@@ -170,6 +194,18 @@
       "import": "./dist/contact/merge-recommendations.test.js",
       "node": "./dist/contact/merge-recommendations.test.js",
       "types": "./src/contact/merge-recommendations.test.ts"
+    },
+    "./contact/shareable-field-previews": {
+      "default": "./dist/contact/shareable-field-previews.js",
+      "import": "./dist/contact/shareable-field-previews.js",
+      "node": "./dist/contact/shareable-field-previews.js",
+      "types": "./src/contact/shareable-field-previews.ts"
+    },
+    "./contact/shareable-field-previews.test": {
+      "default": "./dist/contact/shareable-field-previews.test.js",
+      "import": "./dist/contact/shareable-field-previews.test.js",
+      "node": "./dist/contact/shareable-field-previews.test.js",
+      "types": "./src/contact/shareable-field-previews.test.ts"
     },
     "./date": {
       "default": "./dist/date/index.js",
@@ -285,6 +321,12 @@
       "node": "./dist/globals/company.js",
       "types": "./src/globals/company.ts"
     },
+    "./globals/company.test": {
+      "default": "./dist/globals/company.test.js",
+      "import": "./dist/globals/company.test.js",
+      "node": "./dist/globals/company.test.js",
+      "types": "./src/globals/company.test.ts"
+    },
     "./globals/important-dates": {
       "default": "./dist/globals/important-dates.js",
       "import": "./dist/globals/important-dates.js",
@@ -320,6 +362,18 @@
       "import": "./dist/ids/generate-id.test.js",
       "node": "./dist/ids/generate-id.test.js",
       "types": "./src/ids/generate-id.test.ts"
+    },
+    "./ids/remap-import-id": {
+      "default": "./dist/ids/remap-import-id.js",
+      "import": "./dist/ids/remap-import-id.js",
+      "node": "./dist/ids/remap-import-id.js",
+      "types": "./src/ids/remap-import-id.ts"
+    },
+    "./ids/remap-import-id.test": {
+      "default": "./dist/ids/remap-import-id.test.js",
+      "import": "./dist/ids/remap-import-id.test.js",
+      "node": "./dist/ids/remap-import-id.test.js",
+      "types": "./src/ids/remap-import-id.test.ts"
     },
     "./infra": {
       "default": "./dist/infra/index.js",
@@ -596,6 +650,12 @@
       "import": "./dist/version/version-utils.js",
       "node": "./dist/version/version-utils.js",
       "types": "./src/version/version-utils.ts"
+    },
+    "./version/version-utils.test": {
+      "default": "./dist/version/version-utils.test.js",
+      "import": "./dist/version/version-utils.test.js",
+      "node": "./dist/version/version-utils.test.js",
+      "types": "./src/version/version-utils.test.ts"
     }
   },
   "files": [
@@ -626,5 +686,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.9.2"
+  "version": "1.10.0-rc.1"
 }

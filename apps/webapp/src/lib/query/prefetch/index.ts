@@ -33,6 +33,7 @@ export {
   prefetchInteractionsList,
 } from "./interactions";
 export { fetchKeepInTouch, prefetchKeepInTouch } from "./keepInTouch";
+export { prefetchMcpConsents } from "./mcpConsents";
 export { prefetchMePerson } from "./mePerson";
 export { fetchMergeRecommendations, prefetchMergeRecommendations } from "./mergeRecommendations";
 export { prefetchUpcomingReminders } from "./reminders";

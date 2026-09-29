@@ -1,172 +1,75 @@
-import { tool } from "ai";
-import { z } from "zod";
 import type { DomainContext } from "../../../domains/_shared/context.js";
-import { domainDb } from "../../../domains/_shared/domain-db.js";
 import {
-  addTagMembers,
-  createTag,
-  deleteTag,
-  removeTagMembers,
-  updateTag,
-} from "../../../domains/tags/index.js";
-import { formatToolDomainError } from "../domain-context.js";
+  createTagInputSchema,
+  deleteTagInputSchema,
+  executeCreateTag,
+  executeCreateTagMembership,
+  executeDeleteTag,
+  executeDeleteTagMembership,
+  executeGetTag,
+  executeGetTagContacts,
+  executeGetTags,
+  executeSearchTags,
+  executeUpdateTag,
+  getTagContactsInputSchema,
+  getTagInputSchema,
+  getTagsInputSchema,
+  searchTagsInputSchema,
+  tagMembershipInputSchema,
+  updateTagInputSchema,
+} from "../../assistant-tools/tags.js";
+import { chatTool } from "../chat-tool.js";
 
 export function createTagTools(ctx: DomainContext) {
-  const db = domainDb(ctx);
-
   return {
-    add_tag_to_contacts: tool({
-      description: "Apply a tag to one or more contacts. Skips contacts that already have the tag.",
-      execute: async ({ tagId, personIds }) => {
-        try {
-          await addTagMembers(ctx, tagId, personIds);
-        } catch (error) {
-          return formatToolDomainError(error, "Failed to tag contacts");
-        }
-
-        const people = await db.people.findMany({
-          select: { firstName: true, lastName: true },
-          where: { id: { in: personIds } },
-        });
-
-        const names =
-          people
-            .map((person) => [person.firstName, person.lastName].filter(Boolean).join(" "))
-            .join(", ") || "unknown";
-
-        return { message: `Tagged ${names}.`, tagId };
-      },
-      inputSchema: z.object({
-        personIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to tag"),
-        tagId: z.string().uuid().describe("The UUID of the tag"),
-      }),
+    create_tag: chatTool(ctx, {
+      description: "Create a tag. A color is assigned automatically.",
+      execute: (args) => executeCreateTag(ctx, args),
+      inputSchema: createTagInputSchema,
     }),
-
-    create_tag: tool({
+    create_tag_membership: chatTool(ctx, {
+      description: "Add a tag to contacts you own. Skips people who already have it.",
+      execute: (args) => executeCreateTagMembership(ctx, args),
+      inputSchema: tagMembershipInputSchema,
+    }),
+    delete_tag: chatTool(ctx, {
       description:
-        "Create a new tag. A color is automatically assigned from a rotating palette unless provided.",
-      execute: async ({ label, color }) => {
-        try {
-          const { data } = await createTag(ctx, { color, label });
-          const tag = data.tag;
-          return {
-            color: tag.color,
-            id: tag.id,
-            label: tag.label,
-            message: `Created tag "${tag.label}"`,
-          };
-        } catch (error) {
-          return formatToolDomainError(error, "Failed to create tag");
-        }
-      },
-      inputSchema: z.object({
-        color: z.string().optional().describe("Optional hex color override (e.g. '#3B82F6')"),
-        label: z.string().min(1).max(100).describe("Tag label"),
-      }),
+        "Delete a tag. Does not delete the people who had it. Confirm with the user in the thread before calling.",
+      execute: (args) => executeDeleteTag(ctx, args),
+      inputSchema: deleteTagInputSchema,
     }),
-
-    delete_tag: tool({
+    delete_tag_membership: chatTool(ctx, {
       description:
-        "Delete a tag entirely. This removes the tag but does not delete the contacts associated with it. Ask for confirmation before deleting.",
-      execute: async ({ tagId }) => {
-        const tag = await db.tag.findFirst({
-          select: { label: true },
-          where: { id: tagId, userId: ctx.user.id },
-        });
-
-        try {
-          await deleteTag(ctx, tagId);
-          return { message: `Deleted tag "${tag?.label ?? "(unknown)"}"` };
-        } catch (error) {
-          return formatToolDomainError(error, "Failed to delete tag");
-        }
-      },
-      inputSchema: z.object({
-        tagId: z.string().uuid().describe("The UUID of the tag to delete"),
-      }),
+        "Remove a tag from contacts. Does not delete the people or the tag. Confirm with the user in the thread before calling.",
+      execute: (args) => executeDeleteTagMembership(ctx, args),
+      inputSchema: tagMembershipInputSchema,
     }),
-
-    remove_tag_from_contacts: tool({
-      description: "Remove a tag from one or more contacts. Does not delete the tag itself.",
-      execute: async ({ tagId, personIds }) => {
-        try {
-          await removeTagMembers(ctx, tagId, personIds);
-        } catch (error) {
-          return formatToolDomainError(error, "Failed to remove tag from contacts");
-        }
-
-        const people = await db.people.findMany({
-          select: { firstName: true, lastName: true },
-          where: { id: { in: personIds } },
-        });
-
-        const names =
-          people
-            .map((person) => [person.firstName, person.lastName].filter(Boolean).join(" "))
-            .join(", ") || "unknown";
-
-        return { message: `Removed tag from ${names}.`, tagId };
-      },
-      inputSchema: z.object({
-        personIds: z.array(z.string().uuid()).min(1).describe("UUIDs of the contacts to untag"),
-        tagId: z.string().uuid().describe("The UUID of the tag"),
-      }),
+    get_tag: chatTool(ctx, {
+      description: "Get one tag that belongs to the signed-in user.",
+      execute: (args) => executeGetTag(ctx, args),
+      inputSchema: getTagInputSchema,
     }),
-
-    search_tags: tool({
-      description: "Search tags by label. Returns all tags if no query is provided.",
-      execute: async ({ query, limit }) => {
-        const tags = await db.tag.findMany({
-          orderBy: { label: "asc" },
-          take: limit,
-          where: {
-            userId: ctx.user.id,
-            ...(query ? { label: { contains: query, mode: "insensitive" } } : {}),
-          },
-        });
-
-        const tagIds = tags.map((tag) => tag.id);
-        const memberships = await db.peopleTag.findMany({
-          select: { tagId: true },
-          where: { tagId: { in: tagIds }, userId: ctx.user.id },
-        });
-
-        const countMap = new Map<string, number>();
-        for (const membership of memberships) {
-          countMap.set(membership.tagId, (countMap.get(membership.tagId) ?? 0) + 1);
-        }
-
-        return {
-          tags: tags.map((tag) => ({
-            color: tag.color,
-            contactCount: countMap.get(tag.id) ?? 0,
-            id: tag.id,
-            label: tag.label,
-          })),
-          totalFound: tags.length,
-        };
-      },
-      inputSchema: z.object({
-        limit: z.number().min(1).max(25).default(10).describe("Max results to return"),
-        query: z.string().optional().describe("Free-text search across tag labels"),
-      }),
+    get_tag_contacts: chatTool(ctx, {
+      description:
+        "Get contacts with a tag the signed-in user owns. Optional search; offset paging; at most 25.",
+      execute: (args) => executeGetTagContacts(ctx, args),
+      inputSchema: getTagContactsInputSchema,
     }),
-
-    update_tag: tool({
-      description: "Update an existing tag's label or color.",
-      execute: async ({ tagId, label, color }) => {
-        try {
-          await updateTag(ctx, tagId, { color, label });
-          return { message: "Tag updated successfully.", tagId };
-        } catch (error) {
-          return formatToolDomainError(error, "Failed to update tag");
-        }
-      },
-      inputSchema: z.object({
-        color: z.string().optional().describe("New hex color"),
-        label: z.string().min(1).max(100).optional().describe("New tag label"),
-        tagId: z.string().uuid().describe("The UUID of the tag to update"),
-      }),
+    get_tags: chatTool(ctx, {
+      description: "Browse tags that belong to the signed-in user. Offset paging; at most 25.",
+      execute: (args) => executeGetTags(ctx, args),
+      inputSchema: getTagsInputSchema,
+    }),
+    search_tags: chatTool(ctx, {
+      description:
+        "Search tags by label. Requires search so the full set is never dumped. At most 25 matches.",
+      execute: (args) => executeSearchTags(ctx, args),
+      inputSchema: searchTagsInputSchema,
+    }),
+    update_tag: chatTool(ctx, {
+      description: "Update a tag that belongs to the signed-in user.",
+      execute: (args) => executeUpdateTag(ctx, args),
+      inputSchema: updateTagInputSchema,
     }),
   };
 }

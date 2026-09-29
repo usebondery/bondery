@@ -223,7 +223,6 @@ describe("magic-link auth", () => {
     await prisma.account.create({
       data: {
         id: generateId(),
-        issuer: "local:oauth:github",
         providerAccountId: `github-${id}`,
         providerId: "github",
         userId: id,

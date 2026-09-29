@@ -63,12 +63,7 @@ export function getContactImportantDates(personId: string): ImportantDate[] {
   return listContactImportantDates(personId);
 }
 
-export function createContact(input: {
-  firstName: string;
-  middleName?: string;
-  lastName?: string;
-  linkedin?: string;
-}): Contact {
+export function createContact(input: CreateContactInput): Contact {
   const id = newId();
   submitSyncMutation({
     payload: { ...input, id },
@@ -119,7 +114,16 @@ export function putContactImportantDates(
   personId: string,
   dates: ReplaceImportantDatesInput,
 ): Contact {
-  return updateContact(personId, { importantDates: dates });
+  submitSyncMutation({
+    entityId: personId,
+    payload: { dates },
+    type: "contact.replaceImportantDates",
+  });
+  const contact = getContact(personId);
+  if (!contact) {
+    throw new Error("Failed to update important dates locally");
+  }
+  return contact;
 }
 
 export function addTagToContact(personId: string, tagId: string): void {

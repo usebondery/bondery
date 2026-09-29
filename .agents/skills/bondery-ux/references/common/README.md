@@ -17,4 +17,4 @@ Cross-platform patterns — apply on **web and mobile** unless a platform doc ov
 | [progressive-disclosure.md](./progressive-disclosure.md) | Wizards, show more |
 | [forms-validation.md](./forms-validation.md) | Labels, inline errors |
 
-Platform overrides: [../mobile/README.md](../mobile/README.md), [../desktop/README.md](../desktop/README.md).
+Platform overrides: [../mobile/README.md](../mobile/README.md) (Expo), [../desktop/README.md](../desktop/README.md) (webapp including phone/PWA).

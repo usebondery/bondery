@@ -1,13 +1,9 @@
 import type { ServerResponse } from "node:http";
 import { isStepCount, type ModelMessage, streamText } from "ai";
 import type { DomainContext } from "../../domains/_shared/context.js";
+import { createChatTools } from "./create-chat-tools.js";
 import { getChatModel } from "./provider.js";
-import { SYSTEM_PROMPT } from "./system-prompt.js";
-import { createContactTools } from "./tools/contacts.js";
-import { createGroupTools } from "./tools/groups.js";
-import { createInteractionTools } from "./tools/interactions.js";
-import { createSharingTools } from "./tools/sharing.js";
-import { createTagTools } from "./tools/tags.js";
+import { buildChatSystemPrompt } from "./system-prompt.js";
 
 /**
  * Runs the AI chat agent with the given messages and domain context.
@@ -21,25 +17,13 @@ export function runChatAgent(
   pipeUIMessageStreamToResponse: (response: ServerResponse) => Promise<void>;
   text: PromiseLike<string>;
 } {
-  const contactTools = createContactTools(ctx);
-  const interactionTools = createInteractionTools(ctx);
-  const groupTools = createGroupTools(ctx);
-  const tagTools = createTagTools(ctx);
-  const sharingTools = createSharingTools(ctx);
-
   const today = new Date().toISOString().split("T")[0];
 
   return streamText({
-    instructions: `${SYSTEM_PROMPT}\n\nToday's date: ${today}`,
+    instructions: buildChatSystemPrompt({ myselfPersonId: ctx.user.id, today }),
     messages,
     model: getChatModel(apiKey),
-    stopWhen: isStepCount(5),
-    tools: {
-      ...contactTools,
-      ...interactionTools,
-      ...groupTools,
-      ...tagTools,
-      ...sharingTools,
-    },
+    stopWhen: isStepCount(10),
+    tools: createChatTools(ctx),
   });
 }

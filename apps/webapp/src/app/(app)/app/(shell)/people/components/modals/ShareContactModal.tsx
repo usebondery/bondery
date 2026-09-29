@@ -1,5 +1,6 @@
 "use client";
 
+import { buildShareableFieldPreviews } from "@bondery/helpers/contact";
 import {
   errorNotificationTemplate,
   ModalFooter,
@@ -9,11 +10,7 @@ import {
 } from "@bondery/mantine-next";
 import {
   type Contact,
-  type ContactAddressEntry,
-  type EmailEntry,
   emailAddressSchema,
-  type ImportantDate,
-  type PhoneEntry,
   type ShareableField,
   shareContactEmailSchema,
 } from "@bondery/schemas";
@@ -28,23 +25,6 @@ import { SelectableCard } from "@/components/shell/SelectableCard";
 import { useShareContactModalTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useShareContactMutation } from "@/lib/query/hooks/useContacts";
-
-const ALL_FIELDS: ShareableField[] = [
-  "avatar",
-  "headline",
-  "phones",
-  "emails",
-  "location",
-  "linkedin",
-  "instagram",
-  "facebook",
-  "website",
-  "whatsapp",
-  "signal",
-  "addresses",
-  "notes",
-  "importantDates",
-];
 
 const REQUIRED_FIELDS: ShareableField[] = ["avatar", "headline"];
 const shareContactFormSchema = z.object({
@@ -104,92 +84,25 @@ export function openShareContactModal({ contact }: OpenShareContactModalParams) 
   });
 }
 
-function hasFieldData(contact: Contact, field: ShareableField): boolean {
-  switch (field) {
-    case "name":
-      return Boolean(contact.firstName || contact.lastName);
-    case "avatar":
-      return true;
-    case "headline":
-      return Boolean(contact.headline);
-    case "phones":
-      return Array.isArray(contact.phones) && contact.phones.length > 0;
-    case "emails":
-      return Array.isArray(contact.emails) && contact.emails.length > 0;
-    case "location":
-      return Boolean(contact.location);
-    case "linkedin":
-      return Boolean(contact.linkedin);
-    case "instagram":
-      return Boolean(contact.instagram);
-    case "facebook":
-      return Boolean(contact.facebook);
-    case "website":
-      return Boolean(contact.website);
-    case "whatsapp":
-      return Boolean(contact.whatsapp);
-    case "signal":
-      return Boolean(contact.signal);
-    case "addresses":
-      return Array.isArray(contact.addresses) && contact.addresses.length > 0;
-    case "notes":
-      return Boolean(contact.notes);
-    case "importantDates":
-      return Array.isArray(contact.importantDates) && contact.importantDates.length > 0;
-    default:
-      return false;
-  }
-}
-
-function getFieldPreview(contact: Contact, field: ShareableField): string {
-  switch (field) {
-    case "avatar":
-      return "";
-    case "phones": {
-      const first = (contact.phones as PhoneEntry[])?.[0];
-      return first ? `${first.prefix || ""}${first.value}`.trim() : "";
-    }
-    case "emails": {
-      const first = (contact.emails as EmailEntry[])?.[0];
-      return first?.value ?? "";
-    }
-    case "headline":
-      return contact.headline
-        ? contact.headline.length > 60
-          ? `${contact.headline.slice(0, 60)}…`
-          : contact.headline
-        : "";
-    case "location":
-      return contact.location ?? "";
-    case "notes":
-      return contact.notes
-        ? contact.notes.length > 60
-          ? `${contact.notes.slice(0, 60)}…`
-          : contact.notes
-        : "";
-    case "linkedin":
-      return contact.linkedin ? `@${contact.linkedin}` : "";
-    case "instagram":
-      return contact.instagram ? `@${contact.instagram}` : "";
-    case "facebook":
-      return contact.facebook ?? "";
-    case "website":
-      return contact.website ?? "";
-    case "whatsapp":
-      return contact.whatsapp ?? "";
-    case "signal":
-      return contact.signal ?? "";
-    case "addresses": {
-      const first = (contact.addresses as ContactAddressEntry[])?.[0];
-      return first?.addressFormatted ?? "";
-    }
-    case "importantDates": {
-      const first = (contact.importantDates as ImportantDate[])?.[0];
-      return first ? `${first.type}: ${first.date}` : "";
-    }
-    default:
-      return "";
-  }
+function contactShareFieldPreviews(contact: Contact) {
+  return buildShareableFieldPreviews({
+    addresses: contact.addresses,
+    avatar: contact.avatar,
+    emails: contact.emails,
+    facebook: contact.facebook,
+    firstName: contact.firstName,
+    headline: contact.headline,
+    importantDates: contact.importantDates,
+    instagram: contact.instagram,
+    lastName: contact.lastName,
+    linkedin: contact.linkedin,
+    location: contact.location,
+    notes: contact.notes,
+    phones: contact.phones,
+    signal: contact.signal,
+    website: contact.website,
+    whatsapp: contact.whatsapp,
+  });
 }
 
 export interface ShareContactTexts {
@@ -251,12 +164,14 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
   });
   const canSubmit = shareContactFormSchema.safeParse(form.values).success;
 
-  const availableFields = ALL_FIELDS.filter(
-    (field) => REQUIRED_FIELDS.includes(field) || hasFieldData(contact, field),
-  );
+  const fieldPreviews = contactShareFieldPreviews(contact);
+  const availableFields = fieldPreviews.map((entry) => entry.field);
+  const previewByField = new Map(fieldPreviews.map((entry) => [entry.field, entry.preview]));
 
   const [selectedFields, setSelectedFields] = useState<Set<ShareableField>>(() => {
-    const initial = new Set<ShareableField>(REQUIRED_FIELDS);
+    const initial = new Set<ShareableField>(
+      REQUIRED_FIELDS.filter((field) => availableFields.includes(field)),
+    );
     if (availableFields.includes("linkedin")) {
       initial.add("linkedin");
     }
@@ -299,7 +214,12 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
         message: parsed.data.message,
         personId: contact.id,
         recipientEmails: parsed.data.recipientEmails,
-        selectedFields: Array.from(new Set([...selectedFields, ...REQUIRED_FIELDS])),
+        selectedFields: Array.from(
+          new Set([
+            ...selectedFields,
+            ...REQUIRED_FIELDS.filter((field) => availableFields.includes(field)),
+          ]),
+        ),
         sendCopy: true,
       });
 
@@ -395,7 +315,7 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
                     description={
                       field === "avatar"
                         ? tShare("AvatarDescription", { name: contactName })
-                        : getFieldPreview(contact, field) || undefined
+                        : previewByField.get(field)
                     }
                     disabled={isRequiredField || isBlocking}
                     label={tShare(`Fields.${field}`)}

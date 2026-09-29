@@ -250,4 +250,27 @@ describe("getAuthUserFacingError", () => {
 
     assert.equal(message, "Bad request.");
   });
+
+  it("maps catalog internal_server_error from a query-param shaped error", () => {
+    const message = getAuthUserFacingError(
+      { code: "internal_server_error" },
+      mockT({
+        "errors.api.internal_server_error": "Something went wrong on our end. Please try again.",
+      }),
+    );
+
+    assert.equal(message, "Something went wrong on our end. Please try again.");
+  });
+
+  it("maps oauth query-param code to auth copy", () => {
+    const message = getAuthUserFacingError(
+      { code: "oauth" },
+      mockT({
+        "errors.auth.oauth":
+          "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.",
+      }),
+    );
+
+    assert.equal(message, "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.");
+  });
 });

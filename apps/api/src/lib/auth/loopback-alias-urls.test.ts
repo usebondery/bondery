@@ -22,4 +22,11 @@ describe("withLoopbackUrlAlias", () => {
       "https://api.usebondery.com",
     ]);
   });
+
+  it("keeps a non-root pathname on the loopback alias (MCP /mcp)", () => {
+    assert.deepEqual(withLoopbackUrlAlias("http://localhost:26631/mcp"), [
+      "http://localhost:26631/mcp",
+      "http://127.0.0.1:26631/mcp",
+    ]);
+  });
 });

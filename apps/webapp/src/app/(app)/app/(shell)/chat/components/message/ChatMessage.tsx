@@ -3,7 +3,7 @@
 import { type InlineToken, parseInlineTokens } from "@bondery/helpers";
 import { AnchorLink, CopyButton } from "@bondery/mantine-next";
 import { Avatar, Box, List, ListItem, Paper, Text } from "@mantine/core";
-import { IconMessageChatbot } from "@tabler/icons-react";
+import { IconMessageCircle } from "@tabler/icons-react";
 import type { UIMessage } from "ai";
 import type { ReactNode } from "react";
 import { InlineDateDisplay } from "@/app/(app)/app/(shell)/person/[personId]/components/notes/InlineDateDisplay";
@@ -186,7 +186,7 @@ export function ChatMessage({ message, userAvatarUrl, userName, sentAt }: ChatMe
             width: 32,
           }}
         >
-          <IconMessageChatbot color="var(--mantine-primary-color-filled)" size={18} />
+          <IconMessageCircle color="var(--mantine-primary-color-filled)" size={18} />
         </Box>
       )}
 
@@ -247,7 +247,6 @@ export function ChatMessage({ message, userAvatarUrl, userName, sentAt }: ChatMe
             <CopyButton
               copiedLabel={t("copyMessageSuccess")}
               copyLabel={t("copyMessage")}
-              iconSize={12}
               value={copyValue}
             />
             {timeLabel && (

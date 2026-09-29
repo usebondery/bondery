@@ -77,9 +77,9 @@ export type AddPeopleToGroupSelectionModalCatalog = {
 };
 
 export type AppNavigationCatalog = {
+  Browse: string;
   Chat: string;
-  CollapseSidebar: string;
-  ExpandSidebar: string;
+  ChatMode: string;
   FixAndMerge: string;
   Groups: string;
   Home: string;
@@ -89,6 +89,7 @@ export type AppNavigationCatalog = {
   Myself: string;
   MyselfGreeting: string;
   People: string;
+  ResizeSidebar: string;
   Search: string;
   Settings: string;
 };
@@ -119,9 +120,11 @@ export type CommandPaletteCatalog = {
 export type CommonCatalog = {
   a11y: {
     back: string;
+    closeMenu: string;
     createMore: string;
     info: string;
     loading: string;
+    openMenu: string;
   };
   actions: {
     back: string;
@@ -311,6 +314,7 @@ export type CommonCatalog = {
       INVALID_EMAIL_OR_PASSWORD: string;
       INVALID_PASSWORD: string;
       INVALID_TOKEN: string;
+      oauth: string;
       PASSKEY_LIMIT_REACHED: string;
       PASSKEY_NOT_FOUND: string;
       PREVIOUSLY_REGISTERED: string;
@@ -982,6 +986,10 @@ export type HomePageCatalog = {
 };
 
 export type ChatPageCatalog = {
+  actionsButton: string;
+  ageDaysShort: string;
+  ageHoursShort: string;
+  ageLessThanMinuteShort: string;
   cancel: string;
   copyMessage: string;
   copyMessageSuccess: string;
@@ -990,11 +998,13 @@ export type ChatPageCatalog = {
   deleteSessionError: string;
   deleteSessionSuccess: string;
   description: string;
-  emptyState: string;
+  followUpPlaceholder: string;
+  heroPrompt: string;
   inputPlaceholder: string;
-  lessThanMinuteAgo: string;
+  last30Days: string;
   newSession: string;
   noSessions: string;
+  older: string;
   paywallDescription: string;
   paywallTitle: string;
   premiumLimitAlertDescription: string;
@@ -1008,17 +1018,28 @@ export type ChatPageCatalog = {
   quotaExceededInputTooltip: string;
   quotaTooltip: string;
   SuggestedPrompts: {
+    AddAnniversary: string;
+    BirthdaysThisMonth: string;
     CoffeeWithBlake: string;
+    ContactsInBerlin: string;
     ContactsInNewYork: string;
     CreateNewContact: string;
     InteractionsThisWeek: string;
+    LastTalkedToSam: string;
+    LogCallYesterday: string;
     NotTalkedInAWhile: string;
+    OverdueFollowUps: string;
+    PeopleInFamilyGroup: string;
+    SameCompanyAsAlex: string;
+    TaggedCollegeFriends: string;
     WhoSpeaksSpanish: string;
+    WhoWorksInDesign: string;
   };
   send: string;
   sessions: string;
   thinking: string;
   title: string;
+  tryAskingMe: string;
   untitledSession: string;
   upgradeToPremium: string;
 };
@@ -1795,16 +1816,28 @@ export type OAuthConsentCatalog = {
   Description: string;
   ErrorTitle: string;
   InvalidRequest: string;
+  LoopbackWarning: string;
   MissingAuthorizationId: string;
+  PermissionFullDescription: string;
+  PermissionFullLabel: string;
+  PermissionLabel: string;
+  PermissionReadDescription: string;
+  PermissionReadLabel: string;
   RequestedPermissions: string;
   Scopes: {
+    "api:access": string;
     email: string;
+    "mcp:read": string;
+    "mcp:write": string;
+    offline_access: string;
     openid: string;
     phone: string;
     profile: string;
   };
   Title: string;
   UnexpectedError: string;
+  UnknownClientName: string;
+  WebappClientName: string;
 };
 
 export type OnboardingCatalog = {
@@ -1984,6 +2017,27 @@ export type ReminderDigestEmailCatalog = {
 };
 
 export type SettingsPageCatalog = {
+  AiAssistants: {
+    CopiedButton: string;
+    CopyButton: string;
+    Description: string;
+    DocsHelpLabel: string;
+    EmptyTitle: string;
+    GrantedAt: string;
+    McpJsonLabel: string;
+    McpUrlLabel: string;
+    PermissionField: string;
+    PermissionFullDescription: string;
+    PermissionFullLabel: string;
+    PermissionReadDescription: string;
+    PermissionReadLabel: string;
+    RevokeButton: string;
+    RevokeTooltip: string;
+    RevokeConfirm: string;
+    RevokeMessage: string;
+    RevokeTitle: string;
+    Title: string;
+  };
   ApiKeys: {
     Cancel: string;
     CopiedButton: string;
@@ -1993,6 +2047,7 @@ export type SettingsPageCatalog = {
     CreateErrorTitle: string;
     CreateTitle: string;
     DeleteButton: string;
+    RevokeTooltip: string;
     DeleteMessage: string;
     DeleteTitle: string;
     Description: string;
@@ -2427,6 +2482,7 @@ export type SettingsPageCatalog = {
       NameField: string;
       NameTemplate: string;
       NeverUsed: string;
+      RevokeTooltip: string;
       Title: string;
       UnsupportedTooltip: string;
     };

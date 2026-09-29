@@ -354,7 +354,8 @@
       "glossary",
       "AppNavigation",
       "CommandPalette",
-      "PageHeader"
+      "PageHeader",
+      "ChatPage"
     ],
     "web.unavailable": ["UnavailablePage"]
   }

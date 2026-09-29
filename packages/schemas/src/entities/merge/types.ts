@@ -60,6 +60,10 @@ export interface DeclineMergeRecommendationResponse {
   success: boolean;
 }
 
+export interface MergeAvatarIdentityResponse {
+  identical: boolean;
+}
+
 export interface MergeRecommendationsCountResponse {
   activeCount: number;
 }

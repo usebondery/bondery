@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { IMPORT_COMMIT_RATE_LIMIT } from "@bondery/schemas/constants";
 import { getErrorDocUrl } from "@bondery/schemas/errors";
 import type { FastifyRateLimitOptions } from "@fastify/rate-limit";
@@ -42,6 +43,24 @@ export const NOT_FOUND_TIER = {
 export const HEALTH_TIER = {
   max: 5,
   timeWindow: "1 minute",
+} as const;
+
+/** MCP JSON-RPC — keyed per user/IP and Mcp-Method/Mcp-Name (no body parse). */
+export const MCP_TIER = {
+  keyGenerator: (request: FastifyRequest) => {
+    const methodHeader = request.headers["mcp-method"];
+    const nameHeader = request.headers["mcp-name"];
+    const mcpMethod = typeof methodHeader === "string" ? methodHeader : "-";
+    const mcpName = typeof nameHeader === "string" ? nameHeader : "-";
+    const authorization = request.headers.authorization;
+    const identity =
+      typeof authorization === "string" && authorization.length > 0
+        ? `bearer:${createHash("sha256").update(authorization).digest("hex").slice(0, 16)}`
+        : `ip:${request.ip}`;
+    return `mcp:${identity}:${mcpMethod}:${mcpName}`;
+  },
+  max: 90,
+  timeWindow: "60 seconds",
 } as const;
 
 function buildErrorResponse(_request: FastifyRequest, context: { ttl: number }) {

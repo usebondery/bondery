@@ -38,6 +38,7 @@ describe("last login method matching", () => {
     assert.equal(isMagicLinkVerifyErrorCode("INVALID_TOKEN"), true);
     assert.equal(isMagicLinkVerifyErrorCode("TOKEN_EXPIRED"), true);
     assert.equal(isMagicLinkVerifyErrorCode("oauth"), false);
+    assert.equal(isMagicLinkVerifyErrorCode("internal_server_error"), false);
     assert.equal(isMagicLinkVerifyErrorCode(null), false);
   });
 });

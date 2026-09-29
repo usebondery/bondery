@@ -1,4 +1,25 @@
 {
+  "AiAssistants": {
+    "CopiedButton": "Zkopírováno!",
+    "CopyButton": "Kopírovat",
+    "Description": "Připojte Claude Desktop, Cursor a další MCP klienty ke svým kontaktům. Zkopírujte adresu MCP nebo úryvek mcp.json do klienta.",
+    "DocsHelpLabel": "Jak připojit AI asistenty přes MCP.",
+    "EmptyTitle": "Zatím žádní AI asistenti",
+    "GrantedAt": "Připojeno {time}",
+    "McpJsonLabel": "mcp.json",
+    "McpUrlLabel": "Adresa MCP",
+    "PermissionField": "Přístup",
+    "PermissionFullDescription": "Může také zakládat, upravovat a mazat kontakty a jejich údaje.",
+    "PermissionFullLabel": "Plný přístup",
+    "PermissionReadDescription": "Vyhledávání a čtení vašich kontaktů a jejich údajů.",
+    "PermissionReadLabel": "Jen čtení",
+    "RevokeButton": "Odebrat přístup",
+    "RevokeConfirm": "Ano, odebrat",
+    "RevokeMessage": "Tento asistent už nedostane nový přístup. Později ho můžete znovu schválit.",
+    "RevokeTitle": "Odebrat přístup pro „{name}“?",
+    "RevokeTooltip": "Odebrat asistenta",
+    "Title": "AI asistenti"
+  },
   "ApiKeys": {
     "Cancel": "Zrušit",
     "CopiedButton": "Zkopírováno!",
@@ -33,6 +54,7 @@
     "PermissionReadLabel": "Jen čtení",
     "RevealAlertDescription": "Z bezpečnostních důvodů ukládáme pouze hash klíče — ani Bondery po zavření dialogu nemůže obnovit původní hodnotu. Toto je jediná příležitost, kdy uvidíte celý klíč. Zkopírujte ho na bezpečné místo před zavřením.",
     "RevealAlertTitle": "Uložte si API klíč",
+    "RevokeTooltip": "Odebrat API klíč",
     "SaveButton": "Uložit",
     "SecretCodeLabel": "API klíč",
     "TestRequestLabel": "Testovací požadavek",
@@ -450,6 +472,7 @@
       "NameField": "Název přístupového klíče",
       "NameTemplate": "{browser} na {os}",
       "NeverUsed": "Nikdy nepoužito",
+      "RevokeTooltip": "Odebrat přístupový klíč",
       "Title": "Přístupové klíče",
       "UnsupportedTooltip": "Přístupové klíče v tomto prohlížeči nejsou k dispozici."
     },

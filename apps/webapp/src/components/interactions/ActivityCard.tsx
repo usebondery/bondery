@@ -1,8 +1,8 @@
 "use client";
 
+import { ActionIconButton } from "@bondery/mantine-next";
 import type { Activity } from "@bondery/schemas";
 import {
-  ActionIcon,
   Badge,
   Box,
   Group,
@@ -61,13 +61,13 @@ export function ActivityCard({
     >
       <Menu position="bottom-end" shadow="md">
         <MenuTarget>
-          <ActionIcon
+          <ActionIconButton
+            aria-label={editLabel}
+            icon={<IconDotsVertical />}
             onClick={(event) => event.stopPropagation()}
             style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
             variant="subtle"
-          >
-            <IconDotsVertical size={16} />
-          </ActionIcon>
+          />
         </MenuTarget>
         <MenuDropdown>
           <MenuItem

@@ -58,7 +58,16 @@ export async function resolveContactPersonIds(
       );
     }
 
-    return uniqueIds;
+    if (uniqueIds.length === 0) {
+      return [];
+    }
+
+    const ownedRows = await db.people.findMany({
+      select: { id: true },
+      where: { id: { in: uniqueIds }, userId },
+    });
+    const ownedIds = new Set(ownedRows.map((row) => row.id));
+    return uniqueIds.filter((id) => ownedIds.has(id));
   }
 
   if ("contactFilter" in body && body.contactFilter) {

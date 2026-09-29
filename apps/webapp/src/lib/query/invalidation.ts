@@ -111,6 +111,10 @@ export async function invalidateApiKeys(queryClient: QueryClient): Promise<void>
   await queryClient.invalidateQueries({ queryKey: settingsKeys.apiKeys() });
 }
 
+export async function invalidateMcpConsents(queryClient: QueryClient): Promise<void> {
+  await queryClient.invalidateQueries({ queryKey: settingsKeys.mcpConsents() });
+}
+
 export async function invalidatePasskeys(queryClient: QueryClient): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: settingsKeys.passkeys() });
 }

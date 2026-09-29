@@ -13,7 +13,7 @@ import {
 } from "../_shared/schema.js";
 import { contactAddressReadSchema } from "../address/schema.js";
 import { emailEntryEntitySchema, phoneEntryEntitySchema } from "../channels/schema.js";
-import { importantDateSchema, replaceImportantDatesSchema } from "../important-date/schema.js";
+import { importantDateSchema } from "../important-date/schema.js";
 import type {
   AddressPin,
   BySocialLookupResponse,
@@ -26,11 +26,14 @@ import type {
   ContactRelationshipWithPeople,
   ContactResponse,
   ContactSelectable,
+  ContactShareFieldPreview,
+  ContactSharePreviewResponse,
   ContactSortOrder,
   ContactsFilter,
   ContactsListResponse,
   ContactsListStats,
   ContactsSelectableListResponse,
+  ContactWritableFields,
   CreateContactBody,
   CreateContactFromFullNameInput,
   CreateContactInput,
@@ -59,7 +62,6 @@ import type {
   RelationshipType,
   ShareableField,
   UpdateContactIdentityInput,
-  UpdateContactInput,
   WorkHistoryEntry,
 } from "./types.js";
 
@@ -184,11 +186,34 @@ export const contactRelationshipWithPeopleSchema = contactRelationshipSchema.ext
   targetPerson: contactPreviewSchema,
 }) satisfies z.ZodType<ContactRelationshipWithPeople>;
 
-export const createContactApiInputSchema = z.object({
+/** Writable contact fields shared by create and the applied update path. */
+export const contactWritableFieldsSchema = z.object({
+  addresses: z.array(contactAddressReadSchema).nullable().optional(),
+  emails: z.array(emailEntryEntitySchema).nullable().optional(),
+  facebook: z.string().nullable().optional(),
+  firstName: z.string().optional(),
+  gisPoint: z.unknown().nullable().optional(),
+  headline: z.string().nullable().optional(),
+  instagram: z.string().nullable().optional(),
+  keepFrequencyDays: z.number().nullable().optional(),
+  language: z.string().nullable().optional(),
+  lastInteraction: nullableDateTimeSchema.optional(),
+  lastName: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  linkedin: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  longitude: z.number().nullable().optional(),
+  middleName: z.string().nullable().optional(),
+  notes: z.string().nullable().optional(),
+  phones: z.array(phoneEntryEntitySchema).nullable().optional(),
+  signal: z.string().nullable().optional(),
+  timezone: z.string().nullable().optional(),
+  website: z.string().nullable().optional(),
+  whatsapp: z.string().nullable().optional(),
+}) satisfies z.ZodType<ContactWritableFields>;
+
+export const createContactApiInputSchema = contactWritableFieldsSchema.extend({
   firstName: z.string().trim().min(1, { error: "First name is required" }),
-  lastName: z.string().optional(),
-  linkedin: z.string().optional(),
-  middleName: z.string().optional(),
 }) satisfies z.ZodType<CreateContactInput>;
 
 /** POST /api/contacts body (optional client-supplied id). */
@@ -239,37 +264,8 @@ export const createContactInputSchema = z.object({
     }),
 }) satisfies z.ZodType<CreateContactFromFullNameInput>;
 
-export const updateContactInputSchema: z.ZodType<UpdateContactInput> = z.object({
-  addresses: z.array(contactAddressReadSchema).nullable().optional(),
-  avatar: z.string().nullable().optional(),
-  emails: z.array(emailEntryEntitySchema).nullable().optional(),
-  facebook: z.string().nullable().optional(),
-  firstName: z.string().optional(),
-  gisPoint: z.unknown().nullable().optional(),
-  headline: z.string().nullable().optional(),
-  importantDates: replaceImportantDatesSchema.nullable().optional(),
-  instagram: z.string().nullable().optional(),
-  keepFrequencyDays: z.number().nullable().optional(),
-  language: z.string().nullable().optional(),
-  lastInteraction: nullableDateTimeSchema.optional(),
-  lastInteractionActivityId: z.string().nullable().optional(),
-  lastName: z.string().nullable().optional(),
-  latitude: z.number().nullable().optional(),
-  linkedin: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-  middleName: z.string().nullable().optional(),
-  myself: z.boolean().nullable().optional(),
-  notes: z.string().nullable().optional(),
-  notesUpdatedAt: nullableDateTimeSchema.optional(),
-  phones: z.array(phoneEntryEntitySchema).nullable().optional(),
-  position: z.unknown().nullable().optional(),
-  signal: z.string().nullable().optional(),
-  timezone: z.string().nullable().optional(),
-  userId: z.string().optional(),
-  website: z.string().nullable().optional(),
-  whatsapp: z.string().nullable().optional(),
-});
+/** PATCH body — same writable fields as create extras / MCP update. */
+export const updateContactInputSchema = contactWritableFieldsSchema;
 
 export const contactResponseSchema = z.object({
   contact: contactSchema,
@@ -508,3 +504,14 @@ export const shareableFieldSchema = z.enum([
   "notes",
   "importantDates",
 ]) satisfies z.ZodType<ShareableField>;
+
+export const contactShareFieldPreviewSchema = z.object({
+  field: shareableFieldSchema,
+  preview: z.string(),
+}) satisfies z.ZodType<ContactShareFieldPreview>;
+
+export const contactSharePreviewResponseSchema = z.object({
+  availableFields: z.array(contactShareFieldPreviewSchema),
+  contactId: z.string(),
+  contactName: z.string(),
+}) satisfies z.ZodType<ContactSharePreviewResponse>;

@@ -39,7 +39,7 @@ export async function listInteractions(
     });
 
     if (!person) {
-      throw notFound("Contact not found", "not_found");
+      throw notFound("Contact not found", "contact_not_found");
     }
   }
 

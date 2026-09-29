@@ -1,14 +1,19 @@
 "use client";
 
 import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/helpers/phone";
-import { ActionIconLink, successNotificationTemplate, TypePicker } from "@bondery/mantine-next";
+import {
+  ActionIconButton,
+  ActionIconLink,
+  successNotificationTemplate,
+  TypePicker,
+} from "@bondery/mantine-next";
 import {
   type ContactType,
   firstZodErrorMessage,
   type PhoneEntry,
   replacePhonesSchema,
 } from "@bondery/schemas";
-import { ActionIcon, Card, Group, Input, Loader, Menu, Stack, Tooltip } from "@mantine/core";
+import { Card, Group, Input, Loader, Menu, Stack, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconCopy,
@@ -172,7 +177,7 @@ export function ContactPhonesSection({
               color={phone.preferred ? "orange" : "blue"}
               disabled={!phone.value}
               href={phone.prefix && phone.value ? `tel:${phone.prefix}${phone.value}` : undefined}
-              icon={phone.preferred ? <IconPhoneSpark size={18} /> : <IconPhone size={18} />}
+              icon={phone.preferred ? <IconPhoneSpark /> : <IconPhone />}
               variant="light"
             />
 
@@ -215,14 +220,13 @@ export function ContactPhonesSection({
 
             <Menu position="bottom-end" withinPortal>
               <Menu.Target>
-                <ActionIcon
+                <ActionIconButton
                   aria-label={text.phoneActionsAriaLabel}
                   disabled={savingField === "phones"}
+                  icon={<IconDotsVertical />}
                   ml="auto"
                   variant="subtle"
-                >
-                  <IconDotsVertical size={16} />
-                </ActionIcon>
+                />
               </Menu.Target>
               <Menu.Dropdown>
                 <Menu.Item
@@ -286,15 +290,14 @@ export function ContactPhonesSection({
         <Card p="sm" radius="md" withBorder>
           <Group align="center" gap="xs" wrap="nowrap">
             <Tooltip label={text.addPhone}>
-              <ActionIcon
+              <ActionIconButton
                 aria-label={text.addPhone}
                 color="green"
                 disabled={savingField === "phones"}
+                icon={<IconPlus />}
                 onClick={handleCommitDraftPhone}
                 variant="light"
-              >
-                <IconPlus size={18} />
-              </ActionIcon>
+              />
             </Tooltip>
 
             <ContactInfoPrefixSelect

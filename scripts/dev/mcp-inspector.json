@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "bondery-local": {
+      "protocolEra": "modern",
+      "type": "http",
+      "url": "http://localhost:26631/mcp"
+    }
+  }
+}

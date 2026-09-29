@@ -1,7 +1,7 @@
 "use client";
 
 import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
-import { Stack, Text } from "@mantine/core";
+import { List, ListItem, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { NavigationProgress } from "@mantine/nprogress";
@@ -133,14 +133,10 @@ export function InstagramImportModal({
           content: (
             <Stack gap={4}>
               <Text size="sm">{t("InstructionStep4")}</Text>
-              <Stack gap={2} pl="xs">
-                <Text c="dimmed" size="sm">
-                  ? {t("InstructionStep5")}
-                </Text>
-                <Text c="dimmed" size="sm">
-                  ? {t("InstructionStep6")}
-                </Text>
-              </Stack>
+              <List c="dimmed" pl="xs" size="sm" spacing={2}>
+                <ListItem>{t("InstructionStep5")}</ListItem>
+                <ListItem>{t("InstructionStep6")}</ListItem>
+              </List>
             </Stack>
           ),
           number: 4,

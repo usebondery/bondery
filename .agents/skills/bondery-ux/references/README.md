@@ -6,8 +6,8 @@ Bondery-specific UX principles for agents and humans. Organized by scope:
 references/
   README.md           ← you are here
   common/             Cross-platform rules (empty states, lists, writing, …)
-  mobile/             Touch-first, sheets, offline sync surfacing
-  desktop/            Keyboard + pointer (webapp on laptop/PC)
+  mobile/             Expo native app (touch sheets, FAB, offline) — not webapp PWA
+  desktop/            Webapp (`apps/webapp`) — laptop/PC and phone/PWA
   product/            Bondery-only features (onboarding, imports, resume intent, …)
 ```
 
@@ -30,7 +30,7 @@ Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile
 | [progressive-disclosure.md](./common/progressive-disclosure.md) | Start minimal, reveal on demand |
 | [forms-validation.md](./common/forms-validation.md) | Disable submit until valid (shared rules) |
 
-## Mobile
+## Mobile (Expo native)
 
 | File | Topic |
 |------|--------|
@@ -38,7 +38,9 @@ Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile
 | [settings-previews.md](./mobile/settings-previews.md) | Live preview sections in settings |
 | [lists-selection.md](./mobile/lists-selection.md) | Long-press, drag-select, FAB bulk bar |
 
-## Desktop
+Webapp on a phone is **not** this folder — see [desktop/mobile-pwa-shell.md](./desktop/mobile-pwa-shell.md).
+
+## Desktop (webapp, all viewports)
 
 | File | Topic |
 |------|--------|
@@ -47,6 +49,7 @@ Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile
 | [modals.md](./desktop/modals.md) | Web modals, loading jobs, `ModalFooter`, blocking dismiss |
 | [create-more.md](./desktop/create-more.md) | Repeatable create modals, Create more switch |
 | [tooltips.md](./desktop/tooltips.md) | Mantine Tooltip: theme `multiline`, `withArrow`, `w: 300` |
+| [mobile-pwa-shell.md](./desktop/mobile-pwa-shell.md) | Phone/PWA: thin header menu → existing navbar overlay |
 
 ## Product
 

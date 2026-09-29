@@ -1,9 +1,9 @@
 import { formatContactName } from "@bondery/helpers/contact";
-import type { Contact, GroupWithCount } from "@bondery/schemas";
+import type { ChatSession, Contact, GroupWithCount } from "@bondery/schemas";
 import type { QueryClient } from "@tanstack/react-query";
 import { formatEntityTitleString } from "@/lib/metadata/pageTitles";
 import { matchDynamicRoute } from "@/lib/metadata/routeTitleRegistry";
-import { contactKeys, groupKeys, settingsKeys } from "@/lib/query/keys";
+import { chatKeys, contactKeys, groupKeys, settingsKeys } from "@/lib/query/keys";
 
 export type ResolveClientRouteTitleOptions = {
   queryClient: QueryClient;
@@ -39,6 +39,15 @@ function resolveEntityTitleFromCache(
       if (me) {
         return formatEntityTitleString(formatContactName(me));
       }
+    }
+    return null;
+  }
+
+  if (match.kind === "chat" && match.id) {
+    const sessions = queryClient.getQueryData<ChatSession[]>(chatKeys.sessions());
+    const session = sessions?.find((entry) => entry.id === match.id);
+    if (session?.title) {
+      return formatEntityTitleString(session.title);
     }
     return null;
   }

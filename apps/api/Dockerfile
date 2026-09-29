@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 FROM node:26-slim AS base
-RUN npm install -g pnpm@12.4.0
+RUN npm install -g pnpm@12.6.0
 WORKDIR /app
 ENV TURBO_TELEMETRY_DISABLED=1
 ENV CI=true

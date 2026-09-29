@@ -5,14 +5,26 @@
   "Description": "{clientName} žádá o přístup k vašemu účtu Bondery.",
   "ErrorTitle": "Chyba autorizace",
   "InvalidRequest": "Neplatný autorizační požadavek.",
+  "LoopbackWarning": "Tato aplikace běží na tomto počítači (localhost). Pokračujte, jen pokud jste ji spustili vy.",
   "MissingAuthorizationId": "Chybí autorizační požadavek. Zkuste to prosím znovu z aplikace.",
+  "PermissionFullDescription": "Může také zakládat, upravovat a mazat kontakty a jejich údaje.",
+  "PermissionFullLabel": "Plný přístup",
+  "PermissionLabel": "Přístup",
+  "PermissionReadDescription": "Vyhledávání a čtení vašich kontaktů a jejich údajů.",
+  "PermissionReadLabel": "Jen čtení",
   "RequestedPermissions": "Požadovaná oprávnění",
   "Scopes": {
+    "api:access": "Používat Bondery API vaším jménem",
     "email": "Zobrazit vaši e-mailovou adresu",
+    "mcp:read": "Zobrazit vaše kontakty a jejich údaje",
+    "mcp:write": "Zakládat, upravovat a mazat kontakty a jejich údaje",
+    "offline_access": "Zůstat přihlášen, dokud přístup neodeberete",
     "openid": "Ověřit vaši identitu",
     "phone": "Zobrazit vaše telefonní číslo",
     "profile": "Zobrazit informace o vašem profilu"
   },
   "Title": "Autorizace aplikace",
-  "UnexpectedError": "Došlo k neočekávané chybě. Zkuste to prosím znovu."
+  "UnexpectedError": "Došlo k neočekávané chybě. Zkuste to prosím znovu.",
+  "UnknownClientName": "Neznámá aplikace",
+  "WebappClientName": "Bondery"
 }

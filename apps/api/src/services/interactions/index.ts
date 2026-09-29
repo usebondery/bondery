@@ -5,9 +5,16 @@ import type {
   InteractionType,
   UpdateInteractionInput,
 } from "@bondery/schemas";
-import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
+import { assertOwnedPersonIds } from "../../domains/_shared/assert-owned-person-ids.js";
+import {
+  type DomainContext,
+  DomainError,
+  syncEmitMetaFromContext,
+} from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
+import { buildPeopleRowChange } from "../../lib/sync/build-changes.js";
+import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
 import { maybeCaptureActivation } from "../analytics/maybe-capture-activation.js";
 import { loadFormattedInteraction } from "./format.js";
 
@@ -17,8 +24,40 @@ export type FormattedInteraction = NonNullable<
 
 export { loadFormattedInteraction, mapInteractionParticipant } from "./format.js";
 
+async function requireOwnedInteraction(ctx: DomainContext, interactionId: string) {
+  const db = domainDb(ctx);
+  const interaction = await db.interaction.findFirst({
+    select: { date: true, id: true, title: true, type: true },
+    where: { id: interactionId, userId: ctx.user.id },
+  });
+
+  if (!interaction) {
+    throw new DomainError("Interaction not found", 404, "interaction_not_found");
+  }
+
+  return interaction;
+}
+
+async function persistPeopleLastInteractionChanges(ctx: DomainContext, personIds: string[]) {
+  const uniqueIds = [...new Set(personIds)];
+  if (uniqueIds.length === 0) {
+    return;
+  }
+
+  const db = domainDb(ctx);
+  const changes = (
+    await Promise.all(uniqueIds.map((personId) => buildPeopleRowChange(ctx.user.id, personId, db)))
+  ).filter((change) => change !== null);
+
+  if (changes.length === 0) {
+    return;
+  }
+
+  await persistSyncChanges(ctx.user.id, changes, syncEmitMetaFromContext(ctx));
+}
+
 async function updateParticipantLastInteraction(
-  db: ReturnType<typeof domainDb>,
+  ctx: DomainContext,
   participantIds: string[],
   interactionId: string,
   interactionDate: string,
@@ -27,20 +66,24 @@ async function updateParticipantLastInteraction(
     return;
   }
 
+  const db = domainDb(ctx);
   await db.people.updateMany({
     data: {
       lastInteraction: new Date(interactionDate),
       lastInteractionActivityId: interactionId,
     },
-    where: { id: { in: participantIds } },
+    where: { id: { in: participantIds }, userId: ctx.user.id },
   });
+
+  await persistPeopleLastInteractionChanges(ctx, participantIds);
 }
 
 async function syncLastInteractionForExistingParticipants(
-  db: ReturnType<typeof domainDb>,
+  ctx: DomainContext,
   interactionId: string,
   interactionDate: string,
 ) {
+  const db = domainDb(ctx);
   const participants = await db.interactionParticipant.findMany({
     select: { personId: true },
     where: { interactionId },
@@ -50,16 +93,21 @@ async function syncLastInteractionForExistingParticipants(
     return;
   }
 
+  const personIds = participants.map((participant) => participant.personId);
+
   await db.people.updateMany({
     data: {
       lastInteraction: new Date(interactionDate),
       lastInteractionActivityId: interactionId,
     },
     where: {
-      id: { in: participants.map((participant) => participant.personId) },
+      id: { in: personIds },
       lastInteractionActivityId: interactionId,
+      userId: ctx.user.id,
     },
   });
+
+  await persistPeopleLastInteractionChanges(ctx, personIds);
 }
 
 export async function createInteraction(
@@ -68,6 +116,8 @@ export async function createInteraction(
 ): Promise<FormattedInteraction> {
   const db = domainDb(ctx);
   const { user } = ctx;
+
+  await assertOwnedPersonIds(ctx, input.participantIds ?? []);
 
   const interaction = await db.interaction.create({
     data: {
@@ -88,7 +138,7 @@ export async function createInteraction(
       })),
     });
 
-    await updateParticipantLastInteraction(db, input.participantIds, interaction.id, input.date);
+    await updateParticipantLastInteraction(ctx, input.participantIds, interaction.id, input.date);
   }
 
   const formatted = await loadFormattedInteraction(ctx, interaction.id);
@@ -108,8 +158,15 @@ export async function updateInteraction(
   avatarOptions?: AvatarTransformOptions,
 ): Promise<FormattedInteraction> {
   const db = domainDb(ctx);
+  const { user } = ctx;
 
-  const updates: Prisma.InteractionUpdateInput = {};
+  await requireOwnedInteraction(ctx, interactionId);
+
+  if (input.participantIds) {
+    await assertOwnedPersonIds(ctx, input.participantIds);
+  }
+
+  const updates: Prisma.InteractionUpdateManyMutationInput = {};
   if (input.title !== undefined) {
     updates.title = input.title;
   }
@@ -124,10 +181,13 @@ export async function updateInteraction(
   }
 
   if (Object.keys(updates).length > 0) {
-    await db.interaction.update({
+    const updated = await db.interaction.updateMany({
       data: updates,
-      where: { id: interactionId },
+      where: { id: interactionId, userId: user.id },
     });
+    if (updated.count === 0) {
+      throw new DomainError("Interaction not found", 404, "interaction_not_found");
+    }
   }
 
   if (input.participantIds) {
@@ -144,11 +204,16 @@ export async function updateInteraction(
       });
 
       if (input.date) {
-        await updateParticipantLastInteraction(db, input.participantIds, interactionId, input.date);
+        await updateParticipantLastInteraction(
+          ctx,
+          input.participantIds,
+          interactionId,
+          input.date,
+        );
       }
     }
   } else if (input.date !== undefined) {
-    await syncLastInteractionForExistingParticipants(db, interactionId, input.date);
+    await syncLastInteractionForExistingParticipants(ctx, interactionId, input.date);
   }
 
   const formatted = await loadFormattedInteraction(ctx, interactionId, avatarOptions);
@@ -162,13 +227,18 @@ export async function updateInteraction(
 export async function deleteInteraction(ctx: DomainContext, interactionId: string) {
   const db = domainDb(ctx);
 
+  await requireOwnedInteraction(ctx, interactionId);
+
   await db.interactionParticipant.deleteMany({
     where: { interactionId },
   });
 
-  await db.interaction.delete({
-    where: { id: interactionId },
+  const deleted = await db.interaction.deleteMany({
+    where: { id: interactionId, userId: ctx.user.id },
   });
+  if (deleted.count === 0) {
+    throw new DomainError("Interaction not found", 404, "interaction_not_found");
+  }
 }
 
 export async function logInteraction(
@@ -193,7 +263,7 @@ export async function logInteraction(
 
   const participants = await db.people.findMany({
     select: { firstName: true, lastName: true },
-    where: { id: { in: input.participantIds } },
+    where: { id: { in: input.participantIds }, userId: ctx.user.id },
   });
 
   const names =
@@ -216,14 +286,9 @@ export async function addParticipantsToInteraction(
 ) {
   const db = domainDb(ctx);
 
-  const interaction = await db.interaction.findFirst({
-    select: { date: true, id: true, title: true, type: true },
-    where: { id: interactionId },
-  });
+  const interaction = await requireOwnedInteraction(ctx, interactionId);
 
-  if (!interaction) {
-    throw new DomainError("Interaction not found", 404, "interaction_not_found");
-  }
+  await assertOwnedPersonIds(ctx, participantIds);
 
   const existing = await db.interactionParticipant.findMany({
     select: { personId: true },
@@ -246,11 +311,16 @@ export async function addParticipantsToInteraction(
     })),
   });
 
-  await updateParticipantLastInteraction(db, newIds, interactionId, interaction.date.toISOString());
+  await updateParticipantLastInteraction(
+    ctx,
+    newIds,
+    interactionId,
+    interaction.date.toISOString(),
+  );
 
   const participants = await db.people.findMany({
     select: { firstName: true, lastName: true },
-    where: { id: { in: newIds } },
+    where: { id: { in: newIds }, userId: ctx.user.id },
   });
 
   const names =
@@ -271,14 +341,8 @@ export async function removeParticipantsFromInteraction(
 ) {
   const db = domainDb(ctx);
 
-  const interaction = await db.interaction.findFirst({
-    select: { id: true, title: true, type: true },
-    where: { id: interactionId },
-  });
-
-  if (!interaction) {
-    throw new DomainError("Interaction not found", 404, "interaction_not_found");
-  }
+  await requireOwnedInteraction(ctx, interactionId);
+  await assertOwnedPersonIds(ctx, participantIds);
 
   await db.interactionParticipant.deleteMany({
     where: {
@@ -289,7 +353,7 @@ export async function removeParticipantsFromInteraction(
 
   const people = await db.people.findMany({
     select: { firstName: true, lastName: true },
-    where: { id: { in: participantIds } },
+    where: { id: { in: participantIds }, userId: ctx.user.id },
   });
 
   const names =
@@ -312,7 +376,7 @@ export async function updateInteractionDetails(
     description?: string;
   },
 ) {
-  const updates: Prisma.InteractionUpdateInput = {};
+  const updates: Prisma.InteractionUpdateManyMutationInput = {};
   if (input.title !== undefined) {
     updates.title = input.title;
   }
@@ -332,54 +396,46 @@ export async function updateInteractionDetails(
 
   const db = domainDb(ctx);
 
-  try {
-    const interaction = await db.interaction.update({
-      data: updates,
-      select: {
-        date: true,
-        description: true,
-        id: true,
-        title: true,
-        type: true,
-      },
-      where: { id: interactionId },
-    });
+  await requireOwnedInteraction(ctx, interactionId);
 
-    if (input.date !== undefined) {
-      await syncLastInteractionForExistingParticipants(db, interactionId, input.date);
-    }
-
-    return {
-      date: interaction.date.toISOString(),
-      description: interaction.description,
-      id: interaction.id,
-      message: "Updated interaction successfully.",
-      title: interaction.title,
-      type: interaction.type,
-    };
-  } catch (error) {
-    if (
-      error instanceof Error &&
-      "code" in error &&
-      (error as { code?: string }).code === "P2025"
-    ) {
-      throw new DomainError("Interaction not found", 404, "interaction_not_found");
-    }
-    throw internal("interaction_update_failed", error);
+  const updated = await db.interaction.updateMany({
+    data: updates,
+    where: { id: interactionId, userId: ctx.user.id },
+  });
+  if (updated.count === 0) {
+    throw new DomainError("Interaction not found", 404, "interaction_not_found");
   }
-}
-
-export async function deleteInteractionWithSummary(ctx: DomainContext, interactionId: string) {
-  const db = domainDb(ctx);
 
   const interaction = await db.interaction.findFirst({
-    select: { date: true, id: true, title: true, type: true },
-    where: { id: interactionId },
+    select: {
+      date: true,
+      description: true,
+      id: true,
+      title: true,
+      type: true,
+    },
+    where: { id: interactionId, userId: ctx.user.id },
   });
-
   if (!interaction) {
     throw new DomainError("Interaction not found", 404, "interaction_not_found");
   }
+
+  if (input.date !== undefined) {
+    await syncLastInteractionForExistingParticipants(ctx, interactionId, input.date);
+  }
+
+  return {
+    date: interaction.date.toISOString(),
+    description: interaction.description,
+    id: interaction.id,
+    message: "Updated interaction successfully.",
+    title: interaction.title,
+    type: interaction.type,
+  };
+}
+
+export async function deleteInteractionWithSummary(ctx: DomainContext, interactionId: string) {
+  const interaction = await requireOwnedInteraction(ctx, interactionId);
 
   await deleteInteraction(ctx, interactionId);
 

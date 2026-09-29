@@ -8,37 +8,55 @@ import {
   isApiError,
 } from "@bondery/helpers/api";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { errorNotificationTemplate } from "@bondery/mantine-next";
-import { ActionIcon, Box, Button, Group, Stack, Text, TextInput } from "@mantine/core";
+import { ActionIconButton, errorNotificationTemplate, HelpButton } from "@bondery/mantine-next";
+import { Box, Button, Group, Stack, Text, Textarea, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconMessageChatbot, IconSend } from "@tabler/icons-react";
+import { IconMessageCircle, IconSend } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DefaultChatTransport } from "ai";
 import { notFound, usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PageHeader } from "@/components/shell/PageHeader";
+import { ShellMainFooter } from "@/components/shell/ShellMainFooter";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
+import { useChatSessions } from "@/lib/chat/ChatSessionsContext";
+import { pickRandomItems } from "@/lib/chat/pickRandomItems";
+import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";
+import { usePatchDocumentTitle } from "@/lib/documentTitle";
 import { useChatPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import {
   useChatSessionMessagesQuery,
+  useChatSessionsQuery,
   useChatSessionsRefreshOnStreamEnd,
   useCreateChatSessionMutation,
 } from "@/lib/query/hooks/useChat";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
 import { chatKeys } from "@/lib/query/keys";
+import { ChatSessionActionMenu } from "./components/chrome/ChatSessionActionMenu";
 import { ChatMessage } from "./components/message/ChatMessage";
 import { ChatQuotaAlert } from "./components/quota/ChatQuotaAlert";
 import { ChatQuotaBadge } from "./components/quota/ChatQuotaBadge";
-import { useChatSessions } from "./hooks/ChatSessionsContext";
 
 const SUGGESTED_PROMPT_KEYS = [
-  "NotTalkedInAWhile",
-  "ContactsInNewYork",
+  "AddAnniversary",
+  "BirthdaysThisMonth",
   "CoffeeWithBlake",
-  "WhoSpeaksSpanish",
+  "ContactsInBerlin",
+  "ContactsInNewYork",
   "CreateNewContact",
   "InteractionsThisWeek",
+  "LastTalkedToSam",
+  "LogCallYesterday",
+  "NotTalkedInAWhile",
+  "OverdueFollowUps",
+  "PeopleInFamilyGroup",
+  "SameCompanyAsAlex",
+  "TaggedCollegeFriends",
+  "WhoSpeaksSpanish",
+  "WhoWorksInDesign",
 ] as const;
+
+const NEW_CHAT_VISIBLE_PROMPT_COUNT = 5;
 
 function chatSessionIdFromPathname(pathname: string): string | undefined {
   const prefix = `${WEBAPP_ROUTES.CHAT}/`;
@@ -105,13 +123,24 @@ export function ChatClient() {
     isError: isMessagesError,
     isSuccess: isMessagesSuccess,
   } = useChatSessionMessagesQuery(routeSessionId, !!routeSessionId);
+  const { data: sessions = [] } = useChatSessionsQuery();
+  const sessionDisplayTitle = routeSessionId
+    ? (sessions.find((session) => session.id === routeSessionId)?.title ?? t("untitledSession"))
+    : undefined;
+  const pageHeaderTitle = sessionDisplayTitle ?? t("title");
+  usePatchDocumentTitle(sessionDisplayTitle);
+  const [visiblePromptKeys, setVisiblePromptKeys] = useState(() =>
+    pickRandomItems(SUGGESTED_PROMPT_KEYS, NEW_CHAT_VISIBLE_PROMPT_COUNT),
+  );
   const suggestedPrompts = useMemo(
-    () => SUGGESTED_PROMPT_KEYS.map((key) => t(`SuggestedPrompts.${key}`)),
-    [t],
+    () => visiblePromptKeys.map((key) => t(`SuggestedPrompts.${key}`)),
+    [t, visiblePromptKeys],
   );
   const { chatResetKey, setHighlightedSessionId } = useChatSessions();
+  const confirmDeleteChatSession = useConfirmDeleteChatSession();
   const createChatSessionMutation = useCreateChatSessionMutation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const messageDatesRef = useRef<Map<string, Date>>(new Map());
   const [inputValue, setInputValue] = useState("");
   const [messagesSent, setMessagesSent] = useState(0);
@@ -215,6 +244,7 @@ export function ChatClient() {
       setQuotaExceeded(subscriptionStatus ? !subscriptionStatus.canUseChat : false);
       messageDatesRef.current.clear();
       sessionIdRef.current = undefined;
+      setVisiblePromptKeys(pickRandomItems(SUGGESTED_PROMPT_KEYS, NEW_CHAT_VISIBLE_PROMPT_COUNT));
     }
   }, [chatResetKey, setMessages, subscriptionStatus]);
 
@@ -254,6 +284,7 @@ export function ChatClient() {
 
   function handleSuggestedPrompt(prompt: string) {
     setInputValue(prompt);
+    inputRef.current?.focus();
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -311,6 +342,16 @@ export function ChatClient() {
     }
   }, [adjustedSubscriptionStatus]);
 
+  useEffect(() => {
+    if (quotaExceeded) {
+      return;
+    }
+    // Retrigger-only: focus when the session route or sidebar "new chat" reset changes.
+    void chatResetKey;
+    void routeSessionId;
+    inputRef.current?.focus();
+  }, [chatResetKey, quotaExceeded, routeSessionId]);
+
   if (
     routeSessionId &&
     isMessagesError &&
@@ -321,57 +362,149 @@ export function ChatClient() {
     notFound();
   }
 
+  const showNewChatHero = messages.length === 0 && !routeSessionId;
+
+  const composer = quotaExceeded ? (
+    <ChatQuotaAlert
+      onSuccess={handleUpgradeSuccess}
+      resetAt={serverResetAt ?? subscriptionStatus?.aiMonthlyResetAt}
+      variant={subscriptionStatus?.plan === "premium" ? "premium" : "free"}
+    />
+  ) : (
+    <>
+      {adjustedSubscriptionStatus && (
+        <Box mb="xs" style={{ display: "flex", justifyContent: "center" }}>
+          <ChatQuotaBadge subscriptionStatus={adjustedSubscriptionStatus} />
+        </Box>
+      )}
+      <form onSubmit={handleSubmit}>
+        <Group align="flex-end" gap="sm">
+          <Textarea
+            aria-label={showNewChatHero ? t("inputPlaceholder") : t("followUpPlaceholder")}
+            autoFocus
+            autosize
+            disabled={isLoading}
+            flex={1}
+            maxRows={8}
+            minRows={1}
+            onChange={(e) => setInputValue(e.currentTarget.value)}
+            onKeyDown={(e) => {
+              if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing) {
+                return;
+              }
+              e.preventDefault();
+              e.currentTarget.form?.requestSubmit();
+            }}
+            placeholder={showNewChatHero ? t("inputPlaceholder") : t("followUpPlaceholder")}
+            radius="xl"
+            ref={inputRef}
+            resize="none"
+            rightSection={
+              <ActionIconButton
+                aria-label={t("send")}
+                disabled={isLoading || !inputValue.trim()}
+                icon={<IconSend />}
+                radius="xl"
+                size="md"
+                type="submit"
+                variant="filled"
+              />
+            }
+            rightSectionWidth={42}
+            value={inputValue}
+          />
+        </Group>
+      </form>
+    </>
+  );
+
+  const suggestedPromptButtons = (
+    <Group gap="sm" justify="center" wrap="wrap">
+      {suggestedPrompts.map((prompt) => (
+        <Button
+          key={prompt}
+          onClick={() => handleSuggestedPrompt(prompt)}
+          radius="xl"
+          size="sm"
+          variant="light"
+        >
+          {prompt}
+        </Button>
+      ))}
+    </Group>
+  );
+
+  if (showNewChatHero) {
+    return (
+      <Box
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "column",
+          height: "100%",
+          minHeight: 0,
+          overflow: "hidden",
+        }}
+      >
+        <Stack
+          align="stretch"
+          gap="lg"
+          justify="center"
+          px="xl"
+          py="xl"
+          style={{
+            flex: 1,
+            margin: "0 auto",
+            maxWidth: 800,
+            width: "100%",
+          }}
+        >
+          <Group gap="sm" justify="center" wrap="nowrap">
+            <Title order={2} ta="center">
+              {t("heroPrompt")}
+            </Title>
+            <HelpButton doc="concepts.chat" label={t("description")} />
+          </Group>
+          {composer}
+          {!quotaExceeded ? (
+            <Stack gap="sm">
+              <Text c="dimmed" size="sm" ta="center">
+                {t("tryAskingMe")}
+              </Text>
+              {suggestedPromptButtons}
+            </Stack>
+          ) : null}
+        </Stack>
+      </Box>
+    );
+  }
+
   return (
-    <Box
-      style={{
-        display: "flex",
-        flex: 1,
-        flexDirection: "column",
-        height: "100%",
-        minHeight: 0,
-        overflow: "hidden",
-      }}
-    >
-      <Box p="xl" pb="md" style={{ flex: 1, minHeight: 0, overflowY: "auto" }}>
+    <>
+      <Box p="xl" pb="md">
         <Stack gap="xl">
           <PageHeader
+            action={
+              routeSessionId ? (
+                <ChatSessionActionMenu onDelete={() => confirmDeleteChatSession(routeSessionId)} />
+              ) : undefined
+            }
             helpDoc="concepts.chat"
             helpLabel={t("description")}
-            icon={IconMessageChatbot}
-            title={t("title")}
+            icon={IconMessageCircle}
+            title={pageHeaderTitle}
           />
           <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>
             <Stack gap="md">
-              {messages.length === 0 ? (
-                <Box py="xl">
-                  <Text c="dimmed" mb="lg" ta="center">
-                    {t("emptyState")}
-                  </Text>
-                  <Group gap="sm" justify="center" wrap="wrap">
-                    {suggestedPrompts.map((prompt) => (
-                      <Button
-                        key={prompt}
-                        onClick={() => handleSuggestedPrompt(prompt)}
-                        radius="xl"
-                        size="sm"
-                        variant="light"
-                      >
-                        {prompt}
-                      </Button>
-                    ))}
-                  </Group>
-                </Box>
-              ) : (
-                messages.map((message) => (
-                  <ChatMessage
-                    key={message.id}
-                    message={message}
-                    sentAt={messageDatesRef.current.get(message.id)}
-                    userAvatarUrl={userAvatarUrl}
-                    userName={userName}
-                  />
-                ))
-              )}
+              {messages.map((message) => (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  sentAt={messageDatesRef.current.get(message.id)}
+                  userAvatarUrl={userAvatarUrl}
+                  userName={userName}
+                />
+              ))}
               {isLoading && messages[messages.length - 1]?.role === "user" && (
                 <Box pl="md">
                   <Text c="dimmed" fs="italic" size="sm">
@@ -384,59 +517,19 @@ export function ChatClient() {
           </Box>
         </Stack>
       </Box>
-
-      <Box
-        px="xl"
-        py="md"
-        style={{
-          backgroundColor: "var(--mantine-color-body)",
-          borderTop: "1px solid var(--mantine-color-default-border)",
-          flexShrink: 0,
-        }}
-      >
-        <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>
-          {quotaExceeded ? (
-            <ChatQuotaAlert
-              onSuccess={handleUpgradeSuccess}
-              resetAt={serverResetAt ?? subscriptionStatus?.aiMonthlyResetAt}
-              variant={subscriptionStatus?.plan === "premium" ? "premium" : "free"}
-            />
-          ) : (
-            <>
-              {adjustedSubscriptionStatus && (
-                <Box mb="xs" style={{ display: "flex", justifyContent: "center" }}>
-                  <ChatQuotaBadge subscriptionStatus={adjustedSubscriptionStatus} />
-                </Box>
-              )}
-              <form onSubmit={handleSubmit}>
-                <Group align="flex-end" gap="sm">
-                  <TextInput
-                    disabled={isLoading}
-                    flex={1}
-                    onChange={(e) => setInputValue(e.currentTarget.value)}
-                    placeholder={t("inputPlaceholder")}
-                    radius="xl"
-                    rightSection={
-                      <ActionIcon
-                        aria-label={t("send")}
-                        disabled={isLoading || !inputValue.trim()}
-                        radius="xl"
-                        size="md"
-                        type="submit"
-                        variant="filled"
-                      >
-                        <IconSend size={16} />
-                      </ActionIcon>
-                    }
-                    rightSectionWidth={42}
-                    value={inputValue}
-                  />
-                </Group>
-              </form>
-            </>
-          )}
+      <ShellMainFooter>
+        <Box
+          px="xl"
+          py="md"
+          style={{
+            backgroundColor: "var(--mantine-color-body)",
+            paddingBottom: "calc(var(--mantine-spacing-md) + env(safe-area-inset-bottom, 0px))",
+            paddingInline: "calc(var(--mantine-spacing-md) + var(--mantine-spacing-xl))",
+          }}
+        >
+          <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>{composer}</Box>
         </Box>
-      </Box>
-    </Box>
+      </ShellMainFooter>
+    </>
   );
 }

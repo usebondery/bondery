@@ -3,6 +3,7 @@ import {
   findPeopleGroupIdWithDb,
 } from "../../lib/sync/build-changes.js";
 import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
+import { assertOwnedPersonIds } from "./assert-owned-person-ids.js";
 import { type DomainContext, DomainError, syncEmitMetaFromContext } from "./context.js";
 import { domainDb } from "./domain-db.js";
 import { captureCurrentSyncTxid } from "./with-txid.js";
@@ -23,6 +24,8 @@ export async function upsertPeopleGroupMemberships(
   if (personIds.length === 0) {
     return { addedCount: 0, serverSequence: 0, skippedCount: 0, txid: "" };
   }
+
+  await assertOwnedPersonIds(ctx, personIds);
 
   const existingRows = await db.peopleGroup.findMany({
     select: { personId: true },

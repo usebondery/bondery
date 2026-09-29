@@ -1,9 +1,10 @@
 "use client";
 
 import { type DocId, docHref } from "@bondery/helpers";
-import { ActionIcon, Tooltip, type TooltipProps } from "@mantine/core";
+import { Tooltip, type TooltipProps } from "@mantine/core";
 import { IconHelpCircle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
+import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";
 import { ActionIconLink, type ActionIconLinkProps } from "#nextjs/ActionIconLink/ActionIconLink.js";
 
 export interface HelpButtonProps
@@ -14,10 +15,8 @@ export interface HelpButtonProps
   doc?: DocId;
   /** Docs or help page URL. Opens in a new tab when provided. Omit for tooltip-only (no link). */
   href?: string;
-  /** Custom icon. Defaults to `IconHelpCircle`. */
+  /** Custom icon. Defaults to `IconHelpCircle`. Omit `size` / `stroke` — use ActionIcon `size`. */
   icon?: ReactNode;
-  /** Size of the help icon. Defaults to 14. */
-  iconSize?: number;
   /** Tooltip text shown on hover. Used as the default aria-label unless `ariaLabel` is set. */
   label: string;
   /** Max width of the tooltip popover. Omit to use the theme default (300). */
@@ -36,7 +35,6 @@ export function HelpButton({
   href,
   ariaLabel,
   tooltipMaxWidth,
-  iconSize = 14,
   icon,
   target = "_blank",
   rel = "noopener noreferrer",
@@ -47,7 +45,7 @@ export function HelpButton({
   ...actionIconProps
 }: HelpButtonProps) {
   const resolvedAriaLabel = ariaLabel ?? label;
-  const resolvedIcon = icon ?? <IconHelpCircle size={iconSize} />;
+  const resolvedIcon = icon ?? <IconHelpCircle />;
   const resolvedHref = doc ? docHref(doc) : href;
 
   const button = resolvedHref ? (
@@ -64,16 +62,15 @@ export function HelpButton({
       {...actionIconProps}
     />
   ) : (
-    <ActionIcon
+    <ActionIconButton
       aria-label={resolvedAriaLabel}
       color={color}
+      icon={resolvedIcon}
       radius={radius}
       size={size}
       variant={variant}
       {...actionIconProps}
-    >
-      {resolvedIcon}
-    </ActionIcon>
+    />
   );
 
   return (

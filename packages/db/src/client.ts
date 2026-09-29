@@ -6,7 +6,6 @@ import { injectCreateIds } from "./inject-create-ids.js";
 
 const globalForPrisma = globalThis as unknown as {
   pool?: Pool;
-  prisma?: ReturnType<typeof createPrismaClientFromPool>;
 };
 
 function resolveDatabaseUrl(): string {
@@ -49,7 +48,7 @@ function createPrismaClientFromPool(pool: Pool): BasePrismaClient {
 
 export type PrismaClient = BasePrismaClient;
 
-let prismaInstance: PrismaClient | null = globalForPrisma.prisma ?? null;
+let prismaInstance: PrismaClient | null = null;
 
 function ensurePrismaFromEnv(): PrismaClient {
   if (prismaInstance) {
@@ -70,11 +69,6 @@ export function initializePrisma(pool: Pool): PrismaClient {
 
   globalForPrisma.pool = pool;
   prismaInstance = createPrismaClientFromPool(pool);
-
-  if (process.env.NODE_ENV !== "production") {
-    globalForPrisma.prisma = prismaInstance;
-  }
-
   return prismaInstance;
 }
 
@@ -103,7 +97,6 @@ export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
 export function resetPrismaForTests(): void {
   prismaInstance = null;
   globalForPrisma.pool = undefined;
-  globalForPrisma.prisma = undefined;
 }
 
 export type { PrismaClient as BasePrismaClient } from "./generated/prisma/client.js";

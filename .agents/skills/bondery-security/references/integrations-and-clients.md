@@ -112,7 +112,7 @@ Reads JSON-LD via `code.innerHTML` (read-only DOM parse). Auto-enrich trust chai
 
 ## Email share (SMTP)
 
-`apps/api/src/services/contacts/share.ts` — `tls: { rejectUnauthorized: false }`.
+`apps/api/src/domains/contacts/share.ts` — `tls: { rejectUnauthorized: false }`.
 
 **Review trigger:** MITM risk on email path; document or fix.
 

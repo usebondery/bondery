@@ -11,6 +11,7 @@ import type {
   geocodeTimezoneResponseWireSchema,
   importantDatesReplaceBodySchema,
   interactionsListQuerySchema,
+  mergeAvatarIdentityQuerySchema,
   mergeRecommendationsQuerySchema,
   paginationQuerySchema,
   peopleListQuerySchema,
@@ -30,6 +31,7 @@ import type {
   GeocodeTimezoneResponseWire,
   ImportantDatesReplaceBody,
   InteractionsListQuery,
+  MergeAvatarIdentityQuery,
   MergeRecommendationsQuery,
   PaginationQuery,
   PeopleListQuery,
@@ -61,6 +63,9 @@ type _ChatMessagesQuery = Assert<
 >;
 type _ChatSessionIdParam = Assert<
   IsEqual<ChatSessionIdParam, z.infer<typeof chatSessionIdParamSchema>>
+>;
+type _MergeAvatarIdentityQuery = Assert<
+  IsEqual<MergeAvatarIdentityQuery, z.infer<typeof mergeAvatarIdentityQuerySchema>>
 >;
 type _MergeRecommendationsQuery = Assert<
   IsEqual<MergeRecommendationsQuery, z.infer<typeof mergeRecommendationsQuerySchema>>

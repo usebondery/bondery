@@ -29,10 +29,22 @@ test.describe("unauthenticated login", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test("shows stable login UI for ?error=oauth", async ({ page }) => {
+  test("shows a notification for ?error=oauth", async ({ page }) => {
     await page.goto("/login?error=oauth");
-    await expect(page).toHaveURL(/\/login\?error=oauth/);
+    await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
     await expect(page.getByTestId("login-github")).toBeVisible();
+    await expect(
+      page.getByText("Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn."),
+    ).toBeVisible();
+  });
+
+  test("shows a notification for ?error=internal_server_error", async ({ page }) => {
+    await page.goto("/login?error=internal_server_error");
+    await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
+    await expect(page.getByTestId("login-github")).toBeVisible();
+    await expect(
+      page.getByText("Something went wrong on our end. Please try again."),
+    ).toBeVisible();
   });
 
   test("shows a notification for an invalid magic-link error", async ({ page }) => {

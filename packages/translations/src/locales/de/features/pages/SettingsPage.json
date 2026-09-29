@@ -1,4 +1,25 @@
 {
+  "AiAssistants": {
+    "CopiedButton": "Kopiert!",
+    "CopyButton": "Kopieren",
+    "Description": "Verbinde Claude Desktop, Cursor und andere MCP-Clients mit deinen Kontakten. Kopiere die MCP-URL oder das mcp.json-Snippet in den Client.",
+    "DocsHelpLabel": "So verbindest du KI-Assistenten über MCP.",
+    "EmptyTitle": "Noch keine KI-Assistenten verbunden",
+    "GrantedAt": "Verbunden {time}",
+    "McpJsonLabel": "mcp.json",
+    "McpUrlLabel": "MCP-URL",
+    "PermissionField": "Zugriff",
+    "PermissionFullDescription": "Darf außerdem Kontakte und ihre Daten anlegen, aktualisieren und löschen.",
+    "PermissionFullLabel": "Voller Zugriff",
+    "PermissionReadDescription": "Deine Kontakte und ihre Daten suchen und lesen.",
+    "PermissionReadLabel": "Nur Lesen",
+    "RevokeButton": "Zugriff entziehen",
+    "RevokeConfirm": "Ja, entziehen",
+    "RevokeMessage": "Dieser Assistent erhält keinen neuen Zugriff mehr. Du kannst ihn später erneut genehmigen.",
+    "RevokeTitle": "Zugriff für „{name}“ entziehen?",
+    "RevokeTooltip": "Assistenten entziehen",
+    "Title": "KI-Assistenten"
+  },
   "ApiKeys": {
     "Cancel": "Abbrechen",
     "CopiedButton": "Kopiert!",
@@ -33,6 +54,7 @@
     "PermissionReadLabel": "Nur Lesen",
     "RevealAlertDescription": "Aus Sicherheitsgründen speichern wir nur einen Hash deines Schlüssels. Nicht einmal Bondery kann den Originalschlüssel wiederherstellen, nachdem du dieses Fenster schließt. Dies ist das einzige Mal, dass du den vollständigen Schlüssel sehen kannst. Kopiere ihn an einen sicheren Ort, bevor du schließt.",
     "RevealAlertTitle": "Speichere deinen API key",
+    "RevokeTooltip": "API-Schlüssel entziehen",
     "SaveButton": "Speichern",
     "SecretCodeLabel": "API key",
     "TestRequestLabel": "Testanfrage",
@@ -442,6 +464,7 @@
       "NameField": "Passkey-Name",
       "NameTemplate": "{browser} auf {os}",
       "NeverUsed": "Nie verwendet",
+      "RevokeTooltip": "Passkey entziehen",
       "Title": "Passkeys",
       "UnsupportedTooltip": "Passkeys sind in diesem Browser nicht verfügbar."
     },

@@ -19,7 +19,12 @@ import { UserSessionProvider } from "@/components/shell/UserSessionProvider";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { getRequestSession } from "@/lib/auth/getRequestSession";
 import { buildLoginUrl, getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
-import { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
+import {
+  SIDEBAR_COOKIE_NAME,
+  SIDEBAR_LAST_EXPANDED_COOKIE_NAME,
+  SIDEBAR_WIDTH_COOKIE_NAME,
+} from "@/lib/cookies/constants";
+import { parseStoredLastExpandedWidth, parseStoredSidebarWidth } from "@/lib/shell/sidebarWidth";
 
 export const metadata: Metadata = {
   title: WEBAPP_NAME,
@@ -75,7 +80,13 @@ export default async function AppShellLayout({ children }: { children: React.Rea
     }
   }
 
-  const initialCollapsed = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value === "true";
+  const initialWidth = parseStoredSidebarWidth(
+    cookieStore.get(SIDEBAR_WIDTH_COOKIE_NAME)?.value,
+    cookieStore.get(SIDEBAR_COOKIE_NAME)?.value,
+  );
+  const initialLastExpandedWidth = parseStoredLastExpandedWidth(
+    cookieStore.get(SIDEBAR_LAST_EXPANDED_COOKIE_NAME)?.value,
+  );
 
   return (
     <UserSessionProvider avatarUrl={avatarUrl} colorScheme={colorScheme} displayName={displayName}>
@@ -94,14 +105,18 @@ export default async function AppShellLayout({ children }: { children: React.Rea
             avatarUrl={avatarUrl}
             hasActiveMergeRecommendations={false}
             hasOverdueKeepInTouch={false}
-            initialCollapsed={initialCollapsed}
+            initialLastExpandedWidth={initialLastExpandedWidth}
+            initialWidth={initialWidth}
             userName={displayName}
           >
             {children}
           </AppShellWrapper>
         }
       >
-        <AppShellWithQueryBadges initialCollapsed={initialCollapsed}>
+        <AppShellWithQueryBadges
+          initialLastExpandedWidth={initialLastExpandedWidth}
+          initialWidth={initialWidth}
+        >
           {children}
         </AppShellWithQueryBadges>
       </Suspense>

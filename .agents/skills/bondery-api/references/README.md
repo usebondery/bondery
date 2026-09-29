@@ -14,3 +14,4 @@ Bondery API contracts, transport, and mobile sync.
 | [rate-limits.md](./rate-limits.md) | Per-route and global rate limits |
 | [versioning.md](./versioning.md) | No URL versioning, coordinated deploy, protocol headers |
 | [sync-architecture.md](./sync-architecture.md) | Mobile offline sync (pull, outbox, wake) |
+| [mcp-tools.md](./mcp-tools.md) | MCP tool verbs (`create`/`get`/`update`/`delete`/`search`), prompts, REST vs MCP |

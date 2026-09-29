@@ -1,8 +1,8 @@
 {
   "dependencies": {
     "@ai-sdk/react": "^4.0.97",
-    "@better-auth/oauth-provider": "1.7.1",
-    "@better-auth/passkey": "1.7.1",
+    "@better-auth/oauth-provider": "1.7.6",
+    "@better-auth/passkey": "1.7.6",
     "@bondery/branding": "workspace:*",
     "@bondery/helpers": "workspace:*",
     "@bondery/mantine-next": "workspace:*",
@@ -41,7 +41,7 @@
     "@tiptap/suggestion": "^3.31.3",
     "@types/d3": "^7.4.3",
     "ai": "^7.0.94",
-    "better-auth": "1.7.1",
+    "better-auth": "1.7.6",
     "d3": "^7.9.0",
     "dayjs": "^1.11.23",
     "fflate": "^0.8.3",
@@ -108,11 +108,11 @@
     "store-shots": "pnpm dlx --package @playwright/test@1.62.1 playwright test -c e2e/store-shots.playwright.config.mjs",
     "test:auth": "tsx --test src/lib/auth/*.test.ts",
     "test:availability": "tsx --test src/lib/api/availabilityStore.test.ts src/lib/api/applyTransportErrorPolicy.test.ts src/lib/api/health.test.ts src/lib/api/resolveServerApiUrl.test.ts",
-    "test:merge": "tsx --test src/lib/merge/orientMergePair.test.ts",
+    "test:merge": "tsx --test src/lib/merge/*.test.ts",
     "test:runtime-config": "tsx --test src/lib/platform/runtimeConfig.server.test.ts",
     "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts",
     "test:theme": "tsx --test src/lib/theme/theme.test.ts"
   },
   "type": "module",
-  "version": "1.9.2"
+  "version": "1.10.0-rc.1"
 }

@@ -3,6 +3,7 @@ import { getQueryClient } from "@/lib/query/client";
 import {
   fetchSettings,
   prefetchApiKeys,
+  prefetchMcpConsents,
   prefetchMePerson,
   prefetchOAuthProviders,
   prefetchSubscription,
@@ -19,6 +20,7 @@ export async function SettingsLoader() {
     prefetchTagsList(queryClient, SETTINGS_TAGS_PREVIEW),
     prefetchMePerson(queryClient, "small"),
     prefetchApiKeys(queryClient),
+    prefetchMcpConsents(queryClient),
     prefetchSubscription(queryClient),
     prefetchOAuthProviders(queryClient),
   ]);

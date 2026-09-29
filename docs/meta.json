@@ -38,6 +38,7 @@
     "contributing/local-setup",
     "contributing/environment",
     "contributing/auth",
+    "contributing/mcp",
     "contributing/i18n",
     "---Guides---",
     "contributing/guides",

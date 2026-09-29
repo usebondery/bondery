@@ -13,18 +13,20 @@ export function oauthResourceIdentifier(apiUrl: string): string {
 }
 
 /**
- * MV3 `host_permissions` match origins exactly. Token/authorize fetches pin
- * loopback HTTP to 127.0.0.1 while env is usually `localhost` — list both.
+ * Chrome match patterns cannot include a port (`Hostname cannot include a port`).
+ * `http://localhost/*` still matches every localhost port. Token/authorize
+ * fetches pin loopback HTTP to 127.0.0.1 while env is usually `localhost` —
+ * list both hostnames.
  */
 export function loopbackHostPermissionPatterns(url: string): string[] {
   try {
     const parsed = new URL(url);
-    const port = parsed.port ? `:${parsed.port}` : "";
-    const patterns = [`${parsed.origin}/*`];
+    const patternFor = (hostname: string) => `${parsed.protocol}//${hostname}/*`;
+    const patterns = [patternFor(parsed.hostname)];
     if (parsed.hostname === "localhost") {
-      patterns.push(`${parsed.protocol}//127.0.0.1${port}/*`);
+      patterns.push(patternFor("127.0.0.1"));
     } else if (parsed.hostname === "127.0.0.1") {
-      patterns.push(`${parsed.protocol}//localhost${port}/*`);
+      patterns.push(patternFor("localhost"));
     }
     return [...new Set(patterns)];
   } catch {

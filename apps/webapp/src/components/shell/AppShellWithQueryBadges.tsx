@@ -7,7 +7,8 @@ import { AppShellWrapper } from "./AppShellWrapper";
 
 interface AppShellWithQueryBadgesProps {
   children: React.ReactNode;
-  initialCollapsed: boolean;
+  initialLastExpandedWidth: number;
+  initialWidth: number;
 }
 
 /**
@@ -15,7 +16,8 @@ interface AppShellWithQueryBadgesProps {
  */
 export function AppShellWithQueryBadges({
   children,
-  initialCollapsed,
+  initialLastExpandedWidth,
+  initialWidth,
 }: AppShellWithQueryBadgesProps) {
   const { displayName, avatarUrl } = useUserSession();
   const hasActiveMergeRecommendations = useContactsAttentionBadge();
@@ -27,7 +29,8 @@ export function AppShellWithQueryBadges({
       avatarUrl={avatarUrl}
       hasActiveMergeRecommendations={hasActiveMergeRecommendations}
       hasOverdueKeepInTouch={hasOverdueKeepInTouch}
-      initialCollapsed={initialCollapsed}
+      initialLastExpandedWidth={initialLastExpandedWidth}
+      initialWidth={initialWidth}
       userName={displayName}
     >
       {children}

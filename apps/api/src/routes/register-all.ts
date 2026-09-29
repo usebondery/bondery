@@ -27,12 +27,14 @@ import { instagramImportRoutes } from "./import/instagram/index.js";
 import { linkedInImportRoutes } from "./import/linkedin/index.js";
 import { vcardImportRoutes } from "./import/vcard/index.js";
 import { interactionRoutes } from "./interactions/index.js";
+import { mcpRoutes } from "./mcp/index.js";
 import { meApiKeysRoutes } from "./me/api-keys/index.js";
 import { meExportRoutes } from "./me/export/index.js";
 import { meFeedbackRoutes } from "./me/feedback/index.js";
 import { meImportRoutes } from "./me/import/index.js";
 import { meRoutes } from "./me/index.js";
 import { meInitializeRoutes } from "./me/initialize/index.js";
+import { meMcpConsentsRoutes } from "./me/mcp-consents/index.js";
 import { meOnboardingImportFollowupRoutes } from "./me/onboarding/import-followup.js";
 import { meOnboardingRoutes } from "./me/onboarding/index.js";
 import { meSessionRoutes } from "./me/session/index.js";
@@ -45,7 +47,14 @@ import { syncRoutes } from "./sync/index.js";
 import { tagRoutes } from "./tags/index.js";
 import { stripeWebhookRoutes } from "./webhooks/stripe.js";
 
-type RouteMountArea = "integration" | "session" | "admin" | "internal" | "webhook" | "composite";
+type RouteMountArea =
+  | "integration"
+  | "session"
+  | "admin"
+  | "internal"
+  | "webhook"
+  | "mcp"
+  | "composite";
 
 type RouteMount = {
   area: RouteMountArea;
@@ -59,6 +68,7 @@ const SHELLS: Record<RouteMountArea, (plugin: AppRoutePlugin) => AppRoutePlugin>
   composite: (plugin) => plugin,
   integration: integrationRoutes,
   internal: internalRoutes,
+  mcp: (plugin) => openApiAreaRoutes("internal", plugin),
   session: sessionRoutes,
   webhook: (plugin) => openApiAreaRoutes("internal", plugin),
 };
@@ -97,6 +107,8 @@ const ROUTE_MOUNTS: RouteMount[] = [
   { area: "session", plugin: meSettingsRoutes, prefix: API_ROUTES.ME_SETTINGS },
   { area: "session", plugin: meFeedbackRoutes, prefix: API_ROUTES.ME_FEEDBACK },
   { area: "session", plugin: meApiKeysRoutes, prefix: API_ROUTES.ME_API_KEYS },
+  { area: "session", plugin: meMcpConsentsRoutes, prefix: API_ROUTES.ME_MCP_CONSENTS },
+  { area: "mcp", plugin: mcpRoutes, prefix: API_ROUTES.MCP },
   { area: "composite", plugin: syncRoutes, prefix: API_ROUTES.SYNC },
   { area: "session", plugin: extensionRoutes, prefix: API_ROUTES.EXTENSION },
   { area: "session", plugin: chatRoutes, prefix: API_ROUTES.CHAT },

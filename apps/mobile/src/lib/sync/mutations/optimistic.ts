@@ -30,6 +30,9 @@ export function applyOptimisticMutation(mutation: SyncMutation): void {
       case "contact.removeTag":
         applyOptimisticContactRemoveTag(mutation.entityId, mutation.payload.tagId);
         break;
+      case "contact.replaceImportantDates":
+        applyOptimisticContactReplaceImportantDates(mutation);
+        break;
       case "group.create":
         applyOptimisticGroupCreate(mutation);
         break;
@@ -74,28 +77,24 @@ function applyOptimisticContactCreate(
       id, user_id, first_name, middle_name, last_name, headline, location, notes,
       last_interaction, keep_frequency_days, myself, language, timezone, gis_point,
       has_avatar, created_at, updated_at, local_updated_at, is_pending
-    ) VALUES (?, '', ?, ?, ?, NULL, NULL, NULL, ?, NULL, 0, NULL, NULL, NULL, 0, ?, ?, ?, 1)`,
+    ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, NULL, 0, ?, ?, ?, 1)`,
     id,
     mutation.payload.firstName,
     mutation.payload.middleName ?? null,
     mutation.payload.lastName ?? null,
-    ts,
+    mutation.payload.headline ?? null,
+    mutation.payload.location ?? null,
+    mutation.payload.notes ?? null,
+    mutation.payload.lastInteraction ?? ts,
+    mutation.payload.keepFrequencyDays ?? null,
+    mutation.payload.language ?? null,
+    mutation.payload.timezone ?? null,
     ts,
     ts,
     ts,
   );
 
-  if (mutation.payload.linkedin?.trim()) {
-    db.runSync(
-      `INSERT INTO people_socials (id, person_id, user_id, platform, handle, created_at, updated_at)
-       VALUES (?, ?, '', 'linkedin', ?, ?, ?)`,
-      newId(),
-      id,
-      mutation.payload.linkedin.trim(),
-      ts,
-      ts,
-    );
-  }
+  applyOptimisticContactChannels(id, mutation.payload);
 }
 
 function applyOptimisticContactUpdate(
@@ -132,6 +131,51 @@ function applyOptimisticContactUpdate(
     ts,
     personId,
   );
+
+  applyOptimisticContactChannels(personId, patch);
+}
+
+function applyOptimisticContactReplaceImportantDates(
+  mutation: Extract<SyncMutation, { type: "contact.replaceImportantDates" }>,
+): void {
+  const db = getSyncDatabase();
+  const ts = nowIso();
+  const personId = mutation.entityId;
+
+  db.runSync("DELETE FROM people_important_dates WHERE person_id = ?", personId);
+  mutation.payload.dates.forEach((entry) => {
+    db.runSync(
+      `INSERT INTO people_important_dates (
+        id, person_id, user_id, type, date, note, notify_days_before, created_at, updated_at
+      ) VALUES (?, ?, '', ?, ?, ?, ?, ?, ?)`,
+      isValidUuid(entry.id) ? entry.id : newId(),
+      personId,
+      entry.type,
+      entry.date,
+      entry.note ?? null,
+      entry.notifyDaysBefore ?? null,
+      ts,
+      ts,
+    );
+  });
+}
+
+function applyOptimisticContactChannels(
+  personId: string,
+  patch: {
+    addresses?: Extract<SyncMutation, { type: "contact.update" }>["payload"]["addresses"];
+    emails?: Extract<SyncMutation, { type: "contact.update" }>["payload"]["emails"];
+    facebook?: string | null;
+    instagram?: string | null;
+    linkedin?: string | null;
+    phones?: Extract<SyncMutation, { type: "contact.update" }>["payload"]["phones"];
+    signal?: string | null;
+    website?: string | null;
+    whatsapp?: string | null;
+  },
+): void {
+  const db = getSyncDatabase();
+  const ts = nowIso();
 
   if (patch.phones !== undefined) {
     db.runSync("DELETE FROM people_phones WHERE person_id = ?", personId);
@@ -202,25 +246,6 @@ function applyOptimisticContactUpdate(
         address.latitude,
         address.longitude,
         address.timezone,
-        ts,
-        ts,
-      );
-    });
-  }
-
-  if (patch.importantDates !== undefined) {
-    db.runSync("DELETE FROM people_important_dates WHERE person_id = ?", personId);
-    patch.importantDates?.forEach((entry, _index) => {
-      db.runSync(
-        `INSERT INTO people_important_dates (
-          id, person_id, user_id, type, date, note, notify_days_before, created_at, updated_at
-        ) VALUES (?, ?, '', ?, ?, ?, ?, ?, ?)`,
-        isValidUuid(entry.id) ? entry.id : newId(),
-        personId,
-        entry.type,
-        entry.date,
-        entry.note ?? null,
-        entry.notifyDaysBefore ?? null,
         ts,
         ts,
       );

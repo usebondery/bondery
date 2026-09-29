@@ -11,6 +11,7 @@ import "@/components/code-highlight-hljs.css";
 import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";
+import type { Viewport } from "next";
 import { Lexend } from "next/font/google";
 import { headers } from "next/headers";
 import { WebappMantineProvider } from "@/components/shell/WebappMantineProvider";
@@ -22,6 +23,10 @@ import { computeColorScheme } from "@/lib/theme/computeColorScheme";
 import { resolveSsrColorScheme } from "@/lib/theme/resolveSsrColorScheme";
 
 export const metadata = rootMetadata;
+
+export const viewport: Viewport = {
+  viewportFit: "cover",
+};
 
 const lexend = Lexend({
   subsets: ["latin"],

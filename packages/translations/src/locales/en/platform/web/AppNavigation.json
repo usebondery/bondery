@@ -1,7 +1,7 @@
 {
+  "Browse": "Browse",
   "Chat": "AI Assistant",
-  "CollapseSidebar": "Collapse sidebar",
-  "ExpandSidebar": "Expand sidebar",
+  "ChatMode": "Chats",
   "FixAndMerge": "Fix & merge",
   "Groups": "Groups",
   "Home": "Home",
@@ -11,6 +11,7 @@
   "Myself": "Myself",
   "MyselfGreeting": "Ahoy, {name}! 😎",
   "People": "People",
+  "ResizeSidebar": "Resize sidebar",
   "Search": "Search...",
   "Settings": "Settings"
 }

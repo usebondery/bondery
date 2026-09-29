@@ -28,7 +28,7 @@ Do not use `router.refresh()` for titles. Do not mount `*DocumentTitle` in layou
 ## Key modules
 
 - [`pageTitles.ts`](./pageTitles.ts) — `staticPageTitle` / `entityPageTitle` (server Metadata API)
-- [`routeTitleRegistry.ts`](./routeTitleRegistry.ts) — dynamic pathname matching (person, group, myself)
+- [`routeTitleRegistry.ts`](./routeTitleRegistry.ts) — dynamic pathname matching (person, group, myself, chat)
 - [`resolveClientRouteTitle.ts`](./resolveClientRouteTitle.ts) — entity-only client resolution (cache + optimistic)
 - [`navigationTitleStore.ts`](./navigationTitleStore.ts) — optimistic title before `router.push`
 - [`useNavigateWithTitle.ts`](./useNavigateWithTitle.ts) — navigation helper

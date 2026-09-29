@@ -28,7 +28,7 @@ export type NavLinkItemProps = NavLinkItemBaseProps &
  * Both paddingLeft and paddingRight use the same value so the icon is
  * visually symmetric at all sidebar states.
  */
-const ITEM_PADDING = {
+export const ITEM_PADDING = {
   paddingBottom: "var(--mantine-spacing-xs)",
   paddingLeft: "var(--sidebar-icon-pl)",
   paddingRight: "var(--sidebar-icon-pl)",
@@ -85,7 +85,11 @@ export function NavLinkItem({
           >
             {label}
           </Text>
-          {rightSection && <div style={{ flexShrink: 0 }}>{rightSection}</div>}
+          {rightSection && (
+            <div style={{ alignItems: "center", display: "flex", flexShrink: 0, lineHeight: 1 }}>
+              {rightSection}
+            </div>
+          )}
         </>
       )}
     </>

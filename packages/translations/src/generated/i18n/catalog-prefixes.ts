@@ -126,7 +126,7 @@ export type PersonTabsPrefix = never;
 
 export type ReminderDigestEmailPrefix = "dateTypes";
 
-export type SettingsPagePrefix = "ApiKeys" | "Apps" | "DataManagement" | "DataManagement.BonderyImport" | "DataManagement.Export" | "DataManagement.InstagramImport" | "DataManagement.LinkedInImport" | "DataManagement.ProductAnalytics" | "DataManagement.VCardImport" | "Integration" | "Integration.ChromeExtensionModal" | "Integration.PwaInstallModal" | "Preferences" | "Profile" | "Profile.Passkeys" | "Subscription" | "Support";
+export type SettingsPagePrefix = "AiAssistants" | "ApiKeys" | "Apps" | "DataManagement" | "DataManagement.BonderyImport" | "DataManagement.Export" | "DataManagement.InstagramImport" | "DataManagement.LinkedInImport" | "DataManagement.ProductAnalytics" | "DataManagement.VCardImport" | "Integration" | "Integration.ChromeExtensionModal" | "Integration.PwaInstallModal" | "Preferences" | "Profile" | "Profile.Passkeys" | "Subscription" | "Support";
 
 export type ShareContactEmailBodyPrefix = "labels";
 

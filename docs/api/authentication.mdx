@@ -5,7 +5,7 @@ docId: api.authentication
 description: Authenticate REST API requests with sessions or long-lived API keys.
 ---
 
-The Bondery API supports two authentication methods depending on how you call it.
+The Bondery API supports two authentication methods depending on how you call it. AI assistants use [MCP](/docs/bondery/mcp) with OAuth 2.1 — not these REST credentials.
 
 Replace `https://api.usebondery.com` with your self-hosted API domain when applicable.
 
@@ -69,7 +69,7 @@ A read-only key that calls `POST`, `PATCH`, or `DELETE` receives **403** with `a
 
 Only routes marked for integrations (`openApiArea: integration`) accept API keys. That includes contacts, groups, tags, interactions, contact share, import endpoints, and geocode. The full contract is in the [API reference](./api-reference/index.mdx).
 
-API keys **do not** work on session-only routes: account settings, merge, relationships, per-contact enrichment, sync, chat, subscriptions, admin, webhooks, or extension internals. A valid key on those paths returns **403** (`api_key_route_forbidden`).
+API keys **do not** work on session-only routes: account settings, API key and MCP consent management, merge, relationships, per-contact enrichment, sync, chat, subscriptions, admin, webhooks, or extension internals. A valid key on those paths returns **403** (`api_key_route_forbidden`). `POST /mcp` also rejects API keys.
 
 ## Error codes
 

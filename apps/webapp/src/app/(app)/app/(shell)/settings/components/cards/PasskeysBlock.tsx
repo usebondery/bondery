@@ -14,7 +14,9 @@ import { captureEvent } from "@/lib/analytics/client";
 import {
   type AaguidCatalog,
   loadVendoredAaguidCatalog,
+  lookupAaguidCatalogName,
   lookupAaguidIcons,
+  lookupBetterAuthAuthenticatorName,
   parseCreatedPasskey,
   resolveStoredPasskeyName,
 } from "@/lib/auth/aaguid-catalog";
@@ -145,6 +147,14 @@ function PasskeyRow({
     }
   }, [authClient.passkey, name, onRenamed, passkey.id, tCommon]);
 
+  const catalogIcons = catalog ? lookupAaguidIcons(catalog, passkey.aaguid) : null;
+  const iconTooltip =
+    catalogIcons && catalog
+      ? (lookupAaguidCatalogName(catalog, passkey.aaguid) ??
+        lookupBetterAuthAuthenticatorName(passkey.aaguid) ??
+        undefined)
+      : undefined;
+
   const handleDelete = () => {
     const displayName = persistedNameRef.current;
     openStandardConfirmModal({
@@ -180,7 +190,9 @@ function PasskeyRow({
   return (
     <SettingsCredentialCard
       deleteAriaLabel={deleteAriaLabel}
+      deleteTooltip={t("Passkeys.RevokeTooltip")}
       icon={<PasskeyRowIcon aaguid={passkey.aaguid} catalog={catalog} />}
+      iconTooltip={iconTooltip || undefined}
       label={
         <InlineEditableInput
           aria-label={nameFieldLabel}

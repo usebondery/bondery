@@ -42,6 +42,7 @@ export const contactKeys = {
 export const settingsKeys = {
   all: ["settings"] as const,
   apiKeys: () => [...settingsKeys.all, "api-keys"] as const,
+  mcpConsents: () => [...settingsKeys.all, "mcp-consents"] as const,
   me: () => [...settingsKeys.all, "me"] as const,
   mePerson: (avatarPreset = "small") => [...settingsKeys.all, "me-person", avatarPreset] as const,
   oauthProviders: () => [...settingsKeys.all, "oauth-providers"] as const,

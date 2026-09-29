@@ -1,5 +1,6 @@
 export {
   declineMergeRecommendationResponseSchema,
+  mergeAvatarIdentityResponseSchema,
   mergeConflictChoiceSchema,
   mergeConflictFieldSchema,
   mergeContactsRequestSchema,
@@ -12,6 +13,7 @@ export {
 } from "./schema.js";
 export type {
   DeclineMergeRecommendationResponse,
+  MergeAvatarIdentityResponse,
   MergeConflictChoice,
   MergeConflictField,
   MergeContactsRequest,

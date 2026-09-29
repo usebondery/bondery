@@ -29,7 +29,7 @@ Two Compose apps, same file:
 4. [`.github/workflows/deploy-website.yml`](../../.github/workflows/deploy-website.yml) builds the Docker image and pushes `:production` + `:sha-<short>` (no separate host gate; release smoke validates the image). Production CD stays on this workflow — it does not learn about beta.
 5. Dokploy pulls `:production` (`pull_policy: always`) — configure a redeploy webhook (`BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` in Infisical production) or redeploy manually. In Dokploy, set the production Compose app branch to **`release`** (CI always sends `refs/heads/release` in the webhook payload, including manual workflow runs). Set the beta app branch to **`main`**.
 
-Host CI and production images pin Node 26 (`.nvmrc` / `node:26-slim`). Dependencies use pnpm 12.4.0. Release `smoke` validates the production container runtime.
+Host CI and production images pin Node 26 (`.nvmrc` / `node:26-slim`). Dependencies use pnpm 12.6.0. Release `smoke` validates the production container runtime.
 
 There are **no** `website-X.Y.Z` release tags. Pin `BONDERY_INFRA_WEBSITE_IMAGE_TAG` to a semver or `:sha-<short>` for rollback. Infisical production: `production` (or omit for floating `:production`). Infisical staging: `beta`. Both sync to their Dokploy website apps.
 

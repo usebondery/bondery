@@ -3716,7 +3716,6 @@ export const AccountScalarFieldEnum = {
   id: 'id',
   providerAccountId: 'providerAccountId',
   providerId: 'providerId',
-  issuer: 'issuer',
   userId: 'userId',
   accessToken: 'accessToken',
   refreshToken: 'refreshToken',
@@ -3917,6 +3916,9 @@ export const OauthClientScalarFieldEnum = {
   type: 'type',
   requirePKCE: 'requirePKCE',
   dpopBoundAccessTokens: 'dpopBoundAccessTokens',
+  clientDiscoveryId: 'clientDiscoveryId',
+  clientCredentialsScopes: 'clientCredentialsScopes',
+  applicationType: 'applicationType',
   referenceId: 'referenceId',
   metadata: 'metadata'
 } as const

@@ -20,7 +20,8 @@ export function registerContactMutationRoutes(fastify: AppFastifyInstance): void
     {
       schema: {
         body: createContactBodySchema,
-        description: "Create a new contact.",
+        description:
+          "Create a new contact. Optional phones, emails, socials, notes, and profile fields.",
         response: withCreatedResponse(createContactResponseSchema, "Contact created"),
       } satisfies FastifyZodOpenApiSchema,
     },
@@ -28,13 +29,7 @@ export function registerContactMutationRoutes(fastify: AppFastifyInstance): void
       const ctx = domainContextFromRequest(request);
       const body = request.body;
 
-      const { data, txid } = await createContact(ctx, {
-        firstName: body.firstName,
-        id: body.id,
-        lastName: body.lastName,
-        linkedin: body.linkedin,
-        middleName: body.middleName,
-      });
+      const { data, txid } = await createContact(ctx, body);
 
       return reply.status(201).send({ contact: data.contact, txid });
     },

@@ -37,6 +37,7 @@ import {
   contactRelationshipResponseSchema,
   contactRelationshipsResponseSchema,
   contactResponseSchema,
+  contactSharePreviewResponseSchema,
   contactsListResponseSchema,
   contactsSelectableListResponseSchema,
   createContactApiInputSchema,
@@ -91,7 +92,12 @@ import {
 } from "#entities/import/index.js";
 import { importantDatesListResponseSchema } from "#entities/important-date/index.js";
 import {
+  mcpConsentListItemSchema,
+  mcpConsentsListResponseSchema,
+} from "#entities/mcp-consents/index.js";
+import {
   declineMergeRecommendationResponseSchema,
+  mergeAvatarIdentityResponseSchema,
   mergeContactsRequestSchema,
   mergeContactsResponseSchema,
   mergeRecommendationsCountResponseSchema,
@@ -131,6 +137,7 @@ import {
   geocodeTimezoneResponseWireSchema,
   idsRequestBodySchema,
   importantDatesReplaceBodySchema,
+  mergeAvatarIdentityQuerySchema,
 } from "#http/index.js";
 import { syncConflictErrorResponseSchema } from "#sync/conflict/index.js";
 import { syncBootstrapResponseSchema, syncPullResponseSchema } from "#sync/pull/index.js";
@@ -150,6 +157,7 @@ export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "syncConflictErrorResponseSchema", schema: syncConflictErrorResponseSchema },
   { name: "photoUploadResponseSchema", schema: photoUploadResponseSchema },
   { name: "contactResponseSchema", schema: contactResponseSchema },
+  { name: "contactSharePreviewResponseSchema", schema: contactSharePreviewResponseSchema },
   { name: "createContactResponseSchema", schema: createContactResponseSchema },
   { name: "contactsListResponseSchema", schema: contactsListResponseSchema },
   { name: "contactsSelectableListResponseSchema", schema: contactsSelectableListResponseSchema },
@@ -171,6 +179,7 @@ export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "enrichQueueNextBatchResponseSchema", schema: enrichQueueNextBatchResponseSchema },
   { name: "linkedInDataUpsertResponseSchema", schema: linkedInDataUpsertResponseSchema },
   { name: "mergeContactsResponseSchema", schema: mergeContactsResponseSchema },
+  { name: "mergeAvatarIdentityResponseSchema", schema: mergeAvatarIdentityResponseSchema },
   { name: "mergeRecommendationsResponseSchema", schema: mergeRecommendationsResponseSchema },
   {
     name: "mergeRecommendationsCountResponseSchema",
@@ -217,6 +226,8 @@ export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "userSettingsResponseSchema", schema: userSettingsResponseSchema },
   { name: "userAccountResponseSchema", schema: userAccountResponseSchema },
   { name: "apiKeysListResponseSchema", schema: apiKeysListResponseSchema },
+  { name: "mcpConsentListItemSchema", schema: mcpConsentListItemSchema },
+  { name: "mcpConsentsListResponseSchema", schema: mcpConsentsListResponseSchema },
   { name: "apiKeyListItemSchema", schema: apiKeyListItemSchema },
   { name: "apiKeyCreatedSchema", schema: apiKeyCreatedSchema },
   { name: "chatSessionsListResponseSchema", schema: chatSessionsListResponseSchema },
@@ -247,6 +258,7 @@ export const REQUEST_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "tagMembershipRequestSchema", schema: tagMembershipRequestSchema },
   { name: "contactTagBodySchema", schema: contactTagBodySchema },
   { name: "idsRequestBodySchema", schema: idsRequestBodySchema },
+  { name: "mergeAvatarIdentityQuerySchema", schema: mergeAvatarIdentityQuerySchema },
   { name: "createInteractionInputSchema", schema: createInteractionInputSchema },
   { name: "updateInteractionInputSchema", schema: updateInteractionInputSchema },
   { name: "importantDatesReplaceBodySchema", schema: importantDatesReplaceBodySchema },
