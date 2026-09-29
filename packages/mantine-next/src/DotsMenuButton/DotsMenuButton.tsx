@@ -1,4 +1,4 @@
-import { type ActionIconProps } from "@mantine/core";
+import type { ActionIconProps } from "@mantine/core";
 import { IconDotsVertical } from "@tabler/icons-react";
 import type { MouseEventHandler } from "react";
 import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";

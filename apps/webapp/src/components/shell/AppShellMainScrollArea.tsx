@@ -17,10 +17,7 @@ interface AppShellMainScrollAreaProps {
  * hash, otherwise the matching id. Returns false if a hash is set but the
  * node is not in the DOM yet.
  */
-function applyShellLocationScroll(
-  viewport: HTMLDivElement,
-  behavior: ScrollBehavior,
-): boolean {
+function applyShellLocationScroll(viewport: HTMLDivElement, behavior: ScrollBehavior): boolean {
   const hash = window.location.hash.slice(1);
   if (!hash) {
     viewport.scrollTo({ top: 0 });

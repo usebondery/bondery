@@ -24,7 +24,7 @@ export function DataManagementCard() {
       id="data-management"
       title={t("Title")}
     >
-      <CardSection inheritPadding id="export" py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection id="export" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
         <Text fw={500} mb={4} size="sm">
           {t("Export.SectionTitle")}
         </Text>
@@ -38,7 +38,7 @@ export function DataManagementCard() {
 
       <Divider />
 
-      <CardSection inheritPadding id="import" py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection id="import" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
         <Text fw={500} mb={4} size="sm">
           {t("ImportSectionTitle")}
         </Text>
@@ -55,19 +55,19 @@ export function DataManagementCard() {
 
       <Divider />
 
-      <CardSection inheritPadding id="product-analytics" py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection id="product-analytics" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
         <ProductAnalyticsSection />
       </CardSection>
 
       <Divider />
 
-      <CardSection inheritPadding id="logout" py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection id="logout" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
         <LogoutSection />
       </CardSection>
 
       <Divider />
 
-      <CardSection inheritPadding id="delete-account" py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection id="delete-account" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
         <DeleteAccountSection />
       </CardSection>
     </SettingsSection>

@@ -24,11 +24,7 @@ export function SettingsView({
   const t = useExtensionPopupTranslations("Settings");
   return (
     <Stack gap="md" h={300} p="md">
-      <PopupBrandHeader
-        actionIcon={<IconArrowLeft />}
-        actionTitle="Back"
-        onActionClick={onBack}
-      />
+      <PopupBrandHeader actionIcon={<IconArrowLeft />} actionTitle="Back" onActionClick={onBack} />
       <Stack gap="md" style={{ flex: 1 }}>
         {user && (
           <UserCard

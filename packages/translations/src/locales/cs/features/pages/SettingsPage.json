@@ -14,10 +14,10 @@
     "PermissionReadDescription": "Vyhledávání a čtení vašich kontaktů a jejich údajů.",
     "PermissionReadLabel": "Jen čtení",
     "RevokeButton": "Odebrat přístup",
-    "RevokeTooltip": "Odebrat asistenta",
     "RevokeConfirm": "Ano, odebrat",
     "RevokeMessage": "Tento asistent už nedostane nový přístup. Později ho můžete znovu schválit.",
     "RevokeTitle": "Odebrat přístup pro „{name}“?",
+    "RevokeTooltip": "Odebrat asistenta",
     "Title": "AI asistenti"
   },
   "ApiKeys": {
@@ -29,7 +29,6 @@
     "CreateErrorTitle": "Klíč se nepodařilo vytvořit",
     "CreateTitle": "Vytvořit API klíč",
     "DeleteButton": "Smazat",
-    "RevokeTooltip": "Odebrat API klíč",
     "DeleteMessage": "Klíč okamžitě přestane fungovat. Integrace, které ho používají, budou hlásit chyby.",
     "DeleteTitle": "Smazat „{label}\"?",
     "Description": "Propojte Zapier, skripty a další nástroje se svými kontakty.",
@@ -55,6 +54,7 @@
     "PermissionReadLabel": "Jen čtení",
     "RevealAlertDescription": "Z bezpečnostních důvodů ukládáme pouze hash klíče — ani Bondery po zavření dialogu nemůže obnovit původní hodnotu. Toto je jediná příležitost, kdy uvidíte celý klíč. Zkopírujte ho na bezpečné místo před zavřením.",
     "RevealAlertTitle": "Uložte si API klíč",
+    "RevokeTooltip": "Odebrat API klíč",
     "SaveButton": "Uložit",
     "SecretCodeLabel": "API klíč",
     "TestRequestLabel": "Testovací požadavek",

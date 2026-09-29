@@ -14,10 +14,10 @@
     "PermissionReadDescription": "Deine Kontakte und ihre Daten suchen und lesen.",
     "PermissionReadLabel": "Nur Lesen",
     "RevokeButton": "Zugriff entziehen",
-    "RevokeTooltip": "Assistenten entziehen",
     "RevokeConfirm": "Ja, entziehen",
     "RevokeMessage": "Dieser Assistent erhält keinen neuen Zugriff mehr. Du kannst ihn später erneut genehmigen.",
     "RevokeTitle": "Zugriff für „{name}“ entziehen?",
+    "RevokeTooltip": "Assistenten entziehen",
     "Title": "KI-Assistenten"
   },
   "ApiKeys": {
@@ -29,7 +29,6 @@
     "CreateErrorTitle": "Schlüssel konnte nicht erstellt werden",
     "CreateTitle": "API key erstellen",
     "DeleteButton": "Löschen",
-    "RevokeTooltip": "API-Schlüssel entziehen",
     "DeleteMessage": "Dieser Schlüssel funktioniert sofort nicht mehr. Alle Integrationen, die ihn verwenden, erhalten Fehler.",
     "DeleteTitle": "„{label}“ löschen?",
     "Description": "Verbinde Drittanbieter-Tools, eigene Skripte und andere Tools mit deinen Kontakten.",
@@ -55,6 +54,7 @@
     "PermissionReadLabel": "Nur Lesen",
     "RevealAlertDescription": "Aus Sicherheitsgründen speichern wir nur einen Hash deines Schlüssels. Nicht einmal Bondery kann den Originalschlüssel wiederherstellen, nachdem du dieses Fenster schließt. Dies ist das einzige Mal, dass du den vollständigen Schlüssel sehen kannst. Kopiere ihn an einen sicheren Ort, bevor du schließt.",
     "RevealAlertTitle": "Speichere deinen API key",
+    "RevokeTooltip": "API-Schlüssel entziehen",
     "SaveButton": "Speichern",
     "SecretCodeLabel": "API key",
     "TestRequestLabel": "Testanfrage",

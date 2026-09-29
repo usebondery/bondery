@@ -1,8 +1,8 @@
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import type { ContactSelectable } from "@bondery/schemas";
 import { ActionIconButton } from "@bondery/mantine-next";
+import type { ContactSelectable } from "@bondery/schemas";
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";

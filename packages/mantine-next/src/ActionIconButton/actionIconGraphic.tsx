@@ -1,8 +1,8 @@
 import { Center } from "@mantine/core";
 import {
+  type CSSProperties,
   cloneElement,
   isValidElement,
-  type CSSProperties,
   type ReactElement,
   type ReactNode,
 } from "react";

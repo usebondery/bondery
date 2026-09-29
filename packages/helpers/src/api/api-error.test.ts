@@ -266,13 +266,11 @@ describe("getAuthUserFacingError", () => {
     const message = getAuthUserFacingError(
       { code: "oauth" },
       mockT({
-        "errors.auth.oauth": "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.",
+        "errors.auth.oauth":
+          "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.",
       }),
     );
 
-    assert.equal(
-      message,
-      "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.",
-    );
+    assert.equal(message, "Couldn’t complete sign-in. Try again with email, GitHub, or LinkedIn.");
   });
 });

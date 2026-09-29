@@ -1,7 +1,7 @@
 "use client";
 
-import type { Activity } from "@bondery/schemas";
 import { ActionIconButton } from "@bondery/mantine-next";
+import type { Activity } from "@bondery/schemas";
 import {
   Badge,
   Box,

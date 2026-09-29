@@ -42,7 +42,9 @@ test.describe("unauthenticated login", () => {
     await page.goto("/login?error=internal_server_error");
     await expect(page.getByRole("heading", { name: "Welcome" })).toBeVisible();
     await expect(page.getByTestId("login-github")).toBeVisible();
-    await expect(page.getByText("Something went wrong on our end. Please try again.")).toBeVisible();
+    await expect(
+      page.getByText("Something went wrong on our end. Please try again."),
+    ).toBeVisible();
   });
 
   test("shows a notification for an invalid magic-link error", async ({ page }) => {

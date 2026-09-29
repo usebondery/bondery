@@ -14,10 +14,10 @@
     "PermissionReadDescription": "Search and read your contacts and their data.",
     "PermissionReadLabel": "Read only",
     "RevokeButton": "Revoke",
-    "RevokeTooltip": "Revoke assistant",
     "RevokeConfirm": "Yes, revoke",
     "RevokeMessage": "This assistant will not be able to get new access. You can reconnect later by approving it again.",
     "RevokeTitle": "Revoke access for \"{name}\"?",
+    "RevokeTooltip": "Revoke assistant",
     "Title": "AI assistants"
   },
   "ApiKeys": {
@@ -29,7 +29,6 @@
     "CreateErrorTitle": "Could not create key",
     "CreateTitle": "Create API key",
     "DeleteButton": "Delete",
-    "RevokeTooltip": "Revoke API key",
     "DeleteMessage": "This key will stop working immediately. Any integration using it will get errors.",
     "DeleteTitle": "Delete \"{label}\"?",
     "Description": "Connect third-party tools, custom scripts, and other tools to your contacts.",
@@ -55,6 +54,7 @@
     "PermissionReadLabel": "Read only",
     "RevealAlertDescription": "For security, we only store a hash of your key. Not even Bondery can recover the original after you close this. This is the only time you can view the full key. Copy it to a secure place before closing.",
     "RevealAlertTitle": "Save your API key",
+    "RevokeTooltip": "Revoke API key",
     "SaveButton": "Save",
     "SecretCodeLabel": "API key",
     "TestRequestLabel": "Test request",

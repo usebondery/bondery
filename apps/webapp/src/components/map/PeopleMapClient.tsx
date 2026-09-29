@@ -1,7 +1,6 @@
 "use client";
 
-import { bonderyTheme, PersonChip } from "@bondery/mantine-next";
-import { ActionIconButton } from "@bondery/mantine-next";
+import { ActionIconButton, bonderyTheme, PersonChip } from "@bondery/mantine-next";
 import { ActionIcon, Avatar, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import { IconMinus, IconPlus } from "@tabler/icons-react";
 import type { MarkerCluster } from "leaflet";
