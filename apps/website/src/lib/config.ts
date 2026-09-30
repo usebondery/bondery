@@ -10,6 +10,12 @@ function requireValue(name: string, value: string | undefined): string {
   return value;
 }
 
+/** Public API origin (`BONDERY_PUBLIC_API_URL`). No trailing slash. */
+export const API_URL = requireValue(
+  "BONDERY_PUBLIC_API_URL",
+  process.env.BONDERY_PUBLIC_API_URL,
+).replace(/\/+$/, "");
+
 /** Public web app origin (`BONDERY_PUBLIC_WEBAPP_URL`). */
 export const WEBAPP_URL = requireValue(
   "BONDERY_PUBLIC_WEBAPP_URL",

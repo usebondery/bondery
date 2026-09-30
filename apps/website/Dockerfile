@@ -24,6 +24,7 @@ COPY scripts ./scripts
 COPY docs ./docs
 # Placeholder public env vars for build-time static generation only.
 # Runtime injects real BONDERY_PUBLIC_* via deploy/ops Compose.
+ENV BONDERY_PUBLIC_API_URL=https://api.example.com
 ENV BONDERY_PUBLIC_WEBAPP_URL=https://app.example.com
 ENV BONDERY_PUBLIC_WEBSITE_URL=https://example.com
 RUN --mount=type=cache,id=bondery-pnpm-store-v3,target=/pnpm/store,sharing=locked \

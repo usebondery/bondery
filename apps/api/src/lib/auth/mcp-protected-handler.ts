@@ -20,7 +20,14 @@ import { verifyBonderyAccessJwt } from "./verify-access-jwt.js";
 
 export const MCP_CHALLENGE_SCOPES = [MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
 
-function jsonRpcChallenge(error: unknown, resource: string | string[]): Response {
+/**
+ * RFC 9728 + JSON-RPC 401 used when MCP Bearer is missing or invalid.
+ * GET/HEAD `/mcp` and unauthenticated POST share this builder.
+ */
+export function mcpUnauthorizedChallenge(
+  error: unknown,
+  resource: string | string[] = resolveMcpResourceIdentifier(),
+): Response {
   const challenge = createResourceServerChallenge(error, resource, {
     challengeScopes: MCP_CHALLENGE_SCOPES,
   });
@@ -74,14 +81,14 @@ export function createBonderyMcpAuthHandler(
         requiredScopes: [MCP_READ_SCOPE],
       });
     } catch (error) {
-      return jsonRpcChallenge(error, resource);
+      return mcpUnauthorizedChallenge(error, resource);
     }
 
     try {
       return await handler(request, accessTokenClaims);
     } catch (error) {
       if (isInsufficientScopeError(error)) {
-        return jsonRpcChallenge(error, resource);
+        return mcpUnauthorizedChallenge(error, resource);
       }
       throw error;
     }

@@ -1,0 +1,42 @@
+---
+title: "MCP server"
+icon: Bot
+description: Let Claude, Cursor, and other AI assistants look up contacts, brief you before meetings, and log interactions in Bondery.
+---
+
+The Bondery **MCP server** is how AI assistants work in your address book. You stay in Claude or Cursor; they search people you know, summarize history, and — if you allow it — save new contacts and interactions.
+
+It is not a replacement for the [web app](./webapp.mdx) or the [REST API](./api.mdx). Use it when you already live in an assistant and want Bondery on tap.
+
+## What you can ask
+
+| You want to… | Example |
+|---|---|
+| Prepare for a meeting | “Brief me on Alex before our 3pm.” |
+| Find someone | “Who did I meet at the Berlin conference named Priya?” |
+| Stay in touch | “Who is overdue for keep-in-touch this week?” |
+| Capture after a conversation | “Save that I had coffee with Jordan today.” |
+| Organize | “Add Priya to Investors and tag her as a founder.” |
+
+Read-only access covers search and lookup. Creating, updating, or deleting records needs **Full access** on the consent screen. Deletes and sending a contact share email ask you to confirm in the assistant.
+
+## What it will not do
+
+The assistant cannot dump your full address book, merge duplicates, import LinkedIn or Instagram archives, change photos, or manage billing. Those stay in the Bondery app or the [REST API](./api.mdx).
+
+## How to connect
+
+1. In Bondery, open **Settings → AI assistants**
+2. Copy the **MCP URL** (or the **mcp.json** snippet for Cursor)
+3. Add it in Claude Desktop, Cursor, or another MCP client that supports HTTP + OAuth
+4. Sign in with your Bondery account and choose **Read only** or **Full access**
+
+On hosted Bondery the URL is `https://api.usebondery.com/mcp`. Self-hosters use `{apiBaseUrl}/mcp` from the same Settings card.
+
+Assistants authenticate with **OAuth**, not API keys. Setup details, the tool list, and client notes: [Connect AI assistants (MCP)](../bondery/mcp.mdx).
+
+## Related
+
+* [Connect AI assistants (MCP)](../bondery/mcp.mdx) — URL, OAuth, tools, and client setup
+* [Web app](./webapp.mdx) — the full CRM
+* [API](./api.mdx) — REST for scripts and integrations

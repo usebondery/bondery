@@ -1,8 +1,7 @@
+import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
+import { apiUrl } from "@/lib/api-url";
 import websitePackage from "../../../package.json" with { type: "json" };
-
-/** Hosted MCP HTTP endpoint. Self-host instances are not listed in this catalog. */
-const HOSTED_MCP_URL = "https://api.usebondery.com/mcp";
 
 const TOOLS = [
   {
@@ -194,8 +193,7 @@ const TOOLS = [
   },
 ] as const;
 
-export const revalidate = false;
-
+/** Request-time so Docker build placeholders are not frozen into beta/prod catalogs. */
 export function GET() {
   const version = readBuildMetadata().version ?? websitePackage.version;
 
@@ -211,7 +209,7 @@ export function GET() {
       tools: TOOLS,
       transport: {
         type: "http",
-        url: HOSTED_MCP_URL,
+        url: apiUrl(API_ROUTES.MCP),
       },
       version,
     },

@@ -12,11 +12,13 @@ hidden: true
 - API: `GET /contacts/:id/share-preview` lists which contact fields can be included in a share email. `POST /contacts/share` is unchanged.
 - Chat and MCP: `get_contact_linkedin` reads LinkedIn bio, work history, and education already stored for a contact (same payload as `GET /contacts/:id/linkedin-data`).
 - Chat: Contact, group, tag, and interaction lookups use the same API reads as REST and MCP.
+- Website and API: `/.well-known/llms.txt` on the website permanently redirects to `/llms.txt`. `/.well-known/mcp` on the website and API permanently redirects to `{API}/mcp`. Unauthenticated `GET` `/mcp` after that hop still returns 401 with RFC 9728 `WWW-Authenticate` so MCP clients can start OAuth. The website now requires `BONDERY_PUBLIC_API_URL` (ops Compose derives it from `BONDERY_INFRA_API_DOMAIN`).
 
 ### Breaking
 
 - **Better Auth 1.7.6:** Upgraded from 1.7.1. The database migration drops `account.issuer` (Better Auth 1.7.3+ uses `(provider_id, account_id)` again). Hosted and self-hosted instances apply it automatically when the API container starts (`pre_start` / `release-migrate`). Rebuild `@bondery/db` and restart the API after generate so the Prisma client no longer selects `account.issuer`. Deploy the API and webapp together. Do not roll the API image back to 1.7.1 after this migration — social sign-in and account linking require the new schema.
 - **OAuth plugin:** The API authorization server now uses Better Auth `mcp()` (CIMD + RFC 7591 DCR for MCP clients) instead of `oauthProvider()`. Deploy this API build together with the matching webapp. After migrate, OAuth clients store CIMD provenance (`client_discovery_id` and related columns). First-party webapp and Chrome extension clients stay REST-only; they are not MCP clients. DCR is limited to MCP resources and `mcp:*` scopes.
+- **Website `BONDERY_PUBLIC_API_URL`:** The marketing website requires `BONDERY_PUBLIC_API_URL` at runtime so `/.well-known/mcp` and the MCP server card point at the matching API (beta website → beta API). Set `BONDERY_INFRA_API_DOMAIN` on the ops/website Dokploy app (synced like the webapp and website hostnames). Docker and CI builds keep an `api.example.com` placeholder; readiness fails if that placeholder is still set in production.
 
 ### 🐛 Fixed
 
@@ -27,7 +29,8 @@ hidden: true
 - Webapp: Instagram import instructions use nested bullets for Contacts and Followers instead of question marks.
 - Webapp: OAuth consent and Settings → AI assistants describe MCP access as contacts and their data, not only interactions.
 - Webapp: Merge no longer asks which avatar to keep when both contacts have the same photo bytes.
-- API: Logging or updating an interaction now emits the contact's `lastInteraction` to mobile sync, matching other people writes.
+- API: Unauthenticated `GET` and `HEAD` `/mcp` now return the same RFC 9728 OAuth challenge as `POST`, so MCP clients that probe the URL can discover OAuth instead of treating Bondery as a static Bearer server. Origin-root `/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration` on the API host serve the same metadata as the `/auth` issuer documents.
+- Website: `/docs/api/errors` (including per-code pages) and generated OpenAPI pages such as `/docs/api/api-reference/_generated/health/live/get` load in the docs site.
 
 ### 🔄 Changed
 
@@ -40,6 +43,10 @@ hidden: true
 
 ### 📝 Documentation
 
+- Website: The changelog hub is an index of version pages at `/docs/changelog/X.Y.Z` (changelog notes plus a GitHub Release link when that version was tagged). GitHub Releases exist for `1.8.3`, `1.9.0`, `1.9.2`, and production cuts after `1.9.2`.
+- Website: Apps docs include an [MCP server](/docs/apps/mcp-server) page for using Claude, Cursor, and other assistants with your address book. Connection steps stay in [Connect AI assistants (MCP)](/docs/bondery/mcp).
+- Website: API introduction no longer includes a beta disclaimer callout.
+- Website and API: `/api-reference` (and API `/docs/api`) permanently redirect to the website OpenAPI reference at `/docs/api/api-reference`.
 - Contributing: [Inspect the MCP server](/docs/contributing/mcp) — run `pnpm run mcp:inspect` to authorize and call `{API}/mcp` with the 2026-07-28 MCP Inspector. The Inspector catalog is writable so Tools pagination and other session settings persist.
 
 ### 📦 Dependencies

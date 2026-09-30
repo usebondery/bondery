@@ -16,7 +16,7 @@ Examples:
 
 This resembles SemVer syntactically but is not classic semantic versioning. Compatibility and breaking behavior must be described explicitly rather than inferred only from the number.
 
-Named release candidates use SemVer prerelease spelling **`X.Y.Z-rc.N`** (`N >= 1`, never `rc.0`, never `X.Y.Z.rc-N`). RC is a beta channel only: GitHub prerelease + staging zip, GHCR `:X.Y.Z-rc.N` and `:beta`. Dated changelog files (`docs/changelog/releases/X.Y.Z.mdx`) are required for **clean CalVer** production cuts, not for `X.Y.Z-rc.N`. Operator flow: [`bondery-release`](../../bondery-release/SKILL.md).
+Named release candidates use SemVer prerelease spelling **`X.Y.Z-rc.N`** (`N >= 1`, never `rc.0`, never `X.Y.Z.rc-N`). RC is a beta channel only: GitHub prerelease + staging zip, GHCR `:X.Y.Z-rc.N` and `:beta`. Dated changelog files (`docs/changelog/X.Y.Z.mdx`) are required for **clean CalVer** production cuts, not for `X.Y.Z-rc.N`. Operator flow: [`bondery-release`](../../bondery-release/SKILL.md).
 
 ## While work is in flight
 
@@ -28,7 +28,7 @@ Do not create a dated version section for every merge. A dated section represent
 
 1. Calculate `X.Y.Z` from the release year/month and existing releases in that month.
 2. Review all changes since the previous release; add missing notable entries and remove internal noise.
-3. Create [`docs/changelog/releases/X.Y.Z.mdx`](../../../../docs/changelog/releases/) with `title: "X.Y.Z"`, `## [X.Y.Z] - DD.MM.YYYY`, and the accumulated entries; prepend `"X.Y.Z"` to [`docs/changelog/releases/meta.json`](../../../../docs/changelog/releases/meta.json) (newest first).
+3. Create [`docs/changelog/X.Y.Z.mdx`](../../../../docs/changelog/) with `title: "X.Y.Z"`, `## [X.Y.Z] - DD.MM.YYYY`, and the accumulated entries; prepend `"X.Y.Z"` to [`docs/changelog/meta.json`](../../../../docs/changelog/meta.json) (newest first).
 4. Reset [`docs/changelog/unreleased.mdx`](../../../../docs/changelog/unreleased.mdx) to an empty `## [Unreleased]` section with category headings as needed.
 5. Add `Breaking` notes with migration links when applicable.
 6. Complete package version bumps via `pnpm run sync-version`, generated artifacts, builds, extension gates, deployment, and rollback steps via [`bondery-release`](../../bondery-release/SKILL.md). `sync-version` also rewrites `MIN_EXTENSION_VERSION` from the previous production git tag.
@@ -41,7 +41,7 @@ Dependency-only work follows the [Package upgrade workflow](../../../workflows/c
 
 - [ ] Version derives from release year, month, and patch sequence
 - [ ] All notable changes since the previous release were reviewed
-- [ ] Entries moved from `unreleased.mdx` into `releases/X.Y.Z.mdx`; `"X.Y.Z"` prepended to `releases/meta.json`
+- [ ] Entries moved from `unreleased.mdx` into `X.Y.Z.mdx`; `"X.Y.Z"` prepended to `changelog/meta.json`
 - [ ] A clean `Unreleased` section remains in `unreleased.mdx`
 - [ ] Breaking and self-hosting actions are explicit
 - [ ] Full technical release workflow completed separately

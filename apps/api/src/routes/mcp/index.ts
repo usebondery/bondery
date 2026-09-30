@@ -159,6 +159,25 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
   });
 });
 
+const MCP_POST_ONLY_HEADERS = { Allow: "POST" } as const;
+
+/** Authenticated GET/HEAD stay POST-only. Missing/invalid Bearer uses the same 401 as POST. */
+const mcpProbeHandler = createBonderyMcpAuthHandler(async () => {
+  return new Response(null, { headers: MCP_POST_ONLY_HEADERS, status: 405 });
+});
+
+function fetchResponseForMcpProbe(method: string, response: Response): Response {
+  if (method !== "HEAD") {
+    return response;
+  }
+
+  return new Response(null, {
+    headers: response.headers,
+    status: response.status,
+    statusText: response.statusText,
+  });
+}
+
 export const mcpRoutes: AppRoutePlugin = async (fastify) => {
   fastify.post(
     "/",
@@ -172,8 +191,17 @@ export const mcpRoutes: AppRoutePlugin = async (fastify) => {
     },
   );
 
-  fastify.get("/", { schema: { hide: true } }, async (_request, reply) => {
-    return reply.header("Allow", "POST").code(405).send();
+  fastify.route({
+    async handler(request, reply) {
+      const response = fetchResponseForMcpProbe(
+        request.method,
+        await mcpProbeHandler(toFetchRequest(request)),
+      );
+      await sendFetchResponse(request, reply, response);
+    },
+    method: ["GET", "HEAD"],
+    schema: { hide: true },
+    url: "/",
   });
 
   fastify.delete("/", { schema: { hide: true } }, async (_request, reply) => {

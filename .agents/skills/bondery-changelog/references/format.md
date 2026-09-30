@@ -13,7 +13,7 @@ Omit routine implementation details, formatting, test maintenance, and internal 
 
 ## Document structure
 
-In-flight work lives in [`docs/changelog/unreleased.mdx`](../../../../docs/changelog/unreleased.mdx) (`hidden: true`; unpublished; not in `meta.json`). Each shipped release is a page under `docs/changelog/releases/X.Y.Z.mdx` with `title: "X.Y.Z"`, listed newest-first in [`docs/changelog/releases/meta.json`](../../../../docs/changelog/releases/meta.json). The hub at [`docs/changelog/index.mdx`](../../../../docs/changelog/index.mdx) composes Unreleased plus all releases via `ChangelogFeed`.
+In-flight work lives in [`docs/changelog/unreleased.mdx`](../../../../docs/changelog/unreleased.mdx) (`hidden: true`; unpublished; not in `meta.json`). Each shipped release is a page at `docs/changelog/X.Y.Z.mdx` with `title: "X.Y.Z"`, listed newest-first in [`docs/changelog/meta.json`](../../../../docs/changelog/meta.json). The hub at [`docs/changelog/index.mdx`](../../../../docs/changelog/index.mdx) lists version pages (changelog + GitHub Release when the tag exists); it does not inline every release.
 
 Keep this order within each partial:
 
@@ -25,7 +25,7 @@ Keep this order within each partial:
 - Webapp: Describe the outcome in user language.
 ```
 
-Shipped releases use the same category layout under `## [1.8.0] - 12.08.2026` in `docs/changelog/releases/1.8.0.mdx`.
+Shipped releases use the same category layout under `## [1.8.0] - 12.08.2026` in `docs/changelog/1.8.0.mdx`.
 
 - `Unreleased` remains first even when empty.
 - Dated versions are newest first.

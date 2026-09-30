@@ -404,7 +404,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     group: "Public URLs",
     requiredIn: ["development", "production"],
     secret: false,
-    targets: [t("api"), t("webapp"), t("chrome-extension"), t("mobile")],
+    targets: [t("api"), t("webapp"), t("website"), t("chrome-extension"), t("mobile")],
   },
   {
     canonical: "BONDERY_PUBLIC_WEBAPP_URL",
@@ -711,8 +711,14 @@ export const ENV_MANIFEST: EnvVarDef[] = [
       value: "api.usebondery.com",
     },
     description: "Public API hostname for Traefik Host() rules (no scheme).",
+    dokploySync: { targets: ["website", "services"] },
     exampleValue: "api.usebondery.com",
     group: "Infra",
+    opsExample: {
+      group: "Public hostnames",
+      include: true,
+      value: "api.usebondery.com",
+    },
     requiredIn: ["production"],
     secret: false,
     targets: [],

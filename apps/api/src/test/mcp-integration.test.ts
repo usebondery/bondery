@@ -269,9 +269,33 @@ describe("MCP HTTP endpoint", () => {
     }
   });
 
-  it("rejects GET and DELETE with 405", async () => {
-    const get = await app.inject({ method: "GET", url: "/mcp" });
-    assert.equal(get.statusCode, 405);
+  it("rejects unauthenticated GET and HEAD with RFC 9728, authenticated GET with 405, DELETE with 405", async () => {
+    for (const method of ["GET", "HEAD"] as const) {
+      const unauthenticated = await app.inject({ method, url: "/mcp" });
+      assert.equal(unauthenticated.statusCode, 401, method);
+      assert.ok(
+        String(unauthenticated.headers["www-authenticate"] ?? "").includes("resource_metadata"),
+        method,
+      );
+      assert.match(String(unauthenticated.headers["content-type"] ?? ""), /application\/json/);
+      if (method === "HEAD") {
+        assert.equal(unauthenticated.body, "");
+      } else {
+        assert.ok(unauthenticated.body.includes("jsonrpc"));
+      }
+    }
+
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    const accessToken = await mintMcpToken(app, await createNativeSession(user.id));
+    const authenticatedGet = await app.inject({
+      headers: { authorization: `Bearer ${accessToken}` },
+      method: "GET",
+      url: "/mcp",
+    });
+    assert.equal(authenticatedGet.statusCode, 405);
+    assert.equal(authenticatedGet.headers.allow, "POST");
+
     const del = await app.inject({ method: "DELETE", url: "/mcp" });
     assert.equal(del.statusCode, 405);
   });

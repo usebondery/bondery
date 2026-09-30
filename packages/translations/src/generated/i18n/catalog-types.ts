@@ -2032,10 +2032,10 @@ export type SettingsPageCatalog = {
     PermissionReadDescription: string;
     PermissionReadLabel: string;
     RevokeButton: string;
-    RevokeTooltip: string;
     RevokeConfirm: string;
     RevokeMessage: string;
     RevokeTitle: string;
+    RevokeTooltip: string;
     Title: string;
   };
   ApiKeys: {
@@ -2047,7 +2047,6 @@ export type SettingsPageCatalog = {
     CreateErrorTitle: string;
     CreateTitle: string;
     DeleteButton: string;
-    RevokeTooltip: string;
     DeleteMessage: string;
     DeleteTitle: string;
     Description: string;
@@ -2073,6 +2072,7 @@ export type SettingsPageCatalog = {
     PermissionReadLabel: string;
     RevealAlertDescription: string;
     RevealAlertTitle: string;
+    RevokeTooltip: string;
     SaveButton: string;
     SecretCodeLabel: string;
     TestRequestLabel: string;

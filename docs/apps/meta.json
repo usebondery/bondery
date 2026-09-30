@@ -1,5 +1,5 @@
 {
   "icon": "MonitorSmartphone",
-  "pages": ["webapp", "chrome-extension", "mobile-app", "api"],
+  "pages": ["webapp", "chrome-extension", "mobile-app", "mcp-server", "api"],
   "title": "Apps"
 }

@@ -44,7 +44,7 @@ There are **no** `website-X.Y.Z` release tags. Pin `BONDERY_INFRA_WEBSITE_IMAGE_
 ```bash
 cd deploy/ops
 cp .env.example .env   # generated from manifest (opsExample metadata)
-# Set BONDERY_INFRA_WEBAPP_DOMAIN + BONDERY_INFRA_WEBSITE_DOMAIN
+# Set BONDERY_INFRA_API_DOMAIN + BONDERY_INFRA_WEBAPP_DOMAIN + BONDERY_INFRA_WEBSITE_DOMAIN
 docker compose up -d
 ```
 

@@ -30,7 +30,7 @@ Roadmap cards stay in **Ready for Release** until production deploy is confirmed
 When [`bondery-release` operator checklist](../../bondery-release/SKILL.md) passes (CI smoke green, manual smoke on product stack):
 
 - Matching **Ready for Release** cards → **Released**
-- Add comment with link to release changelog: `https://usebondery.com/docs/changelog` (or anchor to `X.Y.Z` section when available)
+- Add comment with link to that version's changelog: `https://usebondery.com/docs/changelog/X.Y.Z`
 - Items that slipped: leave in Ready for Release or revert to Building with an honest comment — do not mark Released
 
 ## 4. Monthly groom

@@ -57,9 +57,9 @@ Lead with the reader's goal. A user page explains *what to do*; a contributor pa
 
 ### Changelog partials (`docs/changelog/`)
 
-- **In-flight entries** — edit [`docs/changelog/unreleased.mdx`](../../changelog/unreleased.mdx) (`title: "Release notes for next version update"`, `hidden: true`; unpublished; not in `meta.json`).
-- **Shipped releases** — one file per version under `docs/changelog/releases/X.Y.Z.mdx` (`title: "X.Y.Z"`), listed newest-first in [`docs/changelog/releases/meta.json`](../../changelog/releases/meta.json).
-- **Hub page** — [`docs/changelog/index.mdx`](../../changelog/index.mdx) at `/docs/changelog` composes Unreleased plus all releases via `ChangelogFeed`; do not add manual imports per release.
+- **In-flight entries** — edit [`docs/changelog/unreleased.mdx`](../../changelog/unreleased.mdx) (`hidden: true`; unpublished; not in `meta.json`).
+- **Shipped releases** — one file per version at [`docs/changelog/X.Y.Z.mdx`](../../changelog/1.9.2.mdx) (`title: "X.Y.Z"`), listed newest-first in [`docs/changelog/meta.json`](../../changelog/meta.json). Public URL is `/docs/changelog/X.Y.Z`.
+- **Hub page** — [`docs/changelog/index.mdx`](../../changelog/index.mdx) at `/docs/changelog` is an index of version pages (changelog + GitHub Release when the tag exists). Do not inline every release on the hub.
 
 ### Architecture decision records (`docs/adr/`)
 
@@ -101,7 +101,7 @@ Sidebar icons help readers scan the tree. Use [Lucide](https://lucide.dev) names
 | **Top-level folders** (`meta.json`) | One `icon` per section | Guides → `BookOpen`, API → `Webhook` |
 | **Core concepts** (`docs/concepts/`) | `icon` on every page — maps to a product entity | `people.mdx` → `User` |
 | **Product guides** (`docs/bondery/`, `docs/apps/`) | `icon` on user-facing task pages | Extension → `Puzzle`, Mobile → `Smartphone` |
-| **Welcome & changelog** | `icon` on index pages | Welcome → `House`, Changelog → `History` |
+| **Welcome & changelog** | `icon` on index pages | Welcome → `House`, Changelog → `RotateCcwClock` (Lucide 1.43 renamed `History`) |
 | **Self-hosting** (`docs/deploy/`) | `icon` on every page | Requirements → `Server`, Installation → `Download` |
 | **Contributing** | Folder or page `icon` where it helps scan | Environment → `Settings`, Local setup → `Terminal` |
 | **API reference** | Folder + overview pages only; OpenAPI operation pages inherit tag grouping | Auth → `Key` |

@@ -15,11 +15,7 @@ import {
   isVersionBelow,
   MIN_EXTENSION_VERSION,
 } from "@bondery/helpers";
-import {
-  BETTER_AUTH_BASE_PATH,
-  betterAuthAuthorizationServerMetadataPath,
-  betterAuthProtectedResourceMetadataPaths,
-} from "@bondery/helpers/globals/paths";
+import { BETTER_AUTH_BASE_PATH, publicOAuthDiscoveryPaths } from "@bondery/helpers/globals/paths";
 import { getErrorDocUrl } from "@bondery/schemas/errors";
 import { URLS } from "../platform/config.js";
 import { unauthorized } from "../platform/errors/http-errors.js";
@@ -34,7 +30,9 @@ function isPublicInfraPath(url: string): boolean {
   return (
     path.startsWith("/health/") ||
     path === "/extension/manifest" ||
-    path === API_ROUTES.OAUTH_PROVIDERS
+    path === API_ROUTES.OAUTH_PROVIDERS ||
+    path === API_ROUTES.API_REFERENCE ||
+    path === API_ROUTES.DOCS_API
   );
 }
 
@@ -43,17 +41,15 @@ function isPublicAuthPath(url: string): boolean {
   if (
     path === BETTER_AUTH_BASE_PATH ||
     path.startsWith(`${BETTER_AUTH_BASE_PATH}/`) ||
-    path === betterAuthAuthorizationServerMetadataPath()
+    publicOAuthDiscoveryPaths().includes(path) ||
+    path === API_ROUTES.WELL_KNOWN_MCP ||
+    path === `${API_ROUTES.WELL_KNOWN_MCP}/`
   ) {
     return true;
   }
 
-  // Unauthenticated MCP clients start OAuth from POST /mcp (401 + RFC 9728).
-  if (path === API_ROUTES.MCP || path.startsWith(`${API_ROUTES.MCP}/`)) {
-    return true;
-  }
-
-  return betterAuthProtectedResourceMetadataPaths().includes(path);
+  // Unauthenticated MCP clients start OAuth from GET/HEAD/POST /mcp (401 + RFC 9728).
+  return path === API_ROUTES.MCP || path.startsWith(`${API_ROUTES.MCP}/`);
 }
 
 function isPublicWebhookPath(url: string): boolean {

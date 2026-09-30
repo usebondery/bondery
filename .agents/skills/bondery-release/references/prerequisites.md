@@ -36,7 +36,7 @@ The public manifest `latestVersion` is the current **production** CalVer (root v
 
 ## 3. Product changelog (production only)
 
-Cut the changelog per [`bondery-changelog` versioning](../../bondery-changelog/references/versioning-and-release.md): create `docs/changelog/releases/X.Y.Z.mdx`, prepend `"X.Y.Z"` to `docs/changelog/releases/meta.json`, and reset `docs/changelog/unreleased.mdx`. Follow [`bondery-changelog` format](../../bondery-changelog/references/format.md).
+Cut the changelog per [`bondery-changelog` versioning](../../bondery-changelog/references/versioning-and-release.md): create `docs/changelog/X.Y.Z.mdx`, prepend `"X.Y.Z"` to `docs/changelog/meta.json`, and reset `docs/changelog/unreleased.mdx`. Follow [`bondery-changelog` format](../../bondery-changelog/references/format.md).
 
 RC cuts on `chore/release-*` must **not** require `X.Y.Z-rc.N.mdx`.
 
@@ -88,7 +88,7 @@ Production releases use unified `vX.Y.Z` tags only (`release.yml`). RC tags use 
 
 - [ ] `pnpm run sync-version` and `pnpm run check:versions` pass
 - [ ] `MIN_EXTENSION_VERSION` is previous production (from `sync-version`), not hand-edited
-- [ ] Production: `docs/changelog/releases/X.Y.Z.mdx` created; `"X.Y.Z"` prepended to `docs/changelog/releases/meta.json`; fresh `Unreleased` in `unreleased.mdx`
+- [ ] Production: `docs/changelog/X.Y.Z.mdx` created; `"X.Y.Z"` prepended to `docs/changelog/meta.json`; fresh `Unreleased` in `unreleased.mdx`
 - [ ] OpenAPI generated and committed
 - [ ] `pnpm run build` (or verification loop) passes
 - [ ] Changes merged on `main`

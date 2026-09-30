@@ -11,10 +11,9 @@ import { createRelativeLink } from "fumadocs-ui/mdx";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { OpenAPIPage } from "@/components/api-page";
-import { ChangelogFeed } from "@/components/changelog-feed";
 import { getMDXComponents } from "@/components/mdx";
 import {
-  getChangelogMergedToc,
+  getChangelogIndexToc,
   isChangelogIndexSlug,
   isUnpublishedChangelogSlug,
 } from "@/lib/changelog";
@@ -43,7 +42,7 @@ export default async function DocPage(props: PageProps) {
   const lastEdit = page.data.lastModified ? new Date(page.data.lastModified) : null;
   const markdownUrl = getPageMarkdownUrl(page);
   const githubUrl = getDocsGithubUrl(page);
-  const toc = isChangelogIndexSlug(slug) ? getChangelogMergedToc() : page.data.toc;
+  const toc = isChangelogIndexSlug(slug) ? getChangelogIndexToc() : page.data.toc;
 
   return (
     <DocsPage full={page.data.full} toc={toc}>
@@ -59,9 +58,8 @@ export default async function DocPage(props: PageProps) {
         <MDX
           components={getMDXComponents({
             a: createRelativeLink(source, page),
-            ChangelogFeed: () => <ChangelogFeed page={page} />,
             OpenAPIPage: async (openApiProps) => (
-              <OpenAPIPage {...(await openapi.preloadOpenAPIPage(page))} {...openApiProps} />
+              <OpenAPIPage {...openApiProps} {...(await openapi.preloadOpenAPIPage(page))} />
             ),
           })}
         />

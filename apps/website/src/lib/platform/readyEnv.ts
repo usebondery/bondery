@@ -25,6 +25,7 @@ function requireRuntimeUrl(name: string): string {
 
 /** Throws if website public URLs are missing or still Docker build placeholders. */
 export function validateWebsiteRuntimeEnv(): void {
+  requireRuntimeUrl("BONDERY_PUBLIC_API_URL");
   requireRuntimeUrl("BONDERY_PUBLIC_WEBAPP_URL");
   requireRuntimeUrl("BONDERY_PUBLIC_WEBSITE_URL");
 }

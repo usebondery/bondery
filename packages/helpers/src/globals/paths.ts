@@ -7,43 +7,94 @@ export function betterAuthPath(segment: string): string {
   return `${BETTER_AUTH_BASE_PATH}${suffix}`;
 }
 
+const OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH =
+  "/.well-known/oauth-authorization-server" as const;
+const OPENID_CONFIGURATION_WELL_KNOWN_PATH = "/.well-known/openid-configuration" as const;
+
 /** RFC 8414 authorization-server metadata document for the configured base path. */
 export function betterAuthAuthorizationServerMetadataPath(): string {
-  return `/.well-known/oauth-authorization-server${BETTER_AUTH_BASE_PATH}`;
+  return `${OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH}${BETTER_AUTH_BASE_PATH}`;
+}
+
+/**
+ * RFC 8414 documents: path-inserted canonical plus origin-root alias.
+ * Same JSON; headless clients often probe the origin-root URL.
+ */
+export function betterAuthAuthorizationServerMetadataPaths(): string[] {
+  return [betterAuthAuthorizationServerMetadataPath(), OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH];
+}
+
+/** OIDC discovery document under the Better Auth base path. */
+export function betterAuthOpenIdConfigurationPath(): string {
+  return betterAuthPath(OPENID_CONFIGURATION_WELL_KNOWN_PATH);
+}
+
+/**
+ * OIDC discovery documents: `/auth` canonical plus origin-root and
+ * path-inserted aliases for issuer `{API}/auth`.
+ */
+export function betterAuthOpenIdConfigurationPaths(): string[] {
+  return [
+    betterAuthOpenIdConfigurationPath(),
+    OPENID_CONFIGURATION_WELL_KNOWN_PATH,
+    `${OPENID_CONFIGURATION_WELL_KNOWN_PATH}${BETTER_AUTH_BASE_PATH}`,
+  ];
 }
 
 /** RFC 9728 protected-resource metadata (root document). */
 export const BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH =
   "/.well-known/oauth-protected-resource" as const;
 
+function betterAuthResourcePath(resourcePath: string): string {
+  return resourcePath.startsWith("/") ? resourcePath.replace(/\/+$/, "") : `/${resourcePath}`;
+}
+
 /**
- * RFC 9728 paths Better Auth `mcp()` serves: the root document plus the
- * path-inserted document for `{resourcePath}` (default `/mcp`).
+ * RFC 9728 paths: Better Auth `mcp()` root + path-inserted documents, plus the
+ * `{resourcePath}/.well-known/oauth-protected-resource` concatenation some
+ * clients build from the MCP URL.
  */
 export function betterAuthProtectedResourceMetadataPaths(resourcePath = "/mcp"): string[] {
-  const inserted = resourcePath.startsWith("/")
-    ? resourcePath.replace(/\/+$/, "")
-    : `/${resourcePath}`;
+  const inserted = betterAuthResourcePath(resourcePath);
   return [
     BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH,
     `${BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH}${inserted}`,
+    `${inserted}${BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH}`,
+  ];
+}
+
+/**
+ * Every public OAuth/OIDC discovery path (canonical + aliases). Keep Fastify
+ * routes and the unauthenticated allowlist in lockstep via this list.
+ */
+export function publicOAuthDiscoveryPaths(): string[] {
+  return [
+    ...betterAuthAuthorizationServerMetadataPaths(),
+    ...betterAuthOpenIdConfigurationPaths(),
+    ...betterAuthProtectedResourceMetadataPaths(),
   ];
 }
 
 export const WEBSITE_ROUTES = {
   ABOUT: "/about",
+  API_REFERENCE: "/api-reference",
   APP_GROUP: "/app",
   BLOG: "/blog",
   CONTACT: "/contact",
   DOCS: "/docs",
+  DOCS_API_REFERENCE: "/docs/api/api-reference",
   HOME: "/",
+  LLMS_TXT: "/llms.txt",
   LOGIN: "/login",
   PRIVACY: "/privacy",
   SECURITY: "/security",
   TERMS: "/terms",
+  WELL_KNOWN_LLMS_TXT: "/.well-known/llms.txt",
+  WELL_KNOWN_MCP: "/.well-known/mcp",
 };
 
 export const API_ROUTES = {
+  API_REFERENCE: "/api-reference",
   CHAT: "/chat",
   CHAT_SESSIONS: "/chat/sessions",
   CONTACTS: "/contacts",
@@ -62,6 +113,7 @@ export const API_ROUTES = {
   CONTACTS_SELECT: "/contacts/select",
   CONTACTS_SHARE: "/contacts/share",
   CONTACTS_UPCOMING_REMINDERS: "/contacts/important-dates/upcoming",
+  DOCS_API: "/docs/api",
   EXTENSION: "/extension",
   GEOCODE: "/geocode",
   GEOCODE_SUGGEST: "/geocode/suggest",
@@ -97,6 +149,7 @@ export const API_ROUTES = {
   SYNC_WS_TICKET: "/sync/ws-ticket",
   TAGS: "/tags",
   WEBHOOKS_STRIPE: "/webhooks/stripe",
+  WELL_KNOWN_MCP: "/.well-known/mcp",
 } as const;
 
 /** Browser-facing BFF path on the webapp origin (`/api/...`). */

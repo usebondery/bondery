@@ -4,7 +4,7 @@ Run only after technical deploy is confirmed (CI smoke green, Dokploy healthy, m
 
 ## Monthly product release
 
-1. **Blog post** — follow [`.agents/workflows/blog/BLOG-POST.md`](../../../workflows/blog/BLOG-POST.md). Use the curated `docs/changelog/releases/X.Y.Z.mdx` section as source material; do not paste raw commit logs.
+1. **Blog post** — follow [`.agents/workflows/blog/BLOG-POST.md`](../../../workflows/blog/BLOG-POST.md). Use the curated `docs/changelog/X.Y.Z.mdx` section as source material; do not paste raw commit logs.
 
 2. **Community announce** — Discord and Reddit via the announce CLI (`pnpm` script in website package — see blog workflow).
 
