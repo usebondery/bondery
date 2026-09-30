@@ -522,6 +522,7 @@
       "dependsOn": ["^build", "website#generate:api-docs"],
       "env": [
         "BONDERY_INFRA_GIT_SHA",
+        "BONDERY_PUBLIC_API_URL",
         "BONDERY_PUBLIC_PLAUSIBLE_DOMAIN",
         "BONDERY_PUBLIC_PLAUSIBLE_HOST",
         "BONDERY_PUBLIC_WEBAPP_URL",
@@ -562,6 +563,7 @@
       "dependsOn": ["website#generate:api-docs"],
       "env": [
         "BONDERY_INFRA_GIT_SHA",
+        "BONDERY_PUBLIC_API_URL",
         "BONDERY_PUBLIC_PLAUSIBLE_DOMAIN",
         "BONDERY_PUBLIC_PLAUSIBLE_HOST",
         "BONDERY_PUBLIC_WEBAPP_URL",

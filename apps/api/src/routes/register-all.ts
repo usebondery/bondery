@@ -6,6 +6,7 @@
 
 import { API_ROUTES } from "@bondery/helpers";
 import { registerOAuthProvidersRoutes } from "../lib/auth/oauth-providers-routes.js";
+import { registerDocsRedirectRoutes } from "../lib/docs/redirect-routes.js";
 import { registerHealthRoutes } from "../lib/health/routes.js";
 import type { AppFastifyInstance, AppRoutePlugin } from "../lib/platform/fastify-types.js";
 import {
@@ -126,6 +127,7 @@ const ROUTE_MOUNTS: RouteMount[] = [
 
 export async function registerAllRoutes(fastify: AppFastifyInstance): Promise<void> {
   registerHealthRoutes(fastify);
+  registerDocsRedirectRoutes(fastify);
   registerOAuthProvidersRoutes(fastify);
 
   for (const { area, plugin, prefix } of ROUTE_MOUNTS) {

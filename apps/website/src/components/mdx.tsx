@@ -5,6 +5,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import type { MDXComponents } from "mdx/types";
 import { OpenAPIPage } from "@/components/api-page";
+import { ChangelogIndex } from "@/components/changelog-index";
 import { ApiErrorsIndex } from "@/components/docs/api-errors-index";
 import { BonderyRepo } from "@/components/docs/bondery-repo";
 import { RepoStructureFiles } from "@/components/docs/repo-structure-files";
@@ -16,6 +17,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Accordions,
     ApiErrorsIndex,
     BonderyRepo,
+    ChangelogIndex,
     File,
     Files,
     Folder,

@@ -394,7 +394,7 @@ jobs:
 
           ## What's new?
 
-          [Changelog ${VERSION}](https://usebondery.com/docs/changelog/releases/${VERSION})
+          [Changelog ${VERSION}](https://usebondery.com/docs/changelog/${VERSION})
           EOF
             if [ -n "$RETRY_NOTE" ]; then
               printf '\n%s\n' "$RETRY_NOTE" >> "$BODY_FILE"

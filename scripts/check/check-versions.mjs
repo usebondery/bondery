@@ -71,8 +71,8 @@ function assertNoLegacyImageTagEnv() {
 }
 
 function checkReleaseChangelog(version) {
-  const changelogPath = join(root, `docs/changelog/releases/${version}.mdx`);
-  const metaPath = join(root, "docs/changelog/releases/meta.json");
+  const changelogPath = join(root, `docs/changelog/${version}.mdx`);
+  const metaPath = join(root, "docs/changelog/meta.json");
   // biome-ignore lint/suspicious/noUndeclaredEnvVars: GitHub Actions PR metadata only
   const branch = process.env.GITHUB_HEAD_REF ?? "";
   const isReleaseBranch = branch.startsWith("chore/release-");
@@ -83,14 +83,14 @@ function checkReleaseChangelog(version) {
 
   if (!existsSync(changelogPath)) {
     if (isReleaseBranch) {
-      fail(`Release branch ${branch} requires docs/changelog/releases/${version}.mdx`);
+      fail(`Release branch ${branch} requires docs/changelog/${version}.mdx`);
     }
     return;
   }
 
   if (!existsSync(metaPath)) {
     if (isReleaseBranch) {
-      fail(`Release branch ${branch} requires docs/changelog/releases/meta.json`);
+      fail(`Release branch ${branch} requires docs/changelog/meta.json`);
     }
     return;
   }
@@ -99,11 +99,11 @@ function checkReleaseChangelog(version) {
   const pages = meta.pages ?? [];
 
   if (!pages.includes(version)) {
-    fail(`docs/changelog/releases/meta.json must list ${version} in pages`);
+    fail(`docs/changelog/meta.json must list ${version} in pages`);
   }
 
   if (pages[0] !== version) {
-    fail(`docs/changelog/releases/meta.json must list ${version} first (newest first)`);
+    fail(`docs/changelog/meta.json must list ${version} first (newest first)`);
   }
 }
 

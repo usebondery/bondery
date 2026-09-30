@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import { isUnpublishedChangelogSlug } from "@/lib/changelog";
 import { getLLMText } from "@/lib/get-llm-text";
 import { source } from "@/lib/source";
 
@@ -20,7 +21,12 @@ function normalizeMarkdownSlug(slug?: string[]): string[] | undefined {
 
 export async function GET(_req: Request, { params }: RouteContext) {
   const { slug } = await params;
-  const page = source.getPage(normalizeMarkdownSlug(slug));
+  const normalized = normalizeMarkdownSlug(slug);
+  if (isUnpublishedChangelogSlug(normalized)) {
+    notFound();
+  }
+
+  const page = source.getPage(normalized);
   if (!page) {
     notFound();
   }
@@ -33,7 +39,10 @@ export async function GET(_req: Request, { params }: RouteContext) {
 }
 
 export function generateStaticParams() {
-  return source.getPages().map((page) => ({
-    slug: page.slugs,
-  }));
+  return source
+    .getPages()
+    .filter((page) => !isUnpublishedChangelogSlug(page.slugs))
+    .map((page) => ({
+      slug: page.slugs,
+    }));
 }

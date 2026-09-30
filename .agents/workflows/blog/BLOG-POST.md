@@ -150,7 +150,7 @@ Plan: show a one-time popup or banner inside the webapp when users log in after 
 
 When writing the blog post for a monthly release:
 
-1. Pull the new features and fixes from [`docs/changelog/releases/X.Y.Z.mdx`](../../docs/changelog/releases/) for the version
+1. Pull the new features and fixes from [`docs/changelog/X.Y.Z.mdx`](../../docs/changelog/) for the version
 2. Write the post following [WRITING-GUIDE.md](WRITING-GUIDE.md) — focus on *what's new for users*, not internal changes
 3. Set `announce.enabled: true` in metadata
 4. Deploy: merge to `main`, then `git push origin main:release` (website CD — see [Deploy](#3-deploy))

@@ -32,6 +32,18 @@ User → client (webapp / mobile / extension)
 
 OAuth clients are **not** registered through a UI or a logged-in session. `apps/api/src/lib/bootstrap/provision-oauth-clients.ts` upserts first-party clients in Postgres from env vars. It runs automatically after migrations in CI (`pnpm run release-migrate`) and self-host deploys (`api` `pre_start` → `release-migrate` CLI).
 
+## OAuth discovery (API origin)
+
+These well-known documents live on the **API** host (`BONDERY_PUBLIC_API_URL`), not the website. Issuer identity stays `{API}/auth`. Canonical and alias URLs return the same JSON (HTTP 200, no redirect).
+
+| Kind | Canonical | Compatibility aliases |
+| --- | --- | --- |
+| Authorization server (RFC 8414) | `/.well-known/oauth-authorization-server/auth` | `/.well-known/oauth-authorization-server` |
+| OpenID configuration | `/auth/.well-known/openid-configuration` | `/.well-known/openid-configuration`, `/.well-known/openid-configuration/auth` |
+| Protected resource (RFC 9728) | `/.well-known/oauth-protected-resource/mcp` | `/.well-known/oauth-protected-resource`, `/mcp/.well-known/oauth-protected-resource` |
+
+Unauthenticated `GET`/`HEAD` `/mcp` return the same RFC 9728 `WWW-Authenticate` challenge as `POST`. Authorize, token, and registration endpoints stay under `/auth`. Website and API `/.well-known/mcp` are HTTP 308 pointers to `{API}/mcp`, not OAuth metadata (those documents stay in the table above).
+
 ## Local bootstrap
 
 <Steps>

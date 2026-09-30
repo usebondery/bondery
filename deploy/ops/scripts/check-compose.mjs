@@ -61,6 +61,11 @@ if (website) {
       "website must publish a unique dokploy-network alias from BONDERY_INFRA_TRAEFIK_PREFIX",
     );
   }
+  if (!/BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/.test(website)) {
+    errors.push(
+      "website must derive BONDERY_PUBLIC_API_URL from https:// + BONDERY_INFRA_API_DOMAIN",
+    );
+  }
   if (!/BONDERY_PUBLIC_WEBAPP_URL:\s*https:\/\/\$\{BONDERY_INFRA_WEBAPP_DOMAIN/.test(website)) {
     errors.push(
       "website must derive BONDERY_PUBLIC_WEBAPP_URL from https:// + BONDERY_INFRA_WEBAPP_DOMAIN",

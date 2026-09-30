@@ -15,6 +15,7 @@ import {
 
 describe("sync-infisical-to-dokploy", () => {
   const websiteEnv = {
+    BONDERY_INFRA_API_DOMAIN: "api.usebondery.com",
     BONDERY_INFRA_PLAUSIBLE_DOMAIN: "plausible.usebondery.com",
     BONDERY_INFRA_WEBAPP_DOMAIN: "app.usebondery.com",
     BONDERY_INFRA_WEBSITE_DOMAIN: "usebondery.com",
@@ -89,6 +90,7 @@ describe("sync-infisical-to-dokploy", () => {
     const { uploadKeys } = buildUploadPayload(env, "website");
 
     assert.deepEqual(uploadKeys, [
+      "BONDERY_INFRA_API_DOMAIN",
       "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
       "BONDERY_INFRA_WEBAPP_DOMAIN",
       "BONDERY_INFRA_WEBSITE_DOMAIN",
@@ -107,6 +109,7 @@ describe("sync-infisical-to-dokploy", () => {
     const { uploadKeys } = buildUploadPayload(env, "website");
 
     assert.deepEqual(uploadKeys, [
+      "BONDERY_INFRA_API_DOMAIN",
       "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
       "BONDERY_INFRA_TRAEFIK_PREFIX",
       "BONDERY_INFRA_WEBAPP_DOMAIN",
@@ -123,6 +126,7 @@ describe("sync-infisical-to-dokploy", () => {
     const { uploadKeys } = buildUploadPayload(env, "website");
 
     assert.deepEqual(uploadKeys, [
+      "BONDERY_INFRA_API_DOMAIN",
       "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
       "BONDERY_INFRA_WEBAPP_DOMAIN",
       "BONDERY_INFRA_WEBSITE_DOMAIN",
@@ -252,6 +256,7 @@ describe("sync-infisical-to-dokploy", () => {
   it("buildOpsUploadPayload remains an alias for website target", () => {
     const { uploadKeys } = buildOpsUploadPayload(websiteEnv);
     assert.deepEqual(uploadKeys, [
+      "BONDERY_INFRA_API_DOMAIN",
       "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
       "BONDERY_INFRA_WEBAPP_DOMAIN",
       "BONDERY_INFRA_WEBSITE_DOMAIN",
@@ -259,6 +264,7 @@ describe("sync-infisical-to-dokploy", () => {
   });
 
   for (const missingKey of [
+    "BONDERY_INFRA_API_DOMAIN",
     "BONDERY_INFRA_WEBAPP_DOMAIN",
     "BONDERY_INFRA_WEBSITE_DOMAIN",
     "BONDERY_INFRA_PLAUSIBLE_DOMAIN",

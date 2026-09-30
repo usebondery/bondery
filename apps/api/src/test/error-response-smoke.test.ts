@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { API_ROUTES } from "@bondery/helpers";
+import { API_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers";
 import { loadTestEnv } from "./load-test-env.js";
 
 describe("error response smoke", () => {
@@ -18,6 +18,38 @@ describe("error response smoke", () => {
     assert.ok(body.error.message);
     assert.ok(body.error.request_id);
     assert.match(body.error.doc_url, /\/docs\/api\/errors\/auth_required$/);
+    await app.close();
+  });
+
+  it("redirects GET /api-reference and /docs/api to the website OpenAPI reference", async () => {
+    loadTestEnv();
+
+    const { createTestApp } = await import("./create-test-app.js");
+    const app = await createTestApp();
+    const expected = `${process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(/\/+$/, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
+
+    for (const url of [API_ROUTES.API_REFERENCE, API_ROUTES.DOCS_API]) {
+      for (const method of ["GET", "HEAD"] as const) {
+        const response = await app.inject({ method, url });
+        assert.equal(response.statusCode, 308, `${method} ${url}`);
+        assert.equal(response.headers.location, expected, `${method} ${url}`);
+      }
+    }
+
+    await app.close();
+  });
+
+  it("redirects unauthenticated GET /.well-known/mcp to /mcp", async () => {
+    loadTestEnv();
+
+    const { createTestApp } = await import("./create-test-app.js");
+    const app = await createTestApp();
+    const response = await app.inject({
+      method: "GET",
+      url: API_ROUTES.WELL_KNOWN_MCP,
+    });
+    assert.equal(response.statusCode, 308);
+    assert.match(String(response.headers.location ?? ""), /\/mcp$/);
     await app.close();
   });
 

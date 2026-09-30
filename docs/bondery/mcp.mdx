@@ -16,6 +16,8 @@ docId: bondery.mcp
 
 On hosted Bondery that URL is `https://api.usebondery.com/mcp`. On a self-hosted instance it is `{apiBaseUrl}/mcp` — the same API origin your Settings page already uses. Do not paste the hosted URL into a self-hosted client.
 
+Website `/.well-known/mcp` permanently redirects (HTTP 308) to `{API}/mcp` in one hop. The API origin also serves `/.well-known/mcp` → `/mcp`. That path is a convenience pointer, not MCP spec and not RFC 8414 — it does not return OAuth JSON. After `curl -L`, an unauthenticated `GET` `/mcp` is `401` with RFC 9728 `WWW-Authenticate` so the client can start OAuth.
+
 ## What the assistant can do
 
 Tool names use **create, get, update, delete, search** — the same verbs as REST, plus `search_` for free-text lookup. Collection reads that are not a search stay `get_*` with filters. History writes are `create_*`, not `log_*`.
@@ -122,8 +124,6 @@ MCP clients never receive REST `api:access`.
 
 Add a custom connector (or `mcpServers` entry) that points at the MCP URL from Settings. When Claude starts the OAuth flow, sign in on Bondery’s login page and approve access. Use **Read only** unless the assistant needs to create or update records.
 
-Headless setups (for example Hermes on a VPS with no browser) cannot complete this OAuth flow yet. Device authorization is not available in this version.
-
 ## Cursor
 
 Copy the **mcp.json** snippet from Settings (or add this to `.cursor/mcp.json` / `~/.cursor/mcp.json`):
@@ -147,11 +147,14 @@ Cursor’s current HTTP client still negotiates MCP `2025-11-25`. After you appr
 
 Any MCP client that supports HTTP + OAuth 2.1 with PKCE can use the same URL. Claude Desktop uses Client ID Metadata Documents (CIMD). Cursor uses RFC 7591 dynamic client registration. Both stay limited to MCP tools (`mcp:read` / `mcp:write`); they cannot call the REST API.
 
+Headless clients (for example Hermes) discover OAuth from `HEAD` or `GET` `/mcp`. Unauthenticated probes return RFC 9728 `WWW-Authenticate` so the client can start the authorization-server metadata flow. Configure `auth: oauth` (or the client's equivalent), not a REST API key. Device authorization is not offered; sign-in still uses the browser PKCE flow. If a client probes `/.well-known/mcp` on the website or API, follow the 308 to `/mcp` and expect that same OAuth challenge — not metadata JSON.
+
 ## Revoke access
 
 Settings → AI assistants lists assistants you have approved. Revoke a row to stop new access for that assistant. Existing access tokens stay valid until they expire. Tokens are never shown. You can reconnect later by approving the client again.
 
 ## Related
 
+- [MCP server](/docs/apps/mcp-server) — what the assistant is for
 - [API authentication](/docs/api/authentication) — API keys for REST, not MCP
 - [Import](/docs/bondery/import) and [Export](/docs/bondery/export)

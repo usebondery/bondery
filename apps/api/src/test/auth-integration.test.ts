@@ -18,7 +18,8 @@ import { createHash, randomBytes } from "node:crypto";
 import { after, before, describe, it } from "node:test";
 import { prisma } from "@bondery/db";
 import {
-  betterAuthAuthorizationServerMetadataPath,
+  betterAuthAuthorizationServerMetadataPaths,
+  betterAuthOpenIdConfigurationPaths,
   betterAuthPath,
   betterAuthProtectedResourceMetadataPaths,
 } from "@bondery/helpers/globals/paths";
@@ -789,35 +790,52 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
     );
   });
 
-  it("advertises one RFC 8414 document with CIMD and DCR", async () => {
-    const spoofedHost = await app.inject({
-      headers: { host: "evil.example.com" },
+  it("advertises RFC 8414 and OIDC metadata at canonical and alias well-known URLs", async () => {
+    const issuer = resolveOAuthIssuerIdentifier();
+    const asPaths = betterAuthAuthorizationServerMetadataPaths();
+    const oidcPaths = betterAuthOpenIdConfigurationPaths();
+
+    for (const path of [...asPaths, ...oidcPaths]) {
+      const spoofedHost = await app.inject({
+        headers: { host: "evil.example.com" },
+        method: "GET",
+        url: path,
+      });
+      assert.equal(spoofedHost.statusCode, 200, `${path}: ${spoofedHost.body}`);
+      const metadata = spoofedHost.json() as {
+        authorization_endpoint?: string;
+        client_id_metadata_document_supported?: boolean;
+        issuer?: string;
+        registration_endpoint?: string;
+        token_endpoint?: string;
+      };
+      assert.equal(metadata.issuer, issuer, path);
+      assert.equal(String(metadata.issuer).includes("evil.example.com"), false, path);
+      assert.ok(
+        metadata.authorization_endpoint?.includes("/auth/oauth2/authorize"),
+        `${path} authorization_endpoint missing: ${JSON.stringify(metadata)}`,
+      );
+      assert.ok(
+        metadata.token_endpoint?.includes("/auth/oauth2/token"),
+        `${path} token_endpoint missing: ${JSON.stringify(metadata)}`,
+      );
+      if (metadata.registration_endpoint || asPaths.includes(path)) {
+        assert.ok(
+          metadata.registration_endpoint?.includes("/auth/oauth2/register"),
+          `${path} registration_endpoint missing: ${JSON.stringify(metadata)}`,
+        );
+      }
+    }
+
+    const canonicalAs = await app.inject({
       method: "GET",
-      url: betterAuthAuthorizationServerMetadataPath(),
+      url: asPaths[0],
     });
-    assert.equal(spoofedHost.statusCode, 200, spoofedHost.body);
-    const metadata = spoofedHost.json() as {
-      authorization_endpoint?: string;
-      client_id_metadata_document_supported?: boolean;
-      issuer?: string;
-      registration_endpoint?: string;
-      token_endpoint?: string;
-    };
-    assert.equal(metadata.issuer, resolveOAuthIssuerIdentifier());
-    assert.equal(String(metadata.issuer).includes("evil.example.com"), false);
-    assert.ok(
-      metadata.authorization_endpoint?.includes("/auth/oauth2/authorize"),
-      `authorization_endpoint missing: ${JSON.stringify(metadata)}`,
+    assert.equal(
+      (canonicalAs.json() as { client_id_metadata_document_supported?: boolean })
+        .client_id_metadata_document_supported,
+      true,
     );
-    assert.ok(
-      metadata.token_endpoint?.includes("/auth/oauth2/token"),
-      `token_endpoint missing: ${JSON.stringify(metadata)}`,
-    );
-    assert.ok(
-      metadata.registration_endpoint?.includes("/auth/oauth2/register"),
-      `registration_endpoint missing: ${JSON.stringify(metadata)}`,
-    );
-    assert.equal(metadata.client_id_metadata_document_supported, true);
     assert.ok(
       resolveOAuthIssuerIdentifier().startsWith(resolveBetterAuthIssuerUrl()),
       "OAuth issuer is BONDERY_PUBLIC_API_URL plus the /auth base path",

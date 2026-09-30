@@ -24,6 +24,7 @@ runs:
       shell: bash
       working-directory: out/json
       env:
+        BONDERY_PUBLIC_API_URL: https://api.example.com
         BONDERY_PUBLIC_WEBAPP_URL: https://app.example.com
         BONDERY_PUBLIC_WEBSITE_URL: https://example.com
       run: pnpm exec turbo build --filter=website
