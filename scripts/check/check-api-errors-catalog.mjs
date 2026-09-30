@@ -15,7 +15,7 @@ const check = createCheck("check-api-errors-catalog");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../..");
-const errorsDocsRoot = join(
+const docsCatchAll = join(
   repoRoot,
   "apps",
   "website",
@@ -23,19 +23,25 @@ const errorsDocsRoot = join(
   "app",
   "(chromeless)",
   "docs",
-  "api",
-  "errors",
+  "[[...slug]]",
+  "page.tsx",
 );
-const pageTemplate = join(errorsDocsRoot, "[code]", "page.tsx");
+const errorsMdxRoot = join(repoRoot, "docs", "api", "errors");
 
-if (!existsSync(pageTemplate)) {
+if (!existsSync(docsCatchAll)) {
   check.add(
-    "Missing dynamic docs page at apps/website/src/app/(chromeless)/docs/api/errors/[code]/page.tsx",
+    "Missing docs catch-all at apps/website/src/app/(chromeless)/docs/[[...slug]]/page.tsx",
   );
 }
 
-if (!existsSync(join(errorsDocsRoot, "page.tsx"))) {
-  check.add("Missing docs index at apps/website/src/app/(chromeless)/docs/api/errors/page.tsx");
+if (!existsSync(join(errorsMdxRoot, "index.mdx"))) {
+  check.add("Missing docs index at docs/api/errors/index.mdx");
 }
 
-check.ok(`${API_ERROR_CODES.length} codes served by dynamic route`);
+for (const code of API_ERROR_CODES) {
+  if (!existsSync(join(errorsMdxRoot, `${code}.mdx`))) {
+    check.add(`Missing docs page at docs/api/errors/${code}.mdx`);
+  }
+}
+
+check.ok(`${API_ERROR_CODES.length} codes served by docs/api/errors/*.mdx`);
