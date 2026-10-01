@@ -24,8 +24,9 @@ type OAuthLoginClientProps = {
 
 /**
  * Authorization-server login gate — see page.tsx for why this is deliberately
- * independent of the webapp's own session. Always shows the sign-in buttons;
- * never redirects based on any pre-existing webapp state.
+ * independent of the webapp's own session. Sign-in buttons are hidden when
+ * the query is an authorization-server client/redirect error; never redirect
+ * based on any pre-existing webapp state.
  */
 export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthLoginClientProps) {
   const t = useLoginPageTranslations();
@@ -37,6 +38,7 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
   const origin = typeof window === "undefined" ? webappUrl : window.location.origin;
   const search = typeof window === "undefined" ? "" : window.location.search;
   const magicLinkUrls = buildOAuthLoginMagicLinkUrls(origin, search);
+  const oauthLoginFallback = `${origin}${WEBAPP_ROUTES.OAUTH_LOGIN}${search}`;
 
   const handleOAuthLogin = async (provider: "github" | "linkedin") => {
     try {
@@ -53,8 +55,9 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
       // sign-in completes, Better Auth resumes the original authorization
       // transaction instead of following `callbackURL` below — that URL is
       // only a fallback for the (invalid) case of landing here without one.
+      // Never use HOME: chrome.identity would then dump the CRM into the popup.
       const { error } = await authClient.signIn.social({
-        callbackURL: `${webappUrl.replace(/\/$/, "")}${WEBAPP_ROUTES.HOME}`,
+        callbackURL: oauthLoginFallback,
         provider,
       });
 
@@ -83,7 +86,6 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
       setBusyAction("passkey");
       await setLocalePreferencesCookie();
 
-      const fallbackUrl = `${webappUrl.replace(/\/$/, "")}${WEBAPP_ROUTES.HOME}`;
       const { data, error } = await authClient.signIn.passkey();
 
       if (error) {
@@ -94,7 +96,7 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
       const redirectUrl =
         data && typeof data === "object" && "url" in data && typeof data.url === "string"
           ? data.url
-          : fallbackUrl;
+          : oauthLoginFallback;
       window.location.assign(redirectUrl);
     } catch (err) {
       notifyPasskeyLoginError(err, t);

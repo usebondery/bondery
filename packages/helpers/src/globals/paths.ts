@@ -91,6 +91,7 @@ export const WEBSITE_ROUTES = {
   TERMS: "/terms",
   WELL_KNOWN_LLMS_TXT: "/.well-known/llms.txt",
   WELL_KNOWN_MCP: "/.well-known/mcp",
+  WELL_KNOWN_MCP_REGISTRY_AUTH: "/.well-known/mcp-registry-auth",
 };
 
 export const API_ROUTES = {
@@ -171,7 +172,7 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.9.2";
+export const MIN_EXTENSION_VERSION: string = "1.10.0";
 
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;

@@ -51,3 +51,4 @@ export {
   type TargetId,
   TURBO_SYSTEM_PASSTHROUGH,
 } from "#env/manifest.js";
+export { assertDistinctFirstPartyOAuthClientIds } from "#env/oauth-client-ids.js";

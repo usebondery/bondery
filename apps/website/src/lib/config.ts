@@ -27,3 +27,9 @@ export const WEBSITE_URL = requireValue(
   "BONDERY_PUBLIC_WEBSITE_URL",
   process.env.BONDERY_PUBLIC_WEBSITE_URL,
 );
+
+/** Read the marketing origin at call time (metadata routes that await `connection()`). */
+export function getWebsiteUrl(): string {
+  const name = "BONDERY_PUBLIC_WEBSITE_URL";
+  return requireValue(name, process.env[name]);
+}

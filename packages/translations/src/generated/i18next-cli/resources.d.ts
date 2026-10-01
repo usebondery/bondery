@@ -860,6 +860,8 @@ export default interface Resources {
   "features/pages/LoginPage": {
     "And": "and",
     "AuthenticationError": "Authentication error",
+    "AuthorizationWindowInvalidBody": "Close this window and try logging in from the extension again.",
+    "AuthorizationWindowInvalidTitle": "This sign-in window isn’t valid",
     "Benefits": {
       "FreeForever": "Free forever",
       "ImportSocials": "Import data from socials",

@@ -1,6 +1,8 @@
 {
   "And": "und",
   "AuthenticationError": "Authentifizierungsfehler",
+  "AuthorizationWindowInvalidBody": "Schließe dieses Fenster und versuche die Anmeldung erneut über die Erweiterung.",
+  "AuthorizationWindowInvalidTitle": "Dieses Anmeldefenster ist ungültig",
   "Benefits": {
     "FreeForever": "Für immer kostenlos",
     "ImportSocials": "Daten aus sozialen Netzwerken importieren",

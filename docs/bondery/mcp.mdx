@@ -16,6 +16,8 @@ docId: bondery.mcp
 
 On hosted Bondery that URL is `https://api.usebondery.com/mcp`. On a self-hosted instance it is `{apiBaseUrl}/mcp` — the same API origin your Settings page already uses. Do not paste the hosted URL into a self-hosted client.
 
+The hosted server is listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `com.usebondery/mcp`. Clients still connect to `https://api.usebondery.com/mcp` and sign in with OAuth. The registry is metadata only.
+
 Website `/.well-known/mcp` permanently redirects (HTTP 308) to `{API}/mcp` in one hop. The API origin also serves `/.well-known/mcp` → `/mcp`. That path is a convenience pointer, not MCP spec and not RFC 8414 — it does not return OAuth JSON. After `curl -L`, an unauthenticated `GET` `/mcp` is `401` with RFC 9728 `WWW-Authenticate` so the client can start OAuth.
 
 ## What the assistant can do

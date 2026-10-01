@@ -43,6 +43,11 @@ function readAndroidVersionName() {
   return match?.[1] ?? "";
 }
 
+function readServerJsonVersion() {
+  const server = JSON.parse(readFileSync(join(root, "server.json"), "utf8"));
+  return typeof server.version === "string" ? server.version.trim() : "";
+}
+
 function readDeployExampleVersion() {
   const examplePath = join(root, "deploy/bondery/.env.example");
   if (!existsSync(examplePath)) {
@@ -154,6 +159,9 @@ if (readAndroidVersionName() !== nativeVersion) {
   errors.push(
     `apps/mobile/android/app/build.gradle versionName: ${readAndroidVersionName()} (expected native ${nativeVersion})`,
   );
+}
+if (readServerJsonVersion() !== version) {
+  errors.push(`server.json: ${readServerJsonVersion()} (expected ${version})`);
 }
 
 const deployExampleVersion = readDeployExampleVersion();

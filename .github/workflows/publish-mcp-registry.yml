@@ -1,0 +1,60 @@
+name: Publish - MCP Registry
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-rc.')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/shared/infisical-production-secrets
+
+      - name: Require Infisical publisher key
+        run: |
+          if [ -z "${BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY:-}" ]; then
+            echo "BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY is missing from Infisical production."
+            exit 1
+          fi
+
+      - name: Confirm HTTP namespace proof is live
+        run: |
+          PROOF_URL="https://usebondery.com/.well-known/mcp-registry-auth"
+          CODE=$(curl -sS -o /tmp/mcp-registry-auth -w "%{http_code}" "$PROOF_URL")
+          if [ "$CODE" != "200" ]; then
+            echo "Expected HTTP 200 from $PROOF_URL (got $CODE). The registry does not follow redirects. Deploy the marketing website first."
+            exit 1
+          fi
+
+      - name: Stamp server.json version from tag
+        if: github.event_name == 'push'
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION="${VERSION#v}"
+          jq --arg v "$VERSION" '.version = $v' server.json > server.tmp
+          mv server.tmp server.json
+
+      - name: Install mcp-publisher
+        run: |
+          ARCH="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          OS="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          curl -fsSL "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_${OS}_${ARCH}.tar.gz" | tar xz mcp-publisher
+
+      - name: Publish to MCP Registry
+        env:
+          BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY: ${{ env.BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY }}
+        run: |
+          ./mcp-publisher login http --domain usebondery.com --private-key "$BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY"
+          ./mcp-publisher publish

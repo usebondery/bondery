@@ -1,26 +1,29 @@
 import { WEBSITE_ROUTES } from "@bondery/helpers";
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { getAllPosts } from "@/app/blog/_lib";
 import { BLOG_CATEGORIES } from "@/lib/blog/categories";
 import { isUnpublishedChangelogSlug } from "@/lib/changelog";
-import { WEBSITE_URL } from "@/lib/config";
+import { getWebsiteUrl } from "@/lib/config";
 import { source } from "@/lib/source";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
+  const origin = getWebsiteUrl();
   const now = new Date();
 
   const blogCategoryEntries: MetadataRoute.Sitemap = BLOG_CATEGORIES.map((cat) => ({
     changeFrequency: "weekly" as const,
     lastModified: now,
     priority: 0.7,
-    url: `${WEBSITE_URL}/blog/${cat}`,
+    url: `${origin}/blog/${cat}`,
   }));
 
   const blogPostEntries: MetadataRoute.Sitemap = getAllPosts().map((post) => ({
     changeFrequency: "monthly" as const,
     lastModified: new Date(post.date),
     priority: 0.8,
-    url: `${WEBSITE_URL}/blog/${post.category}/${post.slug}`,
+    url: `${origin}/blog/${post.category}/${post.slug}`,
   }));
 
   const docEntries: MetadataRoute.Sitemap = source
@@ -31,7 +34,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "weekly" as const,
       lastModified: page.data.lastModified ? new Date(page.data.lastModified) : now,
       priority: 0.6,
-      url: `${WEBSITE_URL}${page.url}`,
+      url: `${origin}${page.url}`,
     }));
 
   return [
@@ -39,31 +42,31 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       lastModified: now,
       priority: 1,
-      url: `${WEBSITE_URL}${WEBSITE_ROUTES.HOME}`,
+      url: `${origin}${WEBSITE_ROUTES.HOME}`,
     },
     {
       changeFrequency: "monthly",
       lastModified: now,
       priority: 0.8,
-      url: `${WEBSITE_URL}${WEBSITE_ROUTES.CONTACT}`,
+      url: `${origin}${WEBSITE_ROUTES.CONTACT}`,
     },
     {
       changeFrequency: "yearly",
       lastModified: now,
       priority: 0.5,
-      url: `${WEBSITE_URL}${WEBSITE_ROUTES.PRIVACY}`,
+      url: `${origin}${WEBSITE_ROUTES.PRIVACY}`,
     },
     {
       changeFrequency: "yearly",
       lastModified: now,
       priority: 0.5,
-      url: `${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`,
+      url: `${origin}${WEBSITE_ROUTES.TERMS}`,
     },
     {
       changeFrequency: "yearly",
       lastModified: now,
       priority: 0.5,
-      url: `${WEBSITE_URL}${WEBSITE_ROUTES.SECURITY}`,
+      url: `${origin}${WEBSITE_ROUTES.SECURITY}`,
     },
     ...docEntries,
     ...blogCategoryEntries,

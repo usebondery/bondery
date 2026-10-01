@@ -1,6 +1,8 @@
 {
   "And": "a",
   "AuthenticationError": "Chyba ověření",
+  "AuthorizationWindowInvalidBody": "Zavřete toto okno a zkuste se znovu přihlásit z rozšíření.",
+  "AuthorizationWindowInvalidTitle": "Toto přihlašovací okno není platné",
   "Benefits": {
     "FreeForever": "Zdarma navždy",
     "ImportSocials": "Import dat ze sociálních sítí",

@@ -1240,6 +1240,8 @@ export type LinkedInDataCatalog = {
 export type LoginPageCatalog = {
   And: string;
   AuthenticationError: string;
+  AuthorizationWindowInvalidBody: string;
+  AuthorizationWindowInvalidTitle: string;
   Benefits: {
     FreeForever: string;
     ImportSocials: string;

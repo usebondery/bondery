@@ -1,6 +1,7 @@
 import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertDistinctFirstPartyOAuthClientIds } from "@bondery/helpers/env/oauth-client-ids";
 import { isRc, parseCalver, toChromeVersion, toNpm } from "@bondery/helpers/version/calver";
 import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants";
 import { defineConfig } from "wxt";
@@ -58,6 +59,11 @@ export default defineConfig({
         "BONDERY_PUBLIC_WEBAPP_URL",
       ] as const;
       const missing = requiredEnvVars.filter((key) => !process.env[key]?.trim());
+
+      assertDistinctFirstPartyOAuthClientIds(
+        process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
+        process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+      );
 
       if (missing.length > 0) {
         const message = `[wxt] Missing required environment variables: ${missing.join(", ")}`;

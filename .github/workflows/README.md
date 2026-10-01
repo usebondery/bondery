@@ -16,6 +16,7 @@ deploy/
 release/
   bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc)
   rc.yml                   -> rc-release.yml        vX.Y.Z-rc.N prerelease + staging zip; no CWS
+  mcp-registry.yml         -> publish-mcp-registry.yml  workflow_dispatch or vX.Y.Z (skips -rc)
 
 smoke/
   bondery-stack.yml        -> smoke-bondery-stack.yml  manual workflow_dispatch drill
@@ -125,14 +126,17 @@ If you change lockfile layout or pnpm major version, bump the BuildKit cache id 
 | `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` | Marketing website redeploy (`deploy-website.yml`) |
 | `BONDERY_INFRA_CHROME_EXTENSION_ID`, `BONDERY_OPS_CHROME_PUBLISHER_ID` | Chrome Web Store API |
 | `BONDERY_OPS_GHCR_WRITE_TOKEN` | GHCR login (docker build, promote, smoke pull) |
+| `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY` | Ed25519 seed (hex) for `mcp-publisher login http` (`publish-mcp-registry.yml`) |
 | `BONDERY_INFRA_WEBAPP_DOMAIN`, `BONDERY_INFRA_API_DOMAIN` | Derive extension build URLs |
-| `BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID` | Extension OAuth client id |
+| `BONDERY_PUBLIC_OAUTH_CLIENT_ID` | Extension PKCE OAuth client id (must not equal the webapp BFF client) |
+
+**MCP Registry** (`publish-mcp-registry.yml`): publishes root `server.json` as `com.usebondery/mcp` (`https://api.usebondery.com/mcp`). Auth is HTTP (`mcp-publisher login http --domain usebondery.com`). `GET https://usebondery.com/.well-known/mcp-registry-auth` must already return **200** `text/plain` with no redirect (marketing website on `release`; the registry client does not follow redirects). Publish uses Infisical **production** `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY` (never GitHub secrets, never Dokploy). Development and staging have distinct seeds under the same name; they are not used to publish. First publish: merge → website CD → curl 200 on the proof URL → Infisical OIDC allows this workflow → `workflow_dispatch`. Later production tags `vX.Y.Z` republish (RC tags are skipped).
 
 **Ops checklist (Infisical UI — before relying on Infisical-only CI):**
 
 1. Populate production keys above.
 2. Machine identity `f8b9e69d-bc32-4066-ad99-8ad6ecff2d21` — **read** on **production** and **staging**.
-3. OIDC subjects cover: `release.yml`, `rc-release.yml`, `shared-release-extension.yml`, `deploy-website.yml`, smoke workflows, `sync-dokploy-env.yml`.
+3. OIDC subjects cover: `release.yml`, `rc-release.yml`, `shared-release-extension.yml`, `deploy-website.yml`, `publish-mcp-registry.yml`, smoke workflows, `sync-dokploy-env.yml`.
 4. Audience: `https://github.com/usebondery`.
 5. GitHub retains only Turbo (`BONDERY_OPS_TURBO_*`) and Chrome signing (`PRIVATE_CHROME_*`) secrets.
 

@@ -1,9 +1,9 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
-export const dynamic = "force-dynamic";
-
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  await connection();
   const { webappUrl } = buildWebappRuntimeConfigFromEnv();
 
   return {
