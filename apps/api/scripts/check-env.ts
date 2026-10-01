@@ -8,6 +8,7 @@ import {
   getRequiredVarsForTarget,
   resolveBootEnvValue,
 } from "@bondery/helpers/env";
+import { assertDistinctFirstPartyOAuthClientIds } from "@bondery/helpers/env/oauth-client-ids";
 import { envSchema } from "../src/env-schema.js";
 import { getApiRequiredEnvVars } from "../src/lib/platform/required-env.js";
 
@@ -94,3 +95,8 @@ checkEnvVariables({
   environment,
   requiredVars: fromModule,
 });
+
+assertDistinctFirstPartyOAuthClientIds(
+  process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
+  process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+);

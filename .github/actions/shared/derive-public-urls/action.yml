@@ -1,7 +1,9 @@
 name: Derive public URLs from infra domains
 description: >-
-  After Infisical production fetch, derive BONDERY_PUBLIC_WEBAPP_URL and
-  BONDERY_PUBLIC_API_URL from BONDERY_INFRA_* domains and map OAuth client id.
+  After Infisical fetch, derive BONDERY_PUBLIC_WEBAPP_URL and
+  BONDERY_PUBLIC_API_URL from BONDERY_INFRA_* domains. Leaves
+  BONDERY_PUBLIC_OAUTH_CLIENT_ID (Chrome extension PKCE client) unchanged —
+  it must not be aliased to BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID.
 
 runs:
   using: composite
@@ -15,7 +17,4 @@ runs:
         fi
         if [ -n "${BONDERY_INFRA_API_DOMAIN:-}" ]; then
           echo "BONDERY_PUBLIC_API_URL=https://${BONDERY_INFRA_API_DOMAIN}" >> "$GITHUB_ENV"
-        fi
-        if [ -n "${BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID:-}" ]; then
-          echo "BONDERY_PUBLIC_OAUTH_CLIENT_ID=${BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID}" >> "$GITHUB_ENV"
         fi

@@ -17,6 +17,7 @@ import { notifications } from "@mantine/notifications";
 import { IconMail, IconMailForward } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { isOAuthAuthorizationServerError } from "@/lib/auth/authorization-server-error";
 import type { WebappAuthClient } from "@/lib/auth/client";
 import { isLastUsedMagicLink } from "@/lib/auth/last-login-method";
 import { stripTransientAuthErrorFromLocation } from "@/lib/auth/magic-link-urls";
@@ -67,6 +68,7 @@ export function SocialLoginCard({
   const tCommon = useCommonTranslations();
   const searchParams = useSearchParams();
   const queryError = searchParams.get("error");
+  const authorizationWindowInvalid = isOAuthAuthorizationServerError(queryError);
   const [passkeySupported, setPasskeySupported] = useState(true);
   const [emailPanelOpen, setEmailPanelOpen] = useState(false);
   const [awaitingVerify, setAwaitingVerify] = useState(false);
@@ -95,6 +97,10 @@ export function SocialLoginCard({
     }
 
     shownQueryErrorRef.current = queryError;
+    if (isOAuthAuthorizationServerError(queryError)) {
+      return;
+    }
+
     notifications.show({
       id: `login-query-error-${queryError}`,
       ...errorNotificationTemplate({
@@ -209,14 +215,14 @@ export function SocialLoginCard({
       <Stack gap="lg">
         <Stack gap={6}>
           <Title fw={700} fz="h2" lh={1.15} order={2}>
-            {t("FormTitle")}
+            {authorizationWindowInvalid ? t("AuthorizationWindowInvalidTitle") : t("FormTitle")}
           </Title>
           <Text c="dimmed" size="md">
-            {t("Description")}
+            {authorizationWindowInvalid ? t("AuthorizationWindowInvalidBody") : t("Description")}
           </Text>
         </Stack>
 
-        {showProviders ? (
+        {showProviders && !authorizationWindowInvalid ? (
           <Stack gap="xs" w="100%">
             <LoginProviderButtons
               busyAction={busyAction}

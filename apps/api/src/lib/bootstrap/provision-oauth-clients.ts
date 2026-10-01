@@ -6,6 +6,7 @@
  */
 import { createHash } from "node:crypto";
 import { prisma } from "@bondery/db";
+import { assertDistinctFirstPartyOAuthClientIds } from "@bondery/helpers/env/oauth-client-ids";
 import { generateId } from "@bondery/helpers/ids";
 import {
   MCP_OAUTH_SCOPES,
@@ -233,6 +234,10 @@ export async function upsertMcpResources(): Promise<string> {
 }
 
 export async function provisionOAuthClients(): Promise<void> {
+  assertDistinctFirstPartyOAuthClientIds(
+    process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
+    process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+  );
   await resolveResourceId();
   await upsertMcpResources();
   const resourceIds = resolveApiResourceIdentifiers();

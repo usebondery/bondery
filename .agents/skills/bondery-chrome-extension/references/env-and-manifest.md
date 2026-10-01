@@ -14,6 +14,8 @@ Vite `envPrefix`: `BONDERY_PUBLIC_`, `BONDERY_EXTENSION_` (`BONDERY_EXTENSION_FL
 
 `hooks.build:before` warns in development if any required var is missing; **throws in production**. In production **CI** (`CI` or `GITHUB_ACTIONS`) it also throws if API/webapp URLs match `localhost` or `127.0.0.1`. A store zip with baked loopback origins is a shipped foot-gun.
 
+Never bake `BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID` as the extension client. CI must not alias the webapp BFF client onto `BONDERY_PUBLIC_OAUTH_CLIENT_ID`. Sharing one id registers `/auth/oauth-callback` instead of `chromiumapp.org`, and `chrome.identity` fails with `invalid_redirect`.
+
 `scripts/check-env.ts` uses `getRequiredVarsForTarget("chrome-extension", …)`. Production CI additionally requires `BONDERY_INFRA_CHROME_EXTENSION_ID`, `BONDERY_OPS_CHROME_PUBLISHER_ID`, and the Chrome signing secrets — those are **release/CI**, not local WXT bake. See [bondery-release extension.md](../../bondery-release/references/extension.md).
 
 ## `host_permissions` (computed)
@@ -48,6 +50,7 @@ Do not add other hosts to this list without a security review.
 ## Env / manifest checklist
 
 - [ ] All three `BONDERY_PUBLIC_*` present for the build you are shipping
+- [ ] Production bake uses the extension PKCE client id, not the webapp BFF client id
 - [ ] Production CI bake has no localhost/127.0.0.1 API or webapp URL
 - [ ] `host_permissions` still match the origins the SW actually fetches
 - [ ] `webapp.content` matches: CWS production is prod + localhost; extra origin only when flavor is not production

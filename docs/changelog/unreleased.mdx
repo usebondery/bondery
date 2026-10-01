@@ -7,5 +7,6 @@ hidden: true
 
 ### 🐛 Fixed
 
+- Chrome extension: Production Chrome Web Store builds no longer bake the webapp’s OAuth client id. Store login was failing and then opening the app inside the identity popup. The next store version after this ships is required for production login.
 - Website: `/robots.txt` and `/sitemap.xml` now use the deployed marketing origin instead of the Docker build placeholder `https://example.com`.
 - Webapp: `/robots.txt` is served (it 404'd because the metadata file lived outside `src/app`).

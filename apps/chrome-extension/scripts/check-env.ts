@@ -1,6 +1,7 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkEnvVariables, getRequiredVarsForTarget } from "@bondery/helpers/env";
+import { assertDistinctFirstPartyOAuthClientIds } from "@bondery/helpers/env/oauth-client-ids";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,3 +25,8 @@ checkEnvVariables({
   environment,
   requiredVars,
 });
+
+assertDistinctFirstPartyOAuthClientIds(
+  process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
+  process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+);

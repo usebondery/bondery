@@ -279,6 +279,18 @@
       "node": "./dist/env/manifest.js",
       "types": "./src/env/manifest.ts"
     },
+    "./env/oauth-client-ids": {
+      "default": "./dist/env/oauth-client-ids.js",
+      "import": "./dist/env/oauth-client-ids.js",
+      "node": "./dist/env/oauth-client-ids.js",
+      "types": "./src/env/oauth-client-ids.ts"
+    },
+    "./env/oauth-client-ids.test": {
+      "default": "./dist/env/oauth-client-ids.test.js",
+      "import": "./dist/env/oauth-client-ids.test.js",
+      "node": "./dist/env/oauth-client-ids.test.js",
+      "types": "./src/env/oauth-client-ids.test.ts"
+    },
     "./forms": {
       "default": "./dist/forms/index.js",
       "import": "./dist/forms/index.js",
