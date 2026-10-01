@@ -1,0 +1,20 @@
+---
+title: "1.10.1"
+---
+
+## [1.10.1] - 01.10.2026
+
+### ✨ Added
+
+- Website: Hosted MCP can be listed in the official MCP Registry as `com.usebondery/mcp`. Clients still connect at `https://api.usebondery.com/mcp` with OAuth. Namespace proof is `GET https://usebondery.com/.well-known/mcp-registry-auth` (HTTP 200, no redirect).
+
+### 🤖 CI
+
+- Publish `server.json` to the MCP Registry on `workflow_dispatch` or production tags `vX.Y.Z` (not RC), after the marketing-site proof URL is live.
+
+### 🐛 Fixed
+
+- Chrome extension: Production Chrome Web Store builds no longer bake the webapp’s OAuth client id. Store login was failing and then opening the app inside the identity popup. The next store version after this ships is required for production login.
+- Website: `/robots.txt` and `/sitemap.xml` now use the deployed marketing origin instead of the Docker build placeholder `https://example.com`.
+- Webapp: `/robots.txt` is served (it 404'd because the metadata file lived outside `src/app`).
+- Self-host and hosted Compose: the webapp container now receives `BONDERY_PUBLIC_STRIPE_PUBLISHABLE_KEY` from the stack env file (checkout was missing the publishable key at runtime).
