@@ -4,3 +4,8 @@ hidden: true
 ---
 
 ## [Unreleased]
+
+### 🐛 Fixed
+
+- Website: `/robots.txt` and `/sitemap.xml` now use the deployed marketing origin instead of the Docker build placeholder `https://example.com`.
+- Webapp: `/robots.txt` is served (it 404'd because the metadata file lived outside `src/app`).

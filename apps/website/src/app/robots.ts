@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { WEBSITE_URL } from "@/lib/config";
+import { connection } from "next/server";
+import { getWebsiteUrl } from "@/lib/config";
 
 /** Search, citation, and user-fetch crawlers we allow to index public marketing/docs content. */
 const CITATION_AND_SEARCH_BOTS = [
@@ -26,7 +27,10 @@ const TRAINING_AND_DATASET_BOTS = [
   "cohere-ai",
 ] as const;
 
-export default function robots(): MetadataRoute.Robots {
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  await connection();
+  const origin = getWebsiteUrl();
+
   return {
     rules: [
       ...CITATION_AND_SEARCH_BOTS.map((userAgent) => ({
@@ -45,6 +49,6 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: "*",
       },
     ],
-    sitemap: `${WEBSITE_URL}/sitemap.xml`,
+    sitemap: `${origin}/sitemap.xml`,
   };
 }
