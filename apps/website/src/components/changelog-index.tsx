@@ -13,12 +13,11 @@ export function ChangelogIndex() {
         if (!version) {
           return null;
         }
-        const heading = releaseHeadingLabel(version);
         const githubUrl = changelogGithubReleaseUrl(version);
 
         return (
           <section key={entry.url}>
-            <h2 id={changelogVersionHeadingId(version)}>{heading}</h2>
+            <h2 id={changelogVersionHeadingId(version)}>{releaseHeadingLabel(entry)}</h2>
             <ul>
               <li>
                 <Link href={`/docs/changelog/${version}`}>Changelog</Link>
