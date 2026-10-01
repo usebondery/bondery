@@ -39,7 +39,7 @@
     "i18next-cli": "^1.73.1",
     "ioredis": "^6.0.0",
     "jose": "^6.2.12",
-    "nodemailer": "10.0.1",
+    "nodemailer": "10.0.9",
     "pg-boss": "^12.30.0",
     "pino": "^10.3.1",
     "posthog-node": "^5.51.8",
