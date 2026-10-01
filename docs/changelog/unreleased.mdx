@@ -31,6 +31,7 @@ hidden: true
 - Webapp: Merge no longer asks which avatar to keep when both contacts have the same photo bytes.
 - API: Unauthenticated `GET` and `HEAD` `/mcp` now return the same RFC 9728 OAuth challenge as `POST`, so MCP clients that probe the URL can discover OAuth instead of treating Bondery as a static Bearer server. Origin-root `/.well-known/oauth-authorization-server` and `/.well-known/openid-configuration` on the API host serve the same metadata as the `/auth` issuer documents.
 - Website: `/docs/api/errors` (including per-code pages) and generated OpenAPI pages such as `/docs/api/api-reference/_generated/health/live/get` load in the docs site.
+- Website: `/docs/changelog` loads in the Docker image. The hub lists shipped versions from the compiled docs collection instead of reading `docs/changelog/meta.json` from disk (that file is not copied into the runtime container).
 
 ### 🔄 Changed
 

@@ -152,5 +152,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.0-rc.2"
+  "version": "1.10.0-rc.3"
 }
