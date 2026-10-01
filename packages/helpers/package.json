@@ -561,6 +561,18 @@
       "node": "./dist/security/index.js",
       "types": "./src/security/index.ts"
     },
+    "./security/mcp-registry-auth": {
+      "default": "./dist/security/mcp-registry-auth.js",
+      "import": "./dist/security/mcp-registry-auth.js",
+      "node": "./dist/security/mcp-registry-auth.js",
+      "types": "./src/security/mcp-registry-auth.ts"
+    },
+    "./security/mcp-registry-auth.test": {
+      "default": "./dist/security/mcp-registry-auth.test.js",
+      "import": "./dist/security/mcp-registry-auth.test.js",
+      "node": "./dist/security/mcp-registry-auth.test.js",
+      "types": "./src/security/mcp-registry-auth.test.ts"
+    },
     "./security/pgp-public-key": {
       "default": "./dist/security/pgp-public-key.js",
       "import": "./dist/security/pgp-public-key.js",

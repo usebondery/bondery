@@ -50,6 +50,7 @@ describe("agent discovery pointer paths", () => {
     assert.equal(WEBSITE_ROUTES.LLMS_TXT, "/llms.txt");
     assert.equal(WEBSITE_ROUTES.WELL_KNOWN_LLMS_TXT, "/.well-known/llms.txt");
     assert.equal(WEBSITE_ROUTES.WELL_KNOWN_MCP, "/.well-known/mcp");
+    assert.equal(WEBSITE_ROUTES.WELL_KNOWN_MCP_REGISTRY_AUTH, "/.well-known/mcp-registry-auth");
     assert.equal(API_ROUTES.MCP, "/mcp");
     assert.equal(API_ROUTES.WELL_KNOWN_MCP, "/.well-known/mcp");
     assert.equal(WEBSITE_ROUTES.API_REFERENCE, "/api-reference");

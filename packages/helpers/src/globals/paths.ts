@@ -91,6 +91,7 @@ export const WEBSITE_ROUTES = {
   TERMS: "/terms",
   WELL_KNOWN_LLMS_TXT: "/.well-known/llms.txt",
   WELL_KNOWN_MCP: "/.well-known/mcp",
+  WELL_KNOWN_MCP_REGISTRY_AUTH: "/.well-known/mcp-registry-auth",
 };
 
 export const API_ROUTES = {

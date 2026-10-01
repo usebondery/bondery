@@ -105,6 +105,20 @@ function updateAndroidVersionName(nativeVersion) {
   return true;
 }
 
+function updateServerJsonVersion(version) {
+  const rel = "server.json";
+  const abs = join(root, rel);
+  const server = JSON.parse(readFileSync(abs, "utf8"));
+  if (server.version === version) {
+    return false;
+  }
+  if (!checkOnly) {
+    server.version = version;
+    writeFileSync(abs, `${JSON.stringify(server, null, 2)}\n`);
+  }
+  return true;
+}
+
 function updateMinExtensionVersion(minVersion) {
   const rel = "packages/helpers/src/globals/paths.ts";
   const abs = join(root, rel);
@@ -142,6 +156,9 @@ function main() {
   }
   if (updateMinExtensionVersion(minVersion)) {
     changes.push("packages/helpers/src/globals/paths.ts");
+  }
+  if (updateServerJsonVersion(version)) {
+    changes.push("server.json");
   }
 
   if (checkOnly) {

@@ -67,6 +67,20 @@ CI should pass `--stored-auth-only` instead, so a missing token fails immediatel
 
 Automated coverage for the same gates lives in `pnpm run test:auth -w api` (`apps/api/src/test/mcp-integration.test.ts`). The Inspector is for interactive debugging, not a substitute for those tests.
 
+## Official MCP Registry
+
+Hosted Bondery is published as `com.usebondery/mcp` from root [`server.json`](../../server.json). The registry stores metadata; the live endpoint stays `https://api.usebondery.com/mcp`.
+
+Namespace proof is HTTP: `GET https://usebondery.com/.well-known/mcp-registry-auth` must be **200** `text/plain` with no redirect (the registry client does not follow redirects). The public proof is `BONDERY_MCP_REGISTRY_AUTH_PROOF`. The Ed25519 private key is Infisical production `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY` (CI only; never app env).
+
+Publish with [`.github/workflows/publish-mcp-registry.yml`](../../.github/workflows/publish-mcp-registry.yml) (`workflow_dispatch`, or production tags `vX.Y.Z` — not RC). Sequence: marketing website live with the proof URL → Infisical key set → run the workflow. Confirm with:
+
+```bash
+curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=com.usebondery/mcp"
+```
+
+The official registry is still in preview. `server.json` `version` stays in lockstep with root `package.json` via `pnpm run sync-version`.
+
 ## Related
 
 - [MCP server](../apps/mcp-server.mdx) — user-facing product page

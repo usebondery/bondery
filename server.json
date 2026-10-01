@@ -1,0 +1,27 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "description": "Open-source personal CRM for building better bonds",
+  "icons": [
+    {
+      "mimeType": "image/svg+xml",
+      "sizes": ["any"],
+      "src": "https://usebondery.com/logo.svg"
+    }
+  ],
+  "name": "com.usebondery/mcp",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.usebondery.com/mcp"
+    }
+  ],
+  "repository": {
+    "id": "1110131829",
+    "source": "github",
+    "subfolder": "apps/api/src/routes/mcp",
+    "url": "https://github.com/usebondery/bondery"
+  },
+  "title": "Bondery",
+  "version": "1.10.0",
+  "websiteUrl": "https://usebondery.com/docs/bondery/mcp"
+}
