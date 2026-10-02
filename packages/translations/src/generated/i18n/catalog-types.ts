@@ -295,6 +295,7 @@ export type CommonCatalog = {
       validation_error: string;
       webhook: string;
       webhook_not_configured: string;
+      session_not_fresh: string;
     };
     apiTemporarilyUnavailable: string;
     apiUnreachable: string;
@@ -2394,6 +2395,7 @@ export type SettingsPageCatalog = {
       IntroDescription3: string;
       IntroTitle: string;
       MenuInstallHint: string;
+      MenuInstallHintTitle: string;
       NotSupportedHint: string;
     };
     Unlink: string;

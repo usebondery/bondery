@@ -381,7 +381,8 @@
       "IntroDescription2": "Spusťte z docku nebo panelu úloh jako jakoukoli jinou aplikaci",
       "IntroDescription3": "Soustředěné pracovní prostředí pro vaši síť, bez zbytku prohlížeče",
       "IntroTitle": "Používejte Bondery jako desktopovou aplikaci",
-      "MenuInstallHint": "Otevřete menu prohlížeče (⋮) a zvolte Instalovat Bondery",
+      "MenuInstallHint": "Otevřete menu prohlížeče (⋮) a zvolte Instalovat {appName}. Někdy je položka pod Uložit a sdílet.",
+      "MenuInstallHintTitle": "Instalace z menu prohlížeče",
       "NotSupportedHint": "Dostupné v Chrome, Edge nebo Brave na desktopu"
     },
     "Unlink": "Odpojit účet",

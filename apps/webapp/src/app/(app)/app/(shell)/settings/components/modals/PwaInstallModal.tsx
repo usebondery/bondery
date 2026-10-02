@@ -1,34 +1,38 @@
 "use client";
 
-import { ModalFooter } from "@bondery/mantine-next";
+import { PWA_APP_NAME } from "@bondery/helpers";
+import { informationNotificationTemplate, ModalFooter } from "@bondery/mantine-next";
 import { Group, Paper, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
+import { notifications } from "@mantine/notifications";
 import { IconCircleCheck, IconDeviceDesktop } from "@tabler/icons-react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { PwaInstallAnimation } from "../import/PwaInstallAnimation";
 
 interface PwaInstallModalProps {
-  canInstall: boolean;
-  install: () => Promise<void>;
+  install: () => Promise<boolean>;
   isChromiumDesktop: boolean;
   modalId: string;
 }
 
-export function PwaInstallModal({
-  modalId,
-  canInstall,
-  isChromiumDesktop,
-  install,
-}: PwaInstallModalProps) {
+export function PwaInstallModal({ modalId, isChromiumDesktop, install }: PwaInstallModalProps) {
   const t = useSettingsPageTranslations("Integration.PwaInstallModal");
   const closeModal = () => modals.close(modalId);
 
-  const showInstallButton = canInstall || isChromiumDesktop;
-  const hintText = canInstall
-    ? null
-    : isChromiumDesktop
-      ? t("MenuInstallHint")
-      : t("NotSupportedHint");
+  const handleInstall = async () => {
+    const prompted = await install();
+    if (prompted) {
+      closeModal();
+      return;
+    }
+
+    notifications.show(
+      informationNotificationTemplate({
+        description: t("MenuInstallHint", { appName: PWA_APP_NAME }),
+        title: t("MenuInstallHintTitle"),
+      }),
+    );
+  };
 
   return (
     <Stack gap="md">
@@ -65,21 +69,19 @@ export function PwaInstallModal({
         </Stack>
       </Paper>
 
-      {hintText ? (
+      {isChromiumDesktop ? null : (
         <Text c="dimmed" size="sm" ta="center">
-          {hintText}
+          {t("NotSupportedHint")}
         </Text>
-      ) : null}
+      )}
 
       <ModalFooter
         actionColor="grape"
-        actionDisabled={!canInstall}
-        actionLabel={showInstallButton ? t("InstallButton") : undefined}
+        actionLabel={isChromiumDesktop ? t("InstallButton") : undefined}
         actionRightSection={<IconDeviceDesktop size={16} />}
         cancelLabel={t("Close")}
         onAction={() => {
-          void install();
-          closeModal();
+          void handleInstall();
         }}
         onCancel={closeModal}
       />

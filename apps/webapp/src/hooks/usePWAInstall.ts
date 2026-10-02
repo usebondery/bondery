@@ -10,10 +10,11 @@ interface BeforeInstallPromptEvent extends Event {
 const PWA_INSTALLED_KEY = "bondery_pwa_installed";
 
 interface UsePWAInstallResult {
-  /** True only on desktop Chromium when browser has queued an install prompt */
-  canInstall: boolean;
-  /** Triggers the native browser install prompt */
-  install: () => Promise<void>;
+  /**
+   * Triggers the native browser install prompt.
+   * Returns `true` if `prompt()` ran; `false` if no deferred event was captured.
+   */
+  install: () => Promise<boolean>;
   /** True when running in a Chromium-based desktop browser (Chrome, Edge, Brave, Opera, etc.) */
   isChromiumDesktop: boolean;
   /**
@@ -38,7 +39,6 @@ interface UsePWAInstallResult {
  * showing a connected (but unclickable) tile when the user is back in the regular browser tab.
  */
 export function usePWAInstall(): UsePWAInstallResult {
-  const [canInstall, setCanInstall] = useState(false);
   const [isChromiumDesktop, setIsChromiumDesktop] = useState(false);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
   const [isInstalledFromBrowser, setIsInstalledFromBrowser] = useState(false);
@@ -70,14 +70,12 @@ export function usePWAInstall(): UsePWAInstallResult {
         // Chrome only fires this when the app is NOT installed, so clear any stale flag
         localStorage.removeItem(PWA_INSTALLED_KEY);
         setIsInstalledFromBrowser(false);
-        setCanInstall(true);
       }
     };
 
     const handleAppInstalled = () => {
       deferredPrompt.current = null;
       localStorage.setItem(PWA_INSTALLED_KEY, "true");
-      setCanInstall(false);
       setIsInstalledFromBrowser(true);
     };
 
@@ -91,14 +89,21 @@ export function usePWAInstall(): UsePWAInstallResult {
   }, []);
 
   const install = async () => {
-    if (!deferredPrompt.current) {
-      return;
+    const promptEvent = deferredPrompt.current;
+    if (!promptEvent) {
+      return false;
     }
-    await deferredPrompt.current.prompt();
-    await deferredPrompt.current.userChoice;
-    deferredPrompt.current = null;
-    setCanInstall(false);
+
+    try {
+      await promptEvent.prompt();
+      deferredPrompt.current = null;
+      await promptEvent.userChoice;
+      return true;
+    } catch {
+      deferredPrompt.current = null;
+      return false;
+    }
   };
 
-  return { canInstall, install, isChromiumDesktop, isInstalledFromBrowser, isPWAInstalled };
+  return { install, isChromiumDesktop, isInstalledFromBrowser, isPWAInstalled };
 }

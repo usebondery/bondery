@@ -373,7 +373,8 @@
       "IntroDescription2": "Starte von Dock oder Taskleiste wie jede andere App",
       "IntroDescription3": "Ein fokussierter Arbeitsbereich für dein Netzwerk, ohne den Rest des Browsers",
       "IntroTitle": "Bondery als Desktop-App nutzen",
-      "MenuInstallHint": "Öffne das Browsermenü (⋮) und wähle Bondery installieren",
+      "MenuInstallHint": "Öffne das Browsermenü (⋮) und wähle {appName} installieren. Manchmal liegt der Eintrag unter Speichern und teilen.",
+      "MenuInstallHintTitle": "Über das Browsermenü installieren",
       "NotSupportedHint": "Verfügbar in Chrome, Edge oder Brave auf dem Desktop"
     },
     "Unlink": "Konto trennen",

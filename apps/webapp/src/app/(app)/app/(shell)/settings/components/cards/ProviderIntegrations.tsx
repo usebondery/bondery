@@ -68,8 +68,7 @@ export function ProviderIntegrations({
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
 
-  const { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } =
-    usePWAInstall();
+  const { isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } = usePWAInstall();
 
   const t = useSettingsPageTranslations("Profile");
   const tIntegration = useSettingsPageTranslations("Integration");
@@ -301,7 +300,7 @@ export function ProviderIntegrations({
                       return;
                     }
 
-                    openPwaInstallModal({ canInstall, install, isChromiumDesktop });
+                    openPwaInstallModal({ install, isChromiumDesktop });
                   }}
                   provider="pwa"
                 />

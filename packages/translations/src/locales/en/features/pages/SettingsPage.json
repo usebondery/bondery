@@ -373,7 +373,8 @@
       "IntroDescription2": "Launch from the dock or taskbar like any other app",
       "IntroDescription3": "A focused workspace for your network, without the rest of the browser",
       "IntroTitle": "Use Bondery as a desktop app",
-      "MenuInstallHint": "Open the browser menu (⋮) and choose Install Bondery",
+      "MenuInstallHint": "Open the browser menu (⋮) and choose Install {appName}. It is sometimes under Save and share.",
+      "MenuInstallHintTitle": "Install from the browser menu",
       "NotSupportedHint": "Available in Chrome, Edge, or Brave on desktop"
     },
     "Unlink": "Unlink Account",
