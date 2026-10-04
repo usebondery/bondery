@@ -11,8 +11,11 @@ type SearchPeopleOptions = {
   keepInTouch?: boolean;
 };
 
+/** Matches `search_people_ids` / `count_search_people_ids` default threshold. */
+const PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD = 0.3;
+
 /**
- * Fuzzy people search via `search_people_ids` (pg_trgm).
+ * Fuzzy people search via `search_people_ids` (pg_trgm word_similarity).
  */
 export async function searchPeopleIdsWithDb(
   db: PrismaClient,
@@ -30,7 +33,7 @@ export async function searchPeopleIdsWithDb(
         ${options?.groupId ?? null}::uuid,
         ${options?.tagId ?? null}::uuid,
         ${options?.keepInTouch ?? false},
-        ${0.2}::real,
+        ${PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD}::real,
         ${limit}::int,
         ${offset}::int
       )
@@ -57,7 +60,8 @@ export async function countSearchPeopleIdsWithDb(
         ${query},
         ${options?.groupId ?? null}::uuid,
         ${options?.tagId ?? null}::uuid,
-        ${options?.keepInTouch ?? false}
+        ${options?.keepInTouch ?? false},
+        ${PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD}::real
       ) AS count
     `;
     const count = rows[0]?.count;

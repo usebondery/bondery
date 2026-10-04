@@ -27,7 +27,7 @@ export async function shareContactVCard(input: ShareContactVCardInput): Promise<
   const { content, filename } = await fetchContactVCard(input.contactId, input.contact);
   const file = new File(Paths.cache, filename);
   file.create({ overwrite: true });
-  file.write(content);
+  await file.write(content);
 
   const shareOptions = {
     dialogTitle: input.dialogTitle,

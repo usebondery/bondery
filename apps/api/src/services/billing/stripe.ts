@@ -17,7 +17,9 @@ export function getStripeClient(): Stripe {
     if (!secretKey) {
       throw new Error("BONDERY_PRIVATE_STRIPE_SECRET_KEY is not configured");
     }
-    _stripe = new Stripe(secretKey);
+    _stripe = new Stripe(secretKey, {
+      apiVersion: "2026-09-30.endive",
+    });
   }
   return _stripe;
 }

@@ -20,14 +20,14 @@
     "freeport-async": "^2.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.12",
+    "@biomejs/biome": "^2.5.15",
     "@bondery/helpers": "workspace:*",
     "@bondery/schemas": "workspace:*",
-    "@redocly/cli": "^2.51.2",
-    "lefthook": "^2.1.12",
-    "turbo": "^2.10.12",
+    "@redocly/cli": "^2.57.0",
+    "lefthook": "^2.1.15",
+    "turbo": "^2.11.6",
     "typescript": "^7.0.2",
-    "yaml": "^2.9.0"
+    "yaml": "^2.9.1"
   },
   "devEngines": {
     "runtime": {
@@ -140,5 +140,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.10.1"
+  "version": "1.10.2-rc.1"
 }

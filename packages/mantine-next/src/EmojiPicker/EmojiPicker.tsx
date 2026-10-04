@@ -6,18 +6,22 @@ import { EmojiPickerDropdownContent } from "#EmojiPicker/EmojiPickerDropdownCont
 
 interface EmojiPickerProps {
   disabled?: boolean;
+  emptyLabel?: string;
   error?: string;
   onChange: (emoji: string) => void;
   /** Debounce delay in ms for the emoji search input. Defaults to 200 (local filter). */
   searchDebounceMs?: number;
+  searchPlaceholder?: string;
   value: string;
 }
 
 export function EmojiPicker({
   value,
   onChange,
+  emptyLabel,
   error,
   searchDebounceMs,
+  searchPlaceholder,
   disabled = false,
 }: EmojiPickerProps) {
   const [opened, setOpened] = useState(false);
@@ -85,8 +89,10 @@ export function EmojiPicker({
 
         <Popover.Dropdown>
           <EmojiPickerDropdownContent
+            emptyLabel={emptyLabel}
             onSelect={handleSelect}
             searchDebounceMs={searchDebounceMs}
+            searchPlaceholder={searchPlaceholder}
             value={value}
           />
         </Popover.Dropdown>

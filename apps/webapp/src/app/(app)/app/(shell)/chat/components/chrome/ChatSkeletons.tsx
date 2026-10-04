@@ -16,7 +16,7 @@ function SuggestedPromptsSkeleton() {
 }
 
 /**
- * Full-page skeleton for the AI Assistant (Chat) page.
+ * Full-page skeleton for the Chats page.
  * Mirrors: PageHeader + centered empty-state prompt area + input bar pinned to bottom.
  */
 export function ChatPageSkeleton() {

@@ -41,28 +41,22 @@ export async function getGroupMembers(
   return parseGroupMembers(raw, params?.limit ?? 50);
 }
 
-export async function listGroups(path: string) {
-  return clientApiJson<{ groups?: Group[]; totalCount?: number }>(path);
-}
-
-export async function getGroup(id: string) {
-  return clientApiJson<{ group?: Group }>(`${API_ROUTES.GROUPS}/${id}`);
-}
-
-export async function createGroup(input: CreateGroupInput) {
-  return clientApiJson<{ group?: Group }>(API_ROUTES.GROUPS, {
+export async function createGroup(input: CreateGroupInput): Promise<Group> {
+  const raw = await clientApiJson<{ group?: Group }>(API_ROUTES.GROUPS, {
     body: JSON.stringify(input),
     headers: { "Content-Type": "application/json" },
     method: "POST",
   });
+  return parseGroupDetail(raw);
 }
 
-export async function updateGroup(id: string, patch: UpdateGroupInput) {
-  return clientApiJson<{ group?: Group }>(`${API_ROUTES.GROUPS}/${id}`, {
+export async function updateGroup(id: string, patch: UpdateGroupInput): Promise<Group> {
+  const raw = await clientApiJson<{ group?: Group }>(`${API_ROUTES.GROUPS}/${id}`, {
     body: JSON.stringify(patch),
     headers: { "Content-Type": "application/json" },
     method: "PATCH",
   });
+  return parseGroupDetail(raw);
 }
 
 export async function deleteGroup(id: string) {
@@ -99,29 +93,20 @@ export async function removeContactsFromGroup(
   });
 }
 
-export async function listGroupMembers(groupId: string, params?: GroupMembersParams) {
-  return clientApiJson<{ contacts?: unknown[]; totalCount?: number }>(
-    buildGroupMembersPath(groupId, params),
-  );
-}
-
 export async function duplicateGroup(
   sourceGroupId: string,
   input: CreateGroupInput,
 ): Promise<Group> {
   const members = await getGroupMembers(sourceGroupId, { limit: 200, offset: 0 });
   const created = await createGroup(input);
-  if (!created.group?.id) {
-    throw new Error("Group was created but response did not include group");
-  }
 
   const contactIds = members.contacts
     .map((contact) => contact.id)
     .filter((id): id is string => typeof id === "string" && id.length > 0);
 
   if (contactIds.length > 0) {
-    await addContactsToGroup(created.group.id, contactIds);
+    await addContactsToGroup(created.id, contactIds);
   }
 
-  return created.group;
+  return created;
 }

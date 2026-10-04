@@ -6,9 +6,12 @@
 -- Applied separately from Prisma migrations (see scripts/apply-sql-functions.ts).
 
 create extension if not exists "uuid-ossp";
-create extension if not exists pg_trgm;
-create extension if not exists unaccent;
 create extension if not exists postgis;
+
+-- pg_trgm and unaccent are installed in schema `extensions` by
+-- apply-sql-functions.ts (and the Prisma relocate migration) before this
+-- file is parsed. Do not CREATE them here — omitting WITH SCHEMA would put
+-- them back in public.
 
 -- immutable wrapper so unaccent() can be used in a trigram index
 create or replace function immutable_unaccent(text)
@@ -17,11 +20,23 @@ language sql
 immutable
 parallel safe
 as $$
-  select public.unaccent($1::text);
+  select extensions.unaccent($1::text);
 $$;
 
-create index if not exists people_search_trgm_idx
-  on people using gin (immutable_unaccent(first_name || ' ' || coalesce(last_name, '')) gin_trgm_ops);
+-- Per-column GIN expressions must match search_people_ids exactly.
+-- apply-sql-functions drops these indexes only when relocating pg_trgm from
+-- public. Do not DROP the per-column indexes here — that would rebuild GIN
+-- on every db:functions run. Drop the old concatenated index once.
+drop index if exists people_search_trgm_idx;
+
+create index if not exists idx_people_first_name_trgm
+  on people using gin (immutable_unaccent(lower(coalesce(first_name, ''))) extensions.gin_trgm_ops);
+
+create index if not exists idx_people_last_name_trgm
+  on people using gin (immutable_unaccent(lower(coalesce(last_name, ''))) extensions.gin_trgm_ops);
+
+create index if not exists idx_people_middle_name_trgm
+  on people using gin (immutable_unaccent(lower(coalesce(middle_name, ''))) extensions.gin_trgm_ops);
 
 -- ---------------------------------------------------------------------------
 -- Search
@@ -33,7 +48,7 @@ create or replace function search_people_ids(
   p_group_id uuid default null,
   p_tag_id uuid default null,
   p_keep_in_touch boolean default null,
-  p_threshold real default 0.2,
+  p_threshold real default 0.3,
   p_limit int default 50,
   p_offset int default 0
 )
@@ -41,10 +56,26 @@ returns table (id uuid, rank real)
 language sql
 stable
 as $$
+  with q as (
+    select immutable_unaccent(lower(p_query)) as normalized
+  )
   select p.id,
-         similarity(immutable_unaccent(p.first_name || ' ' || coalesce(p.last_name, '')), immutable_unaccent(p_query)) as rank
-  from people p
+         greatest(
+           extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.first_name, '')))),
+           extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.middle_name, '')))),
+           extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.last_name, '')))),
+           extensions.word_similarity(
+             q.normalized,
+             immutable_unaccent(lower(concat_ws(' ', p.first_name, p.middle_name, p.last_name)))
+           ),
+           extensions.word_similarity(
+             q.normalized,
+             immutable_unaccent(lower(concat_ws(' ', p.last_name, p.middle_name, p.first_name)))
+           )
+         ) as rank
+  from people p, q
   where p.user_id = p_user_id
+    and coalesce(p.myself, false) is not true
     and (p_group_id is null or exists (select 1 from people_groups pg where pg.person_id = p.id and pg.group_id = p_group_id))
     and (p_tag_id is null or exists (select 1 from people_tags pt where pt.person_id = p.id and pt.tag_id = p_tag_id))
     and (
@@ -55,7 +86,9 @@ as $$
     )
     and (
       p_query = ''
-      or similarity(immutable_unaccent(p.first_name || ' ' || coalesce(p.last_name, '')), immutable_unaccent(p_query)) > p_threshold
+      or extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.first_name, '')))) > p_threshold
+      or extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.middle_name, '')))) > p_threshold
+      or extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.last_name, '')))) > p_threshold
     )
   order by rank desc, p.first_name asc
   limit p_limit offset p_offset;
@@ -67,7 +100,7 @@ create or replace function count_search_people_ids(
   p_group_id uuid default null,
   p_tag_id uuid default null,
   p_keep_in_touch boolean default null,
-  p_threshold real default 0.2
+  p_threshold real default 0.3
 )
 returns int
 language sql

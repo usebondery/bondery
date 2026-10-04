@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIconButton, PersonChip } from "@bondery/mantine-next";
+import { ActionIconButton, type PeoplePickerOnSearch, PersonChip } from "@bondery/mantine-next";
 import type {
   ContactPreview,
   ContactRelationshipWithPeople,
@@ -9,11 +9,12 @@ import type {
 import { Card, Group, Select, Stack, Text, Tooltip } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { usePersonRelationshipsTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/platform/config";
 
 interface ContactRelationshipsSectionProps {
+  contactsHasMore?: boolean;
   currentPerson: ContactPreview;
   isSubmitting: boolean;
   onAddRelationship: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
@@ -52,6 +53,7 @@ function getPerspectiveType(
 }
 
 export function ContactRelationshipsSection({
+  contactsHasMore = false,
   currentPerson,
   selectablePeople,
   relationships,
@@ -67,10 +69,13 @@ export function ContactRelationshipsSection({
     value: typeOption.value,
   }));
 
-  const handleSearch = useCallback(
-    async (query: string): Promise<ContactPreview[]> => {
-      const results = await searchContacts(query);
-      return results.filter((c) => c.id !== currentPerson.id);
+  const handleSearch = useCallback<PeoplePickerOnSearch<ContactPreview>>(
+    async (query, paging) => {
+      const page = await searchContactsPage(query, paging);
+      return {
+        contacts: page.contacts.filter((c) => c.id !== currentPerson.id),
+        hasMore: page.hasMore,
+      };
     },
     [currentPerson.id],
   );
@@ -95,12 +100,16 @@ export function ContactRelationshipsSection({
 
             return (
               <RelationshipCardRow
+                contactsHasMore={contactsHasMore}
                 currentPerson={currentPerson}
                 initialRelatedPerson={relatedPerson}
                 initialRelationshipType={perspectiveType}
                 isLabel={t("IsLabel")}
                 isSubmitting={isSubmitting}
                 key={relationship.id}
+                loadingMoreLabel={t("LoadingMoreLabel")}
+                loadMoreErrorLabel={t("LoadMoreError")}
+                loadMoreRetryLabel={t("LoadMoreRetry")}
                 mode="edit"
                 noPeopleFound={t("NoPeopleFound")}
                 ofLabel={t("OfLabel")}
@@ -113,7 +122,8 @@ export function ContactRelationshipsSection({
                 relationshipTypeOptions={relationshipTypeOptions}
                 relationshipTypePlaceholder={t("RelationshipTypePlaceholder")}
                 removeActionLabel={t("RemoveAction")}
-                searchDebounceMs={DEBOUNCE_MS.contactPicker}
+                searchDebounceMs={DEBOUNCE_MS.search}
+                searchingLabel={t("SearchingLabel")}
                 searchPlaceholder={t("SearchPlaceholder")}
                 selectablePeople={selectablePeople}
                 showRightAction
@@ -125,9 +135,13 @@ export function ContactRelationshipsSection({
 
       <RelationshipCardRow
         addActionLabel={t("AddHint")}
+        contactsHasMore={contactsHasMore}
         currentPerson={currentPerson}
         isLabel={t("IsLabel")}
         isSubmitting={isSubmitting}
+        loadingMoreLabel={t("LoadingMoreLabel")}
+        loadMoreErrorLabel={t("LoadMoreError")}
+        loadMoreRetryLabel={t("LoadMoreRetry")}
         mode="create"
         noPeopleFound={t("NoPeopleFound")}
         ofLabel={t("OfLabel")}
@@ -136,7 +150,8 @@ export function ContactRelationshipsSection({
         relatedPersonPlaceholder={t("RelatedPersonPlaceholder")}
         relationshipTypeOptions={relationshipTypeOptions}
         relationshipTypePlaceholder={t("RelationshipTypePlaceholder")}
-        searchDebounceMs={DEBOUNCE_MS.contactPicker}
+        searchDebounceMs={DEBOUNCE_MS.search}
+        searchingLabel={t("SearchingLabel")}
         searchPlaceholder={t("SearchPlaceholder")}
         selectablePeople={selectablePeople}
       />
@@ -146,32 +161,48 @@ export function ContactRelationshipsSection({
 
 type RelationshipOption = { value: string; label: string };
 
-interface RelationshipCardRowProps {
+type RelationshipCardRowBaseProps = {
   addActionLabel?: string;
+  contactsHasMore?: boolean;
   currentPerson: ContactPreview;
   initialRelatedPerson?: ContactPreview;
   initialRelationshipType?: RelationshipType;
   isLabel: string;
   isSubmitting: boolean;
+  loadingMoreLabel: string;
+  loadMoreErrorLabel: string;
+  loadMoreRetryLabel: string;
   mode: "create" | "edit";
   noPeopleFound: string;
   ofLabel: string;
   onCreate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
   onDelete?: () => void;
-  onSearch?: (query: string) => Promise<ContactPreview[]>;
   onUpdate?: (relationshipType: RelationshipType, relatedPersonId: string) => Promise<void>;
   relatedPersonPlaceholder: string;
   relationshipTypeOptions: RelationshipOption[];
   relationshipTypePlaceholder: string;
   removeActionLabel?: string;
-  searchDebounceMs?: number;
+  searchingLabel: string;
   searchPlaceholder: string;
   selectablePeople: ContactPreview[];
   showRightAction?: boolean;
-}
+};
+
+type RelationshipCardRowProps = RelationshipCardRowBaseProps &
+  (
+    | {
+        onSearch: PeoplePickerOnSearch<ContactPreview>;
+        searchDebounceMs: number;
+      }
+    | {
+        onSearch?: never;
+        searchDebounceMs?: never;
+      }
+  );
 
 function RelationshipCardRow({
   mode,
+  contactsHasMore = false,
   currentPerson,
   selectablePeople,
   relationshipTypeOptions,
@@ -179,6 +210,10 @@ function RelationshipCardRow({
   relationshipTypePlaceholder,
   relatedPersonPlaceholder,
   searchPlaceholder,
+  searchingLabel,
+  loadingMoreLabel,
+  loadMoreErrorLabel,
+  loadMoreRetryLabel,
   noPeopleFound,
   isLabel,
   ofLabel,
@@ -218,16 +253,16 @@ function RelationshipCardRow({
     }
   }, [initialRelatedPerson]);
 
-  const localHandleSearch = useCallback(
-    async (query: string): Promise<ContactPreview[]> => {
+  const localHandleSearch = useCallback<PeoplePickerOnSearch<ContactPreview>>(
+    async (query, paging) => {
       if (!onSearch) {
-        return [];
+        return { contacts: [], hasMore: false };
       }
-      const results = await onSearch(query);
-      for (const r of results) {
+      const page = await onSearch(query, paging);
+      for (const r of page.contacts) {
         knownRelatedPeopleRef.current.set(r.id, r);
       }
-      return results;
+      return page;
     },
     [onSearch],
   );
@@ -259,6 +294,63 @@ function RelationshipCardRow({
       setIsAutoCreating(false);
     }
   };
+
+  const handleSelectRelatedPerson = (nextPersonId: string) => {
+    if (!nextPersonId) {
+      return;
+    }
+
+    setRelatedPersonId(nextPersonId);
+
+    if (
+      mode === "edit" &&
+      onUpdate &&
+      relationshipType &&
+      nextPersonId !== initialRelatedPerson?.id
+    ) {
+      onUpdate(relationshipType, nextPersonId);
+    }
+
+    void maybeCreate(relationshipType, nextPersonId);
+  };
+
+  const relatedPersonChip =
+    onSearch != null && searchDebounceMs != null ? (
+      <PersonChip
+        contactsHasMore={contactsHasMore}
+        disabled={isSubmitting || isAutoCreating}
+        isSelectable
+        loadingMoreLabel={loadingMoreLabel}
+        loadMoreErrorLabel={loadMoreErrorLabel}
+        loadMoreRetryLabel={loadMoreRetryLabel}
+        noResultsLabel={noPeopleFound}
+        onSearch={localHandleSearch}
+        onSelectPerson={handleSelectRelatedPerson}
+        people={selectableRelatedPeople}
+        person={relatedPerson}
+        placeholder={relatedPersonPlaceholder}
+        searchDebounceMs={searchDebounceMs}
+        searchingLabel={searchingLabel}
+        searchPlaceholder={searchPlaceholder}
+        showChevronWhenEmpty
+      />
+    ) : (
+      <PersonChip
+        disabled={isSubmitting || isAutoCreating}
+        isSelectable
+        loadingMoreLabel={loadingMoreLabel}
+        loadMoreErrorLabel={loadMoreErrorLabel}
+        loadMoreRetryLabel={loadMoreRetryLabel}
+        noResultsLabel={noPeopleFound}
+        onSelectPerson={handleSelectRelatedPerson}
+        people={selectableRelatedPeople}
+        person={relatedPerson}
+        placeholder={relatedPersonPlaceholder}
+        searchingLabel={searchingLabel}
+        searchPlaceholder={searchPlaceholder}
+        showChevronWhenEmpty
+      />
+    );
 
   return (
     <Card p="md" radius="md" shadow="none" withBorder>
@@ -303,36 +395,7 @@ function RelationshipCardRow({
           {ofLabel}
         </Text>
 
-        <PersonChip
-          disabled={isSubmitting || isAutoCreating}
-          isSelectable
-          noResultsLabel={noPeopleFound}
-          onSearch={onSearch ? localHandleSearch : undefined}
-          onSelectPerson={(nextPersonId) => {
-            if (!nextPersonId) {
-              return;
-            }
-
-            setRelatedPersonId(nextPersonId);
-
-            if (
-              mode === "edit" &&
-              onUpdate &&
-              relationshipType &&
-              nextPersonId !== initialRelatedPerson?.id
-            ) {
-              onUpdate(relationshipType, nextPersonId);
-            }
-
-            void maybeCreate(relationshipType, nextPersonId);
-          }}
-          people={selectableRelatedPeople}
-          person={relatedPerson}
-          placeholder={relatedPersonPlaceholder}
-          searchDebounceMs={searchDebounceMs}
-          searchPlaceholder={searchPlaceholder}
-          showChevronWhenEmpty
-        />
+        {relatedPersonChip}
 
         {showRightAction ? (
           <ActionIconButton

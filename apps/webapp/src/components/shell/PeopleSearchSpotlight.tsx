@@ -1,14 +1,14 @@
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { PERSON_SEARCH_OPTION_HIT_CLASS, PersonSearchOptionRow } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
-import { Avatar, Group, Loader, Stack, Text } from "@mantine/core";
+import { Group, Loader, Text } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { createSpotlight, Spotlight } from "@mantine/spotlight";
-import { IconBriefcase, IconCompass, IconSearch, IconUsers } from "@tabler/icons-react";
+import { IconSearch, IconUsers } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
-import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
 import { searchContacts } from "@/lib/contacts/searchContacts";
 import { usePeopleSearchSpotlightTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
@@ -20,8 +20,6 @@ const [peopleStore, peopleSearchActions] = createSpotlight();
 export { peopleSearchActions };
 
 const descriptionColor = "var(--action-description-color, var(--mantine-color-dimmed))";
-
-const MIN_QUERY_LENGTH = 3;
 
 export function PeopleSearchSpotlight() {
   const t = usePeopleSearchSpotlightTranslations();
@@ -45,11 +43,12 @@ export function PeopleSearchSpotlight() {
   const handleQueryChange = useCallback(
     (q: string) => {
       setQuery(q);
-      if (q.trim().length >= MIN_QUERY_LENGTH) {
+      const trimmedQuery = q.trim();
+      if (trimmedQuery.length > 0) {
         // Show the loader immediately so the user sees intent before the
         // debounce fires and the actual fetch begins.
         setIsLoading(true);
-        debouncedSearch(q.trim());
+        debouncedSearch(trimmedQuery);
       } else {
         setResults([]);
         setIsLoading(false);
@@ -76,7 +75,7 @@ export function PeopleSearchSpotlight() {
   }
 
   const trimmed = query.trim();
-  const belowMinLength = trimmed.length < MIN_QUERY_LENGTH;
+  const hasQuery = trimmed.length > 0;
 
   return (
     <Spotlight.Root
@@ -95,9 +94,7 @@ export function PeopleSearchSpotlight() {
       />
 
       <Spotlight.ActionsList>
-        {belowMinLength && !isLoading && <Spotlight.Empty>{t("TypeMinChars")}</Spotlight.Empty>}
-
-        {!belowMinLength && isLoading && (
+        {hasQuery && isLoading && (
           <Spotlight.Empty>
             <Group justify="center" py="md">
               <Loader size="sm" />
@@ -105,54 +102,23 @@ export function PeopleSearchSpotlight() {
           </Spotlight.Empty>
         )}
 
-        {!belowMinLength && !isLoading && results.length === 0 && (
+        {hasQuery && !isLoading && results.length === 0 && (
           <Spotlight.Empty>{t("NoPeopleFound")}</Spotlight.Empty>
         )}
 
-        {!belowMinLength &&
+        {hasQuery &&
           !isLoading &&
-          results.map((contact) => {
-            const fullName = [contact.firstName, contact.middleName, contact.lastName]
-              .filter(Boolean)
-              .join(" ");
+          results.map((contact) => (
+            <Spotlight.Action
+              className={PERSON_SEARCH_OPTION_HIT_CLASS}
+              key={contact.id}
+              onClick={() => handlePersonClick(contact)}
+            >
+              <PersonSearchOptionRow person={contact} />
+            </Spotlight.Action>
+          ))}
 
-            return (
-              <Spotlight.Action key={contact.id} onClick={() => handlePersonClick(contact)}>
-                <Group align="center" gap="sm" w="100%" wrap="nowrap">
-                  <Avatar
-                    color={getAvatarColorFromName(contact.firstName, contact.lastName)}
-                    name={fullName}
-                    radius="xl"
-                    size={32}
-                    src={contact.avatar || undefined}
-                  />
-                  <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-                    <Text fw={600} size="sm" truncate>
-                      {fullName}
-                    </Text>
-                    {contact.headline && (
-                      <Group gap={4} style={{ color: descriptionColor, minWidth: 0 }} wrap="nowrap">
-                        <IconBriefcase size={12} stroke={1.5} style={{ flexShrink: 0 }} />
-                        <Text c="inherit" size="xs" truncate>
-                          {contact.headline}
-                        </Text>
-                      </Group>
-                    )}
-                    {contact.location && (
-                      <Group gap={4} style={{ color: descriptionColor, minWidth: 0 }} wrap="nowrap">
-                        <IconCompass size={12} stroke={1.5} style={{ flexShrink: 0 }} />
-                        <Text c="inherit" size="xs" truncate>
-                          {contact.location}
-                        </Text>
-                      </Group>
-                    )}
-                  </Stack>
-                </Group>
-              </Spotlight.Action>
-            );
-          })}
-
-        {!belowMinLength && !isLoading && results.length > 0 && (
+        {hasQuery && !isLoading && results.length > 0 && (
           <Spotlight.Action onClick={handleSeeAll}>
             <Group gap="xs" justify="center" style={{ color: descriptionColor }}>
               <IconUsers size={16} stroke={1.5} />

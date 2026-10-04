@@ -137,6 +137,7 @@ export const API_ROUTES = {
   ME_SESSION: "/me/session",
   ME_SETTINGS: "/me/settings",
   ME_SETTINGS_GETTING_STARTED_DISMISS: "/me/settings/getting-started-dismiss",
+  ME_STEP_UP: "/me/step-up",
   OAUTH_PROVIDERS: "/oauth-providers",
   SUBSCRIPTIONS: "/subscriptions",
   SUBSCRIPTIONS_CHECKOUT: "/subscriptions/checkout",
@@ -172,7 +173,10 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.10.0";
+export const MIN_EXTENSION_VERSION: string = "1.10.1";
+
+/** One-shot account-delete nonce. Browser → BFF and BFF → API must forward it. */
+export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
 
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
@@ -186,6 +190,9 @@ export const SUPPORT_EMAIL = "team@usebondery.com";
 
 /** The webapp product name used in browser tab titles and metadata. */
 export const WEBAPP_NAME = "Bondery";
+
+/** Display name used in the web app manifest and browser install UI. */
+export const PWA_APP_NAME = `${WEBAPP_NAME} PWA`;
 
 /** Divider character used in browser tab titles, e.g. "Person • Bondery" */
 export const METADATA_TITLE_DIVIDER = "•";
@@ -212,6 +219,7 @@ export const WEBAPP_ROUTES = {
   ACCOUNT: "/app/account",
   APP_GROUP: "/app",
   CHAT: "/app/chat",
+  CONFIRM: "/confirm",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",

@@ -133,9 +133,11 @@ function EditGroupForm({
           <Box style={{ width: 80 }}>
             <EmojiPicker
               disabled={isBlocking}
+              emptyLabel={t("EmojiEmptySearch")}
               error={form.errors.emoji as string | undefined}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
+              searchPlaceholder={t("EmojiSearchPlaceholder")}
               value={form.values.emoji}
             />
           </Box>

@@ -1,14 +1,9 @@
 import { getTelephoneReactMaskExpression } from "@bondery/helpers/phone";
 import { useEffect, useRef } from "react";
-import {
-  type StyleProp,
-  StyleSheet,
-  type TextInput,
-  type TextInputProps,
-  type TextStyle,
-} from "react-native";
+import { type StyleProp, StyleSheet, type TextInputProps, type TextStyle } from "react-native";
 import { IMaskTextInput } from "react-native-imask";
 import { UI_TIMING_MS } from "../../../lib/config";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
@@ -19,7 +14,7 @@ interface MaskedPhoneInputProps {
   enterKeyHint?: TextInputProps["enterKeyHint"];
   error?: boolean;
   onChangeValue: (unmaskedValue: string) => void;
-  onInputRef?: (input: TextInput | null) => void;
+  onInputRef?: (input: NativeTextInputRef | null) => void;
   onSubmitEditing?: TextInputProps["onSubmitEditing"];
   placeholder?: string;
   prefix: string;
@@ -42,7 +37,7 @@ export function MaskedPhoneInput({
   onInputRef,
 }: MaskedPhoneInputProps) {
   const colors = useMobileThemeColors();
-  const inputRef = useRef<TextInput | null>(null);
+  const inputRef = useRef<NativeTextInputRef | null>(null);
   const mask = getTelephoneReactMaskExpression(prefix || "+1");
 
   useEffect(() => {
@@ -81,7 +76,7 @@ export function MaskedPhoneInput({
           borderColor: error ? colors.dangerAccent : colors.border,
           color: colors.textPrimary,
         },
-        containerStyle,
+        containerStyle as never,
       ]}
       unmask
       value={value}

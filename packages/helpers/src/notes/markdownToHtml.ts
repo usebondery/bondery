@@ -2,7 +2,8 @@
  * Converts a Markdown string to Tiptap-compatible HTML.
  *
  * Handles: headings (h1–h3), bold, italic, strikethrough, inline code,
- * highlight (==...==), links ([text](url)), blockquotes, un/ordered lists,
+ * highlight (==...==), links ([text](url)), person mentions
+ * (`[@Name](bp://person/ID)` and `[[bp:person:ID]]`), blockquotes, un/ordered lists,
  * task lists (- [ ] / - [x]), horizontal rules, and plain paragraphs.
  *
  * Cross-platform: works in React Native, Node.js, and browsers.
@@ -51,6 +52,12 @@ export function markdownToHtml(markdown: string): string {
       .replace(/==(.+?)==/g, (_, a) => `<mark>${a}</mark>`)
       // inline code: `…`
       .replace(/`([^`]+)`/g, (_, a) => `<code>${a}</code>`)
+      // Person mention links must run before generic markdown links.
+      .replace(/\[(@[^\]]*)\]\(bp:\/\/person\/([^)]+)\)/g, (_, rawLabel: string, id: string) => {
+        const label = rawLabel.replace(/^@/, "").trim();
+        const text = label.length > 0 ? `@${label}` : "@";
+        return `<span data-type="mention" data-id="${id}" data-label="${label}">${text}</span>`;
+      })
       // bp tokens: [[bp:person:UUID]], [[bp:date:ISO]], etc.
       .replace(
         /\[\[bp:person:([^\]]+)\]\]/g,

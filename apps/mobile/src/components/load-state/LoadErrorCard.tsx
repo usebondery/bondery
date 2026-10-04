@@ -19,7 +19,7 @@ export function LoadErrorCard({ title, description, onRetry, style }: LoadErrorC
       style={[
         styles.card,
         { backgroundColor: colors.surface, borderColor: colors.borderStrong },
-        style,
+        style as never,
       ]}
     >
       <View style={styles.iconWrap}>

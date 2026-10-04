@@ -3,7 +3,7 @@ import { createTagSchema, GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
-import { StyleSheet, type TextInput, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   useCommonTranslations,
   useMobileTagsTranslations,
@@ -22,6 +22,7 @@ import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { createTag, updateTag } from "../../../lib/domains/tags";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { TagDeleteDialog } from "./TagDeleteDialog";
@@ -55,7 +56,7 @@ export function TagEditSheet(props: TagEditSheetProps) {
 
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const labelRef = useRef<TextInput>(null);
+  const labelRef = useRef<NativeTextInputRef>(null);
 
   const {
     control,
@@ -202,7 +203,7 @@ function TagColorLabelRow({
   control: Control<TagFormValues>;
   setValue: UseFormSetValue<TagFormValues>;
   isSubmitting: boolean;
-  labelRef: RefObject<TextInput | null>;
+  labelRef: RefObject<NativeTextInputRef | null>;
   onSubmit: () => void;
   showToast: ReturnType<typeof useAppToast>["showToast"];
 }) {

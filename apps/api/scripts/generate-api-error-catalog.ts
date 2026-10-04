@@ -137,6 +137,7 @@ for (const code of extractAllCodes(apiSrc)) {
 
 const STATUS_OVERRIDES: Record<string, number> = {
   EXTENSION_OUTDATED: 426,
+  session_not_fresh: 403,
 };
 
 function httpStatusFor(code: string, meta: CodeMeta): number {

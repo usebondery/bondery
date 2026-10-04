@@ -55,28 +55,31 @@ export function useContactsTableCopy() {
       emptyStateMessage?: string;
       loadMoreLabel?: string;
     },
-  ): DataTableLabels => ({
-    actionsAriaLabel: t("ActionsAriaLabel"),
-    clearAllTotalTemplate: t("ClearAllTotalTemplate"),
-    columnVisibility: {
-      buttonLabel: t("VisibleColumnsButton"),
-      hiddenSection: t("HiddenColumnsSection"),
-      noHidden: t("NoHiddenColumns"),
-      noVisible: t("NoVisibleColumns"),
-      visibleSection: t("VisibleColumnsSection"),
-    },
-    emptyStateMessage: overrides.emptyStateMessage ?? "",
-    loadMoreLabel: overrides.loadMoreLabel,
-    searchPlaceholder: overrides.searchPlaceholder ?? t("SearchPlaceholder"),
-    selectAllTotalTemplate: t("SelectAllTotalTemplate"),
-    selectedCountTemplate: t("SelectedCountTemplate"),
-    selectedSingularCountTemplate: t("SelectedSingularCountTemplate"),
-    sort: {
-      buttonLabel: t("SortButton"),
-    },
-    totalCountTemplate: t("TotalCountTemplate"),
-    ...overrides,
-  });
+  ): DataTableLabels => {
+    const { emptyStateMessage, loadMoreLabel, searchPlaceholder, ...rest } = overrides;
+    return {
+      actionsAriaLabel: t("ActionsAriaLabel"),
+      clearAllTotalTemplate: t("ClearAllTotalTemplate"),
+      columnVisibility: {
+        buttonLabel: t("VisibleColumnsButton"),
+        hiddenSection: t("HiddenColumnsSection"),
+        noHidden: t("NoHiddenColumns"),
+        noVisible: t("NoVisibleColumns"),
+        visibleSection: t("VisibleColumnsSection"),
+      },
+      emptyStateMessage: emptyStateMessage ?? "",
+      loadMoreLabel,
+      searchPlaceholder: searchPlaceholder ?? t("SearchPlaceholder"),
+      selectAllTotalTemplate: t("SelectAllTotalTemplate"),
+      selectedCountTemplate: t("SelectedCountTemplate"),
+      selectedSingularCountTemplate: t("SelectedSingularCountTemplate"),
+      sort: {
+        buttonLabel: t("SortButton"),
+      },
+      totalCountTemplate: t("TotalCountTemplate"),
+      ...rest,
+    };
+  };
 
   return {
     buildTableLabels,

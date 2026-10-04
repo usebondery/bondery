@@ -7,6 +7,18 @@ import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 import { QueryProvider } from "@/lib/query/QueryProvider";
 
+const NEXT_I18NEXT_SERVER = Symbol.for("next-i18next.server");
+
+/** HMR keeps the next-i18next singleton; drop it in dev so a new resourceLoader attaches. */
+if (process.env.NODE_ENV === "development") {
+  const shared = (globalThis as Record<symbol, { state: unknown } | undefined>)[
+    NEXT_I18NEXT_SERVER
+  ];
+  if (shared) {
+    shared.state = null;
+  }
+}
+
 initServerI18next(i18nConfig);
 
 /**

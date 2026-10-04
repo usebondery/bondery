@@ -447,6 +447,8 @@ export const EXAMPLE_API_KEY_CREATED_RESPONSE = {
   secret: "bondery_key_dd0e8400_secret_example",
 };
 
+export const EXAMPLE_STEP_UP_TOKEN_RESPONSE = { token: "step-up-nonce" };
+
 export const EXAMPLE_PHOTO_UPLOAD_RESPONSE = {
   avatarUrl: "https://cdn.example.com/avatars/ada.jpg",
   success: true,

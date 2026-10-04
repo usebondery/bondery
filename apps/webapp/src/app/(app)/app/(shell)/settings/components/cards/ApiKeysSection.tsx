@@ -1,13 +1,13 @@
 "use client";
 
-import { DescribedSelect, errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
+import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
 import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bondery/schemas";
 import { Button, CardSection, Stack, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconAlertCircle, IconKey, IconPlus, IconTrash } from "@tabler/icons-react";
+import { IconKey, IconPlus } from "@tabler/icons-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { InlineEditableInput } from "@/app/(app)/app/(shell)/person/[personId]/components/info/InlineEditableInput";
-import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
+import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import {
@@ -16,6 +16,7 @@ import {
   useUpdateApiKeyLabelMutation,
 } from "@/lib/query/hooks/useApiKeys";
 import { useApiKeyPermissionOptions } from "../../hooks/useApiKeyPermissionOptions";
+import { openRevokeApiKeyConfirm } from "../../settingsAuthActions";
 import { openApiKeyModal } from "../modals/openApiKeyModal";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
 import { SettingsSection } from "./SettingsSection";
@@ -145,30 +146,34 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
 
   const handleCreated = useCallback((_created: ApiKeyCreated) => {}, []);
 
-  const openCreateModal = useCallback(() => {
+  const openCreateModal = useCallback(async () => {
+    if (atLimit) {
+      return;
+    }
+    const stepped = await ensureFreshIdentity({ purpose: "create_api_key" });
+    if (stepped !== "fresh") {
+      return;
+    }
     openApiKeyModal({
       apiBaseUrl,
       onCreated: handleCreated,
     });
-  }, [apiBaseUrl, handleCreated]);
+  }, [apiBaseUrl, atLimit, handleCreated]);
 
-  const handleDelete = (key: ApiKeyListItem) => {
-    openStandardConfirmModal({
-      cancelLabel: tCommon("confirm.noCancel"),
-      confirmColor: "red",
-      confirmLabel: tCommon("confirm.yesDelete"),
-      confirmLeftSection: <IconTrash size={16} />,
-      message: <Text size="sm">{t("DeleteMessage")}</Text>,
-      onConfirm: async () => {
-        await deleteMutation.mutateAsync(key.id);
-      },
-      title: (
-        <ModalTitle
-          icon={<IconAlertCircle size={24} />}
-          isDangerous
-          text={t("DeleteTitle", { label: key.label })}
-        />
-      ),
+  const handleDelete = async (key: ApiKeyListItem) => {
+    const stepped = await ensureFreshIdentity({
+      purpose: "revoke_api_key",
+      targetId: key.id,
+    });
+    if (stepped !== "fresh") {
+      return;
+    }
+    openRevokeApiKeyConfirm({
+      id: key.id,
+      label: key.label,
+      revokeApiKey: (id, stepUpToken) => deleteMutation.mutateAsync({ id, stepUpToken }),
+      t,
+      tCommon,
     });
   };
 
@@ -178,7 +183,7 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
         <Button
           disabled={atLimit}
           leftSection={<IconPlus size={16} />}
-          onClick={openCreateModal}
+          onClick={() => void openCreateModal()}
           size="sm"
           variant="outline"
         >
@@ -215,7 +220,7 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
                   deleteAriaLabel={t("DeleteButton")}
                   key={key.id}
                   lastUsedLabel={lastUsedLabel(key.lastUsedAt)}
-                  onDelete={() => handleDelete(key)}
+                  onDelete={() => void handleDelete(key)}
                   onLabelUpdated={() => {}}
                   permissionOptions={permissionOptions}
                 />

@@ -838,9 +838,13 @@ export type GroupsPageCatalog = {
     LabelRequired: string;
     LabelTooLong: string;
     LoadContactsError: string;
+    LoadingMoreLabel: string;
+    LoadMoreError: string;
+    LoadMoreRetry: string;
     LoadingDescription: string;
     LoadingTitle: string;
     NoContactsFound: string;
+    SearchingLabel: string;
     SuccessDescription: string;
     SuccessTitle: string;
     Title: string;
@@ -860,8 +864,12 @@ export type GroupsPageCatalog = {
     ErrorTitle: string;
     LoadError: string;
     NoContactsFound: string;
+    LoadingMoreLabel: string;
+    LoadMoreError: string;
+    LoadMoreRetry: string;
     NoSelectionDescription: string;
     NoSelectionTitle: string;
+    SearchingLabel: string;
     SkippedAlreadyInGroup_one: string;
     SkippedAlreadyInGroup_other: string;
     SuccessMessage_one: string;
@@ -907,6 +915,8 @@ export type GroupsPageCatalog = {
     Title: string;
     UpdateFailed: string;
   };
+  EmojiEmptySearch: string;
+  EmojiSearchPlaceholder: string;
   Empty: string;
   FallbackTitle: string;
   HeaderDescription: string;
@@ -1121,7 +1131,10 @@ export type InteractionsPageCatalog = {
   LastInteractionUpdated: string;
   LastInteractionUpdateFailed: string;
   LastInteractionViaActivity: string;
+  LoadingMoreLabel: string;
   LoadMoreBatch: string;
+  LoadMorePickerError: string;
+  LoadMoreRetry: string;
   MorePeople: string;
   NextDue: string;
   NoActivitiesFiltered: string;
@@ -1252,6 +1265,10 @@ export type LoginPageCatalog = {
   ContinueWith: string;
   ContinueWithEmail: string;
   ContinueWithPasskey: string;
+  ConfirmDescription: string;
+  ConfirmMismatch: string;
+  ConfirmStillStale: string;
+  ConfirmTitle: string;
   Description: string;
   EmailLabel: string;
   EmailPlaceholder: string;
@@ -1383,8 +1400,12 @@ export type MergeWithModalCatalog = {
   ModalTitle: string;
   NoConflicts: string;
   NoPeopleFound: string;
+  LoadingMoreLabel: string;
+  LoadMoreError: string;
+  LoadMoreRetry: string;
   Processing: string;
   SearchPeople: string;
+  SearchingLabel: string;
   SelectBothPeopleError: string;
   SelectLeftPerson: string;
   SelectRightPerson: string;
@@ -1735,8 +1756,12 @@ export type NotesEditorCatalog = {
   Italic: string;
   ItalicHint: string;
   LinkPlaceholder: string;
+  LoadingMoreLabel: string;
+  LoadMoreError: string;
+  LoadMoreRetry: string;
   Markdown: string;
   NotesTitle: string;
+  NoPeopleFound: string;
   OrderedList: string;
   OrderedListHint: string;
   Redo: string;
@@ -1947,7 +1972,6 @@ export type PeopleSearchSpotlightCatalog = {
   NoPeopleFound: string;
   SearchPlaceholder: string;
   SeeAllResults: string;
-  TypeMinChars: string;
 };
 
 export type PersonRelationshipsCatalog = {
@@ -1961,6 +1985,9 @@ export type PersonRelationshipsCatalog = {
   ErrorTitle: string;
   IsLabel: string;
   IsText: string;
+  LoadingMoreLabel: string;
+  LoadMoreError: string;
+  LoadMoreRetry: string;
   NoPeopleFound: string;
   OfLabel: string;
   OfText: string;
@@ -1970,6 +1997,7 @@ export type PersonRelationshipsCatalog = {
   RelationshipTypePlaceholder: string;
   RemoveAction: string;
   SearchPlaceholder: string;
+  SearchingLabel: string;
   SuccessTitle: string;
   Title: string;
   Types: {
@@ -2394,6 +2422,7 @@ export type SettingsPageCatalog = {
       IntroDescription3: string;
       IntroTitle: string;
       MenuInstallHint: string;
+      MenuInstallHintTitle: string;
       NotSupportedHint: string;
     };
     Unlink: string;
@@ -2746,6 +2775,9 @@ export type TagsSettingsCatalog = {
   LoadContactsErrorTitle: string;
   LoadMembersErrorDescription: string;
   LoadMembersErrorTitle: string;
+  LoadingMoreLabel: string;
+  LoadMoreError: string;
+  LoadMoreRetry: string;
   ManageTags: string;
   NoPeopleFound: string;
   PeopleWithTagLabel: string;
@@ -2754,6 +2786,7 @@ export type TagsSettingsCatalog = {
   SaveErrorTitle: string;
   SaveSuccessDescription: string;
   SaveSuccessTitle: string;
+  SearchingLabel: string;
   SavingDescription: string;
   SavingTitle: string;
   Title: string;

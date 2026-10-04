@@ -1,10 +1,10 @@
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
 import type {
   FeedbackFormInput,
   UpdateAccountInput,
   UpdateUserSettingsInput,
 } from "@bondery/schemas";
-import { applyTransportResponsePolicy, clientApiFetch, clientApiJson } from "@/lib/api/client";
+import { clientApiJson } from "@/lib/api/client";
 import {
   parseSettingsQueryResult,
   SETTINGS_API_PATH,
@@ -59,8 +59,9 @@ export async function dismissGettingStarted(): Promise<void> {
   });
 }
 
-export async function deleteAccount(): Promise<void> {
+export async function deleteAccount(stepUpToken: string): Promise<void> {
   await clientApiJson(API_ROUTES.ME, {
+    headers: { [BONDERY_STEP_UP_HEADER]: stepUpToken },
     method: "DELETE",
   });
 }
@@ -69,17 +70,9 @@ export async function uploadMePhoto(file: File): Promise<{ avatarUrl: string | n
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await clientApiFetch(API_ROUTES.ME_PHOTO, {
+  const body = await clientApiJson<{ data?: { avatarUrl?: string } }>(API_ROUTES.ME_PHOTO, {
     body: formData,
     method: "POST",
   });
-
-  if (!response.ok) {
-    applyTransportResponsePolicy(response);
-    const error = (await response.json()) as { error?: string };
-    throw new Error(error.error || "Failed to upload photo");
-  }
-
-  const body = (await response.json()) as { data?: { avatarUrl?: string } };
   return { avatarUrl: body.data?.avatarUrl ?? null };
 }

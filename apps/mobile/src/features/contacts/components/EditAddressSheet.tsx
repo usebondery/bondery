@@ -19,7 +19,7 @@ import {
   IconTrash,
 } from "@tabler/icons-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, type TextInput, View } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
@@ -29,6 +29,7 @@ import { SheetSelectField, SheetTextField } from "../../../components/form";
 import { fetchGeocodeSuggestions } from "../../../lib/api/client";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CountryFlag } from "./CountryFlag";
@@ -94,7 +95,7 @@ export function EditAddressSheet({
 }: EditAddressSheetProps) {
   const tContactAddress = useContactAddressTranslations();
   const colors = useMobileThemeColors();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<NativeTextInputRef>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   const activeQueryRef = useRef<string | null>(null);

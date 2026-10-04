@@ -35,6 +35,12 @@ export const ITEM_PADDING = {
   paddingTop: "var(--mantine-spacing-xs)",
 } as const;
 
+/** `UnstyledButton` / `Group` do not take a `radius` prop — use in `style.borderRadius`. */
+export const NAV_LINK_ITEM_BORDER_RADIUS = "var(--mantine-radius-default)";
+
+/** Tailwind gap between sidebar nav rows (browse links and chat sessions). */
+export const SIDEBAR_NAV_STACK_CLASSNAME = "gap-2!";
+
 export function NavLinkItem({
   href,
   onClick,
@@ -55,7 +61,7 @@ export function NavLinkItem({
   const { hovered, ref } = useHover<HTMLElement>();
 
   const sharedStyle = {
-    borderRadius: "var(--mantine-radius-sm)",
+    borderRadius: NAV_LINK_ITEM_BORDER_RADIUS,
     width: "100%",
     // outline sits outside the box model so it doesn't shrink the padding area.
     ...(bordered && {

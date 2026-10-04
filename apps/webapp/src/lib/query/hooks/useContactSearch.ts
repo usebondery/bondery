@@ -1,6 +1,7 @@
+import { PEOPLE_PICKER_PAGE_SIZE } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
 import { useQuery } from "@tanstack/react-query";
-import { getContactsSelectableList } from "@/lib/api/domains/contacts";
+import { searchContacts } from "@/lib/contacts/searchContacts";
 import { contactKeys } from "@/lib/query/keys";
 
 export function useContactSearchQuery(query: string, enabled = true) {
@@ -11,9 +12,12 @@ export function useContactSearchQuery(query: string, enabled = true) {
       if (trimmed.length === 0) {
         return [];
       }
-      const data = await getContactsSelectableList({ limit: 10, search: trimmed });
-      return data.contacts;
+      return searchContacts(trimmed);
     },
-    queryKey: contactKeys.selectable.search(trimmed),
+    queryKey: contactKeys.selectable.list({
+      limit: PEOPLE_PICKER_PAGE_SIZE,
+      offset: 0,
+      search: trimmed,
+    }),
   });
 }

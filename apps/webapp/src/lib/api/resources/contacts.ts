@@ -11,6 +11,7 @@ import type {
   PaginationMeta,
   Tag,
 } from "@bondery/schemas";
+import { missingResourceError } from "@/lib/api/missingResourceError";
 import {
   buildInteractionsListPath,
   type InteractionsListParams,
@@ -153,7 +154,7 @@ export function buildContactDetailPath(id: string, avatarPreset: AvatarPreset = 
 
 export function parseContactDetail(raw: { contact?: Contact }): Contact {
   if (!raw.contact) {
-    throw new Error("Contact not found");
+    throw missingResourceError("contact_not_found");
   }
   return raw.contact;
 }

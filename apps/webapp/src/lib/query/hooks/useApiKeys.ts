@@ -25,7 +25,8 @@ export function useCreateApiKeyMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: CreateApiKeyInput) => createApiKey(body),
+    mutationFn: ({ body, stepUpToken }: { body: CreateApiKeyInput; stepUpToken: string }) =>
+      createApiKey(body, stepUpToken),
 
     onSuccess: async () => {
       await invalidateApiKeys(queryClient);
@@ -50,7 +51,8 @@ export function useDeleteApiKeyMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => deleteApiKey(id),
+    mutationFn: ({ id, stepUpToken }: { id: string; stepUpToken: string }) =>
+      deleteApiKey(id, stepUpToken),
 
     onSuccess: async () => {
       await invalidateApiKeys(queryClient);

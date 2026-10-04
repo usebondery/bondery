@@ -2,7 +2,7 @@ import type { Contact } from "@bondery/schemas";
 import { updateContactIdentitySchema } from "@bondery/schemas";
 import { IconBriefcase, IconCheck, IconTrash } from "@tabler/icons-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Image, StyleSheet, Text, type TextInput, View } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import {
   useCommonTranslations,
   useMobileContactIdentityTranslations,
@@ -16,6 +16,7 @@ import { fetchSettings } from "../../../lib/api/client";
 import { INPUT_MAX_LENGTHS, UI_TIMING_MS } from "../../../lib/config";
 import { updateContact } from "../../../lib/domains/contacts";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { ScalePressable } from "../../../theme/ScalePressable";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
@@ -45,7 +46,7 @@ export function EditIdentitySheet({
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const firstNameRef = useRef<TextInput>(null);
+  const firstNameRef = useRef<NativeTextInputRef>(null);
 
   // Keep a stable ref so callbacks like onAvatarUpdated never capture a stale contact.
   const contactRef = useRef(contact);

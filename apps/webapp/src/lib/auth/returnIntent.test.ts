@@ -11,6 +11,11 @@ describe("isSafeReturnPath", () => {
     assert.equal(isSafeReturnPath("/oauth/consent?client_id=abc"), false);
   });
 
+  it("does not treat /confirm step-up as a post-login return path", () => {
+    assert.equal(isSafeReturnPath("/confirm"), false);
+    assert.equal(isSafeReturnPath("/confirm?action=delete_account"), false);
+  });
+
   it("rejects oversized return paths so a signed oauth_query cannot hide in redirect", () => {
     const stuffed = `/app/people?${"x".repeat(2_100)}`;
     assert.equal(isSafeReturnPath(stuffed), false);

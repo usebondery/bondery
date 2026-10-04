@@ -7,7 +7,8 @@
  * Handles the full set of marks/nodes used by the notes editor:
  * headings (h1-h3), paragraphs, bold, italic, underline, strikethrough,
  * highlights, inline code, links, ordered + unordered + task lists,
- * blockquotes, horizontal rules, line breaks, and @mention spans.
+ * blockquotes, horizontal rules, line breaks, and @mention spans
+ * (`[@Name](bp://person/ID)` when a label is present).
  *
  * Entity references use the unified `[[bp:type:id]]` wire format.
  *
@@ -21,10 +22,9 @@ export function htmlToMarkdown(html: string): string {
 
   let md = html;
 
-  // @mention spans → [[bp:person:ID]]
-  md = md.replace(
-    /<span[^>]*data-type="mention"[^>]*data-id="([^"]*)"[^>]*>.*?<\/span>/gs,
-    (_, id) => `[[bp:person:${id}]]`,
+  // @mention spans → named mobile link when the label survived, else [[bp:person:ID]]
+  md = md.replace(/<span[^>]*data-type="mention"[^>]*>.*?<\/span>/gs, (span) =>
+    mentionSpanToMarkdown(span),
   );
 
   // Inline date spans → [[bp:date:TIMESTAMP]]
@@ -122,4 +122,18 @@ export function htmlToMarkdown(html: string): string {
 
 function stripTags(html: string): string {
   return html.replace(/<[^>]+>/g, "");
+}
+
+function mentionSpanToMarkdown(span: string): string {
+  const id = span.match(/data-id="([^"]*)"/)?.[1];
+  if (!id) {
+    return "";
+  }
+  const labelAttr = span.match(/data-label="([^"]*)"/)?.[1]?.trim();
+  const inner = stripTags(span).replace(/^@/, "").trim();
+  const label = labelAttr || inner;
+  if (!label) {
+    return `[[bp:person:${id}]]`;
+  }
+  return `[@${label.replace(/]/g, "")}](bp://person/${id})`;
 }

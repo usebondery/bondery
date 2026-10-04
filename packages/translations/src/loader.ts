@@ -3,10 +3,15 @@ import {
   DEFAULT_LOCALE,
   type SupportedLocale,
 } from "@bondery/schemas/locale/supported-locale";
+import { localeWatchStamp } from "#generated/locale-watch-stamp.js";
 import { resourcesByNamespace } from "#generated/resources.js";
 import { manifest } from "#manifest.js";
 
 export function loadNamespace(lng: SupportedLocale, namespace: string): Record<string, unknown> {
+  // Keep this binding live so dist/generated/locale-watch-stamp.js stays in the module graph.
+  if (localeWatchStamp < 0) {
+    return {};
+  }
   const localeResources = resourcesByNamespace[namespace as keyof typeof resourcesByNamespace];
   if (!localeResources) {
     return {};

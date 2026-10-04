@@ -26,6 +26,7 @@ const PROVIDER_ICONS: Record<string, ComponentType<{ size?: number }>> = {
 export type LoginBusyAction = OAuthProviderId | "email" | "passkey" | null;
 
 type LoginProviderButtonsProps = {
+  allowedOAuthProviders?: OAuthProviderId[];
   busyAction: LoginBusyAction;
   getPasskeyTestId?: string;
   getProviderTestId?: (providerKey: string) => string | undefined;
@@ -38,6 +39,7 @@ type LoginProviderButtonsProps = {
 };
 
 export function LoginProviderButtons({
+  allowedOAuthProviders,
   busyAction,
   getPasskeyTestId,
   getProviderTestId,
@@ -52,7 +54,16 @@ export function LoginProviderButtons({
   const magicLinkIsLastUsed = isLastUsedMagicLink(lastUsedLoginMethod);
   const passkeyIsLastUsed =
     showPasskey && isLastUsedPasskey(lastUsedLoginMethod) && !magicLinkIsLastUsed;
-  const allOAuthDisabled = showOAuth && areAllOAuthProvidersDisabled(oauthProviders);
+  const visibleProviders =
+    allowedOAuthProviders === undefined
+      ? INTEGRATION_PROVIDERS
+      : INTEGRATION_PROVIDERS.filter((provider) =>
+          allowedOAuthProviders.includes(provider.provider),
+        );
+  const allOAuthDisabled =
+    allowedOAuthProviders === undefined &&
+    showOAuth &&
+    areAllOAuthProvidersDisabled(oauthProviders);
 
   return (
     <Stack gap="xs" w="100%">
@@ -63,7 +74,7 @@ export function LoginProviderButtons({
       ) : null}
 
       {showOAuth
-        ? INTEGRATION_PROVIDERS.map((provider) => {
+        ? visibleProviders.map((provider) => {
             const IconComponent = PROVIDER_ICONS[provider.icon] ?? IconBrandGithubFilled;
             const providerId = provider.provider;
             const enabled = isOAuthProviderEnabled(oauthProviders, providerId);

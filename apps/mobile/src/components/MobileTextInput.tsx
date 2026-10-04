@@ -15,6 +15,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { UI_TIMING_MS } from "../lib/config";
+import type { NativeTextInputRef } from "../lib/native-host-refs";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 
@@ -44,25 +45,23 @@ const WRAPPER_LAYOUT_KEYS = new Set<keyof ViewStyle>([
 ]);
 
 function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
-  const flat = StyleSheet.flatten(containerStyle);
+  const flat = StyleSheet.flatten(containerStyle as never);
   if (!flat) {
     return { fillsWrapper: false, innerContainerStyle: undefined, wrapperStyle: undefined };
   }
 
-  const wrapperStyle = {} as ViewStyle;
-  const innerContainerStyle = {} as ViewStyle;
+  const wrapperStyle: Record<string, unknown> = {};
+  const innerContainerStyle: Record<string, unknown> = {};
 
-  for (const [key, value] of Object.entries(flat) as Array<
-    [keyof ViewStyle, ViewStyle[keyof ViewStyle]]
-  >) {
+  for (const [key, value] of Object.entries(flat)) {
     if (value == null) {
       continue;
     }
 
-    if (WRAPPER_LAYOUT_KEYS.has(key)) {
-      wrapperStyle[key] = value as never;
+    if (WRAPPER_LAYOUT_KEYS.has(key as keyof ViewStyle)) {
+      wrapperStyle[key] = value;
     } else {
-      innerContainerStyle[key] = value as never;
+      innerContainerStyle[key] = value;
     }
   }
 
@@ -72,7 +71,11 @@ function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
     wrapperStyle.width === "100%" ||
     wrapperStyle.alignSelf === "stretch";
 
-  return { fillsWrapper, innerContainerStyle, wrapperStyle };
+  return {
+    fillsWrapper,
+    innerContainerStyle: innerContainerStyle as ViewStyle,
+    wrapperStyle: wrapperStyle as ViewStyle,
+  };
 }
 
 export type MobileTextInputProps = TextInputProps & {
@@ -90,7 +93,7 @@ export type MobileTextInputProps = TextInputProps & {
 };
 
 export const MobileTextInput = memo(
-  forwardRef<TextInput, MobileTextInputProps>(function MobileTextInput(
+  forwardRef<NativeTextInputRef, MobileTextInputProps>(function MobileTextInput(
     {
       error = false,
       errorMessage,
@@ -188,7 +191,7 @@ export const MobileTextInput = memo(
     const { wrapperStyle, innerContainerStyle, fillsWrapper } = splitContainerStyle(containerStyle);
 
     return (
-      <View style={[styles.wrapper, wrapperStyle]}>
+      <View style={[styles.wrapper, wrapperStyle as never]}>
         <Animated.View
           style={[
             styles.container,

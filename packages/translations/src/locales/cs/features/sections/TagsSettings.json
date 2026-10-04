@@ -21,8 +21,11 @@
   "LabelPlaceholder": "Název štítku",
   "LoadContactsErrorDescription": "Nepodařilo se načíst kontakty.",
   "LoadContactsErrorTitle": "Chyba",
+  "LoadingMoreLabel": "Načítám další…",
   "LoadMembersErrorDescription": "Nepodařilo se načíst členy štítku.",
   "LoadMembersErrorTitle": "Chyba",
+  "LoadMoreError": "Další osoby se nepodařilo načíst.",
+  "LoadMoreRetry": "Zkusit znovu",
   "ManageTags": "Spravovat štítky",
   "NoPeopleFound": "Žádní lidé nenalezeni",
   "PeopleWithTagLabel": "Lidé s tímto štítkem",
@@ -33,5 +36,6 @@
   "SaveSuccessTitle": "Štítek upraven",
   "SavingDescription": "Počkejte prosím, ukládáme změny.",
   "SavingTitle": "Ukládání štítku",
+  "SearchingLabel": "Hledání…",
   "Title": "Štítky"
 }

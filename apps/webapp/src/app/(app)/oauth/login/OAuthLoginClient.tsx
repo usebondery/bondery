@@ -6,10 +6,7 @@ import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
 import { useMemo, useState } from "react";
-import {
-  type LoginBusyAction,
-  SocialLoginCard,
-} from "@/app/(app)/login/components/SocialLoginCard";
+import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { buildOAuthLoginMagicLinkUrls } from "@/lib/auth/magic-link-urls";

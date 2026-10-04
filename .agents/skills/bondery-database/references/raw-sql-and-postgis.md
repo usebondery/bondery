@@ -23,7 +23,7 @@ Reusable database behavior belongs in `functions.sql`, not scattered application
 
 Canonical rule lives in `bondery-core`: create extensions with `WITH SCHEMA extensions`, then schema-qualify their functions/operators.
 
-Known gap: current `functions.sql` creates `uuid-ossp`, `pg_trgm`, `unaccent`, and `postgis` without `WITH SCHEMA extensions`. Treat this as existing drift, not a pattern to copy.
+Known gap: current `functions.sql` still creates `uuid-ossp` and `postgis` without `WITH SCHEMA extensions`. `pg_trgm` and `unaccent` are installed in `extensions` by the Prisma relocate migration and `apply-sql-functions.ts`. Treat remaining public-schema creates as existing drift, not a pattern to copy.
 
 New extension work must:
 
@@ -57,14 +57,16 @@ Dynamic identifiers cannot be parameterized like values. Prefer a fixed allowlis
 Current search path:
 
 - SQL: `search_people_ids` in `functions.sql`
-- Wrapper: `apps/api/src/lib/data/search.ts`
-- Consumer: contact page query service
+- Wrapper: `apps/api/src/lib/data/search-prisma.ts`
+- Consumer: contact page query service, pickers, Find person spotlight
 
-The function filters by `user_id`, computes unaccented trigram similarity, orders by rank, and applies Bondery's offset pagination.
+The function filters by `user_id`, excludes `myself`, and matches when `extensions.word_similarity` of the unaccented/lowercased query against first, middle, or last name exceeds 0.3. Rank is `GREATEST` of those per-token scores plus concatenated first-middle-last and last-middle-first. There is no minimum query length.
 
-The GIN expression index must match the query expression exactly. If normalization or concatenation changes, update both function and index and verify with `EXPLAIN (ANALYZE, BUFFERS)`.
+GIN indexes are per-column (`idx_people_first_name_trgm`, `idx_people_last_name_trgm`, `idx_people_middle_name_trgm`) on `immutable_unaccent(lower(coalesce(<col>, '')))` using `extensions.gin_trgm_ops`. The index expression must match the function expression exactly. If normalization or the per-column expression changes, update both function and indexes and verify with `EXPLAIN (ANALYZE, BUFFERS)`.
 
-Do not replace this with generic full-text search guidance: Bondery uses pg_trgm similarity, not `to_tsvector`, for names.
+`pg_trgm` and `unaccent` live in schema `extensions`. Call `extensions.word_similarity`, `extensions.unaccent`, and `extensions.gin_trgm_ops` with that qualifier.
+
+Do not replace this with generic full-text search guidance: Bondery uses pg_trgm `word_similarity`, not `to_tsvector`, for names.
 
 ## PostGIS
 

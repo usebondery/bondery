@@ -33,9 +33,13 @@ const catalogPath = join(catalogDir, "aaguid.json");
 const betterAuthNamesPath = join(catalogDir, "better-auth-authenticator-names.json");
 const sourcePath = join(catalogDir, "source.json");
 const webappRequire = createRequire(join(repoRoot, "apps/webapp/package.json"));
-const { commonAuthenticatorNames } = (await import(
-  pathToFileURL(webappRequire.resolve("@better-auth/passkey")).href
-)) as { commonAuthenticatorNames: unknown };
+
+async function loadBetterAuthAuthenticatorNames(): Promise<unknown> {
+  const { commonAuthenticatorNames } = (await import(
+    pathToFileURL(webappRequire.resolve("@better-auth/passkey")).href
+  )) as { commonAuthenticatorNames: unknown };
+  return commonAuthenticatorNames;
+}
 
 function stringifySortedRecord(record: Record<string, unknown>): string {
   const sorted = Object.fromEntries(
@@ -109,7 +113,7 @@ async function writeBetterAuthAuthenticatorNames(): Promise<{
   entryCount: number;
   version: string;
 }> {
-  const names = sanitizeBetterAuthAuthenticatorNames(commonAuthenticatorNames);
+  const names = sanitizeBetterAuthAuthenticatorNames(await loadBetterAuthAuthenticatorNames());
   const entryCount = Object.keys(names).length;
   if (entryCount === 0) {
     throw new Error(
@@ -178,9 +182,7 @@ async function main(): Promise<void> {
   await writeFile(sourcePath, stringifySortedRecord(source), "utf8");
 }
 
-try {
-  await main();
-} catch (error) {
+void main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
-}
+});

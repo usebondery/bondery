@@ -21,8 +21,11 @@
   "LabelPlaceholder": "Tag-Name",
   "LoadContactsErrorDescription": "Kontakte konnten nicht geladen werden.",
   "LoadContactsErrorTitle": "Fehler",
+  "LoadingMoreLabel": "Weitere werden geladen…",
   "LoadMembersErrorDescription": "Tag-Mitglieder konnten nicht geladen werden.",
   "LoadMembersErrorTitle": "Fehler",
+  "LoadMoreError": "Weitere Personen konnten nicht geladen werden.",
+  "LoadMoreRetry": "Erneut versuchen",
   "ManageTags": "Tags verwalten",
   "NoPeopleFound": "Keine Personen gefunden",
   "PeopleWithTagLabel": "Personen mit diesem Tag",
@@ -33,5 +36,6 @@
   "SaveSuccessTitle": "Tag aktualisiert",
   "SavingDescription": "Bitte warte, während wir deine Änderungen speichern.",
   "SavingTitle": "Tag wird gespeichert",
+  "SearchingLabel": "Suche läuft…",
   "Title": "Tags"
 }

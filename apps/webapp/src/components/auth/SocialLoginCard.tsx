@@ -11,7 +11,7 @@ import {
 } from "@bondery/mantine-next";
 import { loginEmailFormSchema } from "@bondery/schemas";
 import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
-import { Button, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { Alert, Button, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconMail, IconMailForward } from "@tabler/icons-react";
@@ -36,32 +36,53 @@ const RESEND_SECONDS = 30;
 export type LoginSurface = "oauth" | "webapp";
 
 type SocialLoginCardProps = {
+  allowedOAuthProviders?: OAuthProviderId[];
   authClient: WebappAuthClient;
   busyAction: LoginBusyAction;
+  cancelHref?: string;
   continueUrl: string;
+  description?: string;
+  errorMessage?: string | null;
   getPasskeyTestId?: string;
   getProviderTestId?: (providerKey: string) => string | undefined;
   lastUsedLoginMethod: string | null;
+  loading?: boolean;
+  lockedEmail?: string;
   oauthProviders: OAuthProvidersBitmap | null;
   onEmailSubmit: (email: string) => Promise<boolean>;
   onPasskeyClick: () => void;
   onProviderClick: (provider: OAuthProviderId) => void;
+  /** When true (default), after a magic link is sent this tab navigates once a session exists. Confirm must pass false: a session already exists. */
+  pollForSession?: boolean;
+  showPasskey?: boolean;
+  showTerms?: boolean;
   surface: LoginSurface;
+  title?: string;
   websiteUrl: string;
 };
 
 export function SocialLoginCard({
+  allowedOAuthProviders,
   authClient,
   busyAction,
+  cancelHref,
   continueUrl,
+  description,
+  errorMessage,
   getPasskeyTestId,
   getProviderTestId,
   lastUsedLoginMethod,
+  loading = false,
+  lockedEmail,
   oauthProviders,
   onEmailSubmit,
   onPasskeyClick,
   onProviderClick,
+  pollForSession = true,
+  showPasskey: showPasskeyProp = true,
+  showTerms = true,
   surface,
+  title,
   websiteUrl,
 }: SocialLoginCardProps) {
   const t = useLoginPageTranslations();
@@ -84,7 +105,12 @@ export function SocialLoginCard({
   const isBusy = busyAction !== null;
   const isEmailBusy = busyAction === "email";
   const emailSignInEnabled = isEmailSignInEnabled(oauthProviders);
+  const isEmailLocked = lockedEmail !== undefined;
+  const lockedEmailAddress = lockedEmail?.trim() ?? "";
+  const offerLockedEmail = isEmailLocked && lockedEmailAddress.length > 0;
+  const offerTypedEmail = !isEmailLocked;
   const showProviders = !emailPanelOpen;
+  const showOAuth = allowedOAuthProviders === undefined || allowedOAuthProviders.length > 0;
   const magicLinkIsLastUsed = isLastUsedMagicLink(lastUsedLoginMethod);
 
   useEffect(() => {
@@ -126,7 +152,7 @@ export function SocialLoginCard({
   }, [resendSeconds]);
 
   useEffect(() => {
-    if (!awaitingVerify) {
+    if (!pollForSession || !awaitingVerify) {
       return;
     }
 
@@ -141,23 +167,10 @@ export function SocialLoginCard({
     return () => {
       window.clearInterval(poll);
     };
-  }, [authClient, awaitingVerify, continueUrl]);
+  }, [authClient, awaitingVerify, continueUrl, pollForSession]);
 
-  const submitEmail = async () => {
-    const parsed = loginEmailFormSchema.safeParse(form.values);
-    if (!parsed.success || isBusy) {
-      form.validate();
-      return;
-    }
-
-    const sent = await onEmailSubmit(parsed.data.email);
-    if (!sent) {
-      return;
-    }
-
-    const sentEmail = parsed.data.email;
+  const markMagicLinkSent = (sentEmail: string) => {
     stripTransientAuthErrorFromLocation();
-    form.reset();
     setAwaitingVerify(true);
     setResendSeconds(RESEND_SECONDS);
     const sentDescription = t("CheckYourEmailBody", { email: sentEmail });
@@ -171,6 +184,35 @@ export function SocialLoginCard({
         title: t("CheckYourEmail"),
       }),
     });
+  };
+
+  const submitTypedEmail = async () => {
+    const parsed = loginEmailFormSchema.safeParse(form.values);
+    if (!parsed.success || isBusy) {
+      form.validate();
+      return;
+    }
+
+    const sent = await onEmailSubmit(parsed.data.email);
+    if (!sent) {
+      return;
+    }
+
+    form.reset();
+    markMagicLinkSent(parsed.data.email);
+  };
+
+  const submitLockedEmail = async () => {
+    if (!offerLockedEmail || isBusy) {
+      return;
+    }
+
+    const sent = await onEmailSubmit(lockedEmailAddress);
+    if (!sent) {
+      return;
+    }
+
+    markMagicLinkSent(lockedEmailAddress);
   };
 
   const closeEmailPanel = () => {
@@ -210,21 +252,74 @@ export function SocialLoginCard({
     </Tooltip>
   );
 
+  const lockedEmailButton = (
+    <CornerLabeledButton
+      className={classes.filledButton}
+      color="branding-primary"
+      cornerLabel={magicLinkIsLastUsed ? t("LastUsed") : undefined}
+      cornerLabelTestId="login-last-used-badge"
+      data-testid={awaitingVerify ? "login-email-resend" : "login-email-send"}
+      disabled={!emailSignInEnabled || resendSeconds > 0 || (isBusy && !isEmailBusy)}
+      fullWidth
+      leftSection={
+        awaitingVerify || resendSeconds > 0 ? <IconMailForward size={20} /> : <IconMail size={20} />
+      }
+      loading={isEmailBusy}
+      onClick={() => {
+        if (!emailSignInEnabled) {
+          return;
+        }
+        void submitLockedEmail();
+      }}
+      size="lg"
+      type="button"
+      variant="filled"
+    >
+      {resendSeconds > 0
+        ? t("ResendInSeconds", { seconds: resendSeconds })
+        : awaitingVerify
+          ? t("ResendSignInLink")
+          : t("ContinueWithEmail")}
+    </CornerLabeledButton>
+  );
+
+  const lockedEmailControl = emailSignInEnabled ? (
+    lockedEmailButton
+  ) : (
+    <Tooltip label={t("EmailSignInUnavailable")}>
+      <span style={{ display: "block", width: "100%" }}>{lockedEmailButton}</span>
+    </Tooltip>
+  );
+
+  const heading = authorizationWindowInvalid
+    ? t("AuthorizationWindowInvalidTitle")
+    : (title ?? t("FormTitle"));
+  const body = authorizationWindowInvalid
+    ? t("AuthorizationWindowInvalidBody")
+    : (description ?? t("Description"));
+
   return (
-    <LoginBrandShell websiteUrl={websiteUrl}>
+    <LoginBrandShell loading={loading} websiteUrl={websiteUrl}>
       <Stack gap="lg">
         <Stack gap={6}>
           <Title fw={700} fz="h2" lh={1.15} order={2}>
-            {authorizationWindowInvalid ? t("AuthorizationWindowInvalidTitle") : t("FormTitle")}
+            {heading}
           </Title>
           <Text c="dimmed" size="md">
-            {authorizationWindowInvalid ? t("AuthorizationWindowInvalidBody") : t("Description")}
+            {body}
           </Text>
         </Stack>
+
+        {errorMessage ? (
+          <Alert color="red" variant="light">
+            {errorMessage}
+          </Alert>
+        ) : null}
 
         {showProviders && !authorizationWindowInvalid ? (
           <Stack gap="xs" w="100%">
             <LoginProviderButtons
+              allowedOAuthProviders={allowedOAuthProviders}
               busyAction={busyAction}
               getPasskeyTestId={getPasskeyTestId}
               getProviderTestId={getProviderTestId}
@@ -232,17 +327,18 @@ export function SocialLoginCard({
               oauthProviders={oauthProviders}
               onPasskeyClick={onPasskeyClick}
               onProviderClick={onProviderClick}
-              showOAuth
-              showPasskey={passkeySupported}
+              showOAuth={showOAuth}
+              showPasskey={showPasskeyProp && passkeySupported}
             />
-            {continueWithEmailControl}
+            {offerTypedEmail ? continueWithEmailControl : null}
+            {offerLockedEmail ? lockedEmailControl : null}
           </Stack>
         ) : null}
 
-        {emailPanelOpen ? (
+        {emailPanelOpen && offerTypedEmail ? (
           <form
             onSubmit={form.onSubmit(() => {
-              void submitEmail();
+              void submitTypedEmail();
             })}
           >
             <Stack gap="sm">
@@ -295,24 +391,40 @@ export function SocialLoginCard({
           </form>
         ) : null}
 
-        <Text c="dimmed" size="xs">
-          <TypedTrans
-            components={{
-              privacyLink: (
-                <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
-                  {null}
-                </AnchorLink>
-              ),
-              termsLink: (
-                <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.TERMS}`} size="xs">
-                  {null}
-                </AnchorLink>
-              ),
-            }}
-            i18nKey="TermsText"
-            t={t}
-          />
-        </Text>
+        {cancelHref && !emailPanelOpen ? (
+          <Button
+            component="a"
+            data-testid="confirm-cancel"
+            disabled={isBusy}
+            fullWidth
+            href={cancelHref}
+            size="md"
+            variant="subtle"
+          >
+            {tCommon("actions.cancel")}
+          </Button>
+        ) : null}
+
+        {showTerms ? (
+          <Text c="dimmed" size="xs">
+            <TypedTrans
+              components={{
+                privacyLink: (
+                  <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
+                    {null}
+                  </AnchorLink>
+                ),
+                termsLink: (
+                  <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.TERMS}`} size="xs">
+                    {null}
+                  </AnchorLink>
+                ),
+              }}
+              i18nKey="TermsText"
+              t={t}
+            />
+          </Text>
+        ) : null}
       </Stack>
     </LoginBrandShell>
   );

@@ -14726,7 +14726,7 @@ paths:
                   items:
                     type: string
                     format: email
-                    pattern: ^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
+                    pattern: ^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$
                 selectedFields:
                   type: array
                   items:
@@ -15431,7 +15431,8 @@ paths:
     delete:
       tags:
         - Me
-      description: Delete the authenticated user account and associated storage.
+      description: Delete the authenticated user account and associated storage. Requires a one-shot `X-Bondery-Step-Up` token
+        from `POST /me/step-up`.
       security: *a2
       responses:
         "200":
@@ -17525,6 +17526,121 @@ paths:
                   type: service_unavailable_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+  /me/step-up:
+    post:
+      tags:
+        - Me
+      description: Mint a one-shot step-up token. Requires a fresh Better Auth session cookie; JWT-only callers are rejected.
+      security: *a2
+      responses:
+        "201":
+          description: Step-up token
+          content:
+            application/json:
+              example:
+                token: step-up-nonce
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    minLength: 1
+                required:
+                  - token
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: admin_required
+                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /me/feedback:
     post:
       tags:
@@ -17822,7 +17938,8 @@ paths:
     post:
       tags:
         - Me
-      description: Create a new API key for the authenticated user.
+      description: Create a new API key for the authenticated user. Requires a one-shot `X-Bondery-Step-Up` token from `POST
+        /me/step-up`.
       requestBody:
         required: true
         content:
@@ -18164,7 +18281,7 @@ paths:
     delete:
       tags:
         - Me
-      description: Revoke and delete an API key.
+      description: Revoke and delete an API key. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"
@@ -18425,7 +18542,7 @@ paths:
     delete:
       tags:
         - Me
-      description: Revoke an MCP OAuth consent.
+      description: Revoke an MCP OAuth consent. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.
       parameters:
         - schema:
             $ref: "#/components/schemas/ContactId"

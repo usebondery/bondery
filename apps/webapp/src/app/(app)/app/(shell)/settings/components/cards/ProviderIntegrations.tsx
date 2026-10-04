@@ -5,10 +5,9 @@ import { isOAuthProviderEnabled } from "@bondery/helpers/auth/oauth-providers";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
-  ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
+import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { Group, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
@@ -16,24 +15,21 @@ import {
   IconBrandLinkedin,
   IconBrowser,
   IconDeviceDesktop,
-  IconUnlink,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
-import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
-import { betterAuthUnlinkAccountId } from "@/lib/auth/better-auth-unlink-account-id";
-import { createWebappAuthClient } from "@/lib/auth/client";
+import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
-import { TypedTrans } from "@/lib/i18n/TypedTrans";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
+import {
+  openUnlinkProviderConfirm,
+  providerKeyFor,
+  runLinkSocialProvider,
+} from "../../settingsAuthActions";
 import { openChromeExtensionModal } from "../modals/openChromeExtensionModal";
 import { openPwaInstallModal } from "../modals/openPwaInstallModal";
 import { IntegrationCard } from "./IntegrationCard";
-
-function providerKeyFor(provider: OAuthProviderId): string {
-  return INTEGRATION_PROVIDERS.find((item) => item.provider === provider)?.providerKey ?? provider;
-}
 
 interface UserIdentity {
   id: string;
@@ -68,8 +64,7 @@ export function ProviderIntegrations({
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
 
-  const { canInstall, isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } =
-    usePWAInstall();
+  const { isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } = usePWAInstall();
 
   const t = useSettingsPageTranslations("Profile");
   const tIntegration = useSettingsPageTranslations("Integration");
@@ -92,6 +87,12 @@ export function ProviderIntegrations({
   }, []);
 
   const linkProvider = async (provider: "github" | "linkedin") => {
+    const purpose = provider === "github" ? "link_github" : "link_linkedin";
+    const stepped = await ensureFreshIdentity({ purpose });
+    if (stepped !== "fresh") {
+      return;
+    }
+
     const loadingNotification = notifications.show({
       ...loadingNotificationTemplate({
         description: tIntegration("Connecting", {
@@ -102,19 +103,7 @@ export function ProviderIntegrations({
     });
 
     try {
-      const authClient = createWebappAuthClient();
-
-      const { data, error } = await authClient.linkSocial({
-        provider,
-      });
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (data?.url) {
-        window.location.href = data.url;
-      }
+      await runLinkSocialProvider(provider);
     } catch (error) {
       notifications.hide(loadingNotification);
       notifications.show(
@@ -126,7 +115,7 @@ export function ProviderIntegrations({
     }
   };
 
-  const handleUnlinkClick = (provider: "github" | "linkedin") => {
+  const handleUnlinkClick = async (provider: "github" | "linkedin") => {
     if (providers.length <= 1) {
       notifications.show(
         errorNotificationTemplate({
@@ -137,66 +126,35 @@ export function ProviderIntegrations({
       return;
     }
 
-    openStandardConfirmModal({
-      cancelLabel: t("Cancel"),
-      confirmColor: "red",
-      confirmLabel: t("UnlinkAccountButton"),
-      message: (
-        <Text size="sm">
-          <TypedTrans
-            components={{ b: <b /> }}
-            i18nKey="UnlinkAccountMessage"
-            t={t}
-            values={{ provider: provider === "github" ? "GitHub" : "LinkedIn" }}
-          />
-        </Text>
-      ),
-      onConfirm: () => confirmUnlinkProvider(provider),
-      title: (
-        <ModalTitle icon={<IconUnlink size={20} stroke={1.5} />} text={t("UnlinkAccountTitle")} />
-      ),
-    });
-  };
-
-  const confirmUnlinkProvider = async (provider: "github" | "linkedin") => {
-    try {
-      const targetIdentity = userIdentities.find(
-        (identity) =>
-          identity.provider === provider || identity.provider === providerKeyFor(provider),
-      );
-
-      if (!targetIdentity) {
-        throw new Error(`${provider} identity not found`);
-      }
-
-      const authClient = createWebappAuthClient();
-
-      // Better Auth 1.7 unlinkAccount.accountId is the local Account.id
-      // (identity.id), not providerAccountId (identity.identity_id).
-      const { error } = await authClient.unlinkAccount({
-        accountId: betterAuthUnlinkAccountId(targetIdentity),
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      setProviders((prev) => prev.filter((p) => p !== provider && p !== providerKeyFor(provider)));
-
-      notifications.show(
-        successNotificationTemplate({
-          description: tIntegration("UnlinkSuccess", { provider }),
-          title: t("UpdateSuccess"),
-        }),
-      );
-    } catch (error) {
-      notifications.show(
-        errorNotificationTemplate({
-          description: getAuthUserFacingError(error, tCommon),
-          title: tCommon("feedback.errorTitle"),
-        }),
-      );
+    const purpose = provider === "github" ? "unlink_github" : "unlink_linkedin";
+    const stepped = await ensureFreshIdentity({ purpose });
+    if (stepped !== "fresh") {
+      return;
     }
+
+    openUnlinkProviderConfirm({
+      displayName: provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn"),
+      identities: userIdentities,
+      onUnlinked: (unlinked) => {
+        setProviders((prev) =>
+          prev.filter((p) => {
+            if (p === unlinked || p === providerKeyFor(unlinked)) {
+              return false;
+            }
+            return !(unlinked === "linkedin" && p === "linkedin_oidc");
+          }),
+        );
+        notifications.show(
+          successNotificationTemplate({
+            description: tIntegration("UnlinkSuccess", { provider: unlinked }),
+            title: t("UpdateSuccess"),
+          }),
+        );
+      },
+      provider,
+      t,
+      tCommon,
+    });
   };
 
   return (
@@ -217,7 +175,10 @@ export function ProviderIntegrations({
               const icon = provider === "github" ? IconBrandGithub : IconBrandLinkedin;
               const displayName =
                 provider === "github" ? tIntegration("GitHub") : tIntegration("LinkedIn");
-              const isConnected = providers.includes(provider) || providers.includes(providerKey);
+              const isConnected =
+                providers.includes(provider) ||
+                providers.includes(providerKey) ||
+                (provider === "linkedin" && providers.includes("linkedin_oidc"));
               const lastProviderCannotUnlink = isConnected && providers.length === 1;
               const canLink = isOAuthProviderEnabled(oauthProviders, provider);
               const cannotLink = !isConnected && !canLink;
@@ -244,9 +205,9 @@ export function ProviderIntegrations({
                       return;
                     }
                     if (isConnected) {
-                      handleUnlinkClick(provider);
+                      void handleUnlinkClick(provider);
                     } else {
-                      linkProvider(provider);
+                      void linkProvider(provider);
                     }
                   }}
                   provider={provider}
@@ -301,7 +262,7 @@ export function ProviderIntegrations({
                       return;
                     }
 
-                    openPwaInstallModal({ canInstall, install, isChromiumDesktop });
+                    openPwaInstallModal({ install, isChromiumDesktop });
                   }}
                   provider="pwa"
                 />

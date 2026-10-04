@@ -1,5 +1,5 @@
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { IconPlus, IconX } from "@tabler/icons-react-native";
+import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   BackHandler,
@@ -20,6 +20,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FAB_GESTURE, UI_TIMING_MS } from "../../lib/config";
 import { useMobileNavigationTranslations } from "../../lib/i18n/generated/hooks";
+import type { NativeViewRef } from "../../lib/native-host-refs";
 import { FAB_SPEED_DIAL_MOTION, TAMAGUI_TRANSITION } from "../../theme/animations";
 import { floatingBarStyles } from "../../theme/floatingBarStyles";
 import { Tappable } from "../../theme/Tappable";
@@ -37,27 +38,27 @@ const CHROME_RADIUS_CLOSED = MOBILE_LAYOUT.borderRadius.pill;
 const CHROME_RADIUS_OPEN = MOBILE_LAYOUT.floatingTabBar.speedDialChromeRadiusOpen;
 
 interface FloatingBubbleTabBarProps
-  extends Pick<BottomTabBarProps, "descriptors" | "navigation" | "state"> {
+  extends Pick<BottomTabBarProps, "descriptors" | "emitter" | "navigateToTab" | "state"> {
   onChromeBoundsChange?: (event: LayoutChangeEvent) => void;
 }
 
 /**
  * Floating bubble tab bar used on root tab pages.
  */
-export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
+export const FloatingBubbleTabBar = forwardRef<NativeViewRef, FloatingBubbleTabBarProps>(
   function FloatingBubbleTabBar(
-    { state, descriptors, navigation, onChromeBoundsChange },
+    { state, descriptors, emitter, navigateToTab, onChromeBoundsChange },
     forwardedRef,
   ) {
     const tMobileNavigation = useMobileNavigationTranslations();
     const insets = useSafeAreaInsets();
     const colors = useMobileThemeColors();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-    const plusRef = useRef<View>(null);
-    const chromeMeasureRef = useRef<View>(null);
+    const plusRef = useRef<NativeViewRef>(null);
+    const chromeMeasureRef = useRef<NativeViewRef>(null);
 
     const assignChromeMeasureRef = useCallback(
-      (node: View | null) => {
+      (node: NativeViewRef | null) => {
         chromeMeasureRef.current = node;
         if (typeof forwardedRef === "function") {
           forwardedRef(node);
@@ -245,23 +246,22 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
         : null;
 
       const onPress = () => {
-        const shouldNavigate = !isFocused;
         closeMenu();
         closeOverflowSheet();
 
-        const event = navigation.emit({
+        const event = emitter.emit({
           canPreventDefault: true,
           target: route.key,
           type: "tabPress",
         });
 
-        if (shouldNavigate && !event.defaultPrevented) {
-          navigation.navigate(route.name, route.params);
+        if (!isFocused && !event.defaultPrevented) {
+          navigateToTab(route.key);
         }
       };
 
       const onLongPress = () => {
-        navigation.emit({
+        emitter.emit({
           target: route.key,
           type: "tabLongPress",
         });

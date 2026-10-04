@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "zod": "^4.5.4",
+    "zod": "^4.6.5",
     "zod-openapi": "^6.0.2"
   },
   "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
@@ -274,6 +274,30 @@
       "node": "./dist/entities/contact/types.js",
       "types": "./src/entities/contact/types.ts"
     },
+    "./entities/export": {
+      "default": "./dist/entities/export/index.js",
+      "import": "./dist/entities/export/index.js",
+      "node": "./dist/entities/export/index.js",
+      "types": "./src/entities/export/index.ts"
+    },
+    "./entities/export/contract": {
+      "default": "./dist/entities/export/contract.js",
+      "import": "./dist/entities/export/contract.js",
+      "node": "./dist/entities/export/contract.js",
+      "types": "./src/entities/export/contract.ts"
+    },
+    "./entities/export/schema": {
+      "default": "./dist/entities/export/schema.js",
+      "import": "./dist/entities/export/schema.js",
+      "node": "./dist/entities/export/schema.js",
+      "types": "./src/entities/export/schema.ts"
+    },
+    "./entities/export/types": {
+      "default": "./dist/entities/export/types.js",
+      "import": "./dist/entities/export/types.js",
+      "node": "./dist/entities/export/types.js",
+      "types": "./src/entities/export/types.ts"
+    },
     "./entities/group": {
       "default": "./dist/entities/group/index.js",
       "import": "./dist/entities/group/index.js",
@@ -345,6 +369,30 @@
       "import": "./dist/entities/important-date/types.js",
       "node": "./dist/entities/important-date/types.js",
       "types": "./src/entities/important-date/types.ts"
+    },
+    "./entities/mcp-consents": {
+      "default": "./dist/entities/mcp-consents/index.js",
+      "import": "./dist/entities/mcp-consents/index.js",
+      "node": "./dist/entities/mcp-consents/index.js",
+      "types": "./src/entities/mcp-consents/index.ts"
+    },
+    "./entities/mcp-consents/contract": {
+      "default": "./dist/entities/mcp-consents/contract.js",
+      "import": "./dist/entities/mcp-consents/contract.js",
+      "node": "./dist/entities/mcp-consents/contract.js",
+      "types": "./src/entities/mcp-consents/contract.ts"
+    },
+    "./entities/mcp-consents/schema": {
+      "default": "./dist/entities/mcp-consents/schema.js",
+      "import": "./dist/entities/mcp-consents/schema.js",
+      "node": "./dist/entities/mcp-consents/schema.js",
+      "types": "./src/entities/mcp-consents/schema.ts"
+    },
+    "./entities/mcp-consents/types": {
+      "default": "./dist/entities/mcp-consents/types.js",
+      "import": "./dist/entities/mcp-consents/types.js",
+      "node": "./dist/entities/mcp-consents/types.js",
+      "types": "./src/entities/mcp-consents/types.ts"
     },
     "./entities/merge": {
       "default": "./dist/entities/merge/index.js",
@@ -489,6 +537,24 @@
       "import": "./dist/entities/social/types.js",
       "node": "./dist/entities/social/types.js",
       "types": "./src/entities/social/types.ts"
+    },
+    "./entities/step-up": {
+      "default": "./dist/entities/step-up/index.js",
+      "import": "./dist/entities/step-up/index.js",
+      "node": "./dist/entities/step-up/index.js",
+      "types": "./src/entities/step-up/index.ts"
+    },
+    "./entities/step-up/schema": {
+      "default": "./dist/entities/step-up/schema.js",
+      "import": "./dist/entities/step-up/schema.js",
+      "node": "./dist/entities/step-up/schema.js",
+      "types": "./src/entities/step-up/schema.ts"
+    },
+    "./entities/step-up/types": {
+      "default": "./dist/entities/step-up/types.js",
+      "import": "./dist/entities/step-up/types.js",
+      "node": "./dist/entities/step-up/types.js",
+      "types": "./src/entities/step-up/types.ts"
     },
     "./entities/subscription": {
       "default": "./dist/entities/subscription/index.js",
@@ -1074,5 +1140,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.1"
+  "version": "1.10.2-rc.1"
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -28,12 +29,11 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconTag, IconTagPlus, IconTrash } from "@tabler/icons-react";
-import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
-import { getContactsSelectableList } from "@/lib/api/domains/contacts";
-import { useTagsSettingsTranslations } from "@/lib/i18n/generated/hooks";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
+import { useCommonTranslations, useTagsSettingsTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
@@ -44,7 +44,7 @@ import {
   useTagMembersQuery,
   useUpdateTagByIdMutation,
 } from "@/lib/query/hooks/useTags";
-import { contactKeys } from "@/lib/query/keys";
+import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 
 const COLOR_SWATCHES = [
   ...DEFAULT_THEME.colors.red.slice(5, 8),
@@ -92,15 +92,14 @@ function TagEditorModalBody({
   onDeleted,
 }: TagEditorModalBodyProps) {
   const t = useTagsSettingsTranslations();
-  const queryClient = useQueryClient();
+  const tCommon = useCommonTranslations();
   const createTagMutation = useCreateTagMutation();
   const updateTagByIdMutation = useUpdateTagByIdMutation();
   const syncTagContactsMutation = useSyncTagContactsByIdMutation();
   const deleteTagMutation = useDeleteTagMutation();
 
-  const { data: contactsData, isLoading: isLoadingContactsList } = useContactsSelectableListQuery({
-    limit: 200,
-  });
+  const { data: contactsData, isLoading: isLoadingContactsList } =
+    useContactsSelectableListQuery(SELECTABLE_CONTACTS);
   const { data: tagMembers, isLoading: isLoadingMembers } = useTagMembersQuery(
     tag?.id ?? "",
     undefined,
@@ -117,6 +116,24 @@ function TagEditorModalBody({
   });
 
   const allContacts = contactsData?.contacts ?? [];
+  const pickerContacts = useMemo(() => {
+    const merged = new Map(allContacts.map((contact) => [contact.id, contact]));
+    for (const member of tagMembers?.contacts ?? []) {
+      if (!merged.has(member.id)) {
+        merged.set(member.id, {
+          avatar: member.avatar,
+          firstName: member.firstName,
+          headline: null,
+          id: member.id,
+          lastName: member.lastName,
+          location: null,
+          middleName: null,
+          myself: false,
+        });
+      }
+    }
+    return Array.from(merged.values());
+  }, [allContacts, tagMembers?.contacts]);
   const [selectedIds, setSelectedIds] = useState<string[]>(
     mode === "create" ? initialSelectedPersonIds : [],
   );
@@ -140,24 +157,8 @@ function TagEditorModalBody({
   const isBlocking = isSubmitting || isLoadingContacts;
   const { closeModal, closeModalSync } = useModalDismiss(modalId, isBlocking);
 
-  const handleSearch = useCallback(
-    async (query: string): Promise<ContactSelectable[]> => {
-      try {
-        const params = { limit: 10, search: query };
-        const data = await queryClient.fetchQuery({
-          queryFn: () => getContactsSelectableList(params),
-          queryKey: contactKeys.selectable.list(params),
-        });
-        return data.contacts ?? [];
-      } catch {
-        return [];
-      }
-    },
-    [queryClient],
-  );
-
   const buildPreviewContacts = (ids: string[]): ContactPreview[] => {
-    const map = new Map(allContacts.map((contact) => [contact.id, contact]));
+    const map = new Map(pickerContacts.map((contact) => [contact.id, contact]));
     return ids
       .map((id) => map.get(id))
       .filter((contact): contact is ContactSelectable => contact != null)
@@ -213,7 +214,7 @@ function TagEditorModalBody({
         try {
           await updateTagByIdMutation.mutateAsync({
             patch: { color, label: trimmedLabel },
-            tagId: created.tag.id,
+            tagId: created.id,
           });
         } catch {
           isPatchSuccessful = false;
@@ -234,7 +235,7 @@ function TagEditorModalBody({
         if (selectedIds.length > 0) {
           try {
             await syncTagContactsMutation.mutateAsync({
-              tagId: created.tag.id,
+              tagId: created.id,
               toAdd: selectedIds,
               toRemove: [],
             });
@@ -256,13 +257,11 @@ function TagEditorModalBody({
         try {
           onCreated(
             {
-              ...created.tag,
-              color: isPatchSuccessful ? color : created.tag.color,
-              contactCount: areMembersSynced ? selectedIds.length : created.tag.contactCount,
+              ...created,
+              color: isPatchSuccessful ? color : created.color,
+              contactCount: areMembersSynced ? selectedIds.length : 0,
               label: trimmedLabel,
-              previewContacts: areMembersSynced
-                ? buildPreviewContacts(selectedIds)
-                : created.tag.previewContacts,
+              previewContacts: areMembersSynced ? buildPreviewContacts(selectedIds) : [],
             },
             selectedIds,
           );
@@ -341,10 +340,10 @@ function TagEditorModalBody({
             }),
           );
           onDeleted(tag.id);
-        } catch {
+        } catch (error) {
           notifications.show(
             errorNotificationTemplate({
-              description: t("DeleteErrorDescription"),
+              description: getUserFacingError(error, tCommon),
               title: t("DeleteErrorTitle"),
             }),
           );
@@ -397,13 +396,18 @@ function TagEditorModalBody({
             </Center>
           ) : (
             <PeopleMultiPickerInput
-              contacts={allContacts}
+              contacts={pickerContacts}
+              contactsHasMore={contactsData?.pagination.hasMore ?? false}
               disabled={isBlocking}
+              loadingMoreLabel={t("LoadingMoreLabel")}
+              loadMoreErrorLabel={t("LoadMoreError")}
+              loadMoreRetryLabel={t("LoadMoreRetry")}
               noResultsLabel={t("NoPeopleFound")}
               onChange={setSelectedIds}
-              onSearch={handleSearch}
+              onSearch={searchContactsPage}
               placeholder={t("AddFirstPersonPlaceholder")}
-              searchDebounceMs={DEBOUNCE_MS.contactPicker}
+              searchDebounceMs={DEBOUNCE_MS.search}
+              searchingLabel={t("SearchingLabel")}
               selectedIds={selectedIds}
             />
           )}

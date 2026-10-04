@@ -372,7 +372,7 @@ pnpm run dev:extension
 pnpm run dev:mobile
 ```
 
-These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo run`). Persistent app processes (`next dev`, `tsx watch`) stay up; package `tsc --watch` runs beside them. Do not wrap those servers in `turbo watch` — that kills Next on any tracked file write.
+These scripts are defined in the root `package.json` and orchestrated by Turborepo (`turbo run`). Persistent app processes (`next dev`, `tsx watch`) stay up; package `tsc --watch` runs beside them. Do not wrap those servers in `turbo watch` — that kills Next on any tracked file write. Locale JSON is copied by `@bondery/translations#dev` (poll + `fs.watch`); refresh the tab to see new copy. The API restarts once per save burst when the locale watch stamp changes.
 
 ### Stripe billing (optional)
 

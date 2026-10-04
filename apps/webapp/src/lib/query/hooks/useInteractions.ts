@@ -1,6 +1,6 @@
 "use client";
 
-import type { Activity } from "@bondery/schemas";
+import type { Activity, UpdateInteractionInput } from "@bondery/schemas";
 import type { InfiniteData, UseInfiniteQueryResult } from "@tanstack/react-query";
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -77,7 +77,7 @@ export function useUpdateInteractionMutation(interactionId: string, contactId?: 
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (body: Record<string, unknown>) => updateInteraction(interactionId, body),
+    mutationFn: (body: UpdateInteractionInput) => updateInteraction(interactionId, body),
 
     onSuccess: async () => {
       await Promise.all([

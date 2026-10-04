@@ -2,50 +2,115 @@
 
 import { formatContactName } from "@bondery/helpers/contact";
 import type { ContactSelectable } from "@bondery/schemas";
-import {
-  Avatar,
-  Combobox,
-  Group,
-  getDefaultZIndex,
-  Loader,
-  Pill,
-  PillsInput,
-  Text,
-  useCombobox,
-} from "@mantine/core";
-import { useDebouncedCallback } from "@mantine/hooks";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Combobox, getDefaultZIndex, Pill, PillsInput, useCombobox } from "@mantine/core";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { PersonChip } from "#nextjs/PersonChip/index.js";
-import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";
+import {
+  handlePeoplePickerArrowDownLoadMore,
+  type PeoplePickerOnSearch,
+} from "#peoplePicker/peoplePickerPagedList.js";
+import { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
 
-const MAX_DROPDOWN_OPTIONS = 5;
+const PEOPLE_PICKER_PILLS_STYLES = {
+  input: {
+    alignItems: "center" as const,
+    display: "flex",
+    minHeight: 34,
+  },
+};
 
-interface PeopleMultiPickerInputProps {
+type PeopleMultiPickerInputSharedProps = {
   contacts: ContactSelectable[];
+  /**
+   * Prefetch list `pagination.hasMore`. Default false — do not infer from length.
+   */
+  contactsHasMore?: boolean;
   disabled?: boolean;
   error?: React.ReactNode;
   inputRef?: React.Ref<HTMLInputElement>;
+  loadingMoreLabel?: string;
+  loadMoreErrorLabel?: string;
+  loadMoreRetryLabel?: string;
   noResultsLabel?: string;
-  onChange: (ids: string[]) => void;
-  /**
-   * When provided, the picker calls this function (debounced 300 ms) whenever
-   * the user types a non-empty query, instead of filtering the `contacts` prop
-   * client-side. Results are merged into the internal known-contacts map so
-   * that chips for async-found contacts continue to render after selection.
-   */
-  onSearch?: (query: string) => Promise<ContactSelectable[]>;
   placeholder?: string;
-  /**
-   * Debounce delay in ms before `onSearch` is called after the user stops typing.
-   * @defaultValue 300
-   */
-  searchDebounceMs?: number;
   /**
    * Label shown in the dropdown while an `onSearch` call is in progress.
    * @defaultValue "Searching…"
    */
   searchingLabel?: string;
   selectedIds: string[];
+};
+
+type PeopleMultiPickerSearchProps =
+  | {
+      /**
+       * Server search with offset paging. Empty field still lists prefetched
+       * `contacts` (minus selected / myself). Pass `DEBOUNCE_MS.search`.
+       */
+      onSearch: PeoplePickerOnSearch<ContactSelectable>;
+      searchDebounceMs: number;
+    }
+  | {
+      onSearch?: never;
+      searchDebounceMs?: never;
+    };
+
+type PeopleMultiPickerInputProps =
+  | (PeopleMultiPickerInputSharedProps & {
+      /** Selected chips only — no search field, dropdown, or removal. */
+      isReadonly: true;
+      onChange?: never;
+    } & {
+      onSearch?: never;
+      searchDebounceMs?: never;
+    })
+  | (PeopleMultiPickerInputSharedProps & {
+      isReadonly?: false;
+      onChange: (ids: string[]) => void;
+    } & PeopleMultiPickerSearchProps);
+
+function selectedContactsInOrder(
+  contacts: ContactSelectable[],
+  selectedIds: string[],
+): ContactSelectable[] {
+  const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
+  return selectedIds
+    .map((id) => contactsById.get(id))
+    .filter((contact): contact is ContactSelectable => Boolean(contact));
+}
+
+function ReadonlySelectedPeoplePills({
+  contacts,
+  disabled,
+  error,
+  selectedIds,
+}: {
+  contacts: ContactSelectable[];
+  disabled?: boolean;
+  error?: React.ReactNode;
+  selectedIds: string[];
+}) {
+  const selectedContacts = selectedContactsInOrder(contacts, selectedIds);
+
+  return (
+    <PillsInput
+      disabled={disabled}
+      error={error}
+      styles={{
+        input: {
+          ...PEOPLE_PICKER_PILLS_STYLES.input,
+          cursor: "default",
+        },
+      }}
+    >
+      <Pill.Group>
+        {selectedContacts.map((contact) => (
+          <PersonChip isClickable={false} key={contact.id} person={contact} size="sm" />
+        ))}
+      </Pill.Group>
+    </PillsInput>
+  );
 }
 
 /**
@@ -56,29 +121,76 @@ interface PeopleMultiPickerInputProps {
  * When `onSearch` is provided, typing triggers a debounced server-side search
  * instead of filtering the local `contacts` array, allowing the picker to find
  * contacts that were not included in the initial prefetch.
+ *
+ * `isReadonly` renders the same chip field without search, dropdown, or removal.
  */
-export function PeopleMultiPickerInput({
+export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps) {
+  if (props.isReadonly) {
+    return (
+      <ReadonlySelectedPeoplePills
+        contacts={props.contacts}
+        disabled={props.disabled}
+        error={props.error}
+        selectedIds={props.selectedIds}
+      />
+    );
+  }
+
+  return <EditablePeopleMultiPickerInput {...props} />;
+}
+
+function EditablePeopleMultiPickerInput({
   contacts,
+  contactsHasMore = false,
   selectedIds,
   onChange,
   placeholder,
   noResultsLabel,
   searchingLabel = "Searching…",
-  searchDebounceMs = 300,
+  loadingMoreLabel = "Loading more…",
+  loadMoreErrorLabel = "Couldn't load more people.",
+  loadMoreRetryLabel = "Retry",
+  searchDebounceMs,
   error,
   disabled,
   inputRef,
   onSearch,
-}: PeopleMultiPickerInputProps) {
-  const [search, setSearch] = useState("");
-  const [asyncResults, setAsyncResults] = useState<ContactSelectable[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const searchGenerationRef = useRef(0);
+}: PeopleMultiPickerInputSharedProps & {
+  onChange: (ids: string[]) => void;
+} & PeopleMultiPickerSearchProps) {
+  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+  const filterAvailable = useCallback(
+    (contact: ContactSelectable) => !selectedIdSet.has(contact.id) && !contact.myself,
+    [selectedIdSet],
+  );
+  const matchQuery = useCallback((contact: ContactSelectable, query: string) => {
+    return formatContactName(contact).toLowerCase().includes(query.toLowerCase());
+  }, []);
 
-  // Accumulates contacts prop + any async-found contacts so chips always resolve.
+  const {
+    canLoadMore,
+    isFirstPageSearching,
+    isLoadingMore,
+    loadMore,
+    loadMoreError,
+    query: search,
+    resetList,
+    retryLoadMore,
+    scrollResetKey,
+    selectFirstOptionToken,
+    setQuery,
+    visibleItems,
+  } = usePeoplePickerPagedList({
+    contactsHasMore,
+    filter: filterAvailable,
+    matchQuery,
+    onSearch,
+    searchDebounceMs,
+    seed: contacts,
+  });
+
   const [knownContacts, setKnownContacts] = useState<ContactSelectable[]>(contacts);
 
-  // Merge incoming prop updates into knownContacts without discarding async finds.
   useEffect(() => {
     setKnownContacts((prev) => {
       const merged = new Map(prev.map((c) => [c.id, c]));
@@ -89,49 +201,35 @@ export function PeopleMultiPickerInput({
     });
   }, [contacts]);
 
+  useEffect(() => {
+    setKnownContacts((prev) => {
+      const merged = new Map(prev.map((c) => [c.id, c]));
+      for (const c of visibleItems) {
+        merged.set(c.id, c);
+      }
+      return Array.from(merged.values());
+    });
+  }, [visibleItems]);
+
   const contactsCombobox = useCombobox({
+    loop: !canLoadMore,
     onDropdownClose: () => {
       contactsCombobox.resetSelectedOption();
-      setSearch("");
-      setAsyncResults([]);
-      setIsSearching(false);
+      resetList();
     },
     onDropdownOpen: () => {
       contactsCombobox.selectFirstOption();
     },
   });
 
-  const triggerSearch = useDebouncedCallback(async (query: string) => {
-    if (!onSearch) {
-      return;
-    }
+  // Retrigger first-option highlight after replace (not on append).
+  // `useCombobox()` returns a new store object every render — do not depend on it
+  // or load-more re-renders scroll the first option into view.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: token is the replace trigger
+  useEffect(() => {
+    contactsCombobox.selectFirstOption();
+  }, [selectFirstOptionToken]);
 
-    const generation = ++searchGenerationRef.current;
-
-    try {
-      const results = await onSearch(query);
-      if (generation !== searchGenerationRef.current) {
-        return;
-      }
-
-      setAsyncResults(results);
-      setKnownContacts((prev) => {
-        const merged = new Map(prev.map((c) => [c.id, c]));
-        for (const c of results) {
-          merged.set(c.id, c);
-        }
-        return Array.from(merged.values());
-      });
-      contactsCombobox.selectFirstOption();
-    } finally {
-      if (generation === searchGenerationRef.current) {
-        setIsSearching(false);
-      }
-    }
-  }, searchDebounceMs);
-
-  // Include the `contacts` prop immediately so a parent can add a newly created
-  // person without waiting for the merge effect.
   const contactsById = useMemo(() => {
     const merged = new Map(knownContacts.map((contact) => [contact.id, contact]));
     for (const contact of contacts) {
@@ -148,35 +246,6 @@ export function PeopleMultiPickerInput({
     [contactsById, selectedIds],
   );
 
-  const filteredContacts = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    if (onSearch && query) {
-      if (isSearching) {
-        return [];
-      }
-
-      return asyncResults.filter((contact) => !selectedIds.includes(contact.id) && !contact.myself);
-    }
-
-    const availableContacts = contacts.filter(
-      (contact) => !selectedIds.includes(contact.id) && !contact.myself,
-    );
-
-    if (!query) {
-      return availableContacts;
-    }
-
-    return availableContacts.filter((contact) =>
-      formatContactName(contact).toLowerCase().includes(query),
-    );
-  }, [contacts, search, selectedIds, onSearch, asyncResults, isSearching]);
-
-  const visibleContacts = useMemo(
-    () => filteredContacts.slice(0, MAX_DROPDOWN_OPTIONS),
-    [filteredContacts],
-  );
-
   return (
     <Combobox
       onOptionSubmit={(value: string) => {
@@ -186,8 +255,7 @@ export function PeopleMultiPickerInput({
           : [...selectedIds, value];
 
         onChange(nextSelectedIds);
-        setSearch("");
-        setAsyncResults([]);
+        resetList();
       }}
       store={contactsCombobox}
       zIndex={getDefaultZIndex("max")}
@@ -196,15 +264,9 @@ export function PeopleMultiPickerInput({
         <PillsInput
           disabled={disabled}
           error={error}
-          loading={isSearching}
+          loading={isFirstPageSearching}
           onClick={() => contactsCombobox.openDropdown()}
-          styles={{
-            input: {
-              alignItems: "center",
-              display: "flex",
-              minHeight: 34,
-            },
-          }}
+          styles={PEOPLE_PICKER_PILLS_STYLES}
         >
           <Pill.Group>
             {selectedContacts.map((contact) => (
@@ -223,17 +285,9 @@ export function PeopleMultiPickerInput({
                 disabled={disabled}
                 onChange={(event) => {
                   const value = event.currentTarget.value;
-                  setSearch(value);
+                  setQuery(value);
                   contactsCombobox.openDropdown();
                   contactsCombobox.updateSelectedOptionIndex("active");
-                  if (onSearch && value.trim()) {
-                    setIsSearching(true);
-                    void triggerSearch(value.trim());
-                  } else {
-                    searchGenerationRef.current += 1;
-                    setAsyncResults([]);
-                    setIsSearching(false);
-                  }
                 }}
                 onFocus={() => contactsCombobox.openDropdown()}
                 onKeyDown={(event) => {
@@ -244,6 +298,12 @@ export function PeopleMultiPickerInput({
                       onChange(selectedIds.slice(0, -1));
                     }
                   }
+                  handlePeoplePickerArrowDownLoadMore(event, {
+                    canLoadMore,
+                    loadMore,
+                    optionCount: visibleItems.length,
+                    selectedIndex: contactsCombobox.getSelectedOptionIndex(),
+                  });
                 }}
                 placeholder={selectedContacts.length === 0 ? placeholder : undefined}
                 ref={inputRef}
@@ -254,42 +314,21 @@ export function PeopleMultiPickerInput({
         </PillsInput>
       </Combobox.DropdownTarget>
 
-      <Combobox.Dropdown>
-        <Combobox.Options>
-          {onSearch && search.trim() && isSearching ? (
-            <Combobox.Empty>
-              <Group gap="xs" justify="center">
-                <Loader size="xs" />
-                <span>{searchingLabel}</span>
-              </Group>
-            </Combobox.Empty>
-          ) : filteredContacts.length > 0 ? (
-            visibleContacts.map((contact) => {
-              const fullName = formatContactName(contact);
-
-              return (
-                <Combobox.Option key={contact.id} value={contact.id}>
-                  <Group justify="space-between" px="xs" py={6} wrap="nowrap">
-                    <Group gap="sm" wrap="nowrap">
-                      <Avatar
-                        color={getAvatarColorFromName(contact.firstName, contact.lastName)}
-                        name={fullName}
-                        radius="xl"
-                        size="sm"
-                        src={contact.avatar || undefined}
-                      />
-                      <Text fw={500} size="sm">
-                        {fullName}
-                      </Text>
-                    </Group>
-                  </Group>
-                </Combobox.Option>
-              );
-            })
-          ) : (
-            <Combobox.Empty>{noResultsLabel}</Combobox.Empty>
-          )}
-        </Combobox.Options>
+      <Combobox.Dropdown data-composed>
+        <PeoplePickerDropdownBody
+          isFirstPageSearching={isFirstPageSearching}
+          isLoadingMore={isLoadingMore}
+          items={visibleItems}
+          loadingMoreLabel={loadingMoreLabel}
+          loadMoreError={loadMoreError}
+          loadMoreErrorLabel={loadMoreErrorLabel}
+          loadMoreRetryLabel={loadMoreRetryLabel}
+          noResultsLabel={noResultsLabel}
+          onBottomReached={loadMore}
+          onRetryLoadMore={retryLoadMore}
+          scrollResetKey={scrollResetKey}
+          searchingLabel={searchingLabel}
+        />
       </Combobox.Dropdown>
     </Combobox>
   );

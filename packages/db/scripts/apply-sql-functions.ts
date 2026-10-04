@@ -1,7 +1,8 @@
 #!/usr/bin/env tsx
 /**
  * Applies prisma/sql/functions.sql (extensions + custom Postgres functions)
- * against DATABASE_URL. Run after `prisma migrate deploy`.
+ * against DATABASE_URL. Relocates pg_trgm/unaccent into schema `extensions`
+ * first (idempotent). Run after `prisma migrate deploy`.
  *
  * Usage: tsx scripts/apply-sql-functions.ts
  */

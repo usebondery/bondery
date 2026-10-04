@@ -6,33 +6,35 @@ import {
   Avatar,
   Badge,
   type BadgeProps,
-  Center,
   Combobox,
-  Group,
-  Loader,
   type MantineColor,
-  Text,
   UnstyledButton,
   useCombobox,
 } from "@mantine/core";
-import { useDebouncedCallback } from "@mantine/hooks";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import Link from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
+import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
+import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";
+import {
+  handlePeoplePickerArrowDownLoadMore,
+  type PeoplePickerOnSearch,
+} from "#peoplePicker/peoplePickerPagedList.js";
+import { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
 type PersonChipIdentity = ContactPreview & {
-  middleName?: string | null;
   headline?: string | null;
   location?: string | null;
+  middleName?: string | null;
 };
 
 function formatPersonName(candidate: PersonChipIdentity): string {
   return [candidate.firstName, candidate.middleName, candidate.lastName].filter(Boolean).join(" ");
 }
 
-export interface PersonChipProps {
+type PersonChipBaseProps = {
   avatarEdge?: boolean;
   badgeVariant?: BadgeProps["variant"];
   color?: MantineColor;
@@ -40,28 +42,50 @@ export interface PersonChipProps {
   href?: string;
   isClickable?: boolean;
   isSelectable?: boolean;
+  /**
+   * Prefetch list `pagination.hasMore`. Default false — do not infer from length.
+   */
+  contactsHasMore?: boolean;
+  loadingMoreLabel?: string;
+  loadMoreErrorLabel?: string;
+  loadMoreRetryLabel?: string;
   noResultsLabel?: string;
   onClear?: () => void;
   /** Called immediately before client navigation (e.g. optimistic document title). */
   onNavigate?: () => void;
-  /** Async server-side search handler. When provided, triggers after the user stops typing. */
-  onSearch?: (query: string) => Promise<ContactPreview[]>;
   onSelectPerson?: (personId: string) => void;
   openInNewTab?: boolean;
-  people?: ContactPreview[];
+  people?: PersonChipIdentity[];
   person: PersonChipIdentity | null;
   placeholder?: string;
   /** Next.js Link prefetch. Pass `false` on merge cards so deleted duplicates are not prefetched. */
   prefetch?: boolean | null;
   /** Custom right section override — rendered instead of the default chevron/clear icon. */
   rightSection?: ReactNode;
-  /** Debounce delay for `onSearch` in milliseconds. Defaults to 300. */
-  searchDebounceMs?: number;
+  /**
+   * Label shown in the dropdown while an `onSearch` call is in progress.
+   * @defaultValue "Searching…"
+   */
+  searchingLabel?: string;
   searchPlaceholder?: string;
   showChevronWhenEmpty?: boolean;
   showHoverCard?: boolean;
   size?: "sm" | "md";
-}
+};
+
+export type PersonChipProps = PersonChipBaseProps &
+  (
+    | {
+        /** Async server-side search with offset paging. Empty field still lists prefetched `people`. */
+        onSearch: PeoplePickerOnSearch<PersonChipIdentity>;
+        /** Debounce delay for `onSearch`. Pass `DEBOUNCE_MS.search` (600ms). */
+        searchDebounceMs: number;
+      }
+    | {
+        onSearch?: never;
+        searchDebounceMs?: never;
+      }
+  );
 
 export function PersonChip({
   person,
@@ -74,8 +98,13 @@ export function PersonChip({
   disabled = false,
   placeholder = "Select person",
   people = [],
+  contactsHasMore = false,
   searchPlaceholder = "Search...",
   noResultsLabel = "No people found",
+  searchingLabel = "Searching…",
+  loadingMoreLabel = "Loading more…",
+  loadMoreErrorLabel = "Couldn't load more people.",
+  loadMoreRetryLabel = "Retry",
   onSelectPerson,
   isClickable = false,
   href,
@@ -86,7 +115,7 @@ export function PersonChip({
   prefetch,
   rightSection,
   onSearch,
-  searchDebounceMs = 300,
+  searchDebounceMs,
 }: PersonChipProps) {
   const avatarSize = size === "sm" ? 16 : 20;
   const avatarEdgeSize = size === "sm" ? 26 : 32;
@@ -106,26 +135,57 @@ export function PersonChip({
   );
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const matchQuery = useCallback(
+    (candidate: PersonChipIdentity, query: string) => {
+      return getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
+    },
+    [getDisplayName],
+  );
+
+  const {
+    canLoadMore,
+    isFirstPageSearching,
+    isLoadingMore,
+    loadMore,
+    loadMoreError,
+    query: search,
+    resetList,
+    retryLoadMore,
+    scrollResetKey,
+    selectFirstOptionToken,
+    setQuery,
+    visibleItems,
+  } = usePeoplePickerPagedList({
+    contactsHasMore,
+    matchQuery,
+    onSearch,
+    searchDebounceMs,
+    seed: people,
+  });
 
   const combobox = useCombobox({
+    loop: !canLoadMore,
     onDropdownClose: () => {
       combobox.resetSelectedOption();
-      setSearch("");
-      searchGenRef.current += 1;
-      setAsyncResults([]);
-      setIsSearching(false);
+      resetList();
     },
     onDropdownOpen: () => {
       requestAnimationFrame(() => {
         searchInputRef.current?.focus();
+        combobox.selectFirstOption();
       });
     },
   });
-  const [search, setSearch] = useState("");
-  const [asyncResults, setAsyncResults] = useState<ContactPreview[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  const searchGenRef = useRef<number>(0);
-  const knownPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
+
+  // Retrigger first-option highlight after replace (not on append).
+  // `useCombobox()` returns a new store object every render — do not depend on it
+  // or load-more re-renders scroll the first option into view.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: token is the replace trigger
+  useEffect(() => {
+    combobox.selectFirstOption();
+  }, [selectFirstOptionToken]);
+
+  const knownPeopleRef = useRef<Map<string, PersonChipIdentity>>(new Map());
 
   useEffect(() => {
     for (const p of people) {
@@ -133,32 +193,11 @@ export function PersonChip({
     }
   }, [people]);
 
-  const triggerSearch = useDebouncedCallback(async (query: string) => {
-    if (!onSearch) {
-      return;
+  useEffect(() => {
+    for (const candidate of visibleItems) {
+      knownPeopleRef.current.set(candidate.id, candidate);
     }
-    const gen = ++searchGenRef.current;
-    const results = await onSearch(query);
-    if (gen !== searchGenRef.current) {
-      return;
-    }
-    for (const r of results) {
-      knownPeopleRef.current.set(r.id, r);
-    }
-    setAsyncResults(results);
-    setIsSearching(false);
-  }, searchDebounceMs);
-
-  const filteredPeople = useMemo(() => {
-    if (onSearch && search.trim()) {
-      return asyncResults;
-    }
-    const query = search.trim().toLowerCase();
-    if (!query) {
-      return people;
-    }
-    return people.filter((candidate) => getDisplayName(candidate).toLowerCase().includes(query));
-  }, [people, search, onSearch, asyncResults, getDisplayName]);
+  }, [visibleItems]);
 
   const fullName = getDisplayName(person);
   const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
@@ -297,8 +336,9 @@ export function PersonChip({
         combobox.closeDropdown();
       }}
       store={combobox}
+      width={PEOPLE_PICKER_DROPDOWN_WIDTH}
     >
-      <Combobox.Target>
+      <Combobox.Target targetType="button">
         <UnstyledButton
           disabled={disabled}
           onClick={() => {
@@ -311,61 +351,39 @@ export function PersonChip({
         </UnstyledButton>
       </Combobox.Target>
 
-      <Combobox.Dropdown className="min-w-80">
+      <Combobox.Dropdown data-composed>
         <Combobox.Search
           autoFocus
-          loading={isSearching}
+          loading={isFirstPageSearching}
           onChange={(event) => {
-            const value = event.currentTarget.value;
-            setSearch(value);
-            if (onSearch) {
-              const query = value.trim();
-              if (!query) {
-                searchGenRef.current += 1;
-                setAsyncResults([]);
-                setIsSearching(false);
-              } else {
-                setIsSearching(true);
-                triggerSearch(query);
-              }
-            }
+            setQuery(event.currentTarget.value);
+          }}
+          onKeyDown={(event) => {
+            handlePeoplePickerArrowDownLoadMore(event, {
+              canLoadMore,
+              loadMore,
+              optionCount: visibleItems.length,
+              selectedIndex: combobox.getSelectedOptionIndex(),
+            });
           }}
           placeholder={searchPlaceholder}
           ref={searchInputRef}
           value={search}
         />
-        <Combobox.Options className="max-h-60" style={{ overflowY: "auto" }}>
-          {isSearching ? (
-            <Combobox.Empty>
-              <Center>
-                <Loader size="xs" />
-              </Center>
-            </Combobox.Empty>
-          ) : filteredPeople.length > 0 ? (
-            filteredPeople.map((candidate) => {
-              const candidateName = formatPersonName(candidate);
-
-              return (
-                <Combobox.Option key={candidate.id} value={candidate.id}>
-                  <Group gap="sm" wrap="nowrap">
-                    <Avatar
-                      color={getAvatarColorFromName(candidate.firstName, candidate.lastName)}
-                      name={`${candidate.firstName} ${candidate.lastName || ""}`.trim()}
-                      radius="xl"
-                      size="sm"
-                      src={candidate.avatar || undefined}
-                    />
-                    <Text fw={500} size="sm">
-                      {candidateName}
-                    </Text>
-                  </Group>
-                </Combobox.Option>
-              );
-            })
-          ) : (
-            <Combobox.Empty>{noResultsLabel}</Combobox.Empty>
-          )}
-        </Combobox.Options>
+        <PeoplePickerDropdownBody
+          isFirstPageSearching={isFirstPageSearching}
+          isLoadingMore={isLoadingMore}
+          items={visibleItems}
+          loadingMoreLabel={loadingMoreLabel}
+          loadMoreError={loadMoreError}
+          loadMoreErrorLabel={loadMoreErrorLabel}
+          loadMoreRetryLabel={loadMoreRetryLabel}
+          noResultsLabel={noResultsLabel}
+          onBottomReached={loadMore}
+          onRetryLoadMore={retryLoadMore}
+          scrollResetKey={scrollResetKey}
+          searchingLabel={searchingLabel}
+        />
       </Combobox.Dropdown>
     </Combobox>
   );

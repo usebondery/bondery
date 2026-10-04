@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { type LayoutChangeEvent, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactsSelectionActionBar } from "../../components/ContactsSelectionActionBar";
+import type { NativeViewRef } from "../../lib/native-host-refs";
 import { floatingBarStyles } from "../../theme/floatingBarStyles";
 import { MOBILE_Z_INDEX } from "../../theme/tokens";
 import { FabSpeedDialScrim } from "./FabSpeedDialScrim";
@@ -20,8 +21,8 @@ export function FloatingTabsChrome() {
   const { actionBarSlot } = useFloatingChrome();
   const reportBottomInset = useReportFloatingChromeBottomInset();
   const { isOpen, usesInlineMenu, tryDismissFromScrim } = useFabSpeedDial();
-  const hostRef = useRef<View>(null);
-  const chromeRef = useRef<View>(null);
+  const hostRef = useRef<NativeViewRef>(null);
+  const chromeRef = useRef<NativeViewRef>(null);
   const [scrimHeight, setScrimHeight] = useState(0);
 
   const measureScrimHeight = useCallback(() => {

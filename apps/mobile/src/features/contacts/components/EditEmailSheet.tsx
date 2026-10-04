@@ -3,7 +3,7 @@ import type { EmailEntry } from "@bondery/schemas";
 import { emailEntryInputSchema, emailEntrySchema } from "@bondery/schemas";
 import { IconCheck, IconMailPlus, IconTrash } from "@tabler/icons-react-native";
 import { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, Text, type TextInput } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
@@ -12,6 +12,7 @@ import {
 import { SheetSelectField, SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftEmail } from "../contactChannelConstants";
 
@@ -41,7 +42,7 @@ export function EditEmailSheet({
   const tContactInfo = useContactInfoTranslations();
   const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<NativeTextInputRef>(null);
   const {
     control,
     handleSubmit,

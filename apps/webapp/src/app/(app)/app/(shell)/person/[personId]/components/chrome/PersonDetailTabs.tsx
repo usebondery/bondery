@@ -39,6 +39,7 @@ import { PersonTagsInput } from "./PersonTagsInput";
 interface PersonDetailTabsProps {
   activeTab: PersonTabValue;
   contact: Contact;
+  contactsHasMore?: boolean;
   currentPersonPreview: ContactPreview;
   enrichLabel: string;
   getInteractionTypeLabel: (type: string) => string;
@@ -103,6 +104,7 @@ export function PersonDetailTabs({
   savingField,
   savingLastInteraction,
   selectableContacts,
+  contactsHasMore = false,
   selectablePeople,
   tEditGroupsTitle,
   tInteractions,
@@ -168,6 +170,7 @@ export function PersonDetailTabs({
                     (item, index, self) =>
                       self.findIndex((other) => other.id === item.id) === index,
                   ),
+                  contactsHasMore,
                   initialParticipantIds: [contact.id],
                 });
               }}
@@ -193,6 +196,7 @@ export function PersonDetailTabs({
           />
 
           <ContactRelationshipsSection
+            contactsHasMore={contactsHasMore}
             currentPerson={currentPersonPreview}
             isSubmitting={relationshipsSaving}
             onAddRelationship={onAddRelationship}

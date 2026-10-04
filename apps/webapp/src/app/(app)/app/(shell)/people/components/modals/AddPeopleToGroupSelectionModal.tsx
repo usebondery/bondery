@@ -7,10 +7,10 @@ import {
   ModalFooter,
   ModalScrollLayout,
   ModalTitle,
-  PersonChip,
+  PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { ContactPreview, GroupWithCount } from "@bondery/schemas";
+import type { GroupWithCount } from "@bondery/schemas";
 import {
   Badge,
   Box,
@@ -95,7 +95,6 @@ function AddPeopleToGroupSelectionForm({
   const [search, setSearch] = useState("");
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(new Set());
   const [initialSelectedGroupIds, setInitialSelectedGroupIds] = useState<Set<string>>(new Set());
-  const [selectedPeople, setSelectedPeople] = useState<ContactPreview[]>([]);
   const [hasInitialized, setHasInitialized] = useState(false);
 
   const deduplicatedPersonIds = useMemo(() => Array.from(new Set(personIds)), [personIds]);
@@ -163,24 +162,12 @@ function AddPeopleToGroupSelectionForm({
       memberships[0] ? new Set(memberships[0]) : new Set(),
     );
 
-    const selectedPersonIdsSet = new Set(deduplicatedPersonIds);
-    const personChips = (contactsData.contacts || [])
-      .filter((person) => selectedPersonIdsSet.has(person.id))
-      .map((person) => ({
-        avatar: person.avatar,
-        firstName: person.firstName,
-        id: person.id,
-        lastName: person.lastName,
-      }));
-
     setGroups(groupsData.groups || []);
     setInitialSelectedGroupIds(intersection);
     setSelectedGroupIds(new Set(intersection));
-    setSelectedPeople(personChips);
     setHasInitialized(true);
   }, [
     contactsData,
-    deduplicatedPersonIds,
     groupsData,
     hasInitialized,
     isLoadingContacts,
@@ -324,13 +311,14 @@ function AddPeopleToGroupSelectionForm({
       }
       header={
         <Stack gap="md">
-          {selectedPeople.length > 0 && (
-            <Group align="center" gap="xs" wrap="wrap">
-              {selectedPeople.map((person) => (
-                <PersonChip isClickable={false} key={person.id} person={person} size="sm" />
-              ))}
-            </Group>
-          )}
+          {deduplicatedPersonIds.length > 0 ? (
+            <PeopleMultiPickerInput
+              contacts={contactsData?.contacts ?? []}
+              disabled={isBlocking}
+              isReadonly
+              selectedIds={deduplicatedPersonIds}
+            />
+          ) : null}
 
           <TextInput
             disabled={isBlocking}

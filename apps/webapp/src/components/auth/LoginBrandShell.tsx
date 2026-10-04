@@ -1,7 +1,7 @@
 "use client";
 
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
-import { Box, Card, Flex, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
+import { Box, Card, Flex, Group, Loader, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconCheck } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
@@ -9,10 +9,11 @@ import { Logo } from "./Logo";
 
 type LoginBrandShellProps = {
   children: ReactNode;
+  loading?: boolean;
   websiteUrl: string;
 };
 
-export function LoginBrandShell({ children, websiteUrl }: LoginBrandShellProps) {
+export function LoginBrandShell({ children, loading = false, websiteUrl }: LoginBrandShellProps) {
   const t = useLoginPageTranslations();
   const tBenefits = useLoginPageTranslations("Benefits");
   const tCommon = useCommonTranslations();
@@ -55,9 +56,17 @@ export function LoginBrandShell({ children, websiteUrl }: LoginBrandShellProps) 
             </Stack>
           </Stack>
           <Flex align="center" flex={1} justify="center" p="xl">
-            <Box maw="24rem" w="100%">
-              {children}
-            </Box>
+            {loading ? (
+              <Loader
+                aria-label={tCommon("a11y.loading")}
+                data-testid="login-card-loader"
+                size="lg"
+              />
+            ) : (
+              <Box maw="24rem" w="100%">
+                {children}
+              </Box>
+            )}
           </Flex>
         </Flex>
       </Card>

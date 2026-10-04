@@ -72,6 +72,8 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     return Array.from(byId.values());
   }, [contact, selectableContacts]);
 
+  const contactsHasMore = selectableContactsData?.pagination.hasMore ?? false;
+
   useEffect(() => {
     if (addInteractionTriggeredRef.current) {
       return;
@@ -85,6 +87,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
 
     openNewActivityModal({
       contacts: activityModalContacts,
+      contactsHasMore,
       initialParticipantIds: [contact.id],
     });
 
@@ -92,12 +95,13 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     params.delete("addInteraction");
     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(nextUrl);
-  }, [searchParams, activityModalContacts, contact.id, pathname, router]);
+  }, [searchParams, activityModalContacts, contact.id, contactsHasMore, pathname, router]);
 
   const handleActivityClick = (activity: Activity) => {
     openNewActivityModal({
       activity,
       contacts: activityModalContacts,
+      contactsHasMore,
     });
   };
 
@@ -210,6 +214,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
           openNewActivityModal({
             activity,
             contacts: activityModalContacts,
+            contactsHasMore,
           });
         }}
         onOpen={handleActivityClick}

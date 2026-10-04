@@ -1,3 +1,4 @@
+import { BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
 import type { NextRequest } from "next/server";
 import { bffProxyFetch } from "@/lib/api/bffProxy";
 import { buildNestedErrorResponse } from "@/lib/api/buildNestedErrorResponse";
@@ -33,6 +34,11 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
   const extensionVersion = request.headers.get("X-Bondery-Extension-Version");
   if (extensionVersion) {
     headers.set("X-Bondery-Extension-Version", extensionVersion);
+  }
+
+  const stepUp = request.headers.get(BONDERY_STEP_UP_HEADER);
+  if (stepUp) {
+    headers.set(BONDERY_STEP_UP_HEADER, stepUp);
   }
 
   const init: RequestInit = {

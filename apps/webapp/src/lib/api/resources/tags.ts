@@ -1,6 +1,7 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 import type { ContactPreview, PaginationMeta, Tag, TagWithCount } from "@bondery/schemas";
+import { missingResourceError } from "@/lib/api/missingResourceError";
 import { normalizePaginatedList } from "@/lib/api/resources/pagination";
 import { appendAvatarParams } from "@/lib/contacts/avatarParams";
 
@@ -42,7 +43,7 @@ export function buildTagDetailPath(id: string): string {
 
 export function parseTagDetail(raw: { tag?: Tag }): Tag {
   if (!raw.tag) {
-    throw new Error("Tag not found");
+    throw missingResourceError("tag_not_found");
   }
 
   return raw.tag;

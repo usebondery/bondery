@@ -1,0 +1,35 @@
+---
+title: session_not_fresh
+description: Session Not Fresh
+---
+
+## When this happens
+
+The Better Auth session cookie is missing, stale, or the one-shot step-up token for a sensitive Settings mutation is missing, expired, already used, or does not match.
+
+## What your integration should do
+
+Ask the signed-in user to confirm their identity (social, passkey, or email) so the API session cookie is minted again. For `DELETE /me`, `POST /me/api-keys`, `DELETE /me/api-keys/{id}`, and `DELETE /me/mcp-consents/{id}`, mint a fresh token with `POST /me/step-up` after that confirmation and send it once in `X-Bondery-Step-Up`.
+
+## What end users should see
+
+Prompt a recent confirmation (`common.errors.api.session_not_fresh`). Do not send them to sign in again while the app session may still be valid.
+
+## Response fields
+
+| Property | Value |
+|----------|-------|
+| **Type** | `authorization_error` |
+| **HTTP status** | 403 |
+| **code** | `session_not_fresh` |
+| **doc_url** | `/docs/api/errors/session_not_fresh` |
+
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+
+## Source references
+
+- `apps/api/src/lib/platform/auth/native-session.ts`
+- `apps/api/src/lib/auth/step-up-redis.ts`
+- `apps/api/src/routes/me/index.ts`
+- `apps/api/src/routes/me/api-keys/index.ts`
+- `apps/api/src/routes/me/mcp-consents/index.ts`

@@ -105,6 +105,7 @@
     "service_auth_required",
     "service_unavailable",
     "session_fetch_failed",
+    "session_not_fresh",
     "session_settings_missing",
     "settings_failed_to_create_default_settings",
     "settings_failed_to_create_settings",

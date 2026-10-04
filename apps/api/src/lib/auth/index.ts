@@ -59,6 +59,7 @@ import {
 } from "./resolve-signup-method.js";
 import { createBetterAuthSecondaryStorage } from "./secondary-storage.js";
 import { sendMagicLink } from "./send-magic-link.js";
+import { SESSION_FRESH_AGE_SECONDS } from "./session-freshness.js";
 import { runUserDeleteAfter, runUserDeleteBefore } from "./teardown-user.js";
 import { touchPasskeyLastUsed } from "./touch-passkey-last-used.js";
 
@@ -471,6 +472,10 @@ export const auth = betterAuth({
   session: {
     // 30-day session; refreshed by client plugins (web cookie, expoClient, bearer).
     expiresIn: 60 * 60 * 24 * 30, // 30 days
+    // Cookie `updateAge` refreshes expiry. It does not reset `createdAt`, so
+    // sessions older than `SESSION_FRESH_AGE_SECONDS` still get SESSION_NOT_FRESH
+    // until the user reauthenticates.
+    freshAge: SESSION_FRESH_AGE_SECONDS,
     // Dual-write Postgres + Redis (see docs/adr/0001-better-auth-redis-secondary-storage.mdx).
     storeSessionInDatabase: true,
     updateAge: 60 * 60 * 24, // refresh cookie once per day of activity

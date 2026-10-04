@@ -16,6 +16,7 @@ import {
   standardErrorResponses,
 } from "@bondery/schemas/http/responses";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { consumeStepUpHeader } from "../../../lib/auth/step-up-redis.js";
 import { getAuth } from "../../../lib/platform/auth/strategies.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
 import { withCreatedResponse, withOkResponse } from "../../../lib/platform/openapi/responses.js";
@@ -53,14 +54,16 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     {
       schema: {
         body: createApiKeyInputSchema,
-        description: "Create a new API key for the authenticated user.",
+        description:
+          "Create a new API key for the authenticated user. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.",
         response: {
           ...withCreatedResponse(apiKeyCreatedSchema, "API key created"),
           ...conflictResponse,
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute({ body: createApiKeyInputSchema }, async (ctx, { body }, reply) => {
+    withDomainRoute({ body: createApiKeyInputSchema }, async (ctx, { body, request }, reply) => {
+      await consumeStepUpHeader(ctx.user.id, request.headers);
       const result = await createApiKey(ctx, body);
       reply.status(201);
       return result;
@@ -87,7 +90,8 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
     "/:id",
     {
       schema: {
-        description: "Revoke and delete an API key.",
+        description:
+          "Revoke and delete an API key. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.",
         params: uuidParamSchema,
         response: {
           ...noContentResponse,
@@ -95,7 +99,8 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
         },
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }, reply) => {
+    withDomainRoute({ params: uuidParamSchema }, async (ctx, { params, request }, reply) => {
+      await consumeStepUpHeader(ctx.user.id, request.headers);
       await deleteApiKey(ctx, params.id);
       return reply.status(204).send(null);
     }),

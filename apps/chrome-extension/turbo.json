@@ -9,7 +9,8 @@
         "@bondery/schemas#dev",
         "@bondery/helpers#dev",
         "@bondery/mantine-next#dev",
-        "@bondery/branding#dev"
+        "@bondery/branding#dev",
+        "@bondery/translations#dev"
       ]
     }
   }

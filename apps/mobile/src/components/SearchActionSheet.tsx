@@ -1,8 +1,9 @@
 import { IconSearch } from "@tabler/icons-react-native";
 import { Sheet } from "@tamagui/sheet";
 import { type ReactNode, useEffect, useRef } from "react";
-import { StyleSheet, type TextInput, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SHEET_SNAP_POINTS, UI_TIMING_MS } from "../lib/config";
+import type { NativeTextInputRef } from "../lib/native-host-refs";
 import { MOBILE_LAYOUT } from "../theme/tokens";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import { MobileTextInput } from "./MobileTextInput";
@@ -46,7 +47,7 @@ export function SearchActionSheet({
   elevated = false,
 }: SearchActionSheetProps) {
   const colors = useMobileThemeColors();
-  const searchInputRef = useRef<TextInput>(null);
+  const searchInputRef = useRef<NativeTextInputRef>(null);
   const frameBackgroundColor = elevated ? colors.surfaceElevated : colors.surface;
 
   useEffect(() => {

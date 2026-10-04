@@ -1,6 +1,7 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 
 import type { Contact, Group, GroupWithCount, PaginationMeta } from "@bondery/schemas";
+import { missingResourceError } from "@/lib/api/missingResourceError";
 import { normalizePaginatedList } from "@/lib/api/resources/pagination";
 import { appendAvatarParams } from "@/lib/contacts/avatarParams";
 
@@ -60,7 +61,7 @@ export function buildGroupDetailPath(id: string): string {
 
 export function parseGroupDetail(raw: { group?: Group }): Group {
   if (!raw.group) {
-    throw new Error("Group not found");
+    throw missingResourceError("group_not_found");
   }
 
   return raw.group;

@@ -6,6 +6,7 @@ import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
   ModalTitle,
+  type PeoplePickerOnSearch,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type {
@@ -29,18 +30,21 @@ import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import {
   getAutoLastInteractionChoice,
   listMergeFieldConflicts,
+  toPersonPreview,
 } from "../../utils/merge-conflict-helpers";
 import { MergeWithPickStep } from "../merge/MergeWithPickStep";
 import { MergeWithResolveStep } from "../merge/MergeWithResolveStep";
 
 interface OpenMergeWithModalParams {
   contacts: Contact[];
+  contactsHasMore?: boolean;
   disableLeftPicker?: boolean;
   disableRightPicker?: boolean;
   initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
   leftPersonId: string;
-  onSearch?: (query: string) => Promise<ContactSelectable[]>;
+  onSearch?: PeoplePickerOnSearch<ContactSelectable>;
   onSuccess?: () => void;
+  people?: ContactPreview[];
   redirectToMergedPerson?: boolean;
   rightPersonId?: string;
 }
@@ -61,6 +65,7 @@ function MergeWithModalTitle() {
 
 export function openMergeWithModal({
   contacts,
+  contactsHasMore = false,
   leftPersonId,
   rightPersonId,
   disableLeftPicker = true,
@@ -68,6 +73,7 @@ export function openMergeWithModal({
   redirectToMergedPerson = true,
   onSearch,
   onSuccess,
+  people,
   initialConflictChoices,
 }: OpenMergeWithModalParams) {
   const modalId = createModalId("merge-with");
@@ -76,6 +82,7 @@ export function openMergeWithModal({
     children: (
       <MergeWithModal
         contacts={contacts}
+        contactsHasMore={contactsHasMore}
         disableLeftPicker={disableLeftPicker}
         disableRightPicker={disableRightPicker}
         initialConflictChoices={initialConflictChoices}
@@ -84,6 +91,7 @@ export function openMergeWithModal({
         modalId={modalId}
         onSearch={onSearch}
         onSuccess={onSuccess}
+        people={people}
         redirectToMergedPerson={redirectToMergedPerson}
       />
     ),
@@ -97,19 +105,22 @@ export function openMergeWithModal({
 
 interface MergeWithModalProps {
   contacts: Contact[];
+  contactsHasMore: boolean;
   disableLeftPicker: boolean;
   disableRightPicker: boolean;
   initialConflictChoices?: Partial<Record<MergeConflictField, MergeConflictChoice>>;
   initialLeftPersonId: string;
   initialRightPersonId?: string;
   modalId: string;
-  onSearch?: (query: string) => Promise<ContactSelectable[]>;
+  onSearch?: PeoplePickerOnSearch<ContactSelectable>;
   onSuccess?: () => void;
+  people?: ContactPreview[];
   redirectToMergedPerson: boolean;
 }
 
 function MergeWithModal({
   contacts,
+  contactsHasMore,
   initialLeftPersonId,
   initialRightPersonId,
   disableLeftPicker,
@@ -118,6 +129,7 @@ function MergeWithModal({
   modalId,
   onSearch,
   onSuccess,
+  people,
   initialConflictChoices,
 }: MergeWithModalProps) {
   const tCommon = useCommonTranslations();
@@ -133,6 +145,7 @@ function MergeWithModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const autoMergeRef = useRef(false);
   const knownContactsRef = useRef<Map<string, Contact>>(new Map());
+  const knownPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
   const [conflictChoices, setConflictChoices] = useState<
     Partial<Record<MergeConflictField, MergeConflictChoice>>
   >(initialConflictChoices ?? {});
@@ -149,39 +162,40 @@ function MergeWithModal({
   useEffect(() => {
     for (const c of contacts) {
       knownContactsRef.current.set(c.id, c);
+      const preview = toPersonPreview(c);
+      if (preview) {
+        knownPeopleRef.current.set(c.id, preview);
+      }
     }
   }, [contacts]);
 
-  const handleRightSearch = useCallback(
-    async (query: string): Promise<ContactPreview[]> => {
+  const handleRightSearch = useCallback<PeoplePickerOnSearch<ContactPreview>>(
+    async (query, paging) => {
       if (!onSearch) {
-        return [];
+        return { contacts: [], hasMore: false };
       }
-      const results = await onSearch(query);
-      return results
-        .filter((c) => !c.myself && c.id !== leftPersonId)
-        .map((c) => ({
-          avatar: c.avatar,
-          firstName: c.firstName,
-          id: c.id,
-          lastName: c.lastName,
-        }));
+      const page = await onSearch(query, paging);
+      const contacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
+      for (const contact of contacts) {
+        const preview = toPersonPreview(contact);
+        if (preview) {
+          knownPeopleRef.current.set(contact.id, preview);
+        }
+      }
+      return {
+        contacts,
+        hasMore: page.hasMore,
+      };
     },
     [onSearch, leftPersonId],
   );
 
-  const peopleOptions = useMemo(
-    () =>
-      contacts
-        .filter((contact) => !contact.myself)
-        .map((contact) => ({
-          avatar: contact.avatar,
-          firstName: contact.firstName,
-          id: contact.id,
-          lastName: contact.lastName,
-        })),
-    [contacts],
-  );
+  const peopleOptions = useMemo(() => {
+    if (people) {
+      return people;
+    }
+    return contacts.filter((contact) => !contact.myself);
+  }, [contacts, people]);
 
   const leftContact = useMemo(
     () => contacts.find((candidate) => candidate.id === leftPersonId) || null,
@@ -193,6 +207,22 @@ function MergeWithModal({
       contacts.find((candidate) => candidate.id === rightPersonId) ??
       (rightPersonId ? (knownContactsRef.current.get(rightPersonId) ?? null) : null),
     [contacts, rightPersonId],
+  );
+
+  const leftPerson = useMemo(
+    () =>
+      toPersonPreview(leftContact) ??
+      peopleOptions.find((candidate) => candidate.id === leftPersonId) ??
+      (leftPersonId ? (knownPeopleRef.current.get(leftPersonId) ?? null) : null),
+    [leftContact, leftPersonId, peopleOptions],
+  );
+
+  const rightPerson = useMemo(
+    () =>
+      toPersonPreview(rightContact) ??
+      peopleOptions.find((candidate) => candidate.id === rightPersonId) ??
+      (rightPersonId ? (knownPeopleRef.current.get(rightPersonId) ?? null) : null),
+    [peopleOptions, rightContact, rightPersonId],
   );
 
   const leftSelectablePeople = useMemo(
@@ -400,12 +430,16 @@ function MergeWithModal({
       {step === "pick" ? (
         <MergeWithPickStep
           cancelLabel={t("Cancel")}
+          contactsHasMore={contactsHasMore}
           continueLabel={t("Continue")}
           disableLeftPicker={disableLeftPicker}
           disableRightPicker={disableRightPicker}
           isSubmitting={isSubmitting}
-          leftContact={leftContact}
+          leftPerson={leftPerson}
           leftSelectablePeople={leftSelectablePeople}
+          loadingMoreLabel={t("LoadingMoreLabel")}
+          loadMoreErrorLabel={t("LoadMoreError")}
+          loadMoreRetryLabel={t("LoadMoreRetry")}
           mergeWithLabel={t("MergeWithLabel")}
           noPeopleFoundLabel={t("NoPeopleFound")}
           onCancel={closeModal}
@@ -418,8 +452,9 @@ function MergeWithModal({
             }
           }}
           onSelectRight={setRightPersonId}
-          rightContact={rightContact}
+          rightPerson={rightPerson}
           rightSelectablePeople={rightSelectablePeople}
+          searchingLabel={t("SearchingLabel")}
           searchPeopleLabel={t("SearchPeople")}
           selectLeftPersonLabel={t("SelectLeftPerson")}
           selectRightPersonLabel={t("SelectRightPerson")}

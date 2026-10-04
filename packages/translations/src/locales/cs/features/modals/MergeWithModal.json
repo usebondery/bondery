@@ -38,6 +38,9 @@
     "website": "Web",
     "whatsapp": "WhatsApp"
   },
+  "LoadingMoreLabel": "Načítám další…",
+  "LoadMoreError": "Další osoby se nepodařilo načíst.",
+  "LoadMoreRetry": "Zkusit znovu",
   "Merge": "Sloučit",
   "MergeFailed": "Kontakty se nepodařilo sloučit.",
   "MergeSuccess": "Kontakty byly úspěšně sloučeny",
@@ -48,6 +51,7 @@
   "NoConflicts": "Nebyly nalezeny konfliktní hodnoty. Všechny jedinečné informace budou sloučeny.",
   "NoPeopleFound": "Žádné osoby nenalezeny",
   "Processing": "Slučuji kontakty...",
+  "SearchingLabel": "Hledání…",
   "SearchPeople": "Hledat osoby...",
   "SelectBothPeopleError": "Před pokračováním vyberte obě osoby.",
   "SelectLeftPerson": "Vyberte osobu",

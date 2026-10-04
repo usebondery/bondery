@@ -7,10 +7,12 @@ import { IconSearch } from "@tabler/icons-react";
 import { useMemo, useState } from "react";
 
 interface EmojiPickerDropdownContentProps {
+  emptyLabel?: string;
   /** Called when the user clicks an emoji. */
   onSelect: (emoji: string) => void;
   /** Debounce delay in ms for the search input. Local filter only — no API call. */
   searchDebounceMs?: number;
+  searchPlaceholder?: string;
   /** Currently selected emoji (highlighted in the grid). */
   value?: string;
 }
@@ -21,9 +23,11 @@ interface EmojiPickerDropdownContentProps {
  * without duplicating the filtering logic.
  */
 export function EmojiPickerDropdownContent({
+  emptyLabel = "No emojis found",
   value,
   onSelect,
   searchDebounceMs = 200,
+  searchPlaceholder = "Search emojis…",
 }: EmojiPickerDropdownContentProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, searchDebounceMs);
@@ -36,7 +40,7 @@ export function EmojiPickerDropdownContent({
         autoFocus
         leftSection={<IconSearch size={14} />}
         onChange={(e) => setSearch(e.currentTarget.value)}
-        placeholder="Search by emoji name or keyword..."
+        placeholder={searchPlaceholder}
         size="xs"
         value={search}
       />
@@ -44,7 +48,7 @@ export function EmojiPickerDropdownContent({
       <ScrollArea h={250} type="auto">
         {filteredContent.length === 0 ? (
           <Text c="dimmed" py="md" size="sm" ta="center">
-            No emojis found
+            {emptyLabel}
           </Text>
         ) : (
           <Stack gap="md">

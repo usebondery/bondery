@@ -14,6 +14,7 @@ import { EXAMPLE_PROFILE_PHOTO_RESPONSE } from "@bondery/schemas/openapi/fixture
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { domainDb } from "../../domains/_shared/domain-db.js";
+import { consumeStepUpHeader } from "../../lib/auth/step-up-redis.js";
 import { attachContactExtras } from "../../lib/contacts/enrichment.js";
 import { contactListSelect, mapContactListRecord } from "../../lib/data/prisma-mappers.js";
 import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
@@ -66,11 +67,15 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
     "/",
     {
       schema: {
-        description: "Delete the authenticated user account and associated storage.",
+        description:
+          "Delete the authenticated user account and associated storage. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.",
         response: withOkResponse(apiSuccessResponseSchema, "Account deleted"),
       } satisfies FastifyZodOpenApiSchema,
     },
-    withDomainRoute(async (ctx) => deleteAccount(ctx)),
+    withDomainRoute(async (ctx, { request }) => {
+      await consumeStepUpHeader(ctx.user.id, request.headers);
+      return deleteAccount(ctx);
+    }),
   );
 
   /**
