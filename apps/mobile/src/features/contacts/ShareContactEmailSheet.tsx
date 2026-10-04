@@ -9,7 +9,7 @@ import {
   useState,
 } from "react";
 import { type Control, type FieldErrors, type UseFormSetValue, useWatch } from "react-hook-form";
-import { Pressable, ScrollView, StyleSheet, Text, type TextInput, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { MobileTextInput } from "../../components/MobileTextInput";
 import { shareContactEmail } from "../../lib/api/client";
@@ -17,6 +17,7 @@ import { UI_TIMING_MS } from "../../lib/config";
 import { useSheetForm } from "../../lib/forms/useSheetForm";
 import { useMobileShareContactEmailTranslations } from "../../lib/i18n/generated/hooks";
 import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
+import type { NativeTextInputRef } from "../../lib/native-host-refs";
 import { useAppToast } from "../../lib/toast/useAppToast";
 import { MOBILE_LAYOUT, MOBILE_TEXT_STYLES, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -53,7 +54,7 @@ export function ShareContactEmailSheet({
   const tMobileShareContactEmail = useMobileShareContactEmailTranslations();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<NativeTextInputRef>(null);
   const {
     control,
     handleSubmit,
@@ -175,7 +176,7 @@ function ShareContactEmailSheetContent({
   inputError: string | null;
   setInputError: (value: string | null) => void;
   isSubmitting: boolean;
-  inputRef: RefObject<TextInput | null>;
+  inputRef: RefObject<NativeTextInputRef | null>;
   recipientErrors: FieldErrors<ShareEmailFormValues>["recipients"];
   contactName: string;
   onOpenChange: (open: boolean) => void;

@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useMobileNavigationTranslations } from "@/lib/i18n/generated/hooks";
+import type { NativeViewRef } from "../../lib/native-host-refs";
 import { Tappable } from "../../theme/Tappable";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -25,7 +26,7 @@ export function FabSpeedDialMenuItem({
   const tMobileNavigation = useMobileNavigationTranslations();
   const Icon = action.icon;
   const label = tMobileNavigation(action.labelKey as never);
-  const containerRef = useRef<View>(null);
+  const containerRef = useRef<NativeViewRef>(null);
 
   const reportLayout = useCallback(() => {
     containerRef.current?.measureInWindow((x, y, width, height) => {

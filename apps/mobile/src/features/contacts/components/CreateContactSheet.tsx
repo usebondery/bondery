@@ -4,7 +4,7 @@ import { createContactInputSchema } from "@bondery/schemas";
 import { IconUserPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, Text, type TextInput } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { useMobileCreateContactTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
@@ -12,6 +12,7 @@ import { UI_TIMING_MS } from "../../../lib/config";
 import { createContact } from "../../../lib/domains/contacts";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
 import { preloadMobileNamespaces } from "../../../lib/i18n/preloadMobileNamespaces";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -30,7 +31,7 @@ export function CreateContactSheet({ open, onOpenChange, onCreated }: CreateCont
   const router = useRouter();
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<NativeTextInputRef>(null);
 
   const {
     control,

@@ -4,7 +4,7 @@ import { createGroupSchema, GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
 import { type RefObject, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
-import { StyleSheet, type TextInput, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
@@ -20,6 +20,7 @@ import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { createGroup, updateGroup } from "../../../lib/domains/groups";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { useAppToast } from "../../../lib/toast/useAppToast";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { GroupDeleteDialog } from "./GroupDeleteDialog";
@@ -54,7 +55,7 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
 
   const colors = useMobileThemeColors();
   const { showToast } = useAppToast();
-  const labelRef = useRef<TextInput>(null);
+  const labelRef = useRef<NativeTextInputRef>(null);
 
   const {
     control,
@@ -216,7 +217,7 @@ function GroupEditFields({
   control: Control<GroupFormValues>;
   setValue: UseFormSetValue<GroupFormValues>;
   isSubmitting: boolean;
-  labelRef: RefObject<TextInput | null>;
+  labelRef: RefObject<NativeTextInputRef | null>;
   onSubmit: () => void;
   showToast: ReturnType<typeof useAppToast>["showToast"];
 }) {

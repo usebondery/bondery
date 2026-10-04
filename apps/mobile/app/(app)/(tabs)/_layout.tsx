@@ -17,7 +17,6 @@ function TabsLayoutContent() {
       <TabBarPropsProvider>
         <View style={{ flex: 1 }}>
           <Tabs
-            initialRouteName="contacts"
             screenOptions={{
               headerShown: false,
               tabBarShowLabel: false,

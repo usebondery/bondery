@@ -3,7 +3,7 @@ import { normalizedSocialHandleSchema } from "@bondery/helpers/forms";
 import { socialHandleInputSchema } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, type TextInput, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import {
   ActionSheetPopup,
@@ -12,6 +12,7 @@ import {
 import { SheetTextField } from "../../../components/form";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -67,7 +68,7 @@ export function EditSocialSheet({
 }: EditSocialSheetProps) {
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const inputRef = useRef<TextInput>(null);
+  const inputRef = useRef<NativeTextInputRef>(null);
   const [selectedPlatform, setSelectedPlatform] = useState<ContactSocialFieldKey | null>(platform);
   const [error, setError] = useState<string | null>(null);
   const {

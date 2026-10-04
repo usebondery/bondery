@@ -1,13 +1,13 @@
 import type { Ref } from "react";
 import { type Control, Controller, type FieldPath, type FieldValues } from "react-hook-form";
-import type { TextInput } from "react-native";
+import type { NativeTextInputRef } from "../../lib/native-host-refs";
 import { MobileTextInput, type MobileTextInputProps } from "../MobileTextInput";
 
 type SheetTextFieldProps<TFieldValues extends FieldValues> = {
   control: Control<TFieldValues>;
   name: FieldPath<TFieldValues>;
   showErrorWhenTouched?: boolean;
-  inputRef?: Ref<TextInput>;
+  inputRef?: Ref<NativeTextInputRef>;
   onFieldChange?: (value: string) => void;
   onFieldBlur?: (value: string) => void;
   externalErrorMessage?: string;

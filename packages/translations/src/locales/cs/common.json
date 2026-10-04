@@ -155,6 +155,7 @@
       "service_auth_required": "Service auth required.",
       "service_unavailable": "Služba je dočasně nedostupná. Zkuste to prosím později.",
       "session_fetch_failed": "Session fetch failed.",
+      "session_not_fresh": "Tato akce potřebuje nedávné potvrzení. Potvrďte, že jste to vy, a zkuste to znovu.",
       "session_settings_missing": "Session settings missing.",
       "settings": "Settings no fields.",
       "settings_failed_to_create_default_settings": "Settings failed to create default settings.",

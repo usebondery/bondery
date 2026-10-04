@@ -20,6 +20,7 @@ import Animated, {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FAB_GESTURE, UI_TIMING_MS } from "../../lib/config";
 import { useMobileNavigationTranslations } from "../../lib/i18n/generated/hooks";
+import type { NativeViewRef } from "../../lib/native-host-refs";
 import { FAB_SPEED_DIAL_MOTION, TAMAGUI_TRANSITION } from "../../theme/animations";
 import { floatingBarStyles } from "../../theme/floatingBarStyles";
 import { Tappable } from "../../theme/Tappable";
@@ -44,7 +45,7 @@ interface FloatingBubbleTabBarProps
 /**
  * Floating bubble tab bar used on root tab pages.
  */
-export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
+export const FloatingBubbleTabBar = forwardRef<NativeViewRef, FloatingBubbleTabBarProps>(
   function FloatingBubbleTabBar(
     { state, descriptors, emitter, navigateToTab, onChromeBoundsChange },
     forwardedRef,
@@ -53,11 +54,11 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
     const insets = useSafeAreaInsets();
     const colors = useMobileThemeColors();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
-    const plusRef = useRef<View>(null);
-    const chromeMeasureRef = useRef<View>(null);
+    const plusRef = useRef<NativeViewRef>(null);
+    const chromeMeasureRef = useRef<NativeViewRef>(null);
 
     const assignChromeMeasureRef = useCallback(
-      (node: View | null) => {
+      (node: NativeViewRef | null) => {
         chromeMeasureRef.current = node;
         if (typeof forwardedRef === "function") {
           forwardedRef(node);
