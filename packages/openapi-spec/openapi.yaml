@@ -17548,8 +17548,6 @@ paths:
                 required:
                   - token
                 additionalProperties: false
-                example:
-                  token: step-up-nonce
         "400":
           description: Invalid request
           content:

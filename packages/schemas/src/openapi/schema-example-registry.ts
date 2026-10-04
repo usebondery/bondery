@@ -110,7 +110,6 @@ import {
   upcomingRemindersResponseSchema,
 } from "#entities/reminder/index.js";
 import { userSessionResponseSchema } from "#entities/session/index.js";
-import { stepUpTokenResponseSchema } from "#entities/step-up/index.js";
 import {
   updateAccountInputSchema,
   updateImportFollowupBodySchema,
@@ -118,6 +117,7 @@ import {
   userAccountResponseSchema,
   userSettingsResponseSchema,
 } from "#entities/settings/index.js";
+import { stepUpTokenResponseSchema } from "#entities/step-up/index.js";
 import {
   addContactsToTagResponseSchema,
   contactTagBodySchema,
