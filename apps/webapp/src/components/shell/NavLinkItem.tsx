@@ -35,10 +35,7 @@ export const ITEM_PADDING = {
   paddingTop: "var(--mantine-spacing-xs)",
 } as const;
 
-/** Mantine default button corner radius (`defaultRadius: "md"` in theme). */
-export const NAV_LINK_ITEM_RADIUS = "md";
-
-/** `Group` does not apply the `radius` prop — use in `style.borderRadius`. */
+/** `UnstyledButton` / `Group` do not take a `radius` prop — use in `style.borderRadius`. */
 export const NAV_LINK_ITEM_BORDER_RADIUS = "var(--mantine-radius-default)";
 
 /** Tailwind gap between sidebar nav rows (browse links and chat sessions). */
@@ -111,7 +108,6 @@ export function NavLinkItem({
       className={stateClassName}
       h={40}
       onClick={onClick}
-      radius={NAV_LINK_ITEM_RADIUS}
       ref={ref}
       style={{
         alignItems: "center",

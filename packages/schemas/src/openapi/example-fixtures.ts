@@ -94,6 +94,7 @@ export const OPENAPI_SCHEMA_EXAMPLES: Record<string, unknown> = {
   removeGroupMembersRequestSchema: requests.EXAMPLE_REMOVE_FROM_GROUP_REQUEST,
   removeGroupMembersResponseSchema: responses.EXAMPLE_REMOVE_GROUP_MEMBERS_RESPONSE,
   shareContactRequestSchema: requests.EXAMPLE_SHARE_CONTACT_REQUEST,
+  stepUpTokenResponseSchema: responses.EXAMPLE_STEP_UP_TOKEN_RESPONSE,
   syncBootstrapResponseSchema: responses.EXAMPLE_SYNC_BOOTSTRAP_RESPONSE,
   syncConflictErrorResponseSchema: EXAMPLE_SYNC_CONFLICT_ERROR,
   syncPullResponseSchema: responses.EXAMPLE_SYNC_PULL_RESPONSE,

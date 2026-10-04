@@ -110,6 +110,7 @@ import {
   upcomingRemindersResponseSchema,
 } from "#entities/reminder/index.js";
 import { userSessionResponseSchema } from "#entities/session/index.js";
+import { stepUpTokenResponseSchema } from "#entities/step-up/index.js";
 import {
   updateAccountInputSchema,
   updateImportFollowupBodySchema,
@@ -228,6 +229,7 @@ export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "apiKeysListResponseSchema", schema: apiKeysListResponseSchema },
   { name: "mcpConsentListItemSchema", schema: mcpConsentListItemSchema },
   { name: "mcpConsentsListResponseSchema", schema: mcpConsentsListResponseSchema },
+  { name: "stepUpTokenResponseSchema", schema: stepUpTokenResponseSchema },
   { name: "apiKeyListItemSchema", schema: apiKeyListItemSchema },
   { name: "apiKeyCreatedSchema", schema: apiKeyCreatedSchema },
   { name: "chatSessionsListResponseSchema", schema: chatSessionsListResponseSchema },
