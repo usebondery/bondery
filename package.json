@@ -140,5 +140,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.10.1"
+  "version": "1.10.2-rc.1"
 }
