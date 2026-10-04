@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@bondery/schemas": "workspace:*",
-    "@bondery/translations": "workspace:*",
     "@vvo/tzdb": "^6.198.0",
     "transliteration": "^2.6.1",
     "uuid": "^14.0.2",
