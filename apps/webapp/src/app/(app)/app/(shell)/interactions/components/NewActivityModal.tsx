@@ -7,7 +7,12 @@ import {
   PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import { type Activity, type ContactSelectable, interactionFormSchema } from "@bondery/schemas";
+import {
+  type Activity,
+  type ContactSelectable,
+  type InteractionType,
+  interactionFormSchema,
+} from "@bondery/schemas";
 import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 type ActivityParticipantRef = string | { id: string };
@@ -22,7 +27,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { captureEvent } from "@/lib/analytics/client";
 import { ACTIVITY_TYPE_OPTIONS, getActivityTypeConfig } from "@/lib/contacts/activityTypes";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import {
   createModalId,
@@ -46,6 +51,7 @@ import { openAddContactModal } from "../../people/components/modals/AddContactMo
 interface OpenNewActivityModalParams {
   activity?: Activity | null;
   contacts: ContactSelectable[];
+  contactsHasMore?: boolean;
   initialParticipantIds?: string[];
   onCreated?: (activityId: string) => void;
 }
@@ -53,6 +59,7 @@ interface OpenNewActivityModalParams {
 interface NewActivityFormProps {
   activity: Activity | null;
   contacts: ContactSelectable[];
+  contactsHasMore?: boolean;
   initialParticipantIds?: string[];
   modalId: string;
   onCreated?: (activityId: string) => void;
@@ -126,6 +133,7 @@ function NewActivityModalTitle() {
 function NewActivityForm({
   modalId,
   contacts,
+  contactsHasMore = false,
   activity,
   initialParticipantIds,
   onCreated,
@@ -262,13 +270,20 @@ function NewActivityForm({
       const normalizedDate = withFallbackTime(dateValue, fallbackTime);
 
       const payload = {
-        ...values,
         date: normalizedDate.toISOString(),
+        description: values.description,
+        participantIds: values.participantIds,
+        title: values.title,
+        type: values.type as InteractionType,
       };
 
-      const data = activity
-        ? await updateInteractionMutation.mutateAsync(payload)
-        : await createInteractionMutation.mutateAsync(payload);
+      let createdId: string | undefined;
+      if (activity) {
+        await updateInteractionMutation.mutateAsync(payload);
+      } else {
+        const created = await createInteractionMutation.mutateAsync(payload);
+        createdId = created.id;
+      }
 
       captureEvent(
         activity ? "interactions:interaction_update" : "interactions:interaction_create",
@@ -296,8 +311,8 @@ function NewActivityForm({
       }
 
       closeModal();
-      if (onCreated && !isEditMode && data.interaction?.id) {
-        onCreated(data.interaction.id);
+      if (onCreated && createdId) {
+        onCreated(createdId);
       }
     } catch (error) {
       notifications.show(
@@ -327,17 +342,21 @@ function NewActivityForm({
         <Stack gap={4}>
           <PeopleMultiPickerInput
             contacts={pickerContacts}
+            contactsHasMore={contactsHasMore}
             disabled={isBlocking}
             error={form.errors.participantIds}
             inputRef={participantsInputRef}
+            loadingMoreLabel={t("LoadingMoreLabel")}
+            loadMoreErrorLabel={t("LoadMorePickerError")}
+            loadMoreRetryLabel={t("LoadMoreRetry")}
             noResultsLabel={t("NoContactsFound")}
             onChange={(ids) => {
               form.setFieldValue("participantIds", ids);
               form.validateField("participantIds");
             }}
-            onSearch={searchContacts}
+            onSearch={searchContactsPage}
             placeholder={t("AddParticipantsPlaceholder")}
-            searchDebounceMs={DEBOUNCE_MS.contactPicker}
+            searchDebounceMs={DEBOUNCE_MS.search}
             searchingLabel={t("SearchingLabel")}
             selectedIds={form.values.participantIds}
           />
@@ -445,6 +464,7 @@ function NewActivityForm({
 
 export function openNewActivityModal({
   contacts,
+  contactsHasMore = false,
   activity = null,
   initialParticipantIds,
   onCreated,
@@ -456,6 +476,7 @@ export function openNewActivityModal({
       <NewActivityForm
         activity={activity}
         contacts={contacts}
+        contactsHasMore={contactsHasMore}
         initialParticipantIds={initialParticipantIds}
         modalId={modalId}
         onCreated={onCreated}

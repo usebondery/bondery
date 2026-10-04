@@ -17,7 +17,7 @@ import { useMemo } from "react";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import {
   useCommonTranslations,
   useGroupDetailPageTranslations,
@@ -37,6 +37,7 @@ interface UseGroupDetailActionsParams {
   cardPreviewContacts: Contact[];
   clearSelection: () => void;
   contacts: Contact[];
+  contactsHasMore?: boolean;
   excludedIds: Set<string>;
   groupColor: string;
   groupEmoji: string;
@@ -59,6 +60,7 @@ export function useGroupDetailActions({
   selectedIds,
   isAllTotalSelected,
   excludedIds,
+  contactsHasMore = false,
   listFilter,
   clearSelection,
 }: UseGroupDetailActionsParams) {
@@ -187,10 +189,11 @@ export function useGroupDetailActions({
   const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
     openMergeWithModal({
       contacts,
+      contactsHasMore,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
       leftPersonId,
-      onSearch: searchContacts,
+      onSearch: searchContactsPage,
       rightPersonId,
     });
   };

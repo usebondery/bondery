@@ -1,5 +1,5 @@
-import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { IconPlus, IconX } from "@tabler/icons-react-native";
+import type { BottomTabBarProps } from "expo-router/js-tabs";
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   BackHandler,
@@ -37,7 +37,7 @@ const CHROME_RADIUS_CLOSED = MOBILE_LAYOUT.borderRadius.pill;
 const CHROME_RADIUS_OPEN = MOBILE_LAYOUT.floatingTabBar.speedDialChromeRadiusOpen;
 
 interface FloatingBubbleTabBarProps
-  extends Pick<BottomTabBarProps, "descriptors" | "navigation" | "state"> {
+  extends Pick<BottomTabBarProps, "descriptors" | "emitter" | "navigateToTab" | "state"> {
   onChromeBoundsChange?: (event: LayoutChangeEvent) => void;
 }
 
@@ -46,7 +46,7 @@ interface FloatingBubbleTabBarProps
  */
 export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
   function FloatingBubbleTabBar(
-    { state, descriptors, navigation, onChromeBoundsChange },
+    { state, descriptors, emitter, navigateToTab, onChromeBoundsChange },
     forwardedRef,
   ) {
     const tMobileNavigation = useMobileNavigationTranslations();
@@ -245,23 +245,22 @@ export const FloatingBubbleTabBar = forwardRef<View, FloatingBubbleTabBarProps>(
         : null;
 
       const onPress = () => {
-        const shouldNavigate = !isFocused;
         closeMenu();
         closeOverflowSheet();
 
-        const event = navigation.emit({
+        const event = emitter.emit({
           canPreventDefault: true,
           target: route.key,
           type: "tabPress",
         });
 
-        if (shouldNavigate && !event.defaultPrevented) {
-          navigation.navigate(route.name, route.params);
+        if (!isFocused && !event.defaultPrevented) {
+          navigateToTab(route.key);
         }
       };
 
       const onLongPress = () => {
-        navigation.emit({
+        emitter.emit({
           target: route.key,
           type: "tabLongPress",
         });

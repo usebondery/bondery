@@ -52,15 +52,13 @@ export const LIMITS = {
  * Import these instead of hardcoding magic numbers.
  */
 export const DEBOUNCE_MS = {
-  /** Debounce for the contact picker's server-side search (PeopleMultiPickerInput). */
-  contactPicker: 600,
   /** Debounce for local client-side filtering (no server call, e.g. emojis, table search). */
   localFilter: 200,
   /** Debounce inside LocationLookupInput before calling the map suggestion API. */
   locationSuggest: GEOCODE_SUGGEST_DEBOUNCE_MS,
   /** Delay after the user stops panning/zooming the map before fetching new pins. */
   mapViewport: 600,
-  /** Delay for text search inputs before triggering a server/router fetch. */
+  /** Server people search (pickers, Find person, People table) and other text search inputs. */
   search: 600,
   /** @deprecated Use localFilter for client-side filtering. */
   tableSearch: 200,

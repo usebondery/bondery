@@ -2,11 +2,11 @@
   "betterAuth": {
     "entryCount": 14,
     "package": "@better-auth/passkey",
-    "version": "1.7.1"
+    "version": "1.7.7"
   },
-  "entryCount": 55,
-  "fetchedAt": "2026-08-31T19:56:07.136Z",
-  "gitSha": "1ac1f9b664f34ebaf82bd44fa3c15fb30c11d814",
-  "sha256": "90a5760d57c28563f33d2c17e7e0417737fed4012127fd5478782421abf40887",
+  "entryCount": 59,
+  "fetchedAt": "2026-10-02T12:48:20.741Z",
+  "gitSha": "73367869ae919559f7bcd9123299fb514354ceb0",
+  "sha256": "719f7b4c09f2304990dd2905b0285f33d88559636fa0b10c7ebc7984d60b8497",
   "url": "https://raw.githubusercontent.com/passkeydeveloper/passkey-authenticator-aaguids/main/aaguid.json"
 }

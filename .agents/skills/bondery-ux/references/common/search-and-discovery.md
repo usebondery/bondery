@@ -18,8 +18,8 @@ Do not duplicate global find inside every page — use in-page search for **loca
 
 ## Principles
 
-1. **Debounce server search** — `DEBOUNCE_MS.search` (600ms) for API calls; `DEBOUNCE_MS.localFilter` (200ms) for client-only.
-2. **Minimum query length** when API cost matters — People spotlight uses 3+ characters before fetch.
+1. **Debounce server search** — `DEBOUNCE_MS.search` (600ms) for API calls, including all people server search (pickers, Find person, People table, notes `@` mentions); `DEBOUNCE_MS.localFilter` (200ms) for client-only.
+2. **People search has no minimum query length** — any trimmed non-empty query is sent to `search_people_ids`, which matches with `word_similarity` per first/middle/last name token (threshold 0.3). Empty picker/mention fields still list the prefetched `SELECTABLE_CONTACTS` pool. People Combobox pickers (`PeopleMultiPickerInput`, selectable `PersonChip`) and notes `@` mentions share `PeoplePickerOptions` + `PersonSearchOptionRow` from `@bondery/mantine-next`: **5 visible rows** with a peek of row 6 (`PEOPLE_PICKER_VIEWPORT_ROWS` / `PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT`), fetch **pages of 10** (`PEOPLE_PICKER_PAGE_SIZE`), autoload the next page on scroll-bottom when `pagination.hasMore` is true, and ArrowDown on the last option with more results loads the next page instead of wrapping. Do not gate load-more on `items.length === pageSize`. Load-more chrome is `PeoplePickerLoadMore`. Selectable `PersonChip` and notes `@` mention popups use `PEOPLE_PICKER_DROPDOWN_WIDTH` (280px) so names are not clipped to the chip width. Find person spotlight uses the same option row but stays a first page (no infinite scroll). Contacts table search placeholder comes from `ContactsTable.SearchPlaceholder` — do not pass it from People/Group pages.
 3. **"See all" deep links** — spotlight → People with `?search=` pre-filled.
 4. **Preserve query in URL** when the user would expect refresh to keep filters (return intent captures `pathname + search`).
 5. **Empty search results** — see [empty-states.md](./empty-states.md) search tier.

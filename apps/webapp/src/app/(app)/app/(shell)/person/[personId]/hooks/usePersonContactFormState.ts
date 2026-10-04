@@ -1,6 +1,5 @@
 "use client";
 
-import { formatContactName } from "@bondery/helpers/contact";
 import { parsePhoneNumber } from "@bondery/helpers/phone";
 import type {
   Contact,
@@ -11,7 +10,6 @@ import type {
   PhoneEntry,
 } from "@bondery/schemas";
 import { useEffect, useMemo, useState } from "react";
-import type { MentionSuggestionItem } from "../components/notes/MentionList";
 
 interface UsePersonContactFormStateOptions {
   fetchedContact: Contact | undefined;
@@ -50,14 +48,7 @@ export function usePersonContactFormState({
 
   const resolvedContact = contact ?? fetchedContact;
 
-  const selectablePeople: ContactPreview[] = selectableContacts
-    .filter((person) => !person.myself)
-    .map((person) => ({
-      avatar: person.avatar,
-      firstName: person.firstName,
-      id: person.id,
-      lastName: person.lastName,
-    }));
+  const selectablePeople = selectableContacts.filter((person) => !person.myself);
 
   const currentPersonPreview: ContactPreview = {
     avatar: resolvedContact?.avatar ?? null,
@@ -65,34 +56,6 @@ export function usePersonContactFormState({
     id: resolvedContact?.id ?? personId,
     lastName: resolvedContact?.lastName ?? null,
   };
-
-  const mentionableContacts = useMemo<MentionSuggestionItem[]>(() => {
-    if (!resolvedContact) {
-      return [];
-    }
-    const seenIds = new Set<string>();
-
-    return [resolvedContact, ...selectableContacts]
-      .filter((person) => {
-        if (!person?.id || seenIds.has(person.id)) {
-          return false;
-        }
-
-        seenIds.add(person.id);
-        return true;
-      })
-      .map((person) => {
-        const label = formatContactName(person).trim();
-
-        return {
-          avatar: person.avatar ?? null,
-          headline: person.headline ?? null,
-          id: person.id,
-          label: label.length > 0 ? label : person.id,
-          location: person.location ?? null,
-        };
-      });
-  }, [resolvedContact, selectableContacts]);
 
   const lastInteractionSource = useMemo<
     { type: "activity"; activityType: string } | { type: "manual" } | null
@@ -183,7 +146,6 @@ export function usePersonContactFormState({
     emails,
     importantDates,
     lastInteractionSource,
-    mentionableContacts,
     phones,
     resolvedContact,
     selectablePeople,

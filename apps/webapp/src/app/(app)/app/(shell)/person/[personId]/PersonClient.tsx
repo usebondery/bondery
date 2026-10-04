@@ -5,7 +5,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Center, Loader, Paper, Stack } from "@mantine/core";
 import { IconUser, IconUserCircle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
@@ -112,7 +112,6 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
     emails,
     importantDates,
     lastInteractionSource,
-    mentionableContacts,
     phones,
     resolvedContact,
     selectablePeople,
@@ -133,9 +132,20 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
 
   usePatchDocumentTitle(resolvedContact ? formatContactName(resolvedContact) : undefined);
 
+  const mentionSeedRef = useRef(selectableContacts);
+  mentionSeedRef.current = selectableContacts;
+  const mentionHasMoreRef = useRef(false);
+  mentionHasMoreRef.current = selectableContactsData?.pagination.hasMore ?? false;
+  const mentionCurrentPersonRef = useRef(resolvedContact);
+  mentionCurrentPersonRef.current = resolvedContact;
   const mentionSuggestion = useMemo(
-    () => createMentionSuggestion(mentionableContacts),
-    [mentionableContacts],
+    () =>
+      createMentionSuggestion({
+        getContactsHasMore: () => mentionHasMoreRef.current,
+        getCurrentPerson: () => mentionCurrentPersonRef.current,
+        getSeed: () => mentionSeedRef.current,
+      }),
+    [],
   );
 
   const {
@@ -192,6 +202,7 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
     openShareModal,
   } = usePersonModalActions({
     contact,
+    contactsHasMore: selectableContactsData?.pagination.hasMore ?? false,
     personId,
     resolvedContact,
     selectableContacts,
@@ -267,6 +278,7 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
             <PersonDetailTabs
               activeTab={activeTab}
               contact={contact}
+              contactsHasMore={selectableContactsData?.pagination.hasMore ?? false}
               currentPersonPreview={currentPersonPreview}
               enrichLabel={tEnrich("MenuLabel")}
               getInteractionTypeLabel={getInteractionTypeLabel}

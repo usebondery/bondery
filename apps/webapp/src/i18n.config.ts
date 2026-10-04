@@ -1,10 +1,11 @@
 import {
+  resourceLoader as bundledResourceLoader,
   i18nConfig,
   namespacesForPlatform,
-  resourceLoader,
   SUPPORTED_LOCALES,
 } from "@bondery/translations";
 import type { I18nConfig } from "next-i18next/proxy";
+import { diskResourceLoader } from "@/lib/i18n/diskResourceLoader.server";
 
 const config: I18nConfig = {
   defaultNS: i18nConfig.defaultNS,
@@ -17,7 +18,8 @@ const config: I18nConfig = {
   localeInPath: false,
   ns: namespacesForPlatform("web"),
   reloadOnPrerender: process.env.NODE_ENV === "development",
-  resourceLoader,
+  resourceLoader:
+    process.env.NODE_ENV === "development" ? diskResourceLoader : bundledResourceLoader,
   supportedLngs: [...SUPPORTED_LOCALES],
 };
 

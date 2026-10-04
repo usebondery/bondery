@@ -9,7 +9,8 @@
         "@bondery/schemas#dev",
         "@bondery/helpers#dev",
         "@bondery/vcard#dev",
-        "@bondery/emails#dev"
+        "@bondery/emails#dev",
+        "@bondery/translations#dev"
       ]
     }
   }

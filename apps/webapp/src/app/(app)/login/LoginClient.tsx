@@ -6,6 +6,7 @@ import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
+import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
 import { buildLoginMagicLinkUrls } from "@/lib/auth/magic-link-urls";
@@ -13,7 +14,6 @@ import { notifyPasskeyLoginError } from "@/lib/auth/notify-passkey-login-error";
 import { parseReturnIntent, RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
-import { type LoginBusyAction, SocialLoginCard } from "./components/SocialLoginCard";
 
 type LoginClientProps = {
   lastUsedLoginMethod: string | null;

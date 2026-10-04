@@ -1,17 +1,10 @@
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { QueryClient } from "@tanstack/react-query";
-import { clientApiFetch } from "@/lib/api/client";
+import { refreshMergeRecommendations } from "@/lib/api/domains/mergeRecommendations";
 import { invalidateContactsAttention } from "@/lib/query/invalidation";
 
 export interface SyncMergeRecommendationsOptions {
   /** When true, POST /refresh before invalidating (Fix page Scan / bootstrap). */
   requestRefresh?: boolean;
-}
-
-async function requestMergeRecommendationsRefresh(): Promise<void> {
-  await clientApiFetch(API_ROUTES.CONTACTS_MERGE_RECOMMENDATIONS_REFRESH, {
-    method: "POST",
-  }).catch(() => undefined);
 }
 
 /** Invalidate attention counts; optionally trigger explicit merge refresh first. */
@@ -20,7 +13,11 @@ export async function syncMergeRecommendationsAfterChange(
   options: SyncMergeRecommendationsOptions = {},
 ): Promise<void> {
   if (options.requestRefresh) {
-    await requestMergeRecommendationsRefresh();
+    try {
+      await refreshMergeRecommendations();
+    } catch {
+      // Hop-down: still invalidate so Fix can recover. 401 already ran transport policy.
+    }
   }
 
   await invalidateContactsAttention(queryClient);

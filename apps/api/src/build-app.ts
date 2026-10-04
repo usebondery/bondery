@@ -4,6 +4,7 @@
  */
 
 import { createRequire } from "node:module";
+import { BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
 import { openApiDocumentOpts } from "@bondery/schemas/openapi/document-opts";
 import { registerOpenApiComponentSchemas } from "@bondery/schemas/openapi/registry";
 import fastifyAuth from "@fastify/auth";
@@ -142,7 +143,12 @@ export async function buildApp(): Promise<AppFastifyInstance> {
   ].filter(Boolean);
 
   await fastify.register(cors, {
-    allowedHeaders: ["Content-Type", "Authorization", "X-Bondery-Extension-Version"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Bondery-Extension-Version",
+      BONDERY_STEP_UP_HEADER,
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     origin: ALLOWED_ORIGINS,

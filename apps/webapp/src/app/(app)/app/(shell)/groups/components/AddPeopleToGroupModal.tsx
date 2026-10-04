@@ -9,19 +9,20 @@ import {
   PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact, ContactSelectable } from "@bondery/schemas";
+import type { Contact } from "@bondery/schemas";
 import { Center, Loader, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus } from "@tabler/icons-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import { useAddContactsToGroupMutation, useGroupMembersQuery } from "@/lib/query/hooks/useGroups";
+import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 
 interface AddPeopleToGroupModalProps {
   groupId: string;
@@ -67,7 +68,7 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     data: allContactsData,
     isLoading: isLoadingAll,
     isError: isAllContactsError,
-  } = useContactsSelectableListQuery({ limit: 200 });
+  } = useContactsSelectableListQuery(SELECTABLE_CONTACTS);
   const {
     data: groupMembersData,
     isLoading: isLoadingMembers,
@@ -100,10 +101,16 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   const isBlocking = isSubmitting || isLoading;
   const { closeModal } = useModalDismiss(modalId, isBlocking);
 
-  const handleSearch = useCallback(async (query: string): Promise<ContactSelectable[]> => {
-    const results = await searchContacts(query);
-    return results.filter((c) => !existingMemberIdsRef.current.has(c.id));
-  }, []);
+  const handleSearch = useCallback(
+    async (query: string, paging: { limit: number; offset: number }) => {
+      const page = await searchContactsPage(query, paging);
+      return {
+        contacts: page.contacts.filter((c) => !existingMemberIdsRef.current.has(c.id)),
+        hasMore: page.hasMore,
+      };
+    },
+    [],
+  );
 
   const handleSubmit = async () => {
     if (selectedIds.length === 0) {
@@ -195,12 +202,17 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
     <Stack gap="md">
       <PeopleMultiPickerInput
         contacts={contacts as Contact[]}
+        contactsHasMore={allContactsData?.pagination.hasMore ?? false}
         disabled={isBlocking}
+        loadingMoreLabel={t("AddPeopleModal.LoadingMoreLabel")}
+        loadMoreErrorLabel={t("AddPeopleModal.LoadMoreError")}
+        loadMoreRetryLabel={t("AddPeopleModal.LoadMoreRetry")}
         noResultsLabel={t("AddPeopleModal.NoContactsFound")}
         onChange={setSelectedIds}
         onSearch={handleSearch}
         placeholder={t("AddPeopleModal.AddContactsPlaceholder")}
-        searchDebounceMs={DEBOUNCE_MS.contactPicker}
+        searchDebounceMs={DEBOUNCE_MS.search}
+        searchingLabel={t("AddPeopleModal.SearchingLabel")}
         selectedIds={selectedIds}
       />
 

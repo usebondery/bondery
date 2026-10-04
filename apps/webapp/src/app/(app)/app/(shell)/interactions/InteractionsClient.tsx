@@ -64,6 +64,7 @@ export function InteractionsClient() {
     hasNextPage,
     isFetchingNextPage,
   } = useInteractionsInfiniteQuery();
+  const contactsHasMore = contactsData?.pagination.hasMore ?? false;
   const contacts = contactsData?.contacts ?? [];
   const activities = interactionsData?.pages.flatMap((page) => page.activities) ?? [];
   const hasMore = hasNextPage ?? false;
@@ -80,7 +81,7 @@ export function InteractionsClient() {
   }, DEBOUNCE_MS.localFilter);
 
   useHotkeys([
-    [HOTKEYS.LOG_INTERACTION, () => openNewActivityModal({ contacts })],
+    [HOTKEYS.LOG_INTERACTION, () => openNewActivityModal({ contacts, contactsHasMore })],
     [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
   ]);
 
@@ -140,6 +141,7 @@ export function InteractionsClient() {
     openNewActivityModal({
       activity,
       contacts,
+      contactsHasMore,
     });
   };
 
@@ -310,6 +312,7 @@ export function InteractionsClient() {
                 onClick={() => {
                   openNewActivityModal({
                     contacts,
+                    contactsHasMore,
                   });
                 }}
                 size="md"

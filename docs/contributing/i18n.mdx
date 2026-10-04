@@ -162,7 +162,7 @@ Follow [i18next namespaces](https://www.i18next.com/principles/namespaces):
 
 - **Semantic splits:** `common`, `validation`, `glossary`
 - **Per feature/page:** `GroupsPage`, `MobileSettings`, …
-- **Preload groups** in `manifest.json` — load only what a route/screen needs
+- **Preload groups** in `manifest.json` — load only what a route/screen needs. Webapp `(app)/layout` always loads `web.shell` (chrome). Each route layout adds its feature group; it does **not** load every dictionary. Auth screens (`/login`, `/confirm`, `/oauth/*`) wrap a nested `LocaleProvider` after preload so those namespaces are in the client bag on first paint — otherwise hooks render raw keys (`ConfirmTitle`).
 
 Follow [interpolation best practices](https://www.i18next.com/principles/best-practices):
 
@@ -170,15 +170,19 @@ Follow [interpolation best practices](https://www.i18next.com/principles/best-pr
 - Use `context` / plurals / formatting for locale-specific rules
 - Reserve interpolation for **runtime-only** values (user input, timestamps)
 
+## Local dev (string values)
+
+With `pnpm run dev:webapp-api` (or any app `#dev` that `with`s `@bondery/translations#dev`), editing locale JSON copies into `dist/`. The webapp **dev** server reads those files from disk on each request (`reloadOnPrerender`), so new keys and new copy show after a tab refresh without restarting Next. Adding or removing a namespace file also regenerates `src/generated/resources.ts`.
+
 ## Regenerate types and hooks
 
-After editing locale JSON or `manifest.json`:
+After adding or renaming keys, or changing `manifest.json` shape:
 
 ```bash
 pnpm run build -w @bondery/translations
 ```
 
-This rebuilds `Catalog` types, prefix unions, i18next augmentations, and per-app `generated/hooks*.ts`.
+This rebuilds `Catalog` types, prefix unions, i18next augmentations, and per-app `generated/hooks*.ts`. String-value edits during `dev` do not need this.
 
 ## CI checks
 

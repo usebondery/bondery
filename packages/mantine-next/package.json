@@ -9,12 +9,12 @@
   },
   "devDependencies": {
     "@bondery/typescript-config": "workspace:*",
-    "@mantine/core": "^9.6.0",
-    "@mantine/hooks": "^9.6.0",
-    "@tabler/icons-react": "^3.46.0",
-    "next": "16.3.4",
-    "react": "^19.2.8",
-    "react-dom": "^19.2.8",
+    "@mantine/core": "^9.6.3",
+    "@mantine/hooks": "^9.6.3",
+    "@tabler/icons-react": "^3.48.0",
+    "next": "16.3.8",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
     "rimraf": "^6.1.3",
     "typescript": "^7.0.2"
   },
@@ -72,6 +72,30 @@
       "import": "./dist/CopyButton/CopyButton.js",
       "node": "./dist/CopyButton/CopyButton.js",
       "types": "./src/CopyButton/CopyButton.tsx"
+    },
+    "./CornerLabeledButton": {
+      "default": "./dist/CornerLabeledButton/index.js",
+      "import": "./dist/CornerLabeledButton/index.js",
+      "node": "./dist/CornerLabeledButton/index.js",
+      "types": "./src/CornerLabeledButton/index.ts"
+    },
+    "./CornerLabeledButton/CornerLabeledButton": {
+      "default": "./dist/CornerLabeledButton/CornerLabeledButton.js",
+      "import": "./dist/CornerLabeledButton/CornerLabeledButton.js",
+      "node": "./dist/CornerLabeledButton/CornerLabeledButton.js",
+      "types": "./src/CornerLabeledButton/CornerLabeledButton.tsx"
+    },
+    "./CountChip": {
+      "default": "./dist/CountChip/index.js",
+      "import": "./dist/CountChip/index.js",
+      "node": "./dist/CountChip/index.js",
+      "types": "./src/CountChip/index.ts"
+    },
+    "./CountChip/CountChip": {
+      "default": "./dist/CountChip/CountChip.js",
+      "import": "./dist/CountChip/CountChip.js",
+      "node": "./dist/CountChip/CountChip.js",
+      "types": "./src/CountChip/CountChip.tsx"
     },
     "./DataTable": {
       "default": "./dist/DataTable/index.js",
@@ -397,6 +421,60 @@
       "node": "./dist/PeopleMultiPickerInput/PeopleMultiPickerInput.js",
       "types": "./src/PeopleMultiPickerInput/PeopleMultiPickerInput.tsx"
     },
+    "./peoplePicker": {
+      "default": "./dist/peoplePicker/index.js",
+      "import": "./dist/peoplePicker/index.js",
+      "node": "./dist/peoplePicker/index.js",
+      "types": "./src/peoplePicker/index.ts"
+    },
+    "./peoplePicker/constants": {
+      "default": "./dist/peoplePicker/constants.js",
+      "import": "./dist/peoplePicker/constants.js",
+      "node": "./dist/peoplePicker/constants.js",
+      "types": "./src/peoplePicker/constants.ts"
+    },
+    "./peoplePicker/PeoplePickerDropdownBody": {
+      "default": "./dist/peoplePicker/PeoplePickerDropdownBody.js",
+      "import": "./dist/peoplePicker/PeoplePickerDropdownBody.js",
+      "node": "./dist/peoplePicker/PeoplePickerDropdownBody.js",
+      "types": "./src/peoplePicker/PeoplePickerDropdownBody.tsx"
+    },
+    "./peoplePicker/PeoplePickerLoadMore": {
+      "default": "./dist/peoplePicker/PeoplePickerLoadMore.js",
+      "import": "./dist/peoplePicker/PeoplePickerLoadMore.js",
+      "node": "./dist/peoplePicker/PeoplePickerLoadMore.js",
+      "types": "./src/peoplePicker/PeoplePickerLoadMore.tsx"
+    },
+    "./peoplePicker/PeoplePickerOptions": {
+      "default": "./dist/peoplePicker/PeoplePickerOptions.js",
+      "import": "./dist/peoplePicker/PeoplePickerOptions.js",
+      "node": "./dist/peoplePicker/PeoplePickerOptions.js",
+      "types": "./src/peoplePicker/PeoplePickerOptions.tsx"
+    },
+    "./peoplePicker/PersonSearchOptionRow": {
+      "default": "./dist/peoplePicker/PersonSearchOptionRow.js",
+      "import": "./dist/peoplePicker/PersonSearchOptionRow.js",
+      "node": "./dist/peoplePicker/PersonSearchOptionRow.js",
+      "types": "./src/peoplePicker/PersonSearchOptionRow.tsx"
+    },
+    "./peoplePicker/peoplePickerPagedList": {
+      "default": "./dist/peoplePicker/peoplePickerPagedList.js",
+      "import": "./dist/peoplePicker/peoplePickerPagedList.js",
+      "node": "./dist/peoplePicker/peoplePickerPagedList.js",
+      "types": "./src/peoplePicker/peoplePickerPagedList.ts"
+    },
+    "./peoplePicker/peoplePickerPagedList.test": {
+      "default": "./dist/peoplePicker/peoplePickerPagedList.test.js",
+      "import": "./dist/peoplePicker/peoplePickerPagedList.test.js",
+      "node": "./dist/peoplePicker/peoplePickerPagedList.test.js",
+      "types": "./src/peoplePicker/peoplePickerPagedList.test.ts"
+    },
+    "./peoplePicker/usePeoplePickerPagedList": {
+      "default": "./dist/peoplePicker/usePeoplePickerPagedList.js",
+      "import": "./dist/peoplePicker/usePeoplePickerPagedList.js",
+      "node": "./dist/peoplePicker/usePeoplePickerPagedList.js",
+      "types": "./src/peoplePicker/usePeoplePickerPagedList.ts"
+    },
     "./styles": {
       "default": "./src/styles.css",
       "style": "./src/styles.css",
@@ -477,7 +555,7 @@
     "@mantine/dropzone": "^9.6.0",
     "@mantine/hooks": "^9.6.0",
     "@tabler/icons-react": "^3.46.0",
-    "next": "16.3.4",
+    "next": "16.3.8",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
@@ -486,7 +564,8 @@
     "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs mantine-next",
     "check:types": "tsc --noEmit",
     "compile": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "dev": "tsc --watch --preserveWatchOutput",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",
   "types": "./src/index.ts",

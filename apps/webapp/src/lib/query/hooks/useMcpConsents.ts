@@ -17,7 +17,8 @@ export function useRevokeMcpConsentMutation() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => revokeMcpConsent(id),
+    mutationFn: ({ id, stepUpToken }: { id: string; stepUpToken: string }) =>
+      revokeMcpConsent(id, stepUpToken),
     onSuccess: async () => {
       await invalidateMcpConsents(queryClient);
     },

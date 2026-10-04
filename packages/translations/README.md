@@ -114,3 +114,5 @@ pnpm run build -w @bondery/translations
 ```
 
 Generates `src/generated/resources.ts`, compiles TypeScript, copies `src/locales` to `dist/locales`, and validates `manifest.json`.
+
+During `pnpm run dev:webapp-api`, `dev` copies locale JSON into `dist/` when files change. Refresh the app to see new strings. Run `build` after adding keys or namespaces that need typed hooks.

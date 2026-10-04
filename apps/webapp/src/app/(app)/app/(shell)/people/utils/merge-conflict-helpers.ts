@@ -1,4 +1,9 @@
-import type { Contact, MergeConflictChoice, MergeConflictField } from "@bondery/schemas";
+import type {
+  Contact,
+  ContactPreview,
+  MergeConflictChoice,
+  MergeConflictField,
+} from "@bondery/schemas";
 
 export const MERGE_CONFLICT_FIELDS: MergeConflictField[] = [
   "avatar",
@@ -241,7 +246,7 @@ export function getAutoLastInteractionChoice(
   return leftTimestamp > rightTimestamp ? "left" : "right";
 }
 
-export function toPersonPreview(contact: Contact | null) {
+export function toPersonPreview(contact: Contact | ContactPreview | null | undefined) {
   if (!contact) {
     return null;
   }
@@ -251,7 +256,7 @@ export function toPersonPreview(contact: Contact | null) {
     firstName: contact.firstName,
     id: contact.id,
     lastName: contact.lastName,
-    middleName: contact.middleName,
+    middleName: "middleName" in contact ? contact.middleName : null,
   };
 }
 

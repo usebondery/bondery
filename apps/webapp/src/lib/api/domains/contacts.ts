@@ -1,4 +1,4 @@
-import { isApiError } from "@bondery/helpers/api";
+import { buildApiErrorFromResponse, isApiError } from "@bondery/helpers/api";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type {
   Activity,
@@ -143,44 +143,22 @@ export async function getContactGroups(contactId: string): Promise<GroupWithCoun
   return parseContactGroups(raw);
 }
 
-export async function listContacts(path: string): Promise<{
-  contacts?: Contact[];
-  totalCount?: number;
-  stats?: Record<string, number>;
-}> {
-  return clientApiJson(path);
-}
-
-/** @deprecated Prefer getContactDetail */
-export async function getContact(id: string, queryString = ""): Promise<Contact> {
-  const path = queryString
-    ? `${API_ROUTES.CONTACTS}/${id}?${queryString}`
-    : `${API_ROUTES.CONTACTS}/${id}`;
-  const data = await clientApiJson<{ contact?: Contact }>(path);
-  if (!data.contact) {
-    throw new Error("Contact not found");
-  }
-  return data.contact;
-}
-
 export async function createContact(input: CreateContactInput): Promise<Contact> {
   const data = await clientApiJson<{ contact?: Contact }>(API_ROUTES.CONTACTS, {
     body: JSON.stringify(input),
     headers: { "Content-Type": "application/json" },
     method: "POST",
   });
-  if (!data.contact?.id) {
-    throw new Error("Contact was created but response did not include contact");
-  }
-  return data.contact;
+  return parseContactDetail(data);
 }
 
-export async function updateContact(id: string, patch: UpdateContactInput): Promise<void> {
-  await clientApiJson(`${API_ROUTES.CONTACTS}/${id}`, {
+export async function updateContact(id: string, patch: UpdateContactInput): Promise<Contact> {
+  const data = await clientApiJson<{ contact?: Contact }>(`${API_ROUTES.CONTACTS}/${id}`, {
     body: JSON.stringify(patch),
     headers: { "Content-Type": "application/json" },
     method: "PATCH",
   });
+  return parseContactDetail(data);
 }
 
 export async function deleteContact(id: string): Promise<void> {
@@ -257,6 +235,10 @@ export async function downloadContactVcard(id: string): Promise<Response> {
   const response = await clientApiFetch(`${API_ROUTES.CONTACTS}/${id}/vcard`);
   if (!response.ok) {
     applyTransportResponsePolicy(response);
+    throw buildApiErrorFromResponse({
+      bodyText: await response.text(),
+      status: response.status,
+    });
   }
   return response;
 }
@@ -316,17 +298,12 @@ export async function uploadContactPhoto(
   const formData = new FormData();
   formData.append("file", file);
 
-  const response = await clientApiFetch(`${API_ROUTES.CONTACTS}/${contactId}/photo`, {
-    body: formData,
-    method: "POST",
-  });
-
-  if (!response.ok) {
-    applyTransportResponsePolicy(response);
-    const error = (await response.json()) as { error?: string };
-    throw new Error(error.error || "Failed to upload photo");
-  }
-
-  const body = (await response.json()) as { avatarUrl?: string | null };
+  const body = await clientApiJson<{ avatarUrl?: string | null }>(
+    `${API_ROUTES.CONTACTS}/${contactId}/photo`,
+    {
+      body: formData,
+      method: "POST",
+    },
+  );
   return { avatarUrl: body.avatarUrl ?? null };
 }

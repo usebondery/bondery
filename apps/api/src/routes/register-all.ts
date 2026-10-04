@@ -13,6 +13,7 @@ import {
   adminRoutes,
   integrationRoutes,
   internalRoutes,
+  nativeSessionRoutes,
   openApiAreaRoutes,
   sessionRoutes,
 } from "../lib/platform/route-areas.js";
@@ -40,6 +41,7 @@ import { meOnboardingImportFollowupRoutes } from "./me/onboarding/import-followu
 import { meOnboardingRoutes } from "./me/onboarding/index.js";
 import { meSessionRoutes } from "./me/session/index.js";
 import { meSettingsRoutes } from "./me/settings/index.js";
+import { meStepUpRoutes } from "./me/step-up/index.js";
 import { subscriptionCheckoutRoutes } from "./subscriptions/checkout.js";
 import { subscriptionRoutes } from "./subscriptions/index.js";
 import { subscriptionPortalRoutes } from "./subscriptions/portal.js";
@@ -51,6 +53,7 @@ import { stripeWebhookRoutes } from "./webhooks/stripe.js";
 type RouteMountArea =
   | "integration"
   | "session"
+  | "nativeSession"
   | "admin"
   | "internal"
   | "webhook"
@@ -70,6 +73,7 @@ const SHELLS: Record<RouteMountArea, (plugin: AppRoutePlugin) => AppRoutePlugin>
   integration: integrationRoutes,
   internal: internalRoutes,
   mcp: (plugin) => openApiAreaRoutes("internal", plugin),
+  nativeSession: nativeSessionRoutes,
   session: sessionRoutes,
   webhook: (plugin) => openApiAreaRoutes("internal", plugin),
 };
@@ -106,6 +110,7 @@ const ROUTE_MOUNTS: RouteMount[] = [
     prefix: API_ROUTES.ME_ONBOARDING_IMPORT_FOLLOWUP,
   },
   { area: "session", plugin: meSettingsRoutes, prefix: API_ROUTES.ME_SETTINGS },
+  { area: "nativeSession", plugin: meStepUpRoutes, prefix: API_ROUTES.ME_STEP_UP },
   { area: "session", plugin: meFeedbackRoutes, prefix: API_ROUTES.ME_FEEDBACK },
   { area: "session", plugin: meApiKeysRoutes, prefix: API_ROUTES.ME_API_KEYS },
   { area: "session", plugin: meMcpConsentsRoutes, prefix: API_ROUTES.ME_MCP_CONSENTS },

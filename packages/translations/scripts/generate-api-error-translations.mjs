@@ -27,6 +27,8 @@ function userFacingMessage(code, template, locale) {
       not_found: "Požadovanou položku se nepodařilo najít.",
       rate_limit_exceeded: "To děláte příliš často. Chvíli počkejte a zkuste to znovu.",
       service_unavailable: "Služba je dočasně nedostupná. Zkuste to prosím později.",
+      session_not_fresh:
+        "Tato akce potřebuje nedávné potvrzení. Potvrďte, že jste to vy, a zkuste to znovu.",
       sync_conflict: "Tento kontakt byl upraven na jiném zařízení. Obnovte data a zkuste to znovu.",
       validation_error: "Některé zadané údaje nejsou platné.",
     },
@@ -44,6 +46,8 @@ function userFacingMessage(code, template, locale) {
         "Das haben Sie zu oft versucht. Bitte warten Sie kurz und versuchen Sie es erneut.",
       service_unavailable:
         "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
+      session_not_fresh:
+        "Diese Aktion braucht eine aktuelle Bestätigung. Bestätige, dass du es bist, und versuch es dann nochmal.",
       sync_conflict:
         "Dieser Kontakt wurde auf einem anderen Gerät aktualisiert. Aktualisieren Sie die Daten und versuchen Sie es erneut.",
       validation_error: "Einige der eingegebenen Angaben sind ungültig.",
@@ -60,6 +64,8 @@ function userFacingMessage(code, template, locale) {
       not_found: "We couldn't find what you're looking for.",
       rate_limit_exceeded: "You're doing that too often. Please wait a moment and try again.",
       service_unavailable: "The service is temporarily unavailable. Please try again shortly.",
+      session_not_fresh:
+        "This action needs a recent confirmation. Confirm it's you, then try again.",
       sync_conflict: "This contact was updated on another device. Refresh and try again.",
       validation_error: "Some of the information you entered isn't valid.",
     },

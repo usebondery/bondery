@@ -15,6 +15,7 @@ import { ContactRelationshipsSection } from "../info/ContactRelationshipsSection
 
 interface PersonalInfoTabProps {
   contact: Contact;
+  contactsHasMore?: boolean;
   currentPerson: ContactPreview;
   handleBlur: (field: string, value: string) => void;
   importantDates: ImportantDate[];
@@ -58,6 +59,7 @@ export function PersonalInfoTab({
   onSaveAddress,
   currentPerson,
   selectablePeople,
+  contactsHasMore = false,
   relationships,
   isRelationshipsSubmitting,
   onAddRelationship,
@@ -87,6 +89,7 @@ export function PersonalInfoTab({
       />
 
       <ContactRelationshipsSection
+        contactsHasMore={contactsHasMore}
         currentPerson={currentPerson}
         isSubmitting={isRelationshipsSubmitting}
         onAddRelationship={onAddRelationship}

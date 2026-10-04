@@ -10,7 +10,7 @@ import {
   Group,
   Menu,
   MenuItem,
-  ScrollArea,
+  Stack,
   Text,
   UnstyledButton,
 } from "@mantine/core";
@@ -25,7 +25,11 @@ import { type ChatSessionGroupId, groupChatSessionsByAge } from "@/lib/chat/grou
 import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";
 import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useChatSessionsQuery } from "@/lib/query/hooks/useChat";
-import { ITEM_PADDING } from "./NavLinkItem";
+import {
+  ITEM_PADDING,
+  NAV_LINK_ITEM_BORDER_RADIUS,
+  SIDEBAR_NAV_STACK_CLASSNAME,
+} from "./NavLinkItem";
 
 /** Matches DotsMenuButton `size="sm"` (`--ai-size-sm`) so age vs dots does not change row height. */
 const SESSION_ROW_TRAILING_SLOT_HEIGHT_PX = 22;
@@ -68,10 +72,9 @@ function SessionListItem({
             ? "var(--mantine-primary-color-light-hover)"
             : "transparent",
         color: isActive ? "white" : "inherit",
-        overflow: "hidden",
         textDecoration: "none",
         ...ITEM_PADDING,
-        borderRadius: "var(--mantine-radius-sm)",
+        borderRadius: NAV_LINK_ITEM_BORDER_RADIUS,
         width: "100%",
       }}
       wrap="nowrap"
@@ -183,17 +186,8 @@ export function SidebarChatPanel() {
   };
 
   return (
-    <Box
-      style={{
-        display: "flex",
-        flex: 1,
-        flexDirection: "column",
-        minHeight: 0,
-        overflow: "hidden",
-        width: "100%",
-      }}
-    >
-      <Box mb="xs" style={{ flexShrink: 0 }}>
+    <Box style={{ display: "flex", flexDirection: "column", width: "100%" }}>
+      <Box mb="xs">
         <Button
           fullWidth
           leftSection={<IconPlus size={14} />}
@@ -205,51 +199,40 @@ export function SidebarChatPanel() {
         </Button>
       </Box>
 
-      <ScrollArea
-        flex={1}
-        offsetScrollbars={false}
-        scrollbars="y"
-        style={{ minHeight: 0 }}
-        styles={{
-          content: { display: "block", width: "100%" },
-          viewport: { paddingRight: 0 },
-        }}
-        type="hover"
-        w="100%"
-      >
-        {sessions.length === 0 ? (
-          <Text c="dimmed" px="sm" py="md" size="xs" ta="center">
-            {t("noSessions")}
-          </Text>
-        ) : (
-          groupedSessions.map((group) => {
-            const isOpen = openGroups[group.id];
-            return (
-              <Box key={group.id} mb={4}>
-                <UnstyledButton
-                  aria-expanded={isOpen}
-                  onClick={() => toggleGroup(group.id)}
+      {sessions.length === 0 ? (
+        <Text c="dimmed" px="sm" py="md" size="xs" ta="center">
+          {t("noSessions")}
+        </Text>
+      ) : (
+        groupedSessions.map((group) => {
+          const isOpen = openGroups[group.id];
+          return (
+            <Box key={group.id} mb={4}>
+              <UnstyledButton
+                aria-expanded={isOpen}
+                onClick={() => toggleGroup(group.id)}
+                style={{
+                  alignItems: "center",
+                  display: "flex",
+                  gap: 4,
+                  padding: "4px 8px",
+                  width: "100%",
+                }}
+              >
+                <IconChevronDown
+                  size={14}
                   style={{
-                    alignItems: "center",
-                    display: "flex",
-                    gap: 4,
-                    padding: "4px 8px",
-                    width: "100%",
+                    flexShrink: 0,
+                    transform: isOpen ? undefined : "rotate(-90deg)",
+                    transition: "transform 150ms ease",
                   }}
-                >
-                  <IconChevronDown
-                    size={14}
-                    style={{
-                      flexShrink: 0,
-                      transform: isOpen ? undefined : "rotate(-90deg)",
-                      transition: "transform 150ms ease",
-                    }}
-                  />
-                  <Text c="dimmed" fw={600} size="xs" tt="uppercase">
-                    {group.id === "last30Days" ? t("last30Days") : t("older")}
-                  </Text>
-                </UnstyledButton>
-                <Collapse expanded={isOpen} w="100%">
+                />
+                <Text c="dimmed" fw={600} size="xs" tt="uppercase">
+                  {group.id === "last30Days" ? t("last30Days") : t("older")}
+                </Text>
+              </UnstyledButton>
+              <Collapse expanded={isOpen} w="100%">
+                <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
                   {group.sessions.map((session) => {
                     const isActive =
                       pathname === `${WEBAPP_ROUTES.CHAT}/${session.id}` ||
@@ -268,12 +251,12 @@ export function SidebarChatPanel() {
                       />
                     );
                   })}
-                </Collapse>
-              </Box>
-            );
-          })
-        )}
-      </ScrollArea>
+                </Stack>
+              </Collapse>
+            </Box>
+          );
+        })
+      )}
     </Box>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { getUserFacingError } from "@bondery/helpers/api";
 import { formatContactName } from "@bondery/helpers/contact";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { Paper } from "@mantine/core";
@@ -27,7 +28,7 @@ import { openDeleteContactsModal } from "@/components/contacts/openDeleteContact
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
 import { downloadContactVcard } from "@/lib/api/domains/contacts";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { setClientCookie } from "@/lib/cookies/client";
 import { COLUMN_VISIBILITY_COOKIE } from "@/lib/cookies/constants";
 import {
@@ -226,10 +227,11 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   const openMergeModal = (leftPersonId: string, rightPersonId?: string, lockBoth?: boolean) => {
     openMergeWithModal({
       contacts,
+      contactsHasMore: hasMore,
       disableLeftPicker: true,
       disableRightPicker: Boolean(lockBoth),
       leftPersonId,
-      onSearch: searchContacts,
+      onSearch: searchContactsPage,
       rightPersonId,
     });
   };
@@ -392,9 +394,6 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
             onClick: async (contactId) => {
               try {
                 const response = await downloadContactVcard(contactId);
-                if (!response.ok) {
-                  throw new Error("Failed to export vCard");
-                }
                 const blob = await response.blob();
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement("a");
@@ -413,10 +412,10 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
                     title: tActions("ExportSuccess"),
                   }),
                 );
-              } catch {
+              } catch (error) {
                 notifications.show(
                   errorNotificationTemplate({
-                    description: tActions("ExportErrorDescription"),
+                    description: getUserFacingError(error, tCommon),
                     title: tActions("ExportError"),
                   }),
                 );
@@ -441,7 +440,6 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
         onSelectOne={handleSelectOne}
         searchDefaultValue={searchDefaultValue}
         searchLoading={isSearchPending || (isFetching && !isFetchingNextPage)}
-        searchPlaceholder={t("SearchPlaceholder")}
         selectedIds={selectedIds}
         setColumnsForMenu={handleColumnsMenuChange}
         setSortOrderForMenu={handleSort}

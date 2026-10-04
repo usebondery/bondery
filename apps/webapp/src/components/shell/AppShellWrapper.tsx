@@ -302,7 +302,7 @@ export function AppShellWrapper({
                       transform: mobileNavOpened ? "translateX(0)" : "translateX(100%)",
                       width: SIDEBAR_DEFAULT_EXPANDED_WIDTH,
                     } as React.CSSProperties)
-                  : { overflow: "hidden" }
+                  : { overflowX: "hidden", overflowY: "auto" }
               }
             >
               <NavigationSidebarContent

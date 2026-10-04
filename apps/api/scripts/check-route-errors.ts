@@ -19,6 +19,7 @@ const routesRoot = join(apiSrc, "routes");
 const authFiles = [
   join(apiSrc, "lib", "platform", "auth", "strategies.ts"),
   join(apiSrc, "lib", "platform", "auth", "api-key-access.ts"),
+  join(apiSrc, "lib", "platform", "auth", "native-session.ts"),
 ];
 const schemasRoot = join(__dirname, "..", "..", "..", "packages", "schemas", "src");
 

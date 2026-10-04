@@ -5,6 +5,34 @@ hidden: true
 
 ## [Unreleased]
 
+### ✨ Added
+
+- Webapp: Sensitive Settings actions (add passkey, link or unlink GitHub/LinkedIn, create or revoke API keys, revoke MCP consents, delete account) ask you to confirm it’s you on a dedicated confirm page without signing out. Account deletion, API key create/revoke, and MCP consent revoke require a fresh confirmation token.
+
+### 🐛 Fixed
+
+- Webapp: Creating a group, tag, or activity now uses the saved record from the API instead of the request envelope.
+- Webapp: Missing person, group, tag, or activity responses now show catalog error copy instead of English “not found” strings.
+- Webapp: Failed photo uploads, tag deletes, and vCard downloads now show the catalog error instead of a generic message.
+- Webapp: Failed LinkedIn batch enrich and merge-refresh now show the catalog error instead of continuing as if they succeeded.
+- Webapp: Searching people by one or two letters now finds matching first, middle, and last names in the contact picker, Find person, and People table.
+- Webapp: Login, confirm-it’s-you, and OAuth screens snapshot `LoginPage` / `OAuthConsent` translations into the page’s i18n bag so the form shows copy instead of raw keys.
+
 ### 🔄 Changed
 
 - Webapp: Desktop PWA install from Settings always enables **Install** on Chromium. The button triggers the browser install prompt when available; otherwise an info notification explains how to install **Bondery PWA** from the browser menu, including when the entry is under **Save and share**.
+- Webapp and Mobile: Notes @mentions keep the person’s display name as a tappable person link instead of a bare id token.
+- Dev: Locale JSON edits during `pnpm run dev:webapp-api` sync into `@bondery/translations` `dist/` without restarting Next. The webapp rereads those files on each request in development, so new keys show after a tab refresh. The API restarts once per save burst.
+
+### Breaking
+
+- **Postgres extensions schema:** `pg_trgm` and `unaccent` move from `public` to `extensions`. Hosted and self-hosted installs apply this automatically on `pnpm run release-migrate` / API `pre_start`. Search RPCs are recreated by `functions.sql` after migrate. Deploy api and webapp together.
+
+### 🔒 Security
+
+- Webapp and API: Confirm-it’s-you stays valid for 24 hours after sign-in. The 60-second window was only for local step-up testing.
+- Postgres: `pg_trgm` and `unaccent` now live in schema `extensions`. `pnpm run release-migrate` relocates them automatically for existing Cloud and self-hosted installs (no extra SQL beyond the normal migrate).
+
+### 📦 Dependencies
+
+- React 19.3, Next 16.3.8, Better Auth 1.7.7, TipTap 3.31.4, and Turbo 2.11.6. pnpm no longer waits 24 hours before installing newly published packages (`minimumReleaseAge` is 0).

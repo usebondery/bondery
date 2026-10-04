@@ -21,5 +21,6 @@ export * from "#entities/reminder/index.js";
 export * from "#entities/session/index.js";
 export * from "#entities/settings/index.js";
 export * from "#entities/social/index.js";
+export * from "#entities/step-up/index.js";
 export * from "#entities/subscription/index.js";
 export * from "#entities/tag/index.js";

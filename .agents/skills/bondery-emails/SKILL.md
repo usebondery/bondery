@@ -11,6 +11,7 @@
 ## Do not activate for
 
 - Contact **email fields** in CRM UI (phone/email inputs) → [bondery-ux](../bondery-ux/SKILL.md)
+- Human support replies (GitHub issues, inbox, reviews) → [bondery-support-replies](../bondery-support-replies/SKILL.md)
 - Stripe billing logic or webhook maps → [bondery-payments](../bondery-payments/SKILL.md)
 - Auth/session security → [bondery-security](../bondery-security/SKILL.md)
 - Generic React Email craft without Bondery paths → upstream `email-best-practices`

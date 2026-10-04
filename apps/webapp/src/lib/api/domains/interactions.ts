@@ -1,5 +1,5 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { Activity } from "@bondery/schemas";
+import type { Activity, CreateInteractionInput, UpdateInteractionInput } from "@bondery/schemas";
 import { clientApiJson } from "@/lib/api/client";
 import {
   buildInteractionDetailPath,
@@ -24,20 +24,25 @@ export async function getInteractionDetail(id: string): Promise<Activity> {
   return parseInteractionDetail(raw);
 }
 
-export async function createInteraction(body: Record<string, unknown>) {
-  return clientApiJson<{ interaction?: Activity }>(API_ROUTES.INTERACTIONS, {
+export async function createInteraction(body: CreateInteractionInput): Promise<Activity> {
+  const raw = await clientApiJson<{ interaction?: Activity }>(API_ROUTES.INTERACTIONS, {
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },
     method: "POST",
   });
+  return parseInteractionDetail(raw);
 }
 
-export async function updateInteraction(id: string, body: Record<string, unknown>) {
-  return clientApiJson<{ interaction?: Activity }>(`${API_ROUTES.INTERACTIONS}/${id}`, {
+export async function updateInteraction(
+  id: string,
+  body: UpdateInteractionInput,
+): Promise<Activity> {
+  const raw = await clientApiJson<{ interaction?: Activity }>(`${API_ROUTES.INTERACTIONS}/${id}`, {
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },
     method: "PATCH",
   });
+  return parseInteractionDetail(raw);
 }
 
 export async function deleteInteraction(id: string) {

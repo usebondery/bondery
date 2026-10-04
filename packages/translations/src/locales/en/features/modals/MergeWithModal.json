@@ -38,6 +38,9 @@
     "website": "Website",
     "whatsapp": "WhatsApp"
   },
+  "LoadingMoreLabel": "Loading more…",
+  "LoadMoreError": "Couldn't load more people.",
+  "LoadMoreRetry": "Retry",
   "Merge": "Merge",
   "MergeFailed": "Failed to merge contacts.",
   "MergeSuccess": "Contacts merged successfully",
@@ -48,6 +51,7 @@
   "NoConflicts": "No conflicting values found. All unique information will be merged.",
   "NoPeopleFound": "No people found",
   "Processing": "Merging contacts...",
+  "SearchingLabel": "Searching…",
   "SearchPeople": "Search people...",
   "SelectBothPeopleError": "Select both people before continuing.",
   "SelectLeftPerson": "Select person",

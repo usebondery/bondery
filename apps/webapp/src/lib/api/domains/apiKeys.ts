@@ -1,3 +1,4 @@
+import { BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
 import type {
   ApiKeyCreated,
   ApiKeyListItem,
@@ -12,10 +13,16 @@ export async function getApiKeys(): Promise<ApiKeyListItem[]> {
   return parseApiKeysList(raw);
 }
 
-export async function createApiKey(body: CreateApiKeyInput): Promise<ApiKeyCreated> {
+export async function createApiKey(
+  body: CreateApiKeyInput,
+  stepUpToken: string,
+): Promise<ApiKeyCreated> {
   return clientApiJson<ApiKeyCreated>(API_KEYS_API_PATH, {
     body: JSON.stringify(body),
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      [BONDERY_STEP_UP_HEADER]: stepUpToken,
+    },
     method: "POST",
   });
 }
@@ -31,14 +38,9 @@ export async function updateApiKeyLabel(
   });
 }
 
-export async function deleteApiKey(id: string): Promise<void> {
+export async function deleteApiKey(id: string, stepUpToken: string): Promise<void> {
   await clientApiJson(`${API_KEYS_API_PATH}/${id}`, {
+    headers: { [BONDERY_STEP_UP_HEADER]: stepUpToken },
     method: "DELETE",
   });
-}
-
-/** @deprecated Use getApiKeys */
-export async function listApiKeys() {
-  const apiKeys = await getApiKeys();
-  return { apiKeys };
 }

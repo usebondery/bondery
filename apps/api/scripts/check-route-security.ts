@@ -32,6 +32,7 @@ const NESTED_ROUTE_EXPORTS = new Set([
 const FORBIDDEN_IN_ROUTES = [
   "registerApiKeyProtectedHooks",
   "registerSessionAuthHooks",
+  "registerNativeSessionAuthHooks",
   "registerAdminAuthHooks",
   "registerInternalAuthHooks",
   "fastify.auth([fastify.verify",

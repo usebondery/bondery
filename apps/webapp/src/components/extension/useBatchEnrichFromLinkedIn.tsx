@@ -1,6 +1,6 @@
 "use client";
 
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   errorNotificationTemplate,
   informationNotificationTemplate,
@@ -10,7 +10,7 @@ import type { LinkedInDataResponse } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
 import { useCallback, useSyncExternalStore } from "react";
 import { captureEvent } from "@/lib/analytics/client";
-import { applyTransportResponsePolicy, clientApiFetch } from "@/lib/api/client";
+import { discardEnrichQueue, initEnrichQueue } from "@/lib/api/domains/enrichQueue";
 import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
 import {
   defaultState,
@@ -21,11 +21,14 @@ import {
   setState,
   subscribe,
 } from "@/lib/extension/enrichBatchStore";
-import { useEnrichFromLinkedInTranslations } from "@/lib/i18n/generated/hooks";
+import {
+  useCommonTranslations,
+  useEnrichFromLinkedInTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { getQueryClient } from "@/lib/query/client";
 import { useDiscardEnrichQueueMutation } from "@/lib/query/hooks/useEnrichQueue";
-import { contactKeys } from "@/lib/query/keys";
-import { deleteEnrichQueue, getResponseErrorDescription } from "./batch-enrich-api";
+import { invalidateAfterEnrichBatch } from "@/lib/query/invalidation";
+import { contactKeys, enrichQueueKeys } from "@/lib/query/keys";
 import { useEnrichLoop } from "./useEnrichLoop";
 
 function showCompletionNotification(
@@ -47,7 +50,7 @@ function showCompletionNotification(
   );
 }
 
-function finalizeEnrichRun(abortReason: "circuit_breaker" | null) {
+async function finalizeEnrichRun(abortReason: "circuit_breaker" | null) {
   setState({
     currentPerson: null,
     isLoading: false,
@@ -65,8 +68,20 @@ function finalizeEnrichRun(abortReason: "circuit_breaker" | null) {
     return;
   }
 
-  if (!abortReason) {
-    void deleteEnrichQueue();
+  if (abortReason) {
+    return;
+  }
+
+  try {
+    await discardEnrichQueue();
+    const queryClient = getQueryClient();
+    await Promise.all([
+      invalidateAfterEnrichBatch(queryClient),
+      queryClient.invalidateQueries({ queryKey: enrichQueueKeys.status() }),
+      queryClient.invalidateQueries({ queryKey: enrichQueueKeys.count() }),
+    ]);
+  } catch {
+    // Best-effort cleanup after a completed run; 401 already ran transport policy.
   }
 }
 
@@ -75,12 +90,12 @@ function finalizeEnrichRun(abortReason: "circuit_breaker" | null) {
  */
 export function useBatchEnrichFromLinkedIn() {
   const t = useEnrichFromLinkedInTranslations();
+  const tCommon = useCommonTranslations();
   const discardEnrichQueueMutation = useDiscardEnrichQueueMutation();
 
   const storeState = useSyncExternalStore(subscribe, getState, () => defaultState);
 
   const runEnrichLoop = useEnrichLoop({
-    errorDescription: t("ErrorDescription"),
     errorTitle: t("ErrorTitle"),
   });
 
@@ -111,26 +126,20 @@ export function useBatchEnrichFromLinkedIn() {
       return;
     }
 
-    const initRes = await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
-      body: JSON.stringify({}),
-      headers: { "Content-Type": "application/json" },
-      method: "POST",
-    });
-
-    if (!initRes.ok) {
-      applyTransportResponsePolicy(initRes);
-      const description = await getResponseErrorDescription(initRes, t("ErrorDescription"));
+    let totalEligible: number;
+    try {
+      const init = await initEnrichQueue({});
+      totalEligible = init.totalEligible;
+    } catch (error) {
       setState({ isLoading: false });
       notifications.show(
         errorNotificationTemplate({
-          description,
+          description: getUserFacingError(error, tCommon),
           title: t("ErrorTitle"),
         }),
       );
       return;
     }
-
-    const { totalEligible } = (await initRes.json()) as { totalEligible: number };
 
     if (totalEligible === 0) {
       setState({ isLoading: false });
@@ -158,7 +167,7 @@ export function useBatchEnrichFromLinkedIn() {
 
     const { completedCount, abortReason } = await runEnrichLoop(0, 0);
 
-    finalizeEnrichRun(abortReason);
+    await finalizeEnrichRun(abortReason);
 
     if (abortReason === "circuit_breaker") {
       notifications.show(
@@ -171,7 +180,7 @@ export function useBatchEnrichFromLinkedIn() {
       captureEvent("enrichment:batch_end", { total_enriched: completedCount });
       showCompletionNotification(t, completedCount);
     }
-  }, [t, runEnrichLoop]);
+  }, [t, tCommon, runEnrichLoop]);
 
   const startForPerson = useCallback(
     async (contactId: string, linkedinHandle: string | null | undefined) => {
@@ -211,19 +220,15 @@ export function useBatchEnrichFromLinkedIn() {
         return;
       }
 
-      const initRes = await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue/init`, {
-        body: JSON.stringify({ personId: contactId }),
-        headers: { "Content-Type": "application/json" },
-        method: "POST",
-      });
-
-      if (!initRes.ok) {
-        applyTransportResponsePolicy(initRes);
-        const description = await getResponseErrorDescription(initRes, t("ErrorDescription"));
+      let totalEligible: number;
+      try {
+        const init = await initEnrichQueue({ personId: contactId });
+        totalEligible = init.totalEligible;
+      } catch (error) {
         setState({ isLoading: false });
         notifications.show(
           errorNotificationTemplate({
-            description,
+            description: getUserFacingError(error, tCommon),
             title: t("ErrorTitle"),
           }),
         );
@@ -238,7 +243,7 @@ export function useBatchEnrichFromLinkedIn() {
         isLoading: false,
         isPausing: false,
         isRunning: true,
-        totalEligible: 1,
+        totalEligible,
       });
 
       const { completedCount, abortReason } = await runEnrichLoop(0, 0);
@@ -256,7 +261,7 @@ export function useBatchEnrichFromLinkedIn() {
         );
       }
 
-      finalizeEnrichRun(abortReason);
+      await finalizeEnrichRun(abortReason);
 
       if (abortReason === "circuit_breaker") {
         notifications.show(
@@ -275,7 +280,7 @@ export function useBatchEnrichFromLinkedIn() {
         );
       }
     },
-    [t, runEnrichLoop],
+    [t, tCommon, runEnrichLoop],
   );
 
   const resume = useCallback(
@@ -325,7 +330,7 @@ export function useBatchEnrichFromLinkedIn() {
         queueStatus.failed,
       );
 
-      finalizeEnrichRun(abortReason);
+      await finalizeEnrichRun(abortReason);
 
       if (abortReason === "circuit_breaker") {
         notifications.show(

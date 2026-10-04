@@ -30,7 +30,7 @@ import { notifications } from "@mantine/notifications";
 import { IconUsersGroup } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
 import { captureEvent } from "@/lib/analytics/client";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useCreateMore, useModalDismiss } from "@/lib/modals";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
@@ -39,6 +39,7 @@ import {
   useAddContactsToGroupByIdMutation,
   useCreateGroupMutation,
 } from "@/lib/query/hooks/useGroups";
+import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 
 // Predefined color swatches
 const COLOR_SWATCHES = [
@@ -118,7 +119,7 @@ function AddGroupForm({
     data: contactsData,
     isLoading: isLoadingContacts,
     isError: isContactsError,
-  } = useContactsSelectableListQuery({ limit: 200 });
+  } = useContactsSelectableListQuery(SELECTABLE_CONTACTS);
   const createGroupMutation = useCreateGroupMutation();
   const addContactsMutation = useAddContactsToGroupByIdMutation();
   const contacts = contactsData?.contacts ?? [];
@@ -158,16 +159,13 @@ function AddGroupForm({
     });
 
     try {
-      const createdGroupData = await createGroupMutation.mutateAsync({
+      const created = await createGroupMutation.mutateAsync({
         color: values.color.trim(),
         emoji: values.emoji.trim(),
         label: values.label.trim(),
       });
 
-      const groupId = createdGroupData.group?.id;
-      if (!groupId) {
-        throw new Error("Failed to parse new group id");
-      }
+      const groupId = created.id;
 
       if (selectedIds.length > 0) {
         await addContactsMutation.mutateAsync({ contactIds: selectedIds, groupId });
@@ -199,15 +197,9 @@ function AddGroupForm({
 
       if (onCreated) {
         const newGroup: GroupWithCount = {
-          color: values.color.trim(),
+          ...created,
           contactCount: selectedIds.length,
-          createdAt: new Date().toISOString(),
-          emoji: values.emoji.trim(),
-          id: groupId,
-          label: values.label.trim(),
           previewContacts: [],
-          updatedAt: new Date().toISOString(),
-          userId: "",
         };
         closeModalSync();
         onCreated(newGroup);
@@ -235,9 +227,11 @@ function AddGroupForm({
           <Box style={{ width: 80 }}>
             <EmojiPicker
               disabled={isBlocking}
+              emptyLabel={t("EmojiEmptySearch")}
               error={form.errors.emoji as string | undefined}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
+              searchPlaceholder={t("EmojiSearchPlaceholder")}
               value={form.values.emoji}
             />
           </Box>
@@ -283,12 +277,17 @@ function AddGroupForm({
           ) : (
             <PeopleMultiPickerInput
               contacts={contacts as Contact[]}
+              contactsHasMore={contactsData?.pagination.hasMore ?? false}
               disabled={isBlocking}
+              loadingMoreLabel={t("AddGroupModal.LoadingMoreLabel")}
+              loadMoreErrorLabel={t("AddGroupModal.LoadMoreError")}
+              loadMoreRetryLabel={t("AddGroupModal.LoadMoreRetry")}
               noResultsLabel={t("AddGroupModal.NoContactsFound")}
               onChange={setSelectedIds}
-              onSearch={searchContacts}
+              onSearch={searchContactsPage}
               placeholder={t("AddGroupModal.AddContactsPlaceholder")}
-              searchDebounceMs={DEBOUNCE_MS.contactPicker}
+              searchDebounceMs={DEBOUNCE_MS.search}
+              searchingLabel={t("AddGroupModal.SearchingLabel")}
               selectedIds={selectedIds}
             />
           )}

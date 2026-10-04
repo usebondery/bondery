@@ -3,18 +3,19 @@
 import { PersonChip } from "@bondery/mantine-next";
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 
+function attrString(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
+
 /**
  * Inline NodeView for the Mention extension.
  * Renders the mentioned person as a PersonChip Badge directly in the editor.
  */
 export function MentionNodeView({ node }: NodeViewProps) {
-  const { id, label, avatar, headline, location } = node.attrs as {
-    id: string;
-    label: string;
-    avatar: string | null;
-    headline: string | null;
-    location: string | null;
-  };
+  const firstName = attrString(node.attrs.firstName);
+  const lastName = attrString(node.attrs.lastName);
+  const label = attrString(node.attrs.label);
+  const id = attrString(node.attrs.id);
 
   return (
     <NodeViewWrapper
@@ -26,12 +27,12 @@ export function MentionNodeView({ node }: NodeViewProps) {
         isClickable={true}
         openInNewTab={true}
         person={{
-          avatar: avatar || null,
-          firstName: label,
-          headline: headline || null,
+          avatar: attrString(node.attrs.avatar) || null,
+          firstName: firstName || label || id,
+          headline: attrString(node.attrs.headline) || null,
           id,
-          lastName: null,
-          location: location || null,
+          lastName: lastName || null,
+          location: attrString(node.attrs.location) || null,
         }}
         showHoverCard={true}
         size="sm"

@@ -8,7 +8,6 @@ import { Link } from "@mantine/tiptap";
 import { Color } from "@tiptap/extension-color";
 import Emoji from "@tiptap/extension-emoji";
 import Highlight from "@tiptap/extension-highlight";
-import Mention from "@tiptap/extension-mention";
 import Placeholder from "@tiptap/extension-placeholder";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
@@ -16,12 +15,20 @@ import { TextStyle } from "@tiptap/extension-text-style";
 import { ReactNodeViewRenderer, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import { useEffect, useRef } from "react";
-import { MentionNodeView } from "../components/notes/MentionNodeView";
 import { TaskItemNodeView } from "../components/notes/TaskItemNodeView";
 import { emojiSuggestionRender } from "../editor/emojiSuggestion";
 import { InlineDateExtension } from "../editor/InlineDateExtension";
 import { MarkdownPasteExtension } from "../editor/MarkdownPasteExtension";
+import { createPersonMentionExtension } from "../editor/personMentionExtension";
 import { SlashCommandExtension } from "../editor/SlashCommandExtension";
+
+function isNotesEditorChrome(target: EventTarget | null): boolean {
+  return (
+    target instanceof HTMLElement &&
+    (Boolean(target.closest('[data-notes-editor-toolbar="true"]')) ||
+      Boolean(target.closest("[data-mention-list]")))
+  );
+}
 
 interface UsePersonNotesEditorOptions {
   contact: Contact | null;
@@ -75,54 +82,22 @@ export function usePersonNotesEditor({
       SlashCommandExtension.configure({
         suggestion: slashCommandSuggestion,
       }),
-      Mention.extend({
-        addAttributes() {
-          return {
-            ...this.parent?.(),
-            avatar: {
-              default: null,
-              parseHTML: (element) => element.getAttribute("data-avatar"),
-              renderHTML: (attributes) => ({
-                "data-avatar": attributes.avatar ?? "",
-              }),
-            },
-            headline: {
-              default: null,
-              parseHTML: (element) => element.getAttribute("data-headline") || null,
-              renderHTML: (attributes) => ({
-                "data-headline": attributes.headline ?? "",
-              }),
-            },
-            location: {
-              default: null,
-              parseHTML: (element) => element.getAttribute("data-location") || null,
-              renderHTML: (attributes) => ({
-                "data-location": attributes.location ?? "",
-              }),
-            },
-          };
-        },
-        addNodeView() {
-          return ReactNodeViewRenderer(MentionNodeView);
-        },
-      }).configure({
-        suggestion: mentionSuggestion,
-      }),
+      createPersonMentionExtension(mentionSuggestion),
       Placeholder.configure({
         placeholder: tPersonPage("NotesPlaceholder"),
       }),
       InlineDateExtension,
     ],
     immediatelyRender: false,
-    onBlur: ({ editor: notesEditor }) => {
+    onBlur: ({ editor: notesEditor, event }) => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
         debounceTimerRef.current = null;
       }
-      const activeElement = window.document.activeElement;
+      const relatedTarget = event instanceof FocusEvent ? event.relatedTarget : null;
       if (
-        activeElement instanceof HTMLElement &&
-        activeElement.closest('[data-notes-editor-toolbar="true"]')
+        isNotesEditorChrome(relatedTarget) ||
+        isNotesEditorChrome(window.document.activeElement)
       ) {
         return;
       }
@@ -144,9 +119,14 @@ export function usePersonNotesEditor({
   });
 
   useEffect(() => {
-    if (editor && contact?.notes !== undefined) {
-      editor.commands.setContent(contact.notes || "");
+    if (!editor || contact?.notes === undefined) {
+      return;
     }
+    const incoming = contact.notes || "";
+    if (editor.getHTML() === incoming) {
+      return;
+    }
+    editor.commands.setContent(incoming);
   }, [contact?.notes, editor]);
 
   noteSaveRef.current = () => {

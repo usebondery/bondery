@@ -21,8 +21,11 @@
   "LabelPlaceholder": "Tag name",
   "LoadContactsErrorDescription": "Failed to load contacts.",
   "LoadContactsErrorTitle": "Error",
+  "LoadingMoreLabel": "Loading more…",
   "LoadMembersErrorDescription": "Failed to load tag members.",
   "LoadMembersErrorTitle": "Error",
+  "LoadMoreError": "Couldn't load more people.",
+  "LoadMoreRetry": "Retry",
   "ManageTags": "Manage tags",
   "NoPeopleFound": "No people found",
   "PeopleWithTagLabel": "People with this tag",
@@ -33,5 +36,6 @@
   "SaveSuccessTitle": "Tag updated",
   "SavingDescription": "Please wait while we save your changes.",
   "SavingTitle": "Saving tag",
+  "SearchingLabel": "Searching…",
   "Title": "Tags"
 }

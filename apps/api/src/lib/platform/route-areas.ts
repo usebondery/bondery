@@ -10,6 +10,7 @@ import {
   registerInternalAuthHooks,
   registerSessionAuthHooks,
 } from "./auth/api-key-access.js";
+import { registerNativeSessionAuthHooks } from "./auth/native-session.js";
 import type { AppRoutePlugin } from "./fastify-types.js";
 import { applyOpenApiRouteMeta, type OpenApiRouteArea } from "./openapi/meta.js";
 
@@ -72,6 +73,18 @@ export function sessionRoutes(plugin: AppRoutePlugin): AppRoutePlugin {
   return async (fastify) => {
     fastify.addHook("onRoute", stampOpenApiArea("session"));
     registerSessionAuthHooks(fastify);
+    await fastify.register(plugin);
+  };
+}
+
+/**
+ * Native Better Auth cookie session that must be fresh (no JWT-only, no API keys).
+ * OpenAPI area stays `session` so API keys remain denied.
+ */
+export function nativeSessionRoutes(plugin: AppRoutePlugin): AppRoutePlugin {
+  return async (fastify) => {
+    fastify.addHook("onRoute", stampOpenApiArea("session"));
+    registerNativeSessionAuthHooks(fastify);
     await fastify.register(plugin);
   };
 }

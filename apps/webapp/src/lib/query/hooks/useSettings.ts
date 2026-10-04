@@ -135,6 +135,6 @@ export function useDismissGettingStartedMutation() {
 
 export function useDeleteAccountMutation() {
   return useMutation({
-    mutationFn: deleteAccount,
+    mutationFn: (stepUpToken: string) => deleteAccount(stepUpToken),
   });
 }

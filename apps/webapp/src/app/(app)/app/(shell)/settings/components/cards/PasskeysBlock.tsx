@@ -17,12 +17,11 @@ import {
   lookupAaguidCatalogName,
   lookupAaguidIcons,
   lookupBetterAuthAuthenticatorName,
-  parseCreatedPasskey,
-  resolveStoredPasskeyName,
 } from "@/lib/auth/aaguid-catalog";
 import { createWebappAuthClient } from "@/lib/auth/client";
-import { classifyPasskeyCeremonyError } from "@/lib/auth/passkey-ceremony";
 import { isWebAuthnSupported } from "@/lib/auth/passkey-support";
+import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
+import { runAddPasskeyCeremony } from "@/lib/auth/runAddPasskeyCeremony";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { formatLastUsedAtWithFormatter, useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
@@ -31,7 +30,6 @@ import {
   passkeyLastUsedAtIso,
   usePasskeysQuery,
 } from "@/lib/query/hooks/usePasskeys";
-import { invalidatePasskeys } from "@/lib/query/invalidation";
 import { settingsKeys } from "@/lib/query/keys";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
 
@@ -259,18 +257,18 @@ export function PasskeysBlock() {
       neverUsed: t("Passkeys.NeverUsed"),
     });
 
-  const showCreateFailure = useCallback(
-    (createError: unknown) => {
-      captureEvent("account_settings:passkey_fail");
-      notifications.show(
-        errorNotificationTemplate({
-          description: getAuthUserFacingError(createError, tCommon),
-          title: t("Passkeys.CreateErrorTitle"),
-        }),
-      );
-    },
-    [t, tCommon],
-  );
+  const runCeremony = useCallback(async () => {
+    return runAddPasskeyCeremony({
+      authClient,
+      catalog,
+      createErrorDescription: t("Passkeys.CreateErrorDescription"),
+      createErrorTitle: t("Passkeys.CreateErrorTitle"),
+      fallbackName: t("Passkeys.FallbackName"),
+      nameTemplate: ({ browser, os }) => t("Passkeys.NameTemplate", { browser, os }),
+      queryClient,
+      tCommon,
+    });
+  }, [authClient, catalog, queryClient, t, tCommon]);
 
   const handleAdd = async () => {
     if (atLimit || !webAuthnSupported || isAdding) {
@@ -279,69 +277,21 @@ export function PasskeysBlock() {
 
     setIsAdding(true);
     try {
-      // Do not pass `name` — Better Auth 1.7.1 copies it onto WebAuthn user.name
-      // (password-manager username). The friendly label is set via updatePasskey.
-      const { data, error: addError } = await authClient.passkey.addPasskey();
-      if (addError) {
-        const kind = classifyPasskeyCeremonyError(addError);
-        if (kind === "cancel") {
-          captureEvent("account_settings:passkey_cancel");
-          return;
-        }
-        showCreateFailure(addError);
+      const stepped = await ensureFreshIdentity({ purpose: "add_passkey" });
+      if (stepped !== "fresh") {
         return;
       }
 
-      const created = parseCreatedPasskey(data);
-      if (!created) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("Passkeys.CreateErrorDescription"),
-            title: t("Passkeys.CreateErrorTitle"),
-          }),
-        );
-        captureEvent("account_settings:passkey_fail");
+      const result = await runCeremony();
+      if (result !== "session_stale") {
         return;
       }
 
-      let loadedCatalog: AaguidCatalog = catalog ?? {};
-      if (!catalog) {
-        try {
-          loadedCatalog = await loadVendoredAaguidCatalog();
-        } catch {
-          loadedCatalog = {};
-        }
-      }
-
-      const storedName = await resolveStoredPasskeyName({
-        aaguid: created.aaguid,
-        catalog: loadedCatalog,
-        fallback: t("Passkeys.FallbackName"),
-        template: ({ browser, os }) => t("Passkeys.NameTemplate", { browser, os }),
-      });
-
-      const { error: updateError } = await authClient.passkey.updatePasskey({
-        id: created.id,
-        name: storedName,
-      });
-      if (updateError) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: getAuthUserFacingError(updateError, tCommon),
-            title: tCommon("feedback.errorTitle"),
-          }),
-        );
-      }
-
-      captureEvent("account_settings:passkey_add");
-      await invalidatePasskeys(queryClient);
-    } catch (caught) {
-      const kind = classifyPasskeyCeremonyError(caught);
-      if (kind === "cancel") {
-        captureEvent("account_settings:passkey_cancel");
+      const retryStep = await ensureFreshIdentity({ purpose: "add_passkey" });
+      if (retryStep !== "fresh") {
         return;
       }
-      showCreateFailure(caught);
+      await runCeremony();
     } finally {
       setIsAdding(false);
     }

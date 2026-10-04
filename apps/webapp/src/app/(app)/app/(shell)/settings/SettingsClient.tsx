@@ -21,6 +21,7 @@ import { SubscriptionCard } from "./components/cards/SubscriptionCard";
 import { SupportCard } from "./components/cards/SupportCard";
 import { TagsSection } from "./components/cards/TagsSection";
 import { SettingsCardsSkeleton } from "./components/chrome/SettingsSkeletons";
+import { ReconfirmResume } from "./ReconfirmResume";
 
 export function SettingsClient() {
   const t = useSettingsPageTranslations();
@@ -50,6 +51,7 @@ export function SettingsClient() {
 
   return (
     <PageWrapper>
+      <ReconfirmResume />
       <ErrorPageHeader iconType="settings" title={t("Title")} />
       {data ? (
         <Stack gap="xl">

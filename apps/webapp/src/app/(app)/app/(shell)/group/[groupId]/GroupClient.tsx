@@ -102,6 +102,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
     cardPreviewContacts,
     clearSelection,
     contacts,
+    contactsHasMore: hasMore,
     excludedIds,
     groupColor,
     groupEmoji,

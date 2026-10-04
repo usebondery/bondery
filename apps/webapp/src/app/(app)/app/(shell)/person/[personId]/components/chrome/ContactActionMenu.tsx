@@ -1,3 +1,4 @@
+import { getUserFacingError } from "@bondery/helpers/api";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
 import { Button, Menu, MenuItem, Tooltip } from "@mantine/core";
@@ -14,6 +15,7 @@ import { useState } from "react";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { downloadContactVcard } from "@/lib/api/domains/contacts";
 import {
+  useCommonTranslations,
   useContactActionMenuTranslations,
   useEnrichFromLinkedInTranslations,
   useMergeWithModalTranslations,
@@ -42,14 +44,12 @@ export function ContactActionMenu({
   const tShare = useShareContactModalTranslations();
   const tEnrich = useEnrichFromLinkedInTranslations();
   const tActions = useContactActionMenuTranslations();
+  const tCommon = useCommonTranslations();
   const { startForPerson } = useBatchEnrichFromLinkedIn();
 
   const handleExport = async () => {
     try {
       const response = await downloadContactVcard(personId);
-      if (!response.ok) {
-        throw new Error("Failed to export vCard");
-      }
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -69,10 +69,10 @@ export function ContactActionMenu({
           title: tActions("ExportSuccess"),
         }),
       );
-    } catch {
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: tActions("ExportErrorDescription"),
+          description: getUserFacingError(error, tCommon),
           title: tActions("ExportError"),
         }),
       );

@@ -6,13 +6,14 @@ import type { Contact, ContactSelectable } from "@bondery/schemas";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
-import { searchContacts } from "@/lib/contacts/searchContacts";
+import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
 import { openShareContactModal } from "../../../people/components/modals/ShareContactModal";
 
 interface UsePersonModalActionsOptions {
   contact: Contact | null;
+  contactsHasMore?: boolean;
   personId: string;
   resolvedContact: Contact | undefined;
   selectableContacts: ContactSelectable[];
@@ -20,9 +21,10 @@ interface UsePersonModalActionsOptions {
 
 export function usePersonModalActions({
   contact,
+  contactsHasMore = false,
   personId,
   resolvedContact,
-  selectableContacts: _selectableContacts,
+  selectableContacts,
 }: UsePersonModalActionsOptions) {
   const router = useRouter();
 
@@ -41,11 +43,13 @@ export function usePersonModalActions({
   const openMergeWithModalForCurrentPerson = useCallback(() => {
     openMergeWithModal({
       contacts: resolvedContact ? [resolvedContact] : [],
+      contactsHasMore,
       disableLeftPicker: true,
       leftPersonId: resolvedContact?.id ?? personId,
-      onSearch: searchContacts,
+      onSearch: searchContactsPage,
+      people: selectableContacts,
     });
-  }, [personId, resolvedContact]);
+  }, [contactsHasMore, personId, resolvedContact, selectableContacts]);
 
   const openShareModal = useCallback(() => {
     if (!contact) {

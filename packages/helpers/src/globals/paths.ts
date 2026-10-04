@@ -219,6 +219,7 @@ export const WEBAPP_ROUTES = {
   ACCOUNT: "/app/account",
   APP_GROUP: "/app",
   CHAT: "/app/chat",
+  CONFIRM: "/confirm",
   DEFAULT_PAGE_AFTER_LOGIN: "/app/home",
   FIX_CONTACTS: "/app/fix",
   GROUPS: "/app/groups",

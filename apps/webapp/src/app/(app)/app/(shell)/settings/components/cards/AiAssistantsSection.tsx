@@ -1,27 +1,17 @@
 "use client";
 
-import {
-  CodeBlock,
-  type CodeBlockSnippet,
-  DescribedSelect,
-  ModalTitle,
-} from "@bondery/mantine-next";
+import { CodeBlock, type CodeBlockSnippet, DescribedSelect } from "@bondery/mantine-next";
 import type { McpConsentListItem } from "@bondery/schemas";
 import { CardSection, Stack, Text } from "@mantine/core";
-import {
-  IconAlertCircle,
-  IconBraces,
-  IconLink,
-  IconSparkles,
-  IconTrash,
-} from "@tabler/icons-react";
+import { IconBraces, IconLink, IconSparkles } from "@tabler/icons-react";
 import { useMemo } from "react";
-import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { mcpAccessFromScopes } from "@/lib/auth/mcp-access";
 import { mcpAccessOptions } from "@/lib/auth/mcp-access-options";
+import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { useMcpConsentsQuery, useRevokeMcpConsentMutation } from "@/lib/query/hooks/useMcpConsents";
+import { openRevokeMcpConsentConfirm } from "../../settingsAuthActions";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
 import { SettingsSection } from "./SettingsSection";
 
@@ -87,23 +77,20 @@ export function AiAssistantsSection({ apiBaseUrl }: AiAssistantsSectionProps) {
     [t],
   );
 
-  const handleRevoke = (consent: McpConsentListItem) => {
-    openStandardConfirmModal({
-      cancelLabel: tCommon("confirm.noCancel"),
-      confirmColor: "red",
-      confirmLabel: t("RevokeConfirm"),
-      confirmLeftSection: <IconTrash size={16} />,
-      message: <Text size="sm">{t("RevokeMessage")}</Text>,
-      onConfirm: async () => {
-        await revokeMutation.mutateAsync(consent.id);
-      },
-      title: (
-        <ModalTitle
-          icon={<IconAlertCircle size={24} />}
-          isDangerous
-          text={t("RevokeTitle", { name: consent.clientName })}
-        />
-      ),
+  const handleRevoke = async (consent: McpConsentListItem) => {
+    const stepped = await ensureFreshIdentity({
+      purpose: "revoke_mcp_consent",
+      targetId: consent.id,
+    });
+    if (stepped !== "fresh") {
+      return;
+    }
+    openRevokeMcpConsentConfirm({
+      clientName: consent.clientName,
+      id: consent.id,
+      revokeConsent: (id, stepUpToken) => revokeMutation.mutateAsync({ id, stepUpToken }),
+      t,
+      tCommon,
     });
   };
 
@@ -146,7 +133,7 @@ export function AiAssistantsSection({ apiBaseUrl }: AiAssistantsSectionProps) {
                       dateStyle: "medium",
                     }),
                   })}
-                  onDelete={() => handleRevoke(consent)}
+                  onDelete={() => void handleRevoke(consent)}
                 >
                   <DescribedSelect
                     aria-label={t("PermissionField")}

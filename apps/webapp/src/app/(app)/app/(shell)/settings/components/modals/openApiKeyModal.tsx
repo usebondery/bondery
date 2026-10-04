@@ -16,6 +16,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconAlertTriangle, IconFileText, IconKey } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
+import { mintStepUpNonce } from "@/lib/api/domains/step-up";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useCreateApiKeyMutation } from "@/lib/query/hooks/useApiKeys";
@@ -40,6 +41,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
   const [label, setLabel] = useState("");
   const [permission, setPermission] = useState<ApiKeyPermission>("read");
   const [fullKey, setFullKey] = useState("");
+  const [isMinting, setIsMinting] = useState(false);
 
   const createMutation = useCreateApiKeyMutation();
   const permissionOptions = useApiKeyPermissionOptions();
@@ -49,7 +51,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
   const defaultTestSnippetId = resolveDefaultTestSnippetId(os);
 
   const trimmedLabel = label.trim();
-  const isBlocking = createMutation.isPending;
+  const isBlocking = createMutation.isPending || isMinting;
   const canCreate = trimmedLabel.length > 0 && !isBlocking;
 
   const { closeModal } = useModalDismiss(modalId, isBlocking);
@@ -66,9 +68,14 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
       return;
     }
     try {
+      setIsMinting(true);
+      const stepUpToken = await mintStepUpNonce();
       const created = await createMutation.mutateAsync({
-        label: trimmedLabel,
-        permission,
+        body: {
+          label: trimmedLabel,
+          permission,
+        },
+        stepUpToken,
       });
       setFullKey(created.secret);
       setStep("reveal");
@@ -80,6 +87,8 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
           title: t("CreateErrorTitle"),
         }),
       });
+    } finally {
+      setIsMinting(false);
     }
   };
 
@@ -112,7 +121,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
         <ModalFooter
           actionDisabled={!canCreate}
           actionLabel={t("CreateButton")}
-          actionLoading={createMutation.isPending}
+          actionLoading={isBlocking}
           cancelLabel={t("Cancel")}
           onAction={handleCreate}
           onCancel={closeModal}

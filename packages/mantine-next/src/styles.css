@@ -132,20 +132,105 @@ ol {
     border-color var(--transition-time) var(--transition-ease);
 }
 
-.mantine-Combobox-option[data-combobox-selected="true"] .mantine-Text-root {
-  color: white;
+.personSearchOptionRow,
+.personSearchOptionMeta {
+  max-width: 100%;
+  min-width: 0;
 }
 
-.mantine-Combobox-option {
-  transition: background-color var(--transition-time-quick) var(--transition-ease);
+.personSearchOptionMeta {
+  color: var(--action-description-color, var(--mantine-color-dimmed));
+  overflow: hidden;
 }
-
-/* .mantine-Combobox-option[data-combobox-selected="true"] {
-  background-color: var(--mantine-primary-color-light);
-} */
 
 .mantine-Combobox-option:hover {
   background-color: var(--mantine-primary-color-light);
+}
+
+.peoplePickerOptions {
+  --combobox-padding: calc(0.25rem * var(--mantine-scale));
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+/* Autosize viewport uses min-width: min-content, which either shrinks rows
+   or lets long headline/location grow the dropdown past the parent. */
+.peoplePickerOptions .mantine-ScrollArea-viewport,
+.peoplePickerOptions .mantine-ScrollArea-content {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+  width: 100%;
+}
+
+.peoplePickerOptions .mantine-ScrollArea-content {
+  display: block;
+}
+
+.peoplePickerOptions .personSearchOptionHit,
+.peoplePickerOptions .mantine-Combobox-option {
+  box-sizing: border-box;
+  display: block;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* Flush the scrollbar into the dropdown’s end padding, matching Mantine Select. */
+.mantine-Combobox-dropdown:has(.peoplePickerOptions) {
+  padding-inline-end: 0;
+}
+
+.mantine-Combobox-dropdown:has(.peoplePickerOptions) .mantine-Combobox-options {
+  padding-inline-end: 0;
+  width: 100%;
+}
+
+/* PersonSearchOptionRow highlight — Combobox, Spotlight, and custom hit targets */
+:is(
+  .personSearchOptionHit,
+  .mantine-Combobox-option:has(.personSearchOptionRow),
+  .mantine-Spotlight-action:has(.personSearchOptionRow)
+) {
+  border-radius: var(--mantine-radius-default);
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  transition: background-color var(--transition-time-quick) var(--transition-ease);
+}
+
+:is(
+  .personSearchOptionHit,
+  .mantine-Combobox-option:has(.personSearchOptionRow),
+  .mantine-Spotlight-action:has(.personSearchOptionRow)
+):is(
+  :hover,
+  :focus-visible,
+  [data-combobox-selected],
+  [data-combobox-active],
+  [data-selected],
+  [data-active]
+) {
+  --action-description-color: var(--mantine-color-white);
+  background-color: var(--mantine-primary-color-filled);
+}
+
+:is(
+    .personSearchOptionHit,
+    .mantine-Combobox-option:has(.personSearchOptionRow),
+    .mantine-Spotlight-action:has(.personSearchOptionRow)
+  ):is(
+    :hover,
+    :focus-visible,
+    [data-combobox-selected],
+    [data-combobox-active],
+    [data-selected],
+    [data-active]
+  )
+  :is(.personSearchOptionMeta, .mantine-Text-root) {
+  color: var(--mantine-color-white);
 }
 
 .transform-none {
@@ -178,8 +263,8 @@ ol {
   background-color: var(--mantine-primary-color-filled-hover);
 }
 
-/* Grow-on-hover + squeeze-on-press for calendar interactive controls,
-   matching the button-scale-effect timing and scale values */
+/* Do not put width/display on day cells — that overrides Mantine's
+   `--day-size` and squeezes the month grid next to presets. */
 .mantine-DatePickerInput-day:not([data-disabled]),
 .mantine-DatePicker-day:not([data-disabled]),
 .mantine-DatePickerInput-calendarHeaderControl:not([data-disabled]),
@@ -195,6 +280,17 @@ ol {
     transform var(--transition-time) var(--transition-ease),
     filter var(--transition-time) var(--transition-ease),
     background-color var(--transition-time) var(--transition-ease);
+}
+
+.presetsList {
+  flex-shrink: 0;
+}
+
+.presetsButton {
+  align-self: stretch;
+  display: flex;
+  justify-content: flex-start;
+  text-align: start;
 }
 
 .mantine-DatePickerInput-day:hover:not([data-disabled]),
@@ -227,9 +323,9 @@ ol {
 .mantine-DatePickerInput-day:active:not([data-disabled]),
 .mantine-DatePicker-day:active:not([data-disabled]),
 .mantine-DatePickerInput-calendarHeaderControl:active:not([data-disabled]),
-.mantine-DatePautoicker-calendarHeaderControl:active:not([data-disabled]),
+.mantine-DatePicker-calendarHeaderControl:active:not([data-disabled]),
 .mantine-DatePickerInput-calendarHeaderLevel:active:not([data-disabled]),
-.mantine-Dat51ePicker-calendarHeaderLevel:active:not([data-disabled]),
+.mantine-DatePicker-calendarHeaderLevel:active:not([data-disabled]),
 .mantine-DatePickerInput-yearsListControl:active:not([data-disabled]),
 .mantine-DatePicker-yearsListControl:active:not([data-disabled]),
 .mantine-DatePickerInput-monthsListControl:active:not([data-disabled]),

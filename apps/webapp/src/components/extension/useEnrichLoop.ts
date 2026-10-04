@@ -1,25 +1,22 @@
 "use client";
 
+import { getUserFacingError } from "@bondery/helpers/api";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
+import type { EnrichQueueNextBatchItem } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
 import { useCallback } from "react";
-import { applyTransportResponsePolicy } from "@/lib/api/client";
+import { fetchNextEnrichBatch, patchEnrichQueueItem } from "@/lib/api/domains/enrichQueue";
 import { isCancelled, setState } from "@/lib/extension/enrichBatchStore";
-import {
-  enrichSinglePersonViaExtension,
-  fetchNextEnrichBatch,
-  getResponseErrorDescription,
-  MAX_CONSECUTIVE_TIMEOUTS,
-  patchEnrichQueueItem,
-  type QueueItem,
-} from "./batch-enrich-api";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { enrichSinglePersonViaExtension, MAX_CONSECUTIVE_TIMEOUTS } from "./batch-enrich-api";
 
 interface UseEnrichLoopParams {
-  errorDescription: string;
   errorTitle: string;
 }
 
-export function useEnrichLoop({ errorDescription, errorTitle }: UseEnrichLoopParams) {
+export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
+  const tCommon = useCommonTranslations();
+
   const runEnrichLoop = useCallback(
     async (initialCompleted: number, initialFailed: number) => {
       let completedCount = initialCompleted;
@@ -27,7 +24,7 @@ export function useEnrichLoop({ errorDescription, errorTitle }: UseEnrichLoopPar
       let consecutiveTimeouts = 0;
       let abortReason: "circuit_breaker" | null = null;
 
-      const processItem = async (item: QueueItem) => {
+      const processItem = async (item: EnrichQueueNextBatchItem) => {
         setState({
           currentPerson: {
             avatar: null,
@@ -38,7 +35,10 @@ export function useEnrichLoop({ errorDescription, errorTitle }: UseEnrichLoopPar
         });
 
         if (!item.linkedinHandle) {
-          await patchEnrichQueueItem(item.queueItemId, "failed", "Missing LinkedIn handle");
+          await patchEnrichQueueItem(item.queueItemId, {
+            errorMessage: "Missing LinkedIn handle",
+            status: "failed",
+          });
           failedCount++;
           consecutiveTimeouts = 0;
           setState({ currentPerson: null, failed: failedCount });
@@ -48,14 +48,17 @@ export function useEnrichLoop({ errorDescription, errorTitle }: UseEnrichLoopPar
         const result = await enrichSinglePersonViaExtension(item.personId, item.linkedinHandle);
 
         if (result.success) {
-          await patchEnrichQueueItem(item.queueItemId, "completed");
+          await patchEnrichQueueItem(item.queueItemId, { status: "completed" });
           completedCount++;
           consecutiveTimeouts = 0;
           setState({ completed: completedCount, currentPerson: null });
           return;
         }
 
-        await patchEnrichQueueItem(item.queueItemId, "failed", result.error);
+        await patchEnrichQueueItem(item.queueItemId, {
+          errorMessage: result.error,
+          status: "failed",
+        });
         failedCount++;
         if (result.error === "timeout") {
           consecutiveTimeouts++;
@@ -75,40 +78,48 @@ export function useEnrichLoop({ errorDescription, errorTitle }: UseEnrichLoopPar
           break;
         }
 
-        const batchResult = await fetchNextEnrichBatch();
-
-        if (!batchResult.ok) {
-          applyTransportResponsePolicy(batchResult.response);
-          const description = await getResponseErrorDescription(
-            batchResult.response,
-            errorDescription,
-          );
+        let items: EnrichQueueNextBatchItem[];
+        try {
+          items = await fetchNextEnrichBatch();
+        } catch (error) {
           notifications.show(
             errorNotificationTemplate({
-              description,
+              description: getUserFacingError(error, tCommon),
               title: errorTitle,
             }),
           );
           break;
         }
 
-        if (batchResult.items.length === 0) {
+        if (items.length === 0) {
           break;
         }
 
-        for (const item of batchResult.items) {
+        let stoppedForHttpError = false;
+        for (const item of items) {
           if (isCancelled()) {
             break;
           }
 
-          await processItem(item);
+          try {
+            await processItem(item);
+          } catch (error) {
+            notifications.show(
+              errorNotificationTemplate({
+                description: getUserFacingError(error, tCommon),
+                title: errorTitle,
+              }),
+            );
+            stoppedForHttpError = true;
+            break;
+          }
 
           if (abortReason) {
             break;
           }
         }
 
-        if (isCancelled() || abortReason) {
+        if (isCancelled() || abortReason || stoppedForHttpError) {
           break;
         }
 
@@ -117,7 +128,7 @@ export function useEnrichLoop({ errorDescription, errorTitle }: UseEnrichLoopPar
 
       return { abortReason, completedCount, failedCount };
     },
-    [errorDescription, errorTitle],
+    [errorTitle, tCommon],
   );
 
   return runEnrichLoop;

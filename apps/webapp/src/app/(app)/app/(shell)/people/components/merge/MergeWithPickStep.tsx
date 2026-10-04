@@ -1,49 +1,58 @@
 "use client";
 
-import { ModalFooter, PersonChip } from "@bondery/mantine-next";
-import type { Contact, ContactPreview } from "@bondery/schemas";
+import { ModalFooter, type PeoplePickerOnSearch, PersonChip } from "@bondery/mantine-next";
+import type { ContactPreview } from "@bondery/schemas";
 import { Group, Stack, Text } from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons-react";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
-import { toPersonPreview } from "../../utils/merge-conflict-helpers";
 
 interface MergeWithPickStepProps {
   cancelLabel: string;
+  contactsHasMore?: boolean;
   continueLabel: string;
   disableLeftPicker: boolean;
   disableRightPicker: boolean;
   isSubmitting: boolean;
-  leftContact: Contact | null;
+  leftPerson: ContactPreview | null;
   leftSelectablePeople: ContactPreview[];
+  loadingMoreLabel: string;
+  loadMoreErrorLabel: string;
+  loadMoreRetryLabel: string;
   mergeWithLabel: string;
   noPeopleFoundLabel: string;
   onCancel: () => void;
   onContinue: () => void;
-  onRightSearch?: (query: string) => Promise<ContactPreview[]>;
+  onRightSearch?: PeoplePickerOnSearch<ContactPreview>;
   onSelectLeft: (personId: string) => void;
   onSelectRight: (personId: string) => void;
-  rightContact: Contact | null;
+  rightPerson: ContactPreview | null;
   rightSelectablePeople: ContactPreview[];
+  searchingLabel: string;
   searchPeopleLabel: string;
   selectLeftPersonLabel: string;
   selectRightPersonLabel: string;
 }
 
 export function MergeWithPickStep({
+  contactsHasMore = false,
   disableLeftPicker,
   disableRightPicker,
   isSubmitting,
-  leftContact,
+  leftPerson,
   leftSelectablePeople,
+  loadingMoreLabel,
+  loadMoreErrorLabel,
+  loadMoreRetryLabel,
   noPeopleFoundLabel,
   onCancel,
   onContinue,
   onRightSearch,
   onSelectLeft,
   onSelectRight,
-  rightContact,
+  rightPerson,
   rightSelectablePeople,
   searchPeopleLabel,
+  searchingLabel,
   selectLeftPersonLabel,
   selectRightPersonLabel,
   mergeWithLabel,
@@ -56,11 +65,15 @@ export function MergeWithPickStep({
         <PersonChip
           disabled={disableLeftPicker || isSubmitting}
           isSelectable
+          loadingMoreLabel={loadingMoreLabel}
+          loadMoreErrorLabel={loadMoreErrorLabel}
+          loadMoreRetryLabel={loadMoreRetryLabel}
           noResultsLabel={noPeopleFoundLabel}
           onSelectPerson={onSelectLeft}
           people={leftSelectablePeople}
-          person={toPersonPreview(leftContact)}
+          person={leftPerson}
           placeholder={selectLeftPersonLabel}
+          searchingLabel={searchingLabel}
           searchPlaceholder={searchPeopleLabel}
         />
 
@@ -68,18 +81,40 @@ export function MergeWithPickStep({
           {mergeWithLabel}
         </Text>
 
-        <PersonChip
-          disabled={disableRightPicker || isSubmitting}
-          isSelectable
-          noResultsLabel={noPeopleFoundLabel}
-          onSearch={onRightSearch}
-          onSelectPerson={onSelectRight}
-          people={rightSelectablePeople}
-          person={toPersonPreview(rightContact)}
-          placeholder={selectRightPersonLabel}
-          searchDebounceMs={DEBOUNCE_MS.contactPicker}
-          searchPlaceholder={searchPeopleLabel}
-        />
+        {onRightSearch ? (
+          <PersonChip
+            contactsHasMore={contactsHasMore}
+            disabled={disableRightPicker || isSubmitting}
+            isSelectable
+            loadingMoreLabel={loadingMoreLabel}
+            loadMoreErrorLabel={loadMoreErrorLabel}
+            loadMoreRetryLabel={loadMoreRetryLabel}
+            noResultsLabel={noPeopleFoundLabel}
+            onSearch={onRightSearch}
+            onSelectPerson={onSelectRight}
+            people={rightSelectablePeople}
+            person={rightPerson}
+            placeholder={selectRightPersonLabel}
+            searchDebounceMs={DEBOUNCE_MS.search}
+            searchingLabel={searchingLabel}
+            searchPlaceholder={searchPeopleLabel}
+          />
+        ) : (
+          <PersonChip
+            disabled={disableRightPicker || isSubmitting}
+            isSelectable
+            loadingMoreLabel={loadingMoreLabel}
+            loadMoreErrorLabel={loadMoreErrorLabel}
+            loadMoreRetryLabel={loadMoreRetryLabel}
+            noResultsLabel={noPeopleFoundLabel}
+            onSelectPerson={onSelectRight}
+            people={rightSelectablePeople}
+            person={rightPerson}
+            placeholder={selectRightPersonLabel}
+            searchingLabel={searchingLabel}
+            searchPlaceholder={searchPeopleLabel}
+          />
+        )}
       </Group>
 
       <ModalFooter

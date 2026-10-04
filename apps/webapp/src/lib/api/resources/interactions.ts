@@ -1,5 +1,6 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Activity, PaginationMeta } from "@bondery/schemas";
+import { missingResourceError } from "@/lib/api/missingResourceError";
 import { normalizePaginatedList } from "@/lib/api/resources/pagination";
 import { buildAvatarQueryString } from "@/lib/contacts/avatarParams";
 
@@ -42,7 +43,7 @@ export function parseInteractionsList(
 
 export function parseInteractionDetail(raw: { interaction?: Activity }): Activity {
   if (!raw.interaction) {
-    throw new Error("Interaction not found");
+    throw missingResourceError("interaction_not_found");
   }
   return raw.interaction;
 }

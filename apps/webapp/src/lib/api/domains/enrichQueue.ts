@@ -1,11 +1,23 @@
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { EnrichQueueStatusCounts } from "@bondery/schemas";
-import { clientApiFetch, clientApiJson } from "@/lib/api/client";
+import type {
+  EnrichQueueInitBody,
+  EnrichQueueInitResponse,
+  EnrichQueueNextBatchItem,
+  EnrichQueueNextBatchResponse,
+  EnrichQueuePatchBody,
+  EnrichQueueStatusCounts,
+} from "@bondery/schemas";
+import { clientApiJson } from "@/lib/api/client";
 import {
+  buildEnrichQueueInitPath,
+  buildEnrichQueueItemPath,
+  buildEnrichQueueNextBatchPath,
+  buildEnrichQueuePath,
   ENRICH_QUEUE_COUNT_PATH,
   ENRICH_QUEUE_STATUS_PATH,
   type EnrichQueueStatus,
   parseEnrichQueueCount,
+  parseEnrichQueueInit,
+  parseEnrichQueueNextBatch,
   parseEnrichQueueStatus,
 } from "@/lib/api/resources/enrichQueue";
 
@@ -22,7 +34,34 @@ export async function getEnrichQueueStatus(): Promise<EnrichQueueStatus | null> 
 }
 
 export async function discardEnrichQueue(): Promise<void> {
-  await clientApiFetch(`${API_ROUTES.CONTACTS}/enrich-queue`, {
+  await clientApiJson(buildEnrichQueuePath(), {
     method: "DELETE",
+  });
+}
+
+export async function initEnrichQueue(
+  body?: EnrichQueueInitBody,
+): Promise<EnrichQueueInitResponse> {
+  const raw = await clientApiJson<EnrichQueueInitResponse>(buildEnrichQueueInitPath(), {
+    body: JSON.stringify(body ?? {}),
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+  });
+  return parseEnrichQueueInit(raw);
+}
+
+export async function fetchNextEnrichBatch(): Promise<EnrichQueueNextBatchItem[]> {
+  const raw = await clientApiJson<EnrichQueueNextBatchResponse>(buildEnrichQueueNextBatchPath());
+  return parseEnrichQueueNextBatch(raw);
+}
+
+export async function patchEnrichQueueItem(
+  queueItemId: string,
+  body: EnrichQueuePatchBody,
+): Promise<void> {
+  await clientApiJson(buildEnrichQueueItemPath(queueItemId), {
+    body: JSON.stringify(body),
+    headers: { "Content-Type": "application/json" },
+    method: "PATCH",
   });
 }

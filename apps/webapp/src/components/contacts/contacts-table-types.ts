@@ -86,6 +86,7 @@ export interface ContactsTableV2Props {
   renderLocationCell?: (contact: Contact) => ReactNode;
   searchDefaultValue?: string;
   searchLoading?: boolean;
+  /** Defaults to ContactsTable.SearchPlaceholder when omitted. */
   searchPlaceholder?: string;
   searchValue?: string;
   selectedIds?: Set<string>;

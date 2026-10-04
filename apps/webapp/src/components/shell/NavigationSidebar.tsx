@@ -34,7 +34,11 @@ import {
 } from "@/lib/navigation/appNavLinks";
 import { HOTKEYS } from "@/lib/platform/config";
 import { spotlight } from "./CommandPalette";
-import { NavLinkItem } from "./NavLinkItem";
+import {
+  NAV_LINK_ITEM_BORDER_RADIUS,
+  NavLinkItem,
+  SIDEBAR_NAV_STACK_CLASSNAME,
+} from "./NavLinkItem";
 import { SidebarChatPanel } from "./SidebarChatPanel";
 
 const navIcons: Record<AppNavLabelKey, Icon> = {
@@ -115,6 +119,7 @@ export function NavigationSidebarContent({
   const isMyselfActive = pathname === WEBAPP_ROUTES.MYSELF;
   const [chatModePending, setChatModePending] = useState(false);
   const isChat = isChatRoute(pathname) || chatModePending;
+  const sidebarScrollsWithChatList = !isMobileOverlay && !collapsed && isChat;
   const { hovered: userCardHovered, ref: userCardRef } = useHover<HTMLDivElement>();
 
   useEffect(() => {
@@ -147,7 +152,9 @@ export function NavigationSidebarContent({
       style={{
         display: "flex",
         flexDirection: "column",
-        height: "100%",
+        // Browse/collapsed: fixed column height so `mt="auto"` footer pinning and nav `Stack` gap stay correct.
+        // Expanded chat: grow with sessions; navbar scrolls (no nested ScrollArea — avoids hover scale clip).
+        ...(sidebarScrollsWithChatList ? { minHeight: "100%" } : { height: "100%" }),
         ...(isMobileOverlay ? { paddingBottom: "env(safe-area-inset-bottom, 0px)" } : {}),
       }}
     >
@@ -232,7 +239,7 @@ export function NavigationSidebarContent({
       )}
 
       {isMobileOverlay ? (
-        <Stack gap="xs">
+        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
           <NavLinkItem
             active={isChatRoute(pathname)}
             collapsed={collapsed}
@@ -253,7 +260,7 @@ export function NavigationSidebarContent({
           ))}
         </Stack>
       ) : collapsed ? (
-        <Stack gap="xs">
+        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
           <NavLinkItem
             active={isChat}
             collapsed={collapsed}
@@ -282,7 +289,7 @@ export function NavigationSidebarContent({
       ) : isChat ? (
         <SidebarChatPanel />
       ) : (
-        <Stack gap="xs">
+        <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
           {primaryLinks.map((link) => (
             <NavLinkItem
               active={pathname === link.href}
@@ -298,7 +305,7 @@ export function NavigationSidebarContent({
       )}
 
       {/* Secondary navigation links */}
-      <Stack gap="xs" mb="xs" mt="auto" style={{ flexShrink: 0 }}>
+      <Stack className={SIDEBAR_NAV_STACK_CLASSNAME} mb="xs" mt="auto" style={{ flexShrink: 0 }}>
         {secondaryLinks.map((link) => (
           <NavLinkItem
             active={pathname === link.href}
@@ -341,7 +348,7 @@ export function NavigationSidebarContent({
                 : userCardHovered
                   ? "var(--mantine-primary-color-light-hover)"
                   : "transparent",
-              borderRadius: "var(--mantine-radius-sm)",
+              borderRadius: NAV_LINK_ITEM_BORDER_RADIUS,
               color: isMyselfActive ? "white" : "inherit",
               paddingBottom: "var(--mantine-spacing-xs)",
               paddingLeft: "var(--sidebar-icon-pl)",
