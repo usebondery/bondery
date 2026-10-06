@@ -39,7 +39,7 @@ This skill covers Prisma Next's build-tool plugins — the dev-server / build-sy
 pnpm add -D @prisma-next/vite-plugin-contract-emit
 ```
 
-(Or `pnpm install --save-dev`, `yarn add -D`, `bun add -d` — use what the project's package manager is.)
+(Or `npm install --save-dev`, `yarn add -D`, `bun add -d` — use what the project's package manager is.)
 
 ### 2. Wire `vite.config.ts`
 

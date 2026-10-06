@@ -26,7 +26,7 @@
 6. **Secrets via env manifest** — no credentials in code or templates.
 7. **No PII in logs** — log send failures without full email bodies or contact fields.
 8. **Idempotent automated sends** — webhooks and jobs must not double-send.
-9. **Fail fast in dev/prod** — missing or invalid SMTP fails boot (`initEmailTransport`). In `NODE_ENV=test`, automated paths no-op when unconfigured (warn log, do not crash webhooks).
+9. **Fail fast in dev/prod** — missing or invalid SMTP fails boot (`initEmailTransport`). Development also refuses a non-loopback SMTP host (use Mailpit). In `NODE_ENV=test`, automated paths no-op when unconfigured (warn log, do not crash webhooks).
 10. **Update [catalog.md](references/catalog.md)** when adding or changing an email.
 11. **Inbox preview required** — every template passes `preview` into `EmailWrapper` (React Email [`<Preview>`](https://react.email/docs/components/preview)). Complements the subject; **≤90 characters** (`clipEmailPreview` / `EMAIL_PREVIEW_MAX_CHARS`).
 12. **HTML + plaintext** — send `multipart/alternative` via `renderEmailParts` (`render` then [`toPlainText`](https://react.email/docs/utilities/render#4-convert-to-plain-text)). Use `data-skip-in-text="true"` only on decorative HTML you want omitted from plaintext (not the header logo).
@@ -56,6 +56,7 @@
 |--------|-------|
 | Stripe trial webhook + `trial_ending_email_sent_at` | [bondery-payments](../bondery-payments/SKILL.md) |
 | Voice, sentence case | [bondery-ux](../bondery-ux/SKILL.md) |
+| Sentence craft for body copy | [bondery-writing](../bondery-writing/SKILL.md) Orwell-Hemingway |
 | PII, rate limits, trigger auth | [bondery-security](../bondery-security/SKILL.md) |
 | Plunk subprocessor, marketing vs transactional email | [bondery-legal](../bondery-legal/SKILL.md) → [emails.md](../bondery-legal/references/emails.md) |
 | User-visible release notes | [bondery-changelog](../bondery-changelog/SKILL.md) |
@@ -82,7 +83,7 @@
 
 ### Copy and UX
 
-- [ ] Voice matches [bondery-ux](../bondery-ux/SKILL.md) (sentence case, second person, active)
+- [ ] Voice matches [bondery-ux](../bondery-ux/SKILL.md) (sentence case, second person, active); sentence craft is Orwell-Hemingway in [bondery-writing](../bondery-writing/SKILL.md)
 - [ ] No greeting (“Hi there,”) — start with the heading
 - [ ] Heading must not duplicate the CTA label
 - [ ] Subject specific, ~60 chars, no spam triggers

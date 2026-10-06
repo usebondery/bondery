@@ -14,5 +14,5 @@
  */
 
 export { fetchFullEducation } from "./fetchDetails/educationFetch";
-export { fetchProfileLocation } from "./fetchDetails/profileLocation";
+export { fetchProfileLocation, fetchVoyagerProfileMeta } from "./fetchDetails/profileLocation";
 export { fetchFullWorkHistory } from "./fetchDetails/workHistoryFetch";

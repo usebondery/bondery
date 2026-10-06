@@ -30,6 +30,10 @@ Users lose context when:
 
 ---
 
+## Do not mix with `next_action`
+
+`redirect` is **login return** only. A pending UI action on a product page uses `next_action` (`packages/helpers/src/globals/webapp-query.ts`). Names and values: [url-query-params.md](../../bondery-api/references/url-query-params.md).
+
 ## Single mechanism: `redirect` query param
 
 | Trigger | Destination |
@@ -115,7 +119,7 @@ Details: [onboarding.md](./onboarding.md).
 
 | Do | Don’t |
 |----|-------|
-| `redirect` only for login | `returnUrl` alias |
+| `redirect` only for login | `returnUrl` alias, or `next_action` for login return |
 | Validate every consume path | Trust raw URLs |
 | Stay on URL during hop blips | Hard-nav to `/app/unavailable` on 503 |
 | Skip onboarding once for deep links | Skip onboarding for `/app` home |

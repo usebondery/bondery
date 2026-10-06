@@ -3,6 +3,9 @@
     "supabase": {
       "enabled": true
     },
+    "prisma": {
+      "enabled": true
+    },
     "stripe": {
       "enabled": true
     }

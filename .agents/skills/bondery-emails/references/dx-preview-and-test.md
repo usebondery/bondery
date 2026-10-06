@@ -45,7 +45,22 @@ API tests stub email env in `apps/api/src/test/load-test-env.ts` with dummy `BON
 
 ## Dev SMTP
 
-Production uses Plunk SMTP. For local send testing, use a local catcher (Mailpit, Inbucket) with matching env vars — never send intentional hard bounces to fake addresses (damages sender reputation).
+Production uses Plunk SMTP. Local development **must** use Mailpit — never a live ESP (ProtonMail, Plunk) from the laptop.
+
+```bash
+pnpm run start:mailpit
+```
+
+| Surface | Address |
+|---------|---------|
+| SMTP | `127.0.0.1:26640` (`DEV_PORTS.MAILPIT_SMTP`) |
+| UI + HTTP API | `http://127.0.0.1:26641` (`DEV_PORTS.MAILPIT_UI`) |
+
+Set `BONDERY_PRIVATE_EMAIL_HOST=127.0.0.1` and `BONDERY_PRIVATE_EMAIL_PORT=26640`. The development API refuses to boot if the host is not loopback.
+
+**Infisical:** set **development** `BONDERY_PRIVATE_EMAIL_*` to Mailpit so `pnpm run env:pull` does not restore ProtonMail. Staging and production stay on Plunk.
+
+Never send intentional hard bounces to fake addresses on a real ESP (damages sender reputation). Playwright reads magic-link mail through Mailpit HTTP (`GET /api/v1/search`), not the Mailpit UI.
 
 ## Verification loop
 

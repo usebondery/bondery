@@ -283,6 +283,11 @@ export function resolveExampleValue(entry: EnvVarDef, profile: ExampleProfile): 
       value = "https://api.usebondery.com";
     } else if (entry.canonical === "BONDERY_PUBLIC_BILLING_UPGRADES_ENABLED") {
       value = "false";
+    } else if (
+      entry.canonical === "BONDERY_PRIVATE_EMAIL_HOST" ||
+      entry.canonical === "BONDERY_PRIVATE_EMAIL_PORT"
+    ) {
+      value = entry.deployExample?.value ?? value;
     }
   }
   return value;
@@ -905,7 +910,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     canonical: "BONDERY_PRIVATE_EMAIL_HOST",
     deployExample: { group: "Email", include: true, value: "smtp.example.com" },
     description: "SMTP host",
-    exampleValue: "smtp.example.com",
+    exampleValue: "127.0.0.1",
     group: "Email",
     requiredIn: ["development", "production"],
     secret: false,
@@ -916,7 +921,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     canonical: "BONDERY_PRIVATE_EMAIL_PORT",
     deployExample: { group: "Email", include: true, value: "587" },
     description: "SMTP port",
-    exampleValue: "587",
+    exampleValue: "26640",
     group: "Email",
     requiredIn: ["development", "production"],
     secret: false,

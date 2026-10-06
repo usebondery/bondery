@@ -32,3 +32,9 @@ export {
   WEBSITE_ROUTES,
 } from "#globals/paths.js";
 export { SOCIAL_PLATFORM_URL_DETAILS } from "#globals/social-platform-urls.js";
+export type { NextAction } from "#globals/webapp-query.js";
+export {
+  NEXT_ACTION_PARAM,
+  NEXT_ACTIONS,
+  personPathWithNextAction,
+} from "#globals/webapp-query.js";

@@ -3,7 +3,7 @@ title: "Local development setup"
 icon: Terminal
 ---
 
-This guide walks you through setting up the full Bondery development environment. Follow the dependency chain: **Postgres → Redis → (optional) SeaweedFS → API → apps**.
+This guide walks you through setting up the full Bondery development environment. Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**.
 
 **Environment variables:** edit root `.env.local` once, then sync — see [Environment configuration](environment.mdx).
 
@@ -13,6 +13,7 @@ pnpm run setup:dev
 # edit .env.local (OAuth / optional integrations)
 pnpm run start:postgres
 pnpm run start:redis
+pnpm run start:mailpit
 pnpm run start:seaweedfs   # required for avatar / logo uploads
 pnpm run env
 pnpm run dev:webapp-api    # API :26631 + webapp :26632
@@ -27,7 +28,7 @@ On first API start in development, `runDevelopmentBootstrap()` runs the same pip
 | [Node.js](https://nodejs.org/) | 26 | Declared in root `package.json` `devEngines.runtime` (pnpm downloads on install); `.nvmrc` is optional for `nvm use` / `fnm use` |
 | [pnpm](https://pnpm.io/installation) | ≥ 12.4.0 | Declared in root `package.json` `packageManager` / `engines.pnpm`. Install it yourself — the lockfile does not download pnpm (`pmOnFail: ignore`). |
 | [npm](https://www.npmjs.com/) | ≥ 11 | Bundled with Node.js |
-| [Docker](https://www.docker.com/) | latest | Local Postgres, Redis, and SeaweedFS |
+| [Docker](https://www.docker.com/) | latest | Local Postgres, Redis, Mailpit, and SeaweedFS |
 
 For mobile development you also need Expo tooling (installed via root `pnpm install`) and a native toolchain: **iOS** — Xcode + Simulator or a physical device; **Android** — Android Studio + emulator or USB debugging.
 
@@ -168,6 +169,37 @@ BONDERY_PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
 ```
 
 `BONDERY_PRIVATE_REDIS_URL` is **required** in development and production. See [Installation](../deploy/installation.mdx).
+
+#### Mailpit (local SMTP)
+
+The API verifies SMTP at boot. Local development must send through **Mailpit** on loopback — not ProtonMail or Plunk. Production and Dokploy stay on Plunk.
+
+| Mode | Host / port | When to use |
+|------|-------------|-------------|
+| **Local Docker (required)** | `127.0.0.1:26640` | Normal local API work |
+
+From the repo root (Docker must be running):
+
+```bash
+pnpm run start:mailpit
+```
+
+Stop with `pnpm run stop:mailpit`. UI and HTTP API: [http://127.0.0.1:26641](http://127.0.0.1:26641).
+
+Wire the API in root `.env.local` (then `pnpm run env`):
+
+```text
+BONDERY_PRIVATE_EMAIL_HOST=127.0.0.1
+BONDERY_PRIVATE_EMAIL_PORT=26640
+BONDERY_PRIVATE_EMAIL_USER=mailpit
+BONDERY_PRIVATE_EMAIL_PASS=mailpit
+```
+
+If SMTP host is not loopback (`127.0.0.1` / `localhost`), the development API **refuses to boot**. Start Mailpit first.
+
+<Callout type="warn">
+**Infisical `env:pull`:** set the **development** Infisical `BONDERY_PRIVATE_EMAIL_*` values to Mailpit (`127.0.0.1:26640`, any user/pass). Staging and production stay on Plunk. If development Infisical still has ProtonMail, the next `pnpm run env:pull` restores that host and API boot fails on purpose.
+</Callout>
 
 #### API keys (long-lived integration tokens)
 
@@ -359,6 +391,7 @@ From the repo root:
 # 1. Infrastructure
 pnpm run start:postgres
 pnpm run start:redis
+pnpm run start:mailpit
 pnpm run start:seaweedfs
 
 # 2. App dev
@@ -422,6 +455,8 @@ Port registry: [architecture.mdx](architecture.mdx#apps).
 |---|---|---|---|
 | Postgres | [`deploy/bondery/docker-compose.dev-db.yml`](../../deploy/bondery/docker-compose.dev-db.yml) | 54322 | `pnpm run start:postgres` |
 | Redis | [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) | 26636 | `pnpm run start:redis` |
+| Mailpit SMTP | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | 26640 | `pnpm run start:mailpit` |
+| Mailpit UI | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | 26641 | `pnpm run start:mailpit` |
 | SeaweedFS | [`deploy/bondery/docker-compose.seaweedfs.yml`](../../deploy/bondery/docker-compose.seaweedfs.yml) | 8333 | `pnpm run start:seaweedfs` |
 | `api` | [`apps/api`](../../apps/api) | 26631 | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
 | `webapp` | [`apps/webapp`](../../apps/webapp) | 26632 | `pnpm run dev:webapp` or `pnpm run dev:webapp-api` |

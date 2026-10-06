@@ -151,3 +151,8 @@ export function parseDateRange(text: string): { startDate?: string; endDate?: st
 }
 
 export { extractSduiWorkHistory as extractWorkExperience } from "./sduiProfile";
+
+/** Drops Voyager-only fields (e.g. `companyUrn`) before POST to Fastify. */
+export function toApiWorkHistory(entries: WorkEntry[]): Omit<WorkEntry, "companyUrn">[] {
+  return entries.map(({ companyUrn: _companyUrn, ...rest }) => rest);
+}

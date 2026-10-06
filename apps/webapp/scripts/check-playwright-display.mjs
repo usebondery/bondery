@@ -31,7 +31,7 @@ Manual GitHub login requires a visible browser. On WSL, use one of:
      - Node must be installed on Windows, not only inside WSL.
 
 Unauthenticated e2e (no browser UI) works headless:
-  E2E_REUSE_SERVER=1 pnpm run test:e2e -w webapp -- --project=unauth
+  pnpm run test:e2e -w webapp -- --project=unauth
 `);
   process.exit(1);
 }

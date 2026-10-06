@@ -31,7 +31,7 @@ export function StepWelcome({ onNext }: StepProps) {
         <Text c="dimmed" size="sm" ta="center">
           {t("Subtitle")}
         </Text>
-        <Button onClick={onNext} size="md">
+        <Button data-testid="onboarding-lets-go" onClick={onNext} size="md">
           {t("LetsGo")}
         </Button>
       </Stack>

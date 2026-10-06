@@ -53,6 +53,12 @@ function setConfiguredEmailEnv(): void {
   process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO = baseConfig.replyToAddress;
 }
 
+function setLoopbackEmailEnv(): void {
+  setConfiguredEmailEnv();
+  process.env.BONDERY_PRIVATE_EMAIL_HOST = "127.0.0.1";
+  process.env.BONDERY_PRIVATE_EMAIL_PORT = "26640";
+}
+
 function clearEmailEnv(): void {
   delete process.env.BONDERY_PRIVATE_EMAIL_HOST;
   delete process.env.BONDERY_PRIVATE_EMAIL_USER;
@@ -95,7 +101,39 @@ describe("emailTransportOptions", () => {
 
     assert.equal(options.secure, false);
     assert.equal(options.requireTLS, true);
+    assert.equal(options.ignoreTLS, false);
     assert.equal(options.tls.rejectUnauthorized, true);
+  });
+
+  it("disables TLS for loopback host in non-production", () => {
+    const options = emailTransportOptions({
+      ...baseConfig,
+      host: "127.0.0.1",
+      port: 26640,
+    });
+
+    assert.equal(options.secure, false);
+    assert.equal(options.requireTLS, false);
+    assert.equal(options.ignoreTLS, true);
+    assert.equal(options.port, 26640);
+  });
+
+  it("keeps STARTTLS for loopback host in production", () => {
+    const snapshot = snapshotEmailEnv();
+    process.env.NODE_ENV = "production";
+    try {
+      const options = emailTransportOptions({
+        ...baseConfig,
+        host: "127.0.0.1",
+        port: 587,
+      });
+
+      assert.equal(options.secure, false);
+      assert.equal(options.requireTLS, true);
+      assert.equal(options.ignoreTLS, false);
+    } finally {
+      restoreEmailEnv(snapshot);
+    }
   });
 
   it("enables connection pooling with Plunk-safe defaults", () => {
@@ -200,7 +238,7 @@ describe("email transport readiness", () => {
 
   it("verifyEmailTransport reuses recent boot verification for readiness probes", async () => {
     process.env.NODE_ENV = "development";
-    setConfiguredEmailEnv();
+    setLoopbackEmailEnv();
     resetEmailTransporterForTests();
 
     let verifyCalls = 0;
@@ -218,7 +256,7 @@ describe("email transport readiness", () => {
 
   it("initEmailTransport throws when verify fails outside test", async () => {
     process.env.NODE_ENV = "development";
-    setConfiguredEmailEnv();
+    setLoopbackEmailEnv();
     resetEmailTransporterForTests();
 
     const current = getEmailTransporter();
@@ -227,6 +265,28 @@ describe("email transport readiness", () => {
     };
 
     await assert.rejects(() => initEmailTransport(), /SMTP verify failed/);
+  });
+
+  it("initEmailTransport throws in development when SMTP host is not loopback", async () => {
+    process.env.NODE_ENV = "development";
+    setConfiguredEmailEnv();
+    resetEmailTransporterForTests();
+
+    await assert.rejects(() => initEmailTransport(), /pnpm run start:mailpit/);
+  });
+
+  it("initEmailTransport does not require loopback in production", async () => {
+    process.env.NODE_ENV = "production";
+    setConfiguredEmailEnv();
+    resetEmailTransporterForTests();
+
+    const current = getEmailTransporter();
+    current.verify = async () => undefined;
+
+    const readiness = await initEmailTransport();
+
+    assert.equal(readiness.configured, true);
+    assert.equal(readiness.ok, true);
   });
 });
 

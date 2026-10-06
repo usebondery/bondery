@@ -24,7 +24,7 @@ Built from Instagram + LinkedIn URL patterns plus `loopbackHostPermissionPattern
 
 ## Content-script matches
 
-`entrypoints/webapp.content/index.tsx` always includes `https://app.usebondery.com/*` and `http://localhost/*`. Staging/local builds may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin. **`BONDERY_EXTENSION_FLAVOR=production` never adds extra hosts**, so CWS cannot ship `app.beta` matches even if the URL is wrong.
+`entrypoints/webapp.content/index.tsx` always includes `https://app.usebondery.com/*`, `http://localhost/*`, and `http://127.0.0.1/*`. Staging/local builds may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin. **`BONDERY_EXTENSION_FLAVOR=production` never adds extra hosts**, so CWS cannot ship `app.beta` matches even if the URL is wrong.
 
 LinkedIn/Instagram matches are literal in those entrypoints.
 
@@ -53,6 +53,6 @@ Do not add other hosts to this list without a security review.
 - [ ] Production bake uses the extension PKCE client id, not the webapp BFF client id
 - [ ] Production CI bake has no localhost/127.0.0.1 API or webapp URL
 - [ ] `host_permissions` still match the origins the SW actually fetches
-- [ ] `webapp.content` matches: CWS production is prod + localhost; extra origin only when flavor is not production
+- [ ] `webapp.content` matches: CWS production is prod + localhost + 127.0.0.1; extra origin only when flavor is not production
 - [ ] New `permissions` / `host_permissions` called out as a CWS review event
 - [ ] Vite `define` still does not set `NODE_ENV`

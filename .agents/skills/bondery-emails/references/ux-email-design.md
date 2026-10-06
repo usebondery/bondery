@@ -1,6 +1,6 @@
 # UX email design
 
-Email-specific UX rules. For voice and tone, inherit from [bondery-ux](../../bondery-ux/SKILL.md) → `references/common/ux-writing.md`.
+Email-specific UX rules. For voice and tone, inherit from [bondery-ux](../../bondery-ux/SKILL.md) → `references/common/ux-writing.md`. Body-copy sentence craft is Orwell-Hemingway in [bondery-writing](../../bondery-writing/references/orwell-hemingway.md).
 
 ## Audiences
 

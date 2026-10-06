@@ -15,3 +15,4 @@ Bondery API contracts, transport, and mobile sync.
 | [versioning.md](./versioning.md) | No URL versioning, coordinated deploy, protocol headers |
 | [sync-architecture.md](./sync-architecture.md) | Mobile offline sync (pull, outbox, wake) |
 | [mcp-tools.md](./mcp-tools.md) | MCP tool verbs (`create`/`get`/`update`/`delete`/`search`), prompts, REST vs MCP |
+| [url-query-params.md](./url-query-params.md) | Query names: API `search`, webapp `next_action` / `redirect` |

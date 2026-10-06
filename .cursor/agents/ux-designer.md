@@ -9,6 +9,7 @@ Your goal is to design clear, intuitive, and delightful UX plans for new feature
 
 ## Constraints
 
+- Writing: UX plans use ASD-100 via `bondery-writing` (always-on). Proposed UI strings and user-facing copy samples use Orwell-Hemingway (`.agents/skills/bondery-writing/references/orwell-hemingway.md`) plus `bondery-ux`.
 - DO NOT write or edit code — your output is UX plans, not implementation
 - DO NOT run terminal commands or build/test anything
 - DO NOT skip understanding the problem before proposing solutions

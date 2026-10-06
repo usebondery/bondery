@@ -51,6 +51,7 @@ Do not duplicate content across skills — link and keep a single source of trut
 | Public roadmap, Plane ROADMAP project | `bondery-roadmap` |
 | Internal MAIN board, cycles, sanity checks | `bondery-pm` |
 | Release operator runbook (deploy, tags, pins, gates) | `bondery-release` |
+| English registers (Orwell-Hemingway vs ASD-100) | `bondery-writing` |
 | Skill authoring | `bondery-skill-authoring` |
 | Verification loop, PR gates, change-scoped checks | `bondery-verification-loop` |
 | Transactional email, templates, SMTP/Plunk | `bondery-emails` |
@@ -70,7 +71,7 @@ Not every skill belongs in both — only skills that apply broadly.
 
 | | First-party (`bondery-*`) | Upstream CLI |
 |--|---------------------------|--------------|
-| Edit in repo | Yes | No — reinstall via `pnx skills add` |
+| Edit in repo | Yes | No — reinstall via `pnx skills add`, or refresh with `npx skills update` |
 | Lock file | No | Yes — `skills-lock.json` |
 | Checklist in SKILL.md | Required | Optional (upstream may not have one) |
 
@@ -80,7 +81,13 @@ Install upstream skills:
 pnx skills add <owner>/<repo> --skill <skill-name>
 ```
 
-Commit the updated `skills-lock.json` and `.agents/skills/<name>/` together.
+Refresh every locked upstream skill (from repo root; does not overwrite first-party `bondery-*` skills):
+
+```bash
+npx skills update -y
+```
+
+Commit the updated `skills-lock.json` and `.agents/skills/<name>/` together. Do not hand-edit upstream skill content.
 
 ## Bondery conventions checklist
 
@@ -88,4 +95,4 @@ Commit the updated `skills-lock.json` and `.agents/skills/<name>/` together.
 - [ ] SKILL.md has When to use, Non-negotiables, Decision tree, Pre-ship checklist
 - [ ] No duplicated content — cross-link to owner skill instead
 - [ ] Agent configs updated if skill is broadly applicable
-- [ ] Upstream skills installed via CLI, not hand-copied
+- [ ] Upstream skills installed via CLI (`pnx skills add`) or refreshed with `npx skills update`, not hand-copied

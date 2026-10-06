@@ -13,6 +13,10 @@ export const DEV_PORTS = {
   API: 26631,
   EMAIL_PREVIEW: 26639,
   EXTENSION: 26633,
+  /** Local Mailpit SMTP (`deploy/bondery/docker-compose.dev-mail.yml`) */
+  MAILPIT_SMTP: 26640,
+  /** Local Mailpit UI and HTTP API */
+  MAILPIT_UI: 26641,
   MOBILE: 26634,
   /** Local dev Postgres (`deploy/bondery/docker-compose.dev-db.yml`) */
   POSTGRES: 54322,
@@ -33,6 +37,7 @@ export const DEV_URLS = {
   api: `http://localhost:${DEV_PORTS.API}`,
   emailPreview: `http://localhost:${DEV_PORTS.EMAIL_PREVIEW}`,
   extension: `http://localhost:${DEV_PORTS.EXTENSION}`,
+  mailpitUi: `http://localhost:${DEV_PORTS.MAILPIT_UI}`,
   mobile: `http://localhost:${DEV_PORTS.MOBILE}`,
   postgres: `postgresql://postgres:${encodeURIComponent(DEV_POSTGRES_PASSWORD)}@127.0.0.1:${DEV_PORTS.POSTGRES}/bondery`,
   redis: DEV_REDIS_URL,

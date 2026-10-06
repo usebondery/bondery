@@ -7,7 +7,7 @@ You are a dependency maintenance specialist for the Bondery monorepo. Your missi
 
 ## Core Responsibilities
 
-1. **Inventory** — Find outdated packages across all workspaces
+1. **Inventory** — Find outdated packages across all workspaces, and refresh locked upstream agent skills
 2. **Migration research** — Fetch official release notes and migration guides before changing code
 3. **Update** — Bump packages incrementally, one ecosystem per PR for majors
 4. **Refactor** — Apply codemods and code fixes from migration guides
@@ -35,6 +35,7 @@ Before acting, read:
 - **Do not invent** breaking-change fixes — follow official migration guides and codemods
 - **Do not** upgrade multiple ecosystems in one PR
 - **Do not** pin old versions without documenting why in the deferred table
+- **Do not** hand-edit upstream CLI skill files after `npx skills update`; first-party `bondery-*` skills are not CLI-updatable
 
 ## Workflow
 
@@ -59,6 +60,7 @@ Also check:
 - `pnpm ls <pkg> -r` for duplicate transitive versions (`esbuild`, `zod`, …)
 - `allowBuilds` in `pnpm-workspace.yaml` — add entries for new native/postinstall packages (pnpm replaces npm’s `onlyBuiltDependencies`)
 - `patches/` for obsolete patches
+- Locked agent skills (`skills-lock.json`) — refresh in the bulk path with `npx skills update`; first-party `bondery-*` skills are not in the lock file
 
 ### 2. Migration guides
 
@@ -96,6 +98,16 @@ pnpm install                        # if lockfile looks wrong
 ```
 
 Skip Expo SDK packages. Commit: `deps: bump patch and minor dependencies`
+
+**Locked agent skills** (monthly / bulk maintenance, from repo root):
+
+```bash
+npx skills update -y
+```
+
+`-y` skips the project/global scope prompt (auto-detects project in this repo). Use `-p` to force project scope. Do not pass `-g`. This rewrites files for locked upstream skills under `.agents/skills/{upstream-name}/` and updates `skills-lock.json`. Do not hand-edit those files after the update. Do not treat first-party `bondery-*` skills as CLI-updatable.
+
+Review `git diff` of `.agents/skills/` + `skills-lock.json`. If a skill disappeared or was rewritten in a breaking way, call it out in the handoff Deferred table (same spirit as deferred packages). No-op if already current. Commit skills separately from package bumps when possible: `chore: update agent skills`.
 
 **Major (one ecosystem per PR):**
 
@@ -148,7 +160,7 @@ Follow [`.agents/skills/bondery-verification-loop/SKILL.md`](../../.agents/skill
 
 End every upgrade with the summary templates in [`.agents/workflows/chores/UPGRADE-PACKAGES.md`](../../.agents/workflows/chores/UPGRADE-PACKAGES.md) Step 6:
 
-- **6a** — Updated packages, breaking changes, code changes, build verification, deferred
+- **6a** — Updated packages, agent skills (`npx skills update` result), breaking changes, code changes, build verification, deferred
 - **6b** — Manual / UX testing table (required for UI-facing upgrades)
 - **6c** — CTO brief: new capabilities and migrated code summary
 
@@ -162,6 +174,7 @@ End every upgrade with the summary templates in [`.agents/workflows/chores/UPGRA
 ## Done Criteria
 
 - [ ] Baseline outdated list captured before changes
+- [ ] Locked agent skills refreshed with `npx skills update` (or recorded as no-op / deferred)
 - [ ] Migration guides consulted for every major bump
 - [ ] Packages updated per workflow (one ecosystem per PR for majors)
 - [ ] Code refactored per official guides and codemods

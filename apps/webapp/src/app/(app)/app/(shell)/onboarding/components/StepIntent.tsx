@@ -43,6 +43,7 @@ export function StepIntent({ onNext }: StepProps) {
           <UnstyledButton
             aria-label={t(value)}
             className="button-scale-effect"
+            data-testid={`onboarding-intent-${value}`}
             key={value}
             onClick={() => handleSelect(value)}
             style={{

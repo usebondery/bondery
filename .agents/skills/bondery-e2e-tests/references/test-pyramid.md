@@ -35,7 +35,7 @@ Bondery follows a classic test pyramid. E2E is the smallest, slowest layer — r
 
 **Where:** `apps/webapp/e2e/*.spec.ts`
 
-**Examples:** Unauthenticated `/app` redirects to `/login`; OAuth callback with invalid state shows `?error=oauth`; session survives reload.
+**Examples:** Unauthenticated `/app` redirects to `/login`; OAuth callback with invalid state shows `?error=oauth`; in-app session via email `storageState` survives reload. GitHub is not required for in-app paths.
 
 ## Decision guide
 
@@ -43,7 +43,7 @@ Bondery follows a classic test pyramid. E2E is the smallest, slowest layer — r
 |----------|----------|
 | Can this be tested with a pure function input/output? | Unit test |
 | Does it need DB or HTTP but not a browser? | Integration test |
-| Does it need cookies, OAuth redirect, or multi-page navigation? | E2E test |
+| Does it need cookies, OAuth redirect, or multi-page navigation? | E2E test (in-app paths use email `storageState`; GitHub only for IdP login) |
 | Is it a regression in API response shape? | Integration + OpenAPI CI checks (`check:openapi`) |
 | Is it a UI loading state or empty state? | Component test or manual QA — not E2E unless critical path |
 
@@ -52,6 +52,7 @@ Bondery follows a classic test pyramid. E2E is the smallest, slowest layer — r
 - E2E test for every form field validation — use unit tests on Zod schemas
 - E2E test duplicating OpenAPI contract checks — use `check:openapi` and route tests
 - Multiple E2E specs for the same auth path — extend existing `login.*.spec.ts` projects
+- Requiring GitHub OAuth for every in-app E2E path — use `email-setup` + `.auth/email-user.json`
 - Testing implementation details (internal state, fetch call order) in E2E
 
 ## Pyramid checklist

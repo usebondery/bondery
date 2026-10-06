@@ -29,6 +29,8 @@ metadata:
 
 Do **not** activate for routine UI refactors, API contract work, or technical security enforcement — use `bondery-api`, `bondery-ux`, or `bondery-security` instead.
 
+Do **not** restyle Privacy, Terms, or policy claims with `bondery-writing`. Legal wording stays as published.
+
 ## Reconciliation workflow
 
 1. **Classify the change** — does it add/remove a vendor, add/remove a data category, or change retention/consent behavior? If none, skip this skill.
@@ -83,7 +85,7 @@ No `docs/legal/` folder. Legal copy is English-only React components on the webs
 
 Full index: [references/README.md](references/README.md).
 
-Cross-skill owners: technical enforcement → `bondery-security`; API contracts → `bondery-api`; UI/copy display → `bondery-ux`; product email chrome → `bondery-emails`.
+Cross-skill owners: technical enforcement → `bondery-security`; API contracts → `bondery-api`; UI/copy display → `bondery-ux`; product email chrome → `bondery-emails`; English registers → `bondery-writing` (do not restyle legal claims).
 
 ## Legal checklist (before merge)
 

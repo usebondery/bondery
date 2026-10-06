@@ -11,7 +11,8 @@ import { createCheck } from "../../../scripts/check/check-report.mjs";
 const check = createCheck("check-lib-imports");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const libRoot = join(__dirname, "..", "src", "lib");
+const srcRoot = join(__dirname, "..", "src");
+const libRoot = join(srcRoot, "lib");
 
 const FORBIDDEN_IMPORT = /from\s+["'](?:\.\.\/)*(?:routes|services)\//;
 
@@ -32,7 +33,7 @@ function walk(dir: string): string[] {
 const violations: string[] = [];
 
 for (const file of walk(libRoot)) {
-  const rel = relative(join(__dirname, "..", "src"), file).replace(/\\/g, "/");
+  const rel = relative(srcRoot, file).replace(/\\/g, "/");
   const content = readFileSync(file, "utf8");
   if (FORBIDDEN_IMPORT.test(content)) {
     violations.push(rel);

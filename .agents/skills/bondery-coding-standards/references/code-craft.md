@@ -35,6 +35,7 @@
 
 - Prefer code that explains what it does through types and names.
 - Add comments for the **why**: compatibility constraints, non-obvious invariants, security boundaries, or intentional deviations.
+- Write comments and JSDoc in ASD-100 ([`bondery-writing`](../../bondery-writing/references/asd-100.md)). This file still decides *when* a comment exists.
 - Add JSDoc to shared or public functions when callers need behavior, parameter, return, side-effect, or failure guarantees that types do not express.
 - Update the nearest README or architecture documentation when a public workflow, package contract, environment variable, or contributor procedure changes.
 - Do not leave commented-out code or TODOs without an owner and actionable context.

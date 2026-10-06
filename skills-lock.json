@@ -1,63 +1,58 @@
 {
+  "version": 1,
   "skills": {
-    "add-app-clip": {
-      "computedHash": "b70016deb6f8ea4d713ef93c18e65441ab656ed7dca200eef23561f1786564ab",
-      "skillPath": "plugins/expo/skills/add-app-clip/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
+    "better-auth-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/best-practices/SKILL.md",
+      "computedHash": "f35281e7a0c07b3fd3c4e96c7833dafb294a3a8662cb68a8544f4225008d6568"
     },
-    "building-native-ui": {
-      "computedHash": "1c46c05dfcd276872f9660f7795d15f7253f0f0be31c009953ba6ff8b40b3e2b",
-      "skillPath": "plugins/expo/skills/building-native-ui/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
+    "better-auth-security-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "security/SKILL.md",
+      "computedHash": "087c1094fa5f1834af4785c058dcc8c9abe4c1321b853883c76ea46c93a21cfe"
     },
     "connect-recommend": {
       "computedHash": "ddf136d2fdc3fb24d5b4b932ec60cb714e941ca8b624b5f3fe8888728e5b5563",
       "source": "docs.stripe.com",
       "sourceType": "well-known"
     },
+    "create-auth": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/create-auth/SKILL.md",
+      "computedHash": "d101953fda9452eb4e59d4eb50aa829c1961cdd7d0587d26a2b1871abe885e07"
+    },
     "eas-update-insights": {
-      "computedHash": "f20cd2dd96b9d8f33b3635f8c985b7159155e24658f93db878aa8c444ceda181",
-      "skillPath": "plugins/expo/skills/eas-update-insights/SKILL.md",
       "source": "expo/skills",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/eas-update-insights/SKILL.md",
+      "computedHash": "00a3ebec0de9e056488567277a7bc137a0d53ab23584503abfdc93aec541f4b3"
+    },
+    "email-and-password-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/emailAndPassword/SKILL.md",
+      "computedHash": "ac9f9b0a549390f157ec62f5421a0bc90ac622c7e425af13155953847e0b68ea"
     },
     "email-best-practices": {
-      "computedHash": "c7218333381fa335b8a912bd55b3bb58b5b567a174f9e1d8b41940ff82f1a6b6",
-      "skillPath": "skills/email-best-practices/SKILL.md",
       "source": "resend/resend-skills",
-      "sourceType": "github"
-    },
-    "expo-cicd-workflows": {
-      "computedHash": "03a75cb140374ee4e53a7371b00eb7a182aa41d3a16373b08892bb6059646b72",
-      "skillPath": "plugins/expo/skills/expo-cicd-workflows/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
-    },
-    "expo-deployment": {
-      "computedHash": "2b42dcd814392b443c6dc77a6eee7547f9d35d7b2fb0ea83abc25309406b6cc9",
-      "skillPath": "plugins/expo/skills/expo-deployment/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/email-best-practices/SKILL.md",
+      "computedHash": "cf53e0d7ad72c440818c64a104ab220f527f26f10c7d8163fa99e066bf747eed"
     },
     "expo-dev-client": {
-      "computedHash": "b186b8208e123a3404158f6d94061418a505f3c9ea565167dc80fce315841871",
-      "skillPath": "plugins/expo/skills/expo-dev-client/SKILL.md",
       "source": "expo/skills",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "plugins/expo/skills/expo-dev-client/SKILL.md",
+      "computedHash": "c9ae54e5a7e37a3bb02e98ccd63de02167f99c56f0e5131eb832f8d50e6420af"
     },
     "expo-module": {
-      "computedHash": "4b4bf1f2288f62bfbfee2e20b0bd9c8ad321537cb4c47def9c560ae84119562b",
+      "source": "expo/skills",
+      "sourceType": "github",
       "skillPath": "plugins/expo/skills/expo-module/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
-    },
-    "expo-tailwind-setup": {
-      "computedHash": "6a3faa984445c88c4a034f5443ed4c3be8091ca57a1c5ec345c995c7201fcfaa",
-      "skillPath": "plugins/expo/skills/expo-tailwind-setup/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
+      "computedHash": "5e57daebc1ac22109040ffe0ca6f7d0be6b3b2a34f407f7c21af965da1db6f3f"
     },
     "mantine-combobox": {
       "computedHash": "5d06e7b312beec572d5162a215e710518c6e39ef94e35b351dd29eac733e2450",
@@ -74,65 +69,65 @@
       "source": "mantinedev/skills",
       "sourceType": "github"
     },
-    "native-data-fetching": {
-      "computedHash": "d7e2f2e822b00d7546595cb7a2c0cbb8e7d7b6b8d3122a8451ad1632be946cbb",
-      "skillPath": "plugins/expo/skills/native-data-fetching/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
+    "organization-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/organization/SKILL.md",
+      "computedHash": "f03e41bc2995c4fceec98f3db85f9638d71cc391fb10f9d85460304d6642efc2"
     },
     "prisma-next": {
-      "computedHash": "0e12f86c73b9dad3e0de4326ac0f6ee804cb88bf9d515119268a79944adbf79f",
-      "skillPath": "skills/prisma-next/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next/SKILL.md",
+      "computedHash": "b52ac75c388fa0ab956e045d657871f2ee0556beda1529c0fb24c34b8abba431"
     },
     "prisma-next-build": {
-      "computedHash": "3a912b373a91de66e1b797a2b4f76278d6f8a33ef95e76a86c926950e4312430",
-      "skillPath": "skills/prisma-next-build/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-build/SKILL.md",
+      "computedHash": "ec2baef8672ab09f20fc7dd55441e3fbacba7ca3efdfedf948fb306029447f6f"
     },
     "prisma-next-contract": {
-      "computedHash": "645f919986f6b2524baea4247c9dc366b91cf67b9e4c405ca9605a9f28e6e314",
-      "skillPath": "skills/prisma-next-contract/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-contract/SKILL.md",
+      "computedHash": "79678026fe83749c3767c7427c70588eba1b79c05b0dc54719830715c85cff36"
     },
     "prisma-next-debug": {
-      "computedHash": "9a184efa9c69aa0066341ecf9440e61b61f9ce1289113c9b88302c1ef6769439",
-      "skillPath": "skills/prisma-next-debug/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-debug/SKILL.md",
+      "computedHash": "52ed9eeea88864e2c4afaee1e8ea1508d98ffa4da7ca7bcdf25bc0ed1b076e12"
     },
     "prisma-next-feedback": {
-      "computedHash": "959738888ba233c1e69cb5f0606cdae6058569dc7cfdccb70b08dbe039b0bcdd",
-      "skillPath": "skills/prisma-next-feedback/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-feedback/SKILL.md",
+      "computedHash": "8c0b3fd53fa3fb67cafb682b6b5b3de735e12c2ca6af6ad49c7380c8e181c66a"
     },
     "prisma-next-migration-review": {
-      "computedHash": "693a4c15f1a1fddd45aa78cc274245a8abb0638bab6ff807d54ba0fd04bf9794",
-      "skillPath": "skills/prisma-next-migration-review/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-migration-review/SKILL.md",
+      "computedHash": "fd5359a22e3e6ed12a671718cafe96ccc627b0aa59330fb95dc1f9149a577c2d"
     },
     "prisma-next-migrations": {
-      "computedHash": "8569cff34ec761f4f486fd5deebadc02bdb975124c57b6e8983852fe727c7b52",
-      "skillPath": "skills/prisma-next-migrations/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-migrations/SKILL.md",
+      "computedHash": "34b7a69e89c2e7e74ab0fe93121faa326e82da0bfb0f18752f437e5f75557adb"
     },
     "prisma-next-queries": {
-      "computedHash": "436503dd9f1adec9c3081d2831da5d2a590c4a17e83f0de352a0990e28507622",
-      "skillPath": "skills/prisma-next-queries/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-queries/SKILL.md",
+      "computedHash": "a7c10a00f06eb79dfde4f702ee47df94a57916f4e31cc12b57920a4311d85f61"
     },
     "prisma-next-quickstart": {
-      "computedHash": "504a872abea76ad93886fc47eaa9a6f96e258debb3a450aba865efd51165483f",
-      "skillPath": "skills/prisma-next-quickstart/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-quickstart/SKILL.md",
+      "computedHash": "da52052b2a19ec6b04ac4dd6e5d4240a8266fec0d1f889d117c7aa465c1a926c"
     },
     "prisma-next-runtime": {
       "computedHash": "7fc36488ca066cf592eaa07a564c184ebff534b4d3596d2c95c4ddb24f4119cd",
@@ -141,10 +136,10 @@
       "sourceType": "github"
     },
     "prisma-next-supabase": {
-      "computedHash": "b49cce07ee812680f4480f0d60639a68b8f5150497c58042e60399b8901c32eb",
-      "skillPath": "skills/prisma-next-supabase/SKILL.md",
       "source": "prisma/prisma-next",
-      "sourceType": "github"
+      "sourceType": "github",
+      "skillPath": "skills/prisma-next-supabase/SKILL.md",
+      "computedHash": "687f8ac5dcdac451b31f1de9a146e5fa185e3e06af6cfecf26da6b060357aa9f"
     },
     "stripe-best-practices": {
       "computedHash": "1ded21978231cf0d973dfd9191090b76cad0e70d4424b1f13b228b3b9dca9a7d",
@@ -166,23 +161,16 @@
       "source": "docs.stripe.com",
       "sourceType": "well-known"
     },
+    "two-factor-authentication-best-practices": {
+      "source": "better-auth/skills",
+      "sourceType": "github",
+      "skillPath": "better-auth/twoFactor/SKILL.md",
+      "computedHash": "ca66fbdc0281f43065a6c890a9982afba774565085e773863ce31280324d9425"
+    },
     "upgrade-stripe": {
       "computedHash": "46bb3c16878f93b953ed901b950686d64f04f90c67400bf31e1a0d7790d889df",
       "source": "docs.stripe.com",
       "sourceType": "well-known"
-    },
-    "upgrading-expo": {
-      "computedHash": "a1c3049b7e78f66d78dbe38e4f4900980bbeffb825e1118da8e09cc6c89eea29",
-      "skillPath": "plugins/expo/skills/upgrading-expo/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
-    },
-    "use-dom": {
-      "computedHash": "690cda638c59e45661095e6e9acb12141b0a7873bec1fc4a368ef51657d57336",
-      "skillPath": "plugins/expo/skills/use-dom/SKILL.md",
-      "source": "expo/skills",
-      "sourceType": "github"
     }
-  },
-  "version": 1
+  }
 }

@@ -46,8 +46,8 @@ Shared packages follow the [Turborepo compiled-package model](https://turborepo.
 - **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext.
 - **Exports:** `types` → `src/`, `default` → `dist/`; run `pnpm run sync-exports` after adding public subpaths.
 - **Internal imports:** `#*` hash paths with `.js` suffix (not `tsconfig` paths).
-- **Build:** `rimraf dist && tsc` (+ rewrite hash imports); **compile:** incremental `tsc` for dev cold start; **dev:** `tsc --watch` run alongside apps via Turbo `with`.
-- **Persistent app `#dev`:** orchestrate with `turbo run`, not `turbo watch`. Watch re-executes the task and kills `next dev` / `tsx watch` on any tracked write. Package incremental rebuilds come from `with` `tsc --watch`.
+- **Build:** `rimraf dist && tsc` (+ rewrite hash imports); **compile:** incremental `tsc` then rewrite `#` imports in `dist`; **dev:** `tsc --watch` plus rewrite after each emit (`scripts/pkg/tsc-watch-and-rewrite.mjs`). Next.js cannot resolve `#` specifiers in compiled files. pnpm `injectWorkspacePackages` copies packages into app `node_modules`; rewrite also copies `dist` into those copies. `syncInjectedDepsAfterScripts` covers `build` and `compile` only.
+- **Persistent app `#dev`:** orchestrate with `turbo run`, not `turbo watch`. Watch re-executes the task and kills `next dev` / `tsx watch` on any tracked write. Package incremental rebuilds come from `with` `tsc --watch` plus rewrite.
 - **Apps:** consume `dist/` via exports — no `transpilePackages`, no `packages/*/src` aliases (mobile Metro resolves workspace packages from `src/` separately).
 
 ## Mobile local-first data

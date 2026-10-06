@@ -9,9 +9,9 @@ import { findPersonIdBySocial } from "../../lib/contacts/socials.js";
 import { resolveExtensionDefaultGroup, resolvePrimarySocial } from "../../lib/extension/helpers.js";
 import { assignContactsToDefaultImportGroup } from "../../lib/import/default-groups.js";
 import {
-  toPostgresDate,
   updateContactPhoto,
   uploadAllLinkedInLogos,
+  upsertLinkedInHistory,
 } from "../../lib/import/linkedin-helpers.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
@@ -35,11 +35,6 @@ export type ExtensionUpsertInput = {
   linkedinBio?: string;
 };
 
-function parseOptionalDate(value: string | null | undefined): Date | null {
-  const normalized = toPostgresDate(value);
-  return normalized ? new Date(normalized) : null;
-}
-
 /** Fill headline/location/notes only when the stored field is empty. */
 export function extensionEmptyFieldPatch(
   existing: { headline: string | null; location: string | null; notes: string | null },
@@ -56,85 +51,6 @@ export function extensionEmptyFieldPatch(
     patch.notes = input.notes;
   }
   return patch;
-}
-
-async function upsertLinkedInHistory(
-  db: ReturnType<typeof domainDb>,
-  userId: string,
-  personId: string,
-  linkedinBio: string | undefined,
-  workHistory: ScrapedWorkHistoryEntry[] | undefined,
-  educationHistory: ScrapedEducationEntry[] | undefined,
-  log: DomainContext["log"],
-): Promise<void> {
-  if (
-    !(workHistory && workHistory.length > 0) &&
-    !(educationHistory && educationHistory.length > 0) &&
-    !linkedinBio
-  ) {
-    return;
-  }
-
-  const linkedinRow = await db.peopleLinkedin.upsert({
-    create: {
-      bio: linkedinBio ?? null,
-      personId,
-      userId,
-    },
-    update: {
-      ...(linkedinBio ? { bio: linkedinBio } : {}),
-      updatedAt: new Date(),
-    },
-    where: { personId },
-  });
-
-  if (workHistory && workHistory.length > 0) {
-    await db.peopleWorkHistory.deleteMany({
-      where: { peopleLinkedinId: linkedinRow.id, userId },
-    });
-
-    try {
-      await db.peopleWorkHistory.createMany({
-        data: workHistory.map((entry) => ({
-          companyLinkedinId: entry.companyLinkedinId ?? null,
-          companyName: entry.companyName,
-          description: entry.description ?? null,
-          employmentType: entry.employmentType ?? null,
-          endDate: parseOptionalDate(entry.endDate),
-          location: entry.location ?? null,
-          peopleLinkedinId: linkedinRow.id,
-          startDate: parseOptionalDate(entry.startDate),
-          title: entry.title ?? null,
-          userId,
-        })),
-      });
-    } catch (whError) {
-      log?.error({ err: whError }, "[extension] Failed to insert work history");
-    }
-  }
-
-  if (educationHistory && educationHistory.length > 0) {
-    await db.peopleEducationHistory.deleteMany({
-      where: { peopleLinkedinId: linkedinRow.id, userId },
-    });
-
-    try {
-      await db.peopleEducationHistory.createMany({
-        data: educationHistory.map((entry) => ({
-          degree: entry.degree ?? null,
-          description: entry.description ?? null,
-          endDate: parseOptionalDate(entry.endDate),
-          peopleLinkedinId: linkedinRow.id,
-          schoolLinkedinId: entry.schoolLinkedinId ?? null,
-          schoolName: entry.schoolName,
-          startDate: parseOptionalDate(entry.startDate),
-          userId,
-        })),
-      });
-    } catch (ehError) {
-      log?.error({ err: ehError }, "[extension] Failed to insert education");
-    }
-  }
 }
 
 export async function upsertContactFromExtension(ctx: DomainContext, input: ExtensionUpsertInput) {
@@ -227,7 +143,6 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
       linkedinBio,
       workHistory,
       educationHistory,
-      log,
     );
 
     const contact = await loadEnrichedContact(db, user.id, existingContact.id, undefined, log);
@@ -280,7 +195,6 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     linkedinBio,
     workHistory,
     educationHistory,
-    log,
   );
 
   const contact = await loadEnrichedContact(db, user.id, newContactId, undefined, log);

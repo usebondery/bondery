@@ -52,7 +52,7 @@ export function resolveFirstPartyConsentClientName(
   return options.unknownName;
 }
 
-/** DCR UUID or CIMD URL: prefer the registered name, then the metadata hostname. */
+/** Opaque client id or CIMD URL: prefer the registered name, then the metadata hostname. */
 export function resolveThirdPartyConsentClientDisplay(
   clientId: string,
   fetchedName: string | null,

@@ -2,13 +2,9 @@ import type { Prisma } from "@bondery/db";
 import { cleanPersonName } from "@bondery/helpers/name";
 import type { EnrichContactRequest } from "@bondery/schemas";
 import {
-  replaceEducationHistoryWithDb,
-  replaceWorkHistoryWithDb,
-} from "../../../lib/data/contact-rpc.js";
-import {
-  toPostgresDate,
   updateContactPhoto,
   uploadAllLinkedInLogos,
+  upsertLinkedInHistory,
 } from "../../../lib/import/linkedin-helpers.js";
 import { cachedGeocodeLinkedInLocation } from "../../../lib/integrations/mapy.js";
 import { type DomainContext, DomainError } from "../../_shared/context.js";
@@ -36,6 +32,7 @@ export async function enrichContact(
   log?.info(
     {
       educationCount: educationHistory?.length ?? 0,
+      hasBio: Boolean(linkedinBio),
       personId,
       userId: user.id,
       workHistoryCount: workHistory?.length ?? 0,
@@ -52,10 +49,26 @@ export async function enrichContact(
     throw new DomainError("Contact not found", 404, "contact_not_found");
   }
 
-  await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);
+  const hasWork = Boolean(workHistory && workHistory.length > 0);
+  const hasEducation = Boolean(educationHistory && educationHistory.length > 0);
+  if (!hasWork && !hasEducation && !linkedinBio) {
+    log?.warn({ personId }, "[enrich] No LinkedIn history in payload");
+  }
+
+  await upsertLinkedInHistory(db, user.id, personId, linkedinBio, workHistory, educationHistory);
+
+  try {
+    await uploadAllLinkedInLogos(user.id, workHistory, educationHistory);
+  } catch (err) {
+    log?.error({ err }, "[enrich] Logo upload failed, continuing");
+  }
 
   if (profileImageUrl) {
-    await updateContactPhoto(personId, user.id, profileImageUrl);
+    try {
+      await updateContactPhoto(personId, user.id, profileImageUrl);
+    } catch (err) {
+      log?.error({ err }, "[enrich] Photo update failed, continuing");
+    }
   }
 
   const fieldUpdates: Prisma.PeopleUpdateManyMutationInput = {};
@@ -114,57 +127,14 @@ export async function enrichContact(
     }
   }
 
-  const linkedinRow = await db.peopleLinkedin.upsert({
-    create: {
-      bio: linkedinBio ?? null,
+  log?.info(
+    {
+      educationCount: educationHistory?.length ?? 0,
+      hasBio: Boolean(linkedinBio),
       personId,
-      userId: user.id,
+      workHistoryCount: workHistory?.length ?? 0,
     },
-    update: {
-      bio: linkedinBio ?? null,
-      updatedAt: new Date(),
-    },
-    where: {
-      personId,
-    },
-  });
-
-  const peopleLinkedinId = linkedinRow.id;
-
-  if (workHistory && workHistory.length > 0) {
-    const rows = workHistory.map((entry) => ({
-      company_linkedin_id: entry.companyLinkedinId ?? null,
-      company_name: entry.companyName,
-      description: entry.description ?? null,
-      employment_type: entry.employmentType ?? null,
-      end_date: toPostgresDate(entry.endDate),
-      location: entry.location ?? null,
-      start_date: toPostgresDate(entry.startDate),
-      title: entry.title ?? null,
-    }));
-    try {
-      await replaceWorkHistoryWithDb(db, user.id, peopleLinkedinId, rows);
-    } catch (whError) {
-      log?.error({ whError }, "[enrich] Failed to replace work history");
-    }
-  }
-
-  if (educationHistory && educationHistory.length > 0) {
-    const rows = educationHistory.map((entry) => ({
-      degree: entry.degree ?? null,
-      description: entry.description ?? null,
-      end_date: toPostgresDate(entry.endDate),
-      school_linkedin_id: entry.schoolLinkedinId ?? null,
-      school_name: entry.schoolName,
-      start_date: toPostgresDate(entry.startDate),
-    }));
-    try {
-      await replaceEducationHistoryWithDb(db, user.id, peopleLinkedinId, rows);
-    } catch (ehError) {
-      log?.error({ ehError }, "[enrich] Failed to replace education history");
-    }
-  }
-
-  log?.info({ personId }, "[enrich] Enrichment complete");
+    "[enrich] Enrichment complete",
+  );
   return { success: true };
 }

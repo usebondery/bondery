@@ -1,9 +1,13 @@
 import { browser } from "wxt/browser";
+import { linkedInHandlesMatch } from "../../features/linkedin/handle";
+import { pollUntil } from "../../features/linkedin/pollUntil";
 import { scrapeLinkedInProfile } from "../../features/linkedin/scrape/scrapeProfile";
 import {
+  ensureProfileSectionsLoaded,
   extractProfileUrnFromComponentKey,
   getTopcard,
 } from "../../features/linkedin/scrape/sduiProfile";
+import { toApiWorkHistory } from "../../features/linkedin/scrape/workExperience";
 import { extractProfilePhotoUrl } from "../../features/linkedin/ui/LinkedInButton";
 import { extLog } from "../../lib/log";
 import { getLinkedInUsername } from "./username";
@@ -48,22 +52,8 @@ async function waitForEnrichContext(
 }
 
 /** Waits for SDUI topcard + Voyager URN — does not require action buttons (background tabs). */
-function waitForEnrichScrapeReady(timeoutMs = 15_000): Promise<void> {
-  return new Promise((resolve) => {
-    const start = Date.now();
-    const tick = () => {
-      if (getTopcard() && extractProfileUrnFromComponentKey()) {
-        resolve();
-        return;
-      }
-      if (Date.now() - start > timeoutMs) {
-        resolve();
-        return;
-      }
-      requestAnimationFrame(tick);
-    };
-    tick();
-  });
+async function waitForEnrichScrapeReady(timeoutMs = 15_000): Promise<void> {
+  await pollUntil(() => Boolean(getTopcard() && extractProfileUrnFromComponentKey()), timeoutMs);
 }
 
 /**
@@ -79,12 +69,6 @@ export async function runPendingEnrich(triggerRequestId?: string): Promise<void>
   let requestId: string | undefined;
 
   try {
-    const username = getLinkedInUsername();
-    if (!username) {
-      extLog.debug("[linkedin][enrich] not a profile URL, skipping", window.location.href);
-      return;
-    }
-
     const context = await waitForEnrichContext(triggerRequestId);
     if (!context) {
       const msg = "Enrich context not found (extension may have reloaded)";
@@ -107,20 +91,22 @@ export async function runPendingEnrich(triggerRequestId?: string): Promise<void>
     requestId = context.requestId;
     enrichInFlightRequestId = requestId;
 
-    // Verify this is the right profile — normalize both sides to decoded form
-    const normalizedHandle = (() => {
-      try {
-        return decodeURIComponent(linkedinHandle);
-      } catch {
-        return linkedinHandle;
-      }
-    })();
+    const username = getLinkedInUsername();
+    if (!username) {
+      const msg = `Not a LinkedIn profile URL: ${window.location.href}`;
+      extLog.warn("[linkedin][enrich]", msg);
+      await browser.runtime.sendMessage({
+        payload: { error: msg, requestId },
+        type: "ENRICH_ERROR",
+      });
+      return;
+    }
 
-    if (username.toLowerCase() !== normalizedHandle.toLowerCase()) {
-      extLog.warn("[linkedin][enrich] Handle mismatch:", username, "!=", normalizedHandle);
+    if (!linkedInHandlesMatch(username, linkedinHandle)) {
+      extLog.warn("[linkedin][enrich] Handle mismatch:", username, "!=", linkedinHandle);
       await browser.runtime.sendMessage({
         payload: {
-          error: `Profile mismatch: expected ${normalizedHandle}, got ${username}`,
+          error: `Profile mismatch: expected ${linkedinHandle}, got ${username}`,
           requestId,
         },
         type: "ENRICH_ERROR",
@@ -132,7 +118,12 @@ export async function runPendingEnrich(triggerRequestId?: string): Promise<void>
 
     await waitForEnrichScrapeReady();
 
-    const profile = await scrapeLinkedInProfile(username, { skipLazySectionScroll: true });
+    let profile = await scrapeLinkedInProfile(username);
+    if (profile.workHistory.length === 0 && profile.educationHistory.length === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      await ensureProfileSectionsLoaded(undefined, 8_000);
+      profile = await scrapeLinkedInProfile(username);
+    }
     const {
       firstName,
       middleName,
@@ -164,7 +155,7 @@ export async function runPendingEnrich(triggerRequestId?: string): Promise<void>
           middleName,
           platform: "linkedin" as const,
           profileImageUrl: profileImageUrl ?? extractProfilePhotoUrl() ?? undefined,
-          workHistory,
+          workHistory: toApiWorkHistory(workHistory),
         },
         requestId,
       },

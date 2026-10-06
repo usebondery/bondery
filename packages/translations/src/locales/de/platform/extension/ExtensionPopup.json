@@ -11,6 +11,7 @@
     "AddInteraction": "Interaktion mit dieser Person hinzufügen"
   },
   "Settings": {
+    "ApiServer": "API-Server",
     "SignOut": "Abmelden"
   },
   "UpdateRequired": {

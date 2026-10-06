@@ -37,7 +37,7 @@ export {
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
 } from "#geocode/index.js";
-export type { LegalEntity } from "#globals/index.js";
+export type { LegalEntity, NextAction } from "#globals/index.js";
 export {
   API_ROUTES,
   BETTER_AUTH_BASE_PATH,
@@ -58,8 +58,11 @@ export {
   LEGAL_ENTITY,
   METADATA_TITLE_DIVIDER,
   MIN_EXTENSION_VERSION,
+  NEXT_ACTION_PARAM,
+  NEXT_ACTIONS,
   PUBLIC_ROADMAP_PLANE_URL,
   PWA_APP_NAME,
+  personPathWithNextAction,
   publicOAuthDiscoveryPaths,
   ROADMAP_URL,
   SOCIAL_LINKS,

@@ -24,8 +24,12 @@ import { loadTestEnv } from "./load-test-env.js";
 loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
-const { MCP_OAUTH_SCOPES, resolveMcpResourceIdentifier, resolveMcpResourceIdentifiers } =
-  await import("../lib/auth/index.js");
+const {
+  CIMD_CLIENT_DISCOVERY_ID,
+  MCP_OAUTH_SCOPES,
+  resolveMcpResourceIdentifier,
+  resolveMcpResourceIdentifiers,
+} = await import("../lib/auth/index.js");
 const { provisionNewUser } = await import("../lib/auth/provision-new-user.js");
 const { upsertMcpResources } = await import("../lib/bootstrap/provision-oauth-clients.js");
 const { MCP_SERVER_INSTRUCTIONS } = await import("../routes/mcp/instructions.js");
@@ -35,6 +39,9 @@ const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/,
 const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 const MCP_RESOURCE = resolveMcpResourceIdentifier();
 const MCP_CLIENT_ID = "mcp-route-integration-client";
+const MCP_NON_CIMD_CLIENT_ID = "mcp-non-cimd-gate-client";
+const MCP_DISABLE_CLIENT_ID = "mcp-disable-gate-client";
+const MCP_CLIENT_IDS = [MCP_CLIENT_ID, MCP_NON_CIMD_CLIENT_ID, MCP_DISABLE_CLIENT_ID];
 const MCP_SCOPE = "openid profile email offline_access mcp:read mcp:write";
 const MCP_READ_SCOPE = "openid profile email offline_access mcp:read";
 
@@ -80,14 +87,18 @@ async function upsertClientResource(clientId: string, resourceId: string): Promi
   });
 }
 
-async function provisionMcpClient(): Promise<void> {
+async function upsertMcpPublicClient(
+  clientId: string,
+  clientDiscoveryId: string | null,
+): Promise<void> {
   await prisma.oauthClient.upsert({
     create: {
-      clientId: MCP_CLIENT_ID,
+      clientDiscoveryId,
+      clientId,
       clientSecret: null,
       grantTypes: ["authorization_code", "refresh_token"],
       id: generateId(),
-      name: "MCP route test client",
+      name: `MCP test client ${clientId}`,
       public: true,
       redirectUris: [REDIRECT_URI],
       requirePKCE: true,
@@ -98,17 +109,22 @@ async function provisionMcpClient(): Promise<void> {
       type: "user-agent-based",
     },
     update: {
+      clientDiscoveryId,
       disabled: false,
       redirectUris: [REDIRECT_URI],
       scopes: [...MCP_OAUTH_SCOPES],
       skipConsent: true,
     },
-    where: { clientId: MCP_CLIENT_ID },
+    where: { clientId },
   });
   const identifiers = resolveMcpResourceIdentifiers();
   for (const resourceId of identifiers) {
-    await upsertClientResource(MCP_CLIENT_ID, resourceId);
+    await upsertClientResource(clientId, resourceId);
   }
+}
+
+async function provisionMcpClient(): Promise<void> {
+  await upsertMcpPublicClient(MCP_CLIENT_ID, CIMD_CLIENT_DISCOVERY_ID);
 }
 
 function extractCode(location: string): string {
@@ -121,6 +137,7 @@ async function mintMcpToken(
   app: FastifyInstance,
   sessionToken: string,
   scope = MCP_SCOPE,
+  clientId = MCP_CLIENT_ID,
 ): Promise<string> {
   const { challenge, verifier } = generatePkcePair();
   const authorize = await app.inject({
@@ -129,7 +146,7 @@ async function mintMcpToken(
     url: (() => {
       const url = new URL("http://test/auth/oauth2/authorize");
       url.searchParams.set("response_type", "code");
-      url.searchParams.set("client_id", MCP_CLIENT_ID);
+      url.searchParams.set("client_id", clientId);
       url.searchParams.set("redirect_uri", REDIRECT_URI);
       url.searchParams.set("code_challenge", challenge);
       url.searchParams.set("code_challenge_method", "S256");
@@ -144,7 +161,7 @@ async function mintMcpToken(
     headers: { "content-type": "application/x-www-form-urlencoded" },
     method: "POST",
     payload: new URLSearchParams({
-      client_id: MCP_CLIENT_ID,
+      client_id: clientId,
       code: extractCode(authorize.headers.location as string),
       code_verifier: verifier,
       grant_type: "authorization_code",
@@ -256,10 +273,11 @@ describe("MCP HTTP endpoint", () => {
 
   after(async () => {
     await app.close();
-    await prisma.oauthAccessToken.deleteMany({ where: { clientId: MCP_CLIENT_ID } });
-    await prisma.oauthRefreshToken.deleteMany({ where: { clientId: MCP_CLIENT_ID } });
-    await prisma.oauthClientResource.deleteMany({ where: { clientId: MCP_CLIENT_ID } });
-    await prisma.oauthClient.deleteMany({ where: { clientId: MCP_CLIENT_ID } });
+    await prisma.oauthAccessToken.deleteMany({ where: { clientId: { in: MCP_CLIENT_IDS } } });
+    await prisma.oauthRefreshToken.deleteMany({ where: { clientId: { in: MCP_CLIENT_IDS } } });
+    await prisma.oauthConsent.deleteMany({ where: { clientId: { in: MCP_CLIENT_IDS } } });
+    await prisma.oauthClientResource.deleteMany({ where: { clientId: { in: MCP_CLIENT_IDS } } });
+    await prisma.oauthClient.deleteMany({ where: { clientId: { in: MCP_CLIENT_IDS } } });
     if (createdUserIds.length > 0) {
       await prisma.oauthAccessToken.deleteMany({ where: { userId: { in: createdUserIds } } });
       await prisma.oauthRefreshToken.deleteMany({ where: { userId: { in: createdUserIds } } });
@@ -408,6 +426,48 @@ describe("MCP HTTP endpoint", () => {
       "record_interaction",
       "save_new_contact",
     ]);
+  });
+
+  it("rejects MCP JWTs from non-CIMD or disabled clients", async () => {
+    await upsertMcpPublicClient(MCP_NON_CIMD_CLIENT_ID, null);
+    await upsertMcpPublicClient(MCP_DISABLE_CLIENT_ID, CIMD_CLIENT_DISCOVERY_ID);
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    const sessionToken = await createNativeSession(user.id);
+
+    const nonCimdToken = await mintMcpToken(
+      app,
+      sessionToken,
+      MCP_READ_SCOPE,
+      MCP_NON_CIMD_CLIENT_ID,
+    );
+    const nonCimd = await app.inject({
+      headers: { authorization: `Bearer ${nonCimdToken}` },
+      method: "GET",
+      url: "/mcp",
+    });
+    assert.equal(nonCimd.statusCode, 401, nonCimd.body);
+    assert.ok(nonCimd.headers["www-authenticate"]);
+
+    const cimdToken = await mintMcpToken(app, sessionToken, MCP_READ_SCOPE, MCP_DISABLE_CLIENT_ID);
+    const live = await app.inject({
+      headers: { authorization: `Bearer ${cimdToken}` },
+      method: "GET",
+      url: "/mcp",
+    });
+    assert.equal(live.statusCode, 405, live.body);
+
+    await prisma.oauthClient.update({
+      data: { disabled: true },
+      where: { clientId: MCP_DISABLE_CLIENT_ID },
+    });
+    const disabled = await app.inject({
+      headers: { authorization: `Bearer ${cimdToken}` },
+      method: "GET",
+      url: "/mcp",
+    });
+    assert.equal(disabled.statusCode, 401, disabled.body);
+    assert.ok(disabled.headers["www-authenticate"]);
   });
 
   it("returns JSON-RPC 401 + WWW-Authenticate without a bearer", async () => {

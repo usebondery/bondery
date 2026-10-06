@@ -18,7 +18,7 @@ metadata:
 - Writing or reviewing `description` frontmatter for agent discovery
 - Splitting a bloated SKILL.md into `references/`
 - Adding a pre-ship checklist to a skill
-- Installing upstream skills via `pnx skills add` and updating `skills-lock.json`
+- Installing upstream skills via `pnx skills add`, or refreshing locked skills via `npx skills update`, and updating `skills-lock.json`
 
 ## Non-negotiables
 
@@ -28,7 +28,7 @@ metadata:
 - Link every reference file **one hop** from SKILL.md with explicit "when to read" context
 - Every Bondery first-party skill ends with a **pre-ship checklist** section
 - First-party skills use `metadata.namespace: bondery`
-- Do not fork upstream CLI skills — reinstall via `pnx skills add` instead
+- Do not fork upstream CLI skills — reinstall via `pnx skills add`, or refresh locked skills with `npx skills update`
 
 ## Skill types
 
@@ -88,6 +88,6 @@ External spec: https://agentskills.io/specification
 - [ ] **Pre-ship checklist** section at end of SKILL.md (every Bondery skill must have one)
 - [ ] Reference files end with focused checklist where multi-step gates apply
 - [ ] Cross-skill links use repo paths (`../../bondery-api/references/...`)
-- [ ] Upstream CLI skills: run `pnx skills add ...` and commit `skills-lock.json` — do not hand-edit upstream content
+- [ ] Upstream CLI skills: install with `pnx skills add ...` or refresh locked skills with `npx skills update`; commit `skills-lock.json` — do not hand-edit upstream content
 - [ ] Validate: `npx skills-ref validate .agents/skills/<name>` (if available)
 - [ ] Cursor agent configs updated if skill should be read by default (`.cursor/agents/implementer.md`, `.cursor/agents/architect.md`)

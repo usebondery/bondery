@@ -21,6 +21,7 @@ metadata:
 - Mobile offline sync (pull, outbox, materializers)
 - Rate limiting or API versioning questions
 - Adding or renaming MCP tools or prompts (`POST /mcp`)
+- Naming URL query params (`search`, `next_action`, `redirect`)
 
 ## Non-negotiables
 
@@ -29,6 +30,7 @@ metadata:
 - Errors use `{ error: { code, type, message, doc_url, ... } }` — catalog codes only, snake_case
 - Paginated lists use **offset** pagination (`limit`, `offset`) — no cursor / `page_token` / `after_id`
 - Query param is `search`, not `q`
+- Webapp product deep links use `next_action=intended_action` (snake_case names and values) — not one-off flags — see [references/url-query-params.md](references/url-query-params.md)
 - Create returns `201` + full resource object — see `references/api-mutations.md`
 - Fastify routes use Zod + `fastify-zod-openapi` — not TypeBox
 - Registration order is published doc order — see `references/api-route-ordering.md`
@@ -50,6 +52,7 @@ metadata:
 | Rate limits | [references/rate-limits.md](references/rate-limits.md) |
 | Versioning policy | [references/versioning.md](references/versioning.md) |
 | MCP tools / prompts | [references/mcp-tools.md](references/mcp-tools.md) |
+| Query param names (`search`, `next_action`, `redirect`) | [references/url-query-params.md](references/url-query-params.md) |
 
 Full index: [references/README.md](references/README.md).
 
@@ -70,3 +73,4 @@ For client error display and i18n, see the `bondery-ux` skill (`references/commo
 - [ ] `check-route-errors`, `pnpm run check:api-errors` pass at repo root
 - [ ] Auth, tenant scoping, webhooks, or uploads touched → `bondery-security` checklist satisfied
 - [ ] MCP tools follow `{create|get|update|delete|search}_{resource}` — see `references/mcp-tools.md`
+- [ ] Product deep-link actions use `next_action` from `NEXT_ACTIONS` — see `references/url-query-params.md`

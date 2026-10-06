@@ -43,14 +43,14 @@ describe("isFirstPartyOAuthClient", () => {
   it("matches only the provisioned first-party client ids", () => {
     assert.equal(isFirstPartyOAuthClient("webapp-id", ids), true);
     assert.equal(isFirstPartyOAuthClient("ext-id", ids), true);
-    assert.equal(isFirstPartyOAuthClient("cursor-dcr-id", ids), false);
+    assert.equal(isFirstPartyOAuthClient("opaque-assistant-id", ids), false);
   });
 });
 
 describe("resolveThirdPartyConsentClientDisplay", () => {
-  it("uses the registered DCR client_name", () => {
+  it("uses the registered name for an opaque client id", () => {
     assert.deepEqual(
-      resolveThirdPartyConsentClientDisplay("cursor-dcr-id", "Cursor", "Unknown application"),
+      resolveThirdPartyConsentClientDisplay("opaque-assistant-id", "Cursor", "Unknown application"),
       { name: "Cursor" },
     );
   });
@@ -77,9 +77,9 @@ describe("resolveThirdPartyConsentClientDisplay", () => {
     );
   });
 
-  it("uses Unknown application when a DCR client has no name", () => {
+  it("uses Unknown application when an opaque client has no name", () => {
     assert.deepEqual(
-      resolveThirdPartyConsentClientDisplay("cursor-dcr-id", null, "Unknown application"),
+      resolveThirdPartyConsentClientDisplay("opaque-assistant-id", null, "Unknown application"),
       { name: "Unknown application" },
     );
   });

@@ -51,6 +51,7 @@ Also check:
 - Expo packages (`~`) — never bulk-update; use Step 2 Expo batch
 - `allowBuilds` in `pnpm-workspace.yaml` — add entries for new native/postinstall packages (pnpm replaces npm’s `onlyBuiltDependencies`; run `pnpm approve-builds` locally after adding a dep that needs a build script)
 - `patches/` — remove obsolete patches
+- Locked agent skills (`skills-lock.json`) — refresh in Step 1 with `npx skills update`; first-party `bondery-*` skills are not in the lock file and must not be overwritten by the CLI
 
 Save the outdated list for Step 6.
 
@@ -65,7 +66,23 @@ pnpm install                        # if lockfile looks wrong
 
 Skip Expo SDK packages. If a package needs a `package.json` range edit, that is a major upgrade (Step 2). `pnpm update` only moves within declared ranges — use `pnpm --filter <workspace> add <pkg>@<version>` when you need a specific target.
 
-Build every workspace you touched, then commit:
+**Locked agent skills** — from repo root, refresh upstream skills listed in `skills-lock.json`:
+
+```bash
+npx skills update -y
+```
+
+`-y` skips the project/global scope prompt (auto-detects project in this repo). Use `-p` to force project scope. Do not pass `-g`. The command updates skill files under `.agents/skills/{upstream-name}/` and hashes in `skills-lock.json`. Do not hand-edit upstream skill content after the update. First-party `bondery-*` skills are not CLI-updatable.
+
+Review `git diff` of `.agents/skills/` and `skills-lock.json`. If a skill disappeared or was rewritten in a breaking way, record it in Step 6 Deferred (same spirit as deferred packages). A no-op is fine if already current.
+
+Commit skills separately from package bumps when possible:
+
+```
+chore: update agent skills
+```
+
+Build every workspace you touched, then commit package bumps:
 
 ```
 deps: bump patch and minor dependencies
@@ -210,9 +227,13 @@ End with a summary in the PR or handoff. Commit `pnpm-lock.yaml` with every `pac
 | Workspace | `pnpm run build` | Result |
 |-----------|------------------|--------|
 
+### Agent skills
+- `npx skills update`: updated / no-op / deferred (reason)
+- Breaking skill diffs (disappeared or rewritten): …
+
 ### Deferred
-| Package | Reason |
-|---------|--------|
+| Package / skill | Reason |
+|-----------------|--------|
 ```
 
 Changelog: **📦 Dependencies** section, `deps:` commit prefix ([changelog instructions](../../../.github/instructions/changelog.instructions.md)).
@@ -267,3 +288,5 @@ Mark each row **tested / not tested** in the PR. UI-facing upgrades should not m
 - Merge without building every touched workspace
 - Skip manual testing on UI-facing changes
 - Commit `package.json` without `pnpm-lock.yaml`
+- Hand-edit upstream CLI skill files after `npx skills update`
+- Treat first-party `bondery-*` skills as CLI-updatable

@@ -5,7 +5,7 @@
  * and the enrich route (force-update existing contacts from webapp).
  */
 
-import { prisma } from "@bondery/db";
+import { type PrismaClient, prisma } from "@bondery/db";
 import type { ScrapedEducationEntry, ScrapedWorkHistoryEntry } from "@bondery/schemas";
 import { uploadContactAvatarAndSetFlag } from "../contacts/avatar-storage.js";
 import { validateImageMagicBytes, validateImageUpload } from "../platform/config.js";
@@ -40,6 +40,85 @@ export function toPostgresDate(val: string | null | undefined): string | null {
   return val;
 }
 
+function parseOptionalDate(value: string | null | undefined): Date | null {
+  const normalized = toPostgresDate(value);
+  if (!normalized) {
+    return null;
+  }
+  const date = new Date(normalized);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+/**
+ * Upserts `people_linkedin` and replaces work/education rows.
+ * Import and enrich must use this Prisma path so history is not dropped.
+ */
+export async function upsertLinkedInHistory(
+  db: PrismaClient,
+  userId: string,
+  personId: string,
+  linkedinBio: string | null | undefined,
+  workHistory: ScrapedWorkHistoryEntry[] | undefined,
+  educationHistory: ScrapedEducationEntry[] | undefined,
+): Promise<void> {
+  const hasWork = Boolean(workHistory && workHistory.length > 0);
+  const hasEducation = Boolean(educationHistory && educationHistory.length > 0);
+  if (!hasWork && !hasEducation && !linkedinBio) {
+    return;
+  }
+
+  const linkedinRow = await db.peopleLinkedin.upsert({
+    create: {
+      bio: linkedinBio ?? null,
+      personId,
+      userId,
+    },
+    update: {
+      ...(linkedinBio ? { bio: linkedinBio } : {}),
+      updatedAt: new Date(),
+    },
+    where: { personId },
+  });
+
+  if (hasWork && workHistory) {
+    await db.peopleWorkHistory.deleteMany({
+      where: { peopleLinkedinId: linkedinRow.id, userId },
+    });
+    await db.peopleWorkHistory.createMany({
+      data: workHistory.map((entry) => ({
+        companyLinkedinId: entry.companyLinkedinId ?? null,
+        companyName: entry.companyName,
+        description: entry.description ?? null,
+        employmentType: entry.employmentType ?? null,
+        endDate: parseOptionalDate(entry.endDate),
+        location: entry.location ?? null,
+        peopleLinkedinId: linkedinRow.id,
+        startDate: parseOptionalDate(entry.startDate),
+        title: entry.title ?? null,
+        userId,
+      })),
+    });
+  }
+
+  if (hasEducation && educationHistory) {
+    await db.peopleEducationHistory.deleteMany({
+      where: { peopleLinkedinId: linkedinRow.id, userId },
+    });
+    await db.peopleEducationHistory.createMany({
+      data: educationHistory.map((entry) => ({
+        degree: entry.degree ?? null,
+        description: entry.description ?? null,
+        endDate: parseOptionalDate(entry.endDate),
+        peopleLinkedinId: linkedinRow.id,
+        schoolLinkedinId: entry.schoolLinkedinId ?? null,
+        schoolName: entry.schoolName,
+        startDate: parseOptionalDate(entry.startDate),
+        userId,
+      })),
+    });
+  }
+}
+
 /**
  * Downloads an image from a URL and uploads it as the contact's avatar.
  */
@@ -49,7 +128,7 @@ export async function updateContactPhoto(
   imageUrl: string,
 ): Promise<void> {
   try {
-    const response = await fetch(imageUrl);
+    const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8_000) });
     if (!response.ok) {
       return;
     }
@@ -89,7 +168,7 @@ async function uploadLinkedInLogo(
   imageUrl: string,
 ): Promise<string | null> {
   try {
-    const response = await fetch(imageUrl);
+    const response = await fetch(imageUrl, { signal: AbortSignal.timeout(8_000) });
     if (!response.ok) {
       return null;
     }

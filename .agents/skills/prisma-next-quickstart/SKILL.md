@@ -5,7 +5,7 @@ description: >-
   first move after a bootstrap tool dropped you into a scaffold. Use for "what
   can I do with Prisma Next", "what can I do next with Prisma", "where do I
   start", "what should I do first", "just ran createprisma", "createprisma",
-  "npx createprisma", "pnx create-prisma", "first steps", "first query", "I
+  "npx createprisma", "npx create-prisma", "first steps", "first query", "I
   have a scaffolded Prisma Next project what now"; for `pnpm dlx prisma-next
   init` greenfield setup; and for `prisma-next contract infer` + `db sign`
   against an existing database. Also covers the connect-write-read first-arc

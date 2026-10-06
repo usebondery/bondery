@@ -140,6 +140,7 @@ The collection key varies (`contacts`, `interactions`, `sessions`, `messages`, `
 ### Search
 
 - Query param: **`search`** (not `q`)
+- Webapp product URLs use **`next_action`** for pending UI actions — see [url-query-params.md](./url-query-params.md)
 - Trimmed on input; whitespace-only → no filter, `pagination.search: null`
 - People lists use fuzzy `search_people_ids` RPC via `countSearchPeopleIds()` in `apps/api/src/lib/data/search.ts`
 - Geocode suggest uses `search` (required, min 3 chars) — separate from people list search
@@ -228,5 +229,6 @@ GitBook API reference order follows Fastify route registration order. Path tiers
 - [ ] Paginated responses use nested `pagination` with server `hasMore`
 - [ ] Offset pagination only — no cursor params
 - [ ] `search` param (not `q`); sort enum from `contactSortOrderSchema` where applicable
+- [ ] Product deep-link actions use `next_action` from `NEXT_ACTIONS` — see [url-query-params.md](./url-query-params.md)
 - [ ] Zod response schema uses resource-keyed factory (`makePaginatedListResponseSchema`, etc.)
 - [ ] Breaking changes coordinated across API + all clients + OpenAPI

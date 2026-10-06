@@ -161,6 +161,44 @@ export function collectIncludedEntities(blocks: unknown[]): Record<string, unkno
   return entities;
 }
 
+const MAX_VOYAGER_OBJECTS = 2_000;
+const MAX_VOYAGER_WALK_DEPTH = 6;
+
+/**
+ * Walks Voyager JSON (root, `data`, `elements`, `included`) so About/`summary`
+ * is not dropped when LinkedIn puts it outside `included`.
+ */
+export function collectVoyagerObjects(root: unknown): Record<string, unknown>[] {
+  const out: Record<string, unknown>[] = [];
+  const seen = new Set<object>();
+
+  const visit = (value: unknown, depth: number): void => {
+    if (value == null || depth > MAX_VOYAGER_WALK_DEPTH || out.length >= MAX_VOYAGER_OBJECTS) {
+      return;
+    }
+    if (typeof value !== "object") {
+      return;
+    }
+    if (seen.has(value)) {
+      return;
+    }
+    seen.add(value);
+    if (Array.isArray(value)) {
+      for (const item of value) {
+        visit(item, depth + 1);
+      }
+      return;
+    }
+    out.push(value as Record<string, unknown>);
+    for (const child of Object.values(value as Record<string, unknown>)) {
+      visit(child, depth + 1);
+    }
+  };
+
+  visit(root, 0);
+  return out;
+}
+
 /**
  * Logs all unique $type values found in entities (for debugging).
  */
@@ -190,6 +228,9 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
   const url = `https://www.linkedin.com${path}`;
   extLog.debug(`[linkedin][fetchDetails] Voyager API: ${url}`);
 
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(() => controller.abort(), 8_000);
+
   try {
     // Isolated-world fetch is `chrome-extension://…` origin. `same-origin`
     // omits LinkedIn cookies; `include` + host_permissions sends them.
@@ -201,6 +242,7 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
         "x-restli-protocol-version": "2.0.0",
       },
       referrer: location.href,
+      signal: controller.signal,
     });
 
     if (!response.ok) {
@@ -212,7 +254,16 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
   } catch (error) {
     extLog.warn(`[linkedin][fetchDetails] Voyager error for ${path}:`, error);
     return null;
+  } finally {
+    window.clearTimeout(timeoutId);
   }
+}
+
+export function nfcText(value: unknown): string | undefined {
+  if (typeof value !== "string" || value.length === 0) {
+    return undefined;
+  }
+  return value.normalize("NFC");
 }
 
 /**
@@ -230,10 +281,13 @@ export function extractProfileUrn(
   }
 
   // 2. Embedded <code> JSON blocks (secondary — when Voyager data is inlined)
-  const normalizedUsername = username.normalize("NFC");
+  const normalizedUsername = nfcText(username);
+  if (!normalizedUsername) {
+    return null;
+  }
   for (const e of entities) {
-    const pubId = (e.publicIdentifier ?? e.vanityName) as string | undefined;
-    if (pubId?.normalize("NFC") !== normalizedUsername) {
+    const pubId = nfcText(e.publicIdentifier) ?? nfcText(e.vanityName);
+    if (pubId !== normalizedUsername) {
       continue;
     }
 
@@ -275,17 +329,4 @@ export function buildEntityByUrn(
     }
   }
   return map;
-}
-
-/**
- * Tries multiple API endpoints in order, returns the first successful response.
- */
-export async function tryEndpoints(endpoints: string[]): Promise<Record<string, unknown> | null> {
-  for (const path of endpoints) {
-    const data = await voyagerFetch(path);
-    if (data) {
-      return data;
-    }
-  }
-  return null;
 }

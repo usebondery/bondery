@@ -8,7 +8,7 @@ icon: Search
 
 [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) is the reference client for debugging MCP servers. Use it to exercise Bondery’s Streamable HTTP endpoint (`{API}/mcp`) with the **2026-07-28** protocol. Cursor’s HTTP client still negotiates `2025-11-25` and cannot complete initialize against this server.
 
-The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants (RFC 7591 DCR, loopback callback).
+The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants, with Client ID Metadata Documents (CIMD). Pass `--client-metadata-url` with the URL of a hosted `client.json`. Do not use RFC 7591 Dynamic Client Registration. Bondery does not provision an Inspector client id.
 
 ## Prerequisites
 
@@ -24,6 +24,14 @@ pnpm run mcp:inspect
 ```
 
 That launches `@modelcontextprotocol/inspector` against a **writable** catalog seeded from [`scripts/dev/mcp-inspector.json`](../../scripts/dev/mcp-inspector.json) (`protocolEra: "modern"`, URL `http://localhost:26631/mcp`). Settings you change in the UI (including Tools pagination) are saved to gitignored `scripts/dev/mcp-inspector.local.json`. Open the **printed URL** (it includes a one-time session token). Do not type `localhost:6274` from memory.
+
+Host a CIMD `client.json` and pass it through:
+
+```bash
+pnpm run mcp:inspect -- --client-metadata-url https://example.com/client.json
+```
+
+Do not add a Bondery-provisioned Inspector `clientId` to the catalog.
 
 <Callout type="warn">
 The Inspector’s default protocol era is **legacy**. Connecting without `protocolEra: "modern"` sends a 2025-era initialize and the API returns JSON-RPC `-32022` (unsupported protocol version). The seed config pins modern so you do not have to remember the Server Settings toggle.

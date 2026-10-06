@@ -10,6 +10,7 @@ import { createResourceServerChallenge } from "@better-auth/oauth-provider";
 import { isInsufficientScopeError } from "better-auth/oauth2";
 import { APIError } from "better-call";
 import type { JWTPayload } from "jose";
+import { assertActiveCimdMcpOAuthClient } from "./assert-mcp-oauth-client.js";
 import {
   MCP_READ_SCOPE,
   MCP_WRITE_SCOPE,
@@ -55,8 +56,8 @@ export function mcpUnauthorizedChallenge(
 /**
  * Verify an MCP access token (audience aliases + mcp:read door). Nested
  * `createInsufficientScopeError` throws from write tools are mapped to
- * RFC 6750 `insufficient_scope`. Trusted first-party client_id is not
- * consulted on this path.
+ * RFC 6750 `insufficient_scope`. The client must be an enabled CIMD row.
+ * First-party REST client ids are not MCP clients.
  */
 export function createBonderyMcpAuthHandler(
   handler: (request: Request, accessTokenClaims: JWTPayload) => Promise<Response>,
@@ -80,6 +81,7 @@ export function createBonderyMcpAuthHandler(
         audience,
         requiredScopes: [MCP_READ_SCOPE],
       });
+      await assertActiveCimdMcpOAuthClient(accessTokenClaims);
     } catch (error) {
       return mcpUnauthorizedChallenge(error, resource);
     }

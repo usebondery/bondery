@@ -1,5 +1,6 @@
-import { Button, Stack } from "@mantine/core";
+import { Button, Stack, TextInput } from "@mantine/core";
 import { IconArrowLeft, IconLogout } from "@tabler/icons-react";
+import { config } from "../../../config";
 import { useExtensionPopupTranslations } from "../../../lib/i18n/generated/hooks";
 import { PopupBrandHeader } from "../components/PopupBrandHeader";
 import { ThemePicker } from "../components/ThemePicker";
@@ -23,7 +24,7 @@ export function SettingsView({
 }: SettingsViewProps) {
   const t = useExtensionPopupTranslations("Settings");
   return (
-    <Stack gap="md" h={300} p="md">
+    <Stack gap="md" mih={300} p="md">
       <PopupBrandHeader actionIcon={<IconArrowLeft />} actionTitle="Back" onActionClick={onBack} />
       <Stack gap="md" style={{ flex: 1 }}>
         {user && (
@@ -33,6 +34,8 @@ export function SettingsView({
             subtitle={user.email || undefined}
           />
         )}
+
+        <TextInput disabled label={t("ApiServer")} value={config.apiUrl} />
 
         <ThemePicker
           labels={{

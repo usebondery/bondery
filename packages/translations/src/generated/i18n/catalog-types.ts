@@ -665,6 +665,7 @@ export type ExtensionPopupCatalog = {
     AddInteraction: string;
   };
   Settings: {
+    ApiServer: string;
     SignOut: string;
   };
   UpdateRequired: {

@@ -10,6 +10,7 @@ import { extLog } from "../../../lib/log";
 import type { AddPersonResult } from "../../../lib/messaging/types";
 import { profileCache, scrapeLinkedInProfile } from "../scrape/scrapeProfile";
 import { getTopcard } from "../scrape/sduiProfile";
+import { toApiWorkHistory } from "../scrape/workExperience";
 
 export { profileCache };
 
@@ -83,7 +84,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
           middleName: profile.middleName,
           platform: "linkedin" as const,
           profileImageUrl: profile.profilePhotoUrl,
-          workHistory: profile.workHistory,
+          workHistory: toApiWorkHistory(profile.workHistory),
         },
         type: "ADD_PERSON_REQUEST",
       });

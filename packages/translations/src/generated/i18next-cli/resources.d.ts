@@ -157,7 +157,6 @@ export default interface Resources {
         "service_auth_required": "Service auth required.",
         "service_unavailable": "The service is temporarily unavailable. Please try again shortly.",
         "session_fetch_failed": "Session fetch failed.",
-        "session_not_fresh": "This action needs a recent confirmation. Confirm it's you, then try again.",
         "session_settings_missing": "Session settings missing.",
         "settings": "Settings no fields.",
         "settings_failed_to_create_default_settings": "Settings failed to create default settings.",
@@ -2375,6 +2374,7 @@ export default interface Resources {
       "AddInteraction": "Add interaction with this person"
     },
     "Settings": {
+      "ApiServer": "API server",
       "SignOut": "Sign out"
     },
     "UpdateRequired": {

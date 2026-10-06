@@ -41,7 +41,7 @@ Agents get these wrong:
 3. **No WXT auto-imports** — `imports: false` in `wxt.config.ts`. Write explicit imports.
 4. **Never force `NODE_ENV` in Vite `define`.** Forcing production while the React plugin still emits `jsxDEV` kills the popup.
 5. **Env is baked at WXT build time.** Production CI must not bake localhost `BONDERY_PUBLIC_API_URL` / `BONDERY_PUBLIC_WEBAPP_URL`.
-6. **`webapp.content` matches:** production CWS (`BONDERY_EXTENSION_FLAVOR=production`) is `https://app.usebondery.com/*` + localhost only. Staging/RC may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin (beta). `host_permissions` *are* computed from env origins.
+6. **`webapp.content` matches:** production CWS (`BONDERY_EXTENSION_FLAVOR=production`) is `https://app.usebondery.com/*` + `http://localhost/*` + `http://127.0.0.1/*`. Staging/RC may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin (beta). `host_permissions` *are* computed from env origins.
 7. **`cssInjectionMode: "ui"` + shadow root.** Mantine root is `:host`, not `:root`.
 8. **`webExt.disabled: true`.** `pnpm exec wxt` will not launch Chrome. Load `dist/chrome-mv3-dev` unpacked yourself.
 9. **Never import `apps/chrome-extension` into the webapp, or webapp components into the extension** ([ADR 0007](../../../docs/adr/0007-cws-listing-compositions.mdx)).
@@ -85,7 +85,7 @@ Full index: [references/README.md](references/README.md).
 - [ ] Background `entrypoints/background/index.ts` still ≤ 30 lines
 - [ ] No WXT auto-imports; no `NODE_ENV` in Vite `define`
 - [ ] Content UI uses `renderInShadowRoot` + `:host` (not `:root`)
-- [ ] `webapp.content` matches: CWS production is prod + localhost only; staging may add baked beta origin
+- [ ] `webapp.content` matches: CWS production is prod + localhost + 127.0.0.1; staging may add baked beta origin
 - [ ] New `permissions` / `host_permissions` treated as a CWS review event ([extension.md](../bondery-release/references/extension.md))
 - [ ] Production bake does not inline localhost API/webapp URLs
 - [ ] No `apps/chrome-extension` ↔ webapp component imports

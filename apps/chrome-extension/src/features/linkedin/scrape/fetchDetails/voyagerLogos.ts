@@ -215,6 +215,7 @@ export async function enrichWorkEntriesWithLogos(
   entries: WorkEntry[],
   includedEntities?: Record<string, unknown>[],
   domLogos?: Map<string, string>,
+  skipNetworkLogos = false,
 ): Promise<WorkEntry[]> {
   // Step 0: Apply DOM logos (free — already scraped synchronously by the caller)
   if (domLogos && domLogos.size > 0) {
@@ -258,7 +259,7 @@ export async function enrichWorkEntriesWithLogos(
     tasks.push({ key, linkedInId: entry.companyLinkedinId, urn: entry.companyUrn });
   }
 
-  if (tasks.length === 0) {
+  if (skipNetworkLogos || tasks.length === 0) {
     return entries;
   }
 
