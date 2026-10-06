@@ -153,10 +153,10 @@
   },
   "scripts": {
     "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
-    "compile": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput"
+    "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
+    "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs branding"
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.2-rc.1"
+  "version": "1.10.2-rc.2"
 }

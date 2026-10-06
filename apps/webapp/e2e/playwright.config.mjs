@@ -5,62 +5,67 @@
  *
  * - Playwright browser (once per machine): `pnpm run test:e2e:install -w webapp`
  * - WSL/Linux system libs (once, sudo): `pnpm run test:e2e:install-deps -w webapp`
- * - **Headed auth setup needs a display** (WSLg on Win11, VcXsrv + DISPLAY, or run from Windows).
- *   Headless specs (`unauth`, `oauth-callback`) do not need a display.
+ * - **Headed GitHub login needs a display** (WSLg on Win11, VcXsrv + DISPLAY, or run from Windows).
+ *   Headless specs (`unauth`, `oauth-callback`, `auth`, `login-email`) do not need a display.
+ * - Mailpit (`pnpm run start:mailpit`) plus API SMTP on `127.0.0.1:26640`.
  * - API + webapp env files with GitHub OAuth and webapp OAuth client secrets (same as daily dev).
- * - Public URLs must match Playwright's host (default `127.0.0.1`, or set `E2E_PUBLIC_HOST=localhost`
- *   when reusing `dev:webapp-api` with localhost in `.env.development.local`).
- * - GitHub OAuth app callback: `http://127.0.0.1:26631/auth/callback/github`
+ * - Public URLs come from BONDERY_PUBLIC_API_URL and BONDERY_PUBLIC_WEBAPP_URL
+ *   after loading `apps/api/.env.development.local`. Do not set E2E_PUBLIC_HOST
+ *   unless it matches those hosts. A mismatch fails at config load.
+ * - GitHub OAuth app callback: `<BONDERY_PUBLIC_API_URL>/auth/callback/github`
  *   Run `pnpm run provision:oauth-clients` after URL changes.
  *
- * ## Manual GitHub auth (storageState)
+ * ## In-app authenticated specs
+ *
+ * The `auth` project depends on `email-setup`. That project signs in through
+ * `/login` magic-link (Mailpit HTTP) as `e2e-agent@example.test` and writes
+ * `.auth/email-user.json`. It does not use GitHub `setup` or `.auth/user.json`.
+ *
+ * ## Manual GitHub auth (OAuth regression only)
  *
  * Playwright cannot reuse your daily browser's GitHub session. Authenticate once in
- * Playwright's browser and save cookies to `e2e/.auth/user.json` (gitignored):
+ * Playwright's browser and save cookies to `e2e/.auth/user.json` (gitignored) only
+ * when you run GitHub OAuth specs that still need `storageState`:
  *
  * ```bash
  * pnpm run test:e2e:auth-setup -w webapp
  * ```
  *
- * Re-run when sessions expire or after logout tests.
+ * Re-run when GitHub sessions expire. In-app `auth` specs do not need this file.
  *
  * ## Iteration workflow
  *
+ * Playwright does not start the API or webapp. Start Mailpit + `dev:webapp-api`
+ * first. Missing health checks fail in globalSetup.
+ *
  * ```bash
- * # Terminal 1 — dev stack
- * pnpm run kill:dev && pnpm run dev:webapp-api
+ * # Terminal 1 — Mailpit + dev stack
+ * pnpm run start:mailpit
+ * pnpm run dev:webapp-api
  *
- * # First time or expired auth
- * pnpm run test:e2e:auth-setup -w webapp
+ * # In-app authenticated specs (email storageState, no GitHub)
+ * pnpm run test:e2e -w webapp -- --project=auth
  *
- * # Debug full GitHub login (Inspector + optional pause)
- * E2E_REUSE_SERVER=1 pnpm run test:e2e:debug -w webapp -- login.github
- *
- * # Headed GitHub login regression
- * E2E_REUSE_SERVER=1 pnpm run test:e2e:github -w webapp -- --headed
+ * # Unique email login + logout (empty storage)
+ * pnpm run test:e2e -w webapp -- --project=login-email
  *
  * # Unauthenticated + OAuth callback specs (no GitHub)
- * E2E_REUSE_SERVER=1 pnpm run test:e2e -w webapp -- --project=unauth --project=oauth-callback
+ * pnpm run test:e2e -w webapp -- --project=unauth --project=oauth-callback
+ *
+ * # Debug full GitHub login (Inspector + optional pause)
+ * pnpm run test:e2e:debug -w webapp -- login.github
+ *
+ * # Headed GitHub login regression
+ * pnpm run test:e2e:github -w webapp -- --headed
  * ```
  *
- * Set `E2E_REUSE_SERVER=1` to skip killing ports and reuse `dev:webapp-api` servers.
- * By default, orphaned listeners on 26631/26632 are cleared before tests start.
  * Set `E2E_PAUSE_GITHUB=1` to call `page.pause()` during the GitHub login spec.
  */
 
 import { defineConfig, devices } from "@playwright/test";
+import { resolveE2ePublicUrls } from "./resolve-e2e-public-urls.mjs";
 
-const reuseExistingServer = process.env.E2E_REUSE_SERVER === "1";
-const e2eHost = process.env.E2E_PUBLIC_HOST ?? "127.0.0.1";
-
-const E2E_API_URL = `http://${e2eHost}:26631`;
-const E2E_WEBAPP_URL = `http://${e2eHost}:26632`;
-const MONOREPO_ROOT = "../../..";
-
-const e2ePublicEnv = {
-  BONDERY_PUBLIC_API_URL: E2E_API_URL,
-  BONDERY_PUBLIC_WEBAPP_URL: E2E_WEBAPP_URL,
-};
+const { webappUrl: E2E_WEBAPP_URL } = resolveE2ePublicUrls();
 
 export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
@@ -69,7 +74,7 @@ export default defineConfig({
   projects: [
     {
       name: "setup",
-      testMatch: /auth\.setup\.ts/,
+      testMatch: /(?:^|\/)auth\.setup\.ts$/,
       timeout: 300_000,
       use: {
         headless: false,
@@ -86,16 +91,33 @@ export default defineConfig({
       },
     },
     {
-      dependencies: ["setup"],
+      name: "email-setup",
+      testMatch: /(?:^|\/)email\.auth\.setup\.ts$/,
+      timeout: 120_000,
+      use: {
+        headless: true,
+      },
+    },
+    {
+      dependencies: ["email-setup"],
       name: "auth",
       testMatch: /login\.authenticated\.spec\.ts/,
+      timeout: 90_000,
       use: {
-        storageState: ".auth/user.json",
+        storageState: ".auth/email-user.json",
+      },
+    },
+    {
+      name: "login-email",
+      testMatch: /login\.email\.spec\.ts/,
+      timeout: 120_000,
+      use: {
+        storageState: { cookies: [], origins: [] },
       },
     },
     {
       name: "unauth",
-      testMatch: /login\.unauth\.spec\.ts/,
+      testMatch: /login\.unauth\.spec.ts/,
     },
     {
       name: "oauth-callback",
@@ -111,23 +133,5 @@ export default defineConfig({
     baseURL: E2E_WEBAPP_URL,
     trace: "on-first-retry",
   },
-  webServer: [
-    {
-      command: "pnpm run dev -w api",
-      cwd: MONOREPO_ROOT,
-      env: e2ePublicEnv,
-      reuseExistingServer,
-      timeout: 180_000,
-      url: `${E2E_API_URL}/health/live`,
-    },
-    {
-      command: "pnpm run dev -w webapp",
-      cwd: MONOREPO_ROOT,
-      env: e2ePublicEnv,
-      reuseExistingServer,
-      timeout: 180_000,
-      url: `${E2E_WEBAPP_URL}/api/health/live`,
-    },
-  ],
   workers: 1,
 });

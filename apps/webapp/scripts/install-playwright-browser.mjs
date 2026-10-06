@@ -11,12 +11,27 @@ import { fileURLToPath } from "node:url";
 
 const webappRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+function resolvePlaywrightCli() {
+  const candidates = [
+    join(webappRoot, "node_modules/@playwright/test/cli.js"),
+    join(webappRoot, "../../node_modules/@playwright/test/cli.js"),
+  ];
+
+  for (const candidate of candidates) {
+    if (existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  throw new Error("Cannot find @playwright/test/cli.js. Run `pnpm install` from the repo root.");
+}
+
 function run(command) {
   execSync(command, { cwd: webappRoot, stdio: "inherit" });
 }
 
 console.log("Downloading Playwright Chromium...");
-run("pnpm exec playwright install chromium");
+run(`"${process.execPath}" "${resolvePlaywrightCli()}" install chromium`);
 
 const cacheRoot = join(homedir(), ".cache", "ms-playwright");
 const chromiumDirs = existsSync(cacheRoot)

@@ -43,6 +43,7 @@ const {
 const { resolveResourceId, provisionWebappClient, upsertMcpResources } = await import(
   "../lib/bootstrap/provision-oauth-clients.js"
 );
+const { disableDcrOAuthClients } = await import("../lib/bootstrap/disable-dcr-oauth-clients.js");
 
 function base64url(input: Buffer): string {
   return input.toString("base64url");
@@ -162,6 +163,7 @@ async function upsertClientResource(clientId: string, resourceId: string): Promi
 async function provisionMcpTestClient(): Promise<void> {
   await prisma.oauthClient.upsert({
     create: {
+      clientDiscoveryId: CIMD_CLIENT_DISCOVERY_ID,
       clientId: MCP_TEST_CLIENT_ID,
       clientSecret: null,
       grantTypes: ["authorization_code", "refresh_token"],
@@ -177,6 +179,7 @@ async function provisionMcpTestClient(): Promise<void> {
       type: "user-agent-based",
     },
     update: {
+      clientDiscoveryId: CIMD_CLIENT_DISCOVERY_ID,
       disabled: false,
       grantTypes: ["authorization_code", "refresh_token"],
       public: true,
@@ -819,12 +822,10 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
         metadata.token_endpoint?.includes("/auth/oauth2/token"),
         `${path} token_endpoint missing: ${JSON.stringify(metadata)}`,
       );
-      if (metadata.registration_endpoint || asPaths.includes(path)) {
-        assert.ok(
-          metadata.registration_endpoint?.includes("/auth/oauth2/register"),
-          `${path} registration_endpoint missing: ${JSON.stringify(metadata)}`,
-        );
-      }
+      assert.ok(
+        !metadata.registration_endpoint,
+        `${path} must omit registration_endpoint: ${JSON.stringify(metadata)}`,
+      );
     }
 
     const canonicalAs = await app.inject({
@@ -842,78 +843,9 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
     );
   });
 
-  it("registers a public MCP client via DCR without REST resources", async () => {
-    const response = await app.inject({
-      headers: { "content-type": "application/json" },
-      method: "POST",
-      payload: {
-        application_type: "native",
-        client_name: "Cursor DCR probe",
-        grant_types: ["authorization_code", "refresh_token"],
-        redirect_uris: ["http://127.0.0.1:8787/callback"],
-        response_types: ["code"],
-        token_endpoint_auth_method: "none",
-      },
-      url: betterAuthPath("/oauth2/register"),
-    });
-    assert.equal(response.statusCode, 201, response.body);
-    const body = response.json() as { client_id?: string };
-    assert.equal(typeof body.client_id, "string");
-    const clientId = body.client_id as string;
-    createdDcrClientIds.push(clientId);
-    const links = await prisma.oauthClientResource.findMany({ where: { clientId } });
-    assert.ok(links.length > 0, "DCR client must be linked to the MCP resource");
-    assert.equal(
-      links.some((link) => link.resourceId.endsWith("/mcp")),
-      true,
-    );
-    assert.equal(
-      links.some((link) => !link.resourceId.endsWith("/mcp")),
-      false,
-      "DCR must not link REST resources",
-    );
-    const client = await prisma.oauthClient.findUnique({ where: { clientId } });
-    assert.equal(client?.scopes.includes("api:access"), false);
-  });
-
-  it("registers Cursor-shaped DCR with a localhost HTTP callback", async () => {
-    const response = await app.inject({
-      headers: { "content-type": "application/json" },
-      method: "POST",
-      payload: {
-        application_type: "web",
-        client_name: "Cursor",
-        grant_types: ["authorization_code", "refresh_token"],
-        redirect_uris: ["http://localhost:8787/callback"],
-        response_types: ["code"],
-        token_endpoint_auth_method: "none",
-      },
-      url: betterAuthPath("/oauth2/register"),
-    });
-    assert.equal(response.statusCode, 201, response.body);
-    const body = response.json() as { application_type?: string; client_id?: string };
-    assert.equal(typeof body.client_id, "string");
-    createdDcrClientIds.push(body.client_id as string);
-    assert.equal(body.application_type, "native");
-
-    const user = await createTestUser();
-    createdUserIds.push(user.id);
-    const sessionToken = await createNativeSession(user.id);
-    const publicClient = await app.inject({
-      headers: { authorization: `Bearer ${sessionToken}` },
-      method: "GET",
-      url: `${betterAuthPath("/oauth2/public-client")}?client_id=${encodeURIComponent(body.client_id as string)}`,
-    });
-    assert.equal(publicClient.statusCode, 200, publicClient.body);
-    const publicBody = publicClient.json() as { client_name?: string };
-    assert.equal(publicBody.client_name, "Cursor");
-  });
-
-  it("rejects DCR that requests the REST resource", async () => {
-    const response = await app.inject({
-      headers: { "content-type": "application/json" },
-      method: "POST",
-      payload: {
+  it("rejects POST /oauth2/register including Cursor-shaped loopback payloads", async () => {
+    const payloads = [
+      {
         application_type: "native",
         client_name: "REST DCR probe",
         grant_types: ["authorization_code"],
@@ -922,9 +854,132 @@ describe("real-database OAuth 2.1 + PKCE protocol", () => {
         response_types: ["code"],
         token_endpoint_auth_method: "none",
       },
-      url: betterAuthPath("/oauth2/register"),
+      {
+        application_type: "web",
+        client_name: "Cursor",
+        grant_types: ["authorization_code", "refresh_token"],
+        redirect_uris: ["http://localhost:8787/callback"],
+        response_types: ["code"],
+        token_endpoint_auth_method: "none",
+      },
+    ];
+
+    for (const payload of payloads) {
+      const response = await app.inject({
+        headers: { "content-type": "application/json" },
+        method: "POST",
+        payload,
+        url: betterAuthPath("/oauth2/register"),
+      });
+      assert.notEqual(response.statusCode, 201, response.body);
+    }
+  });
+
+  it("disables DCR clients, revokes their tokens, and deletes consents", async () => {
+    const user = await createTestUser();
+    createdUserIds.push(user.id);
+    const dcrClientId = `dcr-retire-${generateId()}`;
+    const cimdKeepClientId = `cimd-keep-${generateId()}`;
+    createdDcrClientIds.push(dcrClientId, cimdKeepClientId);
+
+    await prisma.oauthClient.create({
+      data: {
+        clientId: dcrClientId,
+        grantTypes: ["authorization_code", "refresh_token"],
+        id: generateId(),
+        name: "DCR retire probe",
+        public: true,
+        redirectUris: [REDIRECT_URI],
+        responseTypes: ["code"],
+        scopes: [...MCP_OAUTH_SCOPES],
+      },
     });
-    assert.notEqual(response.statusCode, 201, response.body);
+    await prisma.oauthClient.create({
+      data: {
+        clientDiscoveryId: CIMD_CLIENT_DISCOVERY_ID,
+        clientId: cimdKeepClientId,
+        grantTypes: ["authorization_code", "refresh_token"],
+        id: generateId(),
+        name: "CIMD keep probe",
+        public: true,
+        redirectUris: [REDIRECT_URI],
+        responseTypes: ["code"],
+        scopes: [...MCP_OAUTH_SCOPES],
+      },
+    });
+
+    for (const clientId of [dcrClientId, cimdKeepClientId, CLIENT_ID]) {
+      await prisma.oauthAccessToken.create({
+        data: {
+          clientId,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+          id: generateId(),
+          scopes: ["mcp:read"],
+          token: `access-${generateId()}`,
+          userId: user.id,
+        },
+      });
+      await prisma.oauthRefreshToken.create({
+        data: {
+          clientId,
+          expiresAt: new Date(Date.now() + 60 * 60 * 1000),
+          id: generateId(),
+          scopes: ["mcp:read"],
+          token: `refresh-${generateId()}`,
+          userId: user.id,
+        },
+      });
+      await prisma.oauthConsent.create({
+        data: {
+          clientId,
+          id: generateId(),
+          scopes: ["mcp:read"],
+          userId: user.id,
+        },
+      });
+    }
+
+    const result = await disableDcrOAuthClients();
+    assert.ok(result.clientIds.includes(dcrClientId));
+    assert.equal(result.clientIds.includes(cimdKeepClientId), false);
+    assert.equal(result.clientIds.includes(CLIENT_ID), false);
+    assert.equal(result.clientIds.includes(MCP_TEST_CLIENT_ID), false);
+
+    const dcr = await prisma.oauthClient.findUnique({ where: { clientId: dcrClientId } });
+    const cimd = await prisma.oauthClient.findUnique({ where: { clientId: cimdKeepClientId } });
+    const firstParty = await prisma.oauthClient.findUnique({ where: { clientId: CLIENT_ID } });
+    const mcpStandIn = await prisma.oauthClient.findUnique({
+      where: { clientId: MCP_TEST_CLIENT_ID },
+    });
+    assert.equal(dcr?.disabled, true);
+    assert.equal(cimd?.disabled, false);
+    assert.equal(firstParty?.disabled, false);
+    assert.equal(mcpStandIn?.disabled, false);
+
+    const dcrAccess = await prisma.oauthAccessToken.findMany({ where: { clientId: dcrClientId } });
+    const dcrRefresh = await prisma.oauthRefreshToken.findMany({
+      where: { clientId: dcrClientId },
+    });
+    assert.ok(dcrAccess.every((row) => row.revoked instanceof Date));
+    assert.ok(dcrRefresh.every((row) => row.revoked instanceof Date));
+    assert.equal(await prisma.oauthConsent.count({ where: { clientId: dcrClientId } }), 0);
+
+    const keptAccess = await prisma.oauthAccessToken.findMany({
+      where: { clientId: { in: [cimdKeepClientId, CLIENT_ID] }, userId: user.id },
+    });
+    const keptRefresh = await prisma.oauthRefreshToken.findMany({
+      where: { clientId: { in: [cimdKeepClientId, CLIENT_ID] }, userId: user.id },
+    });
+    assert.ok(keptAccess.length >= 2);
+    assert.ok(keptRefresh.length >= 2);
+    assert.ok(keptAccess.every((row) => row.revoked === null));
+    assert.ok(keptRefresh.every((row) => row.revoked === null));
+    assert.equal(
+      await prisma.oauthConsent.count({
+        where: { clientId: { in: [cimdKeepClientId, CLIENT_ID] }, userId: user.id },
+      }),
+      2,
+    );
   });
 
   it("serves RFC 9728 protected-resource metadata for /mcp", async () => {

@@ -78,6 +78,8 @@ Server gate: `MIN_EXTENSION_VERSION` in `packages/helpers/src/globals/paths.ts` 
 
 Allowed `@bondery/*` deps: `branding`, `helpers`, `mantine-next`, `schemas`, `translations`. **Not** `apps/webapp`. Listing shots compose in the webapp without importing this package ([ADR 0007](../../../../docs/adr/0007-cws-listing-compositions.mdx)).
 
+Popup person chips import `@bondery/mantine-next/PersonChip` (Next-free Badge). Do not import `@bondery/mantine-next` barrel `PersonChip` or `nextjs/PersonChip` — those load Next.js `Link` and crash the popup. Webapp wraps the same Badge in `src/nextjs/PersonChip`.
+
 ## Architecture checklist
 
 - [ ] New HTTP only in `lib/api` + background handler

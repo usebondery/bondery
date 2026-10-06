@@ -31,6 +31,9 @@ export function installWebappBridge(): void {
         },
         targetOrigin,
       );
+      void browser.runtime.sendMessage({ type: "AUTH_STATUS_REQUEST" }).catch(() => {
+        /* Wake the service worker; ping itself does not need a reply. */
+      });
       return;
     }
 

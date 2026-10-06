@@ -20,7 +20,7 @@ metadata:
 - Changelog, incident comms, or company updates where tone matters
 - Deciding whether "open startup" transparency belongs in customer-facing copy
 
-For UI microcopy rules (buttons, errors, empty states, i18n), see `bondery-ux` — this skill owns **brand strategy and voice**; `bondery-ux` owns **product copy mechanics**.
+For UI microcopy rules (buttons, errors, empty states, i18n), see `bondery-ux` — this skill owns **brand strategy and voice**; `bondery-ux` owns **product copy mechanics**. Sentence craft for published copy is Orwell-Hemingway in [`bondery-writing`](../bondery-writing/SKILL.md).
 
 For 1:1 GitHub issue replies, support emails, and similar user messages, see [bondery-support-replies](../bondery-support-replies/SKILL.md).
 
@@ -58,7 +58,7 @@ For visual assets (logo, colors, OG images), see `packages/branding` (`@bondery/
 
 Full index: [references/README.md](references/README.md).
 
-Related skills: [bondery-ux](../bondery-ux/SKILL.md) (UI copy), [bondery-support-replies](../bondery-support-replies/SKILL.md) (1:1 GitHub/email replies), [bondery-changelog](../bondery-changelog/SKILL.md) (release notes), [bondery-emails](../bondery-emails/SKILL.md) (transactional email), [bondery-legal](../bondery-legal/SKILL.md) (privacy claims).
+Related skills: [bondery-writing](../bondery-writing/SKILL.md) (Orwell-Hemingway sentence craft), [bondery-ux](../bondery-ux/SKILL.md) (UI copy), [bondery-support-replies](../bondery-support-replies/SKILL.md) (1:1 GitHub/email replies), [bondery-changelog](../bondery-changelog/SKILL.md) (release notes), [bondery-emails](../bondery-emails/SKILL.md) (transactional email), [bondery-legal](../bondery-legal/SKILL.md) (privacy claims).
 
 ## Brand checklist (before shipping copy)
 

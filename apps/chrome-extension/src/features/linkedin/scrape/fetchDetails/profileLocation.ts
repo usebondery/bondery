@@ -3,11 +3,15 @@
  */
 
 import { extLog } from "../../../../lib/log";
+import type { SduiIdentity } from "../sduiProfile";
+import { extractVoyagerBio, extractVoyagerIdentity } from "./profileIdentity";
 import {
   buildEntityByUrn,
   collectIncludedEntities,
+  collectVoyagerObjects,
   extractLivePageJsonBlocks,
   extractProfileUrn,
+  nfcText,
   voyagerFetch,
 } from "./voyagerShared";
 
@@ -74,11 +78,9 @@ function extractProfileLocationFromEntities(
       continue;
     }
 
-    const pubId = (e.publicIdentifier ?? e.vanityName) as string | undefined;
-    const entityUrn = e.entityUrn as string | undefined;
-    const matchesUser =
-      pubId?.normalize("NFC") === username.normalize("NFC") ||
-      (!!profileUrn && entityUrn === profileUrn);
+    const pubId = nfcText(e.publicIdentifier) ?? nfcText(e.vanityName);
+    const entityUrn = typeof e.entityUrn === "string" ? e.entityUrn : undefined;
+    const matchesUser = pubId === nfcText(username) || (!!profileUrn && entityUrn === profileUrn);
     if (!matchesUser) {
       continue;
     }
@@ -171,6 +173,8 @@ function extractLocationFromApiResponse(
 
 const PROFILE_GRAPHQL_BY_URN = "voyagerIdentityDashProfiles.7bab95a76318a84301169b923d563eb1";
 const PROFILE_GRAPHQL_BY_VANITY = "voyagerIdentityDashProfiles.34ead06db82a2cc9a778fac97f69ad6a";
+const FULL_PROFILE_DECORATION =
+  "com.linkedin.voyager.dash.deco.identity.profile.FullProfileWithEntities-93";
 
 function profileGraphqlPathByUrn(profileUrn: string): string {
   const variables = `(profileUrn:${encodeURIComponent(profileUrn)})`;
@@ -182,13 +186,68 @@ function profileGraphqlPathByVanity(username: string): string {
   return `/voyager/api/graphql?includeWebMetadata=true&variables=${variables}&queryId=${PROFILE_GRAPHQL_BY_VANITY}`;
 }
 
+function dashProfilePath(
+  memberIdentity: string,
+  decorationId: string | null = FULL_PROFILE_DECORATION,
+): string {
+  const decoration = decorationId ? `&decorationId=${decorationId}` : "";
+  return (
+    `/voyager/api/identity/dash/profiles?q=memberIdentity` +
+    `&memberIdentity=${encodeURIComponent(memberIdentity)}` +
+    decoration
+  );
+}
+
+function collectProfileEntities(
+  response: Record<string, unknown> | null,
+): Record<string, unknown>[] {
+  if (!response) {
+    return [];
+  }
+  return collectVoyagerObjects(response);
+}
+
+function bioFromResponse(
+  response: Record<string, unknown> | null,
+  username: string,
+  profileUrn: string | null,
+): string | undefined {
+  return extractVoyagerBio(collectProfileEntities(response), username, profileUrn);
+}
+
+export interface VoyagerProfileMeta {
+  bio: string | undefined;
+  identity: SduiIdentity | null;
+  location: string | undefined;
+}
+
+function identityFromResponse(
+  response: Record<string, unknown> | null,
+  username: string,
+  profileUrn: string | null,
+): SduiIdentity | null {
+  if (!response) {
+    return null;
+  }
+  return extractVoyagerIdentity(collectProfileEntities(response), username, profileUrn);
+}
+
 /**
- * Resolves profile location from Voyager — never from topcard DOM text.
+ * Resolves profile location and identity from Voyager.
  *
- * Priority: GraphQL by vanity (richest geo names) → GraphQL by URN → embedded entities.
- * The URN query often returns Geo with only countryISO; vanity includes defaultLocalizedName.
+ * Location priority: GraphQL by vanity → GraphQL by URN → embedded entities.
+ * Identity uses the same responses (and MiniProfile / Profile entities).
  */
-export async function fetchProfileLocation(username: string): Promise<string | undefined> {
+export async function fetchVoyagerProfileMeta(username: string): Promise<VoyagerProfileMeta> {
+  try {
+    return await loadVoyagerProfileMeta(username);
+  } catch (error) {
+    extLog.warn("[linkedin][fetchDetails] profile meta failed", error);
+    return { bio: undefined, identity: null, location: undefined };
+  }
+}
+
+async function loadVoyagerProfileMeta(username: string): Promise<VoyagerProfileMeta> {
   const normalizedHandle = (() => {
     try {
       return decodeURIComponent(username);
@@ -198,31 +257,83 @@ export async function fetchProfileLocation(username: string): Promise<string | u
   })();
 
   const blocks = extractLivePageJsonBlocks();
-  const entities = collectIncludedEntities(blocks);
-  const profileUrn = extractProfileUrn(entities, normalizedHandle);
+  const entities = collectVoyagerObjects(blocks);
+  const profileUrn = extractProfileUrn(
+    entities.length > 0 ? entities : collectIncludedEntities(blocks),
+    normalizedHandle,
+  );
 
-  const byVanity = await voyagerFetch(profileGraphqlPathByVanity(normalizedHandle));
-  const fromVanity = extractLocationFromApiResponse(byVanity, profileUrn);
-  if (fromVanity) {
-    extLog.debug(`[linkedin][fetchDetails] profile location: graphql/vanity → ${fromVanity}`);
-    return fromVanity;
+  let identity = extractVoyagerIdentity(entities, normalizedHandle, profileUrn);
+  let bio = extractVoyagerBio(entities, normalizedHandle, profileUrn);
+  let location: string | undefined;
+
+  const [byVanity, dashByVanity] = await Promise.all([
+    voyagerFetch(profileGraphqlPathByVanity(normalizedHandle)),
+    voyagerFetch(dashProfilePath(normalizedHandle)),
+  ]);
+  identity ??= identityFromResponse(byVanity, normalizedHandle, profileUrn);
+  identity ??= identityFromResponse(dashByVanity, normalizedHandle, profileUrn);
+  bio ??= bioFromResponse(byVanity, normalizedHandle, profileUrn);
+  bio ??= bioFromResponse(dashByVanity, normalizedHandle, profileUrn);
+  location = extractLocationFromApiResponse(byVanity, profileUrn);
+  location ??= extractLocationFromApiResponse(dashByVanity, profileUrn);
+
+  if (!bio) {
+    const dashBare = await voyagerFetch(dashProfilePath(normalizedHandle, null));
+    identity ??= identityFromResponse(dashBare, normalizedHandle, profileUrn);
+    bio ??= bioFromResponse(dashBare, normalizedHandle, profileUrn);
+    location ??= extractLocationFromApiResponse(dashBare, profileUrn);
   }
 
-  if (profileUrn) {
-    const byUrn = await voyagerFetch(profileGraphqlPathByUrn(profileUrn));
-    const fromUrn = extractLocationFromApiResponse(byUrn, profileUrn);
-    if (fromUrn) {
-      extLog.debug(`[linkedin][fetchDetails] profile location: graphql/urn → ${fromUrn}`);
-      return fromUrn;
+  if (location) {
+    extLog.debug(`[linkedin][fetchDetails] profile location: graphql/vanity → ${location}`);
+  }
+  if (bio) {
+    extLog.debug(`[linkedin][fetchDetails] profile bio: dash/graphql → ${bio.length}c`);
+  }
+
+  if (!location || !identity || !bio) {
+    if (profileUrn) {
+      const [byUrn, dashByUrn] = await Promise.all([
+        voyagerFetch(profileGraphqlPathByUrn(profileUrn)),
+        bio ? Promise.resolve(null) : voyagerFetch(dashProfilePath(profileUrn)),
+      ]);
+      identity ??= identityFromResponse(byUrn, normalizedHandle, profileUrn);
+      identity ??= identityFromResponse(dashByUrn, normalizedHandle, profileUrn);
+      bio ??= bioFromResponse(byUrn, normalizedHandle, profileUrn);
+      bio ??= bioFromResponse(dashByUrn, normalizedHandle, profileUrn);
+      if (!location) {
+        location = extractLocationFromApiResponse(byUrn, profileUrn);
+        location ??= extractLocationFromApiResponse(dashByUrn, profileUrn);
+        if (location) {
+          extLog.debug(`[linkedin][fetchDetails] profile location: graphql/urn → ${location}`);
+        }
+      }
     }
   }
 
-  const embedded = extractProfileLocationFromEntities(entities, normalizedHandle, profileUrn);
-  if (embedded) {
-    extLog.debug(`[linkedin][fetchDetails] profile location: embedded → ${embedded}`);
-    return embedded;
+  if (!location) {
+    location = extractProfileLocationFromEntities(entities, normalizedHandle, profileUrn);
+    if (location) {
+      extLog.debug(`[linkedin][fetchDetails] profile location: embedded → ${location}`);
+    }
   }
 
-  extLog.debug(`[linkedin][fetchDetails] profile location: none for ${normalizedHandle}`);
-  return undefined;
+  if (!location) {
+    extLog.debug(`[linkedin][fetchDetails] profile location: none for ${normalizedHandle}`);
+  }
+  if (!identity) {
+    extLog.debug(`[linkedin][fetchDetails] profile identity: none for ${normalizedHandle}`);
+  }
+  if (!bio) {
+    extLog.debug(`[linkedin][fetchDetails] profile bio: none for ${normalizedHandle}`);
+  }
+
+  return { bio, identity, location };
+}
+
+/** Resolves profile location from Voyager — never from topcard DOM text. */
+export async function fetchProfileLocation(username: string): Promise<string | undefined> {
+  const { location } = await fetchVoyagerProfileMeta(username);
+  return location;
 }

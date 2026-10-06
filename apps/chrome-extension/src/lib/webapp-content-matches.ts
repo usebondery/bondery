@@ -1,5 +1,6 @@
 const PRODUCTION_WEBAPP_MATCH = "https://app.usebondery.com/*";
 const LOCALHOST_MATCH = "http://localhost/*";
+const LOOPBACK_IPV4_MATCH = "http://127.0.0.1/*";
 
 function originMatch(url: string | undefined): string | null {
   if (!url) {
@@ -25,7 +26,7 @@ export function webappContentMatches(
   flavor = import.meta.env.BONDERY_EXTENSION_FLAVOR,
   webappUrl = import.meta.env.BONDERY_PUBLIC_WEBAPP_URL,
 ): string[] {
-  const matches = [PRODUCTION_WEBAPP_MATCH, LOCALHOST_MATCH];
+  const matches = [PRODUCTION_WEBAPP_MATCH, LOCALHOST_MATCH, LOOPBACK_IPV4_MATCH];
   if (flavor === "production") {
     return matches;
   }

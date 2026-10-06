@@ -11,7 +11,6 @@ import {
   extractLivePageJsonBlocks,
   extractProfileUrn,
   logEntityTypes,
-  tryEndpoints,
   voyagerFetch,
 } from "./voyagerShared";
 
@@ -185,7 +184,21 @@ async function mapEducationEntityAsync(
  * Uses the same `fetchCompanyLogo` helper as work-entry enrichment so the
  * lookup strategy (universalName slug → entityUrn → numeric ID) is consistent.
  */
-async function enrichEducationWithLogos(entries: EducationEntry[]): Promise<EducationEntry[]> {
+async function enrichEducationWithLogos(
+  entries: EducationEntry[],
+  skipNetworkLogos = false,
+  domLogos?: Map<string, string>,
+): Promise<EducationEntry[]> {
+  if (domLogos && domLogos.size > 0) {
+    entries = entries.map((entry) => {
+      if (entry.schoolLogoUrl) {
+        return entry;
+      }
+      const url = domLogos.get(entry.schoolName.toLowerCase());
+      return url ? { ...entry, schoolLogoUrl: url } : entry;
+    });
+  }
+
   // Collect distinct IDs that still need logos (deduplicated)
   const seenIds = new Set<string>();
   const tasks: string[] = [];
@@ -200,7 +213,7 @@ async function enrichEducationWithLogos(entries: EducationEntry[]): Promise<Educ
     tasks.push(entry.schoolLinkedinId);
   }
 
-  if (tasks.length === 0) {
+  if (skipNetworkLogos || tasks.length === 0) {
     return entries;
   }
 
@@ -240,16 +253,22 @@ const EDU_ENDPOINTS = (urn: string) => [
  *
  * Same strategy as work: API first (count=100) → live page fallback → [].
  */
-export async function fetchFullEducation(username: string): Promise<EducationEntry[]> {
+export async function fetchFullEducation(
+  username: string,
+  skipNetworkLogos = false,
+  domLogos?: Map<string, string>,
+): Promise<EducationEntry[]> {
   // ── Step 1: Mine live page for the profileUrn and any embedded entities ──
   const blocks = extractLivePageJsonBlocks();
   const entities = collectIncludedEntities(blocks);
 
   const profileUrn = extractProfileUrn(entities, username);
 
-  // ── Step 2: Try dash API (authoritative — requests up to 100 entries) ──
+  // ── Step 2: Try dash API endpoints in parallel (count=100 per request) ──
   if (profileUrn) {
-    const data = await tryEndpoints(EDU_ENDPOINTS(profileUrn));
+    const paths = EDU_ENDPOINTS(profileUrn);
+    const responses = await Promise.all(paths.map((path) => voyagerFetch(path)));
+    const data = responses.find((response) => response != null) ?? null;
 
     if (data) {
       const apiEntities = collectIncludedEntities([data]);
@@ -282,7 +301,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
           `[linkedin][fetchDetails] Parsed ${entries.length} education entries from API`,
           entries.map((e) => `${e.schoolName} — ${e.degree ?? "(no degree)"}`),
         );
-        return enrichEducationWithLogos(entries);
+        return enrichEducationWithLogos(entries, skipNetworkLogos, domLogos);
       }
     } else {
       extLog.warn(`[linkedin][fetchDetails] All education API endpoints failed for ${username}`);
@@ -321,7 +340,7 @@ export async function fetchFullEducation(username: string): Promise<EducationEnt
         `[linkedin][fetchDetails] Parsed ${entries.length} education entries from live page (fallback)`,
         entries.map((e) => `${e.schoolName} — ${e.degree ?? "(no degree)"}`),
       );
-      return enrichEducationWithLogos(entries);
+      return enrichEducationWithLogos(entries, skipNetworkLogos, domLogos);
     }
   }
 

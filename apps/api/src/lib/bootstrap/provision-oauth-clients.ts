@@ -15,6 +15,7 @@ import {
   resolveMcpResourceIdentifiers,
 } from "../auth/index.js";
 import { chromeExtensionRedirectUris } from "./chrome-extension-redirect-uris.js";
+import { disableDcrOAuthClients } from "./disable-dcr-oauth-clients.js";
 
 export function hashOAuthClientSecret(secret: string): string {
   return createHash("sha256").update(Buffer.from(secret, "utf8")).digest("base64url");
@@ -203,9 +204,8 @@ export async function resolveResourceId(): Promise<string> {
 
 /**
  * Upsert MCP resource rows (canonical + loopback aliases). First-party
- * clients are never linked here — CIMD/DCR clients pick MCP via registration
- * default/allowed resources. Linking REST clients to MCP would leak
- * `mcp:*` onto webapp/extension tokens.
+ * clients are never linked here — CIMD clients pick MCP via discovery.
+ * Linking REST clients to MCP would leak `mcp:*` onto webapp/extension tokens.
  */
 export async function upsertMcpResources(): Promise<string> {
   const identifiers = resolveMcpResourceIdentifiers();
@@ -243,4 +243,5 @@ export async function provisionOAuthClients(): Promise<void> {
   const resourceIds = resolveApiResourceIdentifiers();
   await provisionWebappClient(resourceIds);
   await provisionExtensionClient(resourceIds);
+  await disableDcrOAuthClients();
 }

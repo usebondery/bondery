@@ -5,9 +5,9 @@
  * (data-member-id, #experience, data-field="experience_company_logo").
  */
 
+import { pollUntil } from "../pollUntil";
 import type { EducationEntry } from "./education";
-import type { WorkEntry } from "./workExperience";
-import { parseDateRange } from "./workExperience";
+import { parseDateRange, type WorkEntry } from "./workExperience";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -99,7 +99,20 @@ export function isSduiProfile(doc?: Document): boolean {
 }
 
 export function getTopcard(doc?: Document): Element | null {
-  return getDoc(doc).querySelector('[componentkey*="Topcard"]');
+  const cards = [...getDoc(doc).querySelectorAll('[componentkey*="Topcard"]')];
+  if (cards.length === 0) {
+    return null;
+  }
+
+  const withPersonName = cards.find((card) => {
+    const name =
+      text(card.querySelector("h1")) ||
+      text(card.querySelector("h2")) ||
+      text(card.querySelector('[data-anonymize="person-name"]'));
+    return Boolean(name && /\s/.test(name));
+  });
+
+  return withPersonName ?? cards[0] ?? null;
 }
 
 /**
@@ -142,6 +155,69 @@ export function extractProfileUrnFromComponentKey(doc?: Document): string | null
 
 // ─── Identity ────────────────────────────────────────────────────────────────
 
+/**
+ * True when `value` is a LinkedIn vanity slug (the URL handle), not a display name.
+ * LinkedIn auto-handles look like `jakub-žemlička-50779a201`.
+ */
+export function looksLikeLinkedInVanityHandle(value: string, handle?: string): boolean {
+  const normalized = value.normalize("NFC").trim();
+  if (!normalized) {
+    return true;
+  }
+  if (handle && normalized.toLowerCase() === handle.normalize("NFC").trim().toLowerCase()) {
+    return true;
+  }
+  if (/\s/.test(normalized)) {
+    return false;
+  }
+  const lastSegment = normalized.split("-").pop() ?? "";
+  return /^[a-f0-9]{8,12}$/i.test(lastSegment) && /\d/.test(lastSegment);
+}
+
+function titleCaseHandleToken(token: string): string {
+  const chars = [...token];
+  const first = chars.shift();
+  if (!first) {
+    return token;
+  }
+  return first.toLocaleUpperCase() + chars.join("").toLocaleLowerCase();
+}
+
+/**
+ * Last-resort name from a LinkedIn vanity handle when DOM/Voyager identity is missing.
+ * `jakub-žemlička-50779a201` → Jakub / Žemlička.
+ */
+export function displayNameFromLinkedInHandle(handle: string): {
+  firstName: string;
+  lastName?: string;
+  middleName?: string;
+} | null {
+  let decoded = handle;
+  try {
+    decoded = decodeURIComponent(handle);
+  } catch {
+    // Keep the raw handle when it is not percent-encoded.
+  }
+  const stripped = decoded
+    .normalize("NFC")
+    .replace(/-[a-f0-9]{8,12}$/i, (suffix) => (/\d/.test(suffix.slice(1)) ? "" : suffix));
+  const tokens = stripped.split("-").filter(Boolean);
+  if (tokens.length < 2) {
+    return null;
+  }
+  const titled = tokens.map(titleCaseHandleToken);
+  const firstName = titled[0];
+  const lastName = titled[titled.length - 1];
+  if (!firstName) {
+    return null;
+  }
+  return {
+    firstName,
+    ...(lastName && lastName !== firstName ? { lastName } : {}),
+    ...(titled.length > 2 ? { middleName: titled.slice(1, -1).join(" ") } : {}),
+  };
+}
+
 export function splitName(fullName: string): {
   firstName: string;
   middleName?: string;
@@ -163,16 +239,19 @@ export function splitName(fullName: string): {
   };
 }
 
-export function extractSduiIdentity(doc?: Document): SduiIdentity | null {
+export function extractSduiIdentity(doc?: Document, handle?: string): SduiIdentity | null {
   const topcard = getTopcard(doc);
   if (!topcard) {
     return null;
   }
 
+  const nameCandidates = [
+    text(topcard.querySelector("h1")),
+    text(topcard.querySelector("h2")),
+    text(topcard.querySelector('[data-anonymize="person-name"]')),
+  ].filter(Boolean);
   const fullName =
-    text(topcard.querySelector("h1")) ||
-    text(topcard.querySelector("h2")) ||
-    text(topcard.querySelector('[data-anonymize="person-name"]'));
+    nameCandidates.find((candidate) => !looksLikeLinkedInVanityHandle(candidate, handle)) ?? "";
   if (!fullName) {
     return null;
   }
@@ -197,6 +276,9 @@ export function extractSduiIdentity(doc?: Document): SduiIdentity | null {
       .find((s) => /profile|displayphoto|shrink/i.test(s));
 
   const { firstName, middleName, lastName } = splitName(fullName);
+  if (!firstName || looksLikeLinkedInVanityHandle(firstName, handle)) {
+    return null;
+  }
 
   return {
     firstName,
@@ -211,23 +293,32 @@ export function extractSduiIdentity(doc?: Document): SduiIdentity | null {
 // ─── Bio ─────────────────────────────────────────────────────────────────────
 
 export function extractSduiBio(doc?: Document): string | undefined {
-  const aboutCard = getDoc(doc).querySelector('[componentkey*="About"]');
-  if (!aboutCard) {
+  try {
+    const d = getDoc(doc);
+    const aboutCard =
+      d.querySelector('[componentkey*="AboutTopLevelSection"]') ??
+      d.querySelector('[componentkey*="About"]') ??
+      d.querySelector("section:has(#about)") ??
+      d.querySelector("#about")?.closest("section");
+    if (!aboutCard) {
+      return undefined;
+    }
+
+    const expandable = text(aboutCard.querySelector('[data-testid="expandable-text-box"]'));
+    if (expandable) {
+      return expandable;
+    }
+
+    const candidates = [...aboutCard.querySelectorAll("p, span")]
+      .filter((el) => el.children.length === 0)
+      .map((el) => text(el))
+      .filter((t) => t.length > 20 && !/^[\w\s]+•[\w\s]+•/.test(t))
+      .sort((a, b) => b.length - a.length);
+
+    return candidates[0] || undefined;
+  } catch {
     return undefined;
   }
-
-  const expandable = text(aboutCard.querySelector('[data-testid="expandable-text-box"]'));
-  if (expandable && expandable.length > 20) {
-    return expandable;
-  }
-
-  const candidates = [...aboutCard.querySelectorAll("p, span")]
-    .filter((el) => el.children.length === 0)
-    .map((el) => text(el))
-    .filter((t) => t.length > 80 && !/^[\w\s]+•[\w\s]+•/.test(t))
-    .sort((a, b) => b.length - a.length);
-
-  return candidates[0] || undefined;
 }
 
 // ─── Work history ────────────────────────────────────────────────────────────
@@ -369,6 +460,7 @@ export function extractSduiEducation(doc?: Document): EducationEntry[] {
 /**
  * Scrolls the page and polls until SDUI experience section mounts, or timeout.
  * LinkedIn lazy-loads Experience/Education on scroll.
+ * Do not use requestAnimationFrame: inactive enrich tabs pause rAF forever.
  */
 export async function ensureProfileSectionsLoaded(
   doc?: Document,
@@ -378,25 +470,11 @@ export async function ensureProfileSectionsLoaded(
   const selector =
     '[componentkey*="ExperienceTopLevelSection"], section:has(#experience), #experience';
 
-  if (d.querySelector(selector)) {
-    return true;
-  }
-
-  const start = Date.now();
-
-  return new Promise((resolve) => {
-    const tick = () => {
-      if (d.querySelector(selector)) {
-        resolve(true);
-        return;
-      }
-      if (Date.now() - start > timeoutMs) {
-        resolve(false);
-        return;
-      }
+  return pollUntil(
+    () => Boolean(d.querySelector(selector)),
+    timeoutMs,
+    () => {
       window.scrollTo(0, document.body.scrollHeight * 0.4);
-      requestAnimationFrame(tick);
-    };
-    tick();
-  });
+    },
+  );
 }

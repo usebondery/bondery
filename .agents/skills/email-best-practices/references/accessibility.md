@@ -186,4 +186,4 @@ Automated tests do not catch everything. They will not tell you whether alt text
 
 ## Tooling
 
-When generating templates with React Email, the latest version handles several of the structural rules: `<Html>` sets `lang`/`dir`, `<Img>` defaults to `alt=""`, `<Markdown>` tables render `role="presentation"`, and `<Preview>` emits a `<title>`. Upgrade with `pnpm install react-email@latest`. The content rules — heading hierarchy, descriptive alt and link text, contrast, the linked-image rule — still have to be applied by hand.
+When generating templates with React Email, the latest version handles several of the structural rules: `<Html>` sets `lang`/`dir`, `<Img>` defaults to `alt=""`, `<Markdown>` tables render `role="presentation"`, and `<Preview>` emits a `<title>`. Upgrade with `npm install react-email@latest`. The content rules — heading hierarchy, descriptive alt and link text, contrast, the linked-image rule — still have to be applied by hand.

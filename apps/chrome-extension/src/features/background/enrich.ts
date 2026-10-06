@@ -3,9 +3,10 @@ import { enrichPersonFromLinkedIn } from "../../lib/api/domains/contacts";
 import { isAuthenticated } from "../../lib/auth";
 import { extLog } from "../../lib/log";
 import type { EnrichError, EnrichPersonRequest, SubmitEnrichData } from "../../lib/messaging/types";
+import { linkedInProfileUrl } from "../linkedin/handle";
 import { backgroundState } from "./state";
 
-const ENRICH_TIMEOUT_MINUTES = 1.5;
+const ENRICH_TIMEOUT_MINUTES = 3;
 const ENRICH_KEEPALIVE_MINUTES = 0.4;
 const PENDING_ENRICH_SESSION_KEY = "pendingEnrich";
 
@@ -178,14 +179,7 @@ export async function handleEnrichPersonRequest(
     senderTabId,
   };
 
-  const normalizedHandle = (() => {
-    try {
-      return decodeURIComponent(linkedinHandle);
-    } catch {
-      return linkedinHandle;
-    }
-  })();
-  const linkedinUrl = `https://www.linkedin.com/in/${encodeURIComponent(normalizedHandle)}/`;
+  const linkedinUrl = linkedInProfileUrl(linkedinHandle);
   extLog.debug("[background][enrich] opening LinkedIn tab", {
     linkedinUrl,
     requestId,
@@ -260,11 +254,17 @@ export async function handleSubmitEnrichData(
   }
 
   const { senderTabId, linkedinTabId } = backgroundState.pendingEnrich;
-  await clearPendingEnrich();
+
+  try {
+    await browser.alarms.clear("enrich-timeout");
+  } catch {
+    /* scrape is done; keep enrich-keepalive until the API returns */
+  }
 
   extLog.debug("[background][enrich] submitting to API", {
     contactId,
     eduCount: profile.educationHistory?.length ?? 0,
+    hasBio: Boolean(profile.linkedinBio),
     requestId,
     workCount: profile.workHistory?.length ?? 0,
   });
@@ -299,7 +299,11 @@ export async function handleSubmitEnrichData(
       /* sender tab may be closed */
     }
 
-    sendResponse(result);
+    try {
+      sendResponse(result);
+    } catch {
+      /* SUBMIT_ENRICH_DATA channel may already be closed */
+    }
   } catch (error) {
     try {
       await browser.tabs.remove(linkedinTabId);
@@ -322,6 +326,12 @@ export async function handleSubmitEnrichData(
       /* sender tab may be closed */
     }
 
-    sendResponse(result);
+    try {
+      sendResponse(result);
+    } catch {
+      /* SUBMIT_ENRICH_DATA channel may already be closed */
+    }
+  } finally {
+    await clearPendingEnrich();
   }
 }

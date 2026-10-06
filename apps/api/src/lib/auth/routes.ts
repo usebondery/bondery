@@ -14,7 +14,6 @@ import {
   BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH,
   betterAuthAuthorizationServerMetadataPaths,
   betterAuthOpenIdConfigurationPaths,
-  betterAuthPath,
   betterAuthProtectedResourceMetadataPaths,
 } from "@bondery/helpers/globals/paths";
 import type { FastifyInstance, FastifyRequest } from "fastify";
@@ -24,7 +23,6 @@ import { auth } from "./index.js";
 import { oauthProviders } from "./oauth-provider-config.js";
 import { resolveUnconfiguredSocialOAuthProvider } from "./oauth-social-request.js";
 import { isMagicLinkVerifyPath } from "./redact-auth-query.js";
-import { rewriteDcrRegistrationBody } from "./rewrite-dcr-registration-body.js";
 
 const authServerMetadataHandler = oauthProviderAuthServerMetadata(auth);
 const openIdConfigMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
@@ -119,13 +117,6 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
           "OAuth provider is not configured on this instance",
           "oauth_provider_not_configured",
         );
-      }
-
-      if (request.method === "POST") {
-        const path = request.url.split("?")[0] ?? request.url;
-        if (path === betterAuthPath("/oauth2/register")) {
-          request.body = rewriteDcrRegistrationBody(request.body);
-        }
       }
 
       const response = await auth.handler(toFetchRequest(request));

@@ -1,6 +1,6 @@
 # UX writing
 
-All user-visible copy goes through `packages/translations` — see [i18n.md](./i18n.md). This file defines **voice and structure**, not string keys.
+All user-visible copy goes through `packages/translations` — see [i18n.md](./i18n.md). This file defines **voice and structure**, not string keys. Word and sentence craft for published copy is Orwell-Hemingway in [`bondery-writing`](../../../bondery-writing/references/orwell-hemingway.md).
 
 ---
 

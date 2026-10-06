@@ -362,6 +362,18 @@
       "node": "./dist/globals/social-platform-urls.js",
       "types": "./src/globals/social-platform-urls.ts"
     },
+    "./globals/webapp-query": {
+      "default": "./dist/globals/webapp-query.js",
+      "import": "./dist/globals/webapp-query.js",
+      "node": "./dist/globals/webapp-query.js",
+      "types": "./src/globals/webapp-query.ts"
+    },
+    "./globals/webapp-query.test": {
+      "default": "./dist/globals/webapp-query.test.js",
+      "import": "./dist/globals/webapp-query.test.js",
+      "node": "./dist/globals/webapp-query.test.js",
+      "types": "./src/globals/webapp-query.test.ts"
+    },
     "./ids": {
       "default": "./dist/ids/index.js",
       "import": "./dist/ids/index.js",
@@ -708,12 +720,12 @@
   "scripts": {
     "build": "node ../../scripts/pkg/generate-doc-links.mjs && rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs helpers",
     "check:types": "tsc --noEmit",
-    "compile": "tsc",
-    "dev": "tsc --watch --preserveWatchOutput",
+    "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs helpers",
+    "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs helpers",
     "prepare": "pnpm run build",
     "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.2-rc.1"
+  "version": "1.10.2-rc.2"
 }

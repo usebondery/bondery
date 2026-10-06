@@ -13,7 +13,7 @@ pnpm exec wxt
 
 Load **`dist/chrome-mv3-dev`** in `chrome://extensions` (Developer mode → Load unpacked). `webExt.disabled: true` — WXT will not launch Chrome.
 
-Dev server: port **26633**, origin `http://127.0.0.1:26633` (`wxt.config.ts`). Chrome MV3 unpacked CSP allows `127.0.0.1` / `localhost` only; binding to IPv4 avoids `localhost` → `::1` dropping HMR `script-src`. After a CSP change, **Remove** the extension and **Load unpacked** again — Reload is not enough.
+Dev server: port **26633**, origin `http://127.0.0.1:26633` (`wxt.config.ts`). Chrome MV3 unpacked CSP allows that exact origin in `script-src`; `http://127.0.0.1:*` is dropped and Chrome falls back to `script-src 'self'`, which blocks the popup HMR scripts. Binding to IPv4 also avoids `localhost` → `::1`. After a CSP change, **Remove** the extension and **Load unpacked** again — Reload is not enough.
 
 Root scripts:
 

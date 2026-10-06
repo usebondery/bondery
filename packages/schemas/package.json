@@ -1134,11 +1134,11 @@
     "check:contracts:no-zod-infer-exports": "node scripts/check-contracts-no-zod-infer-exports.mjs",
     "check:contracts:openapi-examples": "pnpm exec tsx ./scripts/check-contracts-openapi-examples.ts",
     "check:types": "tsc --noEmit",
-    "compile": "tsc && node scripts/copy-locale-json.mjs",
-    "dev": "tsc --watch --preserveWatchOutput",
+    "compile": "tsc && node scripts/copy-locale-json.mjs && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs schemas",
+    "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs schemas",
     "prepare": "pnpm run build"
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.2-rc.1"
+  "version": "1.10.2-rc.2"
 }

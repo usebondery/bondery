@@ -12,7 +12,6 @@ import {
   extractProfileUrn,
   logEntityTypes,
   resolveEmploymentType,
-  tryEndpoints,
   voyagerFetch,
 } from "./voyagerShared";
 
@@ -317,6 +316,7 @@ const WORK_ENDPOINTS = (urn: string) => [
 export async function fetchFullWorkHistory(
   username: string,
   domLogos?: Map<string, string>,
+  skipNetworkLogos = false,
 ): Promise<WorkEntry[]> {
   // ── Step 1: Mine live page for the profileUrn and any embedded entities ──
   const blocks = extractLivePageJsonBlocks();
@@ -325,11 +325,18 @@ export async function fetchFullWorkHistory(
 
   const profileUrn = extractProfileUrn(entities, username);
 
-  // ── Step 2: Try dash API endpoints (authoritative — requests up to 100 entries) ──
+  // ── Step 2: Try dash API endpoints in parallel (count=100 per request) ──
   if (profileUrn) {
-    for (const path of WORK_ENDPOINTS(profileUrn)) {
-      const data = await voyagerFetch(path);
-      if (!data) {
+    const paths = WORK_ENDPOINTS(profileUrn);
+    const responses = await Promise.all(paths.map((path) => voyagerFetch(path)));
+
+    let untitledFallback: { entries: WorkEntry[]; apiEntities: Record<string, unknown>[] } | null =
+      null;
+
+    for (let i = 0; i < responses.length; i++) {
+      const data = responses[i];
+      const path = paths[i];
+      if (!data || !path) {
         continue;
       }
 
@@ -340,37 +347,34 @@ export async function fetchFullWorkHistory(
       );
 
       const entries = extractPositionsFromApiResponse(apiEntities, data);
-
-      // Accept if we got entries AND at least one has a title
       const hasTitle = entries.some((e) => e.title);
       if (entries.length > 0 && hasTitle) {
         extLog.debug(
           `[linkedin][fetchDetails] Parsed ${entries.length} work entries from API (with titles)`,
           entries.map((e) => `${e.title} @ ${e.companyName}`),
         );
-        return enrichWorkEntriesWithLogos(entries, apiEntities, domLogos);
+        return enrichWorkEntriesWithLogos(entries, apiEntities, domLogos, skipNetworkLogos);
       }
 
-      // If we got entries but no titles, keep trying other endpoints
-      if (entries.length > 0) {
+      if (entries.length > 0 && !untitledFallback) {
+        untitledFallback = { apiEntities, entries };
         extLog.debug(
-          `[linkedin][fetchDetails] Got ${entries.length} entries but no titles — trying next endpoint`,
+          `[linkedin][fetchDetails] Got ${entries.length} entries but no titles — keeping as fallback`,
         );
       }
     }
 
-    // Last resort: re-try first successful endpoint and return whatever we got
-    const data = await tryEndpoints(WORK_ENDPOINTS(profileUrn));
-    if (data) {
-      const apiEntities = collectIncludedEntities([data]);
-      const entries = extractPositionsFromApiResponse(apiEntities, data);
-      if (entries.length > 0) {
-        extLog.debug(
-          `[linkedin][fetchDetails] Parsed ${entries.length} work entries from API (fallback, may lack titles)`,
-          entries.map((e) => `${e.title} @ ${e.companyName}`),
-        );
-        return enrichWorkEntriesWithLogos(entries, apiEntities, domLogos);
-      }
+    if (untitledFallback) {
+      extLog.debug(
+        `[linkedin][fetchDetails] Parsed ${untitledFallback.entries.length} work entries from API (fallback, may lack titles)`,
+        untitledFallback.entries.map((e) => `${e.title} @ ${e.companyName}`),
+      );
+      return enrichWorkEntriesWithLogos(
+        untitledFallback.entries,
+        untitledFallback.apiEntities,
+        domLogos,
+        skipNetworkLogos,
+      );
     }
   } else {
     extLog.warn(`[linkedin][fetchDetails] No profileUrn — cannot call dash API`);
@@ -416,7 +420,7 @@ export async function fetchFullWorkHistory(
         `[linkedin][fetchDetails] Parsed ${entries.length} work entries from live page (fallback)`,
         entries.map((e) => `${e.title} @ ${e.companyName}`),
       );
-      return enrichWorkEntriesWithLogos(entries, entities, domLogos);
+      return enrichWorkEntriesWithLogos(entries, entities, domLogos, skipNetworkLogos);
     }
   }
 

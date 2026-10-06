@@ -1,5 +1,6 @@
 "use client";
 
+import { NEXT_ACTION_PARAM, NEXT_ACTIONS } from "@bondery/helpers/globals/webapp-query";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -79,7 +80,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
       return;
     }
 
-    if (searchParams.get("addInteraction") !== "1") {
+    if (searchParams.get(NEXT_ACTION_PARAM) !== NEXT_ACTIONS.ADD_INTERACTION) {
       return;
     }
 
@@ -92,7 +93,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     });
 
     const params = new URLSearchParams(searchParams.toString());
-    params.delete("addInteraction");
+    params.delete(NEXT_ACTION_PARAM);
     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
     router.replace(nextUrl);
   }, [searchParams, activityModalContacts, contact.id, contactsHasMore, pathname, router]);

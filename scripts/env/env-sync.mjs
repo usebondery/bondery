@@ -7,17 +7,17 @@
  */
 
 import { execSync } from "node:child_process";
-import { dirname, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const stage = process.argv.includes("--stage");
 
-function run(command) {
-  execSync(command, { cwd: root, shell: true, stdio: "inherit" });
+function run(command, cwd = root) {
+  execSync(command, { cwd, shell: true, stdio: "inherit" });
 }
 
-run("pnpm --filter @bondery/helpers run build");
+run("node --run build", join(root, "packages/helpers"));
 
 const exampleArgs = stage ? " --stage" : "";
 run(`node scripts/env/generate-env-examples.mjs${exampleArgs}`);

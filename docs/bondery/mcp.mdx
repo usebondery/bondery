@@ -141,13 +141,15 @@ Copy the **mcp.json** snippet from Settings (or add this to `.cursor/mcp.json` /
 }
 ```
 
-On a self-hosted instance, use `{apiBaseUrl}/mcp` instead of the hosted URL. If you already have other servers, merge the `bondery` entry into the existing `mcpServers` object. Cursor will open Bondery’s OAuth login and consent pages.
+On a self-hosted instance, use `{apiBaseUrl}/mcp` instead of the hosted URL. If you already have other servers, merge the `bondery` entry into the existing `mcpServers` object.
 
-Cursor’s current HTTP client still negotiates MCP `2025-11-25`. After you approve access, initialize will fail until Cursor speaks `2026-07-28`. Claude Desktop and other 2026 clients can call the tools in the table above.
+Cursor’s HTTP client still negotiates MCP `2025-11-25`. Tools do not run until Cursor speaks `2026-07-28`. MCP OAuth uses Client ID Metadata Documents (CIMD), not RFC 7591 Dynamic Client Registration. A Cursor build that only knows DCR cannot sign in.
+
+Claude Desktop and other 2026 CIMD clients can call the tools in the table above.
 
 ## Other MCP clients
 
-Any MCP client that supports HTTP + OAuth 2.1 with PKCE can use the same URL. Claude Desktop uses Client ID Metadata Documents (CIMD). Cursor uses RFC 7591 dynamic client registration. Both stay limited to MCP tools (`mcp:read` / `mcp:write`); they cannot call the REST API.
+Any MCP client that supports HTTP + OAuth 2.1 with PKCE and Client ID Metadata Documents (CIMD) can use the same URL. Assistants stay limited to MCP tools (`mcp:read` / `mcp:write`); they cannot call the REST API.
 
 Headless clients (for example Hermes) discover OAuth from `HEAD` or `GET` `/mcp`. Unauthenticated probes return RFC 9728 `WWW-Authenticate` so the client can start the authorization-server metadata flow. Configure `auth: oauth` (or the client's equivalent), not a REST API key. Device authorization is not offered; sign-in still uses the browser PKCE flow. If a client probes `/.well-known/mcp` on the website or API, follow the 308 to `/mcp` and expect that same OAuth challenge — not metadata JSON.
 

@@ -2375,6 +2375,7 @@ export default interface Resources {
       "AddInteraction": "Add interaction with this person"
     },
     "Settings": {
+      "ApiServer": "API server",
       "SignOut": "Sign out"
     },
     "UpdateRequired": {

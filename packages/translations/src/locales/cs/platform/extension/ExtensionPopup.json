@@ -11,6 +11,7 @@
     "AddInteraction": "Přidat interakci s touto osobou"
   },
   "Settings": {
+    "ApiServer": "API server",
     "SignOut": "Odhlásit se"
   },
   "UpdateRequired": {

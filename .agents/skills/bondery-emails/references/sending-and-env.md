@@ -52,6 +52,9 @@ Declared in `apps/api/src/env-schema.ts`, `.env.local.example`, `deploy/bondery/
 |------|----------|--------------|-------------|
 | 465 | `true` | `false` | `rejectUnauthorized: true` |
 | 587 | `false` | `true` | `rejectUnauthorized: true` |
+| Loopback (`127.0.0.1` / `localhost`) in non-production | `false` | `false` (`ignoreTLS: true`) | unused |
+
+Development and other non-production, non-test boots **throw** when `BONDERY_PRIVATE_EMAIL_HOST` is not loopback. Message: start Mailpit (`pnpm run start:mailpit`) and set `BONDERY_PRIVATE_EMAIL_HOST=127.0.0.1`. Production still uses STARTTLS on 587 / implicit TLS on 465.
 
 ## From / replyTo / CC conventions
 

@@ -47,5 +47,5 @@ export function getAvatarColorFromName(
   }
 
   const colorIndex = getHash(normalized) % AVATAR_COLOR_PALETTE.length;
-  return AVATAR_COLOR_PALETTE[colorIndex];
+  return AVATAR_COLOR_PALETTE[colorIndex] ?? "blue";
 }

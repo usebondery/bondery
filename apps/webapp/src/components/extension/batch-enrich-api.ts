@@ -1,6 +1,9 @@
 /** Number of consecutive timeouts before the circuit breaker aborts the loop. */
 export const MAX_CONSECUTIVE_TIMEOUTS = 5;
 
+/** Scrape can take 180s; API (history / logos / photo / geo) can take another ~90s. */
+export const ENRICH_VIA_EXTENSION_TIMEOUT_MS = 270_000;
+
 export const ENRICH_REQUEST_TYPE = "BONDERY_ENRICH_REQUEST";
 export const ENRICH_RESULT_TYPE = "BONDERY_ENRICH_RESULT";
 
@@ -14,7 +17,7 @@ export function enrichSinglePersonViaExtension(
     const timeout = setTimeout(() => {
       cleanup();
       resolve({ error: "timeout", success: false });
-    }, 90_000);
+    }, ENRICH_VIA_EXTENSION_TIMEOUT_MS);
 
     const onMessage = (event: MessageEvent) => {
       if (event.source !== window) {

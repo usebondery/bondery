@@ -58,20 +58,22 @@ await expect(page.getByTestId('login-github')).toBeVisible()
 GitHub login is inherently slow and environment-dependent. Use:
 
 - `github-login` project with extended timeout (`300_000` ms in config)
-- `auth` project with pre-saved `storageState` for specs that don't need to test OAuth itself
-- `E2E_REUSE_SERVER=1` to avoid port races during local dev
+- `auth` project with email `storageState` (`.auth/email-user.json`) for in-app specs that do not need GitHub
+- `setup` only when the spec must capture GitHub `storageState`
 
-### Port conflicts
+### Missing stack
 
-`global-setup.mjs` kills 26631/26632 unless `E2E_REUSE_SERVER=1`. If tests fail with "port in use", run `pnpm run kill:dev` or set reuse flag.
+Playwright does not start the API or webapp. If health probes fail, start `pnpm run start:mailpit` and `pnpm run dev:webapp-api`.
 
-### Stale auth state
+### Stale GitHub auth state
 
-`login.authenticated.spec.ts` skips when `.auth/user.json` is missing. Re-run:
+GitHub OAuth regression (`github-login` / `auth.setup.ts`) fails when `.auth/user.json` is missing or expired. Re-run:
 
 ```bash
 pnpm run test:e2e:auth-setup -w webapp -- --headed
 ```
+
+In-app `auth` specs use `.auth/email-user.json` from `email-setup`. Delete that file if the shared session is stale, then re-run `--project=auth`. Do not log out in `auth` specs.
 
 ## Retries
 

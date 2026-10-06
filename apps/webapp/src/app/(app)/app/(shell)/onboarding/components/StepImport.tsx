@@ -140,7 +140,13 @@ export function StepImport({
         </Card>
       </SimpleGrid>
 
-      <Button color="gray" onClick={onSkipImport} size="md" variant="subtle">
+      <Button
+        color="gray"
+        data-testid="onboarding-skip-import"
+        onClick={onSkipImport}
+        size="md"
+        variant="subtle"
+      >
         {t("SkipImport")}
       </Button>
     </Stack>

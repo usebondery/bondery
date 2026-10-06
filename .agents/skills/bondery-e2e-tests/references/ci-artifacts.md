@@ -13,7 +13,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/shared/setup-pnpm
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run test:e2e -w webapp -- --project=unauth --project=oauth-callback
+      - run: pnpm run start:mailpit && pnpm run dev:webapp-api
+      - run: pnpm run test:e2e -w webapp -- --project=unauth --project=oauth-callback --project=auth
         env:
           BONDERY_PUBLIC_API_URL: http://127.0.0.1:26631
           BONDERY_PUBLIC_WEBAPP_URL: http://127.0.0.1:26632
@@ -25,9 +26,9 @@ jobs:
           retention-days: 14
 ```
 
-**CI scope today:** prefer `unauth` + `oauth-callback` projects — no GitHub secrets or manual auth file.
+**CI scope today:** prefer `unauth` + `oauth-callback` + email-authenticated `auth` specs — no GitHub secrets or `.auth/user.json`. The `auth` project uses Mailpit magic-link `storageState` (`.auth/email-user.json`). A future job also needs Mailpit on `127.0.0.1:26641` and loopback SMTP. There is no GitHub Actions E2E job yet.
 
-**Full OAuth in CI:** requires GitHub test credentials, encrypted secrets, and a generated `storageState` — treat as a separate milestone.
+**GitHub login in CI:** optional. It needs GitHub test credentials, encrypted secrets, and `auth.setup.ts` — treat as a separate milestone.
 
 ## Reporters
 
@@ -58,10 +59,10 @@ Output under `apps/webapp/e2e/test-results/` (gitignored).
 | Variable | Purpose |
 |----------|---------|
 | `CI` | Enables `forbidOnly`, retries |
-| `E2E_REUSE_SERVER` | Skip port kill; reuse dev stack |
 | `E2E_PAUSE_GITHUB` | `page.pause()` in GitHub login spec |
-| `BONDERY_PUBLIC_API_URL` | Set by config `webServer.env` |
-| `BONDERY_PUBLIC_WEBAPP_URL` | Set by config `webServer.env` |
+| `E2E_PUBLIC_HOST` | Optional. Must match `BONDERY_PUBLIC_*` hosts when set |
+| `BONDERY_PUBLIC_API_URL` | Source of Playwright API health URL and cookie domain |
+| `BONDERY_PUBLIC_WEBAPP_URL` | Source of Playwright `baseURL` and webapp health URL |
 
 ## Secrets
 
@@ -69,7 +70,8 @@ Never commit OAuth client secrets or `.auth/user.json`. CI jobs that need GitHub
 
 ## CI checklist
 
-- [ ] CI runs projects that don't require manual OAuth unless secrets are configured
+- [ ] CI runs `unauth`, `oauth-callback`, and email-authenticated `auth` without GitHub secrets
+- [ ] GitHub login stays optional unless secrets are configured
 - [ ] `forbidOnly: true` in CI (`test.only` fails build)
 - [ ] Failure artifacts uploaded (trace, screenshot)
 - [ ] Env URLs use `127.0.0.1` matching local e2e config

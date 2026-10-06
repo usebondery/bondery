@@ -92,6 +92,11 @@ export { PersonCard, type PersonCardProps } from "#nextjs/PersonCard/index.js";
 export { PersonChip, type PersonChipProps } from "#nextjs/PersonChip/index.js";
 export { PeopleMultiPickerInput } from "#PeopleMultiPickerInput/index.js";
 export {
+  type PersonChipSize,
+  personChipBadgeStyles,
+  personChipSizes,
+} from "#PersonChip/index.js";
+export {
   PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT,
   PEOPLE_PICKER_DROPDOWN_WIDTH,
   PEOPLE_PICKER_PAGE_SIZE,

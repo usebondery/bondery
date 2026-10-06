@@ -158,7 +158,7 @@ After schema changes, commit the new migration files and regenerate the Prisma c
 ---
 
 <Callout type="info">
-**Fun fact:** Bondery local apps use consecutive ports in the `2663x` block — phone keypad **B-O-N-D** → **2-6-6-3** ("Dial BOND"). Local Postgres uses **54322** (direct connection, no gateway). Local API Redis uses **26636** (`pnpm run start:redis`). Port constants live in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts).
+**Fun fact:** Bondery local apps use consecutive ports in the `2663x` block — phone keypad **B-O-N-D** → **2-6-6-3** ("Dial BOND"). Local Postgres uses **54322** (direct connection, no gateway). Local API Redis uses **26636** (`pnpm run start:redis`). Local Mailpit uses **26640** (SMTP) and **26641** (UI) (`pnpm run start:mailpit`). Port constants live in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts).
 </Callout>
 
 ## Shared packages

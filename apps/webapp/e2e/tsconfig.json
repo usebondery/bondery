@@ -7,5 +7,5 @@
     "target": "ES2022",
     "types": ["node"]
   },
-  "include": ["./**/*.ts"]
+  "include": ["./**/*.ts", "./**/*.d.ts"]
 }

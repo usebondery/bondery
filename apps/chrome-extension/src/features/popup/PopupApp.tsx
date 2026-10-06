@@ -1,4 +1,4 @@
-import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { NEXT_ACTIONS, personPathWithNextAction, WEBAPP_ROUTES } from "@bondery/helpers";
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { config } from "../../config";
@@ -178,7 +178,7 @@ export default function PopupApp() {
 
   function openPersonWithAddInteraction(contactId: string) {
     browser.tabs.create({
-      url: `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}?addInteraction=1`,
+      url: `${config.appUrl}${personPathWithNextAction(contactId, NEXT_ACTIONS.ADD_INTERACTION)}`,
     });
     window.close();
   }

@@ -121,9 +121,11 @@
     "setup:seaweedfs": "pnpm run build:api && node --env-file=.env.local apps/api/dist/cli/ensure-storage-buckets.js",
     "setup:stripe": "node --import tsx scripts/ops/setup-stripe.ts",
     "start:apps": "turbo start",
+    "start:mailpit": "docker compose -f deploy/bondery/docker-compose.dev-mail.yml up -d",
     "start:postgres": "docker compose -f deploy/bondery/docker-compose.dev-db.yml --env-file .env.local up -d",
     "start:redis": "docker compose -f deploy/bondery/docker-compose.dev-redis.yml up -d",
     "start:seaweedfs": "docker compose -f deploy/bondery/docker-compose.seaweedfs.yml -f deploy/bondery/docker-compose.seaweedfs.dev.yml --env-file .env.local up -d",
+    "stop:mailpit": "docker compose -f deploy/bondery/docker-compose.dev-mail.yml down",
     "stop:postgres": "docker compose -f deploy/bondery/docker-compose.dev-db.yml --env-file .env.local down",
     "stop:redis": "docker compose -f deploy/bondery/docker-compose.dev-redis.yml down",
     "stop:seaweedfs": "docker compose -f deploy/bondery/docker-compose.seaweedfs.yml -f deploy/bondery/docker-compose.seaweedfs.dev.yml --env-file .env.local down",
@@ -140,5 +142,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.10.2-rc.1"
+  "version": "1.10.2-rc.2"
 }

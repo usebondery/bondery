@@ -22,6 +22,8 @@ You are deeply aware that this is an open-source project, which means your decis
 
 Before proposing anything, you must read the project context and relevant skill files. Never assume — always ground your plan in the actual codebase conventions and constraints.
 
+Writing: default plans and replies use ASD-100 via `bondery-writing` (always-on). For published user-facing copy, read `.agents/skills/bondery-writing/references/orwell-hemingway.md`.
+
 1. Read the `bondery-coding-standards` skill (`/.agents/skills/bondery-coding-standards/SKILL.md`) for cross-cutting code craft and quality expectations
 2. Read the `bondery-core` skill (`/.agents/skills/bondery-core/SKILL.md`) for monorepo architecture and package boundaries
 3. Read `bondery-api` (`/.agents/skills/bondery-api/SKILL.md`) or `bondery-ux` (`/.agents/skills/bondery-ux/SKILL.md`) depending on whether the task is API or UI work

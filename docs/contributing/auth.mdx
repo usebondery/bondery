@@ -42,7 +42,7 @@ These well-known documents live on the **API** host (`BONDERY_PUBLIC_API_URL`), 
 | OpenID configuration | `/auth/.well-known/openid-configuration` | `/.well-known/openid-configuration`, `/.well-known/openid-configuration/auth` |
 | Protected resource (RFC 9728) | `/.well-known/oauth-protected-resource/mcp` | `/.well-known/oauth-protected-resource`, `/mcp/.well-known/oauth-protected-resource` |
 
-Unauthenticated `GET`/`HEAD` `/mcp` return the same RFC 9728 `WWW-Authenticate` challenge as `POST`. Authorize, token, and registration endpoints stay under `/auth`. Website and API `/.well-known/mcp` are HTTP 308 pointers to `{API}/mcp`, not OAuth metadata (those documents stay in the table above).
+Unauthenticated `GET`/`HEAD` `/mcp` return the same RFC 9728 `WWW-Authenticate` challenge as `POST`. Authorize and token endpoints stay under `/auth`. MCP assistants register with CIMD, not RFC 7591 `/oauth2/register`. Website and API `/.well-known/mcp` are HTTP 308 pointers to `{API}/mcp`, not OAuth metadata (those documents stay in the table above).
 
 ## Local bootstrap
 

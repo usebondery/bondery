@@ -38,9 +38,8 @@ export default defineConfig({
   // Target Chromium browsers
   browser: "chrome",
 
-  // Bind HMR to 127.0.0.1. Chrome MV3 only allows localhost/127.0.0.1 in
-  // unpacked extension_pages CSP; `localhost` can resolve to ::1 and then
-  // Chrome drops the extra script-src and falls back to `script-src 'self'`.
+  // Bind HMR to 127.0.0.1. Chrome MV3 unpacked CSP allows that host only;
+  // `localhost` can resolve to ::1 and then Chrome drops the extra script-src.
   dev: {
     server: {
       host: "127.0.0.1",
@@ -86,19 +85,6 @@ export default defineConfig({
         }
       }
     },
-    "build:manifestGenerated": (wxt, manifest) => {
-      if (wxt.config.command !== "serve") {
-        return;
-      }
-      // WXT adds `http://127.0.0.1:26633`. Chrome's unpacked CSP exception is
-      // the host (any port), written as `http://127.0.0.1:*`.
-      manifest.content_security_policy = {
-        extension_pages:
-          "script-src 'self' 'wasm-unsafe-eval' http://127.0.0.1:* http://localhost:*; object-src 'self';",
-        sandbox:
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' http://127.0.0.1:* http://localhost:*; sandbox allow-scripts allow-forms allow-popups allow-modals; child-src 'self';",
-      };
-    },
   },
 
   // Disable auto-imports for explicit control during migration
@@ -106,7 +92,7 @@ export default defineConfig({
 
   // Dynamic manifest configuration using environment variables
   manifest: ({ mode }) => {
-    const _isDev = mode === "development";
+    const isDev = mode === "development";
 
     const webappUrl = process.env.BONDERY_PUBLIC_WEBAPP_URL || DEV_URLS.webapp;
     const apiUrl = process.env.BONDERY_PUBLIC_API_URL || DEV_URLS.api;
@@ -137,6 +123,16 @@ export default defineConfig({
         },
         default_title: "Bondery",
       },
+      // Unpacked MV3 only allows localhost / 127.0.0.1 in script-src. Use the
+      // exact Vite origin — `http://127.0.0.1:*` is dropped and Chrome falls
+      // back to `script-src 'self'`, which blocks HMR in the popup.
+      ...(isDev
+        ? {
+            content_security_policy: {
+              extension_pages: `script-src 'self' 'wasm-unsafe-eval' ${extensionDevOrigin}; object-src 'self';`,
+            },
+          }
+        : {}),
       description: "Import contacts from social media directly to Bondery Webapp",
       host_permissions: hostPermissions,
 

@@ -20,6 +20,8 @@ You do not invent conventions. You do not guess. You do not over-engineer. You w
 
 Before touching any code, read all relevant skill files and the implementation plan in full.
 
+Writing: default replies, comments, and JSDoc use ASD-100 via `bondery-writing` (always-on). For published user-facing copy, read `.agents/skills/bondery-writing/references/orwell-hemingway.md`.
+
 Always read:
 
 - `bondery-coding-standards` skill (`/.agents/skills/bondery-coding-standards/SKILL.md`) — cross-cutting readability, type safety, structure, and tooling expectations

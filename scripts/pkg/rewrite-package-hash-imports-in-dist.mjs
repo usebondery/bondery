@@ -2,10 +2,15 @@
  * Rewrites internal hash imports in package dist folders to relative paths.
  * tsc preserves package.json "imports" specifiers; Node/Next consumers need relative ESM paths.
  *
+ * Then copies dist into pnpm injected workspace copies. `injectWorkspacePackages`
+ * does not symlink; Next reads `apps/webapp/node_modules/@bondery/<pkg>`, not
+ * `packages/<pkg>/dist`. `syncInjectedDepsAfterScripts` only runs after `build`
+ * and `compile` exit, so watch must copy here.
+ *
  * Usage: node scripts/pkg/rewrite-package-hash-imports-in-dist.mjs [package-dir ...]
  * Default: all compilable packages under packages/
  */
-import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { cp, lstat, readdir, readFile, realpath, stat, writeFile } from "node:fs/promises";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -78,7 +83,90 @@ async function rewritePackage(pkgName) {
     }
   }
   console.log(`rewrote # imports in ${changed} file(s) under packages/${pkgName}/dist`);
+  await syncInjectedDist(pkgName);
   return changed;
+}
+
+function skipInjectedPath(dest) {
+  const normalized = dest.replaceAll("\\", "/");
+  return normalized.includes("/.ignored_") || normalized.includes("_pacquet-stage_");
+}
+
+async function collectInjectedPackageDirs(pkgName) {
+  const sourcePkg = join(root, "packages", pkgName);
+  const sourceReal = await realpath(sourcePkg);
+  const candidates = [join(root, "node_modules", "@bondery", pkgName)];
+  for (const group of ["apps", "packages"]) {
+    const groupDir = join(root, group);
+    let entries;
+    try {
+      entries = await readdir(groupDir, { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+      candidates.push(join(groupDir, entry.name, "node_modules", "@bondery", pkgName));
+    }
+  }
+
+  const dests = [];
+  const sourceDist = join(sourcePkg, "dist");
+  for (const dest of candidates) {
+    if (skipInjectedPath(dest)) {
+      continue;
+    }
+    let destStat;
+    try {
+      destStat = await lstat(dest);
+    } catch {
+      continue;
+    }
+    if (destStat.isSymbolicLink()) {
+      continue;
+    }
+    const destReal = await realpath(dest);
+    if (destReal === sourceReal) {
+      continue;
+    }
+    if (await distAlreadyHardlinked(sourceDist, dest)) {
+      continue;
+    }
+    dests.push(dest);
+  }
+  return dests;
+}
+
+async function distAlreadyHardlinked(sourceDist, dest) {
+  try {
+    const [srcStat, destStat] = await Promise.all([
+      lstat(join(sourceDist, "index.js")),
+      lstat(join(dest, "dist", "index.js")),
+    ]);
+    return srcStat.ino === destStat.ino && srcStat.dev === destStat.dev;
+  } catch {
+    return false;
+  }
+}
+
+async function syncInjectedDist(pkgName) {
+  const sourceDist = join(root, "packages", pkgName, "dist");
+  try {
+    await stat(sourceDist);
+  } catch {
+    return;
+  }
+  const dests = await collectInjectedPackageDirs(pkgName);
+  for (const dest of dests) {
+    await cp(sourceDist, join(dest, "dist"), { force: true, recursive: true });
+  }
+  if (dests.length > 0) {
+    console.log(
+      `synced dist to ${dests.length} injected cop${dests.length === 1 ? "y" : "ies"} of @bondery/${pkgName}`,
+    );
+  }
 }
 
 const targets = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_PACKAGES;

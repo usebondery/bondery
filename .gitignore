@@ -13,8 +13,14 @@
 
 /web
 
+# Playwright auth storage (local sessions)
+apps/webapp/e2e/.auth/
+
 # testing
 /coverage
+**/test-results/
+**/playwright-report/
+**/blob-report/
 
 # next.js
 **/.next/

@@ -77,6 +77,8 @@ Optional flags on `env`: `--no-pull`, `--skip-check`, `--dry-run`, `--only=api,w
 
 Optional for local dev when you need shared team secrets (SMTP, GitHub OAuth, Mapy, S3, etc.). Manifest entries with `syncable: true` define which canonical keys are pulled. See the comment block above `ENV_MANIFEST` in [`manifest.ts`](../../packages/helpers/src/env/manifest.ts) for sync recommendations.
 
+**Development SMTP must be Mailpit.** Set Infisical **development** `BONDERY_PRIVATE_EMAIL_HOST` / `PORT` to `127.0.0.1` / `26640` (any user/pass). Staging and production stay on Plunk. If development Infisical still has ProtonMail, `pnpm run env:pull` restores that host and the development API refuses to boot.
+
 ```bash
 # one-time
 infisical login

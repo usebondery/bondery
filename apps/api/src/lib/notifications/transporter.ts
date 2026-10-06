@@ -167,8 +167,51 @@ async function runEmailVerify(): Promise<EmailReadiness> {
   }
 }
 
+function isLoopbackSmtpHost(host: string): boolean {
+  return host === "127.0.0.1" || host === "localhost";
+}
+
+function isProductionEnvironment(): boolean {
+  return process.env.NODE_ENV === "production";
+}
+
+function assertDevelopmentSmtpIsLoopback(config: EmailConfig): void {
+  if (shouldSkipLiveRuntimeVerify() || isProductionEnvironment()) {
+    return;
+  }
+
+  if (isLoopbackSmtpHost(config.host)) {
+    return;
+  }
+
+  throw new Error(
+    "Development SMTP must be Mailpit on loopback. Start Mailpit (`pnpm run start:mailpit`) and set BONDERY_PRIVATE_EMAIL_HOST=127.0.0.1.",
+  );
+}
+
 export function emailTransportOptions(config: EmailConfig) {
   const secure = config.port === 465;
+  const useInsecureLoopback = isLoopbackSmtpHost(config.host) && !isProductionEnvironment();
+
+  if (useInsecureLoopback) {
+    return {
+      auth: {
+        pass: config.pass,
+        user: config.user,
+      },
+      host: config.host,
+      ignoreTLS: true,
+      maxConnections: EMAIL_POOL_MAX_CONNECTIONS,
+      maxMessages: EMAIL_POOL_MAX_MESSAGES,
+      pool: true,
+      port: config.port,
+      requireTLS: false,
+      secure: false,
+      tls: {
+        rejectUnauthorized: true,
+      },
+    };
+  }
 
   return {
     auth: {
@@ -176,6 +219,7 @@ export function emailTransportOptions(config: EmailConfig) {
       user: config.user,
     },
     host: config.host,
+    ignoreTLS: false,
     maxConnections: EMAIL_POOL_MAX_CONNECTIONS,
     maxMessages: EMAIL_POOL_MAX_MESSAGES,
     pool: true,
@@ -303,8 +347,16 @@ export async function initEmailTransport(log?: FastifyBaseLogger): Promise<Email
     return emailReadiness;
   }
 
-  const fromAddress = getEmailConfig()?.fromAddress;
-  if (fromAddress?.toLowerCase().endsWith("@example.com")) {
+  const config = getEmailConfig();
+  if (config) {
+    assertDevelopmentSmtpIsLoopback(config);
+  }
+
+  const fromAddress = config?.fromAddress;
+  if (
+    fromAddress?.toLowerCase().endsWith("@example.com") &&
+    !(config && isLoopbackSmtpHost(config.host))
+  ) {
     log?.error(
       "BONDERY_PRIVATE_EMAIL_ADDRESS is a placeholder (@example.com); SMTP will reject MAIL FROM. Set it to the SMTP mailbox in Infisical and run pnpm run env:pull.",
     );

@@ -1,0 +1,19 @@
+# Local dev Mailpit only — no Traefik, no dokploy-network.
+#
+#   pnpm run start:mailpit
+#
+# SMTP 26640 (DEV_PORTS.MAILPIT_SMTP), UI 26641 (DEV_PORTS.MAILPIT_UI).
+# Ephemeral — no persistence.
+
+services:
+  mailpit:
+    image: axllent/mailpit:v1.27
+    container_name: bondery-mailpit
+    restart: unless-stopped
+    ports:
+      - "26640:1025"
+      - "26641:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: "1"
+      MP_SMTP_AUTH_ALLOW_INSECURE: "1"
+      MP_MAX_MESSAGES: "500"

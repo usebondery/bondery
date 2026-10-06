@@ -224,13 +224,9 @@ const result = await doSomething();
 
 ## 5. Writing style
 
-Study how Ente writes their blog — this is the tone and quality to aim for.
+Study how Ente writes their blog — this is the structure and quality to aim for.
 
-### Tone
-
-- **Conversational but not sloppy.** Write like you're explaining something to a smart friend. No jargon walls, no corporate fluff.
-- **Confident and direct.** Say what the thing does. Don't hedge with "we think this might help" — say "this helps."
-- **Short sentences.** If a sentence has a comma, consider splitting it. Paragraphs should be 2–4 sentences max.
+**Prose craft:** Orwell-Hemingway in [`bondery-writing`](../../skills/bondery-writing/references/orwell-hemingway.md). **Personality:** warm friend in [`bondery-brand`](../../skills/bondery-brand/SKILL.md). This section owns blog structure, openings, and scanner habits only.
 
 ### Opening
 
@@ -261,14 +257,13 @@ For each feature or section:
 - Optionally look forward briefly — what's coming next.
 - A closing quote or one-liner can work well, but don't force it.
 
-### General rules
+### Scanner habits
 
-- **No fluff.** Every sentence should add information or move the reader forward.
-- **Use "you" and "your"** to address the reader directly.
-- **Bold** key phrases sparingly for scanners.
-- **Use bullet lists** for multiple items or features instead of long paragraphs.
-- **Numbers and specifics** beat vague claims. "Over 100,000 cards" is better than "many cards."
-- **One idea per paragraph.** If you switch topics, start a new paragraph.
+- Use "you" and "your".
+- **Bold** key phrases sparingly.
+- Use bullet lists for multiple items instead of long paragraphs.
+- Numbers beat vague claims. "Over 100,000 cards" is better than "many cards."
+- One idea per paragraph. If you switch topics, start a new paragraph.
 
 ## 6. SEO checklist
 

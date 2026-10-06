@@ -34,13 +34,13 @@ When creating a standalone module, default to keeping the example app. Only skip
 Use an explicit slug or path.
 
 ```bash
-pnx create-expo-module@latest key-value-store --local --platform apple android --features Function AsyncFunction
+npx create-expo-module@latest key-value-store --local --platform apple android --features Function AsyncFunction
 ```
 
 If you need deterministic non-interactive output, pass the slug or path explicitly and then pass the rest of the options:
 
 ```bash
-EXPO_NONINTERACTIVE=1 pnx create-expo-module@latest key-value-store \
+EXPO_NONINTERACTIVE=1 npx create-expo-module@latest key-value-store \
   --local \
   --name KeyValueStore \
   --package expo.modules.keyvaluestore \
@@ -56,7 +56,7 @@ Important quirk:
 ### Standalone module
 
 ```bash
-pnx create-expo-module@latest expo-key-value-store --platform apple android --features Function AsyncFunction
+npx create-expo-module@latest expo-key-value-store --platform apple android --features Function AsyncFunction
 ```
 
 ## Creation Options
@@ -160,19 +160,19 @@ Use this subcommand when an existing Expo module needs another supported platfor
 Interactive usage from the module root:
 
 ```bash
-pnx create-expo-module@latest add-platform-support
+npx create-expo-module@latest add-platform-support
 ```
 
 Explicit usage:
 
 ```bash
-pnx create-expo-module@latest add-platform-support --platform android
+npx create-expo-module@latest add-platform-support --platform android
 ```
 
 You can also pass the module path:
 
 ```bash
-pnx create-expo-module@latest add-platform-support ./packages/expo-key-value-store --platform web
+npx create-expo-module@latest add-platform-support ./packages/expo-key-value-store --platform web
 ```
 
 Important behaviors:
