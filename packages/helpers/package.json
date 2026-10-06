@@ -32,138 +32,6 @@
       "node": "./dist/address/index.js",
       "types": "./src/address/index.ts"
     },
-    "./api": {
-      "default": "./dist/api/index.js",
-      "import": "./dist/api/index.js",
-      "node": "./dist/api/index.js",
-      "types": "./src/api/index.ts"
-    },
-    "./cli": {
-      "default": "./dist/cli/index.js",
-      "import": "./dist/cli/index.js",
-      "node": "./dist/cli/index.js",
-      "types": "./src/cli/index.ts"
-    },
-    "./contact": {
-      "default": "./dist/contact/index.js",
-      "import": "./dist/contact/index.js",
-      "node": "./dist/contact/index.js",
-      "types": "./src/contact/index.ts"
-    },
-    "./date": {
-      "default": "./dist/date/index.js",
-      "import": "./dist/date/index.js",
-      "node": "./dist/date/index.js",
-      "types": "./src/date/index.ts"
-    },
-    "./docs": {
-      "default": "./dist/docs/index.js",
-      "import": "./dist/docs/index.js",
-      "node": "./dist/docs/index.js",
-      "types": "./src/docs/index.ts"
-    },
-    "./emoji": {
-      "default": "./dist/emoji/index.js",
-      "import": "./dist/emoji/index.js",
-      "node": "./dist/emoji/index.js",
-      "types": "./src/emoji/index.ts"
-    },
-    "./env": {
-      "default": "./dist/env/index.js",
-      "import": "./dist/env/index.js",
-      "node": "./dist/env/index.js",
-      "types": "./src/env/index.ts"
-    },
-    "./forms": {
-      "default": "./dist/forms/index.js",
-      "import": "./dist/forms/index.js",
-      "node": "./dist/forms/index.js",
-      "types": "./src/forms/index.ts"
-    },
-    "./geocode": {
-      "default": "./dist/geocode/index.js",
-      "import": "./dist/geocode/index.js",
-      "node": "./dist/geocode/index.js",
-      "types": "./src/geocode/index.ts"
-    },
-    "./globals": {
-      "default": "./dist/globals/index.js",
-      "import": "./dist/globals/index.js",
-      "node": "./dist/globals/index.js",
-      "types": "./src/globals/index.ts"
-    },
-    "./ids": {
-      "default": "./dist/ids/index.js",
-      "import": "./dist/ids/index.js",
-      "node": "./dist/ids/index.js",
-      "types": "./src/ids/index.ts"
-    },
-    "./infra": {
-      "default": "./dist/infra/index.js",
-      "import": "./dist/infra/index.js",
-      "node": "./dist/infra/index.js",
-      "types": "./src/infra/index.ts"
-    },
-    "./interactions": {
-      "default": "./dist/interactions/index.js",
-      "import": "./dist/interactions/index.js",
-      "node": "./dist/interactions/index.js",
-      "types": "./src/interactions/index.ts"
-    },
-    "./locale": {
-      "default": "./dist/locale/index.js",
-      "import": "./dist/locale/index.js",
-      "node": "./dist/locale/index.js",
-      "types": "./src/locale/index.ts"
-    },
-    "./name": {
-      "default": "./dist/name/index.js",
-      "import": "./dist/name/index.js",
-      "node": "./dist/name/index.js",
-      "types": "./src/name/index.ts"
-    },
-    "./notes": {
-      "default": "./dist/notes/index.js",
-      "import": "./dist/notes/index.js",
-      "node": "./dist/notes/index.js",
-      "types": "./src/notes/index.ts"
-    },
-    "./phone": {
-      "default": "./dist/phone/index.js",
-      "import": "./dist/phone/index.js",
-      "node": "./dist/phone/index.js",
-      "types": "./src/phone/index.ts"
-    },
-    "./platform": {
-      "default": "./dist/platform/index.js",
-      "import": "./dist/platform/index.js",
-      "node": "./dist/platform/index.js",
-      "types": "./src/platform/index.ts"
-    },
-    "./security": {
-      "default": "./dist/security/index.js",
-      "import": "./dist/security/index.js",
-      "node": "./dist/security/index.js",
-      "types": "./src/security/index.ts"
-    },
-    "./socials": {
-      "default": "./dist/socials/index.js",
-      "import": "./dist/socials/index.js",
-      "node": "./dist/socials/index.js",
-      "types": "./src/socials/index.ts"
-    },
-    "./text": {
-      "default": "./dist/text/index.js",
-      "import": "./dist/text/index.js",
-      "node": "./dist/text/index.js",
-      "types": "./src/text/index.ts"
-    },
-    "./version": {
-      "default": "./dist/version/index.js",
-      "import": "./dist/version/index.js",
-      "node": "./dist/version/index.js",
-      "types": "./src/version/index.ts"
-    },
     "./address/address-utils": {
       "default": "./dist/address/address-utils.js",
       "import": "./dist/address/address-utils.js",
@@ -187,6 +55,12 @@
       "import": "./dist/address/suggestion-to-contact-address.js",
       "node": "./dist/address/suggestion-to-contact-address.js",
       "types": "./src/address/suggestion-to-contact-address.ts"
+    },
+    "./api": {
+      "default": "./dist/api/index.js",
+      "import": "./dist/api/index.js",
+      "node": "./dist/api/index.js",
+      "types": "./src/api/index.ts"
     },
     "./api/ApiError": {
       "default": "./dist/api/ApiError.js",
@@ -272,11 +146,23 @@
       "node": "./dist/auth/resolve-webauthn-rp.test.js",
       "types": "./src/auth/resolve-webauthn-rp.test.ts"
     },
+    "./cli": {
+      "default": "./dist/cli/index.js",
+      "import": "./dist/cli/index.js",
+      "node": "./dist/cli/index.js",
+      "types": "./src/cli/index.ts"
+    },
     "./cli/logger": {
       "default": "./dist/cli/logger.js",
       "import": "./dist/cli/logger.js",
       "node": "./dist/cli/logger.js",
       "types": "./src/cli/logger.ts"
+    },
+    "./contact": {
+      "default": "./dist/contact/index.js",
+      "import": "./dist/contact/index.js",
+      "node": "./dist/contact/index.js",
+      "types": "./src/contact/index.ts"
     },
     "./contact/channel-type-options": {
       "default": "./dist/contact/channel-type-options.js",
@@ -320,11 +206,23 @@
       "node": "./dist/contact/shareable-field-previews.test.js",
       "types": "./src/contact/shareable-field-previews.test.ts"
     },
+    "./date": {
+      "default": "./dist/date/index.js",
+      "import": "./dist/date/index.js",
+      "node": "./dist/date/index.js",
+      "types": "./src/date/index.ts"
+    },
     "./date/date-utils": {
       "default": "./dist/date/date-utils.js",
       "import": "./dist/date/date-utils.js",
       "node": "./dist/date/date-utils.js",
       "types": "./src/date/date-utils.ts"
+    },
+    "./docs": {
+      "default": "./dist/docs/index.js",
+      "import": "./dist/docs/index.js",
+      "node": "./dist/docs/index.js",
+      "types": "./src/docs/index.ts"
     },
     "./docs/doc-links.generated": {
       "default": "./dist/docs/doc-links.generated.js",
@@ -338,6 +236,12 @@
       "node": "./dist/docs/docHref.js",
       "types": "./src/docs/docHref.ts"
     },
+    "./emoji": {
+      "default": "./dist/emoji/index.js",
+      "import": "./dist/emoji/index.js",
+      "node": "./dist/emoji/index.js",
+      "types": "./src/emoji/index.ts"
+    },
     "./emoji/emojiData": {
       "default": "./dist/emoji/emojiData.js",
       "import": "./dist/emoji/emojiData.js",
@@ -349,6 +253,12 @@
       "import": "./dist/emoji/filterEmojiCategories.js",
       "node": "./dist/emoji/filterEmojiCategories.js",
       "types": "./src/emoji/filterEmojiCategories.ts"
+    },
+    "./env": {
+      "default": "./dist/env/index.js",
+      "import": "./dist/env/index.js",
+      "node": "./dist/env/index.js",
+      "types": "./src/env/index.ts"
     },
     "./env/apply-boot-env": {
       "default": "./dist/env/apply-boot-env.js",
@@ -380,6 +290,12 @@
       "node": "./dist/env/oauth-client-ids.test.js",
       "types": "./src/env/oauth-client-ids.test.ts"
     },
+    "./forms": {
+      "default": "./dist/forms/index.js",
+      "import": "./dist/forms/index.js",
+      "node": "./dist/forms/index.js",
+      "types": "./src/forms/index.ts"
+    },
     "./forms/create-contact": {
       "default": "./dist/forms/create-contact.js",
       "import": "./dist/forms/create-contact.js",
@@ -392,11 +308,23 @@
       "node": "./dist/forms/social-handle.js",
       "types": "./src/forms/social-handle.ts"
     },
+    "./geocode": {
+      "default": "./dist/geocode/index.js",
+      "import": "./dist/geocode/index.js",
+      "node": "./dist/geocode/index.js",
+      "types": "./src/geocode/index.ts"
+    },
     "./geocode/query": {
       "default": "./dist/geocode/query.js",
       "import": "./dist/geocode/query.js",
       "node": "./dist/geocode/query.js",
       "types": "./src/geocode/query.ts"
+    },
+    "./globals": {
+      "default": "./dist/globals/index.js",
+      "import": "./dist/globals/index.js",
+      "node": "./dist/globals/index.js",
+      "types": "./src/globals/index.ts"
     },
     "./globals/company": {
       "default": "./dist/globals/company.js",
@@ -446,6 +374,12 @@
       "node": "./dist/globals/webapp-query.test.js",
       "types": "./src/globals/webapp-query.test.ts"
     },
+    "./ids": {
+      "default": "./dist/ids/index.js",
+      "import": "./dist/ids/index.js",
+      "node": "./dist/ids/index.js",
+      "types": "./src/ids/index.ts"
+    },
     "./ids/generate-id": {
       "default": "./dist/ids/generate-id.js",
       "import": "./dist/ids/generate-id.js",
@@ -470,6 +404,12 @@
       "node": "./dist/ids/remap-import-id.test.js",
       "types": "./src/ids/remap-import-id.test.ts"
     },
+    "./infra": {
+      "default": "./dist/infra/index.js",
+      "import": "./dist/infra/index.js",
+      "node": "./dist/infra/index.js",
+      "types": "./src/infra/index.ts"
+    },
     "./infra/build-metadata": {
       "default": "./dist/infra/build-metadata.js",
       "import": "./dist/infra/build-metadata.js",
@@ -488,11 +428,23 @@
       "node": "./dist/instagram/parseInstagramUsername.js",
       "types": "./src/instagram/parseInstagramUsername.ts"
     },
+    "./interactions": {
+      "default": "./dist/interactions/index.js",
+      "import": "./dist/interactions/index.js",
+      "node": "./dist/interactions/index.js",
+      "types": "./src/interactions/index.ts"
+    },
     "./interactions/interaction-types": {
       "default": "./dist/interactions/interaction-types.js",
       "import": "./dist/interactions/interaction-types.js",
       "node": "./dist/interactions/interaction-types.js",
       "types": "./src/interactions/interaction-types.ts"
+    },
+    "./locale": {
+      "default": "./dist/locale/index.js",
+      "import": "./dist/locale/index.js",
+      "node": "./dist/locale/index.js",
+      "types": "./src/locale/index.ts"
     },
     "./locale/languages": {
       "default": "./dist/locale/languages.js",
@@ -524,6 +476,12 @@
       "node": "./dist/locale/world-languages.js",
       "types": "./src/locale/world-languages.ts"
     },
+    "./name": {
+      "default": "./dist/name/index.js",
+      "import": "./dist/name/index.js",
+      "node": "./dist/name/index.js",
+      "types": "./src/name/index.ts"
+    },
     "./name/common-brand-name-tokens": {
       "default": "./dist/name/common-brand-name-tokens.js",
       "import": "./dist/name/common-brand-name-tokens.js",
@@ -548,6 +506,12 @@
       "node": "./dist/name/name-utils.js",
       "types": "./src/name/name-utils.ts"
     },
+    "./notes": {
+      "default": "./dist/notes/index.js",
+      "import": "./dist/notes/index.js",
+      "node": "./dist/notes/index.js",
+      "types": "./src/notes/index.ts"
+    },
     "./notes/htmlToMarkdown": {
       "default": "./dist/notes/htmlToMarkdown.js",
       "import": "./dist/notes/htmlToMarkdown.js",
@@ -565,6 +529,12 @@
       "import": "./dist/notes/personMentionFormat.js",
       "node": "./dist/notes/personMentionFormat.js",
       "types": "./src/notes/personMentionFormat.ts"
+    },
+    "./phone": {
+      "default": "./dist/phone/index.js",
+      "import": "./dist/phone/index.js",
+      "node": "./dist/phone/index.js",
+      "types": "./src/phone/index.ts"
     },
     "./phone/country-codes": {
       "default": "./dist/phone/country-codes.js",
@@ -590,11 +560,23 @@
       "node": "./dist/phone/types.js",
       "types": "./src/phone/types.ts"
     },
+    "./platform": {
+      "default": "./dist/platform/index.js",
+      "import": "./dist/platform/index.js",
+      "node": "./dist/platform/index.js",
+      "types": "./src/platform/index.ts"
+    },
     "./platform/linkedin-utils": {
       "default": "./dist/platform/linkedin-utils.js",
       "import": "./dist/platform/linkedin-utils.js",
       "node": "./dist/platform/linkedin-utils.js",
       "types": "./src/platform/linkedin-utils.ts"
+    },
+    "./security": {
+      "default": "./dist/security/index.js",
+      "import": "./dist/security/index.js",
+      "node": "./dist/security/index.js",
+      "types": "./src/security/index.ts"
     },
     "./security/mcp-registry-auth": {
       "default": "./dist/security/mcp-registry-auth.js",
@@ -625,6 +607,12 @@
       "import": "./dist/security/security-txt.test.js",
       "node": "./dist/security/security-txt.test.js",
       "types": "./src/security/security-txt.test.ts"
+    },
+    "./socials": {
+      "default": "./dist/socials/index.js",
+      "import": "./dist/socials/index.js",
+      "node": "./dist/socials/index.js",
+      "types": "./src/socials/index.ts"
     },
     "./socials/analyze-social-input": {
       "default": "./dist/socials/analyze-social-input.js",
@@ -662,6 +650,12 @@
       "node": "./dist/socials/socials-helpers.test.js",
       "types": "./src/socials/socials-helpers.test.ts"
     },
+    "./text": {
+      "default": "./dist/text/index.js",
+      "import": "./dist/text/index.js",
+      "node": "./dist/text/index.js",
+      "types": "./src/text/index.ts"
+    },
     "./text/inline-tokens": {
       "default": "./dist/text/inline-tokens.js",
       "import": "./dist/text/inline-tokens.js",
@@ -673,6 +667,12 @@
       "import": "./dist/text/reading-time.js",
       "node": "./dist/text/reading-time.js",
       "types": "./src/text/reading-time.ts"
+    },
+    "./version": {
+      "default": "./dist/version/index.js",
+      "import": "./dist/version/index.js",
+      "node": "./dist/version/index.js",
+      "types": "./src/version/index.ts"
     },
     "./version/calver": {
       "default": "./dist/version/calver.js",

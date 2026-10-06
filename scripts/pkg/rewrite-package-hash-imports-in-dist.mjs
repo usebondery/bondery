@@ -160,10 +160,12 @@ async function syncInjectedDist(pkgName) {
   }
   const dests = await collectInjectedPackageDirs(pkgName);
   for (const dest of dests) {
-    await cp(sourceDist, join(dest, "dist"), { recursive: true, force: true });
+    await cp(sourceDist, join(dest, "dist"), { force: true, recursive: true });
   }
   if (dests.length > 0) {
-    console.log(`synced dist to ${dests.length} injected cop${dests.length === 1 ? "y" : "ies"} of @bondery/${pkgName}`);
+    console.log(
+      `synced dist to ${dests.length} injected cop${dests.length === 1 ? "y" : "ies"} of @bondery/${pkgName}`,
+    );
   }
 }
 
