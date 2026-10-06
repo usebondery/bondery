@@ -11,8 +11,6 @@ import {
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import { PersonChip as PersonChipView } from "../../PersonChip/PersonChip.js";
-import { personChipSizes } from "../../PersonChip/personChipLayout.js";
 import Link from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
@@ -22,6 +20,8 @@ import {
   type PeoplePickerOnSearch,
 } from "#peoplePicker/peoplePickerPagedList.js";
 import { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
+import { PersonChip as PersonChipView } from "../../PersonChip/PersonChip.js";
+import { personChipSizes } from "../../PersonChip/personChipLayout.js";
 
 type PersonChipIdentity = ContactPreview & {
   headline?: string | null;

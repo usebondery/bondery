@@ -274,6 +274,7 @@ export type CommonCatalog = {
       service_auth_required: string;
       service_unavailable: string;
       session_fetch_failed: string;
+      session_not_fresh: string;
       session_settings_missing: string;
       settings: string;
       settings_failed_to_create_default_settings: string;
@@ -839,11 +840,11 @@ export type GroupsPageCatalog = {
     LabelRequired: string;
     LabelTooLong: string;
     LoadContactsError: string;
+    LoadingDescription: string;
     LoadingMoreLabel: string;
+    LoadingTitle: string;
     LoadMoreError: string;
     LoadMoreRetry: string;
-    LoadingDescription: string;
-    LoadingTitle: string;
     NoContactsFound: string;
     SearchingLabel: string;
     SuccessDescription: string;
@@ -864,10 +865,10 @@ export type GroupsPageCatalog = {
     EmptyState: string;
     ErrorTitle: string;
     LoadError: string;
-    NoContactsFound: string;
     LoadingMoreLabel: string;
     LoadMoreError: string;
     LoadMoreRetry: string;
+    NoContactsFound: string;
     NoSelectionDescription: string;
     NoSelectionTitle: string;
     SearchingLabel: string;
@@ -1263,13 +1264,13 @@ export type LoginPageCatalog = {
   };
   CheckYourEmail: string;
   CheckYourEmailBody: string;
-  ContinueWith: string;
-  ContinueWithEmail: string;
-  ContinueWithPasskey: string;
   ConfirmDescription: string;
   ConfirmMismatch: string;
   ConfirmStillStale: string;
   ConfirmTitle: string;
+  ContinueWith: string;
+  ContinueWithEmail: string;
+  ContinueWithPasskey: string;
   Description: string;
   EmailLabel: string;
   EmailPlaceholder: string;
@@ -1392,6 +1393,9 @@ export type MergeWithModalCatalog = {
     website: string;
     whatsapp: string;
   };
+  LoadingMoreLabel: string;
+  LoadMoreError: string;
+  LoadMoreRetry: string;
   Merge: string;
   MergeFailed: string;
   MergeSuccess: string;
@@ -1401,12 +1405,9 @@ export type MergeWithModalCatalog = {
   ModalTitle: string;
   NoConflicts: string;
   NoPeopleFound: string;
-  LoadingMoreLabel: string;
-  LoadMoreError: string;
-  LoadMoreRetry: string;
   Processing: string;
-  SearchPeople: string;
   SearchingLabel: string;
+  SearchPeople: string;
   SelectBothPeopleError: string;
   SelectLeftPerson: string;
   SelectRightPerson: string;
@@ -1761,8 +1762,8 @@ export type NotesEditorCatalog = {
   LoadMoreError: string;
   LoadMoreRetry: string;
   Markdown: string;
-  NotesTitle: string;
   NoPeopleFound: string;
+  NotesTitle: string;
   OrderedList: string;
   OrderedListHint: string;
   Redo: string;
@@ -1997,8 +1998,8 @@ export type PersonRelationshipsCatalog = {
   RelationshipTypeLabel: string;
   RelationshipTypePlaceholder: string;
   RemoveAction: string;
-  SearchPlaceholder: string;
   SearchingLabel: string;
+  SearchPlaceholder: string;
   SuccessTitle: string;
   Title: string;
   Types: {
@@ -2774,9 +2775,9 @@ export type TagsSettingsCatalog = {
   LabelPlaceholder: string;
   LoadContactsErrorDescription: string;
   LoadContactsErrorTitle: string;
+  LoadingMoreLabel: string;
   LoadMembersErrorDescription: string;
   LoadMembersErrorTitle: string;
-  LoadingMoreLabel: string;
   LoadMoreError: string;
   LoadMoreRetry: string;
   ManageTags: string;
@@ -2787,9 +2788,9 @@ export type TagsSettingsCatalog = {
   SaveErrorTitle: string;
   SaveSuccessDescription: string;
   SaveSuccessTitle: string;
-  SearchingLabel: string;
   SavingDescription: string;
   SavingTitle: string;
+  SearchingLabel: string;
   Title: string;
 };
 
