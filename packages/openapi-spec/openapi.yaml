@@ -18528,6 +18528,12 @@ paths:
                           - light
                           - dark
                           - auto
+                      defaultPhoneCountry:
+                        nullable: true
+                        type: string
+                        minLength: 2
+                        maxLength: 2
+                        pattern: ^[A-Za-z]{2}$
                       groupSortOrder:
                         type: string
                       language:
@@ -18609,6 +18615,7 @@ paths:
                           type: string
                     required:
                       - colorScheme
+                      - defaultPhoneCountry
                       - groupSortOrder
                       - language
                       - leftSwipeAction
@@ -18790,6 +18797,12 @@ paths:
                   enum:
                     - 24h
                     - 12h
+                defaultPhoneCountry:
+                  nullable: true
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  pattern: ^[A-Za-z]{2}$
                 language:
                   type: string
                   enum:
@@ -18829,6 +18842,9 @@ paths:
                     type: object
                     properties:
                       colorScheme:
+                        nullable: true
+                        type: string
+                      defaultPhoneCountry:
                         nullable: true
                         type: string
                       groupSortOrder:

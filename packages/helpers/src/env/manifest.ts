@@ -1303,6 +1303,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
 
 /** System / pass-through vars always listed in turbo globalPassThroughEnv */
 export const TURBO_SYSTEM_PASSTHROUGH = [
+  "JAVA_HOME",
   "PATH",
   "WINDIR",
   "HOME",

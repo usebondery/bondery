@@ -94,6 +94,7 @@
     "FORCE_COLOR",
     "GITHUB_ACTIONS",
     "HOME",
+    "JAVA_HOME",
     "LOG_LEVEL",
     "METRO_MAX_WORKERS",
     "NEXT_RUNTIME",
