@@ -1,7 +1,7 @@
 import type { Contact, GroupWithCount, TagWithCount } from "@bondery/schemas";
 import { IconTrash } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { useCallback } from "react";
+
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StackNavBar } from "../../components/chrome";
@@ -280,7 +280,7 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
   const groupsLoading = !isMyselfMode && isGroupsInitialSync && id != null;
   const myselfContactId = isMyselfMode ? contact?.id : myselfContactIdFromDb;
 
-  const reloadContact = useCallback(() => {
+  function reloadContact() {
     if (isMyselfMode) {
       refreshMyself();
     } else {
@@ -290,7 +290,7 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
     if (!isMyselfMode) {
       refreshGroups();
     }
-  }, [isMyselfMode, refreshContact, refreshGroups, refreshMyself, refreshTags]);
+  }
 
   if (loading || !contact) {
     return (

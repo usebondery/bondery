@@ -9,7 +9,7 @@ import {
 import { coerceSupportedLocale } from "@bondery/translations";
 import { IconBell } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { Select } from "../../components/ui/Select";
@@ -75,7 +75,7 @@ export function SettingsLanguageScreen() {
   const [timeFormat, setTimeFormat] = useState<TimeFormatValue>("24h");
   const [reminderSendHour, setReminderSendHour] = useState<ReminderHourValue>("08:00:00");
 
-  const loadSettings = useCallback(async () => {
+  async function loadSettings() {
     setIsLoading(true);
     setLoadError(null);
 
@@ -99,52 +99,39 @@ export function SettingsLanguageScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [locale, setLocale, t]);
+  }
 
   useEffect(() => {
     syncEffectState(() => {
       void loadSettings();
     });
-  }, [loadSettings]);
+  }, []);
 
-  const localeOptions = useMemo(
-    () =>
-      APP_LANGUAGES_DATA.map((language) => ({
-        label: formatAppLanguagePickerLabel((key) => tLanguages(key as never), language),
-        leftSection: (
-          <Text className="text-[18px] leading-5" size={null}>
-            {countryCodeToFlagEmoji(language.flag)}
-          </Text>
-        ),
-        value: language.value as MobileLocale,
-      })),
-    [tLanguages],
-  );
+  const localeOptions = APP_LANGUAGES_DATA.map((language) => ({
+    label: formatAppLanguagePickerLabel((key) => tLanguages(key as never), language),
+    leftSection: (
+      <Text className="text-[18px] leading-5" size={null}>
+        {countryCodeToFlagEmoji(language.flag)}
+      </Text>
+    ),
+    value: language.value as MobileLocale,
+  }));
 
-  const timezoneOptions = useMemo(
-    () =>
-      getTimezoneSelectOptions(timezone).map((timezoneOption) => ({
-        label: timezoneOption.label,
-        leftSection: (
-          <Text
-            c="muted"
-            className="font-semibold"
-            size="xs"
-            style={{ fontVariant: ["tabular-nums"] }}
-          >
-            {timezoneOption.offsetLabel}
-          </Text>
-        ),
-        rightSection: (
-          <Text className="text-[18px] leading-5" size={null}>
-            {countryCodeToFlagEmoji(timezoneOption.flag)}
-          </Text>
-        ),
-        searchKeywords: `${timezoneOption.value} ${timezoneOption.offsetLabel}`,
-        value: timezoneOption.value,
-      })),
-    [timezone],
-  );
+  const timezoneOptions = getTimezoneSelectOptions(timezone).map((timezoneOption) => ({
+    label: timezoneOption.label,
+    leftSection: (
+      <Text c="muted" className="font-semibold" size="xs" style={{ fontVariant: ["tabular-nums"] }}>
+        {timezoneOption.offsetLabel}
+      </Text>
+    ),
+    rightSection: (
+      <Text className="text-[18px] leading-5" size={null}>
+        {countryCodeToFlagEmoji(timezoneOption.flag)}
+      </Text>
+    ),
+    searchKeywords: `${timezoneOption.value} ${timezoneOption.offsetLabel}`,
+    value: timezoneOption.value,
+  }));
 
   const timeFormatOptions: Array<{ value: TimeFormatValue; label: string }> = [
     {
@@ -157,14 +144,10 @@ export function SettingsLanguageScreen() {
     },
   ];
 
-  const reminderHourOptions = useMemo(
-    () =>
-      Array.from({ length: 24 }, (_, hour) => ({
-        label: formatReminderHourLabel(hour, timeFormat),
-        value: `${String(hour).padStart(2, "0")}:00:00` as ReminderHourValue,
-      })),
-    [timeFormat],
-  );
+  const reminderHourOptions = Array.from({ length: 24 }, (_, hour) => ({
+    label: formatReminderHourLabel(hour, timeFormat),
+    value: `${String(hour).padStart(2, "0")}:00:00` as ReminderHourValue,
+  }));
 
   const handleLocaleChange = async (nextLocale: MobileLocale) => {
     if (nextLocale === locale) {

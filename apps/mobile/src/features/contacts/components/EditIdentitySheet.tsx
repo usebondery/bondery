@@ -1,7 +1,7 @@
 import type { Contact } from "@bondery/schemas";
 import { updateContactIdentitySchema } from "@bondery/schemas";
 import { IconBriefcase, IconCheck, IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import {
   useCommonTranslations,
@@ -109,18 +109,11 @@ export function EditIdentitySheet({
 
   const hasAvatar = Boolean(avatarUri);
 
-  // Stable across renders within a theme — prevents avatar icon re-renders.
-  const headlineLeadingIcon = useMemo(
-    () => <IconBriefcase size={18} stroke={colors.iconSecondary} />,
-    [colors.iconSecondary],
-  );
+  const headlineLeadingIcon = <IconBriefcase size={18} stroke={colors.iconSecondary} />;
 
-  const performSave = useCallback(
-    (values: Parameters<typeof updateContact>[1]) => {
-      return updateContact(contact.id, values, contact.updatedAt ?? undefined);
-    },
-    [contact.id, contact.updatedAt],
-  );
+  function performSave(values: Parameters<typeof updateContact>[1]) {
+    return updateContact(contact.id, values, contact.updatedAt ?? undefined);
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose,

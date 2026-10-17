@@ -2,7 +2,7 @@ import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
 import type { Contact } from "@bondery/schemas";
 import { createContactInputSchema } from "@bondery/schemas";
 import { IconUserPlus } from "@tabler/icons-react-native";
-import { useCallback, useMemo, useRef } from "react";
+import { useRef } from "react";
 import { StyleSheet, Text } from "react-native";
 import { useMobileCreateContactTranslations } from "@/lib/i18n/generated/hooks";
 import { SheetTextField } from "../../../components/form";
@@ -45,31 +45,28 @@ export function CreateContactSheet({ open, onOpenChange }: CreateContactSheetPro
     schema: createContactInputSchema,
   });
 
-  const handleCreateError = useCallback(
-    (createError: unknown) => {
-      showErrorToast(createError, tMobileCreateContact("ErrorTitle"));
-    },
-    [showErrorToast, tMobileCreateContact],
-  );
+  function handleCreateError(createError: unknown) {
+    showErrorToast(createError, tMobileCreateContact("ErrorTitle"));
+  }
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const performCreate = useCallback(({ fullName }: { fullName: string }) => {
+  function performCreate({ fullName }: { fullName: string }) {
     const parsed = createContactFromFullNameSchema.parse({ fullName });
     return createContact({
       firstName: parsed.firstName,
       lastName: parsed.lastName ?? undefined,
       middleName: parsed.middleName ?? undefined,
     });
-  }, []);
+  }
 
-  const handleCreateSuccess = useCallback((contact: Contact) => {
+  function handleCreateSuccess(contact: Contact) {
     pendingNavigateContactIdRef.current = contact.id;
-  }, []);
+  }
 
-  const handleSheetDismissed = useCallback(() => {
+  function handleSheetDismissed() {
     const contactId = pendingNavigateContactIdRef.current;
     if (!contactId) {
       return;
@@ -80,7 +77,7 @@ export function CreateContactSheet({ open, onOpenChange }: CreateContactSheetPro
       // biome-ignore lint/suspicious/noConsole: Development diagnostics explain dropped navigation.
       console.info(`[CreateContactSheet] navigation dropped (${outcome}): /contact/${contactId}`);
     }
-  }, [openContact]);
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,
@@ -99,10 +96,7 @@ export function CreateContactSheet({ open, onOpenChange }: CreateContactSheetPro
     onOpenChange(false);
   };
 
-  const createActionIcon = useMemo(
-    () => <IconUserPlus color={colors.textOnPrimary} size={16} />,
-    [colors.textOnPrimary],
-  );
+  const createActionIcon = <IconUserPlus color={colors.textOnPrimary} size={16} />;
 
   return (
     <Sheet

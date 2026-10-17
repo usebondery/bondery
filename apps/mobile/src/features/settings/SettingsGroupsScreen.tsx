@@ -1,7 +1,7 @@
 import type { GroupWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { ActionIcon } from "../../components/ui/ActionIcon";
@@ -54,19 +54,12 @@ export function SettingsGroupsScreen() {
 
   const isLoading = isInitialSync && syncedGroups.length === 0;
 
-  const reloadGroups = useCallback(() => {
+  function reloadGroups() {
     refreshGroups();
-  }, [refreshGroups]);
+  }
 
-  const previewGroups = useMemo(
-    () => sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt),
-    [groupLastOpenedAt, groupSortOrder, syncedGroups],
-  );
-
-  const manageGroups = useMemo(
-    () => sortGroups(syncedGroups, "alpha-asc", groupLastOpenedAt),
-    [groupLastOpenedAt, syncedGroups],
-  );
+  const previewGroups = sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt);
+  const manageGroups = sortGroups(syncedGroups, "alpha-asc", groupLastOpenedAt);
 
   const sortOptions: Array<{ value: GroupSortOrder; label: string }> = [
     {
@@ -88,19 +81,19 @@ export function SettingsGroupsScreen() {
     void updateSettings({ groupSortOrder: nextOrder });
   };
 
-  const handleGroupCreated = useCallback(() => {
+  function handleGroupCreated() {
     refreshGroups();
-  }, [refreshGroups]);
+  }
 
-  const handleGroupSaved = useCallback(() => {
+  function handleGroupSaved() {
     setEditingGroup(null);
     refreshGroups();
-  }, [refreshGroups]);
+  }
 
-  const handleGroupDeleted = useCallback(() => {
+  function handleGroupDeleted() {
     setEditingGroup(null);
     refreshGroups();
-  }, [refreshGroups]);
+  }
 
   const previewDescription =
     syncedGroups.length === 0 && !isLoading && !loadError

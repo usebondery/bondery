@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 type UseSheetLocalActionOptions<TResult> = {
   onClose: () => void;
@@ -20,7 +20,7 @@ export function useSheetLocalAction<TResult = void>({
 }: UseSheetLocalActionOptions<TResult>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = useCallback(() => {
+  function submit() {
     setIsSubmitting(true);
     try {
       const result = perform();
@@ -31,7 +31,7 @@ export function useSheetLocalAction<TResult = void>({
     } finally {
       setIsSubmitting(false);
     }
-  }, [onClose, onError, onSuccess, perform]);
+  }
 
   return { isSubmitting, submit };
 }

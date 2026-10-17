@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import {
   useMobileColorPickerTranslations,
@@ -55,38 +55,28 @@ export function ColorPickerInput({
         colors.borderStrong,
       );
 
-  const triggerContent = useMemo(() => {
-    if (hasValue) {
-      return (
-        <View
-          style={[
-            styles.colorSwatch,
-            {
-              backgroundColor: normalizedValue,
-              borderColor: triggerBorderColor,
-            },
-          ]}
-        />
-      );
-    }
-
-    if (compact) {
-      return null;
-    }
-
-    return (
+  let triggerContent: ReactNode;
+  if (hasValue) {
+    triggerContent = (
+      <View
+        style={[
+          styles.colorSwatch,
+          {
+            backgroundColor: normalizedValue,
+            borderColor: triggerBorderColor,
+          },
+        ]}
+      />
+    );
+  } else if (compact) {
+    triggerContent = null;
+  } else {
+    triggerContent = (
       <Text numberOfLines={1} style={[styles.placeholder, { color: colors.textSecondary }]}>
         {resolvedPlaceholder}
       </Text>
     );
-  }, [
-    colors.textSecondary,
-    compact,
-    hasValue,
-    normalizedValue,
-    resolvedPlaceholder,
-    triggerBorderColor,
-  ]);
+  }
 
   const layout = stretch ? "stretch" : "square";
 

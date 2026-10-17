@@ -10,7 +10,7 @@ import {
 } from "@gorhom/bottom-sheet";
 import { IconSearch, IconX } from "@tabler/icons-react-native";
 import type { ComponentRef, ReactNode } from "react";
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import { ActivityIndicator, BackHandler, Platform, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SHEET_SNAP_POINTS, UI_TIMING_MS } from "../../lib/config";
@@ -186,10 +186,7 @@ export function Sheet({
   onOpenChangeRef.current = onOpenChange;
   searchRef.current = search;
   onSnapIndexChangeRef.current = onSnapIndexChange;
-  const namedSnapPoints = useMemo(
-    () => (isFit ? undefined : [`${SHEET_SNAP_POINTS[snapPoint]}%`]),
-    [isFit, snapPoint],
-  );
+  const namedSnapPoints = isFit ? undefined : [`${SHEET_SNAP_POINTS[snapPoint]}%`];
   const maxDynamicContentSize = Math.round(windowHeight * FIT_MAX_HEIGHT_RATIO);
   const contentPaddingBottom = actions ? footerReserve(insets.bottom) : Math.max(insets.bottom, 16);
   /**
@@ -242,7 +239,7 @@ export function Sheet({
     };
   }, []);
 
-  const handleDismiss = useCallback(() => {
+  function handleDismiss() {
     if (isLockedRef.current && openedRef.current && !dismissByParentRef.current) {
       sheetRef.current?.present();
       return;
@@ -252,9 +249,9 @@ export function Sheet({
     onDismissedRef.current?.();
     onCloseRef.current();
     onOpenChangeRef.current?.(false);
-  }, []);
+  }
 
-  const handleChange = useCallback((index: number) => {
+  function handleChange(index: number) {
     if (index === -1 && isLockedRef.current && openedRef.current && !dismissByParentRef.current) {
       sheetRef.current?.present();
       return;
@@ -271,7 +268,7 @@ export function Sheet({
         searchInputRef.current?.focus();
       }, UI_TIMING_MS.sheetFocusDelay);
     }
-  }, []);
+  }
 
   const handleClosePress = () => {
     if (isLocked) {
@@ -281,40 +278,36 @@ export function Sheet({
     onClose();
   };
 
-  const renderBackdrop = useCallback(
-    (props: BottomSheetBackdropProps) => (
+  function renderBackdrop(props: BottomSheetBackdropProps) {
+    return (
       <SheetBackdrop
         {...props}
         accessibilityLabel={t("a11y.close")}
         overlayColor={colors.overlay}
         pressBehavior={isLocked ? "none" : "close"}
       />
-    ),
-    [colors.overlay, isLocked, t],
-  );
+    );
+  }
 
-  const renderFooter = useCallback(
-    (props: BottomSheetFooterProps) => {
-      if (!actions) {
-        return null;
-      }
+  function renderFooter(props: BottomSheetFooterProps) {
+    if (!actions) {
+      return null;
+    }
 
-      return (
-        <BottomSheetFooter {...props} bottomInset={0}>
-          <View
-            className="px-4 pt-2"
-            style={{
-              backgroundColor: colors.surfaceElevated,
-              paddingBottom: Math.max(insets.bottom, 16),
-            }}
-          >
-            <SheetActionButtons actions={actions} />
-          </View>
-        </BottomSheetFooter>
-      );
-    },
-    [actions, colors.surfaceElevated, insets.bottom],
-  );
+    return (
+      <BottomSheetFooter {...props} bottomInset={0}>
+        <View
+          className="px-4 pt-2"
+          style={{
+            backgroundColor: colors.surfaceElevated,
+            paddingBottom: Math.max(insets.bottom, 16),
+          }}
+        >
+          <SheetActionButtons actions={actions} />
+        </View>
+      </BottomSheetFooter>
+    );
+  }
 
   return (
     <BottomSheetModal

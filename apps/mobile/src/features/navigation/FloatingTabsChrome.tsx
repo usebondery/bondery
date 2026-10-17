@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { type LayoutChangeEvent, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactsSelectionActionBar } from "../../components/ContactsSelectionActionBar";
@@ -25,13 +25,10 @@ export function FloatingTabsChrome() {
   const focusedRoute = tabBarProps?.state.routes[tabBarProps.state.index]?.name;
   const showActionBar = actionBarSlot === "contacts-selection" && focusedRoute === "contacts";
 
-  const handleChromeLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      const chromeHeight = event.nativeEvent.layout.height;
-      reportBottomInset(chromeHeight + getFloatingChromeSafePadding(insets.bottom));
-    },
-    [insets.bottom, reportBottomInset],
-  );
+  function handleChromeLayout(event: LayoutChangeEvent) {
+    const chromeHeight = event.nativeEvent.layout.height;
+    reportBottomInset(chromeHeight + getFloatingChromeSafePadding(insets.bottom));
+  }
 
   useEffect(() => {
     const frame = requestAnimationFrame(() => {

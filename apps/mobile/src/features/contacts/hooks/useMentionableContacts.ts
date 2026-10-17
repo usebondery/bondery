@@ -1,5 +1,4 @@
 import type { Contact } from "@bondery/schemas";
-import { useCallback } from "react";
 import {
   getContact,
   readContactsList,
@@ -52,32 +51,26 @@ export function useMentionableContacts({
     (subjectId !== undefined && !subject && isSubjectInitialSync) ||
     (!fetchedMyself && isMyselfInitialSync);
 
-  const getContactName = useCallback(
-    (id: string) => {
-      if (subject?.id === id) {
-        return formatContactName(subject);
-      }
-      if (myself?.id === id) {
-        return formatContactName(myself);
-      }
-      const contact = getContact(id);
-      return contact ? formatContactName(contact) : undefined;
-    },
-    [myself, subject],
-  );
+  function getContactName(id: string) {
+    if (subject?.id === id) {
+      return formatContactName(subject);
+    }
+    if (myself?.id === id) {
+      return formatContactName(myself);
+    }
+    const contact = getContact(id);
+    return contact ? formatContactName(contact) : undefined;
+  }
 
-  const filterContacts = useCallback(
-    (query: string) => {
-      const listed = readContactsList({
-        excludeMyself: true,
-        limit: MAX_MENTION_RESULTS,
-        query,
-      }).contacts;
-      const merged = mergeContacts(subject, [...(myself ? [myself] : []), ...listed]);
-      return filterMentionContacts(merged, query);
-    },
-    [myself, subject],
-  );
+  function filterContacts(query: string) {
+    const listed = readContactsList({
+      excludeMyself: true,
+      limit: MAX_MENTION_RESULTS,
+      query,
+    }).contacts;
+    const merged = mergeContacts(subject, [...(myself ? [myself] : []), ...listed]);
+    return filterMentionContacts(merged, query);
+  }
 
   return {
     filterContacts,

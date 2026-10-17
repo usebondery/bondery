@@ -2,7 +2,7 @@ import { CONTACT_CHANNEL_TYPE_OPTIONS } from "@bondery/helpers";
 import type { EmailEntry } from "@bondery/schemas";
 import { emailEntryInputSchema, emailEntrySchema } from "@bondery/schemas";
 import { IconCheck, IconMailPlus, IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, Text } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import { SheetSelectField, SheetTextField } from "../../../components/form";
@@ -76,31 +76,24 @@ export function EditEmailSheet({
     return () => clearTimeout(timer);
   }, [open]);
 
-  const typeOptions = useMemo(
-    () =>
-      CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
-        label: option.value === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome"),
-        leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
-        value: option.value,
-      })),
-    [tContactInfo],
-  );
+  const typeOptions = CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
+    label: option.value === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome"),
+    leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
+    value: option.value,
+  }));
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const performSave = useCallback(
-    (values: EmailFormValues) => {
-      const parsed = emailEntrySchema.parse({
-        ...values,
-        preferred: initialEntry?.preferred ?? false,
-      });
-      onPersist(parsed);
-      return parsed;
-    },
-    [initialEntry?.preferred, onPersist],
-  );
+  function performSave(values: EmailFormValues) {
+    const parsed = emailEntrySchema.parse({
+      ...values,
+      preferred: initialEntry?.preferred ?? false,
+    });
+    onPersist(parsed);
+    return parsed;
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

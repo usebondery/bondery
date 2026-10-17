@@ -8,7 +8,7 @@ icon: Search
 
 [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) is the reference client for debugging MCP servers. Use it to exercise Bondery’s Streamable HTTP endpoint (`{API}/mcp`) with the **2026-07-28** protocol. Cursor’s HTTP client still negotiates `2025-11-25` and cannot complete initialize against this server.
 
-The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants, with Client ID Metadata Documents (CIMD). Pass `--client-metadata-url` with the URL of a hosted `client.json`. Do not use RFC 7591 Dynamic Client Registration. Bondery does not provision an Inspector client id.
+The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants, with Client ID Metadata Documents (CIMD). Do not use RFC 7591 Dynamic Client Registration — Bondery returns `403` / `Client registration is disabled`. `pnpm run mcp:inspect` writes the resolved CIMD URL into `~/.mcp-inspector/storage/client.json` (Bondery’s HTTPS document on `usebondery.com` when deployed, otherwise the public Inspector smoke-test CIMD). Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
 
 ## Prerequisites
 
@@ -23,13 +23,7 @@ From the repo root:
 pnpm run mcp:inspect
 ```
 
-That launches `@modelcontextprotocol/inspector` against a **writable** catalog seeded from [`scripts/dev/mcp-inspector.json`](../../scripts/dev/mcp-inspector.json) (`protocolEra: "modern"`, URL `http://localhost:26631/mcp`). Settings you change in the UI (including Tools pagination) are saved to gitignored `scripts/dev/mcp-inspector.local.json`. Open the **printed URL** (it includes a one-time session token). Do not type `localhost:6274` from memory.
-
-Host a CIMD `client.json` and pass it through:
-
-```bash
-pnpm run mcp:inspect -- --client-metadata-url https://example.com/client.json
-```
+That launches `@modelcontextprotocol/inspector` against a **writable** catalog seeded from [`scripts/dev/mcp-inspector.json`](../../scripts/dev/mcp-inspector.json) (`protocolEra: "modern"`, URL `http://localhost:26631/mcp`). Settings you change in the UI (including Tools pagination) are saved to gitignored `scripts/dev/mcp-inspector.local.json`. The script frees ports **6274** / **6275** / **6278** and sets `CLIENT_PORT`, `MCP_SANDBOX_PORT`, and `MCP_APP_ORIGIN_PORT` so the UI stays on `http://127.0.0.1:6274`. Open the **printed URL** (it includes a one-time session token). Do not type that URL from memory.
 
 Do not add a Bondery-provisioned Inspector `clientId` to the catalog.
 

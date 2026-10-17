@@ -1,6 +1,6 @@
 import { type ContactSocialFieldKey, createSocialUrl } from "@bondery/helpers";
 import type { Contact } from "@bondery/schemas";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 import { useCommonTranslations, useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 import { ActionButton } from "../../../components/ui/ActionButton";
@@ -34,18 +34,13 @@ export function ContactSocialSection({
   const colors = useMobileThemeColors();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
 
-  const filledPlatforms = useMemo(
-    () => CONTACT_SOCIAL_PLATFORMS.filter((platform) => Boolean(contact[platform.key])),
-    [contact],
+  const filledPlatforms = CONTACT_SOCIAL_PLATFORMS.filter((platform) =>
+    Boolean(contact[platform.key]),
   );
 
-  const availablePlatforms = useMemo(
-    () =>
-      CONTACT_SOCIAL_PLATFORMS.filter((platform) => !contact[platform.key]).map(
-        (platform) => platform.key,
-      ),
-    [contact],
-  );
+  const availablePlatforms = CONTACT_SOCIAL_PLATFORMS.filter(
+    (platform) => !contact[platform.key],
+  ).map((platform) => platform.key);
 
   const canAdd = availablePlatforms.length > 0;
 

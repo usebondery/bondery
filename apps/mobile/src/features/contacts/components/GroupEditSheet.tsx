@@ -2,7 +2,7 @@ import { getRandomEmoji } from "@bondery/helpers/emoji";
 import type { Group } from "@bondery/schemas";
 import { createGroupSchema, GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
-import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { StyleSheet, Text, View } from "react-native";
 import {
@@ -101,53 +101,47 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
     return () => clearTimeout(timer);
   }, [open]);
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleSaveError = useCallback(() => {
+  function handleSaveError() {
     notifications.show({
       message: mode === "create" ? tMobileGroups("CreateFailed") : tMobileGroups("EditFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [mode, t, tMobileGroups]);
+  }
 
   const editGroupId = mode === "edit" ? props.groupId : null;
 
-  const performSave = useCallback(
-    (values: GroupFormValues) => {
-      if (mode === "create") {
-        return createGroup({
-          color: values.color,
-          emoji: values.emoji,
-          label: values.label,
-        });
-      }
-
-      if (!editGroupId) {
-        throw new Error("Missing group id");
-      }
-
-      return updateGroup(editGroupId, {
+  function performSave(values: GroupFormValues) {
+    if (mode === "create") {
+      return createGroup({
         color: values.color,
         emoji: values.emoji,
         label: values.label,
       });
-    },
-    [editGroupId, mode],
-  );
+    }
 
-  const handleSaveSuccess = useCallback(
-    (group: Group) => {
-      if (mode === "create") {
-        props.onCreated(group);
-        return;
-      }
-      props.onSaved(group);
-    },
-    [mode, props],
-  );
+    if (!editGroupId) {
+      throw new Error("Missing group id");
+    }
+
+    return updateGroup(editGroupId, {
+      color: values.color,
+      emoji: values.emoji,
+      label: values.label,
+    });
+  }
+
+  function handleSaveSuccess(group: Group) {
+    if (mode === "create") {
+      props.onCreated(group);
+      return;
+    }
+    props.onSaved(group);
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

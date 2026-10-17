@@ -8,7 +8,7 @@ import type {
 } from "@bondery/schemas";
 import { firstZodErrorMessage, replaceImportantDatesSchema } from "@bondery/schemas";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Linking } from "react-native";
 import {
   useCommonTranslations,
@@ -51,7 +51,7 @@ export function useContactDetailHandlers({
 
   const name = formatContactName(contact);
 
-  const shareContact = useCallback(() => {
+  function shareContact() {
     void (async () => {
       setIsSharing(true);
 
@@ -75,26 +75,23 @@ export function useContactDetailHandlers({
         setIsSharing(false);
       }
     })();
-  }, [contact, name, showErrorToast, tMobileContactDetail]);
+  }
 
-  const handleCloseDeleteConfirm = useCallback(() => {
+  function handleCloseDeleteConfirm() {
     setDeleteConfirmOpen(false);
-  }, []);
+  }
 
-  const performDeleteContact = useCallback(() => {
+  function performDeleteContact() {
     deleteContact(contact.id, contact.updatedAt ?? undefined);
-  }, [contact.id, contact.updatedAt]);
+  }
 
-  const handleDeleteSuccess = useCallback(() => {
+  function handleDeleteSuccess() {
     goBackOrReplace(router, "/contacts");
-  }, [router]);
+  }
 
-  const handleDeleteError = useCallback(
-    (error: unknown) => {
-      showErrorToast(error);
-    },
-    [showErrorToast],
-  );
+  function handleDeleteError(error: unknown) {
+    showErrorToast(error);
+  }
 
   const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
     onClose: handleCloseDeleteConfirm,
@@ -103,131 +100,107 @@ export function useContactDetailHandlers({
     perform: performDeleteContact,
   });
 
-  const handleUpdateSocial = useCallback(
-    (platform: ContactSocialFieldKey, value: string) => {
-      updateContact(
-        contact.id,
-        {
-          [platform]: value,
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleUpdateSocial(platform: ContactSocialFieldKey, value: string) {
+    updateContact(
+      contact.id,
+      {
+        [platform]: value,
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
 
-  const handleSavePhones = useCallback(
-    (nextPhones: PhoneEntry[]) => {
-      updateContact(
-        contact.id,
-        {
-          phones: normalizePhonesForSave(nextPhones),
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleSavePhones(nextPhones: PhoneEntry[]) {
+    updateContact(
+      contact.id,
+      {
+        phones: normalizePhonesForSave(nextPhones),
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
 
-  const handleSaveEmails = useCallback(
-    (nextEmails: EmailEntry[]) => {
-      updateContact(
-        contact.id,
-        {
-          emails: normalizeEmailsForSave(nextEmails),
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleSaveEmails(nextEmails: EmailEntry[]) {
+    updateContact(
+      contact.id,
+      {
+        emails: normalizeEmailsForSave(nextEmails),
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
 
-  const handleSaveAddresses = useCallback(
-    (nextAddresses: ContactAddressEntry[]) => {
-      updateContact(
-        contact.id,
-        {
-          addresses: nextAddresses,
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleSaveAddresses(nextAddresses: ContactAddressEntry[]) {
+    updateContact(
+      contact.id,
+      {
+        addresses: nextAddresses,
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
 
-  const openPhone = useCallback(
-    (phone: PhoneEntry) => {
-      Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
-        notifications.show({
-          message: "Could not open phone dialer",
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
+  function openPhone(phone: PhoneEntry) {
+    Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
+      notifications.show({
+        message: "Could not open phone dialer",
+        title: t("feedback.errorTitle"),
+        type: "error",
       });
-    },
-    [t],
-  );
+    });
+  }
 
-  const openSms = useCallback(
-    (phone: PhoneEntry) => {
-      Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
-        notifications.show({
-          message: "Could not open messages",
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
+  function openSms(phone: PhoneEntry) {
+    Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
+      notifications.show({
+        message: "Could not open messages",
+        title: t("feedback.errorTitle"),
+        type: "error",
       });
-    },
-    [t],
-  );
+    });
+  }
 
-  const openEmail = useCallback(
-    (email: EmailEntry) => {
-      Linking.openURL(`mailto:${email.value}`).catch(() => {
-        notifications.show({
-          message: "Could not open email app",
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
+  function openEmail(email: EmailEntry) {
+    Linking.openURL(`mailto:${email.value}`).catch(() => {
+      notifications.show({
+        message: "Could not open email app",
+        title: t("feedback.errorTitle"),
+        type: "error",
       });
-    },
-    [t],
-  );
+    });
+  }
 
-  const handleSaveImportantDates = useCallback(
-    (nextDates: ImportantDate[]) => {
-      const payload = nextDates
-        .filter((entry) => entry.date)
-        .map((entry) => ({
-          date: entry.date,
-          id: entry.id || undefined,
-          note: entry.note,
-          notifyDaysBefore: entry.notifyDaysBefore ?? null,
-          type: entry.type,
-        }));
+  function handleSaveImportantDates(nextDates: ImportantDate[]) {
+    const payload = nextDates
+      .filter((entry) => entry.date)
+      .map((entry) => ({
+        date: entry.date,
+        id: entry.id || undefined,
+        note: entry.note,
+        notifyDaysBefore: entry.notifyDaysBefore ?? null,
+        type: entry.type,
+      }));
 
-      const parsed = replaceImportantDatesSchema.safeParse(payload);
-      if (!parsed.success) {
-        throw new Error(firstZodErrorMessage(parsed.error));
-      }
+    const parsed = replaceImportantDatesSchema.safeParse(payload);
+    if (!parsed.success) {
+      throw new Error(firstZodErrorMessage(parsed.error));
+    }
 
-      putContactImportantDates(contact.id, parsed.data);
-      onContactUpdated();
-    },
-    [contact.id, onContactUpdated],
-  );
+    putContactImportantDates(contact.id, parsed.data);
+    onContactUpdated();
+  }
 
-  const openNotesEditor = useCallback(() => {
+  function openNotesEditor() {
     if (isMyselfMode) {
       openMyselfNotes();
     } else {
       openContactNotes(contact.id);
     }
-  }, [contact.id, isMyselfMode, openContactNotes, openMyselfNotes]);
+  }
 
   return {
     handleSaveAddresses,

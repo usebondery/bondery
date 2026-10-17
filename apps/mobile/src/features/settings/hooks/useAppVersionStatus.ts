@@ -1,7 +1,7 @@
 import { API_ROUTES, isVersionBelow } from "@bondery/helpers";
 import * as Network from "expo-network";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { API_URL } from "../../../lib/config";
 import { isDeviceOffline, STATUS_PROBE_TIMEOUT_MS } from "./probeNetwork";
 
@@ -38,7 +38,7 @@ export function useAppVersionStatus(currentVersion: string) {
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [status, setStatus] = useState<AppVersionStatus>("checking");
 
-  const refresh = useCallback(async () => {
+  async function refresh() {
     setStatus("checking");
 
     if (await isDeviceOffline()) {
@@ -56,7 +56,7 @@ export function useAppVersionStatus(currentVersion: string) {
 
     setLatestVersion(advertised);
     setStatus(isVersionBelow(currentVersion, advertised) ? "outdated" : "latest");
-  }, [currentVersion]);
+  }
 
   useEffect(() => {
     void refresh();
@@ -70,11 +70,9 @@ export function useAppVersionStatus(currentVersion: string) {
     };
   }, [refresh]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void refresh();
-    }, [refresh]),
-  );
+  useFocusEffect(() => {
+    void refresh();
+  });
 
   return {
     isChecking: status === "checking",

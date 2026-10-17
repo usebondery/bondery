@@ -78,3 +78,13 @@ Contract: `perform` → `onClose` → `onSuccess`. Expose `{ isSubmitting, submi
 pnpm run check:types -w mobile
 pnpm run check-sync-patterns -w mobile
 ```
+
+## React Compiler
+
+The mobile app enables the [React Compiler](https://docs.expo.dev/guides/react-compiler/) (`experiments.reactCompiler` in app config). Biome enforces `useReactCompiler` in `apps/mobile`.
+
+Do not add `memo`, `useCallback`, or `useMemo` only to stabilize renders. The compiler memoizes components and hooks.
+
+Keep `useEffect` and ref sync patterns as today. Opt out with `biome-ignore-all` only for Reanimated or gesture code that cannot follow Rules of React (see `usePressSqueeze`, `useContactsDragSelection`).
+
+Run `pnpm run check:react-compiler` from `apps/mobile` after changing components that used manual memoization.

@@ -1,13 +1,5 @@
 import * as Network from "expo-network";
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 import { readLocalAccessToken, subscribeLocalSessionEnded } from "../auth/session";
 import { useAuth } from "../auth/useAuth";
@@ -60,19 +52,19 @@ export function SyncProvider({ children }: SyncProviderProps) {
   const [pendingCount, setPendingCount] = useState(0);
   const [conflictCount, setConflictCount] = useState(0);
 
-  const refreshCounts = useCallback(() => {
+  function refreshCounts() {
     setPendingCount(countPendingMutations());
     setConflictCount(countConflictMutations());
     setIsInitialSync(!getHasInitialSyncSnapshot() && countContactsLocal() === 0);
-  }, []);
+  }
 
-  const clearReadyState = useCallback(() => {
+  function clearReadyState() {
     previousUserIdRef.current = null;
     setIsReady(false);
     setIsInitialSync(true);
     setPendingCount(0);
     setConflictCount(0);
-  }, []);
+  }
 
   useEffect(() => {
     return subscribeLocalSessionEnded(() => {
@@ -83,7 +75,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
         clearReadyState();
       })();
     });
-  }, [clearReadyState]);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -209,7 +201,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
       active = false;
       tearDownRuntime();
     };
-  }, [clearReadyState, isAuthenticated, isSessionHydrating, refreshCounts, userId]);
+  }, [isAuthenticated, isSessionHydrating, userId]);
 
   return (
     <SyncContext.Provider

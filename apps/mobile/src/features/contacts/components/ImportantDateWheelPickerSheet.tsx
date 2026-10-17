@@ -1,5 +1,5 @@
 import { IconCheck } from "@tabler/icons-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AccessibilityInfo, StyleSheet, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
@@ -69,17 +69,14 @@ export function ImportantDateWheelPickerSheet({
     });
   }, [open, initialIso, defaultWithoutYear]);
 
-  const monthLabels = useMemo(() => getMonthLabels(locale), [locale]);
-  const years = useMemo(() => buildYearRange(), []);
+  const monthLabels = getMonthLabels(locale);
+  const years = buildYearRange();
 
   const clampYear = wheelValue.withoutYear ? 2004 : wheelValue.year;
   const dayCount = daysInMonth(wheelValue.month, clampYear);
 
-  const dayItems = useMemo(
-    () => Array.from({ length: dayCount }, (_, index) => String(index + 1)),
-    [dayCount],
-  );
-  const yearItems = useMemo(() => years.map(String), [years]);
+  const dayItems = Array.from({ length: dayCount }, (_, index) => String(index + 1));
+  const yearItems = years.map(String);
 
   const dayIndex = Math.min(Math.max(wheelValue.day - 1, 0), dayItems.length - 1);
   const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), 11);

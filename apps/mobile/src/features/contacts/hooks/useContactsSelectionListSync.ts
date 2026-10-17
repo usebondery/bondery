@@ -1,5 +1,5 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { useContactsSelection } from "../contactsSelectionStore";
 
@@ -58,11 +58,9 @@ export function useContactsSelectionListSync({
     });
   }, [contactIds, myselfContactId, pruneSelectionToKnownContactIds]);
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        exitSelectionMode();
-      };
-    }, [exitSelectionMode]),
-  );
+  useFocusEffect(() => {
+    return () => {
+      exitSelectionMode();
+    };
+  });
 }

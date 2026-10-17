@@ -1,7 +1,7 @@
 import type { TagWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { ActionIcon } from "../../components/ui/ActionIcon";
@@ -46,9 +46,9 @@ export function SettingsTagsScreen() {
     (state: MobilePreferencesState) => state.setTagSortOrder,
   );
 
-  const sortedTags = useMemo(() => sortTags(syncedTags, tagSortOrder), [tagSortOrder, syncedTags]);
+  const sortedTags = sortTags(syncedTags, tagSortOrder);
 
-  const editTags = useMemo(() => sortTags(syncedTags, "alpha-asc"), [syncedTags]);
+  const editTags = sortTags(syncedTags, "alpha-asc");
 
   const sortOptions: Array<{ value: TagSortOrder; label: string }> = [
     { label: tMobileSettings("GroupSortCountDesc"), value: "count-desc" },
@@ -68,23 +68,23 @@ export function SettingsTagsScreen() {
 
   const isLoading = isInitialSync && syncedTags.length === 0;
 
-  const reloadTags = useCallback(() => {
+  function reloadTags() {
     refreshTags();
-  }, [refreshTags]);
+  }
 
-  const handleTagCreated = useCallback(() => {
+  function handleTagCreated() {
     refreshTags();
-  }, [refreshTags]);
+  }
 
-  const handleTagSaved = useCallback(() => {
+  function handleTagSaved() {
     setEditingTag(null);
     refreshTags();
-  }, [refreshTags]);
+  }
 
-  const handleTagDeleted = useCallback(() => {
+  function handleTagDeleted() {
     setEditingTag(null);
     refreshTags();
-  }, [refreshTags]);
+  }
 
   const previewDescription =
     syncedTags.length === 0 && !isLoading && !loadError

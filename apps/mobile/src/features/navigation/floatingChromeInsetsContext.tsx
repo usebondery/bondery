@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   getFloatingChromePillHeight,
@@ -15,17 +15,14 @@ const FloatingChromeInsetsContext = createContext<FloatingChromeInsetsContextVal
 export function FloatingChromeInsetsProvider({ children }: { children: ReactNode }) {
   const [measuredBottomInset, setMeasuredBottomInsetState] = useState(0);
 
-  const setMeasuredBottomInset = useCallback((height: number) => {
+  function setMeasuredBottomInset(height: number) {
     setMeasuredBottomInsetState((current) => (current === height ? current : height));
-  }, []);
+  }
 
-  const value = useMemo(
-    () => ({
-      measuredBottomInset,
-      setMeasuredBottomInset,
-    }),
-    [measuredBottomInset, setMeasuredBottomInset],
-  );
+  const value = {
+    measuredBottomInset,
+    setMeasuredBottomInset,
+  };
 
   return (
     <FloatingChromeInsetsContext.Provider value={value}>
@@ -50,10 +47,7 @@ export function useFloatingChromeBottomInset(): number {
 export function useReportFloatingChromeBottomInset(): (height: number) => void {
   const context = useContext(FloatingChromeInsetsContext);
 
-  return useCallback(
-    (height: number) => {
-      context?.setMeasuredBottomInset(height);
-    },
-    [context],
-  );
+  return (height: number) => {
+    context?.setMeasuredBottomInset(height);
+  };
 }

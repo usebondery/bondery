@@ -1,5 +1,4 @@
 import type { Contact } from "@bondery/schemas";
-import { useMemo } from "react";
 import { View } from "react-native";
 import { PersonAvatar } from "../../../components/PersonAvatar";
 import { Group } from "../../../components/ui/Group";
@@ -58,17 +57,11 @@ export function SettingsAccountProfileCard({
   fallbackName,
   fallbackAvatarUrl,
 }: SettingsAccountProfileCardProps) {
-  const profileContact = useMemo(() => {
-    if (contact) {
-      return contact;
-    }
-
-    if (fallbackName?.trim()) {
-      return buildFallbackContact(fallbackName);
-    }
-
-    return null;
-  }, [contact, fallbackName]);
+  const profileContact = contact
+    ? contact
+    : fallbackName?.trim()
+      ? buildFallbackContact(fallbackName)
+      : null;
 
   const displayName = profileContact ? formatContactName(profileContact) : null;
   const avatarUrl = contact?.avatar ?? fallbackAvatarUrl ?? null;

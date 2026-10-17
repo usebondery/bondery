@@ -1,5 +1,4 @@
 import type { Contact } from "@bondery/schemas";
-import { memo, useCallback } from "react";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
 import {
   useContactIsSelected,
@@ -24,7 +23,7 @@ interface ContactListItemProps {
   };
 }
 
-function ContactListItemComponent({
+export function ContactListItem({
   contact,
   isMyselfRow,
   isSwipeEnabled = true,
@@ -40,17 +39,14 @@ function ContactListItemComponent({
   const toggleContact = useContactsSelection((state) => state.toggleContact);
   const enterSelectionSession = useContactsSelection((state) => state.enterSelectionSession);
 
-  const handlePress = useCallback(
-    (contactId: string) => {
-      if (isMyselfRow) {
-        onOpenMyself();
-        return;
-      }
+  function handlePress(contactId: string) {
+    if (isMyselfRow) {
+      onOpenMyself();
+      return;
+    }
 
-      onOpenContact(contactId);
-    },
-    [isMyselfRow, onOpenContact, onOpenMyself],
-  );
+    onOpenContact(contactId);
+  }
 
   return (
     <ContactRow
@@ -69,27 +65,3 @@ function ContactListItemComponent({
     />
   );
 }
-
-function areContactListItemPropsEqual(
-  previous: ContactListItemProps,
-  next: ContactListItemProps,
-): boolean {
-  return (
-    previous.contact.id === next.contact.id &&
-    previous.contact.firstName === next.contact.firstName &&
-    previous.contact.middleName === next.contact.middleName &&
-    previous.contact.lastName === next.contact.lastName &&
-    previous.contact.updatedAt === next.contact.updatedAt &&
-    previous.contact.avatar === next.contact.avatar &&
-    previous.isMyselfRow === next.isMyselfRow &&
-    previous.isSwipeEnabled === next.isSwipeEnabled &&
-    previous.leftSwipeAction === next.leftSwipeAction &&
-    previous.rightSwipeAction === next.rightSwipeAction &&
-    previous.texts === next.texts &&
-    previous.onExecuteAction === next.onExecuteAction &&
-    previous.onOpenContact === next.onOpenContact &&
-    previous.onOpenMyself === next.onOpenMyself
-  );
-}
-
-export const ContactListItem = memo(ContactListItemComponent, areContactListItemPropsEqual);

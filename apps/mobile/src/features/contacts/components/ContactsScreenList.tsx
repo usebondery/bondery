@@ -1,6 +1,5 @@
 import type { Contact } from "@bondery/schemas";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
-import { useCallback, useMemo } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { View } from "react-native";
 import { GestureDetector, type GestureType } from "react-native-gesture-handler";
@@ -56,69 +55,53 @@ export function ContactsScreenList({
 }: ContactsScreenListProps) {
   const tMobileContacts = useMobileContactsTranslations();
 
-  const renderFlatItem = useCallback(
-    ({ item }: { item: ContactsFlatRow }) => {
-      if (item.type === "section-header") {
-        return <ContactsSectionHeader title={item.title} />;
-      }
-
-      return (
-        <ContactListItem
-          contact={item.contact}
-          isMyselfRow={
-            item.sectionKind === "myself" ||
-            (item.sectionKind === "search" && item.contact.id === myselfContactId)
-          }
-          isSwipeEnabled={item.sectionKind !== "search"}
-          leftSwipeAction={leftSwipeAction}
-          onExecuteAction={onExecuteAction}
-          onOpenContact={onOpenContact}
-          onOpenMyself={onOpenMyself}
-          rightSwipeAction={rightSwipeAction}
-          texts={rowTexts}
-        />
-      );
-    },
-    [
-      leftSwipeAction,
-      myselfContactId,
-      onExecuteAction,
-      onOpenContact,
-      onOpenMyself,
-      rightSwipeAction,
-      rowTexts,
-    ],
-  );
-
-  const listEmpty = useMemo(() => {
-    let message = tMobileContacts("Empty");
-    if (debouncedQuery && isGroupFilterActive) {
-      message = tMobileContacts("NoMatchSearchInGroup");
-    } else if (debouncedQuery) {
-      message = tMobileContacts("NoMatchSearch");
-    } else if (isGroupFilterActive) {
-      message = tMobileContacts("FilterEmptyGroup");
+  function renderFlatItem({ item }: { item: ContactsFlatRow }) {
+    if (item.type === "section-header") {
+      return <ContactsSectionHeader title={item.title} />;
     }
 
     return (
-      <Stack
-        align="center"
-        className="px-5"
-        justify="center"
-        style={{ paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset }}
-      >
-        <Text c="secondary">{message}</Text>
-      </Stack>
+      <ContactListItem
+        contact={item.contact}
+        isMyselfRow={
+          item.sectionKind === "myself" ||
+          (item.sectionKind === "search" && item.contact.id === myselfContactId)
+        }
+        isSwipeEnabled={item.sectionKind !== "search"}
+        leftSwipeAction={leftSwipeAction}
+        onExecuteAction={onExecuteAction}
+        onOpenContact={onOpenContact}
+        onOpenMyself={onOpenMyself}
+        rightSwipeAction={rightSwipeAction}
+        texts={rowTexts}
+      />
     );
-  }, [debouncedQuery, isGroupFilterActive, tMobileContacts]);
+  }
 
-  const listExtraData = useMemo(
-    () => ({
-      leftSwipeAction,
-      rightSwipeAction,
-    }),
-    [leftSwipeAction, rightSwipeAction],
+  let emptyMessage = tMobileContacts("Empty");
+  if (debouncedQuery && isGroupFilterActive) {
+    emptyMessage = tMobileContacts("NoMatchSearchInGroup");
+  } else if (debouncedQuery) {
+    emptyMessage = tMobileContacts("NoMatchSearch");
+  } else if (isGroupFilterActive) {
+    emptyMessage = tMobileContacts("FilterEmptyGroup");
+  }
+
+  const listEmpty = (
+    <Stack
+      align="center"
+      className="px-5"
+      justify="center"
+      style={{ paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset }}
+    >
+      <Text c="secondary">{emptyMessage}</Text>
+    </Stack>
   );
+
+  const listExtraData = {
+    leftSwipeAction,
+    rightSwipeAction,
+  };
 
   const listKey = isSearchActive
     ? `search-${debouncedQuery}-${isGroupFilterActive ? "group" : "all"}`

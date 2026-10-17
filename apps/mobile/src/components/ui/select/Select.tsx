@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { filterSelectData } from "../filterSelectData";
 import { InputWrapper } from "../InputWrapper";
@@ -44,7 +44,7 @@ export function Select<TValue extends string>(props: SelectProps<TValue>) {
   const [query, setQuery] = useState("");
 
   const searchable = resolveSelectSearchable(searchableProp, data.length);
-  const filteredData = useMemo(() => filterSelectData(data, query), [data, query]);
+  const filteredData = filterSelectData(data, query);
 
   const selectedOption = data.find((option) => option.value === props.value);
   const showValueStyle = clearable ? props.value !== null : Boolean(selectedOption);

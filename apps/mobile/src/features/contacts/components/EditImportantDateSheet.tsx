@@ -12,7 +12,7 @@ import {
   IconChevronDown,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useWatch } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
@@ -156,7 +156,7 @@ export function EditImportantDateSheet({
   const type = useWatch({ control, name: "type" });
   const dateIso = useWatch({ control, name: "date" });
 
-  const usedTypes = useMemo(() => {
+  const usedTypes = (() => {
     const set = new Set<ImportantDateType>();
     for (const item of existingDates) {
       if (mode === "edit" && item.id === initialEntry?.id) {
@@ -167,65 +167,54 @@ export function EditImportantDateSheet({
       }
     }
     return set;
-  }, [existingDates, initialEntry?.id, mode]);
+  })();
 
-  const typeOptions = useMemo(
-    () =>
-      IMPORTANT_DATE_TYPES.filter((value) => {
-        if (value === "birthday" && usedTypes.has("birthday")) {
-          return false;
-        }
-        if (value === "nameday" && usedTypes.has("nameday")) {
-          return false;
-        }
-        return true;
-      }).map((value) => {
-        const meta = IMPORTANT_DATE_TYPE_META[value];
-        return {
-          label: `${meta.emoji} ${tContactImportantDates(`Types.${value}` as never)}`,
-          value,
-        };
-      }),
-    [usedTypes, tContactImportantDates],
-  );
+  const typeOptions = IMPORTANT_DATE_TYPES.filter((value) => {
+    if (value === "birthday" && usedTypes.has("birthday")) {
+      return false;
+    }
+    if (value === "nameday" && usedTypes.has("nameday")) {
+      return false;
+    }
+    return true;
+  }).map((value) => {
+    const meta = IMPORTANT_DATE_TYPE_META[value];
+    return {
+      label: `${meta.emoji} ${tContactImportantDates(`Types.${value}` as never)}`,
+      value,
+    };
+  });
 
-  const notifyOptions = useMemo(
-    () =>
-      (["none", "1", "3", "7"] as const).map((value) => ({
-        label:
-          value === "none"
-            ? tContactImportantDates("NotifyNone")
-            : value === "1"
-              ? tContactImportantDates("NotifyDayBefore")
-              : tContactImportantDates("NotifyDaysBefore"),
-        leftSection: <NotifyBellIcon color={colors.iconSecondary} muted={value === "none"} />,
-        value,
-      })),
-    [colors.iconSecondary, tContactImportantDates],
-  );
+  const notifyOptions = (["none", "1", "3", "7"] as const).map((value) => ({
+    label:
+      value === "none"
+        ? tContactImportantDates("NotifyNone")
+        : value === "1"
+          ? tContactImportantDates("NotifyDayBefore")
+          : tContactImportantDates("NotifyDaysBefore"),
+    leftSection: <NotifyBellIcon color={colors.iconSecondary} muted={value === "none"} />,
+    value,
+  }));
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const performSave = useCallback(
-    (values: ImportantDateSheetOutput) => {
-      if (!values.date) {
-        throw new Error("Date required");
-      }
+  function performSave(values: ImportantDateSheetOutput) {
+    if (!values.date) {
+      throw new Error("Date required");
+    }
 
-      const entry: ImportantDate = {
-        ...(initialEntry ?? createDraftDate()),
-        date: values.date,
-        note: values.note,
-        notifyDaysBefore: values.notifyDaysBefore,
-        type: values.type,
-      };
-      onPersist(entry);
-      return entry;
-    },
-    [initialEntry, onPersist],
-  );
+    const entry: ImportantDate = {
+      ...(initialEntry ?? createDraftDate()),
+      date: values.date,
+      note: values.note,
+      notifyDaysBefore: values.notifyDaysBefore,
+      type: values.type,
+    };
+    onPersist(entry);
+    return entry;
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

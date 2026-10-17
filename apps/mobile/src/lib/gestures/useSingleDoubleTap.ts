@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 
 const DEFAULT_DELAY_MS = 280;
 
@@ -36,7 +36,7 @@ export function useSingleDoubleTap({
     [],
   );
 
-  return useCallback(() => {
+  return () => {
     if (!enabled) {
       singlePressRef.current();
       return;
@@ -66,5 +66,5 @@ export function useSingleDoubleTap({
       pendingTimerRef.current = null;
       singlePressRef.current();
     }, delayMs);
-  }, [delayMs, enabled]);
+  };
 }

@@ -1,6 +1,6 @@
 import { parsePersonMentionUrl } from "@bondery/helpers/notes";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react-native";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
 import { Pressable } from "@/components/ui/Pressable";
@@ -33,27 +33,24 @@ export function ContactDetailNotesSection({
   const [notesExpanded, setNotesExpanded] = useState(false);
   const longNotes = notesMarkdown.length > NOTES_COLLAPSE_CHAR_THRESHOLD;
 
-  const handleMentionLinkPress = useCallback(
-    ({ url }: { url: string }) => {
-      const personId = parsePersonMentionUrl(url);
-      if (!personId) {
-        return;
-      }
+  function handleMentionLinkPress({ url }: { url: string }) {
+    const personId = parsePersonMentionUrl(url);
+    if (!personId) {
+      return;
+    }
 
-      if (!mentionableContactIds.has(personId)) {
-        notifications.show({ title: "Contact no longer available", type: "error" });
-        return;
-      }
+    if (!mentionableContactIds.has(personId)) {
+      notifications.show({ title: "Contact no longer available", type: "error" });
+      return;
+    }
 
-      if (myselfContactId && personId === myselfContactId) {
-        openMyself();
-        return;
-      }
+    if (myselfContactId && personId === myselfContactId) {
+      openMyself();
+      return;
+    }
 
-      openContact(personId);
-    },
-    [mentionableContactIds, myselfContactId, openContact, openMyself],
-  );
+    openContact(personId);
+  }
 
   return (
     <View style={contactDetailStyles.section}>
@@ -107,8 +104,7 @@ export function ContactDetailNotesSection({
               <Pressable
                 accessibilityLabel={notesExpanded ? "Show less notes" : "Show more notes"}
                 accessibilityRole="button"
-                onPress={(e) => {
-                  e.stopPropagation?.();
+                onPress={() => {
                   setNotesExpanded((v) => !v);
                 }}
                 style={styles.showMoreButton}

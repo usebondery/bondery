@@ -1,6 +1,5 @@
 import type { BottomTabBarProps } from "expo-router/js-tabs";
 import type { ReactNode } from "react";
-import { useCallback } from "react";
 import { FloatingPillRail } from "../../components/chrome/FloatingPillRail";
 import { getActionButtonIconSize } from "../../components/ui/actionButtonTokens";
 import { useMobileNavigationTranslations } from "../../lib/i18n/generated/hooks";
@@ -43,15 +42,15 @@ function RootTabBubble({
   const descriptor = descriptors[route.key];
   const options = descriptor.options;
 
-  const emitTabPress = useCallback(() => {
+  function emitTabPress() {
     return emitter.emit({
       canPreventDefault: true,
       target: route.key,
       type: "tabPress",
     });
-  }, [emitter, route.key]);
+  }
 
-  const onPress = useCallback(() => {
+  function onPress() {
     const event = emitTabPress();
 
     if (!isFocused) {
@@ -64,21 +63,14 @@ function RootTabBubble({
     if (showSearchFocusHint) {
       focusActiveTabSearch();
     }
-  }, [
-    emitTabPress,
-    focusActiveTabSearch,
-    isFocused,
-    navigateToTab,
-    route.key,
-    showSearchFocusHint,
-  ]);
+  }
 
-  const onLongPress = useCallback(() => {
+  function onLongPress() {
     emitter.emit({
       target: route.key,
       type: "tabLongPress",
     });
-  }, [emitter, route.key]);
+  }
 
   const accessibilityHint =
     showSearchFocusHint && isFocused ? tMobileNavigation("TabTapSearchHint") : undefined;

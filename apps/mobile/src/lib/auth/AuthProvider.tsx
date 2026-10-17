@@ -1,4 +1,4 @@
-import { type ReactNode, useMemo } from "react";
+import type { ReactNode } from "react";
 import { authClient } from "./client";
 import { AuthContext, type AuthContextValue } from "./useAuth";
 import { useAuthSession } from "./useAuthSession";
@@ -14,29 +14,23 @@ function AuthProviderWithClient({ children }: AuthProviderProps) {
   const isSessionHydrating = sessionState.isPending && session === null;
   const isLoadingSession = isSessionHydrating;
 
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      isAuthenticated: session !== null,
-      isLoadingSession,
-      isSessionHydrating,
-      session,
-    }),
-    [isLoadingSession, isSessionHydrating, session],
-  );
+  const value: AuthContextValue = {
+    isAuthenticated: session !== null,
+    isLoadingSession,
+    isSessionHydrating,
+    session,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 function AuthProviderWithoutClient({ children }: AuthProviderProps) {
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      isAuthenticated: false,
-      isLoadingSession: false,
-      isSessionHydrating: false,
-      session: null,
-    }),
-    [],
-  );
+  const value: AuthContextValue = {
+    isAuthenticated: false,
+    isLoadingSession: false,
+    isSessionHydrating: false,
+    session: null,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

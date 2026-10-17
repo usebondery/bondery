@@ -1,5 +1,5 @@
 import { IconTrash } from "@tabler/icons-react-native";
-import { useCallback } from "react";
+
 import {
   useCommonTranslations,
   useMobileTagsTranslations,
@@ -31,17 +31,17 @@ export function TagDeleteDialog({
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
-  const handleClose = useCallback(() => {
+  function handleClose() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleDeleteError = useCallback(() => {
+  function handleDeleteError() {
     notifications.show({
       message: tMobileTags("DeleteFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [t, tMobileTags]);
+  }
 
   const { isSubmitting, submit } = useSheetLocalAction({
     onClose: handleClose,

@@ -2,6 +2,12 @@ import { spawn } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { killDevPort } from "./kill-dev-port.mjs";
+import {
+  ensureInspectorClientMetadataConfig,
+  resolveMcpInspectorClientMetadataUrl,
+} from "./mcp-inspector-cimd-url.mjs";
+import { MCP_INSPECTOR_WEB_PORTS, mcpInspectorWebProcessEnv } from "./mcp-inspector-env.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const seedPath = join(root, "scripts/dev/mcp-inspector.json");
@@ -41,23 +47,38 @@ function ensureWritableCatalog() {
   }
 }
 
+function freeMcpInspectorPorts() {
+  let ok = true;
+  for (const port of MCP_INSPECTOR_WEB_PORTS) {
+    if (!killDevPort(port)) {
+      ok = false;
+    }
+  }
+  if (!ok) {
+    console.error(
+      `Could not free MCP Inspector ports (${MCP_INSPECTOR_WEB_PORTS.join(", ")}). Stop the other process manually.`,
+    );
+    process.exit(1);
+  }
+}
+
 ensureWritableCatalog();
+freeMcpInspectorPorts();
+
+const userArgs = process.argv.slice(2);
+const clientMetadataUrl = await resolveMcpInspectorClientMetadataUrl();
+ensureInspectorClientMetadataConfig(clientMetadataUrl);
+console.info(`MCP Inspector CIMD: ${clientMetadataUrl}`);
 
 const child = spawn(
   "npx",
-  [
-    "--yes",
-    "@modelcontextprotocol/inspector",
-    "--catalog",
-    catalogPath,
-    "--server",
-    "bondery-local",
-    ...process.argv.slice(2),
-  ],
+  ["--yes", "@modelcontextprotocol/inspector", "--web", "--catalog", catalogPath, ...userArgs],
   {
     cwd: root,
-    shell: true,
+    env: mcpInspectorWebProcessEnv(),
+    shell: process.platform === "win32",
     stdio: "inherit",
+    windowsHide: true,
   },
 );
 

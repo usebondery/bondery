@@ -1,4 +1,4 @@
-import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, type ReactNode, useContext, useState } from "react";
 
 export type FloatingActionBarSlot = "contacts-selection" | null;
 
@@ -13,22 +13,19 @@ const FloatingChromeContext = createContext<FloatingChromeContextValue | null>(n
 export function FloatingChromeProvider({ children }: { children: ReactNode }) {
   const [actionBarSlot, setActionBarSlotState] = useState<FloatingActionBarSlot>(null);
 
-  const setActionBarSlot = useCallback((slot: FloatingActionBarSlot) => {
+  function setActionBarSlot(slot: FloatingActionBarSlot) {
     setActionBarSlotState(slot);
-  }, []);
+  }
 
-  const clearActionBarSlot = useCallback(() => {
+  function clearActionBarSlot() {
     setActionBarSlotState(null);
-  }, []);
+  }
 
-  const value = useMemo(
-    () => ({
-      actionBarSlot,
-      clearActionBarSlot,
-      setActionBarSlot,
-    }),
-    [actionBarSlot, clearActionBarSlot, setActionBarSlot],
-  );
+  const value = {
+    actionBarSlot,
+    clearActionBarSlot,
+    setActionBarSlot,
+  };
 
   return <FloatingChromeContext.Provider value={value}>{children}</FloatingChromeContext.Provider>;
 }

@@ -1,5 +1,5 @@
 import { IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { Sheet } from "../../../components/ui/Sheet";
 import { deleteContacts } from "../../../lib/domains/contacts";
@@ -32,19 +32,19 @@ export function ContactsSelectionDialogs({
   const setIsDeleting = useContactsSelection((state) => state.setIsDeleting);
   const exitSelectionMode = useContactsSelection((state) => state.exitSelectionMode);
 
-  const handleClose = useCallback(() => {
+  function handleClose() {
     setDeleteConfirmOpen(false);
-  }, [setDeleteConfirmOpen]);
+  }
 
-  const handleDeleteError = useCallback(() => {
+  function handleDeleteError() {
     notifications.show({
       message: tMobileContacts("DeleteFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [t, tMobileContacts]);
+  }
 
-  const performDelete = useCallback(() => {
+  function performDelete() {
     const selectionState = useContactsSelection.getState();
     const scope = loadedGroupMembers
       ? { loadedGroupMembers }
@@ -53,12 +53,12 @@ export function ContactsSelectionDialogs({
         : undefined;
     const personIds = resolveContactsSelectionPersonIds(selectionState, debouncedQuery, scope);
     deleteContacts(personIds);
-  }, [debouncedQuery, filterGroupId, loadedGroupMembers]);
+  }
 
-  const handleDeleteSuccess = useCallback(() => {
+  function handleDeleteSuccess() {
     exitSelectionMode();
     onContactsReloaded();
-  }, [exitSelectionMode, onContactsReloaded]);
+  }
 
   const { isSubmitting, submit } = useSheetLocalAction({
     onClose: handleClose,

@@ -1,6 +1,6 @@
 import { MOBILE_GROUP_ID_PARAM, parseMobileGroupIdParam } from "@bondery/helpers";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
 import { resolveDisplayedError } from "../../../lib/api/resolveDisplayedError";
@@ -31,7 +31,7 @@ export function useContactsScreenData() {
     [MOBILE_GROUP_ID_PARAM]?: string | string[];
   }>();
   const groupIdParam = searchParams[MOBILE_GROUP_ID_PARAM];
-  const urlGroupId = useMemo(() => parseMobileGroupIdParam(groupIdParam), [groupIdParam]);
+  const urlGroupId = parseMobileGroupIdParam(groupIdParam);
 
   useEffect(() => {
     syncEffectState(() => {
@@ -71,29 +71,20 @@ export function useContactsScreenData() {
   const totalCount = listResult.totalCount;
   const error = contactsError ? resolveDisplayedError(contactsError, t) : null;
 
-  const sortedGroups = useMemo(
-    () => sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt),
-    [syncedGroups, groupSortOrder, groupLastOpenedAt],
-  );
+  const sortedGroups = sortGroups(syncedGroups, groupSortOrder, groupLastOpenedAt);
 
-  const selectedGroup = useMemo(
-    () => sortedGroups.find((group) => group.id === selectedGroupId) ?? null,
-    [selectedGroupId, sortedGroups],
-  );
+  const selectedGroup = sortedGroups.find((group) => group.id === selectedGroupId) ?? null;
 
-  const selectGroup = useCallback(
-    (nextGroupId: string | null) => {
-      setSelectedGroupId(nextGroupId);
-      setGroupPickerOpen(false);
-      if (nextGroupId) {
-        recordGroupOpened(nextGroupId);
-      }
-      router.setParams({
-        [MOBILE_GROUP_ID_PARAM]: nextGroupId ?? undefined,
-      });
-    },
-    [recordGroupOpened, router],
-  );
+  function selectGroup(nextGroupId: string | null) {
+    setSelectedGroupId(nextGroupId);
+    setGroupPickerOpen(false);
+    if (nextGroupId) {
+      recordGroupOpened(nextGroupId);
+    }
+    router.setParams({
+      [MOBILE_GROUP_ID_PARAM]: nextGroupId ?? undefined,
+    });
+  }
 
   useEffect(() => {
     if (!selectedGroupId) {
@@ -114,50 +105,39 @@ export function useContactsScreenData() {
     });
   }, [router, selectedGroupId, sortedGroups, tMobileContacts]);
 
-  const reloadGroups = useCallback(() => {
+  function reloadGroups() {
     refreshGroups();
-  }, [refreshGroups]);
+  }
 
-  const filteredMyselfContact = useMemo(() => {
-    if (!myselfContact) {
-      return null;
-    }
-
-    return contactMatchesQuery(myselfContact, debouncedQuery) ? myselfContact : null;
-  }, [myselfContact, debouncedQuery]);
+  const filteredMyselfContact =
+    myselfContact && contactMatchesQuery(myselfContact, debouncedQuery) ? myselfContact : null;
 
   const myselfSectionTitle = tMobileContacts("Myself");
   const locale = i18n.language;
 
-  const alphabetSections = useMemo<ContactSection[]>(
-    () => buildAlphabetContactSections(contacts, locale),
-    [contacts, locale],
-  );
+  const alphabetSections = buildAlphabetContactSections(contacts, locale);
 
-  const sections = useMemo<ContactSection[]>(() => {
-    if (debouncedQuery) {
-      const searchData =
-        !groupId && filteredMyselfContact
-          ? [
-              filteredMyselfContact,
-              ...contacts.filter((contact) => contact.id !== filteredMyselfContact.id),
-            ]
-          : contacts;
+  let sections: ContactSection[];
+  if (debouncedQuery) {
+    const searchData =
+      !groupId && filteredMyselfContact
+        ? [
+            filteredMyselfContact,
+            ...contacts.filter((contact) => contact.id !== filteredMyselfContact.id),
+          ]
+        : contacts;
 
-      return [
-        {
-          data: searchData,
-          kind: "search",
-          title: "",
-        },
-      ];
-    }
-
-    if (groupId || !filteredMyselfContact) {
-      return alphabetSections;
-    }
-
-    return [
+    sections = [
+      {
+        data: searchData,
+        kind: "search",
+        title: "",
+      },
+    ];
+  } else if (groupId || !filteredMyselfContact) {
+    sections = alphabetSections;
+  } else {
+    sections = [
       {
         data: [filteredMyselfContact],
         kind: "myself",
@@ -165,25 +145,15 @@ export function useContactsScreenData() {
       },
       ...alphabetSections,
     ];
-  }, [
-    alphabetSections,
-    contacts,
-    debouncedQuery,
-    filteredMyselfContact,
-    groupId,
-    myselfSectionTitle,
-  ]);
+  }
 
-  const { rows: flatRows, stickyHeaderIndices } = useMemo(
-    () => buildContactsFlatRows(sections),
-    [sections],
-  );
+  const { rows: flatRows, stickyHeaderIndices } = buildContactsFlatRows(sections);
 
   const isSearchActive = debouncedQuery.length > 0;
 
-  const reloadContacts = useCallback(async () => {
+  async function reloadContacts() {
     refreshContacts();
-  }, [refreshContacts]);
+  }
 
   const showFullScreenLoader = isInitialSync && contacts.length === 0;
 

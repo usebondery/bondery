@@ -1,4 +1,3 @@
-import { useCallback } from "react";
 import { resolveDisplayedError } from "../api/resolveDisplayedError";
 import { useCommonTranslations } from "../i18n/generated/hooks";
 import { notifications } from "./notifications";
@@ -10,19 +9,16 @@ import { notifications } from "./notifications";
 export function useShowErrorToast() {
   const t = useCommonTranslations();
 
-  return useCallback(
-    (error: unknown, headline?: string) => {
-      const message = resolveDisplayedError(error, t);
-      if (!message) {
-        return;
-      }
+  return (error: unknown, headline?: string) => {
+    const message = resolveDisplayedError(error, t);
+    if (!message) {
+      return;
+    }
 
-      notifications.show({
-        message,
-        title: headline ?? t("feedback.errorTitle"),
-        type: "error",
-      });
-    },
-    [t],
-  );
+    notifications.show({
+      message,
+      title: headline ?? t("feedback.errorTitle"),
+      type: "error",
+    });
+  };
 }

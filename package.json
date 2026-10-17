@@ -112,7 +112,7 @@
     "kill:dev": "node scripts/dev/kill-dev-servers.mjs",
     "lint": "biome check --write .",
     "mcp:inspect": "node scripts/dev/mcp-inspect.mjs",
-    "mcp:inspect:cli": "npx --yes @modelcontextprotocol/inspector --cli --transport http --server-url http://localhost:26631/mcp --protocol-era modern --use-stored-auth",
+    "mcp:inspect:cli": "node scripts/dev/mcp-inspect-cli.mjs",
     "prepare": "lefthook install --reset-hooks-path",
     "provision:oauth-clients": "pnpm --filter api run provision-oauth-clients:dev",
     "provision:platform-admins": "pnpm --filter api run provision-platform-admins:dev",

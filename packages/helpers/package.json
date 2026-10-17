@@ -218,6 +218,18 @@
       "node": "./dist/date/date-utils.js",
       "types": "./src/date/date-utils.ts"
     },
+    "./dev/mcp-inspector-client-metadata": {
+      "default": "./dist/dev/mcp-inspector-client-metadata.js",
+      "import": "./dist/dev/mcp-inspector-client-metadata.js",
+      "node": "./dist/dev/mcp-inspector-client-metadata.js",
+      "types": "./src/dev/mcp-inspector-client-metadata.ts"
+    },
+    "./dev/mcp-inspector-client-metadata.test": {
+      "default": "./dist/dev/mcp-inspector-client-metadata.test.js",
+      "import": "./dist/dev/mcp-inspector-client-metadata.test.js",
+      "node": "./dist/dev/mcp-inspector-client-metadata.test.js",
+      "types": "./src/dev/mcp-inspector-client-metadata.test.ts"
+    },
     "./docs": {
       "default": "./dist/docs/index.js",
       "import": "./dist/docs/index.js",

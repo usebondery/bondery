@@ -1,5 +1,5 @@
 import { getRandomEmoji } from "@bondery/helpers/emoji";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text } from "react-native";
 import {
   useCommonTranslations,
@@ -37,20 +37,17 @@ export function EmojiPickerSheet({
   const pendingScrollEmojiRef = useRef<string | null>(null);
   const { sections, debouncedQuery } = useEmojiPickerFilter(query);
 
-  const handleClose = useCallback(() => {
+  function handleClose() {
     onOpenChange(false);
     pendingScrollEmojiRef.current = null;
-  }, [onOpenChange]);
+  }
 
-  const handleGridSelect = useCallback(
-    (emoji: string) => {
-      onSelect(emoji);
-      handleClose();
-    },
-    [handleClose, onSelect],
-  );
+  function handleGridSelect(emoji: string) {
+    onSelect(emoji);
+    handleClose();
+  }
 
-  const queueScrollToPendingEmoji = useCallback(() => {
+  function queueScrollToPendingEmoji() {
     const pendingEmoji = pendingScrollEmojiRef.current;
     if (!pendingEmoji) {
       return;
@@ -62,9 +59,9 @@ export function EmojiPickerSheet({
         pendingScrollEmojiRef.current = null;
       });
     });
-  }, []);
+  }
 
-  const handleRandomEmoji = useCallback(() => {
+  function handleRandomEmoji() {
     const nextEmoji = getRandomEmoji();
     onSelect(nextEmoji);
     pendingScrollEmojiRef.current = nextEmoji;
@@ -74,15 +71,21 @@ export function EmojiPickerSheet({
     if (!hadActiveSearch) {
       queueScrollToPendingEmoji();
     }
-  }, [onSelect, query, queueScrollToPendingEmoji]);
+  }
 
   useEffect(() => {
     if (!open || debouncedQuery !== "" || !pendingScrollEmojiRef.current) {
       return;
     }
 
-    queueScrollToPendingEmoji();
-  }, [open, debouncedQuery, queueScrollToPendingEmoji]);
+    const pendingEmoji = pendingScrollEmojiRef.current;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        gridRef.current?.scrollToEmoji(pendingEmoji);
+        pendingScrollEmojiRef.current = null;
+      });
+    });
+  }, [open, debouncedQuery]);
 
   const randomEmojiAction = (
     <ActionButtonShellPressable

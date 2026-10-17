@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import type { FieldValues, UseFormHandleSubmit } from "react-hook-form";
 
 type UseSheetNetworkSubmitOptions<TFieldValues extends FieldValues, TResult> = {
@@ -19,7 +19,7 @@ export function useSheetNetworkSubmit<TFieldValues extends FieldValues, TResult>
 ) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = useCallback(() => {
+  function submit() {
     setIsSubmitting(true);
     void handleSubmit(async (values) => {
       try {
@@ -36,7 +36,7 @@ export function useSheetNetworkSubmit<TFieldValues extends FieldValues, TResult>
       .finally(() => {
         setIsSubmitting(false);
       });
-  }, [handleSubmit, onClose, onError, onSuccess, perform]);
+  }
 
   return { isSubmitting, submit };
 }

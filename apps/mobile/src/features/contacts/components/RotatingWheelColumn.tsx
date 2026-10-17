@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import {
   type AccessibilityActionEvent,
   FlatList,
@@ -40,12 +40,12 @@ export function RotatingWheelColumn({
       ? []
       : [...Array(PADDING_ITEMS).fill(""), ...items, ...Array(PADDING_ITEMS).fill("")];
 
-  const scrollToIndex = useCallback((index: number, animated = false) => {
+  function scrollToIndex(index: number, animated = false) {
     listRef.current?.scrollToOffset({
       animated,
       offset: index * WHEEL_PICKER_ITEM_HEIGHT,
     });
-  }, []);
+  }
 
   useEffect(() => {
     if (items.length === 0 || isUserScrollingRef.current) {
@@ -53,8 +53,11 @@ export function RotatingWheelColumn({
     }
 
     const clamped = Math.min(Math.max(selectedIndex, 0), items.length - 1);
-    scrollToIndex(clamped, false);
-  }, [items.length, scrollToIndex, selectedIndex]);
+    listRef.current?.scrollToOffset({
+      animated: false,
+      offset: clamped * WHEEL_PICKER_ITEM_HEIGHT,
+    });
+  }, [items.length, selectedIndex]);
 
   function handleScrollBegin() {
     isUserScrollingRef.current = true;

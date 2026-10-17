@@ -1,6 +1,6 @@
 import type { Tag, TagWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import {
   useCommonTranslations,
@@ -75,28 +75,25 @@ export function ContactTagsSection({
   const [isCreateTagOpen, setCreateTagOpen] = useState(false);
   const tagSortOrder = useMobilePreferences((state) => state.tagSortOrder);
 
-  const sortedTags = useMemo(() => sortTags(tags, tagSortOrder), [tagSortOrder, tags]);
+  const sortedTags = sortTags(tags, tagSortOrder);
 
   const editAccessibilityLabel = tMobileContactDetail("TagsEditAccessibility").replace(
     "{name}",
     contactName,
   );
 
-  const handleTagCreated = useCallback(
-    (tag: Tag) => {
-      try {
-        addTagToContact(contactId, tag.id);
-        onTagAdded(tag);
-      } catch {
-        notifications.show({
-          message: tMobileTags("CreateFailed"),
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
-      }
-    },
-    [contactId, onTagAdded, tMobileTags, t],
-  );
+  function handleTagCreated(tag: Tag) {
+    try {
+      addTagToContact(contactId, tag.id);
+      onTagAdded(tag);
+    } catch {
+      notifications.show({
+        message: tMobileTags("CreateFailed"),
+        title: t("feedback.errorTitle"),
+        type: "error",
+      });
+    }
+  }
 
   return (
     <View style={styles.section}>

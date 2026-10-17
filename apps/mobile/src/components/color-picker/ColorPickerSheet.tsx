@@ -1,5 +1,5 @@
 import { IconCopy } from "@tabler/icons-react-native";
-import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import type { ColorFormatsObject } from "reanimated-color-picker";
 import ColorPicker, { Panel3 } from "reanimated-color-picker";
@@ -38,13 +38,9 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
   const [hexInput, setHexInput] = useState(DEFAULT_GROUP_COLOR);
   const [hexError, setHexError] = useState<string | null>(null);
 
-  const wheelSize = useMemo(
-    () =>
-      Math.min(
-        COLOR_PICKER_LAYOUT.wheelMaxSize,
-        windowWidth - MOBILE_LAYOUT.spacing.horizontal * 2 - 32,
-      ),
-    [windowWidth],
+  const wheelSize = Math.min(
+    COLOR_PICKER_LAYOUT.wheelMaxSize,
+    windowWidth - MOBILE_LAYOUT.spacing.horizontal * 2 - 32,
   );
 
   const previewBorderColor = getContrastBorderColor(
@@ -66,23 +62,20 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
     });
   }, [open, value]);
 
-  const handleClose = useCallback(() => {
+  function handleClose() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleSwatchSelect = useCallback(
-    (hex: string) => {
-      const normalized = normalizeHex(hex);
-      setDraftColor(normalized);
-      setHexInput(normalized);
-      setHexError(null);
-      onSelect(normalized);
-      onOpenChange(false);
-    },
-    [onOpenChange, onSelect],
-  );
+  function handleSwatchSelect(hex: string) {
+    const normalized = normalizeHex(hex);
+    setDraftColor(normalized);
+    setHexInput(normalized);
+    setHexError(null);
+    onSelect(normalized);
+    onOpenChange(false);
+  }
 
-  const handleWheelChange = useCallback((color: ColorFormatsObject) => {
+  function handleWheelChange(color: ColorFormatsObject) {
     const normalized = normalizeHex(color.hex);
 
     if (!normalized) {
@@ -92,22 +85,19 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
     setDraftColor(normalized);
     setHexInput(normalized);
     setHexError(null);
-  }, []);
+  }
 
-  const handleWheelComplete = useCallback(
-    (color: ColorFormatsObject) => {
-      const normalized = normalizeHex(color.hex);
+  function handleWheelComplete(color: ColorFormatsObject) {
+    const normalized = normalizeHex(color.hex);
 
-      if (!normalized) {
-        return;
-      }
+    if (!normalized) {
+      return;
+    }
 
-      onSelect(normalized);
-    },
-    [onSelect],
-  );
+    onSelect(normalized);
+  }
 
-  const commitHexInput = useCallback(() => {
+  function commitHexInput() {
     const normalized = normalizeHex(hexInput);
 
     if (!normalized) {
@@ -119,9 +109,9 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
     setDraftColor(normalized);
     setHexInput(normalized);
     onSelect(normalized);
-  }, [hexInput, onSelect, tMobileColorPicker]);
+  }
 
-  const handleCopyHex = useCallback(async () => {
+  async function handleCopyHex() {
     const normalized = normalizeHex(draftColor);
 
     if (!normalized) {
@@ -134,7 +124,7 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
       successDescription: tMobileColorPicker("ColorCopiedMessage"),
       successHeadline: tContactInfo("CopySuccessTitle"),
     });
-  }, [draftColor, t, tMobileColorPicker, tContactInfo]);
+  }
 
   const colorPreview = (
     <View

@@ -1,5 +1,5 @@
 import type { RefObject } from "react";
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { UI_TIMING_MS } from "../config";
 import type { NativeTextInputRef } from "../native-host-refs";
 
@@ -19,17 +19,14 @@ export function useSheetInputAutofocus(
     }
   }, [open]);
 
-  return useCallback(
-    (index: number) => {
-      if (index < 0 || !pendingRef.current) {
-        return;
-      }
+  return (index: number) => {
+    if (index < 0 || !pendingRef.current) {
+      return;
+    }
 
-      pendingRef.current = false;
-      setTimeout(() => {
-        inputRef.current?.focus();
-      }, UI_TIMING_MS.sheetFocusDelay);
-    },
-    [inputRef],
-  );
+    pendingRef.current = false;
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, UI_TIMING_MS.sheetFocusDelay);
+  };
 }

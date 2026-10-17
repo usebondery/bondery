@@ -2,7 +2,7 @@ import { type ContactSocialFieldKey, extractUsername } from "@bondery/helpers";
 import { normalizedSocialHandleSchema } from "@bondery/helpers/forms";
 import { socialHandleInputSchema } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
@@ -120,13 +120,10 @@ export function EditSocialSheet({
     return () => clearTimeout(timer);
   }, [open, activePlatform]);
 
-  const pickerPlatforms = useMemo(() => {
-    if (mode === "edit" && platform) {
-      return [getContactSocialPlatform(platform)];
-    }
-
-    return CONTACT_SOCIAL_PLATFORMS.filter((item) => availablePlatforms.includes(item.key));
-  }, [availablePlatforms, mode, platform]);
+  const pickerPlatforms =
+    mode === "edit" && platform
+      ? [getContactSocialPlatform(platform)]
+      : CONTACT_SOCIAL_PLATFORMS.filter((item) => availablePlatforms.includes(item.key));
 
   const canSubmit = Boolean(activePlatform) && isValid && (mode === "edit" ? isDirty : true);
 
@@ -155,31 +152,28 @@ export function EditSocialSheet({
     }
   };
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const performSave = useCallback(
-    ({ value: submittedValue }: { value: string }) => {
-      if (!activePlatform || !canSubmit) {
-        throw new Error("Invalid social form");
-      }
+  function performSave({ value: submittedValue }: { value: string }) {
+    if (!activePlatform || !canSubmit) {
+      throw new Error("Invalid social form");
+    }
 
-      const parsed = normalizedSocialHandleSchema.safeParse({
-        platform: activePlatform,
-        value: submittedValue,
-      });
-      if (!parsed.success) {
-        setError(parsed.error.issues[0]?.message ?? "Please enter a valid value");
-        throw new Error("Validation failed");
-      }
+    const parsed = normalizedSocialHandleSchema.safeParse({
+      platform: activePlatform,
+      value: submittedValue,
+    });
+    if (!parsed.success) {
+      setError(parsed.error.issues[0]?.message ?? "Please enter a valid value");
+      throw new Error("Validation failed");
+    }
 
-      setError(null);
-      onPersist(parsed.data.platform, parsed.data.value);
-      return parsed.data;
-    },
-    [activePlatform, canSubmit, onPersist],
-  );
+    setError(null);
+    onPersist(parsed.data.platform, parsed.data.value);
+    return parsed.data;
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

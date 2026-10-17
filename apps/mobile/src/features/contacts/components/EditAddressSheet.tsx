@@ -18,7 +18,7 @@ import {
   IconMapPinPlus,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
 import { useCommonTranslations, useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
@@ -124,15 +124,17 @@ export function EditAddressSheet({
   const [geocodeStatus, setGeocodeStatus] = useState<GeocodeStatus>("idle");
   const [geocodedSuggestion, setGeocodedSuggestion] = useState<ContactAddressEntry | null>(null);
 
-  const invalidateSuggestionsFetch = useCallback(() => {
+  function invalidateSuggestionsFetch() {
     activeQueryRef.current = null;
     abortControllerRef.current?.abort();
     abortControllerRef.current = null;
-  }, []);
+  }
 
   useEffect(() => {
     if (!open) {
-      invalidateSuggestionsFetch();
+      activeQueryRef.current = null;
+      abortControllerRef.current?.abort();
+      abortControllerRef.current = null;
       if (debounceRef.current) {
         clearTimeout(debounceRef.current);
         debounceRef.current = null;
@@ -146,7 +148,7 @@ export function EditAddressSheet({
       setGeocodeStatus(entry?.latitude != null ? "geocoded" : "idle");
       setGeocodedSuggestion(null);
     });
-  }, [open, initialEntry, invalidateSuggestionsFetch]);
+  }, [open, initialEntry]);
 
   useEffect(() => {
     if (!open) {
@@ -160,7 +162,7 @@ export function EditAddressSheet({
     return () => clearTimeout(timer);
   }, [open]);
 
-  const fetchSuggestions = useCallback(async (query: string) => {
+  async function fetchSuggestions(query: string) {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
@@ -186,7 +188,7 @@ export function EditAddressSheet({
         abortControllerRef.current = null;
       }
     }
-  }, []);
+  }
 
   function handleAddressChange(text: string) {
     const trimmed = text.trim();
@@ -212,27 +214,24 @@ export function EditAddressSheet({
     }, GEOCODE_SUGGEST_DEBOUNCE_MS);
   }
 
-  const handleSelectSuggestion = useCallback(
-    (suggestion: ContactAddressEntry) => {
-      invalidateSuggestionsFetch();
-      setValue("value", suggestion.addressFormatted || suggestion.value, {
-        shouldDirty: true,
-        shouldValidate: true,
-      });
-      setGeocodedSuggestion(suggestion);
-      setGeocodeStatus("geocoded");
-      setSuggestions([]);
+  function handleSelectSuggestion(suggestion: ContactAddressEntry) {
+    invalidateSuggestionsFetch();
+    setValue("value", suggestion.addressFormatted || suggestion.value, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    setGeocodedSuggestion(suggestion);
+    setGeocodeStatus("geocoded");
+    setSuggestions([]);
 
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-        debounceRef.current = null;
-      }
-    },
-    [setValue, invalidateSuggestionsFetch],
-  );
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+  }
 
-  const renderSuggestionItem = useCallback(
-    ({ item, index }: { item: ContactAddressEntry; index: number }) => (
+  function renderSuggestionItem({ item, index }: { item: ContactAddressEntry; index: number }) {
+    return (
       <Pressable
         onPress={() => handleSelectSuggestion(item)}
         style={({ pressed }) => [
@@ -249,40 +248,30 @@ export function EditAddressSheet({
           {item.addressFormatted || item.value}
         </Text>
       </Pressable>
-    ),
-    [
-      colors.border,
-      colors.surfacePressed,
-      colors.textPrimary,
-      handleSelectSuggestion,
-      suggestions.length,
-    ],
-  );
+    );
+  }
 
   const suggestionsListHeight = Math.min(
     suggestions.length * SUGGESTION_ROW_HEIGHT,
     SUGGESTIONS_MAX_HEIGHT,
   );
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const performSave = useCallback(
-    (values: ContactAddressSheetOutput) => {
-      const entry = buildAddressEntry(
-        values.value,
-        values.label ?? "",
-        values.type,
-        geocodedSuggestion,
-        initialEntry,
-      );
-      const parsedEntry = contactAddressEntrySchema.parse(entry);
-      onPersist(parsedEntry);
-      return parsedEntry;
-    },
-    [geocodedSuggestion, initialEntry, onPersist],
-  );
+  function performSave(values: ContactAddressSheetOutput) {
+    const entry = buildAddressEntry(
+      values.value,
+      values.label ?? "",
+      values.type,
+      geocodedSuggestion,
+      initialEntry,
+    );
+    const parsedEntry = contactAddressEntrySchema.parse(entry);
+    onPersist(parsedEntry);
+    return parsedEntry;
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

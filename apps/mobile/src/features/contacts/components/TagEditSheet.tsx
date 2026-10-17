@@ -1,7 +1,7 @@
 import type { Tag } from "@bondery/schemas";
 import { createTagSchema, GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
-import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
 import { StyleSheet, View } from "react-native";
 import {
@@ -96,46 +96,40 @@ export function TagEditSheet(props: TagEditSheetProps) {
 
   const editTagId = mode === "edit" ? props.tagId : null;
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleSaveError = useCallback(() => {
+  function handleSaveError() {
     notifications.show({
       message: mode === "create" ? tMobileTags("CreateFailed") : tMobileTags("EditFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [mode, t, tMobileTags]);
+  }
 
-  const performSave = useCallback(
-    (values: TagFormValues) => {
-      if (mode === "create") {
-        return createTag({ color: values.color, label: values.label });
-      }
+  function performSave(values: TagFormValues) {
+    if (mode === "create") {
+      return createTag({ color: values.color, label: values.label });
+    }
 
-      if (!editTagId) {
-        throw new Error("Missing tag id");
-      }
+    if (!editTagId) {
+      throw new Error("Missing tag id");
+    }
 
-      return updateTag(editTagId, {
-        color: values.color,
-        label: values.label,
-      });
-    },
-    [editTagId, mode],
-  );
+    return updateTag(editTagId, {
+      color: values.color,
+      label: values.label,
+    });
+  }
 
-  const handleSaveSuccess = useCallback(
-    (tag: Tag) => {
-      if (mode === "create") {
-        props.onCreated(tag);
-        return;
-      }
-      props.onSaved(tag);
-    },
-    [mode, props],
-  );
+  function handleSaveSuccess(tag: Tag) {
+    if (mode === "create") {
+      props.onCreated(tag);
+      return;
+    }
+    props.onSaved(tag);
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

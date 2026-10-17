@@ -1,7 +1,7 @@
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import type { ImportantDate } from "@bondery/schemas";
 import { IconBell, IconCalendar, IconCalendarPlus, IconPencil } from "@tabler/icons-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
@@ -67,10 +67,8 @@ export function ContactImportantDatesSection({
 
   const canAdd = dates.length < LIMITS.maxImportantDates;
 
-  const sortedDates = useMemo(
-    () =>
-      [...dates].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
-    [dates],
+  const sortedDates = [...dates].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
   function openAddSheet() {

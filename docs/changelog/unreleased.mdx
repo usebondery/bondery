@@ -33,6 +33,8 @@ hidden: true
 
 ### 🔄 Changed
 
+- Dev: `pnpm mcp:inspect` configures MCP Inspector for Bondery CIMD (no dynamic client registration), frees ports **6274** / **6275** / **6278**, and pins `CLIENT_PORT` and related Inspector env vars so the UI stays on **6274**.
+- Website: Hosts HTTPS Client ID Metadata for MCP Inspector at `/.well-known/oauth/client-metadata/inspector.json` (OAuth client identity for local Inspector after the marketing site is deployed).
 - Mobile: The people list no longer has a letter rail on the right.
 - Mobile: Contacts search is by name only. The placeholder matches the web people list.
 - Mobile: The plus button creates a person. The extra add menu is gone.

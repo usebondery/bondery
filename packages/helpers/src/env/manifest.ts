@@ -1299,6 +1299,17 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     targets: [t("api")],
     turboAffectsCache: false,
   },
+  {
+    canonical: "BONDERY_MCP_INSPECTOR_CIMD_URL",
+    description:
+      "Optional HTTPS Client ID Metadata URL override for `pnpm mcp:inspect` (defaults to Bondery or MCPJam smoke-test CIMD)",
+    exampleValue: "",
+    group: "Local dev (contributor)",
+    requiredIn: [],
+    secret: false,
+    targets: [],
+    turboAffectsCache: false,
+  },
 ];
 
 /** System / pass-through vars always listed in turbo globalPassThroughEnv */

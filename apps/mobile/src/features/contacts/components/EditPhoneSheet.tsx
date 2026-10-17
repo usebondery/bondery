@@ -6,7 +6,6 @@ import {
 import type { PhoneEntry } from "@bondery/schemas";
 import { phoneEntrySchema, phoneEntrySheetSchema } from "@bondery/schemas";
 import { IconCheck, IconPhonePlus, IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
 import { SheetPhoneField, SheetSelectField } from "../../../components/form";
@@ -68,44 +67,34 @@ export function EditPhoneSheet({
     schema: phoneEntrySheetSchema,
   });
 
-  const prefixOptions = useMemo(() => {
-    const namesByDialCode = new Map(
-      countryCodes.map((country) => [country.dialCode.replace(/-\d+$/, ""), country.name]),
-    );
-
-    return TELEPHONE_PREFIX_OPTIONS.map((option) => ({
-      label: option.value,
-      leftSection: <TelephonePrefixFlag flag={option.flag} />,
-      searchKeywords: `${option.value} ${option.flag} ${namesByDialCode.get(option.value) ?? ""}`,
-      value: option.value,
-    }));
-  }, []);
-
-  const typeOptions = useMemo(
-    () =>
-      CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
-        label: option.value === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome"),
-        leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
-        value: option.value,
-      })),
-    [tContactInfo],
+  const namesByDialCode = new Map(
+    countryCodes.map((country) => [country.dialCode.replace(/-\d+$/, ""), country.name]),
   );
+  const prefixOptions = TELEPHONE_PREFIX_OPTIONS.map((option) => ({
+    label: option.value,
+    leftSection: <TelephonePrefixFlag flag={option.flag} />,
+    searchKeywords: `${option.value} ${option.flag} ${namesByDialCode.get(option.value) ?? ""}`,
+    value: option.value,
+  }));
 
-  const handleCloseSheet = useCallback(() => {
+  const typeOptions = CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
+    label: option.value === "work" ? tContactInfo("TypeWork") : tContactInfo("TypeHome"),
+    leftSection: <Text style={styles.typeEmoji}>{option.emoji}</Text>,
+    value: option.value,
+  }));
+
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const performSave = useCallback(
-    (values: PhoneFormValues) => {
-      const parsed = phoneEntrySchema.parse({
-        ...values,
-        preferred: initialEntry?.preferred ?? false,
-      });
-      onPersist(parsed);
-      return parsed;
-    },
-    [initialEntry?.preferred, onPersist],
-  );
+  function performSave(values: PhoneFormValues) {
+    const parsed = phoneEntrySchema.parse({
+      ...values,
+      preferred: initialEntry?.preferred ?? false,
+    });
+    onPersist(parsed);
+    return parsed;
+  }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
     onClose: handleCloseSheet,

@@ -1,5 +1,4 @@
 import { type BottomSheetBackdropProps, useBottomSheet } from "@gorhom/bottom-sheet";
-import { useCallback, useMemo } from "react";
 import { StyleSheet } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
@@ -27,28 +26,26 @@ export function SheetBackdrop({
 }: SheetBackdropProps) {
   const { close } = useBottomSheet();
 
-  const handlePress = useCallback(() => {
+  function handlePress() {
     if (pressBehavior === "close") {
       close();
     }
-  }, [close, pressBehavior]);
+  }
 
-  const tapGesture = useMemo(
-    () =>
-      Gesture.Tap().onEnd(() => {
-        runOnJS(handlePress)();
-      }),
-    [handlePress],
-  );
+  const tapGesture = Gesture.Tap().onEnd(() => {
+    runOnJS(handlePress)();
+  });
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: interpolate(animatedIndex.value, [-1, 0], [0, 1], Extrapolation.CLAMP),
   }));
 
-  const containerStyle = useMemo(
-    () => [StyleSheet.absoluteFill, { backgroundColor: overlayColor }, style, animatedStyle],
-    [animatedStyle, overlayColor, style],
-  );
+  const containerStyle = [
+    StyleSheet.absoluteFill,
+    { backgroundColor: overlayColor },
+    style,
+    animatedStyle,
+  ];
 
   return (
     <GestureDetector gesture={tapGesture}>

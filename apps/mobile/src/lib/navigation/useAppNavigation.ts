@@ -1,7 +1,6 @@
 import type { Group, GroupWithCount } from "@bondery/schemas";
 import type { Href } from "expo-router";
 import { useRouter } from "expo-router";
-import { useCallback } from "react";
 import { contactsHrefWithGroupId } from "./contactsGroupFilterRoute";
 import { useIsNavigationLocked } from "./NavigationProvider";
 import { runAppNavigation } from "./navigationCoordinator";
@@ -11,70 +10,49 @@ export function useAppNavigation() {
   const router = useRouter();
   const isNavigationLocked = useIsNavigationLocked();
 
-  const navigate = useCallback(
-    (options: AppNavigateOptions): "executed" | NavigationDropReason => {
-      return runAppNavigation(router, options);
-    },
-    [router],
-  );
+  function navigate(options: AppNavigateOptions): "executed" | NavigationDropReason {
+    return runAppNavigation(router, options);
+  }
 
-  const push = useCallback(
-    (href: Href): "executed" | NavigationDropReason => {
-      return runAppNavigation(router, { href, mode: "push" });
-    },
-    [router],
-  );
+  function push(href: Href): "executed" | NavigationDropReason {
+    return runAppNavigation(router, { href, mode: "push" });
+  }
 
-  const navigateTo = useCallback(
-    (href: Href): "executed" | NavigationDropReason => {
-      return runAppNavigation(router, { href, mode: "navigate" });
-    },
-    [router],
-  );
+  function navigateTo(href: Href): "executed" | NavigationDropReason {
+    return runAppNavigation(router, { href, mode: "navigate" });
+  }
 
-  const replace = useCallback(
-    (href: Href, respectTransitionLock = false): "executed" | NavigationDropReason => {
-      return runAppNavigation(router, {
-        href,
-        mode: "replace",
-        respectTransitionLock,
-      });
-    },
-    [router],
-  );
+  function replace(href: Href, respectTransitionLock = false): "executed" | NavigationDropReason {
+    return runAppNavigation(router, {
+      href,
+      mode: "replace",
+      respectTransitionLock,
+    });
+  }
 
-  const openContact = useCallback(
-    (contactId: string) => {
-      return navigateTo({
-        params: { id: contactId },
-        pathname: "/contact/[id]",
-      });
-    },
-    [navigateTo],
-  );
+  function openContact(contactId: string) {
+    return navigateTo({
+      params: { id: contactId },
+      pathname: "/contact/[id]",
+    });
+  }
 
-  const openMyself = useCallback(() => {
+  function openMyself() {
     return push("/myself");
-  }, [push]);
+  }
 
-  const openGroup = useCallback(
-    (group: Pick<Group, "id"> | GroupWithCount | string) => {
-      const groupId = typeof group === "string" ? group : group.id;
-      return navigateTo(contactsHrefWithGroupId(groupId));
-    },
-    [navigateTo],
-  );
+  function openGroup(group: Pick<Group, "id"> | GroupWithCount | string) {
+    const groupId = typeof group === "string" ? group : group.id;
+    return navigateTo(contactsHrefWithGroupId(groupId));
+  }
 
-  const openContactNotes = useCallback(
-    (contactId: string) => {
-      return push(`/contact/${contactId}/notes`);
-    },
-    [push],
-  );
+  function openContactNotes(contactId: string) {
+    return push(`/contact/${contactId}/notes`);
+  }
 
-  const openMyselfNotes = useCallback(() => {
+  function openMyselfNotes() {
     return push("/myself/notes");
-  }, [push]);
+  }
 
   return {
     isNavigationLocked,

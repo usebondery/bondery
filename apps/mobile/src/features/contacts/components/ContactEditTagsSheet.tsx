@@ -1,5 +1,5 @@
 import type { Tag, TagWithCount } from "@bondery/schemas";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
 import { Text } from "@/components/ui/Text";
@@ -68,14 +68,8 @@ export function ContactEditTagsSheet({
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(() => new Set());
   const [initialSelectedIds, setInitialSelectedIds] = useState<Set<string>>(() => new Set());
 
-  const displayedTags = useMemo(
-    () => sortTags(filterTags(allTags, query), tagSortOrder),
-    [allTags, query, tagSortOrder],
-  );
-  const hasChanges = useMemo(
-    () => !setsEqual(initialSelectedIds, selectedTagIds),
-    [initialSelectedIds, selectedTagIds],
-  );
+  const displayedTags = sortTags(filterTags(allTags, query), tagSortOrder);
+  const hasChanges = !setsEqual(initialSelectedIds, selectedTagIds);
 
   useEffect(() => {
     if (!open) {
@@ -128,19 +122,19 @@ export function ContactEditTagsSheet({
     };
   }, [contactId, onOpenChange, open, tMobileContactDetail, t]);
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleSaveError = useCallback(() => {
+  function handleSaveError() {
     notifications.show({
       message: tMobileContactDetail("EditTagsFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [t, tMobileContactDetail]);
+  }
 
-  const performSave = useCallback(() => {
+  function performSave() {
     const added = [...selectedTagIds].filter((tagId) => !initialSelectedIds.has(tagId));
     const removed = [...initialSelectedIds].filter((tagId) => !selectedTagIds.has(tagId));
 
@@ -152,14 +146,11 @@ export function ContactEditTagsSheet({
     }
 
     return allTags.filter((tag) => selectedTagIds.has(tag.id));
-  }, [allTags, contactId, initialSelectedIds, selectedTagIds]);
+  }
 
-  const handleSaveSuccess = useCallback(
-    (newTags: Tag[]) => {
-      onTagsReplaced(newTags);
-    },
-    [onTagsReplaced],
-  );
+  function handleSaveSuccess(newTags: Tag[]) {
+    onTagsReplaced(newTags);
+  }
 
   const { isSubmitting, submit } = useSheetLocalAction({
     onClose: handleCloseSheet,

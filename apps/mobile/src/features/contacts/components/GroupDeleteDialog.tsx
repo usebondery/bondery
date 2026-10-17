@@ -1,5 +1,5 @@
 import { IconTrash } from "@tabler/icons-react-native";
-import { useCallback } from "react";
+
 import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
 import { Sheet } from "../../../components/ui/Sheet";
 import { deleteGroup } from "../../../lib/domains/groups";
@@ -26,17 +26,17 @@ export function GroupDeleteDialog({
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
-  const handleClose = useCallback(() => {
+  function handleClose() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleDeleteError = useCallback(() => {
+  function handleDeleteError() {
     notifications.show({
       message: tMobileGroups("DeleteFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [t, tMobileGroups]);
+  }
 
   const { isSubmitting, submit } = useSheetLocalAction({
     onClose: handleClose,

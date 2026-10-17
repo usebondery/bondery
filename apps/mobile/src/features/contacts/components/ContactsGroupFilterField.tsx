@@ -1,6 +1,5 @@
 import type { GroupWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
-import { useMemo } from "react";
 import { Select, SelectOptionRow } from "@/components/ui/Select";
 import type { SheetAction } from "@/components/ui/Sheet";
 import { Text } from "@/components/ui/Text";
@@ -33,10 +32,7 @@ export function ContactsGroupFilterField({
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
-  const groupOptions = useMemo(
-    () => groups.map((group) => mapGroupToSelectItem(group, colors.borderStrong)),
-    [colors.borderStrong, groups],
-  );
+  const groupOptions = groups.map((group) => mapGroupToSelectItem(group, colors.borderStrong));
 
   const allContactsHeader = ({ close }: { close: () => void }) => (
     <SelectOptionRow

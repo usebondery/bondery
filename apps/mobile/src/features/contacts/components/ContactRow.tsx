@@ -1,6 +1,6 @@
 import type { Contact } from "@bondery/schemas";
 import { IconCheck } from "@tabler/icons-react-native";
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import Swipeable, {
   type SwipeableMethods,
@@ -43,7 +43,7 @@ const SWIPE_ACTION_ICON_SIZE = 22;
 const DISABLED_ROW_OPACITY = 0.45;
 const CONTACT_ROW_HEIGHT = 56;
 
-export const ContactRow = memo(function ContactRow({
+export function ContactRow({
   contact,
   selected,
   selectionMode,
@@ -61,7 +61,7 @@ export const ContactRow = memo(function ContactRow({
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("default");
   const swipeableRef = useRef<SwipeableMethods>(null);
-  const name = useMemo(() => formatContactName(contact), [contact]);
+  const name = formatContactName(contact);
   const swipeGesturesEnabled = isSwipeEnabled && !selectionMode;
   const showDisabledStyle = isDisabled && selectionMode;
   const isRowSelected = selected && !showDisabledStyle;
@@ -72,15 +72,15 @@ export const ContactRow = memo(function ContactRow({
     }
   }, [selectionMode]);
 
-  const handleLongPress = useCallback(() => {
+  function handleLongPress() {
     if (previewMode || selectionMode || isDisabled) {
       return;
     }
 
     onEnterSelection(contact.id);
-  }, [contact.id, isDisabled, onEnterSelection, previewMode, selectionMode]);
+  }
 
-  const handlePress = useCallback(() => {
+  function handlePress() {
     if (previewMode) {
       return;
     }
@@ -95,49 +95,44 @@ export const ContactRow = memo(function ContactRow({
     }
 
     onPress?.(contact.id);
-  }, [contact.id, isDisabled, onPress, onToggleSelect, previewMode, selectionMode]);
+  }
 
-  const renderLeftActions = useCallback(
-    () => (
+  function renderLeftActions() {
+    return (
       <View
         accessibilityLabel={getSwipeActionLabel(rightSwipeAction, texts)}
         style={[styles.action, { backgroundColor: colors.successSurface }]}
       >
         {getSwipeActionIcon(rightSwipeAction, colors.textPrimary, SWIPE_ACTION_ICON_SIZE)}
       </View>
-    ),
-    [colors.successSurface, colors.textPrimary, rightSwipeAction, texts],
-  );
+    );
+  }
 
-  const renderRightActions = useCallback(
-    () => (
+  function renderRightActions() {
+    return (
       <View
         accessibilityLabel={getSwipeActionLabel(leftSwipeAction, texts)}
         style={[styles.action, { backgroundColor: colors.warningSurface }]}
       >
         {getSwipeActionIcon(leftSwipeAction, colors.textPrimary, SWIPE_ACTION_ICON_SIZE)}
       </View>
-    ),
-    [colors.textPrimary, colors.warningSurface, leftSwipeAction, texts],
-  );
+    );
+  }
 
-  const handleSwipeableOpen = useCallback(
-    (direction: SwipeDirection.LEFT | SwipeDirection.RIGHT) => {
-      swipeableRef.current?.close();
+  function handleSwipeableOpen(direction: SwipeDirection.LEFT | SwipeDirection.RIGHT) {
+    swipeableRef.current?.close();
 
-      if (previewMode) {
-        return;
-      }
+    if (previewMode) {
+      return;
+    }
 
-      if (direction === SwipeDirection.LEFT) {
-        onExecuteAction(contact, leftSwipeAction);
-        return;
-      }
+    if (direction === SwipeDirection.LEFT) {
+      onExecuteAction(contact, leftSwipeAction);
+      return;
+    }
 
-      onExecuteAction(contact, rightSwipeAction);
-    },
-    [contact, leftSwipeAction, onExecuteAction, previewMode, rightSwipeAction],
-  );
+    onExecuteAction(contact, rightSwipeAction);
+  }
 
   const rowContent = (
     <Animated.View style={squeezeStyle}>
@@ -201,7 +196,7 @@ export const ContactRow = memo(function ContactRow({
       </Swipeable>
     </View>
   );
-});
+}
 
 const styles = StyleSheet.create({
   action: {

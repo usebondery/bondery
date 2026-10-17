@@ -8,7 +8,7 @@ import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { loginEmailFormSchema } from "@bondery/schemas";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Anchor } from "../../components/ui/Anchor";
@@ -75,13 +75,13 @@ export default function LoginScreen() {
     (awaitingVerify ? resendSeconds > 0 : !emailValid) ||
     (isBusy && !isEmailBusy);
 
-  const showAuthError = useCallback((headline: string, description: string) => {
+  function showAuthError(headline: string, description: string) {
     notifications.show({
       message: description,
       title: headline,
       type: "error",
     });
-  }, []);
+  }
 
   useEffect(() => {
     const client = authClient;
@@ -100,7 +100,7 @@ export default function LoginScreen() {
     }
 
     showAuthError(tLoginPage("AuthenticationError"), tMobileAuth("MissingConfig"));
-  }, [showAuthError, tLoginPage, tMobileAuth]);
+  }, [authClient, tLoginPage, tMobileAuth]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,7 +127,7 @@ export default function LoginScreen() {
       tLoginPage("AuthenticationError"),
       getAuthUserFacingError({ code: queryError }, tCommon),
     );
-  }, [params.error, showAuthError, tCommon, tLoginPage]);
+  }, [params.error, tCommon, tLoginPage]);
 
   useEffect(() => {
     if (resendSeconds <= 0) {

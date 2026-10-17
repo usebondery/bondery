@@ -1,5 +1,5 @@
 import type { GroupWithCount } from "@bondery/schemas";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
 import { Text } from "@/components/ui/Text";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
@@ -41,7 +41,7 @@ export function ContactsAddToGroupsSheet({
   const [query, setQuery] = useState("");
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(() => new Set());
 
-  const filteredGroups = useMemo(() => filterGroups(groups, query), [groups, query]);
+  const filteredGroups = filterGroups(groups, query);
 
   const subtitle =
     effectiveSelectedCount === 1
@@ -81,19 +81,19 @@ export function ContactsAddToGroupsSheet({
     });
   }
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     setAddToGroupsSheetOpen(false);
-  }, [setAddToGroupsSheetOpen]);
+  }
 
-  const handleAddError = useCallback(() => {
+  function handleAddError() {
     notifications.show({
       message: tMobileContacts("AddToGroupsFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [t, tMobileContacts]);
+  }
 
-  const performAdd = useCallback(() => {
+  function performAdd() {
     const selectionState = useContactsSelection.getState();
     const scope = loadedGroupMembers
       ? { loadedGroupMembers }
@@ -106,12 +106,12 @@ export function ContactsAddToGroupsSheet({
     for (const groupId of targetGroupIds) {
       addContactsToGroup(groupId, personIds);
     }
-  }, [debouncedQuery, filterGroupId, loadedGroupMembers, selectedGroupIds]);
+  }
 
-  const handleAddSuccess = useCallback(() => {
+  function handleAddSuccess() {
     exitSelectionMode();
     onGroupsReloaded();
-  }, [exitSelectionMode, onGroupsReloaded]);
+  }
 
   const { isSubmitting, submit: submitAdd } = useSheetLocalAction({
     onClose: handleCloseSheet,

@@ -2,10 +2,8 @@ import type { BottomTabBarProps } from "expo-router/js-tabs";
 import {
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -27,7 +25,7 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
   const [tabBarProps, setTabBarProps] = useState<BottomTabBarProps | null>(null);
   const [tabBarRevision, setTabBarRevision] = useState(0);
 
-  const syncTabBarProps = useCallback((props: BottomTabBarProps) => {
+  function syncTabBarProps(props: BottomTabBarProps) {
     const previous = tabBarPropsRef.current;
     tabBarPropsRef.current = props;
 
@@ -39,16 +37,13 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
       setTabBarProps(props);
       setTabBarRevision((value) => value + 1);
     }
-  }, []);
+  }
 
-  const value = useMemo(
-    () => ({
-      syncTabBarProps,
-      tabBarProps,
-      tabBarRevision,
-    }),
-    [syncTabBarProps, tabBarProps, tabBarRevision],
-  );
+  const value = {
+    syncTabBarProps,
+    tabBarProps,
+    tabBarRevision,
+  };
 
   return <TabBarPropsContext.Provider value={value}>{children}</TabBarPropsContext.Provider>;
 }

@@ -1,7 +1,6 @@
 import { getRandomExampleName } from "@bondery/helpers/name";
 import type { Contact } from "@bondery/schemas";
 import { useRouter } from "expo-router";
-import { useMemo } from "react";
 import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { Paper } from "../../components/ui/Paper";
@@ -81,16 +80,13 @@ export function SettingsSwipeActionsScreen() {
     (state: MobilePreferencesState) => state.setRightSwipeAction,
   );
 
-  const previewContact = useMemo(() => createPreviewContact(getRandomExampleName()), []);
+  const previewContact = createPreviewContact(getRandomExampleName());
 
-  const swipeTexts = useMemo(
-    () => ({
-      call: t("actions.call"),
-      email: t("actions.email"),
-      message: t("actions.message"),
-    }),
-    [t],
-  );
+  const swipeTexts = {
+    call: t("actions.call"),
+    email: t("actions.email"),
+    message: t("actions.message"),
+  };
 
   const swipeOptions = [
     {

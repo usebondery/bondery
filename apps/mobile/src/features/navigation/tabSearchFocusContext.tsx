@@ -1,13 +1,4 @@
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useId, useRef } from "react";
 
 type TabSearchFocusHandler = () => void;
 
@@ -23,37 +14,34 @@ export function TabSearchFocusProvider({ children }: { children: ReactNode }) {
   const handlersRef = useRef<Map<string, TabSearchFocusHandler>>(new Map());
   const activeHandlerIdRef = useRef<string | null>(null);
 
-  const registerTabSearchFocus = useCallback((id: string, handler: TabSearchFocusHandler) => {
+  function registerTabSearchFocus(id: string, handler: TabSearchFocusHandler) {
     handlersRef.current.set(id, handler);
     activeHandlerIdRef.current = id;
-  }, []);
+  }
 
-  const unregisterTabSearchFocus = useCallback((id: string) => {
+  function unregisterTabSearchFocus(id: string) {
     handlersRef.current.delete(id);
     if (activeHandlerIdRef.current === id) {
       activeHandlerIdRef.current = null;
       const remaining = [...handlersRef.current.keys()];
       activeHandlerIdRef.current = remaining.at(-1) ?? null;
     }
-  }, []);
+  }
 
-  const focusActiveTabSearch = useCallback(() => {
+  function focusActiveTabSearch() {
     const activeId = activeHandlerIdRef.current;
     if (!activeId) {
       return;
     }
 
     handlersRef.current.get(activeId)?.();
-  }, []);
+  }
 
-  const value = useMemo(
-    () => ({
-      focusActiveTabSearch,
-      registerTabSearchFocus,
-      unregisterTabSearchFocus,
-    }),
-    [focusActiveTabSearch, registerTabSearchFocus, unregisterTabSearchFocus],
-  );
+  const value = {
+    focusActiveTabSearch,
+    registerTabSearchFocus,
+    unregisterTabSearchFocus,
+  };
 
   return <TabSearchFocusContext.Provider value={value}>{children}</TabSearchFocusContext.Provider>;
 }

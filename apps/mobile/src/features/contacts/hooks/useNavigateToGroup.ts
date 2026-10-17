@@ -1,5 +1,4 @@
 import type { Group, GroupWithCount } from "@bondery/schemas";
-import { useCallback } from "react";
 import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
 
 /**
@@ -8,10 +7,7 @@ import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
 export function useNavigateToGroup() {
   const { openGroup } = useAppNavigation();
 
-  return useCallback(
-    (group: Pick<Group, "id" | "label" | "emoji"> | GroupWithCount) => {
-      openGroup(group);
-    },
-    [openGroup],
-  );
+  return (group: Pick<Group, "id" | "label" | "emoji"> | GroupWithCount) => {
+    openGroup(group);
+  };
 }

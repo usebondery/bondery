@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import * as Network from "expo-network";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   useCommonTranslations,
   useMobileContactIdentityTranslations,
@@ -31,7 +31,7 @@ export function useContactPhotoUpload({
   const [isPhotoBusy, setIsPhotoBusy] = useState(false);
   const [isRemoveConfirmOpen, setRemoveConfirmOpen] = useState(false);
 
-  const ensureOnline = useCallback(async (): Promise<boolean> => {
+  async function ensureOnline(): Promise<boolean> {
     const state = await Network.getNetworkStateAsync();
     if (state.isConnected) {
       return true;
@@ -42,34 +42,31 @@ export function useContactPhotoUpload({
       type: "error",
     });
     return false;
-  }, [t, tMobileContactIdentity]);
+  }
 
-  const uploadPhoto = useCallback(
-    async (uri: string, mimeType: string) => {
-      if (!(await ensureOnline())) {
-        return;
-      }
+  async function uploadPhoto(uri: string, mimeType: string) {
+    if (!(await ensureOnline())) {
+      return;
+    }
 
-      setIsPhotoBusy(true);
+    setIsPhotoBusy(true);
+    try {
+      const { avatarUrl } = await uploadContactPhoto(contactId, uri, mimeType);
       try {
-        const { avatarUrl } = await uploadContactPhoto(contactId, uri, mimeType);
-        try {
-          await copyPickerFileToAvatar(contactId, uri);
-          markLocalAvatarAfterUpload(contactId, avatarUrl);
-        } catch {
-          // Pull downloads the stored JPEG if the local copy fails.
-        }
-        onAvatarUpdated(avatarUrl);
-      } catch (err) {
-        showErrorToast(err);
-      } finally {
-        setIsPhotoBusy(false);
+        await copyPickerFileToAvatar(contactId, uri);
+        markLocalAvatarAfterUpload(contactId, avatarUrl);
+      } catch {
+        // Pull downloads the stored JPEG if the local copy fails.
       }
-    },
-    [contactId, ensureOnline, onAvatarUpdated, showErrorToast],
-  );
+      onAvatarUpdated(avatarUrl);
+    } catch (err) {
+      showErrorToast(err);
+    } finally {
+      setIsPhotoBusy(false);
+    }
+  }
 
-  const choosePhotoFromLibrary = useCallback(async () => {
+  async function choosePhotoFromLibrary() {
     if (!(await ensureOnline())) {
       return;
     }
@@ -112,9 +109,9 @@ export function useContactPhotoUpload({
     }
 
     await uploadPhoto(asset.uri, mimeType);
-  }, [ensureOnline, t, uploadPhoto, tMobileContactIdentity]);
+  }
 
-  const removePhoto = useCallback(async () => {
+  async function removePhoto() {
     if (!(await ensureOnline())) {
       return;
     }
@@ -134,7 +131,8 @@ export function useContactPhotoUpload({
     } finally {
       setIsPhotoBusy(false);
     }
-  }, [contactId, ensureOnline, onAvatarUpdated, showErrorToast]);
+  }
+
   return {
     choosePhotoFromLibrary,
     isPhotoBusy,

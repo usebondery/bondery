@@ -1,7 +1,7 @@
 import type { Contact, Group } from "@bondery/schemas";
 import type { FlashListRef } from "@shopify/flash-list";
 import { IconSearch } from "@tabler/icons-react-native";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { ActivityIndicator, View } from "react-native";
 import { useScrollBottomInset } from "../../components/chrome";
@@ -95,100 +95,73 @@ export function ContactsScreen() {
     flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
   }, [selectedGroupId]);
 
-  const rowTexts = useMemo(
-    () => ({
-      call: t("actions.call"),
-      email: t("actions.email"),
-      message: t("actions.message"),
-    }),
-    [t],
-  );
+  const rowTexts = {
+    call: t("actions.call"),
+    email: t("actions.email"),
+    message: t("actions.message"),
+  };
 
-  const handleListScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      onScroll(event);
-    },
-    [onScroll],
-  );
+  function handleListScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    onScroll(event);
+  }
 
-  const executeAction = useCallback(
-    (contact: Contact, action: SwipeAction) => {
-      executeContactSwipeAction(contact, action, {
-        errorTitle: t("feedback.errorTitle"),
-        missingEmail: tMobileContacts("MissingEmail"),
-        missingPhone: tMobileContacts("MissingPhone"),
-      });
-    },
-    [t, tMobileContacts],
-  );
+  function executeAction(contact: Contact, action: SwipeAction) {
+    executeContactSwipeAction(contact, action, {
+      errorTitle: t("feedback.errorTitle"),
+      missingEmail: tMobileContacts("MissingEmail"),
+      missingPhone: tMobileContacts("MissingPhone"),
+    });
+  }
 
-  const handleOpenContact = useCallback(
-    (contactId: string) => {
-      openContact(contactId);
-    },
-    [openContact],
-  );
+  function handleOpenContact(contactId: string) {
+    openContact(contactId);
+  }
 
-  const handleOpenMyself = useCallback(() => {
+  function handleOpenMyself() {
     openMyself();
-  }, [openMyself]);
+  }
 
-  const handleGroupCreated = useCallback(
-    (group: Group) => {
-      screenData.selectGroup(group.id);
-      screenData.reloadGroups();
-    },
-    [screenData],
-  );
+  function handleGroupCreated(group: Group) {
+    screenData.selectGroup(group.id);
+    screenData.reloadGroups();
+  }
 
-  const handleOpenCreateGroup = useCallback(() => {
+  function handleOpenCreateGroup() {
     screenData.setCreateGroupOpen(true);
-  }, [screenData]);
+  }
 
-  const headerAccessory = useMemo(
-    () => (
-      <Stack gap="sm">
-        <TextInput
-          autoCapitalize="none"
-          autoCorrect={false}
-          leftSection={<IconSearch size={16} stroke={colors.iconSecondary} />}
-          onChangeText={screenData.handleSearchChange}
-          placeholder={tMobileContacts("SearchPlaceholder")}
-          ref={searchInputRef}
-          rightSection={
-            <View className="w-[22px] items-center justify-center">
-              {screenData.isSearching ? (
-                <ActivityIndicator color={colors.textMuted} size="small" />
-              ) : null}
-            </View>
-          }
-          value={screenData.searchInput}
-          wrapperStyle={{
-            backgroundColor: colors.surfaceMuted,
-            borderColor: colors.borderStrong,
-          }}
-        />
-        <ContactsGroupFilterField
-          groups={screenData.sortedGroups}
-          isDisabled={selectionMode || screenData.showFullScreenLoader}
-          onCreateGroupPress={handleOpenCreateGroup}
-          onOpenChange={screenData.setGroupPickerOpen}
-          selectedGroupId={screenData.selectedGroupId}
-          selectGroup={screenData.selectGroup}
-          showField={false}
-        />
-      </Stack>
-    ),
-    [
-      colors.borderStrong,
-      colors.iconSecondary,
-      colors.surfaceMuted,
-      colors.textMuted,
-      handleOpenCreateGroup,
-      screenData,
-      selectionMode,
-      tMobileContacts,
-    ],
+  const headerAccessory = (
+    <Stack gap="sm">
+      <TextInput
+        autoCapitalize="none"
+        autoCorrect={false}
+        leftSection={<IconSearch size={16} stroke={colors.iconSecondary} />}
+        onChangeText={screenData.handleSearchChange}
+        placeholder={tMobileContacts("SearchPlaceholder")}
+        ref={searchInputRef}
+        rightSection={
+          <View className="w-[22px] items-center justify-center">
+            {screenData.isSearching ? (
+              <ActivityIndicator color={colors.textMuted} size="small" />
+            ) : null}
+          </View>
+        }
+        value={screenData.searchInput}
+        wrapperStyle={{
+          backgroundColor: colors.surfaceMuted,
+          borderColor: colors.borderStrong,
+        }}
+      />
+      <ContactsGroupFilterField
+        groups={screenData.sortedGroups}
+        isDisabled={selectionMode || screenData.showFullScreenLoader}
+        onCreateGroupPress={handleOpenCreateGroup}
+        onOpenChange={screenData.setGroupPickerOpen}
+        selectedGroupId={screenData.selectedGroupId}
+        selectGroup={screenData.selectGroup}
+        showField={false}
+      />
+    </Stack>
   );
 
   return (

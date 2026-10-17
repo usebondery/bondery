@@ -1,6 +1,6 @@
 import { IconLogout, IconTrash } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
 import { Button } from "../../components/ui/Button";
@@ -46,7 +46,7 @@ export function SettingsAccountScreen() {
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const loadAccount = useCallback(async () => {
+  async function loadAccount() {
     setIsLoading(true);
     setLoadError(null);
 
@@ -60,13 +60,13 @@ export function SettingsAccountScreen() {
     } finally {
       setIsLoading(false);
     }
-  }, [t]);
+  }
 
   useEffect(() => {
     syncEffectState(() => {
       void loadAccount();
     });
-  }, [loadAccount]);
+  }, []);
 
   const signOut = async () => {
     if (!authClient) {

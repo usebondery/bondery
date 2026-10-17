@@ -1,6 +1,6 @@
 import type { Group, GroupWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import {
   useCommonTranslations,
@@ -74,31 +74,25 @@ export function ContactGroupsSection({
   const [isEditSheetOpen, setEditSheetOpen] = useState(false);
   const [isCreateGroupOpen, setCreateGroupOpen] = useState(false);
 
-  const sortedGroups = useMemo(
-    () => sortGroups(groups, groupSortOrder, groupLastOpenedAt),
-    [groupLastOpenedAt, groupSortOrder, groups],
-  );
+  const sortedGroups = sortGroups(groups, groupSortOrder, groupLastOpenedAt);
 
   const editAccessibilityLabel = tMobileContactDetail("GroupsEditAccessibility").replace(
     "{name}",
     contactName,
   );
 
-  const handleGroupCreated = useCallback(
-    (group: Group) => {
-      try {
-        addContactsToGroup(group.id, [contactId]);
-        onGroupAdded(group);
-      } catch {
-        notifications.show({
-          message: tMobileGroups("CreateFailed"),
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
-      }
-    },
-    [contactId, onGroupAdded, tMobileGroups, t],
-  );
+  function handleGroupCreated(group: Group) {
+    try {
+      addContactsToGroup(group.id, [contactId]);
+      onGroupAdded(group);
+    } catch {
+      notifications.show({
+        message: tMobileGroups("CreateFailed"),
+        title: t("feedback.errorTitle"),
+        type: "error",
+      });
+    }
+  }
 
   return (
     <View style={styles.section}>

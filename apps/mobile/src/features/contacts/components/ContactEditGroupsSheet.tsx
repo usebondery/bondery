@@ -1,5 +1,5 @@
 import type { Group, GroupWithCount } from "@bondery/schemas";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
 import { Text } from "@/components/ui/Text";
@@ -57,11 +57,8 @@ export function ContactEditGroupsSheet({
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(() => new Set());
   const [initialSelectedIds, setInitialSelectedIds] = useState<Set<string>>(() => new Set());
 
-  const filteredGroups = useMemo(() => filterGroups(allGroups, query), [allGroups, query]);
-  const hasChanges = useMemo(
-    () => !setsEqual(initialSelectedIds, selectedGroupIds),
-    [initialSelectedIds, selectedGroupIds],
-  );
+  const filteredGroups = filterGroups(allGroups, query);
+  const hasChanges = !setsEqual(initialSelectedIds, selectedGroupIds);
 
   useEffect(() => {
     if (!open) {
@@ -114,19 +111,19 @@ export function ContactEditGroupsSheet({
     };
   }, [contactId, onOpenChange, open, tMobileContactDetail, t]);
 
-  const handleCloseSheet = useCallback(() => {
+  function handleCloseSheet() {
     onOpenChange(false);
-  }, [onOpenChange]);
+  }
 
-  const handleSaveError = useCallback(() => {
+  function handleSaveError() {
     notifications.show({
       message: tMobileContactDetail("EditGroupsFailed"),
       title: t("feedback.errorTitle"),
       type: "error",
     });
-  }, [t, tMobileContactDetail]);
+  }
 
-  const performSave = useCallback(() => {
+  function performSave() {
     const added = [...selectedGroupIds].filter((groupId) => !initialSelectedIds.has(groupId));
     const removed = [...initialSelectedIds].filter((groupId) => !selectedGroupIds.has(groupId));
 
@@ -138,14 +135,11 @@ export function ContactEditGroupsSheet({
     }
 
     return allGroups.filter((group) => selectedGroupIds.has(group.id));
-  }, [allGroups, contactId, initialSelectedIds, selectedGroupIds]);
+  }
 
-  const handleSaveSuccess = useCallback(
-    (newGroups: Group[]) => {
-      onGroupsReplaced(newGroups);
-    },
-    [onGroupsReplaced],
-  );
+  function handleSaveSuccess(newGroups: Group[]) {
+    onGroupsReplaced(newGroups);
+  }
 
   const { isSubmitting, submit } = useSheetLocalAction({
     onClose: handleCloseSheet,

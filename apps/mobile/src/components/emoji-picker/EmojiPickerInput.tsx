@@ -1,5 +1,5 @@
 import type { EmojiCategoryName } from "@bondery/helpers/emoji";
-import { useCallback, useMemo, useState } from "react";
+import { type ReactNode, useState } from "react";
 import { type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import {
   useMobileEmojiPickerTranslations,
@@ -62,29 +62,25 @@ export function EmojiPickerInput({
   const resolvedAccessibilityLabel = accessibilityLabel ?? label ?? tMobileGroups("EditEmojiLabel");
   const hasValue = value.trim().length > 0;
 
-  const getCategoryLabel = useCallback(
-    (categoryKey: string) => {
-      const translationKey = CATEGORY_TRANSLATION_KEYS[categoryKey as EmojiCategoryName];
-      return translationKey ? tMobileEmojiPicker(translationKey as never) : categoryKey;
-    },
-    [tMobileEmojiPicker],
-  );
+  function getCategoryLabel(categoryKey: string) {
+    const translationKey = CATEGORY_TRANSLATION_KEYS[categoryKey as EmojiCategoryName];
+    return translationKey ? tMobileEmojiPicker(translationKey as never) : categoryKey;
+  }
 
-  const triggerContent = useMemo(() => {
-    if (hasValue) {
-      return <Text style={[styles.selectedEmoji, { color: colors.textPrimary }]}>{value}</Text>;
-    }
-
-    if (compact) {
-      return null;
-    }
-
-    return (
+  let triggerContent: ReactNode;
+  if (hasValue) {
+    triggerContent = (
+      <Text style={[styles.selectedEmoji, { color: colors.textPrimary }]}>{value}</Text>
+    );
+  } else if (compact) {
+    triggerContent = null;
+  } else {
+    triggerContent = (
       <Text numberOfLines={1} style={[styles.placeholder, { color: colors.textSecondary }]}>
         {resolvedPlaceholder}
       </Text>
     );
-  }, [colors.textPrimary, colors.textSecondary, compact, hasValue, resolvedPlaceholder, value]);
+  }
 
   const layout = stretch ? "stretch" : "square";
 

@@ -180,6 +180,9 @@
       "includes": ["apps/mobile/**"],
       "linter": {
         "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "warn"
+          },
           "nursery": {
             "useReactCompiler": "error"
           }
