@@ -40,11 +40,11 @@ Section order in GitBook follows `OPENAPI_TAG_ORDER` in `packages/schemas/src/op
 
 ```
 Health → Contacts → Groups → Tags → Interactions → Import → Share → Geocode
-→ Me → Sync → Extension → Chat → Subscriptions → Webhooks → Internal
+→ Me → Sync → Extension → Mobile → Chat → Subscriptions → Webhooks → Internal
 ```
 
 - **Integration tier** (API keys): Contacts through Geocode
-- **Session tier**: Me, Sync (mobile offline), Extension, Chat, Subscriptions
+- **Session tier**: Me, Sync (mobile offline), Extension, Mobile, Chat, Subscriptions
 - **Admin / internal**: Webhooks, Internal (hidden)
 
 ## Examples

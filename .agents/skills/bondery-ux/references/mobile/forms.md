@@ -1,6 +1,6 @@
 # Mobile Forms Pattern (React Hook Form)
 
-Canonical patterns for Bondery mobile `ActionSheetPopup` forms.
+Canonical patterns for Bondery mobile `ui/Sheet` forms.
 
 ## Core rule
 
@@ -39,8 +39,8 @@ const {
 
 Use `isSubmitting` for:
 
-- `ActionSheetPopup` → `isBusy={isSubmitting}`
-- Primary action → `loading: isSubmitting`
+- `Sheet` → `isBusy={isSubmitting}`
+- Primary action → `loading: isSubmitting` and `loadingText` (progressive copy, e.g. saving)
 
 ## Text input field pattern
 
@@ -62,6 +62,10 @@ Use wrappers first:
 <SheetPhoneField control={control} watch={watch} name="value" prefixName="prefix" />
 ```
 
+`SheetSelectField` forwards `Select` props: `clearable`, `searchable` (`true` | `false` | `"auto"` at 8+ options), `searchPlaceholder`, `emptySearchLabel`, and `placeholder`.
+
+Standalone `Select` (`apps/mobile/src/components/ui/Select.tsx`) uses `SelectTrigger` + `SelectSheet`. Use `clearable` for nullable values (clear control inside the trigger). Use `triggerVariant="filter"` for contacts-style group filters. Use `sheetListHeader` for rows such as “All contacts”, and `sheetActions` for footer actions such as “New group”. Multi-select sheets compose `SelectSheet` + `SelectOptionRow` (`mode="multiple"`) with local selection state and Save/Cancel actions.
+
 For controls that cannot be directly controlled (wheel picker, image picker), use:
 
 ```tsx
@@ -81,6 +85,7 @@ const primaryAction = {
   onPress: () => void onSubmit(),
   disabled: !isValid || !isDirty,
   loading: isSubmitting,
+  loadingText: t("feedback.saving"),
   tone: "primary",
   variant: "filled",
 };

@@ -11,7 +11,7 @@ Screens **never** choose between “online API” and “offline cache” for ti
 | **Resources** (`lib/resources/`) | List params, row mappers, SQL fragments — no React, no I/O |
 | **Repositories** (`lib/sync/repositories/`) | Execute SQLite reads (imports `lib/resources`) |
 | **Domains** (`lib/domains/`) | Public CRUD API; writes via `submitSyncMutation` |
-| **Sync hooks** (`lib/sync/hooks/`) | UI subscription (`useSyncQuery` on `revision`) |
+| **Sync hooks** (`lib/sync/hooks/`) | Named UI hooks backed by TanStack Query SQLite views |
 | **MutationService** | `submitSyncMutation` in `apps/mobile/src/lib/sync/mutation-service.ts` | Optimistic SQLite + enqueue outbox + schedule drain |
 | **PullManager** (`pull-manager.ts`) | `GET /api/sync/bootstrap` + long-poll `GET /api/sync/pull` → materializers |
 | **SyncDrainer** (`outbox/sync-worker`) | Push pending mutations; reconcile with server |
@@ -23,7 +23,9 @@ Tier-2 (settings) and tier-3 (photos, geocode, share, account delete) stay in `l
 1. First sync (or `last_server_sequence === 0`): `GET /api/sync/bootstrap` loads all tier-1 tables for the user.
 2. Steady state: `GET /api/sync/pull?since=N` returns batched changelog entries from `sync_change_log`.
 3. Mobile applies each batch in one SQLite transaction (server always wins — no client skip of incoming rows).
-4. Cursor `last_server_sequence` advances only after successful local apply.
+4. The materializer reports the tables that it applied.
+5. Active matching views reread SQLite in the same turn; inactive matching views are removed.
+6. Cursor `last_server_sequence` advances only after successful local apply.
 
 ## Write path — unified outbox
 
@@ -74,10 +76,16 @@ Domain writes (REST + push) emit one **batch** per logical change into `sync_cha
 
 Mismatch → **426** — force resync / app update.
 
-## UI hooks
+## UI hooks and view cache
 
-- `useSyncQuery` — re-runs when `revision` changes.
-- `SyncProvider` — `isInitialSync`, `pendingCount`, `conflictCount`, `revision`.
+- SQLite is the tier-1 source of truth. TanStack Query stores keyed in-memory view snapshots only.
+- `useSyncQuery` is the sole TanStack Query adapter. Features import named sync hooks.
+- Local writes and pull materialization emit applied tables through one invalidation bus.
+- Active matching queries reread SQLite and receive `setQueryData` in the same turn.
+- Inactive matching queries are removed without a refetch, so the next observer rereads SQLite.
+- Logout and user switch replace the SQLite QueryClient to prevent cross-user cache reuse.
+- `SyncProvider` owns `isReady`, `isInitialSync`, `pendingCount`, and `conflictCount`.
+- The SQLite cache is not persisted. Tier-2 and tier-3 HTTP data does not use it.
 
 ## Background sync
 

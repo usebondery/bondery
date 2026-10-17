@@ -29,7 +29,6 @@ export function InsertLinkControl() {
     setUrl(linkData?.href || "");
     setOpened(true);
   };
-
   const handleClose = () => {
     setOpened(false);
     setUrl("");

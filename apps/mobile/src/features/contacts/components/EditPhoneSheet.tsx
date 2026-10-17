@@ -6,29 +6,34 @@ import {
 import type { PhoneEntry } from "@bondery/schemas";
 import { phoneEntrySchema, phoneEntrySheetSchema } from "@bondery/schemas";
 import { IconCheck, IconPhonePlus, IconTrash } from "@tabler/icons-react-native";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
-import {
-  ActionSheetPopup,
-  type ActionSheetPopupAction,
-} from "../../../components/ActionSheetPopup";
 import { SheetPhoneField, SheetSelectField } from "../../../components/form";
+import { Sheet, type SheetAction } from "../../../components/ui/Sheet";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftPhone } from "../contactChannelConstants";
 import { TelephonePrefixFlag } from "./TelephonePrefixFlag";
 
 type SheetMode = "add" | "edit";
 
+type PhoneFormValues = {
+  prefix: string;
+  type: "home" | "work";
+  value: string;
+};
+
 interface EditPhoneSheetProps {
   initialEntry: PhoneEntry | null;
-  isSubmitting: boolean;
   mode: SheetMode;
   onCancel: () => void;
   onDelete?: () => void;
+  onError?: (error: unknown) => void;
   onOpenChange: (open: boolean) => void;
-  onSave: (entry: PhoneEntry) => void;
+  onPersist: (entry: PhoneEntry) => void;
   open: boolean;
 }
 
@@ -36,14 +41,14 @@ export function EditPhoneSheet({
   open,
   mode,
   initialEntry,
-  isSubmitting,
   onOpenChange,
   onCancel,
-  onSave,
+  onPersist,
   onDelete,
+  onError,
 }: EditPhoneSheetProps) {
   const tContactInfo = useContactInfoTranslations();
-  const _t = useCommonTranslations();
+  const tCommon = useCommonTranslations();
   const colors = useMobileThemeColors();
   const {
     control,
@@ -86,15 +91,41 @@ export function EditPhoneSheet({
     [tContactInfo],
   );
 
-  const canSubmit = isValid && !isSubmitting;
+  const handleCloseSheet = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-  const onSubmit = handleSubmit((values) => {
-    const parsed = phoneEntrySchema.parse({
-      ...values,
-      preferred: initialEntry?.preferred ?? false,
-    });
-    onSave(parsed);
+  const performSave = useCallback(
+    (values: PhoneFormValues) => {
+      const parsed = phoneEntrySchema.parse({
+        ...values,
+        preferred: initialEntry?.preferred ?? false,
+      });
+      onPersist(parsed);
+      return parsed;
+    },
+    [initialEntry?.preferred, onPersist],
+  );
+
+  const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
+    onClose: handleCloseSheet,
+    onError,
+    perform: performSave,
   });
+
+  const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError,
+    perform: () => {
+      if (!onDelete) {
+        throw new Error("Delete handler missing");
+      }
+      onDelete();
+    },
+  });
+
+  const isBusy = isSubmitting || isDeleting;
+  const canSubmit = isValid && !isBusy;
 
   const primaryAction = {
     disabled: !canSubmit,
@@ -106,33 +137,35 @@ export function EditPhoneSheet({
       ),
     label: mode === "add" ? tContactInfo("AddPhone") : "Save changes",
     loading: isSubmitting,
-    onPress: () => void onSubmit(),
+    loadingText: tCommon("feedback.saving"),
+    onPress: submit,
     tone: "primary" as const,
     variant: "filled" as const,
   };
 
-  const actions: [ActionSheetPopupAction] | [ActionSheetPopupAction, ActionSheetPopupAction] =
+  const actions: [SheetAction] | [SheetAction, SheetAction] =
     mode === "edit" && onDelete
       ? [
           {
-            disabled: isSubmitting,
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            disabled: isBusy,
+            icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
             label: tContactInfo("DeleteAction"),
-            onPress: onDelete,
+            loading: isDeleting,
+            loadingText: tCommon("feedback.deleting"),
+            onPress: submitDelete,
             tone: "danger",
-            variant: "outline",
+            variant: "filled",
           },
           primaryAction,
         ]
       : [primaryAction];
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={actions}
-      isBusy={isSubmitting}
+      isBusy={isBusy}
       onClose={onCancel}
-      onOpenChange={onOpenChange}
-      open={open}
+      opened={open}
       title={mode === "add" ? tContactInfo("AddPhone") : tContactInfo("PhoneNumbers")}
     >
       <View style={styles.phoneRow}>
@@ -146,13 +179,12 @@ export function EditPhoneSheet({
           searchPlaceholder={tContactInfo("PhonePrefixSearchPlaceholder")}
           triggerStyle={styles.prefixTrigger}
         />
+
         <SheetPhoneField
-          autoFocus={open}
-          containerStyle={styles.phoneInput}
           control={control}
-          editable={!isSubmitting}
+          editable={!isBusy}
           name="value"
-          onSubmitEditing={() => void onSubmit()}
+          onSubmitEditing={submit}
           placeholder={tContactInfo("PhonePlaceholder")}
           prefixName="prefix"
         />
@@ -164,15 +196,11 @@ export function EditPhoneSheet({
         name="type"
         options={typeOptions}
       />
-    </ActionSheetPopup>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  phoneInput: {
-    flex: 1,
-    minWidth: 0,
-  },
   phoneRow: {
     alignItems: "center",
     flexDirection: "row",
@@ -180,7 +208,6 @@ const styles = StyleSheet.create({
   },
   prefixTrigger: {
     flexShrink: 0,
-    paddingHorizontal: 10,
     width: 108,
   },
   typeEmoji: {

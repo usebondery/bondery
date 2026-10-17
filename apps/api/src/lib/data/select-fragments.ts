@@ -9,6 +9,7 @@ import type { AvatarTransformQuery } from "@bondery/schemas/http";
 export type ContactWithId = {
   id: string;
   hasAvatar: boolean;
+  avatarUpdatedAt?: string | null;
   updatedAt?: string;
 };
 
@@ -40,6 +41,7 @@ export const CONTACT_SELECT = `
   latitude,
   longitude,
   updatedAt:updated_at,
+  avatarUpdatedAt:avatar_updated_at,
   hasAvatar:has_avatar
 `;
 
@@ -53,6 +55,7 @@ export const SELECTABLE_CONTACT_SELECT = `
   location,
   myself,
   updatedAt:updated_at,
+  avatarUpdatedAt:avatar_updated_at,
   hasAvatar:has_avatar
 `;
 

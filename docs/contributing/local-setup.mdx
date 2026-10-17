@@ -364,6 +364,19 @@ pnpm run android:dev     # USB device or emulator
 pnpm run ios             # iOS Simulator or device
 ```
 
+On Windows, Gradle reads `JAVA_HOME`. Expo Android builds need **JDK 17**. A User `JAVA_HOME` that points at a removed JDK, or at JDK 25, overrides a valid Machine JDK 17, and the native build fails before install.
+
+`jdk-17.0.20.8-hotspot` is OpenJDK **17** (patch 20.8), not Java 20.
+
+`pnpm run android:dev` replaces a missing, stale, or non-17 `JAVA_HOME` with a Microsoft JDK 17 or Android Studio JBR. Open a **new** terminal after you change User env vars. The current terminal keeps the old value.
+
+To persist the User value:
+
+1. Open Environment Variables (Settings → System → About → Advanced system settings).
+2. Set User `JAVA_HOME` to the folder that contains `bin\java.exe`.
+3. Example: `C:\Program Files\Microsoft\jdk-17.0.20.8-hotspot`.
+4. Open a new terminal.
+
 ### Verify sync
 
 1. Sign in with GitHub or LinkedIn (same providers as the webapp).

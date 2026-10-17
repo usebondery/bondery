@@ -45,7 +45,7 @@
     "enableMath": false
   },
   "name": "bondery-monorepo",
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@12.11.2",
   "private": true,
   "scripts": {
     "build": "turbo build",
@@ -142,5 +142,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.10.2"
+  "version": "1.11.0-rc.1"
 }

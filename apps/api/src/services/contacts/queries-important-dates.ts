@@ -52,11 +52,11 @@ export async function listUpcomingReminders(
     include: {
       person: {
         select: {
+          avatarUpdatedAt: true,
           firstName: true,
           hasAvatar: true,
           id: true,
           lastName: true,
-          updatedAt: true,
         },
       },
     },
@@ -125,11 +125,11 @@ export async function listUpcomingReminders(
         person: toContactPreview(
           user.id,
           {
+            avatarUpdatedAt: person.avatarUpdatedAt,
             firstName: person.firstName,
             hasAvatar: person.hasAvatar,
             id: person.id,
             lastName: person.lastName,
-            updatedAt: person.updatedAt.toISOString(),
           },
           avatarOptions,
         ),

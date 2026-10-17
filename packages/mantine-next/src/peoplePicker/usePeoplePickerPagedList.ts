@@ -1,7 +1,8 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { useDebouncedCallback } from "@mantine/hooks";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PEOPLE_PICKER_PAGE_SIZE } from "#peoplePicker/constants.js";
 import {
   applyFirstPageFailure,
@@ -54,76 +55,69 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
   contactsHasMoreRef.current = contactsHasMore;
   const fetchLockRef = useRef(false);
 
-  const bumpScroll = useCallback(() => {
+  const bumpScroll = () => {
     setScrollResetKey((current) => current + 1);
-  }, []);
+  };
 
-  const fetchPage = useCallback(
-    async (offset: number, mode: "typed" | "browse", generation: number) => {
-      const search = onSearchRef.current;
-      if (!search) {
+  const fetchPage = async (offset: number, mode: "typed" | "browse", generation: number) => {
+    const search = onSearchRef.current;
+    if (!search) {
+      return;
+    }
+
+    const query = mode === "typed" ? stateRef.current.query.trim() : "";
+    try {
+      const page = await search(query, { limit: PEOPLE_PICKER_PAGE_SIZE, offset });
+      if (generation !== generationRef.current) {
         return;
       }
-
-      const query = mode === "typed" ? stateRef.current.query.trim() : "";
-      try {
-        const page = await search(query, { limit: PEOPLE_PICKER_PAGE_SIZE, offset });
-        if (generation !== generationRef.current) {
-          return;
-        }
-        setState((current) => {
-          const next = applyPageResult(current, generation, offset, page, mode);
-          return next ?? current;
-        });
-        if (mode === "typed" && offset === 0) {
-          setSelectFirstOptionToken((current) => current + 1);
-        }
-      } catch {
-        if (generation !== generationRef.current) {
-          return;
-        }
-        setState((current) => {
-          if (mode === "typed" && offset === 0) {
-            return applyFirstPageFailure(current, generation) ?? current;
-          }
-          return applyLoadMoreFailure(current, generation) ?? current;
-        });
-      } finally {
-        fetchLockRef.current = false;
+      setState((current) => {
+        const next = applyPageResult(current, generation, offset, page, mode);
+        return next ?? current;
+      });
+      if (mode === "typed" && offset === 0) {
+        setSelectFirstOptionToken((current) => current + 1);
       }
-    },
-    [],
-  );
+    } catch {
+      if (generation !== generationRef.current) {
+        return;
+      }
+      setState((current) => {
+        if (mode === "typed" && offset === 0) {
+          return applyFirstPageFailure(current, generation) ?? current;
+        }
+        return applyLoadMoreFailure(current, generation) ?? current;
+      });
+    } finally {
+      fetchLockRef.current = false;
+    }
+  };
 
   const triggerTypedSearch = useDebouncedCallback((_query: string, generation: number) => {
     void fetchPage(0, "typed", generation);
   }, searchDebounceMs);
 
-  const setQuery = useCallback(
-    (query: string) => {
-      const next = applyQueryChange(stateRef.current, query);
-      generationRef.current = next.generation;
-      setState(next);
-      bumpScroll();
-      if (!isTypedQuery(query)) {
-        setSelectFirstOptionToken((current) => current + 1);
-      }
-      if (isTypedQuery(query) && onSearchRef.current) {
-        triggerTypedSearch(query.trim(), next.generation);
-      }
-    },
-    [bumpScroll, triggerTypedSearch],
-  );
+  const setQuery = (query: string) => {
+    const next = applyQueryChange(stateRef.current, query);
+    generationRef.current = next.generation;
+    setState(next);
+    bumpScroll();
+    if (!isTypedQuery(query)) {
+      setSelectFirstOptionToken((current) => current + 1);
+    }
+    if (isTypedQuery(query) && onSearchRef.current) {
+      triggerTypedSearch(query.trim(), next.generation);
+    }
+  };
 
-  const resetList = useCallback(() => {
+  const resetList = () => {
     const next = applyReset(stateRef.current, contactsHasMoreRef.current);
     generationRef.current = next.generation;
     setState(next);
     bumpScroll();
     setSelectFirstOptionToken((current) => current + 1);
-  }, [bumpScroll]);
-
-  const loadMore = useCallback(() => {
+  };
+  const loadMore = () => {
     if (fetchLockRef.current) {
       return;
     }
@@ -156,22 +150,15 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
     fetchLockRef.current = true;
     setState((prev) => applyLoadMoreStart(prev));
     void fetchPage(offset, typed ? "typed" : "browse", generation);
-  }, [fetchPage, filter, matchQuery]);
+  };
 
-  const retryLoadMore = useCallback(() => {
+  const retryLoadMore = () => {
     setState((current) => ({ ...current, loadMoreError: false }));
     loadMore();
-  }, [loadMore]);
-
+  };
   const hasOnSearch = Boolean(onSearch);
-  const pool = useMemo(
-    () => getFilteredPool(seed, state, { filter, hasOnSearch, matchQuery }),
-    [filter, hasOnSearch, matchQuery, seed, state],
-  );
-  const visibleItems = useMemo(
-    () => getVisiblePickerItemsForMode(pool, state, hasOnSearch),
-    [hasOnSearch, pool, state],
-  );
+  const pool = getFilteredPool(seed, state, { filter, hasOnSearch, matchQuery });
+  const visibleItems = getVisiblePickerItemsForMode(pool, state, hasOnSearch);
   const loadMoreKind = getLoadMoreKind(pool, state, {
     contactsHasMore,
     hasOnSearch,

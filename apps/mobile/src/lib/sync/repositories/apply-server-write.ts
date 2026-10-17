@@ -1,37 +1,15 @@
 import type { Contact, Group, Tag } from "@bondery/schemas";
+import { parseAvatarUpdatedAtFromUrl } from "../avatar-clock";
+import { notePeopleAvatarUpsert } from "../avatar-file-queue";
 import { getSyncDatabase } from "../db";
+import { PEOPLE_UPSERT_SQL } from "../materializer/people";
 
 export function upsertContactFromServer(contact: Contact): void {
   const db = getSyncDatabase();
   const ts = contact.updatedAt ?? new Date().toISOString();
 
   db.runSync(
-    `INSERT INTO people (
-      id, user_id, first_name, middle_name, last_name, headline, location, notes,
-      last_interaction, keep_frequency_days, myself, language, timezone, gis_point,
-      has_avatar, notes_updated_at, last_interaction_activity_id,
-      created_at, updated_at, local_updated_at, is_pending
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0)
-    ON CONFLICT(id) DO UPDATE SET
-      user_id = excluded.user_id,
-      first_name = excluded.first_name,
-      middle_name = excluded.middle_name,
-      last_name = excluded.last_name,
-      headline = excluded.headline,
-      location = excluded.location,
-      notes = excluded.notes,
-      last_interaction = excluded.last_interaction,
-      keep_frequency_days = excluded.keep_frequency_days,
-      myself = excluded.myself,
-      language = excluded.language,
-      timezone = excluded.timezone,
-      gis_point = excluded.gis_point,
-      has_avatar = excluded.has_avatar,
-      notes_updated_at = excluded.notes_updated_at,
-      last_interaction_activity_id = excluded.last_interaction_activity_id,
-      updated_at = excluded.updated_at,
-      local_updated_at = excluded.updated_at,
-      is_pending = 0`,
+    PEOPLE_UPSERT_SQL,
     contact.id,
     contact.userId,
     contact.firstName,
@@ -47,12 +25,14 @@ export function upsertContactFromServer(contact: Contact): void {
     contact.timezone,
     contact.gisPoint as string | null,
     contact.avatar ? 1 : 0,
+    parseAvatarUpdatedAtFromUrl(contact.avatar),
     contact.notesUpdatedAt ?? null,
     contact.lastInteractionActivityId,
     contact.createdAt,
     ts,
     ts,
   );
+  notePeopleAvatarUpsert(contact.id);
 }
 
 export function upsertGroupFromServer(group: Group): void {

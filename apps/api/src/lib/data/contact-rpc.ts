@@ -10,7 +10,7 @@ export type MapPinRow = {
   longitude: number;
   location: string | null;
   last_interaction: Date | string | null;
-  updated_at: Date | string;
+  avatar_updated_at: Date | string | null;
 };
 
 export type MapAddressPinRow = {
@@ -25,7 +25,7 @@ export type MapAddressPinRow = {
   address_formatted: string | null;
   latitude: number;
   longitude: number;
-  updated_at: Date | string;
+  avatar_updated_at: Date | string | null;
 };
 
 export type LinkedinEnrichEligibleRow = {

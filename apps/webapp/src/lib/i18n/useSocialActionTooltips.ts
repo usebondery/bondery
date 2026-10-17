@@ -1,7 +1,6 @@
 "use client";
 
 import type { LooseTranslateFn } from "@bondery/translations";
-import { useCallback } from "react";
 import type { SocialActionKey } from "@/lib/contacts/socialActionTooltips";
 import { useSocialsTranslations } from "@/lib/i18n/generated/hooks";
 
@@ -24,37 +23,31 @@ export function useSocialActionTooltips() {
   const t = useSocialsTranslations();
   const tLoose = t as LooseTranslateFn;
 
-  const getSocialActionTooltip = useCallback(
-    (action: SocialActionKey, firstName: string) => {
-      const name = normalizeFirstName(firstName);
-      return tLoose(TOOLTIP_KEY[action], { name });
-    },
-    [tLoose],
-  );
+  const getSocialActionTooltip = (action: SocialActionKey, firstName: string) => {
+    const name = normalizeFirstName(firstName);
+    return tLoose(TOOLTIP_KEY[action], { name });
+  };
 
-  const getSocialActionLabel = useCallback(
-    (action: SocialActionKey) => {
-      switch (action) {
-        case "phone":
-          return t("AriaPhone");
-        case "email":
-          return t("AriaEmail");
-        case "linkedin":
-          return t("FieldLinkedin");
-        case "instagram":
-          return t("FieldInstagram");
-        case "whatsapp":
-          return t("FieldWhatsapp");
-        case "facebook":
-          return t("FieldFacebook");
-        case "signal":
-          return t("FieldSignal");
-        default:
-          return action;
-      }
-    },
-    [t],
-  );
+  const getSocialActionLabel = (action: SocialActionKey) => {
+    switch (action) {
+      case "phone":
+        return t("AriaPhone");
+      case "email":
+        return t("AriaEmail");
+      case "linkedin":
+        return t("FieldLinkedin");
+      case "instagram":
+        return t("FieldInstagram");
+      case "whatsapp":
+        return t("FieldWhatsapp");
+      case "facebook":
+        return t("FieldFacebook");
+      case "signal":
+        return t("FieldSignal");
+      default:
+        return action;
+    }
+  };
 
   return { getSocialActionLabel, getSocialActionTooltip };
 }

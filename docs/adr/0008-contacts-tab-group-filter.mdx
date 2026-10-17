@@ -1,0 +1,35 @@
+---
+title: "ADR 0008: Contacts tab group filter"
+hidden: true
+---
+
+# ADR 0008: Contacts tab group filter
+
+**Status:** Accepted  
+**Date:** 2026-10-16
+
+## Context
+
+The Contacts tab used a horizontal chip row for groups. Each chip navigated to `/group/[id]`, which added stack depth and peer-navigation issues (see bondery-ux mobile `navigation.md`). Users with many groups spent too long scrolling chips to browse one group’s members.
+
+SQLite `listContacts` already supports `groupId` with search query.
+
+## Decision
+
+1. Replace the Contacts list header chip row with a **sticky filter control** under search.
+2. Open a **singular** bottom sheet to pick a group or **All contacts**; apply filter in place on the same tab.
+3. Reuse `readContactsList({ excludeMyself: true, query, groupId })`. Hide the Myself section when `groupId` is set (match group screen).
+4. Removed `/group/[id]`; `openGroup` navigates to `/contacts?group_id=…` (see `MOBILE_GROUP_ID_PARAM` in `packages/helpers`).
+5. Filter state syncs to the Contacts tab URL via `group_id` (session persists while the tab param is set).
+
+## Alternatives
+
+- **Navigation guards only on chips** — Rejected; does not fix chip scrolling or header churn.
+- **Remove group route** — Rejected; Settings and deep links still need it.
+- **Multi-group filter** — Rejected for MVP.
+
+## Consequences
+
+- Group management on mobile is Contacts filter + Settings → Groups (no dedicated group stack screen).
+- Bulk select-all on Contacts must pass `groupId` into `resolveContactsSelectionPersonIds`.
+- `ContactsGroupsHeader` remains for Settings preview only.

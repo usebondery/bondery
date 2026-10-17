@@ -13,7 +13,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AddNewTagButton } from "@/components/tags/AddNewTagButton";
 import { openTagEditorModal } from "@/components/tags/openTagEditorModal";
 import { TagPill } from "@/components/tags/TagPill";
@@ -48,7 +48,7 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
   const removeTagMutation = useRemoveTagFromContactMutation(personId);
   const { data: personTags = [] } = useContactTagsQuery(personId);
   const { data: allTags = [] } = useTagsListQuery(PERSON_ALL_TAGS);
-  const workspaceTags = useMemo(() => allTags.map(toTag), [allTags]);
+  const workspaceTags = allTags.map(toTag);
   const [search, setSearch] = useState("");
   const addInFlightRef = useRef<Set<string>>(new Set());
 

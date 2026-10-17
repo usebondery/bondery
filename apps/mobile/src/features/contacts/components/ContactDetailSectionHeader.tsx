@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { View } from "react-native";
+import Animated from "react-native-reanimated";
+import { Pressable } from "@/components/ui/Pressable";
 import {
   useCommonTranslations,
   useContactAddressTranslations,
@@ -8,8 +10,8 @@ import {
   useMobileContactsTranslations,
   useTagsInputTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { MOBILE_TEXT_STYLES } from "../../../theme/tokens";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { Text } from "../../../components/ui/Text";
+import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { contactDetailStyles } from "./contactDetailStyles";
 
 interface ContactDetailSectionHeaderAction {
@@ -40,13 +42,13 @@ export function ContactDetailSectionHeader({
   titleNamespace = "common",
   action,
 }: ContactDetailSectionHeaderProps) {
-  const colors = useMobileThemeColors();
   const tCommon = useCommonTranslations();
   const tContactAddress = useContactAddressTranslations();
   const tContactImportantDates = useContactImportantDatesTranslations();
   const tContactInfo = useContactInfoTranslations();
   const tMobileContacts = useMobileContactsTranslations();
   const tTagsInput = useTagsInputTranslations();
+  const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
 
   const tByNamespace = {
     ContactAddress: tContactAddress,
@@ -64,27 +66,30 @@ export function ContactDetailSectionHeader({
     <View style={contactDetailStyles.sectionHeaderRow}>
       <Text
         accessibilityRole="header"
-        style={[
-          contactDetailStyles.sectionTitle,
-          MOBILE_TEXT_STYLES.sectionLabel,
-          { color: colors.textMuted },
-        ]}
+        c="muted"
+        className="flex-1 tracking-wide uppercase"
+        fw={700}
+        size="xs"
       >
-        {resolvedTitle.toUpperCase()}
+        {resolvedTitle}
       </Text>
 
       {action ? (
-        <Pressable
-          accessibilityLabel={action.accessibilityLabel}
-          accessibilityRole="button"
-          onPress={action.onPress}
-          style={contactDetailStyles.sectionHeaderAction}
-        >
-          {action.icon}
-          <Text style={[contactDetailStyles.sectionHeaderActionText, { color: colors.primary }]}>
-            {action.label}
-          </Text>
-        </Pressable>
+        <Animated.View style={squeezeStyle}>
+          <Pressable
+            accessibilityLabel={action.accessibilityLabel}
+            accessibilityRole="button"
+            onPress={action.onPress}
+            onPressIn={pressIn}
+            onPressOut={pressOut}
+            style={contactDetailStyles.sectionHeaderAction}
+          >
+            {action.icon}
+            <Text c="brand" fw={600} size="md">
+              {action.label}
+            </Text>
+          </Pressable>
+        </Animated.View>
       ) : null}
     </View>
   );

@@ -1,4 +1,5 @@
 import type { Prisma } from "@bondery/db";
+import { normalizePhoneSocialStorage } from "@bondery/helpers/phone";
 import type {
   ContactAddressEntry,
   ContactWritableFields,
@@ -15,6 +16,7 @@ import {
 import { upsertContactSocials } from "../../lib/contacts/socials.js";
 import { setPersonLocationWithDb } from "../../lib/data/contact-rpc.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/integrations/mapy.js";
+import { loadDefaultPhoneCountryForUser } from "../../lib/me/default-phone-country.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { listContactChildIds } from "../../lib/sync/build-changes.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
@@ -131,11 +133,13 @@ export async function applyContactPatch(
     }
   }
 
+  const defaultPhoneCountry = await loadDefaultPhoneCountryForUser(db, user.id);
+
   let nextPhones: PhoneEntry[] | undefined;
   if (body.phones !== undefined) {
     priorPhoneIds = await listContactChildIds(user.id, personId, "people_phones", db);
     try {
-      nextPhones = parsePhoneEntries(body.phones);
+      nextPhones = parsePhoneEntries(body.phones, defaultPhoneCountry);
     } catch (parseError) {
       const message = parseError instanceof Error ? parseError.message : "Invalid phones payload";
       throw new DomainError(message, 400, "contact_invalid");
@@ -177,7 +181,12 @@ export async function applyContactPatch(
     socialsUpdates.push({ handle: body.instagram, platform: "instagram" });
   }
   if (body.whatsapp !== undefined) {
-    socialsUpdates.push({ handle: body.whatsapp, platform: "whatsapp" });
+    socialsUpdates.push({
+      handle: body.whatsapp
+        ? normalizePhoneSocialStorage(body.whatsapp, { defaultCountry: defaultPhoneCountry })
+        : body.whatsapp,
+      platform: "whatsapp",
+    });
   }
   if (body.facebook !== undefined) {
     socialsUpdates.push({ handle: body.facebook, platform: "facebook" });
@@ -186,7 +195,12 @@ export async function applyContactPatch(
     socialsUpdates.push({ handle: body.website, platform: "website" });
   }
   if (body.signal !== undefined) {
-    socialsUpdates.push({ handle: body.signal, platform: "signal" });
+    socialsUpdates.push({
+      handle: body.signal
+        ? normalizePhoneSocialStorage(body.signal, { defaultCountry: defaultPhoneCountry })
+        : body.signal,
+      platform: "signal",
+    });
   }
 
   updates.updatedAt = new Date();

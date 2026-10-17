@@ -4,6 +4,7 @@ export {
   BP_PERSON_URL_PREFIX,
   collapsePersonMentionsFromEditor,
   expandPersonMentionsForEditor,
+  extractPersonMentionIds,
   formatPersonMentionLink,
   parsePersonMentionUrl,
 } from "#notes/personMentionFormat.js";

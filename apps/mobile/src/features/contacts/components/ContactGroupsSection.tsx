@@ -11,7 +11,7 @@ import {
 import { LoadErrorCard } from "../../../components/load-state";
 import { addContactsToGroup } from "../../../lib/domains/groups";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { sortGroups } from "../groupSort";
 import { useNavigateToGroup } from "../hooks/useNavigateToGroup";
@@ -68,7 +68,6 @@ export function ContactGroupsSection({
   const tMobileSettings = useMobileSettingsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const navigateToGroup = useNavigateToGroup();
   const groupSortOrder = useMobilePreferences((state) => state.groupSortOrder);
   const groupLastOpenedAt = useMobilePreferences((state) => state.groupLastOpenedAt);
@@ -91,14 +90,14 @@ export function ContactGroupsSection({
         addContactsToGroup(group.id, [contactId]);
         onGroupAdded(group);
       } catch {
-        showToast({
-          description: tMobileGroups("CreateFailed"),
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: tMobileGroups("CreateFailed"),
+          title: t("feedback.errorTitle"),
           type: "error",
         });
       }
     },
-    [contactId, onGroupAdded, showToast, tMobileGroups, t],
+    [contactId, onGroupAdded, tMobileGroups, t],
   );
 
   return (

@@ -16,10 +16,18 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../..");
 const targets = [join(repoRoot, "apps", "webapp", "src"), join(repoRoot, "apps", "mobile", "src")];
 
-const banned = [
+const sharedBanned = [
   /error instanceof Error \? error\.message/,
   /\berror\.message\b.*(?:description|title|Alert|notification|toast|showNotification)/i,
   /description:\s*error\.message/,
+];
+
+const mobileAliasBanned = [
+  /\berr instanceof Error \? err\.message/,
+  /\bloadError instanceof Error \? loadError\.message/,
+  /\bcreateError instanceof Error(?: && createError\.message|\s*\? createError\.message)/,
+  /\b(?:err|loadError|createError|deleteError|logoutError)\.message\b.*(?:description|title|Alert|notification|toast|showNotification|errorDescription)/i,
+  /description:\s*(?:err|loadError|createError|deleteError|logoutError)\.message/,
 ];
 
 function collectFiles(dir) {
@@ -43,7 +51,8 @@ for (const root of targets) {
     if (
       rel.includes("/lib/api/") ||
       rel.includes("getUserFacingError") ||
-      rel.includes("/lib/sync/sync-logger")
+      rel.includes("/lib/sync/sync-logger") ||
+      rel.includes("RootErrorBoundary")
     ) {
       continue;
     }
@@ -51,13 +60,20 @@ for (const root of targets) {
     const lines = readFileSync(file, "utf8").split("\n");
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      if (line.includes("getUserFacingError") || line.includes("getUserMessage(")) {
+      if (
+        line.includes("getUserFacingError") ||
+        line.includes("getUserMessage(") ||
+        line.includes("resolveDisplayedError")
+      ) {
         continue;
       }
       if (line.includes("console.") || line.includes("//")) {
         continue;
       }
-      for (const pattern of banned) {
+      const patterns = rel.includes("/apps/mobile/")
+        ? [...sharedBanned, ...mobileAliasBanned]
+        : sharedBanned;
+      for (const pattern of patterns) {
         if (pattern.test(line)) {
           check.add(`${rel}:${i + 1}: ${line.trim()}`);
         }

@@ -39,7 +39,7 @@ import {
 } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ContactsTable from "@/components/contacts/ContactsTableV2";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
@@ -135,22 +135,13 @@ export function VCardImportModal({
   const openRef = useRef<() => void>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
-  const previewContacts = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact),
-    [parsedContacts],
-  );
+  const previewContacts = parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact);
 
-  const validContactsCount = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).length,
-    [parsedContacts],
-  );
+  const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
 
   const invalidContactsCount = parsedContacts.length - validContactsCount;
 
-  const selectableIds = useMemo(
-    () => previewContacts.map((contact) => contact.id),
-    [previewContacts],
-  );
+  const selectableIds = previewContacts.map((contact) => contact.id);
 
   const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
@@ -190,7 +181,7 @@ export function VCardImportModal({
     });
   }, [isImporting, modalId, step, t]);
 
-  const handleToggleAll = useCallback(() => {
+  const handleToggleAll = () => {
     setSelectedIds((prev) => {
       const isAllSelected = selectableIds.length > 0 && selectableIds.every((id) => prev.has(id));
       if (isAllSelected) {
@@ -198,47 +189,42 @@ export function VCardImportModal({
       }
       return new Set(selectableIds);
     });
-  }, [selectableIds]);
+  };
 
-  const handleToggleOne = useCallback(
-    (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
+  const handleToggleOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
 
-        const rowIndex = options?.index;
-        const hasRangeSelection =
-          options?.shiftKey &&
-          typeof rowIndex === "number" &&
-          lastSelectedIndexRef.current !== null;
+      const rowIndex = options?.index;
+      const hasRangeSelection =
+        options?.shiftKey && typeof rowIndex === "number" && lastSelectedIndexRef.current !== null;
 
-        if (hasRangeSelection && typeof rowIndex === "number") {
-          const anchorIndex = lastSelectedIndexRef.current;
-          if (anchorIndex === null) {
-            return prev;
-          }
-          const start = Math.min(anchorIndex, rowIndex);
-          const end = Math.max(anchorIndex, rowIndex);
-          for (let index = start; index <= end; index += 1) {
-            const row = previewContacts[index];
-            if (row) {
-              next.add(row.id);
-            }
-          }
-        } else if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
+      if (hasRangeSelection && typeof rowIndex === "number") {
+        const anchorIndex = lastSelectedIndexRef.current;
+        if (anchorIndex === null) {
+          return prev;
         }
-
-        return next;
-      });
-
-      if (typeof options?.index === "number") {
-        lastSelectedIndexRef.current = options.index;
+        const start = Math.min(anchorIndex, rowIndex);
+        const end = Math.max(anchorIndex, rowIndex);
+        for (let index = start; index <= end; index += 1) {
+          const row = previewContacts[index];
+          if (row) {
+            next.add(row.id);
+          }
+        }
+      } else if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-    },
-    [previewContacts],
-  );
+
+      return next;
+    });
+
+    if (typeof options?.index === "number") {
+      lastSelectedIndexRef.current = options.index;
+    }
+  };
 
   const parseUpload = async (files: File[]) => {
     if (files.length === 0) {

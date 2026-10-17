@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import {
@@ -23,7 +24,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck } from "@tabler/icons-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { captureEvent } from "@/lib/analytics/client";
 import { ACTIVITY_TYPE_OPTIONS, getActivityTypeConfig } from "@/lib/contacts/activityTypes";
@@ -189,15 +190,11 @@ function NewActivityForm({
     dismissModal();
   }
 
-  const resolvedInitialParticipantIds = useMemo(
-    () =>
-      (activity?.participants || initialParticipantIds || [])
-        .map((participant: ActivityParticipantRef) =>
-          typeof participant === "string" ? participant : participant.id,
-        )
-        .filter((id): id is string => Boolean(id)),
-    [activity, initialParticipantIds],
-  );
+  const resolvedInitialParticipantIds = (activity?.participants || initialParticipantIds || [])
+    .map((participant: ActivityParticipantRef) =>
+      typeof participant === "string" ? participant : participant.id,
+    )
+    .filter((id): id is string => Boolean(id));
 
   const form = useForm({
     initialValues: (() => {
@@ -222,13 +219,13 @@ function NewActivityForm({
     validate: schemaResolver(interactionFormSchema, { sync: true }),
   });
 
-  const pickerContacts = useMemo(() => {
+  const pickerContacts = (() => {
     const pool = new Map(availableContacts.map((contact) => [contact.id, contact]));
     for (const contact of createdContacts) {
       pool.set(contact.id, contact);
     }
     return Array.from(pool.values());
-  }, [availableContacts, createdContacts]);
+  })();
 
   useEffect(() => {
     const pending = createdContacts.filter(
@@ -250,14 +247,10 @@ function NewActivityForm({
     queueMicrotask(() => participantsInputRef.current?.focus());
   }, [createdContacts, form]);
 
-  const activityTypeSelectOptions = useMemo(
-    () =>
-      ACTIVITY_TYPE_OPTIONS.map((type) => ({
-        label: getInteractionTypeLabel(type),
-        value: type,
-      })),
-    [getInteractionTypeLabel],
-  );
+  const activityTypeSelectOptions = ACTIVITY_TYPE_OPTIONS.map((type) => ({
+    label: getInteractionTypeLabel(type),
+    value: type,
+  }));
 
   const selectedTypeConfig = getActivityTypeConfig(form.values.type);
 

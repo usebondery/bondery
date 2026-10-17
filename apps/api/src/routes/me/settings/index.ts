@@ -35,6 +35,7 @@ const settingsPatchResponseSchema = z
     data: z
       .object({
         colorScheme: z.string().nullable().optional(),
+        defaultPhoneCountry: z.string().nullable().optional(),
         groupSortOrder: z.string().nullable().optional(),
         language: supportedLocaleSchema.optional(),
         leftSwipeAction: z.string().nullable().optional(),
@@ -156,6 +157,7 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
             aiMessagesUsed: resolvedSettings.aiMessagesUsed ?? 0,
             avatarUrl: resolvedAvatarUrl,
             colorScheme: resolvedSettings.colorScheme,
+            defaultPhoneCountry: resolvedSettings.defaultPhoneCountry ?? null,
             email: user.email,
             gettingStartedDismissedAt:
               resolvedSettings.gettingStartedDismissedAt?.toISOString() ?? null,

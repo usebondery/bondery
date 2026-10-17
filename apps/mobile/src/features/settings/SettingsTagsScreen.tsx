@@ -2,29 +2,32 @@ import type { TagWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet } from "react-native";
+import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
+import { ActionIcon } from "../../components/ui/ActionIcon";
+import { InputWrapper } from "../../components/ui/InputWrapper";
+import { Select } from "../../components/ui/Select";
+import { Stack } from "../../components/ui/Stack";
 import { updateSettings } from "../../lib/api/client";
 import {
   useCommonTranslations,
   useMobileSettingsTranslations,
   useTagsSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
 import type {
   MobilePreferencesState,
   TagSortOrder,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
 import { useTags } from "../../lib/sync/hooks/useSyncQuery";
-import { MOBILE_HIT_SLOP, MOBILE_LAYOUT } from "../../theme/tokens";
+import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactsTagsHeader } from "../contacts/components/ContactsTagsHeader";
 import { TagEditSheet } from "../contacts/components/TagEditSheet";
 import { sortTags } from "../contacts/tagSort";
 import { SettingsAsyncState } from "./components/SettingsAsyncState";
-import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
 import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
-import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsTagsScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
@@ -83,73 +86,73 @@ export function SettingsTagsScreen() {
     refreshTags();
   }, [refreshTags]);
 
-  const previewCaption =
+  const previewDescription =
     syncedTags.length === 0 && !isLoading && !loadError
       ? tMobileSettings("PreviewHintTagsEmpty")
       : tMobileSettings("PreviewHintTags");
 
-  const createButton = (
-    <Pressable
-      accessibilityLabel={tTagsSettings("AddNewTag")}
-      accessibilityRole="button"
-      hitSlop={MOBILE_HIT_SLOP.nav}
-      onPress={() => setCreateOpen(true)}
-      style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
-    >
-      <IconPlus size={22} stroke={colors.primary} />
-    </Pressable>
-  );
-
   return (
     <>
       <StackNavBar
-        onBack={() => router.back()}
-        right={createButton}
+        onBack={() => goBackOrReplace(router, "/settings")}
+        right={
+          <ActionIcon
+            accessibilityLabel={tTagsSettings("AddNewTag")}
+            onPress={() => setCreateOpen(true)}
+          >
+            <IconPlus size={22} stroke={colors.primary} />
+          </ActionIcon>
+        }
         title={tTagsSettings("Title")}
         variant="elevated"
       />
 
       <ScrollView
-        contentContainerStyle={styles.content}
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+          paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+          paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+        }}
+        style={{ backgroundColor: colors.appBackground }}
       >
-        <SettingsFieldLabel>{tMobileSettings("TagSortSelectLabel")}</SettingsFieldLabel>
-        <SettingsSelect
-          label={tMobileSettings("TagSortSelectLabel")}
-          onValueChange={handleSortChange}
-          options={sortOptions}
-          value={tagSortOrder}
-        />
+        <Stack gap="lg">
+          <Select
+            data={sortOptions}
+            label={tMobileSettings("TagSortSelectLabel")}
+            onChange={handleSortChange}
+            value={tagSortOrder}
+          />
 
-        <SettingsPreviewSection caption={previewCaption}>
-          <SettingsAsyncState
-            errorDescription={loadError}
-            errorTitle={tMobileSettings("TagsLoadErrorTitle")}
-            isLoading={isLoading}
-            onRetry={() => {
-              void reloadTags();
-            }}
-          >
-            <ContactsTagsHeader
-              layout="chipRow"
-              shouldShowCreateAction={false}
-              showEmptyPlaceholder
-              tags={sortedTags}
-            />
-          </SettingsAsyncState>
-        </SettingsPreviewSection>
+          <SettingsPreviewSection description={previewDescription}>
+            <SettingsAsyncState
+              errorDescription={loadError}
+              errorTitle={tMobileSettings("TagsLoadErrorTitle")}
+              isLoading={isLoading}
+              onRetry={() => {
+                void reloadTags();
+              }}
+            >
+              <ContactsTagsHeader
+                layout="chipRow"
+                shouldShowCreateAction={false}
+                showEmptyPlaceholder
+                tags={sortedTags}
+              />
+            </SettingsAsyncState>
+          </SettingsPreviewSection>
 
-        {!isLoading && !loadError ? (
-          <>
-            <SettingsFieldLabel>{tTagsSettings("ManageTags")}</SettingsFieldLabel>
-            <ContactsTagsHeader
-              layout="wrap"
-              onCreatePress={() => setCreateOpen(true)}
-              onTagPress={(tag) => setEditingTag(tag)}
-              tags={editTags}
-            />
-          </>
-        ) : null}
+          {!isLoading && !loadError ? (
+            <InputWrapper label={tTagsSettings("ManageTags")}>
+              <ContactsTagsHeader
+                layout="wrap"
+                onCreatePress={() => setCreateOpen(true)}
+                onTagPress={(tag) => setEditingTag(tag)}
+                tags={editTags}
+              />
+            </InputWrapper>
+          ) : null}
+        </Stack>
       </ScrollView>
 
       <TagEditSheet
@@ -176,15 +179,3 @@ export function SettingsTagsScreen() {
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-  },
-  screen: {
-    flex: 1,
-  },
-});

@@ -22,8 +22,8 @@ export function getGroup(groupId: string): Group | null {
 export function listGroupMembers(options: {
   groupId: string;
   query?: string;
-  limit: number;
-  offset: number;
+  limit?: number;
+  offset?: number;
 }): { contacts: Contact[]; totalCount: number } {
   return listGroupContacts(options);
 }

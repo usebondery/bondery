@@ -9,7 +9,7 @@ Help users **find the right person or action** with minimal context switching.
 | Layer | Purpose | Desktop webapp | Webapp phone / PWA | Expo native |
 |-------|---------|----------------|--------------------|-------------|
 | **Global find** | Jump anywhere — person, action, nav | [global-find.md](../desktop/global-find.md) | Search row inside the nav overlay — [mobile-pwa-shell.md](../desktop/mobile-pwa-shell.md). Not a FAB. | FAB speed dial (create actions, not search) |
-| **In-page search** | Filter the current list | `DataTable` search, People URL `?search=` | Same as desktop | Contacts search bar |
+| **In-page search** | Filter the current list | `DataTable` search, People URL `?search=` | Same as desktop | Contacts search bar; tap active tab → focus search — [tab-search-focus.md](../mobile/tab-search-focus.md) |
 | **Picker search** | Choose entities in a modal | `PeopleMultiPickerInput`, debounced server search | Same as desktop | Sheet pickers |
 
 Do not duplicate global find inside every page — use in-page search for **local context**. Do not add a second command palette or a native-like FAB on the PWA.

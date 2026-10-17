@@ -13,7 +13,6 @@ import { Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconTrash } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
@@ -198,25 +197,22 @@ export function useGroupDetailActions({
     });
   };
 
-  const groupCardData = useMemo<GroupWithCount>(
-    () => ({
-      color: groupColor || "blue",
-      contactCount: groupTotalCount,
-      createdAt: "",
-      emoji: groupEmoji || "👥",
-      id: groupId,
-      label: groupLabel,
-      previewContacts: cardPreviewContacts.map((contact) => ({
-        avatar: contact.avatar,
-        firstName: contact.firstName,
-        id: contact.id,
-        lastName: contact.lastName,
-      })),
-      updatedAt: "",
-      userId: "",
-    }),
-    [groupColor, groupEmoji, groupId, groupLabel, cardPreviewContacts, groupTotalCount],
-  );
+  const groupCardData = {
+    color: groupColor || "blue",
+    contactCount: groupTotalCount,
+    createdAt: "",
+    emoji: groupEmoji || "👥",
+    id: groupId,
+    label: groupLabel,
+    previewContacts: cardPreviewContacts.map((contact) => ({
+      avatar: contact.avatar,
+      firstName: contact.firstName,
+      id: contact.id,
+      lastName: contact.lastName,
+    })),
+    updatedAt: "",
+    userId: "",
+  };
 
   const handleEditGroup = (group: GroupWithCount) => {
     openEditGroupModal({

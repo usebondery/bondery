@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
@@ -18,7 +19,7 @@ import {
 } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import ContactsTable, {
   type ColumnConfig,
   type SortOrder,
@@ -124,9 +125,8 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const paperRef = useRef<HTMLDivElement>(null);
 
-  const columnLabels = useMemo(
-    () => Object.fromEntries(DEFAULT_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label])),
-    [columnDefinitions],
+  const columnLabels = Object.fromEntries(
+    DEFAULT_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label]),
   );
 
   // Icons are stable references — defined inline so they can be merged with
@@ -249,7 +249,6 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       setSelectedIds(new Set(contacts.map((c) => c.id)));
     }
   };
-
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
     const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
 
@@ -348,7 +347,6 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
     setExcludedIds(new Set());
     // Keep selectedIds as-is; DataTable will use allTotalSelected for rendering.
   };
-
   const allSelected = isAllTotalSelected
     ? contacts.length > 0 && contacts.every((c) => !excludedIds.has(c.id))
     : contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));

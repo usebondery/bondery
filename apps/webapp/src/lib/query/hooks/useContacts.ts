@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noExcessiveLinesPerFile: contact query hub coordinates many cache keys */
 "use client";
 
 import { patchAffectsMergeRecommendations } from "@bondery/helpers/contact";
@@ -138,6 +139,18 @@ export function useContactsSelectableListQuery(params: {
     enabled: params.enabled !== false,
     queryFn: () => getContactsSelectableList(listParams),
     queryKey: contactKeys.selectable.list(listParams),
+  });
+}
+
+/** Loads full contact rows for picker chips when IDs are not in a prefetched list. */
+export function useContactDetailsQueries(ids: string[]) {
+  const uniqueIds = Array.from(new Set(ids.filter(Boolean)));
+  return useQueries({
+    queries: uniqueIds.map((id) => ({
+      enabled: Boolean(id),
+      queryFn: () => getContactDetail(id),
+      queryKey: contactKeys.detail(id),
+    })),
   });
 }
 

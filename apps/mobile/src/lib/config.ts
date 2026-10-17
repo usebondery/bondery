@@ -1,6 +1,11 @@
 import { CONTACT_FIELD_MAX_LENGTHS, CONTACT_LIMITS } from "@bondery/schemas";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
+import {
+  metroHostFromHostUri,
+  resolveAndroidLoopbackHost,
+  rewriteLoopbackHostname,
+} from "./config-loopback";
 
 type MobileExtra = {
   apiUrl?: string;
@@ -13,22 +18,16 @@ function getExtra(): MobileExtra {
   return (Constants.expoConfig?.extra ?? {}) as MobileExtra;
 }
 
+function androidLoopbackHost(): string {
+  return resolveAndroidLoopbackHost(metroHostFromHostUri(Constants.expoConfig?.hostUri));
+}
+
 export function normalizeMobileUrlForDevice(urlValue: string): string {
   if (!urlValue || Platform.OS !== "android") {
     return urlValue;
   }
 
-  try {
-    const parsed = new URL(urlValue);
-    if (parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost") {
-      parsed.hostname = "10.0.2.2";
-      return parsed.toString();
-    }
-  } catch {
-    // Leave invalid values unchanged and let existing config validation handle them.
-  }
-
-  return urlValue;
+  return rewriteLoopbackHostname(urlValue, androidLoopbackHost());
 }
 
 function normalizeApiBaseUrl(value: string): string {
@@ -65,23 +64,11 @@ export const MOBILE_OPACITY = {
 
 /** UI timing constants (milliseconds). */
 export const UI_TIMING_MS = {
-  /** Press-hold duration before FAB drag-select reveals the menu. */
-  fabDragRevealMs: 80,
-  /** FAB speed-dial scrim and menu exit animation. */
-  fabMenuCloseMs: 150,
-  /** Maximum cumulative stagger delay for FAB menu items. */
-  fabMenuStaggerMaxMs: 120,
-  /** Per-item enter delay when the FAB menu opens. */
-  fabMenuStaggerMs: 40,
-  /** Max press duration treated as a tap (not drag) on the FAB. */
-  fabTapMaxMs: 150,
   /** Border color transition when a text input gains or loses focus. */
   inputFocusTransition: 200,
   /** Default long-press duration before secondary actions (e.g. edit social). */
   longPressDelay: 350,
-  /**
-   * Overflow popover enter/exit + FAB speed-dial open-guard window (Tamagui `quick` via `POPOVER_MOTION`).
-   */
+  /** Overflow menu open guard window (matches menu fade timing). */
   popoverTransitionMs: 200,
   /** Delay between FlashList scroll-to-index retries. */
   scrollRetryDelay: 40,
@@ -89,20 +76,12 @@ export const UI_TIMING_MS = {
   selectionDragArmDelay: 250,
   /** Wait for sheet/modal open animation before focusing an input. */
   sheetFocusDelay: 150,
+  /** Defer opening a stacked sheet until the current sheet finishes closing. */
+  sheetStackOpenDelay: 320,
   /** Default auto-dismiss duration for app toasts. */
   toastDuration: 4000,
   /** LayoutAnimation duration for toast enter/exit. */
   toastLayoutAnimation: 200,
-} as const;
-
-/** FAB speed-dial gesture thresholds (pixels). */
-export const FAB_GESTURE = {
-  /** Drag below the FAB center that cancels selection. */
-  cancelZoneBelowPx: 24,
-  /** Movement before press-drag arms on the FAB. */
-  dragThresholdPx: 8,
-  /** Vertical bridge between menu items for drag hit-testing. */
-  itemBridgePx: 16,
 } as const;
 
 /** FlashList scroll-to-index retry behaviour. */
@@ -110,26 +89,12 @@ export const LIST_SCROLL = {
   maxRetries: 3,
 } as const;
 
-/** Tamagui sheet snap points (percent of screen height). */
+/** Sheet snap points (percent of screen height) for named `ui/Sheet` sizes. */
 export const SHEET_SNAP_POINTS = {
-  /** Phone / email edit sheets with multiple fields. */
-  channelEdit: 72,
   /** Title + two-button confirm sheets (delete, etc.). */
   confirm: 32,
-  /** Single-field create contact sheet. */
-  createContact: 42,
-  /** Important date wheel picker sheet. */
-  dateWheel: 55,
-  default: 45,
-  /** Identity edit sheet (avatar + name fields). */
-  identityEdit: 85,
-  /** Important date add/edit form sheet. */
-  importantDateEdit: 72,
   selectSearch: 85,
   selectSimple: 40,
-  socialAdd: 54,
-  socialAddSimple: 46,
-  socialEdit: 48,
 } as const;
 
 export const INPUT_MAX_LENGTHS = {
@@ -154,12 +119,6 @@ export const AVATAR_UPLOAD = {
 /** Wheel picker row height (matches minimum touch target). */
 export const WHEEL_PICKER_ITEM_HEIGHT = 44;
 export const WHEEL_PICKER_VISIBLE_ROWS = 5;
-
-/** Page size for contacts list pagination. */
-export const CONTACTS_PAGE_SIZE = 50;
-
-/** Max contacts fetched for a single group view (API allows up to 200). */
-export const GROUP_CONTACTS_FETCH_LIMIT = 200;
 
 /** Notes longer than this collapse behind a "read more" control. */
 export const NOTES_COLLAPSE_CHAR_THRESHOLD = 200;

@@ -1,80 +1,60 @@
-import type { Contact, GroupWithCount } from "@bondery/schemas";
+import type { Contact } from "@bondery/schemas";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { useCallback, useMemo } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
-import { ActivityIndicator, Text, View } from "react-native";
+import { View } from "react-native";
 import { GestureDetector, type GestureType } from "react-native-gesture-handler";
-import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
+import { useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
+import { Stack } from "../../../components/ui/Stack";
+import { Text } from "../../../components/ui/Text";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
-import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
+import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import type { ContactsFlatRow } from "../contactsFlatList";
-import { AlphabetScroller } from "./AlphabetScroller";
 import { ContactListItem } from "./ContactListItem";
-import { ContactsGroupsHeader } from "./ContactsGroupsHeader";
 import { ContactsSectionHeader } from "./ContactsSectionHeader";
-import { contactsScreenStyles as styles } from "./contactsScreenStyles";
 
 interface ContactsScreenListProps {
-  colors: ReturnType<typeof useMobileThemeColors>;
   debouncedQuery: string;
   dragSelectionGesture: GestureType;
   flashListRef: React.RefObject<FlashListRef<ContactsFlatRow> | null>;
   flatRows: ContactsFlatRow[];
-  handleEndReached: () => void;
   handleListScroll: (event: NativeSyntheticEvent<NativeScrollEvent>) => void;
   isDragging: boolean;
-  isLoadingMore: boolean;
+  isGroupFilterActive: boolean;
   isSearchActive: boolean;
   leftSwipeAction: SwipeAction;
   myselfContactId: string | undefined;
-  onCreateGroupPress: () => void;
   onExecuteAction: (contact: Contact, action: SwipeAction) => void;
-  onGroupPress: (group: GroupWithCount) => void;
-  onLetterChange: (letter: string) => void;
   onOpenContact: (contactId: string) => void;
   onOpenMyself: () => void;
   rightSwipeAction: SwipeAction;
   rowTexts: { call: string; email: string; message: string };
   scrollBottomInset: number;
-  sectionLetters: string[];
-  selectionMode: boolean;
-  setListHeaderHeight: (height: number) => void;
   setListViewportHeight: (height: number) => void;
-  sortedGroups: GroupWithCount[];
   stickyHeaderIndices: number[];
 }
 
 export function ContactsScreenList({
-  colors,
   debouncedQuery,
   dragSelectionGesture,
   flatRows,
   flashListRef,
-  handleEndReached,
   handleListScroll,
   isDragging,
-  isLoadingMore,
+  isGroupFilterActive,
   isSearchActive,
   leftSwipeAction,
   myselfContactId,
-  onCreateGroupPress,
   onExecuteAction,
-  onGroupPress,
-  onLetterChange,
   onOpenContact,
   onOpenMyself,
   rightSwipeAction,
   rowTexts,
   scrollBottomInset,
-  sectionLetters,
-  selectionMode,
-  setListHeaderHeight,
   setListViewportHeight,
-  sortedGroups,
   stickyHeaderIndices,
 }: ContactsScreenListProps) {
   const tMobileContacts = useMobileContactsTranslations();
-  const _t = useCommonTranslations();
 
   const renderFlatItem = useCallback(
     ({ item }: { item: ContactsFlatRow }) => {
@@ -110,53 +90,27 @@ export function ContactsScreenList({
     ],
   );
 
-  const listHeader = useMemo(
-    () => (
-      <View
-        onLayout={(event) => {
-          const height = event.nativeEvent.layout.height;
-          setListHeaderHeight(height);
-        }}
+  const listEmpty = useMemo(() => {
+    let message = tMobileContacts("Empty");
+    if (debouncedQuery && isGroupFilterActive) {
+      message = tMobileContacts("NoMatchSearchInGroup");
+    } else if (debouncedQuery) {
+      message = tMobileContacts("NoMatchSearch");
+    } else if (isGroupFilterActive) {
+      message = tMobileContacts("FilterEmptyGroup");
+    }
+
+    return (
+      <Stack
+        align="center"
+        className="px-5"
+        justify="center"
+        style={{ paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset }}
       >
-        <ContactsGroupsHeader
-          groups={sortedGroups}
-          isDisabled={selectionMode}
-          onCreatePress={onCreateGroupPress}
-          onGroupPress={onGroupPress}
-          title={tMobileContacts("Groups")}
-        />
-      </View>
-    ),
-    [
-      onCreateGroupPress,
-      onGroupPress,
-      selectionMode,
-      setListHeaderHeight,
-      sortedGroups,
-      tMobileContacts,
-    ],
-  );
-
-  const listFooter = useMemo(
-    () =>
-      isLoadingMore ? (
-        <View style={styles.footerLoader}>
-          <ActivityIndicator color={colors.textPrimary} size="small" />
-        </View>
-      ) : null,
-    [colors.textPrimary, isLoadingMore],
-  );
-
-  const listEmpty = useMemo(
-    () => (
-      <View style={styles.centeredState}>
-        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-          {debouncedQuery ? tMobileContacts("NoMatchSearch") : tMobileContacts("Empty")}
-        </Text>
-      </View>
-    ),
-    [colors.textSecondary, debouncedQuery, tMobileContacts],
-  );
+        <Text c="secondary">{message}</Text>
+      </Stack>
+    );
+  }, [debouncedQuery, isGroupFilterActive, tMobileContacts]);
 
   const listExtraData = useMemo(
     () => ({
@@ -166,30 +120,34 @@ export function ContactsScreenList({
     [leftSwipeAction, rightSwipeAction],
   );
 
+  const listKey = isSearchActive
+    ? `search-${debouncedQuery}-${isGroupFilterActive ? "group" : "all"}`
+    : isGroupFilterActive
+      ? "browse-group"
+      : "browse";
+
   return (
-    <View style={styles.listContainer}>
+    <View className="flex-1" collapsable={false}>
       <GestureDetector gesture={dragSelectionGesture}>
         <View
+          className="flex-1"
+          collapsable={false}
           onLayout={(event) => {
             const height = event.nativeEvent.layout.height;
             setListViewportHeight(height);
           }}
-          style={styles.listGestureTarget}
         >
           <FlashList
             contentContainerStyle={{ paddingBottom: scrollBottomInset }}
             data={flatRows}
             extraData={listExtraData}
             getItemType={(item) => item.type}
-            key={isSearchActive ? `search-${debouncedQuery}` : "browse"}
+            key={listKey}
             keyExtractor={(item) => item.key}
             ListEmptyComponent={listEmpty}
-            ListFooterComponent={listFooter}
-            ListHeaderComponent={isSearchActive ? null : listHeader}
-            onEndReached={handleEndReached}
-            onEndReachedThreshold={0.4}
             onScroll={handleListScroll}
             ref={flashListRef}
+            removeClippedSubviews={false}
             renderItem={renderFlatItem}
             scrollEnabled={!isDragging}
             scrollEventThrottle={16}
@@ -198,10 +156,6 @@ export function ContactsScreenList({
           />
         </View>
       </GestureDetector>
-
-      {!isSearchActive ? (
-        <AlphabetScroller letters={sectionLetters} onLetterChange={onLetterChange} />
-      ) : null}
     </View>
   );
 }

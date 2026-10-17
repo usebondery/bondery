@@ -58,7 +58,6 @@ export function EnrichRecommendationCard({
       resume(effectiveQueueStatus);
     }
   };
-
   const handleDiscard = async () => {
     await discard();
   };

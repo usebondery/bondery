@@ -10,8 +10,8 @@ import type {
 import { type GeocodeSuggestAddress, parseGeocodeSuggestResponse } from "@bondery/schemas/geocode";
 import { File, UploadTask, UploadType } from "expo-file-system";
 import { API_URL, normalizeMobileUrlForDevice } from "../config";
-import { resolveFetchFailureMessage } from "./parseApiErrorBody";
-import { apiRequest, getBearerHeaders, throwApiResponseError } from "./transport";
+import { apiRequest, getBearerHeaders, mobileFetch, throwApiResponseError } from "./transport";
+import { throwTransportUnavailableError } from "./transport-unavailable-error";
 
 const ALL_SHAREABLE_FIELDS: ShareableField[] = [
   "name",
@@ -79,14 +79,9 @@ export async function fetchContactVCard(
   }
 
   const authHeaders = await getBearerHeaders();
-  let response: Response;
-  try {
-    response = await fetch(`${API_URL}${API_ROUTES.CONTACTS}/${contactId}/vcard`, {
-      headers: authHeaders,
-    });
-  } catch (error) {
-    throw new Error(await resolveFetchFailureMessage(error));
-  }
+  const response = await mobileFetch(`${API_URL}${API_ROUTES.CONTACTS}/${contactId}/vcard`, {
+    headers: authHeaders,
+  });
 
   if (!response.ok) {
     const text = await response.text();
@@ -130,7 +125,7 @@ export async function uploadContactPhoto(
   try {
     result = await uploadTask.uploadAsync();
   } catch (error) {
-    throw new Error(await resolveFetchFailureMessage(error));
+    throw await throwTransportUnavailableError(error);
   }
 
   if (result.status < 200 || result.status >= 300) {

@@ -3,6 +3,8 @@ import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { applySqlFunctions } from "./apply-sql-functions.js";
+import { backfillDefaultPhoneCountry } from "./backfills/default-phone-country.js";
+import { prisma } from "./client.js";
 
 export type ReleaseMigrateHooks = {
   provisionOAuthClients: () => Promise<void>;
@@ -30,6 +32,14 @@ export async function runReleaseMigrate(hooks: ReleaseMigrateHooks): Promise<voi
   });
 
   await applySqlFunctions(databaseUrl);
+
+  const backfillResult = await backfillDefaultPhoneCountry(prisma);
+  if (backfillResult.updated > 0) {
+    process.stdout.write(
+      `Backfilled default_phone_country for ${backfillResult.updated} user(s) (scanned ${backfillResult.scanned}).\n`,
+    );
+  }
+
   await hooks.provisionOAuthClients();
   await hooks.provisionPlatformAdmins();
 }

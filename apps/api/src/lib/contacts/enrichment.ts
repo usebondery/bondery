@@ -76,9 +76,9 @@ function mergeExtrasIntoContact<T extends ContactWithId>(
     avatar: resolveContactAvatarUrl(
       userId,
       {
+        avatarUpdatedAt: contact.avatarUpdatedAt,
         hasAvatar: contact.hasAvatar,
         id: contact.id,
-        updatedAt: contact.updatedAt,
       },
       options?.avatarOptions,
     ),

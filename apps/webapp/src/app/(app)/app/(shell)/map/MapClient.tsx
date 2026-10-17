@@ -1,4 +1,5 @@
 // biome-ignore-all lint/style/noExcessiveLinesPerFile: map client coordinates pins, table, and filters in one place
+// biome-ignore-all lint/nursery/useReactCompiler: map syncs table columns and selection with viewport-driven pin data
 "use client";
 
 import type { ContactNameFields } from "@bondery/helpers/contact";
@@ -28,7 +29,7 @@ import {
   IconUser,
 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { type ReactNode, useDeferredValue, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useDeferredValue, useEffect, useState } from "react";
 import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/(shell)/people/components/modals/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/MergeWithModal";
 import type { ColumnKey } from "@/components/contacts/ContactsTableV2";
@@ -147,40 +148,34 @@ export function MapClient({ view }: MapClientProps) {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const markers = useMemo(() => {
-    if (view === "addresses") {
-      return addressPins.map((p) => ({
-        avatarUrl: p.avatar,
-        firstName: p.firstName,
-        href: `${WEBAPP_ROUTES.PERSON}/${p.personId}`,
-        id: p.addressId,
-        lastName: p.lastName,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        name: [p.firstName, p.lastName].filter(Boolean).join(" "),
-      }));
-    }
-    return locationPins.map((p) => ({
-      avatarUrl: p.avatar,
-      firstName: p.firstName,
-      href: `${WEBAPP_ROUTES.PERSON}/${p.id}`,
-      id: p.id,
-      lastName: p.lastName,
-      latitude: p.latitude,
-      longitude: p.longitude,
-      name: [p.firstName, p.lastName].filter(Boolean).join(" "),
-    }));
-  }, [view, locationPins, addressPins]);
+  const markers =
+    view === "addresses"
+      ? addressPins.map((p) => ({
+          avatarUrl: p.avatar,
+          firstName: p.firstName,
+          href: `${WEBAPP_ROUTES.PERSON}/${p.personId}`,
+          id: p.addressId,
+          lastName: p.lastName,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          name: [p.firstName, p.lastName].filter(Boolean).join(" "),
+        }))
+      : locationPins.map((p) => ({
+          avatarUrl: p.avatar,
+          firstName: p.firstName,
+          href: `${WEBAPP_ROUTES.PERSON}/${p.id}`,
+          id: p.id,
+          lastName: p.lastName,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          name: [p.firstName, p.lastName].filter(Boolean).join(" "),
+        }));
 
-  const visibleLocationPins = useMemo(() => {
-    const idSet = new Set(visibleMarkerIds);
-    return locationPins.filter((p) => idSet.has(p.id));
-  }, [locationPins, visibleMarkerIds]);
+  const visibleLocationPinIdSet = new Set(visibleMarkerIds);
+  const visibleLocationPins = locationPins.filter((p) => visibleLocationPinIdSet.has(p.id));
 
-  const visibleAddressPins = useMemo(() => {
-    const idSet = new Set(visibleMarkerIds);
-    return addressPins.filter((p) => idSet.has(p.addressId));
-  }, [addressPins, visibleMarkerIds]);
+  const visibleAddressPinIdSet = new Set(visibleMarkerIds);
+  const visibleAddressPins = addressPins.filter((p) => visibleAddressPinIdSet.has(p.addressId));
 
   const ADDRESS_TYPE_COLOR: Record<string, string> = {
     home: "blue",
@@ -188,47 +183,43 @@ export function MapClient({ view }: MapClientProps) {
     work: "grape",
   };
 
-  const addressContactRows = useMemo(
-    () =>
-      visibleAddressPins.map(
-        (pin): ContactTableRow => ({
-          _addressType: pin.addressType,
-          _rowKey: pin.addressId,
-          avatar: pin.avatar,
-          createdAt: "",
-          emails: [],
-          facebook: null,
-          firstName: pin.firstName,
-          gisPoint: null,
-          headline: null,
-          id: pin.personId,
-          importantDates: null,
-          instagram: null,
-          keepFrequencyDays: null,
-          language: null,
-          lastInteraction: null,
-          lastInteractionActivityId: null,
-          lastName: pin.lastName,
-          latitude: null,
-          linkedin: null,
-          location:
-            pin.addressFormatted ??
-            [pin.addressCity, pin.addressCountry].filter(Boolean).join(", ") ??
-            null,
-          longitude: null,
-          middleName: null,
-          myself: false,
-          notes: null,
-          phones: [],
-          signal: null,
-          timezone: null,
-          updatedAt: "",
-          userId: "",
-          website: null,
-          whatsapp: null,
-        }),
-      ),
-    [visibleAddressPins],
+  const addressContactRows = visibleAddressPins.map(
+    (pin): ContactTableRow => ({
+      _addressType: pin.addressType,
+      _rowKey: pin.addressId,
+      avatar: pin.avatar,
+      createdAt: "",
+      emails: [],
+      facebook: null,
+      firstName: pin.firstName,
+      gisPoint: null,
+      headline: null,
+      id: pin.personId,
+      importantDates: null,
+      instagram: null,
+      keepFrequencyDays: null,
+      language: null,
+      lastInteraction: null,
+      lastInteractionActivityId: null,
+      lastName: pin.lastName,
+      latitude: null,
+      linkedin: null,
+      location:
+        pin.addressFormatted ??
+        [pin.addressCity, pin.addressCountry].filter(Boolean).join(", ") ??
+        null,
+      longitude: null,
+      middleName: null,
+      myself: false,
+      notes: null,
+      phones: [],
+      signal: null,
+      timezone: null,
+      updatedAt: "",
+      userId: "",
+      website: null,
+      whatsapp: null,
+    }),
   );
 
   const [tableSearch, setTableSearch] = useState("");
@@ -236,13 +227,9 @@ export function MapClient({ view }: MapClientProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
-  const columnLabels = useMemo(
-    () =>
-      Object.fromEntries(
-        MAP_TABLE_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label]),
-      ) as Record<ColumnKey, string>,
-    [columnDefinitions],
-  );
+  const columnLabels = Object.fromEntries(
+    MAP_TABLE_COLUMN_KEYS.map((key) => [key, columnDefinitions[key].label]),
+  ) as Record<ColumnKey, string>;
 
   const columnIcons: Record<ColumnKey, ReactNode> = {
     avatar: null,
@@ -287,23 +274,24 @@ export function MapClient({ view }: MapClientProps) {
     DEBOUNCE_MS.tableSearch,
   );
 
-  const filteredPins = useMemo(() => {
-    const query = tableSearch.trim().toLowerCase();
-    const base = query
-      ? visibleLocationPins.filter((p) =>
-          [p.firstName, p.lastName].filter(Boolean).join(" ").toLowerCase().includes(query),
-        )
-      : visibleLocationPins;
-    return sortPins(base, sortOrder);
-  }, [visibleLocationPins, tableSearch, sortOrder]);
+  const tableSearchQuery = tableSearch.trim().toLowerCase();
+  const filteredPinsBase = tableSearchQuery
+    ? visibleLocationPins.filter((p) =>
+        [p.firstName, p.lastName]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase()
+          .includes(tableSearchQuery),
+      )
+    : visibleLocationPins;
+  const filteredPins = sortPins(filteredPinsBase, sortOrder);
 
-  const filteredAddressRows = useMemo(() => {
-    const query = tableSearch.trim().toLowerCase();
-    const base = query
-      ? addressContactRows.filter((r) => formatContactName(r).toLowerCase().includes(query))
-      : addressContactRows;
-    return sortPins(base, sortOrder);
-  }, [addressContactRows, tableSearch, sortOrder]);
+  const filteredAddressRowsBase = tableSearchQuery
+    ? addressContactRows.filter((r) =>
+        formatContactName(r).toLowerCase().includes(tableSearchQuery),
+      )
+    : addressContactRows;
+  const filteredAddressRows = sortPins(filteredAddressRowsBase, sortOrder);
 
   const allSelected = filteredPins.length > 0 && selectedIds.size === filteredPins.length;
   const someSelected = selectedIds.size > 0 && selectedIds.size < filteredPins.length;
@@ -315,7 +303,6 @@ export function MapClient({ view }: MapClientProps) {
       setSelectedIds(new Set(filteredPins.map((p) => p.id)));
     }
   };
-
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
     const currentIndex = options?.index ?? filteredPins.findIndex((p) => p.id === id);
 

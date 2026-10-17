@@ -33,7 +33,6 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
 import { GettingStartedRailSlot } from "@/components/home/GettingStartedRailSlot";
@@ -82,10 +81,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   const currentMonth = formatter.dateTime(new Date(), { month: "long" });
   const currentYear = formatter.dateTime(new Date(), { year: "numeric" });
 
-  const contactsById = useMemo(
-    () => new Map((timelineContacts ?? []).map((contact) => [contact.id, contact])),
-    [timelineContacts],
-  );
+  const contactsById = new Map((timelineContacts ?? []).map((contact) => [contact.id, contact]));
 
   function handleLogInteraction() {
     openNewActivityModal({
@@ -103,14 +99,14 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
     [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
   ]);
 
-  const compactActivities = useMemo(() => {
+  const compactActivities = (() => {
     if (!timelineActivities) {
       return undefined;
     }
     return [...timelineActivities]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
-  }, [timelineActivities]);
+  })();
 
   const resolveParticipants = (activity: Activity): Contact[] => {
     return (activity.participants || [])

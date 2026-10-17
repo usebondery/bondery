@@ -12,6 +12,10 @@
       "command": "pnx",
       "type": "stdio"
     },
+    "uniwind": {
+      "type": "http",
+      "url": "https://docs.uniwind.dev/mcp"
+    },
     "vercel": {
       "note": "Official Vercel MCP server. Uses OAuth — on first connection the agent will be prompted to authorize via Vercel. Read-only in initial release: search docs, list projects/deployments, inspect logs.",
       "type": "http",

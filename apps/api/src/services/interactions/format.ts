@@ -4,6 +4,7 @@ import { domainDb } from "../../domains/_shared/domain-db.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 
 const interactionPersonSelect = {
+  avatarUpdatedAt: true,
   firstName: true,
   hasAvatar: true,
   id: true,
@@ -16,6 +17,7 @@ type InteractionPersonRow = {
   firstName: string;
   lastName: string | null;
   hasAvatar: boolean;
+  avatarUpdatedAt: Date | null;
   updatedAt: Date;
 };
 
@@ -28,9 +30,9 @@ export function mapInteractionParticipant(
     avatar: resolveContactAvatarUrl(
       userId,
       {
+        avatarUpdatedAt: person.avatarUpdatedAt,
         hasAvatar: person.hasAvatar,
         id: person.id,
-        updatedAt: person.updatedAt.toISOString(),
       },
       avatarOptions,
     ),

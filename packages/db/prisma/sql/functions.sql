@@ -112,6 +112,11 @@ $$;
 -- ---------------------------------------------------------------------------
 -- Map pins
 -- ---------------------------------------------------------------------------
+-- RETURNS TABLE is part of the function identity. CREATE OR REPLACE cannot
+-- change OUT columns (42P13). Drop first when the row type changes.
+
+drop function if exists get_map_pins_in_bbox(uuid, double precision, double precision, double precision, double precision, integer);
+drop function if exists get_map_address_pins_in_bbox(uuid, double precision, double precision, double precision, double precision, integer);
 
 create or replace function get_map_pins_in_bbox(
   p_user_id uuid,
@@ -131,13 +136,13 @@ returns table (
   longitude double precision,
   location text,
   last_interaction timestamptz,
-  updated_at timestamptz
+  avatar_updated_at timestamptz
 )
 language sql
 stable
 as $$
   select p.id, p.first_name, p.last_name, p.headline, p.has_avatar,
-         p.latitude, p.longitude, p.location, p.last_interaction, p.updated_at
+         p.latitude, p.longitude, p.location, p.last_interaction, p.avatar_updated_at
   from people p
   where p.user_id = p_user_id
     and p.latitude between p_min_lat and p_max_lat
@@ -165,14 +170,14 @@ returns table (
   address_formatted text,
   latitude double precision,
   longitude double precision,
-  updated_at timestamptz
+  avatar_updated_at timestamptz
 )
 language sql
 stable
 as $$
   select a.id, p.id, p.first_name, p.last_name, p.has_avatar,
          a.type, a.address_city, a.address_country, a.address_formatted,
-         a.latitude, a.longitude, a.updated_at
+         a.latitude, a.longitude, p.avatar_updated_at
   from people_addresses a
   join people p on p.id = a.person_id
   where a.user_id = p_user_id

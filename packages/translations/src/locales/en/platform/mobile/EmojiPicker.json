@@ -17,5 +17,6 @@
   "EmptySearch": "No emojis found",
   "RandomAccessibilityLabel": "Pick a random emoji",
   "SearchPlaceholder": "Search emojis…",
+  "SheetTitle": "Emoji",
   "TriggerAccessibilityHint": "Opens emoji picker"
 }

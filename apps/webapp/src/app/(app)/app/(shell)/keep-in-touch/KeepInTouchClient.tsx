@@ -23,7 +23,7 @@ import {
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck, IconClock, IconHeartHandshake } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
@@ -98,18 +98,15 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
 
   const activeWindow = endDateToWindowValue(endDate);
 
-  const handleWindowChange = useCallback(
-    (value: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("endDate", computeEndDate(parseInt(value, 10)));
-      router.replace(`${pathname}?${params.toString()}`);
-    },
-    [searchParams, pathname, router],
-  );
+  const handleWindowChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("endDate", computeEndDate(parseInt(value, 10)));
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const { data: keepInTouchData } = useKeepInTouchQuery();
 
-  const contacts = useMemo(() => {
+  const contacts = (() => {
     const all = keepInTouchData?.contacts;
     if (!all) {
       return undefined;
@@ -127,11 +124,11 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
       })
       .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
-  }, [keepInTouchData?.contacts, endDate]);
+  })();
 
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
 
-  const markLoading = useCallback((id: string, loading: boolean) => {
+  const markLoading = (id: string, loading: boolean) => {
     setLoadingIds((prev) => {
       const next = new Set(prev);
       if (loading) {
@@ -141,71 +138,65 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
       }
       return next;
     });
-  }, []);
+  };
 
-  const handleMarkComplete = useCallback(
-    async (contactId: string) => {
-      if (loadingIds.has(contactId)) {
-        return;
-      }
-      markLoading(contactId, true);
+  const handleMarkComplete = async (contactId: string) => {
+    if (loadingIds.has(contactId)) {
+      return;
+    }
+    markLoading(contactId, true);
 
-      try {
-        await patchContact.mutateAsync({
-          id: contactId,
-          patch: { lastInteraction: new Date().toISOString() },
-        });
+    try {
+      await patchContact.mutateAsync({
+        id: contactId,
+        patch: { lastInteraction: new Date().toISOString() },
+      });
 
-        notifications.show(
-          successNotificationTemplate({
-            description: t("MarkCompleteSuccess"),
-            title: t("MarkComplete"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("MarkCompleteFailed"),
-            title: t("MarkComplete"),
-          }),
-        );
-      } finally {
-        markLoading(contactId, false);
-      }
-    },
-    [loadingIds, markLoading, t, patchContact],
-  );
+      notifications.show(
+        successNotificationTemplate({
+          description: t("MarkCompleteSuccess"),
+          title: t("MarkComplete"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("MarkCompleteFailed"),
+          title: t("MarkComplete"),
+        }),
+      );
+    } finally {
+      markLoading(contactId, false);
+    }
+  };
 
-  const handleSaveKeepFrequency = useCallback(
-    async (contactId: string, value: string | null) => {
-      if (loadingIds.has(contactId)) {
-        return;
-      }
-      markLoading(contactId, true);
-      const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+  const handleSaveKeepFrequency = async (contactId: string, value: string | null) => {
+    if (loadingIds.has(contactId)) {
+      return;
+    }
+    markLoading(contactId, true);
+    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
 
-      try {
-        await patchContact.mutateAsync({ id: contactId, patch: { keepFrequencyDays } });
+    try {
+      await patchContact.mutateAsync({ id: contactId, patch: { keepFrequencyDays } });
 
-        notifications.show(
-          successNotificationTemplate({
-            description: "",
-            title: t("FrequencyUpdated"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: "",
-            title: t("FrequencyUpdateFailed"),
-          }),
-        );
-      } finally {
-        markLoading(contactId, false);
-      }
-    },
-    [loadingIds, markLoading, t, patchContact],
-  );
+      notifications.show(
+        successNotificationTemplate({
+          description: "",
+          title: t("FrequencyUpdated"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: "",
+          title: t("FrequencyUpdateFailed"),
+        }),
+      );
+    } finally {
+      markLoading(contactId, false);
+    }
+  };
 
   const windowPicker = (
     <SegmentedControl

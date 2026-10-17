@@ -81,10 +81,7 @@ export function snapSidebarWidth({
   return { lastExpandedWidth: next, width: next };
 }
 
-export function parseStoredSidebarWidth(
-  widthCookie: string | undefined,
-  legacyCollapsedCookie: string | undefined,
-): number {
+export function parseStoredSidebarWidth(widthCookie: string | undefined): number {
   if (widthCookie !== undefined && widthCookie !== "") {
     if (widthCookie === "true") {
       return SIDEBAR_COLLAPSED_WIDTH;
@@ -99,10 +96,6 @@ export function parseStoredSidebarWidth(
       }
       return clampExpandedSidebarWidth(parsed);
     }
-  }
-
-  if (legacyCollapsedCookie === "true") {
-    return SIDEBAR_COLLAPSED_WIDTH;
   }
 
   return SIDEBAR_DEFAULT_EXPANDED_WIDTH;

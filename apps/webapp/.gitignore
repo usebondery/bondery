@@ -1,3 +1,6 @@
+# Playwright storage state (local only)
+.auth/
+
 # Generated files at build time
 src/app/favicon.ico
 src/app/icons/apple-icon.png

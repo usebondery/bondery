@@ -3,39 +3,50 @@ import {
   i18nConfig,
   loadNamespace,
   namespacesForPlatform,
-  preloadGroup,
   SUPPORTED_LOCALES,
 } from "@bondery/translations";
-import i18n from "i18next";
+import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 
-function buildShellResources() {
-  const shellNamespaces = preloadGroup("mobile.shell");
+function resolveI18nInstance() {
+  const candidate = i18next as typeof i18next & { default?: typeof i18next };
+  if (typeof candidate.use === "function") {
+    return candidate;
+  }
+  if (candidate.default && typeof candidate.default.use === "function") {
+    return candidate.default;
+  }
+  return candidate;
+}
+
+const i18n = resolveI18nInstance();
+
+function buildMobileResources() {
+  const namespaces = namespacesForPlatform("mobile");
   return Object.fromEntries(
     SUPPORTED_LOCALES.map((lng) => [
       lng,
-      Object.fromEntries(
-        shellNamespaces.map((namespace) => [namespace, loadNamespace(lng, namespace)]),
-      ),
+      Object.fromEntries(namespaces.map((namespace) => [namespace, loadNamespace(lng, namespace)])),
     ]),
   );
 }
 
-i18n.use(initReactI18next).init({
-  defaultNS: i18nConfig.defaultNS,
-  fallbackLng: i18nConfig.fallbackLng,
-  interpolation: i18nConfig.interpolation,
-  keySeparator: i18nConfig.keySeparator,
-  lng: DEFAULT_LOCALE,
-  ns: namespacesForPlatform("mobile"),
-  nsSeparator: i18nConfig.nsSeparator,
-  partialBundledLanguages: true,
-  resources: buildShellResources(),
-});
-
-export async function preloadMobileNamespaces(groups: string[]) {
-  const namespaces = [...new Set(groups.flatMap((group) => preloadGroup(group)))];
-  await i18n.loadNamespaces(namespaces);
+if (!i18n.isInitialized && typeof i18n.use === "function" && initReactI18next) {
+  i18n.use(initReactI18next).init({
+    defaultNS: i18nConfig.defaultNS,
+    fallbackLng: i18nConfig.fallbackLng,
+    interpolation: i18nConfig.interpolation,
+    keySeparator: i18nConfig.keySeparator,
+    lng: DEFAULT_LOCALE,
+    load: "languageOnly",
+    ns: namespacesForPlatform("mobile"),
+    nsSeparator: i18nConfig.nsSeparator,
+    react: {
+      useSuspense: false,
+    },
+    resources: buildMobileResources(),
+    supportedLngs: [...SUPPORTED_LOCALES],
+  });
 }
 
 export default i18n;

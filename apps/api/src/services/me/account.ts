@@ -59,6 +59,7 @@ export async function updateAccountMetadata(
     }),
     db.people.findFirst({
       select: {
+        avatarUpdatedAt: true,
         firstName: true,
         hasAvatar: true,
         lastName: true,
@@ -70,6 +71,7 @@ export async function updateAccountMetadata(
 
   const avatarUrl = myself?.hasAvatar
     ? resolveContactAvatarUrl(user.id, {
+        avatarUpdatedAt: myself.avatarUpdatedAt,
         hasAvatar: true,
         id: user.id,
       })
@@ -151,10 +153,14 @@ export async function uploadProfilePhoto(
     throw internal("account_failed_to_upload_profile_photo");
   }
 
+  const myself = await db.people.findFirst({
+    select: { avatarUpdatedAt: true },
+    where: { id: user.id, userId: user.id },
+  });
   const avatarUrl = resolveContactAvatarUrl(user.id, {
+    avatarUpdatedAt: myself?.avatarUpdatedAt,
     hasAvatar: true,
     id: user.id,
-    updatedAt: new Date().toISOString(),
   });
 
   if (!avatarUrl) {

@@ -385,6 +385,10 @@
   },
   "Preferences": {
     "Dark": "Dunkel",
+    "DefaultPhoneCountry": "Standard-Ländervorwahl",
+    "DefaultPhoneCountryTooltip": "Wird verwendet, wenn Sie Telefonnummern ohne internationale Vorwahl eingeben.",
+    "DefaultPhoneCountryUpdateError": "Standard-Ländervorwahl konnte nicht aktualisiert werden",
+    "DefaultPhoneCountryUpdateSuccess": "Standard-Ländervorwahl erfolgreich aktualisiert",
     "InvalidReminderTime": "Die Erinnerungszeit muss zwischen 00:00 und 23:59 liegen",
     "Language": "Sprache",
     "LanguageDescription": "Wird als App-Sprache verwendet",
@@ -422,6 +426,7 @@
     "Title": "Einstellungen",
     "UpdateError": "Aktualisierung fehlgeschlagen",
     "UpdateSuccess": "Erfolgreich aktualisiert",
+    "UpdatingDefaultPhoneCountry": "Standard-Ländervorwahl wird aktualisiert...",
     "UpdatingLanguage": "Sprache wird aktualisiert...",
     "UpdatingReminderTime": "Erinnerungszeit wird aktualisiert...",
     "UpdatingTheme": "Design wird aktualisiert...",

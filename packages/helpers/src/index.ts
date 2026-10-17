@@ -37,7 +37,7 @@ export {
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
 } from "#geocode/index.js";
-export type { LegalEntity, NextAction } from "#globals/index.js";
+export type { LegalEntity, MobileContactsRouteParams, NextAction } from "#globals/index.js";
 export {
   API_ROUTES,
   BETTER_AUTH_BASE_PATH,
@@ -50,6 +50,7 @@ export {
   betterAuthProtectedResourceMetadataPaths,
   CHANGELOG_URL,
   CHROME_EXTENSION_URL,
+  contactsPathWithGroupId,
   formatLegalAddressLine,
   formatMetadataTitle,
   GITHUB_REPO_URL,
@@ -58,10 +59,14 @@ export {
   LEGAL_ENTITY,
   METADATA_TITLE_DIVIDER,
   MIN_EXTENSION_VERSION,
+  MOBILE_GROUP_ID_PARAM,
+  MOBILE_ROUTES,
   NEXT_ACTION_PARAM,
   NEXT_ACTIONS,
   PUBLIC_ROADMAP_PLANE_URL,
   PWA_APP_NAME,
+  parseMobileGroupIdParam,
+  parseMobileQueryParam,
   personPathWithNextAction,
   publicOAuthDiscoveryPaths,
   ROADMAP_URL,
@@ -87,16 +92,21 @@ export {
 } from "#name/index.js";
 export type { CountryCode, TelephonePrefixOption } from "#phone/index.js";
 export {
+  canonicalizeDialCode,
   combinePhoneNumber,
   countryCodes,
   DEFAULT_PHONE_REACT_MASK_EXPRESSION,
+  findTelephonePrefixOption,
+  formatDialCodeForDisplay,
   formatPhoneNumber,
+  getTelephonePrefixSearchTexts,
   getTelephoneReactMaskExpression,
   parsePhoneNumber,
   TELEPHONE_PREFIX_OPTIONS,
 } from "#phone/index.js";
 export type { ParsedInstagramName, ParseInstagramUsernameInput } from "#platform/index.js";
 export { extractLinkedinId, linkedinCompanyUrl, parseInstagramUsername } from "#platform/index.js";
+export { filterBySearchQuery, matchesSearchQuery, normalizeSearchText } from "#search/index.js";
 export {
   BONDERY_MCP_REGISTRY_AUTH_PROOF,
   BONDERY_PGP_PUBLIC_KEY,

@@ -1,7 +1,9 @@
 import type { Group } from "@bondery/schemas";
-import { StyleSheet, Text, View } from "react-native";
-import { Tappable } from "../../../theme/Tappable";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { View } from "react-native";
+import Animated from "react-native-reanimated";
+import { Pressable } from "@/components/ui/Pressable";
+import { Text } from "../../../components/ui/Text";
+import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 export type GroupChipGroup = Pick<Group, "id" | "label" | "emoji" | "color"> & {
@@ -15,6 +17,8 @@ interface GroupChipProps {
   onPress?: () => void;
 }
 
+const CHIP_CLASS = "flex-row items-center gap-1.5 rounded-full border px-3 py-2";
+
 export function GroupChip({
   group,
   onPress,
@@ -22,21 +26,23 @@ export function GroupChip({
   isClickable = true,
 }: GroupChipProps) {
   const colors = useMobileThemeColors();
-  const chipStyle = [
-    styles.groupChip,
-    {
-      backgroundColor: colors.surfaceMuted,
-      borderColor: group.color || colors.borderStrong,
-    },
-  ];
+  const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
   const label = accessibilityLabel ?? group.label;
-
+  const chipPaint = {
+    backgroundColor: colors.surfaceMuted,
+    borderColor: group.color || colors.borderStrong,
+  };
   const content = (
     <>
-      {group.emoji ? <Text style={styles.groupEmoji}>{group.emoji}</Text> : null}
-      <Text style={[styles.groupLabel, { color: colors.textPrimary }]}>{group.label}</Text>
-      <View style={[styles.groupCountBadge, { backgroundColor: colors.borderStrong }]}>
-        <Text style={[styles.groupCount, { color: colors.textSecondary }]}>
+      {group.emoji ? <Text size="xl">{group.emoji}</Text> : null}
+      <Text fw={600} size="md">
+        {group.label}
+      </Text>
+      <View
+        className="rounded-[10px] px-1.5 py-px"
+        style={{ backgroundColor: colors.borderStrong }}
+      >
+        <Text c="secondary" className="text-[11px] font-bold" size={null}>
           {group.contactCount}
         </Text>
       </View>
@@ -45,49 +51,30 @@ export function GroupChip({
 
   if (!isClickable) {
     return (
-      <View accessibilityLabel={label} accessibilityRole="text" style={chipStyle}>
+      <View
+        accessibilityLabel={label}
+        accessibilityRole="text"
+        className={CHIP_CLASS}
+        style={chipPaint}
+      >
         {content}
       </View>
     );
   }
 
   return (
-    <Tappable
-      accessibilityLabel={label}
-      accessibilityRole="button"
-      onPress={onPress}
-      style={chipStyle}
-      variant="subtle"
-    >
-      {content}
-    </Tappable>
+    <Animated.View style={squeezeStyle}>
+      <Pressable
+        accessibilityLabel={label}
+        accessibilityRole="button"
+        className={CHIP_CLASS}
+        onPress={onPress}
+        onPressIn={pressIn}
+        onPressOut={pressOut}
+        style={chipPaint}
+      >
+        {content}
+      </Pressable>
+    </Animated.View>
   );
 }
-
-const styles = StyleSheet.create({
-  groupChip: {
-    alignItems: "center",
-    borderRadius: 20,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-  },
-  groupCount: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.sectionLabel,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
-  },
-  groupCountBadge: {
-    borderRadius: 10,
-    paddingHorizontal: 6,
-    paddingVertical: 1,
-  },
-  groupEmoji: {
-    fontSize: 16,
-  },
-  groupLabel: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-});

@@ -4,7 +4,6 @@ import { CodeBlock, type CodeBlockSnippet, DescribedSelect } from "@bondery/mant
 import type { McpConsentListItem } from "@bondery/schemas";
 import { CardSection, Stack, Text } from "@mantine/core";
 import { IconBraces, IconLink, IconSparkles } from "@tabler/icons-react";
-import { useMemo } from "react";
 import { mcpAccessFromScopes } from "@/lib/auth/mcp-access";
 import { mcpAccessOptions } from "@/lib/auth/mcp-access-options";
 import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
@@ -47,35 +46,28 @@ export function AiAssistantsSection({ apiBaseUrl }: AiAssistantsSectionProps) {
   const { data: consents = [] } = useMcpConsentsQuery();
   const revokeMutation = useRevokeMcpConsentMutation();
   const url = mcpServerUrl(apiBaseUrl);
-  const connectSnippets: CodeBlockSnippet[] = useMemo(
-    () => [
-      {
-        code: url,
-        icon: <IconLink size={14} />,
-        id: "url",
-        label: t("McpUrlLabel"),
-        language: "plaintext",
-      },
-      {
-        code: mcpJsonConfig(url),
-        icon: <IconBraces size={14} />,
-        id: "mcp-json",
-        label: t("McpJsonLabel"),
-        language: "json",
-      },
-    ],
-    [t, url],
-  );
-  const permissionOptions = useMemo(
-    () =>
-      mcpAccessOptions({
-        fullDescription: t("PermissionFullDescription"),
-        fullLabel: t("PermissionFullLabel"),
-        readDescription: t("PermissionReadDescription"),
-        readLabel: t("PermissionReadLabel"),
-      }),
-    [t],
-  );
+  const connectSnippets: CodeBlockSnippet[] = [
+    {
+      code: url,
+      icon: <IconLink size={14} />,
+      id: "url",
+      label: t("McpUrlLabel"),
+      language: "plaintext",
+    },
+    {
+      code: mcpJsonConfig(url),
+      icon: <IconBraces size={14} />,
+      id: "mcp-json",
+      label: t("McpJsonLabel"),
+      language: "json",
+    },
+  ];
+  const permissionOptions = mcpAccessOptions({
+    fullDescription: t("PermissionFullDescription"),
+    fullLabel: t("PermissionFullLabel"),
+    readDescription: t("PermissionReadDescription"),
+    readLabel: t("PermissionReadLabel"),
+  });
 
   const handleRevoke = async (consent: McpConsentListItem) => {
     const stepped = await ensureFreshIdentity({

@@ -17,6 +17,7 @@ const nextConfig: NextConfig = {
       "@mantine/tiptap",
     ],
     proxyClientMaxBodySize: "20mb",
+    turbopackRustReactCompiler: true,
     useTypeScriptCli: true,
   },
   async headers() {
@@ -50,6 +51,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  reactCompiler: true,
   serverExternalPackages: ["@takumi-rs/core"],
 };
 

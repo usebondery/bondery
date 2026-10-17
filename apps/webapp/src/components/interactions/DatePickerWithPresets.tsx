@@ -1,10 +1,11 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { Group, Text } from "@mantine/core";
 import { DatePickerInput } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
 import type { ComponentProps } from "react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 type DatePickerWithPresetsProps = Omit<ComponentProps<typeof DatePickerInput>, "onDropdownOpen"> & {
@@ -91,9 +92,9 @@ export function DatePickerWithPresets({
   ...props
 }: DatePickerWithPresetsProps) {
   const t = useInteractionsPageTranslations();
-  const today = useMemo(() => startOfLocalDay(new Date()), []);
+  const today = startOfLocalDay(new Date());
 
-  const presetItems = useMemo<DatePresetItem[]>(() => {
+  const presetItems = (() => {
     const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
     const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
@@ -112,16 +113,12 @@ export function DatePickerWithPresets({
       textLabel,
       value: toDatePreset(date),
     }));
-  }, [t, today]);
+  })();
 
-  const presets = useMemo(
-    () =>
-      presetItems.map((item) => ({
-        label: <DatePresetLabel label={item.textLabel} offsetDays={item.offsetDays} />,
-        value: item.value,
-      })),
-    [presetItems],
-  );
+  const presets = presetItems.map((item) => ({
+    label: <DatePresetLabel label={item.textLabel} offsetDays={item.offsetDays} />,
+    value: item.value,
+  }));
 
   // Stable ref to the current presets array so `markActivePreset` can look up
   // a preset by its label text instead of by DOM index (which is unreliable).
@@ -150,7 +147,7 @@ export function DatePickerWithPresets({
    * robust than by DOM index when multiple pickers are open simultaneously.
    * Runs after a short delay so Mantine's portal has time to mount the dropdown.
    */
-  const markActivePreset = useCallback((current: string | null) => {
+  const markActivePreset = (current: string | null) => {
     setTimeout(() => {
       document.querySelectorAll<HTMLButtonElement>(".presetsButton").forEach((button) => {
         const labelText = button.textContent?.trim() ?? "";
@@ -164,7 +161,7 @@ export function DatePickerWithPresets({
         }
       });
     }, 0);
-  }, []);
+  };
 
   return (
     <DatePickerInput

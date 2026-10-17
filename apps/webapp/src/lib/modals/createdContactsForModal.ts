@@ -1,7 +1,7 @@
 "use client";
 
 import type { ContactSelectable } from "@bondery/schemas";
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
 export interface ActivityFormDraft {
   date: string;
@@ -108,7 +108,7 @@ export function forgetActivityModalState(parentModalId: string): void {
 }
 
 export function useCreatedContactsForModal(parentModalId: string): ContactSelectable[] {
-  const getSnapshot = useCallback(() => getCreatedContactsForModal(parentModalId), [parentModalId]);
+  const getSnapshot = () => getCreatedContactsForModal(parentModalId);
 
   return useSyncExternalStore(subscribeCreatedContacts, getSnapshot, getSnapshot);
 }

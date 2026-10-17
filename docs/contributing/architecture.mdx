@@ -93,7 +93,7 @@ Native iOS and Android client built with Expo. Offline-capable via local SQLite 
 |---|---|
 | Framework | [Expo](https://expo.dev/) + [Expo Router](https://docs.expo.dev/router/introduction/) |
 | Language | TypeScript |
-| UI | [Tamagui](https://tamagui.dev/) |
+| UI | Uniwind kit in `apps/mobile/src/components/ui` (login, settings). [Tamagui](https://tamagui.dev/) remains for contacts sheets. |
 | Local database | [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) |
 | Read sync | `GET /api/sync/bootstrap` + `GET /api/sync/pull` (batched `sync_change_log`) |
 | Write sync | REST when online; `pending_mutations` outbox → `POST /api/sync/push` when offline |

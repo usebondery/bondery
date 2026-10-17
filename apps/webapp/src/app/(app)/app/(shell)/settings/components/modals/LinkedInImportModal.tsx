@@ -16,7 +16,7 @@ import { NavigationProgress } from "@mantine/nprogress";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
@@ -85,32 +85,20 @@ export function LinkedInImportModal({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
 
-  const previewContacts = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).map(toLinkedInPreviewContact),
-    [parsedContacts],
-  );
+  const previewContacts = parsedContacts
+    .filter((contact) => contact.isValid)
+    .map(toLinkedInPreviewContact);
 
-  const validContactsCount = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).length,
-    [parsedContacts],
-  );
+  const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
 
   const invalidContactsCount = parsedContacts.length - validContactsCount;
-  const alreadyExistsCount = useMemo(
-    () => parsedContacts.filter((contact) => contact.alreadyExists).length,
-    [parsedContacts],
+  const alreadyExistsCount = parsedContacts.filter((contact) => contact.alreadyExists).length;
+  const nonSelectableIds = new Set(
+    parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
   );
-  const nonSelectableIds = useMemo(
-    () =>
-      new Set(
-        parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
-      ),
-    [parsedContacts],
-  );
-  const selectableIds = useMemo(
-    () => previewContacts.map((contact) => contact.id).filter((id) => !nonSelectableIds.has(id)),
-    [previewContacts, nonSelectableIds],
-  );
+  const selectableIds = previewContacts
+    .map((contact) => contact.id)
+    .filter((id) => !nonSelectableIds.has(id));
 
   const { allSelected, someSelected, handleToggleAll, handleToggleOne, resetSelectionAnchor } =
     useImportContactSelection({

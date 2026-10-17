@@ -1,5 +1,6 @@
 {
   "Create": "Add to Bondery",
+  "Creating": "Creating person...",
   "ErrorDescription": "Something went wrong while creating this person.",
   "ErrorTitle": "Could not create person",
   "FullNameLabel": "Full name",

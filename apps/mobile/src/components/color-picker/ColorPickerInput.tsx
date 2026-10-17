@@ -1,13 +1,13 @@
 import { useMemo, useState } from "react";
-import { Pressable, type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import { type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import {
   useMobileColorPickerTranslations,
   useMobileGroupsTranslations,
 } from "../../lib/i18n/generated/hooks";
-import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { EMOJI_PICKER_LAYOUT } from "../emoji-picker/constants";
+import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
 import { ColorPickerSheet } from "./ColorPickerSheet";
 import { getContrastBorderColor, isValidHex, normalizeHex } from "./colorUtils";
 
@@ -19,7 +19,6 @@ export interface ColorPickerInputProps {
   label?: string;
   onChange: (hex: string) => void;
   placeholder?: string;
-  showToast: (options: ShowAppToastInput) => void;
   /** Fills available width in a flex row. */
   stretch?: boolean;
   triggerStyle?: StyleProp<ViewStyle>;
@@ -37,7 +36,6 @@ export function ColorPickerInput({
   stretch = false,
   accessibilityLabel,
   triggerStyle,
-  showToast,
 }: ColorPickerInputProps) {
   const tMobileColorPicker = useMobileColorPickerTranslations();
   const tMobileGroups = useMobileGroupsTranslations();
@@ -90,6 +88,8 @@ export function ColorPickerInput({
     triggerBorderColor,
   ]);
 
+  const layout = stretch ? "stretch" : "square";
+
   return (
     <>
       <View style={[stretch ? styles.stretchRoot : compact ? styles.compactRoot : styles.root]}>
@@ -97,42 +97,31 @@ export function ColorPickerInput({
           <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
         ) : null}
 
-        <Pressable
+        <ActionButtonShellPressable
           accessibilityHint={tMobileColorPicker("TriggerAccessibilityHint")}
           accessibilityLabel={resolvedAccessibilityLabel}
-          accessibilityRole="button"
-          accessibilityState={{ disabled }}
           disabled={disabled}
+          layout={layout}
+          matchInputChrome
           onPress={() => setOpen(true)}
-          style={({ pressed }) => [
-            styles.trigger,
-            compact && !stretch ? styles.squareTrigger : null,
-            compact && stretch ? styles.compactTrigger : null,
-            stretch ? styles.stretchTrigger : null,
-            {
-              backgroundColor:
-                pressed && !disabled ? colors.surfacePressed : colors.inputBackground,
-              borderColor: triggerBorderColor,
-              opacity: disabled ? 0.5 : 1,
-            },
+          style={[
+            compact && !stretch ? { width: EMOJI_PICKER_LAYOUT.compactTriggerWidth } : null,
             triggerStyle,
           ]}
+          variant="outline"
         >
-          <View style={styles.triggerContent}>{triggerContent}</View>
-        </Pressable>
+          {triggerContent}
+        </ActionButtonShellPressable>
 
         {error ? <Text style={[styles.error, { color: colors.dangerText }]}>{error}</Text> : null}
       </View>
 
-      {open && !disabled ? (
-        <ColorPickerSheet
-          onOpenChange={setOpen}
-          onSelect={onChange}
-          open
-          showToast={showToast}
-          value={hasValue ? normalizedValue : ""}
-        />
-      ) : null}
+      <ColorPickerSheet
+        onOpenChange={setOpen}
+        onSelect={onChange}
+        open={open && !disabled}
+        value={hasValue ? normalizedValue : ""}
+      />
     </>
   );
 }
@@ -148,10 +137,6 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     flexShrink: 0,
   },
-  compactTrigger: {
-    paddingHorizontal: 8,
-    width: EMOJI_PICKER_LAYOUT.compactTriggerWidth,
-  },
   error: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     marginTop: 6,
@@ -159,7 +144,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
-    marginBottom: MOBILE_LAYOUT.spacing.contentTop / 2,
+    marginBottom: 6,
   },
   placeholder: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
@@ -169,30 +154,8 @@ const styles = StyleSheet.create({
   root: {
     width: "100%",
   },
-  squareTrigger: {
-    height: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 0,
-    width: MOBILE_LAYOUT.touchTarget,
-  },
   stretchRoot: {
     flex: 1,
     minWidth: 0,
-  },
-  stretchTrigger: {
-    width: "100%",
-  },
-  trigger: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: MOBILE_LAYOUT.spacing.contentTop / 2,
-    justifyContent: "center",
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 12,
-  },
-  triggerContent: {
-    alignItems: "center",
-    justifyContent: "center",
   },
 });

@@ -1,15 +1,7 @@
 "use client";
 
 import type { ColorSchemePreference } from "@bondery/schemas";
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 export interface UserSessionState {
   applyUserSession: (
@@ -62,20 +54,19 @@ export function UserSessionProvider({
     setColorScheme(initialColorScheme);
   }, [initialAvatarUrl, initialColorScheme, initialDisplayName]);
 
-  const applyUserSession = useCallback(
-    (patch: Partial<Pick<UserSessionState, "avatarUrl" | "colorScheme" | "displayName">>) => {
-      if (patch.displayName !== undefined) {
-        setDisplayName(patch.displayName);
-      }
-      if (patch.avatarUrl !== undefined) {
-        setAvatarUrl(patch.avatarUrl);
-      }
-      if (patch.colorScheme !== undefined) {
-        setColorScheme(patch.colorScheme);
-      }
-    },
-    [],
-  );
+  const applyUserSession = (
+    patch: Partial<Pick<UserSessionState, "avatarUrl" | "colorScheme" | "displayName">>,
+  ) => {
+    if (patch.displayName !== undefined) {
+      setDisplayName(patch.displayName);
+    }
+    if (patch.avatarUrl !== undefined) {
+      setAvatarUrl(patch.avatarUrl);
+    }
+    if (patch.colorScheme !== undefined) {
+      setColorScheme(patch.colorScheme);
+    }
+  };
 
   const applyRef = useRef(applyUserSession);
   applyRef.current = applyUserSession;

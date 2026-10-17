@@ -85,11 +85,11 @@ export async function listContactRelationships(
 
   const peopleRows = await db.people.findMany({
     select: {
+      avatarUpdatedAt: true,
       firstName: true,
       hasAvatar: true,
       id: true,
       lastName: true,
-      updatedAt: true,
     },
     where: { id: { in: personIds }, userId: user.id },
   });
@@ -111,11 +111,11 @@ export async function listContactRelationships(
         sourcePerson: toContactPreview(
           user.id,
           {
+            avatarUpdatedAt: sourcePerson.avatarUpdatedAt,
             firstName: sourcePerson.firstName,
             hasAvatar: sourcePerson.hasAvatar,
             id: sourcePerson.id,
             lastName: sourcePerson.lastName,
-            updatedAt: sourcePerson.updatedAt.toISOString(),
           },
           avatarOptions,
         ),
@@ -123,11 +123,11 @@ export async function listContactRelationships(
         targetPerson: toContactPreview(
           user.id,
           {
+            avatarUpdatedAt: targetPerson.avatarUpdatedAt,
             firstName: targetPerson.firstName,
             hasAvatar: targetPerson.hasAvatar,
             id: targetPerson.id,
             lastName: targetPerson.lastName,
-            updatedAt: targetPerson.updatedAt.toISOString(),
           },
           avatarOptions,
         ),
@@ -160,11 +160,11 @@ export async function findContactBySocial(ctx: ContactDetailContext, query: BySo
 
   const person = await db.people.findFirst({
     select: {
+      avatarUpdatedAt: true,
       firstName: true,
       hasAvatar: true,
       id: true,
       lastName: true,
-      updatedAt: true,
     },
     where: { id: personId, userId: user.id },
   });
@@ -177,11 +177,11 @@ export async function findContactBySocial(ctx: ContactDetailContext, query: BySo
     contact: toContactPreview(
       user.id,
       {
+        avatarUpdatedAt: person.avatarUpdatedAt,
         firstName: person.firstName,
         hasAvatar: person.hasAvatar,
         id: person.id,
         lastName: person.lastName,
-        updatedAt: person.updatedAt.toISOString(),
       },
       avatarOpts,
     ),

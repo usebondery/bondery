@@ -56,17 +56,18 @@ export async function uploadContactPhoto(
   const serverSequence =
     (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
 
+  const person = await db.people.findFirst({
+    select: { avatarUpdatedAt: true },
+    where: { id: contactId, userId: user.id },
+  });
   const avatarUrl = resolveContactAvatarUrl(user.id, {
+    avatarUpdatedAt: person?.avatarUpdatedAt,
     hasAvatar: true,
     id: contactId,
-    updatedAt: new Date().toISOString(),
   });
-  const cacheBustedUrl = avatarUrl
-    ? `${avatarUrl}${avatarUrl.includes("?") ? "&" : "?"}t=${Date.now()}`
-    : avatarUrl;
 
   return {
-    data: { avatarUrl: cacheBustedUrl, success: true },
+    data: { avatarUrl, success: true },
     serverSequence,
     txid,
   };

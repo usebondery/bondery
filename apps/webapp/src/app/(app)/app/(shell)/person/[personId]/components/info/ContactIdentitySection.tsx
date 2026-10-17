@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
@@ -12,7 +13,7 @@ import {
 import { Group, Stack } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconBriefcase } from "@tabler/icons-react";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { LocationLookupInput } from "@/components/shell/LocationLookupInput";
 import {
   type NameField,
@@ -72,78 +73,72 @@ function usePersonNameFields(
 
   const persistedValuesRef = useRef<Record<NameField, string>>(initialValues);
 
-  const updateField = useCallback((field: NameField, value: string) => {
+  const updateField = (field: NameField, value: string) => {
     setValues((previous) => ({
       ...previous,
       [field]: value,
     }));
-  }, []);
+  };
 
-  const saveField = useCallback(
-    async (field: NameField) => {
-      const config = fieldConfigs.find((item) => item.field === field);
-      if (!config) {
-        return;
-      }
+  const saveField = async (field: NameField) => {
+    const config = fieldConfigs.find((item) => item.field === field);
+    if (!config) {
+      return;
+    }
 
-      const value = values[field];
-      const persistedValue = persistedValuesRef.current[field];
+    const value = values[field];
+    const persistedValue = persistedValuesRef.current[field];
 
-      if (value === persistedValue) {
-        return;
-      }
+    if (value === persistedValue) {
+      return;
+    }
 
-      const validation = nameFieldValidationSchemas[field].safeParse(value);
-      if (!validation.success) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: firstZodErrorMessage(validation.error),
-            title: copy.validationErrorTitle,
-          }),
-        );
-        return;
-      }
+    const validation = nameFieldValidationSchemas[field].safeParse(value);
+    if (!validation.success) {
+      notifications.show(
+        errorNotificationTemplate({
+          description: firstZodErrorMessage(validation.error),
+          title: copy.validationErrorTitle,
+        }),
+      );
+      return;
+    }
 
+    setSavingByField((previous) => ({
+      ...previous,
+      [field]: true,
+    }));
+
+    try {
+      await updateContactMutation.mutateAsync({ [field]: value });
+
+      persistedValuesRef.current[field] = value;
+
+      notifications.show(
+        successNotificationTemplate({
+          description: copy.nameFieldUpdated(config.successLabel),
+          title: copy.savedTitle,
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: copy.updateFieldFailed(field),
+          title: copy.errorTitle,
+        }),
+      );
+    } finally {
       setSavingByField((previous) => ({
         ...previous,
-        [field]: true,
+        [field]: false,
       }));
+    }
+  };
 
-      try {
-        await updateContactMutation.mutateAsync({ [field]: value });
-
-        persistedValuesRef.current[field] = value;
-
-        notifications.show(
-          successNotificationTemplate({
-            description: copy.nameFieldUpdated(config.successLabel),
-            title: copy.savedTitle,
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: copy.updateFieldFailed(field),
-            title: copy.errorTitle,
-          }),
-        );
-      } finally {
-        setSavingByField((previous) => ({
-          ...previous,
-          [field]: false,
-        }));
-      }
-    },
-    [copy, fieldConfigs, nameFieldValidationSchemas, updateContactMutation, values],
-  );
-
-  const handleBlur = useCallback(
-    (field: NameField) => {
-      setFocusedField(null);
-      void saveField(field);
-    },
-    [saveField],
-  );
+  const handleBlur = (field: NameField) => {
+    setFocusedField(null);
+    void saveField(field);
+  };
 
   return {
     focusedField,
@@ -198,7 +193,7 @@ function usePersonProfileFields(
     placeCoordinatesRef.current = null;
   }, [initialHeadline, initialLocation]);
 
-  const updateField = useCallback((field: ProfileField, value: string) => {
+  const updateField = (field: ProfileField, value: string) => {
     setValues((previous) => ({
       ...previous,
       [field]: value,
@@ -207,134 +202,129 @@ function usePersonProfileFields(
     if (field === "location") {
       placeCoordinatesRef.current = null;
     }
-  }, []);
+  };
 
-  const savePlaceFromSuggestion = useCallback(
-    async (value: string, latitude: number | null, longitude: number | null) => {
-      setValues((previous) => ({
-        ...previous,
+  const savePlaceFromSuggestion = async (
+    value: string,
+    latitude: number | null,
+    longitude: number | null,
+  ) => {
+    setValues((previous) => ({
+      ...previous,
+      location: value,
+    }));
+
+    if (latitude === null || longitude === null) {
+      placeCoordinatesRef.current = null;
+      return;
+    }
+
+    placeCoordinatesRef.current = { latitude, longitude };
+
+    setSavingByField((previous) => ({
+      ...previous,
+      location: true,
+    }));
+
+    try {
+      await updateContactMutation.mutateAsync({
+        latitude,
         location: value,
-      }));
+        longitude,
+      });
 
-      if (latitude === null || longitude === null) {
-        placeCoordinatesRef.current = null;
-        return;
-      }
+      persistedValuesRef.current.location = value;
 
-      placeCoordinatesRef.current = { latitude, longitude };
-
+      notifications.show(
+        successNotificationTemplate({
+          description: copy.locationUpdated,
+          title: copy.savedTitle,
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: copy.updateFieldFailed("location"),
+          title: copy.errorTitle,
+        }),
+      );
+    } finally {
       setSavingByField((previous) => ({
         ...previous,
-        location: true,
+        location: false,
       }));
+    }
+  };
 
-      try {
-        await updateContactMutation.mutateAsync({
-          latitude,
-          location: value,
-          longitude,
-        });
+  const saveField = async (field: ProfileField) => {
+    const config = fieldConfigs.find((item) => item.field === field);
+    if (!config) {
+      return;
+    }
 
-        persistedValuesRef.current.location = value;
+    const value = values[field];
+    const persistedValue = persistedValuesRef.current[field];
 
-        notifications.show(
-          successNotificationTemplate({
-            description: copy.locationUpdated,
-            title: copy.savedTitle,
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: copy.updateFieldFailed("location"),
-            title: copy.errorTitle,
-          }),
-        );
-      } finally {
-        setSavingByField((previous) => ({
-          ...previous,
-          location: false,
-        }));
-      }
-    },
-    [copy, updateContactMutation],
-  );
+    if (value === persistedValue) {
+      return;
+    }
 
-  const saveField = useCallback(
-    async (field: ProfileField) => {
-      const config = fieldConfigs.find((item) => item.field === field);
-      if (!config) {
-        return;
-      }
+    const validation = profileFieldValidationSchemas[field].safeParse(value);
+    if (!validation.success) {
+      notifications.show(
+        errorNotificationTemplate({
+          description: firstZodErrorMessage(validation.error),
+          title: copy.validationErrorTitle,
+        }),
+      );
+      return;
+    }
 
-      const value = values[field];
-      const persistedValue = persistedValuesRef.current[field];
+    setSavingByField((previous) => ({
+      ...previous,
+      [field]: true,
+    }));
 
-      if (value === persistedValue) {
-        return;
+    try {
+      const locationCoordinates = field === "location" ? placeCoordinatesRef.current : null;
+      const payload: Record<string, string | number | null> = {
+        [field]: value,
+      };
+
+      if (field === "location" && locationCoordinates) {
+        payload.latitude = locationCoordinates.latitude;
+        payload.longitude = locationCoordinates.longitude;
       }
 
-      const validation = profileFieldValidationSchemas[field].safeParse(value);
-      if (!validation.success) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: firstZodErrorMessage(validation.error),
-            title: copy.validationErrorTitle,
-          }),
-        );
-        return;
-      }
+      await updateContactMutation.mutateAsync(payload);
 
+      persistedValuesRef.current[field] = value;
+
+      notifications.show(
+        successNotificationTemplate({
+          description: copy.fieldUpdated(config.successLabel),
+          title: copy.savedTitle,
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: copy.updateFieldFailed(field),
+          title: copy.errorTitle,
+        }),
+      );
+    } finally {
       setSavingByField((previous) => ({
         ...previous,
-        [field]: true,
+        [field]: false,
       }));
+    }
+  };
 
-      try {
-        const locationCoordinates = field === "location" ? placeCoordinatesRef.current : null;
-        const payload: Record<string, string | number | null> = {
-          [field]: value,
-        };
-
-        if (field === "location" && locationCoordinates) {
-          payload.latitude = locationCoordinates.latitude;
-          payload.longitude = locationCoordinates.longitude;
-        }
-
-        await updateContactMutation.mutateAsync(payload);
-
-        persistedValuesRef.current[field] = value;
-
-        notifications.show(
-          successNotificationTemplate({
-            description: copy.fieldUpdated(config.successLabel),
-            title: copy.savedTitle,
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: copy.updateFieldFailed(field),
-            title: copy.errorTitle,
-          }),
-        );
-      } finally {
-        setSavingByField((previous) => ({
-          ...previous,
-          [field]: false,
-        }));
-      }
-    },
-    [copy, fieldConfigs, profileFieldValidationSchemas, updateContactMutation, values],
-  );
-
-  const handleBlur = useCallback(
-    (field: ProfileField) => {
-      setFocusedField(null);
-      void saveField(field);
-    },
-    [saveField],
-  );
+  const handleBlur = (field: ProfileField) => {
+    setFocusedField(null);
+    void saveField(field);
+  };
 
   return {
     focusedField,
@@ -352,64 +342,57 @@ function usePersonProfileFields(
  * persistence. Parent is only notified lazily after a successful save so
  * the rest of the page tree never re-renders during typing or blur.
  *
- * Wrapped in React.memo with a personId-only comparator: any parent
- * re-render triggered by saving a name is completely ignored here, so
- * typing in one field while another is saving is never interrupted.
+ * Local name state keeps typing isolated from parent re-renders during save.
  */
-const NameFields = React.memo(
-  function NameFields({
-    personId,
-    initialFirstName,
-    initialMiddleName,
-    initialLastName,
-    isMyselfContact,
-  }: NameFieldsProps) {
-    const { nameFieldConfigs, nameFieldValidationSchemas, copy } = useContactIdentityFieldConfigs();
-    const { values, focusedField, savingByField, setFocusedField, updateField, handleBlur } =
-      usePersonNameFields(
-        personId,
-        {
-          firstName: initialFirstName,
-          lastName: initialLastName,
-          middleName: initialMiddleName,
-        },
-        nameFieldConfigs,
-        isMyselfContact,
-        nameFieldValidationSchemas,
-        copy,
-      );
-    const [hoveredField, setHoveredField] = useState<NameField | null>(null);
-
-    return (
-      <Group gap={"xs"} grow wrap="nowrap">
-        {nameFieldConfigs.map((config) => (
-          <InlineEditableInput
-            aria-label={config.placeholder}
-            fw={"bold"}
-            isFocused={focusedField === config.field}
-            isSaving={savingByField[config.field]}
-            key={config.field}
-            maxLength={config.maxLength}
-            onBlur={() => handleBlur(config.field)}
-            onChange={(value) => updateField(config.field, value)}
-            onFocus={() => setFocusedField(config.field)}
-            onMouseEnter={() => setHoveredField(config.field)}
-            onMouseLeave={() => setHoveredField(null)}
-            placeholder={
-              focusedField === config.field || hoveredField === config.field
-                ? config.placeholder
-                : ""
-            }
-            showCounter
-            size="lg"
-            value={values[config.field]}
-          />
-        ))}
-      </Group>
+const NameFields = function NameFields({
+  personId,
+  initialFirstName,
+  initialMiddleName,
+  initialLastName,
+  isMyselfContact,
+}: NameFieldsProps) {
+  const { nameFieldConfigs, nameFieldValidationSchemas, copy } = useContactIdentityFieldConfigs();
+  const { values, focusedField, savingByField, setFocusedField, updateField, handleBlur } =
+    usePersonNameFields(
+      personId,
+      {
+        firstName: initialFirstName,
+        lastName: initialLastName,
+        middleName: initialMiddleName,
+      },
+      nameFieldConfigs,
+      isMyselfContact,
+      nameFieldValidationSchemas,
+      copy,
     );
-  },
-  (prev, next) => prev.personId === next.personId && prev.isMyselfContact === next.isMyselfContact,
-);
+  const [hoveredField, setHoveredField] = useState<NameField | null>(null);
+
+  return (
+    <Group gap={"xs"} grow wrap="nowrap">
+      {nameFieldConfigs.map((config) => (
+        <InlineEditableInput
+          aria-label={config.placeholder}
+          fw={"bold"}
+          isFocused={focusedField === config.field}
+          isSaving={savingByField[config.field]}
+          key={config.field}
+          maxLength={config.maxLength}
+          onBlur={() => handleBlur(config.field)}
+          onChange={(value) => updateField(config.field, value)}
+          onFocus={() => setFocusedField(config.field)}
+          onMouseEnter={() => setHoveredField(config.field)}
+          onMouseLeave={() => setHoveredField(null)}
+          placeholder={
+            focusedField === config.field || hoveredField === config.field ? config.placeholder : ""
+          }
+          showCounter
+          size="lg"
+          value={values[config.field]}
+        />
+      ))}
+    </Group>
+  );
+};
 
 export function ContactIdentitySection({
   contact,

@@ -4,7 +4,7 @@ import { BonderyIcon } from "@bondery/branding/react";
 import { Box } from "@mantine/core";
 import { IconBrandLinkedin } from "@tabler/icons-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 const LINKEDIN_BLUE = "#0A66C2";
@@ -26,15 +26,12 @@ const LINKEDIN = { size: 60, x: 210, y: NODE_Y };
 
 export function ExtensionLinkedInAnimation() {
   const t = useSettingsPageTranslations("Integration.ChromeExtensionModal");
-  const labels = useMemo(
-    () => [
-      t("AnimationProfilePicture"),
-      t("AnimationWorkHistory"),
-      t("AnimationEducation"),
-      t("AnimationJobTitle"),
-    ],
-    [t],
-  );
+  const labels = [
+    t("AnimationProfilePicture"),
+    t("AnimationWorkHistory"),
+    t("AnimationEducation"),
+    t("AnimationJobTitle"),
+  ];
   const [labelIndex, setLabelIndex] = useState(0);
   const [bubbleKey, setBubbleKey] = useState(0);
   const [pulseKey, setPulseKey] = useState(0);

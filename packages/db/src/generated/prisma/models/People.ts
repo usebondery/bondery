@@ -49,6 +49,7 @@ export type PeopleMinAggregateOutputType = {
   notesUpdatedAt: Date | null
   myself: boolean | null
   hasAvatar: boolean | null
+  avatarUpdatedAt: Date | null
   language: string | null
   timezone: string | null
   location: string | null
@@ -72,6 +73,7 @@ export type PeopleMaxAggregateOutputType = {
   notesUpdatedAt: Date | null
   myself: boolean | null
   hasAvatar: boolean | null
+  avatarUpdatedAt: Date | null
   language: string | null
   timezone: string | null
   location: string | null
@@ -95,6 +97,7 @@ export type PeopleCountAggregateOutputType = {
   notesUpdatedAt: number
   myself: number
   hasAvatar: number
+  avatarUpdatedAt: number
   language: number
   timezone: number
   location: number
@@ -132,6 +135,7 @@ export type PeopleMinAggregateInputType = {
   notesUpdatedAt?: true
   myself?: true
   hasAvatar?: true
+  avatarUpdatedAt?: true
   language?: true
   timezone?: true
   location?: true
@@ -155,6 +159,7 @@ export type PeopleMaxAggregateInputType = {
   notesUpdatedAt?: true
   myself?: true
   hasAvatar?: true
+  avatarUpdatedAt?: true
   language?: true
   timezone?: true
   location?: true
@@ -178,6 +183,7 @@ export type PeopleCountAggregateInputType = {
   notesUpdatedAt?: true
   myself?: true
   hasAvatar?: true
+  avatarUpdatedAt?: true
   language?: true
   timezone?: true
   location?: true
@@ -288,6 +294,7 @@ export type PeopleGroupByOutputType = {
   notesUpdatedAt: Date | null
   myself: boolean | null
   hasAvatar: boolean
+  avatarUpdatedAt: Date | null
   language: string | null
   timezone: string | null
   location: string | null
@@ -334,6 +341,7 @@ export type PeopleWhereInput = {
   notesUpdatedAt?: Prisma.DateTimeNullableFilter<"People"> | Date | string | null
   myself?: Prisma.BoolNullableFilter<"People"> | boolean | null
   hasAvatar?: Prisma.BoolFilter<"People"> | boolean
+  avatarUpdatedAt?: Prisma.DateTimeNullableFilter<"People"> | Date | string | null
   language?: Prisma.StringNullableFilter<"People"> | string | null
   timezone?: Prisma.StringNullableFilter<"People"> | string | null
   location?: Prisma.StringNullableFilter<"People"> | string | null
@@ -374,6 +382,7 @@ export type PeopleOrderByWithRelationInput = {
   notesUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   myself?: Prisma.SortOrderInput | Prisma.SortOrder
   hasAvatar?: Prisma.SortOrder
+  avatarUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   language?: Prisma.SortOrderInput | Prisma.SortOrder
   timezone?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -417,6 +426,7 @@ export type PeopleWhereUniqueInput = Prisma.AtLeast<{
   notesUpdatedAt?: Prisma.DateTimeNullableFilter<"People"> | Date | string | null
   myself?: Prisma.BoolNullableFilter<"People"> | boolean | null
   hasAvatar?: Prisma.BoolFilter<"People"> | boolean
+  avatarUpdatedAt?: Prisma.DateTimeNullableFilter<"People"> | Date | string | null
   language?: Prisma.StringNullableFilter<"People"> | string | null
   timezone?: Prisma.StringNullableFilter<"People"> | string | null
   location?: Prisma.StringNullableFilter<"People"> | string | null
@@ -457,6 +467,7 @@ export type PeopleOrderByWithAggregationInput = {
   notesUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   myself?: Prisma.SortOrderInput | Prisma.SortOrder
   hasAvatar?: Prisma.SortOrder
+  avatarUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   language?: Prisma.SortOrderInput | Prisma.SortOrder
   timezone?: Prisma.SortOrderInput | Prisma.SortOrder
   location?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -488,6 +499,7 @@ export type PeopleScalarWhereWithAggregatesInput = {
   notesUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"People"> | Date | string | null
   myself?: Prisma.BoolNullableWithAggregatesFilter<"People"> | boolean | null
   hasAvatar?: Prisma.BoolWithAggregatesFilter<"People"> | boolean
+  avatarUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"People"> | Date | string | null
   language?: Prisma.StringNullableWithAggregatesFilter<"People"> | string | null
   timezone?: Prisma.StringNullableWithAggregatesFilter<"People"> | string | null
   location?: Prisma.StringNullableWithAggregatesFilter<"People"> | string | null
@@ -510,6 +522,7 @@ export type PeopleCreateInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -549,6 +562,7 @@ export type PeopleUncheckedCreateInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -586,6 +600,7 @@ export type PeopleUpdateInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -625,6 +640,7 @@ export type PeopleUncheckedUpdateInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -663,6 +679,7 @@ export type PeopleCreateManyInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -685,6 +702,7 @@ export type PeopleUpdateManyMutationInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -707,6 +725,7 @@ export type PeopleUncheckedUpdateManyInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -745,6 +764,7 @@ export type PeopleCountOrderByAggregateInput = {
   notesUpdatedAt?: Prisma.SortOrder
   myself?: Prisma.SortOrder
   hasAvatar?: Prisma.SortOrder
+  avatarUpdatedAt?: Prisma.SortOrder
   language?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   location?: Prisma.SortOrder
@@ -774,6 +794,7 @@ export type PeopleMaxOrderByAggregateInput = {
   notesUpdatedAt?: Prisma.SortOrder
   myself?: Prisma.SortOrder
   hasAvatar?: Prisma.SortOrder
+  avatarUpdatedAt?: Prisma.SortOrder
   language?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   location?: Prisma.SortOrder
@@ -797,6 +818,7 @@ export type PeopleMinOrderByAggregateInput = {
   notesUpdatedAt?: Prisma.SortOrder
   myself?: Prisma.SortOrder
   hasAvatar?: Prisma.SortOrder
+  avatarUpdatedAt?: Prisma.SortOrder
   language?: Prisma.SortOrder
   timezone?: Prisma.SortOrder
   location?: Prisma.SortOrder
@@ -1151,6 +1173,7 @@ export type PeopleCreateWithoutUserInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1188,6 +1211,7 @@ export type PeopleUncheckedCreateWithoutUserInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1255,6 +1279,7 @@ export type PeopleScalarWhereInput = {
   notesUpdatedAt?: Prisma.DateTimeNullableFilter<"People"> | Date | string | null
   myself?: Prisma.BoolNullableFilter<"People"> | boolean | null
   hasAvatar?: Prisma.BoolFilter<"People"> | boolean
+  avatarUpdatedAt?: Prisma.DateTimeNullableFilter<"People"> | Date | string | null
   language?: Prisma.StringNullableFilter<"People"> | string | null
   timezone?: Prisma.StringNullableFilter<"People"> | string | null
   location?: Prisma.StringNullableFilter<"People"> | string | null
@@ -1277,6 +1302,7 @@ export type PeopleCreateWithoutGroupsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1315,6 +1341,7 @@ export type PeopleUncheckedCreateWithoutGroupsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1367,6 +1394,7 @@ export type PeopleUpdateWithoutGroupsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1405,6 +1433,7 @@ export type PeopleUncheckedUpdateWithoutGroupsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1441,6 +1470,7 @@ export type PeopleCreateWithoutInteractionsLastInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1479,6 +1509,7 @@ export type PeopleUncheckedCreateWithoutInteractionsLastInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1520,6 +1551,7 @@ export type PeopleCreateWithoutLastInteractionActivityInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1558,6 +1590,7 @@ export type PeopleUncheckedCreateWithoutLastInteractionActivityInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1636,6 +1669,7 @@ export type PeopleCreateWithoutInteractionParticipantInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1674,6 +1708,7 @@ export type PeopleUncheckedCreateWithoutInteractionParticipantInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1726,6 +1761,7 @@ export type PeopleUpdateWithoutInteractionParticipantInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1764,6 +1800,7 @@ export type PeopleUncheckedUpdateWithoutInteractionParticipantInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1800,6 +1837,7 @@ export type PeopleCreateWithoutLinkedinInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1838,6 +1876,7 @@ export type PeopleUncheckedCreateWithoutLinkedinInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -1890,6 +1929,7 @@ export type PeopleUpdateWithoutLinkedinInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1928,6 +1968,7 @@ export type PeopleUncheckedUpdateWithoutLinkedinInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1964,6 +2005,7 @@ export type PeopleCreateWithoutEnrichQueueInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2002,6 +2044,7 @@ export type PeopleUncheckedCreateWithoutEnrichQueueInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2054,6 +2097,7 @@ export type PeopleUpdateWithoutEnrichQueueInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2092,6 +2136,7 @@ export type PeopleUncheckedUpdateWithoutEnrichQueueInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2128,6 +2173,7 @@ export type PeopleCreateWithoutPhonesInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2166,6 +2212,7 @@ export type PeopleUncheckedCreateWithoutPhonesInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2218,6 +2265,7 @@ export type PeopleUpdateWithoutPhonesInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2256,6 +2304,7 @@ export type PeopleUncheckedUpdateWithoutPhonesInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2292,6 +2341,7 @@ export type PeopleCreateWithoutEmailsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2330,6 +2380,7 @@ export type PeopleUncheckedCreateWithoutEmailsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2382,6 +2433,7 @@ export type PeopleUpdateWithoutEmailsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2420,6 +2472,7 @@ export type PeopleUncheckedUpdateWithoutEmailsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2456,6 +2509,7 @@ export type PeopleCreateWithoutSocialsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2494,6 +2548,7 @@ export type PeopleUncheckedCreateWithoutSocialsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2546,6 +2601,7 @@ export type PeopleUpdateWithoutSocialsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2584,6 +2640,7 @@ export type PeopleUncheckedUpdateWithoutSocialsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2620,6 +2677,7 @@ export type PeopleCreateWithoutAddressesInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2658,6 +2716,7 @@ export type PeopleUncheckedCreateWithoutAddressesInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2710,6 +2769,7 @@ export type PeopleUpdateWithoutAddressesInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2748,6 +2808,7 @@ export type PeopleUncheckedUpdateWithoutAddressesInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2784,6 +2845,7 @@ export type PeopleCreateWithoutImportantDatesInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2822,6 +2884,7 @@ export type PeopleUncheckedCreateWithoutImportantDatesInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2874,6 +2937,7 @@ export type PeopleUpdateWithoutImportantDatesInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2912,6 +2976,7 @@ export type PeopleUncheckedUpdateWithoutImportantDatesInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2948,6 +3013,7 @@ export type PeopleCreateWithoutRelationshipsFromInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -2986,6 +3052,7 @@ export type PeopleUncheckedCreateWithoutRelationshipsFromInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3027,6 +3094,7 @@ export type PeopleCreateWithoutRelationshipsToInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3065,6 +3133,7 @@ export type PeopleUncheckedCreateWithoutRelationshipsToInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3117,6 +3186,7 @@ export type PeopleUpdateWithoutRelationshipsFromInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3155,6 +3225,7 @@ export type PeopleUncheckedUpdateWithoutRelationshipsFromInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3202,6 +3273,7 @@ export type PeopleUpdateWithoutRelationshipsToInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3240,6 +3312,7 @@ export type PeopleUncheckedUpdateWithoutRelationshipsToInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3276,6 +3349,7 @@ export type PeopleCreateWithoutMergeRecommendationsLeftInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3314,6 +3388,7 @@ export type PeopleUncheckedCreateWithoutMergeRecommendationsLeftInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3355,6 +3430,7 @@ export type PeopleCreateWithoutMergeRecommendationsRightInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3393,6 +3469,7 @@ export type PeopleUncheckedCreateWithoutMergeRecommendationsRightInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3445,6 +3522,7 @@ export type PeopleUpdateWithoutMergeRecommendationsLeftInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3483,6 +3561,7 @@ export type PeopleUncheckedUpdateWithoutMergeRecommendationsLeftInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3530,6 +3609,7 @@ export type PeopleUpdateWithoutMergeRecommendationsRightInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3568,6 +3648,7 @@ export type PeopleUncheckedUpdateWithoutMergeRecommendationsRightInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3604,6 +3685,7 @@ export type PeopleCreateWithoutTagsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3642,6 +3724,7 @@ export type PeopleUncheckedCreateWithoutTagsInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3694,6 +3777,7 @@ export type PeopleUpdateWithoutTagsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3732,6 +3816,7 @@ export type PeopleUncheckedUpdateWithoutTagsInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3768,6 +3853,7 @@ export type PeopleCreateManyUserInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3790,6 +3876,7 @@ export type PeopleUpdateWithoutUserInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3827,6 +3914,7 @@ export type PeopleUncheckedUpdateWithoutUserInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3864,6 +3952,7 @@ export type PeopleUncheckedUpdateManyWithoutUserInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3887,6 +3976,7 @@ export type PeopleCreateManyLastInteractionActivityInput = {
   notesUpdatedAt?: Date | string | null
   myself?: boolean | null
   hasAvatar?: boolean
+  avatarUpdatedAt?: Date | string | null
   language?: string | null
   timezone?: string | null
   location?: string | null
@@ -3908,6 +3998,7 @@ export type PeopleUpdateWithoutInteractionsLastInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3946,6 +4037,7 @@ export type PeopleUncheckedUpdateWithoutInteractionsLastInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3983,6 +4075,7 @@ export type PeopleUncheckedUpdateManyWithoutInteractionsLastInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4005,6 +4098,7 @@ export type PeopleUpdateWithoutLastInteractionActivityInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4043,6 +4137,7 @@ export type PeopleUncheckedUpdateWithoutLastInteractionActivityInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4080,6 +4175,7 @@ export type PeopleUncheckedUpdateManyWithoutLastInteractionActivityInput = {
   notesUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   myself?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
   hasAvatar?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  avatarUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   language?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   location?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4250,6 +4346,7 @@ export type PeopleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   notesUpdatedAt?: boolean
   myself?: boolean
   hasAvatar?: boolean
+  avatarUpdatedAt?: boolean
   language?: boolean
   timezone?: boolean
   location?: boolean
@@ -4291,6 +4388,7 @@ export type PeopleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   notesUpdatedAt?: boolean
   myself?: boolean
   hasAvatar?: boolean
+  avatarUpdatedAt?: boolean
   language?: boolean
   timezone?: boolean
   location?: boolean
@@ -4316,6 +4414,7 @@ export type PeopleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   notesUpdatedAt?: boolean
   myself?: boolean
   hasAvatar?: boolean
+  avatarUpdatedAt?: boolean
   language?: boolean
   timezone?: boolean
   location?: boolean
@@ -4341,6 +4440,7 @@ export type PeopleSelectScalar = {
   notesUpdatedAt?: boolean
   myself?: boolean
   hasAvatar?: boolean
+  avatarUpdatedAt?: boolean
   language?: boolean
   timezone?: boolean
   location?: boolean
@@ -4353,7 +4453,7 @@ export type PeopleSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PeopleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "middleName" | "lastName" | "headline" | "notes" | "notesUpdatedAt" | "myself" | "hasAvatar" | "language" | "timezone" | "location" | "latitude" | "longitude" | "keepFrequencyDays" | "lastInteraction" | "lastInteractionActivityId" | "createdAt" | "updatedAt", ExtArgs["result"]["people"]>
+export type PeopleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "firstName" | "middleName" | "lastName" | "headline" | "notes" | "notesUpdatedAt" | "myself" | "hasAvatar" | "avatarUpdatedAt" | "language" | "timezone" | "location" | "latitude" | "longitude" | "keepFrequencyDays" | "lastInteraction" | "lastInteractionActivityId" | "createdAt" | "updatedAt", ExtArgs["result"]["people"]>
 export type PeopleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   lastInteractionActivity?: boolean | Prisma.People$lastInteractionActivityArgs<ExtArgs>
@@ -4415,6 +4515,7 @@ export type $PeoplePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     notesUpdatedAt: Date | null
     myself: boolean | null
     hasAvatar: boolean
+    avatarUpdatedAt: Date | null
     language: string | null
     timezone: string | null
     location: string | null
@@ -4875,6 +4976,7 @@ export interface PeopleFieldRefs {
   readonly notesUpdatedAt: Prisma.FieldRef<"People", 'DateTime'>
   readonly myself: Prisma.FieldRef<"People", 'Boolean'>
   readonly hasAvatar: Prisma.FieldRef<"People", 'Boolean'>
+  readonly avatarUpdatedAt: Prisma.FieldRef<"People", 'DateTime'>
   readonly language: Prisma.FieldRef<"People", 'String'>
   readonly timezone: Prisma.FieldRef<"People", 'String'>
   readonly location: Prisma.FieldRef<"People", 'String'>

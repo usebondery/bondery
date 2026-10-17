@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       "@mantine/hooks",
       "@mantine/notifications",
     ],
+    turbopackRustReactCompiler: true,
     useTypeScriptCli: true,
   },
   async headers() {
@@ -43,6 +44,7 @@ const nextConfig: NextConfig = {
     ],
   },
   pageExtensions: ["ts", "tsx", "md", "mdx"],
+  reactCompiler: true,
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
   // live in src/app/**/route.ts so they can import @bondery/helpers.
   // Public URLs: server reads BONDERY_PUBLIC_*; client leaves get them as RSC props.

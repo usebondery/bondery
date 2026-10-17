@@ -5,7 +5,7 @@ import { Anchor, type AnchorProps, VisuallyHidden } from "@mantine/core";
 import { IconExternalLink, IconWorld } from "@tabler/icons-react";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { getFaviconUrl } from "@/lib/favicon-url";
 import { resolveLinkKind, toInternalPath } from "@/lib/resolve-link-kind";
 
@@ -63,13 +63,12 @@ export function RichAnchor({
   const showFavicon = showFaviconProp ?? isExternal;
   const showExternalIcon = showExternalIconProp ?? isExternal;
 
-  const host = useMemo(() => {
-    try {
-      return new URL(href, "https://usebondery.com").hostname;
-    } catch {
-      return null;
-    }
-  }, [href]);
+  let host: string | null = null;
+  try {
+    host = new URL(href, "https://usebondery.com").hostname;
+  } catch {
+    host = null;
+  }
 
   const faviconUrl = faviconSrc ?? (host ? getFaviconUrl(host) : null);
 

@@ -1,5 +1,4 @@
-import { CONTACTS_PAGE_SIZE } from "../../lib/config";
-import { listGroupMembers, readContactsList } from "../../lib/sync/hooks/useSyncQuery";
+import { readContactIds } from "../../lib/sync/hooks/useSyncQuery";
 import { buildGroupSelectionMemberPersonIds } from "./buildGroupSelectionMemberPersonIds";
 import type { ContactsSelectionState } from "./contactsSelectionStore";
 
@@ -20,36 +19,11 @@ export function resolveContactsSelectionPersonIds(
   }
 
   const excluded = new Set(state.getExcludedIds());
-  const ids: string[] = [];
-  let offset = 0;
+  const ids = readContactIds({
+    excludeMyself: true,
+    groupId: options?.groupId,
+    query: debouncedQuery,
+  });
 
-  while (true) {
-    const page = options?.groupId
-      ? listGroupMembers({
-          groupId: options.groupId,
-          limit: CONTACTS_PAGE_SIZE,
-          offset,
-          query: debouncedQuery,
-        })
-      : readContactsList({
-          excludeMyself: true,
-          limit: CONTACTS_PAGE_SIZE,
-          offset,
-          query: debouncedQuery,
-        });
-
-    for (const contact of page.contacts) {
-      if (!excluded.has(contact.id)) {
-        ids.push(contact.id);
-      }
-    }
-
-    if (offset + page.contacts.length >= page.totalCount) {
-      break;
-    }
-
-    offset += CONTACTS_PAGE_SIZE;
-  }
-
-  return ids;
+  return ids.filter((id) => !excluded.has(id));
 }

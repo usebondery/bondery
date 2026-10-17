@@ -7,9 +7,10 @@ export type AuthSessionPayload = {
 };
 
 export type AuthContextValue = {
-  session: AuthSessionPayload | null;
-  isLoadingSession: boolean;
   isAuthenticated: boolean;
+  isLoadingSession: boolean;
+  isSessionHydrating: boolean;
+  session: AuthSessionPayload | null;
 };
 
 export const AuthContext = createContext<AuthContextValue | null>(null);

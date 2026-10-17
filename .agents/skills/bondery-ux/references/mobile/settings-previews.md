@@ -20,7 +20,7 @@ Settings that change **how something looks elsewhere** need a live **Preview** o
 
 1. **Title** — "Preview"
 2. **Hint** — one muted sentence: where this applies in the product
-3. **Preview component** — reuse production UI (`ContactsGroupsHeader`, etc.)
+3. **Preview component** — reuse production UI (`ContactsGroupFilterField` for group sort, etc.)
 
 ---
 

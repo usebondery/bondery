@@ -2,17 +2,18 @@ import { type ContactSocialFieldKey, extractUsername } from "@bondery/helpers";
 import { normalizedSocialHandleSchema } from "@bondery/helpers/forms";
 import { socialHandleInputSchema } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { StyleSheet, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
-import {
-  ActionSheetPopup,
-  type ActionSheetPopupAction,
-} from "../../../components/ActionSheetPopup";
 import { SheetTextField } from "../../../components/form";
+import { Sheet, type SheetAction } from "../../../components/ui/Sheet";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import type { NativeTextInputRef } from "../../../lib/native-host-refs";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -26,11 +27,11 @@ type SheetMode = "add" | "edit";
 interface EditSocialSheetProps {
   availablePlatforms: ContactSocialFieldKey[];
   initialValue: string;
-  isSubmitting: boolean;
   mode: SheetMode;
   onCancel: () => void;
+  onError?: (error: unknown) => void;
   onOpenChange: (open: boolean) => void;
-  onSave: (platform: ContactSocialFieldKey, value: string) => void;
+  onPersist: (platform: ContactSocialFieldKey, value: string) => void;
   open: boolean;
   platform: ContactSocialFieldKey | null;
 }
@@ -61,10 +62,10 @@ export function EditSocialSheet({
   platform,
   initialValue,
   availablePlatforms,
-  isSubmitting,
   onOpenChange,
   onCancel,
-  onSave,
+  onPersist,
+  onError,
 }: EditSocialSheetProps) {
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
@@ -93,16 +94,18 @@ export function EditSocialSheet({
       return;
     }
 
-    if (mode === "add") {
-      const nextPlatform = platform ?? availablePlatforms[0] ?? null;
-      setSelectedPlatform(nextPlatform);
-      reset({ value: "" });
-    } else {
-      setSelectedPlatform(platform);
-      reset({ value: platform ? getDisplayValue(platform, initialValue) : "" });
-    }
+    syncEffectState(() => {
+      if (mode === "add") {
+        const nextPlatform = platform ?? availablePlatforms[0] ?? null;
+        setSelectedPlatform(nextPlatform);
+        reset({ value: "" });
+      } else {
+        setSelectedPlatform(platform);
+        reset({ value: platform ? getDisplayValue(platform, initialValue) : "" });
+      }
 
-    setError(null);
+      setError(null);
+    });
   }, [open, platform, initialValue, mode, availablePlatforms, reset]);
 
   useEffect(() => {
@@ -152,65 +155,81 @@ export function EditSocialSheet({
     }
   };
 
-  const onSubmit = handleSubmit(({ value: submittedValue }) => {
-    if (!activePlatform || !canSubmit) {
-      return;
-    }
+  const handleCloseSheet = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-    const parsed = normalizedSocialHandleSchema.safeParse({
-      platform: activePlatform,
-      value: submittedValue,
-    });
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? "Please enter a valid value");
-      return;
-    }
+  const performSave = useCallback(
+    ({ value: submittedValue }: { value: string }) => {
+      if (!activePlatform || !canSubmit) {
+        throw new Error("Invalid social form");
+      }
 
-    setError(null);
-    onSave(parsed.data.platform, parsed.data.value);
+      const parsed = normalizedSocialHandleSchema.safeParse({
+        platform: activePlatform,
+        value: submittedValue,
+      });
+      if (!parsed.success) {
+        setError(parsed.error.issues[0]?.message ?? "Please enter a valid value");
+        throw new Error("Validation failed");
+      }
+
+      setError(null);
+      onPersist(parsed.data.platform, parsed.data.value);
+      return parsed.data;
+    },
+    [activePlatform, canSubmit, onPersist],
+  );
+
+  const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
+    onClose: handleCloseSheet,
+    onError,
+    perform: performSave,
   });
 
-  const handleDelete = () => {
-    if (!activePlatform || isSubmitting) {
-      return;
-    }
-    onSave(activePlatform, "");
-  };
+  const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError,
+    perform: () => {
+      if (!activePlatform) {
+        throw new Error("Platform missing");
+      }
+      onPersist(activePlatform, "");
+    },
+  });
+
+  const isBusy = isSubmitting || isDeleting;
 
   const primaryAction = {
-    disabled: !canSubmit,
+    disabled: !canSubmit || isBusy,
     icon: <IconCheck color={colors.textOnPrimary} size={16} />,
     label: mode === "add" ? "Add social" : "Save changes",
     loading: isSubmitting,
-    onPress: () => void onSubmit(),
+    loadingText: t("feedback.saving"),
+    onPress: submit,
     tone: "primary" as const,
     variant: "filled" as const,
   };
 
-  const actions: [ActionSheetPopupAction] | [ActionSheetPopupAction, ActionSheetPopupAction] =
+  const actions: [SheetAction] | [SheetAction, SheetAction] =
     mode === "edit"
       ? [
           {
-            disabled: isSubmitting,
-            icon: <IconTrash color={colors.dangerAccent} size={16} />,
+            disabled: isBusy,
+            icon: <IconTrash color={colors.textOnPrimary} size={16} />,
             label: "Delete social",
-            onPress: handleDelete,
+            loading: isDeleting,
+            loadingText: t("feedback.deleting"),
+            onPress: submitDelete,
             tone: "danger",
-            variant: "outline",
+            variant: "filled",
           },
           primaryAction,
         ]
       : [primaryAction];
 
   return (
-    <ActionSheetPopup
-      actions={actions}
-      isBusy={isSubmitting}
-      onClose={onCancel}
-      onOpenChange={onOpenChange}
-      open={open}
-      title={sheetTitle}
-    >
+    <Sheet actions={actions} isBusy={isBusy} onClose={onCancel} opened={open} title={sheetTitle}>
       {mode === "add" && pickerPlatforms.length > 0 ? (
         <View style={styles.platformRow}>
           {pickerPlatforms.map((item) => (
@@ -239,7 +258,7 @@ export function EditSocialSheet({
             autoFocus
             containerStyle={styles.inputField}
             control={control}
-            editable={!isSubmitting}
+            editable={!isBusy}
             enterKeyHint="done"
             externalErrorMessage={error ?? undefined}
             inputRef={inputRef}
@@ -253,13 +272,13 @@ export function EditSocialSheet({
                 setError(null);
               }
             }}
-            onSubmitEditing={() => void onSubmit()}
+            onSubmitEditing={submit}
             placeholder={t(platformConfig.placeholderKey as never)}
             returnKeyType="done"
           />
         </View>
       ) : null}
-    </ActionSheetPopup>
+    </Sheet>
   );
 }
 

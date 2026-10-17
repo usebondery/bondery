@@ -17,7 +17,6 @@ import {
 import { StoreShotFrame } from "../StoreShotFrame";
 
 const NOOP = () => {};
-
 export function StayOrganizedShot() {
   const copy = STORE_SHOT_COPY["stay-organized"];
 

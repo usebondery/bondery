@@ -1,4 +1,4 @@
-import type { SyncMutation, SyncPushResult } from "@bondery/schemas/sync";
+import type { SyncMutation, SyncPushRejectedResult, SyncPushResult } from "@bondery/schemas/sync";
 import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
 import {
   addContactTag,
@@ -241,36 +241,54 @@ export async function applySyncMutation(
       default: {
         const exhaustive: never = mutation;
         return {
-          result: {
-            error: "Unknown mutation type",
-            id: (exhaustive as SyncMutation).id,
-            status: "rejected",
-          },
+          result: unknownMutationRejectedResult((exhaustive as SyncMutation).id),
         };
       }
     }
   } catch (error) {
-    if (error instanceof SyncConflictError) {
-      return {
-        result: {
-          error: error.message,
-          id: mutation.id,
-          server: { contact: error.serverContact },
-          status: "conflict",
-        },
-      };
-    }
-
-    if (error instanceof DomainError) {
-      return {
-        result: {
-          error: error.message,
-          id: mutation.id,
-          status: "rejected",
-        },
-      };
+    const mapped = resultFromCaughtSyncMutation(mutation.id, error);
+    if (mapped) {
+      return mapped;
     }
 
     throw error;
   }
+}
+
+export function unknownMutationRejectedResult(mutationId: string): SyncPushRejectedResult {
+  return {
+    code: "bad_request",
+    error: "Unknown mutation type",
+    id: mutationId,
+    status: "rejected",
+  };
+}
+
+export function resultFromCaughtSyncMutation(
+  mutationId: string,
+  error: unknown,
+): { result: SyncPushResult } | null {
+  if (error instanceof SyncConflictError) {
+    return {
+      result: {
+        error: error.message,
+        id: mutationId,
+        server: { contact: error.serverContact },
+        status: "conflict",
+      },
+    };
+  }
+
+  if (error instanceof DomainError) {
+    return {
+      result: {
+        code: error.code,
+        error: error.message,
+        id: mutationId,
+        status: "rejected",
+      },
+    };
+  }
+
+  return null;
 }

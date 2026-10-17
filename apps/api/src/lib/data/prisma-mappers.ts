@@ -1,6 +1,7 @@
 import type { Prisma } from "@bondery/db";
 
 export const contactListSelect = {
+  avatarUpdatedAt: true,
   createdAt: true,
   firstName: true,
   hasAvatar: true,
@@ -27,6 +28,7 @@ export type ContactListRecord = Prisma.PeopleGetPayload<{ select: typeof contact
 
 export function mapContactListRecord(contact: ContactListRecord) {
   return {
+    avatarUpdatedAt: contact.avatarUpdatedAt?.toISOString() ?? null,
     createdAt: contact.createdAt.toISOString(),
     firstName: contact.firstName,
     gisPoint: null,
@@ -52,6 +54,7 @@ export function mapContactListRecord(contact: ContactListRecord) {
 }
 
 export const contactDetailSelect = {
+  avatarUpdatedAt: true,
   createdAt: true,
   firstName: true,
   hasAvatar: true,
@@ -81,6 +84,7 @@ export function mapContactDetailRecord(contact: ContactDetailRecord) {
 }
 
 export const selectableContactSelect = {
+  avatarUpdatedAt: true,
   firstName: true,
   hasAvatar: true,
   headline: true,
@@ -98,6 +102,7 @@ export type SelectableContactRecord = Prisma.PeopleGetPayload<{
 
 export function mapSelectableContactRecord(contact: SelectableContactRecord) {
   return {
+    avatarUpdatedAt: contact.avatarUpdatedAt?.toISOString() ?? null,
     firstName: contact.firstName,
     hasAvatar: contact.hasAvatar,
     headline: contact.headline,

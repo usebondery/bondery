@@ -1,6 +1,9 @@
 import { createContext, type ReactNode, useCallback, useContext, useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MOBILE_LAYOUT } from "../../theme/tokens";
+import {
+  getFloatingChromePillHeight,
+  getFloatingChromeSafePadding,
+} from "../../components/chrome/floatingChromeTokens";
 
 interface FloatingChromeInsetsContextValue {
   measuredBottomInset: number;
@@ -35,7 +38,7 @@ export function FloatingChromeInsetsProvider({ children }: { children: ReactNode
 export function useFloatingChromeBottomInset(): number {
   const context = useContext(FloatingChromeInsetsContext);
   const insets = useSafeAreaInsets();
-  const fallback = MOBILE_LAYOUT.floatingTabBar.contentInset + Math.max(insets.bottom, 8);
+  const fallback = getFloatingChromePillHeight() + getFloatingChromeSafePadding(insets.bottom);
 
   if (!context || context.measuredBottomInset <= 0) {
     return fallback;

@@ -23,7 +23,6 @@ import {
   IconStrikethrough,
   IconUnderline,
 } from "@tabler/icons-react";
-import { useMemo } from "react";
 import type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
 import { useNotesSlashCommandsTranslations } from "@/lib/i18n/generated/hooks";
 
@@ -277,16 +276,12 @@ const SLASH_COMMAND_DEFINITIONS: SlashCommandDefinition[] = [
 export function useSlashCommands(): SlashCommandItem[] {
   const t = useNotesSlashCommandsTranslations() as LooseTranslateFn;
 
-  return useMemo(
-    () =>
-      SLASH_COMMAND_DEFINITIONS.map((definition) => ({
-        action: definition.action,
-        description: t(definition.descriptionKey),
-        group: t(definition.groupKey),
-        icon: definition.icon,
-        id: definition.id,
-        label: t(definition.labelKey),
-      })),
-    [t],
-  );
+  return SLASH_COMMAND_DEFINITIONS.map((definition) => ({
+    action: definition.action,
+    description: t(definition.descriptionKey),
+    group: t(definition.groupKey),
+    icon: definition.icon,
+    id: definition.id,
+    label: t(definition.labelKey),
+  }));
 }

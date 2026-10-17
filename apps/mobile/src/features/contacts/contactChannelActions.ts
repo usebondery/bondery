@@ -2,48 +2,46 @@ import { combinePhoneNumber } from "@bondery/helpers/phone";
 import type { EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { Linking } from "react-native";
 import { copyToClipboard } from "../../lib/clipboard/copyToClipboard";
-import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
+import { notifications } from "../../lib/toast/notifications";
 import { formatDisplayPhone } from "./contactUtils";
 
-type ShowToast = (options: ShowAppToastInput) => void;
-
-export function openPhoneCall(phone: PhoneEntry, showToast: ShowToast, errorTitle: string) {
+export function openPhoneCall(phone: PhoneEntry, errorTitle: string) {
   if (!phone.value.trim()) {
     return;
   }
 
   Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
-    showToast({
-      description: "Could not open phone dialer",
-      headline: errorTitle,
+    notifications.show({
+      message: "Could not open phone dialer",
+      title: errorTitle,
       type: "error",
     });
   });
 }
 
-export function openPhoneSms(phone: PhoneEntry, showToast: ShowToast, errorTitle: string) {
+export function openPhoneSms(phone: PhoneEntry, errorTitle: string) {
   if (!phone.value.trim()) {
     return;
   }
 
   Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
-    showToast({
-      description: "Could not open messages",
-      headline: errorTitle,
+    notifications.show({
+      message: "Could not open messages",
+      title: errorTitle,
       type: "error",
     });
   });
 }
 
-export function openEmailMailto(email: EmailEntry, showToast: ShowToast, errorTitle: string) {
+export function openEmailMailto(email: EmailEntry, errorTitle: string) {
   if (!email.value.trim()) {
     return;
   }
 
   Linking.openURL(`mailto:${email.value}`).catch(() => {
-    showToast({
-      description: "Could not open email app",
-      headline: errorTitle,
+    notifications.show({
+      message: "Could not open email app",
+      title: errorTitle,
       type: "error",
     });
   });
@@ -51,7 +49,6 @@ export function openEmailMailto(email: EmailEntry, showToast: ShowToast, errorTi
 
 export async function copyPhoneToClipboard(
   phone: PhoneEntry,
-  showToast: ShowToast,
   messages: { successTitle: string; successDescription: string; errorTitle: string },
 ) {
   const text = combinePhoneNumber(phone.prefix || "+1", phone.value);
@@ -59,7 +56,7 @@ export async function copyPhoneToClipboard(
     return;
   }
 
-  await copyToClipboard(formatDisplayPhone(phone) || text, showToast, {
+  await copyToClipboard(formatDisplayPhone(phone) || text, {
     errorDescription: "Could not copy phone number",
     errorHeadline: messages.errorTitle,
     successDescription: messages.successDescription,
@@ -69,14 +66,13 @@ export async function copyPhoneToClipboard(
 
 export async function copyEmailToClipboard(
   email: EmailEntry,
-  showToast: ShowToast,
   messages: { successTitle: string; successDescription: string; errorTitle: string },
 ) {
   if (!email.value.trim()) {
     return;
   }
 
-  await copyToClipboard(email.value.trim(), showToast, {
+  await copyToClipboard(email.value.trim(), {
     errorDescription: "Could not copy email address",
     errorHeadline: messages.errorTitle,
     successDescription: messages.successDescription,

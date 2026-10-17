@@ -11,7 +11,7 @@ import {
 import { LoadErrorCard } from "../../../components/load-state";
 import { addTagToContact } from "../../../lib/domains/contacts";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { sortTags } from "../tagSort";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
@@ -71,7 +71,6 @@ export function ContactTagsSection({
   const tMobileTags = useMobileTagsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const [isEditSheetOpen, setEditSheetOpen] = useState(false);
   const [isCreateTagOpen, setCreateTagOpen] = useState(false);
   const tagSortOrder = useMobilePreferences((state) => state.tagSortOrder);
@@ -89,14 +88,14 @@ export function ContactTagsSection({
         addTagToContact(contactId, tag.id);
         onTagAdded(tag);
       } catch {
-        showToast({
-          description: tMobileTags("CreateFailed"),
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: tMobileTags("CreateFailed"),
+          title: t("feedback.errorTitle"),
           type: "error",
         });
       }
     },
-    [contactId, onTagAdded, showToast, tMobileTags, t],
+    [contactId, onTagAdded, tMobileTags, t],
   );
 
   return (

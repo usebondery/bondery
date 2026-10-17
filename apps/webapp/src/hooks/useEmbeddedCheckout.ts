@@ -11,7 +11,7 @@ import { notifications } from "@mantine/notifications";
 import type { StripeEmbeddedCheckout } from "@stripe/stripe-js";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ApiError, clientApiJson } from "@/lib/api/client";
 import { getSubscriptionStatus } from "@/lib/api/domains/subscription";
 import { isUnauthorizedApiError } from "@/lib/auth/handleUnauthorizedSession";
@@ -82,27 +82,27 @@ export function useEmbeddedCheckout({
   const t = useCheckoutTranslations();
   const { stripePublishableKey } = useWebappRuntimeConfig();
 
-  const handleCheckoutConfirmed = useCallback(() => {
+  const handleCheckoutConfirmed = () => {
     void invalidateSubscription(queryClient);
     onSuccess?.();
     router.refresh();
-  }, [onSuccess, queryClient, router]);
+  };
 
-  const stopPolling = useCallback(() => {
+  const stopPolling = () => {
     if (pollTimerRef.current != null) {
       window.clearInterval(pollTimerRef.current);
       pollTimerRef.current = null;
     }
-  }, []);
+  };
 
-  const closeCheckout = useCallback(() => {
+  const closeCheckout = () => {
     openGenerationRef.current += 1;
     stopPolling();
     teardownCheckout(checkoutRef.current);
     checkoutRef.current = null;
     setIsModalOpen(false);
     setIsLoading(false);
-  }, [stopPolling]);
+  };
 
   useEffect(() => {
     return () => {
@@ -110,16 +110,16 @@ export function useEmbeddedCheckout({
     };
   }, [closeCheckout]);
 
-  const showCheckoutError = useCallback(() => {
+  const showCheckoutError = () => {
     notifications.show(
       errorNotificationTemplate({
         description: t("errorMessage"),
         title: t("errorTitle"),
       }),
     );
-  }, [t]);
+  };
 
-  const openCheckout = useCallback(async () => {
+  const openCheckout = async () => {
     if (!stripePublishableKey) {
       showCheckoutError();
       return;
@@ -246,15 +246,7 @@ export function useEmbeddedCheckout({
       closeCheckout();
       showCheckoutError();
     }
-  }, [
-    checkoutMountId,
-    closeCheckout,
-    handleCheckoutConfirmed,
-    showCheckoutError,
-    stopPolling,
-    stripePublishableKey,
-    t,
-  ]);
+  };
 
   return { closeCheckout, isLoading, isModalOpen, openCheckout };
 }

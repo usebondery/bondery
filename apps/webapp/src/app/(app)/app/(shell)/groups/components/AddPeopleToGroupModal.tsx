@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
@@ -14,7 +15,7 @@ import { Center, Loader, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconUserPlus } from "@tabler/icons-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
@@ -76,14 +77,14 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   } = useGroupMembersQuery(groupId, { limit: 200, offset: 0 });
   const addContactsMutation = useAddContactsToGroupMutation(groupId);
 
-  const contacts = useMemo(() => {
+  const contacts = (() => {
     if (!allContactsData?.contacts || !groupMembersData?.contacts) {
       return [];
     }
     const existingIds = new Set(groupMembersData.contacts.map((contact) => contact.id));
     existingMemberIdsRef.current = existingIds;
     return allContactsData.contacts.filter((contact) => !existingIds.has(contact.id));
-  }, [allContactsData?.contacts, groupMembersData?.contacts]);
+  })();
 
   const isLoading = isLoadingAll || isLoadingMembers;
 
@@ -101,16 +102,13 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
   const isBlocking = isSubmitting || isLoading;
   const { closeModal } = useModalDismiss(modalId, isBlocking);
 
-  const handleSearch = useCallback(
-    async (query: string, paging: { limit: number; offset: number }) => {
-      const page = await searchContactsPage(query, paging);
-      return {
-        contacts: page.contacts.filter((c) => !existingMemberIdsRef.current.has(c.id)),
-        hasMore: page.hasMore,
-      };
-    },
-    [],
-  );
+  const handleSearch = async (query: string, paging: { limit: number; offset: number }) => {
+    const page = await searchContactsPage(query, paging);
+    return {
+      contacts: page.contacts.filter((c) => !existingMemberIdsRef.current.has(c.id)),
+      hasMore: page.hasMore,
+    };
+  };
 
   const handleSubmit = async () => {
     if (selectedIds.length === 0) {

@@ -6,7 +6,7 @@ import type { AddressPin } from "@bondery/schemas";
 import { Badge, Center, Paper, Stack, Table, Text, TextInput } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { IconHome, IconMapPin, IconSearch } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useContactAddressTranslations, useMapPageTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 
@@ -55,7 +55,7 @@ export function AddressPinsTable({
 
   const handleSearch = useDebouncedCallback((q: string) => setSearch(q), DEBOUNCE_MS.tableSearch);
 
-  const filtered = useMemo(() => {
+  const filtered = (() => {
     const q = search.trim().toLowerCase();
     if (!q) {
       return pins;
@@ -66,7 +66,7 @@ export function AddressPinsTable({
       const city = (p.addressCity ?? "").toLowerCase();
       return name.includes(q) || addr.includes(q) || city.includes(q);
     });
-  }, [pins, search]);
+  })();
 
   if (pins.length === 0) {
     return (

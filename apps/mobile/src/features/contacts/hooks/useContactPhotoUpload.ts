@@ -7,7 +7,14 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";
 import { AVATAR_UPLOAD } from "../../../lib/config";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import {
+  copyPickerFileToAvatar,
+  deleteLocalAvatarFile,
+  markLocalAvatarAfterUpload,
+  markLocalAvatarRemoved,
+} from "../../../lib/sync/avatar-files";
+import { notifications } from "../../../lib/toast/notifications";
+import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 
 interface UseContactPhotoUploadOptions {
   contactId: string;
@@ -20,7 +27,7 @@ export function useContactPhotoUpload({
 }: UseContactPhotoUploadOptions) {
   const tMobileContactIdentity = useMobileContactIdentityTranslations();
   const t = useCommonTranslations();
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
   const [isPhotoBusy, setIsPhotoBusy] = useState(false);
   const [isRemoveConfirmOpen, setRemoveConfirmOpen] = useState(false);
 
@@ -29,13 +36,13 @@ export function useContactPhotoUpload({
     if (state.isConnected) {
       return true;
     }
-    showToast({
-      description: tMobileContactIdentity("PhotoRequiresConnection"),
-      headline: t("feedback.errorTitle"),
+    notifications.show({
+      message: tMobileContactIdentity("PhotoRequiresConnection"),
+      title: t("feedback.errorTitle"),
       type: "error",
     });
     return false;
-  }, [showToast, t, tMobileContactIdentity]);
+  }, [t, tMobileContactIdentity]);
 
   const uploadPhoto = useCallback(
     async (uri: string, mimeType: string) => {
@@ -46,19 +53,20 @@ export function useContactPhotoUpload({
       setIsPhotoBusy(true);
       try {
         const { avatarUrl } = await uploadContactPhoto(contactId, uri, mimeType);
+        try {
+          await copyPickerFileToAvatar(contactId, uri);
+          markLocalAvatarAfterUpload(contactId, avatarUrl);
+        } catch {
+          // Pull downloads the stored JPEG if the local copy fails.
+        }
         onAvatarUpdated(avatarUrl);
       } catch (err) {
-        showToast({
-          description:
-            err instanceof Error ? err.message : tMobileContactIdentity("PhotoUploadFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
+        showErrorToast(err);
       } finally {
         setIsPhotoBusy(false);
       }
     },
-    [contactId, ensureOnline, onAvatarUpdated, showToast, t, tMobileContactIdentity],
+    [contactId, ensureOnline, onAvatarUpdated, showErrorToast],
   );
 
   const choosePhotoFromLibrary = useCallback(async () => {
@@ -68,9 +76,9 @@ export function useContactPhotoUpload({
 
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      showToast({
-        description: tMobileContactIdentity("PhotoPermissionDenied"),
-        headline: t("feedback.errorTitle"),
+      notifications.show({
+        message: tMobileContactIdentity("PhotoPermissionDenied"),
+        title: t("feedback.errorTitle"),
         type: "error",
       });
       return;
@@ -95,16 +103,16 @@ export function useContactPhotoUpload({
         mimeType as (typeof AVATAR_UPLOAD.allowedMimeTypes)[number],
       )
     ) {
-      showToast({
-        description: tMobileContactIdentity("InvalidPhotoType"),
-        headline: t("feedback.errorTitle"),
+      notifications.show({
+        message: tMobileContactIdentity("InvalidPhotoType"),
+        title: t("feedback.errorTitle"),
         type: "error",
       });
       return;
     }
 
     await uploadPhoto(asset.uri, mimeType);
-  }, [ensureOnline, showToast, t, uploadPhoto, tMobileContactIdentity]);
+  }, [ensureOnline, t, uploadPhoto, tMobileContactIdentity]);
 
   const removePhoto = useCallback(async () => {
     if (!(await ensureOnline())) {
@@ -114,18 +122,19 @@ export function useContactPhotoUpload({
     setIsPhotoBusy(true);
     try {
       await deleteContactPhoto(contactId);
+      try {
+        markLocalAvatarRemoved(contactId);
+      } catch {
+        deleteLocalAvatarFile(contactId);
+      }
       onAvatarUpdated(null);
       setRemoveConfirmOpen(false);
-    } catch {
-      showToast({
-        description: tMobileContactIdentity("PhotoRemoveFailed"),
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
+    } catch (err) {
+      showErrorToast(err);
     } finally {
       setIsPhotoBusy(false);
     }
-  }, [contactId, ensureOnline, onAvatarUpdated, showToast, t, tMobileContactIdentity]);
+  }, [contactId, ensureOnline, onAvatarUpdated, showErrorToast]);
   return {
     choosePhotoFromLibrary,
     isPhotoBusy,

@@ -3,7 +3,7 @@
 import { Card, useMantineTheme } from "@mantine/core";
 import { useHover, useMediaQuery } from "@mantine/hooks";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { startTransition, useEffect, useState } from "react";
 
 const CODE_LINES = [
   { label: "encryption", secret: "*******", value: "AES-256" },
@@ -21,18 +21,18 @@ export function PrivacyCodeAnimation() {
   // Auto-cycle on mobile or if user prefers reduced motion (though we can't easily detect that here without a hook)
   useEffect(() => {
     if (hovered) {
-      setIsRevealed(true);
+      startTransition(() => setIsRevealed(true));
       return;
     }
 
     if (isMobile) {
       const interval = setInterval(() => {
-        setIsRevealed((prev) => !prev);
+        startTransition(() => setIsRevealed((prev) => !prev));
       }, 3000);
       return () => clearInterval(interval);
     }
 
-    setIsRevealed(false);
+    startTransition(() => setIsRevealed(false));
   }, [hovered, isMobile]);
 
   return (

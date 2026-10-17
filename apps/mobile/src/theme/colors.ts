@@ -1,3 +1,13 @@
+import {
+  BRAND_PRIMARY_COLOR,
+  BRAND_PRIMARY_HOVER,
+  BRAND_PRIMARY_PRESS,
+  BRAND_PRIMARY_TEXT,
+  BRAND_SURFACES,
+} from "@bondery/branding/colors";
+
+export { BRAND_SURFACES };
+
 export type MobileThemeMode = "light" | "dark";
 
 export interface MobileThemeColors {
@@ -24,6 +34,8 @@ export interface MobileThemeColors {
   surfaceElevated: string;
   surfaceMuted: string;
   surfacePressed: string;
+  /** Mantine Title `--mantine-color-default-color` (black / white). */
+  textDefault: string;
   textMuted: string;
   textOnPrimary: string;
   textPrimary: string;
@@ -31,72 +43,88 @@ export interface MobileThemeColors {
   warningSurface: string;
 }
 
-const BRAND_PRIMARY = "#a34bcb";
-const BRAND_PRIMARY_HOVER = "#9d3fc9";
-const BRAND_PRIMARY_PRESS = "#8931b2";
+export const BRAND_PRIMARY = BRAND_PRIMARY_COLOR;
 
 /** Pure white — text and icons on primary-filled controls. */
-export const PRIMARY_BUTTON_TEXT = "#ffffff";
+export const PRIMARY_BUTTON_TEXT = BRAND_PRIMARY_TEXT;
+
+function hexToRgba(hex: string, alpha: number): string {
+  const digits = hex.startsWith("#") ? hex.slice(1) : hex;
+  const normalized =
+    digits.length === 3
+      ? `${digits[0]}${digits[0]}${digits[1]}${digits[1]}${digits[2]}${digits[2]}`
+      : digits;
+  const value = Number.parseInt(normalized, 16);
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r},${g},${b},${alpha})`;
+}
+
+const dark = BRAND_SURFACES.dark;
+const light = BRAND_SURFACES.light;
 
 export const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
   dark: {
-    appBackground: "#020617",
-    border: "#1f2937",
-    borderStrong: "#374151",
+    appBackground: dark.body,
+    border: dark.border,
+    borderStrong: "#696969", // Mantine dark.3 — stronger than default-border
     dangerAccent: "#f87171",
     dangerSurface: "#7f1d1d",
     dangerText: "#fca5a5",
-    iconPrimary: "#f8fafc",
-    iconSecondary: "#9ca3af",
-    inputBackground: "#111827",
-    neutralAccent: "#94a3b8",
-    overlay: "rgba(2,6,23,0.62)",
+    iconPrimary: dark.text,
+    iconSecondary: dark.dimmed,
+    inputBackground: dark.hover,
+    neutralAccent: dark.dimmed,
+    overlay: hexToRgba(dark.body, 0.62),
     primary: BRAND_PRIMARY,
     primaryHover: BRAND_PRIMARY_HOVER,
     primaryPress: BRAND_PRIMARY_PRESS,
     selectionBackground: "#1e293b",
     selectionBackgroundStrong: "#312e81",
-    shadow: "#000000",
+    shadow: "#000",
     successAccent: "#34d399",
     successSurface: "#14532d",
-    surface: "#0f172a",
-    surfaceElevated: "#0b1220",
-    surfaceMuted: "#111827",
-    surfacePressed: "#1f2937",
-    textMuted: "#94a3b8",
+    surface: dark.surface,
+    surfaceElevated: dark.surface,
+    surfaceMuted: dark.hover,
+    surfacePressed: dark.hover,
+    textDefault: "#ffffff",
+    textMuted: dark.dimmed,
     textOnPrimary: PRIMARY_BUTTON_TEXT,
-    textPrimary: "#f8fafc",
-    textSecondary: "#cbd5e1",
+    textPrimary: dark.text,
+    textSecondary: "#b8b8b8", // Mantine dark.1 — between text and dimmed
     warningSurface: "#78350f",
   },
   light: {
-    appBackground: "#f8fafc",
-    border: "#e2e8f0",
-    borderStrong: "#cbd5e1",
+    appBackground: light.mutedCanvas,
+    border: light.border,
+    borderStrong: "#adb5bd", // Mantine gray.5 — stronger than default-border
     dangerAccent: "#dc2626",
     dangerSurface: "#fee2e2",
     dangerText: "#b91c1c",
-    iconPrimary: "#0f172a",
-    iconSecondary: "#64748b",
-    inputBackground: "#ffffff",
-    neutralAccent: "#64748b",
-    overlay: "rgba(15,23,42,0.28)",
+    iconPrimary: light.text,
+    iconSecondary: light.dimmed,
+    inputBackground: light.surface,
+    neutralAccent: light.dimmed,
+    overlay: hexToRgba(light.text, 0.28),
     primary: BRAND_PRIMARY,
     primaryHover: BRAND_PRIMARY_HOVER,
     primaryPress: BRAND_PRIMARY_PRESS,
     selectionBackground: "#ede9fe",
     selectionBackgroundStrong: "#c4b5fd",
-    shadow: "#0f172a",
+    shadow: "#000",
     successAccent: "#059669",
     successSurface: "#dcfce7",
-    surface: "#ffffff",
-    surfaceElevated: "#ffffff",
-    surfaceMuted: "#f8fafc",
-    surfacePressed: "#f1f5f9",
-    textMuted: "#64748b",
+    surface: light.surface,
+    surfaceElevated: light.surface,
+    surfaceMuted: light.mutedCanvas,
+    surfacePressed: light.hover,
+    textDefault: "#000000",
+    textMuted: light.dimmed,
     textOnPrimary: PRIMARY_BUTTON_TEXT,
-    textPrimary: "#0f172a",
-    textSecondary: "#334155",
+    textPrimary: light.text,
+    textSecondary: "#495057", // Mantine gray.7 — between text and dimmed
     warningSurface: "#fef3c7",
   },
 };
@@ -117,6 +145,11 @@ export const OAUTH_PROVIDER_COLORS = {
   linkedin: {
     background: "#0a66c2",
     backgroundPress: "#084e96",
+    text: "#ffffff",
+  },
+  passkey: {
+    background: "#4b5563",
+    backgroundPress: "#374151",
     text: "#ffffff",
   },
 } as const;

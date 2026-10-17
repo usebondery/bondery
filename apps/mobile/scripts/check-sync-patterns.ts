@@ -48,7 +48,9 @@ const BANNED_PATTERNS = [
 
 const DOMAIN_READ_EXPORTS = [
   "listContacts",
+  "listContactIds",
   "getContact",
+  "getContactNamesByIds",
   "getMyselfContact",
   "getMyselfContactId",
   "getContactTags",
@@ -144,6 +146,25 @@ function checkFile(absPath: string): Violation[] {
       detail: "Features must not import lib/sync/repositories — use lib/domains or lib/sync/hooks",
       file: rel,
       rule: "no-feature-repository-import",
+      severity: "error",
+    });
+  }
+
+  if (/from\s+["']@tanstack\/react-query["']/.test(content)) {
+    violations.push({
+      detail:
+        "Features must not import TanStack Query directly — use named hooks from lib/sync/hooks",
+      file: rel,
+      rule: "no-feature-tanstack-query-import",
+      severity: "error",
+    });
+  }
+
+  if (/from\s+["'][^"']*lib\/sync\/sqlite-query-client["']/.test(content)) {
+    violations.push({
+      detail: "Features must not access QueryClient — use named hooks from lib/sync/hooks",
+      file: rel,
+      rule: "no-feature-query-client-import",
       severity: "error",
     });
   }

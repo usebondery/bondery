@@ -55,6 +55,7 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
         if (existing) {
           if (existing.payload_hash !== payloadHash) {
             results.push({
+              code: "bad_request",
               error: "Idempotency payload mismatch",
               id: mutation.id,
               status: "rejected",

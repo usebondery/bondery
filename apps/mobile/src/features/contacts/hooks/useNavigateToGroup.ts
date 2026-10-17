@@ -1,37 +1,17 @@
 import type { Group, GroupWithCount } from "@bondery/schemas";
-import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
+import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
 
 /**
- * Navigates to a group detail screen without stacking duplicate routes on rapid taps.
+ * Navigates to a group detail screen through the shared navigation coordinator.
  */
 export function useNavigateToGroup() {
-  const router = useRouter();
-  const navigatingToGroupIdRef = useRef<string | null>(null);
-
-  useFocusEffect(
-    useCallback(() => {
-      navigatingToGroupIdRef.current = null;
-    }, []),
-  );
+  const { openGroup } = useAppNavigation();
 
   return useCallback(
     (group: Pick<Group, "id" | "label" | "emoji"> | GroupWithCount) => {
-      if (navigatingToGroupIdRef.current === group.id) {
-        return;
-      }
-
-      navigatingToGroupIdRef.current = group.id;
-
-      router.navigate({
-        params: {
-          emoji: group.emoji || "",
-          id: group.id,
-          label: group.label,
-        },
-        pathname: "/group/[id]",
-      });
+      openGroup(group);
     },
-    [router],
+    [openGroup],
   );
 }

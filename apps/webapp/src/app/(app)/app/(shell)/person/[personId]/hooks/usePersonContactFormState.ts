@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { parsePhoneNumber } from "@bondery/helpers/phone";
@@ -9,7 +10,7 @@ import type {
   ImportantDate,
   PhoneEntry,
 } from "@bondery/schemas";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 interface UsePersonContactFormStateOptions {
   fetchedContact: Contact | undefined;
@@ -57,20 +58,18 @@ export function usePersonContactFormState({
     lastName: resolvedContact?.lastName ?? null,
   };
 
-  const lastInteractionSource = useMemo<
-    { type: "activity"; activityType: string } | { type: "manual" } | null
-  >(() => {
+  const lastInteractionSource = (() => {
     if (!contact?.lastInteraction) {
       return null;
     }
     if (contact.lastInteractionActivityId) {
       const linked = personActivities.find((a) => a.id === contact.lastInteractionActivityId);
       if (linked) {
-        return { activityType: linked.type, type: "activity" };
+        return { activityType: linked.type, type: "activity" as const };
       }
     }
-    return { type: "manual" };
-  }, [personActivities, contact?.lastInteraction, contact?.lastInteractionActivityId]);
+    return { type: "manual" as const };
+  })();
 
   useEffect(() => {
     if (contact) {

@@ -90,6 +90,9 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
     "GitHub / LinkedIn OAuth apps: callback URL on the API host (not the webapp):",
     "  https://<BONDERY_INFRA_API_DOMAIN>/auth/callback/github  (or /linkedin)",
     "OAuth clients are provisioned automatically on api pre_start (release-migrate).",
+    "",
+    "Native passkeys (optional): BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS on the API",
+    "adds android:apk-key-hash WebAuthn origins. Leave empty to skip Android passkey origins.",
   ],
   "Chrome extension OAuth": ["Generate: openssl rand -hex 16   # BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
   Email: ["SMTP settings (env_file → api only)."],
@@ -128,6 +131,7 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
 export const OPS_GROUP_ORDER = [
   "Image tags",
   "Public hostnames",
+  "Mobile associated domains",
   "Website analytics",
   "Build metadata",
 ] as const;
@@ -144,6 +148,10 @@ export const OPS_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = {
   "Build metadata": ["Optional build metadata surfaced in the container"],
   "Image tags": [
     "Omit to pull the floating production channel. Pin to semver for reproducible deploys / rollback.",
+  ],
+  "Mobile associated domains": [
+    "Optional. Native passkeys need apple-app-site-association (Team ID) and assetlinks.json (SHA-256 fingerprints).",
+    "If unset, those well-known files return 404. Do not invent Team IDs or fingerprints.",
   ],
   "Public hostnames": [
     "Public hostnames (no scheme). Compose derives https://… URLs and Traefik Host().",
@@ -444,6 +452,52 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     requiredIn: [],
     secret: false,
     targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_IOS_APP_TEAM_ID",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Apple Developer Team ID for apple-app-site-association (webcredentials + applinks). Optional. The website returns 404 for that file when unset. Not a secret.",
+    dokploySync: { targets: ["website"] },
+    exampleValue: "",
+    group: "Public URLs",
+    opsExample: {
+      commented: true,
+      group: "Mobile associated domains",
+      include: true,
+      value: "",
+    },
+    requiredIn: [],
+    secret: false,
+    targets: [t("website")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Comma-separated Android SHA-256 signing-cert fingerprints (colon hex). Used for Digital Asset Links and WebAuthn android:apk-key-hash origins. Optional. Missing values fail closed (404 / no apk origin). Not a secret.",
+    dokploySync: { targets: ["website", "services"] },
+    exampleValue: "",
+    group: "Public URLs",
+    opsExample: {
+      commented: true,
+      group: "Mobile associated domains",
+      include: true,
+      value: "",
+    },
+    requiredIn: [],
+    secret: false,
+    targets: [t("api"), t("website")],
   },
   {
     canonical: "BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS",

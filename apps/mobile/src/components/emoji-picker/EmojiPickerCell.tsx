@@ -1,5 +1,6 @@
 import type { EmojiData } from "@bondery/helpers/emoji";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import { colorWithAlpha } from "../../lib/color";
 import { MOBILE_OPACITY } from "../../lib/config";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
@@ -30,8 +31,8 @@ export function EmojiPickerCell({ item, cellSize, isSelected, onPress }: EmojiPi
             ? colors.surfacePressed
             : isSelected
               ? colorWithAlpha(colors.primary, MOBILE_OPACITY.selectedTint)
-              : "transparent",
-          borderColor: isSelected ? colors.primary : "transparent",
+              : colors.inputBackground,
+          borderColor: isSelected ? colors.primary : colors.borderStrong,
           height: cellSize,
           width: cellSize,
         },

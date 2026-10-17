@@ -138,6 +138,7 @@ export const API_ROUTES = {
   ME_SETTINGS: "/me/settings",
   ME_SETTINGS_GETTING_STARTED_DISMISS: "/me/settings/getting-started-dismiss",
   ME_STEP_UP: "/me/step-up",
+  MOBILE: "/mobile",
   OAUTH_PROVIDERS: "/oauth-providers",
   SUBSCRIPTIONS: "/subscriptions",
   SUBSCRIPTIONS_CHECKOUT: "/subscriptions/checkout",
@@ -173,7 +174,7 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.10.1";
+export const MIN_EXTENSION_VERSION: string = "1.10.2";
 
 /** One-shot account-delete nonce. Browser → BFF and BFF → API must forward it. */
 export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;

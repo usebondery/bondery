@@ -7,6 +7,20 @@ import type {
 } from "@bondery/schemas";
 import { resolveLocalContactAvatarUrl } from "../sync/avatar";
 import { parseGisPointLatLon } from "../sync/materializer/read-row";
+import { listContactNotesFields } from "./contacts-list-sql";
+
+export type {
+  ContactsListParams,
+  ContactsListQuery,
+  ContactsListSql,
+} from "./contacts-list-sql";
+export {
+  buildContactIdsSelectSql,
+  buildContactNamesByIdsSelectSql,
+  buildContactsListQuery,
+  buildContactsListSelectSql,
+  listContactNotesFields,
+} from "./contacts-list-sql";
 
 export type PeopleRow = {
   id: string;
@@ -16,7 +30,7 @@ export type PeopleRow = {
   last_name: string | null;
   headline: string | null;
   location: string | null;
-  notes: string | null;
+  notes?: string | null;
   last_interaction: string | null;
   keep_frequency_days: number | null;
   myself: number;
@@ -24,24 +38,11 @@ export type PeopleRow = {
   timezone: string | null;
   gis_point: string | null;
   has_avatar: number;
-  notes_updated_at: string | null;
+  avatar_updated_at: string | null;
+  notes_updated_at?: string | null;
   last_interaction_activity_id: string | null;
   created_at: string;
   updated_at: string;
-};
-
-export type ContactsListParams = {
-  query?: string;
-  limit: number;
-  offset: number;
-  excludeMyself?: boolean;
-  groupId?: string;
-};
-
-export type ContactsListQuery = {
-  fromClause: string;
-  whereClause: string;
-  params: (string | number)[];
 };
 
 export type ContactChildRows = {
@@ -91,37 +92,6 @@ const EMPTY_SOCIALS: Record<string, string | null> = {
   whatsapp: null,
 };
 
-export function buildContactsListQuery(
-  options: Pick<ContactsListParams, "query" | "excludeMyself" | "groupId">,
-): ContactsListQuery {
-  const query = options.query?.trim() ?? "";
-  const excludeMyself = options.excludeMyself ?? true;
-
-  let fromClause = "FROM people p";
-  const params: (string | number)[] = [];
-  const conditions: string[] = [];
-
-  if (options.groupId) {
-    fromClause = "FROM people p INNER JOIN people_groups pg ON pg.person_id = p.id";
-    conditions.push("pg.group_id = ?");
-    params.push(options.groupId);
-  }
-
-  if (excludeMyself) {
-    conditions.push("p.myself = 0");
-  }
-
-  if (query) {
-    conditions.push("(p.first_name LIKE ? OR p.last_name LIKE ? OR p.middle_name LIKE ?)");
-    const like = `%${query}%`;
-    params.push(like, like, like);
-  }
-
-  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
-
-  return { fromClause, params, whereClause };
-}
-
 export function mapPeopleRowToContact(
   row: PeopleRow,
   includeChildren: boolean,
@@ -129,7 +99,12 @@ export function mapPeopleRowToContact(
 ): Contact {
   const { latitude, longitude } = parseGisPointLatLon(row.gis_point);
   const hasAvatar = row.has_avatar === 1;
-  const avatar = resolveLocalContactAvatarUrl(row.user_id, row.id, hasAvatar, row.updated_at);
+  const avatar = resolveLocalContactAvatarUrl(
+    row.user_id,
+    row.id,
+    hasAvatar,
+    row.avatar_updated_at,
+  );
 
   const socials = children?.socials ?? EMPTY_SOCIALS;
 
@@ -197,6 +172,8 @@ export function mapPeopleRowToContact(
       )
     : null;
 
+  const listNotes = listContactNotesFields(row);
+
   return {
     addresses,
     avatar,
@@ -220,8 +197,8 @@ export function mapPeopleRowToContact(
     longitude,
     middleName: row.middle_name,
     myself: row.myself === 1,
-    notes: row.notes,
-    notesUpdatedAt: row.notes_updated_at,
+    notes: listNotes.notes,
+    notesUpdatedAt: listNotes.notesUpdatedAt,
     phones,
     signal: socials.signal ?? null,
     timezone: row.timezone,

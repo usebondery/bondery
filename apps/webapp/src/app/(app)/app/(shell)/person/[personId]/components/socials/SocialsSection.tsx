@@ -12,7 +12,6 @@ import {
   IconPhone,
   IconWorld,
 } from "@tabler/icons-react";
-import { useCallback, useMemo } from "react";
 import {
   useCommonTranslations,
   useContactInfoTranslations,
@@ -54,17 +53,14 @@ export function SocialsSection({
   const contactInfoLabels = useContactInfoLabels();
   const { getSocialActionTooltip } = useSocialActionTooltips();
 
-  const fieldLabels = useMemo(
-    () => ({
-      facebook: t("FieldFacebook"),
-      instagram: t("FieldInstagram"),
-      linkedin: t("FieldLinkedin"),
-      signal: t("FieldSignal"),
-      website: t("FieldWebsite"),
-      whatsapp: t("FieldWhatsapp"),
-    }),
-    [t],
-  );
+  const fieldLabels = {
+    facebook: t("FieldFacebook"),
+    instagram: t("FieldInstagram"),
+    linkedin: t("FieldLinkedin"),
+    signal: t("FieldSignal"),
+    website: t("FieldWebsite"),
+    whatsapp: t("FieldWhatsapp"),
+  };
 
   const editor = useSocialFieldEditor({
     contact,
@@ -73,70 +69,67 @@ export function SocialsSection({
     validationErrorTitle: tVal("title"),
   });
 
-  const socialFieldConfig = useMemo<SocialPopoverFieldConfig[]>(
-    () => [
-      {
-        color: "blue",
-        field: "linkedin",
-        icon: <IconBrandLinkedin />,
-        kind: "handle",
-        label: t("FieldLinkedin"),
-        placeholder: t("LinkedInPlaceholder"),
-        target: "_blank",
-        tooltipLabel: getSocialActionTooltip("linkedin", contact.firstName),
-      },
-      {
-        color: "pink",
-        field: "instagram",
-        icon: <IconBrandInstagram />,
-        kind: "handle",
-        label: t("FieldInstagram"),
-        placeholder: t("InstagramPlaceholder"),
-        target: "_blank",
-        tooltipLabel: getSocialActionTooltip("instagram", contact.firstName),
-      },
-      {
-        color: "blue",
-        field: "facebook",
-        icon: <IconBrandFacebook />,
-        kind: "handle",
-        label: t("FieldFacebook"),
-        placeholder: t("FacebookPlaceholder"),
-        target: "_blank",
-        tooltipLabel: getSocialActionTooltip("facebook", contact.firstName),
-      },
-      {
-        color: "green",
-        field: "whatsapp",
-        icon: <IconBrandWhatsapp />,
-        kind: "phone",
-        label: t("FieldWhatsapp"),
-        placeholder: t("WhatsAppPlaceholder"),
-        target: "_blank",
-        tooltipLabel: getSocialActionTooltip("whatsapp", contact.firstName),
-      },
-      {
-        color: "cyan",
-        field: "signal",
-        icon: <IconBrandSignal />,
-        kind: "phone",
-        label: t("FieldSignal"),
-        placeholder: t("SignalPlaceholder"),
-        tooltipLabel: getSocialActionTooltip("signal", contact.firstName),
-      },
-      {
-        color: "indigo",
-        field: "website",
-        icon: <IconWorld />,
-        kind: "handle",
-        label: t("FieldWebsite"),
-        placeholder: t("WebsitePlaceholder"),
-        target: "_blank",
-        tooltipLabel: t("OpenWebsite"),
-      },
-    ],
-    [contact.firstName, t, getSocialActionTooltip],
-  );
+  const socialFieldConfig: SocialPopoverFieldConfig[] = [
+    {
+      color: "blue",
+      field: "linkedin",
+      icon: <IconBrandLinkedin />,
+      kind: "handle",
+      label: t("FieldLinkedin"),
+      placeholder: t("LinkedInPlaceholder"),
+      target: "_blank",
+      tooltipLabel: getSocialActionTooltip("linkedin", contact.firstName),
+    },
+    {
+      color: "pink",
+      field: "instagram",
+      icon: <IconBrandInstagram />,
+      kind: "handle",
+      label: t("FieldInstagram"),
+      placeholder: t("InstagramPlaceholder"),
+      target: "_blank",
+      tooltipLabel: getSocialActionTooltip("instagram", contact.firstName),
+    },
+    {
+      color: "blue",
+      field: "facebook",
+      icon: <IconBrandFacebook />,
+      kind: "handle",
+      label: t("FieldFacebook"),
+      placeholder: t("FacebookPlaceholder"),
+      target: "_blank",
+      tooltipLabel: getSocialActionTooltip("facebook", contact.firstName),
+    },
+    {
+      color: "green",
+      field: "whatsapp",
+      icon: <IconBrandWhatsapp />,
+      kind: "phone",
+      label: t("FieldWhatsapp"),
+      placeholder: t("WhatsAppPlaceholder"),
+      target: "_blank",
+      tooltipLabel: getSocialActionTooltip("whatsapp", contact.firstName),
+    },
+    {
+      color: "cyan",
+      field: "signal",
+      icon: <IconBrandSignal />,
+      kind: "phone",
+      label: t("FieldSignal"),
+      placeholder: t("SignalPlaceholder"),
+      tooltipLabel: getSocialActionTooltip("signal", contact.firstName),
+    },
+    {
+      color: "indigo",
+      field: "website",
+      icon: <IconWorld />,
+      kind: "handle",
+      label: t("FieldWebsite"),
+      placeholder: t("WebsitePlaceholder"),
+      target: "_blank",
+      tooltipLabel: t("OpenWebsite"),
+    },
+  ];
 
   const preferredPhone =
     phones.find((phone) => phone.preferred && Boolean(phone.value)) ||
@@ -149,7 +142,7 @@ export function SocialsSection({
     : undefined;
   const preferredEmailHref = preferredEmail ? `mailto:${preferredEmail.value}` : undefined;
 
-  const openPhoneModal = useCallback(() => {
+  const openPhoneModal = () => {
     editor.clearCloseTimeout();
     editor.closeField("phone");
     openContactPhonesModal({
@@ -163,19 +156,8 @@ export function SocialsSection({
       phoneTitle: tContactInfo("PhoneNumbers"),
       savingField,
     });
-  }, [
-    contactInfoLabels,
-    editor,
-    emails,
-    onEmailsChange,
-    onPhonesChange,
-    onSaveContactInfo,
-    phones,
-    savingField,
-    tContactInfo,
-  ]);
-
-  const openEmailModal = useCallback(() => {
+  };
+  const openEmailModal = () => {
     editor.clearCloseTimeout();
     editor.closeField("email");
     openContactEmailsModal({
@@ -189,18 +171,7 @@ export function SocialsSection({
       phoneTitle: tContactInfo("PhoneNumbers"),
       savingField,
     });
-  }, [
-    contactInfoLabels,
-    editor,
-    emails,
-    onEmailsChange,
-    onPhonesChange,
-    onSaveContactInfo,
-    phones,
-    savingField,
-    tContactInfo,
-  ]);
-
+  };
   return (
     <div>
       <Group align="center" gap="xs" wrap="wrap">

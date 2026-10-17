@@ -1,6 +1,10 @@
 # Action sheets and keyboard (mobile)
 
-`ActionSheetPopup` forms and confirms. Shared validation: [forms-validation.md](../common/forms-validation.md). RHF wiring: [forms.md](./forms.md).
+`ui/Sheet` forms and confirms. Shared validation: [forms-validation.md](../common/forms-validation.md). RHF wiring: [forms.md](./forms.md).
+
+Text fields inside a sheet use `ui/TextInput` with `variant="sheet"` (or `SheetTextField`, which sets it). Do not use plain `RNTextInput` or `MobileTextInput` under `Sheet` — Gorhom needs sheet-aware focus for keyboard offset.
+
+`ui/Sheet` sets `android_keyboardInputMode="adjustPan"` on Android and `keyboardBehavior="interactive"` on both platforms so fit-sized sheets lift above the keyboard (Gorhom `extend` only grows to the highest detent). Gorhom disables interactive offset when its Android mode is `adjustResize`.
 
 ---
 
@@ -8,12 +12,15 @@
 
 Sheets whose primary purpose is text input must focus that input after open animation.
 
+Wire autofocus through `useSheetInputAutofocus` and `Sheet` `onSnapIndexChange`. Do not focus on `open` alone — the modal portal may not be mounted yet.
+
 ```tsx
-useEffect(() => {
-  if (!open) return;
-  const timer = setTimeout(() => inputRef.current?.focus(), UI_TIMING_MS.sheetFocusDelay);
-  return () => clearTimeout(timer);
-}, [open]);
+const inputRef = useRef<NativeTextInputRef>(null);
+const onSnapIndexChange = useSheetInputAutofocus(open, inputRef);
+
+<Sheet onSnapIndexChange={onSnapIndexChange} opened={open} ...>
+  <SheetTextField inputRef={inputRef} ... />
+</Sheet>
 ```
 
 Reset form state on open (`setValue("")`, clear errors).
@@ -48,8 +55,8 @@ Guard in handler: `if (!canSubmit) return`. One handler, two triggers.
 
 Same rule as web `isBlocking`:
 
-- While `isBusy`: lock dismiss, disable fields (`editable={!isBusy}`), show loading on primary action.
-- `ActionSheetPopup` `isBusy={isSubmitting}`.
+- While `isBusy`: lock dismiss, disable fields (`editable={!isBusy}`), show loading on primary action with `loadingText` (not spinner-only).
+- `Sheet` `isBusy={isSubmitting}`.
 
 ---
 

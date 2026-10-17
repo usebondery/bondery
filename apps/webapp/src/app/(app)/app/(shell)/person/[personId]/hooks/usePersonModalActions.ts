@@ -4,7 +4,6 @@ import { formatContactName } from "@bondery/helpers/contact";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Contact, ContactSelectable } from "@bondery/schemas";
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
@@ -28,19 +27,16 @@ export function usePersonModalActions({
 }: UsePersonModalActionsOptions) {
   const router = useRouter();
 
-  const openDeleteModal = useCallback(
-    () =>
-      openDeleteContactModal({
-        contactId: personId,
-        contactName: resolvedContact ? formatContactName(resolvedContact) : personId,
-        onDeleted: async () => {
-          router.push(WEBAPP_ROUTES.PEOPLE);
-        },
-      }),
-    [personId, resolvedContact, router],
-  );
+  const openDeleteModal = () =>
+    openDeleteContactModal({
+      contactId: personId,
+      contactName: resolvedContact ? formatContactName(resolvedContact) : personId,
+      onDeleted: async () => {
+        router.push(WEBAPP_ROUTES.PEOPLE);
+      },
+    });
 
-  const openMergeWithModalForCurrentPerson = useCallback(() => {
+  const openMergeWithModalForCurrentPerson = () => {
     openMergeWithModal({
       contacts: resolvedContact ? [resolvedContact] : [],
       contactsHasMore,
@@ -49,20 +45,20 @@ export function usePersonModalActions({
       onSearch: searchContactsPage,
       people: selectableContacts,
     });
-  }, [contactsHasMore, personId, resolvedContact, selectableContacts]);
+  };
 
-  const openShareModal = useCallback(() => {
+  const openShareModal = () => {
     if (!contact) {
       return;
     }
     openShareContactModal({ contact });
-  }, [contact]);
+  };
 
-  const openAddToGroupsModal = useCallback(() => {
+  const openAddToGroupsModal = () => {
     openAddPeopleToGroupSelectionModal({
       personIds: [personId],
     });
-  }, [personId]);
+  };
 
   return {
     openAddToGroupsModal,

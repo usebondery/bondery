@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface ChatSessionsContextValue {
   /** Incremented when the user clicks "new chat" — ChatClient watches this to reset. */
@@ -20,11 +20,10 @@ export function ChatSessionsProvider({ children }: { children: React.ReactNode }
   const [chatResetKey, setChatResetKey] = useState(0);
   const [highlightedSessionId, setHighlightedSessionId] = useState<string | undefined>();
 
-  const triggerChatReset = useCallback(() => {
+  const triggerChatReset = () => {
     setHighlightedSessionId(undefined);
     setChatResetKey((k) => k + 1);
-  }, []);
-
+  };
   return (
     <ChatSessionsContext.Provider
       value={{

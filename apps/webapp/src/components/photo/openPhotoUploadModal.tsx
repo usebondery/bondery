@@ -75,14 +75,12 @@ function PhotoUploadFlowBody({ modalId, uploadFile, variant }: PhotoUploadFlowBo
     setPreview("");
     setStep("pick");
   };
-
   const handleCancel = () => {
     if (isUploading) {
       return;
     }
     closeModal();
   };
-
   const handleConfirm = async () => {
     if (!file || isUploading) {
       return;

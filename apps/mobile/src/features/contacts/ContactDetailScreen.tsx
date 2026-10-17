@@ -1,25 +1,24 @@
-import { expandPersonMentionsForEditor, htmlToMarkdown } from "@bondery/helpers/notes";
-import type { Contact, GroupWithCount, ImportantDate, TagWithCount } from "@bondery/schemas";
+import type { Contact, GroupWithCount, TagWithCount } from "@bondery/schemas";
 import { IconTrash } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ActionSheetPopup } from "../../components/ActionSheetPopup";
 import { StackNavBar } from "../../components/chrome";
 import { LoadErrorCard, loadErrorStackInset } from "../../components/load-state";
+import { Sheet } from "../../components/ui/Sheet";
 import {
   useCommonTranslations,
   useMobileContactDetailTranslations,
   useMobileSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
-import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
 import {
   useContact,
   useContactGroups,
-  useContactImportantDates,
   useContactTags,
   useMyselfContact,
+  useMyselfContactId,
 } from "../../lib/sync/hooks/useSyncQuery";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactAddressesSection } from "./components/ContactAddressesSection";
@@ -43,7 +42,7 @@ import {
   parseContactPhones,
 } from "./contactUtils";
 import { useContactDetailHandlers } from "./hooks/useContactDetailHandlers";
-import { useMentionableContacts } from "./hooks/useMentionableContacts";
+import { useDeferredContactNotes } from "./hooks/useDeferredContactNotes";
 import { ShareContactEmailSheet } from "./ShareContactEmailSheet";
 
 interface ContactDetailScreenProps {
@@ -54,13 +53,10 @@ interface ContactDetailScreenProps {
 interface ContactDetailScreenLoadedProps {
   contact: Contact;
   groupsLoading: boolean;
-  importantDates: ImportantDate[];
   isMyselfMode: boolean;
   memberGroups: GroupWithCount[];
   memberTags: TagWithCount[];
-  mentionableContactIds: Set<string>;
   myselfContactId: string | null | undefined;
-  notesMarkdown: string;
   onReload: () => void;
   refreshGroups: () => void;
   refreshTags: () => void;
@@ -70,13 +66,10 @@ interface ContactDetailScreenLoadedProps {
 function ContactDetailScreenLoaded({
   contact,
   groupsLoading,
-  importantDates,
   isMyselfMode,
   memberGroups,
   memberTags,
-  mentionableContactIds,
   myselfContactId,
-  notesMarkdown,
   onReload,
   refreshGroups,
   refreshTags,
@@ -92,6 +85,7 @@ function ContactDetailScreenLoaded({
     isMyselfMode,
     onContactUpdated: onReload,
   });
+  const notes = useDeferredContactNotes(contact.notes);
 
   const phones = parseContactPhones(contact);
   const emails = parseContactEmails(contact);
@@ -100,7 +94,7 @@ function ContactDetailScreenLoaded({
   return (
     <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
       <StackNavBar
-        onBack={() => router.back()}
+        onBack={() => goBackOrReplace(router, "/contacts")}
         right={
           <ContactDetailOverflowMenu
             isBusy={handlers.isDeleting || handlers.isSharing}
@@ -112,48 +106,65 @@ function ContactDetailScreenLoaded({
         }
       />
 
-      <ActionSheetPopup
-        actions={[
-          {
-            disabled: handlers.isDeleting,
-            label: t("actions.cancel"),
-            onPress: () => handlers.setDeleteConfirmOpen(false),
-            tone: "neutral",
-            variant: "outline",
-          },
-          {
-            disabled: handlers.isDeleting,
-            icon: <IconTrash color={colors.textOnPrimary} size={16} />,
-            label: t("actions.delete"),
-            loading: handlers.isDeleting,
-            onPress: handlers.handleDeleteContact,
-            tone: "danger",
-            variant: "filled",
-          },
-        ]}
-        isBusy={handlers.isDeleting}
-        onClose={() => handlers.setDeleteConfirmOpen(false)}
-        onOpenChange={handlers.setDeleteConfirmOpen}
-        open={handlers.isDeleteConfirmOpen}
-        title={tMobileContactDetail("DeleteContactConfirmTitle").replace("{name}", handlers.name)}
-      />
+      {handlers.isDeleteConfirmOpen ? (
+        <Sheet
+          actions={[
+            {
+              disabled: handlers.isDeleting,
+              label: t("actions.cancel"),
+              onPress: () => handlers.setDeleteConfirmOpen(false),
+              tone: "neutral",
+              variant: "outline",
+            },
+            {
+              disabled: handlers.isDeleting,
+              icon: <IconTrash color={colors.textOnPrimary} size={16} />,
+              label: t("actions.delete"),
+              loading: handlers.isDeleting,
+              loadingText: t("feedback.deleting"),
+              onPress: handlers.submitDelete,
+              tone: "danger",
+              variant: "filled",
+            },
+          ]}
+          isBusy={handlers.isDeleting}
+          onClose={() => {
+            if (handlers.isDeleting) {
+              return;
+            }
+            handlers.setDeleteConfirmOpen(false);
+          }}
+          onOpenChange={(nextOpen) => {
+            if (!nextOpen && handlers.isDeleting) {
+              return;
+            }
+            handlers.setDeleteConfirmOpen(nextOpen);
+          }}
+          opened={handlers.isDeleteConfirmOpen}
+          title={tMobileContactDetail("DeleteContactConfirmTitle").replace("{name}", handlers.name)}
+        />
+      ) : null}
 
-      <ShareContactEmailSheet
-        contactId={contact.id}
-        contactName={handlers.name}
-        onClose={() => handlers.setShareEmailSheetOpen(false)}
-        onOpenChange={handlers.setShareEmailSheetOpen}
-        open={handlers.isShareEmailSheetOpen}
-      />
+      {handlers.isShareEmailSheetOpen ? (
+        <ShareContactEmailSheet
+          contactId={contact.id}
+          contactName={handlers.name}
+          onClose={() => handlers.setShareEmailSheetOpen(false)}
+          onOpenChange={handlers.setShareEmailSheetOpen}
+          open={handlers.isShareEmailSheetOpen}
+        />
+      ) : null}
 
-      <EditIdentitySheet
-        contact={contact}
-        isMyselfMode={isMyselfMode}
-        onClose={() => handlers.setIdentitySheetOpen(false)}
-        onContactUpdated={onReload}
-        onOpenChange={handlers.setIdentitySheetOpen}
-        open={handlers.isIdentitySheetOpen}
-      />
+      {handlers.isIdentitySheetOpen ? (
+        <EditIdentitySheet
+          contact={contact}
+          isMyselfMode={isMyselfMode}
+          onClose={() => handlers.setIdentitySheetOpen(false)}
+          onContactUpdated={onReload}
+          onOpenChange={handlers.setIdentitySheetOpen}
+          open={handlers.isIdentitySheetOpen}
+        />
+      ) : null}
 
       <ScrollView
         contentContainerStyle={styles.scrollContent}
@@ -215,15 +226,16 @@ function ContactDetailScreenLoaded({
 
         <ContactImportantDatesSection
           contactFirstName={contact.firstName}
-          dates={importantDates}
+          dates={contact.importantDates ?? []}
           onSaveDates={handlers.handleSaveImportantDates}
         />
 
         <ContactDetailNotesSection
           colors={colors}
-          mentionableContactIds={mentionableContactIds}
+          mentionableContactIds={notes.mentionableContactIds}
           myselfContactId={myselfContactId}
-          notesMarkdown={notesMarkdown}
+          notesMarkdown={notes.notesMarkdown}
+          notesPending={notes.isPending}
           onOpenNotesEditor={handlers.openNotesEditor}
         />
 
@@ -240,9 +252,6 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
   const tMobileSettings = useMobileSettingsTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
-  useEffect(() => {
-    void preloadMobileNamespaces(["mobile.contactDetail"]);
-  }, []);
   const {
     data: syncedContact,
     isInitialSync: isContactInitialSync,
@@ -252,47 +261,24 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
     data: myself,
     isInitialSync: isMyselfInitialSync,
     refresh: refreshMyself,
-  } = useMyselfContact();
+  } = useMyselfContact(isMyselfMode);
+  const { data: myselfContactIdFromDb } = useMyselfContactId(!isMyselfMode);
   const contact = isMyselfMode ? myself : syncedContact;
-  const contactId = contact?.id;
-  const { data: importantDates, refresh: refreshImportantDates } =
-    useContactImportantDates(contactId);
+  const tagsPersonId = isMyselfMode ? contact?.id : id;
   const {
     data: memberTags,
     refresh: refreshTags,
     isInitialSync: isTagsInitialSync,
-  } = useContactTags(contactId);
+  } = useContactTags(tagsPersonId);
   const {
     data: memberGroups,
     refresh: refreshGroups,
     isInitialSync: isGroupsInitialSync,
-  } = useContactGroups(isMyselfMode ? undefined : contactId);
-  const [error, setError] = useState<string | null>(null);
+  } = useContactGroups(isMyselfMode ? undefined : id);
   const loading = isMyselfMode ? isMyselfInitialSync && !contact : isContactInitialSync && !contact;
-  const tagsLoading = isTagsInitialSync && contactId != null;
-  const groupsLoading = !isMyselfMode && isGroupsInitialSync && contactId != null;
-
-  const {
-    contacts: mentionableContacts,
-    myselfContactId,
-    getContactName,
-  } = useMentionableContacts({
-    contactId: contact?.id ?? id ?? null,
-    isMyselfMode,
-  });
-
-  const mentionableContactIds = useMemo(
-    () => new Set(mentionableContacts.map((item) => item.id)),
-    [mentionableContacts],
-  );
-
-  useEffect(() => {
-    if (!isMyselfMode && !id) {
-      setError("Contact not found");
-      return;
-    }
-    setError(null);
-  }, [id, isMyselfMode]);
+  const tagsLoading = isTagsInitialSync && tagsPersonId != null;
+  const groupsLoading = !isMyselfMode && isGroupsInitialSync && id != null;
+  const myselfContactId = isMyselfMode ? contact?.id : myselfContactIdFromDb;
 
   const reloadContact = useCallback(() => {
     if (isMyselfMode) {
@@ -300,32 +286,16 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
     } else {
       refreshContact();
     }
-    refreshImportantDates();
     refreshTags();
     if (!isMyselfMode) {
       refreshGroups();
     }
-  }, [
-    isMyselfMode,
-    refreshContact,
-    refreshGroups,
-    refreshImportantDates,
-    refreshMyself,
-    refreshTags,
-  ]);
+  }, [isMyselfMode, refreshContact, refreshGroups, refreshMyself, refreshTags]);
 
-  const notesMarkdown = useMemo(() => {
-    const raw = htmlToMarkdown(contact?.notes ?? "");
-    if (!contact) {
-      return raw;
-    }
-    return expandPersonMentionsForEditor(raw, getContactName);
-  }, [contact, getContactName]);
-
-  if (loading || error || !contact) {
+  if (loading || !contact) {
     return (
       <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
-        <StackNavBar onBack={() => router.back()} />
+        <StackNavBar onBack={() => goBackOrReplace(router, "/contacts")} />
         {loading ? (
           <View style={styles.centered}>
             <ActivityIndicator color={colors.textPrimary} size="large" />
@@ -333,8 +303,7 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
         ) : (
           <View style={loadErrorStackInset}>
             <LoadErrorCard
-              description={error ?? t("errors.unknown")}
-              onRetry={reloadContact}
+              description={t("errors.api.contact_not_found")}
               title={tMobileSettings("LoadErrorTitle")}
             />
           </View>
@@ -347,13 +316,10 @@ export function ContactDetailScreen({ id, isMyselfMode = false }: ContactDetailS
     <ContactDetailScreenLoaded
       contact={contact}
       groupsLoading={groupsLoading}
-      importantDates={importantDates}
       isMyselfMode={isMyselfMode}
       memberGroups={memberGroups}
       memberTags={memberTags}
-      mentionableContactIds={mentionableContactIds}
       myselfContactId={myselfContactId}
-      notesMarkdown={notesMarkdown}
       onReload={reloadContact}
       refreshGroups={refreshGroups}
       refreshTags={refreshTags}

@@ -1,15 +1,12 @@
 import type { Contact } from "@bondery/schemas";
 import { useMemo } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
-import { normalizeMobileUrlForDevice } from "../../../lib/config";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import {
-  formatContactName,
-  getAvatarColorHex,
-  getContactInitials,
-} from "../../contacts/contactUtils";
-import { SettingsSectionCard } from "./SettingsSectionCard";
+import { View } from "react-native";
+import { PersonAvatar } from "../../../components/PersonAvatar";
+import { Group } from "../../../components/ui/Group";
+import { Paper } from "../../../components/ui/Paper";
+import { Text } from "../../../components/ui/Text";
+import { MOBILE_LAYOUT } from "../../../theme/tokens";
+import { formatContactName } from "../../contacts/contactUtils";
 
 interface SettingsAccountProfileCardProps {
   contact: Contact | null;
@@ -61,8 +58,6 @@ export function SettingsAccountProfileCard({
   fallbackName,
   fallbackAvatarUrl,
 }: SettingsAccountProfileCardProps) {
-  const colors = useMobileThemeColors();
-
   const profileContact = useMemo(() => {
     if (contact) {
       return contact;
@@ -76,84 +71,37 @@ export function SettingsAccountProfileCard({
   }, [contact, fallbackName]);
 
   const displayName = profileContact ? formatContactName(profileContact) : null;
-  const avatarColor = profileContact ? getAvatarColorHex(profileContact) : colors.surfaceMuted;
-  const initials = profileContact ? getContactInitials(profileContact) : "?";
-  const avatarUri = contact?.avatar
-    ? normalizeMobileUrlForDevice(contact.avatar)
-    : fallbackAvatarUrl
-      ? normalizeMobileUrlForDevice(fallbackAvatarUrl)
-      : undefined;
-
-  const shouldShowAvatarImage = !!avatarUri;
+  const avatarUrl = contact?.avatar ?? fallbackAvatarUrl ?? null;
+  const personId = contact?.id ?? "account-profile-fallback";
 
   return (
-    <SettingsSectionCard>
-      <View style={styles.row}>
-        <View
-          style={[
-            styles.avatar,
-            shouldShowAvatarImage
-              ? { backgroundColor: colors.surfaceMuted }
-              : { backgroundColor: avatarColor },
-          ]}
-        >
-          {shouldShowAvatarImage ? (
-            <Image resizeMode="cover" source={{ uri: avatarUri }} style={styles.avatarImage} />
-          ) : (
-            <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>{initials}</Text>
-          )}
-        </View>
+    <Paper withBorder>
+      <Group className="px-4 py-4">
+        <PersonAvatar
+          initials={profileContact ? undefined : "?"}
+          person={{
+            firstName: profileContact?.firstName ?? null,
+            id: personId,
+            lastName: profileContact?.lastName ?? null,
+          }}
+          size={MOBILE_LAYOUT.avatar.profile}
+          skipLocalFile={personId === "account-profile-fallback"}
+          uri={avatarUrl}
+        />
 
-        <View style={styles.textWrap}>
+        <View className="min-w-0 flex-1 gap-0.5">
           {displayName ? (
-            <Text numberOfLines={1} style={[styles.name, { color: colors.textPrimary }]}>
+            <Text fw={600} numberOfLines={1} size="xl">
               {displayName}
             </Text>
           ) : null}
           {email ? (
-            <Text numberOfLines={1} style={[styles.email, { color: colors.textSecondary }]}>
+            <Text c="secondary" numberOfLines={1}>
               {email}
             </Text>
           ) : null}
         </View>
-      </View>
-    </SettingsSectionCard>
+      </Group>
+    </Paper>
   );
 }
-
-const styles = StyleSheet.create({
-  avatar: {
-    alignItems: "center",
-    borderRadius: 26,
-    height: 52,
-    justifyContent: "center",
-    overflow: "hidden",
-    width: 52,
-  },
-  avatarImage: {
-    height: "100%",
-    width: "100%",
-  },
-  avatarText: {
-    fontSize: 18,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
-  },
-  email: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-  },
-  name: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.cardTitle,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  row: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  textWrap: {
-    flex: 1,
-    gap: 2,
-  },
-});

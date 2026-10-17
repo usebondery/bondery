@@ -10,7 +10,7 @@ Users should never wonder whether the app is working. Match loading UI to **how 
 |-----------|---------|---------|
 | **Initial route / page** | **Layout skeleton** — shape matches final UI | Web `loading.tsx` + `*Skeletons.tsx` (People, Home, Chat) |
 | **Inline fetch** (search, row refresh, preview block) | **Spinner or inline cue** in the affected region only | `DataTable` `searchLoading`; spotlight loader |
-| **Button / modal submit** | **Loading on the control** | `loading` on primary button; `isBlocking` on modal |
+| **Button / modal submit** | **Loading on the control** | `loading` + **progressive label** (`loadingText` on mobile `ui/Button`); `isBlocking` on modal |
 | **Modal open / prefetch / long job** | **Job-specific** — see [modals.md](../desktop/modals.md#loading) | Prefetch = body `Loader`; preview = region/`CountChip isLoading`; submit = `actionLoading`; ZIP/import = body replace + Cancel |
 | **Background duplicate / import commit** | **Morphing notification** | See [feedback-and-confirmations.md](./feedback-and-confirmations.md) |
 | **Mobile local-first read** | **No loading** for synced SQLite data | `useSyncQuery` — data is already there |

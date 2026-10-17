@@ -1,6 +1,7 @@
 {
   "a11y": {
     "back": "Back",
+    "close": "Close",
     "closeMenu": "Close menu",
     "createMore": "After creating, stay in this dialog to add another",
     "info": "Info",
@@ -216,11 +217,17 @@
     "unknown": "Something went wrong."
   },
   "feedback": {
+    "adding": "Adding...",
+    "closeToast": "Close notification",
+    "creating": "Creating...",
     "deleting": "Deleting...",
     "duplicating": "Duplicating...",
     "errorTitle": "Error",
     "noResults": "No results",
+    "removing": "Removing...",
     "savedTitle": "Saved",
+    "saving": "Saving...",
+    "sending": "Sending...",
     "successTitle": "Success"
   }
 }

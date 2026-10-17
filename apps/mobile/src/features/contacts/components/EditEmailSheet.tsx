@@ -2,30 +2,34 @@ import { CONTACT_CHANNEL_TYPE_OPTIONS } from "@bondery/helpers";
 import type { EmailEntry } from "@bondery/schemas";
 import { emailEntryInputSchema, emailEntrySchema } from "@bondery/schemas";
 import { IconCheck, IconMailPlus, IconTrash } from "@tabler/icons-react-native";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { StyleSheet, Text } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
-import {
-  ActionSheetPopup,
-  type ActionSheetPopupAction,
-} from "../../../components/ActionSheetPopup";
 import { SheetSelectField, SheetTextField } from "../../../components/form";
+import { Sheet, type SheetAction } from "../../../components/ui/Sheet";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { createDraftEmail } from "../contactChannelConstants";
 
 type SheetMode = "add" | "edit";
 
+type EmailFormValues = {
+  type: "home" | "work";
+  value: string;
+};
+
 interface EditEmailSheetProps {
   initialEntry: EmailEntry | null;
-  isSubmitting: boolean;
   mode: SheetMode;
   onCancel: () => void;
   onDelete?: () => void;
+  onError?: (error: unknown) => void;
   onOpenChange: (open: boolean) => void;
-  onSave: (entry: EmailEntry) => void;
+  onPersist: (entry: EmailEntry) => void;
   open: boolean;
 }
 
@@ -33,14 +37,14 @@ export function EditEmailSheet({
   open,
   mode,
   initialEntry,
-  isSubmitting,
   onOpenChange,
   onCancel,
-  onSave,
+  onPersist,
   onDelete,
+  onError,
 }: EditEmailSheetProps) {
   const tContactInfo = useContactInfoTranslations();
-  const _t = useCommonTranslations();
+  const tCommon = useCommonTranslations();
   const colors = useMobileThemeColors();
   const inputRef = useRef<NativeTextInputRef>(null);
   const {
@@ -82,15 +86,41 @@ export function EditEmailSheet({
     [tContactInfo],
   );
 
-  const canSubmit = isValid && !isSubmitting;
+  const handleCloseSheet = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-  const onSubmit = handleSubmit((values) => {
-    const parsed = emailEntrySchema.parse({
-      ...values,
-      preferred: initialEntry?.preferred ?? false,
-    });
-    onSave(parsed);
+  const performSave = useCallback(
+    (values: EmailFormValues) => {
+      const parsed = emailEntrySchema.parse({
+        ...values,
+        preferred: initialEntry?.preferred ?? false,
+      });
+      onPersist(parsed);
+      return parsed;
+    },
+    [initialEntry?.preferred, onPersist],
+  );
+
+  const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
+    onClose: handleCloseSheet,
+    onError,
+    perform: performSave,
   });
+
+  const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError,
+    perform: () => {
+      if (!onDelete) {
+        throw new Error("Delete handler missing");
+      }
+      onDelete();
+    },
+  });
+
+  const isBusy = isSubmitting || isDeleting;
+  const canSubmit = isValid && !isBusy;
 
   const primaryAction = {
     disabled: !canSubmit,
@@ -102,45 +132,47 @@ export function EditEmailSheet({
       ),
     label: mode === "add" ? tContactInfo("AddEmail") : "Save changes",
     loading: isSubmitting,
-    onPress: () => void onSubmit(),
+    loadingText: tCommon("feedback.saving"),
+    onPress: submit,
     tone: "primary" as const,
     variant: "filled" as const,
   };
 
-  const actions: [ActionSheetPopupAction] | [ActionSheetPopupAction, ActionSheetPopupAction] =
+  const actions: [SheetAction] | [SheetAction, SheetAction] =
     mode === "edit" && onDelete
       ? [
           {
-            disabled: isSubmitting,
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            disabled: isBusy,
+            icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
             label: tContactInfo("DeleteAction"),
-            onPress: onDelete,
+            loading: isDeleting,
+            loadingText: tCommon("feedback.deleting"),
+            onPress: submitDelete,
             tone: "danger",
-            variant: "outline",
+            variant: "filled",
           },
           primaryAction,
         ]
       : [primaryAction];
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={actions}
-      isBusy={isSubmitting}
+      isBusy={isBusy}
       onClose={onCancel}
-      onOpenChange={onOpenChange}
-      open={open}
+      opened={open}
       title={mode === "add" ? tContactInfo("AddEmail") : tContactInfo("EmailAddresses")}
     >
       <SheetTextField
         autoCapitalize="none"
         autoCorrect={false}
         control={control}
-        editable={!isSubmitting}
+        editable={!isBusy}
         enterKeyHint="done"
         inputRef={inputRef}
         keyboardType="email-address"
         name="value"
-        onSubmitEditing={() => void onSubmit()}
+        onSubmitEditing={submit}
         placeholder={tContactInfo("EmailPlaceholder")}
         returnKeyType="done"
       />
@@ -151,7 +183,7 @@ export function EditEmailSheet({
         name="type"
         options={typeOptions}
       />
-    </ActionSheetPopup>
+    </Sheet>
   );
 }
 

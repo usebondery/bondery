@@ -2,24 +2,12 @@
 
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
-import {
-  Alert,
-  Button,
-  Card,
-  Center,
-  Divider,
-  Group,
-  List,
-  ListItem,
-  Loader,
-  Stack,
-  Text,
-  ThemeIcon,
-} from "@mantine/core";
+import { Alert, Button, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconAlertTriangle, IconCheck, IconShield, IconX } from "@tabler/icons-react";
+import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { LoginBrandShell } from "@/components/auth/LoginBrandShell";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { buildOAuthLoginHref } from "@/lib/auth/magic-link-urls";
 import type { McpAccessLevel } from "@/lib/auth/mcp-access";
@@ -111,7 +99,8 @@ export function OAuthConsentClient({
   const t = useOAuthConsentTranslations();
   const searchParams = useSearchParams();
   const runtimeConfig = useWebappRuntimeConfig();
-  const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
+  const { websiteUrl } = runtimeConfig;
+  const authClient = createWebappAuthClient(runtimeConfig);
   const apiBaseUrl = runtimeConfig.apiBaseUrl.replace(/\/+$/, "");
 
   const [loading, setLoading] = useState(true);
@@ -128,29 +117,19 @@ export function OAuthConsentClient({
   const handledRef = useRef(false);
   const redirectingRef = useRef(false);
 
-  const oauthQuery = useMemo(
-    () => buildSignedOAuthQuery(searchParams.toString()) ?? "",
-    [searchParams],
-  );
-  const requestedScopes = useMemo(
-    () => (authDetails ? splitScopes(authDetails.scope) : []),
-    [authDetails],
-  );
+  const oauthQuery = buildSignedOAuthQuery(searchParams.toString()) ?? "";
+  const requestedScopes = authDetails ? splitScopes(authDetails.scope) : [];
   const canOfferWrite = requestedScopes.includes("mcp:write");
-  const permissionOptions = useMemo(
-    () =>
-      mcpAccessOptions({
-        fullDescription: t("PermissionFullDescription"),
-        fullLabel: t("PermissionFullLabel"),
-        readDescription: t("PermissionReadDescription"),
-        readLabel: t("PermissionReadLabel"),
-      }).map((option) =>
-        option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
-      ),
-    [canOfferWrite, t],
+  const permissionOptions = mcpAccessOptions({
+    fullDescription: t("PermissionFullDescription"),
+    fullLabel: t("PermissionFullLabel"),
+    readDescription: t("PermissionReadDescription"),
+    readLabel: t("PermissionReadLabel"),
+  }).map((option) =>
+    option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
   );
 
-  const fetchDetails = useCallback(async () => {
+  const fetchDetails = async () => {
     if (!oauthQuery) {
       setError(t("MissingAuthorizationId"));
       setLoading(false);
@@ -178,8 +157,8 @@ export function OAuthConsentClient({
         return;
       }
 
-      const requestedScopes = splitScopes(request.scope);
-      const isMcp = requestedScopes.includes("mcp:read") || requestedScopes.includes("mcp:write");
+      const requestScopes = splitScopes(request.scope);
+      const isMcp = requestScopes.includes("mcp:read") || requestScopes.includes("mcp:write");
       const firstPartyIds = { chromeExtensionClientId, webappClientId };
       const isLoopback = redirectUriIsLoopback(request.redirectUri);
 
@@ -226,18 +205,12 @@ export function OAuthConsentClient({
         setLoading(false);
       }
     }
-  }, [
-    apiBaseUrl,
-    authClient,
-    chromeExtensionClientId,
-    oauthQuery,
-    searchParams,
-    t,
-    webappClientId,
-  ]);
+  };
 
   useEffect(() => {
+    // biome-ignore lint/nursery/useReactCompiler: one-time consent bootstrap on mount
     void fetchDetails();
+    // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount for OAuth consent bootstrap
   }, [fetchDetails]);
 
   async function submitConsent(accept: boolean) {
@@ -288,29 +261,27 @@ export function OAuthConsentClient({
 
   if (loading) {
     return (
-      <Center mih="100vh">
-        <Loader size="lg" />
-      </Center>
+      <LoginBrandShell leftContent="userKey" loading websiteUrl={websiteUrl}>
+        {null}
+      </LoginBrandShell>
     );
   }
 
   if (error || !authDetails) {
     return (
-      <Center mih="100vh">
-        <Card maw={480} p="xl" shadow="sm" w="100%">
-          <Stack align="center" gap="md">
-            <ThemeIcon color="red" radius="xl" size={48} variant="light">
-              <IconX size={24} />
-            </ThemeIcon>
-            <Text fw={600} size="lg">
-              {t("ErrorTitle")}
-            </Text>
-            <Text c="dimmed" size="sm" ta="center">
-              {error ?? t("InvalidRequest")}
-            </Text>
-          </Stack>
-        </Card>
-      </Center>
+      <LoginBrandShell leftContent="userKey" websiteUrl={websiteUrl}>
+        <Stack align="center" gap="md">
+          <ThemeIcon color="red" radius="xl" size={48} variant="light">
+            <IconX size={24} />
+          </ThemeIcon>
+          <Text fw={600} size="lg">
+            {t("ErrorTitle")}
+          </Text>
+          <Text c="dimmed" size="sm" ta="center">
+            {error ?? t("InvalidRequest")}
+          </Text>
+        </Stack>
+      </LoginBrandShell>
     );
   }
 
@@ -319,79 +290,76 @@ export function OAuthConsentClient({
   const hostname = authDetails.client.hostname;
 
   return (
-    <Center mih="100vh">
-      <Card maw={480} p="xl" shadow="sm" w="100%">
-        <Stack gap="lg">
-          <Group align="center" gap="sm">
-            <ThemeIcon radius="xl" size={40} variant="light">
-              <IconShield size={22} />
-            </ThemeIcon>
-            <Stack gap={0}>
-              <Text fw={600} size="lg">
-                {t("Title")}
-              </Text>
-              <Text c="dimmed" size="sm">
-                {hostname ?? displayName}
-              </Text>
-            </Stack>
-          </Group>
-
-          <Text size="sm">{t("Description", { clientName: displayName })}</Text>
-
-          {authDetails.isLoopback ? (
-            <Alert color="yellow" icon={<IconAlertTriangle size={16} />} variant="light">
-              {t("LoopbackWarning")}
-            </Alert>
+    <LoginBrandShell leftContent="userKey" websiteUrl={websiteUrl}>
+      <Stack gap="lg">
+        <Stack gap={6}>
+          <Title fw={700} fz="h2" lh={1.15} order={2}>
+            {t("Title")}
+          </Title>
+          <Text c="dimmed" size="md">
+            {t("Description", { clientName: displayName })}
+          </Text>
+          {hostname ? (
+            <Text c="dimmed" size="sm">
+              {hostname}
+            </Text>
           ) : null}
-
-          <Divider />
-
-          {authDetails.isMcp ? (
-            <DescribedSelect
-              allowDeselect={false}
-              data={permissionOptions}
-              disabled={submitting}
-              label={t("PermissionLabel")}
-              onChange={(value) => setPermission(value === "full" ? "full" : "read")}
-              value={permission}
-            />
-          ) : scopes.length > 0 ? (
-            <Stack gap="xs">
-              <Text fw={500} size="sm">
-                {t("RequestedPermissions")}
-              </Text>
-              <List size="sm" spacing="xs">
-                {scopes.map((scope) => (
-                  <ListItem
-                    icon={
-                      <ThemeIcon color="blue" radius="xl" size={20} variant="light">
-                        <IconCheck size={12} />
-                      </ThemeIcon>
-                    }
-                    key={scope}
-                  >
-                    {t(`Scopes.${scope}`, { defaultValue: scope })}
-                  </ListItem>
-                ))}
-              </List>
-            </Stack>
-          ) : null}
-
-          <Group grow>
-            <Button
-              disabled={submitting}
-              loading={submitting}
-              onClick={() => submitConsent(false)}
-              variant="default"
-            >
-              {t("Deny")}
-            </Button>
-            <Button disabled={submitting} loading={submitting} onClick={() => submitConsent(true)}>
-              {t("Approve")}
-            </Button>
-          </Group>
         </Stack>
-      </Card>
-    </Center>
+
+        {authDetails.isLoopback ? (
+          <Alert color="yellow" icon={<IconAlertTriangle size={16} />} variant="light">
+            {t("LoopbackWarning")}
+          </Alert>
+        ) : null}
+
+        {authDetails.isMcp ? (
+          <DescribedSelect
+            allowDeselect={false}
+            data={permissionOptions}
+            disabled={submitting}
+            label={t("PermissionLabel")}
+            onChange={(value) => setPermission(value === "full" ? "full" : "read")}
+            value={permission}
+          />
+        ) : scopes.length > 0 ? (
+          <Stack gap="xs">
+            <Text fw={500} size="sm">
+              {t("RequestedPermissions")}
+            </Text>
+            {scopes.map((scope) => (
+              <Group gap="sm" key={scope} wrap="nowrap">
+                <ThemeIcon color="branding-primary" radius="xl" size={20} variant="light">
+                  <IconCheck size={12} />
+                </ThemeIcon>
+                <Text size="sm">{t(`Scopes.${scope}`, { defaultValue: scope })}</Text>
+              </Group>
+            ))}
+          </Stack>
+        ) : null}
+
+        <Group grow>
+          <Button
+            data-testid="oauth-consent-deny"
+            disabled={submitting}
+            leftSection={<IconX size={18} />}
+            loading={submitting}
+            onClick={() => submitConsent(false)}
+            variant="default"
+          >
+            {t("Deny")}
+          </Button>
+          <Button
+            color="branding-primary"
+            data-testid="oauth-consent-approve"
+            disabled={submitting}
+            leftSection={<IconCheck size={18} />}
+            loading={submitting}
+            onClick={() => submitConsent(true)}
+          >
+            {t("Approve")}
+          </Button>
+        </Group>
+      </Stack>
+    </LoginBrandShell>
   );
 }

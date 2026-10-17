@@ -29,7 +29,10 @@ const GEOCODE_BATCH_SIZE = 5;
  * @param files Uploaded .vcf file buffers.
  * @returns Array of prepared contacts for the import preview.
  */
-export async function parseVCardUpload(files: UploadFile[]): Promise<VCardPreparedContact[]> {
+export async function parseVCardUpload(
+  files: UploadFile[],
+  defaultCountry: string | null = null,
+): Promise<VCardPreparedContact[]> {
   if (files.length === 0) {
     throw new Error("No files uploaded");
   }
@@ -47,7 +50,7 @@ export async function parseVCardUpload(files: UploadFile[]): Promise<VCardPrepar
     }
 
     for (const entry of parsed) {
-      const draft = vCardToContactDraft(entry.card);
+      const draft = vCardToContactDraft(entry.card, { defaultCountry });
       const issues: string[] = [];
 
       const firstName = normalizeString(draft.firstName) ?? "";

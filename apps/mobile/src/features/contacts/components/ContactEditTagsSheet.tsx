@@ -1,31 +1,22 @@
 import type { Tag, TagWithCount } from "@bondery/schemas";
-import { XStack } from "@tamagui/stacks";
-import { Paragraph } from "@tamagui/text";
-import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  type ListRenderItemInfo,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
+import { Text } from "@/components/ui/Text";
 import {
   useCommonTranslations,
   useMobileContactDetailTranslations,
   useMobileTagsTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { SearchActionSheet } from "../../../components/SearchActionSheet";
-import { MOBILE_OPACITY } from "../../../lib/config";
 import { addTagToContact, removeTagFromContact } from "../../../lib/domains/contacts";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { getContactTags, listTags } from "../../../lib/sync/hooks/useSyncQuery";
-import { useAppToast } from "../../../lib/toast/useAppToast";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { sortTags } from "../tagSort";
-import { TagSelectRow } from "./TagSelectRow";
+import { TagChip } from "./TagChip";
 
 interface ContactEditTagsSheetProps {
   contactId: string;
@@ -69,13 +60,11 @@ export function ContactEditTagsSheet({
   const tMobileTags = useMobileTagsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const tagSortOrder = useMobilePreferences((state) => state.tagSortOrder);
 
   const [query, setQuery] = useState("");
   const [allTags, setAllTags] = useState<TagWithCount[]>([]);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<Set<string>>(() => new Set());
   const [initialSelectedIds, setInitialSelectedIds] = useState<Set<string>>(() => new Set());
 
@@ -90,15 +79,19 @@ export function ContactEditTagsSheet({
 
   useEffect(() => {
     if (!open) {
-      setQuery("");
-      setAllTags([]);
-      setSelectedTagIds(new Set());
-      setInitialSelectedIds(new Set());
+      syncEffectState(() => {
+        setQuery("");
+        setAllTags([]);
+        setSelectedTagIds(new Set());
+        setInitialSelectedIds(new Set());
+      });
       return;
     }
 
     let cancelled = false;
-    setIsLoadingTags(true);
+    syncEffectState(() => {
+      setIsLoadingTags(true);
+    });
 
     void Promise.resolve()
       .then(() => {
@@ -106,8 +99,8 @@ export function ContactEditTagsSheet({
           return;
         }
 
-        const allTags = listTags();
-        setAllTags(allTags);
+        const tags = listTags();
+        setAllTags(tags);
         const memberIds = new Set(getContactTags(contactId).map((tag) => tag.id));
         setInitialSelectedIds(memberIds);
         setSelectedTagIds(new Set(memberIds));
@@ -117,9 +110,9 @@ export function ContactEditTagsSheet({
           return;
         }
 
-        showToast({
-          description: tMobileContactDetail("TagsLoadError"),
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: tMobileContactDetail("TagsLoadError"),
+          title: t("feedback.errorTitle"),
           type: "error",
         });
         onOpenChange(false);
@@ -133,18 +126,50 @@ export function ContactEditTagsSheet({
     return () => {
       cancelled = true;
     };
-  }, [contactId, onOpenChange, open, showToast, tMobileContactDetail, t]);
+  }, [contactId, onOpenChange, open, tMobileContactDetail, t]);
 
-  function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen && isSaving) {
-      return;
+  const handleCloseSheet = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const handleSaveError = useCallback(() => {
+    notifications.show({
+      message: tMobileContactDetail("EditTagsFailed"),
+      title: t("feedback.errorTitle"),
+      type: "error",
+    });
+  }, [t, tMobileContactDetail]);
+
+  const performSave = useCallback(() => {
+    const added = [...selectedTagIds].filter((tagId) => !initialSelectedIds.has(tagId));
+    const removed = [...initialSelectedIds].filter((tagId) => !selectedTagIds.has(tagId));
+
+    for (const tagId of added) {
+      addTagToContact(contactId, tagId);
+    }
+    for (const tagId of removed) {
+      removeTagFromContact(contactId, tagId);
     }
 
-    onOpenChange(nextOpen);
-  }
+    return allTags.filter((tag) => selectedTagIds.has(tag.id));
+  }, [allTags, contactId, initialSelectedIds, selectedTagIds]);
+
+  const handleSaveSuccess = useCallback(
+    (newTags: Tag[]) => {
+      onTagsReplaced(newTags);
+    },
+    [onTagsReplaced],
+  );
+
+  const { isSubmitting, submit } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError: handleSaveError,
+    onSuccess: handleSaveSuccess,
+    perform: performSave,
+  });
 
   function handleClose() {
-    if (isSaving) {
+    if (isSubmitting) {
       return;
     }
 
@@ -152,7 +177,7 @@ export function ContactEditTagsSheet({
   }
 
   function toggleTag(tagId: string) {
-    if (isSaving || isLoadingTags) {
+    if (isSubmitting || isLoadingTags) {
       return;
     }
 
@@ -168,199 +193,70 @@ export function ContactEditTagsSheet({
     });
   }
 
-  const handleSave = () => {
-    void (async () => {
-      if (!hasChanges || isSaving) {
-        return;
-      }
+  const canSave = hasChanges && !isSubmitting && !isLoadingTags;
 
-      const added = [...selectedTagIds].filter((tagId) => !initialSelectedIds.has(tagId));
-      const removed = [...initialSelectedIds].filter((tagId) => !selectedTagIds.has(tagId));
-
-      setIsSaving(true);
-
-      try {
-        for (const tagId of added) {
-          addTagToContact(contactId, tagId);
-        }
-        for (const tagId of removed) {
-          removeTagFromContact(contactId, tagId);
-        }
-
-        const newTags = allTags.filter((tag) => selectedTagIds.has(tag.id));
-        onOpenChange(false);
-        onTagsReplaced(newTags);
-      } catch {
-        showToast({
-          description: tMobileContactDetail("EditTagsFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      } finally {
-        setIsSaving(false);
-      }
-    })();
-  };
-
-  const renderItem = ({ item }: ListRenderItemInfo<TagWithCount>) => (
-    <TagSelectRow
-      disabled={isSaving || isLoadingTags}
-      isSelected={selectedTagIds.has(item.id)}
-      onToggle={() => toggleTag(item.id)}
-      tag={item}
-    />
-  );
-
-  const canSave = hasChanges && !isSaving && !isLoadingTags;
-
-  const sheetHeader = (
-    <Paragraph
-      color={colors.textPrimary}
-      fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
-      fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
-    >
-      {tMobileContactDetail("EditTagsSheetTitle")}
-    </Paragraph>
-  );
-
-  const sheetFooter = (
-    <XStack gap={10}>
-      <Pressable
-        accessibilityRole="button"
-        disabled={isSaving}
-        onPress={handleClose}
-        style={({ pressed }) => [
-          styles.footerButton,
-          styles.footerButtonOutline,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.borderStrong,
-            opacity: isSaving ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
-          },
-        ]}
-      >
-        <Text style={[styles.footerButtonText, { color: colors.textPrimary }]}>
-          {t("actions.cancel")}
-        </Text>
-      </Pressable>
-
-      <Pressable
-        accessibilityRole="button"
-        disabled={!canSave}
-        onPress={handleSave}
-        style={({ pressed }) => [
-          styles.footerButton,
-          {
-            backgroundColor: colors.primary,
-            borderColor: colors.primary,
-            opacity: !canSave ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
-          },
-        ]}
-      >
-        {isSaving ? (
-          <ActivityIndicator color={colors.textOnPrimary} size="small" />
-        ) : (
-          <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {tMobileContactDetail("EditTagsSave")}
-          </Text>
-        )}
-      </Pressable>
-    </XStack>
+  const listEmpty = isLoadingTags ? (
+    <View className="items-center py-8">
+      <ActivityIndicator color={colors.primary} size="small" />
+    </View>
+  ) : (
+    <>
+      <Text className="text-center" fw={600}>
+        {tMobileTags("NoTagsYet")}
+      </Text>
+      <Text c="secondary" className="mt-1.5 text-center" size="sm">
+        {tMobileTags("NoTagsYetHint")}
+      </Text>
+    </>
   );
 
   return (
-    <SearchActionSheet
-      dismissible={!isSaving}
-      footer={sheetFooter}
-      header={sheetHeader}
-      onOpenChange={handleOpenChange}
+    <SelectSheet
+      actions={[
+        {
+          disabled: isSubmitting,
+          label: t("actions.cancel"),
+          onPress: handleClose,
+          tone: "neutral",
+          variant: "outline",
+        },
+        {
+          disabled: !canSave,
+          label: tMobileContactDetail("EditTagsSave"),
+          loading: isSubmitting,
+          loadingText: t("feedback.saving"),
+          onPress: submit,
+          tone: "primary",
+          variant: "filled",
+        },
+      ]}
+      data={isLoadingTags ? [] : displayedTags}
+      emptyLabel={t("feedback.noResults")}
+      emptyState={allTags.length === 0 || isLoadingTags ? listEmpty : undefined}
+      isBusy={isSubmitting}
+      keyExtractor={(item) => item.id}
+      onClose={handleClose}
       onQueryChange={setQuery}
-      open={open}
+      opened={open}
       query={query}
-      searchEditable={!isSaving && !isLoadingTags}
-      searchPlaceholder={tMobileTags("EditTagsSearchPlaceholder")}
-    >
-      {isLoadingTags ? (
-        <View style={styles.loadingState}>
-          <ActivityIndicator color={colors.primary} size="small" />
-        </View>
-      ) : allTags.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Paragraph
-            color={colors.textPrimary}
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.body}
-            fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
-            textAlign="center"
-          >
-            {tMobileTags("NoTagsYet")}
-          </Paragraph>
-          <Paragraph
-            color={colors.textSecondary}
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
-            marginTop={6}
-            textAlign="center"
-          >
-            {tMobileTags("NoTagsYetHint")}
-          </Paragraph>
-        </View>
-      ) : (
-        <FlatList
-          automaticallyAdjustKeyboardInsets
-          contentContainerStyle={styles.listContent}
-          data={displayedTags}
-          initialNumToRender={24}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("feedback.noResults")}
-            </Text>
-          }
-          maxToRenderPerBatch={24}
-          renderItem={renderItem}
-          style={styles.searchList}
-          windowSize={8}
+      renderItem={({ item }) => (
+        <SelectOptionRow
+          disabled={isSubmitting || isLoadingTags}
+          isSelected={selectedTagIds.has(item.id)}
+          mode="multiple"
+          onPress={() => toggleTag(item.id)}
+          option={{
+            label: item.label ?? "",
+            leftSection: <TagChip isClickable={false} tag={item} />,
+            value: item.id,
+          }}
         />
       )}
-    </SearchActionSheet>
+      searchable
+      searchEditable={!isSubmitting && !isLoadingTags}
+      searchPlaceholder={tMobileTags("EditTagsSearchPlaceholder")}
+      snapPoint="selectSearch"
+      title={tMobileContactDetail("EditTagsSheetTitle")}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  emptyText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    paddingVertical: 24,
-    textAlign: "center",
-  },
-  footerButton: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: MOBILE_LAYOUT.touchTarget,
-  },
-  footerButtonOutline: {},
-  footerButtonText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  listContent: {
-    paddingBottom: 12,
-  },
-  loadingState: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    paddingVertical: 32,
-  },
-  searchList: {
-    flex: 1,
-  },
-});

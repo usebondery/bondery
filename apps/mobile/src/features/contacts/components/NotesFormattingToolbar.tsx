@@ -1,6 +1,8 @@
 import { IconBold, IconItalic, IconStrikethrough, IconUnderline } from "@tabler/icons-react-native";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import type { ReactNode } from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
 import type { EnrichedMarkdownTextInputInstance, StyleState } from "react-native-enriched-markdown";
+import { Pressable } from "@/components/ui/Pressable";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
@@ -9,32 +11,34 @@ interface NotesFormattingToolbarProps {
   styleState: StyleState | null;
 }
 
-export function NotesFormattingToolbar({ editorRef, styleState }: NotesFormattingToolbarProps) {
+function ToolbarButton({
+  icon,
+  isActive,
+  onPress,
+  accessibilityLabel,
+}: {
+  icon: ReactNode;
+  isActive?: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+}) {
   const colors = useMobileThemeColors();
 
-  function ToolbarButton({
-    icon,
-    isActive,
-    onPress,
-    accessibilityLabel,
-  }: {
-    icon: React.ReactNode;
-    isActive?: boolean;
-    onPress: () => void;
-    accessibilityLabel: string;
-  }) {
-    return (
-      <Pressable
-        accessibilityLabel={accessibilityLabel}
-        accessibilityRole="button"
-        accessibilityState={{ selected: isActive }}
-        onPress={onPress}
-        style={[styles.button, isActive && { backgroundColor: `${colors.primary}22` }]}
-      >
-        {icon}
-      </Pressable>
-    );
-  }
+  return (
+    <Pressable
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="button"
+      accessibilityState={{ selected: isActive }}
+      onPress={onPress}
+      style={[styles.button, isActive && { backgroundColor: `${colors.primary}22` }]}
+    >
+      {icon}
+    </Pressable>
+  );
+}
+
+export function NotesFormattingToolbar({ editorRef, styleState }: NotesFormattingToolbarProps) {
+  const colors = useMobileThemeColors();
 
   const iconColor = (active?: boolean) => (active ? colors.primary : colors.iconPrimary);
   const iconSize = 20;

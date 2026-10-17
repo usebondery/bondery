@@ -1,4 +1,5 @@
 import type { PrismaClient } from "@bondery/db";
+import { normalizePhoneParts } from "@bondery/helpers/phone";
 import type { EmailEntry, PhoneEntry } from "@bondery/schemas";
 import type { ContactWithId } from "../data/select-fragments.js";
 
@@ -14,7 +15,10 @@ function normalizeContactType(value: unknown): "home" | "work" {
 /**
  * Parses and validates contact phone entries from API input payload.
  */
-export function parsePhoneEntries(input: unknown): PhoneEntry[] {
+export function parsePhoneEntries(
+  input: unknown,
+  defaultCountry: string | null = null,
+): PhoneEntry[] {
   if (!Array.isArray(input)) {
     throw new Error("phones must be an array");
   }
@@ -35,11 +39,19 @@ export function parsePhoneEntries(input: unknown): PhoneEntry[] {
       throw new Error(`phones[${index}].value is required`);
     }
 
+    const normalized = normalizePhoneParts(maybePrefix.trim(), maybeValue.trim(), {
+      defaultCountry,
+    });
+
+    if ("error" in normalized) {
+      throw new Error(`phones[${index}].value is invalid`);
+    }
+
     return {
       preferred: (item as Record<string, unknown>).preferred === true,
-      prefix: maybePrefix.trim(),
+      prefix: normalized.prefix,
       type: normalizeContactType((item as Record<string, unknown>).type),
-      value: maybeValue.trim(),
+      value: normalized.value,
     };
   });
 }

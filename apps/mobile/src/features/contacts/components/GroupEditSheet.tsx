@@ -2,14 +2,14 @@ import { getRandomEmoji } from "@bondery/helpers/emoji";
 import type { Group } from "@bondery/schemas";
 import { createGroupSchema, GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas";
 import { IconCheck, IconTrash } from "@tabler/icons-react-native";
-import { type RefObject, useEffect, useRef, useState } from "react";
+import { type RefObject, useCallback, useEffect, useRef, useState } from "react";
 import { type Control, type UseFormSetValue, useWatch } from "react-hook-form";
-import { StyleSheet, View } from "react-native";
-import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
+import { StyleSheet, Text, View } from "react-native";
 import {
-  ActionSheetPopup,
-  type ActionSheetPopupAction,
-} from "../../../components/ActionSheetPopup";
+  useCommonTranslations,
+  useMobileEmojiPickerTranslations,
+  useMobileGroupsTranslations,
+} from "@/lib/i18n/generated/hooks";
 import {
   ColorPickerInput,
   DEFAULT_GROUP_COLOR,
@@ -17,13 +17,22 @@ import {
 } from "../../../components/color-picker";
 import { EmojiPickerInput } from "../../../components/emoji-picker";
 import { SheetTextField } from "../../../components/form";
+import { ActionButtonShellPressable } from "../../../components/ui/ActionButtonShellPressable";
+import { BottomSheetScrollView, Sheet, type SheetAction } from "../../../components/ui/Sheet";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { createGroup, updateGroup } from "../../../lib/domains/groups";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import type { NativeTextInputRef } from "../../../lib/native-host-refs";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { GroupDeleteDialog } from "./GroupDeleteDialog";
+
+type GroupFormValues = {
+  label: string;
+  emoji: string;
+  color: string;
+};
 
 type GroupEditSheetProps =
   | {
@@ -54,14 +63,13 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
     mode === "edit" ? props.initialColor || DEFAULT_GROUP_COLOR : DEFAULT_GROUP_COLOR;
 
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const labelRef = useRef<NativeTextInputRef>(null);
 
   const {
     control,
     handleSubmit,
     setValue,
-    formState: { isDirty, isValid, isSubmitting },
+    formState: { isDirty, isValid },
   } = useSheetForm({
     getDefaultValues: () =>
       mode === "create"
@@ -93,67 +101,89 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
     return () => clearTimeout(timer);
   }, [open]);
 
-  const canSave =
-    mode === "create" ? isValid && !isSubmitting : isDirty && isValid && !isSubmitting;
+  const handleCloseSheet = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-  const onSubmit = handleSubmit(async (values) => {
-    if (!canSave) {
-      return;
-    }
-    try {
+  const handleSaveError = useCallback(() => {
+    notifications.show({
+      message: mode === "create" ? tMobileGroups("CreateFailed") : tMobileGroups("EditFailed"),
+      title: t("feedback.errorTitle"),
+      type: "error",
+    });
+  }, [mode, t, tMobileGroups]);
+
+  const editGroupId = mode === "edit" ? props.groupId : null;
+
+  const performSave = useCallback(
+    (values: GroupFormValues) => {
       if (mode === "create") {
-        const group = createGroup({
+        return createGroup({
           color: values.color,
           emoji: values.emoji,
           label: values.label,
         });
-        onOpenChange(false);
-        props.onCreated(group);
-        return;
       }
 
-      const group = updateGroup(props.groupId, {
+      if (!editGroupId) {
+        throw new Error("Missing group id");
+      }
+
+      return updateGroup(editGroupId, {
         color: values.color,
         emoji: values.emoji,
         label: values.label,
       });
+    },
+    [editGroupId, mode],
+  );
 
-      onOpenChange(false);
+  const handleSaveSuccess = useCallback(
+    (group: Group) => {
+      if (mode === "create") {
+        props.onCreated(group);
+        return;
+      }
       props.onSaved(group);
-    } catch {
-      showToast({
-        description:
-          mode === "create" ? tMobileGroups("CreateFailed") : tMobileGroups("EditFailed"),
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
-    }
+    },
+    [mode, props],
+  );
+
+  const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
+    onClose: handleCloseSheet,
+    onError: handleSaveError,
+    onSuccess: handleSaveSuccess,
+    perform: performSave,
   });
+
+  const canSave =
+    mode === "create" ? isValid && !isSubmitting : isDirty && isValid && !isSubmitting;
 
   const sheetTitle =
     mode === "create" ? tMobileGroups("CreateSheetTitle") : tMobileGroups("EditSheetTitle");
   const saveLabel = mode === "create" ? tMobileGroups("CreateSave") : tMobileGroups("EditSave");
 
-  const primaryAction: ActionSheetPopupAction = {
+  const primaryAction: SheetAction = {
     disabled: !canSave,
     icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
     label: saveLabel,
     loading: isSubmitting,
-    onPress: () => void onSubmit(),
+    loadingText: t("feedback.saving"),
+    onPress: submit,
     tone: "primary",
     variant: "filled",
   };
 
-  const actions: [ActionSheetPopupAction] | [ActionSheetPopupAction, ActionSheetPopupAction] =
+  const actions: [SheetAction] | [SheetAction, SheetAction] =
     mode === "edit"
       ? [
           {
             disabled: isSubmitting,
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
             label: tMobileGroups("DeleteGroup"),
             onPress: () => setDeleteDialogOpen(true),
             tone: "danger",
-            variant: "outline",
+            variant: "filled",
           },
           primaryAction,
         ]
@@ -166,23 +196,24 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
 
   return (
     <>
-      <ActionSheetPopup
+      <Sheet
         actions={actions}
         isBusy={isSubmitting}
         onClose={() => onOpenChange(false)}
-        onOpenChange={onOpenChange}
-        open={open}
+        opened={open}
+        snapPoint="fit"
         title={sheetTitle}
       >
-        <GroupEditFields
-          control={control}
-          isSubmitting={isSubmitting}
-          labelRef={labelRef}
-          onSubmit={() => void onSubmit()}
-          setValue={setValue}
-          showToast={showToast}
-        />
-      </ActionSheetPopup>
+        <BottomSheetScrollView keyboardShouldPersistTaps="handled">
+          <GroupEditFields
+            control={control}
+            isSubmitting={isSubmitting}
+            labelRef={labelRef}
+            onSubmit={submit}
+            setValue={setValue}
+          />
+        </BottomSheetScrollView>
+      </Sheet>
 
       {mode === "edit" ? (
         <GroupDeleteDialog
@@ -193,18 +224,12 @@ export function GroupEditSheet(props: GroupEditSheetProps) {
             props.onDeleted();
           }}
           onOpenChange={setDeleteDialogOpen}
-          open={isDeleteDialogOpen}
+          opened={isDeleteDialogOpen}
         />
       ) : null}
     </>
   );
 }
-
-type GroupFormValues = {
-  label: string;
-  emoji: string;
-  color: string;
-};
 
 function GroupEditFields({
   control,
@@ -212,18 +237,22 @@ function GroupEditFields({
   isSubmitting,
   labelRef,
   onSubmit,
-  showToast,
 }: {
   control: Control<GroupFormValues>;
   setValue: UseFormSetValue<GroupFormValues>;
   isSubmitting: boolean;
   labelRef: RefObject<NativeTextInputRef | null>;
   onSubmit: () => void;
-  showToast: ReturnType<typeof useAppToast>["showToast"];
 }) {
   const tMobileGroups = useMobileGroupsTranslations();
+  const tMobileEmojiPicker = useMobileEmojiPickerTranslations();
   const emoji = useWatch({ control, name: "emoji" }) ?? "";
   const selectedColor = useWatch({ control, name: "color" }) ?? DEFAULT_GROUP_COLOR;
+
+  const handleRandomAppearance = () => {
+    setValue("emoji", getRandomEmoji(), { shouldDirty: true, shouldValidate: true });
+    setValue("color", getRandomGroupColor(), { shouldDirty: true, shouldValidate: true });
+  };
 
   return (
     <View style={styles.fields}>
@@ -242,10 +271,19 @@ function GroupEditFields({
           compact
           disabled={isSubmitting}
           onChange={(next) => setValue("color", next, { shouldDirty: true, shouldValidate: true })}
-          showToast={showToast}
           stretch
           value={selectedColor}
         />
+
+        <ActionButtonShellPressable
+          accessibilityLabel={tMobileEmojiPicker("RandomAccessibilityLabel")}
+          disabled={isSubmitting}
+          matchInputChrome
+          onPress={handleRandomAppearance}
+          variant="outline"
+        >
+          <Text style={styles.randomDice}>🎲</Text>
+        </ActionButtonShellPressable>
       </View>
 
       <SheetTextField
@@ -271,5 +309,10 @@ const styles = StyleSheet.create({
     alignItems: "flex-start",
     flexDirection: "row",
     gap: 12,
+  },
+  randomDice: {
+    fontSize: 20,
+    lineHeight: 24,
+    textAlign: "center",
   },
 });

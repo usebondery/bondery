@@ -10,7 +10,7 @@ import {
   TableTr,
   Tooltip,
 } from "@mantine/core";
-import { memo, type ReactElement } from "react";
+import type { ReactElement } from "react";
 import type { DataColumnConfig, RowAction } from "#DataTable/types.js";
 import { DotsMenuButton } from "#DotsMenuButton/index.js";
 
@@ -130,14 +130,4 @@ function DataTableRowComponent<TRow>({
   );
 }
 
-export const DataTableRow = memo(
-  DataTableRowComponent,
-  (prev, next) =>
-    prev.rowId === next.rowId &&
-    prev.rowIndex === next.rowIndex &&
-    prev.isSelected === next.isSelected &&
-    prev.isMenuOpen === next.isMenuOpen &&
-    prev.isNonSelectable === next.isNonSelectable &&
-    prev.row === next.row &&
-    prev.visibleColumns === next.visibleColumns,
-) as typeof DataTableRowComponent;
+export const DataTableRow = DataTableRowComponent as typeof DataTableRowComponent;

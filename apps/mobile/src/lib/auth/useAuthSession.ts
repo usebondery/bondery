@@ -1,9 +1,8 @@
-import { useAuth } from "./useAuth";
+import { authClient } from "./client";
 
-/**
- * @deprecated Use `useAuth` from `./useAuth` instead.
- */
 export function useAuthSession() {
-  const { session, isLoadingSession } = useAuth();
-  return { isLoadingSession, session };
+  if (!authClient) {
+    throw new Error("Auth client is not configured");
+  }
+  return authClient.useSession();
 }

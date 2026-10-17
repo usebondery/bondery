@@ -1,26 +1,26 @@
 import { IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useState } from "react";
-import { Text } from "react-native";
+import { useCallback } from "react";
 import {
   useCommonTranslations,
   useMobileTagsTranslations,
   useTagsSettingsTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
+import { Sheet } from "../../../components/ui/Sheet";
 import { deleteTag } from "../../../lib/domains/tags";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface TagDeleteDialogProps {
   onDeleted: () => void;
   onOpenChange: (open: boolean) => void;
-  open: boolean;
+  opened: boolean;
   tagId: string;
   tagLabel: string;
 }
 
 export function TagDeleteDialog({
-  open,
+  opened: open,
   tagId,
   tagLabel,
   onOpenChange,
@@ -30,38 +30,36 @@ export function TagDeleteDialog({
   const tTagsSettings = useTagsSettingsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = useCallback(async () => {
-    if (isDeleting) {
-      return;
-    }
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-    setIsDeleting(true);
+  const handleDeleteError = useCallback(() => {
+    notifications.show({
+      message: tMobileTags("DeleteFailed"),
+      title: t("feedback.errorTitle"),
+      type: "error",
+    });
+  }, [t, tMobileTags]);
 
-    try {
+  const { isSubmitting, submit } = useSheetLocalAction({
+    onClose: handleClose,
+    onError: handleDeleteError,
+    onSuccess: onDeleted,
+    perform: () => {
       deleteTag(tagId);
-      onOpenChange(false);
-      onDeleted();
-    } catch {
-      showToast({
-        description: tMobileTags("DeleteFailed"),
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
-      setIsDeleting(false);
-    }
-  }, [isDeleting, onDeleted, onOpenChange, showToast, t, tagId, tMobileTags]);
+    },
+  });
 
   const dialogTitle = tTagsSettings("DeleteConfirmTitle");
   const dialogMessage = tTagsSettings("DeleteConfirmMessage").replace("{label}", tagLabel);
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={[
         {
-          disabled: isDeleting,
+          disabled: isSubmitting,
           label: t("actions.cancel"),
           onPress: () => onOpenChange(false),
           tone: "neutral",
@@ -70,29 +68,29 @@ export function TagDeleteDialog({
         {
           icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
           label: tTagsSettings("DeleteConfirmButton"),
-          loading: isDeleting,
-          onPress: handleDelete,
+          loading: isSubmitting,
+          loadingText: t("feedback.deleting"),
+          onPress: submit,
           tone: "danger",
           variant: "filled",
         },
       ]}
-      isBusy={isDeleting}
+      isBusy={isSubmitting}
       onClose={() => {
-        if (isDeleting) {
+        if (isSubmitting) {
           return;
         }
         onOpenChange(false);
       }}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen && isDeleting) {
+        if (!nextOpen && isSubmitting) {
           return;
         }
         onOpenChange(nextOpen);
       }}
-      open={open}
+      opened={open}
+      subtitle={dialogMessage}
       title={dialogTitle}
-    >
-      <Text style={{ color: colors.textSecondary }}>{dialogMessage}</Text>
-    </ActionSheetPopup>
+    />
   );
 }

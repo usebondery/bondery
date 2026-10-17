@@ -530,6 +530,12 @@ export const EXAMPLE_EXTENSION_MANIFEST_RESPONSE = {
   },
 };
 
+export const EXAMPLE_MOBILE_MANIFEST_RESPONSE = {
+  mobile: {
+    latestVersion: "1.9.1",
+  },
+};
+
 export const EXAMPLE_HEALTH_OK_RESPONSE = {
   cached: false,
   cacheExpiresAt: EXAMPLE_ISO_TIMESTAMP,

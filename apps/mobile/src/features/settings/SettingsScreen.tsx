@@ -6,38 +6,38 @@ import {
   IconBrandLinkedin,
   IconBrandReddit,
   IconBrandX,
+  IconGavel,
   IconInfoCircle,
   IconMessage,
   IconServer,
   IconSettings,
-  IconShield,
   IconSun,
   IconTag,
   IconUsers,
   IconWorld,
 } from "@tabler/icons-react-native";
-import { useRouter } from "expo-router";
-import { useEffect } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import {
   TabRootLargeTitle,
   TabRootScreenHeader,
   useScrollBottomInset,
 } from "../../components/chrome";
+import { ActionButton } from "../../components/ui/ActionButton";
+import { Group } from "../../components/ui/Group";
+import { InputWrapper } from "../../components/ui/InputWrapper";
+import { NavLink } from "../../components/ui/NavLink";
+import { Paper } from "../../components/ui/Paper";
+import { Stack } from "../../components/ui/Stack";
+import { ThemeIcon } from "../../components/ui/ThemeIcon";
 import {
   useCommonTranslations,
   useMobileSettingsTranslations,
   useTagsSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
-import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
-import { useAppToast } from "../../lib/toast/useAppToast";
+import { notifications } from "../../lib/toast/notifications";
 import { SOCIAL_BRAND_COLORS } from "../../theme/colors";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { ContactSocialButton } from "../contacts/components/ContactSocialButton";
-import { useFabSpeedDialScrollDismiss } from "../navigation/useFabSpeedDialScrollDismiss";
-import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
-import { SettingsSectionCard } from "./components/SettingsSectionCard";
 import { openExternalUrl } from "./openExternalUrl";
 
 const SOCIAL_BUTTONS = [
@@ -82,151 +82,178 @@ export function SettingsScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
   const tTagsSettings = useTagsSettingsTranslations();
   const _t = useCommonTranslations();
-  useEffect(() => {
-    void preloadMobileNamespaces(["mobile.settingsTab"]);
-  }, []);
-  const router = useRouter();
-  const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("tabRoot");
-  const { onScroll: fabScrollDismiss } = useFabSpeedDialScrollDismiss();
 
   const openDocs = () => {
     void openExternalUrl(HELP_DOCS_URL, () => {
-      showToast({
-        description: tMobileSettings("OpenDocsErrorDescription"),
-        headline: tMobileSettings("OpenDocsErrorHeadline"),
+      notifications.show({
+        message: tMobileSettings("OpenDocsErrorDescription"),
+        title: tMobileSettings("OpenDocsErrorHeadline"),
         type: "error",
       });
     });
   };
 
+  const guidesLabel = tMobileSettings("Guides");
+
   return (
-    <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+    <View className="flex-1" style={{ backgroundColor: colors.appBackground }}>
       <TabRootScreenHeader
         titleRow={<TabRootLargeTitle>{tMobileSettings("Title")}</TabRootLargeTitle>}
       />
 
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: scrollBottomInset }]}
-        onScroll={fabScrollDismiss}
-        scrollEventThrottle={16}
-        style={styles.scroll}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingBottom: scrollBottomInset,
+          paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+          paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+        }}
       >
-        <SettingsSectionCard title={tMobileSettings("Account")}>
-          <SettingsNavigationRow
-            icon={<IconSettings size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Account")}
-            onPress={() => router.push("/settings/account")}
-          />
-        </SettingsSectionCard>
+        <Stack gap="lg">
+          <InputWrapper label={tMobileSettings("Account")}>
+            <Paper withBorder>
+              <NavLink
+                href="/settings/account"
+                label={tMobileSettings("Account")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconSettings size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+                withDivider={false}
+              />
+            </Paper>
+          </InputWrapper>
 
-        <SettingsSectionCard title={tMobileSettings("Preferences")}>
-          <SettingsNavigationRow
-            icon={<IconMessage size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("SwipeActions")}
-            onPress={() => router.push("/settings/swipe-actions")}
-          />
+          <InputWrapper label={tMobileSettings("Preferences")}>
+            <Paper withBorder>
+              <NavLink
+                href="/settings/swipe-actions"
+                label={tMobileSettings("SwipeActions")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconMessage size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+              />
+              <NavLink
+                href="/settings/groups"
+                label={tMobileSettings("Groups")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconUsers size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+              />
+              <NavLink
+                href="/settings/tags"
+                label={tTagsSettings("Title")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconTag size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+              />
+              <NavLink
+                href="/settings/language"
+                label={tMobileSettings("LanguageAndTime")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconWorld size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+              />
+              <NavLink
+                href="/settings/theme"
+                label={tMobileSettings("Theme")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconSun size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+                withDivider={false}
+              />
+            </Paper>
+          </InputWrapper>
 
-          <SettingsNavigationRow
-            icon={<IconUsers size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("GroupSort")}
-            onPress={() => router.push("/settings/group-sort")}
-          />
+          <InputWrapper label={tMobileSettings("Links")}>
+            <Paper withBorder>
+              <NavLink
+                accessibilityLabel={`${guidesLabel}. ${tMobileSettings("External")}`}
+                external
+                label={guidesLabel}
+                leftSection={
+                  <ThemeIcon>
+                    <IconBook size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+                onPress={openDocs}
+              />
+              <NavLink
+                href="/settings/about"
+                label={tMobileSettings("AboutUs")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconInfoCircle size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+              />
+              <NavLink
+                href="/settings/legal"
+                label={tMobileSettings("Legal")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconGavel size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+                withDivider={false}
+              />
+            </Paper>
+          </InputWrapper>
 
-          <SettingsNavigationRow
-            icon={<IconTag size={18} stroke={colors.iconPrimary} />}
-            label={tTagsSettings("Title")}
-            onPress={() => router.push("/settings/tags")}
-          />
+          <InputWrapper label={tMobileSettings("FollowUs")}>
+            <Paper withBorder>
+              <Group className="px-4 py-3.5" grow>
+                {SOCIAL_BUTTONS.map((social) => {
+                  const Icon = social.icon;
 
-          <SettingsNavigationRow
-            icon={<IconWorld size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("LanguageAndTime")}
-            onPress={() => router.push("/settings/language")}
-          />
+                  return (
+                    <ActionButton
+                      accessibilityLabel={tMobileSettings(social.labelKey)}
+                      color={social.color}
+                      key={social.id}
+                      onPress={() => {
+                        void openExternalUrl(social.url);
+                      }}
+                      size="md"
+                      variant="outline"
+                    >
+                      <Icon size={20} stroke={social.color} />
+                    </ActionButton>
+                  );
+                })}
+              </Group>
+            </Paper>
+          </InputWrapper>
 
-          <SettingsNavigationRow
-            icon={<IconSun size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Theme")}
-            onPress={() => router.push("/settings/theme")}
-            showDivider={false}
-          />
-        </SettingsSectionCard>
-
-        <SettingsSectionCard title={tMobileSettings("Links")}>
-          <SettingsNavigationRow
-            destination="external"
-            externalLabel={tMobileSettings("External")}
-            icon={<IconBook size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Guides")}
-            onPress={openDocs}
-          />
-
-          <SettingsNavigationRow
-            icon={<IconInfoCircle size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("AboutUs")}
-            onPress={() => router.push("/settings/about")}
-          />
-
-          <SettingsNavigationRow
-            icon={<IconShield size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Legal")}
-            onPress={() => router.push("/settings/legal")}
-            showDivider={false}
-          />
-        </SettingsSectionCard>
-
-        <SettingsSectionCard title={tMobileSettings("FollowUs")}>
-          <View style={styles.socialsRow}>
-            {SOCIAL_BUTTONS.map((social) => {
-              const Icon = social.icon;
-
-              return (
-                <ContactSocialButton
-                  accessibilityLabel={tMobileSettings(social.labelKey)}
-                  color={social.color}
-                  icon={<Icon size={20} stroke={social.color} />}
-                  key={social.id}
-                  onPress={() => {
-                    void openExternalUrl(social.url);
-                  }}
-                />
-              );
-            })}
-          </View>
-        </SettingsSectionCard>
-
-        <SettingsSectionCard title={tMobileSettings("Technical")}>
-          <SettingsNavigationRow
-            icon={<IconServer size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Technical")}
-            onPress={() => router.push("/settings/technical")}
-            showDivider={false}
-          />
-        </SettingsSectionCard>
+          <InputWrapper label={tMobileSettings("Technical")}>
+            <Paper withBorder>
+              <NavLink
+                href="/settings/technical"
+                label={tMobileSettings("Technical")}
+                leftSection={
+                  <ThemeIcon>
+                    <IconServer size={18} stroke={colors.iconPrimary} />
+                  </ThemeIcon>
+                }
+                withDivider={false}
+              />
+            </Paper>
+          </InputWrapper>
+        </Stack>
       </ScrollView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-  },
-  screen: {
-    flex: 1,
-  },
-  scroll: {
-    flex: 1,
-  },
-  socialsRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 14,
-    justifyContent: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-  },
-});

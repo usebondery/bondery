@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text } from "react-native";
-import { MOBILE_TEXT_STYLES } from "../../theme/tokens";
-import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { MOBILE_LAYOUT } from "../../theme/layout";
+import { Heading } from "../ui/Heading";
 
 interface TabRootLargeTitleProps {
   children: ReactNode;
@@ -9,20 +8,14 @@ interface TabRootLargeTitleProps {
 
 /** Large tab-root screen title sized to fit the fixed title row slot. */
 export function TabRootLargeTitle({ children }: TabRootLargeTitleProps) {
-  const colors = useMobileThemeColors();
-
   return (
-    <Text
+    <Heading
+      className="self-start"
       numberOfLines={1}
-      style={[MOBILE_TEXT_STYLES.largeTitle, styles.title, { color: colors.textPrimary }]}
+      order={1}
+      style={{ lineHeight: MOBILE_LAYOUT.screenChrome.titleRowHeight }}
     >
       {children}
-    </Text>
+    </Heading>
   );
 }
-
-const styles = StyleSheet.create({
-  title: {
-    alignSelf: "flex-start",
-  },
-});

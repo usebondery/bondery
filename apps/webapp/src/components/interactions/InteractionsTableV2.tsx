@@ -21,7 +21,6 @@ import {
   IconUsers,
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
 import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
@@ -139,16 +138,12 @@ export function InteractionsTableV2({
   const locale = useLocale();
   const getInteractionTypeLabel = useInteractionTypeLabel();
 
-  const dateFormatter = useMemo(
-    () =>
-      new Intl.DateTimeFormat(locale || "en-US", {
-        dateStyle: "medium",
-      }),
-    [locale],
-  );
+  const dateFormatter = new Intl.DateTimeFormat(locale || "en-US", {
+    dateStyle: "medium",
+  });
 
   // --- Derive rows with participants ---
-  const derivedRows = useMemo<DerivedInteractionRow[]>(() => {
+  const derivedRows = (() => {
     return activities.map((activity) => {
       const participants = resolveParticipants(activity);
       const participantNames = participants
@@ -163,10 +158,10 @@ export function InteractionsTableV2({
         participants,
       };
     });
-  }, [activities, resolveParticipants]);
+  })();
 
   // --- Filter and sort ---
-  const filteredAndSortedRows = useMemo(() => {
+  const filteredAndSortedRows = (() => {
     const searchQuery = searchValue.trim().toLowerCase();
 
     const filtered = searchQuery
@@ -193,7 +188,7 @@ export function InteractionsTableV2({
           return new Date(right.activity.date).getTime() - new Date(left.activity.date).getTime();
       }
     });
-  }, [derivedRows, searchValue, sortOrder]);
+  })();
 
   // --- Build data columns ---
   const dataColumns: DataColumnConfig<DerivedInteractionRow>[] = columns.map((col) => ({

@@ -1,10 +1,5 @@
-import i18n from "../i18n/i18n";
-import { isDeviceOffline } from "../network/isDeviceOffline";
+import type { TransportUnavailableKind } from "./transport-unavailable-error";
 
-export async function resolveFetchFailureMessage(_error: unknown): Promise<string> {
-  if (await isDeviceOffline()) {
-    return i18n.t("errors.connection");
-  }
-
-  return i18n.t("errors.apiUnreachable");
+export function classifyFetchFailureKind(isOffline: boolean): TransportUnavailableKind {
+  return isOffline ? "offline" : "unreachable";
 }

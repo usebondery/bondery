@@ -19,8 +19,12 @@ import {
   putContactImportantDates,
   updateContact,
 } from "../../../lib/domains/contacts";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { goBackOrReplace } from "../../../lib/navigation/goBackOrReplace";
+import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
 import { ShareUnavailableError, shareContactVCard } from "../../../lib/share/shareContactVCard";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
+import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 import { normalizeEmailsForSave, normalizePhonesForSave } from "../contactChannelConstants";
 import { formatContactName } from "../contactUtils";
 
@@ -38,8 +42,8 @@ export function useContactDetailHandlers({
   const tMobileContactDetail = useMobileContactDetailTranslations();
   const t = useCommonTranslations();
   const router = useRouter();
-  const { showToast } = useAppToast();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { openContactNotes, openMyselfNotes } = useAppNavigation();
+  const showErrorToast = useShowErrorToast();
   const [isSharing, setIsSharing] = useState(false);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isShareEmailSheetOpen, setShareEmailSheetOpen] = useState(false);
@@ -59,46 +63,48 @@ export function useContactDetailHandlers({
         });
       } catch (err) {
         if (err instanceof ShareUnavailableError) {
-          showToast({
-            headline: tMobileContactDetail("ShareUnavailable"),
+          notifications.show({
+            title: tMobileContactDetail("ShareUnavailable"),
             type: "error",
           });
           return;
         }
 
-        showToast({
-          description: tMobileContactDetail("ShareFailedDescription"),
-          headline: tMobileContactDetail("ShareFailed"),
-          type: "error",
-        });
+        showErrorToast(err, tMobileContactDetail("ShareFailed"));
       } finally {
         setIsSharing(false);
       }
     })();
-  }, [contact, name, showToast, tMobileContactDetail]);
+  }, [contact, name, showErrorToast, tMobileContactDetail]);
 
-  const handleDeleteContact = useCallback(() => {
-    void (async () => {
-      setIsDeleting(true);
+  const handleCloseDeleteConfirm = useCallback(() => {
+    setDeleteConfirmOpen(false);
+  }, []);
 
-      try {
-        deleteContact(contact.id, contact.updatedAt ?? undefined);
-        setDeleteConfirmOpen(false);
-        router.back();
-      } catch {
-        showToast({
-          description: tMobileContactDetail("DeleteFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      } finally {
-        setIsDeleting(false);
-      }
-    })();
-  }, [contact.id, contact.updatedAt, router, showToast, t, tMobileContactDetail]);
+  const performDeleteContact = useCallback(() => {
+    deleteContact(contact.id, contact.updatedAt ?? undefined);
+  }, [contact.id, contact.updatedAt]);
+
+  const handleDeleteSuccess = useCallback(() => {
+    goBackOrReplace(router, "/contacts");
+  }, [router]);
+
+  const handleDeleteError = useCallback(
+    (error: unknown) => {
+      showErrorToast(error);
+    },
+    [showErrorToast],
+  );
+
+  const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
+    onClose: handleCloseDeleteConfirm,
+    onError: handleDeleteError,
+    onSuccess: handleDeleteSuccess,
+    perform: performDeleteContact,
+  });
 
   const handleUpdateSocial = useCallback(
-    async (platform: ContactSocialFieldKey, value: string) => {
+    (platform: ContactSocialFieldKey, value: string) => {
       updateContact(
         contact.id,
         {
@@ -112,7 +118,7 @@ export function useContactDetailHandlers({
   );
 
   const handleSavePhones = useCallback(
-    async (nextPhones: PhoneEntry[]) => {
+    (nextPhones: PhoneEntry[]) => {
       updateContact(
         contact.id,
         {
@@ -126,7 +132,7 @@ export function useContactDetailHandlers({
   );
 
   const handleSaveEmails = useCallback(
-    async (nextEmails: EmailEntry[]) => {
+    (nextEmails: EmailEntry[]) => {
       updateContact(
         contact.id,
         {
@@ -140,7 +146,7 @@ export function useContactDetailHandlers({
   );
 
   const handleSaveAddresses = useCallback(
-    async (nextAddresses: ContactAddressEntry[]) => {
+    (nextAddresses: ContactAddressEntry[]) => {
       updateContact(
         contact.id,
         {
@@ -156,44 +162,44 @@ export function useContactDetailHandlers({
   const openPhone = useCallback(
     (phone: PhoneEntry) => {
       Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
-        showToast({
-          description: "Could not open phone dialer",
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: "Could not open phone dialer",
+          title: t("feedback.errorTitle"),
           type: "error",
         });
       });
     },
-    [showToast, t],
+    [t],
   );
 
   const openSms = useCallback(
     (phone: PhoneEntry) => {
       Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
-        showToast({
-          description: "Could not open messages",
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: "Could not open messages",
+          title: t("feedback.errorTitle"),
           type: "error",
         });
       });
     },
-    [showToast, t],
+    [t],
   );
 
   const openEmail = useCallback(
     (email: EmailEntry) => {
       Linking.openURL(`mailto:${email.value}`).catch(() => {
-        showToast({
-          description: "Could not open email app",
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: "Could not open email app",
+          title: t("feedback.errorTitle"),
           type: "error",
         });
       });
     },
-    [showToast, t],
+    [t],
   );
 
   const handleSaveImportantDates = useCallback(
-    (nextDates: ImportantDate[]): Promise<void> => {
+    (nextDates: ImportantDate[]) => {
       const payload = nextDates
         .filter((entry) => entry.date)
         .map((entry) => ({
@@ -211,21 +217,19 @@ export function useContactDetailHandlers({
 
       putContactImportantDates(contact.id, parsed.data);
       onContactUpdated();
-      return Promise.resolve();
     },
     [contact.id, onContactUpdated],
   );
 
   const openNotesEditor = useCallback(() => {
     if (isMyselfMode) {
-      router.push("/myself/notes");
+      openMyselfNotes();
     } else {
-      router.push(`/contact/${contact.id}/notes`);
+      openContactNotes(contact.id);
     }
-  }, [contact.id, isMyselfMode, router]);
+  }, [contact.id, isMyselfMode, openContactNotes, openMyselfNotes]);
 
   return {
-    handleDeleteContact,
     handleSaveAddresses,
     handleSaveEmails,
     handleSaveImportantDates,
@@ -245,5 +249,6 @@ export function useContactDetailHandlers({
     setIdentitySheetOpen,
     setShareEmailSheetOpen,
     shareContact,
+    submitDelete,
   };
 }

@@ -84,7 +84,6 @@ export function SupportCard() {
   const handleOpenFeedbackModal = () => {
     openFeedbackModal();
   };
-
   return (
     <SettingsSection icon={<IconLifebuoy size={20} stroke={1.5} />} id="support" title={t("Title")}>
       <CardSection inheritPadding py="md">

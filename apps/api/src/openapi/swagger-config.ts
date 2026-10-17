@@ -83,6 +83,11 @@ export const swaggerOpenApiConfig = {
       description: "Browser extension integration endpoints",
       name: "Extension",
     },
+    {
+      description:
+        "Public mobile app configuration. `GET /mobile/manifest` advertises the current production CalVer for a non-blocking update check. Not a health probe — use `GET /health/live` for liveness.",
+      name: "Mobile",
+    },
     { description: "AI chat assistant", name: "Chat" },
     {
       description: "Subscription and billing management",

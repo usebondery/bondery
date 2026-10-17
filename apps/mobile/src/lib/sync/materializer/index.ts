@@ -1,6 +1,12 @@
-import type { SyncBatch, SyncChange, SyncTableKey } from "@bondery/schemas/sync";
+import {
+  SYNC_TABLE_KEYS,
+  type SyncBatch,
+  type SyncChange,
+  type SyncTableKey,
+} from "@bondery/schemas/sync";
 import type { SQLiteDatabase } from "expo-sqlite";
 import { getSyncDatabase } from "../db";
+import { collectAppliedSyncTables } from "./applied-tables";
 import { applyPeopleShapeOp } from "./people";
 import type { ShapeRowMessage } from "./read-row";
 import {
@@ -31,13 +37,18 @@ const MATERIALIZERS: Record<SyncShapeKey, (db: SQLiteDatabase, message: ShapeRow
     tags: applyTagsShapeOp,
   };
 
-export const ALL_SYNC_TABLE_KEYS = Object.keys(MATERIALIZERS) as SyncShapeKey[];
+export const ALL_SYNC_TABLE_KEYS = [...SYNC_TABLE_KEYS];
 
-function applyChange(db: SQLiteDatabase, change: SyncChange): void {
+export type MaterializerResult = {
+  hadChanges: boolean;
+  tables: SyncTableKey[];
+};
+
+function applyChange(db: SQLiteDatabase, change: SyncChange): SyncTableKey | null {
   const table = change.table as SyncShapeKey;
   const materializer = MATERIALIZERS[table];
   if (!materializer) {
-    return;
+    return null;
   }
 
   const operation =
@@ -47,35 +58,39 @@ function applyChange(db: SQLiteDatabase, change: SyncChange): void {
     operation,
     value: (change.value ?? { id: change.entityId }) as Record<string, unknown>,
   });
+  return table;
 }
 
-export function applySyncBatch(batch: SyncBatch): boolean {
+export function applySyncBatch(batch: SyncBatch): MaterializerResult {
   const db = getSyncDatabase();
-  let hadChanges = false;
+  const tables = new Set<SyncTableKey>();
 
   db.withTransactionSync(() => {
     for (const change of batch.changes) {
-      applyChange(db, change);
-      hadChanges = true;
+      const table = applyChange(db, change);
+      if (table) {
+        tables.add(table);
+      }
     }
   });
 
-  return hadChanges;
+  return { hadChanges: tables.size > 0, tables: Array.from(tables) };
 }
 
-export function applySyncBatches(batches: SyncBatch[]): boolean {
+export function applySyncBatches(batches: SyncBatch[]): MaterializerResult {
   let hadChanges = false;
   for (const batch of batches) {
-    if (applySyncBatch(batch)) {
+    const result = applySyncBatch(batch);
+    if (result.hadChanges) {
       hadChanges = true;
     }
   }
-  return hadChanges;
+  return { hadChanges, tables: collectAppliedSyncTables(batches) };
 }
 
 export function applyBootstrapTables(
   tables: Partial<Record<SyncTableKey, Record<string, unknown>[]>>,
-): boolean {
+): MaterializerResult {
   const db = getSyncDatabase();
   let hadChanges = false;
 
@@ -90,7 +105,8 @@ export function applyBootstrapTables(
     }
   });
 
-  return hadChanges;
+  return { hadChanges, tables: [...ALL_SYNC_TABLE_KEYS] };
 }
 
+export { collectAppliedSyncTables } from "./applied-tables";
 export { applyPeopleShapeOp } from "./people";

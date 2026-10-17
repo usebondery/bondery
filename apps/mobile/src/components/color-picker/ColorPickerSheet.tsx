@@ -1,21 +1,20 @@
-import { IconCopy, IconX } from "@tabler/icons-react-native";
-import { Sheet } from "@tamagui/sheet";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import { IconCopy } from "@tabler/icons-react-native";
+import { startTransition, useCallback, useEffect, useMemo, useState } from "react";
+import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import type { ColorFormatsObject } from "reanimated-color-picker";
 import ColorPicker, { Panel3 } from "reanimated-color-picker";
 import { copyToClipboard } from "../../lib/clipboard/copyToClipboard";
-import { SHEET_SNAP_POINTS } from "../../lib/config";
 import {
   useCommonTranslations,
   useContactInfoTranslations,
   useMobileColorPickerTranslations,
   useMobileGroupsTranslations,
 } from "../../lib/i18n/generated/hooks";
-import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
-import { MOBILE_HIT_SLOP, MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { MobileTextInput } from "../MobileTextInput";
+import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
+import { BottomSheetScrollView, Sheet } from "../ui/Sheet";
+import { TextInput } from "../ui/TextInput";
 import { ColorSwatchGrid } from "./ColorSwatchGrid";
 import { getContrastBorderColor, normalizeHex } from "./colorUtils";
 import { COLOR_PICKER_LAYOUT, DEFAULT_GROUP_COLOR } from "./constants";
@@ -24,17 +23,10 @@ interface ColorPickerSheetProps {
   onOpenChange: (open: boolean) => void;
   onSelect: (hex: string) => void;
   open: boolean;
-  showToast: (options: ShowAppToastInput) => void;
   value: string;
 }
 
-export function ColorPickerSheet({
-  open,
-  value,
-  onOpenChange,
-  onSelect,
-  showToast,
-}: ColorPickerSheetProps) {
+export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorPickerSheetProps) {
   const tContactInfo = useContactInfoTranslations();
   const tMobileColorPicker = useMobileColorPickerTranslations();
   const tMobileGroups = useMobileGroupsTranslations();
@@ -67,17 +59,12 @@ export function ColorPickerSheet({
     }
 
     const normalized = normalizeHex(value) || DEFAULT_GROUP_COLOR;
-    setDraftColor(normalized);
-    setHexInput(normalized);
-    setHexError(null);
+    startTransition(() => {
+      setDraftColor(normalized);
+      setHexInput(normalized);
+      setHexError(null);
+    });
   }, [open, value]);
-
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      onOpenChange(nextOpen);
-    },
-    [onOpenChange],
-  );
 
   const handleClose = useCallback(() => {
     onOpenChange(false);
@@ -141,13 +128,13 @@ export function ColorPickerSheet({
       return;
     }
 
-    await copyToClipboard(normalized, showToast, {
+    await copyToClipboard(normalized, {
       errorDescription: tMobileColorPicker("CopyFailedMessage"),
       errorHeadline: t("feedback.errorTitle"),
       successDescription: tMobileColorPicker("ColorCopiedMessage"),
       successHeadline: tContactInfo("CopySuccessTitle"),
     });
-  }, [draftColor, showToast, t, tMobileColorPicker, tContactInfo]);
+  }, [draftColor, t, tMobileColorPicker, tContactInfo]);
 
   const colorPreview = (
     <View
@@ -163,138 +150,84 @@ export function ColorPickerSheet({
 
   return (
     <Sheet
-      dismissOnOverlayPress
-      dismissOnSnapToBottom
-      modal
-      moveOnKeyboardChange
-      native
-      onOpenChange={handleOpenChange}
-      open={open}
-      snapPoints={[SHEET_SNAP_POINTS.selectSearch]}
-      snapPointsMode="percent"
+      onClose={handleClose}
+      opened={open}
+      snapPoint="selectSearch"
+      title={tMobileColorPicker("SheetTitle")}
     >
-      <Sheet.Overlay backgroundColor={colors.overlay} />
-      <Sheet.Frame
-        backgroundColor={colors.surface}
-        borderTopLeftRadius={MOBILE_LAYOUT.borderRadius.control * 2}
-        borderTopRightRadius={MOBILE_LAYOUT.borderRadius.control * 2}
-        flex={1}
-        paddingBottom={20}
-        paddingTop={10}
+      <BottomSheetScrollView
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
       >
-        <Sheet.Handle backgroundColor={colors.borderStrong} marginBottom={10} />
-
-        <View style={styles.sheetContent}>
-          <View style={styles.closeRow}>
-            <Pressable
-              accessibilityLabel="Close"
-              accessibilityRole="button"
-              hitSlop={MOBILE_HIT_SLOP.icon}
-              onPress={handleClose}
-              style={({ pressed }) => [styles.closeButton, pressed && { opacity: 0.7 }]}
-            >
-              <IconX size={20} stroke={colors.iconPrimary} />
-            </Pressable>
+        <View style={styles.hexRow}>
+          <View style={styles.hexInputSlot}>
+            <TextInput
+              accessibilityLabel={`${tMobileGroups("EditColorLabel")} ${draftColor}`}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              enterKeyHint="done"
+              error={hexError != null}
+              leftSection={colorPreview}
+              onBlur={commitHexInput}
+              onChangeText={(text) => {
+                setHexInput(text);
+                if (hexError) {
+                  setHexError(null);
+                }
+              }}
+              onSubmitEditing={commitHexInput}
+              placeholder={tMobileColorPicker("HexPlaceholder")}
+              returnKeyType="done"
+              value={hexInput}
+              variant="sheet"
+            />
           </View>
 
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
+          <ActionButtonShellPressable
+            accessibilityLabel={tMobileColorPicker("CopyAccessibilityLabel")}
+            matchInputChrome
+            onPress={() => void handleCopyHex()}
+            size="md"
+            variant="outline"
           >
-            <View style={styles.hexRow}>
-              <View style={styles.hexInputSlot}>
-                <MobileTextInput
-                  accessibilityLabel={`${tMobileGroups("EditColorLabel")} ${draftColor}`}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  enterKeyHint="done"
-                  error={hexError != null}
-                  leadingIcon={colorPreview}
-                  onBlur={commitHexInput}
-                  onChangeText={(text) => {
-                    setHexInput(text);
-                    if (hexError) {
-                      setHexError(null);
-                    }
-                  }}
-                  onSubmitEditing={commitHexInput}
-                  placeholder={tMobileColorPicker("HexPlaceholder")}
-                  returnKeyType="done"
-                  value={hexInput}
-                />
-              </View>
-
-              <Pressable
-                accessibilityLabel={tMobileColorPicker("CopyAccessibilityLabel")}
-                accessibilityRole="button"
-                onPress={() => void handleCopyHex()}
-                style={({ pressed }) => [
-                  styles.copyButton,
-                  {
-                    backgroundColor: pressed ? colors.surfacePressed : colors.inputBackground,
-                    borderColor: colors.borderStrong,
-                  },
-                ]}
-              >
-                <IconCopy color={colors.iconSecondary} size={18} />
-              </Pressable>
-            </View>
-
-            {hexError ? (
-              <Text style={[styles.hexError, { color: colors.dangerText }]}>{hexError}</Text>
-            ) : null}
-
-            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              {tMobileColorPicker("SwatchesLabel")}
-            </Text>
-
-            <ColorSwatchGrid onSelect={handleSwatchSelect} value={draftColor} />
-
-            <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
-              {tMobileColorPicker("CustomColorLabel")}
-            </Text>
-
-            <ColorPicker
-              onChangeJS={handleWheelChange}
-              onCompleteJS={handleWheelComplete}
-              value={draftColor}
-            >
-              <Panel3
-                style={{
-                  alignSelf: "center",
-                  height: wheelSize,
-                  width: wheelSize,
-                }}
-              />
-            </ColorPicker>
-          </ScrollView>
+            <IconCopy color={colors.iconSecondary} size={18} />
+          </ActionButtonShellPressable>
         </View>
-      </Sheet.Frame>
+
+        {hexError ? (
+          <Text style={[styles.hexError, { color: colors.dangerText }]}>{hexError}</Text>
+        ) : null}
+
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+          {tMobileColorPicker("SwatchesLabel")}
+        </Text>
+
+        <ColorSwatchGrid onSelect={handleSwatchSelect} value={draftColor} />
+
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+          {tMobileColorPicker("CustomColorLabel")}
+        </Text>
+
+        <ColorPicker
+          onChangeJS={handleWheelChange}
+          onCompleteJS={handleWheelComplete}
+          value={draftColor}
+        >
+          <Panel3
+            style={{
+              alignSelf: "center",
+              height: wheelSize,
+              width: wheelSize,
+            }}
+          />
+        </ColorPicker>
+      </BottomSheetScrollView>
     </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  closeButton: {
-    alignItems: "center",
-    height: MOBILE_LAYOUT.iconButton,
-    justifyContent: "center",
-    width: MOBILE_LAYOUT.iconButton,
-  },
-  closeRow: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginBottom: 4,
-  },
-  copyButton: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    height: MOBILE_LAYOUT.touchTarget,
-    justifyContent: "center",
-    width: MOBILE_LAYOUT.touchTarget,
-  },
   hexError: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     marginTop: -4,
@@ -304,7 +237,7 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   hexRow: {
-    alignItems: "flex-start",
+    alignItems: "center",
     flexDirection: "row",
     gap: 8,
   },
@@ -322,10 +255,5 @@ const styles = StyleSheet.create({
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
     marginTop: 4,
-  },
-  sheetContent: {
-    flex: 1,
-    minHeight: 0,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
   },
 });

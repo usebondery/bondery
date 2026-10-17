@@ -18,8 +18,10 @@ import type {
 import { EnrichedMarkdownTextInput } from "react-native-enriched-markdown";
 import { StackNavBar } from "../../components/chrome";
 import { updateContact } from "../../lib/domains/contacts";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
+import { syncEffectState } from "../../lib/react/syncEffectState";
 import { useContact, useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
-import { useAppToast } from "../../lib/toast/useAppToast";
+import { notifications } from "../../lib/toast/notifications";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { EditorCommandPalette, type EditorPaletteMode } from "./components/EditorCommandPalette";
@@ -44,7 +46,6 @@ const AUTOSAVE_DELAY_MS = 1500;
 export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProps) {
   const router = useRouter();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
 
   const [contactId, setContactId] = useState<string | null>(id ?? null);
   const [contactName, setContactName] = useState<string>("");
@@ -110,21 +111,23 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
   const resolvedContact = isMyselfMode ? fetchedMyself : fetchedContact;
 
   useEffect(() => {
-    if (!resolvedContact) {
-      if (!isMyselfMode && !id) {
-        showToast({ headline: "Failed to load notes", type: "error" });
-        setLoading(false);
+    syncEffectState(() => {
+      if (!resolvedContact) {
+        if (!isMyselfMode && !id) {
+          notifications.show({ title: "Failed to load notes", type: "error" });
+          setLoading(false);
+        }
+        return;
       }
-      return;
-    }
 
-    setContactId(resolvedContact.id);
-    setContactName(formatContactName(resolvedContact));
-    setLoadedContact(resolvedContact);
-    setNotesUpdatedAt(resolvedContact.notesUpdatedAt ?? null);
-    setRawMarkdown(htmlToMarkdown(resolvedContact.notes ?? ""));
-    setLoading(false);
-  }, [id, isMyselfMode, resolvedContact, showToast]);
+      setContactId(resolvedContact.id);
+      setContactName(formatContactName(resolvedContact));
+      setLoadedContact(resolvedContact);
+      setNotesUpdatedAt(resolvedContact.notesUpdatedAt ?? null);
+      setRawMarkdown(htmlToMarkdown(resolvedContact.notes ?? ""));
+      setLoading(false);
+    });
+  }, [id, isMyselfMode, resolvedContact]);
 
   const saveNotes = useCallback(
     async (markdown: string) => {
@@ -142,12 +145,12 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
         setSaveStatus("saved");
       } catch {
         setSaveStatus("error");
-        showToast({ headline: "Failed to save notes", type: "error" });
+        notifications.show({ title: "Failed to save notes", type: "error" });
       } finally {
         isSavingRef.current = false;
       }
     },
-    [contactId, showToast],
+    [contactId],
   );
 
   const scheduleAutosave = useCallback(
@@ -309,7 +312,7 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
-      <StackNavBar onBack={() => router.back()} titleRow={titleRow} />
+      <StackNavBar onBack={() => goBackOrReplace(router, "/contacts")} titleRow={titleRow} />
 
       {showEditor ? (
         <KeyboardAvoidingView

@@ -19,17 +19,18 @@ import {
   IconTrash,
 } from "@tabler/icons-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
-import { useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
-import {
-  ActionSheetPopup,
-  type ActionSheetPopupAction,
-} from "../../../components/ActionSheetPopup";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
+import { useCommonTranslations, useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
 import { SheetSelectField, SheetTextField } from "../../../components/form";
+import { Sheet, type SheetAction } from "../../../components/ui/Sheet";
 import { fetchGeocodeSuggestions } from "../../../lib/api/client";
 import { UI_TIMING_MS } from "../../../lib/config";
 import { useSheetForm } from "../../../lib/forms/useSheetForm";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import type { NativeTextInputRef } from "../../../lib/native-host-refs";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CountryFlag } from "./CountryFlag";
@@ -38,12 +39,12 @@ type SheetMode = "add" | "edit";
 
 interface EditAddressSheetProps {
   initialEntry: ContactAddressEntry | null;
-  isSubmitting: boolean;
   mode: SheetMode;
   onCancel: () => void;
   onDelete?: () => void;
+  onError?: (error: unknown) => void;
   onOpenChange: (open: boolean) => void;
-  onSave: (entry: ContactAddressEntry) => void;
+  onPersist: (entry: ContactAddressEntry) => void;
   open: boolean;
 }
 
@@ -87,12 +88,13 @@ export function EditAddressSheet({
   open,
   mode,
   initialEntry,
-  isSubmitting,
   onOpenChange,
   onCancel,
-  onSave,
+  onPersist,
   onDelete,
+  onError,
 }: EditAddressSheetProps) {
+  const tCommon = useCommonTranslations();
   const tContactAddress = useContactAddressTranslations();
   const colors = useMobileThemeColors();
   const inputRef = useRef<NativeTextInputRef>(null);
@@ -139,9 +141,11 @@ export function EditAddressSheet({
     }
 
     const entry = initialEntry;
-    setSuggestions([]);
-    setGeocodeStatus(entry?.latitude != null ? "geocoded" : "idle");
-    setGeocodedSuggestion(null);
+    syncEffectState(() => {
+      setSuggestions([]);
+      setGeocodeStatus(entry?.latitude != null ? "geocoded" : "idle");
+      setGeocodedSuggestion(null);
+    });
   }, [open, initialEntry, invalidateSuggestionsFetch]);
 
   useEffect(() => {
@@ -260,18 +264,45 @@ export function EditAddressSheet({
     SUGGESTIONS_MAX_HEIGHT,
   );
 
-  const canSubmit = isValid && !isSubmitting;
-  const onSubmit = handleSubmit((values: ContactAddressSheetOutput) => {
-    const entry = buildAddressEntry(
-      values.value,
-      values.label ?? "",
-      values.type,
-      geocodedSuggestion,
-      initialEntry,
-    );
-    const parsedEntry = contactAddressEntrySchema.parse(entry);
-    onSave(parsedEntry);
+  const handleCloseSheet = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
+
+  const performSave = useCallback(
+    (values: ContactAddressSheetOutput) => {
+      const entry = buildAddressEntry(
+        values.value,
+        values.label ?? "",
+        values.type,
+        geocodedSuggestion,
+        initialEntry,
+      );
+      const parsedEntry = contactAddressEntrySchema.parse(entry);
+      onPersist(parsedEntry);
+      return parsedEntry;
+    },
+    [geocodedSuggestion, initialEntry, onPersist],
+  );
+
+  const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {
+    onClose: handleCloseSheet,
+    onError,
+    perform: performSave,
   });
+
+  const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError,
+    perform: () => {
+      if (!onDelete) {
+        throw new Error("Delete handler missing");
+      }
+      onDelete();
+    },
+  });
+
+  const isBusy = isSubmitting || isDeleting;
+  const canSubmit = isValid && !isBusy;
 
   const typeOptions = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
     label:
@@ -291,7 +322,7 @@ export function EditAddressSheet({
       <IconMapPinCheck size={18} stroke={colors.primary} />
     ) : null;
 
-  const primaryAction: ActionSheetPopupAction = {
+  const primaryAction: SheetAction = {
     disabled: !canSubmit,
     icon:
       mode === "add" ? (
@@ -302,33 +333,35 @@ export function EditAddressSheet({
     label:
       mode === "add" ? tContactAddress("AddAddressAction") : tContactAddress("SaveAddressAction"),
     loading: isSubmitting,
-    onPress: () => void onSubmit(),
+    loadingText: tCommon("feedback.saving"),
+    onPress: submit,
     tone: "primary",
     variant: "filled",
   };
 
-  const actions: [ActionSheetPopupAction] | [ActionSheetPopupAction, ActionSheetPopupAction] =
+  const actions: [SheetAction] | [SheetAction, SheetAction] =
     mode === "edit" && onDelete
       ? [
           {
-            disabled: isSubmitting,
-            icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
+            disabled: isBusy,
+            icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
             label: tContactAddress("DeleteAction"),
-            onPress: onDelete,
+            loading: isDeleting,
+            loadingText: tCommon("feedback.deleting"),
+            onPress: submitDelete,
             tone: "danger",
-            variant: "outline",
+            variant: "filled",
           },
           primaryAction,
         ]
       : [primaryAction];
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={actions}
-      isBusy={isSubmitting}
+      isBusy={isBusy}
       onClose={onCancel}
-      onOpenChange={onOpenChange}
-      open={open}
+      opened={open}
       title={
         mode === "add" ? tContactAddress("AddAddressTitle") : tContactAddress("EditAddressTitle")
       }
@@ -337,7 +370,7 @@ export function EditAddressSheet({
         autoCapitalize="words"
         autoCorrect={false}
         control={control as never}
-        editable={!isSubmitting}
+        editable={!isBusy}
         enterKeyHint="search"
         inputRef={inputRef}
         leadingIcon={<IconMapPin size={16} stroke={colors.iconSecondary} />}
@@ -345,8 +378,7 @@ export function EditAddressSheet({
         onFieldChange={handleAddressChange}
         placeholder={tContactAddress("LookupPlaceholder")}
         returnKeyType="search"
-        showMaxLengthCounter={false}
-        trailingAccessory={geocodeTrailingIcon}
+        rightSection={geocodeTrailingIcon}
       />
 
       {suggestions.length > 0 ? (
@@ -374,7 +406,7 @@ export function EditAddressSheet({
         autoCapitalize="words"
         autoCorrect={false}
         control={control as never}
-        editable={!isSubmitting}
+        editable={!isBusy}
         maxLength={64}
         name="label"
         placeholder={tContactAddress("LabelFieldPlaceholder")}
@@ -386,7 +418,7 @@ export function EditAddressSheet({
         name="type"
         options={typeOptions}
       />
-    </ActionSheetPopup>
+    </Sheet>
   );
 }
 

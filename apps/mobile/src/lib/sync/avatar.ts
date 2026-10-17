@@ -1,10 +1,13 @@
 import { normalizeMobileUrlForDevice, STORAGE_URL } from "../config";
+import { toCacheBustToken } from "./avatar-clock";
+
+export { parseAvatarUpdatedAtFromUrl } from "./avatar-clock";
 
 export function resolveLocalContactAvatarUrl(
   userId: string,
   personId: string,
   hasAvatar: boolean,
-  updatedAt?: string | null,
+  avatarUpdatedAt?: string | null,
 ): string | null {
   if (!hasAvatar || !STORAGE_URL || !userId) {
     return null;
@@ -12,7 +15,8 @@ export function resolveLocalContactAvatarUrl(
 
   const path = `${userId}/${personId}.jpg`;
   const baseUrl = `${STORAGE_URL.replace(/\/+$/, "")}/avatars/${path}`;
-  const cacheBust = updatedAt ? `?t=${Date.parse(updatedAt)}` : "";
+  const ts = toCacheBustToken(avatarUpdatedAt);
+  const cacheBust = ts != null ? `?t=${ts}` : "";
   return normalizeMobileUrlForDevice(`${baseUrl}${cacheBust}`);
 }
 

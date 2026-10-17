@@ -24,6 +24,7 @@ function getFocusedRouteKey(props: BottomTabBarProps): string | undefined {
 
 export function TabBarPropsProvider({ children }: { children: ReactNode }) {
   const tabBarPropsRef = useRef<BottomTabBarProps | null>(null);
+  const [tabBarProps, setTabBarProps] = useState<BottomTabBarProps | null>(null);
   const [tabBarRevision, setTabBarRevision] = useState(0);
 
   const syncTabBarProps = useCallback((props: BottomTabBarProps) => {
@@ -35,6 +36,7 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
     const routeCountChanged = previous?.state.routes.length !== props.state.routes.length;
 
     if (!previous || focusChanged || routeCountChanged) {
+      setTabBarProps(props);
       setTabBarRevision((value) => value + 1);
     }
   }, []);
@@ -42,10 +44,10 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
   const value = useMemo(
     () => ({
       syncTabBarProps,
-      tabBarProps: tabBarPropsRef.current,
+      tabBarProps,
       tabBarRevision,
     }),
-    [syncTabBarProps, tabBarRevision],
+    [syncTabBarProps, tabBarProps, tabBarRevision],
   );
 
   return <TabBarPropsContext.Provider value={value}>{children}</TabBarPropsContext.Provider>;

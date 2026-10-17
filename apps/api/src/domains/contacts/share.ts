@@ -147,11 +147,11 @@ export async function shareContact(
 
   const myselfContact = await db.people.findFirst({
     select: {
+      avatarUpdatedAt: true,
       firstName: true,
       hasAvatar: true,
       lastName: true,
       middleName: true,
-      updatedAt: true,
     },
     where: { myself: true, userId: user.id },
   });
@@ -205,9 +205,9 @@ export async function shareContact(
     recipientEmail: recipientEmails[0],
     senderAvatarUrl:
       resolveContactAvatarUrl(user.id, {
+        avatarUpdatedAt: myselfContact?.avatarUpdatedAt,
         hasAvatar: myselfContact?.hasAvatar ?? false,
         id: user.id,
-        updatedAt: myselfContact?.updatedAt?.toISOString(),
       }) ?? undefined,
     senderEmail: user.email,
     senderName,

@@ -1,25 +1,33 @@
-import { getUserFacingError } from "@bondery/helpers/api";
-import type { Contact } from "@bondery/schemas";
 import { IconLogout, IconTrash } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ActionSheetPopup } from "../../components/ActionSheetPopup";
+import { Alert, ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
+import { Button } from "../../components/ui/Button";
+import { Sheet } from "../../components/ui/Sheet";
+import { Stack } from "../../components/ui/Stack";
+import { Text } from "../../components/ui/Text";
 import { deleteMyAccount, fetchSettings } from "../../lib/api/client";
+import { resolveDisplayedError } from "../../lib/api/resolveDisplayedError";
 import { authClient } from "../../lib/auth/client";
+import { endLocalSession } from "../../lib/auth/session";
 import {
   useCommonTranslations,
   useMobileAuthTranslations,
   useMobileSettingsTranslations,
   useSettingsPageTranslations,
 } from "../../lib/i18n/generated/hooks";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
+import { syncEffectState } from "../../lib/react/syncEffectState";
 import { useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { SettingsAccountProfileCard } from "./components/SettingsAccountProfileCard";
-import { SettingsActionButton } from "./components/SettingsActionButton";
 import { SettingsAsyncState } from "./components/SettingsAsyncState";
+
+function plainTextFromHtml(value: string): string {
+  return value.replace(/<[^>]+>/g, "");
+}
 
 export function SettingsAccountScreen() {
   const tMobileAuth = useMobileAuthTranslations();
@@ -33,8 +41,7 @@ export function SettingsAccountScreen() {
   const [email, setEmail] = useState<string | null>(null);
   const [fallbackName, setFallbackName] = useState<string | null>(null);
   const [fallbackAvatarUrl, setFallbackAvatarUrl] = useState<string | null>(null);
-  const [myselfContact, setMyselfContact] = useState<Contact | null>(null);
-  const { data: syncedMyself } = useMyselfContact();
+  const { data: myselfContact } = useMyselfContact();
   const [pendingAction, setPendingAction] = useState<"logout" | "delete" | null>(null);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -49,18 +56,16 @@ export function SettingsAccountScreen() {
       setFallbackName(settingsResponse.data?.name ?? null);
       setFallbackAvatarUrl(settingsResponse.data?.avatarUrl ?? null);
     } catch (err) {
-      setLoadError(getUserFacingError(err, t));
+      setLoadError(resolveDisplayedError(err, t));
     } finally {
       setIsLoading(false);
     }
   }, [t]);
 
   useEffect(() => {
-    setMyselfContact(syncedMyself);
-  }, [syncedMyself]);
-
-  useEffect(() => {
-    void loadAccount();
+    syncEffectState(() => {
+      void loadAccount();
+    });
   }, [loadAccount]);
 
   const signOut = async () => {
@@ -68,10 +73,7 @@ export function SettingsAccountScreen() {
       throw new Error(tMobileAuth("MissingConfig"));
     }
 
-    const { error } = await authClient.signOut();
-    if (error) {
-      throw new Error(getUserFacingError(error, t));
-    }
+    await endLocalSession({ reason: "user_initiated" });
   };
 
   const handleLogout = async () => {
@@ -85,7 +87,7 @@ export function SettingsAccountScreen() {
     try {
       await signOut();
     } catch (logoutError) {
-      setActionError(getUserFacingError(logoutError, t));
+      setActionError(resolveDisplayedError(logoutError, t));
     } finally {
       setPendingAction(null);
     }
@@ -101,10 +103,7 @@ export function SettingsAccountScreen() {
 
     try {
       await deleteMyAccount();
-
-      if (authClient) {
-        await authClient.signOut();
-      }
+      await endLocalSession({ reason: "account_deleted" });
 
       setDeleteConfirmOpen(false);
       Alert.alert(
@@ -112,7 +111,7 @@ export function SettingsAccountScreen() {
         tSettingsPage("DataManagement.AccountDeleted"),
       );
     } catch (deleteError) {
-      setActionError(getUserFacingError(deleteError, t));
+      setActionError(resolveDisplayedError(deleteError, t));
     } finally {
       setPendingAction(null);
     }
@@ -125,62 +124,75 @@ export function SettingsAccountScreen() {
   return (
     <>
       <StackNavBar
-        onBack={() => router.back()}
+        onBack={() => goBackOrReplace(router, "/settings")}
         title={tMobileSettings("Account")}
         variant="elevated"
       />
 
       <ScrollView
-        contentContainerStyle={styles.content}
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+          paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+          paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+        }}
+        style={{ backgroundColor: colors.appBackground }}
       >
-        <SettingsAsyncState
-          errorDescription={loadError}
-          errorTitle={tMobileSettings("AccountLoadErrorTitle")}
-          isLoading={isLoading}
-          loadingMinHeight={120}
-          onRetry={() => {
-            void loadAccount();
-          }}
-        >
-          <SettingsAccountProfileCard
-            contact={myselfContact}
-            email={email}
-            fallbackAvatarUrl={fallbackAvatarUrl}
-            fallbackName={fallbackName}
-          />
-        </SettingsAsyncState>
-
-        {!isLoading && !loadError ? (
-          <View style={styles.actionsWrap}>
-            <SettingsActionButton
-              disabled={pendingAction !== null}
-              icon={<IconLogout color={colors.textSecondary} size={16} />}
-              label={tSettingsPage("DataManagement.SignOutButton")}
-              onPress={() => {
-                void handleLogout();
-              }}
-              tone="neutral"
-              variant="outline"
+        <Stack>
+          <SettingsAsyncState
+            errorDescription={loadError}
+            errorTitle={tMobileSettings("AccountLoadErrorTitle")}
+            isLoading={isLoading}
+            loadingMinHeight={120}
+            onRetry={() => {
+              void loadAccount();
+            }}
+          >
+            <SettingsAccountProfileCard
+              contact={myselfContact}
+              email={email}
+              fallbackAvatarUrl={fallbackAvatarUrl}
+              fallbackName={fallbackName}
             />
+          </SettingsAsyncState>
 
-            <SettingsActionButton
-              disabled={pendingAction !== null}
-              icon={<IconTrash color={colors.dangerAccent} size={16} />}
-              label={tSettingsPage("DataManagement.DeleteButton")}
-              onPress={() => setDeleteConfirmOpen(true)}
-              tone="danger"
-              variant="outline"
-            />
+          {!isLoading && !loadError ? (
+            <Stack gap="sm">
+              <Button
+                align="spread"
+                color="neutral"
+                disabled={pendingAction !== null}
+                onPress={() => {
+                  void handleLogout();
+                }}
+                rightSection={<IconLogout color={colors.textSecondary} size={16} />}
+                variant="outline"
+              >
+                {tSettingsPage("DataManagement.SignOutButton")}
+              </Button>
 
-            {actionError ? (
-              <Text style={[styles.errorText, { color: colors.dangerText }]}>{actionError}</Text>
-            ) : null}
-          </View>
-        ) : null}
+              <Button
+                align="spread"
+                color="danger"
+                disabled={pendingAction !== null}
+                onPress={() => setDeleteConfirmOpen(true)}
+                rightSection={<IconTrash color={colors.dangerAccent} size={16} />}
+                variant="outline"
+              >
+                {tSettingsPage("DataManagement.DeleteButton")}
+              </Button>
+
+              {actionError ? (
+                <Text c="danger" className="mt-1.5" size="xs">
+                  {actionError}
+                </Text>
+              ) : null}
+            </Stack>
+          ) : null}
+        </Stack>
       </ScrollView>
 
-      <ActionSheetPopup
+      <Sheet
         actions={[
           {
             disabled: pendingAction === "delete",
@@ -194,6 +206,7 @@ export function SettingsAccountScreen() {
             icon: <IconTrash color={colors.textOnPrimary} size={16} />,
             label: tSettingsPage("DataManagement.DeleteConfirmButton"),
             loading: pendingAction === "delete",
+            loadingText: t("feedback.deleting"),
             onPress: confirmDeleteAccount,
             tone: "danger",
             variant: "filled",
@@ -201,30 +214,13 @@ export function SettingsAccountScreen() {
         ]}
         isBusy={pendingAction === "delete"}
         onClose={() => setDeleteConfirmOpen(false)}
-        onOpenChange={setDeleteConfirmOpen}
-        open={isDeleteConfirmOpen}
+        opened={isDeleteConfirmOpen}
         title={tSettingsPage("DataManagement.DeleteConfirmTitle")}
-      />
+      >
+        <Text c="secondary" size="sm">
+          {plainTextFromHtml(tSettingsPage("DataManagement.DeleteConfirmMessage"))}
+        </Text>
+      </Sheet>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  actionsWrap: {
-    gap: 10,
-  },
-  content: {
-    gap: 16,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-  },
-  errorText: {
-    fontSize: 12,
-    marginTop: 6,
-    textAlign: "left",
-  },
-  screen: {
-    flex: 1,
-  },
-});

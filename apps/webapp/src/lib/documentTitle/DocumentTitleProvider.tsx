@@ -2,15 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-} from "react";
+import { createContext, type ReactNode, useContext, useLayoutEffect, useRef } from "react";
 import {
   clearOptimisticDocumentTitle,
   peekOptimisticDocumentTitle,
@@ -34,15 +26,12 @@ export function DocumentTitleProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
   const entityTitleOverrideRef = useRef<string | null>(null);
 
-  const resolveTitle = useCallback(
-    (optimisticTitle?: string) =>
-      resolveClientRouteTitle(pathname, {
-        entityTitleOverride: entityTitleOverrideRef.current,
-        optimisticTitle,
-        queryClient,
-      }),
-    [pathname, queryClient],
-  );
+  const resolveTitle = (optimisticTitle?: string) =>
+    resolveClientRouteTitle(pathname, {
+      entityTitleOverride: entityTitleOverrideRef.current,
+      optimisticTitle,
+      queryClient,
+    });
 
   useLayoutEffect(() => {
     entityTitleOverrideRef.current = null;
@@ -56,20 +45,17 @@ export function DocumentTitleProvider({ children }: { children: ReactNode }) {
     }
   }, [resolveTitle]);
 
-  const setEntityTitle = useCallback(
-    (name: string) => {
-      entityTitleOverrideRef.current = name.trim() || null;
-      if (entityTitleOverrideRef.current) {
-        const title = resolveTitle();
-        if (title) {
-          applyDocumentTitle(title);
-        }
+  const setEntityTitle = (name: string) => {
+    entityTitleOverrideRef.current = name.trim() || null;
+    if (entityTitleOverrideRef.current) {
+      const title = resolveTitle();
+      if (title) {
+        applyDocumentTitle(title);
       }
-    },
-    [resolveTitle],
-  );
+    }
+  };
 
-  const contextValue = useMemo(() => ({ setEntityTitle }), [setEntityTitle]);
+  const contextValue = { setEntityTitle };
 
   return (
     <DocumentTitleContext.Provider value={contextValue}>{children}</DocumentTitleContext.Provider>

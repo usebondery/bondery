@@ -1,6 +1,7 @@
 {
   "a11y": {
     "back": "Zpět",
+    "close": "Zavřít",
     "closeMenu": "Zavřít nabídku",
     "createMore": "Po vytvoření zůstaňte v dialogu a přidejte další",
     "info": "Informace",
@@ -216,11 +217,17 @@
     "unknown": "Něco se pokazilo."
   },
   "feedback": {
+    "adding": "Přidávání...",
+    "closeToast": "Zavřít oznámení",
+    "creating": "Vytváření...",
     "deleting": "Mazání...",
     "duplicating": "Duplikování...",
     "errorTitle": "Chyba",
     "noResults": "Žádné výsledky",
+    "removing": "Odebírání...",
     "savedTitle": "Saved",
+    "saving": "Ukládání...",
+    "sending": "Odesílání...",
     "successTitle": "Úspěch"
   }
 }

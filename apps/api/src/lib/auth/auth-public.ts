@@ -2,6 +2,10 @@
  * Public Better Auth resource identifiers and OAuth scopes.
  */
 import type { passkey } from "@better-auth/passkey";
+import {
+  parseAndroidSha256CertFingerprints,
+  resolveWebAuthnAllowedOrigins,
+} from "@bondery/helpers/auth/resolve-webauthn-origins";
 import { resolveWebAuthnRp } from "@bondery/helpers/auth/resolve-webauthn-rp";
 import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 import { buildAuthTranslations } from "./build-auth-translations.js";
@@ -113,15 +117,33 @@ export function resolveUseSecureCookies(): boolean {
  * endpoints. IP webapp hosts cannot be a WebAuthn rpID; fall back to localhost
  * so boot succeeds and ceremonies fail closed on origin mismatch.
  */
-export function resolveWebAuthnRpConfig(): { origin: string; rpID: string } {
+export function resolveWebAuthnRpConfig(): { origin: string | string[]; rpID: string } {
   const webAuthnRp = resolveWebAuthnRp({
     rpIdOverride: process.env.BONDERY_PUBLIC_WEBAUTHN_RP_ID,
     webappUrl: process.env.BONDERY_PUBLIC_WEBAPP_URL,
   });
 
-  return webAuthnRp.ok
-    ? { origin: webAuthnRp.origin, rpID: webAuthnRp.rpID }
-    : { origin: "http://localhost", rpID: "localhost" };
+  if (!webAuthnRp.ok) {
+    return { origin: "http://localhost", rpID: "localhost" };
+  }
+
+  const origins = resolveWebAuthnAllowedOrigins({
+    androidSha256Fingerprints: parseAndroidSha256CertFingerprints(
+      process.env.BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS,
+    ),
+    rpID: webAuthnRp.rpID,
+    webappOrigin: webAuthnRp.origin,
+    websiteUrl: process.env.BONDERY_PUBLIC_WEBSITE_URL,
+  });
+
+  if (origins.length === 0) {
+    return { origin: webAuthnRp.origin, rpID: webAuthnRp.rpID };
+  }
+
+  return {
+    origin: origins.length === 1 ? origins[0] : origins,
+    rpID: webAuthnRp.rpID,
+  };
 }
 
 /**

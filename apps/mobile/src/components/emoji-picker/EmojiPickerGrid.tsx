@@ -4,6 +4,7 @@ import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LIST_SCROLL, UI_TIMING_MS } from "../../lib/config";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { useSheetScrollable } from "../ui/Sheet";
 import { EMOJI_PICKER_LAYOUT, getEmojiPickerCellSize } from "./constants";
 import { EmojiPickerCell } from "./EmojiPickerCell";
 import { buildEmojiFlatRows, type EmojiFlatRow, findEmojiFlatIndex } from "./emojiFlatList";
@@ -26,6 +27,7 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
     const colors = useMobileThemeColors();
     const { width: windowWidth } = useWindowDimensions();
     const cellSize = getEmojiPickerCellSize(windowWidth);
+    const renderScrollComponent = useSheetScrollable();
     const listRef = useRef<FlashListRef<EmojiFlatRow>>(null);
     const pendingScrollIndexRef = useRef<number | null>(null);
     const scrollRetryCountRef = useRef(0);
@@ -123,6 +125,7 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
         ListEmptyComponent={listEmpty}
         ref={listRef}
         renderItem={renderFlatItem}
+        renderScrollComponent={renderScrollComponent}
         showsVerticalScrollIndicator={false}
         style={styles.list}
       />

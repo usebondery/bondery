@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: merge picker caches known contacts in refs during render
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
@@ -21,7 +22,7 @@ import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconArrowMerge } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { getMergeAvatarIdentity } from "@/lib/api/domains/contacts";
 import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n/generated/hooks";
 import { bothHaveDefinedAvatars, hasMergeAvatarChoice } from "@/lib/merge/hasMergeAvatarChoice";
@@ -169,79 +170,58 @@ function MergeWithModal({
     }
   }, [contacts]);
 
-  const handleRightSearch = useCallback<PeoplePickerOnSearch<ContactPreview>>(
-    async (query, paging) => {
-      if (!onSearch) {
-        return { contacts: [], hasMore: false };
+  const handleRightSearch: PeoplePickerOnSearch<ContactSelectable> = async (query, paging) => {
+    if (!onSearch) {
+      return { contacts: [], hasMore: false };
+    }
+    const page = await onSearch(query, paging);
+    const contacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
+    for (const contact of contacts) {
+      const preview = toPersonPreview(contact);
+      if (preview) {
+        knownPeopleRef.current.set(contact.id, preview);
       }
-      const page = await onSearch(query, paging);
-      const contacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
-      for (const contact of contacts) {
-        const preview = toPersonPreview(contact);
-        if (preview) {
-          knownPeopleRef.current.set(contact.id, preview);
-        }
-      }
-      return {
-        contacts,
-        hasMore: page.hasMore,
-      };
-    },
-    [onSearch, leftPersonId],
-  );
+    }
+    return {
+      contacts,
+      hasMore: page.hasMore,
+    };
+  };
 
-  const peopleOptions = useMemo(() => {
+  const peopleOptions = (() => {
     if (people) {
       return people;
     }
     return contacts.filter((contact) => !contact.myself);
-  }, [contacts, people]);
+  })();
 
-  const leftContact = useMemo(
-    () => contacts.find((candidate) => candidate.id === leftPersonId) || null,
-    [contacts, leftPersonId],
-  );
+  const leftContact = contacts.find((candidate) => candidate.id === leftPersonId) || null;
 
-  const rightContact = useMemo(
-    () =>
-      contacts.find((candidate) => candidate.id === rightPersonId) ??
-      (rightPersonId ? (knownContactsRef.current.get(rightPersonId) ?? null) : null),
-    [contacts, rightPersonId],
-  );
+  const rightContact =
+    contacts.find((candidate) => candidate.id === rightPersonId) ??
+    (rightPersonId ? (knownContactsRef.current.get(rightPersonId) ?? null) : null);
 
-  const leftPerson = useMemo(
-    () =>
-      toPersonPreview(leftContact) ??
-      peopleOptions.find((candidate) => candidate.id === leftPersonId) ??
-      (leftPersonId ? (knownPeopleRef.current.get(leftPersonId) ?? null) : null),
-    [leftContact, leftPersonId, peopleOptions],
-  );
+  const leftPerson =
+    toPersonPreview(leftContact) ??
+    peopleOptions.find((candidate) => candidate.id === leftPersonId) ??
+    (leftPersonId ? (knownPeopleRef.current.get(leftPersonId) ?? null) : null);
 
-  const rightPerson = useMemo(
-    () =>
-      toPersonPreview(rightContact) ??
-      peopleOptions.find((candidate) => candidate.id === rightPersonId) ??
-      (rightPersonId ? (knownPeopleRef.current.get(rightPersonId) ?? null) : null),
-    [peopleOptions, rightContact, rightPersonId],
-  );
+  const rightPerson =
+    toPersonPreview(rightContact) ??
+    peopleOptions.find((candidate) => candidate.id === rightPersonId) ??
+    (rightPersonId ? (knownPeopleRef.current.get(rightPersonId) ?? null) : null);
 
-  const leftSelectablePeople = useMemo(
-    () => peopleOptions.filter((candidate) => candidate.id !== rightPersonId),
-    [peopleOptions, rightPersonId],
-  );
+  const leftSelectablePeople = peopleOptions.filter((candidate) => candidate.id !== rightPersonId);
 
-  const rightSelectablePeople = useMemo(
-    () => peopleOptions.filter((candidate) => candidate.id !== leftPersonId),
-    [peopleOptions, leftPersonId],
-  );
+  const rightSelectablePeople = peopleOptions.filter((candidate) => candidate.id !== leftPersonId);
 
-  const conflicts = useMemo(() => {
+  const conflicts = (() => {
     if (!leftContact || !rightContact) {
       return [] as ReturnType<typeof listMergeFieldConflicts>;
     }
 
     return listMergeFieldConflicts(leftContact, rightContact);
-  }, [leftContact, rightContact]);
+  })();
 
   const bothHaveAvatars = bothHaveDefinedAvatars(leftContact, rightContact);
 
@@ -275,18 +255,17 @@ function MergeWithModal({
     };
   }, [bothHaveAvatars, leftPersonId, rightPersonId]);
 
-  const autoLastInteractionChoice = useMemo(
-    () => getAutoLastInteractionChoice(leftContact?.lastInteraction, rightContact?.lastInteraction),
-    [leftContact?.lastInteraction, rightContact?.lastInteraction],
+  const autoLastInteractionChoice = getAutoLastInteractionChoice(
+    leftContact?.lastInteraction,
+    rightContact?.lastInteraction,
   );
 
-  const conflictResolutions = useMemo(() => {
+  const conflictResolutions = (() => {
     return {
       ...conflictChoices,
       ...(autoLastInteractionChoice ? { lastInteraction: autoLastInteractionChoice } : {}),
     };
-  }, [autoLastInteractionChoice, conflictChoices]);
-
+  })();
   const goToResolve = () => {
     if (!leftPersonId || !rightPersonId) {
       notifications.show(
@@ -316,7 +295,7 @@ function MergeWithModal({
     setStep("resolve");
   };
 
-  const handleMerge = useCallback(async () => {
+  const handleMerge = async () => {
     if (!leftPersonId || !rightPersonId) {
       return;
     }
@@ -379,18 +358,7 @@ function MergeWithModal({
       mergeRequestsInFlight.delete(requestKey);
       setIsSubmitting(false);
     }
-  }, [
-    closeModalSync,
-    conflictResolutions,
-    leftPersonId,
-    mergeContactsMutation,
-    onSuccess,
-    redirectToMergedPerson,
-    rightPersonId,
-    router,
-    t,
-    tCommon,
-  ]);
+  };
 
   useEffect(() => {
     if (
@@ -415,10 +383,7 @@ function MergeWithModal({
     handleMerge,
   ]);
 
-  const fieldLabel = useCallback(
-    (field: MergeConflictField | "latLng") => t(`Fields.${field}`),
-    [t],
-  );
+  const fieldLabel = (field: MergeConflictField | "latLng") => t(`Fields.${field}`);
 
   const showAvatarPicker =
     hasMergeAvatarChoice(leftContact, rightContact) &&

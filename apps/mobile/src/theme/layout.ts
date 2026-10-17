@@ -1,37 +1,19 @@
 /** Shared layout dimensions for touch targets, spacing, and chrome. */
 export const MOBILE_LAYOUT = {
-  alphabetScroller: {
-    bubble: 48,
-  },
   avatar: {
+    editor: 96,
     hero: 88,
     heroRadius: 44,
+    list: 34,
+    profile: 52,
   },
   borderRadius: {
     control: 10,
     pill: 999,
   },
   floatingTabBar: {
-    /** Top padding for scroll content sitting above the floating tab bar. */
-    contentInset: 54,
-    plusBubble: 56,
-    /** Combined vertical padding inside the tab rail (top + bottom). */
-    railVerticalPadding: 16,
     /** Extra top padding when a screen header sits below the status bar only. */
     screenHeaderInset: 40,
-    /** Scroll inset when the selection action bar replaces the tab bar (rail + safe area). */
-    selectionBarInset: 62,
-    /** Gap between the FAB menu stack and the plus bubble top edge. */
-    speedDialAnchorGap: 12,
-    /** Corner radius for the unified chrome when the speed-dial is expanded. */
-    speedDialChromeRadiusOpen: 22,
-    /** Gap between stacked FAB speed-dial menu items. */
-    speedDialItemGap: 8,
-    /** Inline speed-dial items before falling back to ActionListSheet. */
-    speedDialMaxInlineItems: 4,
-    /** Inner padding between speed-dial menu rows and the tab rail row. */
-    speedDialMenuPadding: 8,
-    tabBubble: 46,
   },
   iconButton: 32,
   inputCompact: 40,
@@ -58,11 +40,9 @@ export const MOBILE_LAYOUT = {
   touchTargetLarge: 52,
 } as const;
 
-/** Z-order for portaled FAB speed-dial layers. */
+/** Z-order for the floating tab chrome overlay. */
 export const MOBILE_Z_INDEX = {
   fabChrome: 1001,
-  fabMenu: 1002,
-  fabScrim: 1000,
 } as const;
 
 /** Expand tappable areas without changing visual size. */

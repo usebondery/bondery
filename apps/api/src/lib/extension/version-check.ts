@@ -29,7 +29,8 @@ function isPublicInfraPath(url: string): boolean {
   const path = url.split("?")[0] ?? url;
   return (
     path.startsWith("/health/") ||
-    path === "/extension/manifest" ||
+    path === `${API_ROUTES.EXTENSION}/manifest` ||
+    path === `${API_ROUTES.MOBILE}/manifest` ||
     path === API_ROUTES.OAUTH_PROVIDERS ||
     path === API_ROUTES.API_REFERENCE ||
     path === API_ROUTES.DOCS_API

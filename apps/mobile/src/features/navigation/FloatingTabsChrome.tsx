@@ -1,70 +1,26 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { type LayoutChangeEvent, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ContactsSelectionActionBar } from "../../components/ContactsSelectionActionBar";
+import { FloatingChromeDock } from "../../components/chrome/FloatingChromeDock";
+import { FloatingCreateContactButton } from "../../components/chrome/FloatingCreateContactButton";
+import { getFloatingChromeSafePadding } from "../../components/chrome/floatingChromeTokens";
 import type { NativeViewRef } from "../../lib/native-host-refs";
-import { floatingBarStyles } from "../../theme/floatingBarStyles";
 import { MOBILE_Z_INDEX } from "../../theme/tokens";
-import { FabSpeedDialScrim } from "./FabSpeedDialScrim";
 import { FloatingBubbleTabBar } from "./FloatingBubbleTabBar";
-import { useFabSpeedDial } from "./fabSpeedDialContext";
 import { useFloatingChrome } from "./floatingChromeContext";
 import { useReportFloatingChromeBottomInset } from "./floatingChromeInsetsContext";
 import { useTabBarProps } from "./tabBarPropsContext";
 
 /**
- * Sibling overlay above tab screens: dim scrim (middle) + floating tab bar (top).
+ * Sibling overlay above tab screens: floating tab bar (or selection action bar).
  */
 export function FloatingTabsChrome() {
   const insets = useSafeAreaInsets();
   const tabBarProps = useTabBarProps();
   const { actionBarSlot } = useFloatingChrome();
   const reportBottomInset = useReportFloatingChromeBottomInset();
-  const { isOpen, usesInlineMenu, tryDismissFromScrim } = useFabSpeedDial();
-  const hostRef = useRef<NativeViewRef>(null);
   const chromeRef = useRef<NativeViewRef>(null);
-  const [scrimHeight, setScrimHeight] = useState(0);
-
-  const measureScrimHeight = useCallback(() => {
-    const host = hostRef.current;
-    const chrome = chromeRef.current;
-
-    if (!host || !chrome) {
-      return;
-    }
-
-    chrome.measureLayout(
-      host,
-      (_left, top) => {
-        setScrimHeight(Math.max(0, Math.round(top)));
-      },
-      () => {
-        requestAnimationFrame(measureScrimHeight);
-      },
-    );
-  }, []);
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    measureScrimHeight();
-    const frame = requestAnimationFrame(measureScrimHeight);
-    const settleTimer = setTimeout(measureScrimHeight, 50);
-    const interval = setInterval(measureScrimHeight, 32);
-
-    const stopInterval = setTimeout(() => {
-      clearInterval(interval);
-    }, 400);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      clearTimeout(settleTimer);
-      clearTimeout(stopInterval);
-      clearInterval(interval);
-    };
-  }, [isOpen, measureScrimHeight]);
 
   const focusedRoute = tabBarProps?.state.routes[tabBarProps.state.index]?.name;
   const showActionBar = actionBarSlot === "contacts-selection" && focusedRoute === "contacts";
@@ -72,11 +28,9 @@ export function FloatingTabsChrome() {
   const handleChromeLayout = useCallback(
     (event: LayoutChangeEvent) => {
       const chromeHeight = event.nativeEvent.layout.height;
-      const safeAreaPadding = Math.max(insets.bottom, 8);
-      reportBottomInset(chromeHeight + safeAreaPadding);
-      measureScrimHeight();
+      reportBottomInset(chromeHeight + getFloatingChromeSafePadding(insets.bottom));
     },
-    [insets.bottom, measureScrimHeight, reportBottomInset],
+    [insets.bottom, reportBottomInset],
   );
 
   useEffect(() => {
@@ -86,7 +40,7 @@ export function FloatingTabsChrome() {
           return;
         }
 
-        reportBottomInset(height + Math.max(insets.bottom, 8));
+        reportBottomInset(height + getFloatingChromeSafePadding(insets.bottom));
       });
     });
 
@@ -100,46 +54,27 @@ export function FloatingTabsChrome() {
   }
 
   return (
-    <View
-      collapsable={false}
-      onLayout={measureScrimHeight}
-      pointerEvents="box-none"
-      ref={hostRef}
-      style={[floatingBarStyles.host, { zIndex: MOBILE_Z_INDEX.fabChrome }]}
+    <FloatingChromeDock
+      elevation={MOBILE_Z_INDEX.fabChrome}
+      hostFullWidth={!showActionBar}
+      onLayout={handleChromeLayout}
+      ref={chromeRef}
+      zIndex={MOBILE_Z_INDEX.fabChrome}
     >
-      {usesInlineMenu ? (
-        <FabSpeedDialScrim height={scrimHeight} onDismiss={tryDismissFromScrim} visible={isOpen} />
-      ) : null}
-
-      <View
-        pointerEvents="box-none"
-        style={[
-          floatingBarStyles.chromeContainer,
-          {
-            elevation: MOBILE_Z_INDEX.fabChrome + 1,
-            paddingBottom: Math.max(insets.bottom, 8),
-            zIndex: MOBILE_Z_INDEX.fabChrome + 1,
-          },
-        ]}
-      >
-        {showActionBar ? (
-          <View
-            collapsable={false}
-            onLayout={handleChromeLayout}
-            pointerEvents="box-none"
-            ref={chromeRef}
-            style={{ alignItems: "center", width: "100%" }}
-          >
-            <ContactsSelectionActionBar />
+      {showActionBar ? (
+        <ContactsSelectionActionBar />
+      ) : (
+        <View
+          pointerEvents="box-none"
+          style={{ alignItems: "center", flexDirection: "row", width: "100%" }}
+        >
+          <View pointerEvents="none" style={{ flex: 1 }} />
+          <FloatingBubbleTabBar {...tabBarProps} />
+          <View style={{ alignItems: "flex-end", flex: 1 }}>
+            <FloatingCreateContactButton />
           </View>
-        ) : (
-          <FloatingBubbleTabBar
-            ref={chromeRef}
-            {...tabBarProps}
-            onChromeBoundsChange={handleChromeLayout}
-          />
-        )}
-      </View>
-    </View>
+        </View>
+      )}
+    </FloatingChromeDock>
   );
 }

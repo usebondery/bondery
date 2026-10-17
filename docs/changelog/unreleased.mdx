@@ -4,3 +4,42 @@ hidden: true
 ---
 
 ## [Unreleased]
+
+### ✨ Added
+
+- Mobile: Sign in with a passkey or an email login link on the native login screen.
+- Mobile: Floating tab bar on Contacts and Settings with a center create-person control. Deep routes hide the bar.
+- Mobile: Tapping Contacts again while you are on that tab focuses people search and opens the keyboard.
+- Mobile: Settings About shows your app version and whether a newer production build is available.
+- API: `GET /mobile/manifest` returns the latest production app version for optional update checks.
+- Website: Hosts Apple and Android associated-domain files for native passkeys. Operators set `BONDERY_PUBLIC_IOS_APP_TEAM_ID` and `BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS`. Missing values return 404 instead of inventing IDs.
+
+### 🐛 Fixed
+
+- Mobile: Letters such as Š, Č, and Ř get their own people-list sections. Š comes after S.
+- Mobile: Deleting a group no longer crashes the Android app.
+- Mobile: The people list and group lists show every local contact. The alphabet index matches that full list.
+- Mobile: Opening a person no longer waits while the app loads every contact for note mentions.
+- Mobile: Native screens show translated copy instead of raw translation keys.
+- Mobile: After sign-in, contacts no longer crash while creating the local sync database.
+- Mobile: The app no longer goes blank after the splash screen while sign-in is still loading.
+- Mobile: The Android launch splash shows the brand icon again, and sign-in no longer waits forever on a pending session.
+- Mobile: The native splash stays up until the first real screen on iOS and Android. The app no longer swaps it for a blank purple view.
+- Mobile: Opening the native app after a reload no longer gets stuck in a blank error loop.
+- Mobile: Sign-in failures show in the app toast instead of inline on the login sheet.
+- Mobile: Tapping a disabled GitHub, LinkedIn, or email button shows a toast instead of helper text under the button.
+- Mobile: GitHub and LinkedIn sign-in reach the API on Android. Loopback URLs use the emulator host or the Metro LAN host, and OAuth returns to `bondery://auth/callback`.
+- API and clients: Contact avatars cache-bust on photo upload time instead of the contact record `updatedAt`.
+
+### 🔄 Changed
+
+- Mobile: The people list no longer has a letter rail on the right.
+- Mobile: Contacts search is by name only. The placeholder matches the web people list.
+- Mobile: The plus button creates a person. The extra add menu is gone.
+- Mobile: Legal settings uses a gavel icon.
+- Mobile: Native login uses a purple hero with the Bondery logotype and a bottom sheet that fills about 70% of the screen. The sheet heading is Welcome. Email sign-in replaces the other buttons, matching web login. Web login is unchanged.
+- Mobile: Native login marks the last sign-in method, matching web login.
+- Mobile: The launch splash now uses Bondery purple and the brand icon.
+- Mobile: Native login copy uses Tamagui `Text`. The sheet centers the description, buttons, and terms as one group.
+- Mobile: Theme in Settings is a system, light, or dark control. Account delete confirms in a bottom sheet.
+- Mobile: Settings screens use a shared layout and refreshed account, legal, tags, groups, and technical sections.

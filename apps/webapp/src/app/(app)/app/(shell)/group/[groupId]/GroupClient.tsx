@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -185,7 +186,6 @@ export function GroupClient({ groupId }: GroupClientProps) {
     }
     void fetchNextPage();
   };
-
   const bulkSelectionActions: BulkSelectionAction[] = [
     {
       icon: <IconUsersMinus size={16} />,
@@ -210,7 +210,6 @@ export function GroupClient({ groupId }: GroupClientProps) {
       groupLabel,
     });
   };
-
   if (!group) {
     return null;
   }

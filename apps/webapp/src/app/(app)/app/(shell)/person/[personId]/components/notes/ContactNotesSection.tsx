@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 import { ActionIconButton, successNotificationTemplate } from "@bondery/mantine-next";
 import { Group, Loader, Stack, Text, Textarea, Tooltip } from "@mantine/core";
 import { useClipboard } from "@mantine/hooks";
@@ -113,9 +114,7 @@ export function ContactNotesSection({
       return;
     }
     applyAndSync(editableText, mode as "source" | "markdown");
-  };
-
-  // Subscribe to editor state so toolbar active-states stay in sync with keyboard shortcuts
+  }; // Subscribe to editor state so toolbar active-states stay in sync with keyboard shortcuts
   const _editorState = useEditorState({
     editor,
     selector: ({ editor: ed }) => ed?.state ?? null,
@@ -133,7 +132,6 @@ export function ContactNotesSection({
 
     editor.chain().focus().toggleTaskList().run();
   };
-
   return (
     <div>
       <Group align="center" gap="xs" mb="xs">

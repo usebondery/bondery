@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { MOBILE_LAYOUT } from "../../theme/layout";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { useScreenChromeInsets } from "./useScreenChromeInsets";
@@ -16,31 +16,24 @@ export function TabRootScreenHeader({ titleRow, accessory }: TabRootScreenHeader
 
   return (
     <View
-      style={[
-        styles.header,
-        {
-          backgroundColor: colors.appBackground,
-          paddingTop,
-        },
-      ]}
+      className="pb-2"
+      style={{
+        backgroundColor: colors.appBackground,
+        paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+        paddingTop,
+      }}
     >
-      <View style={styles.titleRowSlot}>{titleRow}</View>
-      {accessory ? <View style={styles.accessory}>{accessory}</View> : null}
+      <View
+        className="w-full self-stretch justify-center overflow-hidden"
+        style={{ height: MOBILE_LAYOUT.screenChrome.titleRowHeight }}
+      >
+        {titleRow}
+      </View>
+      {accessory ? (
+        <View style={{ marginTop: MOBILE_LAYOUT.screenChrome.accessoryTopMargin }}>
+          {accessory}
+        </View>
+      ) : null}
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  accessory: {
-    marginTop: MOBILE_LAYOUT.screenChrome.accessoryTopMargin,
-  },
-  header: {
-    paddingBottom: 8,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-  },
-  titleRowSlot: {
-    height: MOBILE_LAYOUT.screenChrome.titleRowHeight,
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-});

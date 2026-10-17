@@ -17,6 +17,7 @@ export interface UserSettings {
   aiMessagesUsed?: number;
   avatarUrl: string | null;
   colorScheme: ColorSchemePreference;
+  defaultPhoneCountry: string | null;
   gettingStartedDismissedAt?: string | null;
   groupSortOrder: string;
   importCompletedAt?: string | null;
@@ -36,6 +37,7 @@ export interface UserSettings {
 
 export interface UpdateUserSettingsInput {
   colorScheme?: ColorSchemePreference;
+  defaultPhoneCountry?: string | null;
   groupSortOrder?: GroupSortOrderPreference;
   language?: SupportedLocale;
   leftSwipeAction?: SwipeActionPreference;

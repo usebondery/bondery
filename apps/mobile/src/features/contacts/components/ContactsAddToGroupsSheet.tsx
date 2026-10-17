@@ -1,60 +1,39 @@
 import type { GroupWithCount } from "@bondery/schemas";
-import { XStack } from "@tamagui/stacks";
-import { Paragraph } from "@tamagui/text";
-import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  type ListRenderItemInfo,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
+import { Text } from "@/components/ui/Text";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
-import { SearchActionSheet } from "../../../components/SearchActionSheet";
-import { MOBILE_OPACITY } from "../../../lib/config";
+import { mapGroupToSelectItem } from "@/lib/select/mapGroupToSelectItem";
 import { addContactsToGroup } from "../../../lib/domains/groups";
-import { useAppToast } from "../../../lib/toast/useAppToast";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { useContactsEffectiveSelectedCount, useContactsSelection } from "../contactsSelectionStore";
+import { filterGroups } from "../groupListSearch";
 import { resolveContactsSelectionPersonIds } from "../resolveContactsSelectionPersonIds";
-import { GroupSelectRow } from "./GroupSelectRow";
 
 interface ContactsAddToGroupsSheetProps {
   debouncedQuery: string;
+  filterGroupId?: string | null;
   groups: GroupWithCount[];
   /** When set, add uses these loaded group members instead of the global contact filter. */
   loadedGroupMembers?: { id: string }[];
-  onGroupsReloaded: () => Promise<void>;
-}
-
-function filterGroups(groups: GroupWithCount[], query: string): GroupWithCount[] {
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) {
-    return groups;
-  }
-
-  return groups.filter((group) => {
-    const haystack = `${group.label} ${group.emoji ?? ""}`.toLowerCase();
-    return haystack.includes(normalizedQuery);
-  });
+  onGroupsReloaded: () => void;
 }
 
 export function ContactsAddToGroupsSheet({
   groups,
   debouncedQuery,
+  filterGroupId,
   onGroupsReloaded,
   loadedGroupMembers,
 }: ContactsAddToGroupsSheetProps) {
   const tMobileContacts = useMobileContactsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const effectiveSelectedCount = useContactsEffectiveSelectedCount();
   const isOpen = useContactsSelection((state) => state.isAddToGroupsSheetOpen);
-  const isAddingToGroups = useContactsSelection((state) => state.isAddingToGroups);
   const setAddToGroupsSheetOpen = useContactsSelection((state) => state.setAddToGroupsSheetOpen);
   const setIsAddingToGroups = useContactsSelection((state) => state.setIsAddingToGroups);
   const exitSelectionMode = useContactsSelection((state) => state.exitSelectionMode);
@@ -74,21 +53,15 @@ export function ContactsAddToGroupsSheet({
 
   useEffect(() => {
     if (!isOpen) {
-      setQuery("");
-      setSelectedGroupIds(new Set());
+      syncEffectState(() => {
+        setQuery("");
+        setSelectedGroupIds(new Set());
+      });
     }
   }, [isOpen]);
 
-  function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen && isAddingToGroups) {
-      return;
-    }
-
-    setAddToGroupsSheetOpen(nextOpen);
-  }
-
   function handleClose() {
-    if (isAddingToGroups) {
+    if (isSubmitting) {
       return;
     }
 
@@ -108,203 +81,114 @@ export function ContactsAddToGroupsSheet({
     });
   }
 
+  const handleCloseSheet = useCallback(() => {
+    setAddToGroupsSheetOpen(false);
+  }, [setAddToGroupsSheetOpen]);
+
+  const handleAddError = useCallback(() => {
+    notifications.show({
+      message: tMobileContacts("AddToGroupsFailed"),
+      title: t("feedback.errorTitle"),
+      type: "error",
+    });
+  }, [t, tMobileContacts]);
+
+  const performAdd = useCallback(() => {
+    const selectionState = useContactsSelection.getState();
+    const scope = loadedGroupMembers
+      ? { loadedGroupMembers }
+      : filterGroupId
+        ? { groupId: filterGroupId }
+        : undefined;
+    const personIds = resolveContactsSelectionPersonIds(selectionState, debouncedQuery, scope);
+    const targetGroupIds = Array.from(selectedGroupIds);
+
+    for (const groupId of targetGroupIds) {
+      addContactsToGroup(groupId, personIds);
+    }
+  }, [debouncedQuery, filterGroupId, loadedGroupMembers, selectedGroupIds]);
+
+  const handleAddSuccess = useCallback(() => {
+    exitSelectionMode();
+    onGroupsReloaded();
+  }, [exitSelectionMode, onGroupsReloaded]);
+
+  const { isSubmitting, submit: submitAdd } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError: handleAddError,
+    onSuccess: handleAddSuccess,
+    perform: performAdd,
+  });
+
+  useEffect(() => {
+    syncEffectState(() => {
+      setIsAddingToGroups(isSubmitting);
+    });
+  }, [isSubmitting, setIsAddingToGroups]);
+
   const handleConfirmAdd = () => {
-    void (async () => {
-      if (selectedGroupIds.size === 0) {
-        return;
-      }
+    if (selectedGroupIds.size === 0 || isSubmitting) {
+      return;
+    }
 
-      const selectionState = useContactsSelection.getState();
-      const personIds = resolveContactsSelectionPersonIds(
-        selectionState,
-        debouncedQuery,
-        loadedGroupMembers ? { loadedGroupMembers } : undefined,
-      );
-      const targetGroupIds = Array.from(selectedGroupIds);
-
-      setIsAddingToGroups(true);
-
-      try {
-        for (const groupId of targetGroupIds) {
-          addContactsToGroup(groupId, personIds);
-        }
-
-        setAddToGroupsSheetOpen(false);
-        exitSelectionMode();
-        await onGroupsReloaded();
-      } catch {
-        showToast({
-          description: tMobileContacts("AddToGroupsFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      } finally {
-        setIsAddingToGroups(false);
-      }
-    })();
+    submitAdd();
   };
 
-  const renderItem = ({ item }: ListRenderItemInfo<GroupWithCount>) => (
-    <GroupSelectRow
-      group={item}
-      isSelected={selectedGroupIds.has(item.id)}
-      onToggle={() => toggleGroup(item.id)}
-    />
-  );
+  const canConfirm = selectedGroupIds.size > 0 && !isSubmitting;
 
-  const canConfirm = selectedGroupIds.size > 0 && !isAddingToGroups;
-
-  const sheetHeader = (
+  const emptyState = (
     <>
-      <Paragraph
-        color={colors.textPrimary}
-        fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
-        fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
-      >
-        {tMobileContacts("AddToGroupsSheetTitle")}
-      </Paragraph>
-      <Paragraph
-        color={colors.textSecondary}
-        fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
-        marginTop={4}
-      >
-        {subtitle}
-      </Paragraph>
+      <Text className="text-center" fw={600}>
+        {tMobileContacts("NoGroupsYet")}
+      </Text>
+      <Text c="secondary" className="mt-1.5 text-center" size="sm">
+        {tMobileContacts("NoGroupsYetHint")}
+      </Text>
     </>
   );
 
-  const sheetFooter = (
-    <XStack gap={10}>
-      <Pressable
-        accessibilityRole="button"
-        disabled={isAddingToGroups}
-        onPress={handleClose}
-        style={({ pressed }) => [
-          styles.footerButton,
-          styles.footerButtonOutline,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.borderStrong,
-            opacity: isAddingToGroups
-              ? MOBILE_OPACITY.disabled
-              : pressed
-                ? MOBILE_OPACITY.pressed
-                : 1,
-          },
-        ]}
-      >
-        <Text style={[styles.footerButtonText, { color: colors.textSecondary }]}>
-          {t("actions.cancel")}
-        </Text>
-      </Pressable>
-
-      <Pressable
-        accessibilityRole="button"
-        disabled={!canConfirm}
-        onPress={handleConfirmAdd}
-        style={({ pressed }) => [
-          styles.footerButton,
-          {
-            backgroundColor: colors.primary,
-            borderColor: colors.primary,
-            opacity: !canConfirm ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
-          },
-        ]}
-      >
-        {isAddingToGroups ? (
-          <ActivityIndicator color={colors.textOnPrimary} size="small" />
-        ) : (
-          <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {tMobileContacts("AddToGroupsConfirm")}
-          </Text>
-        )}
-      </Pressable>
-    </XStack>
-  );
-
   return (
-    <SearchActionSheet
-      dismissible={!isAddingToGroups}
-      footer={sheetFooter}
-      header={sheetHeader}
-      onOpenChange={handleOpenChange}
+    <SelectSheet
+      actions={[
+        {
+          disabled: isSubmitting,
+          label: t("actions.cancel"),
+          onPress: handleClose,
+          tone: "neutral",
+          variant: "outline",
+        },
+        {
+          disabled: !canConfirm,
+          label: tMobileContacts("AddToGroupsConfirm"),
+          loading: isSubmitting,
+          loadingText: t("feedback.adding"),
+          onPress: handleConfirmAdd,
+          tone: "primary",
+          variant: "filled",
+        },
+      ]}
+      data={filteredGroups}
+      emptyLabel={t("feedback.noResults")}
+      emptyState={groups.length === 0 ? emptyState : undefined}
+      isBusy={isSubmitting}
+      keyExtractor={(item) => item.id}
+      onClose={handleClose}
       onQueryChange={setQuery}
-      open={isOpen}
+      opened={isOpen}
       query={query}
-      searchEditable={!isAddingToGroups}
-      searchPlaceholder={tMobileContacts("AddToGroupsSearchPlaceholder")}
-    >
-      {groups.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Paragraph
-            color={colors.textPrimary}
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.body}
-            fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
-            textAlign="center"
-          >
-            {tMobileContacts("NoGroupsYet")}
-          </Paragraph>
-          <Paragraph
-            color={colors.textSecondary}
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
-            marginTop={6}
-            textAlign="center"
-          >
-            {tMobileContacts("NoGroupsYetHint")}
-          </Paragraph>
-        </View>
-      ) : (
-        <FlatList
-          automaticallyAdjustKeyboardInsets
-          contentContainerStyle={styles.listContent}
-          data={filteredGroups}
-          initialNumToRender={24}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("feedback.noResults")}
-            </Text>
-          }
-          maxToRenderPerBatch={24}
-          renderItem={renderItem}
-          style={styles.searchList}
-          windowSize={8}
+      renderItem={({ item }) => (
+        <SelectOptionRow
+          isSelected={selectedGroupIds.has(item.id)}
+          mode="multiple"
+          onPress={() => toggleGroup(item.id)}
+          option={mapGroupToSelectItem(item, colors.borderStrong)}
         />
       )}
-    </SearchActionSheet>
+      searchable
+      searchPlaceholder={tMobileContacts("AddToGroupsSearchPlaceholder")}
+      snapPoint="selectSearch"
+      subtitle={subtitle}
+      title={tMobileContacts("AddToGroupsSheetTitle")}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  emptyText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    paddingVertical: 24,
-    textAlign: "center",
-  },
-  footerButton: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: MOBILE_LAYOUT.touchTarget,
-  },
-  footerButtonOutline: {},
-  footerButtonText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  listContent: {
-    paddingBottom: 12,
-  },
-  searchList: {
-    flex: 1,
-  },
-});

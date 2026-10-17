@@ -6,7 +6,6 @@ import type { ContactSelectable } from "@bondery/schemas";
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
 import {
@@ -53,23 +52,14 @@ export function GettingStartedProgressRail({
 
   const dismissMutation = useDismissGettingStartedMutation();
 
-  const parsedSettings = useMemo(
-    () => parseGettingStartedSettings(settingsData),
+  const parsedSettings = parseGettingStartedSettings(settingsData);
 
-    [settingsData],
-  );
+  const state = buildGettingStartedState({
+    hasInteraction,
+    settings: parsedSettings,
 
-  const state = useMemo(
-    () =>
-      buildGettingStartedState({
-        hasInteraction,
-        settings: parsedSettings,
-
-        totalContacts,
-      }),
-
-    [parsedSettings, totalContacts, hasInteraction],
-  );
+    totalContacts,
+  });
 
   if (!state.showRail) {
     return null;

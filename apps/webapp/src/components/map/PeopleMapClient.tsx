@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { ActionIconButton, bonderyTheme, PersonChip } from "@bondery/mantine-next";
@@ -6,7 +7,7 @@ import { IconMinus, IconPlus } from "@tabler/icons-react";
 import type { MarkerCluster } from "leaflet";
 import { DivIcon } from "leaflet";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
   AttributionControl,
@@ -57,7 +58,7 @@ export function PeopleMapClient({
   // Default center over the Atlantic so both USA and Europe are visible at low zoom
   const defaultCenter = center || ([35, -25] as [number, number]);
 
-  const iconById = useMemo(() => {
+  const iconById = (() => {
     const map = new Map<string, DivIcon>();
 
     for (const marker of markers) {
@@ -100,7 +101,7 @@ export function PeopleMapClient({
     }
 
     return map;
-  }, [disableChipNavigation, markers]);
+  })();
 
   return (
     <div
@@ -325,7 +326,7 @@ function VisibleMarkersController({
   // Emit current viewport bounds — intentionally stable (empty deps, reads from ref).
   // Only fires on initial mount + map events, NOT when markers change.
   // This breaks the fetch → markers → notify → fetch infinite loop.
-  const emitBounds = useCallback((m: ReturnType<typeof useMap>) => {
+  const emitBounds = (m: ReturnType<typeof useMap>) => {
     if (!onBoundsChangeRef.current) {
       return;
     }
@@ -336,12 +337,12 @@ function VisibleMarkersController({
       minLat: b.getSouth(),
       minLon: b.getWest(),
     });
-  }, []);
+  };
 
   // Recompute which markers are inside the viewport.
   // Stable (empty deps, reads from refs). Called on map events and when markers change.
   // Does NOT call onBoundsChange — pins arriving from the API never trigger another fetch.
-  const emitVisible = useCallback((m: ReturnType<typeof useMap>) => {
+  const emitVisible = (m: ReturnType<typeof useMap>) => {
     if (!onVisibleMarkerIdsChangeRef.current) {
       return;
     }
@@ -360,7 +361,7 @@ function VisibleMarkersController({
 
     lastVisibleIdsRef.current = visibleIds;
     onVisibleMarkerIdsChangeRef.current(visibleIds);
-  }, []);
+  };
 
   const map = useMapEvents({
     moveend: () => {

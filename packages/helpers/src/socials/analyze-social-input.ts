@@ -20,6 +20,7 @@ export type AnalyzeSocialFieldInputResult =
     };
 
 export interface AnalyzeSocialFieldInputOptions {
+  defaultCountry?: string | null;
   dialCode?: string;
   persistedByField?: Partial<Record<ContactSocialFieldKey, string>>;
   skipReroute?: boolean;
@@ -118,6 +119,7 @@ function suggestReroute(
   }
 
   const processed = processContactSocialFieldValue(suggestedField, rawValue, {
+    defaultCountry: options?.defaultCountry,
     dialCode: options?.dialCode,
   });
 
@@ -144,6 +146,7 @@ export function analyzeSocialFieldInput(
   options?: AnalyzeSocialFieldInputOptions,
 ): AnalyzeSocialFieldInputResult {
   const action = resolveContactSocialFieldCommit(field, rawValue, persistedValue, {
+    defaultCountry: options?.defaultCountry,
     dialCode: options?.dialCode,
   });
 

@@ -2,7 +2,7 @@
 
 import { Button, Menu, MenuDropdown, MenuItem, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 export type SortOption = "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
@@ -16,15 +16,12 @@ export function SortMenu({ sortBy, setSortBy }: SortMenuProps) {
   const t = useGroupsPageTranslations("SortMenu");
   const [opened, setOpened] = useState(false);
 
-  const sortOptions = useMemo(
-    () => [
-      { label: t("CountDesc"), value: "count-desc" as const },
-      { label: t("CountAsc"), value: "count-asc" as const },
-      { label: t("AlphaAsc"), value: "alpha-asc" as const },
-      { label: t("AlphaDesc"), value: "alpha-desc" as const },
-    ],
-    [t],
-  );
+  const sortOptions = [
+    { label: t("CountDesc"), value: "count-desc" as const },
+    { label: t("CountAsc"), value: "count-asc" as const },
+    { label: t("AlphaAsc"), value: "alpha-asc" as const },
+    { label: t("AlphaDesc"), value: "alpha-desc" as const },
+  ];
 
   return (
     <Menu onChange={setOpened} opened={opened} shadow="md" width={180}>

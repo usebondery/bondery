@@ -1,35 +1,18 @@
 import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { useMobileSettingsTranslations } from "@/lib/i18n/generated/hooks";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { SettingsFieldLabel } from "./SettingsFieldLabel";
+import { InputWrapper } from "../../../components/ui/InputWrapper";
+import { useMobileSettingsTranslations } from "../../../lib/i18n/generated/hooks";
 
 interface SettingsPreviewSectionProps {
-  caption: string;
   children: ReactNode;
+  description: string;
 }
 
-export function SettingsPreviewSection({ caption, children }: SettingsPreviewSectionProps) {
+export function SettingsPreviewSection({ children, description }: SettingsPreviewSectionProps) {
   const tMobileSettings = useMobileSettingsTranslations();
-  const colors = useMobileThemeColors();
 
   return (
-    <View style={styles.wrap}>
-      <SettingsFieldLabel>{tMobileSettings("Preview")}</SettingsFieldLabel>
-      <Text style={[styles.caption, { color: colors.textMuted }]}>{caption}</Text>
+    <InputWrapper description={description} label={tMobileSettings("Preview")}>
       {children}
-    </View>
+    </InputWrapper>
   );
 }
-
-const styles = StyleSheet.create({
-  caption: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
-    lineHeight: 18,
-    marginTop: -4,
-  },
-  wrap: {
-    gap: 12,
-  },
-});

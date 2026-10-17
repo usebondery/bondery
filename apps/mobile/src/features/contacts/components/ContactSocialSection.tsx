@@ -3,17 +3,17 @@ import type { Contact } from "@bondery/schemas";
 import { useMemo, useState } from "react";
 import { Linking, StyleSheet, Text, View } from "react-native";
 import { useCommonTranslations, useSocialsTranslations } from "@/lib/i18n/generated/hooks";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { ActionButton } from "../../../components/ui/ActionButton";
+import { notifications } from "../../../lib/toast/notifications";
 import { MOBILE_TEXT_STYLES } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { ContactSocialButton } from "./ContactSocialButton";
 import { CONTACT_SOCIAL_PLATFORMS, renderContactSocialAddIcon } from "./contactSocialConfig";
 import { EditSocialSheet } from "./EditSocialSheet";
 
 interface ContactSocialSectionProps {
   contact: Contact;
   contactFirstName?: string | null;
-  onUpdateSocial: (platform: ContactSocialFieldKey, value: string) => Promise<void>;
+  onUpdateSocial: (platform: ContactSocialFieldKey, value: string) => void;
 }
 
 type SheetState =
@@ -32,9 +32,7 @@ export function ContactSocialSection({
   const tSocials = useSocialsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filledPlatforms = useMemo(
     () => CONTACT_SOCIAL_PLATFORMS.filter((platform) => Boolean(contact[platform.key])),
@@ -58,8 +56,8 @@ export function ContactSocialSection({
     }
 
     Linking.openURL(url).catch(() => {
-      showToast({
-        headline: "Could not open link",
+      notifications.show({
+        title: "Could not open link",
         type: "error",
       });
     });
@@ -81,27 +79,23 @@ export function ContactSocialSection({
     });
   }
 
-  async function savePlatform(platform: ContactSocialFieldKey, value: string) {
-    setIsSubmitting(true);
-
+  function persistSocial(platform: ContactSocialFieldKey, value: string) {
     try {
-      await onUpdateSocial(platform, value);
-      setSheet({ open: false });
-      showToast({
-        description: value
+      onUpdateSocial(platform, value);
+      notifications.show({
+        message: value
           ? `${platform.charAt(0).toUpperCase()}${platform.slice(1)} updated`
           : `${platform.charAt(0).toUpperCase()}${platform.slice(1)} removed`,
-        headline: value ? "Saved" : "Removed",
+        title: value ? "Saved" : "Removed",
         type: "success",
       });
     } catch {
-      showToast({
-        description: `Failed to update ${platform}`,
-        headline: "Could not save",
+      notifications.show({
+        message: `Failed to update ${platform}`,
+        title: "Could not save",
         type: "error",
       });
-    } finally {
-      setIsSubmitting(false);
+      throw new Error("Social update failed");
     }
   }
 
@@ -122,41 +116,46 @@ export function ContactSocialSection({
           const nameSuffix = contactFirstName ? ` for ${contactFirstName}` : "";
 
           return (
-            <ContactSocialButton
+            <ActionButton
               accessibilityHint="Long press to edit"
               accessibilityLabel={`${t(platform.accessibilityLabelKey as never)}${nameSuffix}`}
               color={platform.color}
-              icon={platform.renderIcon(platform.color)}
               key={platform.key}
               onLongPress={() => openEditSheet(platform.key)}
               onPress={() => openLink(platform.key, handle)}
-            />
+              size="md"
+              variant="outline"
+            >
+              {platform.renderIcon(platform.color)}
+            </ActionButton>
           );
         })}
 
         {canAdd ? (
-          <ContactSocialButton
+          <ActionButton
             accessibilityLabel="Add social link"
             color={colors.textMuted}
             dashed
-            icon={renderContactSocialAddIcon(colors.textMuted)}
             onPress={openAddSheet}
-          />
+            size="md"
+            variant="outline"
+          >
+            {renderContactSocialAddIcon(colors.textMuted)}
+          </ActionButton>
         ) : null}
       </View>
 
       <EditSocialSheet
         availablePlatforms={availablePlatforms}
         initialValue={sheetInitialValue}
-        isSubmitting={isSubmitting}
         mode={sheet.open ? sheet.mode : "add"}
         onCancel={() => setSheet({ open: false })}
         onOpenChange={(open) => {
-          if (!open && !isSubmitting) {
+          if (!open) {
             setSheet({ open: false });
           }
         }}
-        onSave={(platform, value) => void savePlatform(platform, value)}
+        onPersist={persistSocial}
         open={sheet.open}
         platform={sheetPlatform}
       />

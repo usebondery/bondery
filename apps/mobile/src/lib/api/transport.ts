@@ -1,13 +1,14 @@
 import { buildApiErrorFromResponse } from "@bondery/helpers/api";
-import { authClient, getAccessToken } from "../auth/client";
+import { getAccessToken } from "../auth/client";
+import { AuthRequiredError, endLocalSession } from "../auth/session";
 import { API_URL } from "../config";
-import { resolveFetchFailureMessage } from "./parseApiErrorBody";
+import { throwTransportUnavailableError } from "./transport-unavailable-error";
 
 export async function getBearerHeaders(): Promise<Record<string, string>> {
   const accessToken = await getAccessToken();
 
   if (!accessToken) {
-    throw new Error("No authenticated mobile session found.");
+    throw new AuthRequiredError("missing_local_session");
   }
 
   return {
@@ -15,29 +16,11 @@ export async function getBearerHeaders(): Promise<Record<string, string>> {
   };
 }
 
-async function mobileFetch(url: string, init?: RequestInit): Promise<Response> {
+export async function mobileFetch(url: string, init?: RequestInit): Promise<Response> {
   try {
     return await fetch(url, init);
   } catch (error) {
-    if (error instanceof Error && error.name === "AbortError") {
-      throw error;
-    }
-    throw new Error(await resolveFetchFailureMessage(error));
-  }
-}
-
-let isSigningOutLocally = false;
-
-async function invalidateSessionOnUnauthorized(): Promise<void> {
-  if (!authClient || isSigningOutLocally) {
-    return;
-  }
-
-  isSigningOutLocally = true;
-  try {
-    await authClient.signOut();
-  } finally {
-    isSigningOutLocally = false;
+    throw await throwTransportUnavailableError(error);
   }
 }
 
@@ -47,7 +30,7 @@ export async function throwApiResponseError(params: {
   contentType?: string | null;
 }): Promise<never> {
   if (params.status === 401) {
-    await invalidateSessionOnUnauthorized();
+    await endLocalSession({ reason: "session_expired" });
   }
 
   throw buildApiErrorFromResponse({

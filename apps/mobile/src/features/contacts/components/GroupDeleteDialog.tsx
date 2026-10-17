@@ -1,9 +1,10 @@
 import { IconTrash } from "@tabler/icons-react-native";
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { useCommonTranslations, useMobileGroupsTranslations } from "@/lib/i18n/generated/hooks";
-import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
+import { Sheet } from "../../../components/ui/Sheet";
 import { deleteGroup } from "../../../lib/domains/groups";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface GroupDeleteDialogProps {
@@ -11,11 +12,11 @@ interface GroupDeleteDialogProps {
   groupTitle: string;
   onDeleted: () => void;
   onOpenChange: (open: boolean) => void;
-  open: boolean;
+  opened: boolean;
 }
 
 export function GroupDeleteDialog({
-  open,
+  opened: open,
   groupId,
   groupTitle,
   onOpenChange,
@@ -24,37 +25,35 @@ export function GroupDeleteDialog({
   const tMobileGroups = useMobileGroupsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
-  const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleDelete = useCallback(async () => {
-    if (isDeleting) {
-      return;
-    }
+  const handleClose = useCallback(() => {
+    onOpenChange(false);
+  }, [onOpenChange]);
 
-    setIsDeleting(true);
+  const handleDeleteError = useCallback(() => {
+    notifications.show({
+      message: tMobileGroups("DeleteFailed"),
+      title: t("feedback.errorTitle"),
+      type: "error",
+    });
+  }, [t, tMobileGroups]);
 
-    try {
+  const { isSubmitting, submit } = useSheetLocalAction({
+    onClose: handleClose,
+    onError: handleDeleteError,
+    onSuccess: onDeleted,
+    perform: () => {
       deleteGroup(groupId);
-      onOpenChange(false);
-      onDeleted();
-    } catch {
-      showToast({
-        description: tMobileGroups("DeleteFailed"),
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
-      setIsDeleting(false);
-    }
-  }, [groupId, isDeleting, onDeleted, onOpenChange, showToast, t, tMobileGroups]);
+    },
+  });
 
   const dialogTitle = tMobileGroups("DeleteDialogTitle").replace("{title}", groupTitle);
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={[
         {
-          disabled: isDeleting,
+          disabled: isSubmitting,
           label: t("actions.cancel"),
           onPress: () => onOpenChange(false),
           tone: "neutral",
@@ -63,26 +62,27 @@ export function GroupDeleteDialog({
         {
           icon: <IconTrash size={16} stroke={colors.textOnPrimary} />,
           label: tMobileGroups("DeleteConfirm"),
-          loading: isDeleting,
-          onPress: handleDelete,
+          loading: isSubmitting,
+          loadingText: t("feedback.deleting"),
+          onPress: submit,
           tone: "danger",
           variant: "filled",
         },
       ]}
-      isBusy={isDeleting}
+      isBusy={isSubmitting}
       onClose={() => {
-        if (isDeleting) {
+        if (isSubmitting) {
           return;
         }
         onOpenChange(false);
       }}
       onOpenChange={(nextOpen) => {
-        if (!nextOpen && isDeleting) {
+        if (!nextOpen && isSubmitting) {
           return;
         }
         onOpenChange(nextOpen);
       }}
-      open={open}
+      opened={open}
       title={dialogTitle}
     />
   );

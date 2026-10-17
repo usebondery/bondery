@@ -8,6 +8,7 @@ import { API_ROUTES } from "@bondery/helpers";
 import { registerOAuthProvidersRoutes } from "../lib/auth/oauth-providers-routes.js";
 import { registerDocsRedirectRoutes } from "../lib/docs/redirect-routes.js";
 import { registerHealthRoutes } from "../lib/health/routes.js";
+import { registerMobileManifestRoute } from "../lib/mobile/manifest-route.js";
 import type { AppFastifyInstance, AppRoutePlugin } from "../lib/platform/fastify-types.js";
 import {
   adminRoutes,
@@ -132,6 +133,7 @@ const ROUTE_MOUNTS: RouteMount[] = [
 
 export async function registerAllRoutes(fastify: AppFastifyInstance): Promise<void> {
   registerHealthRoutes(fastify);
+  registerMobileManifestRoute(fastify);
   registerDocsRedirectRoutes(fastify);
   registerOAuthProvidersRoutes(fastify);
 

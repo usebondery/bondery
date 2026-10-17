@@ -3,7 +3,6 @@
 import { PersonAvatarGroup } from "@bondery/mantine-next";
 import type { Activity, Contact } from "@bondery/schemas";
 import { Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
-import { useMemo } from "react";
 import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { ActivityCard } from "./ActivityCard";
@@ -39,7 +38,7 @@ export function InteractionsList({
 }: InteractionsListProps) {
   const formatter = useFormatter();
 
-  const groupedActivities = useMemo(() => {
+  const groupedActivities = (() => {
     const groups: Record<string, Activity[]> = {};
 
     activities.forEach((activity) => {
@@ -52,7 +51,7 @@ export function InteractionsList({
     });
 
     return groups;
-  }, [activities, formatter]);
+  })();
 
   return (
     <Stack gap="lg">

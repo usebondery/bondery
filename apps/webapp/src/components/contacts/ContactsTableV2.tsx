@@ -9,7 +9,7 @@ import {
 } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
 import { IconArrowMerge, IconTrash, IconUsersPlus } from "@tabler/icons-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import type { SortOrder } from "@/lib/contacts/table-types";
 import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
@@ -75,20 +75,14 @@ export default function ContactsTableV2({
     Boolean(searchValue ?? searchDefaultValue),
   );
 
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setSearchIsActive(value.length > 0);
-      onSearchChange?.(value);
-    },
-    [onSearchChange],
-  );
+  const handleSearchChange = (value: string) => {
+    setSearchIsActive(value.length > 0);
+    onSearchChange?.(value);
+  };
 
-  const dateFormatter = useMemo(
-    () => new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" }),
-    [dateLocale],
-  );
+  const dateFormatter = new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" });
 
-  const selectedContacts = contacts.filter((contact) => selectedIds?.has(contact.id));
+  const selectedIdList = selectedIds ? Array.from(selectedIds) : [];
 
   const standardMenuActions: MenuAction[] = [];
   if (standardActions?.onMergeOne) {
@@ -120,14 +114,14 @@ export default function ContactsTableV2({
   const standardBulkSelectionActions: BulkSelectionAction[] = [];
   if (standardActions?.onMergeSelected) {
     standardBulkSelectionActions.push({
-      disabled: selectedContacts.length !== 2,
+      disabled: selectedIdList.length !== 2,
       disabledTooltip: t("MergeExactlyTwoTooltip"),
       icon: <IconArrowMerge size={16} />,
       key: "mergeSelected",
       label: standardActions.mergeBulkLabel || t("MergeBulk"),
       onClick: () => {
-        if (selectedContacts.length === 2) {
-          standardActions.onMergeSelected?.(selectedContacts[0].id, selectedContacts[1].id);
+        if (selectedIdList.length === 2) {
+          standardActions.onMergeSelected?.(selectedIdList[0], selectedIdList[1]);
         }
       },
     });
@@ -138,8 +132,7 @@ export default function ContactsTableV2({
       key: "addSelectedToGroups",
       label: standardActions.addToGroupsBulkLabel || t("EditGroupsBulk"),
       onClick: () => {
-        const ids = selectedContacts.map((contact) => contact.id);
-        standardActions.onAddToGroupsSelected?.(ids);
+        standardActions.onAddToGroupsSelected?.(selectedIdList);
       },
     });
   }
@@ -151,8 +144,7 @@ export default function ContactsTableV2({
         label: standardActions.deleteBulkLabel || t("Delete"),
         loading: standardActions.isDeleteSelectedLoading,
         onClick: () => {
-          const ids = selectedContacts.map((contact) => contact.id);
-          standardActions.onDeleteSelected?.(ids);
+          standardActions.onDeleteSelected?.(selectedIdList);
         },
       }
     : null;
@@ -168,10 +160,7 @@ export default function ContactsTableV2({
     ...(standardDeleteBulkAction ? [standardDeleteBulkAction] : []),
   ];
 
-  const normalizedColumns = useMemo(
-    () => normalizeVisibleColumns(visibleColumnsProp, columnDefinitions),
-    [columnDefinitions, visibleColumnsProp],
-  );
+  const normalizedColumns = normalizeVisibleColumns(visibleColumnsProp, columnDefinitions);
 
   const sourceColumns = columnsForMenu ?? normalizedColumns;
 

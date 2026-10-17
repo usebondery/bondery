@@ -33,7 +33,11 @@ export async function setContactHasAvatar(
   hasAvatar: boolean,
 ): Promise<void> {
   await db.people.updateMany({
-    data: { hasAvatar, updatedAt: new Date() },
+    data: {
+      avatarUpdatedAt: hasAvatar ? new Date() : null,
+      hasAvatar,
+      updatedAt: new Date(),
+    },
     where: { id: contactId, userId },
   });
 }

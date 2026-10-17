@@ -9,16 +9,22 @@ import {
   useState,
 } from "react";
 import { type Control, type FieldErrors, type UseFormSetValue, useWatch } from "react-hook-form";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { ActionSheetPopup } from "../../components/ActionSheetPopup";
-import { MobileTextInput } from "../../components/MobileTextInput";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
+import { Sheet } from "../../components/ui/Sheet";
+import { TextInput } from "../../components/ui/TextInput";
 import { shareContactEmail } from "../../lib/api/client";
 import { UI_TIMING_MS } from "../../lib/config";
 import { useSheetForm } from "../../lib/forms/useSheetForm";
-import { useMobileShareContactEmailTranslations } from "../../lib/i18n/generated/hooks";
-import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
+import { useSheetNetworkSubmit } from "../../lib/forms/useSheetNetworkSubmit";
+import {
+  useCommonTranslations,
+  useMobileShareContactEmailTranslations,
+} from "../../lib/i18n/generated/hooks";
 import type { NativeTextInputRef } from "../../lib/native-host-refs";
-import { useAppToast } from "../../lib/toast/useAppToast";
+import { syncEffectState } from "../../lib/react/syncEffectState";
+import { notifications } from "../../lib/toast/notifications";
+import { useShowErrorToast } from "../../lib/toast/useShowErrorToast";
 import { MOBILE_LAYOUT, MOBILE_TEXT_STYLES, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import {
@@ -53,7 +59,7 @@ export function ShareContactEmailSheet({
 }: ShareContactEmailSheetProps) {
   const tMobileShareContactEmail = useMobileShareContactEmailTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
   const inputRef = useRef<NativeTextInputRef>(null);
   const {
     control,
@@ -72,17 +78,16 @@ export function ShareContactEmailSheet({
 
   const [emailInput, setEmailInput] = useState("");
   const [inputError, setInputError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!open) {
       return;
     }
 
-    void preloadMobileNamespaces(["mobile.shareContact"]);
-    setEmailInput("");
-    setInputError(null);
-    setIsSubmitting(false);
+    syncEffectState(() => {
+      setEmailInput("");
+      setInputError(null);
+    });
   }, [open]);
 
   useEffect(() => {
@@ -95,39 +100,31 @@ export function ShareContactEmailSheet({
     return () => clearTimeout(timer);
   }, [open]);
 
-  const sendWithValidation = handleSubmit(
-    async ({ recipients: finalRecipients, message: formMessage }) => {
-      setIsSubmitting(true);
-
-      try {
-        await shareContactEmail({
-          message: formMessage,
-          personId: contactId,
-          recipientEmails: finalRecipients,
-        });
-
-        showToast({
-          description: tMobileShareContactEmail("SuccessDescription"),
-          headline: tMobileShareContactEmail("SuccessHeadline"),
-          type: "success",
-        });
-        onClose();
-      } catch {
-        showToast({
-          description: tMobileShareContactEmail("ErrorDescription"),
-          headline: tMobileShareContactEmail("ErrorHeadline"),
-          type: "error",
-        });
-      } finally {
-        setIsSubmitting(false);
-      }
+  const { isSubmitting, submit } = useSheetNetworkSubmit(handleSubmit, {
+    onClose,
+    onError: (err) => {
+      showErrorToast(err, tMobileShareContactEmail("ErrorHeadline"));
     },
-  );
+    onSuccess: () => {
+      notifications.show({
+        message: tMobileShareContactEmail("SuccessDescription"),
+        title: tMobileShareContactEmail("SuccessHeadline"),
+        type: "success",
+      });
+    },
+    perform: async ({ recipients: finalRecipients, message: formMessage }) => {
+      await shareContactEmail({
+        message: formMessage,
+        personId: contactId,
+        recipientEmails: finalRecipients,
+      });
+    },
+  });
 
-  async function handleSend(recipients: string[]) {
+  function handleSend(recipients: string[]) {
     const finalRecipients = buildFinalRecipients(recipients, emailInput);
     setValue("recipients", finalRecipients, { shouldDirty: true, shouldValidate: true });
-    await sendWithValidation();
+    submit();
   }
 
   return (
@@ -142,7 +139,7 @@ export function ShareContactEmailSheet({
       isSubmitting={isSubmitting}
       onClose={onClose}
       onOpenChange={onOpenChange}
-      open={open}
+      opened={open}
       recipientErrors={errors.recipients}
       setEmailInput={setEmailInput}
       setInputError={setInputError}
@@ -165,12 +162,12 @@ function ShareContactEmailSheetContent({
   contactName,
   onOpenChange,
   onClose,
-  open,
+  opened,
   colors,
 }: {
   control: Control<ShareEmailFormValues>;
   setValue: UseFormSetValue<ShareEmailFormValues>;
-  handleSend: (recipients: string[]) => Promise<void>;
+  handleSend: (recipients: string[]) => void;
   emailInput: string;
   setEmailInput: Dispatch<SetStateAction<string>>;
   inputError: string | null;
@@ -181,9 +178,10 @@ function ShareContactEmailSheetContent({
   contactName: string;
   onOpenChange: (open: boolean) => void;
   onClose: () => void;
-  open: boolean;
+  opened: boolean;
   colors: ReturnType<typeof useMobileThemeColors>;
 }) {
+  const tCommon = useCommonTranslations();
   const tMobileShareContactEmail = useMobileShareContactEmailTranslations();
   const recipients = useWatch({ control, name: "recipients" }) ?? [];
 
@@ -293,13 +291,14 @@ function ShareContactEmailSheetContent({
   );
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={[
         {
           disabled: !canSend,
           icon: <IconSend color={colors.textOnPrimary} size={16} />,
           label: sendButtonLabel,
           loading: isSubmitting,
+          loadingText: tCommon("feedback.sending"),
           onPress: () => {
             if (!canSend) {
               return;
@@ -313,7 +312,7 @@ function ShareContactEmailSheetContent({
       isBusy={isSubmitting}
       onClose={onClose}
       onOpenChange={onOpenChange}
-      open={open}
+      opened={opened}
       title={tMobileShareContactEmail("Title").replace("{name}", contactName)}
     >
       <ScrollView
@@ -334,7 +333,7 @@ function ShareContactEmailSheetContent({
             {tMobileShareContactEmail("RecipientsLabel")}
           </Text>
 
-          <MobileTextInput
+          <TextInput
             autoCapitalize="none"
             autoCorrect={false}
             editable={!isSubmitting && !atRecipientCap}
@@ -348,8 +347,9 @@ function ShareContactEmailSheetContent({
             placeholder={tMobileShareContactEmail("RecipientsPlaceholder")}
             ref={inputRef}
             returnKeyType="next"
-            trailingAccessory={addButton}
+            rightSection={addButton}
             value={emailInput}
+            variant="sheet"
           />
 
           {inputError ? (
@@ -400,7 +400,7 @@ function ShareContactEmailSheetContent({
           setValue={setValue}
         />
       </ScrollView>
-    </ActionSheetPopup>
+    </Sheet>
   );
 }
 
@@ -420,8 +420,7 @@ function ShareMessageField({
 
   return (
     <View style={styles.messageSection}>
-      <MobileTextInput
-        containerStyle={styles.messageContainer}
+      <TextInput
         editable={!isSubmitting}
         maxLength={MAX_SHARE_MESSAGE_LENGTH}
         multiline
@@ -432,6 +431,8 @@ function ShareMessageField({
         placeholder={tMobileShareContactEmail("MessagePlaceholder")}
         style={styles.messageInput}
         value={message}
+        variant="sheet"
+        wrapperStyle={styles.messageContainer}
       />
       {message.length > MESSAGE_LENGTH_COUNTER_THRESHOLD ? (
         <Text style={[styles.hintText, { color: colors.textMuted }]}>

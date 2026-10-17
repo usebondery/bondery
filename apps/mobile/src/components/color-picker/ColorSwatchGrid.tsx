@@ -1,5 +1,6 @@
 import { IconCheck } from "@tabler/icons-react-native";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import { normalizeHex } from "./colorUtils";
 import { COLOR_PICKER_LAYOUT, GROUP_COLOR_SWATCH_ROWS } from "./constants";
 

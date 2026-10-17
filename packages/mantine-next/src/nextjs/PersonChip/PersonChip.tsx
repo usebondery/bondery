@@ -10,7 +10,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { type ReactNode, useCallback, useEffect, useRef } from "react";
+import { type ReactNode, useEffect, useRef } from "react";
 import Link from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
@@ -118,24 +118,18 @@ export function PersonChip({
 }: PersonChipProps) {
   const { chevronSize, clearSize } = personChipSizes(size);
 
-  const getDisplayName = useCallback(
-    (candidate: PersonChipIdentity | null) => {
-      if (!candidate) {
-        return placeholder;
-      }
+  const getDisplayName = (candidate: PersonChipIdentity | null) => {
+    if (!candidate) {
+      return placeholder;
+    }
 
-      return formatPersonName(candidate);
-    },
-    [placeholder],
-  );
+    return formatPersonName(candidate);
+  };
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const matchQuery = useCallback(
-    (candidate: PersonChipIdentity, query: string) => {
-      return getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
-    },
-    [getDisplayName],
-  );
+  const matchQuery = (candidate: PersonChipIdentity, query: string) => {
+    return getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
+  };
 
   const {
     canLoadMore,

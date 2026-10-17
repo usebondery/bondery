@@ -67,6 +67,10 @@ export const envSchema = {
       default: "",
       type: "string",
     },
+    BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS: {
+      default: "",
+      type: "string",
+    },
     BONDERY_PUBLIC_API_URL: {
       type: "string",
     },
@@ -136,6 +140,7 @@ declare module "fastify" {
   interface FastifyInstance {
     config: {
       LOG_LEVEL: string;
+      BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS: string;
       BONDERY_PUBLIC_WEBAPP_URL: string;
       BONDERY_PUBLIC_WEBAUTHN_RP_ID: string;
       BONDERY_PUBLIC_WEBSITE_URL: string;

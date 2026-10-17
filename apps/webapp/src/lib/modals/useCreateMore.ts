@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useState } from "react";
 
 /**
  * Owns the Create more switch outside Mantine `useForm`. Starts off every time
@@ -13,15 +13,12 @@ export function useCreateMore(options?: { enabled?: boolean }): {
   const enabled = options?.enabled ?? true;
   const [createMore, setCreateMoreState] = useState(false);
 
-  const setCreateMore = useCallback(
-    (checked: boolean) => {
-      if (!enabled) {
-        return;
-      }
-      setCreateMoreState(checked);
-    },
-    [enabled],
-  );
+  const setCreateMore = (checked: boolean) => {
+    if (!enabled) {
+      return;
+    }
+    setCreateMoreState(checked);
+  };
 
   if (!enabled) {
     return { createMore: false, setCreateMore };

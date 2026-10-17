@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback } from "react";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 
 /**
@@ -10,16 +9,13 @@ import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore"
 export function useNavigateWithTitle() {
   const router = useRouter();
 
-  const navigateWithTitle = useCallback(
-    (href: string, title: string) => {
-      const trimmed = title.trim();
-      if (trimmed) {
-        setOptimisticDocumentTitle(trimmed);
-      }
-      router.push(href);
-    },
-    [router],
-  );
+  const navigateWithTitle = (href: string, title: string) => {
+    const trimmed = title.trim();
+    if (trimmed) {
+      setOptimisticDocumentTitle(trimmed);
+    }
+    router.push(href);
+  };
 
   return { navigateWithTitle };
 }

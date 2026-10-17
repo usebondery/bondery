@@ -1,7 +1,16 @@
+import { buildApiErrorFromResponse } from "@bondery/helpers/api";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { SyncBootstrapResponse, SyncPullResponse } from "@bondery/schemas/sync";
+import type { SyncBootstrapResponse, SyncPullResponse, SyncTableKey } from "@bondery/schemas/sync";
+import { mobileFetch } from "../api/transport";
 import { getAccessToken } from "../auth/client";
+import {
+  AuthRequiredError,
+  classifyTransportFailure,
+  endLocalSession,
+  logLocalSessionMissing,
+} from "../auth/session";
 import { API_URL } from "../config";
+import { flushAvatarFileJobs } from "./avatar-files";
 import { syncRequestHeaders } from "./constants";
 import { getSyncDatabase } from "./db";
 import { applyBootstrapTables, applySyncBatches } from "./materializer";
@@ -11,10 +20,17 @@ import {
   setBootstrapCompleted,
   setLastServerSequence,
 } from "./outbox/pending-mutations";
+import {
+  decidePullLoopFailure,
+  type PullLoopFailureAction,
+  shouldEnterPullLoopAfterBootstrap,
+} from "./pull-auth";
+import { type PullSessionGeneration, syncSessionGuard } from "./pull-session-guard";
 import { shouldSchedulePullOnWake } from "./pull-wake";
+import { refreshSqliteViews } from "./refresh-sqlite-views";
 import { logSyncPullError, logSyncPullResponse } from "./sync-logger";
 
-type SyncSubscriber = () => void;
+type SyncSubscriber = (tables: readonly SyncTableKey[]) => void;
 export type SyncPullReason =
   | "wake"
   | "reconnect"
@@ -31,22 +47,24 @@ const SAFETY_PULL_INTERVAL_MS = 300_000;
 
 const subscribers = new Set<SyncSubscriber>();
 let pullAbort: AbortController | null = null;
-let pullLoopRunning = false;
+let pullLoopPromise: Promise<void> | null = null;
 let pullMode: SyncPullMode = "long_poll";
 let safetyTimer: ReturnType<typeof setInterval> | null = null;
 
 let pullInFlight: Promise<boolean> | null = null;
 let pullPending = false;
 let wakeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
+let lifecycleRequest = 0;
 
 export function subscribeSyncUpdates(listener: SyncSubscriber): () => void {
   subscribers.add(listener);
   return () => subscribers.delete(listener);
 }
 
-export function notifySyncSubscribers(): void {
+export function notifySyncSubscribers(tables: readonly SyncTableKey[]): void {
+  refreshSqliteViews(tables);
   for (const listener of subscribers) {
-    listener();
+    listener(tables);
   }
 }
 
@@ -76,8 +94,8 @@ export function setSyncPullMode(mode: SyncPullMode): void {
     startSafetyTimer();
   } else {
     stopSafetyTimer();
-    if (pullAbort && !pullAbort.signal.aborted && !pullLoopRunning) {
-      void pullLoop();
+    if (pullAbort && !pullAbort.signal.aborted && !pullLoopPromise) {
+      startPullLoop();
     }
   }
 }
@@ -113,14 +131,19 @@ export function onSyncWakeReconnect(): void {
 }
 
 export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean> {
+  const generation = syncSessionGuard.capture();
+  if (generation === null) {
+    return Promise.resolve(false);
+  }
+
   if (pullInFlight) {
     pullPending = true;
     return pullInFlight;
   }
 
-  pullInFlight = pullOnce(pullAbort?.signal, input.reason).finally(() => {
+  pullInFlight = pullOnce(pullAbort?.signal, input.reason, generation).finally(() => {
     pullInFlight = null;
-    if (pullPending) {
+    if (pullPending && syncSessionGuard.isCurrent(generation)) {
       pullPending = false;
       void schedulePull({ reason: input.reason });
     }
@@ -133,13 +156,56 @@ async function getSyncAccessToken(): Promise<string | null> {
   return getAccessToken();
 }
 
-async function syncFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
+async function delay(ms: number, signal: AbortSignal): Promise<void> {
+  await new Promise<void>((resolve) => {
+    if (signal.aborted) {
+      resolve();
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      resolve();
+    }, ms);
+
+    signal.addEventListener(
+      "abort",
+      () => {
+        clearTimeout(timer);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}
+
+type PullSession = {
+  accessToken: string;
+  generation: PullSessionGeneration;
+};
+
+async function isCurrentPullSession(session: PullSession): Promise<boolean> {
+  if (!syncSessionGuard.isCurrent(session.generation)) {
+    return false;
+  }
+  const accessToken = await getSyncAccessToken();
+  return syncSessionGuard.isCurrentSession(session.generation, session.accessToken, accessToken);
+}
+
+async function syncFetch<T>(
+  path: string,
+  generation: PullSessionGeneration,
+  signal?: AbortSignal,
+): Promise<{ payload: T; session: PullSession } | null> {
   const token = await getSyncAccessToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new AuthRequiredError("missing_local_session");
+  }
+  const session = { accessToken: token, generation };
+  if (!(await isCurrentPullSession(session))) {
+    return null;
   }
 
-  const response = await fetch(`${API_URL}${path}`, {
+  const response = await mobileFetch(`${API_URL}${path}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       ...syncRequestHeaders(),
@@ -147,30 +213,75 @@ async function syncFetch<T>(path: string, signal?: AbortSignal): Promise<T> {
     signal,
   });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || `Sync request failed (${response.status})`);
+  if (!(await isCurrentPullSession(session))) {
+    return null;
   }
 
-  return (await response.json()) as T;
+  if (response.status === 401) {
+    await endLocalSession({ reason: "session_expired" });
+    throw new AuthRequiredError("session_revoked");
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw buildApiErrorFromResponse({
+      bodyText: text,
+      status: response.status,
+    });
+  }
+
+  return {
+    payload: (await response.json()) as T,
+    session,
+  };
 }
 
-export async function bootstrapSync(signal?: AbortSignal): Promise<void> {
-  const payload = await syncFetch<SyncBootstrapResponse>(API_ROUTES.SYNC_BOOTSTRAP, signal);
+async function runBootstrapSync(
+  signal: AbortSignal | undefined,
+  generation: PullSessionGeneration,
+): Promise<boolean> {
+  const response = await syncFetch<SyncBootstrapResponse>(
+    API_ROUTES.SYNC_BOOTSTRAP,
+    generation,
+    signal,
+  );
+  if (!response || !(await isCurrentPullSession(response.session))) {
+    return false;
+  }
+  const { payload } = response;
   getSyncDatabase();
-  applyBootstrapTables(payload.tables);
+  const result = applyBootstrapTables(payload.tables);
   setLastServerSequence(payload.nextServerSequence);
   setBootstrapCompleted(true);
-  notifySyncSubscribers();
+  notifySyncSubscribers(result.tables);
+  const filesChanged = await flushAvatarFileJobs();
+  if (!(await isCurrentPullSession(response.session))) {
+    return false;
+  }
+  if (filesChanged) {
+    notifySyncSubscribers(["people"]);
+  }
+  return true;
 }
 
-export async function pullOnce(
+export function bootstrapSync(
   signal?: AbortSignal,
-  reason: SyncPullReason = "manual",
+  generation: PullSessionGeneration | null = syncSessionGuard.capture(),
+): Promise<boolean> {
+  return (
+    syncSessionGuard.runIfCurrent(generation, (activeGeneration) =>
+      runBootstrapSync(signal, activeGeneration),
+    ) ?? Promise.resolve(false)
+  );
+}
+
+async function runPullOnce(
+  signal: AbortSignal | undefined,
+  reason: SyncPullReason,
+  generation: PullSessionGeneration,
 ): Promise<boolean> {
   if (!getHasInitialSyncSnapshot()) {
-    await bootstrapSync(signal);
-    return true;
+    return bootstrapSync(signal, generation);
   }
 
   const since = getLastServerSequence();
@@ -182,16 +293,20 @@ export async function pullOnce(
     waitMs: String(waitMs),
   });
 
-  const payload = await syncFetch<SyncPullResponse>(
+  const response = await syncFetch<SyncPullResponse>(
     `${API_ROUTES.SYNC_PULL}?${query.toString()}`,
+    generation,
     signal,
   );
+  if (!response || !(await isCurrentPullSession(response.session))) {
+    return false;
+  }
+  const { payload } = response;
 
   logSyncPullResponse(payload.batches.length, payload.nextServerSequence, reason);
 
   if (payload.requiresBootstrap) {
-    await bootstrapSync(signal);
-    return true;
+    return bootstrapSync(signal, generation);
   }
 
   if (payload.batches.length === 0) {
@@ -202,34 +317,81 @@ export async function pullOnce(
   }
 
   getSyncDatabase();
-  applySyncBatches(payload.batches);
+  const result = applySyncBatches(payload.batches);
   setLastServerSequence(payload.nextServerSequence);
   setBootstrapCompleted(true);
-  notifySyncSubscribers();
+  notifySyncSubscribers(result.tables);
+  const filesChanged = await flushAvatarFileJobs();
+  if (!(await isCurrentPullSession(response.session))) {
+    return false;
+  }
+  if (filesChanged) {
+    notifySyncSubscribers(["people"]);
+  }
   return true;
 }
 
-async function pullLoop(): Promise<void> {
-  if (pullLoopRunning) {
+export function pullOnce(
+  signal?: AbortSignal,
+  reason: SyncPullReason = "manual",
+  generation: PullSessionGeneration | null = syncSessionGuard.capture(),
+): Promise<boolean> {
+  return (
+    syncSessionGuard.runIfCurrent(generation, (activeGeneration) =>
+      runPullOnce(signal, reason, activeGeneration),
+    ) ?? Promise.resolve(false)
+  );
+}
+
+async function pullLoop(
+  controller: AbortController,
+  generation: PullSessionGeneration,
+): Promise<void> {
+  const signal = controller.signal;
+
+  while (!signal.aborted && syncSessionGuard.isCurrent(generation) && pullMode === "long_poll") {
+    try {
+      await pullOnce(signal, "long_poll", generation);
+    } catch (error) {
+      if (signal.aborted || !syncSessionGuard.isCurrent(generation)) {
+        break;
+      }
+
+      const action = decidePullLoopFailure(error);
+      if (action === "sign_out") {
+        await endLocalSession({ reason: "session_expired" });
+        break;
+      }
+
+      if (action === "stop") {
+        if (classifyTransportFailure(error) === "missing_local_session") {
+          logLocalSessionMissing();
+        }
+        break;
+      }
+
+      logSyncPullError(error);
+      await delay(5_000, signal);
+    }
+  }
+}
+
+function startPullLoop(
+  generation: PullSessionGeneration | null = syncSessionGuard.capture(),
+): void {
+  if (pullLoopPromise) {
     return;
   }
-  pullLoopRunning = true;
-
-  try {
-    while (pullAbort && !pullAbort.signal.aborted && pullMode === "long_poll") {
-      try {
-        await pullOnce(pullAbort.signal, "long_poll");
-      } catch (error) {
-        if (pullAbort.signal.aborted) {
-          break;
-        }
-        logSyncPullError(error);
-        await new Promise((resolve) => setTimeout(resolve, 5_000));
-      }
-    }
-  } finally {
-    pullLoopRunning = false;
+  const controller = pullAbort;
+  if (!controller || !syncSessionGuard.isCurrent(generation)) {
+    return;
   }
+  const operation = pullLoop(controller, generation).finally(() => {
+    if (pullLoopPromise === operation) {
+      pullLoopPromise = null;
+    }
+  });
+  pullLoopPromise = operation;
 }
 
 function startSafetyTimer(): void {
@@ -247,32 +409,81 @@ function stopSafetyTimer(): void {
 }
 
 export async function startPullSync(): Promise<void> {
-  await stopPullSync();
+  const request = ++lifecycleRequest;
+  await stopPullRuntime();
+  if (request !== lifecycleRequest) {
+    return;
+  }
+
   pullAbort = new AbortController();
+  const signal = pullAbort.signal;
+  const generation = syncSessionGuard.activate();
   getSyncDatabase();
+
+  let bootstrapFailure: PullLoopFailureAction | null = null;
 
   if (!getHasInitialSyncSnapshot()) {
     try {
-      await bootstrapSync(pullAbort.signal);
+      await bootstrapSync(signal, generation);
     } catch (error) {
-      logSyncPullError(error);
+      if (signal.aborted || !syncSessionGuard.isCurrent(generation)) {
+        return;
+      }
+
+      bootstrapFailure = decidePullLoopFailure(error);
+      if (bootstrapFailure === "sign_out") {
+        await endLocalSession({ reason: "session_expired" });
+      } else if (bootstrapFailure === "stop") {
+        if (classifyTransportFailure(error) === "missing_local_session") {
+          logLocalSessionMissing();
+        }
+      } else {
+        logSyncPullError(error);
+      }
     }
   }
 
+  if (
+    signal.aborted ||
+    !syncSessionGuard.isCurrent(generation) ||
+    !shouldEnterPullLoopAfterBootstrap(bootstrapFailure)
+  ) {
+    return;
+  }
+
   if (pullMode === "long_poll") {
-    void pullLoop();
+    startPullLoop(generation);
   } else {
     startSafetyTimer();
   }
 }
 
 export async function stopPullSync(): Promise<void> {
-  pullAbort?.abort();
-  pullAbort = null;
+  lifecycleRequest += 1;
+  await stopPullRuntime();
+}
+
+async function stopPullRuntime(): Promise<void> {
+  const controller = pullAbort;
+  const inFlight = pullInFlight;
+  const loop = pullLoopPromise;
+  pullPending = false;
+  const trackedOperations = syncSessionGuard.deactivateAndWait();
+  controller?.abort();
   stopSafetyTimer();
   if (wakeDebounceTimer) {
     clearTimeout(wakeDebounceTimer);
     wakeDebounceTimer = null;
+  }
+
+  await Promise.allSettled([
+    trackedOperations,
+    ...(inFlight ? [inFlight] : []),
+    ...(loop ? [loop] : []),
+  ]);
+
+  if (pullAbort === controller) {
+    pullAbort = null;
   }
 }
 

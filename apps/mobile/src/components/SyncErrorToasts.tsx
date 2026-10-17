@@ -1,22 +1,16 @@
 import { useEffect } from "react";
-import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { subscribeSyncErrors } from "../lib/sync/outbox/sync-worker";
-import { useAppToast } from "../lib/toast/useAppToast";
+import { useShowErrorToast } from "../lib/toast/useShowErrorToast";
 
 /** Surfaces rejected push mutations as toasts. */
 export function SyncErrorToasts() {
-  const t = useCommonTranslations();
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
 
   useEffect(() => {
-    return subscribeSyncErrors((message) => {
-      showToast({
-        description: message,
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
+    return subscribeSyncErrors((error) => {
+      showErrorToast(error);
     });
-  }, [showToast, t]);
+  }, [showErrorToast]);
 
   return null;
 }

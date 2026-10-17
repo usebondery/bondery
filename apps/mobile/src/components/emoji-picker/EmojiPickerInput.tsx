@@ -1,13 +1,13 @@
 import type { EmojiCategoryName } from "@bondery/helpers/emoji";
-import { IconChevronDown } from "@tabler/icons-react-native";
 import { useCallback, useMemo, useState } from "react";
-import { Pressable, type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
+import { type StyleProp, StyleSheet, Text, View, type ViewStyle } from "react-native";
 import {
   useMobileEmojiPickerTranslations,
   useMobileGroupsTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
 import { EMOJI_PICKER_LAYOUT } from "./constants";
 import { EmojiPickerSheet } from "./EmojiPickerSheet";
 
@@ -70,9 +70,6 @@ export function EmojiPickerInput({
     [tMobileEmojiPicker],
   );
 
-  const triggerBorderColor = error ? colors.dangerAccent : colors.borderStrong;
-  const triggerTextColor = hasValue ? colors.textPrimary : colors.textSecondary;
-
   const triggerContent = useMemo(() => {
     if (hasValue) {
       return <Text style={[styles.selectedEmoji, { color: colors.textPrimary }]}>{value}</Text>;
@@ -83,11 +80,13 @@ export function EmojiPickerInput({
     }
 
     return (
-      <Text numberOfLines={1} style={[styles.placeholder, { color: triggerTextColor }]}>
+      <Text numberOfLines={1} style={[styles.placeholder, { color: colors.textSecondary }]}>
         {resolvedPlaceholder}
       </Text>
     );
-  }, [colors.textPrimary, compact, hasValue, resolvedPlaceholder, triggerTextColor, value]);
+  }, [colors.textPrimary, colors.textSecondary, compact, hasValue, resolvedPlaceholder, value]);
+
+  const layout = stretch ? "stretch" : "square";
 
   return (
     <>
@@ -96,46 +95,34 @@ export function EmojiPickerInput({
           <Text style={[styles.label, { color: colors.textSecondary }]}>{label}</Text>
         ) : null}
 
-        <Pressable
+        <ActionButtonShellPressable
           accessibilityHint={tMobileEmojiPicker("TriggerAccessibilityHint")}
           accessibilityLabel={resolvedAccessibilityLabel}
-          accessibilityRole="button"
-          accessibilityState={{ disabled }}
           disabled={disabled}
+          layout={layout}
+          matchInputChrome
           onPress={() => setOpen(true)}
-          style={({ pressed }) => [
-            styles.trigger,
-            compact ? styles.compactTrigger : null,
-            stretch ? styles.stretchTrigger : null,
-            {
-              backgroundColor:
-                pressed && !disabled ? colors.surfacePressed : colors.inputBackground,
-              borderColor: triggerBorderColor,
-              opacity: disabled ? 0.5 : 1,
-            },
+          style={[
+            compact && !stretch ? { width: EMOJI_PICKER_LAYOUT.compactTriggerWidth } : null,
             triggerStyle,
           ]}
+          variant="outline"
         >
-          <View style={styles.triggerContent}>{triggerContent}</View>
-          {!(compact && hasValue) ? (
-            <IconChevronDown color={colors.iconSecondary} size={16} />
-          ) : null}
-        </Pressable>
+          {triggerContent}
+        </ActionButtonShellPressable>
 
         {error ? <Text style={[styles.error, { color: colors.dangerText }]}>{error}</Text> : null}
       </View>
 
-      {open && !disabled ? (
-        <EmojiPickerSheet
-          emptySearchLabel={tMobileEmojiPicker("EmptySearch")}
-          getCategoryLabel={getCategoryLabel}
-          onOpenChange={setOpen}
-          onSelect={onChange}
-          open
-          searchPlaceholder={tMobileEmojiPicker("SearchPlaceholder")}
-          value={value}
-        />
-      ) : null}
+      <EmojiPickerSheet
+        emptySearchLabel={tMobileEmojiPicker("EmptySearch")}
+        getCategoryLabel={getCategoryLabel}
+        onOpenChange={setOpen}
+        onSelect={onChange}
+        open={open && !disabled}
+        searchPlaceholder={tMobileEmojiPicker("SearchPlaceholder")}
+        value={value}
+      />
     </>
   );
 }
@@ -146,10 +133,6 @@ const styles = StyleSheet.create({
     flexShrink: 0,
     width: EMOJI_PICKER_LAYOUT.compactTriggerWidth,
   },
-  compactTrigger: {
-    paddingHorizontal: 8,
-    width: EMOJI_PICKER_LAYOUT.compactTriggerWidth,
-  },
   error: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     marginTop: 6,
@@ -157,7 +140,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
-    marginBottom: MOBILE_LAYOUT.spacing.contentTop / 2,
+    marginBottom: 6,
   },
   placeholder: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
@@ -169,30 +152,11 @@ const styles = StyleSheet.create({
   },
   selectedEmoji: {
     fontSize: EMOJI_PICKER_LAYOUT.triggerEmojiFontSize,
-    lineHeight: MOBILE_LAYOUT.touchTarget,
+    lineHeight: MOBILE_TYPOGRAPHY.fontSize.cardTitle,
     textAlign: "center",
   },
   stretchRoot: {
     flex: 1,
-    minWidth: 0,
-  },
-  stretchTrigger: {
-    width: "100%",
-  },
-  trigger: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    flexDirection: "row",
-    gap: MOBILE_LAYOUT.spacing.contentTop / 2,
-    justifyContent: "space-between",
-    minHeight: MOBILE_LAYOUT.touchTarget,
-    paddingHorizontal: 12,
-  },
-  triggerContent: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
     minWidth: 0,
   },
 });

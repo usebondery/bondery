@@ -92,6 +92,7 @@ export async function listGroups(ctx: GroupListContext, query?: PreviewListQuery
     if (previewIds.length > 0) {
       const previewContacts = await db.people.findMany({
         select: {
+          avatarUpdatedAt: true,
           firstName: true,
           hasAvatar: true,
           id: true,
@@ -112,9 +113,9 @@ export async function listGroups(ctx: GroupListContext, query?: PreviewListQuery
             avatar: resolveContactAvatarUrl(
               user.id,
               {
+                avatarUpdatedAt: contact.avatarUpdatedAt,
                 hasAvatar: contact.hasAvatar,
                 id: contact.id,
-                updatedAt: contact.updatedAt.toISOString(),
               },
               avatarOptions,
             ),

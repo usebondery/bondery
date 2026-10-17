@@ -11,7 +11,6 @@ import { Button, Group, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconTrash, IconUsersGroup, IconUsersPlus } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
@@ -61,7 +60,7 @@ export function GroupsClient() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const sortedGroups = useMemo(() => {
+  const sortedGroups = (() => {
     const groups = [...initialGroups];
     switch (sortBy) {
       case "alpha-asc":
@@ -73,7 +72,7 @@ export function GroupsClient() {
       default:
         return groups.sort((a, b) => b.contactCount - a.contactCount);
     }
-  }, [initialGroups, sortBy]);
+  })();
 
   if (isError && !data && isPageLoadFailure(error)) {
     throw error;

@@ -1,15 +1,18 @@
 import { getRandomExampleName } from "@bondery/helpers/name";
 import type { Contact } from "@bondery/schemas";
 import { useRouter } from "expo-router";
-import type { ReactNode } from "react";
 import { useMemo } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
+import { Paper } from "../../components/ui/Paper";
+import { Select } from "../../components/ui/Select";
+import { Stack } from "../../components/ui/Stack";
 import { updateSettings } from "../../lib/api/client";
 import {
   useCommonTranslations,
   useMobileSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
 import { getSwipeActionIcon } from "../../lib/preferences/swipeActionIcons";
 import type {
   MobilePreferencesState,
@@ -19,9 +22,7 @@ import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { ContactRow } from "../contacts/components/ContactRow";
-import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
 import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
-import { SettingsSelect } from "./components/SettingsSelect";
 
 const PREVIEW_CONTACT_ID = "swipe-actions-preview";
 
@@ -91,25 +92,21 @@ export function SettingsSwipeActionsScreen() {
     [t],
   );
 
-  const swipeOptions: Array<{
-    value: SwipeAction;
-    label: string;
-    icon: ReactNode;
-  }> = [
+  const swipeOptions = [
     {
-      icon: getSwipeActionIcon("call", iconStroke),
       label: t("actions.call"),
-      value: "call",
+      leftSection: { icon: getSwipeActionIcon("call", iconStroke), type: "icon" as const },
+      value: "call" as SwipeAction,
     },
     {
-      icon: getSwipeActionIcon("message", iconStroke),
       label: t("actions.message"),
-      value: "message",
+      leftSection: { icon: getSwipeActionIcon("message", iconStroke), type: "icon" as const },
+      value: "message" as SwipeAction,
     },
     {
-      icon: getSwipeActionIcon("email", iconStroke),
       label: t("actions.email"),
-      value: "email",
+      leftSection: { icon: getSwipeActionIcon("email", iconStroke), type: "icon" as const },
+      value: "email" as SwipeAction,
     },
   ];
 
@@ -134,70 +131,53 @@ export function SettingsSwipeActionsScreen() {
   return (
     <>
       <StackNavBar
-        onBack={() => router.back()}
+        onBack={() => goBackOrReplace(router, "/settings")}
         title={tMobileSettings("SwipeActions")}
         variant="elevated"
       />
 
       <ScrollView
-        contentContainerStyle={styles.content}
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+          paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+          paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+        }}
+        style={{ backgroundColor: colors.appBackground }}
       >
-        <SettingsFieldLabel>{tMobileSettings("LeftSwipe")}</SettingsFieldLabel>
-        <SettingsSelect
-          label={tMobileSettings("LeftSwipe")}
-          onValueChange={handleLeftSwipeChange}
-          options={swipeOptions}
-          value={leftSwipeAction}
-        />
+        <Stack gap="lg">
+          <Select
+            data={swipeOptions}
+            label={tMobileSettings("LeftSwipe")}
+            onChange={handleLeftSwipeChange}
+            value={leftSwipeAction}
+          />
 
-        <SettingsFieldLabel>{tMobileSettings("RightSwipe")}</SettingsFieldLabel>
-        <SettingsSelect
-          label={tMobileSettings("RightSwipe")}
-          onValueChange={handleRightSwipeChange}
-          options={swipeOptions}
-          value={rightSwipeAction}
-        />
+          <Select
+            data={swipeOptions}
+            label={tMobileSettings("RightSwipe")}
+            onChange={handleRightSwipeChange}
+            value={rightSwipeAction}
+          />
 
-        <SettingsPreviewSection caption={tMobileSettings("PreviewHintSwipeActions")}>
-          <View
-            style={[
-              styles.previewCard,
-              { backgroundColor: colors.surface, borderColor: colors.borderStrong },
-            ]}
-          >
-            <ContactRow
-              contact={previewContact}
-              leftSwipeAction={leftSwipeAction}
-              onEnterSelection={noop}
-              onExecuteAction={noop}
-              onToggleSelect={noop}
-              previewMode
-              rightSwipeAction={rightSwipeAction}
-              selected={false}
-              selectionMode={false}
-              texts={swipeTexts}
-            />
-          </View>
-        </SettingsPreviewSection>
+          <SettingsPreviewSection description={tMobileSettings("PreviewHintSwipeActions")}>
+            <Paper withBorder>
+              <ContactRow
+                contact={previewContact}
+                leftSwipeAction={leftSwipeAction}
+                onEnterSelection={noop}
+                onExecuteAction={noop}
+                onToggleSelect={noop}
+                previewMode
+                rightSwipeAction={rightSwipeAction}
+                selected={false}
+                selectionMode={false}
+                texts={swipeTexts}
+              />
+            </Paper>
+          </SettingsPreviewSection>
+        </Stack>
       </ScrollView>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-  },
-  previewCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    overflow: "hidden",
-  },
-  screen: {
-    flex: 1,
-  },
-});

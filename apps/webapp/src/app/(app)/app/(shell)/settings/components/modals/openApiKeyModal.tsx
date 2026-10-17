@@ -96,7 +96,6 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
     setFullKey("");
     closeModal();
   };
-
   if (step === "create") {
     return (
       <Stack gap="md">

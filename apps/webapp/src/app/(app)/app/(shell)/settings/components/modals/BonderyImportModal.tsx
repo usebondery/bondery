@@ -175,7 +175,6 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
     }
     closeModal();
   };
-
   const checkFile = async (file: File) => {
     cancelledRef.current = false;
     fileRef.current = file;
