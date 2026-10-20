@@ -16,6 +16,7 @@ import { useEffect, useRef } from "react";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useContactInteractionsInfiniteQuery,
   useContactsSelectableListQuery,
@@ -93,7 +94,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     const params = new URLSearchParams(searchParams.toString());
     params.delete(NEXT_ACTION_PARAM);
     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-    router.replace(nextUrl);
+    router.replace(routeAssert(nextUrl));
   }, [searchParams, activityModalContacts, contact.id, contactsHasMore, pathname, router]);
 
   const handleActivityClick = (activity: Activity) => {

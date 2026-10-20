@@ -12,6 +12,10 @@ import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { useMcpConsentsQuery, useRevokeMcpConsentMutation } from "@/lib/query/hooks/useMcpConsents";
 import { openRevokeMcpConsentConfirm } from "../../settingsAuthActions";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
+import {
+  SETTINGS_CREDENTIAL_ICON_PX,
+  SettingsCredentialIconImg,
+} from "./SettingsCredentialIconImg";
 import { SettingsSection } from "./SettingsSection";
 
 const PERMISSION_SELECT_WIDTH = 172;
@@ -22,6 +26,14 @@ interface AiAssistantsSectionProps {
 
 function mcpServerUrl(apiBaseUrl: string): string {
   return `${apiBaseUrl.replace(/\/+$/, "")}/mcp`;
+}
+
+function McpClientRowIcon({ logoUri }: { logoUri: string | null }) {
+  if (!logoUri) {
+    return <IconSparkles size={SETTINGS_CREDENTIAL_ICON_PX} stroke={1.5} />;
+  }
+
+  return <SettingsCredentialIconImg src={logoUri} />;
 }
 
 function mcpJsonConfig(url: string): string {
@@ -117,7 +129,7 @@ export function AiAssistantsSection({ apiBaseUrl }: AiAssistantsSectionProps) {
                 <SettingsCredentialCard
                   deleteAriaLabel={t("RevokeButton")}
                   deleteTooltip={t("RevokeTooltip")}
-                  icon={<IconSparkles />}
+                  icon={<McpClientRowIcon logoUri={consent.logoUri} />}
                   key={consent.id}
                   label={consent.clientName}
                   lastUsedLabel={t("GrantedAt", {

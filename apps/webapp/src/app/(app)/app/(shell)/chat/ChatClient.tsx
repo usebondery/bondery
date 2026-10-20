@@ -25,6 +25,7 @@ import { pickRandomItems } from "@/lib/chat/pickRandomItems";
 import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
 import { useChatPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeChatSession } from "@/lib/navigation/route/chat";
 import {
   useChatSessionMessagesQuery,
   useChatSessionsQuery,
@@ -252,7 +253,7 @@ export function ChatClient() {
       return;
     }
 
-    const targetPath = `${WEBAPP_ROUTES.CHAT}/${createdId}`;
+    const targetPath = routeChatSession(createdId);
     if (pathname === targetPath) {
       return;
     }

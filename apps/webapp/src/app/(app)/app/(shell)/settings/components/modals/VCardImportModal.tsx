@@ -44,6 +44,7 @@ import ContactsTable from "@/components/contacts/ContactsTableV2";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useCommitVCardImportMutation,
   useParseVCardImportMutation,
@@ -317,7 +318,7 @@ export function VCardImportModal({
       captureImportComplete("vcard", totalImported, isFirstImport);
 
       closeModal();
-      router.push(WEBAPP_ROUTES.PEOPLE);
+      router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({

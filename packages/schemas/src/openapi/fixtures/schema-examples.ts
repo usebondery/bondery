@@ -434,6 +434,7 @@ export const EXAMPLE_MCP_CONSENT_LIST_ITEM = {
   clientName: "Claude",
   createdAt: EXAMPLE_ISO_TIMESTAMP,
   id: EXAMPLE_USER_ID,
+  logoUri: "https://claude.ai/favicon.ico",
   scopes: ["openid", "profile", "email", "offline_access", "mcp:read"],
 };
 

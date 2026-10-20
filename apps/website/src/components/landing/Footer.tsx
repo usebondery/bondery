@@ -1,5 +1,5 @@
 import { HELP_DOCS_URL, SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, type AppHref, hrefAssert } from "@bondery/mantine-next";
 import { Box, Divider, Flex, Paper, Title } from "@mantine/core";
 import {
   IconBrandDiscordFilled,
@@ -14,7 +14,7 @@ import { Logo } from "@/components/Logo";
 type LinkItem = {
   key: string;
   title: ReactNode;
-  href?: string;
+  href?: AppHref;
   target?: string;
 };
 
@@ -23,7 +23,7 @@ type LinkGroupItem = {
   links: LinkItem[];
 };
 
-function hasHref(link: LinkItem): link is LinkItem & { href: string } {
+function hasHref(link: LinkItem): link is LinkItem & { href: AppHref } {
   return typeof link.href === "string" && link.href.length > 0;
 }
 
@@ -72,8 +72,18 @@ export function Footer() {
               links={[
                 { href: "/#features", key: "features", title: "Features" },
                 { href: "/#pricing", key: "pricing", title: "Pricing" },
-                { href: HELP_DOCS_URL, key: "help-docs", target: "_blank", title: "Help Docs" },
-                { href: "/roadmap", key: "roadmap", target: "_blank", title: "Roadmap" },
+                {
+                  href: hrefAssert(HELP_DOCS_URL),
+                  key: "help-docs",
+                  target: "_blank",
+                  title: "Help Docs",
+                },
+                {
+                  href: hrefAssert("/roadmap"),
+                  key: "roadmap",
+                  target: "_blank",
+                  title: "Roadmap",
+                },
               ]}
               title="Product"
             />
@@ -83,7 +93,7 @@ export function Footer() {
               links={[
                 { href: WEBSITE_ROUTES.BLOG, key: "blog", title: "Blog" },
                 { href: WEBSITE_ROUTES.CONTACT, key: "contact", title: "Contact us" },
-                { href: "/status", key: "status", target: "_blank", title: "Status" },
+                { href: hrefAssert("/status"), key: "status", target: "_blank", title: "Status" },
               ]}
               title="Company"
             />

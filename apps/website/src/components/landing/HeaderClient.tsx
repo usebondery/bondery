@@ -1,19 +1,25 @@
 "use client";
 
 import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
-import { ActionIconButton, AnchorLink, ButtonLink } from "@bondery/mantine-next";
+import {
+  ActionIconButton,
+  AnchorLink,
+  type AppHref,
+  ButtonLink,
+  hrefAssert,
+} from "@bondery/mantine-next";
 import { Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { Logo } from "@/components/Logo";
+import { routeAssert } from "@/lib/navigation/route/assert";
 
-const navLinks = [
+const navLinks: { href: AppHref; label: string }[] = [
   { href: "/#features", label: "Features" },
   { href: "/#pricing", label: "Pricing" },
   { href: WEBSITE_ROUTES.BLOG, label: "Blog" },
-  { href: WEBSITE_ROUTES.DOCS, label: "Docs" },
+  { href: routeAssert(WEBSITE_ROUTES.DOCS), label: "Docs" },
 ];
-
 type HeaderClientProps = {
   initialStars: number;
   webappUrl: string;
@@ -21,7 +27,7 @@ type HeaderClientProps = {
 
 export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-  const loginHref = `${webappUrl}/login`;
+  const loginHref = hrefAssert(`${webappUrl}/login`);
 
   return (
     <Box className="sticky top-6 z-50 " component="header">

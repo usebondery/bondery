@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { webappUrl } from "@/lib/webapp-url";
+import { redirectWebapp } from "@/lib/navigation/redirect/webapp";
 
 type RouteContext = {
   params: Promise<{ path?: string[] }>;
@@ -8,6 +7,5 @@ type RouteContext = {
 export async function GET(request: Request, { params }: RouteContext) {
   const { path } = await params;
   const requestUrl = new URL(request.url);
-  const target = webappUrl("/auth/callback", path ?? []);
-  redirect(`${target}${requestUrl.search}`);
+  redirectWebapp("/auth/callback", path ?? [], requestUrl.search);
 }

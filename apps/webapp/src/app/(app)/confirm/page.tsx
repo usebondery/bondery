@@ -1,5 +1,4 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getOAuthProvidersServer } from "@/lib/api/domains/server/oauth-providers";
 import { firstNextSearchParam } from "@/lib/auth/authorization-server-error";
@@ -13,6 +12,8 @@ import {
   parseReconfirmPurpose,
 } from "@/lib/auth/reconfirm";
 import { resolveServerSession } from "@/lib/auth/resolveServerSession";
+import { redirectRoute } from "@/lib/navigation/redirect/route";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { ConfirmClient } from "./ConfirmClient";
 
 type ConfirmPageProps = {
@@ -33,12 +34,12 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
   ]);
 
   if (session.status !== "ok") {
-    redirect(WEBAPP_ROUTES.LOGIN);
+    redirectRoute(routeAssert(WEBAPP_ROUTES.LOGIN));
   }
 
   const purpose = parseReconfirmPurpose(firstNextSearchParam(params[CONFIRM_ACTION_PARAM]));
   if (!purpose) {
-    redirect(WEBAPP_ROUTES.SETTINGS);
+    redirectRoute(routeAssert(WEBAPP_ROUTES.SETTINGS));
   }
 
   const oauthProviders = await oauthProvidersPromise;

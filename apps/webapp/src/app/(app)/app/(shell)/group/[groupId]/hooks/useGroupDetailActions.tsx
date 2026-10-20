@@ -22,6 +22,7 @@ import {
   useGroupDetailPageTranslations,
   useGroupsPageTranslations,
 } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import type { ContactsListFilterParams } from "@/lib/query/contactsListParams";
 import {
   useDeleteGroupMutation,
@@ -250,7 +251,7 @@ export function useGroupDetailActions({
             id: loadingNotification,
           });
 
-          router.push(WEBAPP_ROUTES.GROUPS);
+          router.push(routeAssert(WEBAPP_ROUTES.GROUPS));
         } catch {
           notifications.update({
             ...errorNotificationTemplate({

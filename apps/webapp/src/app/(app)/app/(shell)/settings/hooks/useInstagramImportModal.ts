@@ -11,6 +11,7 @@ import { useRef, useState } from "react";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useCommitInstagramImportMutation,
   useParseInstagramImportMutation,
@@ -277,7 +278,7 @@ export function useInstagramImportModal({
           updated: totalUpdated,
         });
       } else {
-        router.push(WEBAPP_ROUTES.PEOPLE);
+        router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
       }
     } catch (error) {
       notifications.show(

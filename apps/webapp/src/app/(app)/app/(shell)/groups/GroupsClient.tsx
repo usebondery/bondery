@@ -18,6 +18,8 @@ import { captureEvent } from "@/lib/analytics/client";
 import { useCommonTranslations, useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticGroupDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { routeGroup } from "@/lib/navigation/route/group";
+import { routeWithQuery } from "@/lib/navigation/route/query";
 import {
   useDeleteGroupMutation,
   useDuplicateGroupMutation,
@@ -57,7 +59,7 @@ export function GroupsClient() {
   const handleSortChange = (option: SortOption) => {
     const params = new URLSearchParams(searchParams);
     params.set("sort", option);
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(routeWithQuery(pathname, params));
   };
 
   const sortedGroups = (() => {
@@ -83,7 +85,7 @@ export function GroupsClient() {
     if (!group) {
       return;
     }
-    navigateWithTitle(`/app/group/${group.id}`, optimisticGroupDocumentTitle(group.label));
+    navigateWithTitle(routeGroup(group.id), optimisticGroupDocumentTitle(group.label));
   };
 
   const handleEditGroup = (group: GroupWithCount) => {

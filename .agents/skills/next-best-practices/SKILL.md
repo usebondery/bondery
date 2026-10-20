@@ -145,6 +145,10 @@ See [self-hosting.md](./self-hosting.md) for:
 - Cache handlers for multi-instance ISR
 - What works vs needs extra setup
 
+## Typed routes (webapp / website)
+
+`typedRoutes` and `experimental.typedEnv` are on for both Next apps. `check:types` runs `next typegen` before `tsc`. Prefer the `route*` / `href*` / `redirect*` helpers in each app `lib/navigation` (and `hrefAssert` from mantine-next) over bare casts. See those READMEs.
+
 ## Debug Tricks
 
 See [debug-tricks.md](./debug-tricks.md) for:

@@ -5,12 +5,15 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "@tabler/icons-react",
+      "lucide-react",
       "@bondery/mantine-next",
       "@mantine/core",
       "@mantine/hooks",
       "@mantine/notifications",
     ],
+    turbopackPluginRuntimeStrategy: "workerThreads",
     turbopackRustReactCompiler: true,
+    typedEnv: true,
     useTypeScriptCli: true,
   },
   async headers() {
@@ -35,6 +38,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    formats: ["image/avif", "image/webp"],
     remotePatterns: [
       {
         hostname: "icons.duckduckgo.com",
@@ -44,6 +48,7 @@ const nextConfig: NextConfig = {
     ],
   },
   pageExtensions: ["ts", "tsx", "md", "mdx"],
+  poweredByHeader: false,
   reactCompiler: true,
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
   // live in src/app/**/route.ts so they can import @bondery/helpers.
@@ -68,6 +73,7 @@ const nextConfig: NextConfig = {
     ];
   },
   serverExternalPackages: ["@takumi-rs/core"],
+  typedRoutes: true,
 };
 
 const withFumadocsMDX = createFumadocsMDX();

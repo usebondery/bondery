@@ -27,6 +27,7 @@ import { getMergeAvatarIdentity } from "@/lib/api/domains/contacts";
 import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n/generated/hooks";
 import { bothHaveDefinedAvatars, hasMergeAvatarChoice } from "@/lib/merge/hasMergeAvatarChoice";
 import { createModalId, useModalDismiss } from "@/lib/modals";
+import { routePerson } from "@/lib/navigation/route/person";
 import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import {
   getAutoLastInteractionChoice,
@@ -343,7 +344,7 @@ function MergeWithModal({
       closeModalSync();
       onSuccess?.();
       if (redirectToMergedPerson) {
-        router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
+        router.push(routePerson(result.personId));
       }
     } catch (error) {
       notifications.hide(loadingNotificationId);

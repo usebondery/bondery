@@ -1,6 +1,5 @@
 "use client";
 
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ActionIconButton } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
@@ -14,6 +13,7 @@ import {
   parseGettingStartedSettings,
 } from "@/lib/home/gettingStartedItems";
 import { useHomePageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeSettings } from "@/lib/navigation/route/settings";
 import { useDismissGettingStartedMutation } from "@/lib/query/hooks/useSettings";
 import { ProgressRailItem } from "./ProgressRailItem";
 
@@ -34,8 +34,6 @@ const TASK_LABEL_KEYS = {
   GettingStartedTaskId,
   "Tasks.AddContacts" | "Tasks.ImportContacts" | "Tasks.LogInteraction"
 >;
-
-const SETTINGS_IMPORT_SECTION = `${WEBAPP_ROUTES.SETTINGS}#data-management`;
 
 export function GettingStartedProgressRail({
   settingsData,
@@ -76,7 +74,7 @@ export function GettingStartedProgressRail({
   const handleTaskAction = (taskId: GettingStartedTaskId) => {
     switch (taskId) {
       case "importContacts":
-        router.push(SETTINGS_IMPORT_SECTION);
+        router.push(routeSettings("data-management"));
 
         return;
 

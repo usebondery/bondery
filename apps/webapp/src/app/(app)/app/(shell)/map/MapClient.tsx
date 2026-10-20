@@ -47,6 +47,7 @@ import { PageWrapper } from "@/components/shell/PageWrapper";
 import type { MapPinsBounds } from "@/lib/api/resources/contacts";
 import { useMapPageTranslations, usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { useMapViewportPins } from "@/lib/query/hooks/useMapViewportPins";
 import type { MapView } from "./utils/types";
@@ -145,7 +146,7 @@ export function MapClient({ view }: MapClientProps) {
   const handleViewChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", value);
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(routeWithQuery(pathname, params));
   };
 
   const markers =

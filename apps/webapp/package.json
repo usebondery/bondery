@@ -99,7 +99,7 @@
     "check:modal-patterns": "tsx scripts/check-modal-patterns.ts",
     "check:schemas-imports": "tsx scripts/check-schemas-imports.ts",
     "check:theme-patterns": "tsx scripts/check-theme-patterns.ts",
-    "check:types": "node ../../scripts/dev/tsc-native.mjs --noEmit && pnpm run check:analytics-events && pnpm run check:api-fetch && pnpm run check:modal-patterns && pnpm run check:schemas-imports && pnpm run check:theme-patterns",
+    "check:types": "next typegen && node ../../scripts/dev/tsc-native.mjs --noEmit && pnpm run check:analytics-events && pnpm run check:api-fetch && pnpm run check:modal-patterns && pnpm run check:schemas-imports && pnpm run check:theme-patterns",
     "dev": "next dev --port 26632",
     "generate-icons": "tsx scripts/generate-icons.ts",
     "prebuild": "cross-env NODE_ENV=production pnpm run generate-icons",

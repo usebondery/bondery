@@ -104,6 +104,18 @@
       "node": "./dist/api/types.js",
       "types": "./src/api/types.ts"
     },
+    "./auth/oauth-client-logo-uri": {
+      "default": "./dist/auth/oauth-client-logo-uri.js",
+      "import": "./dist/auth/oauth-client-logo-uri.js",
+      "node": "./dist/auth/oauth-client-logo-uri.js",
+      "types": "./src/auth/oauth-client-logo-uri.ts"
+    },
+    "./auth/oauth-client-logo-uri.test": {
+      "default": "./dist/auth/oauth-client-logo-uri.test.js",
+      "import": "./dist/auth/oauth-client-logo-uri.test.js",
+      "node": "./dist/auth/oauth-client-logo-uri.test.js",
+      "types": "./src/auth/oauth-client-logo-uri.test.ts"
+    },
     "./auth/oauth-providers": {
       "default": "./dist/auth/oauth-providers.js",
       "import": "./dist/auth/oauth-providers.js",
@@ -218,17 +230,17 @@
       "node": "./dist/date/date-utils.js",
       "types": "./src/date/date-utils.ts"
     },
-    "./dev/mcp-inspector-client-metadata": {
-      "default": "./dist/dev/mcp-inspector-client-metadata.js",
-      "import": "./dist/dev/mcp-inspector-client-metadata.js",
-      "node": "./dist/dev/mcp-inspector-client-metadata.js",
-      "types": "./src/dev/mcp-inspector-client-metadata.ts"
+    "./dev/mcp-inspector-cimd": {
+      "default": "./dist/dev/mcp-inspector-cimd.js",
+      "import": "./dist/dev/mcp-inspector-cimd.js",
+      "node": "./dist/dev/mcp-inspector-cimd.js",
+      "types": "./src/dev/mcp-inspector-cimd.ts"
     },
-    "./dev/mcp-inspector-client-metadata.test": {
-      "default": "./dist/dev/mcp-inspector-client-metadata.test.js",
-      "import": "./dist/dev/mcp-inspector-client-metadata.test.js",
-      "node": "./dist/dev/mcp-inspector-client-metadata.test.js",
-      "types": "./src/dev/mcp-inspector-client-metadata.test.ts"
+    "./dev/mcp-inspector-cimd.test": {
+      "default": "./dist/dev/mcp-inspector-cimd.test.js",
+      "import": "./dist/dev/mcp-inspector-cimd.test.js",
+      "node": "./dist/dev/mcp-inspector-cimd.test.js",
+      "types": "./src/dev/mcp-inspector-cimd.test.ts"
     },
     "./docs": {
       "default": "./dist/docs/index.js",

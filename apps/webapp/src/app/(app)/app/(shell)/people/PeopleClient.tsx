@@ -40,6 +40,7 @@ import {
   useShareContactModalTranslations,
 } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
@@ -193,13 +194,13 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       params.delete("search");
     }
     startSearchTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`);
+      router.replace(routeWithQuery(pathname, params));
     });
   }, DEBOUNCE_MS.search);
   const handleSort = (order: SortOrder) => {
     const params = new URLSearchParams(searchParams);
     params.set("sort", order);
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(routeWithQuery(pathname, params));
   };
 
   const handleDeleteContact = (contactId: string) => {

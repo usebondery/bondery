@@ -4,6 +4,8 @@ import { PersonAvatar } from "@bondery/mantine-next";
 import { Badge, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCalendar, IconLanguage, IconMapPin } from "@tabler/icons-react";
 import Link from "next/link";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routePerson } from "@/lib/navigation/route/person";
 
 interface ContactCardContact {
   appLink?: string;
@@ -27,7 +29,7 @@ interface ContactCardProps {
 }
 
 export function ContactCard({ contact, detailed }: ContactCardProps) {
-  const link = contact.appLink ?? `/app/person/${contact.id}`;
+  const link = contact.appLink ? routeAssert(contact.appLink) : routePerson(contact.id);
 
   const tags = (contact.tags ?? []).map((tag) => (typeof tag === "string" ? tag : tag.label));
 

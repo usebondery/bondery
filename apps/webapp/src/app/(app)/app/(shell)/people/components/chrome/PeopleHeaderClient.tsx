@@ -8,6 +8,7 @@ import { IconAddressBook, IconUser, IconUserPlus } from "@tabler/icons-react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeSettings } from "@/lib/navigation/route/settings";
 import { HOTKEYS } from "@/lib/platform/config";
 import { openAddContactModal } from "../modals/AddContactModal";
 
@@ -51,7 +52,7 @@ export function PeopleHeaderClient() {
       }
       secondaryAction={
         <ButtonLink
-          href={`${WEBAPP_ROUTES.SETTINGS}#data-management`}
+          href={routeSettings("data-management")}
           leftSection={<IconAddressBook size={16} />}
           scroll={false}
           size="md"

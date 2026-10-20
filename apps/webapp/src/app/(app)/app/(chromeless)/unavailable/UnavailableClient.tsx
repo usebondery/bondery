@@ -8,8 +8,9 @@ import { useEffect, useRef, useState } from "react";
 import { retryApiConnection } from "@/lib/api/availabilityStore";
 import { OUTAGE_RESUME_DELAY_MS } from "@/lib/auth/constants";
 import { handleUnauthorizedSession } from "@/lib/auth/handleUnauthorizedSession";
-import { parseReturnIntent } from "@/lib/auth/returnIntent";
+import { parseReturnIntent, routeFromReturn } from "@/lib/auth/returnIntent";
 import { useUnavailablePageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { STATUS_URL } from "@/lib/platform/config";
 
 const POLL_INTERVAL_MS = 5_000;
@@ -35,8 +36,8 @@ export function UnavailableClient() {
       setTimeout(resolve, OUTAGE_RESUME_DELAY_MS);
     });
 
-    const returnTo = parseReturnIntent(searchParams) ?? WEBAPP_ROUTES.HOME;
-    router.replace(returnTo);
+    const returnTo = parseReturnIntent(searchParams);
+    router.replace(returnTo ? routeFromReturn(returnTo) : routeAssert(WEBAPP_ROUTES.HOME));
     router.refresh();
   };
 

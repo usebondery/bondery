@@ -1,4 +1,4 @@
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
 import {
   Accordion,
   AccordionControl,
@@ -67,7 +67,7 @@ function renderAnswerWithDocsLink(answer: string, href: string, label: string) {
   return (
     <>
       {answer.slice(0, index)}
-      <AnchorLink href={href}>{label}</AnchorLink>
+      <AnchorLink href={hrefAssert(href)}>{label}</AnchorLink>
       {answer.slice(index + marker.length)}
     </>
   );

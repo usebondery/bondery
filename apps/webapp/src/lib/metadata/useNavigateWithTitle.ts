@@ -1,5 +1,6 @@
 "use client";
 
+import type { Route } from "next";
 import { useRouter } from "next/navigation";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 
@@ -9,7 +10,7 @@ import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore"
 export function useNavigateWithTitle() {
   const router = useRouter();
 
-  const navigateWithTitle = (href: string, title: string) => {
+  const navigateWithTitle = (href: Route, title: string) => {
     const trimmed = title.trim();
     if (trimmed) {
       setOptimisticDocumentTitle(trimmed);

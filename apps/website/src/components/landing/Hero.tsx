@@ -2,7 +2,7 @@ import { ButtonLink } from "@bondery/mantine-next";
 import { Box, Container, Flex, Image, Stack, Text, Title } from "@mantine/core";
 import { IconArrowDown, IconTopologyStar } from "@tabler/icons-react";
 import NextImage from "next/image";
-import { WEBAPP_URL } from "@/lib/config";
+import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
 
 const HERO_DASHBOARD_ALT =
   "Bondery home dashboard with interactions timeline, contact stats, and reminders";
@@ -21,7 +21,7 @@ export function Hero() {
         size="xl"
       >
         <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
-          <Stack align={{ base: "center", lg: "stretch" }} gap="lg">
+          <Stack className="items-center lg:items-stretch" gap="lg">
             <Title
               className="text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl"
               order={1}
@@ -50,7 +50,7 @@ export function Hero() {
             >
               <ButtonLink
                 className="w-full! md:w-auto!"
-                href={`${WEBAPP_URL}/login`}
+                href={hrefWebappLogin()}
                 leftSection={<IconTopologyStar size={20} />}
                 size="lg"
               >

@@ -27,6 +27,7 @@
     "react-dom": "^19.3.0",
     "react-i18next": "^17.0.15",
     "remark-gfm": "^4.0.1",
+    "server-only": "^0.0.1",
     "takumi-js": "^2.14.0",
     "zod": "^4.6.5"
   },
@@ -57,7 +58,7 @@
     "build": "next build",
     "check:docs:mdx": "tsx scripts/check-docs-mdx.ts",
     "check:env": "tsx scripts/check-env.ts",
-    "check:types": "node ../../scripts/dev/tsc-native.mjs --noEmit",
+    "check:types": "next typegen && node ../../scripts/dev/tsc-native.mjs --noEmit",
     "dev": "next dev --port 26630",
     "generate-icons": "tsx scripts/generate-icons.ts",
     "generate:api-docs": "tsx scripts/generate-api-docs.mts",

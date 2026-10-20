@@ -1302,7 +1302,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
   {
     canonical: "BONDERY_MCP_INSPECTOR_CIMD_URL",
     description:
-      "Optional HTTPS Client ID Metadata URL override for `pnpm mcp:inspect` (defaults to Bondery or MCPJam smoke-test CIMD)",
+      "Optional HTTPS Client ID Metadata URL override for `pnpm mcp:inspect` (defaults to the public MCPJam Inspector CIMD)",
     exampleValue: "",
     group: "Local dev (contributor)",
     requiredIn: [],

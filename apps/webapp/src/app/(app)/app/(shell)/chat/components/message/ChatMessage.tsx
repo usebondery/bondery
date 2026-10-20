@@ -1,7 +1,7 @@
 "use client";
 
 import { type InlineToken, parseInlineTokens } from "@bondery/helpers";
-import { AnchorLink, CopyButton } from "@bondery/mantine-next";
+import { AnchorLink, CopyButton, hrefAssert } from "@bondery/mantine-next";
 import { Avatar, Box, List, ListItem, Paper, Text } from "@mantine/core";
 import { IconMessageCircle } from "@tabler/icons-react";
 import type { UIMessage } from "ai";
@@ -66,7 +66,7 @@ function renderToken(token: InlineToken, key: string): ReactNode {
       return <ChatShareCard id={token.id} key={key} name={token.name} />;
     case "link":
       return (
-        <AnchorLink href={token.href} key={key} target="_blank">
+        <AnchorLink href={hrefAssert(token.href)} key={key} target="_blank">
           {token.label}
         </AnchorLink>
       );

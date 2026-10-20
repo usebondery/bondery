@@ -1,11 +1,12 @@
 import { buildApiErrorFromResponse } from "@bondery/helpers/api";
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { isApiUnavailableError, isApiUnavailableResponseStatus } from "@/lib/api/availability";
 import { handleServerUnauthorizedSession } from "@/lib/auth/handleServerUnauthorizedSession";
 import { getRequestReturnPathForLogin, parseReturnIntent } from "@/lib/auth/returnIntent";
 import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
+import { redirectRoute } from "@/lib/navigation/redirect/route";
+import { routeAssert } from "@/lib/navigation/route/assert";
 
 async function getPathname(): Promise<string> {
   const headersList = await headers();
@@ -26,7 +27,7 @@ async function applyUnauthorizedPolicy(errorToRethrow?: unknown): Promise<never>
     if (errorToRethrow !== undefined) {
       throw errorToRethrow;
     }
-    redirect(WEBSITE_ROUTES.LOGIN);
+    redirectRoute(routeAssert(WEBAPP_ROUTES.LOGIN));
   }
 
   const headersList = await headers();

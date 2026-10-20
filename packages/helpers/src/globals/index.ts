@@ -44,5 +44,5 @@ export type { NextAction } from "#globals/webapp-query.js";
 export {
   NEXT_ACTION_PARAM,
   NEXT_ACTIONS,
-  personPathWithNextAction,
+  routePersonWithNextAction,
 } from "#globals/webapp-query.js";

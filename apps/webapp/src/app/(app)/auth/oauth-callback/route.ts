@@ -13,7 +13,7 @@ import {
   encryptWebappSession,
   webappSessionCookieOptions,
 } from "@/lib/auth/oauthClient.server";
-import { shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
+import { isSafeReturnPath, shouldBypassOnboardingForReturnPath } from "@/lib/auth/returnIntent";
 import {
   buildWebappRuntimeConfigFromEnv,
   getWebappPublicOrigin,
@@ -120,7 +120,8 @@ export async function GET(request: Request) {
     return NextResponse.redirect(loginUrl);
   }
 
-  const safeRedirectPath = flow.redirectTo;
+  const safeRedirectPath =
+    flow.redirectTo && isSafeReturnPath(flow.redirectTo) ? flow.redirectTo : null;
   const postLoginUrl = safeRedirectPath
     ? `${webappOrigin}${safeRedirectPath}`
     : `${webappOrigin}${WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}`;

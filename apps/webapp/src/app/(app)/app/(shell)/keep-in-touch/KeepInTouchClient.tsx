@@ -31,6 +31,8 @@ import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routeWithQuery } from "@/lib/navigation/route/query";
 import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
 import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
 import { KeepInTouchSelect } from "./components/KeepInTouchSelect";
@@ -101,7 +103,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   const handleWindowChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("endDate", computeEndDate(parseInt(value, 10)));
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(routeWithQuery(pathname, params));
   };
 
   const { data: keepInTouchData } = useKeepInTouchQuery();
@@ -228,7 +230,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
           <Text c="dimmed" maw={400} ta="center">
             {t("EmptyDescription")}
           </Text>
-          <Button component={AnchorLink} href={WEBAPP_ROUTES.PEOPLE} variant="light">
+          <Button component={AnchorLink} href={routeAssert(WEBAPP_ROUTES.PEOPLE)} variant="light">
             {t("GoToPeople")}
           </Button>
         </Stack>

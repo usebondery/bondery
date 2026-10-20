@@ -7,6 +7,7 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { getFaviconUrl } from "@/lib/favicon-url";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { resolveLinkKind, toInternalPath } from "@/lib/resolve-link-kind";
 
 export type RichAnchorProps = Omit<AnchorProps, "children" | "href"> & {
@@ -86,7 +87,7 @@ export function RichAnchor({
 
   if (!isExternal) {
     return (
-      <AnchorLink href={toInternalPath(href)} underline={underline} {...anchorProps}>
+      <AnchorLink href={routeAssert(toInternalPath(href))} underline={underline} {...anchorProps}>
         {children}
       </AnchorLink>
     );

@@ -1,7 +1,7 @@
 "use client";
 
 import type { DocId } from "@bondery/helpers";
-import { ActionIconButton, ActionIconLink, HelpButton } from "@bondery/mantine-next";
+import { ActionIconButton, ActionIconLink, type AppHref, HelpButton } from "@bondery/mantine-next";
 import { Group, Title } from "@mantine/core";
 import type { Icon } from "@tabler/icons-react";
 import { IconArrowLeft } from "@tabler/icons-react";
@@ -10,7 +10,7 @@ import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 
 interface PageHeaderProps {
   action?: ReactNode;
-  backHref?: string;
+  backHref?: AppHref;
   backOnClick?: () => void;
   helpDoc?: DocId;
   helpLabel?: string;

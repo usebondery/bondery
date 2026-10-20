@@ -33,6 +33,10 @@ import {
 } from "@/lib/query/hooks/usePasskeys";
 import { settingsKeys } from "@/lib/query/keys";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
+import {
+  SETTINGS_CREDENTIAL_ICON_PX,
+  SettingsCredentialIconImg,
+} from "./SettingsCredentialIconImg";
 
 type PasskeyRowProps = {
   catalog: AaguidCatalog | null;
@@ -45,16 +49,6 @@ type PasskeyRowProps = {
   passkey: PasskeyRecord;
 };
 
-const CATALOG_ICON_PX = 18;
-
-function CatalogIconImg({ src }: { src: string }) {
-  return (
-    // Catalog icons are data: SVG URIs — next/image cannot optimize them.
-    // biome-ignore lint/performance/noImgElement: data-URI SVG; never decode
-    <img alt="" aria-hidden height={CATALOG_ICON_PX} src={src} width={CATALOG_ICON_PX} />
-  );
-}
-
 function PasskeyRowIcon({
   aaguid,
   catalog,
@@ -64,7 +58,7 @@ function PasskeyRowIcon({
 }) {
   const icons = catalog ? lookupAaguidIcons(catalog, aaguid) : null;
   if (!icons) {
-    return <IconFingerprint size={CATALOG_ICON_PX} stroke={1.5} />;
+    return <IconFingerprint size={SETTINGS_CREDENTIAL_ICON_PX} stroke={1.5} />;
   }
 
   const { iconDark, iconLight } = icons;
@@ -72,10 +66,10 @@ function PasskeyRowIcon({
     return (
       <>
         <Box darkHidden>
-          <CatalogIconImg src={iconLight} />
+          <SettingsCredentialIconImg src={iconLight} />
         </Box>
         <Box lightHidden>
-          <CatalogIconImg src={iconDark} />
+          <SettingsCredentialIconImg src={iconDark} />
         </Box>
       </>
     );
@@ -83,10 +77,10 @@ function PasskeyRowIcon({
 
   const src = iconLight ?? iconDark;
   if (!src) {
-    return <IconFingerprint size={CATALOG_ICON_PX} stroke={1.5} />;
+    return <IconFingerprint size={SETTINGS_CREDENTIAL_ICON_PX} stroke={1.5} />;
   }
 
-  return <CatalogIconImg src={src} />;
+  return <SettingsCredentialIconImg src={src} />;
 }
 
 function PasskeyRow({

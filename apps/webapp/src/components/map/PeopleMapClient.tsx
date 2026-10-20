@@ -19,6 +19,7 @@ import {
 } from "react-leaflet";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import { useMapCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import type { MapBounds, PeopleMapFocus, PeopleMapMarker } from "./PeopleMap";
@@ -170,7 +171,7 @@ export function PeopleMapClient({
                 marker.href
                   ? {
                       click: () => {
-                        router.push(marker.href as string);
+                        router.push(routeAssert(marker.href as string));
                       },
                     }
                   : undefined

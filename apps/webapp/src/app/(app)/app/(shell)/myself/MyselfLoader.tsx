@@ -5,6 +5,7 @@ import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { getMePersonServer } from "@/lib/api/domains/server/mePerson";
 import { getSingleContactPageTranslations } from "@/lib/i18n/generated/hooks.server";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { getQueryClient } from "@/lib/query/client";
 import { contactKeys, settingsKeys } from "@/lib/query/keys";
 import { PersonClient } from "../person/[personId]/PersonClient";
@@ -30,7 +31,7 @@ export async function MyselfLoader({ initialTab }: MyselfLoaderProps) {
     return (
       <PageWrapper>
         <ErrorPageHeader
-          backHref={API_ROUTES.CONTACTS}
+          backHref={routeAssert(API_ROUTES.CONTACTS)}
           iconType="user"
           title={t("ProfileNotFound")}
         />

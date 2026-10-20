@@ -37,6 +37,7 @@ import {
   useCreateMore,
   useModalDismiss,
 } from "@/lib/modals";
+import { routePerson } from "@/lib/navigation/route/person";
 import { useCreateContactMutation } from "@/lib/query/hooks/useContacts";
 
 const addContactFormSchema = z
@@ -188,7 +189,7 @@ export function AddContactForm({
 
       closeModal();
       navigateWithTitle(
-        `${WEBAPP_ROUTES.PERSON}/${createdContact.id}`,
+        routePerson(createdContact.id),
         optimisticPersonDocumentTitle(createdContact),
       );
     } catch (error) {

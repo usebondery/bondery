@@ -26,6 +26,7 @@ import {
 } from "@/lib/cookies/constants";
 import { DocumentTitleProvider } from "@/lib/documentTitle";
 import { useAppNavigationTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   clampSidebarDragWidth,
   getAppShellNavbarWidth,
@@ -92,7 +93,7 @@ function AppShellMobileHeader({
         <AnchorLink
           display="flex"
           h="100%"
-          href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}
+          href={routeAssert(WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN)}
           lh={0}
           onClick={onLogoClick}
           style={{ alignItems: "center" }}

@@ -26,6 +26,7 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import { useSlashCommands } from "@/lib/i18n/useSlashCommands";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useContactGroupsQuery,
   useContactImportantDatesQuery,
@@ -233,7 +234,7 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
                     router.back();
                     return;
                   }
-                  router.push(WEBAPP_ROUTES.PEOPLE);
+                  router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
                 }
           }
           helpDoc={myselfMode ? "concepts.myself" : undefined}

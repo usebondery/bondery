@@ -8,7 +8,7 @@ icon: Search
 
 [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) is the reference client for debugging MCP servers. Use it to exercise Bondery’s Streamable HTTP endpoint (`{API}/mcp`) with the **2026-07-28** protocol. Cursor’s HTTP client still negotiates `2025-11-25` and cannot complete initialize against this server.
 
-The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants, with Client ID Metadata Documents (CIMD). Do not use RFC 7591 Dynamic Client Registration — Bondery returns `403` / `Client registration is disabled`. `pnpm run mcp:inspect` writes the resolved CIMD URL into `~/.mcp-inspector/storage/client.json` (Bondery’s HTTPS document on `usebondery.com` when deployed, otherwise the public Inspector smoke-test CIMD). Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
+The Inspector is not an API key client. It uses the same OAuth 2.1 + PKCE flow as other MCP assistants, with Client ID Metadata Documents (CIMD). Do not use RFC 7591 Dynamic Client Registration — Bondery returns `403` / `Client registration is disabled`. `pnpm run mcp:inspect` writes the public MCPJam Inspector CIMD URL into `~/.mcp-inspector/storage/client.json`. Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
 
 ## Prerequisites
 

@@ -20,7 +20,7 @@ List search rules: [api-design.md](./api-design.md).
 | `next_action` | Pending UI action after the page loads. Read once, then strip it from the URL. |
 | `redirect` | Login return path only. Never a product-page action. |
 
-Constants: `NEXT_ACTION_PARAM`, `NEXT_ACTIONS`, `personPathWithNextAction` in `packages/helpers/src/globals/webapp-query.ts`.
+Constants: `NEXT_ACTION_PARAM`, `NEXT_ACTIONS`, `routePersonWithNextAction` in `packages/helpers/src/globals/webapp-query.ts`.
 
 | Value (`intended_action`) | Effect |
 |---------------------------|--------|
@@ -30,7 +30,7 @@ Constants: `NEXT_ACTION_PARAM`, `NEXT_ACTIONS`, `personPathWithNextAction` in `p
 
 | Producer | URL |
 |----------|-----|
-| Chrome extension popup (already-in-Bondery confirm → Add interaction) | `personPathWithNextAction(id, NEXT_ACTIONS.ADD_INTERACTION)` |
+| Chrome extension popup (already-in-Bondery confirm → Add interaction) | `routePersonWithNextAction(id, NEXT_ACTIONS.ADD_INTERACTION)` |
 | Any new deep link | Same helper. Add the value to `NEXT_ACTIONS` first. |
 
 | Consumer | Behavior |

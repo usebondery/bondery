@@ -2,10 +2,10 @@
 
 import { Anchor, type AnchorProps } from "@mantine/core";
 import type { ReactNode } from "react";
-import Link from "#nextjs/NextLink.js";
+import Link, { type AppHref } from "#nextjs/NextLink.js";
 
 export type AnchorLinkProps = Omit<AnchorProps, "component" | "href" | "children"> & {
-  href: string;
+  href: AppHref;
   children: ReactNode;
   target?: string;
   scroll?: boolean;

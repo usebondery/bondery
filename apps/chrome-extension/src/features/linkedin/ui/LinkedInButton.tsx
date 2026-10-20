@@ -1,13 +1,12 @@
 import { BonderyIconWhite } from "@bondery/branding";
-import { WEBAPP_ROUTES } from "@bondery/helpers";
 import { Button, Text } from "@mantine/core";
 import type React from "react";
 import { useEffect, useState } from "react";
 import { browser } from "wxt/browser";
-import { config } from "../../../config";
 import { useExtensionSocialButtonsTranslations } from "../../../lib/i18n/generated/hooks";
 import { extLog } from "../../../lib/log";
 import type { AddPersonResult } from "../../../lib/messaging/types";
+import { openWebappPersonWindow } from "../../../lib/navigation";
 import { profileCache, scrapeLinkedInProfile } from "../scrape/scrapeProfile";
 import { getTopcard } from "../scrape/sduiProfile";
 import { toApiWorkHistory } from "../scrape/workExperience";
@@ -91,10 +90,7 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
 
       if (result.payload.success) {
         if (result.payload.existed) {
-          window.open(
-            `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${result.payload.contactId}`,
-            "_blank",
-          );
+          openWebappPersonWindow(result.payload.contactId);
         }
         return;
       }

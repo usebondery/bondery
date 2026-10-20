@@ -1,6 +1,7 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { redirect } from "next/navigation";
+import { redirectRoute } from "@/lib/navigation/redirect/route";
+import { routeAssert } from "@/lib/navigation/route/assert";
 
 export default function ChangePasswordPage() {
-  redirect(WEBAPP_ROUTES.SETTINGS);
+  redirectRoute(routeAssert(WEBAPP_ROUTES.SETTINGS));
 }

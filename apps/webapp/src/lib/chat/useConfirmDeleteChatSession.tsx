@@ -13,6 +13,7 @@ import { IconTrash } from "@tabler/icons-react";
 import { usePathname, useRouter } from "next/navigation";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { useChatPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { useDeleteChatSessionMutation } from "@/lib/query/hooks/useChat";
 import { useChatSessions } from "./ChatSessionsContext";
 
@@ -41,7 +42,7 @@ export function useConfirmDeleteChatSession() {
             }),
           );
           if (pathname === `${WEBAPP_ROUTES.CHAT}/${sessionId}`) {
-            router.push(WEBAPP_ROUTES.CHAT);
+            router.push(routeAssert(WEBAPP_ROUTES.CHAT));
             triggerChatReset();
           }
         } catch (error) {

@@ -25,6 +25,8 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routePerson } from "@/lib/navigation/route/person";
 import { HOTKEYS } from "@/lib/platform/config";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 import { useAppNavigationLinks } from "./NavigationSidebar";
@@ -44,7 +46,11 @@ export function CommandPalette() {
     ...primaryLinks,
     chatLink,
     ...secondaryLinks,
-    { href: WEBAPP_ROUTES.MYSELF, icon: IconUserCircle, label: tNav("Myself") },
+    {
+      href: routeAssert(WEBAPP_ROUTES.MYSELF),
+      icon: IconUserCircle,
+      label: tNav("Myself"),
+    },
   ].map((link) => ({
     description: t("GoToDescription", { label: link.label }),
     id: `goto-${link.href}`,
@@ -68,7 +74,7 @@ export function CommandPalette() {
               onClick: () =>
                 openNewActivityModal({
                   contacts: [],
-                  onCreated: () => router.push(WEBAPP_ROUTES.INTERACTIONS),
+                  onCreated: () => router.push(routeAssert(WEBAPP_ROUTES.INTERACTIONS)),
                 }),
               rightSection: <Kbd keys={parseShortcutKeys(HOTKEYS.LOG_INTERACTION)} size="xs" />,
             },
@@ -82,7 +88,7 @@ export function CommandPalette() {
                 openAddContactModal({
                   onCreated: (contact) =>
                     navigateWithTitle(
-                      `${WEBAPP_ROUTES.PERSON}/${contact.id}`,
+                      routePerson(contact.id),
                       optimisticPersonDocumentTitle(contact),
                     ),
                 }),

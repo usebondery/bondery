@@ -13,6 +13,8 @@ hidden: true
 - Mobile: Settings About shows your app version and whether a newer production build is available.
 - API: `GET /mobile/manifest` returns the latest production app version for optional update checks.
 - Website: Hosts Apple and Android associated-domain files for native passkeys. Operators set `BONDERY_PUBLIC_IOS_APP_TEAM_ID` and `BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS`. Missing values return 404 instead of inventing IDs.
+- API: MCP consent list items include `logoUri` (HTTPS client icon from OAuth metadata, or null).
+- Webapp: Connected AI assistants in Settings show each client’s logo when one is available.
 
 ### 🐛 Fixed
 
@@ -33,8 +35,10 @@ hidden: true
 
 ### 🔄 Changed
 
-- Dev: `pnpm mcp:inspect` configures MCP Inspector for Bondery CIMD (no dynamic client registration), frees ports **6274** / **6275** / **6278**, and pins `CLIENT_PORT` and related Inspector env vars so the UI stays on **6274**.
-- Website: Hosts HTTPS Client ID Metadata for MCP Inspector at `/.well-known/oauth/client-metadata/inspector.json` (OAuth client identity for local Inspector after the marketing site is deployed).
+- Dev: `pnpm mcp:inspect` configures MCP Inspector with the public MCPJam Client ID Metadata Document (no dynamic client registration), frees ports **6274** / **6275** / **6278**, and pins `CLIENT_PORT` and related Inspector env vars so the UI stays on **6274**. Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
+- Website: Stops hosting MCP Inspector Client ID Metadata at `/.well-known/oauth/client-metadata/inspector.json`. Local Inspector uses the public MCPJam CIMD instead.
+- Webapp and Website: Turn on Next.js typed routes. In-app links and redirects use typed `route*` / `href*` / `redirect*` helpers.
+- Chrome extension: Opens the webapp through shared navigation helpers.
 - Mobile: The people list no longer has a letter rail on the right.
 - Mobile: Contacts search is by name only. The placeholder matches the web people list.
 - Mobile: The plus button creates a person. The extra add menu is gone.

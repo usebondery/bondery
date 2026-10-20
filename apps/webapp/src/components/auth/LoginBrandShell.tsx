@@ -44,7 +44,12 @@ export function LoginBrandShell({
       >
         <Flex direction={{ base: "column", md: "row" }} h="100%">
           <Stack flex={1} gap="xl" p="xl" style={{ backgroundColor: BRAND_PRIMARY_COLOR }}>
-            <Logo ariaLabel={t("LogoAriaLabel")} color="white" href={websiteUrl} size={28} />
+            <Logo
+              ariaLabel={t("LogoAriaLabel")}
+              color="white"
+              href={new URL(websiteUrl)}
+              size={28}
+            />
             {leftContent === "marketing" ? (
               <Stack flex={1} gap="lg" justify="center">
                 <Title c="white" fz={{ base: "h3", md: "h2" }} lh={1.2} order={1}>

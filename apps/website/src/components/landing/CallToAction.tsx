@@ -1,7 +1,7 @@
 import { ButtonLink } from "@bondery/mantine-next";
 import { Card, Container, Stack, Title } from "@mantine/core";
 import { IconArrowUpRight } from "@tabler/icons-react";
-import { WEBAPP_URL } from "@/lib/config";
+import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
 
 export function CallToAction() {
   return (
@@ -33,7 +33,7 @@ export function CallToAction() {
             Ready to organize your network?{" "}
           </Title>
           <ButtonLink
-            href={`${WEBAPP_URL}/login`}
+            href={hrefWebappLogin()}
             radius={"xl"}
             rightSection={<IconArrowUpRight />}
             size="lg"

@@ -1,6 +1,7 @@
 import { AnchorLink } from "@bondery/mantine-next";
 import { Flex, Paper, Text, ThemeIcon, Title } from "@mantine/core";
 import { CATEGORY_ICONS } from "@/lib/blog/categories";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import type { PostMeta } from "../_lib/types";
 
 type BlogCardProps = Pick<PostMeta, "title" | "date" | "description" | "category" | "slug">;
@@ -15,7 +16,7 @@ export function BlogCard({ title, date, description, category, slug }: BlogCardP
   const CategoryIcon = CATEGORY_ICONS[category];
 
   return (
-    <AnchorLink href={`/blog/${category}/${slug}`} underline="never">
+    <AnchorLink href={routeAssert(`/blog/${category}/${slug}`)} underline="never">
       <Paper
         className="card-scale-effect"
         p="lg"

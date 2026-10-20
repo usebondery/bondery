@@ -7,10 +7,10 @@ import {
   type ActionIconGraphic,
   renderActionIconGraphic,
 } from "#ActionIconButton/actionIconGraphic.js";
-import Link from "#nextjs/NextLink.js";
+import Link, { type AppHref } from "#nextjs/NextLink.js";
 
 export type ActionIconLinkProps = Omit<ActionIconProps, "component" | "href" | "children"> & {
-  href?: string;
+  href?: AppHref;
   ariaLabel: string;
   /**
    * Icon graphic (Tabler icon, SVG, or `next/image` with `fill`).

@@ -1,7 +1,7 @@
 "use client";
 
 import { createSocialUrl } from "@bondery/helpers";
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, hrefAssert } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
 import { Group, Space, Tooltip } from "@mantine/core";
 import {
@@ -126,7 +126,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
               <ActionIconLink
                 ariaLabel={social.label}
                 color={social.color}
-                href={social.href}
+                href={social.href ? hrefAssert(social.href) : undefined}
                 icon={social.icon}
                 size="md"
                 target={social.href?.startsWith("http") ? "_blank" : undefined}

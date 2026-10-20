@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { DEFAULT_PERSON_TAB, PERSON_TABS, type PersonTabValue } from "../utils/personTabConstants";
 
 export function usePersonTabNavigation(initialTab?: string) {
@@ -19,7 +20,7 @@ export function usePersonTabNavigation(initialTab?: string) {
       : DEFAULT_PERSON_TAB;
     setActiveTab(tab);
     const query = tab === DEFAULT_PERSON_TAB ? "" : `?tab=${tab}`;
-    router.replace(`${pathname}${query}`, { scroll: false });
+    router.replace(routeAssert(`${pathname}${query}`), { scroll: false });
   };
 
   return { activeTab, handleTabChange };

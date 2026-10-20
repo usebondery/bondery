@@ -2,7 +2,6 @@ import "leaflet/dist/leaflet.css";
 import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { PaymentFailureModal } from "@/components/billing/PaymentFailureModal";
 import { EnrichResumeDetector } from "@/components/extension/EnrichResumeDetector";
@@ -18,11 +17,14 @@ import { SyncWakeRegistrar } from "@/components/shell/SyncWakeRegistrar";
 import { UserSessionProvider } from "@/components/shell/UserSessionProvider";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { getRequestSession } from "@/lib/auth/getRequestSession";
-import { buildLoginUrl, getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
+import { getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
 import {
   SIDEBAR_LAST_EXPANDED_COOKIE_NAME,
   SIDEBAR_WIDTH_COOKIE_NAME,
 } from "@/lib/cookies/constants";
+import { redirectRoute } from "@/lib/navigation/redirect/route";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routeLogin } from "@/lib/navigation/route/login";
 import { parseStoredLastExpandedWidth, parseStoredSidebarWidth } from "@/lib/shell/sidebarWidth";
 
 export const metadata: Metadata = {
@@ -50,7 +52,7 @@ export default async function AppShellLayout({ children }: { children: React.Rea
   const session = await getRequestSession();
 
   if (session.kind !== "authenticated") {
-    redirect(buildLoginUrl(getRequestReturnPathForLogin(headersList)));
+    redirectRoute(routeLogin(getRequestReturnPathForLogin(headersList)));
   }
 
   const shellReady = session.api === "ok" && session.shell !== null;
@@ -71,11 +73,11 @@ export default async function AppShellLayout({ children }: { children: React.Rea
       !bypassOnboarding &&
       !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)
     ) {
-      redirect(WEBAPP_ROUTES.ONBOARDING);
+      redirectRoute(routeAssert(WEBAPP_ROUTES.ONBOARDING));
     }
 
     if (userSession.onboardingCompletedAt && pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
-      redirect(WEBAPP_ROUTES.HOME);
+      redirectRoute(routeAssert(WEBAPP_ROUTES.HOME));
     }
   }
 

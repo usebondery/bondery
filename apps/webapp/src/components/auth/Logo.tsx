@@ -1,5 +1,6 @@
 import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding/react";
 import { Flex } from "@mantine/core";
+import type { Route } from "next";
 import Link from "next/link";
 
 type LogoProps = {
@@ -8,7 +9,7 @@ type LogoProps = {
   /** `white` for the brand panel; `auto` follows the color scheme. */
   color?: "auto" | "white";
   /** URL to link to (defaults to "/") */
-  href?: string;
+  href?: Route | URL;
   /** @deprecated Use size instead */
   iconSize?: number;
   /** Size of the logotype in pixels */
@@ -22,11 +23,16 @@ type LogoProps = {
  * Can be used throughout the application with consistent branding
  */
 export function Logo({ ariaLabel, color = "auto", href = "/", iconSize, size }: LogoProps) {
+  const homeHref: Route | URL = href;
   // Support legacy iconSize prop
   const logoSize = size ?? iconSize ?? 120;
 
   return (
-    <Link aria-label={ariaLabel} href={href} style={{ color: "inherit", textDecoration: "none" }}>
+    <Link
+      aria-label={ariaLabel}
+      href={homeHref}
+      style={{ color: "inherit", textDecoration: "none" }}
+    >
       {color === "white" ? (
         <BonderyLogotypeWhite aria-hidden height={logoSize} width={logoSize * 3} />
       ) : (

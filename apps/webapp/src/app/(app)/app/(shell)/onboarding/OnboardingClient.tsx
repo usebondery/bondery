@@ -6,6 +6,7 @@ import { Modal } from "@mantine/core";
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { useFinishOnboardingMutation } from "@/lib/query/hooks/useSettings";
 import { StepImport } from "./components/StepImport";
 import { StepIntent } from "./components/StepIntent";
@@ -44,7 +45,7 @@ function OnboardingFlowContent() {
     nprogress.set(100);
     try {
       await finishOnboardingMutation.mutateAsync(followup);
-      router.replace(WEBAPP_ROUTES.HOME);
+      router.replace(routeAssert(WEBAPP_ROUTES.HOME));
       router.refresh();
     } catch {
       // isPending resets automatically; user can retry

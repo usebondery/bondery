@@ -29,6 +29,7 @@ import {
   useMergeWithModalTranslations,
 } from "@/lib/i18n/generated/hooks";
 import { orientMergePair } from "@/lib/merge/orientMergePair";
+import { routePerson } from "@/lib/navigation/route/person";
 import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
 import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
 
@@ -174,7 +175,7 @@ export function MergeRecommendationCard({
       );
       onAccepted?.();
       if (redirectAfterMerge) {
-        router.push(`${WEBAPP_ROUTES.PERSON}/${result.personId}`);
+        router.push(routePerson(result.personId));
       }
     } catch (error) {
       notifications.show(

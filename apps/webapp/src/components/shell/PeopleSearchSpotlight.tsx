@@ -13,6 +13,8 @@ import { searchContacts } from "@/lib/contacts/searchContacts";
 import { usePeopleSearchSpotlightTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { routePeopleSpotlightSearch } from "@/lib/navigation/route/people";
+import { routePerson } from "@/lib/navigation/route/person";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 
 const [peopleStore, peopleSearchActions] = createSpotlight();
@@ -61,14 +63,11 @@ export function PeopleSearchSpotlight() {
   }
 
   function handlePersonClick(contact: ContactSelectable) {
-    navigateWithTitle(
-      `${WEBAPP_ROUTES.PERSON}/${contact.id}`,
-      optimisticPersonDocumentTitle(contact),
-    );
+    navigateWithTitle(routePerson(contact.id), optimisticPersonDocumentTitle(contact));
   }
 
   function handleSeeAll() {
-    router.push(`${WEBAPP_ROUTES.PEOPLE}?search=${encodeURIComponent(query.trim())}`);
+    router.push(routePeopleSpotlightSearch(query));
   }
 
   const trimmed = query.trim();

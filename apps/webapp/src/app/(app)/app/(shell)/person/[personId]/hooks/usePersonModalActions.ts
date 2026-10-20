@@ -6,6 +6,7 @@ import type { Contact, ContactSelectable } from "@bondery/schemas";
 import { useRouter } from "next/navigation";
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { openAddPeopleToGroupSelectionModal } from "../../../people/components/modals/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "../../../people/components/modals/MergeWithModal";
 import { openShareContactModal } from "../../../people/components/modals/ShareContactModal";
@@ -32,7 +33,7 @@ export function usePersonModalActions({
       contactId: personId,
       contactName: resolvedContact ? formatContactName(resolvedContact) : personId,
       onDeleted: async () => {
-        router.push(WEBAPP_ROUTES.PEOPLE);
+        router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
       },
     });
 

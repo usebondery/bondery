@@ -1,11 +1,13 @@
 import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
-import { redirect } from "next/navigation";
 import { BYPASS_ONBOARDING_ONCE_COOKIE } from "@/lib/auth/constants";
 import { getRequestSession } from "@/lib/auth/getRequestSession";
 import { signOutServerSession } from "@/lib/auth/resolveServerSession";
-import { buildLoginUrl, getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
+import { getRequestReturnPathForLogin } from "@/lib/auth/returnIntent";
+import { redirectRoute } from "@/lib/navigation/redirect/route";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routeLogin } from "@/lib/navigation/route/login";
 
 /** Sync fallback while per-route generateMetadata streams on client navigation. */
 export const metadata: Metadata = {
@@ -27,11 +29,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   if (session.kind === "anonymous") {
     await signOutServerSession();
-    redirect(buildLoginUrl(returnPathForLogin));
+    redirectRoute(routeLogin(returnPathForLogin));
   }
 
   if (pathname.startsWith(WEBAPP_ROUTES.UNAVAILABLE)) {
-    redirect(WEBAPP_ROUTES.HOME);
+    redirectRoute(routeAssert(WEBAPP_ROUTES.HOME));
   }
 
   if (session.api === "ok" && session.shell) {
@@ -43,11 +45,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       !bypassOnboarding &&
       !pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)
     ) {
-      redirect(WEBAPP_ROUTES.ONBOARDING);
+      redirectRoute(routeAssert(WEBAPP_ROUTES.ONBOARDING));
     }
 
     if (userSession.onboardingCompletedAt && pathname.startsWith(WEBAPP_ROUTES.ONBOARDING)) {
-      redirect(WEBAPP_ROUTES.HOME);
+      redirectRoute(routeAssert(WEBAPP_ROUTES.HOME));
     }
   }
 

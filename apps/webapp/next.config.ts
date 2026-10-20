@@ -17,7 +17,9 @@ const nextConfig: NextConfig = {
       "@mantine/tiptap",
     ],
     proxyClientMaxBodySize: "20mb",
+    turbopackPluginRuntimeStrategy: "workerThreads",
     turbopackRustReactCompiler: true,
+    typedEnv: true,
     useTypeScriptCli: true,
   },
   async headers() {
@@ -51,8 +53,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  images: {
+    formats: ["image/avif", "image/webp"],
+  },
+  poweredByHeader: false,
   reactCompiler: true,
   serverExternalPackages: ["@takumi-rs/core"],
+  typedRoutes: true,
 };
 
 export default nextConfig;

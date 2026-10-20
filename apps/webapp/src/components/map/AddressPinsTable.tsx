@@ -8,6 +8,7 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { IconHome, IconMapPin, IconSearch } from "@tabler/icons-react";
 import { useState } from "react";
 import { useContactAddressTranslations, useMapPageTranslations } from "@/lib/i18n/generated/hooks";
+import { routePerson } from "@/lib/navigation/route/person";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 
 interface AddressPinsTableProps {
@@ -117,11 +118,7 @@ export function AddressPinsTable({
                 return (
                   <Table.Tr key={pin.addressId}>
                     <Table.Td>
-                      <AnchorLink
-                        fw={500}
-                        href={`${WEBAPP_ROUTES.PERSON}/${pin.personId}`}
-                        size="sm"
-                      >
+                      <AnchorLink fw={500} href={routePerson(pin.personId)} size="sm">
                         {formatPinName(pin)}
                       </AnchorLink>
                     </Table.Td>
