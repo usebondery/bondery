@@ -90,7 +90,7 @@
   "name": "@bondery/vcard",
   "private": true,
   "scripts": {
-    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs vcard",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs vcard",
     "check:types": "tsc --noEmit",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput"

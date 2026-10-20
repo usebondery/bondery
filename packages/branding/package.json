@@ -158,7 +158,7 @@
     "react": "^19.2.7"
   },
   "scripts": {
-    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
     "check:types": "tsc --noEmit",
     "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs branding",

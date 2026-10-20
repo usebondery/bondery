@@ -341,12 +341,12 @@ export type CommonCatalog = {
     creating: string;
     deleting: string;
     duplicating: string;
-    removing: string;
-    saving: string;
-    sending: string;
     errorTitle: string;
     noResults: string;
+    removing: string;
     savedTitle: string;
+    saving: string;
+    sending: string;
     successTitle: string;
   };
 };
@@ -1597,8 +1597,8 @@ export type MobileEmojiPickerCatalog = {
   };
   EmptySearch: string;
   RandomAccessibilityLabel: string;
-  SheetTitle: string;
   SearchPlaceholder: string;
+  SheetTitle: string;
   TriggerAccessibilityHint: string;
 };
 
@@ -2469,7 +2469,6 @@ export type SettingsPageCatalog = {
     DefaultPhoneCountryTooltip: string;
     DefaultPhoneCountryUpdateError: string;
     DefaultPhoneCountryUpdateSuccess: string;
-    UpdatingDefaultPhoneCountry: string;
     InvalidReminderTime: string;
     Language: string;
     LanguageDescription: string;
@@ -2507,6 +2506,7 @@ export type SettingsPageCatalog = {
     Title: string;
     UpdateError: string;
     UpdateSuccess: string;
+    UpdatingDefaultPhoneCountry: string;
     UpdatingLanguage: string;
     UpdatingReminderTime: string;
     UpdatingTheme: string;

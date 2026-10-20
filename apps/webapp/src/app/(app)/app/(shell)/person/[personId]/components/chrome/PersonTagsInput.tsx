@@ -25,6 +25,7 @@ import {
   useTagsListQuery,
 } from "@/lib/query/hooks/useTags";
 import { PERSON_ALL_TAGS } from "@/lib/query/personPageQueryParams";
+import "./PersonTagsInput.css";
 
 interface PersonTagsInputProps {
   personId: string;
@@ -355,16 +356,6 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
           </Combobox.Options>
         </ScrollArea.Autosize>
       </Combobox.Dropdown>
-
-      <style global jsx>{`
-        .tags-input-combobox-option[data-combobox-selected="true"] .tags-input-option-pill {
-          transform: scale(1.03);
-        }
-        .tags-input-combobox-option[data-combobox-selected="true"] .tags-input-add-button {
-          transform: scale(1.03);
-          font-weight: 600;
-        }
-      `}</style>
     </Combobox>
   );
 }

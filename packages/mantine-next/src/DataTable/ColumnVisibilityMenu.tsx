@@ -112,7 +112,7 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
           </Text>
           <DndContext
             collisionDetection={closestCenter}
-            onDragEnd={(e) => handleDragEnd(e, true)}
+            onDragEnd={(e: DragEndEvent) => handleDragEnd(e, true)}
             sensors={sensors}
           >
             <SortableContext
@@ -142,7 +142,7 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
           </Text>
           <DndContext
             collisionDetection={closestCenter}
-            onDragEnd={(e) => handleDragEnd(e, false)}
+            onDragEnd={(e: DragEndEvent) => handleDragEnd(e, false)}
             sensors={sensors}
           >
             <SortableContext

@@ -1126,7 +1126,7 @@
   "name": "@bondery/schemas",
   "private": true,
   "scripts": {
-    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs schemas",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs schemas",
     "check:contracts": "pnpm run check:contracts:no-internal-deps && pnpm run check:contracts:no-init-cycles && pnpm run check:contracts:no-zod-infer-exports && pnpm run build && pnpm run check:contracts:assertions && pnpm run check:contracts:openapi-examples",
     "check:contracts:assertions": "pnpm exec tsx ./src/contracts.assertions.ts",
     "check:contracts:no-init-cycles": "node scripts/check-contracts-no-init-cycles.mjs",

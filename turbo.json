@@ -2,6 +2,7 @@
   "$schema": "https://v2-10-1.turborepo.dev/schema.json",
   "concurrency": "20",
   "globalPassThroughEnv": [
+    "PNPM_STORE_DIR",
     "BONDERY_DEV_SKIP_RELEASE_MIGRATE",
     "BONDERY_DEV_SKIP_STORAGE_BUCKETS",
     "BONDERY_EXTENSION_FLAVOR",

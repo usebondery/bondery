@@ -11,7 +11,7 @@ function localesRoot(): string {
   const fromAppCwd = join(process.cwd(), "../../packages/translations/dist/locales");
   const fromRepoCwd = join(process.cwd(), "packages/translations/dist/locales");
   for (const candidate of [fromThisFile, fromAppCwd, fromRepoCwd]) {
-    if (existsSync(candidate)) {
+    if (existsSync(/*turbopackIgnore: true*/ candidate)) {
       return candidate;
     }
   }
@@ -36,7 +36,12 @@ export function diskResourceLoader(
   const root = localesRoot();
   for (const locale of [lng, DEFAULT_LOCALE]) {
     try {
-      const parsed: unknown = JSON.parse(readFileSync(join(root, locale, relative), "utf8"));
+      const parsed: unknown = JSON.parse(
+        readFileSync(
+          /*turbopackIgnore: true*/ join(/*turbopackIgnore: true*/ root, locale, relative),
+          "utf8",
+        ),
+      );
       if (parsed && typeof parsed === "object") {
         return Promise.resolve(parsed as Record<string, unknown>);
       }

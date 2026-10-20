@@ -7,7 +7,7 @@ import {
   TELEPHONE_PREFIX_OPTIONS,
 } from "@bondery/helpers/phone";
 import { Group, Input, Select } from "@mantine/core";
-import type { ClipboardEvent } from "react";
+import type { ClipboardEvent, KeyboardEvent } from "react";
 import { IMaskInput } from "react-imask";
 import type { SocialFieldKey } from "../../hooks/useSocialFieldEditor";
 
@@ -142,7 +142,7 @@ export function SocialPhoneInput({
 
           onValueChange(accepted || "");
         }}
-        onKeyDown={(event) => {
+        onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
           if (event.key === "Enter") {
             event.preventDefault();
             onCommit();

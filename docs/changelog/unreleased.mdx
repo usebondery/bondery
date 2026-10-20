@@ -35,10 +35,26 @@ hidden: true
 
 ### 🔄 Changed
 
+- Repo: Switch pnpm from hoisted installs to isolated installs. Expo packages stay selectively public-hoisted for Metro and autolinking.
+- Webapp and Website: Ship Next.js containers from `output: 'standalone'` (traced runtime only). No full monorepo `node_modules` in the runner.
+- Docker: Disable pnpm’s global virtual store inside image builds so package binaries resolve under BuildKit store mounts. Local installs still use the virtual store for Turbopack.
+- Mobile: Metro and Expo autolinking follow the isolated layout (`nodeModulesPaths` plus `experiments.autolinkingModuleResolution`).
 - Dev: `pnpm mcp:inspect` configures MCP Inspector with the public MCPJam Client ID Metadata Document (no dynamic client registration), frees ports **6274** / **6275** / **6278**, and pins `CLIENT_PORT` and related Inspector env vars so the UI stays on **6274**. Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
 - Website: Stops hosting MCP Inspector Client ID Metadata at `/.well-known/oauth/client-metadata/inspector.json`. Local Inspector uses the public MCPJam CIMD instead.
 - Webapp and Website: Turn on Next.js typed routes. In-app links and redirects use typed `route*` / `href*` / `redirect*` helpers.
 - Chrome extension: Opens the webapp through shared navigation helpers.
+
+### Breaking
+
+- **pnpm install layout:** After you pull, delete every `node_modules` directory (repo root, apps, and packages) and run `pnpm install`. A clean install is required when moving from hoisted to isolated linking.
+
+### 📦 Dependencies
+
+- Webapp and Website: Upgrade Next.js to 16.4.2. Production builds use Turbopack (no webpack fallback).
+
+### 🤖 CI
+
+- Docker: Ignore host `out/` turbo-prune leftovers in the build context. Bump the pnpm BuildKit store cache id to `bondery-pnpm-store-v4`.
 - Mobile: The people list no longer has a letter rail on the right.
 - Mobile: Contacts search is by name only. The placeholder matches the web people list.
 - Mobile: The plus button creates a person. The extra add menu is gone.

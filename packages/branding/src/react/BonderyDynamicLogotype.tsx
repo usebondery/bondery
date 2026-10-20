@@ -1,4 +1,4 @@
-import type { CSSProperties, HTMLAttributes } from "react";
+import type { CSSProperties } from "react";
 import { BonderyIcon } from "#react/BonderyIcon.js";
 import { BonderyIconWhite } from "#react/BonderyIconWhite.js";
 import { BonderyLogotypeBlack } from "#react/BonderyLogotypeBlack.js";
@@ -15,13 +15,15 @@ import {
 } from "#typography.js";
 
 export type BonderyDynamicLogotypeProps = {
+  /** Optional class on the outer span. */
+  className?: string;
+  /** Icon height in pixels. Label font size scales with this. */
+  height?: number;
   /** Label beside the icon (e.g. `"Bondery Docs"`). Omit for icon-only. */
   text?: string;
   /** Color scheme for icon and label. */
   theme: "light" | "dark";
-  /** Icon height in pixels. Label font size scales with this. */
-  height?: number;
-} & Pick<HTMLAttributes<HTMLSpanElement>, "className">;
+};
 
 const TEXT_COLORS = {
   dark: "#ffffff",

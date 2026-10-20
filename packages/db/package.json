@@ -49,7 +49,7 @@
   "name": "@bondery/db",
   "private": true,
   "scripts": {
-    "build": "rimraf dist tsconfig.tsbuildinfo && tsc",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc",
     "check:types": "tsc --noEmit",
     "db:functions": "tsx --env-file=.env.local scripts/apply-sql-functions.ts",
     "db:generate": "prisma generate",

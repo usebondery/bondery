@@ -6,6 +6,8 @@
 **/.cache
 **/dist
 !packages/**/dist
+# Host turbo prune output must not leak into Docker (stale importers break frozen install).
+out
 
 # Local secrets
 **/.env

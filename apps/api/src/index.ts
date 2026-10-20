@@ -3,6 +3,7 @@
  */
 
 import "fastify";
+import "./fastify-plugin-types.js";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkEnvVariables } from "@bondery/helpers/env";

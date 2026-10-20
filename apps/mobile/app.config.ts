@@ -41,6 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       plugin: "eas-build-cache-provider",
     },
     experiments: {
+      autolinkingModuleResolution: true,
       reactCompiler: true,
       typedRoutes: true,
     },
@@ -78,6 +79,7 @@ export default ({ config }: ConfigContext): ExpoConfig => {
       "expo-sharing",
       "expo-image",
       "expo-sqlite",
+      "expo-background-task",
       [
         "expo-splash-screen",
         {

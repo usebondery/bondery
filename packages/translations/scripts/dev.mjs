@@ -8,11 +8,11 @@ import {
   watch,
   writeFileSync,
 } from "node:fs";
+import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const packageRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
-const repoRoot = resolve(packageRoot, "../..");
 
 const srcLocales = join(packageRoot, "src", "locales");
 const distLocales = join(packageRoot, "dist", "locales");
@@ -178,11 +178,11 @@ setInterval(() => {
   }
 }, POLL_MS);
 
-const tsc = spawn(
-  process.execPath,
-  [join(repoRoot, "node_modules/typescript/bin/tsc"), "--watch", "--preserveWatchOutput"],
-  { cwd: packageRoot, stdio: "inherit" },
-);
+const tscBin = createRequire(join(packageRoot, "package.json")).resolve("typescript/bin/tsc");
+const tsc = spawn(process.execPath, [tscBin, "--watch", "--preserveWatchOutput"], {
+  cwd: packageRoot,
+  stdio: "inherit",
+});
 
 tsc.on("exit", (code) => {
   process.exit(code ?? 0);

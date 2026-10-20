@@ -91,21 +91,23 @@ const blockListPatterns = [
   // Backend app in the monorepo — Metro should never resolve into it
   toBlockPattern(path.join(workspaceRoot, "apps", "api")),
   // Inside each watched workspace package, exclude nested node_modules.
-  // Metro doesn't need to crawl or transform packages-within-packages; all
-  // dependencies are hoisted to the monorepo root node_modules.
+  // Metro doesn't need to crawl or transform packages-within-packages.
+  // With nodeLinker: isolated, deps live under each package's node_modules
+  // (plus publicHoistPattern for expo). Root node_modules is still a fallback.
   ...workspacePackageFolders.map((folderPath) =>
     toBlockPattern(path.join(folderPath, "node_modules")),
   ),
 ];
 config.resolver.blockList = blockListPatterns;
 // Resolve node_modules from the app first, then fall back to the root
+// (expo packages may be public-hoisted there under isolated linking).
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
 
 // Deduplicate React — always resolve from the mobile app's own node_modules
-// to prevent "multiple copies of React" errors in a monorepo.
+// to prevent "multiple copies of React" errors in a monorepo (isolated linker).
 const DEDUPLICATED = ["react", "react-dom", "react-native"];
 const localNodeModules = path.resolve(projectRoot, "node_modules");
 

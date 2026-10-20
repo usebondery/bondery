@@ -83,7 +83,7 @@ Workflows fetch production secrets with `infisical-production-secrets`. Empty we
 
 **Verify path filters:** `website-build` runs when marketing-site paths change. `contract` always runs. API HTTP integration (`test:api`) is not in CI; run manually when changing routes if needed. Auth integration (`pnpm --filter api run test:auth`) is local-only until the suite is repaired.
 
-Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages copy pruned manifests and sources, then run a single `pnpm install --no-runtime` with a BuildKit cache mount for the pnpm store (`id=bondery-pnpm-store-v3`). The lockfile does not record `devEngines.runtime` (`runtime: false`); a second frozen install or `pnpm prune --prod` against a turbo-prune lockfile otherwise fails with `missing snapshot for node@runtime`. Next.js images skip `pnpm prune --prod` because pnpm 12 pacquet cannot restage a hoisted `node_modules` in Docker. `--no-runtime` skips downloading Node (already in the image); `pnpm fetch` is not used because it cannot skip runtime packages. Requires BuildKit (enabled by default in Docker 23+ and GitHub Actions `docker/build-push-action`).
+Docker builds also use GHA layer cache (`cache-from: type=gha`). Builder stages copy pruned manifests and sources, then run a single `pnpm install --no-runtime` with a BuildKit cache mount for the pnpm store (`id=bondery-pnpm-store-v4`). The lockfile does not record `devEngines.runtime` (`runtime: false`); a second frozen install against a turbo-prune lockfile otherwise fails with `missing snapshot for node@runtime`. **Next.js images (webapp, website)** use `output: 'standalone'` and copy only `.next/standalone` into the runner (plus `public` / `.next/static` into that tree). Production builds use Turbopack (Next 16.4+) with `turbopack.root` at the monorepo root and `experimental.turbopackAdditionalRoots` for the pnpm global virtual store (`PNPM_STORE_DIR` in Docker). **API** uses `pnpm deploy --filter=api --prod` for a portable production tree. `--no-runtime` skips downloading Node (already in the image); `pnpm fetch` is not used because it cannot skip runtime packages. Requires BuildKit (enabled by default in Docker 23+ and GitHub Actions `docker/build-push-action`).
 
 ## Docker channels
 
@@ -112,7 +112,7 @@ DOCKER_BUILDKIT=1 docker build -f apps/api/Dockerfile .
 DOCKER_BUILDKIT=1 docker build -f apps/website/Dockerfile .
 ```
 
-If you change lockfile layout or pnpm major version, bump the BuildKit cache id in Dockerfiles (`bondery-pnpm-store-v3`) to avoid stale store entries.
+If you change lockfile layout or pnpm major version, bump the BuildKit cache id in Dockerfiles (`bondery-pnpm-store-v4`) to avoid stale store entries.
 
 ## Release smoke and Infisical
 
