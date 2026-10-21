@@ -30,6 +30,13 @@ function resolvePnpmStorePath(): string | undefined {
 const pnpmStorePath = resolvePnpmStorePath();
 
 const nextConfig: NextConfig = {
+  // Portless: allow https://app.usebondery.test to hit the Next dev server.
+  allowedDevOrigins: [
+    "app.usebondery.test",
+    "*.app.usebondery.test",
+    "usebondery.test",
+    "*.usebondery.test",
+  ],
   experimental: {
     optimizePackageImports: [
       "@tabler/icons-react",

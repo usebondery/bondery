@@ -5,6 +5,30 @@ icon: Terminal
 
 This guide walks you through setting up the full Bondery development environment. Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**.
 
+**Local web URLs** use [Portless](https://github.com/vercel-labs/portless) HTTPS. Root [`portless.json`](../../portless.json) maps hostnames. Open these in the browser:
+
+| App | Local URL |
+|---|---|
+| website | [https://usebondery.test](https://usebondery.test) |
+| webapp | [https://app.usebondery.test](https://app.usebondery.test) |
+| api | [https://api.usebondery.test](https://api.usebondery.test) |
+| Mailpit UI | [https://mail.usebondery.test](https://mail.usebondery.test) |
+
+Apps still listen on fixed loopback ports behind the proxy (`26630` / `26631` / `26632`). Use those ports for Stripe CLI, SSR `BONDERY_INFRA_INTERNAL_API_URL`, Tailscale phone testing, and `dev:classic`. Do not open raw `http://localhost:2663x` for daily web work.
+
+App `dev` scripts set `PORTLESS_TLD=test`. Mailpit SMTP stays on `127.0.0.1:26640` (not Portless).
+
+### Migrate from `*.usebondery.localhost`
+
+If you used the old Portless TLD:
+
+1. Stop the old proxy: from `apps/website`, run `pnpm exec portless proxy stop`.
+2. Start any app with `pnpm run dev` so `PORTLESS_TLD=test` takes effect.
+3. On Windows, open an elevated PowerShell and run `pnpm exec portless hosts sync` from `apps/website`.
+4. Remove stale `*.usebondery.localhost` lines from your hosts file if they remain.
+5. Keep the existing CA trust (`pnpm exec portless trust`). Do not re-run trust unless the CA is missing.
+6. Update OAuth console callbacks to `https://api.usebondery.test/auth/callback/...`.
+
 **Environment variables:** edit root `.env.local` once, then sync — see [Environment configuration](environment.mdx).
 
 ```bash
@@ -16,7 +40,7 @@ pnpm run start:redis
 pnpm run start:mailpit
 pnpm run start:seaweedfs   # required for avatar / logo uploads
 pnpm run env
-pnpm run dev:webapp-api    # API :26631 + webapp :26632
+pnpm run dev:webapp-api    # API + webapp via Portless HTTPS
 ```
 
 On first API start in development, `runDevelopmentBootstrap()` runs the same pipeline as production `api.pre_start` (migrations, SQL functions, OAuth clients, platform admins, storage buckets) unless you set `BONDERY_DEV_SKIP_RELEASE_MIGRATE` or `BONDERY_DEV_SKIP_STORAGE_BUCKETS`. You do **not** need to run `db:migrate:deploy` and `provision:oauth-clients` manually before every `pnpm run dev`.
@@ -184,7 +208,7 @@ From the repo root (Docker must be running):
 pnpm run start:mailpit
 ```
 
-Stop with `pnpm run stop:mailpit`. UI and HTTP API: [http://127.0.0.1:26641](http://127.0.0.1:26641).
+Stop with `pnpm run stop:mailpit`. Human UI: [https://mail.usebondery.test](https://mail.usebondery.test) (Portless alias). Loopback UI/API for e2e stays [http://127.0.0.1:26641](http://127.0.0.1:26641).
 
 Wire the API in root `.env.local` (then `pnpm run env`):
 
@@ -213,12 +237,14 @@ Keep `BONDERY_PRIVATE_API_KEY_PEPPER` stable. If you change it after creating ke
 
 ### Start
 
+First Portless trust (once per machine): from `apps/api`, run `pnpm exec portless trust`. On Windows, run the first `pnpm run dev` from an elevated PowerShell so Portless can write hosts, or run `pnpm exec portless hosts sync`.
+
 ```bash
 cd apps/api
 pnpm run dev
 ```
 
-The API server starts on **port 26631** with hot reload enabled.
+`dev` runs Portless. Open [https://api.usebondery.test](https://api.usebondery.test). The process listens on loopback `26631` behind the proxy. Escape hatch: `pnpm run dev:classic`.
 
 ---
 
@@ -233,6 +259,8 @@ Filled by `pnpm run env` into `apps/webapp/.env.development.local` — see [Envi
 
 The webapp is itself a confidential OAuth client of the API's authorization server. See [Authentication](./auth.mdx) for env vars, bootstrap commands, and troubleshooting.
 
+For SSR, keep `BONDERY_INFRA_INTERNAL_API_URL=http://127.0.0.1:26631` so server fetches hit the API loopback. The browser still uses `BONDERY_PUBLIC_API_URL` (Portless).
+
 ### Start
 
 ```bash
@@ -240,7 +268,7 @@ cd apps/webapp
 pnpm run dev
 ```
 
-The webapp starts on **port 26632**. Open [http://localhost:26632](http://localhost:26632) in your browser.
+Open [https://app.usebondery.test](https://app.usebondery.test). Escape hatch: `pnpm run dev:classic` → `http://localhost:26632`.
 
 Or from the repo root: `pnpm run dev:webapp-api` (API + webapp together).
 
@@ -262,7 +290,7 @@ cd apps/website
 pnpm run dev
 ```
 
-The website starts on **port 26630**. Open [http://localhost:26630](http://localhost:26630) in your browser.
+Open [https://usebondery.test](https://usebondery.test). Escape hatch: `pnpm run dev:classic` → `http://localhost:26630`.
 
 ---
 
@@ -319,7 +347,7 @@ Tailscale gives your dev machine a stable `100.x.x.x` address on your tailnet �
    ```
 
 4. Run `pnpm run env` and restart the API.
-5. Revert `BONDERY_PUBLIC_API_URL` to `http://localhost:26631` when you return to laptop web dev.
+5. Revert `BONDERY_PUBLIC_API_URL` to `https://api.usebondery.test` when you return to laptop web dev.
 
 Start Metro with LAN binding so the phone can load the JS bundle over Tailscale:
 
@@ -422,13 +450,13 @@ These scripts are defined in the root `package.json` and orchestrated by Turbore
 
 ### Stripe billing (optional)
 
-Inbound Stripe events (portal cancel, payment failure, trial-ending email) do not reach `127.0.0.1`. After [Stripe CLI](https://docs.stripe.com/stripe-cli) is installed:
+Inbound Stripe events (portal cancel, payment failure, trial-ending email) do not reach your laptop without the CLI. After [Stripe CLI](https://docs.stripe.com/stripe-cli) is installed and Portless is trusted (`pnpm exec portless trust`):
 
 ```bash
 stripe login                 # once per machine — not run by our scripts
 pnpm run setup:stripe        # write CLI webhook secret → .env.local → pnpm run env
-# restart the API
-pnpm run dev:stripe          # second terminal: forward to http://127.0.0.1:26631/webhooks/stripe
+# restart the API under Portless (`pnpm run dev` / `dev:webapp-api`)
+pnpm run dev:stripe          # second terminal: forward to https://api.usebondery.test/webhooks/stripe
 ```
 
 See [Environment configuration](environment.mdx#stripe-cli-local-webhooks).
@@ -462,18 +490,18 @@ Lint the whole repo from the root: `pnpm run lint` (Biome).
 
 ## Quick reference
 
-Port registry: [architecture.mdx](architecture.mdx#apps).
+URL and port registry: [architecture.mdx](architecture.mdx#apps). Hostnames: root [`portless.json`](../../portless.json).
 
-| App | Source | Dev port | Start command |
+| App | Source | Local URL / port | Start command |
 |---|---|---|---|
-| Postgres | [`deploy/bondery/docker-compose.dev-db.yml`](../../deploy/bondery/docker-compose.dev-db.yml) | 54322 | `pnpm run start:postgres` |
-| Redis | [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) | 26636 | `pnpm run start:redis` |
-| Mailpit SMTP | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | 26640 | `pnpm run start:mailpit` |
-| Mailpit UI | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | 26641 | `pnpm run start:mailpit` |
-| SeaweedFS | [`deploy/bondery/docker-compose.seaweedfs.yml`](../../deploy/bondery/docker-compose.seaweedfs.yml) | 8333 | `pnpm run start:seaweedfs` |
-| `api` | [`apps/api`](../../apps/api) | 26631 | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
-| `webapp` | [`apps/webapp`](../../apps/webapp) | 26632 | `pnpm run dev:webapp` or `pnpm run dev:webapp-api` |
-| `website` | [`apps/website`](../../apps/website) | 26630 | `pnpm run dev` |
-| `mobile` | [`apps/mobile`](../../apps/mobile) | 26634 (Expo Metro) | `pnpm run dev:mobile` |
-| `chrome-extension` | [`apps/chrome-extension`](../../apps/chrome-extension) | 26633 (WXT HMR) | `pnpm exec wxt` |
-| `@bondery/emails` preview | [`packages/emails`](../../packages/emails) | 26639 | `pnpm run preview` |
+| Postgres | [`deploy/bondery/docker-compose.dev-db.yml`](../../deploy/bondery/docker-compose.dev-db.yml) | port `54322` | `pnpm run start:postgres` |
+| Redis | [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) | port `26636` | `pnpm run start:redis` |
+| Mailpit SMTP | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | port `26640` | `pnpm run start:mailpit` |
+| Mailpit UI | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | [https://mail.usebondery.test](https://mail.usebondery.test) (loopback `26641`) | `pnpm run start:mailpit` |
+| SeaweedFS | [`deploy/bondery/docker-compose.seaweedfs.yml`](../../deploy/bondery/docker-compose.seaweedfs.yml) | [http://127.0.0.1:8333](http://127.0.0.1:8333) | `pnpm run start:seaweedfs` |
+| `api` | [`apps/api`](../../apps/api) | [https://api.usebondery.test](https://api.usebondery.test) (loopback `26631`) | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
+| `webapp` | [`apps/webapp`](../../apps/webapp) | [https://app.usebondery.test](https://app.usebondery.test) (loopback `26632`) | `pnpm run dev:webapp` or `pnpm run dev:webapp-api` |
+| `website` | [`apps/website`](../../apps/website) | [https://usebondery.test](https://usebondery.test) (loopback `26630`) | `pnpm --filter website run dev` |
+| `mobile` | [`apps/mobile`](../../apps/mobile) | Metro `http://localhost:26634` | `pnpm run dev:mobile` |
+| `chrome-extension` | [`apps/chrome-extension`](../../apps/chrome-extension) | WXT HMR `http://localhost:26633` | `pnpm exec wxt` |
+| `@bondery/emails` preview | [`packages/emails`](../../packages/emails) | [http://localhost:26639](http://localhost:26639) | `pnpm run preview` |

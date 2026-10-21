@@ -1,4 +1,12 @@
-import type { MapPinsBounds, SortOrder } from "@/lib/api/resources/contacts";
+import type { SortOrder } from "@/lib/api/resources/contacts";
+
+/** Serialized camera strings — same shape as `serializeMapCamera` output. */
+export type MapPinsCameraKey = {
+  latitude: string;
+  longitude: string;
+  zoom: string;
+};
+
 export type ContactsListParams = {
   search?: string;
   sort?: SortOrder;
@@ -25,8 +33,8 @@ export const contactKeys = {
   linkedin: (id: string) => [...contactKeys.detail(id), "linkedin"] as const,
   list: (params: ContactsListParams) => [...contactKeys.lists(), params] as const,
   lists: () => [...contactKeys.all, "list"] as const,
-  mapPins: (mode: "address" | "contact", bounds?: MapPinsBounds) =>
-    [...contactKeys.all, "map-pins", mode, bounds ?? {}] as const,
+  mapPins: (mode: "address" | "contact", camera?: MapPinsCameraKey) =>
+    [...contactKeys.all, "map-pins", mode, camera ?? {}] as const,
   relationships: (id: string) => [...contactKeys.detail(id), "relationships"] as const,
   search: (search: string) => [...contactKeys.all, "search", search] as const,
   selectable: {

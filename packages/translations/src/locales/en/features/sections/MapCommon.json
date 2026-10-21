@@ -1,5 +1,7 @@
 {
   "Location": "Location",
+  "ShowFlatMap": "Show as map",
+  "ShowGlobe": "Show as globe",
   "ZoomControls": "Map zoom",
   "ZoomIn": "Zoom in",
   "ZoomOut": "Zoom out"

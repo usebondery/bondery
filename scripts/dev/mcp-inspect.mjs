@@ -7,7 +7,11 @@ import {
   ensureInspectorClientMetadataConfig,
   resolveMcpInspectorClientMetadataUrl,
 } from "./mcp-inspector-cimd-url.mjs";
-import { MCP_INSPECTOR_WEB_PORTS, mcpInspectorWebProcessEnv } from "./mcp-inspector-env.mjs";
+import {
+  MCP_INSPECTOR_API_URL,
+  MCP_INSPECTOR_WEB_PORTS,
+  mcpInspectorWebProcessEnv,
+} from "./mcp-inspector-env.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const seedPath = join(root, "scripts/dev/mcp-inspector.json");
@@ -40,6 +44,15 @@ function ensureWritableCatalog() {
       existing.protocolEra = "modern";
       dirty = true;
     }
+    const seedUrl = seedServer.url ?? MCP_INSPECTOR_API_URL;
+    if (existing.url !== seedUrl) {
+      existing.url = seedUrl;
+      dirty = true;
+    }
+    if (seedServer.type && existing.type !== seedServer.type) {
+      existing.type = seedServer.type;
+      dirty = true;
+    }
   }
 
   if (dirty) {
@@ -69,6 +82,7 @@ const userArgs = process.argv.slice(2);
 const clientMetadataUrl = await resolveMcpInspectorClientMetadataUrl();
 ensureInspectorClientMetadataConfig(clientMetadataUrl);
 console.info(`MCP Inspector CIMD: ${clientMetadataUrl}`);
+console.info(`MCP Inspector API: ${MCP_INSPECTOR_API_URL}`);
 
 const child = spawn(
   "npx",

@@ -87,6 +87,13 @@ function resolveSyncModes(flags): SyncMode[] {
   return ["development"];
 }
 
+/** Mobile examples keep loopback ports; device/emulator cannot use Portless DNS. */
+const MOBILE_EXAMPLE_PUBLIC_URLS = {
+  BONDERY_PUBLIC_API_URL: "http://localhost:26631",
+  BONDERY_PUBLIC_WEBAPP_URL: "http://localhost:26632",
+  BONDERY_PUBLIC_WEBSITE_URL: "http://localhost:26630",
+} as const;
+
 function collectTargetVars(targetId, rootEnv, useExamples) {
   const byKey = new Map();
 
@@ -102,11 +109,24 @@ function collectTargetVars(targetId, rootEnv, useExamples) {
           const sourceEntry = ENV_MANIFEST.find((e) => e.canonical === target.deriveFrom);
           const sourceVal = sourceEntry?.exampleValue ?? "";
           value = applyTransform(target.transform, sourceVal);
+        } else if (targetId === "mobile" && entry.canonical in MOBILE_EXAMPLE_PUBLIC_URLS) {
+          value =
+            MOBILE_EXAMPLE_PUBLIC_URLS[entry.canonical as keyof typeof MOBILE_EXAMPLE_PUBLIC_URLS];
         } else {
           value = entry.exampleValue;
         }
       } else {
         value = resolveCanonicalValue(rootEnv, entry, target);
+        // Mobile device/emulator cannot resolve Portless *.usebondery.test.
+        // Keep loopback public URLs for the mobile target even when root uses Portless.
+        if (
+          targetId === "mobile" &&
+          entry.canonical in MOBILE_EXAMPLE_PUBLIC_URLS &&
+          value !== undefined
+        ) {
+          value =
+            MOBILE_EXAMPLE_PUBLIC_URLS[entry.canonical as keyof typeof MOBILE_EXAMPLE_PUBLIC_URLS];
+        }
       }
       if (value === undefined) {
         continue;

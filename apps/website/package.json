@@ -43,6 +43,7 @@
     "cross-env": "^10.1.0",
     "github-slugger": "^2.0.0",
     "next-validate-link": "^1.6.7",
+    "portless": "^0.15.8",
     "postcss": "^8.5.24",
     "postcss-preset-mantine": "^1.18.0",
     "postcss-simple-vars": "^7.0.1",
@@ -53,6 +54,11 @@
     "typescript": "^7.0.2"
   },
   "name": "website",
+  "portless": {
+    "appPort": 26630,
+    "name": "usebondery",
+    "script": "dev:next"
+  },
   "private": true,
   "scripts": {
     "announce": "tsx scripts/announce.ts",
@@ -60,11 +66,14 @@
     "check:docs:mdx": "tsx scripts/check-docs-mdx.ts",
     "check:env": "tsx scripts/check-env.ts",
     "check:types": "next typegen && node ../../scripts/dev/tsc-native.mjs --noEmit",
-    "dev": "next dev --port 26630",
+    "dev": "cross-env PORTLESS_TLD=test portless",
+    "dev:classic": "next dev --port 26630",
+    "dev:next": "next dev --port 26630",
     "generate-icons": "tsx scripts/generate-icons.ts",
     "generate:api-docs": "tsx scripts/generate-api-docs.mts",
     "prebuild": "cross-env NODE_ENV=production pnpm run generate-icons && pnpm run generate:api-docs",
     "predev": "node ../../scripts/dev/kill-website-dev.mjs && cross-env NODE_ENV=development pnpm run generate-icons && pnpm run generate:api-docs",
+    "predev:classic": "node ../../scripts/dev/kill-website-dev.mjs && cross-env NODE_ENV=development pnpm run generate-icons && pnpm run generate:api-docs",
     "start": "next start"
   },
   "version": "1.11.0-rc.1"

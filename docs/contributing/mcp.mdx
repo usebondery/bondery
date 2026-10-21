@@ -23,7 +23,7 @@ From the repo root:
 pnpm run mcp:inspect
 ```
 
-That launches `@modelcontextprotocol/inspector` against a **writable** catalog seeded from [`scripts/dev/mcp-inspector.json`](../../scripts/dev/mcp-inspector.json) (`protocolEra: "modern"`, URL `http://localhost:26631/mcp`). Settings you change in the UI (including Tools pagination) are saved to gitignored `scripts/dev/mcp-inspector.local.json`. The script frees ports **6274** / **6275** / **6278** and sets `CLIENT_PORT`, `MCP_SANDBOX_PORT`, and `MCP_APP_ORIGIN_PORT` so the UI stays on `http://127.0.0.1:6274`. Open the **printed URL** (it includes a one-time session token). Do not type that URL from memory.
+That launches `@modelcontextprotocol/inspector` against a **writable** catalog seeded from [`scripts/dev/mcp-inspector.json`](../../scripts/dev/mcp-inspector.json) (`protocolEra: "modern"`, URL `https://api.usebondery.test/mcp`). The API must be running under Portless (`pnpm --filter api run dev`). The script sets `NODE_EXTRA_CA_CERTS` to the Portless CA when present, frees ports **6274** / **6275** / **6278**, and pins `CLIENT_PORT`, `MCP_SANDBOX_PORT`, and `MCP_APP_ORIGIN_PORT` so the UI stays on `http://127.0.0.1:6274`. Open the **printed URL** (it includes a one-time session token). Do not type that URL from memory.
 
 Do not add a Bondery-provisioned Inspector `clientId` to the catalog.
 

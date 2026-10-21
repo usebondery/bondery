@@ -33,16 +33,17 @@ export const DEV_PORTS = {
 /** Local Redis URL when `pnpm run start:redis` is running. */
 export const DEV_REDIS_URL = `redis://127.0.0.1:${DEV_PORTS.REDIS}` as const;
 
+/** Local public origins for the Portless HTTPS web stack (website / webapp / api). */
 export const DEV_URLS = {
-  api: `http://localhost:${DEV_PORTS.API}`,
+  api: "https://api.usebondery.test",
   emailPreview: `http://localhost:${DEV_PORTS.EMAIL_PREVIEW}`,
   extension: `http://localhost:${DEV_PORTS.EXTENSION}`,
-  mailpitUi: `http://localhost:${DEV_PORTS.MAILPIT_UI}`,
+  mailpitUi: "https://mail.usebondery.test",
   mobile: `http://localhost:${DEV_PORTS.MOBILE}`,
   postgres: `postgresql://postgres:${encodeURIComponent(DEV_POSTGRES_PASSWORD)}@127.0.0.1:${DEV_PORTS.POSTGRES}/bondery`,
   redis: DEV_REDIS_URL,
-  webapp: `http://localhost:${DEV_PORTS.WEBAPP}`,
-  website: `http://localhost:${DEV_PORTS.WEBSITE}`,
+  webapp: "https://app.usebondery.test",
+  website: "https://usebondery.test",
 } as const;
 
-export const DEV_SYNC_WS_URL = `ws://localhost:${DEV_PORTS.API}/api/sync/ws`;
+export const DEV_SYNC_WS_URL = "wss://api.usebondery.test/api/sync/ws";

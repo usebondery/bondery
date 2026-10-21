@@ -1331,6 +1331,8 @@ export type MagicLinkEmailCatalog = {
 
 export type MapCommonCatalog = {
   Location: string;
+  ShowFlatMap: string;
+  ShowGlobe: string;
   ZoomControls: string;
   ZoomIn: string;
   ZoomOut: string;
@@ -1340,6 +1342,14 @@ export type MapPageCatalog = {
   AddressSearchPlaceholder: string;
   Back: string;
   Empty: string;
+  MyLocation: string;
+  MyLocationDenied: string;
+  MyLocationInsecure: string;
+  MyLocationLocating: string;
+  MyLocationMarker: string;
+  MyLocationTimeout: string;
+  MyLocationUnavailable: string;
+  MyLocationUnsupported: string;
   NoAddressesFound: string;
   NoAddressesMatchSearch: string;
   NoContactsFound: string;
@@ -1353,7 +1363,10 @@ export type MapPageCatalog = {
   Subtitle: string;
   Title: string;
   ViewAddresses: string;
+  ViewAddressesTooltip: string;
   ViewLocations: string;
+  ViewLocationsTooltip: string;
+  ViewSwitcherLabel: string;
   VisibleColumns: {
     Coordinates: string;
     Location: string;

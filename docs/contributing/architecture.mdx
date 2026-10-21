@@ -27,7 +27,7 @@ Domain mutations (create/update/delete contacts, groups, tags, etc.) live in `ap
 
 ### `apps/webapp` — Web application
 
-**Source:** [`apps/webapp`](https://github.com/usebondery/bondery/tree/main/apps/webapp) · **Local dev:** port `26632` · [http://localhost:26632](http://localhost:26632)
+**Source:** [`apps/webapp`](https://github.com/usebondery/bondery/tree/main/apps/webapp) · **Local dev:** [https://app.usebondery.test](https://app.usebondery.test) (Portless; loopback `26632`)
 
 The primary user-facing product at [app.usebondery.com](https://app.usebondery.com).
 
@@ -50,9 +50,9 @@ Server components and client hooks call the Fastify API with the user's session 
 
 ### `apps/api` — REST API server
 
-**Source:** [`apps/api`](https://github.com/usebondery/bondery/tree/main/apps/api) · **Local dev:** port `26631` · [http://localhost:26631](http://localhost:26631) · **Production:** [api.usebondery.com](https://api.usebondery.com)
+**Source:** [`apps/api`](https://github.com/usebondery/bondery/tree/main/apps/api) · **Local dev:** [https://api.usebondery.test](https://api.usebondery.test) (Portless; loopback `26631`) · **Production:** [api.usebondery.com](https://api.usebondery.com)
 
-Mobile sync WebSocket: `ws://localhost:26631/api/sync/ws` (same port as the API).
+Mobile sync WebSocket: `wss://api.usebondery.test/api/sync/ws` (same Portless API host).
 
 Central backend for all product data and privileged operations.
 
@@ -106,7 +106,7 @@ See [Local development setup](local-setup.mdx#7-mobile-application-appsmobile) f
 
 ### `apps/website` — Marketing site
 
-**Source:** [`apps/website`](https://github.com/usebondery/bondery/tree/main/apps/website) · **Local dev:** port `26630` · [http://localhost:26630](http://localhost:26630)
+**Source:** [`apps/website`](https://github.com/usebondery/bondery/tree/main/apps/website) · **Local dev:** [https://usebondery.test](https://usebondery.test) (Portless; loopback `26630`)
 
 Public landing page at [usebondery.com](https://usebondery.com).
 

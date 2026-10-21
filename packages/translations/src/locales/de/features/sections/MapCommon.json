@@ -1,5 +1,7 @@
 {
   "Location": "Standort",
+  "ShowFlatMap": "Als Karte anzeigen",
+  "ShowGlobe": "Als Globus anzeigen",
   "ZoomControls": "Kartenzoom",
   "ZoomIn": "Hineinzoomen",
   "ZoomOut": "Herauszoomen"

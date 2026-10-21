@@ -1,5 +1,7 @@
 {
   "Location": "Poloha",
+  "ShowFlatMap": "Zobrazit jako mapu",
+  "ShowGlobe": "Zobrazit jako glóbus",
   "ZoomControls": "Přiblížení mapy",
   "ZoomIn": "Přiblížit",
   "ZoomOut": "Oddálit"

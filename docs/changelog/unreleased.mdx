@@ -15,6 +15,10 @@ hidden: true
 - Website: Hosts Apple and Android associated-domain files for native passkeys. Operators set `BONDERY_PUBLIC_IOS_APP_TEAM_ID` and `BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS`. Missing values return 404 instead of inventing IDs.
 - API: MCP consent list items include `logoUri` (HTTPS client icon from OAuth metadata, or null).
 - Webapp: Connected AI assistants in Settings show each client’s logo when one is available.
+- Webapp: MapLibre people map with OSM tiles, clustering, globe or flat projection, and my-location.
+- Webapp: The people map keeps pan and zoom in the URL (`latitude`, `longitude`, `zoom`). Back from a person restores that camera and reuses cached pins for it.
+- Webapp: Hovering a person pin on the map shows the shared person preview card.
+- Webapp: Globe projection shows a sky atmosphere; flat map turns it off.
 
 ### 🐛 Fixed
 
@@ -39,14 +43,22 @@ hidden: true
 - Webapp and Website: Ship Next.js containers from `output: 'standalone'` (traced runtime only). No full monorepo `node_modules` in the runner.
 - Docker: Disable pnpm’s global virtual store inside image builds so package binaries resolve under BuildKit store mounts. Local installs still use the virtual store for Turbopack.
 - Mobile: Metro and Expo autolinking follow the isolated layout (`nodeModulesPaths` plus `experiments.autolinkingModuleResolution`).
-- Dev: `pnpm mcp:inspect` configures MCP Inspector with the public MCPJam Client ID Metadata Document (no dynamic client registration), frees ports **6274** / **6275** / **6278**, and pins `CLIENT_PORT` and related Inspector env vars so the UI stays on **6274**. Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
+- Dev: Local website, webapp, and API use Portless HTTPS on `*.usebondery.test` (`https://usebondery.test`, `https://app.usebondery.test`, `https://api.usebondery.test`). App `dev` sets `PORTLESS_TLD=test`. Dial BOND ports stay the bind targets behind the proxy. Use `dev:classic` for raw `localhost` ports.
+- Dev: Mailpit UI is aliased at `https://mail.usebondery.test`. SMTP stays on `127.0.0.1:26640`.
+- Dev: `pnpm mcp:inspect` connects to `https://api.usebondery.test/mcp`, trusts the Portless CA when present, and uses the public MCPJam Client ID Metadata Document. Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
+- Dev: Stripe CLI local webhooks forward to `https://api.usebondery.test` (not a raw Dial BOND port).
 - Website: Stops hosting MCP Inspector Client ID Metadata at `/.well-known/oauth/client-metadata/inspector.json`. Local Inspector uses the public MCPJam CIMD instead.
 - Webapp and Website: Turn on Next.js typed routes. In-app links and redirects use typed `route*` / `href*` / `redirect*` helpers.
 - Chrome extension: Opens the webapp through shared navigation helpers.
 
+### 📝 Documentation
+
+- Contributing: Local setup, architecture, auth, and MCP docs teach Portless HTTPS on `*.usebondery.test`. Classic `localhost` ports stay as the escape hatch.
+
 ### Breaking
 
 - **pnpm install layout:** After you pull, delete every `node_modules` directory (repo root, apps, and packages) and run `pnpm install`. A clean install is required when moving from hoisted to isolated linking.
+- **Local web URLs:** Daily web and API work uses Portless HTTPS on `*.usebondery.test` (not `*.usebondery.localhost` and not `http://localhost:2663x`). Stop the old Portless proxy. Run `portless trust` and `portless hosts sync` (Admin on Windows). Clear stale `*.usebondery.localhost` hosts entries. Refresh development env (`pnpm env:development` / Infisical) so `BONDERY_PUBLIC_*_URL` values match. Register OAuth callbacks at `https://api.usebondery.test/auth/callback/...`. Keep classic `http://localhost:26631/...` only for `dev:classic`. See [Local development setup](/docs/contributing/local-setup).
 
 ### 📦 Dependencies
 
