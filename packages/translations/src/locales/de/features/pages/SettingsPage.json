@@ -386,6 +386,7 @@
   "Preferences": {
     "Dark": "Dunkel",
     "DefaultPhoneCountry": "Standard-Ländervorwahl",
+    "DefaultPhoneCountrySearch": "Ländervorwahl suchen...",
     "DefaultPhoneCountryTooltip": "Wird verwendet, wenn Sie Telefonnummern ohne internationale Vorwahl eingeben.",
     "DefaultPhoneCountryUpdateError": "Standard-Ländervorwahl konnte nicht aktualisiert werden",
     "DefaultPhoneCountryUpdateSuccess": "Standard-Ländervorwahl erfolgreich aktualisiert",
