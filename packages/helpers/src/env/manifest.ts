@@ -294,7 +294,10 @@ export function resolveExampleValue(entry: EnvVarDef, profile: ExampleProfile): 
   if (profile === "production") {
     if (entry.canonical === "BONDERY_PUBLIC_WEBAPP_URL" && isPortlessLocalPublicUrl(value)) {
       value = "https://app.usebondery.com";
-    } else if (entry.canonical === "BONDERY_PUBLIC_WEBSITE_URL" && isPortlessLocalPublicUrl(value)) {
+    } else if (
+      entry.canonical === "BONDERY_PUBLIC_WEBSITE_URL" &&
+      isPortlessLocalPublicUrl(value)
+    ) {
       value = "https://usebondery.com";
     } else if (entry.canonical === "BONDERY_PUBLIC_API_URL" && isPortlessLocalPublicUrl(value)) {
       value = "https://api.usebondery.com";
@@ -1346,6 +1349,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
 export const TURBO_SYSTEM_PASSTHROUGH = [
   "JAVA_HOME",
   "PATH",
+  "PNPM_STORE_DIR",
   "WINDIR",
   "HOME",
   "USERPROFILE",

@@ -3,26 +3,15 @@
  * Run TypeScript 7 `tsc`. Resolves from cwd first (isolated linker), then repo root.
  */
 import { spawnSync } from "node:child_process";
-import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveTypescriptTsc } from "../pkg/resolve-typescript-tsc.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
-function resolveTsc() {
-  for (const from of [process.cwd(), root]) {
-    try {
-      return createRequire(join(from, "package.json")).resolve("typescript/bin/tsc");
-    } catch {
-      // try next
-    }
-  }
-  return null;
-}
-
-const tsc = resolveTsc();
+const tsc = resolveTypescriptTsc([process.cwd(), root]);
 if (!tsc) {
-  console.error("tsc-native: could not resolve typescript/bin/tsc");
+  console.error("tsc-native: could not resolve TypeScript compiler");
   process.exit(1);
 }
 

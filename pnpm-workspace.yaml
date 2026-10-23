@@ -31,10 +31,27 @@ syncInjectedDepsAfterScripts:
 
 # Third-party peer gaps under isolated + global virtual store.
 # @mantine/hooks imports react-dom; Vite resolves from the store link path.
+# React Native libraries import React from .d.ts files. The store path cannot
+# see @types/react unless the package declares that peer.
 packageExtensions:
   "@mantine/hooks":
     dependencies:
       react-dom: "*"
+  expo-image:
+    peerDependencies:
+      "@types/react": "*"
+  expo-router:
+    peerDependencies:
+      "@types/react": "*"
+  react-native-gesture-handler:
+    peerDependencies:
+      "@types/react": "*"
+  react-native-svg:
+    peerDependencies:
+      "@types/react": "*"
+  uniwind:
+    peerDependencies:
+      "@types/react": "*"
 
 overrides:
   "@better-auth/core": "1.7.7"
