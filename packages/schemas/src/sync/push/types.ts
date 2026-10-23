@@ -38,6 +38,7 @@ export type SyncPushConflictResult = {
 };
 
 export type SyncPushRejectedResult = {
+  code?: string;
   error: string;
   id: string;
   status: "rejected";

@@ -24,6 +24,7 @@ import { KeepInTouchSelect } from "@/app/(app)/app/(shell)/keep-in-touch/compone
 import { computeNextDueDate } from "@/app/(app)/app/(shell)/keep-in-touch/utils/keepInTouchConfig";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { datePickerValueToIsoDateTime } from "@/lib/dates/toIsoDateTime";
+import { routeGroup } from "@/lib/navigation/route/group";
 import { GroupCard } from "../../../../groups/components/GroupCard";
 import { openNewActivityModal } from "../../../../interactions/components/NewActivityModal";
 import type { ContactAddressSavePayload } from "../../utils/contactAddressUtils";
@@ -239,7 +240,7 @@ export function PersonDetailTabs({
                   interactive={true}
                   key={group.id}
                   onAddPeople={() => {}}
-                  onClick={(groupId) => router.push(`/app/group/${groupId}`)}
+                  onClick={(groupId) => router.push(routeGroup(groupId))}
                   onDelete={() => {}}
                   onDuplicate={() => {}}
                   onEdit={() => {}}

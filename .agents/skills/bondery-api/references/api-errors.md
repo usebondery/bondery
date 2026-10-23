@@ -46,7 +46,7 @@ Throw via helpers or `new DomainError(...)` with catalog codes. Never put intern
 - Sync conflict → 409, `code: "sync_conflict"`, `details.contact` with full contact
 - Rate limit → 429, `code: "rate_limit_exceeded"`, `retry_after`
 
-Standard error responses on routes: `standardErrorResponses` in `packages/schemas/src/http/responses.ts` (400, 401, 403, 404, 429, 500, 503).
+Standard error responses on routes: `standardErrorResponses` in `packages/schemas/src/http/responses.ts` (400, 401, 403, 404, 426, 429, 500, 503).
 
 ## Before merge (new error code)
 

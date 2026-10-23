@@ -23,7 +23,6 @@ export function EnrichResumeNotificationContent() {
   const handleResume = () => {
     resume(pendingQueueStatus);
   };
-
   const handleDiscard = async () => {
     await discard();
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDateRange, formatDuration } from "@bondery/helpers";
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
 import type { EducationEntry } from "@bondery/schemas";
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconSchool } from "@tabler/icons-react";
@@ -24,7 +24,7 @@ export function EducationCard({ entry }: EducationCardProps) {
   const duration = formatDuration(entry.startDate, entry.endDate);
 
   const schoolNameElement = entry.schoolLinkedinUrl ? (
-    <AnchorLink fw={500} href={entry.schoolLinkedinUrl} size="sm" target="_blank">
+    <AnchorLink fw={500} href={hrefAssert(entry.schoolLinkedinUrl)} size="sm" target="_blank">
       {entry.schoolName}
     </AnchorLink>
   ) : (

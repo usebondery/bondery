@@ -10,6 +10,8 @@ import { buildBlogPostingSchema } from "@/lib/seo/schemas/blog-posting";
 import { getAllSlugs, getPostComponent, getPostMeta } from "../../_lib";
 import { getPostReadingTime } from "../../_lib/server-utils";
 
+const blogMdxComponents = getBlogMdxComponents({});
+
 type Props = {
   params: Promise<{ category: string; slug: string }>;
 };
@@ -120,7 +122,8 @@ export default async function BlogPostPage({ params }: Props) {
           </Stack>
 
           <article>
-            <Content components={getBlogMdxComponents({})} />
+            {/* biome-ignore lint/nursery/useReactCompiler: MDX entry is resolved per slug at request time */}
+            <Content components={blogMdxComponents} />
           </article>
         </Stack>
       </Container>

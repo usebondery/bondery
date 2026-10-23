@@ -4,7 +4,6 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { CodeBlockSnippet } from "@bondery/mantine-next";
 import Image from "next/image";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 const BRAND_ICON_SIZE = 14;
@@ -50,31 +49,29 @@ export function resolveDefaultTestSnippetId(os: string | undefined): ApiKeyTestS
 export function useApiKeyTestSnippets(apiBaseUrl: string, fullKey: string): CodeBlockSnippet[] {
   const t = useSettingsPageTranslations("ApiKeys");
 
-  return useMemo(() => {
-    const url = `${apiBaseUrl.replace(/\/+$/, "")}${API_ROUTES.CONTACTS}`;
+  const url = `${apiBaseUrl.replace(/\/+$/, "")}${API_ROUTES.CONTACTS}`;
 
-    return [
-      {
-        code: `Invoke-RestMethod -Uri "${url}" -Headers @{ Authorization = "Bearer ${fullKey}" }`,
-        icon: <BrandOsIcon alt={t("TestSnippetWindows")} name="windows" />,
-        id: "windows",
-        label: t("TestSnippetWindows"),
-        language: "powershell",
-      },
-      {
-        code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
-        icon: <BrandOsIcon alt={t("TestSnippetMac")} name="apple" />,
-        id: "macos",
-        label: t("TestSnippetMac"),
-        language: "bash",
-      },
-      {
-        code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
-        icon: <BrandOsIcon alt={t("TestSnippetLinux")} name="linux" />,
-        id: "linux",
-        label: t("TestSnippetLinux"),
-        language: "bash",
-      },
-    ];
-  }, [apiBaseUrl, fullKey, t]);
+  return [
+    {
+      code: `Invoke-RestMethod -Uri "${url}" -Headers @{ Authorization = "Bearer ${fullKey}" }`,
+      icon: <BrandOsIcon alt={t("TestSnippetWindows")} name="windows" />,
+      id: "windows",
+      label: t("TestSnippetWindows"),
+      language: "powershell",
+    },
+    {
+      code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
+      icon: <BrandOsIcon alt={t("TestSnippetMac")} name="apple" />,
+      id: "macos",
+      label: t("TestSnippetMac"),
+      language: "bash",
+    },
+    {
+      code: `curl -H "Authorization: Bearer ${fullKey}" "${url}"`,
+      icon: <BrandOsIcon alt={t("TestSnippetLinux")} name="linux" />,
+      id: "linux",
+      label: t("TestSnippetLinux"),
+      language: "bash",
+    },
+  ];
 }

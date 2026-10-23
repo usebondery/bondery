@@ -1,12 +1,13 @@
 "use client";
 
+import type { AppHref } from "@bondery/mantine-next";
 import { IconMessageCircle, IconSettings, IconUser } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { PageHeader } from "./PageHeader";
 
 interface ErrorPageHeaderProps {
   action?: ReactNode;
-  backHref?: string;
+  backHref?: AppHref;
   iconType: "user" | "message-circle" | "settings";
   title: string;
 }

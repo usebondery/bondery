@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -25,6 +26,8 @@ import {
   usePeoplePageTranslations,
 } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { GROUP_CARD_PREVIEW } from "@/lib/query/groupDetailQueryParams";
@@ -163,7 +166,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
   const handleSortChange = (order: SortOrder) => {
     const params = new URLSearchParams(searchParams);
     params.set("sort", order);
-    router.replace(`${pathname}?${params.toString()}`);
+    router.replace(routeWithQuery(pathname, params));
   };
 
   const [isSearchPending, startSearchTransition] = useTransition();
@@ -175,7 +178,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
       params.delete("search");
     }
     startSearchTransition(() => {
-      router.replace(`${pathname}?${params.toString()}`);
+      router.replace(routeWithQuery(pathname, params));
     });
   }, DEBOUNCE_MS.search);
 
@@ -185,7 +188,6 @@ export function GroupClient({ groupId }: GroupClientProps) {
     }
     void fetchNextPage();
   };
-
   const bulkSelectionActions: BulkSelectionAction[] = [
     {
       icon: <IconUsersMinus size={16} />,
@@ -210,7 +212,6 @@ export function GroupClient({ groupId }: GroupClientProps) {
       groupLabel,
     });
   };
-
   if (!group) {
     return null;
   }
@@ -228,7 +229,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
             if (typeof window !== "undefined" && window.history.length > 1) {
               router.back();
             } else {
-              router.push(WEBAPP_ROUTES.GROUPS);
+              router.push(routeAssert(WEBAPP_ROUTES.GROUPS));
             }
           }}
           icon={IconUsersGroup}

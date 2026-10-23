@@ -120,6 +120,7 @@ export type CommandPaletteCatalog = {
 export type CommonCatalog = {
   a11y: {
     back: string;
+    close: string;
     closeMenu: string;
     createMore: string;
     info: string;
@@ -335,11 +336,17 @@ export type CommonCatalog = {
     unknown: string;
   };
   feedback: {
+    adding: string;
+    closeToast: string;
+    creating: string;
     deleting: string;
     duplicating: string;
     errorTitle: string;
     noResults: string;
+    removing: string;
     savedTitle: string;
+    saving: string;
+    sending: string;
     successTitle: string;
   };
 };
@@ -1279,6 +1286,9 @@ export type LoginPageCatalog = {
   InvalidLinkBody: string;
   InvalidLinkTitle: string;
   LastUsed: string;
+  LoadingContinueWith: string;
+  LoadingContinueWithPasskey: string;
+  LoadingSendLoginLink: string;
   LogoAriaLabel: string;
   NoPasskeyFound: string;
   OpenLinkOnThisDeviceOauth: string;
@@ -1321,6 +1331,8 @@ export type MagicLinkEmailCatalog = {
 
 export type MapCommonCatalog = {
   Location: string;
+  ShowFlatMap: string;
+  ShowGlobe: string;
   ZoomControls: string;
   ZoomIn: string;
   ZoomOut: string;
@@ -1330,6 +1342,14 @@ export type MapPageCatalog = {
   AddressSearchPlaceholder: string;
   Back: string;
   Empty: string;
+  MyLocation: string;
+  MyLocationDenied: string;
+  MyLocationInsecure: string;
+  MyLocationLocating: string;
+  MyLocationMarker: string;
+  MyLocationTimeout: string;
+  MyLocationUnavailable: string;
+  MyLocationUnsupported: string;
   NoAddressesFound: string;
   NoAddressesMatchSearch: string;
   NoContactsFound: string;
@@ -1343,7 +1363,10 @@ export type MapPageCatalog = {
   Subtitle: string;
   Title: string;
   ViewAddresses: string;
+  ViewAddressesTooltip: string;
   ViewLocations: string;
+  ViewLocationsTooltip: string;
+  ViewSwitcherLabel: string;
   VisibleColumns: {
     Coordinates: string;
     Location: string;
@@ -1425,6 +1448,7 @@ export type MobileAuthCatalog = {
   MissingAuthUrl: string;
   MissingCode: string;
   MissingConfig: string;
+  PasskeysUnavailableOnDevice: string;
 };
 
 export type MobileColorPickerCatalog = {
@@ -1521,6 +1545,14 @@ export type MobileContactsCatalog = {
   DeleteTitle: string;
   DeselectAll: string;
   Empty: string;
+  FilterAllContacts: string;
+  FilterEmptyGroup: string;
+  GroupFilterAccessibilityHint: string;
+  GroupFilterAccessibilityLabel: string;
+  GroupFilterClearAccessibilityLabel: string;
+  GroupFilterDeletedToast: string;
+  GroupFilterNewGroup: string;
+  GroupFilterSheetTitle: string;
   Groups: string;
   MissingEmail: string;
   MissingPhone: string;
@@ -1529,12 +1561,14 @@ export type MobileContactsCatalog = {
   NoGroupsYet: string;
   NoGroupsYetHint: string;
   NoMatchSearch: string;
+  NoMatchSearchInGroup: string;
   QuickActions: string;
   RemoveFromGroup: string;
   RemoveFromGroupConfirmTitle: string;
   RemoveFromGroupFailed: string;
   SearchPlaceholder: string;
   SelectAll: string;
+  SelectAllCount: string;
   SelectedCount: string;
   SelectionActionsTitle: string;
   SortNameAsc: string;
@@ -1546,6 +1580,7 @@ export type MobileContactsCatalog = {
 
 export type MobileCreateContactCatalog = {
   Create: string;
+  Creating: string;
   ErrorDescription: string;
   ErrorTitle: string;
   FullNameLabel: string;
@@ -1576,6 +1611,7 @@ export type MobileEmojiPickerCatalog = {
   EmptySearch: string;
   RandomAccessibilityLabel: string;
   SearchPlaceholder: string;
+  SheetTitle: string;
   TriggerAccessibilityHint: string;
 };
 
@@ -1613,6 +1649,7 @@ export type MobileNavigationCatalog = {
   Contacts: string;
   CreatePerson: string;
   Settings: string;
+  TabTapSearchHint: string;
 };
 
 export type MobileSettingsCatalog = {
@@ -1623,11 +1660,14 @@ export type MobileSettingsCatalog = {
   ApiServerNotConfigured: string;
   ApiServerUrl: string;
   AppVersion: string;
+  AppVersionCheckFailed: string;
+  AppVersionChecking: string;
+  AppVersionLatest: string;
+  AppVersionUpdateAvailable: string;
   Changelog: string;
   Docs: string;
   External: string;
   FollowUs: string;
-  GroupSort: string;
   GroupSortAlphaAsc: string;
   GroupSortAlphaDesc: string;
   GroupSortCountAsc: string;
@@ -1635,6 +1675,7 @@ export type MobileSettingsCatalog = {
   GroupSortRecentOpened: string;
   GroupSortSelectLabel: string;
   GroupSortUpdatedDescription: string;
+  Groups: string;
   GroupsLoadErrorDescription: string;
   GroupsLoadErrorTitle: string;
   Guides: string;
@@ -1665,6 +1706,7 @@ export type MobileSettingsCatalog = {
   PreviewHintSwipeActions: string;
   PreviewHintTags: string;
   PreviewHintTagsEmpty: string;
+  RecheckAppVersion: string;
   RecheckConnection: string;
   Repository: string;
   RightSwipe: string;
@@ -2435,6 +2477,11 @@ export type SettingsPageCatalog = {
   };
   Preferences: {
     Dark: string;
+    DefaultPhoneCountry: string;
+    DefaultPhoneCountrySearch: string;
+    DefaultPhoneCountryTooltip: string;
+    DefaultPhoneCountryUpdateError: string;
+    DefaultPhoneCountryUpdateSuccess: string;
     InvalidReminderTime: string;
     Language: string;
     LanguageDescription: string;
@@ -2472,6 +2519,7 @@ export type SettingsPageCatalog = {
     Title: string;
     UpdateError: string;
     UpdateSuccess: string;
+    UpdatingDefaultPhoneCountry: string;
     UpdatingLanguage: string;
     UpdatingReminderTime: string;
     UpdatingTheme: string;

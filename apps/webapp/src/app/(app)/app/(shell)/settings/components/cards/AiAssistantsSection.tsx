@@ -4,7 +4,6 @@ import { CodeBlock, type CodeBlockSnippet, DescribedSelect } from "@bondery/mant
 import type { McpConsentListItem } from "@bondery/schemas";
 import { CardSection, Stack, Text } from "@mantine/core";
 import { IconBraces, IconLink, IconSparkles } from "@tabler/icons-react";
-import { useMemo } from "react";
 import { mcpAccessFromScopes } from "@/lib/auth/mcp-access";
 import { mcpAccessOptions } from "@/lib/auth/mcp-access-options";
 import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
@@ -13,6 +12,10 @@ import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { useMcpConsentsQuery, useRevokeMcpConsentMutation } from "@/lib/query/hooks/useMcpConsents";
 import { openRevokeMcpConsentConfirm } from "../../settingsAuthActions";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
+import {
+  SETTINGS_CREDENTIAL_ICON_PX,
+  SettingsCredentialIconImg,
+} from "./SettingsCredentialIconImg";
 import { SettingsSection } from "./SettingsSection";
 
 const PERMISSION_SELECT_WIDTH = 172;
@@ -23,6 +26,14 @@ interface AiAssistantsSectionProps {
 
 function mcpServerUrl(apiBaseUrl: string): string {
   return `${apiBaseUrl.replace(/\/+$/, "")}/mcp`;
+}
+
+function McpClientRowIcon({ logoUri }: { logoUri: string | null }) {
+  if (!logoUri) {
+    return <IconSparkles size={SETTINGS_CREDENTIAL_ICON_PX} stroke={1.5} />;
+  }
+
+  return <SettingsCredentialIconImg src={logoUri} />;
 }
 
 function mcpJsonConfig(url: string): string {
@@ -47,35 +58,28 @@ export function AiAssistantsSection({ apiBaseUrl }: AiAssistantsSectionProps) {
   const { data: consents = [] } = useMcpConsentsQuery();
   const revokeMutation = useRevokeMcpConsentMutation();
   const url = mcpServerUrl(apiBaseUrl);
-  const connectSnippets: CodeBlockSnippet[] = useMemo(
-    () => [
-      {
-        code: url,
-        icon: <IconLink size={14} />,
-        id: "url",
-        label: t("McpUrlLabel"),
-        language: "plaintext",
-      },
-      {
-        code: mcpJsonConfig(url),
-        icon: <IconBraces size={14} />,
-        id: "mcp-json",
-        label: t("McpJsonLabel"),
-        language: "json",
-      },
-    ],
-    [t, url],
-  );
-  const permissionOptions = useMemo(
-    () =>
-      mcpAccessOptions({
-        fullDescription: t("PermissionFullDescription"),
-        fullLabel: t("PermissionFullLabel"),
-        readDescription: t("PermissionReadDescription"),
-        readLabel: t("PermissionReadLabel"),
-      }),
-    [t],
-  );
+  const connectSnippets: CodeBlockSnippet[] = [
+    {
+      code: url,
+      icon: <IconLink size={14} />,
+      id: "url",
+      label: t("McpUrlLabel"),
+      language: "plaintext",
+    },
+    {
+      code: mcpJsonConfig(url),
+      icon: <IconBraces size={14} />,
+      id: "mcp-json",
+      label: t("McpJsonLabel"),
+      language: "json",
+    },
+  ];
+  const permissionOptions = mcpAccessOptions({
+    fullDescription: t("PermissionFullDescription"),
+    fullLabel: t("PermissionFullLabel"),
+    readDescription: t("PermissionReadDescription"),
+    readLabel: t("PermissionReadLabel"),
+  });
 
   const handleRevoke = async (consent: McpConsentListItem) => {
     const stepped = await ensureFreshIdentity({
@@ -125,7 +129,7 @@ export function AiAssistantsSection({ apiBaseUrl }: AiAssistantsSectionProps) {
                 <SettingsCredentialCard
                   deleteAriaLabel={t("RevokeButton")}
                   deleteTooltip={t("RevokeTooltip")}
-                  icon={<IconSparkles />}
+                  icon={<McpClientRowIcon logoUri={consent.logoUri} />}
                   key={consent.id}
                   label={consent.clientName}
                   lastUsedLabel={t("GrantedAt", {

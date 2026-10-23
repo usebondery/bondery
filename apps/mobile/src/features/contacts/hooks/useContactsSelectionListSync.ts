@@ -1,5 +1,6 @@
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { useContactsSelection } from "../contactsSelectionStore";
 
 interface UseContactsSelectionListSyncOptions {
@@ -27,33 +28,39 @@ export function useContactsSelectionListSync({
   );
 
   useEffect(() => {
-    setMyselfContactId(myselfContactId);
-    pruneMyselfFromSelection();
+    syncEffectState(() => {
+      setMyselfContactId(myselfContactId);
+      pruneMyselfFromSelection();
+    });
   }, [myselfContactId, pruneMyselfFromSelection, setMyselfContactId]);
 
   useEffect(() => {
-    setSelectionTotalCount(totalCount);
+    syncEffectState(() => {
+      setSelectionTotalCount(totalCount);
+    });
   }, [setSelectionTotalCount, totalCount]);
 
   useEffect(() => {
-    setLoadedContactCount(contactIds.length);
+    syncEffectState(() => {
+      setLoadedContactCount(contactIds.length);
+    });
   }, [contactIds.length, setLoadedContactCount]);
 
   useEffect(() => {
-    const knownContactIds = new Set(contactIds);
+    syncEffectState(() => {
+      const knownContactIds = new Set(contactIds);
 
-    if (myselfContactId) {
-      knownContactIds.add(myselfContactId);
-    }
+      if (myselfContactId) {
+        knownContactIds.add(myselfContactId);
+      }
 
-    pruneSelectionToKnownContactIds(knownContactIds);
+      pruneSelectionToKnownContactIds(knownContactIds);
+    });
   }, [contactIds, myselfContactId, pruneSelectionToKnownContactIds]);
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        exitSelectionMode();
-      };
-    }, [exitSelectionMode]),
-  );
+  useFocusEffect(() => {
+    return () => {
+      exitSelectionMode();
+    };
+  });
 }

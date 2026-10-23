@@ -1,6 +1,6 @@
 # Modals (desktop / webapp)
 
-Webapp modals for keyboard + pointer users. Mobile equivalent: `ActionSheetPopup` — see [mobile/action-sheets-and-keyboard.md](../mobile/action-sheets-and-keyboard.md).
+Webapp modals for keyboard + pointer users. Mobile equivalent: `ui/Sheet` — see [mobile/action-sheets-and-keyboard.md](../mobile/action-sheets-and-keyboard.md).
 
 ---
 

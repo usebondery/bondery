@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { extractUsername } from "@bondery/helpers";
@@ -24,7 +25,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconBrandLinkedin, IconUserPlus } from "@tabler/icons-react";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { z } from "zod";
 import { captureEvent } from "@/lib/analytics/client";
 import { useCommonTranslations, usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
@@ -36,6 +37,7 @@ import {
   useCreateMore,
   useModalDismiss,
 } from "@/lib/modals";
+import { routePerson } from "@/lib/navigation/route/person";
 import { useCreateContactMutation } from "@/lib/query/hooks/useContacts";
 
 const addContactFormSchema = z
@@ -121,7 +123,7 @@ export function AddContactForm({
 
   const { closeModal } = useModalDismiss(modalId, isBlocking);
 
-  const exampleName = useMemo(() => getRandomExampleName(), []);
+  const exampleName = getRandomExampleName();
 
   const form = useForm({
     initialValues: {
@@ -187,7 +189,7 @@ export function AddContactForm({
 
       closeModal();
       navigateWithTitle(
-        `${WEBAPP_ROUTES.PERSON}/${createdContact.id}`,
+        routePerson(createdContact.id),
         optimisticPersonDocumentTitle(createdContact),
       );
     } catch (error) {

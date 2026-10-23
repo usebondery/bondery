@@ -1,5 +1,6 @@
 import type { Contact } from "@bondery/schemas";
-import { Pressable, StyleSheet, View } from "react-native";
+import { StyleSheet, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import type { SlashCommandDefinition } from "../slashCommands";
 import { MentionContactListContent } from "./MentionContactListContent";

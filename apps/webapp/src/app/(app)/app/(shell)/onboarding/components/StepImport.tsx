@@ -45,7 +45,6 @@ export function StepImport({
       showNavigationProgress: false,
     });
   };
-
   const openInstagram = () => {
     openInstagramImportModal({
       onAwaitingExport: () => onAwaitingExportFromModal("instagram"),
@@ -53,7 +52,6 @@ export function StepImport({
       showNavigationProgress: false,
     });
   };
-
   if (importResult) {
     return (
       <Stack gap="lg">

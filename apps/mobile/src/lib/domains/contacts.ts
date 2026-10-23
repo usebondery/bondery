@@ -1,3 +1,4 @@
+import { formatContactName } from "@bondery/helpers/contact";
 import type {
   Contact,
   CreateContactInput,
@@ -15,7 +16,9 @@ import {
   getMyselfContact as getMyselfContactFromRepo,
   getMyselfContactId as getMyselfContactIdFromRepo,
   listContactGroups,
+  listContactIds as listContactIdsFromRepo,
   listContactImportantDates,
+  listContactNameRowsByIds,
   listContacts as listContactsFromRepo,
   listContactTags,
 } from "../sync/repositories/contacts";
@@ -39,6 +42,10 @@ export function listContacts(params: ContactsListParams): {
   return listContactsFromRepo(params);
 }
 
+export function listContactIds(params: ContactsListParams): string[] {
+  return listContactIdsFromRepo(params);
+}
+
 export function getContact(personId: string): Contact | null {
   return getContactFromRepo(personId);
 }
@@ -49,6 +56,14 @@ export function getMyselfContact(): Contact | null {
 
 export function getMyselfContactId(): string | null {
   return getMyselfContactIdFromRepo();
+}
+
+export function getContactNamesByIds(personIds: string[]): Map<string, string> {
+  const names = new Map<string, string>();
+  for (const row of listContactNameRowsByIds(personIds)) {
+    names.set(row.id, formatContactName(row));
+  }
+  return names;
 }
 
 export function getContactGroups(personId: string): Group[] {

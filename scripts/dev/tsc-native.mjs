@@ -1,17 +1,17 @@
 #!/usr/bin/env node
 /**
- * Run TypeScript 7 `tsc` from the monorepo root (hoisted `typescript` package).
+ * Run TypeScript 7 `tsc`. Resolves from cwd first (isolated linker), then repo root.
  */
 import { spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveTypescriptTsc } from "../pkg/resolve-typescript-tsc.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-const tsc = join(root, "node_modules/typescript/bin/tsc");
 
-if (!existsSync(tsc)) {
-  console.error("tsc-native: could not find node_modules/typescript/bin/tsc");
+const tsc = resolveTypescriptTsc([process.cwd(), root]);
+if (!tsc) {
+  console.error("tsc-native: could not resolve TypeScript compiler");
   process.exit(1);
 }
 

@@ -1,6 +1,6 @@
 import type { Tag, TagWithCount } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import {
   useCommonTranslations,
@@ -11,7 +11,7 @@ import {
 import { LoadErrorCard } from "../../../components/load-state";
 import { addTagToContact } from "../../../lib/domains/contacts";
 import { useMobilePreferences } from "../../../lib/preferences/useMobilePreferences";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { sortTags } from "../tagSort";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
@@ -71,33 +71,29 @@ export function ContactTagsSection({
   const tMobileTags = useMobileTagsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const [isEditSheetOpen, setEditSheetOpen] = useState(false);
   const [isCreateTagOpen, setCreateTagOpen] = useState(false);
   const tagSortOrder = useMobilePreferences((state) => state.tagSortOrder);
 
-  const sortedTags = useMemo(() => sortTags(tags, tagSortOrder), [tagSortOrder, tags]);
+  const sortedTags = sortTags(tags, tagSortOrder);
 
   const editAccessibilityLabel = tMobileContactDetail("TagsEditAccessibility").replace(
     "{name}",
     contactName,
   );
 
-  const handleTagCreated = useCallback(
-    (tag: Tag) => {
-      try {
-        addTagToContact(contactId, tag.id);
-        onTagAdded(tag);
-      } catch {
-        showToast({
-          description: tMobileTags("CreateFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      }
-    },
-    [contactId, onTagAdded, showToast, tMobileTags, t],
-  );
+  function handleTagCreated(tag: Tag) {
+    try {
+      addTagToContact(contactId, tag.id);
+      onTagAdded(tag);
+    } catch {
+      notifications.show({
+        message: tMobileTags("CreateFailed"),
+        title: t("feedback.errorTitle"),
+        type: "error",
+      });
+    }
+  }
 
   return (
     <View style={styles.section}>

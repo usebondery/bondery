@@ -1,7 +1,5 @@
-import { NEXT_ACTIONS, personPathWithNextAction, WEBAPP_ROUTES } from "@bondery/helpers";
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
-import { config } from "../../config";
 import { extLog } from "../../lib/log";
 import type {
   ActiveProfileContextResult,
@@ -15,6 +13,11 @@ import type {
   UserSettingsResponse,
   VersionCheckResponse,
 } from "../../lib/messaging/types";
+import {
+  openWebappHomeTab,
+  openWebappPersonAddInteractionTab,
+  openWebappPersonTab,
+} from "../../lib/navigation";
 import { useExtensionTheme } from "../../lib/ui";
 import type { MainAuthedState, PopupState, UserInfo } from "./types";
 import { ImportView } from "./views/ImportView";
@@ -165,21 +168,17 @@ export default function PopupApp() {
   }
 
   function openBondery() {
-    browser.tabs.create({ url: `${config.appUrl}${WEBAPP_ROUTES.HOME}` });
+    void openWebappHomeTab();
     window.close();
   }
 
   function openPerson(contactId: string) {
-    browser.tabs.create({
-      url: `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}`,
-    });
+    void openWebappPersonTab(contactId);
     window.close();
   }
 
   function openPersonWithAddInteraction(contactId: string) {
-    browser.tabs.create({
-      url: `${config.appUrl}${personPathWithNextAction(contactId, NEXT_ACTIONS.ADD_INTERACTION)}`,
-    });
+    void openWebappPersonAddInteractionTab(contactId);
     window.close();
   }
 

@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
@@ -5,7 +6,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Center, Loader, Paper, Stack } from "@mantine/core";
 import { IconUser, IconUserCircle } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
@@ -25,6 +26,7 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import { useSlashCommands } from "@/lib/i18n/useSlashCommands";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useContactGroupsQuery,
   useContactImportantDatesQuery,
@@ -76,10 +78,7 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
   const tRelationships = usePersonRelationshipsTranslations();
   const getInteractionTypeLabel = useInteractionTypeLabel();
   const slashCommands = useSlashCommands();
-  const slashCommandSuggestion = useMemo(
-    () => createSlashCommandSuggestion(slashCommands),
-    [slashCommands],
-  );
+  const slashCommandSuggestion = createSlashCommandSuggestion(slashCommands);
   const { startForPerson } = useBatchEnrichFromLinkedIn();
 
   const updateContactMutation = useUpdateContactMutation(personId);
@@ -99,9 +98,8 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
     PERSON_SELECTABLE_CONTACTS,
   );
 
-  const selectableContacts = useMemo(
-    () => (selectableContactsData?.contacts ?? []).filter((candidate) => candidate.id !== personId),
-    [selectableContactsData?.contacts, personId],
+  const selectableContacts = (selectableContactsData?.contacts ?? []).filter(
+    (candidate) => candidate.id !== personId,
   );
 
   const { activeTab, handleTabChange } = usePersonTabNavigation(initialTab);
@@ -138,15 +136,11 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
   mentionHasMoreRef.current = selectableContactsData?.pagination.hasMore ?? false;
   const mentionCurrentPersonRef = useRef(resolvedContact);
   mentionCurrentPersonRef.current = resolvedContact;
-  const mentionSuggestion = useMemo(
-    () =>
-      createMentionSuggestion({
-        getContactsHasMore: () => mentionHasMoreRef.current,
-        getCurrentPerson: () => mentionCurrentPersonRef.current,
-        getSeed: () => mentionSeedRef.current,
-      }),
-    [],
-  );
+  const mentionSuggestion = createMentionSuggestion({
+    getContactsHasMore: () => mentionHasMoreRef.current,
+    getCurrentPerson: () => mentionCurrentPersonRef.current,
+    getSeed: () => mentionSeedRef.current,
+  });
 
   const {
     handleAddRelationship,
@@ -240,7 +234,7 @@ export function PersonClient({ personId, initialTab, myselfMode = false }: Perso
                     router.back();
                     return;
                   }
-                  router.push(WEBAPP_ROUTES.PEOPLE);
+                  router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
                 }
           }
           helpDoc={myselfMode ? "concepts.myself" : undefined}

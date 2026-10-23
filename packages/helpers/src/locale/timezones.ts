@@ -4,6 +4,7 @@ export interface TimezoneData {
   city: string;
   continent: string;
   country: string;
+  countryCode: string;
   flag: string;
   group: string[];
   offset: number;
@@ -27,6 +28,7 @@ export const TIMEZONES_DATA: TimezoneData[] = [
     city: "UTC",
     continent: "UTC",
     country: "Coordinated Universal Time",
+    countryCode: "",
     flag: "",
     group: ["UTC"],
     offset: 0,
@@ -36,6 +38,7 @@ export const TIMEZONES_DATA: TimezoneData[] = [
     city: tz.mainCities[0] ?? tz.name,
     continent: normalizeContinent(tz.continentName),
     country: tz.countryName,
+    countryCode: tz.countryCode,
     flag: tz.countryCode.toLowerCase(),
     group: tz.group,
     offset: tz.rawOffsetInMinutes,

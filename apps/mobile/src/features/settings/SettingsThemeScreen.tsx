@@ -1,28 +1,25 @@
 import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
-import type { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView } from "react-native";
 import { StackNavBar } from "../../components/chrome";
+import { SegmentedControl } from "../../components/ui/SegmentedControl";
+import { Stack } from "../../components/ui/Stack";
 import { updateSettings } from "../../lib/api/client";
-import {
-  useCommonTranslations,
-  useMobileSettingsTranslations,
-} from "../../lib/i18n/generated/hooks";
+import { useMobileSettingsTranslations } from "../../lib/i18n/generated/hooks";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
 import type {
   MobilePreferencesState,
   ThemePreference,
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
-import { useAppToast } from "../../lib/toast/useAppToast";
-import { MOBILE_LAYOUT, MOBILE_TEXT_STYLES } from "../../theme/tokens";
+import { useShowErrorToast } from "../../lib/toast/useShowErrorToast";
+import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { SettingsSelect } from "./components/SettingsSelect";
 
 export function SettingsThemeScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
-  const t = useCommonTranslations();
   const router = useRouter();
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
   const colors = useMobileThemeColors();
 
   const themePreference = useMobilePreferences(
@@ -33,28 +30,6 @@ export function SettingsThemeScreen() {
   );
 
   const iconStroke = colors.iconSecondary;
-
-  const themeOptions: Array<{
-    value: ThemePreference;
-    label: string;
-    icon: ReactNode;
-  }> = [
-    {
-      icon: <IconSettings size={16} stroke={iconStroke} />,
-      label: tMobileSettings("ThemeMatchSystem"),
-      value: "system",
-    },
-    {
-      icon: <IconSun size={16} stroke={iconStroke} />,
-      label: tMobileSettings("ThemeLight"),
-      value: "light",
-    },
-    {
-      icon: <IconMoon size={16} stroke={iconStroke} />,
-      label: tMobileSettings("ThemeDark"),
-      value: "dark",
-    },
-  ];
 
   const handleThemeChange = async (nextThemePreference: ThemePreference) => {
     if (nextThemePreference === themePreference) {
@@ -68,57 +43,56 @@ export function SettingsThemeScreen() {
       await updateSettings({
         colorScheme: nextThemePreference === "system" ? "auto" : nextThemePreference,
       });
-    } catch {
+    } catch (err) {
       setThemePreference(previousThemePreference);
-      showToast({
-        description: t("errors.unknown"),
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
+      showErrorToast(err);
     }
   };
 
   return (
     <>
       <StackNavBar
-        onBack={() => router.back()}
+        onBack={() => goBackOrReplace(router, "/settings")}
         title={tMobileSettings("Theme")}
         variant="elevated"
       />
 
       <ScrollView
-        contentContainerStyle={styles.content}
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
+          paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+          paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+        }}
+        style={{ backgroundColor: colors.appBackground }}
       >
-        <Text style={[styles.label, { color: colors.textSecondary }]}>
-          {tMobileSettings("Theme")}
-        </Text>
-        <SettingsSelect
-          label={tMobileSettings("Theme")}
-          onValueChange={(nextThemePreference) => {
-            void handleThemeChange(nextThemePreference as ThemePreference);
-          }}
-          options={themeOptions}
-          value={themePreference}
-        />
+        <Stack gap="lg">
+          <SegmentedControl
+            data={[
+              {
+                label: tMobileSettings("ThemeMatchSystem"),
+                leftSection: <IconSettings size={16} stroke={iconStroke} />,
+                value: "system",
+              },
+              {
+                label: tMobileSettings("ThemeLight"),
+                leftSection: <IconSun size={16} stroke={iconStroke} />,
+                value: "light",
+              },
+              {
+                label: tMobileSettings("ThemeDark"),
+                leftSection: <IconMoon size={16} stroke={iconStroke} />,
+                value: "dark",
+              },
+            ]}
+            label={tMobileSettings("Theme")}
+            onChange={(nextThemePreference) => {
+              void handleThemeChange(nextThemePreference);
+            }}
+            value={themePreference}
+          />
+        </Stack>
       </ScrollView>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingBottom: MOBILE_LAYOUT.spacing.contentBottom,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-  },
-  label: {
-    marginBottom: -8,
-    marginTop: 4,
-    ...MOBILE_TEXT_STYLES.fieldLabel,
-  },
-  screen: {
-    flex: 1,
-  },
-});

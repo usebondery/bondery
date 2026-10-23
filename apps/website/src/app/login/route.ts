@@ -1,6 +1,5 @@
-import { permanentRedirect } from "next/navigation";
-import { webappUrl } from "@/lib/webapp-url";
+import { permanentRedirectWebapp } from "@/lib/navigation/redirect/webapp";
 
 export function GET() {
-  permanentRedirect(webappUrl("/login"));
+  permanentRedirectWebapp("/login");
 }

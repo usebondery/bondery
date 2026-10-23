@@ -45,7 +45,7 @@
     "enableMath": false
   },
   "name": "bondery-monorepo",
-  "packageManager": "pnpm@12.6.0",
+  "packageManager": "pnpm@12.11.2",
   "private": true,
   "scripts": {
     "build": "turbo build",
@@ -112,7 +112,7 @@
     "kill:dev": "node scripts/dev/kill-dev-servers.mjs",
     "lint": "biome check --write .",
     "mcp:inspect": "node scripts/dev/mcp-inspect.mjs",
-    "mcp:inspect:cli": "npx --yes @modelcontextprotocol/inspector --cli --transport http --server-url http://localhost:26631/mcp --protocol-era modern --use-stored-auth",
+    "mcp:inspect:cli": "node scripts/dev/mcp-inspect-cli.mjs",
     "prepare": "lefthook install --reset-hooks-path",
     "provision:oauth-clients": "pnpm --filter api run provision-oauth-clients:dev",
     "provision:platform-admins": "pnpm --filter api run provision-platform-admins:dev",
@@ -121,11 +121,11 @@
     "setup:seaweedfs": "pnpm run build:api && node --env-file=.env.local apps/api/dist/cli/ensure-storage-buckets.js",
     "setup:stripe": "node --import tsx scripts/ops/setup-stripe.ts",
     "start:apps": "turbo start",
-    "start:mailpit": "docker compose -f deploy/bondery/docker-compose.dev-mail.yml up -d",
+    "start:mailpit": "docker compose -f deploy/bondery/docker-compose.dev-mail.yml up -d && node scripts/dev/mailpit-portless-alias.mjs",
     "start:postgres": "docker compose -f deploy/bondery/docker-compose.dev-db.yml --env-file .env.local up -d",
     "start:redis": "docker compose -f deploy/bondery/docker-compose.dev-redis.yml up -d",
     "start:seaweedfs": "docker compose -f deploy/bondery/docker-compose.seaweedfs.yml -f deploy/bondery/docker-compose.seaweedfs.dev.yml --env-file .env.local up -d",
-    "stop:mailpit": "docker compose -f deploy/bondery/docker-compose.dev-mail.yml down",
+    "stop:mailpit": "node scripts/dev/mailpit-portless-alias.mjs --remove && docker compose -f deploy/bondery/docker-compose.dev-mail.yml down",
     "stop:postgres": "docker compose -f deploy/bondery/docker-compose.dev-db.yml --env-file .env.local down",
     "stop:redis": "docker compose -f deploy/bondery/docker-compose.dev-redis.yml down",
     "stop:seaweedfs": "docker compose -f deploy/bondery/docker-compose.seaweedfs.yml -f deploy/bondery/docker-compose.seaweedfs.dev.yml --env-file .env.local down",
@@ -142,5 +142,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.10.2"
+  "version": "1.11.0-rc.1"
 }

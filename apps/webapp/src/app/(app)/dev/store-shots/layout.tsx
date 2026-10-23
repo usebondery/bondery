@@ -1,5 +1,3 @@
-import "leaflet/dist/leaflet.css";
-
 import { bonderyTheme } from "@bondery/mantine-next";
 import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import type { Metadata, Viewport } from "next";

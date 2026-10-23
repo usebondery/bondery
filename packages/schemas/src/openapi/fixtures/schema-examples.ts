@@ -434,6 +434,7 @@ export const EXAMPLE_MCP_CONSENT_LIST_ITEM = {
   clientName: "Claude",
   createdAt: EXAMPLE_ISO_TIMESTAMP,
   id: EXAMPLE_USER_ID,
+  logoUri: "https://claude.ai/favicon.ico",
   scopes: ["openid", "profile", "email", "offline_access", "mcp:read"],
 };
 
@@ -527,6 +528,12 @@ export const EXAMPLE_EXTENSION_MANIFEST_RESPONSE = {
     latestVersion: "1.9.1",
     minVersion: "1.0.0",
     storeUrl: "https://chrome.google.com/webstore/detail/bondery/example",
+  },
+};
+
+export const EXAMPLE_MOBILE_MANIFEST_RESPONSE = {
+  mobile: {
+    latestVersion: "1.9.1",
   },
 };
 

@@ -3,7 +3,7 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ContactPreview } from "@bondery/schemas";
 import { Avatar } from "@mantine/core";
-import Link from "#nextjs/NextLink.js";
+import Link, { hrefAssert } from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 
@@ -41,7 +41,7 @@ export function PersonAvatar({
 
   return (
     <PersonAvatarTooltip person={person}>
-      {isClickable ? <Link href={resolvedHref}>{avatar}</Link> : avatar}
+      {isClickable ? <Link href={hrefAssert(resolvedHref)}>{avatar}</Link> : avatar}
     </PersonAvatarTooltip>
   );
 }

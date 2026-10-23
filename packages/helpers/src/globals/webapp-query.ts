@@ -10,6 +10,6 @@ export const NEXT_ACTIONS = {
 
 export type NextAction = (typeof NEXT_ACTIONS)[keyof typeof NEXT_ACTIONS];
 
-export function personPathWithNextAction(personId: string, action: NextAction): string {
+export function routePersonWithNextAction(personId: string, action: NextAction): string {
   return `${WEBAPP_ROUTES.PERSON}/${personId}?${NEXT_ACTION_PARAM}=${encodeURIComponent(action)}`;
 }

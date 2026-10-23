@@ -1,48 +1,50 @@
 import type { Contact } from "@bondery/schemas";
 import type { SwipeAction } from "../../lib/preferences/useMobilePreferences";
-import type { ShowAppToastInput } from "../../lib/toast/useAppToast";
+import { getContact } from "../../lib/sync/hooks/useSyncQuery";
+import { notifications } from "../../lib/toast/notifications";
 import { openEmailMailto, openPhoneCall, openPhoneSms } from "./contactChannelActions";
 import { getPrimaryEmailEntry, getPrimaryPhoneEntry } from "./contactUtils";
 
 export function executeContactSwipeAction(
   contact: Contact,
   action: SwipeAction,
-  showToast: (input: ShowAppToastInput) => void,
   messages: {
     missingPhone: string;
     missingEmail: string;
     errorTitle: string;
   },
 ) {
+  const hydrated = getContact(contact.id) ?? contact;
+
   if (action === "email") {
-    const email = getPrimaryEmailEntry(contact);
+    const email = getPrimaryEmailEntry(hydrated);
 
     if (!email) {
-      showToast({
-        headline: messages.missingEmail,
+      notifications.show({
+        title: messages.missingEmail,
         type: "neutral",
       });
       return;
     }
 
-    openEmailMailto(email, showToast, messages.errorTitle);
+    openEmailMailto(email, messages.errorTitle);
     return;
   }
 
-  const phone = getPrimaryPhoneEntry(contact);
+  const phone = getPrimaryPhoneEntry(hydrated);
 
   if (!phone) {
-    showToast({
-      headline: messages.missingPhone,
+    notifications.show({
+      title: messages.missingPhone,
       type: "neutral",
     });
     return;
   }
 
   if (action === "call") {
-    openPhoneCall(phone, showToast, messages.errorTitle);
+    openPhoneCall(phone, messages.errorTitle);
     return;
   }
 
-  openPhoneSms(phone, showToast, messages.errorTitle);
+  openPhoneSms(phone, messages.errorTitle);
 }

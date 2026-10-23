@@ -9,15 +9,15 @@ import { formatImportantDate, isYearlessDate, resolveDateLocale } from "./import
 
 export { formatContactName };
 
-export function getContactInitial(contact: Contact): string {
-  const fullName = formatContactName(contact);
-  return fullName.charAt(0).toUpperCase() || "#";
-}
+type PersonNameFields = {
+  firstName?: string | null;
+  lastName?: string | null;
+};
 
 /**
  * Returns 2 initials (first + last name) for an avatar, matching the webapp behaviour.
  */
-export function getContactInitials(contact: Contact): string {
+export function getContactInitials(contact: PersonNameFields): string {
   const first = contact.firstName?.trim().charAt(0).toUpperCase() ?? "";
   const last = contact.lastName?.trim().charAt(0).toUpperCase() ?? "";
   return first + last || first || "#";
@@ -42,7 +42,7 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
  * Returns a deterministic hex color for a contact avatar, using the same
  * hash algorithm and palette as the webapp's getAvatarColorFromName.
  */
-export function getAvatarColorHex(contact: Contact): string {
+export function getAvatarColorHex(contact: PersonNameFields): string {
   const hash = getAvatarHash(contact.firstName, contact.lastName);
   return AVATAR_COLOR_PALETTE_HEX[hash % AVATAR_COLOR_PALETTE_HEX.length];
 }
@@ -104,14 +104,8 @@ export function contactMatchesQuery(contact: Contact, query: string): boolean {
     return true;
   }
 
-  const fullName = formatContactName(contact).toLowerCase();
-  const primaryPhone = getPrimaryPhone(contact)?.toLowerCase() || "";
-  const primaryEmail = getPrimaryEmail(contact)?.toLowerCase() || "";
-
-  return (
-    fullName.includes(normalizedQuery) ||
-    primaryPhone.includes(normalizedQuery) ||
-    primaryEmail.includes(normalizedQuery)
+  return [contact.firstName, contact.middleName, contact.lastName].some((part) =>
+    (part ?? "").toLowerCase().includes(normalizedQuery),
   );
 }
 

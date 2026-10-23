@@ -1,11 +1,12 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
 import { getOAuthProvidersServer } from "@/lib/api/domains/server/oauth-providers";
 import { resolveAuthorizationServerErrorHref } from "@/lib/auth/authorization-server-error";
 import { getLastUsedLoginMethodCookie } from "@/lib/auth/getLastUsedLoginMethodCookie";
 import { resolveServerSession, signOutStaleServerSession } from "@/lib/auth/resolveServerSession";
-import { parseReturnIntent, RETURN_INTENT_PARAM } from "@/lib/auth/returnIntent";
+import { parseReturnIntent, RETURN_INTENT_PARAM, routeFromReturn } from "@/lib/auth/returnIntent";
+import { redirectRoute } from "@/lib/navigation/redirect/route";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { LoginClient } from "./LoginClient";
 
 type LoginPageProps = {
@@ -21,7 +22,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   const authorizationServerErrorHref = resolveAuthorizationServerErrorHref(params);
   if (authorizationServerErrorHref) {
     // BFF session must not swallow /oauth2/authorize failures (invalid_redirect).
-    redirect(authorizationServerErrorHref);
+    redirectRoute(routeAssert(authorizationServerErrorHref));
   }
 
   const oauthProvidersPromise = getOAuthProvidersServer();
@@ -37,7 +38,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
     : null;
 
   if (session.status === "ok") {
-    redirect(returnPath ?? WEBAPP_ROUTES.HOME);
+    redirectRoute(returnPath ? routeFromReturn(returnPath) : routeAssert(WEBAPP_ROUTES.HOME));
   }
 
   // Drop stale BFF session cookies so they are not retried forever.

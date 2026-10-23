@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { BonderyDynamicLogotype } from "@bondery/branding/react";
@@ -16,7 +17,7 @@ import {
 import { useDisclosure, useDrag, useHotkeys, useMediaQuery } from "@mantine/hooks";
 import { IconMenu2, IconX } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
-import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type MouseEvent, useEffect, useRef, useState } from "react";
 import { ChatSessionsProvider } from "@/lib/chat/ChatSessionsContext";
 import { setClientCookie } from "@/lib/cookies/client";
 import {
@@ -25,6 +26,7 @@ import {
 } from "@/lib/cookies/constants";
 import { DocumentTitleProvider } from "@/lib/documentTitle";
 import { useAppNavigationTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   clampSidebarDragWidth,
   getAppShellNavbarWidth,
@@ -39,7 +41,6 @@ import { NavigationSidebarContent } from "./NavigationSidebar";
 import { PeopleSearchSpotlight } from "./PeopleSearchSpotlight";
 import { ShellMainFooterHost, ShellMainFooterProvider } from "./ShellMainFooter";
 
-export { SIDEBAR_COOKIE_NAME } from "@/lib/cookies/constants";
 export {
   SIDEBAR_COLLAPSED_WIDTH,
   SIDEBAR_DEFAULT_EXPANDED_WIDTH as SIDEBAR_EXPANDED_WIDTH,
@@ -92,7 +93,7 @@ function AppShellMobileHeader({
         <AnchorLink
           display="flex"
           h="100%"
-          href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN}
+          href={routeAssert(WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN)}
           lh={0}
           onClick={onLogoClick}
           style={{ alignItems: "center" }}
@@ -156,7 +157,7 @@ export function AppShellWrapper({
     resizeChromeCollapsed ?? isSidebarCollapsed(width),
   );
 
-  const expandSidebarIfCollapsed = useCallback(() => {
+  const expandSidebarIfCollapsed = () => {
     if (!isSidebarCollapsed(widthRef.current)) {
       return;
     }
@@ -164,8 +165,7 @@ export function AppShellWrapper({
     widthRef.current = expandedWidth;
     setWidth(expandedWidth);
     persistSidebarWidths(expandedWidth, expandedWidth);
-  }, []);
-
+  };
   const { active: isResizing, ref: resizeHandleRef } = useDrag<HTMLDivElement>(
     (state) => {
       if (state.first) {

@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
@@ -6,7 +7,7 @@ import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { notifyPasskeyLoginError } from "@/lib/auth/notify-passkey-login-error";
@@ -108,7 +109,7 @@ export function ConfirmClient({
   const [methodPickerOpen, setMethodPickerOpen] = useState(!hasReturned);
   const returnHandledRef = useRef(false);
   const runtimeConfig = useWebappRuntimeConfig();
-  const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
+  const authClient = createWebappAuthClient(runtimeConfig);
   const searchParams = useSearchParams();
   const { websiteUrl } = runtimeConfig;
   const { data: settingsResult, isPending: settingsPending } = useSettingsQuery();
@@ -268,6 +269,7 @@ export function ConfirmClient({
         providerKey === "github" ? "confirm-github" : `confirm-${providerKey}`
       }
       lastUsedLoginMethod={lastUsedLoginMethod}
+      leftContent="shield"
       loading={!showMethods}
       lockedEmail={showMethods ? bff.email : ""}
       oauthProviders={oauthProviders}

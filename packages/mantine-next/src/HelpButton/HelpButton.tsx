@@ -6,6 +6,7 @@ import { IconHelpCircle } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";
 import { ActionIconLink, type ActionIconLinkProps } from "#nextjs/ActionIconLink/ActionIconLink.js";
+import { hrefAssert } from "#nextjs/NextLink.js";
 
 export interface HelpButtonProps
   extends Omit<ActionIconLinkProps, "ariaLabel" | "icon" | "href" | "children"> {
@@ -52,7 +53,7 @@ export function HelpButton({
     <ActionIconLink
       ariaLabel={resolvedAriaLabel}
       color={color}
-      href={resolvedHref}
+      href={hrefAssert(resolvedHref)}
       icon={resolvedIcon}
       radius={radius}
       rel={rel}

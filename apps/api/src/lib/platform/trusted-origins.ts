@@ -44,6 +44,10 @@ export function resolveTrustedOrigins(options: {
       "http://127.0.0.1:*",
       "https://localhost:*",
       "https://127.0.0.1:*",
+      // Expo Go. The expo() plugin also adds this when NODE_ENV is development.
+      "exp://",
+      // Expo Dev Client `expo-origin` / leftover createURL callbacks.
+      "exp+bondery://",
     );
   }
 

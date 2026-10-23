@@ -1,75 +1,67 @@
 import { IconRefresh } from "@tabler/icons-react-native";
-import { ActivityIndicator, Pressable, StyleSheet, View } from "react-native";
-import { MobileTextInput } from "../../../components/MobileTextInput";
-import { MOBILE_HIT_SLOP } from "../../../theme/tokens";
+import { ActivityIndicator, View } from "react-native";
+import { ActionIcon } from "../../../components/ui/ActionIcon";
+import { TextInput } from "../../../components/ui/TextInput";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 interface SettingsReadOnlyFieldProps {
-  description?: string;
+  errorMessage?: string;
+  label?: string;
   loading?: boolean;
   onReload?: () => void;
   reloadAccessibilityLabel?: string;
   statusDotColor?: string;
+  statusMessage?: string;
   value: string;
 }
 
 function StatusDot({ color }: { color: string }) {
-  return <View style={[styles.statusDot, { backgroundColor: color }]} />;
+  return <View className="h-2 w-2 rounded-sm" style={{ backgroundColor: color }} />;
 }
 
 export function SettingsReadOnlyField({
   value,
-  description,
+  errorMessage,
+  label,
   statusDotColor,
+  statusMessage,
   loading = false,
   onReload,
   reloadAccessibilityLabel,
 }: SettingsReadOnlyFieldProps) {
   const colors = useMobileThemeColors();
 
-  const trailingAccessory =
+  const rightSection =
     onReload != null ? (
-      <View style={styles.trailingAccessory}>
+      <View className="w-[22px] items-center justify-center">
         {loading ? (
           <ActivityIndicator color={colors.textMuted} size="small" />
         ) : (
-          <Pressable
-            accessibilityLabel={reloadAccessibilityLabel}
-            accessibilityRole="button"
-            hitSlop={MOBILE_HIT_SLOP.icon}
+          <ActionIcon
+            accessibilityLabel={reloadAccessibilityLabel ?? ""}
             onPress={onReload}
-            style={({ pressed }) => [{ opacity: pressed ? 0.6 : 1 }]}
+            size="sm"
           >
             <IconRefresh size={18} stroke={colors.iconSecondary} />
-          </Pressable>
+          </ActionIcon>
         )}
       </View>
     ) : undefined;
 
   return (
-    <MobileTextInput
-      backgroundColor={colors.surfaceMuted}
-      description={description}
+    <TextInput
       editable={false}
-      leadingIcon={statusDotColor ? <StatusDot color={statusDotColor} /> : undefined}
-      showMaxLengthCounter={false}
+      errorMessage={errorMessage}
+      label={label}
+      leftSection={statusDotColor ? <StatusDot color={statusDotColor} /> : undefined}
+      rightSection={rightSection}
       showSoftInputOnFocus={false}
-      trailingAccessory={trailingAccessory}
-      unfocusedBorderColor={colors.borderStrong}
+      statusMessage={statusMessage}
       value={value}
+      wrapperStyle={{
+        backgroundColor: colors.surfaceMuted,
+        borderColor: colors.borderStrong,
+      }}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  statusDot: {
-    borderRadius: 4,
-    height: 8,
-    width: 8,
-  },
-  trailingAccessory: {
-    alignItems: "center",
-    justifyContent: "center",
-    width: 22,
-  },
-});

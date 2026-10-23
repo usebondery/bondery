@@ -1,5 +1,7 @@
 export { AppNavigationBar } from "./AppNavigationBar";
 export { AppStatusBar } from "./AppStatusBar";
+export { FloatingChromeDock } from "./FloatingChromeDock";
+export { FloatingPillRail } from "./FloatingPillRail";
 export { StackNavBar } from "./StackNavBar";
 export { TabRootLargeTitle } from "./TabRootLargeTitle";
 export { TabRootScreenHeader } from "./TabRootScreenHeader";

@@ -13,24 +13,6 @@ export const contactDetailScreenStyles = StyleSheet.create({
     justifyContent: "center",
     width: MOBILE_LAYOUT.touchTargetLarge,
   },
-  avatarCircle: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.avatar.heroRadius,
-    height: MOBILE_LAYOUT.avatar.hero,
-    justifyContent: "center",
-    marginBottom: 8,
-    overflow: "hidden",
-    width: MOBILE_LAYOUT.avatar.hero,
-  },
-  avatarImage: {
-    height: MOBILE_LAYOUT.avatar.hero,
-    width: MOBILE_LAYOUT.avatar.hero,
-  },
-  avatarInitial: {
-    fontSize: 30,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
-    letterSpacing: 1,
-  },
   centered: {
     alignItems: "center",
     flex: 1,
@@ -40,6 +22,9 @@ export const contactDetailScreenStyles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
     paddingVertical: 24,
+  },
+  heroAvatarWrap: {
+    marginBottom: 8,
   },
   heroHeaderSpacer: {
     flex: 1,

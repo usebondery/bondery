@@ -1,6 +1,7 @@
 const fs = require("node:fs");
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("node:path");
+const { withUniwindConfig } = require("uniwind/metro");
 
 // Patch fs.promises.readFile to retry on EMFILE / ENFILE.
 //
@@ -31,9 +32,10 @@ const workspaceRoot = path.resolve(projectRoot, "../..");
 const workspacePackagesRoot = path.resolve(workspaceRoot, "packages");
 
 // Only watch workspace packages that the mobile app actually depends on.
-// Watching unrelated packages (emails, branding, mantine-next, vcard, …) adds
+// Watching unrelated packages (emails, mantine-next, vcard, …) adds
 // unnecessary files to Metro's crawl surface and slows down the initial file map
-// build and HMR watching.
+// build and HMR watching. App JS imports `@bondery/branding/colors`, so branding
+// must stay in the watch set.
 const mobilePkg = JSON.parse(fs.readFileSync(path.resolve(projectRoot, "package.json"), "utf8"));
 const mobileDeps = new Set([
   ...Object.keys(mobilePkg.dependencies ?? {}),
@@ -89,21 +91,23 @@ const blockListPatterns = [
   // Backend app in the monorepo — Metro should never resolve into it
   toBlockPattern(path.join(workspaceRoot, "apps", "api")),
   // Inside each watched workspace package, exclude nested node_modules.
-  // Metro doesn't need to crawl or transform packages-within-packages; all
-  // dependencies are hoisted to the monorepo root node_modules.
+  // Metro doesn't need to crawl or transform packages-within-packages.
+  // With nodeLinker: isolated, deps live under each package's node_modules
+  // (plus publicHoistPattern for expo). Root node_modules is still a fallback.
   ...workspacePackageFolders.map((folderPath) =>
     toBlockPattern(path.join(folderPath, "node_modules")),
   ),
 ];
 config.resolver.blockList = blockListPatterns;
 // Resolve node_modules from the app first, then fall back to the root
+// (expo packages may be public-hoisted there under isolated linking).
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, "node_modules"),
   path.resolve(workspaceRoot, "node_modules"),
 ];
 
 // Deduplicate React — always resolve from the mobile app's own node_modules
-// to prevent "multiple copies of React" errors in a monorepo.
+// to prevent "multiple copies of React" errors in a monorepo (isolated linker).
 const DEDUPLICATED = ["react", "react-dom", "react-native"];
 const localNodeModules = path.resolve(projectRoot, "node_modules");
 
@@ -117,6 +121,7 @@ const WORKSPACE_SOURCE_PACKAGES = [
     name: "@bondery/translations",
     root: path.join(workspacePackagesRoot, "translations"),
   },
+  { name: "@bondery/branding", root: path.join(workspacePackagesRoot, "branding") },
 ];
 
 function normalizePath(filePath) {
@@ -149,6 +154,34 @@ function resolveWorkspacePackage(moduleName) {
     const filePath = resolveWorkspaceSourceFile(root, subpath);
     if (filePath) {
       return { filePath, type: "sourceFile" };
+    }
+  }
+  return null;
+}
+
+function resolveWorkspaceRelativeJs(originModulePath, moduleName) {
+  if (!moduleName.startsWith(".")) {
+    return null;
+  }
+  const normalizedOrigin = normalizePath(originModulePath);
+  const inWorkspaceSrc = WORKSPACE_SOURCE_PACKAGES.some(({ root }) =>
+    normalizedOrigin.includes(`${normalizePath(path.join(root, "src"))}/`),
+  );
+  if (!inWorkspaceSrc) {
+    return null;
+  }
+  const originDir = path.dirname(originModulePath);
+  const withoutExt = moduleName.replace(/\.(js|ts|tsx)$/, "");
+  const candidates = [
+    path.join(originDir, `${withoutExt}.ts`),
+    path.join(originDir, `${withoutExt}.tsx`),
+    path.join(originDir, withoutExt, "index.ts"),
+    path.join(originDir, withoutExt, "index.tsx"),
+    path.join(originDir, `${withoutExt}.json`),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return { filePath: candidate, type: "sourceFile" };
     }
   }
   return null;
@@ -195,6 +228,11 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     return hashImport;
   }
 
+  const relativeJs = resolveWorkspaceRelativeJs(context.originModulePath, moduleName);
+  if (relativeJs) {
+    return relativeJs;
+  }
+
   const workspacePackage = resolveWorkspacePackage(moduleName);
   if (workspacePackage) {
     return workspacePackage;
@@ -203,4 +241,7 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
   return context.resolveRequest(context, moduleName, platform);
 };
 
-module.exports = config;
+module.exports = withUniwindConfig(config, {
+  cssEntryFile: "./global.css",
+  dtsFile: "./src/uniwind-types.d.ts",
+});

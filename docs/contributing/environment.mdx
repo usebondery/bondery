@@ -62,7 +62,7 @@ pnpm run dev
 | `pnpm run env:sync` | Build helpers, regenerate examples + `turbo.json`, run `check:versions` |
 | `pnpm run env:examples` | Regenerate only (no helpers build / version check) |
 
-`env:development` and `env:production` use the **same values** from root `.env.local` (localhost URLs). Local production-mode builds are not deploys — they need your local URLs, not `usebondery.com`.
+`env:development` and `env:production` use the **same values** from root `.env.local` (Portless `*.usebondery.test` for website / webapp / api). Local production-mode builds are not deploys — they need your local URLs, not `usebondery.com`.
 
 Pre-commit runs `env:sync --stage` when you change the manifest, env scripts, or root `package.json` — same pattern as OpenAPI.
 

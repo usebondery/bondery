@@ -21,7 +21,7 @@ metadata:
 - Mobile offline sync (pull, outbox, materializers)
 - Rate limiting or API versioning questions
 - Adding or renaming MCP tools or prompts (`POST /mcp`)
-- Naming URL query params (`search`, `next_action`, `redirect`)
+- Naming URL query params (`search`, `next_action`, `redirect`, Expo `group_id`)
 
 ## Non-negotiables
 
@@ -30,6 +30,7 @@ metadata:
 - Errors use `{ error: { code, type, message, doc_url, ... } }` — catalog codes only, snake_case
 - Paginated lists use **offset** pagination (`limit`, `offset`) — no cursor / `page_token` / `after_id`
 - Query param is `search`, not `q`
+- Expo mobile shareable query params are snake_case (`group_id` on `/contacts`) — see `references/url-query-params.md`
 - Webapp product deep links use `next_action=intended_action` (snake_case names and values) — not one-off flags — see [references/url-query-params.md](references/url-query-params.md)
 - Create returns `201` + full resource object — see `references/api-mutations.md`
 - Fastify routes use Zod + `fastify-zod-openapi` — not TypeBox
@@ -52,7 +53,7 @@ metadata:
 | Rate limits | [references/rate-limits.md](references/rate-limits.md) |
 | Versioning policy | [references/versioning.md](references/versioning.md) |
 | MCP tools / prompts | [references/mcp-tools.md](references/mcp-tools.md) |
-| Query param names (`search`, `next_action`, `redirect`) | [references/url-query-params.md](references/url-query-params.md) |
+| Query param names (`search`, `next_action`, `redirect`, Expo `group_id`) | [references/url-query-params.md](references/url-query-params.md) |
 
 Full index: [references/README.md](references/README.md).
 

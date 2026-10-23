@@ -5,7 +5,6 @@ import type { MantineColorScheme } from "@mantine/core";
 import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
 import { sessionColorSchemeManager } from "@/lib/theme/sessionColorSchemeManager";
 
 interface WebappMantineProviderProps {
@@ -17,7 +16,7 @@ export function WebappMantineProvider({
   children,
   defaultColorScheme,
 }: WebappMantineProviderProps) {
-  const colorSchemeManager = useMemo(() => sessionColorSchemeManager(), []);
+  const colorSchemeManager = sessionColorSchemeManager();
 
   return (
     <MantineProvider

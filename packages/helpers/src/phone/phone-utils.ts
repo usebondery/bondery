@@ -1,48 +1,43 @@
-import { SORTED_COUNTRY_CODES_BY_DIAL_LENGTH } from "#phone/country-codes.js";
+import {
+  type NormalizePhoneResult,
+  normalizePhoneInput,
+  normalizePhoneParts,
+} from "#phone/phone-normalize.js";
 
 /**
- * Parse a phone number and extract country code and number
- * @param phoneNumber - Full phone number with or without +
- * @returns Object with dialCode and number, or null if invalid
+ * Parse a phone number and extract country code and number.
+ * National numbers require `defaultCountry` — no silent `+1` fallback.
+ *
+ * @deprecated Prefer `normalizePhoneInput` or `normalizePhoneParts`.
  */
-export function parsePhoneNumber(phoneNumber: string): {
+export function parsePhoneNumber(
+  phoneNumber: string,
+  defaultCountry?: string | null,
+): {
   dialCode: string;
   number: string;
 } | null {
-  if (!phoneNumber) {
+  if (!phoneNumber?.trim()) {
     return null;
   }
 
-  // Remove all non-digit characters except +
-  let cleaned = phoneNumber.replace(/[^\d+]/g, "");
+  const trimmed = phoneNumber.trim();
+  const hasInternationalMarker =
+    trimmed.startsWith("+") || trimmed.startsWith("00") || trimmed.includes("+");
 
-  // Ensure it starts with +
-  if (!cleaned.startsWith("+")) {
-    cleaned = `+${cleaned}`;
+  const normalized: NormalizePhoneResult = hasInternationalMarker
+    ? normalizePhoneInput(trimmed, { defaultCountry })
+    : defaultCountry
+      ? normalizePhoneInput(trimmed, { defaultCountry })
+      : { error: "missing_default_country" };
+
+  if ("error" in normalized) {
+    return null;
   }
 
-  // Try to match against known country codes (longest first)
-  for (const country of SORTED_COUNTRY_CODES_BY_DIAL_LENGTH) {
-    if (cleaned.startsWith(country.dialCode)) {
-      return {
-        dialCode: country.dialCode,
-        number: cleaned.substring(country.dialCode.length),
-      };
-    }
-  }
-
-  // If no match, assume +1 (US/Canada) if starts with +1
-  if (cleaned.startsWith("+1")) {
-    return {
-      dialCode: "+1",
-      number: cleaned.substring(2),
-    };
-  }
-
-  // Default: treat everything after + as area code + number
   return {
-    dialCode: "+1",
-    number: cleaned.substring(1),
+    dialCode: normalized.prefix,
+    number: normalized.value,
   };
 }
 
@@ -51,8 +46,8 @@ export function parsePhoneNumber(phoneNumber: string): {
  * @param phoneNumber - Full phone number
  * @returns Formatted phone number
  */
-export function formatPhoneNumber(phoneNumber: string): string {
-  const parsed = parsePhoneNumber(phoneNumber);
+export function formatPhoneNumber(phoneNumber: string, defaultCountry?: string | null): string {
+  const parsed = parsePhoneNumber(phoneNumber, defaultCountry);
   if (!parsed) {
     return phoneNumber;
   }
@@ -74,4 +69,23 @@ export function formatPhoneNumber(phoneNumber: string): string {
 export function combinePhoneNumber(dialCode: string, number: string): string {
   const cleanNumber = number.replace(/\D/g, "");
   return dialCode + cleanNumber;
+}
+
+/**
+ * Parses prefix + national value using the same rules as API storage.
+ */
+export function parsePhoneParts(
+  prefix: string,
+  value: string,
+  defaultCountry?: string | null,
+): { dialCode: string; number: string } | null {
+  const normalized = normalizePhoneParts(prefix, value, { defaultCountry });
+  if ("error" in normalized) {
+    return null;
+  }
+
+  return {
+    dialCode: normalized.prefix,
+    number: normalized.value,
+  };
 }

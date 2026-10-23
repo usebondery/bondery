@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useRef } from "react";
+import { startTransition, useEffect, useRef } from "react";
 import type { DefaultValues, FieldValues, UseFormProps, UseFormReturn } from "react-hook-form";
 import { useForm } from "react-hook-form";
 import type { z } from "zod";
@@ -17,9 +17,11 @@ interface UseSheetFormOptions<TSchema extends z.ZodTypeAny> {
 }
 
 /**
- * React Hook Form wrapper for ActionSheetPopup forms.
+ * React Hook Form wrapper for `ui/Sheet` forms.
  * Resets fields only when the sheet is opened, preventing in-flight typing from
  * being overwritten by parent prop updates while the sheet remains visible.
+ *
+ * For submit lifecycle, use `useSheetLocalSubmit` (tier-1) or `useSheetNetworkSubmit` (tier-2).
  */
 export function useSheetForm<TSchema extends z.ZodTypeAny>({
   open,
@@ -33,7 +35,10 @@ export function useSheetForm<TSchema extends z.ZodTypeAny>({
 > {
   const wasOpenRef = useRef(false);
   const getDefaultValuesRef = useRef(getDefaultValues);
-  getDefaultValuesRef.current = getDefaultValues;
+
+  useEffect(() => {
+    getDefaultValuesRef.current = getDefaultValues;
+  }, [getDefaultValues]);
 
   const form = useForm<FormInput<TSchema>, FormContext, FormOutput<TSchema>>({
     defaultValues: getDefaultValues(),
@@ -55,7 +60,9 @@ export function useSheetForm<TSchema extends z.ZodTypeAny>({
     }
 
     wasOpenRef.current = true;
-    form.reset(getDefaultValuesRef.current());
+    startTransition(() => {
+      form.reset(getDefaultValuesRef.current());
+    });
   }, [open, form]);
 
   return form;

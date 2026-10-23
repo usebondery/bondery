@@ -1,4 +1,5 @@
 import type { ColorScheme, SupportedLocale } from "@bondery/db";
+import { getCountryCodeForTimezone } from "@bondery/helpers/phone";
 import type { UpdateSettingsBody } from "@bondery/schemas";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
@@ -21,6 +22,7 @@ function normalizeReminderSendHour(value: string): string {
 
 export function formatSettingsPatchData(result: {
   timezone?: string | null;
+  defaultPhoneCountry?: string | null;
   reminderSendHour?: string | null;
   timeFormat?: string | null;
   language?: UserSettingsLanguage | null;
@@ -33,6 +35,7 @@ export function formatSettingsPatchData(result: {
 }) {
   return {
     colorScheme: result.colorScheme,
+    defaultPhoneCountry: result.defaultPhoneCountry ?? null,
     groupSortOrder: result.groupSortOrder,
     language: result.language,
     leftSwipeAction: result.leftSwipeAction,
@@ -81,6 +84,7 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
 
   const updatePayload: {
     timezone?: string;
+    defaultPhoneCountry?: string | null;
     reminderSendHour?: string;
     language?: UserSettingsLanguage;
     colorScheme?: ColorScheme;
@@ -94,6 +98,9 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
 
   if (input.timezone !== undefined) {
     updatePayload.timezone = input.timezone;
+  }
+  if (input.defaultPhoneCountry !== undefined) {
+    updatePayload.defaultPhoneCountry = input.defaultPhoneCountry;
   }
   if (input.reminderSendHour !== undefined) {
     updatePayload.reminderSendHour = normalizeReminderSendHour(input.reminderSendHour);
@@ -132,6 +139,7 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
       select: {
         colorScheme: true,
         createdAt: true,
+        defaultPhoneCountry: true,
         language: true,
         reminderSendHour: true,
         timeFormat: true,
@@ -154,9 +162,20 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
   }
 
   const existingSettings = await db.userSettings.findUnique({
-    select: { id: true },
+    select: { defaultPhoneCountry: true, id: true },
     where: { userId: user.id },
   });
+
+  if (
+    input.timezone !== undefined &&
+    input.defaultPhoneCountry === undefined &&
+    !existingSettings?.defaultPhoneCountry
+  ) {
+    const derived = getCountryCodeForTimezone(input.timezone);
+    if (derived) {
+      updatePayload.defaultPhoneCountry = derived;
+    }
+  }
 
   const result = existingSettings
     ? await db.userSettings.update({

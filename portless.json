@@ -1,0 +1,20 @@
+{
+  "apps": {
+    "apps/api": {
+      "appPort": 26631,
+      "name": "api.usebondery",
+      "script": "dev:server"
+    },
+    "apps/webapp": {
+      "appPort": 26632,
+      "name": "app.usebondery",
+      "script": "dev:next"
+    },
+    "apps/website": {
+      "appPort": 26630,
+      "name": "usebondery",
+      "script": "dev:next"
+    }
+  },
+  "turbo": true
+}

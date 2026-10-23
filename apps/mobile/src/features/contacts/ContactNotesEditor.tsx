@@ -8,7 +8,7 @@ import {
 import type { Contact } from "@bondery/schemas";
 import { contactNotesUpdateSchema } from "@bondery/schemas";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from "react-native";
 import type {
   EnrichedMarkdownTextInputInstance,
@@ -18,8 +18,10 @@ import type {
 import { EnrichedMarkdownTextInput } from "react-native-enriched-markdown";
 import { StackNavBar } from "../../components/chrome";
 import { updateContact } from "../../lib/domains/contacts";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
+import { syncEffectState } from "../../lib/react/syncEffectState";
 import { useContact, useMyselfContact } from "../../lib/sync/hooks/useSyncQuery";
-import { useAppToast } from "../../lib/toast/useAppToast";
+import { notifications } from "../../lib/toast/notifications";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { EditorCommandPalette, type EditorPaletteMode } from "./components/EditorCommandPalette";
@@ -44,7 +46,6 @@ const AUTOSAVE_DELAY_MS = 1500;
 export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProps) {
   const router = useRouter();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
 
   const [contactId, setContactId] = useState<string | null>(id ?? null);
   const [contactName, setContactName] = useState<string>("");
@@ -82,113 +83,96 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
       ? "slash"
       : "closed";
 
-  const mentionResults = useMemo(
-    () => filterContacts(mentionQuery),
-    [filterContacts, mentionQuery],
-  );
+  const mentionResults = filterContacts(mentionQuery);
 
-  const getContactNameForEditor = useCallback(
-    (personId: string) => {
-      if (loadedContact && personId === loadedContact.id) {
-        return formatContactName(loadedContact);
-      }
-      return getContactName(personId);
-    },
-    [getContactName, loadedContact],
-  );
-
-  const editorDefaultValue = useMemo(() => {
-    if (rawMarkdown === null) {
-      return "";
-    }
-
-    return expandPersonMentionsForEditor(rawMarkdown, getContactNameForEditor);
-  }, [rawMarkdown, getContactNameForEditor]);
+  const editorDefaultValue =
+    rawMarkdown === null
+      ? ""
+      : expandPersonMentionsForEditor(rawMarkdown, (personId) => {
+          if (loadedContact && personId === loadedContact.id) {
+            return formatContactName(loadedContact);
+          }
+          return getContactName(personId);
+        });
 
   const { data: fetchedContact } = useContact(isMyselfMode ? undefined : id);
   const { data: fetchedMyself } = useMyselfContact();
   const resolvedContact = isMyselfMode ? fetchedMyself : fetchedContact;
 
   useEffect(() => {
-    if (!resolvedContact) {
-      if (!isMyselfMode && !id) {
-        showToast({ headline: "Failed to load notes", type: "error" });
-        setLoading(false);
-      }
-      return;
-    }
-
-    setContactId(resolvedContact.id);
-    setContactName(formatContactName(resolvedContact));
-    setLoadedContact(resolvedContact);
-    setNotesUpdatedAt(resolvedContact.notesUpdatedAt ?? null);
-    setRawMarkdown(htmlToMarkdown(resolvedContact.notes ?? ""));
-    setLoading(false);
-  }, [id, isMyselfMode, resolvedContact, showToast]);
-
-  const saveNotes = useCallback(
-    async (markdown: string) => {
-      if (!contactId || isSavingRef.current) {
+    syncEffectState(() => {
+      if (!resolvedContact) {
+        if (!isMyselfMode && !id) {
+          notifications.show({ title: "Failed to load notes", type: "error" });
+          setLoading(false);
+        }
         return;
       }
-      isSavingRef.current = true;
-      setSaveStatus("saving");
-      try {
-        const collapsed = collapsePersonMentionsFromEditor(markdown);
-        const html = markdownToHtml(collapsed) || null;
-        const payload = contactNotesUpdateSchema.parse({ notes: html });
-        const updated = updateContact(contactId, payload);
-        setNotesUpdatedAt(updated.notesUpdatedAt ?? null);
-        setSaveStatus("saved");
-      } catch {
-        setSaveStatus("error");
-        showToast({ headline: "Failed to save notes", type: "error" });
-      } finally {
-        isSavingRef.current = false;
-      }
-    },
-    [contactId, showToast],
-  );
 
-  const scheduleAutosave = useCallback(
-    (markdown: string) => {
-      pendingMarkdown.current = markdown;
+      setContactId(resolvedContact.id);
+      setContactName(formatContactName(resolvedContact));
+      setLoadedContact(resolvedContact);
+      setNotesUpdatedAt(resolvedContact.notesUpdatedAt ?? null);
+      setRawMarkdown(htmlToMarkdown(resolvedContact.notes ?? ""));
+      setLoading(false);
+    });
+  }, [id, isMyselfMode, resolvedContact]);
+
+  async function saveNotes(markdown: string) {
+    if (!contactId || isSavingRef.current) {
+      return;
+    }
+    isSavingRef.current = true;
+    setSaveStatus("saving");
+    try {
+      const collapsed = collapsePersonMentionsFromEditor(markdown);
+      const html = markdownToHtml(collapsed) || null;
+      const payload = contactNotesUpdateSchema.parse({ notes: html });
+      const updated = updateContact(contactId, payload);
+      setNotesUpdatedAt(updated.notesUpdatedAt ?? null);
+      setSaveStatus("saved");
+    } catch {
+      setSaveStatus("error");
+      notifications.show({ title: "Failed to save notes", type: "error" });
+    } finally {
+      isSavingRef.current = false;
+    }
+  }
+
+  function scheduleAutosave(markdown: string) {
+    pendingMarkdown.current = markdown;
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+    }
+    setSaveStatus("idle");
+    saveTimer.current = setTimeout(() => {
+      if (pendingMarkdown.current !== null) {
+        void saveNotes(pendingMarkdown.current);
+        pendingMarkdown.current = null;
+      }
+    }, AUTOSAVE_DELAY_MS);
+  }
+
+  useFocusEffect(() => {
+    return () => {
       if (saveTimer.current) {
         clearTimeout(saveTimer.current);
+        saveTimer.current = null;
       }
-      setSaveStatus("idle");
-      saveTimer.current = setTimeout(() => {
-        if (pendingMarkdown.current !== null) {
-          void saveNotes(pendingMarkdown.current);
-          pendingMarkdown.current = null;
-        }
-      }, AUTOSAVE_DELAY_MS);
-    },
-    [saveNotes],
-  );
+      if (pendingMarkdown.current !== null) {
+        void saveNotes(pendingMarkdown.current);
+        pendingMarkdown.current = null;
+      }
+    };
+  });
 
-  useFocusEffect(
-    useCallback(() => {
-      return () => {
-        if (saveTimer.current) {
-          clearTimeout(saveTimer.current);
-          saveTimer.current = null;
-        }
-        if (pendingMarkdown.current !== null) {
-          void saveNotes(pendingMarkdown.current);
-          pendingMarkdown.current = null;
-        }
-      };
-    }, [saveNotes]),
-  );
-
-  const dismissPalette = useCallback(() => {
+  function dismissPalette() {
     clearSlash();
     setMentionActive(false);
     setMentionQuery("");
-  }, [clearSlash]);
+  }
 
-  const removeActiveSlashToken = useCallback(async () => {
+  async function removeActiveSlashToken() {
     const editor = editorRef.current;
     if (!editor || !slashState) {
       return;
@@ -199,33 +183,30 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
     if (withoutSlash !== markdown) {
       editor.setValue(withoutSlash);
     }
-  }, [slashState]);
+  }
 
-  const handleSlashCommandSelect = useCallback(
-    async (command: SlashCommandDefinition) => {
-      const editor = editorRef.current;
-      if (!editor || !slashState) {
-        return;
-      }
+  async function handleSlashCommandSelect(command: SlashCommandDefinition) {
+    const editor = editorRef.current;
+    if (!editor || !slashState) {
+      return;
+    }
 
-      await removeActiveSlashToken();
+    await removeActiveSlashToken();
 
-      if (command.id === "mention") {
-        isTransitioningToMentionRef.current = true;
-        clearSlash();
-        editor.startMention("@");
-        setMentionActive(true);
-        setMentionQuery("");
-        return;
-      }
-
+    if (command.id === "mention") {
+      isTransitioningToMentionRef.current = true;
       clearSlash();
-      command.run(editor);
-    },
-    [clearSlash, removeActiveSlashToken, slashState],
-  );
+      editor.startMention("@");
+      setMentionActive(true);
+      setMentionQuery("");
+      return;
+    }
 
-  const handleMentionSelect = useCallback((contact: Contact) => {
+    clearSlash();
+    command.run(editor);
+  }
+
+  function handleMentionSelect(contact: Contact) {
     const editor = editorRef.current;
     if (!editor) {
       return;
@@ -233,19 +214,19 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
 
     const { displayText, url } = formatPersonMentionLink(formatContactName(contact), contact.id);
     editor.insertMention(displayText, url);
-  }, []);
+  }
 
-  const handleStartMention = useCallback(() => {
+  function handleStartMention() {
     clearSlash();
     setMentionActive(true);
     setMentionQuery("");
-  }, [clearSlash]);
+  }
 
-  const handleChangeMention = useCallback(({ text }: { text: string }) => {
+  function handleChangeMention({ text }: { text: string }) {
     setMentionQuery(text);
-  }, []);
+  }
 
-  const handleEndMention = useCallback(() => {
+  function handleEndMention() {
     if (isTransitioningToMentionRef.current) {
       isTransitioningToMentionRef.current = false;
       return;
@@ -253,36 +234,29 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
 
     setMentionActive(false);
     setMentionQuery("");
-  }, []);
+  }
 
-  const navSubtitle = useMemo(() => {
-    if (saveStatus === "saving") {
-      return "Saving…";
-    }
-    if (saveStatus === "error") {
-      return "Save failed";
-    }
-    if (notesUpdatedAt) {
-      return formatRelativeEditedAt(notesUpdatedAt);
-    }
-    return undefined;
-  }, [saveStatus, notesUpdatedAt]);
+  let navSubtitle: string | undefined;
+  if (saveStatus === "saving") {
+    navSubtitle = "Saving…";
+  } else if (saveStatus === "error") {
+    navSubtitle = "Save failed";
+  } else if (notesUpdatedAt) {
+    navSubtitle = formatRelativeEditedAt(notesUpdatedAt);
+  }
 
-  const markdownStyle = useMemo(
-    (): MarkdownTextInputStyle => ({
-      em: { color: colors.textPrimary },
-      link: { color: colors.primary },
-      linkVariants: {
-        "^bp://person/": {
-          backgroundColor: `${colors.primary}18`,
-          color: colors.primary,
-          underline: false,
-        },
+  const markdownStyle: MarkdownTextInputStyle = {
+    em: { color: colors.textPrimary },
+    link: { color: colors.primary },
+    linkVariants: {
+      "^bp://person/": {
+        backgroundColor: `${colors.primary}18`,
+        color: colors.primary,
+        underline: false,
       },
-      strong: { color: colors.textPrimary },
-    }),
-    [colors],
-  );
+    },
+    strong: { color: colors.textPrimary },
+  };
 
   const showEditor = !loading && rawMarkdown !== null;
 
@@ -309,7 +283,7 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
 
   return (
     <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
-      <StackNavBar onBack={() => router.back()} titleRow={titleRow} />
+      <StackNavBar onBack={() => goBackOrReplace(router, "/contacts")} titleRow={titleRow} />
 
       {showEditor ? (
         <KeyboardAvoidingView

@@ -1,6 +1,4 @@
-import { WEBAPP_ROUTES } from "@bondery/helpers";
 import { browser } from "wxt/browser";
-import { config } from "../../config";
 import {
   addOrFindPerson,
   findPersonBySocial,
@@ -14,6 +12,7 @@ import type {
   PersonPreviewData,
   ScrapedProfileData,
 } from "../../lib/messaging/types";
+import { openWebappPersonTab } from "../../lib/navigation";
 import { backgroundState } from "./state";
 
 const personExistenceCache = new Map<string, { result: SocialLookupResult; expiresAt: number }>();
@@ -259,8 +258,7 @@ export async function handleAddPerson(
         exists: true,
       });
 
-      const personUrl = `${config.appUrl}${WEBAPP_ROUTES.PERSON}/${contactId}`;
-      await browser.tabs.create({ url: personUrl });
+      await openWebappPersonTab(contactId);
 
       sendResponse({
         payload: { contactId, existed: false, success: true },

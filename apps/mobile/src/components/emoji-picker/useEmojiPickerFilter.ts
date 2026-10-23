@@ -1,5 +1,4 @@
 import { filterEmojiCategories } from "@bondery/helpers/emoji";
-import { useMemo } from "react";
 import { DEBOUNCE_MS } from "../../lib/config";
 import { useDebouncedValue } from "../../lib/hooks/useDebouncedValue";
 
@@ -14,14 +13,10 @@ export function useEmojiPickerFilter(query: string): {
 } {
   const debouncedQuery = useDebouncedValue(query, DEBOUNCE_MS.localFilter);
 
-  const sections = useMemo(
-    () =>
-      filterEmojiCategories(debouncedQuery).map(([title, data]) => ({
-        data,
-        title,
-      })),
-    [debouncedQuery],
-  );
+  const sections = filterEmojiCategories(debouncedQuery).map(([title, data]) => ({
+    data,
+    title,
+  }));
 
   return { debouncedQuery, sections };
 }

@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: chat session refs and transport read sessionId during render
 "use client";
 
 import { useChat } from "@ai-sdk/react";
@@ -15,7 +16,7 @@ import { IconMessageCircle, IconSend } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { DefaultChatTransport } from "ai";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { ShellMainFooter } from "@/components/shell/ShellMainFooter";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
@@ -24,6 +25,7 @@ import { pickRandomItems } from "@/lib/chat/pickRandomItems";
 import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
 import { useChatPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeChatSession } from "@/lib/navigation/route/chat";
 import {
   useChatSessionMessagesQuery,
   useChatSessionsQuery,
@@ -132,10 +134,7 @@ export function ChatClient() {
   const [visiblePromptKeys, setVisiblePromptKeys] = useState(() =>
     pickRandomItems(SUGGESTED_PROMPT_KEYS, NEW_CHAT_VISIBLE_PROMPT_COUNT),
   );
-  const suggestedPrompts = useMemo(
-    () => visiblePromptKeys.map((key) => t(`SuggestedPrompts.${key}`)),
-    [t, visiblePromptKeys],
-  );
+  const suggestedPrompts = visiblePromptKeys.map((key) => t(`SuggestedPrompts.${key}`));
   const { chatResetKey, setHighlightedSessionId } = useChatSessions();
   const confirmDeleteChatSession = useConfirmDeleteChatSession();
   const createChatSessionMutation = useCreateChatSessionMutation();
@@ -182,19 +181,15 @@ export function ChatClient() {
 
       notifyChatErrorRef.current(apiError);
     },
-    transport: useMemo(
-      () =>
-        new DefaultChatTransport({
-          api: "/api/chat",
-          body: () => (sessionIdRef.current ? { sessionId: sessionIdRef.current } : {}),
-        }),
-      [],
-    ),
+    transport: new DefaultChatTransport({
+      api: "/api/chat",
+      body: () => (sessionIdRef.current ? { sessionId: sessionIdRef.current } : {}),
+    }),
   });
 
   const isLoading = status === "submitted" || status === "streaming";
 
-  const getSessionId = useCallback(() => sessionIdRef.current, []);
+  const getSessionId = () => sessionIdRef.current;
 
   useChatSessionsRefreshOnStreamEnd(status, getSessionId, () => {
     setMessagesSent((n) => n + 1);
@@ -258,7 +253,7 @@ export function ChatClient() {
       return;
     }
 
-    const targetPath = `${WEBAPP_ROUTES.CHAT}/${createdId}`;
+    const targetPath = routeChatSession(createdId);
     if (pathname === targetPath) {
       return;
     }
@@ -314,12 +309,10 @@ export function ChatClient() {
   }
 
   // Called by the checkout hook's success event to clear the quota-exceeded state.
-  const handleUpgradeSuccess = useCallback(() => {
+  const handleUpgradeSuccess = () => {
     setQuotaExceeded(false);
-  }, []);
-
-  // Compute adjusted subscription status with client-side message count
-  const adjustedSubscriptionStatus = useMemo(() => {
+  }; // Compute adjusted subscription status with client-side message count
+  const adjustedSubscriptionStatus = (() => {
     if (!subscriptionStatus || messagesSent === 0) {
       return subscriptionStatus ?? null;
     }
@@ -329,7 +322,7 @@ export function ChatClient() {
       aiMessagesUsed: updatedUsed,
       canUseChat: updatedUsed < subscriptionStatus.aiMessageLimit,
     };
-  }, [subscriptionStatus, messagesSent]);
+  })();
 
   // Derive quotaExceeded from the optimistic counter so the input blocks
   // immediately without waiting for a server round-trip.

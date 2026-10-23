@@ -20,6 +20,7 @@ model UserSettings {
   user                      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   language                  SupportedLocale @default(en)
   timezone                  String?
+  defaultPhoneCountry       String?         @map("default_phone_country") @db.Char(2)
   timeFormat                String          @default("24h") @map("time_format")
   colorScheme               ColorScheme     @default(auto) @map("color_scheme")
   leftSwipeAction           String          @default("none") @map("left_swipe_action")

@@ -1,27 +1,14 @@
 import type { Contact } from "@bondery/schemas";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { CONTACTS_PAGE_SIZE } from "../../../lib/config";
 import {
   getContact,
-  getMyselfContact,
   readContactsList,
+  useContact,
+  useMyselfContact,
 } from "../../../lib/sync/hooks/useSyncQuery";
-import { useSync } from "../../../lib/sync/SyncProvider";
 import { formatContactName } from "../contactUtils";
+import { filterMentionContacts, MAX_MENTION_RESULTS } from "./filterMentionContacts";
 
-export const MAX_MENTION_RESULTS = 8;
-
-export function filterMentionContacts(contacts: Contact[], query: string): Contact[] {
-  const normalizedQuery = query.trim().toLowerCase();
-
-  if (!normalizedQuery) {
-    return contacts.slice(0, MAX_MENTION_RESULTS);
-  }
-
-  return contacts
-    .filter((contact) => formatContactName(contact).toLowerCase().includes(normalizedQuery))
-    .slice(0, MAX_MENTION_RESULTS);
-}
+export { filterMentionContacts, MAX_MENTION_RESULTS };
 
 function mergeContacts(primary: Contact | null, others: Contact[]): Contact[] {
   const byId = new Map<string, Contact>();
@@ -39,16 +26,6 @@ function mergeContacts(primary: Contact | null, others: Contact[]): Contact[] {
   return Array.from(byId.values());
 }
 
-function fetchContactsPage(offset: number): Contact[] {
-  const response = readContactsList({
-    limit: CONTACTS_PAGE_SIZE,
-    offset,
-    query: "",
-  });
-
-  return response.contacts;
-}
-
 interface UseMentionableContactsOptions {
   contactId: string | null;
   isMyselfMode?: boolean;
@@ -61,106 +38,41 @@ export function useMentionableContacts({
   isMyselfMode = false,
   subjectContact = null,
 }: UseMentionableContactsOptions) {
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [myselfContactId, setMyselfContactId] = useState<string | null>(null);
-  const backgroundLoadStartedRef = useRef(false);
-  const { revision } = useSync();
+  const subjectId = !subjectContact && !isMyselfMode ? (contactId ?? undefined) : undefined;
+  const { data: fetchedSubject, isInitialSync: isSubjectInitialSync } = useContact(subjectId);
+  const { data: fetchedMyself, isInitialSync: isMyselfInitialSync } = useMyselfContact();
+  const subject = isMyselfMode
+    ? (fetchedMyself ?? subjectContact)
+    : (subjectContact ?? fetchedSubject);
+  const myself =
+    !isMyselfMode && fetchedMyself?.id !== subject?.id ? (fetchedMyself ?? null) : null;
+  const myselfContactId = isMyselfMode ? (subject?.id ?? null) : (fetchedMyself?.id ?? null);
+  const loading =
+    (subjectId !== undefined && !subject && isSubjectInitialSync) ||
+    (!fetchedMyself && isMyselfInitialSync);
 
-  useEffect(() => {
-    void revision;
-    let cancelled = false;
-    backgroundLoadStartedRef.current = false;
-
-    function loadRemainingPages(startOffset: number) {
-      let offset = startOffset;
-
-      while (!cancelled) {
-        const page = fetchContactsPage(offset);
-        if (page.length === 0) {
-          break;
-        }
-
-        setContacts((current) => mergeContacts(null, [...current, ...page]));
-
-        if (page.length < CONTACTS_PAGE_SIZE) {
-          break;
-        }
-
-        offset += CONTACTS_PAGE_SIZE;
-      }
+  function getContactName(id: string) {
+    if (subject?.id === id) {
+      return formatContactName(subject);
     }
-
-    function load() {
-      setLoading(true);
-
-      try {
-        const fetchedSubject =
-          !subjectContact && contactId && !isMyselfMode ? getContact(contactId as string) : null;
-        const fetchedMyself = getMyselfContact();
-        const firstPage = fetchContactsPage(0);
-
-        if (cancelled) {
-          return;
-        }
-
-        const resolvedSubject = isMyselfMode
-          ? (fetchedMyself ?? subjectContact)
-          : (subjectContact ?? fetchedSubject ?? null);
-
-        const myselfContact =
-          !isMyselfMode && fetchedMyself?.id !== resolvedSubject?.id
-            ? (fetchedMyself ?? null)
-            : null;
-
-        setMyselfContactId(
-          isMyselfMode ? (resolvedSubject?.id ?? null) : (fetchedMyself?.id ?? null),
-        );
-
-        const merged = mergeContacts(resolvedSubject, [
-          ...(myselfContact ? [myselfContact] : []),
-          ...firstPage,
-        ]);
-
-        setContacts(merged);
-        setLoading(false);
-
-        if (!backgroundLoadStartedRef.current && firstPage.length === CONTACTS_PAGE_SIZE) {
-          backgroundLoadStartedRef.current = true;
-          loadRemainingPages(CONTACTS_PAGE_SIZE);
-        }
-      } finally {
-        if (!cancelled) {
-          setLoading(false);
-        }
-      }
+    if (myself?.id === id) {
+      return formatContactName(myself);
     }
+    const contact = getContact(id);
+    return contact ? formatContactName(contact) : undefined;
+  }
 
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [contactId, isMyselfMode, revision, subjectContact]);
-
-  const contactNameById = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const contact of contacts) {
-      map.set(contact.id, formatContactName(contact));
-    }
-    return map;
-  }, [contacts]);
-
-  const getContactName = useCallback((id: string) => contactNameById.get(id), [contactNameById]);
-
-  const filterContacts = useCallback(
-    (query: string) => filterMentionContacts(contacts, query),
-    [contacts],
-  );
+  function filterContacts(query: string) {
+    const listed = readContactsList({
+      excludeMyself: true,
+      limit: MAX_MENTION_RESULTS,
+      query,
+    }).contacts;
+    const merged = mergeContacts(subject, [...(myself ? [myself] : []), ...listed]);
+    return filterMentionContacts(merged, query);
+  }
 
   return {
-    contactNameById,
-    contacts,
     filterContacts,
     getContactName,
     loading,

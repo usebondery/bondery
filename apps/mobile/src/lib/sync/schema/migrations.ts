@@ -16,7 +16,19 @@ const DOMAIN_TABLES = [
   "pending_mutations",
 ];
 
+function tableExists(db: SQLiteDatabase, table: string): boolean {
+  const row = db.getFirstSync<{ name: string }>(
+    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+    table,
+  );
+  return row?.name === table;
+}
+
 function getStoredSchemaVersion(db: SQLiteDatabase): number | null {
+  if (!tableExists(db, "sync_meta")) {
+    return null;
+  }
+
   const row = db.getFirstSync<{ value: string }>(
     "SELECT value FROM sync_meta WHERE key = ?",
     SYNC_META_KEYS.sqliteSchemaVersion,
@@ -28,15 +40,26 @@ function getStoredSchemaVersion(db: SQLiteDatabase): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function deleteVolatileSyncMeta(db: SQLiteDatabase): void {
+  if (!tableExists(db, "sync_meta")) {
+    return;
+  }
+
+  db.execSync(
+    `DELETE FROM sync_meta WHERE key NOT IN ('device_id', '${SYNC_META_KEYS.sqliteSchemaVersion}')`,
+  );
+}
+
 function dropDomainTablesIfExist(db: SQLiteDatabase): void {
-  db.withTransactionSync(() => {
-    for (const table of DOMAIN_TABLES) {
-      db.execSync(`DROP TABLE IF EXISTS ${table}`);
-    }
-    db.execSync(
-      `DELETE FROM sync_meta WHERE key NOT IN ('device_id', '${SYNC_META_KEYS.sqliteSchemaVersion}')`,
-    );
-  });
+  for (const table of DOMAIN_TABLES) {
+    db.execSync(`DROP TABLE IF EXISTS ${table}`);
+  }
+  deleteVolatileSyncMeta(db);
+}
+
+function enableWalMode(db: SQLiteDatabase): void {
+  // journal_mode cannot change inside a transaction (SQLite SQLITE_ERROR).
+  db.execSync("PRAGMA journal_mode = WAL;");
 }
 
 /** @deprecated Use dropDomainTablesIfExist — kept for wipe on logout (tables exist). */
@@ -56,8 +79,6 @@ function _wipeDomainTables(db: SQLiteDatabase): void {
 }
 
 function createSchemaV2(db: SQLiteDatabase): void {
-  db.execSync("PRAGMA journal_mode = WAL;");
-
   db.execSync(`
     CREATE TABLE IF NOT EXISTS sync_meta (
       key TEXT PRIMARY KEY NOT NULL,
@@ -96,6 +117,8 @@ function createSchemaV2(db: SQLiteDatabase): void {
       timezone TEXT,
       gis_point TEXT,
       has_avatar INTEGER NOT NULL DEFAULT 0,
+      avatar_updated_at TEXT,
+      avatar_local_updated_at TEXT,
       notes_updated_at TEXT,
       last_interaction_activity_id TEXT,
       created_at TEXT,
@@ -260,37 +283,52 @@ function createSchemaV2(db: SQLiteDatabase): void {
   );
 }
 
-function tableExists(db: SQLiteDatabase, table: string): boolean {
-  const row = db.getFirstSync<{ name: string }>(
-    "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
-    table,
-  );
-  return row?.name === table;
+function peopleColumnNames(db: SQLiteDatabase): Set<string> {
+  const rows = db.getAllSync<{ name: string }>("PRAGMA table_info(people)");
+  return new Set(rows.map((row) => row.name));
+}
+
+/** Additive clocks for file-backed avatars. Do not bump SQLITE_SCHEMA_VERSION. */
+function ensurePeopleAvatarClockColumns(db: SQLiteDatabase): void {
+  if (!tableExists(db, "people")) {
+    return;
+  }
+
+  const columns = peopleColumnNames(db);
+  if (!columns.has("avatar_updated_at")) {
+    db.execSync("ALTER TABLE people ADD COLUMN avatar_updated_at TEXT");
+  }
+  if (!columns.has("avatar_local_updated_at")) {
+    db.execSync("ALTER TABLE people ADD COLUMN avatar_local_updated_at TEXT");
+  }
 }
 
 export function runSyncMigrations(db: SQLiteDatabase): void {
+  enableWalMode(db);
+
   const storedVersion = getStoredSchemaVersion(db);
   const needsUpgrade = storedVersion !== null && storedVersion !== SQLITE_SCHEMA_VERSION;
   const missingV2Tables =
     storedVersion === SQLITE_SCHEMA_VERSION && !tableExists(db, "people_phones");
 
-  if (needsUpgrade || missingV2Tables) {
-    // v1 only had `people` — DELETE FROM new tables threw and blocked createSchemaV2.
-    dropDomainTablesIfExist(db);
-  }
-
   db.withTransactionSync(() => {
+    if (needsUpgrade || missingV2Tables) {
+      // v1 only had `people` — DELETE FROM new tables threw and blocked createSchemaV2.
+      dropDomainTablesIfExist(db);
+    }
     createSchemaV2(db);
+    ensurePeopleAvatarClockColumns(db);
   });
 }
 
 export function wipeSyncDatabase(db: SQLiteDatabase): void {
   db.withTransactionSync(() => {
     for (const table of DOMAIN_TABLES) {
+      if (!tableExists(db, table)) {
+        continue;
+      }
       db.execSync(`DELETE FROM ${table}`);
     }
-    db.execSync(
-      `DELETE FROM sync_meta WHERE key NOT IN ('device_id', '${SYNC_META_KEYS.sqliteSchemaVersion}')`,
-    );
+    deleteVolatileSyncMeta(db);
   });
 }

@@ -4,7 +4,7 @@ import { filterEmojiCategories } from "@bondery/helpers/emoji";
 import { Button, ScrollArea, SimpleGrid, Stack, Text, TextInput } from "@mantine/core";
 import { useDebouncedValue } from "@mantine/hooks";
 import { IconSearch } from "@tabler/icons-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 interface EmojiPickerDropdownContentProps {
   emptyLabel?: string;
@@ -32,7 +32,7 @@ export function EmojiPickerDropdownContent({
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebouncedValue(search, searchDebounceMs);
 
-  const filteredContent = useMemo(() => filterEmojiCategories(debouncedSearch), [debouncedSearch]);
+  const filteredContent = filterEmojiCategories(debouncedSearch);
 
   return (
     <Stack gap="sm">

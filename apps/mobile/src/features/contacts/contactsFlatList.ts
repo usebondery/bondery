@@ -28,7 +28,6 @@ export const CONTACTS_SECTION_HEADER_HEIGHT = 33;
 export function buildContactsFlatRows(sections: ContactSection[]) {
   const rows: ContactsFlatRow[] = [];
   const stickyHeaderIndices: number[] = [];
-  const letterToIndex = new Map<string, number>();
 
   for (const section of sections) {
     if (section.title && section.kind !== "search") {
@@ -40,7 +39,6 @@ export function buildContactsFlatRows(sections: ContactSection[]) {
         type: "section-header",
       });
       stickyHeaderIndices.push(headerIndex);
-      letterToIndex.set(section.title, headerIndex);
     }
 
     for (const contact of section.data) {
@@ -53,5 +51,5 @@ export function buildContactsFlatRows(sections: ContactSection[]) {
     }
   }
 
-  return { letterToIndex, rows, stickyHeaderIndices };
+  return { rows, stickyHeaderIndices };
 }

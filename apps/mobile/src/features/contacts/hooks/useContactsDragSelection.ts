@@ -1,3 +1,6 @@
+/** Drag selection uses refs, rAF, and Reanimated gestures outside render. */
+// biome-ignore-all lint/nursery/useReactCompiler: contacts drag-selection
+
 import type { FlashListRef } from "@shopify/flash-list";
 import { type RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";

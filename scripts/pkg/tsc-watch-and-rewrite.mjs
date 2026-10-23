@@ -6,7 +6,7 @@
  * Usage: node scripts/pkg/tsc-watch-and-rewrite.mjs <package-dir>
  */
 import { spawn } from "node:child_process";
-import { existsSync } from "node:fs";
+import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -18,13 +18,19 @@ if (!pkg) {
   process.exit(1);
 }
 
-const tsc = join(root, "node_modules/typescript/bin/tsc");
-if (!existsSync(tsc)) {
-  console.error("tsc-watch-and-rewrite: could not find node_modules/typescript/bin/tsc");
-  process.exit(1);
-}
-
 const pkgDir = join(root, "packages", pkg);
+// Prefer package-local typescript (isolated linker); fall back to root.
+let tsc;
+try {
+  tsc = createRequire(join(pkgDir, "package.json")).resolve("typescript/bin/tsc");
+} catch {
+  try {
+    tsc = createRequire(join(root, "package.json")).resolve("typescript/bin/tsc");
+  } catch {
+    console.error("tsc-watch-and-rewrite: could not resolve typescript/bin/tsc");
+    process.exit(1);
+  }
+}
 const rewriteScript = join(root, "scripts/pkg/rewrite-package-hash-imports-in-dist.mjs");
 
 let rewriteTimer;

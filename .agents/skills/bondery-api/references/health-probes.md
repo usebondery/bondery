@@ -12,6 +12,7 @@ Canonical paths for liveness and readiness across Bondery deployables.
 | `GET /api/health/ready` | webapp only | BFF proxy → Fastify `GET /health/ready` |
 | `GET /extension/manifest` | api | Chrome extension min version + store URL (not a health probe) |
 | `GET /api/extension/manifest` | webapp | BFF proxy → `GET /extension/manifest` |
+| `GET /mobile/manifest` | api | Mobile app latest production CalVer (not a health probe) |
 
 **Do not use:** root `/health`, `/status`, `/live`, `/ready`, or `/api/live` / `/api/ready` for container probes.
 
@@ -44,7 +45,7 @@ API liveness uses the same builder (`buildLivenessStatus`). Optional `version` /
 
 Schemas: `@bondery/schemas/health` (`livenessStatusSchema`, `readinessStatusSchema`).
 
-Do not put product metadata (extension versions) on liveness routes — use `GET /extension/manifest`.
+Do not put product metadata (extension or mobile versions) on liveness routes — use `GET /extension/manifest` and `GET /mobile/manifest`.
 
 ## API implementation
 
@@ -55,7 +56,9 @@ Routes: [`apps/api/src/lib/health/routes.ts`](../../../apps/api/src/lib/health/r
 
 Extension manifest: [`apps/api/src/routes/extension/manifest-route.ts`](../../../apps/api/src/routes/extension/manifest-route.ts)
 
-Auth bypass: health paths and `/extension/manifest` skip extension version enforcement in [`version-check.ts`](../../../apps/api/src/lib/extension/version-check.ts).
+Mobile manifest: [`apps/api/src/lib/mobile/manifest-route.ts`](../../../apps/api/src/lib/mobile/manifest-route.ts)
+
+Auth bypass: health paths, `/extension/manifest`, and `/mobile/manifest` skip extension version enforcement in [`version-check.ts`](../../../apps/api/src/lib/extension/version-check.ts).
 
 ## Webapp BFF
 

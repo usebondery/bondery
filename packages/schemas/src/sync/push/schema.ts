@@ -50,6 +50,7 @@ export const syncPushConflictResultSchema = z.object({
 });
 
 export const syncPushRejectedResultSchema = z.object({
+  code: z.string().optional(),
   error: z.string(),
   id: z.string().uuid(),
   status: z.literal("rejected"),

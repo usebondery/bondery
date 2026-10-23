@@ -10,44 +10,36 @@ import {
   IconUser,
   IconUserCircle,
 } from "@tabler/icons-react";
-import type { ReactNode } from "react";
-import { useMemo } from "react";
-import type { ColumnKey, SortOrder } from "@/lib/contacts/table-types";
+import type { SortOrder } from "@/lib/contacts/table-types";
 import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 
 export function useContactsTableCopy() {
   const t = useContactsTableTranslations();
 
-  const columnDefinitions = useMemo<Record<ColumnKey, { label: string; icon: ReactNode }>>(
-    () => ({
-      avatar: { icon: null, label: "" },
-      email: { icon: <IconMail size={16} />, label: t("ColumnEmail") },
-      headline: { icon: <IconBriefcase size={16} />, label: t("ColumnHeadline") },
-      lastInteraction: {
-        icon: <IconClock size={16} />,
-        label: t("ColumnLastInteraction"),
-      },
-      location: { icon: <IconMapPin size={16} />, label: t("ColumnLocation") },
-      name: { icon: <IconUser size={16} />, label: t("ColumnName") },
-      phone: { icon: <IconPhone size={16} />, label: t("ColumnPhone") },
-      social: { icon: <IconUserCircle size={16} />, label: t("ColumnSocials") },
-    }),
-    [t],
-  );
+  const columnDefinitions = {
+    avatar: { icon: null, label: "" },
+    email: { icon: <IconMail size={16} />, label: t("ColumnEmail") },
+    headline: { icon: <IconBriefcase size={16} />, label: t("ColumnHeadline") },
+    lastInteraction: {
+      icon: <IconClock size={16} />,
+      label: t("ColumnLastInteraction"),
+    },
+    location: { icon: <IconMapPin size={16} />, label: t("ColumnLocation") },
+    name: { icon: <IconUser size={16} />, label: t("ColumnName") },
+    phone: { icon: <IconPhone size={16} />, label: t("ColumnPhone") },
+    social: { icon: <IconUserCircle size={16} />, label: t("ColumnSocials") },
+  };
 
-  const sortOptions = useMemo<SortOption<SortOrder>[]>(
-    () => [
-      { key: "nameAsc", label: t("SortNameAsc") },
-      { key: "nameDesc", label: t("SortNameDesc") },
-      { key: "surnameAsc", label: t("SortSurnameAsc") },
-      { key: "surnameDesc", label: t("SortSurnameDesc") },
-      { key: "interactionDesc", label: t("SortInteractionDesc") },
-      { key: "interactionAsc", label: t("SortInteractionAsc") },
-      { key: "createdAtDesc", label: t("SortCreatedDesc") },
-      { key: "createdAtAsc", label: t("SortCreatedAsc") },
-    ],
-    [t],
-  );
+  const sortOptions: SortOption<SortOrder>[] = [
+    { key: "nameAsc", label: t("SortNameAsc") },
+    { key: "nameDesc", label: t("SortNameDesc") },
+    { key: "surnameAsc", label: t("SortSurnameAsc") },
+    { key: "surnameDesc", label: t("SortSurnameDesc") },
+    { key: "interactionDesc", label: t("SortInteractionDesc") },
+    { key: "interactionAsc", label: t("SortInteractionAsc") },
+    { key: "createdAtDesc", label: t("SortCreatedDesc") },
+    { key: "createdAtAsc", label: t("SortCreatedAsc") },
+  ];
 
   const buildTableLabels = (
     overrides: Partial<DataTableLabels> & {

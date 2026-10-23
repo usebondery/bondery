@@ -6,7 +6,7 @@ import { errorNotificationTemplate, successNotificationTemplate } from "@bondery
 import type { Contact, EmailEntry, ImportantDate, PhoneEntry } from "@bondery/schemas";
 import type { TranslateFn } from "@bondery/translations";
 import { notifications } from "@mantine/notifications";
-import { type Dispatch, type SetStateAction, useCallback, useState } from "react";
+import { type Dispatch, type SetStateAction, useState } from "react";
 import type {
   useCreateContactRelationshipMutation,
   useDeleteContactRelationshipMutation,
@@ -88,57 +88,52 @@ export function usePersonContactHandlers({
     updateRelationshipMutation,
   });
 
-  const handleContactFieldSave = useCallback(
-    async (field: string, value: string) => {
-      if (!contact || !personId) {
-        return;
-      }
+  const handleContactFieldSave = async (field: string, value: string) => {
+    if (!contact || !personId) {
+      return;
+    }
 
-      const originalValue = contact[field as keyof Contact] || "";
-      if (value === originalValue) {
-        return;
-      }
+    const originalValue = contact[field as keyof Contact] || "";
+    if (value === originalValue) {
+      return;
+    }
 
-      const shouldTrackGlobalLoading = field !== "language" && field !== "timezone";
+    const shouldTrackGlobalLoading = field !== "language" && field !== "timezone";
+    if (shouldTrackGlobalLoading) {
+      setSavingField(field);
+    }
+
+    try {
+      await updateContactMutation.mutateAsync({ [field]: value });
+
+      setContact(
+        (previous) =>
+          ({
+            ...previous,
+            [field]: value,
+          }) as Contact,
+      );
+
+      notifications.show(
+        successNotificationTemplate({
+          description:
+            field === "timezone" ? tPersonPage("TimezoneUpdated") : tPersonPage("LanguageUpdated"),
+          title: tInteractions("SuccessTitle"),
+        }),
+      );
+    } catch (_error) {
+      notifications.show(
+        errorNotificationTemplate({
+          description: `Failed to update ${field === "timezone" ? "timezone" : "language"}`,
+          title: tInteractions("ErrorTitle"),
+        }),
+      );
+    } finally {
       if (shouldTrackGlobalLoading) {
-        setSavingField(field);
+        setSavingField(null);
       }
-
-      try {
-        await updateContactMutation.mutateAsync({ [field]: value });
-
-        setContact(
-          (previous) =>
-            ({
-              ...previous,
-              [field]: value,
-            }) as Contact,
-        );
-
-        notifications.show(
-          successNotificationTemplate({
-            description:
-              field === "timezone"
-                ? tPersonPage("TimezoneUpdated")
-                : tPersonPage("LanguageUpdated"),
-            title: tInteractions("SuccessTitle"),
-          }),
-        );
-      } catch (_error) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: `Failed to update ${field === "timezone" ? "timezone" : "language"}`,
-            title: tInteractions("ErrorTitle"),
-          }),
-        );
-      } finally {
-        if (shouldTrackGlobalLoading) {
-          setSavingField(null);
-        }
-      }
-    },
-    [contact, personId, setContact, tInteractions, tPersonPage, updateContactMutation],
-  );
+    }
+  };
 
   const { handleSaveAddress } = usePersonAddressSave({
     contact,
@@ -151,301 +146,269 @@ export function usePersonContactHandlers({
     updateContactMutation,
   });
 
-  const handleSaveLastInteraction = useCallback(
-    async (date: string | null) => {
-      if (!contact || !personId) {
-        return;
-      }
-      setSavingLastInteraction(true);
-      try {
-        await updateContactMutation.mutateAsync({ lastInteraction: date });
-        setContact((prev) => ({ ...prev, lastInteraction: date }) as Contact);
-        notifications.show(
-          successNotificationTemplate({
-            description: tInteractions("LastInteractionUpdated"),
-            title: tInteractions("SuccessTitle"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: tInteractions("LastInteractionUpdateFailed"),
-            title: tInteractions("ErrorTitle"),
-          }),
-        );
-      } finally {
-        setSavingLastInteraction(false);
-      }
-    },
-    [contact, personId, setContact, tInteractions, updateContactMutation],
-  );
+  const handleSaveLastInteraction = async (date: string | null) => {
+    if (!contact || !personId) {
+      return;
+    }
+    setSavingLastInteraction(true);
+    try {
+      await updateContactMutation.mutateAsync({ lastInteraction: date });
+      setContact((prev) => ({ ...prev, lastInteraction: date }) as Contact);
+      notifications.show(
+        successNotificationTemplate({
+          description: tInteractions("LastInteractionUpdated"),
+          title: tInteractions("SuccessTitle"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: tInteractions("LastInteractionUpdateFailed"),
+          title: tInteractions("ErrorTitle"),
+        }),
+      );
+    } finally {
+      setSavingLastInteraction(false);
+    }
+  };
 
-  const handleSaveKeepFrequency = useCallback(
-    async (value: string | null) => {
-      if (!contact || !personId) {
-        return;
-      }
-      const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
-      try {
-        await updateContactMutation.mutateAsync({ keepFrequencyDays });
-        setContact((prev) => ({ ...prev, keepFrequencyDays }) as Contact);
-        notifications.show(
-          successNotificationTemplate({
-            description: tInteractions("KeepInTouchUpdatedDescription"),
-            title: tInteractions("KeepInTouchUpdated"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: tInteractions("KeepInTouchUpdateFailed"),
-            title: tInteractions("ErrorTitle"),
-          }),
-        );
-      }
-    },
-    [contact, personId, setContact, tInteractions, updateContactMutation],
-  );
+  const handleSaveKeepFrequency = async (value: string | null) => {
+    if (!contact || !personId) {
+      return;
+    }
+    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+    try {
+      await updateContactMutation.mutateAsync({ keepFrequencyDays });
+      setContact((prev) => ({ ...prev, keepFrequencyDays }) as Contact);
+      notifications.show(
+        successNotificationTemplate({
+          description: tInteractions("KeepInTouchUpdatedDescription"),
+          title: tInteractions("KeepInTouchUpdated"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: tInteractions("KeepInTouchUpdateFailed"),
+          title: tInteractions("ErrorTitle"),
+        }),
+      );
+    }
+  };
 
-  const handleSavePhones = useCallback(
-    async (phonesOverride?: PhoneEntry[]) => {
-      if (!contact || !personId) {
-        return;
-      }
+  const handleSavePhones = async (phonesOverride?: PhoneEntry[]) => {
+    if (!contact || !personId) {
+      return;
+    }
 
-      const sourcePhones = phonesOverride ?? phones;
-      const phonesToSave = sourcePhones
-        .filter((phone) => phone.value && phone.value.trim() !== "")
-        .map((phone) => ({
-          ...phone,
-          prefix: phone.prefix || "+1",
-          value: phone.value.trim(),
-        }));
+    const sourcePhones = phonesOverride ?? phones;
+    const phonesToSave = sourcePhones
+      .filter((phone) => phone.value && phone.value.trim() !== "")
+      .map((phone) => ({
+        ...phone,
+        prefix: phone.prefix || "+1",
+        value: phone.value.trim(),
+      }));
 
-      const currentPhones = Array.isArray(contact.phones) ? contact.phones : [];
-      if (JSON.stringify(phonesToSave) === JSON.stringify(currentPhones)) {
-        return;
-      }
+    const currentPhones = Array.isArray(contact.phones) ? contact.phones : [];
+    if (JSON.stringify(phonesToSave) === JSON.stringify(currentPhones)) {
+      return;
+    }
 
-      try {
-        await updateContactMutation.mutateAsync({ phones: phonesToSave });
+    try {
+      await updateContactMutation.mutateAsync({ phones: phonesToSave });
 
-        setContact({
-          ...contact,
-          phones: phonesToSave,
-        });
+      setContact({
+        ...contact,
+        phones: phonesToSave,
+      });
 
-        notifications.show(
-          successNotificationTemplate({
-            description: tContactInfo("PhonesUpdated"),
-            title: tInteractions("SuccessTitle"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: tContactInfo("PhonesUpdateError"),
-            title: tInteractions("ErrorTitle"),
-          }),
-        );
-      }
-    },
-    [contact, personId, phones, setContact, tContactInfo, tInteractions, updateContactMutation],
-  );
+      notifications.show(
+        successNotificationTemplate({
+          description: tContactInfo("PhonesUpdated"),
+          title: tInteractions("SuccessTitle"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: tContactInfo("PhonesUpdateError"),
+          title: tInteractions("ErrorTitle"),
+        }),
+      );
+    }
+  };
 
-  const handleSaveEmails = useCallback(
-    async (emailsOverride?: EmailEntry[]) => {
-      if (!contact || !personId) {
-        return;
-      }
+  const handleSaveEmails = async (emailsOverride?: EmailEntry[]) => {
+    if (!contact || !personId) {
+      return;
+    }
 
-      const sourceEmails = emailsOverride ?? emails;
-      const emailsToSave = sourceEmails.filter((email) => email.value.trim() !== "");
+    const sourceEmails = emailsOverride ?? emails;
+    const emailsToSave = sourceEmails.filter((email) => email.value.trim() !== "");
 
-      const currentEmails = Array.isArray(contact.emails) ? contact.emails : [];
-      if (JSON.stringify(emailsToSave) === JSON.stringify(currentEmails)) {
-        return;
-      }
+    const currentEmails = Array.isArray(contact.emails) ? contact.emails : [];
+    if (JSON.stringify(emailsToSave) === JSON.stringify(currentEmails)) {
+      return;
+    }
 
-      try {
-        await updateContactMutation.mutateAsync({ emails: emailsToSave });
+    try {
+      await updateContactMutation.mutateAsync({ emails: emailsToSave });
 
-        setContact({
-          ...contact,
-          emails: emailsToSave,
-        });
+      setContact({
+        ...contact,
+        emails: emailsToSave,
+      });
 
-        notifications.show(
-          successNotificationTemplate({
-            description: tContactInfo("EmailsUpdated"),
-            title: tInteractions("SuccessTitle"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: tContactInfo("EmailsUpdateError"),
-            title: tInteractions("ErrorTitle"),
-          }),
-        );
-      }
-    },
-    [contact, emails, personId, setContact, tContactInfo, tInteractions, updateContactMutation],
-  );
+      notifications.show(
+        successNotificationTemplate({
+          description: tContactInfo("EmailsUpdated"),
+          title: tInteractions("SuccessTitle"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: tContactInfo("EmailsUpdateError"),
+          title: tInteractions("ErrorTitle"),
+        }),
+      );
+    }
+  };
 
-  const handleSaveContactInfo = useCallback(
-    async (payload?: { phones?: PhoneEntry[]; emails?: EmailEntry[] }) => {
-      const tasks: Promise<void>[] = [];
+  const handleSaveContactInfo = async (payload?: {
+    phones?: PhoneEntry[];
+    emails?: EmailEntry[];
+  }) => {
+    const tasks: Promise<void>[] = [];
 
-      if (payload?.phones) {
-        tasks.push(handleSavePhones(payload.phones));
-      }
+    if (payload?.phones) {
+      tasks.push(handleSavePhones(payload.phones));
+    }
 
-      if (payload?.emails) {
-        tasks.push(handleSaveEmails(payload.emails));
-      }
+    if (payload?.emails) {
+      tasks.push(handleSaveEmails(payload.emails));
+    }
 
-      if (!tasks.length) {
-        tasks.push(handleSavePhones());
-        tasks.push(handleSaveEmails());
-      }
+    if (!tasks.length) {
+      tasks.push(handleSavePhones());
+      tasks.push(handleSaveEmails());
+    }
 
-      await Promise.all(tasks);
-    },
-    [handleSaveEmails, handleSavePhones],
-  );
+    await Promise.all(tasks);
+  };
 
-  const handleSaveImportantDates = useCallback(
-    async (datesOverride?: ImportantDate[]) => {
-      if (!contact || !personId) {
-        return;
-      }
+  const handleSaveImportantDates = async (datesOverride?: ImportantDate[]) => {
+    if (!contact || !personId) {
+      return;
+    }
 
-      const sourceDates = datesOverride ?? importantDates;
-      const datesToSave = sourceDates
-        .filter((entry) => entry.date)
-        .map((entry) => ({
-          date: entry.date,
-          id: entry.id,
-          note: entry.note,
-          notifyDaysBefore: entry.notifyDaysBefore ?? null,
-          type: entry.type,
-        }));
+    const sourceDates = datesOverride ?? importantDates;
+    const datesToSave = sourceDates
+      .filter((entry) => entry.date)
+      .map((entry) => ({
+        date: entry.date,
+        id: entry.id,
+        note: entry.note,
+        notifyDaysBefore: entry.notifyDaysBefore ?? null,
+        type: entry.type,
+      }));
 
-      setSavingField("importantDates");
+    setSavingField("importantDates");
 
-      try {
-        await putImportantDatesMutation.mutateAsync(datesToSave);
+    try {
+      await putImportantDatesMutation.mutateAsync(datesToSave);
 
-        notifications.show(
-          successNotificationTemplate({
-            description: tImportantDates("UpdateSuccess"),
-            title: tImportantDates("SuccessTitle"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description: tImportantDates("UpdateError"),
-            title: tImportantDates("ErrorTitle"),
-          }),
-        );
-      } finally {
-        setSavingField(null);
-      }
-    },
-    [contact, importantDates, personId, putImportantDatesMutation, tImportantDates],
-  );
+      notifications.show(
+        successNotificationTemplate({
+          description: tImportantDates("UpdateSuccess"),
+          title: tImportantDates("SuccessTitle"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description: tImportantDates("UpdateError"),
+          title: tImportantDates("ErrorTitle"),
+        }),
+      );
+    } finally {
+      setSavingField(null);
+    }
+  };
 
-  const handleSocialSave = useCallback(
-    async (field: string, value: string) => {
-      if (!contact || !personId) {
-        return;
-      }
+  const handleSocialSave = async (field: string, value: string) => {
+    if (!contact || !personId) {
+      return;
+    }
 
-      let processedValue = value;
-      if (["linkedin", "instagram", "facebook", "whatsapp"].includes(field)) {
-        processedValue = extractUsername(field, value);
-      }
+    let processedValue = value;
+    if (["linkedin", "instagram", "facebook", "whatsapp"].includes(field)) {
+      processedValue = extractUsername(field, value);
+    }
 
-      if (field === "whatsapp") {
-        processedValue = combinePhoneNumber(whatsappPrefix, value);
-      } else if (field === "signal") {
-        processedValue = combinePhoneNumber(signalPrefix, value);
-      }
+    if (field === "whatsapp") {
+      processedValue = combinePhoneNumber(whatsappPrefix, value);
+    } else if (field === "signal") {
+      processedValue = combinePhoneNumber(signalPrefix, value);
+    }
 
-      const originalValue = contact[field as keyof Contact] || "";
-      if (processedValue === originalValue) {
-        return;
-      }
+    const originalValue = contact[field as keyof Contact] || "";
+    if (processedValue === originalValue) {
+      return;
+    }
 
-      if (field === "firstName" && (!processedValue || processedValue.trim() === "")) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: tVal("fields.firstName.required"),
-            title: tVal("title"),
-          }),
-        );
-        setEditedValues((prev) => ({
-          ...prev,
-          [field]: originalValue as string,
-        }));
-        return;
-      }
+    if (field === "firstName" && (!processedValue || processedValue.trim() === "")) {
+      notifications.show(
+        errorNotificationTemplate({
+          description: tVal("fields.firstName.required"),
+          title: tVal("title"),
+        }),
+      );
+      setEditedValues((prev) => ({
+        ...prev,
+        [field]: originalValue as string,
+      }));
+      return;
+    }
 
-      setSavingField(field);
+    setSavingField(field);
 
-      try {
-        await updateContactMutation.mutateAsync({ [field]: processedValue });
+    try {
+      await updateContactMutation.mutateAsync({ [field]: processedValue });
 
-        setContact({
-          ...contact,
-          [field]: processedValue,
-          ...(field === "notes" ? { notesUpdatedAt: new Date().toISOString() } : {}),
-        });
+      setContact({
+        ...contact,
+        [field]: processedValue,
+        ...(field === "notes" ? { notesUpdatedAt: new Date().toISOString() } : {}),
+      });
 
-        const fieldDisplayName = field.charAt(0).toUpperCase() + field.slice(1);
+      const fieldDisplayName = field.charAt(0).toUpperCase() + field.slice(1);
 
-        notifications.show(
-          successNotificationTemplate({
-            description: `${fieldDisplayName} updated successfully`,
-            title: tInteractions("SuccessTitle"),
-          }),
-        );
-      } catch {
-        notifications.show(
-          errorNotificationTemplate({
-            description:
-              field === "timezone"
-                ? tPersonPage("TimezoneUpdateFailed")
-                : tPersonPage("LanguageUpdateFailed"),
-            title: tInteractions("ErrorTitle"),
-          }),
-        );
-      } finally {
-        setSavingField(null);
-      }
-    },
-    [
-      contact,
-      personId,
-      setContact,
-      setEditedValues,
-      signalPrefix,
-      tInteractions,
-      tPersonPage,
-      tVal,
-      updateContactMutation,
-      whatsappPrefix,
-    ],
-  );
+      notifications.show(
+        successNotificationTemplate({
+          description: `${fieldDisplayName} updated successfully`,
+          title: tInteractions("SuccessTitle"),
+        }),
+      );
+    } catch {
+      notifications.show(
+        errorNotificationTemplate({
+          description:
+            field === "timezone"
+              ? tPersonPage("TimezoneUpdateFailed")
+              : tPersonPage("LanguageUpdateFailed"),
+          title: tInteractions("ErrorTitle"),
+        }),
+      );
+    } finally {
+      setSavingField(null);
+    }
+  };
 
-  const handleContactFieldBlur = useCallback(
-    (field: string, value: string) => {
-      void handleContactFieldSave(field, value);
-    },
-    [handleContactFieldSave],
-  );
+  const handleContactFieldBlur = (field: string, value: string) => {
+    void handleContactFieldSave(field, value);
+  };
 
   return {
     handleAddRelationship,

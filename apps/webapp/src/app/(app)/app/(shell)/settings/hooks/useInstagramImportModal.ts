@@ -7,10 +7,11 @@ import type { InstagramImportStrategy, InstagramPreparedContact } from "@bondery
 import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import { notifications } from "@mantine/notifications";
 import { useRouter } from "next/navigation";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useCommitInstagramImportMutation,
   useParseInstagramImportMutation,
@@ -64,22 +65,19 @@ export function useInstagramImportModal({
     }
   };
 
-  const importStrategyOptions = useMemo(
-    () => [
-      { label: t("StrategyCloseFriends"), value: "close_friends" as const },
-      { label: t("StrategyFollowing"), value: "following" as const },
-      { label: t("StrategyFollowers"), value: "followers" as const },
-      {
-        label: t("StrategyFollowingAndFollowers"),
-        value: "following_and_followers" as const,
-      },
-      {
-        label: t("StrategyMutualFollowing"),
-        value: "mutual_following" as const,
-      },
-    ],
-    [t],
-  );
+  const importStrategyOptions = [
+    { label: t("StrategyCloseFriends"), value: "close_friends" as const },
+    { label: t("StrategyFollowing"), value: "following" as const },
+    { label: t("StrategyFollowers"), value: "followers" as const },
+    {
+      label: t("StrategyFollowingAndFollowers"),
+      value: "following_and_followers" as const,
+    },
+    {
+      label: t("StrategyMutualFollowing"),
+      value: "mutual_following" as const,
+    },
+  ];
 
   const [step, setStep] = useState<InstagramImportStep>(initialStep);
   const [isParsing, setIsParsing] = useState(false);
@@ -94,36 +92,21 @@ export function useInstagramImportModal({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const openRef = useRef<() => void>(null);
 
-  const previewContacts = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).map(toInstagramPreviewContact),
-    [parsedContacts],
-  );
+  const previewContacts = parsedContacts
+    .filter((contact) => contact.isValid)
+    .map(toInstagramPreviewContact);
 
-  const validContactsCount = useMemo(
-    () => parsedContacts.filter((contact) => contact.isValid).length,
-    [parsedContacts],
-  );
+  const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
 
   const invalidContactsCount = parsedContacts.length - validContactsCount;
-  const alreadyExistsCount = useMemo(
-    () => parsedContacts.filter((contact) => contact.alreadyExists).length,
-    [parsedContacts],
+  const alreadyExistsCount = parsedContacts.filter((contact) => contact.alreadyExists).length;
+  const likelyInfluencersCount = parsedContacts.filter((contact) => !contact.likelyPerson).length;
+  const nonSelectableIds = new Set(
+    parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
   );
-  const likelyInfluencersCount = useMemo(
-    () => parsedContacts.filter((contact) => !contact.likelyPerson).length,
-    [parsedContacts],
-  );
-  const nonSelectableIds = useMemo(
-    () =>
-      new Set(
-        parsedContacts.filter((contact) => contact.alreadyExists).map((contact) => contact.tempId),
-      ),
-    [parsedContacts],
-  );
-  const selectableIds = useMemo(
-    () => previewContacts.map((contact) => contact.id).filter((id) => !nonSelectableIds.has(id)),
-    [previewContacts, nonSelectableIds],
-  );
+  const selectableIds = previewContacts
+    .map((contact) => contact.id)
+    .filter((id) => !nonSelectableIds.has(id));
 
   const { allSelected, someSelected, handleToggleAll, handleToggleOne, resetSelectionAnchor } =
     useImportContactSelection({
@@ -295,7 +278,7 @@ export function useInstagramImportModal({
           updated: totalUpdated,
         });
       } else {
-        router.push(WEBAPP_ROUTES.PEOPLE);
+        router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
       }
     } catch (error) {
       notifications.show(

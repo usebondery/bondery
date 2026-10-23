@@ -84,6 +84,7 @@ export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
     if (previewIds.length > 0) {
       const previewContacts = await db.people.findMany({
         select: {
+          avatarUpdatedAt: true,
           firstName: true,
           hasAvatar: true,
           id: true,
@@ -104,9 +105,9 @@ export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
             avatar: resolveContactAvatarUrl(
               user.id,
               {
+                avatarUpdatedAt: contact.avatarUpdatedAt,
                 hasAvatar: contact.hasAvatar,
                 id: contact.id,
-                updatedAt: contact.updatedAt.toISOString(),
               },
               avatarOptions,
             ),
@@ -184,6 +185,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     lastName: string | null;
     updatedAt: string;
     hasAvatar: boolean;
+    avatarUpdatedAt: Date | string | null;
   }> = [];
   let totalCount = 0;
 
@@ -206,6 +208,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
       const rankedIds = searchResult.ranked.map((r) => r.id);
       const fetchedContacts = await db.people.findMany({
         select: {
+          avatarUpdatedAt: true,
           firstName: true,
           hasAvatar: true,
           id: true,
@@ -220,6 +223,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
       });
 
       const normalized = fetchedContacts.map((row) => ({
+        avatarUpdatedAt: row.avatarUpdatedAt,
         firstName: row.firstName,
         hasAvatar: row.hasAvatar,
         id: row.id,
@@ -234,6 +238,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
       db.people.findMany({
         orderBy: peopleListOrderBy(query.sort),
         select: {
+          avatarUpdatedAt: true,
           firstName: true,
           hasAvatar: true,
           id: true,
@@ -248,6 +253,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     ]);
 
     contacts = contactRows.map((row) => ({
+      avatarUpdatedAt: row.avatarUpdatedAt,
       firstName: row.firstName,
       hasAvatar: row.hasAvatar,
       id: row.id,
@@ -262,9 +268,9 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     avatar: resolveContactAvatarUrl(
       user.id,
       {
+        avatarUpdatedAt: c.avatarUpdatedAt,
         hasAvatar: c.hasAvatar,
         id: c.id,
-        updatedAt: c.updatedAt,
       },
       avatarOptions,
     ),

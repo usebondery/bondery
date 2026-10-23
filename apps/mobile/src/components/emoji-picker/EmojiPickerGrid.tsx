@@ -1,9 +1,10 @@
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef } from "react";
+import { forwardRef, useImperativeHandle, useRef } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
 import { LIST_SCROLL, UI_TIMING_MS } from "../../lib/config";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
+import { useSheetScrollable } from "../ui/Sheet";
 import { EMOJI_PICKER_LAYOUT, getEmojiPickerCellSize } from "./constants";
 import { EmojiPickerCell } from "./EmojiPickerCell";
 import { buildEmojiFlatRows, type EmojiFlatRow, findEmojiFlatIndex } from "./emojiFlatList";
@@ -26,89 +27,79 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
     const colors = useMobileThemeColors();
     const { width: windowWidth } = useWindowDimensions();
     const cellSize = getEmojiPickerCellSize(windowWidth);
+    const renderScrollComponent = useSheetScrollable();
     const listRef = useRef<FlashListRef<EmojiFlatRow>>(null);
     const pendingScrollIndexRef = useRef<number | null>(null);
     const scrollRetryCountRef = useRef(0);
 
-    const flatRows = useMemo(() => buildEmojiFlatRows(sections), [sections]);
+    const flatRows = buildEmojiFlatRows(sections);
 
-    const scrollToEmoji = useCallback(
-      (emoji: string) => {
-        const index = findEmojiFlatIndex(flatRows, emoji);
-        if (index === null) {
-          return;
-        }
+    function scrollToEmoji(emoji: string) {
+      const index = findEmojiFlatIndex(flatRows, emoji);
+      if (index === null) {
+        return;
+      }
 
-        pendingScrollIndexRef.current = index;
-        scrollRetryCountRef.current = 0;
+      pendingScrollIndexRef.current = index;
+      scrollRetryCountRef.current = 0;
 
-        const attemptScroll = () => {
-          void listRef.current
-            ?.scrollToIndex({
-              animated: true,
-              index,
-              viewOffset: 8,
-              viewPosition: 0.25,
-            })
-            .catch(() => {
-              if (
-                pendingScrollIndexRef.current !== index ||
-                scrollRetryCountRef.current >= LIST_SCROLL.maxRetries
-              ) {
-                return;
-              }
+      const attemptScroll = () => {
+        void listRef.current
+          ?.scrollToIndex({
+            animated: true,
+            index,
+            viewOffset: 8,
+            viewPosition: 0.25,
+          })
+          .catch(() => {
+            if (
+              pendingScrollIndexRef.current !== index ||
+              scrollRetryCountRef.current >= LIST_SCROLL.maxRetries
+            ) {
+              return;
+            }
 
-              scrollRetryCountRef.current += 1;
-              setTimeout(attemptScroll, UI_TIMING_MS.scrollRetryDelay);
-            });
-        };
+            scrollRetryCountRef.current += 1;
+            setTimeout(attemptScroll, UI_TIMING_MS.scrollRetryDelay);
+          });
+      };
 
-        requestAnimationFrame(attemptScroll);
-      },
-      [flatRows],
-    );
+      requestAnimationFrame(attemptScroll);
+    }
 
-    useImperativeHandle(ref, () => ({ scrollToEmoji }), [scrollToEmoji]);
+    useImperativeHandle(ref, () => ({ scrollToEmoji }));
 
-    const renderFlatItem = useCallback(
-      ({ item }: { item: EmojiFlatRow }) => {
-        if (item.type === "header") {
-          return (
-            <Text
-              accessibilityRole="header"
-              style={[styles.sectionHeader, { color: colors.textSecondary }]}
-            >
-              {getCategoryLabel(item.categoryKey)}
-            </Text>
-          );
-        }
-
+    function renderFlatItem({ item }: { item: EmojiFlatRow }) {
+      if (item.type === "header") {
         return (
-          <View style={[styles.row, { gap: EMOJI_PICKER_LAYOUT.gridGap }]}>
-            {item.items.map((emojiItem) => (
-              <EmojiPickerCell
-                cellSize={cellSize}
-                isSelected={value === emojiItem.emoji}
-                item={emojiItem}
-                key={emojiItem.emoji}
-                onPress={onSelect}
-              />
-            ))}
-          </View>
-        );
-      },
-      [cellSize, colors.textSecondary, getCategoryLabel, onSelect, value],
-    );
-
-    const listEmpty = useMemo(
-      () => (
-        <View style={styles.emptyContainer}>
-          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-            {emptySearchLabel}
+          <Text
+            accessibilityRole="header"
+            style={[styles.sectionHeader, { color: colors.textSecondary }]}
+          >
+            {getCategoryLabel(item.categoryKey)}
           </Text>
+        );
+      }
+
+      return (
+        <View style={[styles.row, { gap: EMOJI_PICKER_LAYOUT.gridGap }]}>
+          {item.items.map((emojiItem) => (
+            <EmojiPickerCell
+              cellSize={cellSize}
+              isSelected={value === emojiItem.emoji}
+              item={emojiItem}
+              key={emojiItem.emoji}
+              onPress={onSelect}
+            />
+          ))}
         </View>
-      ),
-      [colors.textSecondary, emptySearchLabel],
+      );
+    }
+
+    const listEmpty = (
+      <View style={styles.emptyContainer}>
+        <Text style={[styles.emptyText, { color: colors.textSecondary }]}>{emptySearchLabel}</Text>
+      </View>
     );
 
     return (
@@ -123,6 +114,7 @@ export const EmojiPickerGrid = forwardRef<EmojiPickerGridRef, EmojiPickerGridPro
         ListEmptyComponent={listEmpty}
         ref={listRef}
         renderItem={renderFlatItem}
+        renderScrollComponent={renderScrollComponent}
         showsVerticalScrollIndicator={false}
         style={styles.list}
       />

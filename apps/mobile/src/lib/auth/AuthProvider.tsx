@@ -1,37 +1,44 @@
-import * as SplashScreen from "expo-splash-screen";
-import { type ReactNode, useEffect, useMemo } from "react";
+import type { ReactNode } from "react";
 import { authClient } from "./client";
 import { AuthContext, type AuthContextValue } from "./useAuth";
-
-SplashScreen.preventAutoHideAsync().catch(() => {});
+import { useAuthSession } from "./useAuthSession";
 
 type AuthProviderProps = {
   children: ReactNode;
 };
 
-export function AuthProvider({ children }: AuthProviderProps) {
-  const sessionState = authClient?.useSession() ?? {
-    data: null,
-    isPending: !authClient,
-  };
+function AuthProviderWithClient({ children }: AuthProviderProps) {
+  const sessionState = useAuthSession();
 
   const session = sessionState.data ?? null;
-  const isLoadingSession = sessionState.isPending;
+  const isSessionHydrating = sessionState.isPending && session === null;
+  const isLoadingSession = isSessionHydrating;
 
-  useEffect(() => {
-    if (!isLoadingSession) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [isLoadingSession]);
-
-  const value = useMemo<AuthContextValue>(
-    () => ({
-      isAuthenticated: !isLoadingSession && session !== null,
-      isLoadingSession,
-      session,
-    }),
-    [isLoadingSession, session],
-  );
+  const value: AuthContextValue = {
+    isAuthenticated: session !== null,
+    isLoadingSession,
+    isSessionHydrating,
+    session,
+  };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+function AuthProviderWithoutClient({ children }: AuthProviderProps) {
+  const value: AuthContextValue = {
+    isAuthenticated: false,
+    isLoadingSession: false,
+    isSessionHydrating: false,
+    session: null,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function AuthProvider({ children }: AuthProviderProps) {
+  if (!authClient) {
+    return <AuthProviderWithoutClient>{children}</AuthProviderWithoutClient>;
+  }
+
+  return <AuthProviderWithClient>{children}</AuthProviderWithClient>;
 }

@@ -1,12 +1,10 @@
 "use client";
 
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ActionIconButton } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
 import {
@@ -15,6 +13,7 @@ import {
   parseGettingStartedSettings,
 } from "@/lib/home/gettingStartedItems";
 import { useHomePageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeSettings } from "@/lib/navigation/route/settings";
 import { useDismissGettingStartedMutation } from "@/lib/query/hooks/useSettings";
 import { ProgressRailItem } from "./ProgressRailItem";
 
@@ -36,8 +35,6 @@ const TASK_LABEL_KEYS = {
   "Tasks.AddContacts" | "Tasks.ImportContacts" | "Tasks.LogInteraction"
 >;
 
-const SETTINGS_IMPORT_SECTION = `${WEBAPP_ROUTES.SETTINGS}#data-management`;
-
 export function GettingStartedProgressRail({
   settingsData,
 
@@ -53,23 +50,14 @@ export function GettingStartedProgressRail({
 
   const dismissMutation = useDismissGettingStartedMutation();
 
-  const parsedSettings = useMemo(
-    () => parseGettingStartedSettings(settingsData),
+  const parsedSettings = parseGettingStartedSettings(settingsData);
 
-    [settingsData],
-  );
+  const state = buildGettingStartedState({
+    hasInteraction,
+    settings: parsedSettings,
 
-  const state = useMemo(
-    () =>
-      buildGettingStartedState({
-        hasInteraction,
-        settings: parsedSettings,
-
-        totalContacts,
-      }),
-
-    [parsedSettings, totalContacts, hasInteraction],
-  );
+    totalContacts,
+  });
 
   if (!state.showRail) {
     return null;
@@ -86,7 +74,7 @@ export function GettingStartedProgressRail({
   const handleTaskAction = (taskId: GettingStartedTaskId) => {
     switch (taskId) {
       case "importContacts":
-        router.push(SETTINGS_IMPORT_SECTION);
+        router.push(routeSettings("data-management"));
 
         return;
 

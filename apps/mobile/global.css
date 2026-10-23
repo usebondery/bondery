@@ -1,0 +1,9 @@
+@import "tailwindcss";
+@import "uniwind";
+
+/* Named gaps match `@bondery/branding` BRAND_SPACING_REM (Mantine sm/md/lg). */
+@theme {
+  --spacing-lg: 1.25rem;
+  --spacing-md: 1rem;
+  --spacing-sm: 0.75rem;
+}

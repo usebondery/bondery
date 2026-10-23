@@ -1,5 +1,6 @@
 import { IconReload } from "@tabler/icons-react-native";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { StyleSheet, Text } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import { PRIMARY_BUTTON_TEXT } from "../../theme/colors";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";

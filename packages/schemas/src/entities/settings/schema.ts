@@ -75,8 +75,23 @@ export const updateImportFollowupBodySchema: z.ZodType<UpdateImportFollowupBody>
     }
   });
 
+const isoCountryCodeStringSchema = z
+  .string()
+  .trim()
+  .length(2, { error: "Country code must be 2 letters" })
+  .regex(/^[A-Za-z]{2}$/, { error: "Country code must be ISO-3166 alpha-2" });
+
+/** Response/OpenAPI wire shape — no transform (Fastify serialization). */
+export const isoCountryCodeSchema = isoCountryCodeStringSchema;
+
+/** Request body — normalizes to uppercase. */
+export const isoCountryCodeInputSchema = isoCountryCodeStringSchema.transform((value) =>
+  value.toUpperCase(),
+);
+
 const mutableUserSettingsInputSchema = z.object({
   colorScheme: colorSchemePreferenceSchema,
+  defaultPhoneCountry: isoCountryCodeInputSchema.nullable(),
   groupSortOrder: groupSortOrderPreferenceSchema,
   language: supportedLocaleSchema.nullable(),
   leftSwipeAction: swipeActionPreferenceSchema,
@@ -91,6 +106,7 @@ const mutableUserSettingsInputSchema = z.object({
 /** Wire shape for GET /api/me/settings — DB-backed preference fields. */
 const mutableUserSettingsSchema = z.object({
   colorScheme: colorSchemePreferenceSchema,
+  defaultPhoneCountry: isoCountryCodeSchema.nullable(),
   groupSortOrder: z.string(),
   language: supportedLocaleSchema,
   leftSwipeAction: z.string(),
@@ -117,8 +133,9 @@ export const userSettingsSchema = z.object({
 }) satisfies z.ZodType<UserSettings>;
 
 export const updateUserSettingsInputSchema = mutableUserSettingsInputSchema
-  .omit({ language: true, timezone: true })
+  .omit({ defaultPhoneCountry: true, language: true, timezone: true })
   .extend({
+    defaultPhoneCountry: isoCountryCodeInputSchema.nullable().optional(),
     language: supportedLocaleSchema.optional(),
     timezone: z.string().optional(),
   })

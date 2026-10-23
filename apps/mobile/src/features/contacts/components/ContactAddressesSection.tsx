@@ -17,7 +17,8 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { copyToClipboard } from "../../../lib/clipboard/copyToClipboard";
 import { LIMITS } from "../../../lib/config";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
+import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { formatAddressCardLines, formatDisplayAddress } from "../contactUtils";
@@ -33,7 +34,7 @@ type SheetState =
 
 interface ContactAddressesSectionProps {
   addresses: ContactAddressEntry[];
-  onSaveAddresses: (addresses: ContactAddressEntry[]) => Promise<void>;
+  onSaveAddresses: (addresses: ContactAddressEntry[]) => void;
 }
 
 function buildNativeMapsUrl(address: ContactAddressEntry): string {
@@ -64,9 +65,9 @@ export function ContactAddressesSection({
   const tContactInfo = useContactInfoTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const errorTitle = t("feedback.errorTitle");
 
   const canAdd = addresses.length < LIMITS.maxAddresses;
 
@@ -82,76 +83,54 @@ export function ContactAddressesSection({
     setSheet({ open: false });
   }
 
-  async function handleSave(entry: ContactAddressEntry) {
+  function persistAddresses(nextAddresses: ContactAddressEntry[]) {
+    try {
+      onSaveAddresses(nextAddresses);
+    } catch (err) {
+      showErrorToast(err, tContactAddress("SaveErrorTitle"));
+      throw err;
+    }
+  }
+
+  function handleSaveEntry(entry: ContactAddressEntry) {
     if (!sheet.open) {
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      let nextAddresses: ContactAddressEntry[];
+    let nextAddresses: ContactAddressEntry[];
 
-      if (sheet.mode === "add") {
-        nextAddresses = [...addresses, entry];
-      } else {
-        nextAddresses = addresses.map((a, i) => (i === sheet.index ? entry : a));
-      }
-
-      await onSaveAddresses(nextAddresses);
-      closeSheet();
-    } catch (err) {
-      showToast({
-        description: err instanceof Error ? err.message : tContactAddress("SaveErrorMessage"),
-        headline: tContactAddress("SaveErrorTitle"),
-        type: "error",
-      });
-    } finally {
-      setIsSubmitting(false);
+    if (sheet.mode === "add") {
+      nextAddresses = [...addresses, entry];
+    } else {
+      nextAddresses = addresses.map((a, i) => (i === sheet.index ? entry : a));
     }
+
+    persistAddresses(nextAddresses);
   }
 
-  async function handleDelete(index: number) {
-    setIsSubmitting(true);
-    try {
-      const nextAddresses = addresses.filter((_, i) => i !== index);
-      await onSaveAddresses(nextAddresses);
-      closeSheet();
-    } catch (err) {
-      showToast({
-        description: err instanceof Error ? err.message : tContactAddress("SaveErrorMessage"),
-        headline: tContactAddress("SaveErrorTitle"),
-        type: "error",
-      });
-    } finally {
-      setIsSubmitting(false);
+  function handleDeleteEntry() {
+    if (!sheet.open || sheet.mode !== "edit") {
+      return;
     }
+
+    persistAddresses(addresses.filter((_, i) => i !== sheet.index));
   }
 
-  async function handleSetPreferred(index: number) {
+  function handleSetPreferred(index: number) {
     if (index === 0) {
       return;
     }
     const preferred = addresses[index];
     const rest = addresses.filter((_, i) => i !== index);
-    const nextAddresses = [preferred, ...rest];
-
-    try {
-      await onSaveAddresses(nextAddresses);
-    } catch (err) {
-      showToast({
-        description: err instanceof Error ? err.message : tContactAddress("SaveErrorMessage"),
-        headline: tContactAddress("SaveErrorTitle"),
-        type: "error",
-      });
-    }
+    persistAddresses([preferred, ...rest]);
   }
 
   function openInMaps(address: ContactAddressEntry) {
     const url = buildNativeMapsUrl(address);
     Linking.openURL(url).catch(() => {
-      showToast({
-        description: "Could not open maps",
-        headline: t("feedback.errorTitle"),
+      notifications.show({
+        message: "Could not open maps",
+        title: t("feedback.errorTitle"),
         type: "error",
       });
     });
@@ -163,7 +142,7 @@ export function ContactAddressesSection({
       return;
     }
 
-    await copyToClipboard(label, showToast, {
+    await copyToClipboard(label, {
       errorDescription: "Could not copy address",
       errorHeadline: t("feedback.errorTitle"),
       successDescription: label,
@@ -172,7 +151,6 @@ export function ContactAddressesSection({
   }
 
   const sheetEntry = sheet.open && sheet.mode === "edit" ? sheet.entry : null;
-  const sheetIndex = sheet.open && sheet.mode === "edit" ? sheet.index : -1;
 
   return (
     <View style={contactDetailStyles.section}>
@@ -242,7 +220,9 @@ export function ContactAddressesSection({
               icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
               id: "delete",
               label: tContactAddress("DeleteAction"),
-              onPress: () => void handleDelete(index),
+              onPress: () => {
+                persistAddresses(addresses.filter((_, addressIndex) => addressIndex !== index));
+              },
               tone: "danger" as const,
             },
           ];
@@ -294,18 +274,22 @@ export function ContactAddressesSection({
 
       <EditAddressSheet
         initialEntry={sheetEntry}
-        isSubmitting={isSubmitting}
         mode={sheet.open ? sheet.mode : "add"}
         onCancel={closeSheet}
-        onDelete={
-          sheet.open && sheet.mode === "edit" ? () => void handleDelete(sheetIndex) : undefined
-        }
+        onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        onError={() => {
+          notifications.show({
+            message: tContactAddress("SaveErrorTitle"),
+            title: errorTitle,
+            type: "error",
+          });
+        }}
         onOpenChange={(open) => {
           if (!open) {
             closeSheet();
           }
         }}
-        onSave={handleSave}
+        onPersist={handleSaveEntry}
         open={sheet.open}
       />
     </View>

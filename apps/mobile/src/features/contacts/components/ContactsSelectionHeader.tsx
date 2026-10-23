@@ -1,96 +1,101 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import Animated from "react-native-reanimated";
+import { Pressable } from "@/components/ui/Pressable";
 import { useCommonTranslations, useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
-
 import { ToolbarHeader } from "../../../components/chrome";
-
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
-
-import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-
-import { useContactsSelection } from "../contactsSelectionStore";
+import { Text } from "../../../components/ui/Text";
+import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
+import { useContactsEffectiveSelectedCount, useContactsSelection } from "../contactsSelectionStore";
 
 export function ContactsSelectionHeader() {
   const tMobileContacts = useMobileContactsTranslations();
   const t = useCommonTranslations();
-
-  const colors = useMobileThemeColors();
-
   const totalCount = useContactsSelection((state) => state.totalCount);
-
   const isAllTotalSelected = useContactsSelection((state) => state.isAllTotalSelected);
-
   const selectAllTotal = useContactsSelection((state) => state.selectAllTotal);
-
   const deselectAllInSession = useContactsSelection((state) => state.deselectAllInSession);
-
   const exitSelectionMode = useContactsSelection((state) => state.exitSelectionMode);
-
+  const selectedCount = useContactsEffectiveSelectedCount();
   const showSelectAll = !isAllTotalSelected;
+  const selectAllLabel = tMobileContacts("SelectAllCount", { count: totalCount });
+  const deselectAllLabel = tMobileContacts("DeselectAll");
+  const leftLabel = showSelectAll ? selectAllLabel : deselectAllLabel;
+  const selectedCountLabel = tMobileContacts("SelectedCount", { count: selectedCount });
 
   const handleLeftAction = () => {
     if (showSelectAll) {
       selectAllTotal();
-
       return;
     }
 
     deselectAllInSession();
   };
 
-  const handleCancel = () => {
-    exitSelectionMode();
-  };
-
   return (
     <ToolbarHeader
+      center={
+        <Text fw={600} numberOfLines={1} size="sm" ta="center">
+          {selectedCountLabel}
+        </Text>
+      }
       left={
-        <Pressable
-          accessibilityLabel={
-            showSelectAll ? tMobileContacts("SelectAll") : tMobileContacts("DeselectAll")
-          }
-          accessibilityRole="button"
+        <SelectionHeaderTextAction
+          accessibilityLabel={leftLabel}
           disabled={totalCount === 0}
-          hitSlop={8}
+          label={leftLabel}
           onPress={handleLeftAction}
-          style={({ pressed }) => [{ opacity: totalCount === 0 ? 0.45 : pressed ? 0.7 : 1 }]}
-        >
-          <Text style={[styles.headerAction, { color: colors.primary }]}>
-            {showSelectAll ? tMobileContacts("SelectAll") : tMobileContacts("DeselectAll")}
-          </Text>
-        </Pressable>
+        />
       }
       right={
-        <Pressable
+        <SelectionHeaderTextAction
           accessibilityLabel={t("actions.cancel")}
-          accessibilityRole="button"
-          hitSlop={8}
-          onPress={handleCancel}
-        >
-          <Text style={[styles.headerAction, styles.headerActionRight, { color: colors.primary }]}>
-            {t("actions.cancel")}
-          </Text>
-        </Pressable>
+          label={t("actions.cancel")}
+          onPress={exitSelectionMode}
+        />
       }
     />
   );
 }
 
-const styles = StyleSheet.create({
-  headerAction: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
+function SelectionHeaderTextAction({
+  accessibilityLabel,
+  disabled = false,
+  label,
+  onPress,
+}: {
+  accessibilityLabel: string;
+  disabled?: boolean;
+  label: string;
+  onPress: () => void;
+}) {
+  const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
 
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-
-  headerActionRight: {
-    textAlign: "right",
-  },
-
-  selectionCount: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
-
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-
-    textAlign: "center",
-  },
-});
+  return (
+    <Animated.View style={squeezeStyle}>
+      <Pressable
+        accessibilityLabel={accessibilityLabel}
+        accessibilityRole="button"
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        hitSlop={8}
+        onPress={onPress}
+        onPressIn={() => {
+          if (disabled) {
+            return;
+          }
+          pressIn();
+        }}
+        onPressOut={pressOut}
+      >
+        <Text
+          c="brand"
+          className={disabled ? "opacity-45" : undefined}
+          fw={600}
+          numberOfLines={1}
+          size="md"
+        >
+          {label}
+        </Text>
+      </Pressable>
+    </Animated.View>
+  );
+}

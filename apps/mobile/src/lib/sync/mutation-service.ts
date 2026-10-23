@@ -1,5 +1,6 @@
 import type { SyncMutation, SyncMutationInput } from "@bondery/schemas/sync";
 import { generateUuid } from "./ids";
+import { getSyncMutationTables } from "./mutation-tables";
 import { applyOptimisticMutation } from "./mutations/optimistic";
 import { enqueuePendingMutation, nextClientSequence } from "./outbox/pending-mutations";
 import { scheduleSyncDrain } from "./outbox/sync-worker";
@@ -17,7 +18,7 @@ export function submitSyncMutation(mutation: SyncMutationInput): SyncMutation {
   enqueuePendingMutation(full);
   logSyncMutationEnqueued(full);
   scheduleSyncDrain();
-  notifySyncSubscribers();
+  notifySyncSubscribers(getSyncMutationTables(full.type));
 
   return full;
 }

@@ -1,6 +1,14 @@
 export type { LegalEntity } from "#globals/company.js";
 export { formatLegalAddressLine, LEGAL_ENTITY } from "#globals/company.js";
 export { IMPORTANT_DATE_TYPE_META } from "#globals/important-dates.js";
+export type { MobileContactsRouteParams, MobileGroupIdParam } from "#globals/mobile-query.js";
+export {
+  contactsPathWithGroupId,
+  MOBILE_GROUP_ID_PARAM,
+  MOBILE_ROUTES,
+  parseMobileGroupIdParam,
+  parseMobileQueryParam,
+} from "#globals/mobile-query.js";
 export {
   API_ROUTES,
   BETTER_AUTH_BASE_PATH,
@@ -36,5 +44,5 @@ export type { NextAction } from "#globals/webapp-query.js";
 export {
   NEXT_ACTION_PARAM,
   NEXT_ACTIONS,
-  personPathWithNextAction,
+  routePersonWithNextAction,
 } from "#globals/webapp-query.js";

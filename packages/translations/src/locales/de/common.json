@@ -1,6 +1,7 @@
 {
   "a11y": {
     "back": "Zurück",
+    "close": "Schließen",
     "closeMenu": "Menü schließen",
     "createMore": "Nach dem Erstellen im Dialog bleiben, um einen weiteren Eintrag hinzuzufügen",
     "info": "Info",
@@ -216,11 +217,17 @@
     "unknown": "Etwas ist schiefgelaufen."
   },
   "feedback": {
+    "adding": "Wird hinzugefügt...",
+    "closeToast": "Benachrichtigung schließen",
+    "creating": "Wird erstellt...",
     "deleting": "Wird gelöscht...",
     "duplicating": "Wird dupliziert...",
     "errorTitle": "Fehler",
     "noResults": "Keine Ergebnisse",
+    "removing": "Wird entfernt...",
     "savedTitle": "Gespeichert",
+    "saving": "Wird gespeichert...",
+    "sending": "Wird gesendet...",
     "successTitle": "Erfolg"
   }
 }

@@ -8,6 +8,9 @@
     },
     "stripe": {
       "enabled": true
+    },
+    "mobbin": {
+      "enabled": true
     }
   }
 }

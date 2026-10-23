@@ -67,7 +67,7 @@ export function ThemePicker({ initialValue, label }: ThemePickerProps) {
 
   return (
     <SharedThemePicker
-      className="max-w-96"
+      className="w-full"
       labels={{
         dark: t("Dark"),
         light: t("Light"),

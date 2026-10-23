@@ -48,13 +48,22 @@ export const ENV_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = {
     "",
     "GitHub / LinkedIn OAuth apps: callback URL must be on the API host (not the webapp):",
     "  <BONDERY_PUBLIC_API_URL>/auth/callback/github  (or /linkedin)",
-    "  Local example: http://localhost:26631/auth/callback/github",
+    "  Local Portless: https://api.usebondery.test/auth/callback/github",
+    "  Classic escape hatch: http://localhost:26631/auth/callback/github",
     "  Then run: pnpm run provision:oauth-clients",
   ],
   Database: [
     "Generate a Postgres password:",
     "  openssl rand -base64 24 | tr -d '/+=' | head -c 32   # BONDERY_PRIVATE_POSTGRES_PASSWORD",
     "pnpm run env derives DATABASE_URL for api/db from this password.",
+  ],
+  Mobile: [
+    "Web local issuer is Portless HTTPS (*.usebondery.test).",
+    "Device/emulator may still use loopback raw ports below.",
+  ],
+  "Public URLs": [
+    "Local web stack uses Portless HTTPS (website/webapp/api).",
+    "Webapp SSR: set BONDERY_INFRA_INTERNAL_API_URL=http://127.0.0.1:26631 (browser still uses the public API URL).",
   ],
   Storage: [
     "Local dev: bundled SeaweedFS defaults below are fine.",
@@ -90,6 +99,9 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
     "GitHub / LinkedIn OAuth apps: callback URL on the API host (not the webapp):",
     "  https://<BONDERY_INFRA_API_DOMAIN>/auth/callback/github  (or /linkedin)",
     "OAuth clients are provisioned automatically on api pre_start (release-migrate).",
+    "",
+    "Native passkeys (optional): BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS on the API",
+    "adds android:apk-key-hash WebAuthn origins. Leave empty to skip Android passkey origins.",
   ],
   "Chrome extension OAuth": ["Generate: openssl rand -hex 16   # BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
   Email: ["SMTP settings (env_file → api only)."],
@@ -128,6 +140,7 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
 export const OPS_GROUP_ORDER = [
   "Image tags",
   "Public hostnames",
+  "Mobile associated domains",
   "Website analytics",
   "Build metadata",
 ] as const;
@@ -144,6 +157,10 @@ export const OPS_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = {
   "Build metadata": ["Optional build metadata surfaced in the container"],
   "Image tags": [
     "Omit to pull the floating production channel. Pin to semver for reproducible deploys / rollback.",
+  ],
+  "Mobile associated domains": [
+    "Optional. Native passkeys need apple-app-site-association (Team ID) and assetlinks.json (SHA-256 fingerprints).",
+    "If unset, those well-known files return 404. Do not invent Team IDs or fingerprints.",
   ],
   "Public hostnames": [
     "Public hostnames (no scheme). Compose derives https://… URLs and Traefik Host().",
@@ -256,9 +273,9 @@ export type EnvVarDef = {
  *   BONDERY_PRIVATE_WEBAPP_SESSION_SECRET — invented per dev machine; run setup:dev / provision:oauth-clients
  * - BONDERY_PRIVATE_BETTER_AUTH_SECRETS — can be shared or per-env; team policy
  * - BONDERY_PRIVATE_REDIS_URL — local Docker Redis unless using shared remote Redis
- * - BONDERY_PUBLIC_*_URL localhost ports — machine-specific unless using ngrok shared URLs
  * - BONDERY_DEV_* — local API boot toggles only
- * - BONDERY_INFRA_* — deploy hostnames / image tags, not local dev
+ * - BONDERY_INFRA_* (except INTERNAL_API_URL) — deploy hostnames / image tags, not local pull
+ * Portless public URLs (BONDERY_PUBLIC_API/WEBAPP/WEBSITE_URL) are team-shared in Infisical development.
  */
 
 /** Resolve example value for a manifest entry and generation profile. */
@@ -275,12 +292,18 @@ export function resolveExampleValue(entry: EnvVarDef, profile: ExampleProfile): 
 
   let value = entry.exampleValue;
   if (profile === "production") {
-    if (entry.canonical.includes("WEBAPP_URL") && value.includes("localhost")) {
+    if (entry.canonical === "BONDERY_PUBLIC_WEBAPP_URL" && isPortlessLocalPublicUrl(value)) {
       value = "https://app.usebondery.com";
-    } else if (entry.canonical.includes("WEBSITE_URL") && value.includes("localhost")) {
+    } else if (
+      entry.canonical === "BONDERY_PUBLIC_WEBSITE_URL" &&
+      isPortlessLocalPublicUrl(value)
+    ) {
       value = "https://usebondery.com";
-    } else if (entry.canonical.includes("API_URL") && value.includes("localhost")) {
+    } else if (entry.canonical === "BONDERY_PUBLIC_API_URL" && isPortlessLocalPublicUrl(value)) {
       value = "https://api.usebondery.com";
+    } else if (entry.canonical === "BONDERY_INFRA_INTERNAL_API_URL") {
+      // Compose sets the internal Docker DNS URL; keep production examples empty.
+      value = "";
     } else if (entry.canonical === "BONDERY_PUBLIC_BILLING_UPGRADES_ENABLED") {
       value = "false";
     } else if (
@@ -291,6 +314,11 @@ export function resolveExampleValue(entry: EnvVarDef, profile: ExampleProfile): 
     }
   }
   return value;
+}
+
+/** True when a public URL example is Portless local (`.test` or classic `.localhost`). */
+function isPortlessLocalPublicUrl(value: string): boolean {
+  return value.includes("usebondery.test") || value.includes("localhost");
 }
 
 /** Sort deploy example rows by DEPLOY_GROUP_ORDER then key. */
@@ -405,28 +433,31 @@ export const ENV_MANIFEST: EnvVarDef[] = [
   {
     canonical: "BONDERY_PUBLIC_API_URL",
     description: "Public API base URL (no trailing /api)",
-    exampleValue: "http://localhost:26631",
+    exampleValue: "https://api.usebondery.test",
     group: "Public URLs",
     requiredIn: ["development", "production"],
     secret: false,
+    syncable: true,
     targets: [t("api"), t("webapp"), t("website"), t("chrome-extension"), t("mobile")],
   },
   {
     canonical: "BONDERY_PUBLIC_WEBAPP_URL",
     description: "Public webapp origin",
-    exampleValue: "http://localhost:26632",
+    exampleValue: "https://app.usebondery.test",
     group: "Public URLs",
     requiredIn: ["development", "production"],
     secret: false,
+    syncable: true,
     targets: [t("api"), t("webapp"), t("website"), t("chrome-extension"), t("mobile")],
   },
   {
     canonical: "BONDERY_PUBLIC_WEBSITE_URL",
     description: "Public marketing website origin",
-    exampleValue: "http://localhost:26630",
+    exampleValue: "https://usebondery.test",
     group: "Public URLs",
     requiredIn: ["development", "production"],
     secret: false,
+    syncable: true,
     targets: [t("api"), t("webapp"), t("website"), t("mobile")],
   },
   {
@@ -444,6 +475,52 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     requiredIn: [],
     secret: false,
     targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_IOS_APP_TEAM_ID",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Apple Developer Team ID for apple-app-site-association (webcredentials + applinks). Optional. The website returns 404 for that file when unset. Not a secret.",
+    dokploySync: { targets: ["website"] },
+    exampleValue: "",
+    group: "Public URLs",
+    opsExample: {
+      commented: true,
+      group: "Mobile associated domains",
+      include: true,
+      value: "",
+    },
+    requiredIn: [],
+    secret: false,
+    targets: [t("website")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS",
+    deployExample: {
+      commented: true,
+      group: "Better Auth",
+      include: true,
+      value: "",
+    },
+    description:
+      "Comma-separated Android SHA-256 signing-cert fingerprints (colon hex). Used for Digital Asset Links and WebAuthn android:apk-key-hash origins. Optional. Missing values fail closed (404 / no apk origin). Not a secret.",
+    dokploySync: { targets: ["website", "services"] },
+    exampleValue: "",
+    group: "Public URLs",
+    opsExample: {
+      commented: true,
+      group: "Mobile associated domains",
+      include: true,
+      value: "",
+    },
+    requiredIn: [],
+    secret: false,
+    targets: [t("api"), t("website")],
   },
   {
     canonical: "BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS",
@@ -1188,6 +1265,16 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     targets: [],
   },
   {
+    canonical: "BONDERY_INFRA_INTERNAL_API_URL",
+    description:
+      "Webapp SSR/BFF API base URL (loopback or Compose DNS). Browser clients keep using BONDERY_PUBLIC_API_URL.",
+    exampleValue: "http://127.0.0.1:26631",
+    group: "Infra",
+    requiredIn: [],
+    secret: false,
+    targets: [t("webapp")],
+  },
+  {
     canonical: "BONDERY_INFRA_GIT_SHA",
     deployExample: { group: "Build metadata", include: true, value: "" },
     description: "Git SHA surfaced in runtime config and health probes",
@@ -1245,11 +1332,24 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     targets: [t("api")],
     turboAffectsCache: false,
   },
+  {
+    canonical: "BONDERY_MCP_INSPECTOR_CIMD_URL",
+    description:
+      "Optional HTTPS Client ID Metadata URL override for `pnpm mcp:inspect` (defaults to the public MCPJam Inspector CIMD)",
+    exampleValue: "",
+    group: "Local dev (contributor)",
+    requiredIn: [],
+    secret: false,
+    targets: [],
+    turboAffectsCache: false,
+  },
 ];
 
 /** System / pass-through vars always listed in turbo globalPassThroughEnv */
 export const TURBO_SYSTEM_PASSTHROUGH = [
+  "JAVA_HOME",
   "PATH",
+  "PNPM_STORE_DIR",
   "WINDIR",
   "HOME",
   "USERPROFILE",

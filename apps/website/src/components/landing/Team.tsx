@@ -1,4 +1,4 @@
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, hrefAssert } from "@bondery/mantine-next";
 import { Avatar, Card, Container, Flex, Group, Stack, Text, Title } from "@mantine/core";
 import { IconBrandLinkedin, IconBrandX } from "@tabler/icons-react";
 import { TEAM_MEMBERS, type TeamMember } from "@/data/team";
@@ -29,7 +29,7 @@ function TeamCard({ member }: { member: TeamMember }) {
             <ActionIconLink
               ariaLabel={`${member.name} on LinkedIn`}
               color="gray"
-              href={member.linkedin}
+              href={hrefAssert(member.linkedin)}
               icon={<IconBrandLinkedin />}
               rel="noopener noreferrer"
               size="lg"
@@ -40,7 +40,7 @@ function TeamCard({ member }: { member: TeamMember }) {
               <ActionIconLink
                 ariaLabel={`${member.name} on X`}
                 color="gray"
-                href={member.x}
+                href={hrefAssert(member.x)}
                 icon={<IconBrandX />}
                 rel="noopener noreferrer"
                 size="lg"

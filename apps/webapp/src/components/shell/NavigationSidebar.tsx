@@ -32,6 +32,7 @@ import {
   primaryAppNavLinks,
   secondaryAppNavLinks,
 } from "@/lib/navigation/appNavLinks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { HOTKEYS } from "@/lib/platform/config";
 import { spotlight } from "./CommandPalette";
 import {
@@ -136,7 +137,7 @@ export function NavigationSidebarContent({
     if (value === SIDEBAR_MODE_CHAT) {
       if (!isChatRoute(pathname)) {
         setChatModePending(true);
-        router.push(WEBAPP_ROUTES.CHAT);
+        router.push(routeAssert(WEBAPP_ROUTES.CHAT));
       }
       return;
     }
@@ -162,7 +163,7 @@ export function NavigationSidebarContent({
           already has the logotype in AppShellHeader. */}
       {!isMobileOverlay && (
         <Group justify="flex-start" mb="md">
-          <AnchorLink href={WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN} underline="never">
+          <AnchorLink href={routeAssert(WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN)} underline="never">
             <Box darkHidden>
               <BonderyDynamicLogotype
                 height={36}
@@ -337,7 +338,7 @@ export function NavigationSidebarContent({
             gap="sm"
             justify="flex-start"
             ref={userCardRef}
-            renderRoot={(props) => <Link href={WEBAPP_ROUTES.MYSELF} {...props} />}
+            renderRoot={(props) => <Link href={routeAssert(WEBAPP_ROUTES.MYSELF)} {...props} />}
             style={{
               // No inline transition — the button-scale-effect CSS class already
               // defines transition for transform, filter, AND background-color.

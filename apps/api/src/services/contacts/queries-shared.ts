@@ -46,7 +46,7 @@ export function toContactPreview(
     firstName: string;
     lastName: string | null;
     hasAvatar: boolean;
-    updatedAt?: string | null;
+    avatarUpdatedAt?: Date | string | null;
   },
   avatarOptions?: Parameters<typeof resolveContactAvatarUrl>[2],
 ): ContactPreview {
@@ -54,9 +54,9 @@ export function toContactPreview(
     avatar: resolveContactAvatarUrl(
       userId,
       {
+        avatarUpdatedAt: person.avatarUpdatedAt,
         hasAvatar: person.hasAvatar,
         id: person.id,
-        updatedAt: person.updatedAt,
       },
       avatarOptions,
     ),
@@ -77,7 +77,7 @@ export function toContactSelectable(
     location?: string | null;
     myself?: boolean | null;
     hasAvatar: boolean;
-    updatedAt?: string | null;
+    avatarUpdatedAt?: Date | string | null;
   },
   avatarOptions?: Parameters<typeof resolveContactAvatarUrl>[2],
 ): ContactSelectable {
@@ -85,9 +85,9 @@ export function toContactSelectable(
     avatar: resolveContactAvatarUrl(
       userId,
       {
+        avatarUpdatedAt: person.avatarUpdatedAt,
         hasAvatar: person.hasAvatar,
         id: person.id,
-        updatedAt: person.updatedAt,
       },
       avatarOptions,
     ),

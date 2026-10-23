@@ -2,6 +2,7 @@
 
 import { Group, Indicator, Text, Tooltip, UnstyledButton } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
+import type { Route } from "next";
 import Link from "next/link";
 import type { ComponentType, ReactNode, Ref } from "react";
 
@@ -20,7 +21,7 @@ type NavLinkItemBaseProps = {
 };
 
 export type NavLinkItemProps = NavLinkItemBaseProps &
-  ({ href: string; onClick?: undefined } | { href?: undefined; onClick: () => void });
+  ({ href: Route; onClick?: undefined } | { href?: undefined; onClick: () => void });
 
 /**
  * Padding keeps the icon horizontally centred inside the collapsed sidebar

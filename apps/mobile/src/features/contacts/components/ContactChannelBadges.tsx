@@ -1,11 +1,12 @@
 import { getContactAddressTypeEmoji, getContactChannelTypeEmoji } from "@bondery/helpers";
 import type { ContactAddressType, ContactType } from "@bondery/schemas";
 import { IconStarFilled } from "@tabler/icons-react-native";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import {
   useContactAddressTranslations,
   useContactInfoTranslations,
 } from "@/lib/i18n/generated/hooks";
+import { Text } from "../../../components/ui/Text";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { contactDetailStyles } from "./contactDetailStyles";
 
@@ -51,14 +52,14 @@ export function ContactChannelBadges({
           ]}
         >
           <IconStarFilled fill={colors.primary} size={12} stroke={colors.primary} />
-          <Text style={[contactDetailStyles.badgeText, { color: colors.primary }]}>
+          <Text c="brand" className="text-[11px]" fw={600} size={null}>
             {tContactInfo("Preferred")}
           </Text>
         </View>
       ) : null}
       <View style={[contactDetailStyles.badge, { backgroundColor: colors.border }]}>
         <Text style={contactDetailStyles.typeEmoji}>{typeEmoji}</Text>
-        <Text style={[contactDetailStyles.badgeText, { color: colors.textSecondary }]}>
+        <Text c="secondary" className="text-[11px]" fw={600} size={null}>
           {typeLabel}
         </Text>
       </View>

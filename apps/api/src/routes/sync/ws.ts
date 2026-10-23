@@ -1,7 +1,7 @@
 import { prisma } from "@bondery/db";
 import { parseSyncWsClientMessage } from "@bondery/schemas/sync";
 import websocket from "@fastify/websocket";
-import type { WebSocket } from "ws";
+import type { RawData, WebSocket } from "ws";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { getLastServerSequence } from "../../lib/sync/idempotency.js";
 import { requireSyncWakeRuntime, type SyncWakeSocket } from "../../lib/sync/wake/index.js";
@@ -76,7 +76,7 @@ export const syncWsRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
         request.log.error({ err: error, userId }, "sync wake hello failed");
       }
 
-      socket.on("message", (raw) => {
+      socket.on("message", (raw: RawData) => {
         try {
           const text = typeof raw === "string" ? raw : raw.toString("utf8");
           const message = parseSyncWsClientMessage(JSON.parse(text));

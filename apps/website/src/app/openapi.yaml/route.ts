@@ -11,7 +11,7 @@ function resolveOpenApiYamlPath(): string {
   }
 }
 
-const OPENAPI_YAML = readFileSync(resolveOpenApiYamlPath());
+const OPENAPI_YAML = readFileSync(/*turbopackIgnore: true*/ resolveOpenApiYamlPath());
 
 export const revalidate = false;
 

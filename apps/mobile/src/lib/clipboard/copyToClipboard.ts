@@ -1,9 +1,8 @@
 import * as Clipboard from "expo-clipboard";
-import type { ShowAppToastInput } from "../toast/useAppToast";
+import { notifications } from "../toast/notifications";
 
 export async function copyToClipboard(
   text: string,
-  showToast: (options: ShowAppToastInput) => void,
   options: {
     successHeadline: string;
     successDescription?: string;
@@ -13,16 +12,16 @@ export async function copyToClipboard(
 ): Promise<boolean> {
   try {
     await Clipboard.setStringAsync(text);
-    showToast({
-      description: options.successDescription ?? text,
-      headline: options.successHeadline,
+    notifications.show({
+      message: options.successDescription ?? text,
+      title: options.successHeadline,
       type: "success",
     });
     return true;
   } catch {
-    showToast({
-      description: options.errorDescription,
-      headline: options.errorHeadline,
+    notifications.show({
+      message: options.errorDescription,
+      title: options.errorHeadline,
       type: "error",
     });
     return false;

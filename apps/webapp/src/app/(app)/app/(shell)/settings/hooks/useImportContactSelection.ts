@@ -1,7 +1,7 @@
 "use client";
 
 import type { Contact } from "@bondery/schemas";
-import { useCallback, useMemo, useRef } from "react";
+import { useRef } from "react";
 
 interface UseImportContactSelectionParams {
   nonSelectableIds: Set<string>;
@@ -23,74 +23,66 @@ export function useImportContactSelection({
   const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.has(id));
   const someSelected = selectedIds.size > 0 && !allSelected;
 
-  const handleToggleAll = useCallback(() => {
+  const handleToggleAll = () => {
     if (allSelected) {
       setSelectedIds(new Set());
       return;
     }
 
     setSelectedIds(new Set(selectableIds));
-  }, [allSelected, selectableIds, setSelectedIds]);
+  };
 
-  const handleToggleOne = useCallback(
-    (id: string, options?: { shiftKey?: boolean; index?: number }) => {
-      if (nonSelectableIds.has(id)) {
-        return;
-      }
+  const handleToggleOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
+    if (nonSelectableIds.has(id)) {
+      return;
+    }
 
-      setSelectedIds((prev) => {
-        const next = new Set(prev);
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
 
-        const rowIndex = options?.index;
-        const hasRangeSelection =
-          options?.shiftKey &&
-          typeof rowIndex === "number" &&
-          lastSelectedIndexRef.current !== null;
+      const rowIndex = options?.index;
+      const hasRangeSelection =
+        options?.shiftKey && typeof rowIndex === "number" && lastSelectedIndexRef.current !== null;
 
-        if (hasRangeSelection && typeof rowIndex === "number") {
-          const anchorIndex = lastSelectedIndexRef.current;
-          if (anchorIndex === null) {
-            return prev;
-          }
-          const start = Math.min(anchorIndex, rowIndex);
-          const end = Math.max(anchorIndex, rowIndex);
-
-          for (let index = start; index <= end; index += 1) {
-            const row = previewContacts[index];
-            if (!row || nonSelectableIds.has(row.id)) {
-              continue;
-            }
-
-            next.add(row.id);
-          }
-        } else if (next.has(id)) {
-          next.delete(id);
-        } else {
-          next.add(id);
+      if (hasRangeSelection && typeof rowIndex === "number") {
+        const anchorIndex = lastSelectedIndexRef.current;
+        if (anchorIndex === null) {
+          return prev;
         }
+        const start = Math.min(anchorIndex, rowIndex);
+        const end = Math.max(anchorIndex, rowIndex);
 
-        return next;
-      });
+        for (let index = start; index <= end; index += 1) {
+          const row = previewContacts[index];
+          if (!row || nonSelectableIds.has(row.id)) {
+            continue;
+          }
 
-      if (typeof options?.index === "number") {
-        lastSelectedIndexRef.current = options.index;
+          next.add(row.id);
+        }
+      } else if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
       }
-    },
-    [nonSelectableIds, previewContacts, setSelectedIds],
-  );
 
-  const resetSelectionAnchor = useCallback(() => {
+      return next;
+    });
+
+    if (typeof options?.index === "number") {
+      lastSelectedIndexRef.current = options.index;
+    }
+  };
+
+  const resetSelectionAnchor = () => {
     lastSelectedIndexRef.current = null;
-  }, []);
+  };
 
-  return useMemo(
-    () => ({
-      allSelected,
-      handleToggleAll,
-      handleToggleOne,
-      resetSelectionAnchor,
-      someSelected,
-    }),
-    [allSelected, handleToggleAll, handleToggleOne, resetSelectionAnchor, someSelected],
-  );
+  return {
+    allSelected,
+    handleToggleAll,
+    handleToggleOne,
+    resetSelectionAnchor,
+    someSelected,
+  };
 }

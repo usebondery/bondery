@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 FROM node:26-slim AS base
-RUN npm install -g pnpm@12.6.0
+RUN npm install -g pnpm@12.11.2
 WORKDIR /app
 ENV TURBO_TELEMETRY_DISABLED=1
 ENV CI=true
@@ -22,7 +22,10 @@ COPY --from=prune /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=prune /app/out/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY scripts ./scripts
 COPY docs ./docs
-RUN --mount=type=cache,id=bondery-pnpm-store-v3,target=/pnpm/store,sharing=locked \
+# GVS + BuildKit store mounts leave bin shims (tsc, rimraf, …) pointing at missing
+# files under --ignore-scripts. Keep GVS for local Next/Turbopack; disable in images.
+RUN sed -i '/^enableGlobalVirtualStore:/d' pnpm-workspace.yaml
+RUN --mount=type=cache,id=bondery-pnpm-store-v4,target=/pnpm/store,sharing=locked \
     pnpm install --frozen-lockfile --ignore-scripts --no-runtime --store-dir "${PNPM_STORE_DIR}"
 ENV DATABASE_URL=postgresql://postgres:password@127.0.0.1:54322/bondery
 RUN pnpm -r --filter "api^..." run build && pnpm --filter api run build
@@ -30,6 +33,8 @@ RUN pnpm -r --filter "api^..." run build && pnpm --filter api run build
 # See https://pnpm.io/docker — injectWorkspacePackages must be true in pnpm-workspace.yaml.
 RUN pnpm deploy --filter=api --prod /deploy/api
 WORKDIR /deploy/api
+# Resolve prisma from @bondery/db (its dependency). Isolated + `pnpm deploy` does
+# not hoist it to the deploy root the way `nodeLinker: hoisted` did.
 RUN node -e "import('@bondery/db').then(() => console.log('@bondery/db resolvable'))" \
   && test -f node_modules/@bondery/db/prisma.config.ts \
   && test -f node_modules/@bondery/db/prisma/migrations/migration_lock.toml \
@@ -37,7 +42,7 @@ RUN node -e "import('@bondery/db').then(() => console.log('@bondery/db resolvabl
   && test -f node_modules/@bondery/schemas/dist/locale/supported-locales.json \
   && test -f node_modules/@bondery/translations/manifest.json \
   && node -e "import('@bondery/translations/manifest').then(() => console.log('@bondery/translations/manifest resolvable'))" \
-  && node -e "import { createRequire } from 'node:module'; import { execFileSync } from 'node:child_process'; const entry=createRequire(import.meta.url).resolve('prisma/build/index.js'); execFileSync(process.execPath, [entry, 'version'], {stdio:'inherit'}); console.log('prisma runnable')" \
+  && sh -c 'cd node_modules/@bondery/db && node -e "import { createRequire } from '\''node:module'\''; import { execFileSync } from '\''node:child_process'\''; const entry=createRequire(import.meta.url).resolve('\''prisma/build/index.js'\''); execFileSync(process.execPath, [entry, '\''version'\''], {stdio:'\''inherit'\''}); console.log('\''prisma runnable from @bondery/db'\'')"' \
   && sh -c 'cd node_modules/@bondery/db && DATABASE_URL=postgresql://postgres:password@127.0.0.1:54322/bondery node -e "import { createRequire } from '\''node:module'\''; import { execFileSync } from '\''node:child_process'\''; const entry=createRequire(import.meta.url).resolve('\''prisma/build/index.js'\''); execFileSync(process.execPath, [entry, '\''validate'\''], {stdio:'\''inherit'\''}); console.log('\''prisma validate from @bondery/db cwd'\'')"' \
   && node --check dist/cli/release-migrate.js \
   && node --check dist/cli/ensure-storage-buckets.js

@@ -1,28 +1,34 @@
 import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, type AppHref } from "@bondery/mantine-next";
 import { Container, Group, Paper, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconBrandDiscord, IconBrandReddit, IconMail } from "@tabler/icons-react";
 
-const CONTACT_METHODS = [
+const CONTACT_METHODS: {
+  color: string;
+  href: AppHref;
+  icon: typeof IconMail;
+  target: string | undefined;
+  text: string;
+}[] = [
   {
     color: "violet",
     href: `mailto:${SUPPORT_EMAIL}`,
     icon: IconMail,
-    target: undefined as string | undefined,
+    target: undefined,
     text: SUPPORT_EMAIL,
   },
   {
     color: "indigo",
     href: SOCIAL_LINKS.discord,
     icon: IconBrandDiscord,
-    target: "_blank" as const,
+    target: "_blank",
     text: "Chat with us on Discord",
   },
   {
     color: "orange",
     href: SOCIAL_LINKS.reddit,
     icon: IconBrandReddit,
-    target: "_blank" as const,
+    target: "_blank",
     text: "Post on our Reddit",
   },
 ];

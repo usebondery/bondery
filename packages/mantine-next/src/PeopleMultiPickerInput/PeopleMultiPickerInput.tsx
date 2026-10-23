@@ -1,9 +1,10 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { formatContactName } from "@bondery/helpers/contact";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Combobox, getDefaultZIndex, Pill, PillsInput, useCombobox } from "@mantine/core";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { PersonChip } from "#nextjs/PersonChip/index.js";
 import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";
 import {
@@ -158,14 +159,12 @@ function EditablePeopleMultiPickerInput({
 }: PeopleMultiPickerInputSharedProps & {
   onChange: (ids: string[]) => void;
 } & PeopleMultiPickerSearchProps) {
-  const selectedIdSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-  const filterAvailable = useCallback(
-    (contact: ContactSelectable) => !selectedIdSet.has(contact.id) && !contact.myself,
-    [selectedIdSet],
-  );
-  const matchQuery = useCallback((contact: ContactSelectable, query: string) => {
+  const selectedIdSet = new Set(selectedIds);
+  const filterAvailable = (contact: ContactSelectable) =>
+    !selectedIdSet.has(contact.id) && !contact.myself;
+  const matchQuery = (contact: ContactSelectable, query: string) => {
     return formatContactName(contact).toLowerCase().includes(query.toLowerCase());
-  }, []);
+  };
 
   const {
     canLoadMore,
@@ -230,21 +229,17 @@ function EditablePeopleMultiPickerInput({
     contactsCombobox.selectFirstOption();
   }, [selectFirstOptionToken]);
 
-  const contactsById = useMemo(() => {
+  const contactsById = (() => {
     const merged = new Map(knownContacts.map((contact) => [contact.id, contact]));
     for (const contact of contacts) {
       merged.set(contact.id, contact);
     }
     return merged;
-  }, [contacts, knownContacts]);
+  })();
 
-  const selectedContacts = useMemo(
-    () =>
-      selectedIds
-        .map((id) => contactsById.get(id))
-        .filter((contact): contact is ContactSelectable => Boolean(contact)),
-    [contactsById, selectedIds],
-  );
+  const selectedContacts = selectedIds
+    .map((id) => contactsById.get(id))
+    .filter((contact): contact is ContactSelectable => Boolean(contact));
 
   return (
     <Combobox

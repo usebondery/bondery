@@ -1,9 +1,10 @@
 import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import type { ImportantDate } from "@bondery/schemas";
 import { IconBell, IconCalendar, IconCalendarPlus, IconPencil } from "@tabler/icons-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import {
   useCommonTranslations,
   useContactImportantDatesTranslations,
@@ -12,7 +13,8 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import { LIMITS } from "../../../lib/config";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
+import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { formatImportantDate, resolveDateLocale } from "../importantDateUtils";
@@ -28,7 +30,7 @@ type SheetState =
 interface ContactImportantDatesSectionProps {
   contactFirstName: string;
   dates: ImportantDate[];
-  onSaveDates: (dates: ImportantDate[]) => Promise<void>;
+  onSaveDates: (dates: ImportantDate[]) => void;
 }
 
 function notifyLabel(
@@ -59,26 +61,24 @@ export function ContactImportantDatesSection({
   const colors = useMobileThemeColors();
   const { i18n } = useTranslation();
   const dateLocale = resolveDateLocale(i18n.language);
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const errorTitle = t("feedback.errorTitle");
 
   const canAdd = dates.length < LIMITS.maxImportantDates;
 
-  const sortedDates = useMemo(
-    () =>
-      [...dates].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
-    [dates],
+  const sortedDates = [...dates].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
   );
 
   function openAddSheet() {
     if (!canAdd) {
-      showToast({
-        description: tMobileContactIdentity("MaxDatesReached").replace(
+      notifications.show({
+        message: tMobileContactIdentity("MaxDatesReached").replace(
           "{max}",
           String(LIMITS.maxImportantDates),
         ),
-        headline: t("feedback.errorTitle"),
+        title: t("feedback.errorTitle"),
         type: "error",
       });
       return;
@@ -91,20 +91,12 @@ export function ContactImportantDatesSection({
     setSheet({ entry: dates[index], index, mode: "edit", open: true });
   }
 
-  async function persistDates(nextDates: ImportantDate[]) {
-    setIsSubmitting(true);
-
+  function persistDates(nextDates: ImportantDate[]) {
     try {
-      await onSaveDates(nextDates);
-      setSheet({ open: false });
+      onSaveDates(nextDates);
     } catch (err) {
-      showToast({
-        description: err instanceof Error ? err.message : tContactImportantDates("UpdateError"),
-        headline: tContactImportantDates("ErrorTitle"),
-        type: "error",
-      });
-    } finally {
-      setIsSubmitting(false);
+      showErrorToast(err, tContactImportantDates("ErrorTitle"));
+      throw err;
     }
   }
 
@@ -123,7 +115,7 @@ export function ContactImportantDatesSection({
       );
     }
 
-    void persistDates(nextDates);
+    persistDates(nextDates);
   }
 
   function handleDeleteEntry() {
@@ -131,8 +123,7 @@ export function ContactImportantDatesSection({
       return;
     }
 
-    const nextDates = dates.filter((_, index) => index !== sheet.index);
-    void persistDates(nextDates);
+    persistDates(dates.filter((_, index) => index !== sheet.index));
   }
 
   return (
@@ -238,16 +229,22 @@ export function ContactImportantDatesSection({
         contactFirstName={contactFirstName}
         existingDates={dates}
         initialEntry={sheet.open && sheet.mode === "edit" ? sheet.entry : null}
-        isSubmitting={isSubmitting}
         mode={sheet.open ? sheet.mode : "add"}
         onCancel={() => setSheet({ open: false })}
         onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        onError={() => {
+          notifications.show({
+            message: tContactImportantDates("ErrorTitle"),
+            title: errorTitle,
+            type: "error",
+          });
+        }}
         onOpenChange={(open) => {
           if (!open) {
             setSheet({ open: false });
           }
         }}
-        onSave={handleSaveEntry}
+        onPersist={handleSaveEntry}
         open={sheet.open}
       />
     </View>

@@ -1,8 +1,9 @@
-import { Paragraph } from "@tamagui/text";
 import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../theme/tokens";
+import { StyleSheet, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
+import { MOBILE_LAYOUT } from "../theme/layout";
 import { useMobileThemeColors } from "../theme/useMobileThemeColors";
+import { Text } from "./ui/Text";
 
 export const OVERFLOW_MENU_RADIUS = MOBILE_LAYOUT.borderRadius.control;
 
@@ -32,8 +33,6 @@ export function OverflowMenuItem({
   onPress,
 }: OverflowMenuItemProps) {
   const colors = useMobileThemeColors();
-  const labelColor = tone === "danger" ? colors.dangerAccent : colors.textPrimary;
-
   return (
     <Pressable
       accessibilityHint={hint}
@@ -50,17 +49,18 @@ export function OverflowMenuItem({
       ]}
     >
       <View style={styles.iconSlot}>{icon}</View>
-      <Paragraph
-        color={labelColor}
-        flex={1}
-        fontSize={MOBILE_TYPOGRAPHY.fontSize.bodyLarge}
-        fontWeight={MOBILE_TYPOGRAPHY.fontWeight.medium}
+      <Text
+        c="primary"
+        className="flex-1"
+        fw={500}
         numberOfLines={1}
+        size="lg"
+        style={tone === "danger" ? { color: colors.dangerAccent } : undefined}
       >
         {label}
-      </Paragraph>
+      </Text>
       {hint ? (
-        <Text numberOfLines={1} style={[styles.hint, { color: colors.textMuted }]}>
+        <Text c="muted" className="ml-2 shrink-0" numberOfLines={1} size="xs">
           {hint}
         </Text>
       ) : (
@@ -71,12 +71,6 @@ export function OverflowMenuItem({
 }
 
 const styles = StyleSheet.create({
-  hint: {
-    flexShrink: 0,
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
-    fontWeight: "400",
-    marginLeft: 8,
-  },
   hintSpacer: {
     width: 0,
   },

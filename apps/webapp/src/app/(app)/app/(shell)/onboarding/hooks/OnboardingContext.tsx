@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 
 export type OnboardingIntent = "personal" | "professional" | "both" | null;
 
@@ -15,11 +15,11 @@ const OnboardingCtx = createContext<OnboardingContextValue | null>(null);
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [intent, setIntentState] = useState<OnboardingIntent>(null);
 
-  const setIntent = useCallback((value: OnboardingIntent) => {
+  const setIntent = (value: OnboardingIntent) => {
     setIntentState(value);
-  }, []);
+  };
 
-  const value = useMemo(() => ({ intent, setIntent }), [intent, setIntent]);
+  const value = { intent, setIntent };
 
   return <OnboardingCtx.Provider value={value}>{children}</OnboardingCtx.Provider>;
 }

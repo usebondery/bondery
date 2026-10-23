@@ -37,7 +37,6 @@ export function ContactPhotoUploadButton({
       variant: "contact",
     });
   };
-
   return (
     <ContactAvatar
       avatarUrl={avatarUrl}

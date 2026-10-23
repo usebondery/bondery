@@ -2,10 +2,8 @@ import type { BottomTabBarProps } from "expo-router/js-tabs";
 import {
   createContext,
   type ReactNode,
-  useCallback,
   useContext,
   useLayoutEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -24,9 +22,10 @@ function getFocusedRouteKey(props: BottomTabBarProps): string | undefined {
 
 export function TabBarPropsProvider({ children }: { children: ReactNode }) {
   const tabBarPropsRef = useRef<BottomTabBarProps | null>(null);
+  const [tabBarProps, setTabBarProps] = useState<BottomTabBarProps | null>(null);
   const [tabBarRevision, setTabBarRevision] = useState(0);
 
-  const syncTabBarProps = useCallback((props: BottomTabBarProps) => {
+  function syncTabBarProps(props: BottomTabBarProps) {
     const previous = tabBarPropsRef.current;
     tabBarPropsRef.current = props;
 
@@ -35,18 +34,16 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
     const routeCountChanged = previous?.state.routes.length !== props.state.routes.length;
 
     if (!previous || focusChanged || routeCountChanged) {
+      setTabBarProps(props);
       setTabBarRevision((value) => value + 1);
     }
-  }, []);
+  }
 
-  const value = useMemo(
-    () => ({
-      syncTabBarProps,
-      tabBarProps: tabBarPropsRef.current,
-      tabBarRevision,
-    }),
-    [syncTabBarProps, tabBarRevision],
-  );
+  const value = {
+    syncTabBarProps,
+    tabBarProps,
+    tabBarRevision,
+  };
 
   return <TabBarPropsContext.Provider value={value}>{children}</TabBarPropsContext.Provider>;
 }

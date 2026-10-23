@@ -13,7 +13,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { AddNewTagButton } from "@/components/tags/AddNewTagButton";
 import { openTagEditorModal } from "@/components/tags/openTagEditorModal";
 import { TagPill } from "@/components/tags/TagPill";
@@ -25,6 +25,7 @@ import {
   useTagsListQuery,
 } from "@/lib/query/hooks/useTags";
 import { PERSON_ALL_TAGS } from "@/lib/query/personPageQueryParams";
+import "./PersonTagsInput.css";
 
 interface PersonTagsInputProps {
   personId: string;
@@ -48,7 +49,7 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
   const removeTagMutation = useRemoveTagFromContactMutation(personId);
   const { data: personTags = [] } = useContactTagsQuery(personId);
   const { data: allTags = [] } = useTagsListQuery(PERSON_ALL_TAGS);
-  const workspaceTags = useMemo(() => allTags.map(toTag), [allTags]);
+  const workspaceTags = allTags.map(toTag);
   const [search, setSearch] = useState("");
   const addInFlightRef = useRef<Set<string>>(new Set());
 
@@ -355,16 +356,6 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
           </Combobox.Options>
         </ScrollArea.Autosize>
       </Combobox.Dropdown>
-
-      <style global jsx>{`
-        .tags-input-combobox-option[data-combobox-selected="true"] .tags-input-option-pill {
-          transform: scale(1.03);
-        }
-        .tags-input-combobox-option[data-combobox-selected="true"] .tags-input-add-button {
-          transform: scale(1.03);
-          font-weight: 600;
-        }
-      `}</style>
     </Combobox>
   );
 }

@@ -12,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function MapPage({
   searchParams,
 }: {
-  searchParams: Promise<{ view?: string }>;
+  searchParams: Promise<{ lat?: string; lng?: string; view?: string; z?: string }>;
 }) {
   const { view } = await searchParams;
   const resolvedView: MapView = view === "addresses" ? "addresses" : "locations";

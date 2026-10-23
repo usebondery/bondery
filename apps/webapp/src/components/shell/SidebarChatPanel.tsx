@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
@@ -24,6 +25,8 @@ import { formatCompactAge } from "@/lib/chat/formatCompactAge";
 import { type ChatSessionGroupId, groupChatSessionsByAge } from "@/lib/chat/groupChatSessionsByAge";
 import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";
 import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routeChatSession } from "@/lib/navigation/route/chat";
 import { useChatSessionsQuery } from "@/lib/query/hooks/useChat";
 import {
   ITEM_PADDING,
@@ -64,7 +67,7 @@ function SessionListItem({
       h={40}
       justify="flex-start"
       ref={ref}
-      renderRoot={(props) => <Link href={`${WEBAPP_ROUTES.CHAT}/${session.id}`} {...props} />}
+      renderRoot={(props) => <Link href={routeChatSession(session.id)} {...props} />}
       style={{
         backgroundColor: isActive
           ? "var(--mantine-primary-color-filled)"
@@ -170,7 +173,7 @@ export function SidebarChatPanel() {
   }, []);
 
   function handleNewSession() {
-    router.push(WEBAPP_ROUTES.CHAT);
+    router.push(routeAssert(WEBAPP_ROUTES.CHAT));
     triggerChatReset();
   }
 

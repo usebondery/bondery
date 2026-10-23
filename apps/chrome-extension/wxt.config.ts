@@ -13,8 +13,15 @@ const { version } = require("./package.json") as { version: string };
 const parsedVersion = parseCalver(version);
 const chromeVersion = toChromeVersion(parsedVersion);
 const versionName = isRc(parsedVersion) ? toNpm(parsedVersion) : undefined;
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const extensionRoot = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(extensionRoot, "../..");
 const extensionDevOrigin = `http://127.0.0.1:${DEV_PORTS.EXTENSION}`;
+// Isolated linker + global virtual store: pin React to this app so Vite can
+// resolve peers of @mantine/* when they load from the store link path.
+const reactAlias = {
+  react: path.join(extensionRoot, "node_modules/react"),
+  "react-dom": path.join(extensionRoot, "node_modules/react-dom"),
+};
 const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
 const extensionFlavor =
   process.env.BONDERY_EXTENSION_FLAVOR === "production"
@@ -188,6 +195,7 @@ export default defineConfig({
     envPrefix: ["BONDERY_PUBLIC_", "BONDERY_EXTENSION_", "WXT_"],
     resolve: {
       alias: {
+        ...reactAlias,
         "@bondery/translations": path.join(repoRoot, "packages/translations/src"),
       },
     },

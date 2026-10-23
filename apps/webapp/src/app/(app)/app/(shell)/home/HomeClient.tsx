@@ -33,7 +33,6 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useMemo } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
 import { GettingStartedRailSlot } from "@/components/home/GettingStartedRailSlot";
@@ -48,6 +47,9 @@ import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { routeAssert } from "@/lib/navigation/route/assert";
+import { routePeopleSorted } from "@/lib/navigation/route/people";
+import { routePerson } from "@/lib/navigation/route/person";
 import { HOTKEYS } from "@/lib/platform/config";
 import {
   useHasAnyInteractionQuery,
@@ -82,10 +84,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   const currentMonth = formatter.dateTime(new Date(), { month: "long" });
   const currentYear = formatter.dateTime(new Date(), { year: "numeric" });
 
-  const contactsById = useMemo(
-    () => new Map((timelineContacts ?? []).map((contact) => [contact.id, contact])),
-    [timelineContacts],
-  );
+  const contactsById = new Map((timelineContacts ?? []).map((contact) => [contact.id, contact]));
 
   function handleLogInteraction() {
     openNewActivityModal({
@@ -103,14 +102,14 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
     [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
   ]);
 
-  const compactActivities = useMemo(() => {
+  const compactActivities = (() => {
     if (!timelineActivities) {
       return undefined;
     }
     return [...timelineActivities]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       .slice(0, 5);
-  }, [timelineActivities]);
+  })();
 
   const resolveParticipants = (activity: Activity): Contact[] => {
     return (activity.participants || [])
@@ -301,14 +300,17 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" verticalSpacing="xl">
           <Stack gap="md">
             <Group align="center" gap={4}>
-              <Link href={WEBAPP_ROUTES.INTERACTIONS} style={{ textDecoration: "none" }}>
+              <Link
+                href={routeAssert(WEBAPP_ROUTES.INTERACTIONS)}
+                style={{ textDecoration: "none" }}
+              >
                 <Title order={2}>{t("TimelinePreviewTitle")}</Title>
               </Link>
               <Tooltip label={t("TimelinePreviewTooltip")}>
                 <ActionIconLink
                   ariaLabel={t("TimelinePreviewTooltip")}
                   color="gray"
-                  href={WEBAPP_ROUTES.INTERACTIONS}
+                  href={routeAssert(WEBAPP_ROUTES.INTERACTIONS)}
                   icon={<IconInfoCircle />}
                   size="sm"
                   variant="transparent"
@@ -361,7 +363,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
               ) : (
                 <Stack gap="sm">
                   {reminders.map((reminder) => {
-                    const personHref = `${WEBAPP_ROUTES.PERSON}/${reminder.person.id}`;
+                    const personHref = routePerson(reminder.person.id);
 
                     return (
                       <UpcomingReminderCard
@@ -382,17 +384,14 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
 
             <Stack gap="md">
               <Group align="center" gap={4}>
-                <Link
-                  href={`${WEBAPP_ROUTES.PEOPLE}?sort=createdAtDesc`}
-                  style={{ textDecoration: "none" }}
-                >
+                <Link href={routePeopleSorted("createdAtDesc")} style={{ textDecoration: "none" }}>
                   <Title order={2}>{t("RecentlyAddedTitle")}</Title>
                 </Link>
                 <Tooltip label={t("RecentlyAddedTooltip")}>
                   <ActionIconLink
                     ariaLabel={t("RecentlyAddedTooltip")}
                     color="gray"
-                    href={`${WEBAPP_ROUTES.PEOPLE}?sort=createdAtDesc`}
+                    href={routePeopleSorted("createdAtDesc")}
                     icon={<IconInfoCircle />}
                     size="sm"
                     variant="transparent"
@@ -410,7 +409,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 <Group gap="sm" wrap="wrap">
                   {recentlyAdded.map((person) => (
                     <PersonChip
-                      href={`${WEBAPP_ROUTES.PERSON}/${person.id}`}
+                      href={routePerson(person.id)}
                       isClickable
                       key={person.id}
                       onNavigate={() =>
@@ -428,7 +427,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
             <Stack gap="md">
               <Group align="center" gap={4}>
                 <Link
-                  href={`${WEBAPP_ROUTES.PEOPLE}?sort=interactionDesc`}
+                  href={routePeopleSorted("interactionDesc")}
                   style={{ textDecoration: "none" }}
                 >
                   <Title order={2}>{t("RecentlyInteractedTitle")}</Title>
@@ -437,7 +436,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                   <ActionIconLink
                     ariaLabel={t("RecentlyInteractedTooltip")}
                     color="gray"
-                    href={`${WEBAPP_ROUTES.PEOPLE}?sort=interactionDesc`}
+                    href={routePeopleSorted("interactionDesc")}
                     icon={<IconInfoCircle />}
                     size="sm"
                     variant="transparent"
@@ -455,7 +454,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 <Group gap="sm" wrap="wrap">
                   {recentlyInteracted.map((person) => (
                     <PersonChip
-                      href={`${WEBAPP_ROUTES.PERSON}/${person.id}`}
+                      href={routePerson(person.id)}
                       isClickable
                       key={person.id}
                       onNavigate={() =>

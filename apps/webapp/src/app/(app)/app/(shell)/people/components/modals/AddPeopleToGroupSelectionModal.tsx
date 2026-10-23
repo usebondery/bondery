@@ -10,7 +10,7 @@ import {
   PeopleMultiPickerInput,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { GroupWithCount } from "@bondery/schemas";
+import type { Contact, ContactSelectable, GroupWithCount } from "@bondery/schemas";
 import {
   Badge,
   Box,
@@ -31,7 +31,7 @@ import {
   IconSearch,
   IconUsersGroup,
 } from "@tabler/icons-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { compoundPluralKey } from "@/lib/i18n/compoundPluralKey";
 import {
   useAddPeopleToGroupSelectionModalTranslations,
@@ -39,10 +39,7 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";
 import { createModalId, useModalDismiss } from "@/lib/modals";
-import {
-  useContactGroupsQueries,
-  useContactsSelectableListQuery,
-} from "@/lib/query/hooks/useContacts";
+import { useContactDetailsQueries, useContactGroupsQueries } from "@/lib/query/hooks/useContacts";
 import {
   useGroupsListQuery,
   useSyncContactGroupMembershipsMutation,
@@ -53,6 +50,19 @@ import { GROUP_CARD_MAX_WIDTH_BY_VARIANT, GroupCard } from "../../../groups/comp
 export interface GroupMembershipUpdate {
   groups: GroupWithCount[];
   selectedGroupIds: string[];
+}
+
+function toContactSelectable(contact: Contact): ContactSelectable {
+  return {
+    avatar: contact.avatar,
+    firstName: contact.firstName,
+    headline: contact.headline,
+    id: contact.id,
+    lastName: contact.lastName,
+    location: contact.location,
+    middleName: contact.middleName,
+    myself: contact.myself,
+  };
 }
 
 interface AddPeopleToGroupSelectionModalProps {
@@ -97,18 +107,20 @@ function AddPeopleToGroupSelectionForm({
   const [initialSelectedGroupIds, setInitialSelectedGroupIds] = useState<Set<string>>(new Set());
   const [hasInitialized, setHasInitialized] = useState(false);
 
-  const deduplicatedPersonIds = useMemo(() => Array.from(new Set(personIds)), [personIds]);
+  const deduplicatedPersonIds = Array.from(new Set(personIds));
   const {
     data: groupsData,
     isLoading: isLoadingGroups,
     isError: isGroupsError,
   } = useGroupsListQuery({ previewLimit: 3 });
   const membershipQueries = useContactGroupsQueries(deduplicatedPersonIds);
-  const {
-    data: contactsData,
-    isLoading: isLoadingContacts,
-    isError: isContactsError,
-  } = useContactsSelectableListQuery({ enabled: deduplicatedPersonIds.length > 0, limit: 200 });
+  const contactDetailQueries = useContactDetailsQueries(deduplicatedPersonIds);
+  const pickerContacts = contactDetailQueries
+    .map((query) => query.data)
+    .filter((contact): contact is Contact => Boolean(contact))
+    .map(toContactSelectable);
+  const isLoadingContacts = contactDetailQueries.some((query) => query.isLoading);
+  const isContactsError = contactDetailQueries.some((query) => query.isError);
   const syncMembershipsMutation = useSyncContactGroupMembershipsMutation();
 
   const isLoadingMemberships = membershipQueries.some((query) => query.isLoading);
@@ -141,13 +153,7 @@ function AddPeopleToGroupSelectionForm({
       return;
     }
 
-    if (
-      isLoadingGroups ||
-      isLoadingContacts ||
-      isLoadingMemberships ||
-      !groupsData ||
-      !contactsData
-    ) {
+    if (isLoadingGroups || isLoadingContacts || isLoadingMemberships || !groupsData) {
       return;
     }
 
@@ -167,16 +173,15 @@ function AddPeopleToGroupSelectionForm({
     setSelectedGroupIds(new Set(intersection));
     setHasInitialized(true);
   }, [
-    contactsData,
     groupsData,
     hasInitialized,
     isLoadingContacts,
     isLoadingGroups,
     isLoadingMemberships,
-    membershipQueries.map,
+    membershipQueries,
   ]);
 
-  const filteredGroups = useMemo(() => {
+  const filteredGroups = (() => {
     const trimmedSearch = search.trim().toLowerCase();
 
     if (!trimmedSearch) {
@@ -184,7 +189,7 @@ function AddPeopleToGroupSelectionForm({
     }
 
     return groups.filter((group) => group.label.toLowerCase().includes(trimmedSearch));
-  }, [groups, search]);
+  })();
 
   const handleToggleGroup = (groupId: string) => {
     const nextSelectedIds = new Set(selectedGroupIds);
@@ -313,7 +318,7 @@ function AddPeopleToGroupSelectionForm({
         <Stack gap="md">
           {deduplicatedPersonIds.length > 0 ? (
             <PeopleMultiPickerInput
-              contacts={contactsData?.contacts ?? []}
+              contacts={pickerContacts}
               disabled={isBlocking}
               isReadonly
               selectedIds={deduplicatedPersonIds}

@@ -1,4 +1,5 @@
 import { prisma } from "@bondery/db";
+import { resolveOAuthClientLogoUri } from "@bondery/helpers/auth/oauth-client-logo-uri";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { resolveTrustedOAuthClientIds } from "../../lib/auth/index.js";
 import { notFound } from "../../lib/platform/errors/http-errors.js";
@@ -11,7 +12,7 @@ export async function listMcpConsents(userId: string) {
   const excluded = [...firstPartyClientIds()];
   const rows = await prisma.oauthConsent.findMany({
     include: {
-      client: { select: { name: true } },
+      client: { select: { icon: true, name: true } },
     },
     orderBy: { createdAt: "desc" },
     where: {
@@ -25,6 +26,7 @@ export async function listMcpConsents(userId: string) {
     clientName: row.client.name?.trim() || row.clientId,
     createdAt: (row.createdAt ?? new Date(0)).toISOString(),
     id: row.id,
+    logoUri: resolveOAuthClientLogoUri(row.client.icon),
     scopes: row.scopes,
   }));
 

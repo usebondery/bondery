@@ -8,10 +8,10 @@ import {
   IconStar,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Text, View } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { copyPhoneToClipboard, openPhoneCall, openPhoneSms } from "../contactChannelActions";
 import {
@@ -31,7 +31,7 @@ type SheetState =
   | { open: true; mode: "edit"; index: number; entry: PhoneEntry };
 
 interface ContactPhonesSectionProps {
-  onSavePhones: (phones: PhoneEntry[]) => Promise<void>;
+  onSavePhones: (phones: PhoneEntry[]) => void;
   phones: PhoneEntry[];
 }
 
@@ -39,17 +39,15 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
   const t = useCommonTranslations();
   const tContactInfo = useContactInfoTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canAdd = phones.length < MAX_CONTACT_CHANNELS;
   const errorTitle = t("feedback.errorTitle");
 
   function openAddSheet() {
     if (!canAdd) {
-      showToast({
-        headline: tContactInfo("MaxPhonesReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
+      notifications.show({
+        title: tContactInfo("MaxPhonesReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
         type: "error",
       });
       return;
@@ -62,20 +60,16 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
     setSheet({ entry: phones[index], index, mode: "edit", open: true });
   }
 
-  async function persistPhones(nextPhones: PhoneEntry[]) {
-    setIsSubmitting(true);
-
+  function persistPhones(nextPhones: PhoneEntry[]) {
     try {
-      await onSavePhones(nextPhones);
-      setSheet({ open: false });
+      onSavePhones(nextPhones);
     } catch {
-      showToast({
-        description: tContactInfo("PhonesUpdateError"),
-        headline: errorTitle,
+      notifications.show({
+        message: tContactInfo("PhonesUpdateError"),
+        title: errorTitle,
         type: "error",
       });
-    } finally {
-      setIsSubmitting(false);
+      throw new Error("Phones update failed");
     }
   }
 
@@ -94,7 +88,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
       );
     }
 
-    void persistPhones(nextPhones);
+    persistPhones(nextPhones);
   }
 
   function handleDeleteEntry() {
@@ -103,15 +97,15 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
     }
 
     const nextPhones = phones.filter((_, index) => index !== sheet.index);
-    void persistPhones(nextPhones);
+    persistPhones(nextPhones);
   }
 
   function handleDeleteAtIndex(index: number) {
-    void persistPhones(phones.filter((_, phoneIndex) => phoneIndex !== index));
+    persistPhones(phones.filter((_, phoneIndex) => phoneIndex !== index));
   }
 
   function handleSetPreferred(index: number) {
-    void persistPhones(applyPreferredPhone(phones, index));
+    persistPhones(applyPreferredPhone(phones, index));
   }
 
   const sheetEntry =
@@ -121,14 +115,11 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
         ? createDraftPhone(phones.length === 0)
         : null;
 
-  const copyMessages = useMemo(
-    () => ({
-      errorTitle,
-      successDescription: tContactInfo("PhoneCopiedMessage"),
-      successTitle: tContactInfo("CopySuccessTitle"),
-    }),
-    [errorTitle, tContactInfo],
-  );
+  const copyMessages = {
+    errorTitle,
+    successDescription: tContactInfo("PhoneCopiedMessage"),
+    successTitle: tContactInfo("CopySuccessTitle"),
+  };
 
   return (
     <View style={contactDetailStyles.section}>
@@ -181,7 +172,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
                   icon: <IconMessage size={18} stroke={colors.iconPrimary} />,
                   id: "sms",
                   label: tContactInfo("SendSmsAction"),
-                  onPress: () => openPhoneSms(phone, showToast, errorTitle),
+                  onPress: () => openPhoneSms(phone, errorTitle),
                 },
                 {
                   disabled: !phone.value.trim(),
@@ -189,7 +180,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
                   icon: <IconPhone size={18} stroke={colors.iconPrimary} />,
                   id: "call",
                   label: tContactInfo("CallAction"),
-                  onPress: () => openPhoneCall(phone, showToast, errorTitle),
+                  onPress: () => openPhoneCall(phone, errorTitle),
                 },
                 {
                   disabled: !phone.value.trim(),
@@ -198,7 +189,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
                   id: "copy",
                   label: tContactInfo("CopyAction"),
                   onPress: () => {
-                    void copyPhoneToClipboard(phone, showToast, copyMessages);
+                    void copyPhoneToClipboard(phone, copyMessages);
                   },
                 },
                 {
@@ -222,11 +213,11 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
                   tone: "danger",
                 },
               ]}
-              onDoublePress={() => openPhoneCall(phone, showToast, errorTitle)}
+              onDoublePress={() => openPhoneCall(phone, errorTitle)}
               onLongPress={() => {
-                void copyPhoneToClipboard(phone, showToast, copyMessages);
+                void copyPhoneToClipboard(phone, copyMessages);
               }}
-              onPress={() => openPhoneSms(phone, showToast, errorTitle)}
+              onPress={() => openPhoneSms(phone, errorTitle)}
               primaryLabel={displayPhone}
               type={phone.type}
             />
@@ -236,16 +227,22 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
 
       <EditPhoneSheet
         initialEntry={sheetEntry}
-        isSubmitting={isSubmitting}
         mode={sheet.open ? sheet.mode : "add"}
         onCancel={() => setSheet({ open: false })}
         onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        onError={() => {
+          notifications.show({
+            message: tContactInfo("PhonesUpdateError"),
+            title: errorTitle,
+            type: "error",
+          });
+        }}
         onOpenChange={(open) => {
           if (!open) {
             setSheet({ open: false });
           }
         }}
-        onSave={handleSaveEntry}
+        onPersist={handleSaveEntry}
         open={sheet.open}
       />
     </View>

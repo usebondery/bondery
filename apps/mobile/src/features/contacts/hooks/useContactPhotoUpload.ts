@@ -1,13 +1,20 @@
 import * as ImagePicker from "expo-image-picker";
 import * as Network from "expo-network";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import {
   useCommonTranslations,
   useMobileContactIdentityTranslations,
 } from "@/lib/i18n/generated/hooks";
 import { deleteContactPhoto, uploadContactPhoto } from "../../../lib/api/client";
 import { AVATAR_UPLOAD } from "../../../lib/config";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import {
+  copyPickerFileToAvatar,
+  deleteLocalAvatarFile,
+  markLocalAvatarAfterUpload,
+  markLocalAvatarRemoved,
+} from "../../../lib/sync/avatar-files";
+import { notifications } from "../../../lib/toast/notifications";
+import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 
 interface UseContactPhotoUploadOptions {
   contactId: string;
@@ -20,57 +27,55 @@ export function useContactPhotoUpload({
 }: UseContactPhotoUploadOptions) {
   const tMobileContactIdentity = useMobileContactIdentityTranslations();
   const t = useCommonTranslations();
-  const { showToast } = useAppToast();
+  const showErrorToast = useShowErrorToast();
   const [isPhotoBusy, setIsPhotoBusy] = useState(false);
   const [isRemoveConfirmOpen, setRemoveConfirmOpen] = useState(false);
 
-  const ensureOnline = useCallback(async (): Promise<boolean> => {
+  async function ensureOnline(): Promise<boolean> {
     const state = await Network.getNetworkStateAsync();
     if (state.isConnected) {
       return true;
     }
-    showToast({
-      description: tMobileContactIdentity("PhotoRequiresConnection"),
-      headline: t("feedback.errorTitle"),
+    notifications.show({
+      message: tMobileContactIdentity("PhotoRequiresConnection"),
+      title: t("feedback.errorTitle"),
       type: "error",
     });
     return false;
-  }, [showToast, t, tMobileContactIdentity]);
+  }
 
-  const uploadPhoto = useCallback(
-    async (uri: string, mimeType: string) => {
-      if (!(await ensureOnline())) {
-        return;
-      }
+  async function uploadPhoto(uri: string, mimeType: string) {
+    if (!(await ensureOnline())) {
+      return;
+    }
 
-      setIsPhotoBusy(true);
+    setIsPhotoBusy(true);
+    try {
+      const { avatarUrl } = await uploadContactPhoto(contactId, uri, mimeType);
       try {
-        const { avatarUrl } = await uploadContactPhoto(contactId, uri, mimeType);
-        onAvatarUpdated(avatarUrl);
-      } catch (err) {
-        showToast({
-          description:
-            err instanceof Error ? err.message : tMobileContactIdentity("PhotoUploadFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      } finally {
-        setIsPhotoBusy(false);
+        await copyPickerFileToAvatar(contactId, uri);
+        markLocalAvatarAfterUpload(contactId, avatarUrl);
+      } catch {
+        // Pull downloads the stored JPEG if the local copy fails.
       }
-    },
-    [contactId, ensureOnline, onAvatarUpdated, showToast, t, tMobileContactIdentity],
-  );
+      onAvatarUpdated(avatarUrl);
+    } catch (err) {
+      showErrorToast(err);
+    } finally {
+      setIsPhotoBusy(false);
+    }
+  }
 
-  const choosePhotoFromLibrary = useCallback(async () => {
+  async function choosePhotoFromLibrary() {
     if (!(await ensureOnline())) {
       return;
     }
 
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!permission.granted) {
-      showToast({
-        description: tMobileContactIdentity("PhotoPermissionDenied"),
-        headline: t("feedback.errorTitle"),
+      notifications.show({
+        message: tMobileContactIdentity("PhotoPermissionDenied"),
+        title: t("feedback.errorTitle"),
         type: "error",
       });
       return;
@@ -95,18 +100,18 @@ export function useContactPhotoUpload({
         mimeType as (typeof AVATAR_UPLOAD.allowedMimeTypes)[number],
       )
     ) {
-      showToast({
-        description: tMobileContactIdentity("InvalidPhotoType"),
-        headline: t("feedback.errorTitle"),
+      notifications.show({
+        message: tMobileContactIdentity("InvalidPhotoType"),
+        title: t("feedback.errorTitle"),
         type: "error",
       });
       return;
     }
 
     await uploadPhoto(asset.uri, mimeType);
-  }, [ensureOnline, showToast, t, uploadPhoto, tMobileContactIdentity]);
+  }
 
-  const removePhoto = useCallback(async () => {
+  async function removePhoto() {
     if (!(await ensureOnline())) {
       return;
     }
@@ -114,18 +119,20 @@ export function useContactPhotoUpload({
     setIsPhotoBusy(true);
     try {
       await deleteContactPhoto(contactId);
+      try {
+        markLocalAvatarRemoved(contactId);
+      } catch {
+        deleteLocalAvatarFile(contactId);
+      }
       onAvatarUpdated(null);
       setRemoveConfirmOpen(false);
-    } catch {
-      showToast({
-        description: tMobileContactIdentity("PhotoRemoveFailed"),
-        headline: t("feedback.errorTitle"),
-        type: "error",
-      });
+    } catch (err) {
+      showErrorToast(err);
     } finally {
       setIsPhotoBusy(false);
     }
-  }, [contactId, ensureOnline, onAvatarUpdated, showToast, t, tMobileContactIdentity]);
+  }
+
   return {
     choosePhotoFromLibrary,
     isPhotoBusy,

@@ -12,10 +12,11 @@ import { Button, Center, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useContactInteractionsInfiniteQuery,
   useContactsSelectableListQuery,
@@ -53,25 +54,23 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     PERSON_SELECTABLE_CONTACTS,
   );
 
-  const selectableContacts = useMemo(
-    () => (selectableContactsData?.contacts ?? []).filter((candidate) => candidate.id !== personId),
-    [selectableContactsData?.contacts, personId],
+  const selectableContacts = (selectableContactsData?.contacts ?? []).filter(
+    (candidate) => candidate.id !== personId,
   );
 
-  const contactsById = useMemo(() => {
+  const contactsById = (() => {
     return new Map([[contact.id, contact]]);
-  }, [contact]);
+  })();
 
-  const sortedActivities = useMemo(
-    () => [...activities].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [activities],
+  const sortedActivities = [...activities].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  const activityModalContacts = useMemo(() => {
+  const activityModalContacts = (() => {
     const merged = [contact, ...selectableContacts];
     const byId = new Map(merged.map((candidate) => [candidate.id, candidate]));
     return Array.from(byId.values());
-  }, [contact, selectableContacts]);
+  })();
 
   const contactsHasMore = selectableContactsData?.pagination.hasMore ?? false;
 
@@ -95,7 +94,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     const params = new URLSearchParams(searchParams.toString());
     params.delete(NEXT_ACTION_PARAM);
     const nextUrl = params.toString() ? `${pathname}?${params.toString()}` : pathname;
-    router.replace(nextUrl);
+    router.replace(routeAssert(nextUrl));
   }, [searchParams, activityModalContacts, contact.id, contactsHasMore, pathname, router]);
 
   const handleActivityClick = (activity: Activity) => {

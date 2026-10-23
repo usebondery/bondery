@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/helpers/phone";
@@ -25,7 +26,7 @@ import {
   IconStar,
   IconTrash,
 } from "@tabler/icons-react";
-import { useEffect, useState } from "react";
+import { type KeyboardEvent, useEffect, useState } from "react";
 import { IMaskInput } from "react-imask";
 import type { ContactInfoLabels } from "@/lib/contacts/contact-info-labels";
 import { createDraftPhone, MAX_PHONE_ENTRIES } from "../../utils/contactInfoUtils";
@@ -195,7 +196,7 @@ export function ContactPhonesSection({
               mask={getTelephoneReactMaskExpression(phone.prefix || "+1")}
               onAccept={(value: string) => handlePhoneChange(index, value)}
               onBlur={saveCurrentPhones}
-              onKeyDown={(event) => {
+              onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
                   saveCurrentPhones();
@@ -314,7 +315,7 @@ export function ContactPhonesSection({
               mask={getTelephoneReactMaskExpression(draftPhone.prefix || "+1")}
               onAccept={(value: string) => handleDraftPhoneChange(value)}
               onBlur={handleCommitDraftPhone}
-              onKeyDown={(event) => {
+              onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
                 if (event.key === "Enter") {
                   event.preventDefault();
                   handleCommitDraftPhone();

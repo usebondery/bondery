@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: shift-select and selection refs must stay in sync during render
 "use client";
 
 import {
@@ -19,7 +20,7 @@ import {
   VisuallyHidden,
 } from "@mantine/core";
 import { IconChecks } from "@tabler/icons-react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { ColumnVisibilityMenu } from "#DataTable/ColumnVisibilityMenu.js";
 import { DataTableRow } from "#DataTable/DataTableRow.js";
 import { SearchInput } from "#DataTable/SearchInput.js";
@@ -76,7 +77,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   const [openedMenuRowId, setOpenedMenuRowId] = useState<string | null>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
-  // Keep mutable refs so callbacks stabilised with useCallback always read the latest values.
+  // Keep mutable refs so row handlers always read the latest selection state.
   // This prevents memoised DataTableRow components from holding stale closures after each
   // selection change (bug: clicking row B would apply state from before row A was selected).
   const onSelectOneRef = useRef(onSelectOne);
@@ -92,19 +93,18 @@ export function DataTable<TRow, TSortKey extends string = string>({
   const dataRef = useRef(data);
   dataRef.current = data;
 
-  const handleMenuOpen = useCallback((menuRowId: string) => {
+  const handleMenuOpen = (menuRowId: string) => {
     setOpenedMenuRowId(menuRowId);
-  }, []);
+  };
 
-  const handleMenuClose = useCallback(() => {
+  const handleMenuClose = () => {
     setOpenedMenuRowId(null);
-  }, []);
-
+  };
   const showSelection =
     selectedIds !== undefined &&
     (onSelectionChange !== undefined || onSelectAll !== undefined || onSelectOne !== undefined);
   const showRowActions = rowActions && rowActions.length > 0;
-  const visibleColumns = useMemo(() => columns.filter((col) => col.visible), [columns]);
+  const visibleColumns = columns.filter((col) => col.visible);
 
   // --- Selection helpers ---
   const selectableData = data.filter((row) => !nonSelectableIds?.has(getRowId(row)));
@@ -122,7 +122,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   const allSelectedRef = useRef(allSelected);
   allSelectedRef.current = allSelected;
 
-  const handleSelectAll = useCallback(() => {
+  const handleSelectAll = () => {
     if (onSelectAllRef.current) {
       onSelectAllRef.current();
       return;
@@ -141,50 +141,45 @@ export function DataTable<TRow, TSortKey extends string = string>({
       }
     }
     onSelectionChangeRef.current(newSelectedIds);
-  }, [getRowId]);
+  }; // Stable per-row handler — reads latest state/callbacks through refs.
+  const handleSelectOne = (row: TRow, rowIndex: number, options?: { shiftKey?: boolean }) => {
+    const rowId = getRowId(row);
 
-  // Stable per-row handler — reads latest state/callbacks through refs.
-  const handleSelectOne = useCallback(
-    (row: TRow, rowIndex: number, options?: { shiftKey?: boolean }) => {
-      const rowId = getRowId(row);
-
-      if (onSelectOneRef.current) {
-        onSelectOneRef.current(rowId, {
-          index: rowIndex,
-          shiftKey: options?.shiftKey,
-        });
-        lastSelectedIndexRef.current = rowIndex;
-        return;
-      }
-
-      if (!onSelectionChangeRef.current || !selectedIdsRef.current) {
-        return;
-      }
-      const newSelectedIds = new Set(selectedIdsRef.current);
-
-      if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
-        const start = Math.min(lastSelectedIndexRef.current, rowIndex);
-        const end = Math.max(lastSelectedIndexRef.current, rowIndex);
-        for (let i = start; i <= end; i++) {
-          const rangeRow = dataRef.current[i];
-          const rangeRowId = getRowId(rangeRow);
-          if (!nonSelectableIdsRef.current?.has(rangeRowId)) {
-            newSelectedIds.add(rangeRowId);
-          }
-        }
-      } else {
-        if (newSelectedIds.has(rowId)) {
-          newSelectedIds.delete(rowId);
-        } else {
-          newSelectedIds.add(rowId);
-        }
-      }
-
+    if (onSelectOneRef.current) {
+      onSelectOneRef.current(rowId, {
+        index: rowIndex,
+        shiftKey: options?.shiftKey,
+      });
       lastSelectedIndexRef.current = rowIndex;
-      onSelectionChangeRef.current(newSelectedIds);
-    },
-    [getRowId],
-  );
+      return;
+    }
+
+    if (!onSelectionChangeRef.current || !selectedIdsRef.current) {
+      return;
+    }
+    const newSelectedIds = new Set(selectedIdsRef.current);
+
+    if (options?.shiftKey && lastSelectedIndexRef.current !== null) {
+      const start = Math.min(lastSelectedIndexRef.current, rowIndex);
+      const end = Math.max(lastSelectedIndexRef.current, rowIndex);
+      for (let i = start; i <= end; i++) {
+        const rangeRow = dataRef.current[i];
+        const rangeRowId = getRowId(rangeRow);
+        if (!nonSelectableIdsRef.current?.has(rangeRowId)) {
+          newSelectedIds.add(rangeRowId);
+        }
+      }
+    } else {
+      if (newSelectedIds.has(rowId)) {
+        newSelectedIds.delete(rowId);
+      } else {
+        newSelectedIds.add(rowId);
+      }
+    }
+
+    lastSelectedIndexRef.current = rowIndex;
+    onSelectionChangeRef.current(newSelectedIds);
+  };
 
   // --- Bulk actions bar ---
   // The effective selected count accounts for filter-mode where allTotalSelected=true

@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -78,7 +79,6 @@ export function usePWAInstall(): UsePWAInstallResult {
       localStorage.setItem(PWA_INSTALLED_KEY, "true");
       setIsInstalledFromBrowser(true);
     };
-
     window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     window.addEventListener("appinstalled", handleAppInstalled);
 

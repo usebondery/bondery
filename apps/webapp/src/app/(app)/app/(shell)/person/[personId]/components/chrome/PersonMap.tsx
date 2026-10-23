@@ -1,7 +1,6 @@
 "use client";
 
 import { Stack, Text } from "@mantine/core";
-import { useMemo } from "react";
 import { PeopleMap } from "@/components/map/PeopleMap";
 import { useMapCommonTranslations } from "@/lib/i18n/generated/hooks";
 
@@ -15,7 +14,7 @@ interface PersonMapProps {
 export function PersonMap({ latitude, longitude, name, avatarUrl }: PersonMapProps) {
   const t = useMapCommonTranslations();
 
-  const markers = useMemo(() => {
+  const markers = (() => {
     return [
       {
         avatarUrl,
@@ -25,7 +24,7 @@ export function PersonMap({ latitude, longitude, name, avatarUrl }: PersonMapPro
         name,
       },
     ];
-  }, [avatarUrl, latitude, longitude, name]);
+  })();
 
   return (
     <Stack gap="sm">

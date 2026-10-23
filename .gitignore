@@ -26,6 +26,9 @@ apps/webapp/e2e/.auth/
 **/.next/
 /out/
 
+# MapLibre worker copied by apps/webapp prebuild
+apps/webapp/public/maplibre/
+
 # production
 /build
 **/dist/

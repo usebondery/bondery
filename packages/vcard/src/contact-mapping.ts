@@ -1,4 +1,5 @@
 import { cleanPersonName, extractNameParts, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
+import { normalizePhoneParts } from "@bondery/helpers/phone";
 import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import type {
   VCard,
@@ -16,17 +17,19 @@ function mapTextTypeToContactType(types: string[]): "home" | "work" {
   return types.includes("work") ? "work" : "home";
 }
 
-function splitPhoneUri(uri: string): { prefix: string; value: string } {
+function splitPhoneUri(
+  uri: string,
+  defaultCountry: string | null,
+): { prefix: string; value: string } {
   const normalized = uri.startsWith("tel:") ? uri.slice(4) : uri;
-  // Match an international prefix (+1 to +999) followed by the rest of the number.
-  // The prefix is the country code only (1-3 digits after +), not the entire number.
-  const match = normalized.match(/^(\+\d{1,3})[-\s]?(.+)$/);
-  if (!match) {
-    return { prefix: "", value: normalized };
+  const parsed = normalizePhoneParts("", normalized, { defaultCountry });
+  if ("error" in parsed) {
+    return { prefix: "", value: normalized.replace(/\D/g, "") };
   }
+
   return {
-    prefix: match[1],
-    value: match[2].replace(/^[-\s]+/, ""),
+    prefix: parsed.prefix,
+    value: parsed.value,
   };
 }
 
@@ -320,7 +323,11 @@ function parseAndroidCustomDate(property: VCardProperty): {
  * @param card Parsed and normalized vCard.
  * @returns Contact-shaped draft without repository-specific identifiers.
  */
-export function vCardToContactDraft(card: VCard): VCardContactDraft {
+export function vCardToContactDraft(
+  card: VCard,
+  options?: { defaultCountry?: string | null },
+): VCardContactDraft {
+  const defaultCountry = options?.defaultCountry ?? null;
   const name = deriveName(card);
   const bestWebsite = pickBestUrl(card.urls);
   const bestPhoto =
@@ -386,7 +393,7 @@ export function vCardToContactDraft(card: VCard): VCardContactDraft {
     middleName: name.middleName,
     notes: bestNote,
     phones: card.phones.map((phone) => {
-      const split = splitPhoneUri(phone.uri);
+      const split = splitPhoneUri(phone.uri, defaultCountry);
       return {
         preferred: normalizePreferred(phone.pref),
         prefix: split.prefix,

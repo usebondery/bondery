@@ -1,7 +1,11 @@
 import type { Contact, Group, ImportantDate, Tag } from "@bondery/schemas";
 import {
+  buildContactIdsSelectSql,
+  buildContactNamesByIdsSelectSql,
   buildContactsListQuery,
+  buildContactsListSelectSql,
   type ContactChildRows,
+  type ContactsListParams,
   mapPeopleRowToContact,
   mapSocialRowsToRecord,
   type PeopleRow,
@@ -38,34 +42,34 @@ function loadContactChildren(personId: string): ContactChildRows {
   };
 }
 
-export function listContacts(options: {
-  query?: string;
-  limit: number;
-  offset: number;
-  excludeMyself?: boolean;
-  groupId?: string;
-}): { contacts: Contact[]; totalCount: number } {
+export function listContacts(options: ContactsListParams): {
+  contacts: Contact[];
+  totalCount: number;
+} {
   const db = getSyncDatabase();
   const { fromClause, whereClause, params } = buildContactsListQuery(options);
+  const listSql = buildContactsListSelectSql(options);
 
   const countRow = db.getFirstSync<{ count: number }>(
     `SELECT COUNT(DISTINCT p.id) as count ${fromClause} ${whereClause}`,
     ...params,
   );
 
-  const rows = db.getAllSync<PeopleRow>(
-    `SELECT DISTINCT p.* ${fromClause} ${whereClause}
-     ORDER BY p.first_name ASC, p.last_name ASC
-     LIMIT ? OFFSET ?`,
-    ...params,
-    options.limit,
-    options.offset,
-  );
+  const rows = db.getAllSync<PeopleRow>(listSql.sql, ...listSql.params);
 
   return {
-    contacts: rows.map((row) => mapPeopleRowToContact(row, false)),
+    contacts: rows.map((row) =>
+      mapPeopleRowToContact({ ...row, notes: null, notes_updated_at: null }, false),
+    ),
     totalCount: countRow?.count ?? 0,
   };
+}
+
+export function listContactIds(options: ContactsListParams): string[] {
+  const db = getSyncDatabase();
+  const { params, sql } = buildContactIdsSelectSql(options);
+  const rows = db.getAllSync<{ id: string }>(sql, ...params);
+  return rows.map((row) => row.id);
 }
 
 export function getContact(personId: string): Contact | null {
@@ -94,6 +98,33 @@ export function getMyselfContactId(): string | null {
   return row?.id ?? null;
 }
 
+export function listContactNameRowsByIds(personIds: string[]): Array<{
+  firstName: string;
+  id: string;
+  lastName: string | null;
+  middleName: string | null;
+}> {
+  const query = buildContactNamesByIdsSelectSql(personIds);
+  if (!query) {
+    return [];
+  }
+
+  const db = getSyncDatabase();
+  const rows = db.getAllSync<{
+    first_name: string;
+    id: string;
+    last_name: string | null;
+    middle_name: string | null;
+  }>(query.sql, ...query.params);
+
+  return rows.map((row) => ({
+    firstName: row.first_name,
+    id: row.id,
+    lastName: row.last_name,
+    middleName: row.middle_name,
+  }));
+}
+
 export function countContacts(): number {
   const db = getSyncDatabase();
   const row = db.getFirstSync<{ count: number }>(
@@ -119,5 +150,22 @@ export function listContactTags(personId: string): Tag[] {
 }
 
 export function listContactImportantDates(personId: string): ImportantDate[] {
-  return getContact(personId)?.importantDates ?? [];
+  const db = getSyncDatabase();
+  const rows = db.getAllSync<ContactChildRows["importantDates"][number]>(
+    "SELECT id, person_id, user_id, type, date, note, notify_days_before, notify_on, created_at, updated_at FROM people_important_dates WHERE person_id = ?",
+    personId,
+  );
+
+  return rows.map((row) => ({
+    createdAt: row.created_at,
+    date: row.date,
+    id: row.id,
+    note: row.note,
+    notifyDaysBefore: row.notify_days_before as ImportantDate["notifyDaysBefore"],
+    notifyOn: row.notify_on,
+    personId: row.person_id,
+    type: row.type as ImportantDate["type"],
+    updatedAt: row.updated_at,
+    userId: row.user_id,
+  }));
 }

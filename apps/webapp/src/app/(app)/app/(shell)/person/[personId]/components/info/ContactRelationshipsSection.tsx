@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { ActionIconButton, type PeoplePickerOnSearch, PersonChip } from "@bondery/mantine-next";
@@ -8,7 +9,7 @@ import type {
 } from "@bondery/schemas";
 import { Card, Group, Select, Stack, Text, Tooltip } from "@mantine/core";
 import { IconPlus, IconTrash } from "@tabler/icons-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { usePersonRelationshipsTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/platform/config";
@@ -69,16 +70,13 @@ export function ContactRelationshipsSection({
     value: typeOption.value,
   }));
 
-  const handleSearch = useCallback<PeoplePickerOnSearch<ContactPreview>>(
-    async (query, paging) => {
-      const page = await searchContactsPage(query, paging);
-      return {
-        contacts: page.contacts.filter((c) => c.id !== currentPerson.id),
-        hasMore: page.hasMore,
-      };
-    },
-    [currentPerson.id],
-  );
+  const handleSearch: PeoplePickerOnSearch<ContactPreview> = async (query, paging) => {
+    const page = await searchContactsPage(query, paging);
+    return {
+      contacts: page.contacts.filter((c) => c.id !== currentPerson.id),
+      hasMore: page.hasMore,
+    };
+  };
 
   return (
     <Stack gap="sm">
@@ -253,19 +251,16 @@ function RelationshipCardRow({
     }
   }, [initialRelatedPerson]);
 
-  const localHandleSearch = useCallback<PeoplePickerOnSearch<ContactPreview>>(
-    async (query, paging) => {
-      if (!onSearch) {
-        return { contacts: [], hasMore: false };
-      }
-      const page = await onSearch(query, paging);
-      for (const r of page.contacts) {
-        knownRelatedPeopleRef.current.set(r.id, r);
-      }
-      return page;
-    },
-    [onSearch],
-  );
+  const localHandleSearch: PeoplePickerOnSearch<ContactPreview> = async (query, paging) => {
+    if (!onSearch) {
+      return { contacts: [], hasMore: false };
+    }
+    const page = await onSearch(query, paging);
+    for (const r of page.contacts) {
+      knownRelatedPeopleRef.current.set(r.id, r);
+    }
+    return page;
+  };
 
   const relatedPerson = relatedPersonId
     ? (selectableRelatedPeople.find((candidate) => candidate.id === relatedPersonId) ??

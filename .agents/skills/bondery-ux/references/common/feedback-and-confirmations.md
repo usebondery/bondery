@@ -35,7 +35,7 @@ Do not add success notifications (toasts, banners, snackbars, modals) when the u
 
 ## Implementation
 
-- **Mobile:** `useAppToast` for errors and invisible successes only.
+- **Mobile:** `notifications` from `apps/mobile/src/lib/toast/notifications` for errors and invisible successes only.
 - **Webapp:** Mantine `notifications` — same rule.
 - **Settings:** Changing a select/toggle is self-confirming. Revert control + error on API failure.
 - **Avoid double confirmation:** Do not combine "navigate to result" **and** "success toast". Create more **on** is not double confirmation (no navigate; an empty form is not proof). Create more **off** keeps skip-toast-when-navigate. Do not add toasts to an off path that already navigates just because the on path needs one.
@@ -62,5 +62,7 @@ Duplicating an entity (group, interaction, etc.) has no immediate on-screen chan
 | **Failure** | Update same toast to error |
 
 **Webapp:** `notifications.show` + `notifications.update` with returned `id` and `@bondery/mantine-next` templates.
+
+**Mobile:** same `show` + `update` API on `notifications` from `apps/mobile/src/lib/toast/notifications`. Loading toasts are available; group duplicate on mobile does not use them yet.
 
 **Reference:** `GroupsClient.tsx`, `useGroupDetailActions.tsx`, `InteractionsClient.tsx`, `PersonInteractionsSection.tsx`, `HomeClient.tsx`.

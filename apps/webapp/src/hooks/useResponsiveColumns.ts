@@ -1,6 +1,6 @@
 "use client";
 
-import { type RefObject, useEffect, useMemo, useState } from "react";
+import { type RefObject, useEffect, useState } from "react";
 import type { ColumnConfig } from "@/components/contacts/ContactsTableV2";
 import type { ColumnKey } from "@/lib/contacts/table-types";
 
@@ -132,7 +132,7 @@ export function useResponsiveColumns(
   }, [containerRef]);
 
   // Derive which columns to auto-hide based on container width
-  const autoHiddenKeys = useMemo<Set<ColumnKey>>(() => {
+  const autoHiddenKeys = (() => {
     // Find active breakpoint (highest minWidth that is <= containerWidth)
     const active = breakpoints
       .slice()
@@ -170,17 +170,13 @@ export function useResponsiveColumns(
     }
 
     return toHide;
-  }, [columns, containerWidth, breakpoints, pinnedKeys]);
+  })();
 
   // Build effective columns: apply responsive hiding on top of user visibility
-  const effectiveColumns = useMemo<ColumnConfig[]>(
-    () =>
-      columns.map((col) => ({
-        ...col,
-        visible: col.visible && !autoHiddenKeys.has(col.key),
-      })),
-    [columns, autoHiddenKeys],
-  );
+  const effectiveColumns = columns.map((col) => ({
+    ...col,
+    visible: col.visible && !autoHiddenKeys.has(col.key),
+  }));
 
   /**
    * Called when the user changes column visibility via the menu.

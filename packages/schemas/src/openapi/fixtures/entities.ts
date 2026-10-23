@@ -289,6 +289,7 @@ export const EXAMPLE_USER_SETTINGS = {
   aiMessagesUsed: 12,
   avatarUrl: null,
   colorScheme: "auto" as const,
+  defaultPhoneCountry: "GB",
   email: "ada@example.com",
   gettingStartedDismissedAt: EXAMPLE_ISO_TIMESTAMP,
   groupSortOrder: "alpha-asc",

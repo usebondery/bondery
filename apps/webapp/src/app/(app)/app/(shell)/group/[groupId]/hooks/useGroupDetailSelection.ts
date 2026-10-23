@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import type { Contact } from "@bondery/schemas";
@@ -37,7 +38,6 @@ export function useGroupDetailSelection({
       setSelectedIds(new Set(contacts.map((c) => c.id)));
     }
   };
-
   const handleSelectOne = (id: string, options?: { shiftKey?: boolean; index?: number }) => {
     const currentIndex = options?.index ?? contacts.findIndex((contact) => contact.id === id);
 
@@ -101,13 +101,11 @@ export function useGroupDetailSelection({
     setIsAllTotalSelected(true);
     setExcludedIds(new Set());
   };
-
   const clearSelection = () => {
     setIsAllTotalSelected(false);
     setExcludedIds(new Set());
     setSelectedIds(new Set());
   };
-
   const allSelected = isAllTotalSelected
     ? contacts.length > 0 && contacts.every((c) => !excludedIds.has(c.id))
     : contacts.length > 0 && contacts.every((c) => selectedIds.has(c.id));

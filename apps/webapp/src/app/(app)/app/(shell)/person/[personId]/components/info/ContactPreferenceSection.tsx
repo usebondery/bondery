@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { WORLD_LANGUAGES_DATA } from "@bondery/helpers/locale";

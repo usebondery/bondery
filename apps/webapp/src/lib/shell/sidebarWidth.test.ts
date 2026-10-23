@@ -79,17 +79,13 @@ describe("clampSidebarDragWidth", () => {
 });
 
 describe("parseStoredSidebarWidth", () => {
-  it("migrates the legacy collapsed cookie", () => {
-    assert.equal(parseStoredSidebarWidth(undefined, "true"), SIDEBAR_COLLAPSED_WIDTH);
-  });
-
   it("defaults to the expanded width when cookies are missing", () => {
-    assert.equal(parseStoredSidebarWidth(undefined, undefined), SIDEBAR_DEFAULT_EXPANDED_WIDTH);
+    assert.equal(parseStoredSidebarWidth(undefined), SIDEBAR_DEFAULT_EXPANDED_WIDTH);
   });
 
   it("reads a stored pixel width", () => {
-    assert.equal(parseStoredSidebarWidth("80", undefined), SIDEBAR_COLLAPSED_WIDTH);
-    assert.equal(parseStoredSidebarWidth("300", undefined), 300);
+    assert.equal(parseStoredSidebarWidth("80"), SIDEBAR_COLLAPSED_WIDTH);
+    assert.equal(parseStoredSidebarWidth("300"), 300);
   });
 });
 

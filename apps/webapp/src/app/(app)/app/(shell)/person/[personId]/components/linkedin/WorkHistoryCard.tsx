@@ -1,7 +1,7 @@
 "use client";
 
 import { formatDateRange, formatDuration } from "@bondery/helpers";
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
 import type { WorkHistoryEntry } from "@bondery/schemas";
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
@@ -24,7 +24,7 @@ export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
   const duration = formatDuration(entry.startDate, entry.endDate);
 
   const companyNameElement = entry.companyLinkedinUrl ? (
-    <AnchorLink fw={500} href={entry.companyLinkedinUrl} size="sm" target="_blank">
+    <AnchorLink fw={500} href={hrefAssert(entry.companyLinkedinUrl)} size="sm" target="_blank">
       {entry.companyName}
     </AnchorLink>
   ) : (

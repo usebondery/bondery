@@ -1,7 +1,7 @@
 "use client";
 
 import { createSocialUrl } from "@bondery/helpers";
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, hrefAssert } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
 import { Group, Space, Tooltip } from "@mantine/core";
 import {
@@ -14,7 +14,6 @@ import {
   IconPhone,
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
 import { SOCIAL_ACTION_ORDER, type SocialActionKey } from "@/lib/contacts/socialActionTooltips";
 import { useSocialActionTooltips } from "@/lib/i18n/useSocialActionTooltips";
 import { getPreferredEmail, getPreferredPhone } from "./utils/contacts-table-channel-helpers";
@@ -31,83 +30,80 @@ interface SocialLink {
 export function ContactSocialIcons({ contact }: { contact: Contact }) {
   const { getSocialActionTooltip, getSocialActionLabel } = useSocialActionTooltips();
 
-  const socialByKey: Record<SocialActionKey, SocialLink> = useMemo(
-    () => ({
-      email: {
-        color: "red",
-        disabled: (() => {
-          const emails = Array.isArray(contact.emails) ? contact.emails : [];
-          return emails.length === 0;
-        })(),
-        href: (() => {
-          const preferredEmail = getPreferredEmail(contact.emails);
-          if (preferredEmail) {
-            return `mailto:${preferredEmail.value}`;
-          }
-        })(),
-        icon: <IconMail />,
-        key: "email",
-        label: getSocialActionLabel("email"),
-      },
-      facebook: {
-        color: "blue",
-        disabled: !contact.facebook,
-        href: contact.facebook ? createSocialUrl("facebook", contact.facebook) : undefined,
-        icon: <IconBrandFacebook />,
-        key: "facebook",
-        label: getSocialActionLabel("facebook"),
-      },
-      instagram: {
-        color: "pink",
-        disabled: !contact.instagram,
-        href: contact.instagram ? createSocialUrl("instagram", contact.instagram) : undefined,
-        icon: <IconBrandInstagram />,
-        key: "instagram",
-        label: getSocialActionLabel("instagram"),
-      },
-      linkedin: {
-        color: "blue",
-        disabled: !contact.linkedin,
-        href: contact.linkedin ? createSocialUrl("linkedin", contact.linkedin) : undefined,
-        icon: <IconBrandLinkedin />,
-        key: "linkedin",
-        label: getSocialActionLabel("linkedin"),
-      },
-      phone: {
-        color: "blue",
-        disabled: (() => {
-          const phones = Array.isArray(contact.phones) ? contact.phones : [];
-          return phones.length === 0;
-        })(),
-        href: (() => {
-          const preferredPhone = getPreferredPhone(contact.phones);
-          if (preferredPhone) {
-            return `tel:${preferredPhone.prefix || ""}${preferredPhone.value}`;
-          }
-        })(),
-        icon: <IconPhone />,
-        key: "phone",
-        label: getSocialActionLabel("phone"),
-      },
-      signal: {
-        color: "indigo",
-        disabled: !contact.signal,
-        href: contact.signal || undefined,
-        icon: <IconBrandSignal />,
-        key: "signal",
-        label: getSocialActionLabel("signal"),
-      },
-      whatsapp: {
-        color: "green",
-        disabled: !contact.whatsapp,
-        href: contact.whatsapp ? createSocialUrl("whatsapp", contact.whatsapp) : undefined,
-        icon: <IconBrandWhatsapp />,
-        key: "whatsapp",
-        label: getSocialActionLabel("whatsapp"),
-      },
-    }),
-    [contact, getSocialActionLabel],
-  );
+  const socialByKey: Record<SocialActionKey, SocialLink> = {
+    email: {
+      color: "red",
+      disabled: (() => {
+        const emails = Array.isArray(contact.emails) ? contact.emails : [];
+        return emails.length === 0;
+      })(),
+      href: (() => {
+        const preferredEmail = getPreferredEmail(contact.emails);
+        if (preferredEmail) {
+          return `mailto:${preferredEmail.value}`;
+        }
+      })(),
+      icon: <IconMail />,
+      key: "email",
+      label: getSocialActionLabel("email"),
+    },
+    facebook: {
+      color: "blue",
+      disabled: !contact.facebook,
+      href: contact.facebook ? createSocialUrl("facebook", contact.facebook) : undefined,
+      icon: <IconBrandFacebook />,
+      key: "facebook",
+      label: getSocialActionLabel("facebook"),
+    },
+    instagram: {
+      color: "pink",
+      disabled: !contact.instagram,
+      href: contact.instagram ? createSocialUrl("instagram", contact.instagram) : undefined,
+      icon: <IconBrandInstagram />,
+      key: "instagram",
+      label: getSocialActionLabel("instagram"),
+    },
+    linkedin: {
+      color: "blue",
+      disabled: !contact.linkedin,
+      href: contact.linkedin ? createSocialUrl("linkedin", contact.linkedin) : undefined,
+      icon: <IconBrandLinkedin />,
+      key: "linkedin",
+      label: getSocialActionLabel("linkedin"),
+    },
+    phone: {
+      color: "blue",
+      disabled: (() => {
+        const phones = Array.isArray(contact.phones) ? contact.phones : [];
+        return phones.length === 0;
+      })(),
+      href: (() => {
+        const preferredPhone = getPreferredPhone(contact.phones);
+        if (preferredPhone) {
+          return `tel:${preferredPhone.prefix || ""}${preferredPhone.value}`;
+        }
+      })(),
+      icon: <IconPhone />,
+      key: "phone",
+      label: getSocialActionLabel("phone"),
+    },
+    signal: {
+      color: "indigo",
+      disabled: !contact.signal,
+      href: contact.signal || undefined,
+      icon: <IconBrandSignal />,
+      key: "signal",
+      label: getSocialActionLabel("signal"),
+    },
+    whatsapp: {
+      color: "green",
+      disabled: !contact.whatsapp,
+      href: contact.whatsapp ? createSocialUrl("whatsapp", contact.whatsapp) : undefined,
+      icon: <IconBrandWhatsapp />,
+      key: "whatsapp",
+      label: getSocialActionLabel("whatsapp"),
+    },
+  };
 
   const socials: SocialLink[] = SOCIAL_ACTION_ORDER.map((key) => socialByKey[key]);
 
@@ -130,7 +126,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
               <ActionIconLink
                 ariaLabel={social.label}
                 color={social.color}
-                href={social.href}
+                href={social.href ? hrefAssert(social.href) : undefined}
                 icon={social.icon}
                 size="md"
                 target={social.href?.startsWith("http") ? "_blank" : undefined}

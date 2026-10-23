@@ -5,7 +5,7 @@ import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
@@ -30,7 +30,7 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
   const tCommon = useCommonTranslations();
   const [busyAction, setBusyAction] = useState<LoginBusyAction>(null);
   const runtimeConfig = useWebappRuntimeConfig();
-  const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
+  const authClient = createWebappAuthClient(runtimeConfig);
   const { webappUrl, websiteUrl } = runtimeConfig;
   const origin = typeof window === "undefined" ? webappUrl : window.location.origin;
   const search = typeof window === "undefined" ? "" : window.location.search;

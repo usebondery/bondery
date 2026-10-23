@@ -5,7 +5,10 @@ import {
   vcardParseResponseSchema,
 } from "@bondery/schemas";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { domainDb } from "../../../domains/_shared/domain-db.js";
 import { commitVCardImport } from "../../../domains/import/vcard.js";
+import { loadDefaultPhoneCountryForUser } from "../../../lib/me/default-phone-country.js";
+import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import { badRequest } from "../../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../../lib/platform/openapi/responses.js";
@@ -48,7 +51,9 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
           });
         }
 
-        const contacts = await parseVCardUpload(files);
+        const ctx = domainContextFromRequest(request);
+        const defaultCountry = await loadDefaultPhoneCountryForUser(domainDb(ctx), ctx.user.id);
+        const contacts = await parseVCardUpload(files, defaultCountry);
 
         const response: VCardParseResponse = {
           contacts,

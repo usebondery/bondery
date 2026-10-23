@@ -5,6 +5,13 @@
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM"],
     "outDir": "./dist",
+    // Force one Fastify module identity so plugin augmentations
+    // (@fastify/swagger, multipart, websocket, rate-limit) apply under
+    // nodeLinker: isolated + enableGlobalVirtualStore.
+    "paths": {
+      "fastify": ["./node_modules/fastify"],
+      "fastify/*": ["./node_modules/fastify/*"]
+    },
     "rootDir": "./src",
     "types": ["node"]
   },

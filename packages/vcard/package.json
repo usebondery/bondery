@@ -90,12 +90,12 @@
   "name": "@bondery/vcard",
   "private": true,
   "scripts": {
-    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs vcard",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs vcard",
     "check:types": "tsc --noEmit",
     "compile": "tsc",
     "dev": "tsc --watch --preserveWatchOutput"
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.2"
+  "version": "1.11.0-rc.1"
 }

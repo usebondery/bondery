@@ -6,7 +6,7 @@ import { spawn, spawnSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { API_ROUTES } from "../../packages/helpers/src/globals/paths.ts";
-import { DEV_PORTS } from "../../packages/schemas/src/constants/dev-ports.ts";
+import { DEV_URLS } from "../../packages/schemas/src/constants/dev-ports.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -39,8 +39,9 @@ function resolveStripeCommand(): StripeCommand {
   return { command: "cmd.exe", prefixArgs: ["/d", "/s", "/c", "stripe"] };
 }
 
+/** Stripe CLI `--forward-to` target. Uses Portless HTTPS when the API runs via `pnpm run dev`. */
 export function stripeListenForwardUrl(): string {
-  return `http://127.0.0.1:${DEV_PORTS.API}${API_ROUTES.WEBHOOKS_STRIPE}`;
+  return `${DEV_URLS.api}${API_ROUTES.WEBHOOKS_STRIPE}`;
 }
 
 export function repoRootFromScripts(): string {

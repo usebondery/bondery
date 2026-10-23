@@ -13,8 +13,7 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
-    "target": "ES2020",
-    "types": ["node"]
+    "target": "ES2020"
   },
   "exclude": ["**/*.test.ts", "scripts/**"],
   "extends": "expo/tsconfig.base",

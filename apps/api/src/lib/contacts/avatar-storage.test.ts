@@ -1,12 +1,17 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
+import type { PrismaClient } from "@bondery/db";
 import { createMemoryStorage } from "../../test/memory-storage.js";
 import {
   AVATARS_BUCKET,
   resetStorageForTests,
   setStorageForTests,
 } from "../storage/get-storage.js";
-import { areContactAvatarFilesIdentical, getContactAvatarStoragePath } from "./avatar-storage.js";
+import {
+  areContactAvatarFilesIdentical,
+  getContactAvatarStoragePath,
+  setContactHasAvatar,
+} from "./avatar-storage.js";
 
 const USER_ID = "user-1";
 const LEFT_ID = "11111111-1111-4111-8111-111111111111";
@@ -58,5 +63,41 @@ describe("areContactAvatarFilesIdentical", () => {
     );
 
     assert.equal(await areContactAvatarFilesIdentical(USER_ID, LEFT_ID, RIGHT_ID), true);
+  });
+});
+
+describe("setContactHasAvatar", () => {
+  it("sets avatarUpdatedAt when hasAvatar is true", async () => {
+    const calls: unknown[] = [];
+    const db = {
+      people: {
+        updateMany: async (args: unknown) => {
+          calls.push(args);
+        },
+      },
+    };
+
+    await setContactHasAvatar(db as PrismaClient, USER_ID, LEFT_ID, true);
+
+    const data = (calls[0] as { data: { hasAvatar: boolean; avatarUpdatedAt: Date | null } }).data;
+    assert.equal(data.hasAvatar, true);
+    assert.equal(data.avatarUpdatedAt instanceof Date, true);
+  });
+
+  it("clears avatarUpdatedAt when hasAvatar is false", async () => {
+    const calls: unknown[] = [];
+    const db = {
+      people: {
+        updateMany: async (args: unknown) => {
+          calls.push(args);
+        },
+      },
+    };
+
+    await setContactHasAvatar(db as PrismaClient, USER_ID, LEFT_ID, false);
+
+    const data = (calls[0] as { data: { hasAvatar: boolean; avatarUpdatedAt: Date | null } }).data;
+    assert.equal(data.hasAvatar, false);
+    assert.equal(data.avatarUpdatedAt, null);
   });
 });

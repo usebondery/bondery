@@ -1,19 +1,19 @@
 import type { Contact } from "@bondery/schemas";
 import { IconPencil } from "@tabler/icons-react-native";
-import { Image, Pressable, Text, View } from "react-native";
+import { View } from "react-native";
+import Animated from "react-native-reanimated";
+import { Pressable } from "@/components/ui/Pressable";
 import {
-  useCommonTranslations,
   useContactInfoTranslations,
   useMobileContactIdentityTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { normalizeMobileUrlForDevice } from "../../../lib/config";
+import { PersonAvatar } from "../../../components/PersonAvatar";
+import { Heading } from "../../../components/ui/Heading";
+import { Text } from "../../../components/ui/Text";
+import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
+import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import {
-  formatContactLocation,
-  formatContactName,
-  getAvatarColorHex,
-  getContactInitials,
-} from "../contactUtils";
+import { formatContactLocation, formatContactName } from "../contactUtils";
 import { contactDetailScreenStyles as styles } from "./contactDetailScreenStyles";
 import { contactDetailStyles } from "./contactDetailStyles";
 
@@ -30,11 +30,7 @@ export function ContactDetailHeroSection({
 }: ContactDetailHeroSectionProps) {
   const tContactInfo = useContactInfoTranslations();
   const tMobileContactIdentity = useMobileContactIdentityTranslations();
-  const _t = useCommonTranslations();
-  const initials = getContactInitials(contact);
-  const avatarColor = getAvatarColorHex(contact);
-  const avatarUri = contact.avatar ? normalizeMobileUrlForDevice(contact.avatar) : null;
-  const shouldShowAvatarImage = Boolean(avatarUri);
+  const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
   const name = formatContactName(contact);
   const locationLabel = formatContactLocation(contact);
 
@@ -42,45 +38,39 @@ export function ContactDetailHeroSection({
     <View style={styles.heroSection}>
       <View style={contactDetailStyles.sectionHeaderRow}>
         <View style={styles.heroHeaderSpacer} />
-        <Pressable
-          accessibilityLabel={tMobileContactIdentity("EditProfile")}
-          accessibilityRole="button"
-          onPress={onEditPress}
-          style={contactDetailStyles.sectionHeaderAction}
-        >
-          <IconPencil size={16} stroke={colors.primary} />
-          <Text style={[contactDetailStyles.sectionHeaderActionText, { color: colors.primary }]}>
-            {tContactInfo("EditAction")}
-          </Text>
-        </Pressable>
+        <Animated.View style={squeezeStyle}>
+          <Pressable
+            accessibilityLabel={tMobileContactIdentity("EditProfile")}
+            accessibilityRole="button"
+            onPress={onEditPress}
+            onPressIn={pressIn}
+            onPressOut={pressOut}
+            style={contactDetailStyles.sectionHeaderAction}
+          >
+            <IconPencil size={16} stroke={colors.primary} />
+            <Text c="brand" fw={600} size="md">
+              {tContactInfo("EditAction")}
+            </Text>
+          </Pressable>
+        </Animated.View>
       </View>
 
       <View style={styles.hero}>
-        <View
-          style={[
-            styles.avatarCircle,
-            { backgroundColor: colors.surfacePressed },
-            !shouldShowAvatarImage && { backgroundColor: avatarColor },
-          ]}
-        >
-          {shouldShowAvatarImage ? (
-            <Image
-              resizeMode="cover"
-              source={{ uri: avatarUri || undefined }}
-              style={styles.avatarImage}
-            />
-          ) : (
-            <Text style={[styles.avatarInitial, { color: colors.textOnPrimary }]}>{initials}</Text>
-          )}
+        <View style={styles.heroAvatarWrap}>
+          <PersonAvatar person={contact} size={MOBILE_LAYOUT.avatar.hero} uri={contact.avatar} />
         </View>
-        <Text style={[styles.heroName, { color: colors.textPrimary }]}>{name}</Text>
+        <Heading className="text-center text-[24px]" order={2} ta="center">
+          {name}
+        </Heading>
         {contact.headline ? (
-          <Text style={[styles.heroHeadline, { color: colors.textSecondary }]}>
+          <Text c="secondary" className="text-center" size="md" ta="center">
             {contact.headline}
           </Text>
         ) : null}
         {locationLabel ? (
-          <Text style={[styles.heroPlace, { color: colors.textMuted }]}>{locationLabel}</Text>
+          <Text c="muted" className="text-center" size="xs" ta="center">
+            {locationLabel}
+          </Text>
         ) : null}
       </View>
     </View>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ActionIconLink } from "@bondery/mantine-next";
+import { ActionIconLink, hrefAssert } from "@bondery/mantine-next";
 import { Popover, Tooltip } from "@mantine/core";
 import type { ReactNode } from "react";
 
@@ -78,7 +78,7 @@ export function SocialPopoverButton({
               ariaLabel={ariaLabel}
               color={color}
               disabled={disabled && !loading}
-              href={canNavigate ? href : undefined}
+              href={canNavigate && href ? hrefAssert(href) : undefined}
               icon={icon}
               loading={loading}
               onClick={() => {

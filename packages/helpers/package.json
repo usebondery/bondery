@@ -9,8 +9,10 @@
   "description": "Shared runtime utilities and form normalization pipelines for Bondery. Depends on @bondery/schemas.",
   "devDependencies": {
     "@bondery/typescript-config": "workspace:*",
+    "@types/node": "^26.1.2",
     "dotenv": "^18.0.5",
     "rimraf": "^6.1.3",
+    "tsx": "4.23.15",
     "typescript": "^7.0.2"
   },
   "exports": {
@@ -103,6 +105,18 @@
       "import": "./dist/api/types.js",
       "node": "./dist/api/types.js",
       "types": "./src/api/types.ts"
+    },
+    "./auth/oauth-client-logo-uri": {
+      "default": "./dist/auth/oauth-client-logo-uri.js",
+      "import": "./dist/auth/oauth-client-logo-uri.js",
+      "node": "./dist/auth/oauth-client-logo-uri.js",
+      "types": "./src/auth/oauth-client-logo-uri.ts"
+    },
+    "./auth/oauth-client-logo-uri.test": {
+      "default": "./dist/auth/oauth-client-logo-uri.test.js",
+      "import": "./dist/auth/oauth-client-logo-uri.test.js",
+      "node": "./dist/auth/oauth-client-logo-uri.test.js",
+      "types": "./src/auth/oauth-client-logo-uri.test.ts"
     },
     "./auth/oauth-providers": {
       "default": "./dist/auth/oauth-providers.js",
@@ -217,6 +231,18 @@
       "import": "./dist/date/date-utils.js",
       "node": "./dist/date/date-utils.js",
       "types": "./src/date/date-utils.ts"
+    },
+    "./dev/mcp-inspector-cimd": {
+      "default": "./dist/dev/mcp-inspector-cimd.js",
+      "import": "./dist/dev/mcp-inspector-cimd.js",
+      "node": "./dist/dev/mcp-inspector-cimd.js",
+      "types": "./src/dev/mcp-inspector-cimd.ts"
+    },
+    "./dev/mcp-inspector-cimd.test": {
+      "default": "./dist/dev/mcp-inspector-cimd.test.js",
+      "import": "./dist/dev/mcp-inspector-cimd.test.js",
+      "node": "./dist/dev/mcp-inspector-cimd.test.js",
+      "types": "./src/dev/mcp-inspector-cimd.test.ts"
     },
     "./docs": {
       "default": "./dist/docs/index.js",
@@ -718,7 +744,7 @@
   "name": "@bondery/helpers",
   "private": true,
   "scripts": {
-    "build": "node ../../scripts/pkg/generate-doc-links.mjs && rimraf dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs helpers",
+    "build": "node ../../scripts/pkg/generate-doc-links.mjs && node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs helpers",
     "check:types": "tsc --noEmit",
     "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs helpers",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs helpers",
@@ -727,5 +753,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.2"
+  "version": "1.11.0-rc.1"
 }

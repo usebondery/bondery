@@ -1,5 +1,6 @@
 import { useIsFocused } from "expo-router";
 import { useEffect } from "react";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { useFloatingChrome } from "../../navigation/floatingChromeContext";
 import { useContactsSelectionMode } from "../contactsSelectionStore";
 
@@ -13,11 +14,15 @@ export function ContactsSelectionChromeRegistrar() {
 
   useEffect(() => {
     if (!selectionMode || !isFocused) {
-      clearActionBarSlot();
+      syncEffectState(() => {
+        clearActionBarSlot();
+      });
       return;
     }
 
-    setActionBarSlot("contacts-selection");
+    syncEffectState(() => {
+      setActionBarSlot("contacts-selection");
+    });
 
     return () => {
       clearActionBarSlot();

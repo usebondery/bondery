@@ -1,3 +1,5 @@
+import "server-only";
+
 /**
  * Server-only website config. Import from Server Components, route handlers, and
  * metadata — not from `"use client"` modules. Pass values into clients as props.

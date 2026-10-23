@@ -8,7 +8,7 @@ import type {
 } from "@bondery/schemas";
 import { firstZodErrorMessage, replaceImportantDatesSchema } from "@bondery/schemas";
 import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { Linking } from "react-native";
 import {
   useCommonTranslations,
@@ -19,8 +19,12 @@ import {
   putContactImportantDates,
   updateContact,
 } from "../../../lib/domains/contacts";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { goBackOrReplace } from "../../../lib/navigation/goBackOrReplace";
+import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
 import { ShareUnavailableError, shareContactVCard } from "../../../lib/share/shareContactVCard";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
+import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 import { normalizeEmailsForSave, normalizePhonesForSave } from "../contactChannelConstants";
 import { formatContactName } from "../contactUtils";
 
@@ -38,8 +42,8 @@ export function useContactDetailHandlers({
   const tMobileContactDetail = useMobileContactDetailTranslations();
   const t = useCommonTranslations();
   const router = useRouter();
-  const { showToast } = useAppToast();
-  const [isDeleting, setIsDeleting] = useState(false);
+  const { openContactNotes, openMyselfNotes } = useAppNavigation();
+  const showErrorToast = useShowErrorToast();
   const [isSharing, setIsSharing] = useState(false);
   const [isDeleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [isShareEmailSheetOpen, setShareEmailSheetOpen] = useState(false);
@@ -47,7 +51,7 @@ export function useContactDetailHandlers({
 
   const name = formatContactName(contact);
 
-  const shareContact = useCallback(() => {
+  function shareContact() {
     void (async () => {
       setIsSharing(true);
 
@@ -59,173 +63,146 @@ export function useContactDetailHandlers({
         });
       } catch (err) {
         if (err instanceof ShareUnavailableError) {
-          showToast({
-            headline: tMobileContactDetail("ShareUnavailable"),
+          notifications.show({
+            title: tMobileContactDetail("ShareUnavailable"),
             type: "error",
           });
           return;
         }
 
-        showToast({
-          description: tMobileContactDetail("ShareFailedDescription"),
-          headline: tMobileContactDetail("ShareFailed"),
-          type: "error",
-        });
+        showErrorToast(err, tMobileContactDetail("ShareFailed"));
       } finally {
         setIsSharing(false);
       }
     })();
-  }, [contact, name, showToast, tMobileContactDetail]);
+  }
 
-  const handleDeleteContact = useCallback(() => {
-    void (async () => {
-      setIsDeleting(true);
+  function handleCloseDeleteConfirm() {
+    setDeleteConfirmOpen(false);
+  }
 
-      try {
-        deleteContact(contact.id, contact.updatedAt ?? undefined);
-        setDeleteConfirmOpen(false);
-        router.back();
-      } catch {
-        showToast({
-          description: tMobileContactDetail("DeleteFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      } finally {
-        setIsDeleting(false);
-      }
-    })();
-  }, [contact.id, contact.updatedAt, router, showToast, t, tMobileContactDetail]);
+  function performDeleteContact() {
+    deleteContact(contact.id, contact.updatedAt ?? undefined);
+  }
 
-  const handleUpdateSocial = useCallback(
-    async (platform: ContactSocialFieldKey, value: string) => {
-      updateContact(
-        contact.id,
-        {
-          [platform]: value,
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleDeleteSuccess() {
+    goBackOrReplace(router, "/contacts");
+  }
 
-  const handleSavePhones = useCallback(
-    async (nextPhones: PhoneEntry[]) => {
-      updateContact(
-        contact.id,
-        {
-          phones: normalizePhonesForSave(nextPhones),
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleDeleteError(error: unknown) {
+    showErrorToast(error);
+  }
 
-  const handleSaveEmails = useCallback(
-    async (nextEmails: EmailEntry[]) => {
-      updateContact(
-        contact.id,
-        {
-          emails: normalizeEmailsForSave(nextEmails),
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  const { isSubmitting: isDeleting, submit: submitDelete } = useSheetLocalAction({
+    onClose: handleCloseDeleteConfirm,
+    onError: handleDeleteError,
+    onSuccess: handleDeleteSuccess,
+    perform: performDeleteContact,
+  });
 
-  const handleSaveAddresses = useCallback(
-    async (nextAddresses: ContactAddressEntry[]) => {
-      updateContact(
-        contact.id,
-        {
-          addresses: nextAddresses,
-        },
-        contact.updatedAt ?? undefined,
-      );
-      onContactUpdated();
-    },
-    [contact.id, contact.updatedAt, onContactUpdated],
-  );
+  function handleUpdateSocial(platform: ContactSocialFieldKey, value: string) {
+    updateContact(
+      contact.id,
+      {
+        [platform]: value,
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
 
-  const openPhone = useCallback(
-    (phone: PhoneEntry) => {
-      Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
-        showToast({
-          description: "Could not open phone dialer",
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
+  function handleSavePhones(nextPhones: PhoneEntry[]) {
+    updateContact(
+      contact.id,
+      {
+        phones: normalizePhonesForSave(nextPhones),
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
+
+  function handleSaveEmails(nextEmails: EmailEntry[]) {
+    updateContact(
+      contact.id,
+      {
+        emails: normalizeEmailsForSave(nextEmails),
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
+
+  function handleSaveAddresses(nextAddresses: ContactAddressEntry[]) {
+    updateContact(
+      contact.id,
+      {
+        addresses: nextAddresses,
+      },
+      contact.updatedAt ?? undefined,
+    );
+    onContactUpdated();
+  }
+
+  function openPhone(phone: PhoneEntry) {
+    Linking.openURL(`tel:${phone.prefix}${phone.value}`).catch(() => {
+      notifications.show({
+        message: "Could not open phone dialer",
+        title: t("feedback.errorTitle"),
+        type: "error",
       });
-    },
-    [showToast, t],
-  );
+    });
+  }
 
-  const openSms = useCallback(
-    (phone: PhoneEntry) => {
-      Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
-        showToast({
-          description: "Could not open messages",
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
+  function openSms(phone: PhoneEntry) {
+    Linking.openURL(`sms:${phone.prefix}${phone.value}`).catch(() => {
+      notifications.show({
+        message: "Could not open messages",
+        title: t("feedback.errorTitle"),
+        type: "error",
       });
-    },
-    [showToast, t],
-  );
+    });
+  }
 
-  const openEmail = useCallback(
-    (email: EmailEntry) => {
-      Linking.openURL(`mailto:${email.value}`).catch(() => {
-        showToast({
-          description: "Could not open email app",
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
+  function openEmail(email: EmailEntry) {
+    Linking.openURL(`mailto:${email.value}`).catch(() => {
+      notifications.show({
+        message: "Could not open email app",
+        title: t("feedback.errorTitle"),
+        type: "error",
       });
-    },
-    [showToast, t],
-  );
+    });
+  }
 
-  const handleSaveImportantDates = useCallback(
-    (nextDates: ImportantDate[]): Promise<void> => {
-      const payload = nextDates
-        .filter((entry) => entry.date)
-        .map((entry) => ({
-          date: entry.date,
-          id: entry.id || undefined,
-          note: entry.note,
-          notifyDaysBefore: entry.notifyDaysBefore ?? null,
-          type: entry.type,
-        }));
+  function handleSaveImportantDates(nextDates: ImportantDate[]) {
+    const payload = nextDates
+      .filter((entry) => entry.date)
+      .map((entry) => ({
+        date: entry.date,
+        id: entry.id || undefined,
+        note: entry.note,
+        notifyDaysBefore: entry.notifyDaysBefore ?? null,
+        type: entry.type,
+      }));
 
-      const parsed = replaceImportantDatesSchema.safeParse(payload);
-      if (!parsed.success) {
-        throw new Error(firstZodErrorMessage(parsed.error));
-      }
-
-      putContactImportantDates(contact.id, parsed.data);
-      onContactUpdated();
-      return Promise.resolve();
-    },
-    [contact.id, onContactUpdated],
-  );
-
-  const openNotesEditor = useCallback(() => {
-    if (isMyselfMode) {
-      router.push("/myself/notes");
-    } else {
-      router.push(`/contact/${contact.id}/notes`);
+    const parsed = replaceImportantDatesSchema.safeParse(payload);
+    if (!parsed.success) {
+      throw new Error(firstZodErrorMessage(parsed.error));
     }
-  }, [contact.id, isMyselfMode, router]);
+
+    putContactImportantDates(contact.id, parsed.data);
+    onContactUpdated();
+  }
+
+  function openNotesEditor() {
+    if (isMyselfMode) {
+      openMyselfNotes();
+    } else {
+      openContactNotes(contact.id);
+    }
+  }
 
   return {
-    handleDeleteContact,
     handleSaveAddresses,
     handleSaveEmails,
     handleSaveImportantDates,
@@ -245,5 +222,6 @@ export function useContactDetailHandlers({
     setIdentitySheetOpen,
     setShareEmailSheetOpen,
     shareContact,
+    submitDelete,
   };
 }

@@ -1,7 +1,17 @@
 import { WEBAPP_ROUTES, WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
+import type { Route } from "next";
 import { REQUEST_PATHNAME_HEADER, REQUEST_SEARCH_HEADER } from "@/lib/auth/constants";
 
 export const RETURN_INTENT_PARAM = "redirect";
+
+declare const safeAppReturnPathBrand: unique symbol;
+
+/** Return path validated by {@link isSafeReturnPath} or capture helpers. */
+export type SafeAppReturnPath = string & { readonly [safeAppReturnPathBrand]: true };
+
+export function routeFromReturn(safePath: SafeAppReturnPath): Route {
+  return safePath as Route;
+}
 
 const MAX_RETURN_PATH_LENGTH = 2_048;
 
@@ -29,7 +39,7 @@ export function buildPathWithSearch(pathname: string, search?: string | null): s
   return search.startsWith("?") ? `${pathname}${search}` : `${pathname}?${search}`;
 }
 
-export function isSafeReturnPath(path: string | null | undefined): path is string {
+export function isSafeReturnPath(path: string | null | undefined): path is SafeAppReturnPath {
   if (!path || path.length > MAX_RETURN_PATH_LENGTH) {
     return false;
   }
@@ -51,8 +61,12 @@ export function isSafeReturnPath(path: string | null | undefined): path is strin
   return true;
 }
 
+function narrowSafeReturnPath(path: string): SafeAppReturnPath | null {
+  return isSafeReturnPath(path) ? path : null;
+}
+
 /** Extracts a safe return path, forwarding `redirect` when currently on unavailable. */
-export function captureReturnPath(path: string): string | null {
+export function captureReturnPath(path: string): SafeAppReturnPath | null {
   if (path.startsWith(WEBAPP_ROUTES.UNAVAILABLE)) {
     const queryIndex = path.indexOf("?");
     if (queryIndex >= 0) {
@@ -63,19 +77,21 @@ export function captureReturnPath(path: string): string | null {
     return null;
   }
 
-  return isSafeReturnPath(path) ? path : null;
+  return narrowSafeReturnPath(path);
 }
 
-export function parseReturnIntent(searchParams: SearchParamsLike): string | null {
+export function parseReturnIntent(searchParams: SearchParamsLike): SafeAppReturnPath | null {
   const raw = searchParams.get(RETURN_INTENT_PARAM);
-  return isSafeReturnPath(raw) ? raw : null;
+  return raw && isSafeReturnPath(raw) ? raw : null;
 }
 
-function shouldPreserveReturnIntent(path: string | null | undefined): path is string {
+function shouldPreserveReturnIntent(
+  path: SafeAppReturnPath | null | undefined,
+): path is SafeAppReturnPath {
   return Boolean(path && isSafeReturnPath(path) && !DEFAULT_POST_LOGIN_PATHS.has(path));
 }
 
-export function buildLoginUrl(returnPath?: string | null): string {
+export function buildLoginUrl(returnPath?: SafeAppReturnPath | null): string {
   const captured = returnPath ? captureReturnPath(returnPath) : null;
   if (!shouldPreserveReturnIntent(captured)) {
     return WEBSITE_ROUTES.LOGIN;
@@ -101,7 +117,7 @@ export function captureClientReturnPath(): string {
   return buildPathWithSearch(window.location.pathname, window.location.search);
 }
 
-export function getClientReturnPathForLogin(): string | null {
+export function getClientReturnPathForLogin(): SafeAppReturnPath | null {
   return captureReturnPath(captureClientReturnPath());
 }
 
@@ -113,11 +129,13 @@ export function getRequestReturnPath(headersList: { get(name: string): string | 
 
 export function getRequestReturnPathForLogin(headersList: {
   get(name: string): string | null;
-}): string | null {
+}): SafeAppReturnPath | null {
   return captureReturnPath(getRequestReturnPath(headersList));
 }
 
-export function shouldBypassOnboardingForReturnPath(path: string | null): path is string {
+export function shouldBypassOnboardingForReturnPath(
+  path: SafeAppReturnPath | null,
+): path is SafeAppReturnPath {
   if (!isSafeReturnPath(path)) {
     return false;
   }

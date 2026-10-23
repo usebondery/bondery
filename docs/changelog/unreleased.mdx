@@ -4,3 +4,76 @@ hidden: true
 ---
 
 ## [Unreleased]
+
+### ✨ Added
+
+- Mobile: Sign in with a passkey or an email login link on the native login screen.
+- Mobile: Floating tab bar on Contacts and Settings with a center create-person control. Deep routes hide the bar.
+- Mobile: Tapping Contacts again while you are on that tab focuses people search and opens the keyboard.
+- Mobile: Settings About shows your app version and whether a newer production build is available.
+- API: `GET /mobile/manifest` returns the latest production app version for optional update checks.
+- Website: Hosts Apple and Android associated-domain files for native passkeys. Operators set `BONDERY_PUBLIC_IOS_APP_TEAM_ID` and `BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS`. Missing values return 404 instead of inventing IDs.
+- API: MCP consent list items include `logoUri` (HTTPS client icon from OAuth metadata, or null).
+- Webapp: Connected AI assistants in Settings show each client’s logo when one is available.
+- Webapp: MapLibre people map with OSM tiles, clustering, globe or flat projection, and my-location.
+- Webapp: The people map keeps pan and zoom in the URL (`latitude`, `longitude`, `zoom`). Back from a person restores that camera and reuses cached pins for it.
+- Webapp: Hovering a person pin on the map shows the shared person preview card.
+- Webapp: Globe projection shows a sky atmosphere; flat map turns it off.
+
+### 🐛 Fixed
+
+- Mobile: Letters such as Š, Č, and Ř get their own people-list sections. Š comes after S.
+- Mobile: Deleting a group no longer crashes the Android app.
+- Mobile: The people list and group lists show every local contact. The alphabet index matches that full list.
+- Mobile: Opening a person no longer waits while the app loads every contact for note mentions.
+- Mobile: Native screens show translated copy instead of raw translation keys.
+- Mobile: After sign-in, contacts no longer crash while creating the local sync database.
+- Mobile: The app no longer goes blank after the splash screen while sign-in is still loading.
+- Mobile: The Android launch splash shows the brand icon again, and sign-in no longer waits forever on a pending session.
+- Mobile: The native splash stays up until the first real screen on iOS and Android. The app no longer swaps it for a blank purple view.
+- Mobile: Opening the native app after a reload no longer gets stuck in a blank error loop.
+- Mobile: Sign-in failures show in the app toast instead of inline on the login sheet.
+- Mobile: Tapping a disabled GitHub, LinkedIn, or email button shows a toast instead of helper text under the button.
+- Mobile: GitHub and LinkedIn sign-in reach the API on Android. Loopback URLs use the emulator host or the Metro LAN host, and OAuth returns to `bondery://auth/callback`.
+- API and clients: Contact avatars cache-bust on photo upload time instead of the contact record `updatedAt`.
+
+### 🔄 Changed
+
+- Repo: Switch pnpm from hoisted installs to isolated installs. Expo packages stay selectively public-hoisted for Metro and autolinking.
+- Webapp and Website: Ship Next.js containers from `output: 'standalone'` (traced runtime only). No full monorepo `node_modules` in the runner.
+- Docker: Disable pnpm’s global virtual store inside image builds so package binaries resolve under BuildKit store mounts. Local installs still use the virtual store for Turbopack.
+- Mobile: Metro and Expo autolinking follow the isolated layout (`nodeModulesPaths` plus `experiments.autolinkingModuleResolution`).
+- Dev: Local website, webapp, and API use Portless HTTPS on `*.usebondery.test` (`https://usebondery.test`, `https://app.usebondery.test`, `https://api.usebondery.test`). App `dev` sets `PORTLESS_TLD=test`. Dial BOND ports stay the bind targets behind the proxy. Use `dev:classic` for raw `localhost` ports.
+- Dev: Mailpit UI is aliased at `https://mail.usebondery.test`. SMTP stays on `127.0.0.1:26640`.
+- Dev: `pnpm mcp:inspect` connects to `https://api.usebondery.test/mcp`, trusts the Portless CA when present, and uses the public MCPJam Client ID Metadata Document. Override with `BONDERY_MCP_INSPECTOR_CIMD_URL`.
+- Dev: Stripe CLI local webhooks forward to `https://api.usebondery.test` (not a raw Dial BOND port).
+- Website: Stops hosting MCP Inspector Client ID Metadata at `/.well-known/oauth/client-metadata/inspector.json`. Local Inspector uses the public MCPJam CIMD instead.
+- Webapp and Website: Turn on Next.js typed routes. In-app links and redirects use typed `route*` / `href*` / `redirect*` helpers.
+- Chrome extension: Opens the webapp through shared navigation helpers.
+
+### 📝 Documentation
+
+- Contributing: Local setup, architecture, auth, and MCP docs teach Portless HTTPS on `*.usebondery.test`. Classic `localhost` ports stay as the escape hatch.
+
+### Breaking
+
+- **pnpm install layout:** After you pull, delete every `node_modules` directory (repo root, apps, and packages) and run `pnpm install`. A clean install is required when moving from hoisted to isolated linking.
+- **Local web URLs:** Daily web and API work uses Portless HTTPS on `*.usebondery.test` (not `*.usebondery.localhost` and not `http://localhost:2663x`). Stop the old Portless proxy. Run `portless trust` and `portless hosts sync` (Admin on Windows). Clear stale `*.usebondery.localhost` hosts entries. Refresh development env (`pnpm env:development` / Infisical) so `BONDERY_PUBLIC_*_URL` values match. Register OAuth callbacks at `https://api.usebondery.test/auth/callback/...`. Keep classic `http://localhost:26631/...` only for `dev:classic`. See [Local development setup](/docs/contributing/local-setup).
+
+### 📦 Dependencies
+
+- Webapp and Website: Upgrade Next.js to 16.4.2. Production builds use Turbopack (no webpack fallback).
+
+### 🤖 CI
+
+- Docker: Ignore host `out/` turbo-prune leftovers in the build context. Bump the pnpm BuildKit store cache id to `bondery-pnpm-store-v4`.
+- Mobile: The people list no longer has a letter rail on the right.
+- Mobile: Contacts search is by name only. The placeholder matches the web people list.
+- Mobile: The plus button creates a person. The extra add menu is gone.
+- Mobile: Legal settings uses a gavel icon.
+- Mobile: Native login uses a purple hero with the Bondery logotype and a bottom sheet that fills about 70% of the screen. The sheet heading is Welcome. Email sign-in replaces the other buttons, matching web login. Web login is unchanged.
+- Mobile: Native login marks the last sign-in method, matching web login.
+- Mobile: The launch splash now uses Bondery purple and the brand icon.
+- Mobile: Native login copy uses Tamagui `Text`. The sheet centers the description, buttons, and terms as one group.
+- Mobile: Theme in Settings is a system, light, or dark control. Account delete confirms in a bottom sheet.
+- Mobile: Settings screens use a shared layout and refreshed account, legal, tags, groups, and technical sections.

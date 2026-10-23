@@ -6,6 +6,7 @@
 
  */
 
+import { phoneIdentityKey } from "@bondery/helpers/phone";
 import type {
   MergeConflictChoice,
   MergeConflictField,
@@ -123,9 +124,7 @@ export function normalizeEmailValue(value: string): string {
 }
 
 export function normalizePhoneValue(prefix: string | null | undefined, value: string): string {
-  const normalized = `${prefix || ""}${value}`.replace(/\D+/g, "");
-
-  return normalized.replace(/^00/, "");
+  return phoneIdentityKey(prefix ?? "", value);
 }
 
 export function normalizeSocialHandle(value: string | null | undefined): string {

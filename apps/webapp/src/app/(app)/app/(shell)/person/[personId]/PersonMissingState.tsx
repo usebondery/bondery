@@ -3,6 +3,7 @@ import { Stack, Text } from "@mantine/core";
 import { ErrorPageHeader } from "@/components/shell/ErrorPageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { getSingleContactPageTranslations } from "@/lib/i18n/generated/hooks.server";
+import { routeAssert } from "@/lib/navigation/route/assert";
 
 export async function PersonMissingState({ description }: { description?: string }) {
   const t = await getSingleContactPageTranslations();
@@ -10,7 +11,7 @@ export async function PersonMissingState({ description }: { description?: string
   return (
     <PageWrapper>
       <ErrorPageHeader
-        backHref={WEBAPP_ROUTES.PEOPLE}
+        backHref={routeAssert(WEBAPP_ROUTES.PEOPLE)}
         iconType="user"
         title={t("PersonNotFound")}
       />

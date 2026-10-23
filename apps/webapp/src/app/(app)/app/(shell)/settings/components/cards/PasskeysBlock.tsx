@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
@@ -7,7 +8,7 @@ import { Box, Button, Group, Skeleton, Stack, Text, Tooltip } from "@mantine/cor
 import { notifications } from "@mantine/notifications";
 import { IconAlertCircle, IconFingerprint, IconPlus, IconTrash } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InlineEditableInput } from "@/app/(app)/app/(shell)/person/[personId]/components/info/InlineEditableInput";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
@@ -32,6 +33,10 @@ import {
 } from "@/lib/query/hooks/usePasskeys";
 import { settingsKeys } from "@/lib/query/keys";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
+import {
+  SETTINGS_CREDENTIAL_ICON_PX,
+  SettingsCredentialIconImg,
+} from "./SettingsCredentialIconImg";
 
 type PasskeyRowProps = {
   catalog: AaguidCatalog | null;
@@ -44,16 +49,6 @@ type PasskeyRowProps = {
   passkey: PasskeyRecord;
 };
 
-const CATALOG_ICON_PX = 18;
-
-function CatalogIconImg({ src }: { src: string }) {
-  return (
-    // Catalog icons are data: SVG URIs — next/image cannot optimize them.
-    // biome-ignore lint/performance/noImgElement: data-URI SVG; never decode
-    <img alt="" aria-hidden height={CATALOG_ICON_PX} src={src} width={CATALOG_ICON_PX} />
-  );
-}
-
 function PasskeyRowIcon({
   aaguid,
   catalog,
@@ -63,7 +58,7 @@ function PasskeyRowIcon({
 }) {
   const icons = catalog ? lookupAaguidIcons(catalog, aaguid) : null;
   if (!icons) {
-    return <IconFingerprint size={CATALOG_ICON_PX} stroke={1.5} />;
+    return <IconFingerprint size={SETTINGS_CREDENTIAL_ICON_PX} stroke={1.5} />;
   }
 
   const { iconDark, iconLight } = icons;
@@ -71,10 +66,10 @@ function PasskeyRowIcon({
     return (
       <>
         <Box darkHidden>
-          <CatalogIconImg src={iconLight} />
+          <SettingsCredentialIconImg src={iconLight} />
         </Box>
         <Box lightHidden>
-          <CatalogIconImg src={iconDark} />
+          <SettingsCredentialIconImg src={iconDark} />
         </Box>
       </>
     );
@@ -82,10 +77,10 @@ function PasskeyRowIcon({
 
   const src = iconLight ?? iconDark;
   if (!src) {
-    return <IconFingerprint size={CATALOG_ICON_PX} stroke={1.5} />;
+    return <IconFingerprint size={SETTINGS_CREDENTIAL_ICON_PX} stroke={1.5} />;
   }
 
-  return <CatalogIconImg src={src} />;
+  return <SettingsCredentialIconImg src={src} />;
 }
 
 function PasskeyRow({
@@ -101,7 +96,7 @@ function PasskeyRow({
   const t = useSettingsPageTranslations("Profile");
   const tCommon = useCommonTranslations();
   const runtimeConfig = useWebappRuntimeConfig();
-  const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
+  const authClient = createWebappAuthClient(runtimeConfig);
   const [name, setName] = useState(passkey.name?.trim() || fallbackName);
   const [isSaving, setIsSaving] = useState(false);
   const persistedNameRef = useRef(passkey.name?.trim() || fallbackName);
@@ -112,7 +107,7 @@ function PasskeyRow({
     persistedNameRef.current = next;
   }, [fallbackName, passkey.name]);
 
-  const saveName = useCallback(async () => {
+  const saveName = async () => {
     const trimmed = name.trim();
     if (!trimmed || trimmed === persistedNameRef.current) {
       setName(persistedNameRef.current);
@@ -143,7 +138,7 @@ function PasskeyRow({
     } finally {
       setIsSaving(false);
     }
-  }, [authClient.passkey, name, onRenamed, passkey.id, tCommon]);
+  };
 
   const catalogIcons = catalog ? lookupAaguidIcons(catalog, passkey.aaguid) : null;
   const iconTooltip =
@@ -184,7 +179,6 @@ function PasskeyRow({
       ),
     });
   };
-
   return (
     <SettingsCredentialCard
       deleteAriaLabel={deleteAriaLabel}
@@ -215,7 +209,7 @@ export function PasskeysBlock() {
   const queryClient = useQueryClient();
   const formatter = useDateFormatter();
   const runtimeConfig = useWebappRuntimeConfig();
-  const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
+  const authClient = createWebappAuthClient(runtimeConfig);
   const { data: passkeys = [], error, isError, isLoading } = usePasskeysQuery();
   const [webAuthnSupported, setWebAuthnSupported] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
@@ -257,7 +251,7 @@ export function PasskeysBlock() {
       neverUsed: t("Passkeys.NeverUsed"),
     });
 
-  const runCeremony = useCallback(async () => {
+  const runCeremony = async () => {
     return runAddPasskeyCeremony({
       authClient,
       catalog,
@@ -268,7 +262,7 @@ export function PasskeysBlock() {
       queryClient,
       tCommon,
     });
-  }, [authClient, catalog, queryClient, t, tCommon]);
+  };
 
   const handleAdd = async () => {
     if (atLimit || !webAuthnSupported || isAdding) {

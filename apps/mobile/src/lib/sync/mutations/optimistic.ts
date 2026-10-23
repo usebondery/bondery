@@ -1,4 +1,5 @@
 import type { SyncMutation } from "@bondery/schemas/sync";
+import { deleteLocalAvatarFile } from "../avatar-files";
 import { getSyncDatabase } from "../db";
 import { generateUuid, isValidUuid } from "../ids";
 
@@ -12,6 +13,7 @@ function newId(): string {
 
 export function applyOptimisticMutation(mutation: SyncMutation): void {
   const db = getSyncDatabase();
+  let deletedPersonId: string | null = null;
 
   db.withTransactionSync(() => {
     switch (mutation.type) {
@@ -23,6 +25,7 @@ export function applyOptimisticMutation(mutation: SyncMutation): void {
         break;
       case "contact.delete":
         applyOptimisticContactDelete(mutation.entityId);
+        deletedPersonId = mutation.entityId;
         break;
       case "contact.addTag":
         applyOptimisticContactAddTag(mutation.entityId, mutation.payload.tagId);
@@ -63,6 +66,10 @@ export function applyOptimisticMutation(mutation: SyncMutation): void {
         break;
     }
   });
+
+  if (deletedPersonId) {
+    deleteLocalAvatarFile(deletedPersonId);
+  }
 }
 
 function applyOptimisticContactCreate(
@@ -76,8 +83,9 @@ function applyOptimisticContactCreate(
     `INSERT INTO people (
       id, user_id, first_name, middle_name, last_name, headline, location, notes,
       last_interaction, keep_frequency_days, myself, language, timezone, gis_point,
-      has_avatar, created_at, updated_at, local_updated_at, is_pending
-    ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, NULL, 0, ?, ?, ?, 1)`,
+      has_avatar, avatar_updated_at, avatar_local_updated_at,
+      created_at, updated_at, local_updated_at, is_pending
+    ) VALUES (?, '', ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?, NULL, 0, NULL, NULL, ?, ?, ?, 1)`,
     id,
     mutation.payload.firstName,
     mutation.payload.middleName ?? null,

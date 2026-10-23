@@ -1,11 +1,12 @@
 import { parsePersonMentionUrl } from "@bondery/helpers/notes";
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react-native";
-import { useRouter } from "expo-router";
-import { useCallback, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 import { EnrichedMarkdownText } from "react-native-enriched-markdown";
+import { Pressable } from "@/components/ui/Pressable";
 import { NOTES_COLLAPSE_CHAR_THRESHOLD } from "../../../lib/config";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { useAppNavigation } from "../../../lib/navigation/useAppNavigation";
+import { notifications } from "../../../lib/toast/notifications";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
 import { contactDetailScreenStyles as styles } from "./contactDetailScreenStyles";
@@ -13,9 +14,10 @@ import { contactDetailStyles } from "./contactDetailStyles";
 
 interface ContactDetailNotesSectionProps {
   colors: ReturnType<typeof useMobileThemeColors>;
-  mentionableContactIds: Set<string>;
+  mentionableContactIds: ReadonlySet<string>;
   myselfContactId: string | null | undefined;
   notesMarkdown: string;
+  notesPending?: boolean;
   onOpenNotesEditor: () => void;
 }
 
@@ -24,40 +26,37 @@ export function ContactDetailNotesSection({
   mentionableContactIds,
   myselfContactId,
   notesMarkdown,
+  notesPending = false,
   onOpenNotesEditor,
 }: ContactDetailNotesSectionProps) {
-  const router = useRouter();
-  const { showToast } = useAppToast();
+  const { openContact, openMyself } = useAppNavigation();
   const [notesExpanded, setNotesExpanded] = useState(false);
   const longNotes = notesMarkdown.length > NOTES_COLLAPSE_CHAR_THRESHOLD;
 
-  const handleMentionLinkPress = useCallback(
-    ({ url }: { url: string }) => {
-      const personId = parsePersonMentionUrl(url);
-      if (!personId) {
-        return;
-      }
+  function handleMentionLinkPress({ url }: { url: string }) {
+    const personId = parsePersonMentionUrl(url);
+    if (!personId) {
+      return;
+    }
 
-      if (!mentionableContactIds.has(personId)) {
-        showToast({ headline: "Contact no longer available", type: "error" });
-        return;
-      }
+    if (!mentionableContactIds.has(personId)) {
+      notifications.show({ title: "Contact no longer available", type: "error" });
+      return;
+    }
 
-      if (myselfContactId && personId === myselfContactId) {
-        router.push("/myself");
-        return;
-      }
+    if (myselfContactId && personId === myselfContactId) {
+      openMyself();
+      return;
+    }
 
-      router.push(`/contact/${personId}`);
-    },
-    [mentionableContactIds, myselfContactId, router, showToast],
-  );
+    openContact(personId);
+  }
 
   return (
     <View style={contactDetailStyles.section}>
       <ContactDetailSectionHeader title="Notes" />
       <Pressable
-        accessibilityLabel={notesMarkdown ? "Edit notes" : "Add notes"}
+        accessibilityLabel={notesPending || notesMarkdown ? "Edit notes" : "Add notes"}
         accessibilityRole="button"
         onPress={onOpenNotesEditor}
         style={[
@@ -68,7 +67,9 @@ export function ContactDetailNotesSection({
           },
         ]}
       >
-        {notesMarkdown ? (
+        {notesPending ? (
+          <ActivityIndicator color={colors.textMuted} size="small" />
+        ) : notesMarkdown ? (
           <>
             <View style={notesExpanded ? undefined : styles.notesCollapsed}>
               <EnrichedMarkdownText
@@ -103,8 +104,7 @@ export function ContactDetailNotesSection({
               <Pressable
                 accessibilityLabel={notesExpanded ? "Show less notes" : "Show more notes"}
                 accessibilityRole="button"
-                onPress={(e) => {
-                  e.stopPropagation?.();
+                onPress={() => {
                   setNotesExpanded((v) => !v);
                 }}
                 style={styles.showMoreButton}

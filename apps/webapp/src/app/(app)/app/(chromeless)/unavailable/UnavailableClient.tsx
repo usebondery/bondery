@@ -1,14 +1,16 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { Box, Button, Group, Loader, Stack, Text, Title } from "@mantine/core";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { retryApiConnection } from "@/lib/api/availabilityStore";
 import { OUTAGE_RESUME_DELAY_MS } from "@/lib/auth/constants";
 import { handleUnauthorizedSession } from "@/lib/auth/handleUnauthorizedSession";
-import { parseReturnIntent } from "@/lib/auth/returnIntent";
+import { parseReturnIntent, routeFromReturn } from "@/lib/auth/returnIntent";
 import { useUnavailablePageTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { STATUS_URL } from "@/lib/platform/config";
 
 const POLL_INTERVAL_MS = 5_000;
@@ -23,7 +25,7 @@ export function UnavailableClient() {
   const [secondsUntilPoll, setSecondsUntilPoll] = useState(POLL_INTERVAL_MS / 1000);
   const isNavigatingRef = useRef(false);
 
-  const navigateBack = useCallback(async () => {
+  const navigateBack = async () => {
     if (isNavigatingRef.current) {
       return;
     }
@@ -34,12 +36,12 @@ export function UnavailableClient() {
       setTimeout(resolve, OUTAGE_RESUME_DELAY_MS);
     });
 
-    const returnTo = parseReturnIntent(searchParams) ?? WEBAPP_ROUTES.HOME;
-    router.replace(returnTo);
+    const returnTo = parseReturnIntent(searchParams);
+    router.replace(returnTo ? routeFromReturn(returnTo) : routeAssert(WEBAPP_ROUTES.HOME));
     router.refresh();
-  }, [router, searchParams]);
+  };
 
-  const probeSession = useCallback(async (): Promise<boolean> => {
+  const probeSession = async (): Promise<boolean> => {
     const result = await retryApiConnection();
     if (result === "unauthorized") {
       void handleUnauthorizedSession();
@@ -52,7 +54,7 @@ export function UnavailableClient() {
     }
     setSessionReachable(false);
     return false;
-  }, [navigateBack]);
+  };
 
   useEffect(() => {
     void probeSession();

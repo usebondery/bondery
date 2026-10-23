@@ -2,21 +2,24 @@ import { CHANGELOG_URL, HELP_DOCS_URL } from "@bondery/helpers/globals/paths";
 import { IconBook, IconClipboardList } from "@tabler/icons-react-native";
 import Constants from "expo-constants";
 import { useRouter } from "expo-router";
-import { ScrollView, StyleSheet, Text } from "react-native";
+import { ScrollView } from "react-native";
 import { StackNavBar, useScrollBottomInset } from "../../components/chrome";
+import { NavLink } from "../../components/ui/NavLink";
+import { Paper } from "../../components/ui/Paper";
+import { Stack } from "../../components/ui/Stack";
+import { ThemeIcon } from "../../components/ui/ThemeIcon";
 import { API_URL } from "../../lib/config";
 import {
   useCommonTranslations,
   useMobileSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
-import { useAppToast } from "../../lib/toast/useAppToast";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
+import { notifications } from "../../lib/toast/notifications";
+import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { SettingsFieldLabel } from "./components/SettingsFieldLabel";
-import { SettingsNavigationRow } from "./components/SettingsNavigationRow";
 import { SettingsReadOnlyField } from "./components/SettingsReadOnlyField";
-import { SettingsSectionCard } from "./components/SettingsSectionCard";
 import { useApiServerStatus } from "./hooks/useApiServerStatus";
+import { useAppVersionStatus } from "./hooks/useAppVersionStatus";
 import { openExternalUrl } from "./openExternalUrl";
 
 const OFFLINE_STATUS_DOT_COLOR = "#ca8a04";
@@ -27,16 +30,24 @@ export function SettingsTechnicalScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
   const _t = useCommonTranslations();
   const router = useRouter();
-  const { showToast } = useAppToast();
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("stack");
   const { status: apiServerStatus, isChecking, refresh } = useApiServerStatus();
+  const {
+    status: appVersionStatus,
+    isChecking: isAppVersionChecking,
+    latestVersion,
+    refresh: refreshAppVersion,
+  } = useAppVersionStatus(APP_VERSION);
+  const changelogLabel = tMobileSettings("Changelog");
+  const docsLabel = tMobileSettings("Docs");
+  const externalHint = tMobileSettings("External");
 
   const openDocs = () => {
     void openExternalUrl(HELP_DOCS_URL, () => {
-      showToast({
-        description: tMobileSettings("OpenDocsErrorDescription"),
-        headline: tMobileSettings("OpenDocsErrorHeadline"),
+      notifications.show({
+        message: tMobileSettings("OpenDocsErrorDescription"),
+        title: tMobileSettings("OpenDocsErrorHeadline"),
         type: "error",
       });
     });
@@ -60,69 +71,97 @@ export function SettingsTechnicalScreen() {
           ? colors.dangerAccent
           : colors.textMuted;
 
+  const appVersionDescription =
+    appVersionStatus === "latest"
+      ? tMobileSettings("AppVersionLatest")
+      : appVersionStatus === "outdated"
+        ? tMobileSettings("AppVersionUpdateAvailable", { version: latestVersion ?? "" })
+        : appVersionStatus === "offline"
+          ? tMobileSettings("ServerStatusOffline")
+          : appVersionStatus === "unreachable"
+            ? tMobileSettings("AppVersionCheckFailed")
+            : tMobileSettings("AppVersionChecking");
+
+  const appVersionDotColor =
+    appVersionStatus === "latest"
+      ? colors.successAccent
+      : appVersionStatus === "offline" || appVersionStatus === "outdated"
+        ? OFFLINE_STATUS_DOT_COLOR
+        : appVersionStatus === "unreachable"
+          ? colors.dangerAccent
+          : colors.textMuted;
+
   return (
     <>
       <StackNavBar
-        onBack={() => router.back()}
+        onBack={() => goBackOrReplace(router, "/settings")}
         title={tMobileSettings("Technical")}
         variant="elevated"
       />
 
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: scrollBottomInset }]}
-        style={[styles.screen, { backgroundColor: colors.appBackground }]}
+        className="flex-1"
+        contentContainerStyle={{
+          paddingBottom: scrollBottomInset,
+          paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
+          paddingTop: MOBILE_LAYOUT.spacing.contentTop,
+        }}
+        style={{ backgroundColor: colors.appBackground }}
       >
-        <SettingsSectionCard>
-          <SettingsNavigationRow
-            destination="external"
-            externalLabel={tMobileSettings("External")}
-            icon={<IconClipboardList size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Changelog")}
-            onPress={() => {
-              void openExternalUrl(CHANGELOG_URL);
+        <Stack gap="lg">
+          <Paper withBorder>
+            <NavLink
+              accessibilityLabel={`${changelogLabel}. ${externalHint}`}
+              external
+              label={changelogLabel}
+              leftSection={
+                <ThemeIcon>
+                  <IconClipboardList size={18} stroke={colors.iconPrimary} />
+                </ThemeIcon>
+              }
+              onPress={() => {
+                void openExternalUrl(CHANGELOG_URL);
+              }}
+            />
+            <NavLink
+              accessibilityLabel={`${docsLabel}. ${externalHint}`}
+              external
+              label={docsLabel}
+              leftSection={
+                <ThemeIcon>
+                  <IconBook size={18} stroke={colors.iconPrimary} />
+                </ThemeIcon>
+              }
+              onPress={openDocs}
+              withDivider={false}
+            />
+          </Paper>
+
+          <SettingsReadOnlyField
+            label={tMobileSettings("ApiServerUrl")}
+            loading={isChecking}
+            onReload={() => {
+              void refresh();
             }}
+            reloadAccessibilityLabel={tMobileSettings("RecheckConnection")}
+            statusDotColor={serverStatusDotColor}
+            statusMessage={serverStatusDescription}
+            value={API_URL || tMobileSettings("ApiServerNotConfigured")}
           />
 
-          <SettingsNavigationRow
-            destination="external"
-            externalLabel={tMobileSettings("External")}
-            icon={<IconBook size={18} stroke={colors.iconPrimary} />}
-            label={tMobileSettings("Docs")}
-            onPress={openDocs}
-            showDivider={false}
+          <SettingsReadOnlyField
+            label={tMobileSettings("AppVersion")}
+            loading={isAppVersionChecking}
+            onReload={() => {
+              void refreshAppVersion();
+            }}
+            reloadAccessibilityLabel={tMobileSettings("RecheckAppVersion")}
+            statusDotColor={appVersionDotColor}
+            statusMessage={appVersionDescription}
+            value={APP_VERSION}
           />
-        </SettingsSectionCard>
-
-        <SettingsFieldLabel>{tMobileSettings("ApiServerUrl")}</SettingsFieldLabel>
-        <SettingsReadOnlyField
-          description={serverStatusDescription}
-          loading={isChecking}
-          onReload={() => {
-            void refresh();
-          }}
-          reloadAccessibilityLabel={tMobileSettings("RecheckConnection")}
-          statusDotColor={serverStatusDotColor}
-          value={API_URL || tMobileSettings("ApiServerNotConfigured")}
-        />
-
-        <SettingsFieldLabel>{tMobileSettings("AppVersion")}</SettingsFieldLabel>
-        <Text style={[styles.versionValue, { color: colors.textPrimary }]}>{APP_VERSION}</Text>
+        </Stack>
       </ScrollView>
     </>
   );
 }
-
-const styles = StyleSheet.create({
-  content: {
-    gap: 16,
-    paddingHorizontal: MOBILE_LAYOUT.spacing.horizontal,
-    paddingTop: MOBILE_LAYOUT.spacing.contentTop,
-  },
-  screen: {
-    flex: 1,
-  },
-  versionValue: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.bodyLarge,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
-  },
-});

@@ -8,7 +8,7 @@ import {
 } from "@bondery/mantine-next";
 import type { LinkedInDataResponse } from "@bondery/schemas";
 import { notifications } from "@mantine/notifications";
-import { useCallback, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 import { captureEvent } from "@/lib/analytics/client";
 import { discardEnrichQueue, initEnrichQueue } from "@/lib/api/domains/enrichQueue";
 import { checkExtensionAuth } from "@/lib/extension/checkExtensionAuth";
@@ -99,7 +99,7 @@ export function useBatchEnrichFromLinkedIn() {
     errorTitle: t("ErrorTitle"),
   });
 
-  const start = useCallback(async () => {
+  const start = async () => {
     setState({ isLoading: true });
 
     const authState = await checkExtensionAuth();
@@ -180,173 +180,167 @@ export function useBatchEnrichFromLinkedIn() {
       captureEvent("enrichment:batch_end", { total_enriched: completedCount });
       showCompletionNotification(t, completedCount);
     }
-  }, [t, tCommon, runEnrichLoop]);
+  };
 
-  const startForPerson = useCallback(
-    async (contactId: string, linkedinHandle: string | null | undefined) => {
-      if (!linkedinHandle) {
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("NoLinkedInHandle"),
-            title: t("ErrorTitle"),
-          }),
-        );
-        return;
-      }
-
-      setState({ isLoading: true });
-
-      const authState = await checkExtensionAuth();
-
-      if (authState === "not_installed") {
-        setState({ isLoading: false });
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("ExtensionRequiredMessage"),
-            title: t("ErrorTitle"),
-          }),
-        );
-        return;
-      }
-
-      if (authState === "not_authenticated") {
-        setState({ isLoading: false });
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("NotAuthenticatedMessage"),
-            title: t("NotAuthenticatedTitle"),
-          }),
-        );
-        return;
-      }
-
-      let totalEligible: number;
-      try {
-        const init = await initEnrichQueue({ personId: contactId });
-        totalEligible = init.totalEligible;
-      } catch (error) {
-        setState({ isLoading: false });
-        notifications.show(
-          errorNotificationTemplate({
-            description: getUserFacingError(error, tCommon),
-            title: t("ErrorTitle"),
-          }),
-        );
-        return;
-      }
-
-      setCancelled(false);
-      setState({
-        completed: 0,
-        currentPerson: null,
-        failed: 0,
-        isLoading: false,
-        isPausing: false,
-        isRunning: true,
-        totalEligible,
-      });
-
-      const { completedCount, abortReason } = await runEnrichLoop(0, 0);
-
-      if (!isCancelled() && !abortReason && completedCount > 0) {
-        const queryClient = getQueryClient();
-        queryClient.setQueryData(
-          contactKeys.linkedin(contactId),
-          (prev: LinkedInDataResponse | undefined) => ({
-            education: prev?.education ?? [],
-            linkedinBio: prev?.linkedinBio ?? null,
-            syncedAt: new Date().toISOString(),
-            workHistory: prev?.workHistory ?? [],
-          }),
-        );
-      }
-
-      await finalizeEnrichRun(abortReason);
-
-      if (abortReason === "circuit_breaker") {
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("ExtensionNotRespondingDescription"),
-            title: t("ExtensionNotRespondingTitle"),
-          }),
-        );
-      } else if (!isCancelled() && completedCount > 0) {
-        captureEvent("enrichment:contact_update", { source: "linkedin" });
-        notifications.show(
-          successNotificationTemplate({
-            description: t("AllDoneDescriptionSingle"),
-            title: t("AllDoneTitle"),
-          }),
-        );
-      }
-    },
-    [t, tCommon, runEnrichLoop],
-  );
-
-  const resume = useCallback(
-    async (queueStatus: { pending: number; completed: number; failed: number }) => {
-      setState({ isLoading: true });
-
-      const authState = await checkExtensionAuth();
-
-      if (authState === "not_installed") {
-        setState({ isLoading: false });
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("ExtensionRequiredMessage"),
-            title: t("ErrorTitle"),
-          }),
-        );
-        return;
-      }
-
-      if (authState === "not_authenticated") {
-        setState({ isLoading: false });
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("NotAuthenticatedMessage"),
-            title: t("NotAuthenticatedTitle"),
-          }),
-        );
-        return;
-      }
-
-      const totalEligible = queueStatus.pending + queueStatus.completed + queueStatus.failed;
-
-      setPendingQueueStatus(null);
-      setCancelled(false);
-      setState({
-        completed: queueStatus.completed,
-        currentPerson: null,
-        failed: queueStatus.failed,
-        isLoading: false,
-        isPausing: false,
-        isRunning: true,
-        totalEligible,
-      });
-
-      const { completedCount, abortReason } = await runEnrichLoop(
-        queueStatus.completed,
-        queueStatus.failed,
+  const startForPerson = async (contactId: string, linkedinHandle: string | null | undefined) => {
+    if (!linkedinHandle) {
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("NoLinkedInHandle"),
+          title: t("ErrorTitle"),
+        }),
       );
+      return;
+    }
 
-      await finalizeEnrichRun(abortReason);
+    setState({ isLoading: true });
 
-      if (abortReason === "circuit_breaker") {
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("ExtensionNotRespondingDescription"),
-            title: t("ExtensionNotRespondingTitle"),
-          }),
-        );
-      } else if (!isCancelled() && completedCount > 0) {
-        showCompletionNotification(t, completedCount);
-      }
-    },
-    [t, runEnrichLoop],
-  );
+    const authState = await checkExtensionAuth();
 
-  const pause = useCallback(() => {
+    if (authState === "not_installed") {
+      setState({ isLoading: false });
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("ExtensionRequiredMessage"),
+          title: t("ErrorTitle"),
+        }),
+      );
+      return;
+    }
+
+    if (authState === "not_authenticated") {
+      setState({ isLoading: false });
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("NotAuthenticatedMessage"),
+          title: t("NotAuthenticatedTitle"),
+        }),
+      );
+      return;
+    }
+
+    let totalEligible: number;
+    try {
+      const init = await initEnrichQueue({ personId: contactId });
+      totalEligible = init.totalEligible;
+    } catch (error) {
+      setState({ isLoading: false });
+      notifications.show(
+        errorNotificationTemplate({
+          description: getUserFacingError(error, tCommon),
+          title: t("ErrorTitle"),
+        }),
+      );
+      return;
+    }
+
+    setCancelled(false);
+    setState({
+      completed: 0,
+      currentPerson: null,
+      failed: 0,
+      isLoading: false,
+      isPausing: false,
+      isRunning: true,
+      totalEligible,
+    });
+
+    const { completedCount, abortReason } = await runEnrichLoop(0, 0);
+
+    if (!isCancelled() && !abortReason && completedCount > 0) {
+      const queryClient = getQueryClient();
+      queryClient.setQueryData(
+        contactKeys.linkedin(contactId),
+        (prev: LinkedInDataResponse | undefined) => ({
+          education: prev?.education ?? [],
+          linkedinBio: prev?.linkedinBio ?? null,
+          syncedAt: new Date().toISOString(),
+          workHistory: prev?.workHistory ?? [],
+        }),
+      );
+    }
+
+    await finalizeEnrichRun(abortReason);
+
+    if (abortReason === "circuit_breaker") {
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("ExtensionNotRespondingDescription"),
+          title: t("ExtensionNotRespondingTitle"),
+        }),
+      );
+    } else if (!isCancelled() && completedCount > 0) {
+      captureEvent("enrichment:contact_update", { source: "linkedin" });
+      notifications.show(
+        successNotificationTemplate({
+          description: t("AllDoneDescriptionSingle"),
+          title: t("AllDoneTitle"),
+        }),
+      );
+    }
+  };
+
+  const resume = async (queueStatus: { pending: number; completed: number; failed: number }) => {
+    setState({ isLoading: true });
+
+    const authState = await checkExtensionAuth();
+
+    if (authState === "not_installed") {
+      setState({ isLoading: false });
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("ExtensionRequiredMessage"),
+          title: t("ErrorTitle"),
+        }),
+      );
+      return;
+    }
+
+    if (authState === "not_authenticated") {
+      setState({ isLoading: false });
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("NotAuthenticatedMessage"),
+          title: t("NotAuthenticatedTitle"),
+        }),
+      );
+      return;
+    }
+
+    const totalEligible = queueStatus.pending + queueStatus.completed + queueStatus.failed;
+
+    setPendingQueueStatus(null);
+    setCancelled(false);
+    setState({
+      completed: queueStatus.completed,
+      currentPerson: null,
+      failed: queueStatus.failed,
+      isLoading: false,
+      isPausing: false,
+      isRunning: true,
+      totalEligible,
+    });
+
+    const { completedCount, abortReason } = await runEnrichLoop(
+      queueStatus.completed,
+      queueStatus.failed,
+    );
+
+    await finalizeEnrichRun(abortReason);
+
+    if (abortReason === "circuit_breaker") {
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("ExtensionNotRespondingDescription"),
+          title: t("ExtensionNotRespondingTitle"),
+        }),
+      );
+    } else if (!isCancelled() && completedCount > 0) {
+      showCompletionNotification(t, completedCount);
+    }
+  };
+
+  const pause = () => {
     setCancelled(true);
     setState({ isPausing: true });
     notifications.show({
@@ -356,12 +350,11 @@ export function useBatchEnrichFromLinkedIn() {
       }),
       autoClose: 6000,
     });
-  }, [t]);
-
-  const discard = useCallback(async () => {
+  };
+  const discard = async () => {
     await discardEnrichQueueMutation.mutateAsync();
     setPendingQueueStatus(null);
-  }, [discardEnrichQueueMutation]);
+  };
 
   return {
     completed: storeState.completed,

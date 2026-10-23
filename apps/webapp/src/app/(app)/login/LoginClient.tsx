@@ -5,7 +5,7 @@ import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
@@ -25,20 +25,20 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
   const tCommon = useCommonTranslations();
   const [busyAction, setBusyAction] = useState<LoginBusyAction>(null);
   const runtimeConfig = useWebappRuntimeConfig();
-  const authClient = useMemo(() => createWebappAuthClient(runtimeConfig), [runtimeConfig]);
+  const authClient = createWebappAuthClient(runtimeConfig);
   const searchParams = useSearchParams();
   const { websiteUrl } = runtimeConfig;
 
   const redirectParam = parseReturnIntent(searchParams);
   const origin = typeof window === "undefined" ? runtimeConfig.webappUrl : window.location.origin;
   const magicLinkUrls = buildLoginMagicLinkUrls(origin, redirectParam);
-  const postLoginCallbackUrl = useMemo(() => {
+  const postLoginCallbackUrl = (() => {
     const startUrl = new URL("/auth/start", origin);
     if (redirectParam) {
       startUrl.searchParams.set(RETURN_INTENT_PARAM, redirectParam);
     }
     return startUrl.toString();
-  }, [origin, redirectParam]);
+  })();
 
   const handleOAuthLogin = async (provider: "github" | "linkedin") => {
     try {

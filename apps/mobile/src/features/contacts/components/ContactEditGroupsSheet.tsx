@@ -1,29 +1,21 @@
 import type { Group, GroupWithCount } from "@bondery/schemas";
-import { XStack } from "@tamagui/stacks";
-import { Paragraph } from "@tamagui/text";
-import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  type ListRenderItemInfo,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
+import { SelectOptionRow, SelectSheet } from "@/components/ui/Select";
+import { Text } from "@/components/ui/Text";
 import {
   useCommonTranslations,
   useMobileContactDetailTranslations,
   useMobileContactsTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { SearchActionSheet } from "../../../components/SearchActionSheet";
-import { MOBILE_OPACITY } from "../../../lib/config";
+import { mapGroupToSelectItem } from "@/lib/select/mapGroupToSelectItem";
 import { addContactsToGroup, removeContactsFromGroup } from "../../../lib/domains/groups";
+import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { getContactGroups, listGroups } from "../../../lib/sync/hooks/useSyncQuery";
-import { useAppToast } from "../../../lib/toast/useAppToast";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { GroupSelectRow } from "./GroupSelectRow";
+import { filterGroups } from "../groupListSearch";
 
 interface ContactEditGroupsSheetProps {
   contactId: string;
@@ -31,18 +23,6 @@ interface ContactEditGroupsSheetProps {
   onGroupsReplaced: (groups: Group[]) => void;
   onOpenChange: (open: boolean) => void;
   open: boolean;
-}
-
-function filterGroups(groups: GroupWithCount[], query: string): GroupWithCount[] {
-  const normalizedQuery = query.trim().toLowerCase();
-  if (!normalizedQuery) {
-    return groups;
-  }
-
-  return groups.filter((group) => {
-    const haystack = `${group.label} ${group.emoji ?? ""}`.toLowerCase();
-    return haystack.includes(normalizedQuery);
-  });
 }
 
 function setsEqual(left: Set<string>, right: Set<string>): boolean {
@@ -70,32 +50,31 @@ export function ContactEditGroupsSheet({
   const tMobileContacts = useMobileContactsTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
 
   const [query, setQuery] = useState("");
   const [allGroups, setAllGroups] = useState<GroupWithCount[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
   const [selectedGroupIds, setSelectedGroupIds] = useState<Set<string>>(() => new Set());
   const [initialSelectedIds, setInitialSelectedIds] = useState<Set<string>>(() => new Set());
 
-  const filteredGroups = useMemo(() => filterGroups(allGroups, query), [allGroups, query]);
-  const hasChanges = useMemo(
-    () => !setsEqual(initialSelectedIds, selectedGroupIds),
-    [initialSelectedIds, selectedGroupIds],
-  );
+  const filteredGroups = filterGroups(allGroups, query);
+  const hasChanges = !setsEqual(initialSelectedIds, selectedGroupIds);
 
   useEffect(() => {
     if (!open) {
-      setQuery("");
-      setAllGroups([]);
-      setSelectedGroupIds(new Set());
-      setInitialSelectedIds(new Set());
+      syncEffectState(() => {
+        setQuery("");
+        setAllGroups([]);
+        setSelectedGroupIds(new Set());
+        setInitialSelectedIds(new Set());
+      });
       return;
     }
 
     let cancelled = false;
-    setIsLoadingGroups(true);
+    syncEffectState(() => {
+      setIsLoadingGroups(true);
+    });
 
     void Promise.resolve()
       .then(() => {
@@ -103,8 +82,8 @@ export function ContactEditGroupsSheet({
           return;
         }
 
-        const allGroups = listGroups();
-        setAllGroups(allGroups);
+        const groups = listGroups();
+        setAllGroups(groups);
         const memberIds = new Set(getContactGroups(contactId).map((group) => group.id));
         setInitialSelectedIds(memberIds);
         setSelectedGroupIds(new Set(memberIds));
@@ -114,9 +93,9 @@ export function ContactEditGroupsSheet({
           return;
         }
 
-        showToast({
-          description: tMobileContactDetail("GroupsLoadError"),
-          headline: t("feedback.errorTitle"),
+        notifications.show({
+          message: tMobileContactDetail("GroupsLoadError"),
+          title: t("feedback.errorTitle"),
           type: "error",
         });
         onOpenChange(false);
@@ -130,18 +109,47 @@ export function ContactEditGroupsSheet({
     return () => {
       cancelled = true;
     };
-  }, [contactId, onOpenChange, open, showToast, tMobileContactDetail, t]);
+  }, [contactId, onOpenChange, open, tMobileContactDetail, t]);
 
-  function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen && isSaving) {
-      return;
-    }
-
-    onOpenChange(nextOpen);
+  function handleCloseSheet() {
+    onOpenChange(false);
   }
 
+  function handleSaveError() {
+    notifications.show({
+      message: tMobileContactDetail("EditGroupsFailed"),
+      title: t("feedback.errorTitle"),
+      type: "error",
+    });
+  }
+
+  function performSave() {
+    const added = [...selectedGroupIds].filter((groupId) => !initialSelectedIds.has(groupId));
+    const removed = [...initialSelectedIds].filter((groupId) => !selectedGroupIds.has(groupId));
+
+    for (const groupId of added) {
+      addContactsToGroup(groupId, [contactId]);
+    }
+    for (const groupId of removed) {
+      removeContactsFromGroup(groupId, [contactId]);
+    }
+
+    return allGroups.filter((group) => selectedGroupIds.has(group.id));
+  }
+
+  function handleSaveSuccess(newGroups: Group[]) {
+    onGroupsReplaced(newGroups);
+  }
+
+  const { isSubmitting, submit } = useSheetLocalAction({
+    onClose: handleCloseSheet,
+    onError: handleSaveError,
+    onSuccess: handleSaveSuccess,
+    perform: performSave,
+  });
+
   function handleClose() {
-    if (isSaving) {
+    if (isSubmitting) {
       return;
     }
 
@@ -149,7 +157,7 @@ export function ContactEditGroupsSheet({
   }
 
   function toggleGroup(groupId: string) {
-    if (isSaving || isLoadingGroups) {
+    if (isSubmitting || isLoadingGroups) {
       return;
     }
 
@@ -165,199 +173,65 @@ export function ContactEditGroupsSheet({
     });
   }
 
-  const handleSave = () => {
-    void (async () => {
-      if (!hasChanges || isSaving) {
-        return;
-      }
+  const canSave = hasChanges && !isSubmitting && !isLoadingGroups;
 
-      const added = [...selectedGroupIds].filter((groupId) => !initialSelectedIds.has(groupId));
-      const removed = [...initialSelectedIds].filter((groupId) => !selectedGroupIds.has(groupId));
-
-      setIsSaving(true);
-
-      try {
-        for (const groupId of added) {
-          addContactsToGroup(groupId, [contactId]);
-        }
-        for (const groupId of removed) {
-          removeContactsFromGroup(groupId, [contactId]);
-        }
-
-        const newGroups = allGroups.filter((group) => selectedGroupIds.has(group.id));
-        onOpenChange(false);
-        onGroupsReplaced(newGroups);
-      } catch {
-        showToast({
-          description: tMobileContactDetail("EditGroupsFailed"),
-          headline: t("feedback.errorTitle"),
-          type: "error",
-        });
-      } finally {
-        setIsSaving(false);
-      }
-    })();
-  };
-
-  const renderItem = ({ item }: ListRenderItemInfo<GroupWithCount>) => (
-    <GroupSelectRow
-      disabled={isSaving || isLoadingGroups}
-      group={item}
-      isSelected={selectedGroupIds.has(item.id)}
-      onToggle={() => toggleGroup(item.id)}
-    />
-  );
-
-  const canSave = hasChanges && !isSaving && !isLoadingGroups;
-
-  const sheetHeader = (
-    <Paragraph
-      color={colors.textPrimary}
-      fontSize={MOBILE_TYPOGRAPHY.fontSize.sheetTitle}
-      fontWeight={MOBILE_TYPOGRAPHY.fontWeight.bold}
-    >
-      {tMobileContactDetail("EditGroupsSheetTitle")}
-    </Paragraph>
-  );
-
-  const sheetFooter = (
-    <XStack gap={10}>
-      <Pressable
-        accessibilityRole="button"
-        disabled={isSaving}
-        onPress={handleClose}
-        style={({ pressed }) => [
-          styles.footerButton,
-          styles.footerButtonOutline,
-          {
-            backgroundColor: colors.surface,
-            borderColor: colors.borderStrong,
-            opacity: isSaving ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
-          },
-        ]}
-      >
-        <Text style={[styles.footerButtonText, { color: colors.textPrimary }]}>
-          {t("actions.cancel")}
-        </Text>
-      </Pressable>
-
-      <Pressable
-        accessibilityRole="button"
-        disabled={!canSave}
-        onPress={handleSave}
-        style={({ pressed }) => [
-          styles.footerButton,
-          {
-            backgroundColor: colors.primary,
-            borderColor: colors.primary,
-            opacity: !canSave ? MOBILE_OPACITY.disabled : pressed ? MOBILE_OPACITY.pressed : 1,
-          },
-        ]}
-      >
-        {isSaving ? (
-          <ActivityIndicator color={colors.textOnPrimary} size="small" />
-        ) : (
-          <Text style={[styles.footerButtonText, { color: colors.textOnPrimary }]}>
-            {tMobileContactDetail("EditGroupsSave")}
-          </Text>
-        )}
-      </Pressable>
-    </XStack>
+  const listEmpty = isLoadingGroups ? (
+    <View className="items-center py-8">
+      <ActivityIndicator color={colors.primary} size="small" />
+    </View>
+  ) : (
+    <>
+      <Text className="text-center" fw={600}>
+        {tMobileContacts("NoGroupsYet")}
+      </Text>
+      <Text c="secondary" className="mt-1.5 text-center" size="sm">
+        {tMobileContacts("NoGroupsYetHint")}
+      </Text>
+    </>
   );
 
   return (
-    <SearchActionSheet
-      dismissible={!isSaving}
-      footer={sheetFooter}
-      header={sheetHeader}
-      onOpenChange={handleOpenChange}
+    <SelectSheet
+      actions={[
+        {
+          disabled: isSubmitting,
+          label: t("actions.cancel"),
+          onPress: handleClose,
+          tone: "neutral",
+          variant: "outline",
+        },
+        {
+          disabled: !canSave,
+          label: tMobileContactDetail("EditGroupsSave"),
+          loading: isSubmitting,
+          loadingText: t("feedback.saving"),
+          onPress: submit,
+          tone: "primary",
+          variant: "filled",
+        },
+      ]}
+      data={isLoadingGroups ? [] : filteredGroups}
+      emptyLabel={t("feedback.noResults")}
+      emptyState={allGroups.length === 0 || isLoadingGroups ? listEmpty : undefined}
+      isBusy={isSubmitting}
+      keyExtractor={(item) => item.id}
+      onClose={handleClose}
       onQueryChange={setQuery}
-      open={open}
+      opened={open}
       query={query}
-      searchEditable={!isSaving && !isLoadingGroups}
-      searchPlaceholder={tMobileContacts("AddToGroupsSearchPlaceholder")}
-    >
-      {isLoadingGroups ? (
-        <View style={styles.loadingState}>
-          <ActivityIndicator color={colors.primary} size="small" />
-        </View>
-      ) : allGroups.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Paragraph
-            color={colors.textPrimary}
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.body}
-            fontWeight={MOBILE_TYPOGRAPHY.fontWeight.semibold}
-            textAlign="center"
-          >
-            {tMobileContacts("NoGroupsYet")}
-          </Paragraph>
-          <Paragraph
-            color={colors.textSecondary}
-            fontSize={MOBILE_TYPOGRAPHY.fontSize.caption}
-            marginTop={6}
-            textAlign="center"
-          >
-            {tMobileContacts("NoGroupsYetHint")}
-          </Paragraph>
-        </View>
-      ) : (
-        <FlatList
-          automaticallyAdjustKeyboardInsets
-          contentContainerStyle={styles.listContent}
-          data={filteredGroups}
-          initialNumToRender={24}
-          keyboardShouldPersistTaps="handled"
-          keyExtractor={(item) => item.id}
-          ListEmptyComponent={
-            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-              {t("feedback.noResults")}
-            </Text>
-          }
-          maxToRenderPerBatch={24}
-          renderItem={renderItem}
-          style={styles.searchList}
-          windowSize={8}
+      renderItem={({ item }) => (
+        <SelectOptionRow
+          disabled={isSubmitting || isLoadingGroups}
+          isSelected={selectedGroupIds.has(item.id)}
+          mode="multiple"
+          onPress={() => toggleGroup(item.id)}
+          option={mapGroupToSelectItem(item, colors.borderStrong)}
         />
       )}
-    </SearchActionSheet>
+      searchable
+      searchPlaceholder={tMobileContacts("AddToGroupsSearchPlaceholder")}
+      snapPoint="selectSearch"
+      title={tMobileContactDetail("EditGroupsSheetTitle")}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 24,
-    paddingVertical: 32,
-  },
-  emptyText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    paddingVertical: 24,
-    textAlign: "center",
-  },
-  footerButton: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    flex: 1,
-    justifyContent: "center",
-    minHeight: MOBILE_LAYOUT.touchTarget,
-  },
-  footerButtonOutline: {},
-  footerButtonText: {
-    fontSize: MOBILE_TYPOGRAPHY.fontSize.body,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
-  },
-  listContent: {
-    paddingBottom: 12,
-  },
-  loadingState: {
-    alignItems: "center",
-    flex: 1,
-    justifyContent: "center",
-    paddingVertical: 32,
-  },
-  searchList: {
-    flex: 1,
-  },
-});

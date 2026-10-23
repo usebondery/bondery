@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
@@ -29,7 +30,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconTag, IconTagPlus, IconTrash } from "@tabler/icons-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { captureEvent } from "@/lib/analytics/client";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
@@ -116,7 +117,7 @@ function TagEditorModalBody({
   });
 
   const allContacts = contactsData?.contacts ?? [];
-  const pickerContacts = useMemo(() => {
+  const pickerContacts = (() => {
     const merged = new Map(allContacts.map((contact) => [contact.id, contact]));
     for (const member of tagMembers?.contacts ?? []) {
       if (!merged.has(member.id)) {
@@ -133,7 +134,7 @@ function TagEditorModalBody({
       }
     }
     return Array.from(merged.values());
-  }, [allContacts, tagMembers?.contacts]);
+  })();
   const [selectedIds, setSelectedIds] = useState<string[]>(
     mode === "create" ? initialSelectedPersonIds : [],
   );
@@ -358,7 +359,6 @@ function TagEditorModalBody({
       ),
     });
   };
-
   return (
     <form onSubmit={form.onSubmit(handleSave)}>
       <Stack gap="md">

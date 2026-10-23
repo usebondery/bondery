@@ -7,10 +7,10 @@ import {
   IconStar,
   IconTrash,
 } from "@tabler/icons-react-native";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Text, View } from "react-native";
 import { useCommonTranslations, useContactInfoTranslations } from "@/lib/i18n/generated/hooks";
-import { useAppToast } from "../../../lib/toast/useAppToast";
+import { notifications } from "../../../lib/toast/notifications";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { copyEmailToClipboard, openEmailMailto } from "../contactChannelActions";
 import {
@@ -30,24 +30,22 @@ type SheetState =
 
 interface ContactEmailsSectionProps {
   emails: EmailEntry[];
-  onSaveEmails: (emails: EmailEntry[]) => Promise<void>;
+  onSaveEmails: (emails: EmailEntry[]) => void;
 }
 
 export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSectionProps) {
   const t = useCommonTranslations();
   const tContactInfo = useContactInfoTranslations();
   const colors = useMobileThemeColors();
-  const { showToast } = useAppToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const canAdd = emails.length < MAX_CONTACT_CHANNELS;
   const errorTitle = t("feedback.errorTitle");
 
   function openAddSheet() {
     if (!canAdd) {
-      showToast({
-        headline: tContactInfo("MaxEmailsReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
+      notifications.show({
+        title: tContactInfo("MaxEmailsReached").replace("{max}", String(MAX_CONTACT_CHANNELS)),
         type: "error",
       });
       return;
@@ -60,20 +58,16 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
     setSheet({ entry: emails[index], index, mode: "edit", open: true });
   }
 
-  async function persistEmails(nextEmails: EmailEntry[]) {
-    setIsSubmitting(true);
-
+  function persistEmails(nextEmails: EmailEntry[]) {
     try {
-      await onSaveEmails(nextEmails);
-      setSheet({ open: false });
+      onSaveEmails(nextEmails);
     } catch {
-      showToast({
-        description: tContactInfo("EmailsUpdateError"),
-        headline: errorTitle,
+      notifications.show({
+        message: tContactInfo("EmailsUpdateError"),
+        title: errorTitle,
         type: "error",
       });
-    } finally {
-      setIsSubmitting(false);
+      throw new Error("Emails update failed");
     }
   }
 
@@ -92,7 +86,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
       );
     }
 
-    void persistEmails(nextEmails);
+    persistEmails(nextEmails);
   }
 
   function handleDeleteEntry() {
@@ -101,15 +95,15 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
     }
 
     const nextEmails = emails.filter((_, index) => index !== sheet.index);
-    void persistEmails(nextEmails);
+    persistEmails(nextEmails);
   }
 
   function handleDeleteAtIndex(index: number) {
-    void persistEmails(emails.filter((_, emailIndex) => emailIndex !== index));
+    persistEmails(emails.filter((_, emailIndex) => emailIndex !== index));
   }
 
   function handleSetPreferred(index: number) {
-    void persistEmails(applyPreferredEmail(emails, index));
+    persistEmails(applyPreferredEmail(emails, index));
   }
 
   const sheetEntry =
@@ -119,14 +113,11 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
         ? createDraftEmail(emails.length === 0)
         : null;
 
-  const copyMessages = useMemo(
-    () => ({
-      errorTitle,
-      successDescription: tContactInfo("EmailCopiedMessage"),
-      successTitle: tContactInfo("CopySuccessTitle"),
-    }),
-    [errorTitle, tContactInfo],
-  );
+  const copyMessages = {
+    errorTitle,
+    successDescription: tContactInfo("EmailCopiedMessage"),
+    successTitle: tContactInfo("CopySuccessTitle"),
+  };
 
   return (
     <View style={contactDetailStyles.section}>
@@ -178,7 +169,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                   icon: <IconMail size={18} stroke={colors.iconPrimary} />,
                   id: "email",
                   label: tContactInfo("SendEmailAction"),
-                  onPress: () => openEmailMailto(email, showToast, errorTitle),
+                  onPress: () => openEmailMailto(email, errorTitle),
                 },
                 {
                   disabled: !email.value.trim(),
@@ -187,7 +178,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                   id: "copy",
                   label: tContactInfo("CopyAction"),
                   onPress: () => {
-                    void copyEmailToClipboard(email, showToast, copyMessages);
+                    void copyEmailToClipboard(email, copyMessages);
                   },
                 },
                 {
@@ -212,9 +203,9 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                 },
               ]}
               onLongPress={() => {
-                void copyEmailToClipboard(email, showToast, copyMessages);
+                void copyEmailToClipboard(email, copyMessages);
               }}
-              onPress={() => openEmailMailto(email, showToast, errorTitle)}
+              onPress={() => openEmailMailto(email, errorTitle)}
               primaryLabel={email.value}
               type={email.type}
             />
@@ -224,16 +215,22 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
 
       <EditEmailSheet
         initialEntry={sheetEntry}
-        isSubmitting={isSubmitting}
         mode={sheet.open ? sheet.mode : "add"}
         onCancel={() => setSheet({ open: false })}
         onDelete={sheet.open && sheet.mode === "edit" ? handleDeleteEntry : undefined}
+        onError={() => {
+          notifications.show({
+            message: tContactInfo("EmailsUpdateError"),
+            title: errorTitle,
+            type: "error",
+          });
+        }}
         onOpenChange={(open) => {
           if (!open) {
             setSheet({ open: false });
           }
         }}
-        onSave={handleSaveEntry}
+        onPersist={handleSaveEntry}
         open={sheet.open}
       />
     </View>

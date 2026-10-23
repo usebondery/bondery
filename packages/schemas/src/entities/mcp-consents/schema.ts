@@ -7,6 +7,7 @@ export const mcpConsentListItemSchema = z.object({
   clientName: z.string(),
   createdAt: createdAtSchema,
   id: z.string().uuid(),
+  logoUri: z.string().url().nullable(),
   scopes: z.array(z.string()),
 }) satisfies z.ZodType<McpConsentListItem>;
 

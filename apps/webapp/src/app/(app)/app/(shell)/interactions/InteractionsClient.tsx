@@ -32,7 +32,7 @@ import {
   IconTimelineEventText,
   IconTrash,
 } from "@tabler/icons-react";
-import { useCallback, useMemo, useState } from "react";
+import { useState } from "react";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
 import {
   createDefaultInteractionColumns,
@@ -85,13 +85,10 @@ export function InteractionsClient() {
     [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
   ]);
 
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      setIsSearchLoading(true);
-      debouncedSetSearchValue(value);
-    },
-    [debouncedSetSearchValue],
-  );
+  const handleSearchChange = (value: string) => {
+    setIsSearchLoading(true);
+    debouncedSetSearchValue(value);
+  };
   const [viewMode, setViewMode] = useState<"interactions" | "table">("interactions");
   const [sortOrder, setSortOrder] = useState<InteractionSortOrder>("dateDesc");
   const [columns, setColumns] = useState<InteractionColumnConfig[]>(() =>
@@ -104,38 +101,32 @@ export function InteractionsClient() {
     }),
   );
 
-  const contactsById = useMemo(
-    () => new Map(contacts.map((contact) => [contact.id, contact])),
-    [contacts],
-  );
+  const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
-  const resolveParticipants = useCallback(
-    (activity: Activity): Contact[] => {
-      return (activity.participants || [])
-        .map((participant: ActivityParticipantRef) => {
-          const participantId = typeof participant === "string" ? participant : participant.id;
-          const knownContact = contactsById.get(participantId);
+  const resolveParticipants = (activity: Activity): Contact[] => {
+    return (activity.participants || [])
+      .map((participant: ActivityParticipantRef) => {
+        const participantId = typeof participant === "string" ? participant : participant.id;
+        const knownContact = contactsById.get(participantId);
 
-          if (knownContact) {
-            return knownContact;
-          }
+        if (knownContact) {
+          return knownContact;
+        }
 
-          if (!participantId || typeof participant === "string") {
-            return null;
-          }
+        if (!participantId || typeof participant === "string") {
+          return null;
+        }
 
-          return {
-            avatar: participant.avatar || null,
-            firstName: participant.firstName || t("UnknownPerson"),
-            id: participantId,
-            lastName: participant.lastName || null,
-            middleName: null,
-          } as Contact;
-        })
-        .filter((participant): participant is Contact => Boolean(participant));
-    },
-    [contactsById, t],
-  );
+        return {
+          avatar: participant.avatar || null,
+          firstName: participant.firstName || t("UnknownPerson"),
+          id: participantId,
+          lastName: participant.lastName || null,
+          middleName: null,
+        } as Contact;
+      })
+      .filter((participant): participant is Contact => Boolean(participant));
+  };
 
   const handleActivityClick = (activity: Activity) => {
     openNewActivityModal({
@@ -276,15 +267,13 @@ export function InteractionsClient() {
     });
   };
 
-  const sortedInteractionsActivities = useMemo(
-    () => [...activities].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [activities],
+  const sortedInteractionsActivities = [...activities].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   const handleLoadMore = () => {
     void fetchNextPage();
   };
-
   if (!interactionsData) {
     return null;
   }

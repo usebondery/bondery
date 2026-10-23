@@ -50,9 +50,9 @@ export async function getMapAddressPins(ctx: ContactMapContext, query: MapBounds
     avatar: resolveContactAvatarUrl(
       user.id,
       {
+        avatarUpdatedAt: row.avatar_updated_at,
         hasAvatar: row.has_avatar,
         id: row.person_id,
-        updatedAt: toIsoString(row.updated_at),
       },
       avatarOptions,
     ),
@@ -93,9 +93,9 @@ export async function getMapPins(ctx: ContactMapContext, query: MapBoundsQuery) 
     avatar: resolveContactAvatarUrl(
       user.id,
       {
+        avatarUpdatedAt: row.avatar_updated_at,
         hasAvatar: row.has_avatar,
         id: row.id,
-        updatedAt: toIsoString(row.updated_at),
       },
       avatarOptions,
     ),

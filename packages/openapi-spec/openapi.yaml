@@ -878,6 +878,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -1175,6 +1191,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -1394,6 +1426,147 @@ paths:
                       ok: true
                   status: ok
                   timestamp: 2026-01-15T12:00:00.000Z
+  /mobile/manifest:
+    get:
+      tags:
+        - Mobile
+      description: Public mobile app configuration. `latestVersion` is the current production CalVer for a non-blocking update
+        check. Not a health probe — use `GET /health/live` for liveness.
+      responses:
+        "200":
+          description: Mobile manifest
+          content:
+            application/json:
+              example:
+                mobile:
+                  latestVersion: 1.9.1
+              schema:
+                type: object
+                properties:
+                  mobile:
+                    type: object
+                    properties:
+                      latestVersion:
+                        type: string
+                        example: 1.9.1
+                    required:
+                      - latestVersion
+                    additionalProperties: false
+                required:
+                  - mobile
+                additionalProperties: false
+                example:
+                  mobile:
+                    latestVersion: 1.9.1
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: admin_required
+                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
   /oauth-providers:
     get:
       tags:
@@ -1487,6 +1660,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -1973,6 +2162,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -2341,6 +2546,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -2486,6 +2707,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -2707,6 +2944,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -2868,6 +3121,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -3094,6 +3363,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -3305,6 +3590,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -3539,6 +3840,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -3713,6 +4030,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -4131,6 +4464,22 @@ paths:
                       whatsapp: null
               schema:
                 $ref: "#/components/schemas/SyncConflictError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -4243,6 +4592,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -4433,6 +4798,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -4593,6 +4974,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -4737,6 +5134,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -4865,6 +5278,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -5007,6 +5436,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -5124,6 +5569,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -5253,6 +5714,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -5374,6 +5851,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -5610,6 +6103,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -5815,6 +6324,22 @@ paths:
                   message: Relationship already exists
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: conflict_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -6031,6 +6556,22 @@ paths:
                   type: conflict_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -6149,6 +6690,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -6329,6 +6886,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -6579,6 +7152,22 @@ paths:
                   type: conflict_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -6779,6 +7368,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -6938,6 +7543,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -7181,6 +7802,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -7295,6 +7932,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -7559,6 +8212,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -7801,6 +8470,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -7922,6 +8607,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -8041,6 +8742,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -8168,6 +8885,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -8367,6 +9100,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -8481,6 +9230,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -8603,6 +9368,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -8729,6 +9510,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -8871,6 +9668,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -9016,6 +9829,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -9133,6 +9962,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -9247,6 +10092,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -9443,6 +10304,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -9650,6 +10527,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -9844,6 +10737,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -10049,6 +10958,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -10408,6 +11333,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -10770,6 +11711,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -10976,6 +11933,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -11121,6 +12094,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -11243,6 +12232,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -11371,6 +12376,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -11519,6 +12540,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -11631,6 +12668,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -12117,6 +13170,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -12287,6 +13356,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -12447,6 +13532,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -12650,6 +13751,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -12784,6 +13901,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -12906,6 +14039,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -13033,6 +14182,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -13177,6 +14342,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -13289,6 +14470,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -13496,6 +14693,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -13631,6 +14844,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -13763,6 +14992,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -13938,6 +15183,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -14144,6 +15405,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -14327,6 +15604,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -14548,6 +15841,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -14660,6 +15969,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -14834,6 +16159,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -15093,6 +16434,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -15223,6 +16580,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -15388,6 +16761,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -15503,6 +16892,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -15675,6 +17080,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -15804,6 +17225,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -15918,6 +17355,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -16072,6 +17525,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -16179,6 +17648,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -16450,6 +17935,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -16628,6 +18129,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -16743,6 +18260,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -16884,6 +18417,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -16940,6 +18489,7 @@ paths:
                   aiMessagesUsed: 12
                   avatarUrl: null
                   colorScheme: auto
+                  defaultPhoneCountry: GB
                   email: ada@example.com
                   gettingStartedDismissedAt: 2026-01-15T12:00:00.000Z
                   groupSortOrder: alpha-asc
@@ -16979,6 +18529,12 @@ paths:
                           - light
                           - dark
                           - auto
+                      defaultPhoneCountry:
+                        nullable: true
+                        type: string
+                        minLength: 2
+                        maxLength: 2
+                        pattern: ^[A-Za-z]{2}$
                       groupSortOrder:
                         type: string
                       language:
@@ -17060,6 +18616,7 @@ paths:
                           type: string
                     required:
                       - colorScheme
+                      - defaultPhoneCountry
                       - groupSortOrder
                       - language
                       - leftSwipeAction
@@ -17129,6 +18686,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -17225,6 +18798,12 @@ paths:
                   enum:
                     - 24h
                     - 12h
+                defaultPhoneCountry:
+                  nullable: true
+                  type: string
+                  minLength: 2
+                  maxLength: 2
+                  pattern: ^[A-Za-z]{2}$
                 language:
                   type: string
                   enum:
@@ -17264,6 +18843,9 @@ paths:
                     type: object
                     properties:
                       colorScheme:
+                        nullable: true
+                        type: string
+                      defaultPhoneCountry:
                         nullable: true
                         type: string
                       groupSortOrder:
@@ -17367,6 +18949,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -17486,6 +19084,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -17599,6 +19213,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -17739,6 +19369,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -17893,6 +19539,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -18075,6 +19737,22 @@ paths:
                   type: conflict_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -18238,6 +19916,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -18346,6 +20040,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -18403,6 +20113,7 @@ paths:
                     clientName: Claude
                     createdAt: 2026-01-15T12:00:00.000Z
                     id: 6ba7b810-9dad-11d1-80b4-00c04fd430c8
+                    logoUri: https://claude.ai/favicon.ico
                     scopes:
                       - openid
                       - profile
@@ -18428,6 +20139,10 @@ paths:
                         id:
                           type: string
                           format: uuid
+                        logoUri:
+                          nullable: true
+                          type: string
+                          format: uri
                         scopes:
                           type: array
                           items:
@@ -18437,6 +20152,7 @@ paths:
                         - clientName
                         - createdAt
                         - id
+                        - logoUri
                         - scopes
                       additionalProperties: false
                   totalCount:
@@ -18496,6 +20212,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -18605,6 +20337,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -18801,6 +20549,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -19000,6 +20764,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -20097,6 +21877,8 @@ paths:
                           additionalProperties: false
                         - type: object
                           properties:
+                            code:
+                              type: string
                             error:
                               type: string
                             id:
@@ -20171,6 +21953,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -20293,6 +22091,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -20531,6 +22345,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -20670,6 +22500,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -20799,6 +22645,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -20968,6 +22830,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -21105,6 +22983,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -21266,6 +23160,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -21371,6 +23281,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -21546,6 +23472,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -21772,6 +23714,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -21901,6 +23859,22 @@ paths:
                   type: conflict_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -22001,6 +23975,22 @@ paths:
                   message: Contact not found
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
               schema:
                 $ref: "#/components/schemas/ApiError"
         "429":
@@ -22142,6 +24132,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -22257,6 +24263,22 @@ paths:
                   type: not_found_error
               schema:
                 $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
         "429":
           description: Too many requests
           content:
@@ -22299,7 +24321,7 @@ paths:
                 $ref: "#/components/schemas/ApiError"
 servers:
   - description: Local development server
-    url: http://localhost:26631
+    url: https://api.usebondery.test
   - description: Production server
     url: https://api.usebondery.com
 tags:
@@ -22332,6 +24354,9 @@ tags:
     name: Sync
   - description: Browser extension integration endpoints
     name: Extension
+  - description: Public mobile app configuration. `GET /mobile/manifest` advertises the current production CalVer for a
+      non-blocking update check. Not a health probe — use `GET /health/live` for liveness.
+    name: Mobile
   - description: AI chat assistant
     name: Chat
   - description: Subscription and billing management

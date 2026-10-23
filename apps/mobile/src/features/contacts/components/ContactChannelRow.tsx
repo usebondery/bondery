@@ -1,8 +1,10 @@
 import type { ContactAddressType, ContactType } from "@bondery/schemas";
 import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import type { OverflowMenuItemConfig } from "../../../components/OverflowMenuItem";
+import { Text } from "../../../components/ui/Text";
 import { useSingleDoubleTap } from "../../../lib/gestures/useSingleDoubleTap";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { ContactChannelBadges } from "./ContactChannelBadges";
@@ -66,7 +68,7 @@ export function ContactChannelRow({
         >
           <View style={contactDetailStyles.cardLeft}>
             {labelContent ?? (
-              <Text style={[contactDetailStyles.cardPrimary, { color: colors.textPrimary }]}>
+              <Text fw={600} numberOfLines={2} size="lg">
                 {primaryLabel}
               </Text>
             )}

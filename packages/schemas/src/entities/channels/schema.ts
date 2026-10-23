@@ -61,7 +61,7 @@ export const phoneEntryInputSchema =
 export const phoneEntrySchema = phoneEntryInputSchema.transform((value) => ({
   ...value,
   preferred: value.preferred ?? false,
-  prefix: value.prefix || "+1",
+  prefix: value.prefix.trim(),
   value: value.value.replace(/\D/g, ""),
 })) satisfies z.ZodType<PhoneEntryInput>;
 

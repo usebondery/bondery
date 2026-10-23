@@ -7,6 +7,7 @@ import {
   AnchorLink,
   CornerLabeledButton,
   errorNotificationTemplate,
+  hrefAssert,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import { loginEmailFormSchema } from "@bondery/schemas";
@@ -24,7 +25,7 @@ import { stripTransientAuthErrorFromLocation } from "@/lib/auth/magic-link-urls"
 import { isWebAuthnSupported } from "@/lib/auth/passkey-support";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { TypedTrans } from "@/lib/i18n/TypedTrans";
-import { LoginBrandShell } from "./LoginBrandShell";
+import { LoginBrandShell, type LoginBrandShellLeftContent } from "./LoginBrandShell";
 import { type LoginBusyAction, LoginProviderButtons } from "./LoginProviderButtons";
 import classes from "./SocialLoginCard.module.css";
 
@@ -46,6 +47,7 @@ type SocialLoginCardProps = {
   getPasskeyTestId?: string;
   getProviderTestId?: (providerKey: string) => string | undefined;
   lastUsedLoginMethod: string | null;
+  leftContent?: LoginBrandShellLeftContent;
   loading?: boolean;
   lockedEmail?: string;
   oauthProviders: OAuthProvidersBitmap | null;
@@ -72,6 +74,7 @@ export function SocialLoginCard({
   getPasskeyTestId,
   getProviderTestId,
   lastUsedLoginMethod,
+  leftContent = "marketing",
   loading = false,
   lockedEmail,
   oauthProviders,
@@ -218,7 +221,6 @@ export function SocialLoginCard({
   const closeEmailPanel = () => {
     setEmailPanelOpen(false);
   };
-
   const continueWithEmailButton = (
     <CornerLabeledButton
       className={classes.filledButton}
@@ -299,7 +301,7 @@ export function SocialLoginCard({
     : (description ?? t("Description"));
 
   return (
-    <LoginBrandShell loading={loading} websiteUrl={websiteUrl}>
+    <LoginBrandShell leftContent={leftContent} loading={loading} websiteUrl={websiteUrl}>
       <Stack gap="lg">
         <Stack gap={6}>
           <Title fw={700} fz="h2" lh={1.15} order={2}>
@@ -410,12 +412,12 @@ export function SocialLoginCard({
             <TypedTrans
               components={{
                 privacyLink: (
-                  <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.PRIVACY}`} size="xs">
+                  <AnchorLink href={hrefAssert(`${websiteUrl}${WEBSITE_ROUTES.PRIVACY}`)} size="xs">
                     {null}
                   </AnchorLink>
                 ),
                 termsLink: (
-                  <AnchorLink href={`${websiteUrl}${WEBSITE_ROUTES.TERMS}`} size="xs">
+                  <AnchorLink href={hrefAssert(`${websiteUrl}${WEBSITE_ROUTES.TERMS}`)} size="xs">
                     {null}
                   </AnchorLink>
                 ),

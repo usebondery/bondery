@@ -1,7 +1,6 @@
 "use client";
 
 import { Button, Center, Stack, Text, Title } from "@mantine/core";
-import { useMemo } from "react";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
 import { useOnboardingTranslations } from "@/lib/i18n/generated/hooks";
 
@@ -13,12 +12,12 @@ export function StepWelcome({ onNext }: StepProps) {
   const t = useOnboardingTranslations("Welcome");
   const { displayName } = useUserSession();
 
-  const firstName = useMemo(() => {
+  const firstName = (() => {
     if (!displayName) {
       return null;
     }
     return displayName.split(" ")[0] || null;
-  }, [displayName]);
+  })();
 
   const greeting = firstName != null ? t("TitleWithName", { name: firstName }) : t("TitleGeneric");
 

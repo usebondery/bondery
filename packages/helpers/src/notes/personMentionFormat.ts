@@ -4,6 +4,28 @@ export const BP_PERSON_URL_PREFIX = "bp://person/";
 const BP_PERSON_LINK_RE = /\[([^\]]+)\]\(bp:\/\/person\/([^)]+)\)/g;
 const BP_PERSON_TOKEN_RE = /\[\[bp:person:([^\]]+)\]\]/g;
 
+/** Unique person IDs referenced by wire tokens or editor markdown links. */
+export function extractPersonMentionIds(markdown: string): string[] {
+  const ids: string[] = [];
+  const seen = new Set<string>();
+
+  function add(id: string | undefined) {
+    if (!id || seen.has(id)) {
+      return;
+    }
+    seen.add(id);
+    ids.push(id);
+  }
+
+  for (const match of markdown.matchAll(BP_PERSON_TOKEN_RE)) {
+    add(match[1]);
+  }
+  for (const match of markdown.matchAll(BP_PERSON_LINK_RE)) {
+    add(match[2]);
+  }
+  return ids;
+}
+
 /**
  * Converts Bondery wire-format person tokens to mobile-editor markdown links.
  *

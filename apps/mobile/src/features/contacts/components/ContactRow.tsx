@@ -1,19 +1,23 @@
 import type { Contact } from "@bondery/schemas";
 import { IconCheck } from "@tabler/icons-react-native";
-import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { Image, StyleSheet, Text, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { StyleSheet, View } from "react-native";
 import Swipeable, {
   type SwipeableMethods,
   SwipeDirection,
 } from "react-native-gesture-handler/ReanimatedSwipeable";
-import { normalizeMobileUrlForDevice, UI_TIMING_MS } from "../../../lib/config";
+import Animated from "react-native-reanimated";
+import { Pressable } from "@/components/ui/Pressable";
+import { PersonAvatar } from "../../../components/PersonAvatar";
+import { Group } from "../../../components/ui/Group";
+import { Text } from "../../../components/ui/Text";
+import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
+import { UI_TIMING_MS } from "../../../lib/config";
 import { getSwipeActionIcon, getSwipeActionLabel } from "../../../lib/preferences/swipeActionIcons";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
-import { TAMAGUI_TRANSITION } from "../../../theme/animations";
-import { Tappable } from "../../../theme/Tappable";
-import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
+import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { formatContactName, getAvatarColorHex, getContactInitials } from "../contactUtils";
+import { formatContactName } from "../contactUtils";
 
 interface ContactRowProps {
   contact: Contact;
@@ -37,8 +41,9 @@ interface ContactRowProps {
 
 const SWIPE_ACTION_ICON_SIZE = 22;
 const DISABLED_ROW_OPACITY = 0.45;
+const CONTACT_ROW_HEIGHT = 56;
 
-export const ContactRow = memo(function ContactRow({
+export function ContactRow({
   contact,
   selected,
   selectionMode,
@@ -54,10 +59,9 @@ export const ContactRow = memo(function ContactRow({
   onPress,
 }: ContactRowProps) {
   const colors = useMobileThemeColors();
+  const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("default");
   const swipeableRef = useRef<SwipeableMethods>(null);
-  const name = useMemo(() => formatContactName(contact), [contact]);
-  const avatarColor = getAvatarColorHex(contact);
-  const avatarUri = contact.avatar ? normalizeMobileUrlForDevice(contact.avatar) : undefined;
+  const name = formatContactName(contact);
   const swipeGesturesEnabled = isSwipeEnabled && !selectionMode;
   const showDisabledStyle = isDisabled && selectionMode;
   const isRowSelected = selected && !showDisabledStyle;
@@ -68,17 +72,15 @@ export const ContactRow = memo(function ContactRow({
     }
   }, [selectionMode]);
 
-  const shouldShowAvatarImage = !!avatarUri && !isRowSelected;
-
-  const handleLongPress = useCallback(() => {
+  function handleLongPress() {
     if (previewMode || selectionMode || isDisabled) {
       return;
     }
 
     onEnterSelection(contact.id);
-  }, [contact.id, isDisabled, onEnterSelection, previewMode, selectionMode]);
+  }
 
-  const handlePress = useCallback(() => {
+  function handlePress() {
     if (previewMode) {
       return;
     }
@@ -93,95 +95,85 @@ export const ContactRow = memo(function ContactRow({
     }
 
     onPress?.(contact.id);
-  }, [contact.id, isDisabled, onPress, onToggleSelect, previewMode, selectionMode]);
+  }
 
-  const renderLeftActions = useCallback(
-    () => (
+  function renderLeftActions() {
+    return (
       <View
         accessibilityLabel={getSwipeActionLabel(rightSwipeAction, texts)}
-        style={[styles.action, styles.leftAction, { backgroundColor: colors.successSurface }]}
+        style={[styles.action, { backgroundColor: colors.successSurface }]}
       >
         {getSwipeActionIcon(rightSwipeAction, colors.textPrimary, SWIPE_ACTION_ICON_SIZE)}
       </View>
-    ),
-    [colors.successSurface, colors.textPrimary, rightSwipeAction, texts],
-  );
+    );
+  }
 
-  const renderRightActions = useCallback(
-    () => (
+  function renderRightActions() {
+    return (
       <View
         accessibilityLabel={getSwipeActionLabel(leftSwipeAction, texts)}
-        style={[styles.action, styles.rightAction, { backgroundColor: colors.warningSurface }]}
+        style={[styles.action, { backgroundColor: colors.warningSurface }]}
       >
         {getSwipeActionIcon(leftSwipeAction, colors.textPrimary, SWIPE_ACTION_ICON_SIZE)}
       </View>
-    ),
-    [colors.textPrimary, colors.warningSurface, leftSwipeAction, texts],
-  );
+    );
+  }
 
-  const handleSwipeableOpen = useCallback(
-    (direction: SwipeDirection.LEFT | SwipeDirection.RIGHT) => {
-      swipeableRef.current?.close();
+  function handleSwipeableOpen(direction: SwipeDirection.LEFT | SwipeDirection.RIGHT) {
+    swipeableRef.current?.close();
 
-      if (previewMode) {
-        return;
-      }
+    if (previewMode) {
+      return;
+    }
 
-      if (direction === SwipeDirection.LEFT) {
-        onExecuteAction(contact, leftSwipeAction);
-        return;
-      }
+    if (direction === SwipeDirection.LEFT) {
+      onExecuteAction(contact, leftSwipeAction);
+      return;
+    }
 
-      onExecuteAction(contact, rightSwipeAction);
-    },
-    [contact, leftSwipeAction, onExecuteAction, previewMode, rightSwipeAction],
-  );
+    onExecuteAction(contact, rightSwipeAction);
+  }
 
   const rowContent = (
-    <Tappable
-      accessibilityState={{ disabled: showDisabledStyle }}
-      alignItems="center"
-      animateOnly={["scale"]}
-      backgroundColor={isRowSelected ? colors.selectionBackground : colors.surface}
-      borderBottomColor={colors.border}
-      borderBottomWidth={previewMode ? 0 : 1}
-      delayLongPress={selectionMode ? undefined : UI_TIMING_MS.longPressDelay}
-      flexDirection="row"
-      justifyContent="space-between"
-      minHeight={56}
-      onLongPress={selectionMode ? undefined : handleLongPress}
-      onPress={handlePress}
-      opacity={showDisabledStyle ? DISABLED_ROW_OPACITY : 1}
-      paddingHorizontal={16}
-      transition={TAMAGUI_TRANSITION.quick}
-      variant="default"
-    >
-      <View style={styles.leftSide}>
-        <View
-          style={[
-            styles.avatar,
-            isRowSelected
-              ? [styles.avatarSelected, { backgroundColor: colors.selectionBackgroundStrong }]
-              : shouldShowAvatarImage
-                ? [styles.avatarImageBackground, { backgroundColor: colors.surfaceMuted }]
-                : { backgroundColor: avatarColor },
-          ]}
-        >
+    <Animated.View style={squeezeStyle}>
+      <Pressable
+        accessibilityState={{ disabled: showDisabledStyle }}
+        className="w-full flex-row items-center justify-between px-4"
+        delayLongPress={selectionMode ? undefined : UI_TIMING_MS.longPressDelay}
+        onLongPress={selectionMode ? undefined : handleLongPress}
+        onPress={handlePress}
+        onPressIn={() => {
+          if (showDisabledStyle) {
+            return;
+          }
+          pressIn();
+        }}
+        onPressOut={pressOut}
+        style={{
+          backgroundColor: isRowSelected ? colors.selectionBackground : colors.surface,
+          borderBottomColor: colors.border,
+          borderBottomWidth: previewMode ? 0 : 1,
+          minHeight: CONTACT_ROW_HEIGHT,
+          opacity: showDisabledStyle ? DISABLED_ROW_OPACITY : 1,
+        }}
+      >
+        <Group className="min-w-0 flex-1 pr-3" gap="sm">
           {isRowSelected ? (
-            <IconCheck size={16} stroke={colors.textPrimary} />
-          ) : shouldShowAvatarImage ? (
-            <Image resizeMode="cover" source={{ uri: avatarUri }} style={styles.avatarImage} />
+            <View
+              className="items-center justify-center"
+              style={[styles.avatar, { backgroundColor: colors.selectionBackgroundStrong }]}
+            >
+              <IconCheck size={16} stroke={colors.textPrimary} />
+            </View>
           ) : (
-            <Text style={[styles.avatarText, { color: colors.textOnPrimary }]}>
-              {getContactInitials(contact)}
-            </Text>
+            <PersonAvatar person={contact} size={MOBILE_LAYOUT.avatar.list} uri={contact.avatar} />
           )}
-        </View>
-        <Text numberOfLines={1} style={[styles.nameText, { color: colors.textPrimary }]}>
-          {name}
-        </Text>
-      </View>
-    </Tappable>
+          <Text className="shrink" fw={500} numberOfLines={1} size="xl">
+            {name}
+          </Text>
+        </Group>
+      </Pressable>
+    </Animated.View>
   );
 
   if (!isSwipeEnabled) {
@@ -204,7 +196,7 @@ export const ContactRow = memo(function ContactRow({
       </Swipeable>
     </View>
   );
-});
+}
 
 const styles = StyleSheet.create({
   action: {
@@ -213,35 +205,8 @@ const styles = StyleSheet.create({
     width: 100,
   },
   avatar: {
-    alignItems: "center",
-    borderRadius: 17,
-    height: 34,
-    justifyContent: "center",
-    width: 34,
+    borderRadius: MOBILE_LAYOUT.avatar.list / 2,
+    height: MOBILE_LAYOUT.avatar.list,
+    width: MOBILE_LAYOUT.avatar.list,
   },
-  avatarImage: {
-    borderRadius: 17,
-    height: "100%",
-    width: "100%",
-  },
-  avatarImageBackground: {},
-  avatarSelected: {},
-  avatarText: {
-    fontSize: 12,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.bold,
-  },
-  leftAction: {},
-  leftSide: {
-    alignItems: "center",
-    flex: 1,
-    flexDirection: "row",
-    gap: 12,
-    paddingRight: 12,
-  },
-  nameText: {
-    flexShrink: 1,
-    fontSize: 16,
-    fontWeight: MOBILE_TYPOGRAPHY.fontWeight.medium,
-  },
-  rightAction: {},
 });

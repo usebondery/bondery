@@ -16,7 +16,8 @@ export async function setClientCookie(
   { maxAge = DEFAULT_MAX_AGE, path = "/", sameSite = "lax" }: SetClientCookieOptions = {},
 ): Promise<void> {
   await cookieStore.set({
-    expires: Math.floor(Date.now() / 1000) + maxAge,
+    // Cookie Store API expects a Unix timestamp in milliseconds (not seconds).
+    expires: Date.now() + maxAge * 1000,
     name,
     path,
     sameSite,

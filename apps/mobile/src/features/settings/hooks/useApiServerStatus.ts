@@ -1,25 +1,10 @@
 import * as Network from "expo-network";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { API_URL } from "../../../lib/config";
+import { isDeviceOffline, STATUS_PROBE_TIMEOUT_MS } from "./probeNetwork";
 
 export type ApiServerStatus = "checking" | "connected" | "offline" | "unreachable";
-
-const STATUS_PROBE_TIMEOUT_MS = 5_000;
-
-async function isDeviceOffline(): Promise<boolean> {
-  const state = await Network.getNetworkStateAsync();
-
-  if (state.isConnected === false) {
-    return true;
-  }
-
-  if (state.isInternetReachable === false) {
-    return true;
-  }
-
-  return false;
-}
 
 async function probeApiServer(): Promise<boolean> {
   if (!API_URL) {
@@ -50,7 +35,7 @@ async function probeApiServer(): Promise<boolean> {
 export function useApiServerStatus() {
   const [status, setStatus] = useState<ApiServerStatus>("checking");
 
-  const refresh = useCallback(async () => {
+  async function refresh() {
     setStatus("checking");
 
     if (await isDeviceOffline()) {
@@ -60,7 +45,7 @@ export function useApiServerStatus() {
 
     const isReachable = await probeApiServer();
     setStatus(isReachable ? "connected" : "unreachable");
-  }, []);
+  }
 
   useEffect(() => {
     void refresh();
@@ -74,11 +59,9 @@ export function useApiServerStatus() {
     };
   }, [refresh]);
 
-  useFocusEffect(
-    useCallback(() => {
-      void refresh();
-    }, [refresh]),
-  );
+  useFocusEffect(() => {
+    void refresh();
+  });
 
   return {
     isChecking: status === "checking",

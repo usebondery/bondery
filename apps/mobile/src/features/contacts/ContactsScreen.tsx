@@ -1,34 +1,35 @@
 import type { Contact, Group } from "@bondery/schemas";
 import type { FlashListRef } from "@shopify/flash-list";
 import { IconSearch } from "@tabler/icons-react-native";
-import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { ActivityIndicator, View } from "react-native";
 import { useScrollBottomInset } from "../../components/chrome";
 import { LoadErrorCard, loadErrorTabRootInset } from "../../components/load-state";
-import { MobileTextInput } from "../../components/MobileTextInput";
+import { Stack } from "../../components/ui/Stack";
+import { TextInput } from "../../components/ui/TextInput";
 import {
   useCommonTranslations,
   useMobileContactsTranslations,
   useMobileSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
-import { preloadMobileNamespaces } from "../../lib/i18n/preloadMobileNamespaces";
+import type { NativeTextInputRef } from "../../lib/native-host-refs";
+import { useAppNavigation } from "../../lib/navigation/useAppNavigation";
 import {
   type MobilePreferencesState,
   type SwipeAction,
   useMobilePreferences,
 } from "../../lib/preferences/useMobilePreferences";
-import { useAppToast } from "../../lib/toast/useAppToast";
+import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { useFabSpeedDialScrollDismiss } from "../navigation/useFabSpeedDialScrollDismiss";
+import { useRegisterTabSearchFocus } from "../navigation/tabSearchFocusContext";
 import { ContactsAddToGroupsSheet } from "./components/ContactsAddToGroupsSheet";
+import { ContactsGroupFilterField } from "./components/ContactsGroupFilterField";
 import { ContactsScreenHeader } from "./components/ContactsScreenHeader";
 import { ContactsScreenList } from "./components/ContactsScreenList";
 import { ContactsSelectionBackHandler } from "./components/ContactsSelectionBackHandler";
 import { ContactsSelectionChromeRegistrar } from "./components/ContactsSelectionChromeRegistrar";
 import { ContactsSelectionDialogs } from "./components/ContactsSelectionDialogs";
-import { contactsScreenStyles as styles } from "./components/contactsScreenStyles";
 import { GroupEditSheet } from "./components/GroupEditSheet";
 import { executeContactSwipeAction } from "./contactSwipeActions";
 import type { ContactsFlatRow } from "./contactsFlatList";
@@ -36,23 +37,16 @@ import { useContactsSelectionMode } from "./contactsSelectionStore";
 import { useContactsDragSelection } from "./hooks/useContactsDragSelection";
 import { useContactsScreenData } from "./hooks/useContactsScreenData";
 import { useContactsSelectionListSync } from "./hooks/useContactsSelectionListSync";
-import { useFlashListScrollToIndex } from "./hooks/useFlashListScrollToIndex";
-import { useNavigateToGroup } from "./hooks/useNavigateToGroup";
 
 export function ContactsScreen() {
   const tMobileContacts = useMobileContactsTranslations();
   const tMobileSettings = useMobileSettingsTranslations();
   const t = useCommonTranslations();
-  useEffect(() => {
-    void preloadMobileNamespaces(["mobile.contactsTab"]);
-  }, []);
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("tabRoot");
-  const { showToast } = useAppToast();
-  const router = useRouter();
-  const navigateToGroup = useNavigateToGroup();
-  const { onScroll: fabScrollDismiss } = useFabSpeedDialScrollDismiss();
+  const { openContact, openMyself } = useAppNavigation();
   const flashListRef = useRef<FlashListRef<ContactsFlatRow>>(null);
+  const searchInputRef = useRef<NativeTextInputRef>(null);
   const selectionMode = useContactsSelectionMode();
   const leftSwipeAction = useMobilePreferences(
     (state: MobilePreferencesState) => state.leftSwipeAction,
@@ -62,6 +56,19 @@ export function ContactsScreen() {
   );
 
   const screenData = useContactsScreenData();
+
+  useRegisterTabSearchFocus(
+    () => {
+      searchInputRef.current?.focus();
+    },
+    {
+      enabled:
+        !screenData.showFullScreenLoader &&
+        !screenData.error &&
+        !selectionMode &&
+        !screenData.isGroupPickerOpen,
+    },
+  );
 
   useContactsSelectionListSync({
     contactIds: screenData.contacts.map((contact) => contact.id),
@@ -77,103 +84,101 @@ export function ContactsScreen() {
     enabled: selectionMode && !screenData.isSearchActive,
     flashListRef,
     flatRows: screenData.flatRows,
-    listHeaderHeight: screenData.isSearchActive ? 0 : screenData.listHeaderHeight,
+    listHeaderHeight: 0,
     listViewportHeight: screenData.listViewportHeight,
     myselfContactId: screenData.myselfContactId,
   });
 
-  const scrollToFlatIndex = useFlashListScrollToIndex(flashListRef);
+  const selectedGroupId = screenData.selectedGroupId;
+  useEffect(() => {
+    void selectedGroupId;
+    flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
+  }, [selectedGroupId]);
 
-  const rowTexts = useMemo(
-    () => ({
-      call: t("actions.call"),
-      email: t("actions.email"),
-      message: t("actions.message"),
-    }),
-    [t],
-  );
+  const rowTexts = {
+    call: t("actions.call"),
+    email: t("actions.email"),
+    message: t("actions.message"),
+  };
 
-  const handleListScroll = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      onScroll(event);
-      fabScrollDismiss(event);
-    },
-    [fabScrollDismiss, onScroll],
-  );
+  function handleListScroll(event: NativeSyntheticEvent<NativeScrollEvent>) {
+    onScroll(event);
+  }
 
-  const executeAction = useCallback(
-    (contact: Contact, action: SwipeAction) => {
-      executeContactSwipeAction(contact, action, showToast, {
-        errorTitle: t("feedback.errorTitle"),
-        missingEmail: tMobileContacts("MissingEmail"),
-        missingPhone: tMobileContacts("MissingPhone"),
-      });
-    },
-    [showToast, t, tMobileContacts],
-  );
+  function executeAction(contact: Contact, action: SwipeAction) {
+    executeContactSwipeAction(contact, action, {
+      errorTitle: t("feedback.errorTitle"),
+      missingEmail: tMobileContacts("MissingEmail"),
+      missingPhone: tMobileContacts("MissingPhone"),
+    });
+  }
 
-  const handleOpenContact = useCallback(
-    (contactId: string) => {
-      router.push({ params: { id: contactId }, pathname: "/contact/[id]" });
-    },
-    [router],
-  );
+  function handleOpenContact(contactId: string) {
+    openContact(contactId);
+  }
 
-  const handleOpenMyself = useCallback(() => {
-    router.push("/myself");
-  }, [router]);
+  function handleOpenMyself() {
+    openMyself();
+  }
 
-  const handleGroupCreated = useCallback(
-    (group: Group) => {
-      navigateToGroup(group);
-    },
-    [navigateToGroup],
-  );
+  function handleGroupCreated(group: Group) {
+    screenData.selectGroup(group.id);
+    screenData.reloadGroups();
+  }
 
-  const handleLetterChange = useCallback(
-    (letter: string) => {
-      const targetIndex = screenData.letterToIndex.get(letter);
+  function handleOpenCreateGroup() {
+    screenData.setCreateGroupOpen(true);
+  }
 
-      if (targetIndex !== undefined) {
-        scrollToFlatIndex(targetIndex);
-      }
-    },
-    [screenData.letterToIndex, scrollToFlatIndex],
+  const headerAccessory = (
+    <Stack gap="sm">
+      <TextInput
+        autoCapitalize="none"
+        autoCorrect={false}
+        leftSection={<IconSearch size={16} stroke={colors.iconSecondary} />}
+        onChangeText={screenData.handleSearchChange}
+        placeholder={tMobileContacts("SearchPlaceholder")}
+        ref={searchInputRef}
+        rightSection={
+          <View className="w-[22px] items-center justify-center">
+            {screenData.isSearching ? (
+              <ActivityIndicator color={colors.textMuted} size="small" />
+            ) : null}
+          </View>
+        }
+        value={screenData.searchInput}
+        wrapperStyle={{
+          backgroundColor: colors.surfaceMuted,
+          borderColor: colors.borderStrong,
+        }}
+      />
+      <ContactsGroupFilterField
+        groups={screenData.sortedGroups}
+        isDisabled={selectionMode || screenData.showFullScreenLoader}
+        onCreateGroupPress={handleOpenCreateGroup}
+        onOpenChange={screenData.setGroupPickerOpen}
+        selectedGroupId={screenData.selectedGroupId}
+        selectGroup={screenData.selectGroup}
+        showField={false}
+      />
+    </Stack>
   );
 
   return (
-    <View style={[styles.screen, { backgroundColor: colors.appBackground }]}>
+    <View className="flex-1" style={{ backgroundColor: colors.appBackground }}>
       <ContactsSelectionChromeRegistrar />
       <ContactsSelectionBackHandler />
-      <ContactsScreenHeader
-        accessory={
-          <MobileTextInput
-            autoCapitalize="none"
-            autoCorrect={false}
-            backgroundColor={colors.surfaceMuted}
-            leadingIcon={<IconSearch size={16} stroke={colors.iconSecondary} />}
-            onChangeText={screenData.handleSearchChange}
-            placeholder={tMobileContacts("SearchPlaceholder")}
-            style={styles.searchInput}
-            trailingAccessory={
-              screenData.isSearching ? (
-                <View style={styles.searchSpinner}>
-                  <ActivityIndicator color={colors.textMuted} size="small" />
-                </View>
-              ) : (
-                <View style={styles.searchSpinner} />
-              )
-            }
-            unfocusedBorderColor={colors.borderStrong}
-            value={screenData.searchInput}
-          />
-        }
-      />
+      <ContactsScreenHeader accessory={headerAccessory} />
 
       {screenData.showFullScreenLoader ? (
-        <View style={styles.centeredState}>
+        <Stack
+          align="center"
+          className="px-5"
+          justify="center"
+          style={{ paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset }}
+        >
           <ActivityIndicator color={colors.textPrimary} size="large" />
-        </View>
+        </Stack>
       ) : null}
 
       {!screenData.showFullScreenLoader && screenData.error ? (
@@ -190,42 +195,35 @@ export function ContactsScreen() {
 
       {!screenData.showFullScreenLoader && !screenData.error ? (
         <ContactsScreenList
-          colors={colors}
           debouncedQuery={screenData.debouncedQuery}
           dragSelectionGesture={dragSelectionGesture}
           flashListRef={flashListRef}
           flatRows={screenData.flatRows}
-          handleEndReached={screenData.handleEndReached}
           handleListScroll={handleListScroll}
           isDragging={isDragging}
-          isLoadingMore={screenData.isLoadingMore}
+          isGroupFilterActive={screenData.isGroupFilterActive}
           isSearchActive={screenData.isSearchActive}
           leftSwipeAction={leftSwipeAction}
           myselfContactId={screenData.myselfContactId}
-          onCreateGroupPress={() => screenData.setCreateGroupOpen(true)}
           onExecuteAction={executeAction}
-          onGroupPress={navigateToGroup}
-          onLetterChange={handleLetterChange}
           onOpenContact={handleOpenContact}
           onOpenMyself={handleOpenMyself}
           rightSwipeAction={rightSwipeAction}
           rowTexts={rowTexts}
           scrollBottomInset={scrollBottomInset}
-          sectionLetters={screenData.sectionLetters}
-          selectionMode={selectionMode}
-          setListHeaderHeight={screenData.setListHeaderHeight}
           setListViewportHeight={screenData.setListViewportHeight}
-          sortedGroups={screenData.sortedGroups}
           stickyHeaderIndices={screenData.stickyHeaderIndices}
         />
       ) : null}
 
       <ContactsSelectionDialogs
         debouncedQuery={screenData.debouncedQuery}
+        filterGroupId={screenData.selectedGroupId}
         onContactsReloaded={screenData.reloadContacts}
       />
       <ContactsAddToGroupsSheet
         debouncedQuery={screenData.debouncedQuery}
+        filterGroupId={screenData.selectedGroupId}
         groups={screenData.sortedGroups}
         onGroupsReloaded={screenData.reloadGroups}
       />

@@ -1,5 +1,5 @@
 import { SOCIAL_PLATFORM_URL_DETAILS } from "#globals/social-platform-urls.js";
-import { combinePhoneNumber } from "#phone/index.js";
+import { combinePhoneNumber, normalizePhoneSocialStorage } from "#phone/index.js";
 import { normalizeWebsiteUrl } from "#socials/normalize-website-url.js";
 
 export interface SocialPlatformConfig {
@@ -129,7 +129,11 @@ export function formatWhatsAppNumber(phone: string): string {
 /**
  * Normalizes a phone-based social value (WhatsApp / Signal) for API storage.
  */
-export function normalizePhoneSocialValue(platform: "whatsapp" | "signal", input: string): string {
+export function normalizePhoneSocialValue(
+  platform: "whatsapp" | "signal",
+  input: string,
+  options?: { defaultCountry?: string | null; dialCode?: string },
+): string {
   const trimmed = input.trim();
   if (!trimmed) {
     return "";
@@ -139,16 +143,11 @@ export function normalizePhoneSocialValue(platform: "whatsapp" | "signal", input
     const fromUrl = extractUsername("whatsapp", trimmed);
     if (fromUrl !== trimmed) {
       const digits = formatWhatsAppNumber(fromUrl);
-      return digits ? `+${digits}` : "";
+      return digits ? normalizePhoneSocialStorage(`+${digits}`, options) : "";
     }
   }
 
-  let cleaned = trimmed.replace(/[^\d+]/g, "");
-  if (!cleaned.startsWith("+")) {
-    cleaned = `+${cleaned}`;
-  }
-
-  return cleaned;
+  return normalizePhoneSocialStorage(trimmed, options);
 }
 
 export interface ProcessContactSocialFieldResult {
@@ -172,7 +171,7 @@ export function resolveContactSocialFieldCommit(
   field: ContactSocialFieldKey,
   rawValue: string,
   persistedValue: string,
-  options?: { dialCode?: string },
+  options?: { defaultCountry?: string | null; dialCode?: string },
 ): ContactSocialFieldCommitAction {
   const persisted = persistedValue.trim();
   const processed = processContactSocialFieldValue(field, rawValue, options);
@@ -201,7 +200,7 @@ export function resolveContactSocialFieldCommit(
 export function processContactSocialFieldValue(
   field: ContactSocialFieldKey,
   rawValue: string,
-  options?: { dialCode?: string },
+  options?: { defaultCountry?: string | null; dialCode?: string },
 ): ProcessContactSocialFieldResult {
   const inputValue = rawValue.trim();
 
@@ -220,10 +219,18 @@ export function processContactSocialFieldValue(
         return { value: "" };
       }
 
-      return { value: combinePhoneNumber(options.dialCode, inputValue) };
+      const normalized = normalizePhoneSocialStorage(inputValue, {
+        defaultCountry: options.defaultCountry,
+        dialCode: options.dialCode,
+      });
+      return { value: normalized || combinePhoneNumber(options.dialCode, inputValue) };
     }
 
-    return { value: normalizePhoneSocialValue(field, inputValue) };
+    return {
+      value: normalizePhoneSocialValue(field, inputValue, {
+        defaultCountry: options?.defaultCountry,
+      }),
+    };
   }
 
   if (field === "website") {

@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { buildManualContactAddress } from "@bondery/helpers/address";
@@ -15,7 +16,7 @@ import {
 import { Card, Group, Stack, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconPlus } from "@tabler/icons-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { PeopleMap, type PeopleMapFocus } from "@/components/map/PeopleMap";
 import { LocationLookupInput } from "@/components/shell/LocationLookupInput";
 import { useContactAddressTranslations } from "@/lib/i18n/generated/hooks";
@@ -39,20 +40,16 @@ interface ContactAddressSectionProps {
 
 export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddressSectionProps) {
   const t = useContactAddressTranslations();
-  const typeOptions = useMemo(
-    () =>
-      ADDRESS_TYPE_OPTIONS.map((option) => ({
-        emoji: option.emoji,
-        label:
-          option.value === "home"
-            ? t("TypeHome")
-            : option.value === "work"
-              ? t("TypeWork")
-              : t("TypeOther"),
-        value: option.value,
-      })),
-    [t],
-  );
+  const typeOptions = ADDRESS_TYPE_OPTIONS.map((option) => ({
+    emoji: option.emoji,
+    label:
+      option.value === "home"
+        ? t("TypeHome")
+        : option.value === "work"
+          ? t("TypeWork")
+          : t("TypeOther"),
+    value: option.value,
+  }));
 
   const [addresses, setAddresses] = useState<EditableAddress[]>(() => toEditableAddresses(contact));
   const [draft, setDraft] = useState<DraftAddress>({ suggestion: null, type: "home", value: "" });
@@ -115,7 +112,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
   const canAddMore = addresses.length < CONTACT_LIMITS.maxAddresses;
   const preferredAddressId = addresses[0]?.id;
 
-  const markers = useMemo(() => {
+  const markers = (() => {
     const addressMarkers = addresses
       .map((entry, index) => {
         const latitude = Number(entry.latitude);
@@ -138,9 +135,9 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
       .filter((marker): marker is NonNullable<typeof marker> => Boolean(marker));
 
     return addressMarkers.length > 0 ? addressMarkers : [];
-  }, [addresses, contact]);
+  })();
 
-  const mapCenter = useMemo<[number, number]>(() => {
+  const mapCenter = ((): [number, number] => {
     if (!markers.length) {
       return [0, 0];
     }
@@ -151,7 +148,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     );
 
     return [sumLat / markers.length, sumLon / markers.length];
-  }, [markers]);
+  })();
 
   const saveNow = (
     addrList: EditableAddress[],

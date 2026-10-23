@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 const SLASH_TOKEN_RE = /(^|\s)\/([^\s]*)$/;
 
@@ -67,30 +67,24 @@ export function useSlashCommandDetection() {
   const plainTextRef = useRef("");
   const selectionRef = useRef({ end: 0, start: 0 });
 
-  const updateSlashState = useCallback((text: string, cursor: number) => {
+  function updateSlashState(text: string, cursor: number) {
     const detected = detectSlashCommand(text, cursor);
     setSlashState(detected);
-  }, []);
+  }
 
-  const handleChangeText = useCallback(
-    (text: string) => {
-      plainTextRef.current = text;
-      updateSlashState(text, selectionRef.current.start);
-    },
-    [updateSlashState],
-  );
+  function handleChangeText(text: string) {
+    plainTextRef.current = text;
+    updateSlashState(text, selectionRef.current.start);
+  }
 
-  const handleChangeSelection = useCallback(
-    (selection: { start: number; end: number }) => {
-      selectionRef.current = selection;
-      updateSlashState(plainTextRef.current, selection.start);
-    },
-    [updateSlashState],
-  );
+  function handleChangeSelection(selection: { start: number; end: number }) {
+    selectionRef.current = selection;
+    updateSlashState(plainTextRef.current, selection.start);
+  }
 
-  const clearSlash = useCallback(() => {
+  function clearSlash() {
     setSlashState(null);
-  }, []);
+  }
 
   return {
     clearSlash,

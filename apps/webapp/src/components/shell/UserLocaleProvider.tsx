@@ -10,15 +10,7 @@ import { DatesProvider } from "@mantine/dates";
 import type { Resource } from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { I18nProvider } from "next-i18next/client";
-import {
-  createContext,
-  type ReactNode,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 
 export interface UserLocaleSettings {
   applyUserLocale: (
@@ -82,20 +74,19 @@ export function LocaleProvider({
     setTimeFormat(initialTimeFormat);
   }, [initialLocale, initialTimezone, initialTimeFormat]);
 
-  const applyUserLocale = useCallback(
-    (patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>) => {
-      if (patch.locale) {
-        setLocale(patch.locale);
-      }
-      if (patch.timezone) {
-        setTimezone(patch.timezone);
-      }
-      if (patch.timeFormat) {
-        setTimeFormat(patch.timeFormat);
-      }
-    },
-    [],
-  );
+  const applyUserLocale = (
+    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
+  ) => {
+    if (patch.locale) {
+      setLocale(patch.locale);
+    }
+    if (patch.timezone) {
+      setTimezone(patch.timezone);
+    }
+    if (patch.timeFormat) {
+      setTimeFormat(patch.timeFormat);
+    }
+  };
 
   const applyRef = useRef(applyUserLocale);
   applyRef.current = applyUserLocale;

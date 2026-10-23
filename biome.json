@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -28,6 +28,7 @@
       "!**/build",
       "!**/.parcel-cache",
       "!**/next-env.d.ts",
+      "!**/uniwind-types.d.ts",
       "!**/*.svg",
       "!**/Untitled-1.html",
       "!**/*.generated.ts",
@@ -171,6 +172,55 @@
         "rules": {
           "correctness": {
             "useHookAtTopLevel": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/mobile/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "warn"
+          },
+          "nursery": {
+            "useReactCompiler": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/website/**"],
+      "linter": {
+        "rules": {
+          "nursery": {
+            "useReactCompiler": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/webapp/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "warn"
+          },
+          "nursery": {
+            "useReactCompiler": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/mantine-next/**"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "useExhaustiveDependencies": "warn"
+          },
+          "nursery": {
+            "useReactCompiler": "error"
           }
         }
       }

@@ -13,7 +13,12 @@ verifyDepsBeforeRun: false
 runtime: false
 runtimeOnFail: ignore
 
-nodeLinker: hoisted
+nodeLinker: isolated
+# Expo / React Native native modules need a flatter public layout for
+# Metro and autolinking. Prefer packageExtensions for other peer gaps.
+publicHoistPattern:
+  - "*expo*"
+  - "*expo-*/**"
 autoInstallPeers: true
 linkWorkspacePackages: true
 preferWorkspacePackages: true
@@ -23,6 +28,30 @@ injectWorkspacePackages: true
 syncInjectedDepsAfterScripts:
   - build
   - compile
+
+# Third-party peer gaps under isolated + global virtual store.
+# @mantine/hooks imports react-dom; Vite resolves from the store link path.
+# React Native libraries import React from .d.ts files. The store path cannot
+# see @types/react unless the package declares that peer.
+packageExtensions:
+  "@mantine/hooks":
+    dependencies:
+      react-dom: "*"
+  expo-image:
+    peerDependencies:
+      "@types/react": "*"
+  expo-router:
+    peerDependencies:
+      "@types/react": "*"
+  react-native-gesture-handler:
+    peerDependencies:
+      "@types/react": "*"
+  react-native-svg:
+    peerDependencies:
+      "@types/react": "*"
+  uniwind:
+    peerDependencies:
+      "@types/react": "*"
 
 overrides:
   "@better-auth/core": "1.7.7"
@@ -52,7 +81,7 @@ overrides:
   "@tiptap/react": "3.31.4"
   "@tiptap/starter-kit": "3.31.4"
   "@tiptap/suggestion": "3.31.4"
-  next: "16.3.8"
+  next: "16.4.2"
   postcss: "^8.5.28"
   rolldown: "1.2.7"
   esbuild: "0.28.2"

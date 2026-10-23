@@ -30,6 +30,17 @@ describe("resolveTrustedOrigins", () => {
 
     assert.ok(origins.includes("http://localhost:*"));
     assert.ok(origins.includes("http://127.0.0.1:*"));
+    assert.ok(origins.includes("exp://"));
+    assert.ok(origins.includes("exp+bondery://"));
+  });
+
+  it("does not trust Expo Dev Client origins in production allowlists", () => {
+    const origins = resolveTrustedOrigins({
+      webappUrl: "https://app.example.com",
+    });
+
+    assert.equal(origins.includes("exp://"), false);
+    assert.equal(origins.includes("exp+bondery://"), false);
   });
 
   it("allows the pinned Chrome extension origin for token CORS", () => {

@@ -5,7 +5,8 @@ import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { Modal } from "@mantine/core";
 import { NavigationProgress, nprogress } from "@mantine/nprogress";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { useFinishOnboardingMutation } from "@/lib/query/hooks/useSettings";
 import { StepImport } from "./components/StepImport";
 import { StepIntent } from "./components/StepIntent";
@@ -31,36 +32,29 @@ function OnboardingFlowContent() {
     nprogress.set(STEP_PROGRESS[step] ?? 0);
   }, [step]);
 
-  const nextStep = useCallback(() => {
+  const nextStep = () => {
     setStep((s) => s + 1);
-  }, []);
+  };
+  const finishOnboarding = async (followup?: {
+    status: "awaiting_export" | "dismissed";
+    platform?: ImportFollowupPlatform;
+  }) => {
+    if (isCompleting) {
+      return;
+    }
+    nprogress.set(100);
+    try {
+      await finishOnboardingMutation.mutateAsync(followup);
+      router.replace(routeAssert(WEBAPP_ROUTES.HOME));
+      router.refresh();
+    } catch {
+      // isPending resets automatically; user can retry
+    }
+  };
 
-  const finishOnboarding = useCallback(
-    async (followup?: {
-      status: "awaiting_export" | "dismissed";
-      platform?: ImportFollowupPlatform;
-    }) => {
-      if (isCompleting) {
-        return;
-      }
-      nprogress.set(100);
-      try {
-        await finishOnboardingMutation.mutateAsync(followup);
-        router.replace(WEBAPP_ROUTES.HOME);
-        router.refresh();
-      } catch {
-        // isPending resets automatically; user can retry
-      }
-    },
-    [router, isCompleting, finishOnboardingMutation],
-  );
-
-  const handleAwaitingExportFromModal = useCallback(
-    async (platform: ImportFollowupPlatform) => {
-      await finishOnboarding({ platform, status: "awaiting_export" });
-    },
-    [finishOnboarding],
-  );
+  const handleAwaitingExportFromModal = async (platform: ImportFollowupPlatform) => {
+    await finishOnboarding({ platform, status: "awaiting_export" });
+  };
 
   const renderStep = () => {
     switch (step) {

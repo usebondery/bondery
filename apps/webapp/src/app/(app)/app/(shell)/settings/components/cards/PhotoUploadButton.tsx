@@ -20,7 +20,6 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
       variant: "profile",
     });
   };
-
   return (
     <UserAvatar
       avatarUrl={avatarUrl}

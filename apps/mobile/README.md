@@ -45,8 +45,25 @@ Then run on emulator/device from Expo CLI.
 ## Theming
 
 - Shared mobile colors are centralized in `src/theme/colors.ts`.
-- Tamagui theme keys for primary buttons are defined in `src/theme/tamagui.config.ts`.
 - Keep `PRIMARY_BUTTON_BACKGROUND` aligned with webapp brand color for cross-platform consistency.
+
+## Mobile UI kit
+
+Login and Settings compose Uniwind controls from `apps/mobile/src/components/ui/`. Import each file directly. There is no barrel `index.ts`.
+
+```tsx
+import { Button } from "../../components/ui/Button";
+import { Checkbox } from "../../components/ui/Checkbox";
+import { NavLink } from "../../components/ui/NavLink";
+import { Paper } from "../../components/ui/Paper";
+import { Select } from "../../components/ui/Select";
+import { Sheet } from "../../components/ui/Sheet";
+import { Text } from "../../components/ui/Text";
+```
+
+Props follow Mantine names: `c`, `fw`, `ta`, `size`, `variant`, `leftSection`, `rightSection`, `className`. Join class fragments with `joinClassNames`. Paint colors with `useMobileThemeColors` JS tokens. Do not call `Uniwind.setTheme`.
+
+`Sheet` wraps Gorhom `BottomSheetModal` with shared chrome: title, close, busy lock, optional search row, and footer actions. Use `opened`, `onClose`, and `snapPoint` (`fit` or a key from `SHEET_SNAP_POINTS` in `src/lib/config.ts`). For scrollable lists inside a sheet, use `BottomSheetFlatList` or `useSheetScrollable()` from the same module. Press feedback lives inside `Button`, `NavLink`, `ActionIcon`, `SegmentedControl`, and `PersonAvatar` when `onPress` is set. Screens must not wrap those controls in an extra press primitive. `Checkbox` wraps `expo-checkbox`. `OverflowMenu` uses a React Native `Modal`.
 
 ## QA checklist
 
@@ -54,7 +71,7 @@ Then run on emulator/device from Expo CLI.
   - Confirm floating bubble menu is visible on `/contacts` and `/settings`.
   - Confirm active route bubble has primary filled background + white icon.
 - Deep routes
-  - Confirm floating bubble menu is hidden on `/contact/[id]`, `/contact/new`, and `/group/[id]`.
+  - Confirm floating bubble menu is hidden on `/contact/[id]` and `/contact/new`.
 - Plus menu
   - Confirm center plus toggles menu open/close.
   - Confirm tap outside closes the menu.

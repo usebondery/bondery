@@ -7,11 +7,11 @@ import {
   TELEPHONE_PREFIX_OPTIONS,
 } from "@bondery/helpers/phone";
 import { Group, Input, Select } from "@mantine/core";
-import { type ClipboardEvent, memo, useMemo } from "react";
+import type { ClipboardEvent, KeyboardEvent } from "react";
 import { IMaskInput } from "react-imask";
 import type { SocialFieldKey } from "../../hooks/useSocialFieldEditor";
 
-const PrefixSelect = memo(function PrefixSelect({
+const PrefixSelect = function PrefixSelect({
   value,
   onChange,
   disabled,
@@ -20,10 +20,7 @@ const PrefixSelect = memo(function PrefixSelect({
   onChange: (value: string) => void;
   disabled?: boolean;
 }) {
-  const selectedOption = useMemo(
-    () => TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value),
-    [value],
-  );
+  const selectedOption = TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value);
 
   return (
     <Select
@@ -47,7 +44,7 @@ const PrefixSelect = memo(function PrefixSelect({
       value={value}
     />
   );
-});
+};
 
 interface SocialPhoneInputProps {
   autoFocus?: boolean;
@@ -145,7 +142,7 @@ export function SocialPhoneInput({
 
           onValueChange(accepted || "");
         }}
-        onKeyDown={(event) => {
+        onKeyDown={(event: KeyboardEvent<HTMLInputElement>) => {
           if (event.key === "Enter") {
             event.preventDefault();
             onCommit();

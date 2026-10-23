@@ -17,16 +17,16 @@ export async function getMyselfProfile(
   avatarOptions?: AvatarTransformOptions,
 ): Promise<MyselfProfile> {
   const myself = await db.people.findFirst({
-    select: { firstName: true, hasAvatar: true, updatedAt: true },
+    select: { avatarUpdatedAt: true, firstName: true, hasAvatar: true },
     where: { myself: true, userId },
   });
 
   const avatarUrl = resolveContactAvatarUrl(
     userId,
     {
+      avatarUpdatedAt: myself?.avatarUpdatedAt,
       hasAvatar: myself?.hasAvatar ?? false,
       id: userId,
-      updatedAt: myself?.updatedAt?.toISOString(),
     },
     avatarOptions,
   );

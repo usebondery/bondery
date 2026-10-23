@@ -96,7 +96,10 @@ export function createBonderyAuth() {
         },
       }),
       // Preserve Postgres uuid columns already referenced by every app table.
-      database: { generateId: () => generateId() },
+      database: {
+        generateId: () => generateId(),
+        joins: true,
+      },
     },
     basePath: BETTER_AUTH_BASE_PATH,
     baseURL: resolveBetterAuthIssuerUrl(),

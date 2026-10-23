@@ -8,7 +8,7 @@ import {
 import type { ContactAddressEntry } from "@bondery/schemas";
 import { Autocomplete, Group } from "@mantine/core";
 import { IconCompass } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { fetchGeocodeSuggestions } from "@/lib/api/geocode";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 
@@ -16,6 +16,8 @@ interface LocationLookupInputProps {
   ariaLabel?: string;
   disabled?: boolean;
   label?: string;
+  /** Defaults to compass. Pass a magnifying glass for map/search chrome. */
+  leftSection?: ReactNode;
   /** "place" shows only city/region/country suggestions (e.g. for a person's LinkedIn-style location field).
    *  "address" (default) also includes streets and full addresses. */
   mode?: "place" | "address";
@@ -48,6 +50,7 @@ export function LocationLookupInput({
   value,
   disabled,
   ariaLabel,
+  leftSection,
   style,
   mode = "address",
   onChange,
@@ -149,7 +152,7 @@ export function LocationLookupInput({
       disabled={disabled}
       filter={({ options: inputOptions }) => inputOptions}
       label={label}
-      leftSection={<IconCompass size={16} />}
+      leftSection={leftSection ?? <IconCompass size={16} />}
       loading={loading}
       onBlur={onBlur}
       onChange={(v) => {

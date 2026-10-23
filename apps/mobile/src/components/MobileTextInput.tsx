@@ -1,4 +1,4 @@
-import { forwardRef, memo, type ReactNode, useCallback, useEffect, useState } from "react";
+import { forwardRef, type ReactNode, useEffect, useState } from "react";
 import {
   type StyleProp,
   StyleSheet,
@@ -92,8 +92,8 @@ export type MobileTextInputProps = TextInputProps & {
   backgroundColor?: string;
 };
 
-export const MobileTextInput = memo(
-  forwardRef<NativeTextInputRef, MobileTextInputProps>(function MobileTextInput(
+export const MobileTextInput = forwardRef<NativeTextInputRef, MobileTextInputProps>(
+  function MobileTextInput(
     {
       error = false,
       errorMessage,
@@ -150,29 +150,23 @@ export const MobileTextInput = memo(
       };
     }, [error, idleBorderColor, colors.dangerAccent, colors.primary]);
 
-    const handleFocus = useCallback(
-      (event: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) => {
-        setIsFocused(true);
-        if (!error && editable !== false) {
-          focusProgress.value = withTiming(1, {
-            duration: UI_TIMING_MS.inputFocusTransition,
-          });
-        }
-        onFocus?.(event);
-      },
-      [editable, error, focusProgress, onFocus],
-    );
-
-    const handleBlur = useCallback(
-      (event: Parameters<NonNullable<TextInputProps["onBlur"]>>[0]) => {
-        setIsFocused(false);
-        focusProgress.value = withTiming(0, {
+    function handleFocus(event: Parameters<NonNullable<TextInputProps["onFocus"]>>[0]) {
+      setIsFocused(true);
+      if (!error && editable !== false) {
+        focusProgress.value = withTiming(1, {
           duration: UI_TIMING_MS.inputFocusTransition,
         });
-        onBlur?.(event);
-      },
-      [focusProgress, onBlur],
-    );
+      }
+      onFocus?.(event);
+    }
+
+    function handleBlur(event: Parameters<NonNullable<TextInputProps["onBlur"]>>[0]) {
+      setIsFocused(false);
+      focusProgress.value = withTiming(0, {
+        duration: UI_TIMING_MS.inputFocusTransition,
+      });
+      onBlur?.(event);
+    }
 
     const trailingContent =
       shouldShowMaxLengthCounter || trailingAccessory ? (
@@ -232,7 +226,7 @@ export const MobileTextInput = memo(
         ) : null}
       </View>
     );
-  }),
+  },
 );
 
 const styles = StyleSheet.create({

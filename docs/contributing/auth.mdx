@@ -162,7 +162,7 @@ Your extension ID changed or the OAuth client was wiped (e.g. after `prisma migr
 
 ### `invalid_target` / requested resource is not configured
 
-The authorization server matches the RFC 8707 `resource` parameter to `oauth_resource.identifier` exactly. `localhost` and `127.0.0.1` are different identifiers. Local env is usually `http://localhost:26631`; Chrome identity fetches `http://127.0.0.1:26631`. Re-run `pnpm run provision:oauth-clients` so both loopback aliases are registered and linked, then restart the API. The extension must still send `resource` = `BONDERY_PUBLIC_API_URL` (not the rewritten fetch host).
+The authorization server matches the RFC 8707 `resource` parameter to `oauth_resource.identifier` exactly. Daily web env uses Portless `https://api.usebondery.test`. Chrome identity may still fetch `http://127.0.0.1:26631` while `localhost` and `127.0.0.1` stay different identifiers. Re-run `pnpm run provision:oauth-clients` so Portless and classic loopback aliases are registered and linked, then restart the API. The extension must still send `resource` = `BONDERY_PUBLIC_API_URL` (not the rewritten fetch host).
 
 ### CORS blocked on `sign-in/social` with `200 (OK)` but no `Access-Control-Allow-Origin`
 
@@ -179,10 +179,10 @@ Common causes:
 | Physical phone needs API | Install Tailscale on phone and dev machine. Temporarily set `BONDERY_PUBLIC_API_URL` to `http://100.x.x.x:26631` (your Tailscale IP), run `pnpm run env`, restart API. Keep webapp on localhost for laptop web dev. |
 | Expo web or LAN IP testing | Add the origin to `BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS` (comma-separated), then `pnpm run env` and restart the API. |
 
-Also verify GitHub/LinkedIn OAuth app callback URLs point at the **API** host you are using (e.g. `http://localhost:26631/auth/callback/github` for daily web dev, or `http://<tailscale-ip>:26631/auth/callback/github` when testing on a physical phone), not the webapp origin.
+Also verify GitHub/LinkedIn OAuth app callback URLs point at the **API** host you are using (e.g. `https://api.usebondery.test/auth/callback/github` for daily web dev, `http://localhost:26631/auth/callback/github` for `dev:classic`, or `http://<tailscale-ip>:26631/auth/callback/github` when testing on a physical phone), not the webapp origin.
 
 <Callout type="warn">
-**Do not point the localhost webapp at a remote API URL.** Browser auth calls from `localhost` to a Tailscale or LAN IP cross origins and break cookie semantics. Use localhost API for web dev; swap `BONDERY_PUBLIC_API_URL` to your Tailscale IP only for native mobile sessions. LinkedIn OAuth may require HTTPS (Tailscale Serve or Funnel) — optional for native mobile, which does not use browser OAuth redirects.
+**Do not point the Portless webapp at a remote API URL.** Browser auth calls from `app.usebondery.test` to a Tailscale or LAN IP cross origins and break cookie semantics. Use `https://api.usebondery.test` for web dev; swap `BONDERY_PUBLIC_API_URL` to your Tailscale IP only for native mobile sessions. LinkedIn OAuth may require HTTPS (Tailscale Serve or Funnel) — optional for native mobile, which does not use browser OAuth redirects.
 </Callout>
 
 ### Webapp login redirect loop

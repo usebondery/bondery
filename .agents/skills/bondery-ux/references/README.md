@@ -35,6 +35,8 @@ Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile
 | File | Topic |
 |------|--------|
 | [action-sheets-and-keyboard.md](./mobile/action-sheets-and-keyboard.md) | Autofocus, Done key, blocking sheets |
+| [navigation.md](./mobile/navigation.md) | Stack transitions, peer routes, in-flight tap guard |
+| [tab-search-focus.md](./mobile/tab-search-focus.md) | Tap active tab → focus in-page search |
 | [settings-previews.md](./mobile/settings-previews.md) | Live preview sections in settings |
 | [lists-selection.md](./mobile/lists-selection.md) | Long-press, drag-select, FAB bulk bar |
 

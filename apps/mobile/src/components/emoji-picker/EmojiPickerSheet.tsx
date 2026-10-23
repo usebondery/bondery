@@ -1,13 +1,13 @@
 import { getRandomEmoji } from "@bondery/helpers/emoji";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, StyleSheet, Text } from "react-native";
+import { useEffect, useRef, useState } from "react";
+import { StyleSheet, Text } from "react-native";
 import {
   useCommonTranslations,
   useMobileEmojiPickerTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../theme/tokens";
-import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { SearchActionSheet } from "../SearchActionSheet";
+import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
+import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
+import { Sheet } from "../ui/Sheet";
 import { EmojiPickerGrid, type EmojiPickerGridRef } from "./EmojiPickerGrid";
 import { useEmojiPickerFilter } from "./useEmojiPickerFilter";
 
@@ -32,31 +32,22 @@ export function EmojiPickerSheet({
 }: EmojiPickerSheetProps) {
   const tMobileEmojiPicker = useMobileEmojiPickerTranslations();
   const _t = useCommonTranslations();
-  const colors = useMobileThemeColors();
   const [query, setQuery] = useState("");
   const gridRef = useRef<EmojiPickerGridRef>(null);
   const pendingScrollEmojiRef = useRef<string | null>(null);
   const { sections, debouncedQuery } = useEmojiPickerFilter(query);
 
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      onOpenChange(nextOpen);
-      if (!nextOpen) {
-        pendingScrollEmojiRef.current = null;
-      }
-    },
-    [onOpenChange],
-  );
+  function handleClose() {
+    onOpenChange(false);
+    pendingScrollEmojiRef.current = null;
+  }
 
-  const handleGridSelect = useCallback(
-    (emoji: string) => {
-      onSelect(emoji);
-      handleOpenChange(false);
-    },
-    [handleOpenChange, onSelect],
-  );
+  function handleGridSelect(emoji: string) {
+    onSelect(emoji);
+    handleClose();
+  }
 
-  const queueScrollToPendingEmoji = useCallback(() => {
+  function queueScrollToPendingEmoji() {
     const pendingEmoji = pendingScrollEmojiRef.current;
     if (!pendingEmoji) {
       return;
@@ -68,9 +59,9 @@ export function EmojiPickerSheet({
         pendingScrollEmojiRef.current = null;
       });
     });
-  }, []);
+  }
 
-  const handleRandomEmoji = useCallback(() => {
+  function handleRandomEmoji() {
     const nextEmoji = getRandomEmoji();
     onSelect(nextEmoji);
     pendingScrollEmojiRef.current = nextEmoji;
@@ -80,42 +71,45 @@ export function EmojiPickerSheet({
     if (!hadActiveSearch) {
       queueScrollToPendingEmoji();
     }
-  }, [onSelect, query, queueScrollToPendingEmoji]);
+  }
 
   useEffect(() => {
     if (!open || debouncedQuery !== "" || !pendingScrollEmojiRef.current) {
       return;
     }
 
-    queueScrollToPendingEmoji();
-  }, [open, debouncedQuery, queueScrollToPendingEmoji]);
+    const pendingEmoji = pendingScrollEmojiRef.current;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        gridRef.current?.scrollToEmoji(pendingEmoji);
+        pendingScrollEmojiRef.current = null;
+      });
+    });
+  }, [open, debouncedQuery]);
 
   const randomEmojiAction = (
-    <Pressable
+    <ActionButtonShellPressable
       accessibilityLabel={tMobileEmojiPicker("RandomAccessibilityLabel")}
-      accessibilityRole="button"
+      matchInputChrome
       onPress={handleRandomEmoji}
-      style={({ pressed }) => [
-        styles.randomButton,
-        {
-          backgroundColor: pressed ? colors.surfacePressed : colors.inputBackground,
-          borderColor: colors.borderStrong,
-        },
-      ]}
+      variant="outline"
     >
       <Text style={styles.randomButtonEmoji}>🎲</Text>
-    </Pressable>
+    </ActionButtonShellPressable>
   );
 
   return (
-    <SearchActionSheet
-      elevated
-      onOpenChange={handleOpenChange}
-      onQueryChange={setQuery}
-      open={open}
-      query={query}
-      searchPlaceholder={searchPlaceholder}
-      searchRightAction={randomEmojiAction}
+    <Sheet
+      onClose={handleClose}
+      opened={open}
+      search={{
+        onQueryChange: setQuery,
+        placeholder: searchPlaceholder,
+        query,
+        rightAction: randomEmojiAction,
+      }}
+      snapPoint="selectSearch"
+      title={tMobileEmojiPicker("SheetTitle")}
     >
       <EmojiPickerGrid
         emptySearchLabel={emptySearchLabel}
@@ -125,19 +119,11 @@ export function EmojiPickerSheet({
         sections={sections}
         value={value}
       />
-    </SearchActionSheet>
+    </Sheet>
   );
 }
 
 const styles = StyleSheet.create({
-  randomButton: {
-    alignItems: "center",
-    borderRadius: MOBILE_LAYOUT.borderRadius.control,
-    borderWidth: 1,
-    height: MOBILE_LAYOUT.inputCompact,
-    justifyContent: "center",
-    width: MOBILE_LAYOUT.inputCompact,
-  },
   randomButtonEmoji: {
     fontSize: MOBILE_TYPOGRAPHY.fontSize.cardTitle,
     lineHeight: MOBILE_TYPOGRAPHY.fontSize.cardTitle + 2,

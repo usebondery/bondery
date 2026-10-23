@@ -8,7 +8,7 @@ Mobile tier-1 CRM data is **local-first** (SQLite + sync outbox). Tier-2/3 use H
 |--------|--------|----------------|
 | `lib/api/resources/*` | `lib/resources/*` | List params, row mappers, SQL fragments — **no React, no I/O** |
 | `lib/api/domains/*` | `lib/domains/*` | Public CRUD API (web: `async` + HTTP; mobile: **sync** + `submitSyncMutation`) |
-| `lib/query/hooks/*` | `lib/sync/hooks/*` | UI subscription boundary (`useSyncQuery` ≈ TanStack `useQuery`) |
+| `lib/query/hooks/*` | `lib/sync/hooks/*` | Named UI hooks backed by the SQLite Query view cache |
 | `clientApiJson` / `serverApiJson` | `lib/api/client.ts`, `online-only.ts` | Tier-2/3 REST only |
 | — | `lib/sync/*` | Pull, outbox, materializers (mobile-only) |
 | — | `lib/sync/repositories/*` | Thin SQLite execution (imports `lib/resources`) |
@@ -37,7 +37,10 @@ flowchart TB
   end
 ```
 
-**Invalidation:** webapp calls `invalidateQueries`; mobile bumps `SyncProvider.revision` (same intent, different mechanism).
+**Invalidation:** SQLite remains the tier-1 source of truth. Mobile reruns active matching SQLite
+views and stores their snapshots in TanStack Query after each local write or materialized pull.
+Inactive matching views are removed so their next observer rereads SQLite synchronously. Features
+use named sync hooks and never access QueryClient.
 
 ## Import policy
 
@@ -50,12 +53,24 @@ flowchart TB
 
 ## Adding a tier-1 entity
 
-1. API domain + `emitSyncBatch` (see [sync-architecture.md](../../../.agents/skills/bondery-specific/references/api/sync-architecture.md))
+1. API domain + `emitSyncBatch` (see [sync-architecture.md](../../../.agents/skills/bondery-api/references/sync-architecture.md))
 2. Mobile materializer + optimistic writer
 3. `lib/resources/<entity>.ts` — mappers and query builders
 4. `lib/sync/repositories/<entity>.ts` — `db.getAllSync` / `db.run`
 5. `lib/domains/<entity>.ts` — named exports aligned with webapp `lib/api/domains/*`
 6. `lib/sync/hooks/*` — `useSyncQuery` wrappers for screens
+
+## Sheet submit lifecycle (tier-1 CRM)
+
+Bottom sheets must not `await` sync push/pull. Domain handlers stay **synchronous** (`lib/domains/*` → `submitSyncMutation`).
+
+| Hook | Use when |
+|------|----------|
+| `useSheetLocalSubmit` | RHF form; `perform(values)` writes locally |
+| `useSheetLocalAction` | Confirm/delete or non-RHF actions |
+| `useSheetNetworkSubmit` | Tier-2 HTTP (share email, settings) |
+
+Contract: `perform` → `onClose` → `onSuccess`. Expose `{ isSubmitting, submit }` to `Sheet` actions. Parent sections pass `onPersist` / sync callbacks only — no parent `isSubmitting` for channel edit sheets.
 
 ## Regression checks
 
@@ -63,3 +78,13 @@ flowchart TB
 pnpm run check:types -w mobile
 pnpm run check-sync-patterns -w mobile
 ```
+
+## React Compiler
+
+The mobile app enables the [React Compiler](https://docs.expo.dev/guides/react-compiler/) (`experiments.reactCompiler` in app config). Biome enforces `useReactCompiler` in `apps/mobile`.
+
+Do not add `memo`, `useCallback`, or `useMemo` only to stabilize renders. The compiler memoizes components and hooks.
+
+Keep `useEffect` and ref sync patterns as today. Opt out with `biome-ignore-all` only for Reanimated or gesture code that cannot follow Rules of React (see `usePressSqueeze`, `useContactsDragSelection`).
+
+Run `pnpm run check:react-compiler` from `apps/mobile` after changing components that used manual memoization.

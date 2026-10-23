@@ -1,4 +1,6 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import type { Route } from "next";
+import { routeAssert } from "./route/assert";
 
 /** Sidebar label key (AppNavigation namespace). */
 export type AppNavLabelKey =
@@ -13,50 +15,50 @@ export type AppNavLabelKey =
   | "Settings";
 
 export type AppNavLinkDef = {
-  href: string;
+  href: Route;
   labelKey: AppNavLabelKey;
 };
 
 export const primaryAppNavLinks: AppNavLinkDef[] = [
   {
-    href: WEBAPP_ROUTES.HOME,
+    href: routeAssert(WEBAPP_ROUTES.HOME),
     labelKey: "Home",
   },
   {
-    href: WEBAPP_ROUTES.INTERACTIONS,
+    href: routeAssert(WEBAPP_ROUTES.INTERACTIONS),
     labelKey: "Interactions",
   },
   {
-    href: WEBAPP_ROUTES.PEOPLE,
+    href: routeAssert(WEBAPP_ROUTES.PEOPLE),
     labelKey: "People",
   },
   {
-    href: WEBAPP_ROUTES.KEEP_IN_TOUCH,
+    href: routeAssert(WEBAPP_ROUTES.KEEP_IN_TOUCH),
     labelKey: "KeepInTouch",
   },
   {
-    href: WEBAPP_ROUTES.GROUPS,
+    href: routeAssert(WEBAPP_ROUTES.GROUPS),
     labelKey: "Groups",
   },
   {
-    href: WEBAPP_ROUTES.MAP,
+    href: routeAssert(WEBAPP_ROUTES.MAP),
     labelKey: "Map",
   },
 ];
 
 /** Chat lives in the sidebar Chat panel / collapsed icon, not the Browse list. */
 export const chatAppNavLink: AppNavLinkDef = {
-  href: WEBAPP_ROUTES.CHAT,
+  href: routeAssert(WEBAPP_ROUTES.CHAT),
   labelKey: "Chat",
 };
 
 export const secondaryAppNavLinks: AppNavLinkDef[] = [
   {
-    href: WEBAPP_ROUTES.FIX_CONTACTS,
+    href: routeAssert(WEBAPP_ROUTES.FIX_CONTACTS),
     labelKey: "FixAndMerge",
   },
   {
-    href: WEBAPP_ROUTES.SETTINGS,
+    href: routeAssert(WEBAPP_ROUTES.SETTINGS),
     labelKey: "Settings",
   },
 ];

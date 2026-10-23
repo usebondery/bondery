@@ -3,7 +3,7 @@
  * Copy patterns — do not import this file from production code.
  *
  * Naming: category:object_action (PostHog convention)
- * @see .agents/skills/bondery-analytics/references/naming-and-schema.md
+ * @see references/naming-and-schema.md (bondery-analytics skill)
  */
 
 // Client component (after mutation success):

@@ -1,16 +1,15 @@
 import { IconCheck } from "@tabler/icons-react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { AccessibilityInfo, Pressable, StyleSheet, Text, View } from "react-native";
+import { AccessibilityInfo, StyleSheet, Text, View } from "react-native";
+import { Pressable } from "@/components/ui/Pressable";
 import {
   useCommonTranslations,
   useMobileContactIdentityTranslations,
 } from "@/lib/i18n/generated/hooks";
-import { ActionSheetPopup } from "../../../components/ActionSheetPopup";
-import {
-  MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT,
-  MobileCheckbox,
-} from "../../../components/MobileCheckbox";
+import { CHECKBOX_ROW_MIN_HEIGHT, Checkbox } from "../../../components/ui/Checkbox";
+import { Sheet } from "../../../components/ui/Sheet";
+import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import {
@@ -33,11 +32,11 @@ interface ImportantDateWheelPickerSheetProps {
   onCancel: () => void;
   onConfirm: (iso: string) => void;
   onOpenChange: (open: boolean) => void;
-  open: boolean;
+  opened: boolean;
 }
 
 export function ImportantDateWheelPickerSheet({
-  open,
+  opened: open,
   initialIso,
   defaultWithoutYear = false,
   onOpenChange,
@@ -61,24 +60,23 @@ export function ImportantDateWheelPickerSheet({
       return;
     }
 
-    setWheelValue(
-      initialIso
-        ? fromImportantDateIso(initialIso)
-        : createDefaultWheelValue(defaultWithoutYear ? "birthday" : "other", null),
-    );
+    syncEffectState(() => {
+      setWheelValue(
+        initialIso
+          ? fromImportantDateIso(initialIso)
+          : createDefaultWheelValue(defaultWithoutYear ? "birthday" : "other", null),
+      );
+    });
   }, [open, initialIso, defaultWithoutYear]);
 
-  const monthLabels = useMemo(() => getMonthLabels(locale), [locale]);
-  const years = useMemo(() => buildYearRange(), []);
+  const monthLabels = getMonthLabels(locale);
+  const years = buildYearRange();
 
   const clampYear = wheelValue.withoutYear ? 2004 : wheelValue.year;
   const dayCount = daysInMonth(wheelValue.month, clampYear);
 
-  const dayItems = useMemo(
-    () => Array.from({ length: dayCount }, (_, index) => String(index + 1)),
-    [dayCount],
-  );
-  const yearItems = useMemo(() => years.map(String), [years]);
+  const dayItems = Array.from({ length: dayCount }, (_, index) => String(index + 1));
+  const yearItems = years.map(String);
 
   const dayIndex = Math.min(Math.max(wheelValue.day - 1, 0), dayItems.length - 1);
   const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), 11);
@@ -115,7 +113,7 @@ export function ImportantDateWheelPickerSheet({
   }
 
   return (
-    <ActionSheetPopup
+    <Sheet
       actions={[
         {
           icon: <IconCheck size={16} stroke={colors.textOnPrimary} />,
@@ -127,7 +125,7 @@ export function ImportantDateWheelPickerSheet({
       ]}
       onClose={onCancel}
       onOpenChange={onOpenChange}
-      open={open}
+      opened={open}
       title={tMobileContactIdentity("SelectDateTitle")}
     >
       <Pressable
@@ -142,7 +140,7 @@ export function ImportantDateWheelPickerSheet({
           {tMobileContactIdentity("WithoutYearLabel")}
         </Text>
         <View pointerEvents="none">
-          <MobileCheckbox
+          <Checkbox
             accessibilityLabel={tMobileContactIdentity("WithoutYearLabel")}
             checked={wheelValue.withoutYear}
             disabled
@@ -181,7 +179,7 @@ export function ImportantDateWheelPickerSheet({
           </View>
         ) : null}
       </View>
-    </ActionSheetPopup>
+    </Sheet>
   );
 }
 
@@ -209,6 +207,6 @@ const styles = StyleSheet.create({
     gap: 12,
     justifyContent: "space-between",
     marginBottom: 8,
-    minHeight: MOBILE_CHECKBOX_TOUCH_ROW_MIN_HEIGHT,
+    minHeight: CHECKBOX_ROW_MIN_HEIGHT,
   },
 });

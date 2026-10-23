@@ -7,6 +7,7 @@
   "devDependencies": {
     "@bondery/typescript-config": "workspace:*",
     "rimraf": "^6.1.3",
+    "tsx": "4.23.15",
     "typescript": "^7.0.2"
   },
   "exports": {
@@ -1126,7 +1127,7 @@
   "name": "@bondery/schemas",
   "private": true,
   "scripts": {
-    "build": "rimraf dist tsconfig.tsbuildinfo && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs schemas",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node scripts/copy-locale-json.mjs && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs schemas",
     "check:contracts": "pnpm run check:contracts:no-internal-deps && pnpm run check:contracts:no-init-cycles && pnpm run check:contracts:no-zod-infer-exports && pnpm run build && pnpm run check:contracts:assertions && pnpm run check:contracts:openapi-examples",
     "check:contracts:assertions": "pnpm exec tsx ./src/contracts.assertions.ts",
     "check:contracts:no-init-cycles": "node scripts/check-contracts-no-init-cycles.mjs",
@@ -1140,5 +1141,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.10.2"
+  "version": "1.11.0-rc.1"
 }

@@ -1,5 +1,6 @@
 import { AnchorLink } from "@bondery/mantine-next";
 import { List, ListItem, Stack, Text, Title } from "@mantine/core";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { STORE_SHOT_COPY } from "./_lib/copy";
 import { STORE_SHOT_SLUGS } from "./_lib/slugs";
 
@@ -13,7 +14,7 @@ export default function StoreShotsIndexPage() {
       <List spacing="sm" type="ordered">
         {STORE_SHOT_SLUGS.map((slug) => (
           <ListItem key={slug}>
-            <AnchorLink href={`/dev/store-shots/${slug}`}>
+            <AnchorLink href={routeAssert(`/dev/store-shots/${slug}`)}>
               {STORE_SHOT_COPY[slug].headline}
             </AnchorLink>
           </ListItem>

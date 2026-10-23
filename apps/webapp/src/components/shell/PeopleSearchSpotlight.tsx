@@ -8,11 +8,13 @@ import { useDebouncedCallback } from "@mantine/hooks";
 import { createSpotlight, Spotlight } from "@mantine/spotlight";
 import { IconSearch, IconUsers } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { searchContacts } from "@/lib/contacts/searchContacts";
 import { usePeopleSearchSpotlightTranslations } from "@/lib/i18n/generated/hooks";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { useNavigateWithTitle } from "@/lib/metadata/useNavigateWithTitle";
+import { routePeopleSpotlightSearch } from "@/lib/navigation/route/people";
+import { routePerson } from "@/lib/navigation/route/person";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 
 const [peopleStore, peopleSearchActions] = createSpotlight();
@@ -40,22 +42,19 @@ export function PeopleSearchSpotlight() {
     }
   }, DEBOUNCE_MS.search);
 
-  const handleQueryChange = useCallback(
-    (q: string) => {
-      setQuery(q);
-      const trimmedQuery = q.trim();
-      if (trimmedQuery.length > 0) {
-        // Show the loader immediately so the user sees intent before the
-        // debounce fires and the actual fetch begins.
-        setIsLoading(true);
-        debouncedSearch(trimmedQuery);
-      } else {
-        setResults([]);
-        setIsLoading(false);
-      }
-    },
-    [debouncedSearch],
-  );
+  const handleQueryChange = (q: string) => {
+    setQuery(q);
+    const trimmedQuery = q.trim();
+    if (trimmedQuery.length > 0) {
+      // Show the loader immediately so the user sees intent before the
+      // debounce fires and the actual fetch begins.
+      setIsLoading(true);
+      debouncedSearch(trimmedQuery);
+    } else {
+      setResults([]);
+      setIsLoading(false);
+    }
+  };
 
   function handleClose() {
     setQuery("");
@@ -64,14 +63,11 @@ export function PeopleSearchSpotlight() {
   }
 
   function handlePersonClick(contact: ContactSelectable) {
-    navigateWithTitle(
-      `${WEBAPP_ROUTES.PERSON}/${contact.id}`,
-      optimisticPersonDocumentTitle(contact),
-    );
+    navigateWithTitle(routePerson(contact.id), optimisticPersonDocumentTitle(contact));
   }
 
   function handleSeeAll() {
-    router.push(`${WEBAPP_ROUTES.PEOPLE}?search=${encodeURIComponent(query.trim())}`);
+    router.push(routePeopleSpotlightSearch(query));
   }
 
   const trimmed = query.trim();

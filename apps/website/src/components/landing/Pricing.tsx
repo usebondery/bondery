@@ -8,7 +8,7 @@ import {
   IconTopologyStar,
   IconUsers,
 } from "@tabler/icons-react";
-import { WEBAPP_URL } from "@/lib/config";
+import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
 import { PricingCard } from "./PricingCard";
 
 export function Pricing() {
@@ -88,7 +88,7 @@ export function Pricing() {
           action={
             <ButtonLink
               fullWidth
-              href={`${WEBAPP_URL}/login`}
+              href={hrefWebappLogin()}
               leftSection={<IconTopologyStar size={18} />}
               size="lg"
               variant="primary"
@@ -105,7 +105,7 @@ export function Pricing() {
           action={
             <ButtonLink
               fullWidth
-              href={`${WEBAPP_URL}/login`}
+              href={hrefWebappLogin()}
               leftSection={<IconTopologyStar size={18} />}
               size="lg"
               variant="primary"

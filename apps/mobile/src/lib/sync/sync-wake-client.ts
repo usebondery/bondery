@@ -1,3 +1,4 @@
+import { buildApiErrorFromResponse } from "@bondery/helpers/api";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   buildSyncWsUrl,
@@ -5,10 +6,13 @@ import {
   type SyncWsBatchMessage,
   syncWsTicketResponseSchema,
 } from "@bondery/schemas/sync";
+import { mobileFetch } from "../api/transport";
 import { getAccessToken } from "../auth/client";
+import { AuthRequiredError, endLocalSession } from "../auth/session";
 import { API_URL } from "../config";
 import { syncRequestHeaders } from "./constants";
 import { ensureDeviceId } from "./outbox/pending-mutations";
+import { shouldReconnectSyncWake } from "./pull-auth";
 import { onSyncWakeEvent, onSyncWakeReconnect, setSyncPullMode } from "./pull-manager";
 
 const MIN_RECONNECT_MS = 1_000;
@@ -23,19 +27,27 @@ let activeClient: SyncWakeClient | null = null;
 async function fetchWsTicket(): Promise<string> {
   const token = await getAccessToken();
   if (!token) {
-    throw new Error("Not authenticated");
+    throw new AuthRequiredError("missing_local_session");
   }
 
-  const response = await fetch(`${API_URL}${API_ROUTES.SYNC_WS_TICKET}`, {
+  const response = await mobileFetch(`${API_URL}${API_ROUTES.SYNC_WS_TICKET}`, {
     headers: {
       Authorization: `Bearer ${token}`,
       ...syncRequestHeaders(),
     },
   });
 
+  if (response.status === 401) {
+    await endLocalSession({ reason: "session_expired" });
+    throw new AuthRequiredError("session_revoked");
+  }
+
   if (!response.ok) {
     const text = await response.text();
-    throw new Error(text || `WS ticket request failed (${response.status})`);
+    throw buildApiErrorFromResponse({
+      bodyText: text,
+      status: response.status,
+    });
   }
 
   const json = await response.json();
@@ -121,9 +133,9 @@ export async function startSyncWakeClient(): Promise<SyncWakeClient> {
       socket.onerror = () => {
         socket?.close();
       };
-    } catch {
+    } catch (error) {
       setSyncPullMode("long_poll");
-      if (!stopped) {
+      if (!stopped && shouldReconnectSyncWake(error)) {
         scheduleReconnect();
       }
     }

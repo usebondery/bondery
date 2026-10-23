@@ -11,7 +11,7 @@ import {
   usePeoplePickerPagedList,
 } from "@bondery/mantine-next";
 import { Group, Loader, Paper, Text, UnstyledButton } from "@mantine/core";
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useNotesEditorTranslations } from "@/lib/i18n/generated/hooks";
 
 export interface MentionSuggestionItem {
@@ -93,7 +93,7 @@ export const MentionList = forwardRef<MentionListHandle, MentionListProps>(funct
     setQuery(query);
   }, [listQuery, query, setQuery]);
 
-  const items = useMemo(() => {
+  const items = (() => {
     if (query.trim().length > 0 || !currentPerson) {
       return visibleItems;
     }
@@ -101,7 +101,7 @@ export const MentionList = forwardRef<MentionListHandle, MentionListProps>(funct
       return visibleItems;
     }
     return [currentPerson, ...visibleItems];
-  }, [currentPerson, query, visibleItems]);
+  })();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: token is the replace trigger
   useEffect(() => {

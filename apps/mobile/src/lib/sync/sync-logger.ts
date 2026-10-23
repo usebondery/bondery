@@ -1,5 +1,6 @@
 import type { SyncMutation } from "@bondery/schemas/sync";
 import { SYNC_DEBUG } from "@/lib/config";
+import { classifyTransportFailure } from "../auth/session";
 
 const LOG_PREFIX = "[sync]";
 
@@ -61,6 +62,10 @@ export function logSyncPullResponse(
 }
 
 export function logSyncPullError(error: unknown): void {
+  if (classifyTransportFailure(error) !== "network") {
+    return;
+  }
+
   writeDevLog("warn", LOG_PREFIX, "pull error", {
     message: error instanceof Error ? error.message : String(error),
   });

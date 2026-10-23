@@ -1,6 +1,6 @@
 "use client";
 
-import { AnchorLink } from "@bondery/mantine-next";
+import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
 import { Box, Divider, List, Table, Text, Title } from "@mantine/core";
 import type { ReactNode } from "react";
 import { LEGAL_ENTITY } from "@/data/company";
@@ -658,7 +658,7 @@ export function Privacy() {
               <Table.Td>{provider.useCase}</Table.Td>
               <Table.Td>{provider.notes || "—"}</Table.Td>
               <Table.Td>
-                <AnchorLink href={provider.privacy} target="_blank">
+                <AnchorLink href={hrefAssert(provider.privacy)} target="_blank">
                   {provider.privacy}
                 </AnchorLink>
               </Table.Td>

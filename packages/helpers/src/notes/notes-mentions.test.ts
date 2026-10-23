@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { htmlToMarkdown } from "./htmlToMarkdown.js";
 import { markdownToHtml } from "./markdownToHtml.js";
+import { extractPersonMentionIds } from "./personMentionFormat.js";
 
 describe("notes mention conversion", () => {
   it("preserves mention id and label through html → markdown → html", () => {
@@ -27,5 +28,14 @@ describe("notes mention conversion", () => {
   it("matches mention spans when data-id comes before data-type", () => {
     const html = '<p><span data-id="person-1" data-type="mention" data-label="Ada">@Ada</span></p>';
     assert.equal(htmlToMarkdown(html), "[@Ada](bp://person/person-1)");
+  });
+
+  it("extracts unique person ids from tokens and markdown links", () => {
+    assert.deepEqual(
+      extractPersonMentionIds(
+        "See [[bp:person:person-1]] and [@Ada](bp://person/person-2) and [[bp:person:person-1]]",
+      ),
+      ["person-1", "person-2"],
+    );
   });
 });

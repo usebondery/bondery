@@ -10,6 +10,7 @@ model People {
   notesUpdatedAt           DateTime? @map("notes_updated_at")
   myself                   Boolean?  @default(false)
   hasAvatar                Boolean   @default(false) @map("has_avatar")
+  avatarUpdatedAt          DateTime? @map("avatar_updated_at")
   language                 String?
   timezone                 String?
   location                 String?

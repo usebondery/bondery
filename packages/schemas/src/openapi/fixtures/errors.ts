@@ -1,3 +1,4 @@
+import { SYNC_PROTOCOL_VERSION } from "#sync/protocol.js";
 import { EXAMPLE_CONTACT } from "./entities.js";
 
 const EXAMPLE_REQUEST_ID = "00000000-0000-0000-0000-000000000000";
@@ -60,6 +61,17 @@ export const EXAMPLE_ERROR_404 = exampleError({
   code: "contact_not_found",
   message: "Contact not found",
   type: "not_found_error",
+});
+
+/** Same HTTP 426 as sqlite_schema_mismatch and extension_outdated. */
+export const EXAMPLE_ERROR_426 = exampleError({
+  code: "sync_protocol_mismatch",
+  details: {
+    clientVersion: null,
+    requiredVersion: SYNC_PROTOCOL_VERSION,
+  },
+  message: "Sync protocol version mismatch",
+  type: "invalid_request_error",
 });
 
 /** Relationship duplicate from POST /api/contacts/:id/relationships. */

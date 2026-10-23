@@ -1,3 +1,4 @@
+// biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
 import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
@@ -5,7 +6,7 @@ import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bonder
 import { Button, CardSection, Stack, Text, Tooltip } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconKey, IconPlus } from "@tabler/icons-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { InlineEditableInput } from "@/app/(app)/app/(shell)/person/[personId]/components/info/InlineEditableInput";
 import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
@@ -56,7 +57,7 @@ function ApiKeyRow({
     persistedLabelRef.current = apiKey.label;
   }, [apiKey.label]);
 
-  const saveLabel = useCallback(async () => {
+  const saveLabel = async () => {
     const trimmed = label.trim();
     if (!trimmed || trimmed === persistedLabelRef.current) {
       setLabel(persistedLabelRef.current);
@@ -80,7 +81,7 @@ function ApiKeyRow({
     } finally {
       setIsSaving(false);
     }
-  }, [apiKey.id, label, onLabelUpdated, t, updateMutation]);
+  };
 
   return (
     <SettingsCredentialCard
@@ -144,9 +145,9 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
       neverUsed: t("NeverUsed"),
     });
 
-  const handleCreated = useCallback((_created: ApiKeyCreated) => {}, []);
+  const handleCreated = (_created: ApiKeyCreated) => {};
 
-  const openCreateModal = useCallback(async () => {
+  const openCreateModal = async () => {
     if (atLimit) {
       return;
     }
@@ -158,7 +159,7 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
       apiBaseUrl,
       onCreated: handleCreated,
     });
-  }, [apiBaseUrl, atLimit, handleCreated]);
+  };
 
   const handleDelete = async (key: ApiKeyListItem) => {
     const stepped = await ensureFreshIdentity({

@@ -19,7 +19,7 @@ Package scripts live in `packages/db/package.json`; run them from the repo root 
 Release order is mandatory:
 
 ```text
-prisma migrate deploy → apply functions.sql → provision OAuth clients → provision platform admins
+prisma migrate deploy → apply functions.sql → backfill default_phone_country (null rows only) → provision OAuth clients → provision platform admins
 ```
 
 Compose `api` `pre_start`, CI (`pnpm run release-migrate`), and host-run `pnpm run dev` (development) use this pipeline. `docker compose up` alone does not migrate unless `api` is recreated and `pre_start` runs.
