@@ -1,6 +1,5 @@
 "use client";
 
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ButtonLink, Kbd, parseShortcutKeys } from "@bondery/mantine-next";
 import { Button, Group, Text, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";

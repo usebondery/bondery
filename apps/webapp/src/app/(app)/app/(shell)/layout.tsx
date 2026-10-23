@@ -1,4 +1,3 @@
-import "leaflet/dist/leaflet.css";
 import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
