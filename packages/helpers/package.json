@@ -4,7 +4,7 @@
     "@vvo/tzdb": "^6.198.0",
     "transliteration": "^2.6.1",
     "uuid": "^14.0.2",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "description": "Shared runtime utilities and form normalization pipelines for Bondery. Depends on @bondery/schemas.",
   "devDependencies": {
