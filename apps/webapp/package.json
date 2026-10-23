@@ -68,7 +68,7 @@
     "supercluster": "^8.0.1",
     "takumi-js": "^2.14.0",
     "tippy.js": "^6.3.7",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "description": "Bondery Webapp",
   "devDependencies": {

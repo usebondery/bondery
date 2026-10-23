@@ -30,7 +30,7 @@
     "remark-gfm": "^4.0.1",
     "server-only": "^0.0.1",
     "takumi-js": "^2.14.0",
-    "zod": "^4.6.5"
+    "zod": "^4.6.6"
   },
   "description": "Bondery Website",
   "devDependencies": {
