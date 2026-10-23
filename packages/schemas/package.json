@@ -7,6 +7,7 @@
   "devDependencies": {
     "@bondery/typescript-config": "workspace:*",
     "rimraf": "^6.1.3",
+    "tsx": "4.23.15",
     "typescript": "^7.0.2"
   },
   "exports": {
