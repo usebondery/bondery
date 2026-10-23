@@ -118,9 +118,7 @@ export function PeopleMapClient({
         style={{ height: "100%", width: "100%" }}
       >
         <AttributionControl compact={false} customAttribution={OSM_ATTRIBUTION} />
-        {showZoomControls ? (
-          <MapZoomControls myLocationControl={myLocationControl} />
-        ) : null}
+        {showZoomControls ? <MapZoomControls myLocationControl={myLocationControl} /> : null}
         <MapFocusController defaultZoom={zoom} focus={focus} />
         <FitMarkersController defaultZoom={zoom} disabled={disableAutoFit} markers={markers} />
         <VisibleMarkersController

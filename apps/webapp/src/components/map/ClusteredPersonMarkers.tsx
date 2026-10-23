@@ -54,8 +54,7 @@ export function ClusteredPersonMarkers({
   const validMarkers = useMemo(
     () =>
       markers.filter(
-        (marker) =>
-          isFiniteCoordinate(marker.latitude) && isFiniteCoordinate(marker.longitude),
+        (marker) => isFiniteCoordinate(marker.latitude) && isFiniteCoordinate(marker.longitude),
       ),
     [markers],
   );
