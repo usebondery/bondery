@@ -24320,7 +24320,7 @@ paths:
                 $ref: "#/components/schemas/ApiError"
 servers:
   - description: Local development server
-    url: http://localhost:26631
+    url: https://api.usebondery.test
   - description: Production server
     url: https://api.usebondery.com
 tags:

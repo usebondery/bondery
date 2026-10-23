@@ -14,10 +14,7 @@ import { fileURLToPath } from "node:url";
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 const appDir = path.join(scriptsDir, "..");
 const require = createRequire(import.meta.url);
-const maplibreDist = path.join(
-  path.dirname(require.resolve("maplibre-gl/package.json")),
-  "dist",
-);
+const maplibreDist = path.join(path.dirname(require.resolve("maplibre-gl/package.json")), "dist");
 const destDir = path.join(appDir, "public", "maplibre");
 
 mkdirSync(destDir, { recursive: true });

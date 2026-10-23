@@ -10,10 +10,7 @@ import {
 describe("parseMapCameraSearchParams", () => {
   it("returns null when any param is missing", () => {
     assert.equal(parseMapCameraSearchParams(new URLSearchParams()), null);
-    assert.equal(
-      parseMapCameraSearchParams(new URLSearchParams("latitude=1&longitude=2")),
-      null,
-    );
+    assert.equal(parseMapCameraSearchParams(new URLSearchParams("latitude=1&longitude=2")), null);
     assert.equal(parseMapCameraSearchParams(new URLSearchParams("latitude=1&zoom=3")), null);
     assert.equal(parseMapCameraSearchParams(new URLSearchParams("longitude=2&zoom=3")), null);
   });
@@ -35,9 +32,7 @@ describe("parseMapCameraSearchParams", () => {
 
   it("parses valid camera values", () => {
     assert.deepEqual(
-      parseMapCameraSearchParams(
-        new URLSearchParams("latitude=38.72&longitude=-9.14&zoom=12.4"),
-      ),
+      parseMapCameraSearchParams(new URLSearchParams("latitude=38.72&longitude=-9.14&zoom=12.4")),
       { latitude: 38.72, longitude: -9.14, zoom: 12.4 },
     );
   });

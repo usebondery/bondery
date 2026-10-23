@@ -1,5 +1,4 @@
 {
-  "turbo": true,
   "apps": {
     "apps/api": {
       "appPort": 26631,
@@ -16,5 +15,6 @@
       "name": "usebondery",
       "script": "dev:next"
     }
-  }
+  },
+  "turbo": true
 }

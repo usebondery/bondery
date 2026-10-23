@@ -11,7 +11,7 @@ import {
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
 import { type ReactNode, useEffect, useRef } from "react";
-import Link from "#nextjs/NextLink.js";
+import Link, { hrefAssert } from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
 import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";
@@ -244,7 +244,7 @@ export function PersonChip({
     const content =
       isClickable && !disabled && resolvedHref ? (
         <Link
-          href={resolvedHref}
+          href={hrefAssert(resolvedHref)}
           onClick={() => onNavigate?.()}
           prefetch={prefetch}
           rel={openInNewTab ? "noopener noreferrer" : undefined}
