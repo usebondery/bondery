@@ -8,7 +8,7 @@ import {
   type RowAction,
 } from "@bondery/mantine-next";
 import type { Contact } from "@bondery/schemas";
-import { IconArrowMerge, IconTrash, IconUsersPlus } from "@tabler/icons-react";
+import { IconArrowMerge, IconCalendarPlus, IconTrash, IconUsersPlus } from "@tabler/icons-react";
 import { useState } from "react";
 import type { SortOrder } from "@/lib/contacts/table-types";
 import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
@@ -20,6 +20,55 @@ import type {
   MenuAction,
 } from "./contacts-table-types";
 import { normalizeVisibleColumns, useContactsTableColumns } from "./hooks/useContactsTableColumns";
+
+/**
+ * Selection may store a row key or a contact id.
+ * Address rows use `_rowKey`. This returns each person id once, in selection order.
+ */
+function participantIdsForCheckedRows(contacts: Contact[], selectedIds: Set<string>): string[] {
+  const contactIdByRowId = new Map<string, string>();
+  for (const contact of contacts) {
+    const rowId = (contact as ContactTableRow)._rowKey ?? contact.id;
+    if (!contactIdByRowId.has(rowId)) {
+      contactIdByRowId.set(rowId, contact.id);
+    }
+    if (!contactIdByRowId.has(contact.id)) {
+      contactIdByRowId.set(contact.id, contact.id);
+    }
+  }
+
+  const participantIds: string[] = [];
+  const seenContactIds = new Set<string>();
+  for (const selectedId of selectedIds) {
+    const contactId = contactIdByRowId.get(selectedId);
+    if (!contactId || seenContactIds.has(contactId)) {
+      continue;
+    }
+    seenContactIds.add(contactId);
+    participantIds.push(contactId);
+  }
+  return participantIds;
+}
+
+/**
+ * Select all with every match loaded uses loaded contacts minus excludedIds.
+ * Each person is included once.
+ */
+function participantIdsForLoadedSelection(
+  contacts: Contact[],
+  excludedIds: Set<string> | undefined,
+): string[] {
+  const participantIds: string[] = [];
+  const seenContactIds = new Set<string>();
+  for (const contact of contacts) {
+    if (excludedIds?.has(contact.id) || seenContactIds.has(contact.id)) {
+      continue;
+    }
+    seenContactIds.add(contact.id);
+    participantIds.push(contact.id);
+  }
+  return participantIds;
+}
 
 export type {
   BulkSelectionAction,
@@ -111,7 +160,27 @@ export default function ContactsTableV2({
       }
     : null;
 
+  const createInteractionDisabled = Boolean(isAllTotalSelected && hasMore);
+
   const standardBulkSelectionActions: BulkSelectionAction[] = [];
+  if (standardActions?.onCreateInteractionSelected) {
+    standardBulkSelectionActions.push({
+      disabled: createInteractionDisabled,
+      disabledTooltip: t("LogInteractionSelectLoadedTooltip"),
+      icon: <IconCalendarPlus size={16} />,
+      key: "createInteraction",
+      label: t("LogInteractionBulk"),
+      onClick: () => {
+        if (createInteractionDisabled) {
+          return;
+        }
+        const participantIds = isAllTotalSelected
+          ? participantIdsForLoadedSelection(contacts, excludedIds)
+          : participantIdsForCheckedRows(contacts, selectedIds ?? new Set());
+        standardActions.onCreateInteractionSelected?.(participantIds);
+      },
+    });
+  }
   if (standardActions?.onMergeSelected) {
     standardBulkSelectionActions.push({
       disabled: selectedIdList.length !== 2,

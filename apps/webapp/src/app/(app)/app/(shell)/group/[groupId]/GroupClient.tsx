@@ -12,6 +12,7 @@ import {
 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useDeferredValue, useEffect, useState, useTransition } from "react";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import ContactsTable, {
   type BulkSelectionAction,
   type ColumnConfig,
@@ -279,6 +280,13 @@ export function GroupClient({ groupId }: GroupClientProps) {
             standardActions={{
               onAddToGroupsOne: (contactId) => handleAddToGroups([contactId]),
               onAddToGroupsSelected: (contactIds) => handleAddToGroups(contactIds),
+              onCreateInteractionSelected: (contactIds) => {
+                openNewActivityModal({
+                  contacts,
+                  contactsHasMore: hasMore,
+                  initialParticipantIds: contactIds,
+                });
+              },
               onDeleteOne: deleteContact,
               onDeleteSelected: handleBulkDelete,
               onMergeOne: (contactId) => openMergeModal(contactId),

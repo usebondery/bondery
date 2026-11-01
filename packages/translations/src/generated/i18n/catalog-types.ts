@@ -571,6 +571,8 @@ export type ContactsTableCatalog = {
   EditGroupsMenu: string;
   HiddenColumnsSection: string;
   LoadMore: string;
+  LogInteractionBulk: string;
+  LogInteractionSelectLoadedTooltip: string;
   MergeBulk: string;
   MergeExactlyTwoTooltip: string;
   MergeMenu: string;

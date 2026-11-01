@@ -34,6 +34,7 @@ import {
 } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { type ReactNode, useDeferredValue, useEffect, useState } from "react";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddPeopleToGroupSelectionModal } from "@/app/(app)/app/(shell)/people/components/modals/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/MergeWithModal";
 import type { ColumnKey } from "@/components/contacts/ContactsTableV2";
@@ -618,6 +619,12 @@ export function MapClient({ view }: MapClientProps) {
                   }),
                 onAddToGroupsSelected: (contactIds) =>
                   openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
+                onCreateInteractionSelected: (contactIds) => {
+                  openNewActivityModal({
+                    contacts: filteredAddressRows,
+                    initialParticipantIds: contactIds,
+                  });
+                },
                 onDeleteOne: handleDeleteContact,
                 onDeleteSelected: handleBulkDelete,
                 onMergeOne: (contactId) => openMergeModal(contactId),
@@ -653,6 +660,12 @@ export function MapClient({ view }: MapClientProps) {
                   }),
                 onAddToGroupsSelected: (contactIds) =>
                   openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
+                onCreateInteractionSelected: (contactIds) => {
+                  openNewActivityModal({
+                    contacts: filteredPins as Contact[],
+                    initialParticipantIds: contactIds,
+                  });
+                },
                 onDeleteOne: handleDeleteContact,
                 onDeleteSelected: handleBulkDelete,
                 onMergeOne: (contactId) => openMergeModal(contactId),

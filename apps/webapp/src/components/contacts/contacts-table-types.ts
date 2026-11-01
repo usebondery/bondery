@@ -49,6 +49,7 @@ export interface StandardContactActions {
   mergeMenuLabel?: string;
   onAddToGroupsOne?: (contactId: string) => void;
   onAddToGroupsSelected?: (contactIds: string[]) => void;
+  onCreateInteractionSelected?: (contactIds: string[]) => void;
   onDeleteOne?: (contactId: string) => void;
   onDeleteSelected?: (contactIds: string[]) => void;
   onMergeOne?: (contactId: string) => void;

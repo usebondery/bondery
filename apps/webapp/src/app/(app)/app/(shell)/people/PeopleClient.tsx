@@ -20,6 +20,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
+import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import ContactsTable, {
   type ColumnConfig,
   type SortOrder,
@@ -449,6 +450,13 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
           mergeDisabledTooltip: tActions("CannotMergeMyself"),
           onAddToGroupsOne: (contactId) => handleAddToGroup([contactId]),
           onAddToGroupsSelected: (contactIds) => handleAddToGroup(contactIds),
+          onCreateInteractionSelected: (contactIds) => {
+            openNewActivityModal({
+              contacts,
+              contactsHasMore: hasMore,
+              initialParticipantIds: contactIds,
+            });
+          },
           onDeleteOne: handleDeleteContact,
           onDeleteSelected: handleDeleteSelected,
           onMergeOne: (contactId) => openMergeModal(contactId),
