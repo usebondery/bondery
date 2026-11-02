@@ -122,11 +122,10 @@ export function MapAttributionControl() {
 
   return (
     <Tooltip label={t("AttributionTooltip")}>
-      <ActionIconButton
+      <ActionIcon
         aria-label={t("AttributionLabel")}
         component="a"
         href={OSM_COPYRIGHT_URL}
-        icon={<IconCopyright />}
         rel="noreferrer"
         size="lg"
         style={{
@@ -138,7 +137,9 @@ export function MapAttributionControl() {
         }}
         target="_blank"
         variant="default"
-      />
+      >
+        <IconCopyright />
+      </ActionIcon>
     </Tooltip>
   );
 }

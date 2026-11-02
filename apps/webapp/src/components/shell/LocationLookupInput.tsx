@@ -64,6 +64,7 @@ export function LocationLookupInput({
   const [loading, setLoading] = useState(false);
   const suggestionsByKey = useRef<Record<string, ContactAddressEntry>>({});
   const optionFlagByKey = useRef<Record<string, string>>({});
+  const optionTextByKey = useRef<Record<string, string>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
   /** Tracks whether the user has actively changed the input value. */
   const userHasTyped = useRef(false);
@@ -91,6 +92,7 @@ export function LocationLookupInput({
         suggestionsByKey.current = {};
         optionFlagByKey.current = {};
         optionFlagByLabel.current = {};
+        optionTextByKey.current = {};
         return;
       }
 
@@ -110,6 +112,7 @@ export function LocationLookupInput({
           const dictionary: Record<string, ContactAddressEntry> = {};
           const flags: Record<string, string> = {};
           const flagsByLabel: Record<string, string> = {};
+          const textsByKey: Record<string, string> = {};
           const labels: Array<{ label: string; value: string }> = [];
           const seen = new Set<string>();
 
@@ -124,12 +127,14 @@ export function LocationLookupInput({
             dictionary[key] = item;
             flags[key] = flag;
             flagsByLabel[displayLabel] ??= flag;
+            textsByKey[key] = displayLabel;
             labels.push({ label: displayLabel, value: key });
           }
 
           suggestionsByKey.current = dictionary;
           optionFlagByKey.current = flags;
           optionFlagByLabel.current = flagsByLabel;
+          optionTextByKey.current = textsByKey;
           setOptions(labels);
         } catch (error) {
           if (error instanceof Error && error.name === "AbortError") {
@@ -140,6 +145,7 @@ export function LocationLookupInput({
             suggestionsByKey.current = {};
             optionFlagByKey.current = {};
             optionFlagByLabel.current = {};
+            optionTextByKey.current = {};
           }
         } finally {
           if (activeQueryRef.current === text) {
@@ -190,7 +196,7 @@ export function LocationLookupInput({
             className={`fi fi-${optionFlagByKey.current[option.value] || "aq"}`}
             style={{ flexShrink: 0, width: 18 }}
           />
-          <span>{option.label}</span>
+          <span>{optionTextByKey.current[option.value] ?? option.value}</span>
         </Group>
       )}
       rightSection={

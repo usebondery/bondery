@@ -104,16 +104,20 @@ export const EXAMPLE_RELATIONSHIP_GRAPH_RESPONSE = {
       {
         avatar: null,
         firstName: "Ada",
+        headline: "Mathematician",
         id: EXAMPLE_CONTACT_ID,
         lastName: "Lovelace",
+        location: "London, UK",
         middleName: null,
         myself: false,
       },
       {
         avatar: null,
         firstName: "Charles",
+        headline: "Mathematician",
         id: EXAMPLE_CONTACT_ID_2,
         lastName: "Babbage",
+        location: "London, UK",
         middleName: null,
         myself: false,
       },
@@ -283,6 +287,7 @@ export const EXAMPLE_TAG_UPDATE_RESPONSE = { tag: EXAMPLE_TAG };
 
 export const EXAMPLE_ADD_CONTACTS_TO_TAG_RESPONSE = {
   addedCount: 3,
+  skippedCount: 1,
 };
 
 export const EXAMPLE_REMOVE_CONTACTS_FROM_TAG_RESPONSE = {

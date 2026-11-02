@@ -173,6 +173,7 @@
       "sync_protocol_mismatch": "Sync protocol mismatch.",
       "tag": "Tag upsert failed.",
       "tag_failed": "Tag failed.",
+      "tag_label_exists": "A tag with this name already exists.",
       "tag_not_found": "Tag not found.",
       "user": "User lookup failed.",
       "user_lookup_failed": "User lookup failed.",

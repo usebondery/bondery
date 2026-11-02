@@ -8,7 +8,13 @@ import { buildApiErrorFromResponse, extractApiErrorFields, isApiError } from "@b
  */
 
 function jsonPayloadFromTransportError(error: unknown): string {
-  const bodyText = error instanceof Error ? error.message : String(error);
+  // The text is only parsed for a JSON error body, never shown to a user.
+  const bodyText =
+    error instanceof Error
+      ? String(error.message)
+      : typeof error === "string"
+        ? error
+        : JSON.stringify(error);
   const jsonStart = bodyText.indexOf("{");
   const jsonEnd = bodyText.lastIndexOf("}");
 

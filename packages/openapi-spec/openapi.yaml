@@ -3743,14 +3743,18 @@ paths:
                   nodes:
                     - avatar: null
                       firstName: Ada
+                      headline: Mathematician
                       id: 550e8400-e29b-41d4-a716-446655440000
                       lastName: Lovelace
+                      location: London, UK
                       middleName: null
                       myself: false
                     - avatar: null
                       firstName: Charles
+                      headline: Mathematician
                       id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
                       lastName: Babbage
+                      location: London, UK
                       middleName: null
                       myself: false
                   truncated: false
@@ -15198,6 +15202,7 @@ paths:
             application/json:
               example:
                 addedCount: 3
+                skippedCount: 1
               schema:
                 type: object
                 properties:

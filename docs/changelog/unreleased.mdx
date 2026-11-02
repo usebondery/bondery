@@ -29,8 +29,6 @@ hidden: true
 - Webapp and API: A tag keeps the color you pick when you create it. The editor no longer sends a second request.
 - API: `POST /tags` accepts an optional `color`. `GET /contacts` and `GET /contacts/select` accept `tag_ids` as one comma-separated value.
 - API: MCP and in-app chat can delete up to 25 tags in one `delete_tags` call. The host or the chat confirm still runs first. People who had those tags stay.
-- Webapp: Graph at `/app/graph` shows people, saved relationships, shared companies and schools, and a circle behind a group of at least three people. You sit in the middle. A line to you means the person is in your account. Search fades other names. Hover lights a person and the marks tied to them. Click keeps a preview. Double-click opens the person. Show on graph on a person page opens that view. A narrow screen lists the same links as short sentences. The picture stops at 500 people, 1,000 relationships, and 40 companies or schools.
-- API: `GET /contacts/relationship-graph` returns that picture. `hubs=1` adds companies and schools. `groups=1` adds group circles. `focus` returns one person and their neighbors.
 - Webapp: People, a group's members, and a person's interactions load the next page as you scroll. Those lists no longer show a Load more button. Import tables and the map table stay as they are.
 - Webapp: Chat can stop a reply and retry one that stopped or failed. Stop keeps the text already written, and the reply says when a change may already be saved. A retry stays hidden after a turn that changed your people. A delete asks before it runs, and the reply lists the steps it took.
 - Webapp: The chat composer offers Auto, Haiku, or Sonnet for the next message. The choice stays in this browser for that chat.
@@ -82,7 +80,6 @@ hidden: true
 ### 📝 Documentation
 
 - Contributing: Local setup, architecture, auth, and MCP docs teach Portless HTTPS on `*.usebondery.test`. Classic `localhost` ports stay as the escape hatch.
-- Docs: The Graph concept page explains the picture, search, focus, and the draw limits.
 
 ### Breaking
 
