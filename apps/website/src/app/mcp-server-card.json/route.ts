@@ -2,6 +2,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { apiUrl } from "@/lib/api-url";
 import { WEBSITE_URL } from "@/lib/config";
+import { discoveryCorsPreflight, withDiscoveryCors } from "@/lib/discovery-cors";
 import websitePackage from "../../../package.json" with { type: "json" };
 
 /**
@@ -55,10 +56,13 @@ export function GET() {
       websiteUrl: `${origin}/docs/bondery/mcp`,
     },
     {
-      headers: {
+      headers: withDiscoveryCors({
         "Cache-Control": "max-age=86400",
         "Content-Type": "application/mcp-server-card+json; charset=utf-8",
-      },
+      }),
     },
   );
 }
+
+/** Cross-origin agents read the card with a custom Accept type, so preflight is OPTIONS. */
+export const OPTIONS = discoveryCorsPreflight;

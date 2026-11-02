@@ -74,7 +74,8 @@
     "prebuild": "cross-env NODE_ENV=production pnpm run generate-icons && pnpm run generate:api-docs",
     "predev": "node ../../scripts/dev/kill-website-dev.mjs && cross-env NODE_ENV=development pnpm run generate-icons && pnpm run generate:api-docs",
     "predev:classic": "node ../../scripts/dev/kill-website-dev.mjs && cross-env NODE_ENV=development pnpm run generate-icons && pnpm run generate:api-docs",
-    "start": "next start"
+    "start": "next start",
+    "test:cors": "tsx --test src/lib/discovery-cors.test.ts"
   },
   "version": "1.11.0-rc.2"
 }

@@ -1,6 +1,7 @@
 import { WEBAPP_NAME } from "@bondery/helpers";
 import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { WEBSITE_URL } from "@/lib/config";
+import { discoveryCorsPreflight, withDiscoveryCors } from "@/lib/discovery-cors";
 import websitePackage from "../../../../package.json" with { type: "json" };
 import catalog from "./manifest.json";
 
@@ -70,10 +71,13 @@ export function GET() {
       specVersion: ARD_SPEC_VERSION,
     },
     {
-      headers: {
+      headers: withDiscoveryCors({
         "Cache-Control": "max-age=86400",
         "Content-Type": "application/json",
-      },
+      }),
     },
   );
 }
+
+/** Crawlers fetch the catalog cross-origin. */
+export const OPTIONS = discoveryCorsPreflight;
