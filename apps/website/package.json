@@ -77,5 +77,5 @@
     "start": "next start",
     "test:cors": "tsx --test src/lib/discovery-cors.test.ts"
   },
-  "version": "1.11.0-rc.2"
+  "version": "1.11.0-rc.3"
 }
