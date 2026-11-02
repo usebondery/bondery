@@ -1,6 +1,7 @@
 import { GROUP_LABEL_MAX_LENGTH } from "@bondery/schemas";
 import { z } from "zod";
-import type { DomainContext } from "../../domains/_shared/context.js";
+import { type DomainContext, DomainError } from "../../domains/_shared/context.js";
+import { domainDb } from "../../domains/_shared/domain-db.js";
 import {
   addTagMembers,
   createTag,
@@ -27,6 +28,12 @@ export const getTagInputSchema = z.object({
 });
 
 export const createTagInputSchema = z.object({
+  color: z
+    .string()
+    .trim()
+    .regex(/^#?[0-9a-fA-F]{6}$/, { error: "Color must be a valid 6-digit hex value" })
+    .optional()
+    .describe("Hex color such as #3B82F6. Omit to let the API pick one."),
   label: z.string().min(1).max(GROUP_LABEL_MAX_LENGTH),
 });
 
@@ -38,6 +45,14 @@ export const updateTagInputSchema = z.object({
 
 export const deleteTagInputSchema = z.object({
   tagId: z.string().uuid(),
+});
+
+export const deleteTagsInputSchema = z.object({
+  tagIds: z
+    .array(z.string().uuid())
+    .min(1)
+    .max(ASSISTANT_COLLECTION_CAP)
+    .describe("Tag ids to delete. At most 25. People who had these tags are kept."),
 });
 
 export const getTagContactsInputSchema = z.object({
@@ -85,7 +100,10 @@ export async function executeCreateTag(
   ctx: DomainContext,
   args: z.infer<typeof createTagInputSchema>,
 ) {
-  const created = await createTag(ctx, { label: args.label });
+  const created = await createTag(ctx, {
+    ...(args.color !== undefined ? { color: args.color } : {}),
+    label: args.label,
+  });
   return { tag: created.data.tag };
 }
 
@@ -108,6 +126,25 @@ export async function executeDeleteTag(
   return { message: "Tag deleted successfully" };
 }
 
+export async function executeDeleteTags(
+  ctx: DomainContext,
+  args: z.infer<typeof deleteTagsInputSchema>,
+) {
+  const uniqueIds = [...new Set(args.tagIds)];
+  const owned = await domainDb(ctx).tag.findMany({
+    select: { id: true },
+    where: { id: { in: uniqueIds }, userId: ctx.user.id },
+  });
+  if (owned.length !== uniqueIds.length) {
+    throw new DomainError("Tag not found", 404, "tag_not_found");
+  }
+
+  for (const tagId of uniqueIds) {
+    await deleteTag(ctx, tagId);
+  }
+  return { message: "Tags deleted successfully" };
+}
+
 export async function executeGetTagContacts(
   ctx: DomainContext,
   args: z.infer<typeof getTagContactsInputSchema>,
@@ -125,7 +162,7 @@ export async function executeCreateTagMembership(
 ) {
   const uniquePersonIds = [...new Set(args.personIds)];
   const result = await addTagMembers(ctx, args.tagId, uniquePersonIds);
-  return { addedCount: result.data.addedCount };
+  return { addedCount: result.data.addedCount, skippedCount: result.data.skippedCount };
 }
 
 export async function executeDeleteTagMembership(

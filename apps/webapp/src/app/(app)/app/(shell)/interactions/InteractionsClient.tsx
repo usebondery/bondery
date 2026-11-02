@@ -8,19 +8,16 @@ import {
   parseShortcutKeys,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, Contact, InteractionParticipant } from "@bondery/schemas";
-import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
-
-type ActivityParticipantRef = string | InteractionParticipant;
-
+import type { Activity, InteractionParticipant, PersonPreview } from "@bondery/schemas";
 import {
   Button,
   Center,
   Group,
-  Paper,
-  SegmentedControl,
+  Loader,
+  Popover,
   Stack,
   Text,
+  TextInput,
   Tooltip,
 } from "@mantine/core";
 import { useDebouncedCallback, useHotkeys } from "@mantine/hooks";
@@ -28,22 +25,24 @@ import { notifications } from "@mantine/notifications";
 import {
   IconCalendarPlus,
   IconCopy,
-  IconTable,
+  IconSearch,
   IconTimelineEventText,
   IconTrash,
 } from "@tabler/icons-react";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
+import { FilterMenuButton } from "@/components/filters/FilterMenuButton";
+import { FilterMenuDropdown } from "@/components/filters/FilterMenuDropdown";
+import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
-import {
-  createDefaultInteractionColumns,
-  type InteractionColumnConfig,
-  type InteractionSortOrder,
-  InteractionsTableV2,
-} from "@/components/interactions/InteractionsTableV2";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
+import { ShellScrollLoadMore } from "@/components/shell/ShellScrollLoadMore";
+import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { calendarParamFromPicker } from "@/lib/interactions/interactionListRange";
+import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
 import { useContactsSelectableListQuery } from "@/lib/query/hooks/useContacts";
 import {
@@ -51,81 +50,114 @@ import {
   useDeleteInteractionMutation,
   useInteractionsInfiniteQuery,
 } from "@/lib/query/hooks/useInteractions";
+import {
+  parseInteractionsListParams,
+  sameInteractionsTimelineFilter,
+  timelineFilterFromParsed,
+} from "@/lib/query/interactionsListParams";
 import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
 import { openNewActivityModal } from "./components/NewActivityModal";
+
+type ActivityParticipantRef = string | InteractionParticipant;
+
+function InteractionsSearchInput({
+  initialValue,
+  loading,
+  onChange,
+  placeholder,
+}: {
+  initialValue: string;
+  loading: boolean;
+  onChange: (value: string) => void;
+  placeholder: string;
+}) {
+  const [value, setValue] = useState(initialValue);
+  return (
+    <TextInput
+      aria-label={placeholder}
+      leftSection={<IconSearch size={16} />}
+      loading={loading}
+      onChange={(event) => {
+        const next = event.currentTarget.value;
+        setValue(next);
+        onChange(next);
+      }}
+      placeholder={placeholder}
+      style={{ flex: 1 }}
+      value={value}
+    />
+  );
+}
 
 export function InteractionsClient() {
   const t = useInteractionsPageTranslations();
   const tCommon = useCommonTranslations();
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const parsed = parseInteractionsListParams({
+    end_date: searchParams.get("end_date"),
+    search: searchParams.get("search"),
+    start_date: searchParams.get("start_date"),
+  });
+  const requestedFilter = timelineFilterFromParsed(parsed);
+  const [listFilter, setListFilter] = useState(requestedFilter);
+  if (!parsed.invalidRange && !sameInteractionsTimelineFilter(listFilter, requestedFilter)) {
+    setListFilter(requestedFilter);
+  }
+  const urlSearch = parsed.search ?? "";
+  const [isSearchPending, startSearchTransition] = useTransition();
+  const [dateFilterOpened, setDateFilterOpened] = useState(false);
   const { data: contactsData } = useContactsSelectableListQuery(SELECTABLE_CONTACTS);
   const {
     data: interactionsData,
     fetchNextPage,
     hasNextPage,
+    isError,
+    isFetching,
     isFetchingNextPage,
-  } = useInteractionsInfiniteQuery();
+    isFetchNextPageError,
+    refetch,
+  } = useInteractionsInfiniteQuery(listFilter);
   const contactsHasMore = contactsData?.pagination.hasMore ?? false;
   const contacts = contactsData?.contacts ?? [];
   const activities = interactionsData?.pages.flatMap((page) => page.activities) ?? [];
   const hasMore = hasNextPage ?? false;
   const deleteInteractionMutation = useDeleteInteractionMutation();
   const createInteractionMutation = useCreateInteractionMutation();
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [searchValue, setSearchValue] = useState("");
-  const [isSearchLoading, setIsSearchLoading] = useState(false);
-  // Debounced: SearchInput owns its own input state; this only fires the
-  // expensive client-side filter in InteractionsTableV2 after the user pauses.
-  const debouncedSetSearchValue = useDebouncedCallback((value: string) => {
-    setSearchValue(value);
-    setIsSearchLoading(false);
-  }, DEBOUNCE_MS.localFilter);
 
   useHotkeys([
     [HOTKEYS.LOG_INTERACTION, () => openNewActivityModal({ contacts, contactsHasMore })],
     [HOTKEYS.FIND_PERSON, () => peopleSearchActions.open()],
   ]);
 
-  const handleSearchChange = (value: string) => {
-    setIsSearchLoading(true);
-    debouncedSetSearchValue(value);
-  };
-  const [viewMode, setViewMode] = useState<"interactions" | "table">("interactions");
-  const [sortOrder, setSortOrder] = useState<InteractionSortOrder>("dateDesc");
-  const [columns, setColumns] = useState<InteractionColumnConfig[]>(() =>
-    createDefaultInteractionColumns({
-      date: t("TableColumnDate"),
-      notes: t("TableColumnNotes"),
-      participants: t("TableColumnParticipants"),
-      title: t("TableColumnTitle"),
-      type: t("TableColumnType"),
-    }),
-  );
-
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
-  const resolveParticipants = (activity: Activity): Contact[] => {
-    return (activity.participants || [])
-      .map((participant: ActivityParticipantRef) => {
-        const participantId = typeof participant === "string" ? participant : participant.id;
-        const knownContact = contactsById.get(participantId);
+  const resolveParticipants = (activity: Activity): PersonPreview[] => {
+    return (activity.participants || []).flatMap((participant: ActivityParticipantRef) => {
+      const participantId = typeof participant === "string" ? participant : participant.id;
+      const knownContact = contactsById.get(participantId);
 
-        if (knownContact) {
-          return knownContact;
-        }
+      if (knownContact) {
+        return [knownContact];
+      }
 
-        if (!participantId || typeof participant === "string") {
-          return null;
-        }
+      if (!participantId || typeof participant === "string") {
+        return [];
+      }
 
-        return {
+      return [
+        {
           avatar: participant.avatar || null,
           firstName: participant.firstName || t("UnknownPerson"),
+          headline: participant.headline,
           id: participantId,
           lastName: participant.lastName || null,
-          middleName: null,
-        } as Contact;
-      })
-      .filter((participant): participant is Contact => Boolean(participant));
+          location: participant.location,
+          middleName: participant.middleName,
+        },
+      ];
+    });
   };
 
   const handleActivityClick = (activity: Activity) => {
@@ -213,70 +245,62 @@ export function InteractionsClient() {
     }
   };
 
-  const handleDeleteSelected = (activities: Activity[]) => {
-    if (activities.length === 0) {
-      return;
-    }
-
-    openStandardConfirmModal({
-      cancelLabel: t("Cancel"),
-      confirmColor: "red",
-      confirmLabel: t("DeleteAction"),
-      message: (
-        <Text size="sm">{t("DeleteSelectedConfirmMessage", { count: activities.length })}</Text>
-      ),
-      onConfirm: async () => {
-        const loadingNotificationId = notifications.show({
-          ...loadingNotificationTemplate({
-            description: t("DeletingSelectedDescription", { count: activities.length }),
-            title: t("DeletingSelectedTitle"),
-          }),
-        });
-
-        try {
-          await Promise.all(
-            activities.map((item) => deleteInteractionMutation.mutateAsync(item.id)),
-          );
-
-          notifications.update({
-            ...successNotificationTemplate({
-              description: t("ActivitiesDeleted", { count: activities.length }),
-              title: t("SuccessTitle"),
-            }),
-            id: loadingNotificationId,
-          });
-
-          setSelectedIds(new Set());
-        } catch {
-          notifications.update({
-            ...errorNotificationTemplate({
-              description: t("DeleteFailed"),
-              title: t("ErrorTitle"),
-            }),
-            id: loadingNotificationId,
-          });
-        }
-      },
-      title: (
-        <ModalTitle
-          icon={<IconTrash size={20} />}
-          isDangerous={true}
-          text={t("DeleteSelectedConfirmTitle", { count: activities.length })}
-        />
-      ),
-    });
-  };
-
   const sortedInteractionsActivities = [...activities].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
-  const handleLoadMore = () => {
-    void fetchNextPage();
+  const replaceParams = (mutate: (params: URLSearchParams) => void) => {
+    const params = new URLSearchParams(searchParams);
+    mutate(params);
+    router.replace(routeWithQuery(pathname, params));
   };
-  if (!interactionsData) {
-    return null;
+  const commitSearch = useDebouncedCallback((value: string) => {
+    const trimmed = value.trim();
+    startSearchTransition(() => {
+      replaceParams((params) => {
+        if (trimmed) {
+          params.set("search", trimmed);
+        } else {
+          params.delete("search");
+        }
+      });
+    });
+  }, DEBOUNCE_MS.search);
+  const writeDate = (key: "end_date" | "start_date", value: string | undefined) => {
+    replaceParams((params) => {
+      if (value) {
+        params.set(key, value);
+      } else {
+        params.delete(key);
+      }
+    });
+  };
+  const urlStart = parsed.start_date ?? null;
+  const urlEnd = parsed.end_date ?? null;
+  const [startDate, setStartDate] = useState(urlStart);
+  const [endDate, setEndDate] = useState(urlEnd);
+  const [seenUrlStart, setSeenUrlStart] = useState(urlStart);
+  const [seenUrlEnd, setSeenUrlEnd] = useState(urlEnd);
+  if (seenUrlStart !== urlStart) {
+    setSeenUrlStart(urlStart);
+    setStartDate(urlStart);
   }
+  if (seenUrlEnd !== urlEnd) {
+    setSeenUrlEnd(urlEnd);
+    setEndDate(urlEnd);
+  }
+  const dateFilterActive = Boolean(startDate || endDate);
+  const resetDateFilter = () => {
+    setStartDate(null);
+    setEndDate(null);
+    replaceParams((params) => {
+      params.delete("start_date");
+      params.delete("end_date");
+    });
+  };
+  const filteredEmpty =
+    activities.length === 0 &&
+    Boolean(listFilter.search || listFilter.start_date || listFilter.end_date);
 
   return (
     <PageWrapper>
@@ -310,110 +334,122 @@ export function InteractionsClient() {
               </Button>
             </Tooltip>
           }
-          secondaryAction={
-            <SegmentedControl
-              data={[
-                {
-                  label: (
-                    <Group gap={6} wrap="nowrap">
-                      <IconTimelineEventText size={14} />
-                      <span>{t("TimelineView")}</span>
-                    </Group>
-                  ),
-                  value: "interactions",
-                },
-                {
-                  label: (
-                    <Group gap={6} wrap="nowrap">
-                      <IconTable size={14} />
-                      <span>{t("TableView")}</span>
-                    </Group>
-                  ),
-                  value: "table",
-                },
-              ]}
-              onChange={(value) => setViewMode(value as "interactions" | "table")}
-              value={viewMode}
-            />
-          }
           title={t("PageTitle")}
         />
 
-        {viewMode === "interactions" ? (
-          <Stack gap="md">
-            <InteractionsList
-              activities={sortedInteractionsActivities}
-              deleteLabel={t("DeleteAction")}
-              duplicateLabel={t("DuplicateAction")}
-              editLabel={t("EditAction")}
-              onDelete={handleDelete}
-              onDuplicate={handleDuplicate}
-              onEdit={handleActivityClick}
-              onOpen={handleActivityClick}
-              resolveParticipants={resolveParticipants}
+        <Stack className="mx-auto w-full max-w-2xl" gap="md">
+          <Group gap="sm" wrap="nowrap">
+            <InteractionsSearchInput
+              initialValue={urlSearch}
+              loading={isSearchPending || (isFetching && !isFetchingNextPage)}
+              onChange={commitSearch}
+              placeholder={t("SearchPlaceholder")}
             />
-            {hasMore ? (
+            <Popover onChange={setDateFilterOpened} position="bottom-end">
+              <Popover.Target>
+                <FilterMenuButton isActive={dateFilterActive} opened={dateFilterOpened}>
+                  {t("DateFilter")}
+                </FilterMenuButton>
+              </Popover.Target>
+              <FilterMenuDropdown
+                onReset={resetDateFilter}
+                resetDisabled={!dateFilterActive}
+                resetLabel={t("ResetFilters")}
+              >
+                <Group align="flex-start" gap="sm" wrap="nowrap">
+                  <DatePickerWithPresets
+                    clearable
+                    label={t("StartDateLabel")}
+                    maxDate={endDate ?? undefined}
+                    onChange={(value) => {
+                      const next = calendarParamFromPicker(value) ?? null;
+                      setStartDate(next);
+                      writeDate("start_date", next ?? undefined);
+                    }}
+                    placeholder={t("PickDate")}
+                    popoverProps={{ withinPortal: false }}
+                    value={startDate}
+                    valueFormat="YYYY-MM-DD"
+                    w={180}
+                  />
+                  <DatePickerWithPresets
+                    clearable
+                    label={t("EndDateLabel")}
+                    minDate={startDate ?? undefined}
+                    onChange={(value) => {
+                      const next = calendarParamFromPicker(value) ?? null;
+                      setEndDate(next);
+                      writeDate("end_date", next ?? undefined);
+                    }}
+                    placeholder={t("PickDate")}
+                    popoverProps={{ withinPortal: false }}
+                    value={endDate}
+                    valueFormat="YYYY-MM-DD"
+                    w={180}
+                  />
+                </Group>
+                {parsed.invalidRange ? (
+                  <Text c="red" size="sm">
+                    {t("InvalidDateRange")}
+                  </Text>
+                ) : null}
+              </FilterMenuDropdown>
+            </Popover>
+          </Group>
+          {!interactionsData ? (
+            isError ? (
+              <ShellScrollLoadMore
+                errorLabel={t("LoadMoreError")}
+                fallbackLabel={t("LoadMoreBatch")}
+                hasMore
+                isFetchingNextPage={false}
+                isFetchNextPageError
+                onLoadMore={() => {
+                  void refetch();
+                }}
+                retryLabel={t("LoadMoreRetry")}
+              />
+            ) : (
               <Center>
-                <Button loading={isFetchingNextPage} onClick={handleLoadMore} variant="light">
-                  {t("LoadMoreBatch")}
-                </Button>
+                <Loader />
               </Center>
-            ) : null}
-          </Stack>
-        ) : (
-          <Paper p="md" radius="md" shadow="sm" withBorder>
-            <InteractionsTableV2
-              activities={activities}
-              columns={columns}
-              hasMore={hasMore}
-              labels={{
-                actionsAriaLabel: t("TableColumnActions"),
-                columns: {
-                  date: t("TableColumnDate"),
-                  notes: t("TableColumnNotes"),
-                  participants: t("TableColumnParticipants"),
-                  title: t("TableColumnTitle"),
-                  type: t("TableColumnType"),
-                },
-                deleteLabel: t("DeleteAction"),
-                deleteSelectedAction: t("DeleteSelectedAction"),
-                duplicateLabel: t("DuplicateAction"),
-                editLabel: t("EditAction"),
-                hiddenColumnsSection: t("HiddenColumnsSection"),
-                noHiddenColumns: t("NoHiddenColumns"),
-                noInteractionsFound: t("NoActivitiesFound"),
-                noInteractionsMatchSearch: t("NoActivitiesFiltered"),
-                noVisibleColumns: t("NoVisibleColumns"),
-                searchPlaceholder: t("SearchPlaceholder"),
-                selectedCountTemplate: t("SelectedCountTemplate"),
-                sortButton: t("SortButton"),
-                sortDateNewest: t("SortDateNewest"),
-                sortDateOldest: t("SortDateOldest"),
-                sortParticipantsLeast: t("SortParticipantsLeast"),
-                sortParticipantsMost: t("SortParticipantsMost"),
-                totalCountTemplate: t("TotalCountTemplate"),
-                visibleColumnsButton: t("VisibleColumnsButton"),
-                visibleColumnsSection: t("VisibleColumnsSection"),
-              }}
-              loadMoreLabel={t("LoadMoreBatch")}
-              loadMoreLoading={isFetchingNextPage}
-              onColumnsChange={setColumns}
-              onDelete={handleDelete}
-              onDeleteSelected={handleDeleteSelected}
-              onDuplicate={handleDuplicate}
-              onEdit={handleActivityClick}
-              onLoadMore={handleLoadMore}
-              onSearchChange={handleSearchChange}
-              onSelectionChange={setSelectedIds}
-              onSortChange={setSortOrder}
-              resolveParticipants={resolveParticipants}
-              searchLoading={isSearchLoading}
-              searchValue={searchValue}
-              selectedIds={selectedIds}
-              sortOrder={sortOrder}
-            />
-          </Paper>
-        )}
+            )
+          ) : (
+            <>
+              {filteredEmpty ? (
+                <Text c="dimmed" size="sm" ta="center">
+                  {listFilter.search
+                    ? t("NoMatchingSearch", { search: listFilter.search })
+                    : t("NoMatchingActivities")}
+                </Text>
+              ) : (
+                <InteractionsList
+                  actionsLabel={t("TableColumnActions")}
+                  activities={sortedInteractionsActivities}
+                  deleteLabel={t("DeleteAction")}
+                  duplicateLabel={t("DuplicateAction")}
+                  editLabel={t("EditAction")}
+                  onDelete={handleDelete}
+                  onDuplicate={handleDuplicate}
+                  onEdit={handleActivityClick}
+                  onOpen={handleActivityClick}
+                  resolveParticipants={resolveParticipants}
+                />
+              )}
+              <ShellScrollLoadMore
+                errorLabel={t("LoadMoreError")}
+                fallbackLabel={t("LoadMoreBatch")}
+                hasMore={hasMore}
+                isFetchingNextPage={isFetchingNextPage}
+                isFetchNextPageError={isFetchNextPageError}
+                onLoadMore={() => {
+                  void fetchNextPage();
+                }}
+                retryLabel={t("LoadMoreRetry")}
+              />
+            </>
+          )}
+        </Stack>
       </Stack>
     </PageWrapper>
   );

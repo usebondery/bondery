@@ -2,7 +2,8 @@
 
 import { ScrollArea } from "@mantine/core";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { ShellScrollViewportProvider } from "./ShellScrollViewportContext";
 
 /** Settings (and any hashed page) may paint the target after the route effect. */
 const HASH_TARGET_RETRY_MS = 2000;
@@ -43,6 +44,11 @@ export function AppShellMainScrollArea({
 }: AppShellMainScrollAreaProps) {
   const pathname = usePathname();
   const viewportRef = useRef<HTMLDivElement>(null);
+  const [viewport, setViewport] = useState<HTMLDivElement | null>(null);
+  const setViewportNode = useCallback((node: HTMLDivElement | null) => {
+    viewportRef.current = node;
+    setViewport(node);
+  }, []);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -97,9 +103,12 @@ export function AppShellMainScrollArea({
       scrollbars="y"
       styles={{
         content: {
+          boxSizing: "border-box",
           display: "flex",
           flexDirection: "column",
-          minHeight: "100%",
+          ...(scrollLocked
+            ? { height: "100%", minHeight: 0, overflow: "hidden" }
+            : { minHeight: "100%" }),
           padding: "var(--mantine-spacing-md)",
         },
         root: {
@@ -112,9 +121,9 @@ export function AppShellMainScrollArea({
         },
       }}
       type="auto"
-      viewportRef={viewportRef}
+      viewportRef={setViewportNode}
     >
-      {children}
+      <ShellScrollViewportProvider viewport={viewport}>{children}</ShellScrollViewportProvider>
     </ScrollArea>
   );
 }

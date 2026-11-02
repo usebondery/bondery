@@ -34,7 +34,7 @@ export function createGroupTools(ctx: DomainContext) {
     }),
     delete_group: chatTool(ctx, {
       description:
-        "Delete a group. Does not delete the people in it. Confirm with the user in the thread before calling.",
+        "Delete a group. Does not delete the people in it. The app shows a confirm before this runs.",
       execute: (args) => executeDeleteGroup(ctx, args),
       inputSchema: deleteGroupInputSchema,
     }),

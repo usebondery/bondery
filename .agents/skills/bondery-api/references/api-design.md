@@ -145,7 +145,15 @@ The collection key varies (`contacts`, `interactions`, `sessions`, `messages`, `
 - People lists use fuzzy `search_people_ids` RPC via `countSearchPeopleIds()` in `apps/api/src/lib/data/search.ts`
 - Geocode suggest uses `search` (required, min 3 chars) — separate from people list search
 
-**Endpoints with `search`:** `GET /contacts`, `GET /contacts/select`, `GET /groups/:id/contacts`, `GET /tags/:id/contacts` (via `peopleListQuerySchema`).
+**Endpoints with `search`:** `GET /contacts`, `GET /contacts/select`, `GET /groups/:id/contacts`, `GET /tags/:id/contacts` (via `peopleListQuerySchema`). `GET /interactions` uses `interactionsListQuerySchema`: optional `search`, plus inclusive `start_date` and `end_date` (ISO datetime). Sort stays `dateDesc`. There is no `sort` param.
+
+### Date bounds
+
+List date filters use `start_date` and `end_date`. Do not use `start`, `end`, `from`, or `to`. Do not add an alias.
+
+`GET /interactions` treats both bounds as inclusive on `interaction.date`. `start_date` after `end_date` is the existing Zod 400. The message is `start_date must not be after end_date`. There is no new error code.
+
+The interactions page URL uses the same names. The values are `YYYY-MM-DD`. The client converts `start_date` to local midnight and `end_date` to local `23:59:59.999` before the request.
 
 ### Sort
 
@@ -169,7 +177,6 @@ interactionAsc | interactionDesc | createdAtAsc | createdAtDesc
 |----------|-------------|-------|
 | `GET /groups` | `previewListQuerySchema` | `previewLimit` only |
 | `GET /tags` | `previewListQuerySchema` | `previewLimit` only |
-| `GET /interactions` | `interactionsListQuerySchema` | `contactId` filter; pagination only |
 | `GET /chat/sessions` | `paginationQuerySchema` | Server sorts `updatedAt desc` |
 | `GET /sync/pull` | `syncPullQuerySchema` | `since`, `limit`, `waitMs` |
 

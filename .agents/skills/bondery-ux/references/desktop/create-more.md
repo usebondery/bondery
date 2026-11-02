@@ -42,7 +42,7 @@ Default is **off**. Do not persist the switch. Every time the modal opens, it st
 
 Show the switch only when `createMoreLabel` and `onCreateMoreChange` are both passed.
 
-Layout: left cluster = switch, right cluster = Cancel + primary (`justify="space-between"`). Do not render the switch when `dangerLabel`/`onDanger` or `backLabel`/`onBack` are set (create vs edit/wizard). Single-action full-width footers ignore Create more props.
+Layout below `sm`: switch on its own row above Cancel + primary. Cancel and primary share that row at equal width. From `sm` up: left cluster = switch, right cluster = Cancel + primary (`justify="space-between"`). Do not render the switch when `dangerLabel`/`onDanger` or `backLabel`/`onBack` are set (create vs edit/wizard). Single-action full-width footers ignore Create more props.
 
 Pass `createMoreDisabled={isBlocking}` so the switch matches other controls during submit. See [modals.md](./modals.md#no-dismiss-during-blocking-state).
 

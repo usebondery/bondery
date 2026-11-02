@@ -59,6 +59,7 @@ import {
   linkedInDataUpsertResponseSchema,
   mapAddressPinsResponseSchema,
   mapPinsResponseSchema,
+  relationshipGraphResponseSchema,
   updateContactInputSchema,
   updateContactRelationshipInputSchema,
 } from "#entities/contact/index.js";
@@ -164,6 +165,7 @@ export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "contactsSelectableListResponseSchema", schema: contactsSelectableListResponseSchema },
   { name: "mapPinsResponseSchema", schema: mapPinsResponseSchema },
   { name: "mapAddressPinsResponseSchema", schema: mapAddressPinsResponseSchema },
+  { name: "relationshipGraphResponseSchema", schema: relationshipGraphResponseSchema },
   { name: "contactRelationshipsResponseSchema", schema: contactRelationshipsResponseSchema },
   { name: "contactRelationshipResponseSchema", schema: contactRelationshipResponseSchema },
   { name: "deleteContactsResponseSchema", schema: deleteContactsResponseSchema },

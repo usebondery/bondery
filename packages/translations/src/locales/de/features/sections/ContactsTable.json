@@ -13,6 +13,8 @@
   "EditGroupsMenu": "Gruppen bearbeiten...",
   "HiddenColumnsSection": "Ausgeblendet",
   "LoadMore": "Mehr laden",
+  "LogInteractionBulk": "Interaktion erfassen",
+  "LogInteractionSelectLoadedTooltip": "Wählen Sie bestimmte Personen. Alle auswählen umfasst Personen, die nicht geladen sind.",
   "MergeBulk": "Zusammenführen",
   "MergeExactlyTwoTooltip": "Es müssen genau zwei Kontakte ausgewählt sein.",
   "MergeMenu": "Zusammenführen...",

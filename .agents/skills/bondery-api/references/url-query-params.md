@@ -10,6 +10,8 @@ Pattern for pending UI actions: **`next_action=intended_action`**. The param nam
 |-------|-----|
 | `search` | Free-text list filter. Never `q`. |
 | `limit`, `offset` | Offset pagination only. Never cursor / `page_token` / `after_id`. |
+| `start_date`, `end_date` | Inclusive list date bounds. Never `start`, `end`, `from`, or `to`. |
+| `tag_ids` | People-list tag filter. One comma-separated value: `tag_ids=id1,id2`. |
 
 List search rules: [api-design.md](./api-design.md).
 
@@ -20,7 +22,7 @@ List search rules: [api-design.md](./api-design.md).
 | `next_action` | Pending UI action after the page loads. Read once, then strip it from the URL. |
 | `redirect` | Login return path only. Never a product-page action. |
 
-Constants: `NEXT_ACTION_PARAM`, `NEXT_ACTIONS`, `routePersonWithNextAction` in `packages/helpers/src/globals/webapp-query.ts`.
+Constants: `NEXT_ACTION_PARAM`, `NEXT_ACTIONS`, `routePersonWithNextAction`, and `TAG_IDS_QUERY_PARAM` in `packages/helpers/src/globals/webapp-query.ts`. `TAG_IDS_QUERY_PARAM` is defined next to the people-list schema and re-exported here.
 
 | Value (`intended_action`) | Effect |
 |---------------------------|--------|
@@ -67,6 +69,7 @@ Do not pass display fields (`label`, `emoji`) in the URL when the id is enough â
 ## Checklist
 
 - [ ] New list filter uses `search`, not `q`
+- [ ] List date bounds use `start_date` and `end_date`, with no alias
 - [ ] Product deep-link actions use `next_action=<snake_case>` from `NEXT_ACTIONS`
 - [ ] Login return uses `redirect` only
 - [ ] Mobile shareable filters use `group_id`, not `groupId`

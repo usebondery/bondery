@@ -141,6 +141,10 @@ export function AppShellWrapper({
   const theme = useMantineTheme();
   const isBelowSm =
     useMediaQuery(`(max-width: calc(${theme.breakpoints.sm} - 0.1px))`, false) ?? false;
+  const isGraphDesktop =
+    useMediaQuery(`(min-width: ${theme.breakpoints.sm})`, false, {
+      getInitialValueInEffect: true,
+    }) ?? false;
   const [mobileNavOpened, { close: closeMobileNav, toggle: toggleMobileNav }] =
     useDisclosure(false);
   const pendingSpotlightRef = useRef(false);
@@ -257,6 +261,7 @@ export function AppShellWrapper({
   }
 
   const isMobileNavOpen = isBelowSm && mobileNavOpened;
+  const lockGraphScroll = isGraphDesktop && pathname === WEBAPP_ROUTES.GRAPH;
 
   return (
     <DocumentTitleProvider>
@@ -325,7 +330,7 @@ export function AppShellWrapper({
                 overflow: "hidden",
               }}
             >
-              <AppShellMainScrollArea scrollLocked={isMobileNavOpen}>
+              <AppShellMainScrollArea scrollLocked={isMobileNavOpen || lockGraphScroll}>
                 {children}
               </AppShellMainScrollArea>
               <ShellMainFooterHost />

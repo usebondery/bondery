@@ -43,7 +43,7 @@ export default async function StoreShotsLayout({ children }: { children: ReactNo
         .tsqd-parent-container {
           display: none !important;
         }
-        .store-shot-timeline .max-w-md {
+        .store-shot-timeline .mantine-Paper-root {
           max-width: 100%;
         }
         [data-store-shot] .mantine-Paper-root,
@@ -74,9 +74,6 @@ export default async function StoreShotsLayout({ children }: { children: ReactNo
           color-scheme: light;
         }
         .store-shot-light-timeline .mantine-Paper-root {
-          background-color: #ffffff !important;
-        }
-        .store-shot-light-timeline .max-w-md {
           background-color: #ffffff !important;
         }
         .store-shot-light-timeline .mantine-Stack-root > div > .mantine-Text-root {

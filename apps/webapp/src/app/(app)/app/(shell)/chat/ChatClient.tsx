@@ -1,27 +1,38 @@
 // biome-ignore-all lint/nursery/useReactCompiler: chat session refs and transport read sessionId during render
 "use client";
 
-import { useChat } from "@ai-sdk/react";
-import {
-  buildApiErrorFromResponse,
-  extractApiErrorFields,
-  getUserFacingError,
-  isApiError,
-} from "@bondery/helpers/api";
+import { getUserFacingError, isApiError } from "@bondery/helpers/api";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { ActionIconButton, errorNotificationTemplate, HelpButton } from "@bondery/mantine-next";
-import { Box, Button, Group, Stack, Text, Textarea, Title } from "@mantine/core";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
+import type { ChatModelId } from "@bondery/schemas";
+import { Box } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconMessageCircle, IconSend } from "@tabler/icons-react";
+import { IconMessageCircle } from "@tabler/icons-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { DefaultChatTransport } from "ai";
+import type { UIMessage } from "ai";
 import { notFound, usePathname, useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { ShellMainFooter } from "@/components/shell/ShellMainFooter";
 import { useUserSession } from "@/components/shell/UserSessionProvider";
+import { type ChatHydratedMessage, messageSentAt } from "@/lib/api/resources/chat";
 import { useChatSessions } from "@/lib/chat/ChatSessionsContext";
+import {
+  findPendingApproval,
+  isToolPart,
+  resolveToolKind,
+  toolNameFromPart,
+} from "@/lib/chat/chatActivity";
+import {
+  DEFAULT_CHAT_MODEL_ID,
+  readChatModelPreference,
+  writeChatModelPreference,
+} from "@/lib/chat/chatModelPreference";
 import { pickRandomItems } from "@/lib/chat/pickRandomItems";
+import {
+  NEW_CHAT_VISIBLE_PROMPT_COUNT,
+  SUGGESTED_PROMPT_KEYS,
+} from "@/lib/chat/suggestedPromptKeys";
+import { useChatSession } from "@/lib/chat/useChatSession";
 import { useConfirmDeleteChatSession } from "@/lib/chat/useConfirmDeleteChatSession";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
 import { useChatPageTranslations, useCommonTranslations } from "@/lib/i18n/generated/hooks";
@@ -35,30 +46,10 @@ import {
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
 import { chatKeys } from "@/lib/query/keys";
 import { ChatSessionActionMenu } from "./components/chrome/ChatSessionActionMenu";
-import { ChatMessage } from "./components/message/ChatMessage";
+import { ChatThreadView } from "./components/chrome/ChatThreadView";
+import { ChatComposer } from "./components/composer/ChatComposer";
 import { ChatQuotaAlert } from "./components/quota/ChatQuotaAlert";
 import { ChatQuotaBadge } from "./components/quota/ChatQuotaBadge";
-
-const SUGGESTED_PROMPT_KEYS = [
-  "AddAnniversary",
-  "BirthdaysThisMonth",
-  "CoffeeWithBlake",
-  "ContactsInBerlin",
-  "ContactsInNewYork",
-  "CreateNewContact",
-  "InteractionsThisWeek",
-  "LastTalkedToSam",
-  "LogCallYesterday",
-  "NotTalkedInAWhile",
-  "OverdueFollowUps",
-  "PeopleInFamilyGroup",
-  "SameCompanyAsAlex",
-  "TaggedCollegeFriends",
-  "WhoSpeaksSpanish",
-  "WhoWorksInDesign",
-] as const;
-
-const NEW_CHAT_VISIBLE_PROMPT_COUNT = 5;
 
 function chatSessionIdFromPathname(pathname: string): string | undefined {
   const prefix = `${WEBAPP_ROUTES.CHAT}/`;
@@ -70,44 +61,22 @@ function chatSessionIdFromPathname(pathname: string): string | undefined {
   return sessionId || undefined;
 }
 
-function jsonPayloadFromTransportError(error: unknown): string {
-  let bodyText: string;
-  if (error instanceof Error) {
-    bodyText = error.message;
-  } else {
-    bodyText = String(error);
+/** True when this turn changed CRM data, live or stored. Blocks a retry. */
+function turnHasWrite(activity: ChatHydratedMessage["activity"], parts: UIMessage["parts"]) {
+  if (activity?.writeMayHaveLanded) {
+    return true;
   }
-  const jsonStart = bodyText.indexOf("{");
-  const jsonEnd = bodyText.lastIndexOf("}");
-  if (jsonStart >= 0 && jsonEnd > jsonStart) {
-    return bodyText.slice(jsonStart, jsonEnd + 1);
-  }
-  return bodyText;
-}
 
-function chatTransportErrorToApiError(error: unknown) {
-  const bodyText = jsonPayloadFromTransportError(error);
-  const fields = extractApiErrorFields(bodyText);
-  if (!fields.code) {
-    return error;
+  if ((activity?.activities ?? []).some((entry) => entry.kind === "write")) {
+    return true;
   }
-  const status =
-    fields.code === "chat_quota_exceeded" ? 403 : fields.code === "service_unavailable" ? 503 : 500;
-  return buildApiErrorFromResponse({ bodyText, status });
-}
 
-function chatQuotaResetAt(error: unknown): string | undefined {
-  const bodyText = jsonPayloadFromTransportError(error);
-  try {
-    const parsed = JSON.parse(bodyText) as {
-      error?: { details?: { resetAt?: unknown } };
-    };
-    return typeof parsed.error?.details?.resetAt === "string"
-      ? parsed.error.details.resetAt
-      : undefined;
-  } catch {
-    return undefined;
-  }
+  return parts.some(
+    (part) =>
+      isToolPart(part) &&
+      resolveToolKind(toolNameFromPart(part)) === "write" &&
+      (part as { state?: string }).state !== "approval-requested",
+  );
 }
 
 export function ChatClient() {
@@ -140,7 +109,6 @@ export function ChatClient() {
   const createChatSessionMutation = useCreateChatSessionMutation();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const messageDatesRef = useRef<Map<string, Date>>(new Map());
   const [inputValue, setInputValue] = useState("");
   const [messagesSent, setMessagesSent] = useState(0);
   // resetAt captured from a 403 response — more up-to-date than the SSR prop.
@@ -162,32 +130,48 @@ export function ChatClient() {
     );
   };
 
-  const { messages, sendMessage, status, setMessages } = useChat({
-    onError: (error) => {
-      const apiError = chatTransportErrorToApiError(error);
-
-      if (
-        (isApiError(apiError) &&
-          (apiError.code === "chat_quota_exceeded" || apiError.status === 403)) ||
-        (error instanceof Error && error.message.includes("403"))
-      ) {
-        setQuotaExceeded(true);
-        const resetAt = chatQuotaResetAt(error);
-        if (resetAt) {
-          setServerResetAt(resetAt);
-        }
-        return;
+  const chat = useChatSession({
+    getSessionId: () => sessionIdRef.current,
+    initialModelId: readChatModelPreference(routeSessionId ?? undefined),
+    onError: (error) => notifyChatErrorRef.current(error),
+    onQuotaExceeded: (resetAt) => {
+      setQuotaExceeded(true);
+      if (resetAt) {
+        setServerResetAt(resetAt);
       }
-
-      notifyChatErrorRef.current(apiError);
     },
-    transport: new DefaultChatTransport({
-      api: "/api/chat",
-      body: () => (sessionIdRef.current ? { sessionId: sessionIdRef.current } : {}),
-    }),
   });
 
+  const { messages, sendMessage, status, setMessages, stop, regenerate, addToolApprovalResponse } =
+    chat;
+  const { modelId, selectModel, turnOutcomes, withRetryIntent } = chat;
+
   const isLoading = status === "submitted" || status === "streaming";
+  const lastMessage = messages[messages.length - 1];
+  const pendingApproval =
+    lastMessage?.role === "assistant" ? findPendingApproval(lastMessage.parts) : undefined;
+  const composerLocked = isLoading || pendingApproval !== undefined;
+  const canStop = status === "submitted" || status === "streaming";
+  const hydratedById = new Map<string, ChatHydratedMessage>(
+    (hydratedMessages ?? []).map((message) => [message.id, message]),
+  );
+  const turns = messages.map((message, index) => {
+    const stored = hydratedById.get(message.id)?.activity;
+    const liveOutcome = turnOutcomes.get(message.id);
+
+    return {
+      activity: liveOutcome
+        ? {
+            activities: stored?.activities ?? [],
+            status: liveOutcome,
+            writeMayHaveLanded: stored?.writeMayHaveLanded ?? false,
+          }
+        : stored,
+      isLast: index === messages.length - 1,
+      message,
+      sentAt: messageSentAt(message),
+    };
+  });
 
   const getSessionId = () => sessionIdRef.current;
 
@@ -208,7 +192,6 @@ export function ChatClient() {
       sessionIdRef.current = undefined;
       setMessages([]);
       setInputValue("");
-      messageDatesRef.current.clear();
       return;
     }
 
@@ -223,7 +206,6 @@ export function ChatClient() {
     }
 
     setMessages(hydratedMessages ?? []);
-    messageDatesRef.current.clear();
   }, [hydratedMessages, isMessagesSuccess, routeSessionId, setMessages]);
 
   // Reset chat state when sidebar "new chat" is clicked (chatResetKey changes)
@@ -237,11 +219,20 @@ export function ChatClient() {
       setMessagesSent(0);
       setServerResetAt(null);
       setQuotaExceeded(subscriptionStatus ? !subscriptionStatus.canUseChat : false);
-      messageDatesRef.current.clear();
       sessionIdRef.current = undefined;
+      selectModel(DEFAULT_CHAT_MODEL_ID);
       setVisiblePromptKeys(pickRandomItems(SUGGESTED_PROMPT_KEYS, NEW_CHAT_VISIBLE_PROMPT_COUNT));
     }
-  }, [chatResetKey, setMessages, subscriptionStatus]);
+  }, [chatResetKey, selectModel, setMessages, subscriptionStatus]);
+
+  // Each session keeps its own model choice. A new chat starts on the default.
+  // Read only when the route changes. `selectModel` stays out of the deps so a
+  // picker change is not replaced by the stored value on the next render.
+  const selectModelRef = useRef(selectModel);
+  selectModelRef.current = selectModel;
+  useEffect(() => {
+    selectModelRef.current(readChatModelPreference(routeSessionId));
+  }, [routeSessionId]);
 
   useEffect(() => {
     if (status === "submitted" || status === "streaming") {
@@ -266,15 +257,13 @@ export function ChatClient() {
     router.replace(targetPath);
   }, [messages, pathname, queryClient, router, status]);
 
+  // Keep the newest turn in view, including while a reply streams.
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    // Stamp any newly-seen messages with the current time
-    const now = new Date();
-    for (const msg of messages) {
-      if (!messageDatesRef.current.has(msg.id)) {
-        messageDatesRef.current.set(msg.id, now);
-      }
+    if (messages.length === 0) {
+      return;
     }
+
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   function handleSuggestedPrompt(prompt: string) {
@@ -282,10 +271,66 @@ export function ChatClient() {
     inputRef.current?.focus();
   }
 
+  /** Stop the reply. The user turn and any partial answer stay in the thread. */
+  const handleStop = useCallback(() => {
+    stop();
+  }, [stop]);
+
+  // Escape stops a running reply. The textarea is disabled while a turn runs,
+  // so the listener lives on the window.
+  useEffect(() => {
+    if (!canStop) {
+      return;
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        handleStop();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [canStop, handleStop]);
+
+  const handleModelChange = (nextModelId: ChatModelId) => {
+    selectModel(nextModelId);
+
+    const activeSessionId = sessionIdRef.current;
+    if (activeSessionId) {
+      writeChatModelPreference(activeSessionId, nextModelId);
+    }
+  };
+
+  /** Resume a paused delete. The tool has not run until this point. */
+  async function handleApproval(approved: boolean) {
+    if (!pendingApproval) {
+      return;
+    }
+
+    await addToolApprovalResponse({ approved, id: pendingApproval.approvalId });
+  }
+
+  /** Ask for a new reply to the last turn. Reuses that turn and costs one message. */
+  async function handleRetry() {
+    if (composerLocked || quotaExceeded) {
+      return;
+    }
+
+    try {
+      await withRetryIntent(async () => {
+        await regenerate();
+      });
+    } catch (error) {
+      notifyChatErrorRef.current(error);
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = inputValue.trim();
-    if (!text || isLoading) {
+    if (!text || composerLocked) {
       return;
     }
 
@@ -298,13 +343,16 @@ export function ChatClient() {
         createdSessionIdRef.current = sessionId;
         sessionIdRef.current = sessionId;
         setHighlightedSessionId(sessionId);
+        writeChatModelPreference(sessionId, modelId);
       } catch (error) {
         notifyChatErrorRef.current(error);
         return;
       }
     }
 
-    sendMessage({ text });
+    // The server stamps `createdAt` when it stores the row. Live turns carry the
+    // same field so the time shows before the list is refetched.
+    sendMessage({ metadata: { createdAt: new Date().toISOString() }, text });
     setInputValue("");
   }
 
@@ -370,159 +418,64 @@ export function ChatClient() {
           <ChatQuotaBadge subscriptionStatus={adjustedSubscriptionStatus} />
         </Box>
       )}
-      <form onSubmit={handleSubmit}>
-        <Group align="flex-end" gap="sm">
-          <Textarea
-            aria-label={showNewChatHero ? t("inputPlaceholder") : t("followUpPlaceholder")}
-            autoFocus
-            autosize
-            disabled={isLoading}
-            flex={1}
-            maxRows={8}
-            minRows={1}
-            onChange={(e) => setInputValue(e.currentTarget.value)}
-            onKeyDown={(e) => {
-              if (e.key !== "Enter" || e.shiftKey || e.nativeEvent.isComposing) {
-                return;
-              }
-              e.preventDefault();
-              e.currentTarget.form?.requestSubmit();
-            }}
-            placeholder={showNewChatHero ? t("inputPlaceholder") : t("followUpPlaceholder")}
-            radius="xl"
-            ref={inputRef}
-            resize="none"
-            rightSection={
-              <ActionIconButton
-                aria-label={t("send")}
-                disabled={isLoading || !inputValue.trim()}
-                icon={<IconSend />}
-                radius="xl"
-                size="md"
-                type="submit"
-                variant="filled"
-              />
-            }
-            rightSectionWidth={42}
-            value={inputValue}
-          />
-        </Group>
-      </form>
+      <ChatComposer
+        canStop={canStop}
+        dictationResetKey={`${routeSessionId ?? "new"}:${chatResetKey}`}
+        disabled={composerLocked}
+        inputRef={inputRef}
+        isNewChat={showNewChatHero}
+        modelId={modelId}
+        onModelChange={handleModelChange}
+        onStop={handleStop}
+        onSubmit={handleSubmit}
+        setValue={setInputValue}
+        value={inputValue}
+      />
     </>
   );
+  // Retry is offered only for the last turn, and only when nothing was written.
+  // A finished reply keeps its text, so a retry needs the stored status; a
+  // stopped or failed one keeps its live parts.
+  const lastTurn = turns[turns.length - 1];
+  const retryAllowed =
+    lastTurn?.message.role === "assistant" &&
+    lastTurn.activity?.status !== "complete" &&
+    !turnHasWrite(lastTurn.activity, lastTurn.message.parts);
 
-  const suggestedPromptButtons = (
-    <Group gap="sm" justify="center" wrap="wrap">
-      {suggestedPrompts.map((prompt) => (
-        <Button
-          key={prompt}
-          onClick={() => handleSuggestedPrompt(prompt)}
-          radius="xl"
-          size="sm"
-          variant="light"
-        >
-          {prompt}
-        </Button>
-      ))}
-    </Group>
+  const header = (
+    <PageHeader
+      action={
+        routeSessionId ? (
+          <ChatSessionActionMenu onDelete={() => confirmDeleteChatSession(routeSessionId)} />
+        ) : undefined
+      }
+      helpDoc="concepts.chat"
+      helpLabel={t("description")}
+      icon={IconMessageCircle}
+      title={pageHeaderTitle}
+    />
   );
-
-  if (showNewChatHero) {
-    return (
-      <Box
-        style={{
-          display: "flex",
-          flex: 1,
-          flexDirection: "column",
-          height: "100%",
-          minHeight: 0,
-          overflow: "hidden",
-        }}
-      >
-        <Stack
-          align="stretch"
-          gap="lg"
-          justify="center"
-          px="xl"
-          py="xl"
-          style={{
-            flex: 1,
-            margin: "0 auto",
-            maxWidth: 800,
-            width: "100%",
-          }}
-        >
-          <Group gap="sm" justify="center" wrap="nowrap">
-            <Title order={2} ta="center">
-              {t("heroPrompt")}
-            </Title>
-            <HelpButton doc="concepts.chat" label={t("description")} />
-          </Group>
-          {composer}
-          {!quotaExceeded ? (
-            <Stack gap="sm">
-              <Text c="dimmed" size="sm" ta="center">
-                {t("tryAskingMe")}
-              </Text>
-              {suggestedPromptButtons}
-            </Stack>
-          ) : null}
-        </Stack>
-      </Box>
-    );
-  }
 
   return (
-    <>
-      <Box p="xl" pb="md">
-        <Stack gap="xl">
-          <PageHeader
-            action={
-              routeSessionId ? (
-                <ChatSessionActionMenu onDelete={() => confirmDeleteChatSession(routeSessionId)} />
-              ) : undefined
-            }
-            helpDoc="concepts.chat"
-            helpLabel={t("description")}
-            icon={IconMessageCircle}
-            title={pageHeaderTitle}
-          />
-          <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>
-            <Stack gap="md">
-              {messages.map((message) => (
-                <ChatMessage
-                  key={message.id}
-                  message={message}
-                  sentAt={messageDatesRef.current.get(message.id)}
-                  userAvatarUrl={userAvatarUrl}
-                  userName={userName}
-                />
-              ))}
-              {isLoading && messages[messages.length - 1]?.role === "user" && (
-                <Box pl="md">
-                  <Text c="dimmed" fs="italic" size="sm">
-                    {t("thinking")}
-                  </Text>
-                </Box>
-              )}
-            </Stack>
-            <div ref={messagesEndRef} />
-          </Box>
-        </Stack>
-      </Box>
-      <ShellMainFooter>
-        <Box
-          px="xl"
-          py="md"
-          style={{
-            backgroundColor: "var(--mantine-color-body)",
-            paddingBottom: "calc(var(--mantine-spacing-md) + env(safe-area-inset-bottom, 0px))",
-            paddingInline: "calc(var(--mantine-spacing-md) + var(--mantine-spacing-xl))",
-          }}
-        >
-          <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>{composer}</Box>
-        </Box>
-      </ShellMainFooter>
-    </>
+    <ChatThreadView
+      composer={composer}
+      composerLocked={composerLocked}
+      header={header}
+      helpLabel={t("description")}
+      heroPrompt={t("heroPrompt")}
+      isLoading={isLoading}
+      onApproval={(approved) => void handleApproval(approved)}
+      onRetry={() => void handleRetry()}
+      onSuggestedPrompt={handleSuggestedPrompt}
+      pendingApproval={pendingApproval !== undefined}
+      quotaExceeded={quotaExceeded}
+      retryAllowed={retryAllowed}
+      showNewChatHero={showNewChatHero}
+      suggestedPrompts={suggestedPrompts}
+      threadEndRef={messagesEndRef}
+      turns={turns}
+      userAvatarUrl={userAvatarUrl}
+      userName={userName}
+    />
   );
 }

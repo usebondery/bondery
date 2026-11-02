@@ -34,8 +34,11 @@ export const interactionTypeSchema: z.ZodType<InteractionType> = z.enum([
 export const interactionParticipantSchema: z.ZodType<InteractionParticipant> = z.object({
   avatar: z.string().nullable(),
   firstName: z.string(),
+  headline: z.string().nullable(),
   id: z.string(),
   lastName: z.string().nullable(),
+  location: z.string().nullable(),
+  middleName: z.string().nullable(),
   updatedAt: updatedAtSchema.optional(),
 });
 
@@ -81,7 +84,7 @@ const interactionDetailSchema = z
     date: createdAtSchema,
     description: z.string().nullable(),
     id: z.string(),
-    participants: z.array(z.object({}).passthrough()),
+    participants: z.array(interactionParticipantSchema),
     title: z.string().nullable(),
     type: z.string(),
   })

@@ -41,6 +41,12 @@ create index if not exists idx_people_middle_name_trgm
 -- ---------------------------------------------------------------------------
 -- Search
 -- ---------------------------------------------------------------------------
+-- CREATE OR REPLACE cannot change a parameter list. A new parameter creates an
+-- overload instead, and default arguments then make every call ambiguous.
+-- Drop the previous signatures before recreating.
+
+drop function if exists search_people_ids(uuid, text, uuid, uuid, boolean, real, int, int);
+drop function if exists count_search_people_ids(uuid, text, uuid, uuid, boolean, real);
 
 create or replace function search_people_ids(
   p_user_id uuid,
@@ -50,7 +56,8 @@ create or replace function search_people_ids(
   p_keep_in_touch boolean default null,
   p_threshold real default 0.3,
   p_limit int default 50,
-  p_offset int default 0
+  p_offset int default 0,
+  p_tag_ids uuid[] default null
 )
 returns table (id uuid, rank real)
 language sql
@@ -77,7 +84,12 @@ as $$
   where p.user_id = p_user_id
     and coalesce(p.myself, false) is not true
     and (p_group_id is null or exists (select 1 from people_groups pg where pg.person_id = p.id and pg.group_id = p_group_id))
-    and (p_tag_id is null or exists (select 1 from people_tags pt where pt.person_id = p.id and pt.tag_id = p_tag_id))
+    and ((p_tag_ids is null and p_tag_id is null)
+         or exists (
+           select 1 from people_tags pt
+           where pt.person_id = p.id
+             and pt.tag_id = any(coalesce(p_tag_ids, array[p_tag_id]))
+         ))
     and (
       p_keep_in_touch is not true
       or (p.keep_frequency_days is not null
@@ -100,13 +112,14 @@ create or replace function count_search_people_ids(
   p_group_id uuid default null,
   p_tag_id uuid default null,
   p_keep_in_touch boolean default null,
-  p_threshold real default 0.3
+  p_threshold real default 0.3,
+  p_tag_ids uuid[] default null
 )
 returns int
 language sql
 stable
 as $$
-  select count(*)::int from search_people_ids(p_user_id, p_query, p_group_id, p_tag_id, p_keep_in_touch, p_threshold, 2147483647, 0);
+  select count(*)::int from search_people_ids(p_user_id, p_query, p_group_id, p_tag_id, p_keep_in_touch, p_threshold, 2147483647, 0, p_tag_ids);
 $$;
 
 -- ---------------------------------------------------------------------------

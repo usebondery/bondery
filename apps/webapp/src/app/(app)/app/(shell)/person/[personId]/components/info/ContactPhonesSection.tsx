@@ -5,8 +5,9 @@ import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/help
 import {
   ActionIconButton,
   ActionIconLink,
+  DescribedSelect,
+  type DescribedSelectOption,
   successNotificationTemplate,
-  TypePicker,
 } from "@bondery/mantine-next";
 import {
   type ContactType,
@@ -37,7 +38,7 @@ interface ContactPhonesSectionProps {
   onPhonesChange: (phones: PhoneEntry[]) => void;
   onSave: (payload?: { phones?: PhoneEntry[] }) => void;
   phones: PhoneEntry[];
-  phoneTypeOptions: Array<{ emoji: string; label: string; value: string }>;
+  phoneTypeOptions: DescribedSelectOption[];
   savingField: string | null;
   showSchemaNotification: (message?: string) => void;
 }
@@ -210,10 +211,15 @@ export function ContactPhonesSection({
               value={phone.value}
             />
 
-            <TypePicker
-              ariaLabel={text.typeLabel}
+            <DescribedSelect
+              aria-label={text.typeLabel}
               data={phoneTypeOptions}
-              onChange={(value) => handlePhoneTypeChange(index, value as ContactType)}
+              onChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                handlePhoneTypeChange(index, value as ContactType);
+              }}
               size="sm"
               style={{ flex: "0 0 110px" }}
               value={phone.type}
@@ -328,16 +334,19 @@ export function ContactPhonesSection({
               value={draftPhone.value}
             />
 
-            <TypePicker
-              ariaLabel={text.typeLabel}
+            <DescribedSelect
+              aria-label={text.typeLabel}
               data={phoneTypeOptions}
               disabled={savingField === "phones"}
-              onChange={(value) =>
+              onChange={(value) => {
+                if (!value) {
+                  return;
+                }
                 setDraftPhone((previous) => ({
                   ...previous,
-                  type: (value as ContactType) || "home",
-                }))
-              }
+                  type: value as ContactType,
+                }));
+              }}
               size="sm"
               style={{ flex: "0 0 110px" }}
               value={draftPhone.type}

@@ -1,7 +1,11 @@
 "use client";
 
-import { TELEPHONE_PREFIX_OPTIONS } from "@bondery/helpers/phone";
 import { Group, Select } from "@mantine/core";
+import {
+  filterTelephonePrefixOptions,
+  findTelephonePrefixSelectOption,
+  TELEPHONE_PREFIX_SELECT_DATA,
+} from "@/lib/phone/telephonePrefixSelect";
 
 interface ContactInfoPrefixSelectProps {
   ariaLabel?: string;
@@ -16,20 +20,21 @@ export function ContactInfoPrefixSelect({
   style,
   ariaLabel,
 }: ContactInfoPrefixSelectProps) {
-  const selected = TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value);
+  const selected = findTelephonePrefixSelectOption(value);
 
   return (
     <Select
       aria-label={ariaLabel}
-      data={TELEPHONE_PREFIX_OPTIONS}
+      data={TELEPHONE_PREFIX_SELECT_DATA}
+      filter={filterTelephonePrefixOptions}
       leftSection={<span className={`fi fi-${selected?.flag || "us"}`} />}
       onChange={(val) => onChange(val || "+1")}
       renderOption={({ option }) => {
-        const country = TELEPHONE_PREFIX_OPTIONS.find((item) => item.value === option.value);
+        const prefixOption = findTelephonePrefixSelectOption(option.value);
         return (
           <Group gap="xs">
-            <span className={`fi fi-${country?.flag || "us"}`} />
-            <span>{option.value}</span>
+            <span className={`fi fi-${prefixOption?.flag || "us"}`} />
+            <span>{option.label}</span>
           </Group>
         );
       }}

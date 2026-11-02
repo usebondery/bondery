@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     .filter((page) => !isUnpublishedChangelogSlug(page.slugs))
     .map((page) => ({
       changeFrequency: "weekly" as const,
-      lastModified: page.data.lastModified ? new Date(page.data.lastModified) : now,
+      lastModified: now,
       priority: 0.6,
       url: `${origin}${page.url}`,
     }));

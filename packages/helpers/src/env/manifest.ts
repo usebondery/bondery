@@ -1310,6 +1310,8 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     targets: [t("mobile")],
   },
 
+  // --- Ops (build-time only) ---
+
   // --- Local dev (API boot only; not used in Compose pre_start) ---
   {
     canonical: "BONDERY_DEV_SKIP_RELEASE_MIGRATE",

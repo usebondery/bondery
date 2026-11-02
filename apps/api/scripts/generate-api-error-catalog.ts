@@ -175,7 +175,7 @@ function httpStatusFor(code: string, meta: CodeMeta): number {
   ) {
     return 401;
   }
-  if (code === "admin_required" || code.includes("FORBIDDEN") || code === "chat_quota_exceeded") {
+  if (code.includes("FORBIDDEN") || code === "chat_quota_exceeded") {
     return 403;
   }
   if (code === "api_key_method_forbidden" || code === "api_key_route_forbidden") {

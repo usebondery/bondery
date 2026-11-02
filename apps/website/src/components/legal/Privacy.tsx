@@ -64,9 +64,10 @@ const subprocessors = [
   {
     location: "",
     name: "OpenStreetMap",
-    notes: "Map tiles are loaded directly in your browser when you use the map view.",
+    notes:
+      "Map tiles load via OpenFreeMap in your browser when you use the map view. OpenStreetMap remains the map data and copyright source.",
     privacy: "https://wiki.osmfoundation.org/wiki/Privacy_Policy",
-    useCase: "Map tiles",
+    useCase: "Map data and copyright",
   },
 ];
 
@@ -106,7 +107,7 @@ function _BulletList({ items }: { items: ReactNode[] }) {
 
 export function Privacy() {
   return (
-    <LegalDocumentLayout lastUpdated="August 18, 2026" title="Privacy Policy">
+    <LegalDocumentLayout lastUpdated="November 2, 2026" title="Privacy Policy">
       <Text mb="lg">
         {LEGAL_ENTITY.legalName}, EUID: {LEGAL_ENTITY.euid} (&quot;Bondery,&quot; &quot;we,&quot;
         &quot;us,&quot; or &quot;our&quot;) respects the privacy of its users (&quot;User,&quot;
@@ -270,6 +271,19 @@ export function Privacy() {
         We do not process biometric data. We do not access your social media accounts directly — any
         browser extension functionality only reads publicly visible page content that you explicitly
         choose to import.
+      </Text>
+
+      <Title mb="sm" mt="lg" order={3}>
+        i) Voice Input
+      </Title>
+      <Text mb="lg">
+        The web application offers dictation, which lets you speak a message instead of typing it.
+        Dictation uses the speech recognition engine built into your browser. Your browser asks for
+        microphone access, and it converts your speech to text. Depending on your browser, the audio
+        may be sent to that browser&apos;s own speech service. Bondery does not receive, store, or
+        record the audio. Bondery receives only the text that appears in the message field. That
+        text is handled like any other message you write. Dictation is optional and starts only when
+        you press the microphone control. Your browser may not offer dictation.
       </Text>
 
       <Divider my="xl" />

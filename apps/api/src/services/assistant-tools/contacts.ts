@@ -30,6 +30,11 @@ export const searchContactsInputSchema = z.object({
       "createdAtDesc",
     ])
     .optional(),
+  tagIds: z
+    .array(z.string().uuid())
+    .max(20)
+    .optional()
+    .describe("Only contacts with any of these tag IDs (OR)"),
 });
 
 export const getContactInputSchema = z.object({
@@ -70,6 +75,7 @@ export async function executeSearchContacts(
     offset: args.offset ?? 0,
     search: args.search,
     ...(args.sort !== undefined ? { sort: args.sort } : {}),
+    ...(args.tagIds !== undefined && args.tagIds.length > 0 ? { tag_ids: args.tagIds } : {}),
   });
 }
 

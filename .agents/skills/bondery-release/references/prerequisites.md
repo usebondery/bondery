@@ -50,9 +50,12 @@ Commit generated output so API docs and clients stay in sync.
 
 ## 5. Build and verify
 
+Run `pnpm check` on the release branch before the first push. It mirrors the pull-request gates: Biome, env sync, docs, OpenAPI, schema contracts, types, translations, API errors, and API sync tests. It does not run `check:versions`. It does not build Docker images.
+
 ```bash
-pnpm run build
+pnpm check
 pnpm run check:versions
+pnpm run build
 ```
 
 Or run `bondery-verification-loop` for the release-scoped diff. Fix failures before proceeding.
@@ -66,13 +69,14 @@ Commit prerequisites as one or more logical commits on `main` (often via a `chor
 **Cut beta `X.Y.Z-rc.1`**
 
 1. Branch `chore/release-X.Y.Z`, set root version `X.Y.Z-rc.1`, `pnpm run sync-version`.
-2. Merge to `main` → `stage-images` → `:sha` + `:beta` + `:X.Y.Z-rc.1`.
-3. `git tag vX.Y.Z-rc.1 && git push` → verify `:sha` / `:rc.1` / `:beta` digests + GitHub prerelease + staging zip.
-4. Beta patch: `X.Y.Z-rc.2`, repeat.
+2. Run `pnpm check` and `pnpm run check:versions` before the first push.
+3. Merge to `main` → `stage-images` → `:sha` + `:beta` + `:X.Y.Z-rc.1`.
+4. `git tag vX.Y.Z-rc.1 && git push` → verify `:sha` / `:rc.1` / `:beta` digests + GitHub prerelease + staging zip.
+5. Beta patch: `X.Y.Z-rc.2`, repeat.
 
 **Cut production `X.Y.Z`**
 
-1. PR: `X.Y.Z-rc.N` → `X.Y.Z`, dated changelog, `sync-version` (MIN = previous prod).
+1. PR: `X.Y.Z-rc.N` → `X.Y.Z`, dated changelog, `sync-version` (MIN = previous prod). Run `pnpm check` before the first push.
 2. Merge → `:sha` only (does not move `:beta`; drop-rc is not the GA container).
 3. `git tag vX.Y.Z` → promote last `:X.Y.Z-rc.N` → `:X.Y.Z` then `:production` + `:latest` after smoke/CWS, CWS CRX rebuild, GitHub release without zip.
 4. Approve `production-containers` after CWS is published.
@@ -86,6 +90,7 @@ Production releases use unified `vX.Y.Z` tags only (`release.yml`). RC tags use 
 
 ## Prerequisites checklist
 
+- [ ] `pnpm check` passes before the first push
 - [ ] `pnpm run sync-version` and `pnpm run check:versions` pass
 - [ ] `MIN_EXTENSION_VERSION` is previous production (from `sync-version`), not hand-edited
 - [ ] Production: `docs/changelog/X.Y.Z.mdx` created; `"X.Y.Z"` prepended to `docs/changelog/meta.json`; fresh `Unreleased` in `unreleased.mdx`

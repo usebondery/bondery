@@ -15,6 +15,7 @@ export const ASSISTANT_TOOL_NAMES = [
   "delete_relationship",
   "delete_tag",
   "delete_tag_membership",
+  "delete_tags",
   "get_contact",
   "get_contact_by_social",
   "get_contact_groups",

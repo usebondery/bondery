@@ -18,6 +18,7 @@ export {
   previewListQuerySchema,
   searchQuerySchema,
   syncPullQuerySchema,
+  TAG_IDS_QUERY_PARAM,
   uuidParamSchema,
 } from "./schema.js";
 export type {

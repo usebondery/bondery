@@ -37,5 +37,6 @@
   "SavingDescription": "Bitte warte, während wir deine Änderungen speichern.",
   "SavingTitle": "Tag wird gespeichert",
   "SearchingLabel": "Suche läuft…",
+  "TagExists": "Ein Tag mit diesem Namen existiert bereits.",
   "Title": "Tags"
 }

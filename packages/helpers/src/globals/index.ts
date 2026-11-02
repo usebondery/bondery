@@ -44,5 +44,8 @@ export type { NextAction } from "#globals/webapp-query.js";
 export {
   NEXT_ACTION_PARAM,
   NEXT_ACTIONS,
+  parseTagIdsQueryParam,
   routePersonWithNextAction,
+  serializeTagIdsQueryParam,
+  TAG_IDS_QUERY_PARAM,
 } from "#globals/webapp-query.js";

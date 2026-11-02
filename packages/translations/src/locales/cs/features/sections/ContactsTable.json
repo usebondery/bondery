@@ -13,6 +13,8 @@
   "EditGroupsMenu": "Upravit skupiny...",
   "HiddenColumnsSection": "Skryté",
   "LoadMore": "Načíst další",
+  "LogInteractionBulk": "Zaznamenat interakci",
+  "LogInteractionSelectLoadedTooltip": "Vyberte konkrétní lidi. Vybrat vše zahrnuje lidi, kteří nejsou načtení.",
   "MergeBulk": "Sloučit",
   "MergeExactlyTwoTooltip": "Musí být vybrány přesně dva kontakty.",
   "MergeMenu": "Sloučit...",

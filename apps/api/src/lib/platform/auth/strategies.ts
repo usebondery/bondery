@@ -17,8 +17,7 @@ import type { ApiKeyPermission } from "@bondery/schemas";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { productPermissionFromBa } from "../../auth/api-key-permissions.js";
 import { auth } from "../../auth/index.js";
-import { isPlatformAdmin } from "../../auth/is-platform-admin.js";
-import { forbidden, unauthorized } from "../errors/http-errors.js";
+import { unauthorized } from "../errors/http-errors.js";
 import type { AppFastifyInstance } from "../fastify-types.js";
 import { assertApiKeyAccess } from "./api-key-access.js";
 import { isApiKeyBearerToken } from "./api-keys.js";
@@ -41,8 +40,6 @@ declare module "fastify" {
   interface FastifyInstance {
     /** Enforces API key route allowlist and permission for key-authenticated requests */
     assertApiKeyAccess: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
-    /** Validates session + Better Auth platform admin role */
-    verifyAdmin: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates session or long-lived API key */
     verifyAuth: (request: FastifyRequest, reply: FastifyReply) => Promise<void>;
     /** Validates service role key via Authorization: Bearer header for server-to-server calls */
@@ -192,19 +189,6 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
       }
 
       verifiedServiceTokens.add(token);
-    },
-  );
-
-  fastify.decorate(
-    "verifyAdmin",
-    async (request: FastifyRequest, reply: FastifyReply): Promise<void> => {
-      await fastify.verifySession(request, reply);
-
-      const { user } = getAuth(request);
-
-      if (!(await isPlatformAdmin(user.id))) {
-        throw forbidden("Forbidden - Admin access required", "admin_required");
-      }
     },
   );
 }

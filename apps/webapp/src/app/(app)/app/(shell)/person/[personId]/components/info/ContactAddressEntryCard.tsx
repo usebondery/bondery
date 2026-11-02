@@ -5,9 +5,10 @@ import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
 import {
   ActionIconButton,
   ActionIconLink,
+  DescribedSelect,
+  type DescribedSelectOption,
   errorNotificationTemplate,
   successNotificationTemplate,
-  TypePicker,
 } from "@bondery/mantine-next";
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import type { TranslateFn } from "@bondery/translations";
@@ -46,12 +47,7 @@ interface ContactAddressEntryCardProps {
   addresses: EditableAddress[];
   detectingTimezoneId: string | null;
   entry: EditableAddress;
-  getTypeData: (currentType?: ContactAddressType) => Array<{
-    emoji: string;
-    label: string;
-    value: string;
-    disabled: boolean;
-  }>;
+  getTypeData: (currentType?: ContactAddressType) => DescribedSelectOption[];
   isPreferred: boolean;
   isSaving?: boolean;
   onSave: (payload: ContactAddressSavePayload) => void;
@@ -149,8 +145,8 @@ export function ContactAddressEntryCard({
             value={entry.value}
           />
 
-          <TypePicker
-            ariaLabel={t("TypeLabel")}
+          <DescribedSelect
+            aria-label={t("TypeLabel")}
             data={getTypeData(entry.type)}
             disabled={isSaving}
             onChange={(value) => {

@@ -16,7 +16,11 @@ update_contact can set identity, notes, language, timezone, location, phones, em
 
 Groups are named lists of people. Tags are labels. Relationships connect two people. Keep-in-touch is a cadence (how often to reach out), not a message to send.
 
-Deletes and sending a shared contact by email require the host to confirm. Do not bulk-delete.
+Tag labels are unique per account, ignoring letter case. Reuse an existing tag instead of creating a near-duplicate.
+
+search_contacts accepts optional tagIds (an array of tag IDs). A contact matches when it has any listed tag. Use get_tags first to resolve tag labels to IDs.
+
+Deletes and sending a shared contact by email require the host to confirm. Delete several tags with delete_tags (at most 25). Do not bulk-delete people, groups, or interactions.
 
 Preview a share with get_contact_share, then create_contact_share after the user confirms recipients and fields.
 

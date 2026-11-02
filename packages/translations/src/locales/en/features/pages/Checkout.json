@@ -9,7 +9,7 @@
   "paymentBlockedAction": "Update billing",
   "paymentBlockedMessage": "We could not process your payment after several attempts. Update your billing details to restore Premium access.",
   "paymentBlockedTitle": "Payment required",
-  "successMessage": "Enjoy unlimited AI chat and all Premium features.",
+  "successMessage": "Enjoy 300 AI messages a month and all Premium features.",
   "successTitle": "You're now Premium!",
   "upgradePendingMessage": "Your account will upgrade to Premium shortly.",
   "upgradePendingTitle": "Payment received",

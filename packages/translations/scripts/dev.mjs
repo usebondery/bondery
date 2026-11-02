@@ -8,9 +8,9 @@ import {
   watch,
   writeFileSync,
 } from "node:fs";
-import { createRequire } from "node:module";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveTypescriptTsc } from "../../../scripts/pkg/resolve-typescript-tsc.mjs";
 
 const packageRoot = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 
@@ -178,7 +178,11 @@ setInterval(() => {
   }
 }, POLL_MS);
 
-const tscBin = createRequire(join(packageRoot, "package.json")).resolve("typescript/bin/tsc");
+const tscBin = resolveTypescriptTsc([packageRoot, resolve(packageRoot, "../..")]);
+if (!tscBin) {
+  console.error("[translations] could not resolve TypeScript compiler");
+  process.exit(1);
+}
 const tsc = spawn(process.execPath, [tscBin, "--watch", "--preserveWatchOutput"], {
   cwd: packageRoot,
   stdio: "inherit",

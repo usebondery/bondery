@@ -42,14 +42,14 @@ export function ContactInfoSection({
   };
 
   const phoneTypeOptions = PHONE_TYPE_OPTIONS.map((option) => ({
-    emoji: option.emoji,
     label: option.value === "home" ? text.typeHome : text.typeWork,
+    leftSection: <span>{option.emoji}</span>,
     value: option.value,
   }));
 
   const emailTypeOptions = EMAIL_TYPE_OPTIONS.map((option) => ({
-    emoji: option.emoji,
     label: option.value === "home" ? text.typeHome : text.typeWork,
+    leftSection: <span>{option.emoji}</span>,
     value: option.value,
   }));
 

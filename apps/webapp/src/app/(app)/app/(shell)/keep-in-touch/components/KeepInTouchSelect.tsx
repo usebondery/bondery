@@ -1,6 +1,7 @@
 "use client";
 
-import { Select, Stack, Text } from "@mantine/core";
+import { DescribedSelect } from "@bondery/mantine-next";
+import { Stack, Text } from "@mantine/core";
 import { IconHeartHandshake } from "@tabler/icons-react";
 import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
@@ -49,7 +50,7 @@ export function KeepInTouchSelect({
   ];
 
   const select = (
-    <Select
+    <DescribedSelect
       allowDeselect={false}
       aria-label={ariaLabel}
       data={data}

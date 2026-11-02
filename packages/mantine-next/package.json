@@ -208,6 +208,12 @@
       "node": "./dist/EmojiPicker/emojiData.js",
       "types": "./src/EmojiPicker/emojiData.ts"
     },
+    "./ExternalLink": {
+      "default": "./dist/ExternalLink/index.js",
+      "import": "./dist/ExternalLink/index.js",
+      "node": "./dist/ExternalLink/index.js",
+      "types": "./src/ExternalLink/index.ts"
+    },
     "./HelpButton": {
       "default": "./dist/HelpButton/index.js",
       "import": "./dist/HelpButton/index.js",
@@ -519,18 +525,6 @@
       "node": "./dist/ThemePicker/ThemePicker.js",
       "types": "./src/ThemePicker/ThemePicker.tsx"
     },
-    "./TypePicker": {
-      "default": "./dist/TypePicker/index.js",
-      "import": "./dist/TypePicker/index.js",
-      "node": "./dist/TypePicker/index.js",
-      "types": "./src/TypePicker/index.ts"
-    },
-    "./TypePicker/TypePicker": {
-      "default": "./dist/TypePicker/TypePicker.js",
-      "import": "./dist/TypePicker/TypePicker.js",
-      "node": "./dist/TypePicker/TypePicker.js",
-      "types": "./src/TypePicker/TypePicker.tsx"
-    },
     "./theme": {
       "default": "./dist/theme.js",
       "import": "./dist/theme.js",
@@ -573,6 +567,7 @@
   "peerDependencies": {
     "@mantine/code-highlight": "^9.6.0",
     "@mantine/core": "^9.6.0",
+    "@mantine/dates": "^9.6.0",
     "@mantine/dropzone": "^9.6.0",
     "@mantine/hooks": "^9.6.0",
     "@tabler/icons-react": "^3.46.0",
@@ -590,5 +585,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.0-rc.1"
+  "version": "1.11.0-rc.2"
 }

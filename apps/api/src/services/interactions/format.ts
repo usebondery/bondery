@@ -7,8 +7,11 @@ const interactionPersonSelect = {
   avatarUpdatedAt: true,
   firstName: true,
   hasAvatar: true,
+  headline: true,
   id: true,
   lastName: true,
+  location: true,
+  middleName: true,
   updatedAt: true,
 } as const;
 
@@ -16,6 +19,9 @@ type InteractionPersonRow = {
   id: string;
   firstName: string;
   lastName: string | null;
+  middleName: string | null;
+  headline: string | null;
+  location: string | null;
   hasAvatar: boolean;
   avatarUpdatedAt: Date | null;
   updatedAt: Date;
@@ -37,8 +43,11 @@ export function mapInteractionParticipant(
       avatarOptions,
     ),
     firstName: person.firstName,
+    headline: person.headline,
     id: person.id,
     lastName: person.lastName,
+    location: person.location,
+    middleName: person.middleName,
     updatedAt: person.updatedAt.toISOString(),
   };
 }

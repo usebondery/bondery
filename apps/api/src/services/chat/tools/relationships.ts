@@ -20,7 +20,7 @@ export function createRelationshipTools(ctx: DomainContext) {
     }),
     delete_relationship: chatTool(ctx, {
       description:
-        "Delete a relationship. Does not delete the people. Confirm with the user in the thread before calling.",
+        "Delete a relationship. Does not delete the people. The app shows a confirm before this runs.",
       execute: (args) => executeDeleteRelationship(ctx, args),
       inputSchema: deleteRelationshipInputSchema,
     }),

@@ -22,6 +22,7 @@ export const namespacesByPlatform = {
     "ExtensionVersionCheck",
     "FeedbackPage",
     "FixContactsPage",
+    "GraphPage",
     "GroupDetailPage",
     "GroupsPage",
     "HomePage",

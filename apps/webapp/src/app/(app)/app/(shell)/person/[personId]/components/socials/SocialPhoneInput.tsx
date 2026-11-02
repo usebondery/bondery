@@ -1,14 +1,15 @@
 "use client";
 
 import { extractUsername, formatWhatsAppNumber } from "@bondery/helpers";
-import {
-  getTelephoneReactMaskExpression,
-  parsePhoneNumber,
-  TELEPHONE_PREFIX_OPTIONS,
-} from "@bondery/helpers/phone";
+import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/helpers/phone";
 import { Group, Input, Select } from "@mantine/core";
 import type { ClipboardEvent, KeyboardEvent } from "react";
 import { IMaskInput } from "react-imask";
+import {
+  filterTelephonePrefixOptions,
+  findTelephonePrefixSelectOption,
+  TELEPHONE_PREFIX_SELECT_DATA,
+} from "@/lib/phone/telephonePrefixSelect";
 import type { SocialFieldKey } from "../../hooks/useSocialFieldEditor";
 
 const PrefixSelect = function PrefixSelect({
@@ -20,22 +21,21 @@ const PrefixSelect = function PrefixSelect({
   onChange: (value: string) => void;
   disabled?: boolean;
 }) {
-  const selectedOption = TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value);
+  const selectedOption = findTelephonePrefixSelectOption(value);
 
   return (
     <Select
-      data={TELEPHONE_PREFIX_OPTIONS}
+      data={TELEPHONE_PREFIX_SELECT_DATA}
       disabled={disabled}
+      filter={filterTelephonePrefixOptions}
       leftSection={<span className={`fi fi-${selectedOption?.flag || "us"}`} />}
       onChange={(val) => onChange(val || "+1")}
       renderOption={({ option }) => (
         <Group gap="xs">
           <span
-            className={`fi fi-${
-              TELEPHONE_PREFIX_OPTIONS.find((item) => item.value === option.value)?.flag || "us"
-            }`}
+            className={`fi fi-${findTelephonePrefixSelectOption(option.value)?.flag || "us"}`}
           />
-          <span>{option.value}</span>
+          <span>{option.label}</span>
         </Group>
       )}
       searchable

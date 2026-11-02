@@ -62,17 +62,20 @@ export async function queryPeoplePage<S extends Prisma.PeopleSelect>(
   const { limit, offset } = parsePagination(query);
   const search = normalizeSearch(query.search);
   const keepInTouch = Boolean(query.keepInTouch);
+  const tagIds = query.tag_ids && query.tag_ids.length > 0 ? query.tag_ids : undefined;
 
   const baseWhere: Prisma.PeopleWhereInput = {
     myself: false,
     userId: user.id,
     ...(keepInTouch ? { keepFrequencyDays: { not: null } } : {}),
+    // OR semantics: a contact matches when it has any selected tag.
+    ...(tagIds ? { tags: { some: { tagId: { in: tagIds } } } } : {}),
   };
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
-      searchPeopleIdsWithDb(db, user.id, search, limit, offset, { keepInTouch }),
-      countSearchPeopleIdsWithDb(db, user.id, search, { keepInTouch }),
+      searchPeopleIdsWithDb(db, user.id, search, limit, offset, { keepInTouch, tagIds }),
+      countSearchPeopleIdsWithDb(db, user.id, search, { keepInTouch, tagIds }),
     ]);
 
     if (searchResult.error) {

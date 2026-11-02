@@ -1,0 +1,40 @@
+---
+title: "ADR 0010: Chat session controls"
+hidden: true
+---
+
+# ADR 0010: Chat session controls
+
+**Status:** Accepted  
+**Date:** 2026-11-01
+
+## Context
+
+The chat stream has no stop control and no durable tool activity. A hard delete runs without a confirm. A failed reply cannot be retried on the same turn. The model is fixed to Haiku 4.5.
+
+The client receives tool parts during the live turn and drops them. The database stores assistant text only. The draft is cleared and the field locks on send.
+
+## Decision
+
+1. `useChat.stop()` aborts the browser fetch. The BFF forwards `request.signal`. Fastify aborts `streamText`. The user row stays. Partial assistant text stays. The draft stays cleared. Quota stays spent.
+2. Assistant `content` stores `{ text, status, writeMayHaveLanded?, activities? }`. It does not store tool arguments, tool results, or full tool parts.
+3. `toolApproval` returns `'user-approval'` for the five hard-delete tools. The SDK pause is the confirm. Membership removal is an ordinary write.
+4. A retry POST reuses the user row and charges one quota message. A finished write hides retry.
+5. The public model id is an allowlisted OpenRouter-form slug. The API maps it to an Anthropic id. The choice is versioned `localStorage` per session. Title generation stays on Haiku.
+6. Upgrade copy states 300 messages a month.
+
+## Alternatives
+
+- OpenRouter HTTP. Rejected. Traffic stays on the existing Anthropic provider.
+- A model column or a settings page. Rejected. The choice is per session in the browser.
+- Draft restore, quota refund, or undo of a finished delete. Rejected.
+- A second confirm protocol beside the SDK pause. Rejected.
+- Persisting raw tool parts for replay. Rejected. Reload would diverge from the next model call.
+- Anthropic extended thinking, regenerate of a finished reply, and edit-last-message. Rejected.
+
+## Consequences
+
+- The webapp and the API ship together. An old client cannot answer a hard-delete pause.
+- Sonnet costs more provider spend. The user quota is the same.
+- A reload during a pending delete drops the confirm. The delete has not run.
+- No new vendor. Anthropic stays the chat subprocessor. No privacy-policy edit.

@@ -1,7 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
-import { getUserFacingError } from "@bondery/helpers/api";
+import { getUserFacingError, isApiError } from "@bondery/helpers/api";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -209,17 +209,7 @@ function TagEditorModalBody({
 
     try {
       if (mode === "create") {
-        const created = await createTagMutation.mutateAsync({ label: trimmedLabel });
-
-        let isPatchSuccessful = true;
-        try {
-          await updateTagByIdMutation.mutateAsync({
-            patch: { color, label: trimmedLabel },
-            tagId: created.id,
-          });
-        } catch {
-          isPatchSuccessful = false;
-        }
+        const created = await createTagMutation.mutateAsync({ color, label: trimmedLabel });
 
         notifications.hide(loadingId);
         captureEvent("tags:tag_create");
@@ -246,7 +236,7 @@ function TagEditorModalBody({
           }
         }
 
-        if (!isPatchSuccessful || !areMembersSynced) {
+        if (!areMembersSynced) {
           notifications.show(
             errorNotificationTemplate({
               description: t("SaveErrorDescription"),
@@ -259,7 +249,7 @@ function TagEditorModalBody({
           onCreated(
             {
               ...created,
-              color: isPatchSuccessful ? color : created.color,
+              color,
               contactCount: areMembersSynced ? selectedIds.length : 0,
               label: trimmedLabel,
               previewContacts: areMembersSynced ? buildPreviewContacts(selectedIds) : [],
@@ -303,8 +293,15 @@ function TagEditorModalBody({
           // Keep persistence successful even if caller-side UI update throws.
         }
       }
-    } catch {
+    } catch (error) {
       notifications.hide(loadingId);
+
+      // A duplicate label is a field problem, so show it under the input.
+      if (isApiError(error) && error.status === 409 && error.code === "tag_label_exists") {
+        form.setFieldError("label", t("TagExists"));
+        return;
+      }
+
       notifications.show(
         errorNotificationTemplate({
           description: t("SaveErrorDescription"),

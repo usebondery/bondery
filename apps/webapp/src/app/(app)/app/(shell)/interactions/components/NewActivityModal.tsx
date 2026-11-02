@@ -2,6 +2,7 @@
 "use client";
 
 import {
+  DescribedSelect,
   errorNotificationTemplate,
   ModalFooter,
   ModalTitle,
@@ -11,6 +12,7 @@ import {
 import {
   type Activity,
   type ContactSelectable,
+  type InteractionParticipant,
   type InteractionType,
   interactionFormSchema,
 } from "@bondery/schemas";
@@ -19,7 +21,7 @@ import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i1
 type ActivityParticipantRef = string | { id: string };
 
 import { getUserFacingError } from "@bondery/helpers/api";
-import { Avatar, Button, Group, Select, Stack, Text, Textarea, TextInput } from "@mantine/core";
+import { Avatar, Button, Flex, SimpleGrid, Stack, Text, Textarea, TextInput } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
@@ -48,6 +50,7 @@ import {
   useUpdateInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { openAddContactModal } from "../../people/components/modals/AddContactModal";
+import classes from "./NewActivityModal.module.css";
 
 interface OpenNewActivityModalParams {
   activity?: Activity | null;
@@ -79,28 +82,23 @@ function parseLocalDateInputValue(value: string): Date {
 }
 
 /**
- * Build a minimal Contact stub from a raw participant object returned by the
+ * Build a ContactSelectable stub from a participant object returned by the
  * GET /interactions API. The API embeds participant data directly on each
  * activity so chips can resolve to a name even when the participant is not in
  * the caller's `contacts` prop.
  */
-function buildParticipantSeed(p: unknown): ContactSelectable | null {
-  if (!p || typeof p === "string") {
-    return null;
-  }
-  const raw = p as Record<string, unknown>;
-  const id = typeof raw.id === "string" ? raw.id : null;
-  if (!id) {
+function buildParticipantSeed(participant: InteractionParticipant): ContactSelectable | null {
+  if (!participant.id) {
     return null;
   }
   return {
-    avatar: (raw.avatar ?? null) as string | null,
-    firstName: (raw.firstName ?? "") as string,
-    headline: null,
-    id,
-    lastName: (raw.lastName ?? null) as string | null,
-    location: null,
-    middleName: (raw.middleName ?? null) as string | null,
+    avatar: participant.avatar ?? null,
+    firstName: participant.firstName || "",
+    headline: participant.headline ?? null,
+    id: participant.id,
+    lastName: participant.lastName ?? null,
+    location: participant.location ?? null,
+    middleName: participant.middleName ?? null,
     myself: null,
   };
 }
@@ -152,8 +150,11 @@ function NewActivityForm({
       // Seed the pool with participant data embedded in the activity so that chips
       // for already-selected contacts always resolve to a name, even when those
       // contacts aren't in the caller's `contacts` prop.
-      for (const p of activity.participants as unknown[]) {
-        const seed = buildParticipantSeed(p);
+      for (const participant of activity.participants) {
+        if (typeof participant === "string") {
+          continue;
+        }
+        const seed = buildParticipantSeed(participant);
         if (seed && !pool.has(seed.id)) {
           pool.set(seed.id, seed);
         }
@@ -247,12 +248,18 @@ function NewActivityForm({
     queueMicrotask(() => participantsInputRef.current?.focus());
   }, [createdContacts, form]);
 
-  const activityTypeSelectOptions = ACTIVITY_TYPE_OPTIONS.map((type) => ({
-    label: getInteractionTypeLabel(type),
-    value: type,
-  }));
-
-  const selectedTypeConfig = getActivityTypeConfig(form.values.type);
+  const activityTypeSelectOptions = ACTIVITY_TYPE_OPTIONS.map((type) => {
+    const typeConfig = getActivityTypeConfig(type);
+    return {
+      label: getInteractionTypeLabel(type),
+      leftSection: (
+        <Avatar color={typeConfig.color} radius="xl" size={20}>
+          {typeConfig.emoji}
+        </Avatar>
+      ),
+      value: type,
+    };
+  });
 
   const handleSubmit = async (values: typeof form.values) => {
     setIsSubmitting(true);
@@ -378,58 +385,42 @@ function NewActivityForm({
           </Button>
         </Stack>
 
-        <Stack gap="xs">
-          <Group align="center" justify="space-between">
+        <Flex className={classes.grid}>
+          <Stack gap="xs" style={{ gridArea: "notes" }}>
             <Text fw={500} size="sm">
               {t("Note")}
             </Text>
-          </Group>
-          <Textarea
-            disabled={isBlocking}
-            minRows={6}
-            placeholder={t("DescriptionPlaceholder")}
-            {...form.getInputProps("description")}
-            styles={{
-              input: {
-                resize: "vertical",
-              },
-            }}
-          />
-        </Stack>
+            <Textarea
+              disabled={isBlocking}
+              minRows={6}
+              placeholder={t("DescriptionPlaceholder")}
+              {...form.getInputProps("description")}
+              styles={{
+                input: {
+                  resize: "vertical",
+                },
+              }}
+            />
+          </Stack>
 
-        <Group mt="md">
-          <Group grow w="100%">
+          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" style={{ gridArea: "meta" }}>
             <DatePickerWithPresets
               disabled={isBlocking}
               placeholder={t("PickDate")}
               {...form.getInputProps("date")}
               w="100%"
             />
-            <Select
+            <DescribedSelect
+              allowDeselect={false}
               data={activityTypeSelectOptions}
               disabled={isBlocking}
               placeholder={t("Type")}
               {...form.getInputProps("type")}
-              allowDeselect={false}
-              leftSection={
-                <Avatar color={selectedTypeConfig.color} radius="xl" size={20}>
-                  {selectedTypeConfig.emoji}
-                </Avatar>
-              }
-              renderOption={({ option }) => {
-                const typeConfig = getActivityTypeConfig(option.value);
-                return (
-                  <Group gap="sm" wrap="nowrap">
-                    <Avatar color={typeConfig.color} radius="xl" size={20}>
-                      {typeConfig.emoji}
-                    </Avatar>
-                    <Text size="sm">{option.label}</Text>
-                  </Group>
-                );
-              }}
+              value={form.values.type}
+              w="100%"
             />
-          </Group>
-        </Group>
+          </SimpleGrid>
+        </Flex>
 
         <ModalFooter
           actionDisabled={isBlocking}

@@ -28,7 +28,7 @@ Tool names use **create, get, update, delete, search** — the same verbs as RES
 
 | Tool | Access | What it does |
 |---|---|---|
-| `search_contacts` | Read only | Search contacts by name or free text (at most 25; `search` is required) |
+| `search_contacts` | Read only | Search contacts by name or free text (at most 25; `search` is required; optional `tagIds` matches any listed tag) |
 | `get_contact` | Read only | Read one contact you own (same JSON as `GET /contacts/:id`) |
 | `get_contact_by_social` | Read only | Look up a contact by Instagram, LinkedIn, or Facebook handle |
 | `get_contact_groups` | Read only | Groups a contact you own belongs to |
@@ -59,9 +59,10 @@ Tool names use **create, get, update, delete, search** — the same verbs as RES
 | `search_tags` | Read only | Search tags by label (`search` required, at most 25) |
 | `get_tags` | Read only | Browse tags (at most 25) |
 | `get_tag` | Read only | Read one tag you own |
-| `create_tag` | Full access | Create a tag |
+| `create_tag` | Full access | Create a tag (optional `color`; labels are unique per account, ignoring case) |
 | `update_tag` | Full access | Update a tag you own |
 | `delete_tag` | Full access | Delete a tag (not the people who had it) |
+| `delete_tags` | Full access | Delete up to 25 tags (not the people who had them) |
 | `get_tag_contacts` | Read only | Get contacts with a tag (at most 25) |
 | `create_tag_membership` | Full access | Add a tag to contacts you own |
 | `delete_tag_membership` | Full access | Remove a tag from contacts |

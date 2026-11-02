@@ -2,11 +2,12 @@
 
 import type { DocId } from "@bondery/helpers";
 import { ActionIconButton, ActionIconLink, type AppHref, HelpButton } from "@bondery/mantine-next";
-import { Group, Title } from "@mantine/core";
+import { Flex, Group, Title } from "@mantine/core";
 import type { Icon } from "@tabler/icons-react";
 import { IconArrowLeft } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import classes from "./PageHeader.module.css";
 
 interface PageHeaderProps {
   action?: ReactNode;
@@ -18,6 +19,21 @@ interface PageHeaderProps {
   primaryAction?: ReactNode;
   secondaryAction?: ReactNode;
   title: string;
+}
+
+function PageHeaderActions({ children }: { children: ReactNode }) {
+  return (
+    <Flex
+      align={{ base: "stretch", sm: "center" }}
+      className={classes.actions}
+      direction={{ base: "column", sm: "row" }}
+      gap="sm"
+      justify="flex-end"
+      w={{ base: "100%", sm: "auto" }}
+    >
+      {children}
+    </Flex>
+  );
 }
 
 export function PageHeader({
@@ -32,18 +48,24 @@ export function PageHeader({
   backOnClick,
 }: PageHeaderProps) {
   const tCommon = useCommonTranslations();
-  const resolvedAction =
-    action ||
-    (primaryAction || secondaryAction ? (
-      <Group gap="sm">
-        {secondaryAction}
-        {primaryAction}
-      </Group>
-    ) : undefined);
+  const resolvedAction = action ? (
+    <PageHeaderActions>{action}</PageHeaderActions>
+  ) : primaryAction || secondaryAction ? (
+    <PageHeaderActions>
+      {secondaryAction}
+      {primaryAction}
+    </PageHeaderActions>
+  ) : undefined;
 
   return (
-    <Group gap="sm" justify={resolvedAction ? "space-between" : "flex-start"} mb={"xl"}>
-      <Group gap="sm">
+    <Flex
+      align={{ base: "stretch", sm: "center" }}
+      direction={{ base: "column", sm: "row" }}
+      gap="sm"
+      justify={resolvedAction ? { base: "flex-start", sm: "space-between" } : "flex-start"}
+      mb="xl"
+    >
+      <Group gap="sm" wrap="wrap">
         {backOnClick ? (
           <ActionIconButton
             aria-label={tCommon("a11y.back")}
@@ -67,6 +89,6 @@ export function PageHeader({
         {helpLabel ? <HelpButton doc={helpDoc} label={helpLabel} /> : null}
       </Group>
       {resolvedAction}
-    </Group>
+    </Flex>
   );
 }

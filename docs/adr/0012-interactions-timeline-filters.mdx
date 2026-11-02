@@ -1,0 +1,42 @@
+---
+title: "ADR 0012: Interactions timeline filters"
+hidden: true
+---
+
+# ADR 0012: Interactions timeline filters
+
+**Status:** Accepted  
+**Date:** 2026-11-01
+
+## Context
+
+The interactions page scrolls inside the shell viewport. `html` and `body` do not scroll. A window observer never sees the list end.
+
+The page needs text search and a date range. `interaction.date` stores a timestamp. The page URL stores calendar days. The API does not know the browser timezone.
+
+## Decision
+
+1. `GET /interactions` keeps `limit`, `offset`, `contactId`, and avatar params. It adds optional `search`, `start_date`, and `end_date`.
+2. `search` is one trimmed substring. Empty text is no text filter. `pagination.search` echoes the trimmed value, or `null` when there is no text filter.
+3. `start_date` and `end_date` are ISO datetimes. Both bounds are inclusive on `interaction.date`. `start_date` after `end_date` is a Zod 400. There is no new error code. Sort stays `dateDesc`. There is no `sort` param. Do not use `start`, `end`, `from`, or `to`.
+4. Search uses Prisma `contains` with `mode: "insensitive"`. The match is an OR across `type`, `title`, `description`, and participant `firstName`, `lastName`, and `middleName`. The participant person `userId` equals the caller. `userId`, optional `contactId`, and the date range stay AND conditions. The query does not split tokens and does not call `search_people_ids`.
+5. The page URL uses `search`, `start_date`, and `end_date` as `YYYY-MM-DD`. An empty value deletes the param. Text search waits `DEBOUNCE_MS.search`, then calls `router.replace`. A date change writes the URL at once.
+6. The client converts a calendar day before the request. `start_date` is local midnight. `end_date` is local 23:59:59.999. The conversion matches `parseLocalDateInputValue` in `NewActivityModal`. The client does not send UTC calendar days.
+7. When both days exist and `start_date` is after `end_date`, the page shows an inline error and does not send `start_date` or `end_date`. The last successful list stays on screen.
+8. The infinite query key stores `search`, `start_date`, and `end_date` as `YYYY-MM-DD`. A new key starts at offset 0. The server prefetch runs for search with no dates. The server skips prefetch when a date is present.
+9. Shell lists load the next page with one intersection sentinel. The observer root is the shell viewport. The root is not `window`. Dropdowns keep `onBottomReached`. A short preview and a failed next page use an explicit button. Virtualize a list only when the mounted row count is the problem.
+
+## Alternatives
+
+- `from` and `to` as `YYYY-MM-DD` on the API. Rejected. The wire values are instants. The URL keeps the calendar days.
+- UTC day bounds on the server. Rejected. A logged interaction uses the browser calendar day.
+- `ScrollArea.Autosize` or a second page scroller. Rejected. The shell viewport already scrolls.
+- `react-virtuoso`. Rejected. The mounted row count is not the problem.
+- Prefetch of a dated list on the server. Rejected. The server has no client timezone.
+
+## Consequences
+
+- An old client can still call `GET /interactions` without the new params.
+- A dated list waits for the browser. The first paint of that URL has no server list.
+- Case-insensitive `contains` is not a trigram index. A large timeline can scan more rows.
+- The home preview stays the first page. The person tab scrolls more rows and does not send search or dates.

@@ -11,7 +11,7 @@ import {
   parseShortcutKeys,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, Contact, InteractionParticipant } from "@bondery/schemas";
+import type { Activity, InteractionParticipant, PersonPreview } from "@bondery/schemas";
 import {
   useCommonTranslations,
   useHomePageTranslations,
@@ -111,28 +111,31 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
       .slice(0, 5);
   })();
 
-  const resolveParticipants = (activity: Activity): Contact[] => {
-    return (activity.participants || [])
-      .map((participant: ActivityParticipantRef) => {
-        const participantId = typeof participant === "string" ? participant : participant.id;
-        const knownContact = contactsById.get(participantId);
+  const resolveParticipants = (activity: Activity): PersonPreview[] => {
+    return (activity.participants || []).flatMap((participant: ActivityParticipantRef) => {
+      const participantId = typeof participant === "string" ? participant : participant.id;
+      const knownContact = contactsById.get(participantId);
 
-        if (knownContact) {
-          return knownContact;
-        }
+      if (knownContact) {
+        return [knownContact];
+      }
 
-        if (!participantId || typeof participant === "string") {
-          return null;
-        }
+      if (!participantId || typeof participant === "string") {
+        return [];
+      }
 
-        return {
+      return [
+        {
           avatar: participant.avatar || null,
           firstName: participant.firstName || t("UnknownPerson"),
+          headline: participant.headline,
           id: participantId,
           lastName: participant.lastName || null,
-        } as Contact;
-      })
-      .filter((participant): participant is Contact => Boolean(participant));
+          location: participant.location,
+          middleName: participant.middleName,
+        },
+      ];
+    });
   };
 
   const handleActivityOpen = (activity: Activity) => {
@@ -326,6 +329,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
               </Paper>
             ) : (
               <InteractionsList
+                actionsLabel={timelineT("TableColumnActions")}
                 activities={compactActivities}
                 deleteLabel={timelineT("DeleteAction")}
                 duplicateLabel={timelineT("DuplicateAction")}

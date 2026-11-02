@@ -1,0 +1,9 @@
+.graph-marker-button,
+.graph-marker-button * {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+.graph-marker-button img {
+  pointer-events: none;
+}

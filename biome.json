@@ -78,6 +78,9 @@
       "a11y": {
         "noSvgWithoutTitle": "off"
       },
+      "correctness": {
+        "noUndeclaredDependencies": "error"
+      },
       "preset": "recommended",
       "style": {
         "noExcessiveLinesPerFile": {

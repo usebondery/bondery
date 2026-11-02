@@ -7,6 +7,7 @@ export {
   getContactVCardExport,
   listContactRelationships,
 } from "./queries-detail.js";
+export { getRelationshipGraph } from "./queries-graph.js";
 export { listContactImportantDates, listUpcomingReminders } from "./queries-important-dates.js";
 export { listContacts } from "./queries-list.js";
 export { getMapAddressPins, getMapPins } from "./queries-map.js";

@@ -36,7 +36,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 
 - All user-visible strings go through `packages/translations` — no hardcoded literals
 - API error notifications use `getUserFacingError` — never server `message`
-- Paginated lists use server `pagination.hasMore` for “load more” — see `bondery-api` → `api-design.md`
+- Paginated lists use server `pagination.hasMore`. A shell table loads the next page with the shell sentinel — see [lists-and-selection.md](references/common/lists-and-selection.md)
 - Keyboard shortcut display uses `Kbd` from `@bondery/mantine-next` — not `@mantine/core`
 - `avatar: null` means show initials — no phantom image requests
 - Repetitive web create modals include Create more (or pass `repeatable: false` for nested pickers) — see [create-more.md](references/desktop/create-more.md)
@@ -58,6 +58,9 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 | Create more / stay-open after create | [references/desktop/create-more.md](references/desktop/create-more.md) |
 | Keyboard shortcut chips | [references/desktop/keyboard-shortcuts.md](references/desktop/keyboard-shortcuts.md) |
 | Tooltips (Mantine, web) | [references/desktop/tooltips.md](references/desktop/tooltips.md) |
+| Start and end date inputs | [references/desktop/date-inputs.md](references/desktop/date-inputs.md) |
+| Filter menus | [references/desktop/filter-menus.md](references/desktop/filter-menus.md) |
+| Drag cursor (`grab` / `grabbing`) | [references/desktop/pointer.md](references/desktop/pointer.md) |
 | Mobile forms / sheets | [references/mobile/forms.md](references/mobile/forms.md) |
 | Mobile stack / rapid taps | [references/mobile/navigation.md](references/mobile/navigation.md) |
 | Mobile tab tap → search focus | [references/mobile/tab-search-focus.md](references/mobile/tab-search-focus.md) |
@@ -71,7 +74,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - [ ] API errors shown via `getUserFacingError` — not server `message`
 - [ ] Empty, loading, and error states handled (not just happy path)
 - [ ] Platform-appropriate pattern (Expo sheet vs web modal; webapp phone uses [mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md), not Expo tabs)
-- [ ] Paginated tables use server `hasMore` for load-more — not client-derived pagination
+- [ ] A shell `DataTable` list uses the shell sentinel and server `pagination.hasMore`. Do not render a Load more button in `DataTable`. Do not derive the next page from the client page size.
 - [ ] Keyboard shortcuts use `Kbd` + `parseShortcutKeys` from `@bondery/mantine-next`
 - [ ] Mantine Tooltip (webapp/website): do not pass `multiline`, `withArrow`, `w`, or `maw` unless overriding theme defaults — see [tooltips.md](references/desktop/tooltips.md)
 - [ ] Mobile `ui/Button` / sheet actions: `loading` includes `loadingText` (progressive label)
@@ -79,3 +82,6 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - [ ] Repetitive create modals: Create more switch per create-more.md (or explicit `repeatable: false`)
 - [ ] Create more ON shows a success toast even when the OFF path navigates and skips one
 - [ ] Mobile hub/list navigation uses shared in-flight guard — no raw `router.push` on settings rows; see [navigation.md](references/mobile/navigation.md)
+- [ ] Web modal inputs are full width on `base`. Side-by-side fields start at `sm` only — see [modals.md](references/desktop/modals.md)
+- [ ] Start and end date fields cannot cross. The other field disables days outside the bound, and the input shows the selected day. See [date-inputs.md](references/desktop/date-inputs.md)
+- [ ] A filter menu has Reset at the top. Reset clears every filter in that menu. See [filter-menus.md](references/desktop/filter-menus.md)

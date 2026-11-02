@@ -76,5 +76,5 @@
     "predev:classic": "node ../../scripts/dev/kill-website-dev.mjs && cross-env NODE_ENV=development pnpm run generate-icons && pnpm run generate:api-docs",
     "start": "next start"
   },
-  "version": "1.11.0-rc.1"
+  "version": "1.11.0-rc.2"
 }

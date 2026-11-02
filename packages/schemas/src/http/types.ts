@@ -26,6 +26,8 @@ export interface PeopleListQuery extends PaginationQuery {
   keepInTouch?: boolean;
   search?: string;
   sort?: ContactSortOrder;
+  /** Contact matches any listed tag id (OR). */
+  tag_ids?: string[];
 }
 
 export interface GeocodeSuggestQuery {
@@ -48,6 +50,12 @@ export interface InteractionsListQuery extends PaginationQuery {
   avatarQuality?: "low" | "medium" | "high";
   avatarSize?: "small" | "medium" | "large";
   contactId?: string;
+  /** Inclusive ISO datetime upper bound on `interaction.date`. */
+  end_date?: string;
+  /** Trimmed text. Empty means no text filter. */
+  search?: string;
+  /** Inclusive ISO datetime lower bound on `interaction.date`. */
+  start_date?: string;
 }
 
 export interface ChatMessagesQuery extends PaginationQuery {

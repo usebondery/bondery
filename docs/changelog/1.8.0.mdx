@@ -36,7 +36,7 @@ title: "1.8.0"
 
 ### Breaking
 
-- **PostHog ingest env vars:** Remove `BONDERY_PRIVATE_POSTHOG_HOST` and `BONDERY_PRIVATE_POSTHOG_KEY` from webapp and Compose env. Set `BONDERY_PUBLIC_POSTHOG_HOST` and `BONDERY_PUBLIC_POSTHOG_KEY` instead (same PostHog project API key for browser and server capture). API admin query vars (`BONDERY_PRIVATE_POSTHOG_API_SECRET`, `BONDERY_PRIVATE_POSTHOG_PROJECT_ID`) are unchanged.
+- **PostHog ingest env vars:** Remove `BONDERY_PRIVATE_POSTHOG_HOST` and `BONDERY_PRIVATE_POSTHOG_KEY` from webapp and Compose env. Set `BONDERY_PUBLIC_POSTHOG_HOST` and `BONDERY_PUBLIC_POSTHOG_KEY` instead (same PostHog project API key for browser and server capture).
 
 - **Health probe URLs:** Self-hosters and operators must update Docker HEALTHCHECKs, load-balancer probes, and monitoring to the new paths. API: `/health/live` and `/health/ready`. Webapp and website containers: `/health/live` and `/health/ready` on each app's origin. Webapp BFF for API dependency status: `/api/health/ready`. Extension clients must use `/extension/manifest` instead of `/status`. Old paths (`/status`, `/health`, `/api/live`, `/api/ready`, `/api/status`, `/api/health`) are removed with no redirects.
 

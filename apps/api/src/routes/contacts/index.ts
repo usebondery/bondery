@@ -5,6 +5,7 @@
 
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { registerContactDetailRoutes } from "./detail-routes.js";
+import { registerContactGraphRoutes } from "./graph-routes.js";
 import { registerUpcomingImportantDateRoutes } from "./important-dates/index.js";
 import { registerContactListRoutes } from "./list-routes.js";
 import { registerContactLookupRoutes } from "./lookup-routes.js";
@@ -22,6 +23,7 @@ export const contactIntegrationRoutes: AppRoutePlugin = async (fastify) => {
   registerContactMutationRoutes(fastify);
   registerContactLookupRoutes(fastify);
   registerContactMapRoutes(fastify);
+  registerContactGraphRoutes(fastify);
   registerUpcomingImportantDateRoutes(fastify);
   registerContactDetailRoutes(fastify);
 };

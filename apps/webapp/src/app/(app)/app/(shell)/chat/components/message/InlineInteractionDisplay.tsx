@@ -3,6 +3,7 @@
 import { Badge, Skeleton } from "@mantine/core";
 import { IconTimelineEventText } from "@tabler/icons-react";
 import Link from "next/link";
+import { inlineTokenLabel, type TokenLookup } from "@/lib/chat/inlineTokenLabel";
 import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { useChatInteractionQuery } from "@/lib/query/hooks/useChat";
 
@@ -13,6 +14,9 @@ interface InlineInteractionDisplayProps {
 /**
  * Inline badge for an interaction reference in the AI chat.
  * Fetches type + title by ID, then renders with the type's emoji and color.
+ *
+ * The title comes from `inlineTokenLabel`, the same source the spoken text
+ * reads, so the badge and the voice never disagree.
  */
 export function InlineInteractionDisplay({ id }: InlineInteractionDisplayProps) {
   const { data: interaction, isLoading } = useChatInteractionQuery(id);
@@ -29,6 +33,10 @@ export function InlineInteractionDisplay({ id }: InlineInteractionDisplayProps) 
   }
 
   const { emoji, color } = getActivityTypeConfig(interaction.type);
+  const lookup: TokenLookup = {
+    getInteraction: (interactionId) => (interactionId === id ? interaction : null),
+  };
+  const label = inlineTokenLabel({ id, type: "interaction" }, lookup);
 
   return (
     <Link href="/app/interactions" style={{ textDecoration: "none" }}>
@@ -47,7 +55,7 @@ export function InlineInteractionDisplay({ id }: InlineInteractionDisplayProps) 
         }}
         variant="light"
       >
-        {interaction.title ?? ""}
+        {label ?? ""}
       </Badge>
     </Link>
   );

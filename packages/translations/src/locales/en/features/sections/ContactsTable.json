@@ -13,6 +13,8 @@
   "EditGroupsMenu": "Edit groups...",
   "HiddenColumnsSection": "Hidden",
   "LoadMore": "Load more",
+  "LogInteractionBulk": "Log interaction",
+  "LogInteractionSelectLoadedTooltip": "Select specific people. Select all includes people that are not loaded.",
   "MergeBulk": "Merge",
   "MergeExactlyTwoTooltip": "Exactly two contacts must be selected.",
   "MergeMenu": "Merge...",

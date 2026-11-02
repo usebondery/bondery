@@ -37,5 +37,6 @@
   "SavingDescription": "Please wait while we save your changes.",
   "SavingTitle": "Saving tag",
   "SearchingLabel": "Searching…",
+  "TagExists": "A tag with this name already exists.",
   "Title": "Tags"
 }

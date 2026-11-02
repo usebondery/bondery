@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"],
-      "collections/*": ["./.source/*"]
+      "@/*": ["./src/*"]
     },
     "target": "ES2017",
     "tsBuildInfoFile": "./.cache/tsconfig.tsbuildinfo"

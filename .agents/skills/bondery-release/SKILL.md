@@ -66,6 +66,7 @@ Full index: [references/README.md](references/README.md).
 
 ## Release operator checklist
 
+- [ ] `pnpm check` and `pnpm run check:versions` pass on the release branch before the first push
 - [ ] Target RC cut merged to `main`; `stage-images` produced `:sha-<short>` + `:X.Y.Z-rc.N` + `:beta`; `vX.Y.Z-rc.N` verify succeeded
 - [ ] Production drop-`-rc` prerequisites on `main` complete ([prerequisites.md](references/prerequisites.md))
 - [ ] Changelog dated section cut (`bondery-changelog`) for production only

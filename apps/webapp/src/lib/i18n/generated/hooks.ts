@@ -3,7 +3,7 @@
 "use client";
 
 import { createNamespaceHook } from "../createNamespaceHook";
-import type { AboutPagePrefix, AddPeopleToGroupSelectionModalPrefix, AppNavigationPrefix, ChatPagePrefix, CheckoutPrefix, CommandPalettePrefix, CommonPrefix, ContactActionMenuPrefix, ContactAddressPrefix, ContactIdentityFieldsPrefix, ContactImportantDatesPrefix, ContactInfoPrefix, ContactPagePrefix, ContactPhotoUploadPrefix, ContactPreferenceSectionPrefix, ContactsTablePrefix, EnrichFromLinkedInPrefix, EnrichRecommendationCardPrefix, ExtensionVersionCheckPrefix, FeedbackPagePrefix, FixContactsPagePrefix, GlossaryPrefix, GroupDetailPagePrefix, GroupsPagePrefix, HomePagePrefix, InteractionTypesPrefix, InteractionsPagePrefix, KeepInTouchPrefix, LanguagesPrefix, LinkedInDataPrefix, LoginPagePrefix, MapCommonPrefix, MapPagePrefix, MergeWithModalPrefix, NotFoundPagePrefix, NotesEditorPrefix, NotesSlashCommandsPrefix, OAuthConsentPrefix, OnboardingPrefix, PageHeaderPrefix, PeoplePagePrefix, PeopleSearchSpotlightPrefix, PersonRelationshipsPrefix, PersonTabsPrefix, SettingsPagePrefix, ShareContactModalPrefix, SingleContactPagePrefix, SocialsPrefix, TagsInputPrefix, TagsSettingsPrefix, UnavailablePagePrefix, ValidationPrefix } from "@bondery/translations/generated/i18n/catalog-prefixes";
+import type { AboutPagePrefix, AddPeopleToGroupSelectionModalPrefix, AppNavigationPrefix, ChatPagePrefix, CheckoutPrefix, CommandPalettePrefix, CommonPrefix, ContactActionMenuPrefix, ContactAddressPrefix, ContactIdentityFieldsPrefix, ContactImportantDatesPrefix, ContactInfoPrefix, ContactPagePrefix, ContactPhotoUploadPrefix, ContactPreferenceSectionPrefix, ContactsTablePrefix, EnrichFromLinkedInPrefix, EnrichRecommendationCardPrefix, ExtensionVersionCheckPrefix, FeedbackPagePrefix, FixContactsPagePrefix, GlossaryPrefix, GraphPagePrefix, GroupDetailPagePrefix, GroupsPagePrefix, HomePagePrefix, InteractionTypesPrefix, InteractionsPagePrefix, KeepInTouchPrefix, LanguagesPrefix, LinkedInDataPrefix, LoginPagePrefix, MapCommonPrefix, MapPagePrefix, MergeWithModalPrefix, NotFoundPagePrefix, NotesEditorPrefix, NotesSlashCommandsPrefix, OAuthConsentPrefix, OnboardingPrefix, PageHeaderPrefix, PeoplePagePrefix, PeopleSearchSpotlightPrefix, PersonRelationshipsPrefix, PersonTabsPrefix, SettingsPagePrefix, ShareContactModalPrefix, SingleContactPagePrefix, SocialsPrefix, TagsInputPrefix, TagsSettingsPrefix, UnavailablePagePrefix, ValidationPrefix } from "@bondery/translations/generated/i18n/catalog-prefixes";
 
 export function useAboutPageTranslations(): import("@bondery/translations").TranslateFn<"AboutPage">;
 export function useAboutPageTranslations<P extends AboutPagePrefix>(keyPrefix: P): import("@bondery/translations").TranslateFn<"AboutPage", P>;
@@ -107,6 +107,12 @@ export function useFeedbackPageTranslations() {
 export function useFixContactsPageTranslations(): import("@bondery/translations").TranslateFn<"FixContactsPage">;
 export function useFixContactsPageTranslations() {
   return createNamespaceHook("FixContactsPage");
+}
+
+export function useGraphPageTranslations(): import("@bondery/translations").TranslateFn<"GraphPage">;
+export function useGraphPageTranslations<P extends GraphPagePrefix>(keyPrefix: P): import("@bondery/translations").TranslateFn<"GraphPage", P>;
+export function useGraphPageTranslations(keyPrefix?: GraphPagePrefix) {
+  return createNamespaceHook("GraphPage", keyPrefix);
 }
 
 export function useGroupDetailPageTranslations(): import("@bondery/translations").TranslateFn<"GroupDetailPage">;
@@ -286,5 +292,5 @@ export function useValidationTranslations(keyPrefix?: ValidationPrefix) {
   return createNamespaceHook("validation", keyPrefix);
 }
 
-export const WEB_NAMESPACES = ["AboutPage","AddPeopleToGroupSelectionModal","AppNavigation","ChatPage","Checkout","CommandPalette","ContactActionMenu","ContactAddress","ContactIdentityFields","ContactImportantDates","ContactInfo","ContactPage","ContactPhotoUpload","ContactPreferenceSection","ContactsTable","EnrichFromLinkedIn","EnrichRecommendationCard","ExtensionVersionCheck","FeedbackPage","FixContactsPage","GroupDetailPage","GroupsPage","HomePage","InteractionTypes","InteractionsPage","KeepInTouch","Languages","LinkedInData","LoginPage","MapCommon","MapPage","MergeWithModal","NotFoundPage","NotesEditor","NotesSlashCommands","OAuthConsent","Onboarding","PageHeader","PeoplePage","PeopleSearchSpotlight","PersonRelationships","PersonTabs","SettingsPage","ShareContactModal","SingleContactPage","Socials","TagsInput","TagsSettings","UnavailablePage","common","glossary","validation"] as const;
+export const WEB_NAMESPACES = ["AboutPage","AddPeopleToGroupSelectionModal","AppNavigation","ChatPage","Checkout","CommandPalette","ContactActionMenu","ContactAddress","ContactIdentityFields","ContactImportantDates","ContactInfo","ContactPage","ContactPhotoUpload","ContactPreferenceSection","ContactsTable","EnrichFromLinkedIn","EnrichRecommendationCard","ExtensionVersionCheck","FeedbackPage","FixContactsPage","GraphPage","GroupDetailPage","GroupsPage","HomePage","InteractionTypes","InteractionsPage","KeepInTouch","Languages","LinkedInData","LoginPage","MapCommon","MapPage","MergeWithModal","NotFoundPage","NotesEditor","NotesSlashCommands","OAuthConsent","Onboarding","PageHeader","PeoplePage","PeopleSearchSpotlight","PersonRelationships","PersonTabs","SettingsPage","ShareContactModal","SingleContactPage","Socials","TagsInput","TagsSettings","UnavailablePage","common","glossary","validation"] as const;
 export type WebNamespace = (typeof WEB_NAMESPACES)[number];

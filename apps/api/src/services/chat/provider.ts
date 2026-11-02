@@ -1,4 +1,6 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
+import type { ChatModelId } from "./models.js";
+import { resolveAnthropicModelId } from "./models.js";
 
 /**
  * Real Anthropic keys are `sk-ant-api03-…` and much longer than the env
@@ -18,12 +20,18 @@ export function resolveAnthropicApiKey(configValue: string | undefined): string 
  * Creates the LLM provider instance for the chat agent.
  * Uses Anthropic Claude, abstracted via AI SDK for easy swapping.
  *
+ * `modelId` is the public chat model id. An omitted id stays on the default,
+ * so title generation and old clients keep the cheap model.
+ *
  * @returns An AI SDK-compatible language model.
  */
-export function getChatModel(apiKey = process.env.BONDERY_PRIVATE_ANTHROPIC_API_KEY) {
+export function getChatModel(
+  apiKey = process.env.BONDERY_PRIVATE_ANTHROPIC_API_KEY,
+  modelId?: ChatModelId,
+) {
   const anthropic = createAnthropic({
     apiKey,
   });
 
-  return anthropic("claude-haiku-4-5");
+  return anthropic(resolveAnthropicModelId(modelId));
 }

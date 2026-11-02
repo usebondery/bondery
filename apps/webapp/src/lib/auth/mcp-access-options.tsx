@@ -10,14 +10,14 @@ export function mcpAccessOptions(copy: {
   return [
     {
       description: copy.readDescription,
-      icon: <IconEye size={16} stroke={1.5} />,
       label: copy.readLabel,
+      leftSection: <IconEye size={16} stroke={1.5} />,
       value: "read",
     },
     {
       description: copy.fullDescription,
-      icon: <IconShieldCheck size={16} stroke={1.5} />,
       label: copy.fullLabel,
+      leftSection: <IconShieldCheck size={16} stroke={1.5} />,
       value: "full",
     },
   ];

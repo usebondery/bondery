@@ -98,6 +98,31 @@ export const avatarTransformQuerySchema = z.object({
   avatarSize: avatarSizeSchema.optional(),
 }) satisfies z.ZodType<AvatarTransformQuery>;
 
+/** Public query name for the people-list tag filter. */
+export const TAG_IDS_QUERY_PARAM = "tag_ids" as const;
+
+/** Maximum number of tag ids accepted by `tag_ids` on the people list query. */
+const MAX_TAG_FILTER_IDS = 20;
+
+/**
+ * One comma-separated value: `?tag_ids=a,b`.
+ * A repeated `tag_ids` key is also accepted. Trims each entry and drops empties.
+ */
+const tagIdsQuerySchema = z.preprocess((value) => {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+  const rawEntries = Array.isArray(value) ? value : [value];
+  const parts = rawEntries.flatMap((entry) =>
+    typeof entry === "string" ? entry.split(",") : [entry],
+  );
+  const cleaned = parts
+    .filter((part): part is string => typeof part === "string")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+  return cleaned.length > 0 ? cleaned : undefined;
+}, z.array(z.string().uuid()).max(MAX_TAG_FILTER_IDS).optional());
+
 /** People list query — pagination, search, sort, keep-in-touch filter, and avatar transforms. */
 export const peopleListQuerySchema = z.object({
   avatarQuality: avatarQualitySchema.optional(),
@@ -107,6 +132,7 @@ export const peopleListQuerySchema = z.object({
   offset: z.coerce.number().int().min(0).optional().default(0),
   search: z.string().optional(),
   sort: contactSortOrderSchema.optional(),
+  [TAG_IDS_QUERY_PARAM]: tagIdsQuerySchema,
 }) satisfies z.ZodType<PeopleListQuery>;
 
 /** GET /api/geocode/suggest query string. */
@@ -128,14 +154,38 @@ export const previewListQuerySchema = z.object({
   previewLimit: z.string().optional(),
 }) satisfies z.ZodType<PreviewListQuery>;
 
-/** Interactions list query — pagination plus avatar transforms and optional contact filter. */
-export const interactionsListQuerySchema = z.object({
-  avatarQuality: avatarQualitySchema.optional(),
-  avatarSize: avatarSizeSchema.optional(),
-  contactId: contactIdSchema.optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
-}) satisfies z.ZodType<InteractionsListQuery>;
+/** RFC 3339 datetime with timezone offset. Avoid Zod `iso.datetime` (Turbopack SSR TDZ). */
+const ISO_DATETIME_OFFSET_PATTERN =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+const interactionInstantSchema = z.string().regex(ISO_DATETIME_OFFSET_PATTERN, {
+  error: "Expected ISO 8601 datetime with timezone offset",
+});
+
+/** Interactions list query — pagination, text search, inclusive date range, and avatar transforms. */
+export const interactionsListQuerySchema = z
+  .object({
+    avatarQuality: avatarQualitySchema.optional(),
+    avatarSize: avatarSizeSchema.optional(),
+    contactId: contactIdSchema.optional(),
+    end_date: interactionInstantSchema.optional(),
+    limit: z.coerce.number().int().min(1).max(200).optional().default(50),
+    offset: z.coerce.number().int().min(0).optional().default(0),
+    search: z.string().trim().optional(),
+    start_date: interactionInstantSchema.optional(),
+  })
+  .superRefine((value, ctx) => {
+    if (!value.start_date || !value.end_date) {
+      return;
+    }
+    if (Date.parse(value.start_date) > Date.parse(value.end_date)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "start_date must not be after end_date",
+        path: ["start_date"],
+      });
+    }
+  }) satisfies z.ZodType<InteractionsListQuery>;
 
 /** Chat session messages list query. */
 export const chatMessagesQuerySchema = z.object({

@@ -1,7 +1,7 @@
 {
+  "AttributionLabel": "Zdroj mapy",
+  "AttributionTooltip": "Přispěvatelé OpenStreetMap. Dlaždice od OpenFreeMap.",
   "Location": "Poloha",
-  "ShowFlatMap": "Zobrazit jako mapu",
-  "ShowGlobe": "Zobrazit jako glóbus",
   "ZoomControls": "Přiblížení mapy",
   "ZoomIn": "Přiblížit",
   "ZoomOut": "Oddálit"

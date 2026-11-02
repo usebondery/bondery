@@ -2,17 +2,12 @@
 "use client";
 
 import { ActionIconButton } from "@bondery/mantine-next";
-import { ActionIcon, Tooltip } from "@mantine/core";
-import { IconCurrentLocation, IconGlobe, IconMap, IconMinus, IconPlus } from "@tabler/icons-react";
+import { ActionIcon, Group, Loader, Paper, Text, Tooltip } from "@mantine/core";
+import { IconCopyright, IconCurrentLocation, IconMinus, IconPlus } from "@tabler/icons-react";
 import { type MapRef, useMap } from "@vis.gl/react-maplibre";
 import { useEffect, useRef, useState } from "react";
 import { useMapCommonTranslations } from "@/lib/i18n/generated/hooks";
-import { applyMapProjectionVisuals } from "./applyMapProjectionVisuals";
-import {
-  type MapProjectionPreference,
-  persistMapProjectionPreference,
-  readMapProjectionPreference,
-} from "./mapProjectionPreference";
+import { OSM_COPYRIGHT_URL } from "./openFreeMapStyle";
 import type {
   MapBounds,
   MapCamera,
@@ -27,17 +22,12 @@ const MAP_CONTROLS_Z_INDEX = 5;
 
 export function MapZoomControls({
   myLocationControl,
-  onProjectionChange,
 }: {
   myLocationControl?: PeopleMapMyLocationControl | null;
-  onProjectionChange?: (projection: MapProjectionPreference) => void;
 }) {
   const { current: map } = useMap();
   const t = useMapCommonTranslations();
   const [currentZoom, setCurrentZoom] = useState(() => map?.getZoom() ?? 0);
-  const [projection, setProjection] = useState<MapProjectionPreference>("mercator");
-  const onProjectionChangeRef = useRef(onProjectionChange);
-  onProjectionChangeRef.current = onProjectionChange;
 
   useEffect(() => {
     if (!map) {
@@ -55,27 +45,6 @@ export function MapZoomControls({
     };
   }, [map]);
 
-  useEffect(() => {
-    if (!map) {
-      return;
-    }
-
-    let cancelled = false;
-    void readMapProjectionPreference().then((stored) => {
-      if (cancelled) {
-        return;
-      }
-      // setProjection/setSky are omitted from MapRef; use the MapLibre map.
-      applyMapProjectionVisuals(map.getMap(), stored);
-      setProjection(stored);
-      onProjectionChangeRef.current?.(stored);
-    });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [map]);
-
   if (!map) {
     return null;
   }
@@ -87,7 +56,6 @@ export function MapZoomControls({
   const myLocationNeedsDisabledTooltip = Boolean(
     myLocationControl?.disabled && myLocationControl.disabledTooltip,
   );
-  const projectionLabel = projection === "mercator" ? t("ShowGlobe") : t("ShowFlatMap");
 
   return (
     <ActionIcon.Group
@@ -101,26 +69,6 @@ export function MapZoomControls({
         zIndex: MAP_CONTROLS_Z_INDEX,
       }}
     >
-      <Tooltip label={projectionLabel}>
-        <ActionIcon
-          aria-label={projectionLabel}
-          onClick={() => {
-            const next: MapProjectionPreference = projection === "mercator" ? "globe" : "mercator";
-            applyMapProjectionVisuals(map.getMap(), next);
-            setProjection(next);
-            onProjectionChangeRef.current?.(next);
-            void persistMapProjectionPreference(next).catch(() => {});
-          }}
-          size="lg"
-          variant="default"
-        >
-          {projection === "mercator" ? (
-            <IconGlobe size={20} stroke={1.5} />
-          ) : (
-            <IconMap size={20} stroke={1.5} />
-          )}
-        </ActionIcon>
-      </Tooltip>
       <ActionIconButton
         aria-label={t("ZoomIn")}
         disabled={currentZoom >= maxZoom}
@@ -166,6 +114,58 @@ export function MapZoomControls({
         </Tooltip>
       ) : null}
     </ActionIcon.Group>
+  );
+}
+
+export function MapAttributionControl() {
+  const t = useMapCommonTranslations();
+
+  return (
+    <Tooltip label={t("AttributionTooltip")}>
+      <ActionIcon
+        aria-label={t("AttributionLabel")}
+        component="a"
+        href={OSM_COPYRIGHT_URL}
+        rel="noreferrer"
+        size="lg"
+        style={{
+          bottom: 12,
+          pointerEvents: "auto",
+          position: "absolute",
+          right: 12,
+          zIndex: MAP_CONTROLS_Z_INDEX,
+        }}
+        target="_blank"
+        variant="default"
+      >
+        <IconCopyright />
+      </ActionIcon>
+    </Tooltip>
+  );
+}
+
+export function MapPinsFetchingStatus({ label }: { label: string }) {
+  return (
+    <Paper
+      left="50%"
+      pos="absolute"
+      px="sm"
+      py={6}
+      radius="md"
+      shadow="sm"
+      style={{
+        pointerEvents: "none",
+        transform: "translateX(-50%)",
+        zIndex: MAP_CONTROLS_Z_INDEX,
+      }}
+      top={12}
+      withBorder
+    >
+      <Group gap="xs" wrap="nowrap">
+        <Loader aria-hidden size="xs" />
+        <Text size="xs">{label}</Text>
+      </Group>
+    </Paper>
   );
 }
 

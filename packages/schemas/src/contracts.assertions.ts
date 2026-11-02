@@ -134,10 +134,18 @@ function run() {
   const participant = interactionParticipantSchema.parse({
     avatar: null,
     firstName: "Ada",
+    headline: "Mathematician",
     id: "p-1",
     lastName: "Lovelace",
+    location: "London, UK",
+    middleName: null,
   });
   assertEqual(participant.firstName, "Ada", "interactionParticipantSchema should use camelCase");
+  assertEqual(
+    participant.location,
+    "London, UK",
+    "interactionParticipantSchema should carry the card display lines",
+  );
 
   // subscription dto contract
   const subscriptionStatus = subscriptionStatusSchema.parse({

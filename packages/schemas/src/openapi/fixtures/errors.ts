@@ -51,7 +51,7 @@ export const EXAMPLE_ERROR_401 = exampleError({
 
 /** Generic forbidden response (error handler wire format). */
 export const EXAMPLE_ERROR_403 = exampleError({
-  code: "admin_required",
+  code: "api_key_route_forbidden",
   message: "Forbidden",
   type: "authorization_error",
 });

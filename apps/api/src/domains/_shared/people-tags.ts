@@ -91,7 +91,7 @@ export async function upsertPeopleTagMemberships(
   ctx: DomainContext,
   tagId: string,
   personIds: string[],
-): Promise<{ addedCount: number; txid: string; serverSequence: number }> {
+): Promise<{ addedCount: number; skippedCount: number; txid: string; serverSequence: number }> {
   const { user } = ctx;
   const db = domainDb(ctx);
 
@@ -101,23 +101,38 @@ export async function upsertPeopleTagMemberships(
   }
 
   if (personIds.length === 0) {
-    return { addedCount: 0, serverSequence: 0, txid: "" };
+    return { addedCount: 0, serverSequence: 0, skippedCount: 0, txid: "" };
   }
 
   await assertOwnedPersonIds(ctx, personIds);
 
-  await db.peopleTag.createMany({
-    data: personIds.map((personId) => ({
-      personId,
+  const existingRows = await db.peopleTag.findMany({
+    select: { personId: true },
+    where: {
+      personId: { in: personIds },
       tagId,
       userId: user.id,
-    })),
-    skipDuplicates: true,
+    },
   });
+
+  const existingIds = new Set(existingRows.map((row) => row.personId));
+  const newPersonIds = personIds.filter((id) => !existingIds.has(id));
+  const skippedCount = personIds.length - newPersonIds.length;
+
+  if (newPersonIds.length > 0) {
+    await db.peopleTag.createMany({
+      data: newPersonIds.map((personId) => ({
+        personId,
+        tagId,
+        userId: user.id,
+      })),
+      skipDuplicates: true,
+    });
+  }
 
   const changes = (
     await Promise.all(
-      personIds.map((personId) => buildPeopleTagChangeWithDb(db, user.id, personId, tagId)),
+      newPersonIds.map((personId) => buildPeopleTagChangeWithDb(db, user.id, personId, tagId)),
     )
   ).filter((change): change is NonNullable<typeof change> => change !== null);
 
@@ -125,7 +140,7 @@ export async function upsertPeopleTagMemberships(
   const serverSequence =
     (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
 
-  return { addedCount: personIds.length, serverSequence, txid };
+  return { addedCount: newPersonIds.length, serverSequence, skippedCount, txid };
 }
 
 export async function removePeopleTagMemberships(
@@ -140,7 +155,7 @@ export async function removePeopleTagMemberships(
     personIds.map((personId) => findPeopleTagIdWithDb(db, user.id, personId, tagId)),
   );
 
-  await db.peopleTag.deleteMany({
+  const deleted = await db.peopleTag.deleteMany({
     where: {
       personId: { in: personIds },
       tagId,
@@ -161,5 +176,5 @@ export async function removePeopleTagMemberships(
   const serverSequence =
     (await persistSyncChanges(user.id, changes, syncEmitMetaFromContext(ctx))) ?? 0;
 
-  return { removedCount: personIds.length, serverSequence, txid };
+  return { removedCount: deleted.count, serverSequence, txid };
 }

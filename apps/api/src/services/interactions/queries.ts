@@ -1,21 +1,18 @@
-import type { Prisma } from "@bondery/db";
-import type { AvatarTransformQuery } from "@bondery/schemas/http";
+import type { InteractionsListQuery } from "@bondery/schemas/http";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
 import {
   buildPaginatedResponse,
   buildPaginationMeta,
+  normalizeSearch,
   parsePagination,
 } from "../../lib/data/pagination.js";
 import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { loadFormattedInteractions } from "./format.js";
+import { buildInteractionListWhere } from "./list-where.js";
 
-export type InteractionsListQuery = AvatarTransformQuery & {
-  limit?: number | string;
-  offset?: number | string;
-  contactId?: string;
-};
+export type { InteractionsListQuery };
 
 type ServiceLog = {
   error: (payload: unknown, message: string) => void;
@@ -31,6 +28,7 @@ export async function listInteractions(
   const { limit, offset } = parsePagination(query);
   const avatarOptions = extractAvatarOptions(query);
   const contactId = query.contactId;
+  const search = normalizeSearch(query.search);
 
   if (contactId) {
     const person = await db.people.findFirst({
@@ -43,10 +41,13 @@ export async function listInteractions(
     }
   }
 
-  const where: Prisma.InteractionWhereInput = {
+  const where = buildInteractionListWhere({
+    contactId,
+    end_date: query.end_date,
+    search,
+    start_date: query.start_date,
     userId: user.id,
-    ...(contactId ? { participants: { some: { personId: contactId } } } : {}),
-  };
+  });
 
   let interactions: Awaited<ReturnType<typeof loadFormattedInteractions>> = [];
   let totalCount = 0;
@@ -81,7 +82,7 @@ export async function listInteractions(
     itemCount: interactions.length,
     limit,
     offset,
-    search: null,
+    search,
     sort: "dateDesc",
     totalCount,
   });

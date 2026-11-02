@@ -2,13 +2,14 @@
 "use client";
 
 import { Paper, Skeleton } from "@mantine/core";
-import { AttributionControl, Map as MapLibreMap, Marker } from "@vis.gl/react-maplibre";
+import { Map as MapLibreMap, Marker } from "@vis.gl/react-maplibre";
+import type { SkySpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { useRef, useState } from "react";
 import { ClusteredPersonMarkers } from "./ClusteredPersonMarkers";
 import { ensureMapLibreWorker } from "./ensureMapLibreWorker";
 import { SelfMapAvatarMarker } from "./mapMarkerIcons";
-import { OSM_ATTRIBUTION, OSM_RASTER_STYLE } from "./osmRasterStyle";
+import { OPEN_FREE_MAP_LIBERTY_STYLE } from "./openFreeMapStyle";
 import type {
   MapBounds,
   MapCamera,
@@ -19,7 +20,9 @@ import type {
 } from "./PeopleMap";
 import {
   FitMarkersController,
+  MapAttributionControl,
   MapFocusController,
+  MapPinsFetchingStatus,
   MapZoomControls,
   VisibleMarkersController,
 } from "./peopleMapControllers";
@@ -30,10 +33,16 @@ ensureMapLibreWorker();
 const SELF_MARKER_ID = "__self__";
 const MAP_CORNER_RADIUS_PX = 12;
 
+/** Atmosphere fade for globe projection (MapLibre sky docs). */
+const GLOBE_SKY: SkySpecification = {
+  "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 1, 5, 1, 7, 0],
+};
+
 interface PeopleMapClientProps {
   center?: [number, number];
   disableAutoFit?: boolean;
   disableChipNavigation?: boolean;
+  fetchingStatus?: string | null;
   focus?: PeopleMapFocus | null;
   height?: number;
   hideZoomControls?: boolean;
@@ -67,6 +76,7 @@ export function PeopleMapClient({
   onReady,
   disableAutoFit = false,
   disableChipNavigation = false,
+  fetchingStatus = null,
   myLocationControl = null,
   selfLocation = null,
   selfMarker = null,
@@ -108,17 +118,22 @@ export function PeopleMapClient({
           longitude: defaultCenter[1],
           zoom,
         }}
-        mapStyle={OSM_RASTER_STYLE}
+        mapStyle={OPEN_FREE_MAP_LIBERTY_STYLE}
         // Do not set maxBounds to ±180 — MapLibre constrain/resize crashes
         // (gl-matrix vec4 null) when bounds equal the full world. Leaflet used
         // extreme longitudes for worldCopyJump; MapLibre uses renderWorldCopies.
         onLoad={handleMapLoad}
+        projection="globe"
         renderWorldCopies
         scrollZoom={scrollWheelZoom}
+        sky={GLOBE_SKY}
         style={{ height: "100%", width: "100%" }}
       >
-        <AttributionControl compact={false} customAttribution={OSM_ATTRIBUTION} />
         {showZoomControls ? <MapZoomControls myLocationControl={myLocationControl} /> : null}
+        {showZoomControls ? <MapAttributionControl /> : null}
+        {showZoomControls && fetchingStatus ? (
+          <MapPinsFetchingStatus label={fetchingStatus} />
+        ) : null}
         <MapFocusController defaultZoom={zoom} focus={focus} />
         <FitMarkersController defaultZoom={zoom} disabled={disableAutoFit} markers={markers} />
         <VisibleMarkersController

@@ -88,6 +88,46 @@ export const EXAMPLE_MAP_PINS_RESPONSE = {
   ],
 };
 
+export const EXAMPLE_RELATIONSHIP_GRAPH_RESPONSE = {
+  graph: {
+    edges: [
+      {
+        id: "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+        relationshipType: "friend" as const,
+        sourcePersonId: EXAMPLE_CONTACT_ID,
+        targetPersonId: EXAMPLE_CONTACT_ID_2,
+      },
+    ],
+    groups: [],
+    hubs: [],
+    nodes: [
+      {
+        avatar: null,
+        firstName: "Ada",
+        headline: "Mathematician",
+        id: EXAMPLE_CONTACT_ID,
+        lastName: "Lovelace",
+        location: "London, UK",
+        middleName: null,
+        myself: false,
+      },
+      {
+        avatar: null,
+        firstName: "Charles",
+        headline: "Mathematician",
+        id: EXAMPLE_CONTACT_ID_2,
+        lastName: "Babbage",
+        location: "London, UK",
+        middleName: null,
+        myself: false,
+      },
+    ],
+    truncated: false,
+    unlinked: [],
+    unlinkedCount: 0,
+  },
+};
+
 export const EXAMPLE_MAP_ADDRESS_PINS_RESPONSE = {
   pins: [
     {
@@ -247,6 +287,7 @@ export const EXAMPLE_TAG_UPDATE_RESPONSE = { tag: EXAMPLE_TAG };
 
 export const EXAMPLE_ADD_CONTACTS_TO_TAG_RESPONSE = {
   addedCount: 3,
+  skippedCount: 1,
 };
 
 export const EXAMPLE_REMOVE_CONTACTS_FROM_TAG_RESPONSE = {

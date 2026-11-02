@@ -82,7 +82,7 @@ Routes under `app/(app)/app/<feature>/` follow a tiered template. Not every tier
 
 | Tier | Pattern | Examples |
 |------|---------|----------|
-| **A** | `page → Loader → Client → components/` | settings, home, groups, fix (`FixClient`), keep-in-touch, interactions, admin/stats, chat (`ChatClient`) |
+| **A** | `page → Loader → Client → components/` | settings, home, groups, fix (`FixClient`), keep-in-touch, interactions, chat (`ChatClient`) |
 | **B** | `page` + `Suspense` → sub-loader in `components/` | people |
 | **C** | `page → Client` (no prefetch) | map (`MapClient`), onboarding, unavailable (`UnavailableClient`) |
 | **D** | Tier A + `hooks/`, `utils/`, subdivided `components/` | person (`PersonClient`), group (`GroupClient`), settings |

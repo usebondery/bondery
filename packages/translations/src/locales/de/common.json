@@ -6,7 +6,9 @@
     "createMore": "Nach dem Erstellen im Dialog bleiben, um einen weiteren Eintrag hinzuzufügen",
     "info": "Info",
     "loading": "Wird geladen",
-    "openMenu": "Menü öffnen"
+    "loadingMore": "Weitere werden geladen…",
+    "openMenu": "Menü öffnen",
+    "opensInNewTab": "wird in einem neuen Tab geöffnet"
   },
   "actions": {
     "back": "Zurück",
@@ -39,7 +41,6 @@
       "account_failed_to_upload_profile_photo": "Account failed to upload profile photo.",
       "account_invalid": "Account invalid.",
       "account_photo_invalid_format": "Account photo invalid format.",
-      "admin_required": "Admin required.",
       "api": "Api key session mint failed.",
       "api_key_failed": "Api key failed.",
       "api_key_limit_exceeded": "Api key limit exceeded.",
@@ -172,6 +173,7 @@
       "sync_protocol_mismatch": "Sync protocol mismatch.",
       "tag": "Tag upsert failed.",
       "tag_failed": "Tag failed.",
+      "tag_label_exists": "A tag with this name already exists.",
       "tag_not_found": "Tag not found.",
       "user": "User lookup failed.",
       "user_lookup_failed": "User lookup failed.",

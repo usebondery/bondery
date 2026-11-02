@@ -27,7 +27,8 @@ Update this file in the **same PR** that adds or removes a vendor integration.
 | **GitHub** | OAuth sign-in | Email, name, avatar URL, provider account ID | US | `BONDERY_PRIVATE_AUTH_GITHUB_*`, Better Auth | `undisclosed` — not in subprocessor table |
 | **LinkedIn** | OAuth sign-in (OIDC) | Email, name, profile (`openid profile email`) | US/EU | `BONDERY_PRIVATE_AUTH_LINKEDIN_*`, Better Auth | `undisclosed` — not in subprocessor table |
 | **Mapy.com** | Geocoding, timezone | Location/address strings from contacts | EU | `BONDERY_PRIVATE_MAPS_KEY`, `lib/integrations/mapy.ts`, `routes/geocode/` | `in-sync` |
-| **OpenStreetMap** | Map tiles (browser) | Tile requests (IP, viewport) | — | `apps/webapp/src/components/map/PeopleMapClient.tsx` | `in-sync` |
+| **OpenFreeMap** | Vector tiles (browser) | Style and tile requests (IP, viewport) | EU | `apps/webapp/src/components/map/PeopleMapClient.tsx` | `undisclosed` — Privacy lists OSM for map data/copyright and notes OpenFreeMap for tiles; no separate OpenFreeMap row. Privacy: https://openfreemap.org/privacy/ |
+| **OpenStreetMap** | Map data and copyright | OSM data shown via OpenFreeMap tiles (browser) | — | `apps/webapp/src/components/map/peopleMapControllers.tsx` | `in-sync` |
 | **S3-compatible / local disk** | Avatars, LinkedIn logos | Image binary | Config-dependent | `BONDERY_STORAGE_DRIVER`, `BONDERY_PRIVATE_S3_*`, `lib/storage/` | `drifted` — policy attributes storage to Supabase |
 | **Redis** | Rate limits, sync wake | Request/user IDs in keys | EU (hosted) | `BONDERY_PRIVATE_REDIS_URL` | `undisclosed` — described under Hetzner notes only |
 | **Supabase** | — | — | — | Legacy stubs only (`apps/api/src/lib/data/supabase.ts` unused) | `drifted` — **stale in policy** |
@@ -41,6 +42,8 @@ Update this file in the **same PR** that adds or removes a vendor integration.
 | LinkedIn CSV import | User file upload | Names, emails, companies | `routes/import/linkedin/` |
 | vCard import/export | User file / download | Contact PII | `routes/import/vcard/`, `lib/contacts/vcard.ts` |
 | Marketing site analytics | Self-hosted Plausible CE on `plausible.usebondery.com` | Aggregate pageviews, referrers, UTMs (no cookies, no PII) | `apps/website/src/app/layout.tsx`, `deploy/plausible/` |
+| Browser speech recognition | `SpeechRecognition` engine built into the user's browser (Chrome, Edge, Safari). No Bondery server route, no upload | Microphone audio (may reach the browser vendor's speech service); transcript held in the composer and sent as normal chat text | `apps/webapp/src/lib/speech/dictation/browserDictationEngine.ts` |
+| Browser speech synthesis (read aloud) | `speechSynthesis` engine built into the user's browser | Message text, read on the device. No audio leaves the device and no server route exists | `apps/webapp/src/lib/speech/browserSpeechEngine.ts` |
 
 No third-party enrichment API — extension scraping only.
 

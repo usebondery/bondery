@@ -35,6 +35,8 @@ export const contactKeys = {
   lists: () => [...contactKeys.all, "list"] as const,
   mapPins: (mode: "address" | "contact", camera?: MapPinsCameraKey) =>
     [...contactKeys.all, "map-pins", mode, camera ?? {}] as const,
+  relationshipGraph: (focus: string | null) =>
+    [...contactKeys.all, "relationship-graph", focus] as const,
   relationships: (id: string) => [...contactKeys.detail(id), "relationships"] as const,
   search: (search: string) => [...contactKeys.all, "search", search] as const,
   selectable: {
@@ -72,10 +74,21 @@ export const interactionKeys = {
   all: ["interactions"] as const,
   detail: (id: string) => [...interactionKeys.details(), id] as const,
   details: () => [...interactionKeys.all, "detail"] as const,
-  infinite: (params: { limit?: number; contactId?: string }) =>
-    [...interactionKeys.lists(), "infinite", params] as const,
-  list: (params?: { limit?: number; offset?: number; contactId?: string }) =>
-    [...interactionKeys.lists(), params ?? {}] as const,
+  infinite: (params: {
+    contactId?: string;
+    end_date?: string;
+    limit?: number;
+    search?: string;
+    start_date?: string;
+  }) => [...interactionKeys.lists(), "infinite", params] as const,
+  list: (params?: {
+    contactId?: string;
+    end_date?: string;
+    limit?: number;
+    offset?: number;
+    search?: string;
+    start_date?: string;
+  }) => [...interactionKeys.lists(), params ?? {}] as const,
   lists: () => [...interactionKeys.all, "list"] as const,
 };
 

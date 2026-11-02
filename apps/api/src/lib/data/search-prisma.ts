@@ -8,6 +8,7 @@ export interface RankedPerson {
 type SearchPeopleOptions = {
   groupId?: string;
   tagId?: string;
+  tagIds?: string[];
   keepInTouch?: boolean;
 };
 
@@ -35,7 +36,8 @@ export async function searchPeopleIdsWithDb(
         ${options?.keepInTouch ?? false},
         ${PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD}::real,
         ${limit}::int,
-        ${offset}::int
+        ${offset}::int,
+        ${options?.tagIds && options.tagIds.length > 0 ? options.tagIds : null}::uuid[]
       )
     `;
     return { error: null, ranked };
@@ -61,7 +63,8 @@ export async function countSearchPeopleIdsWithDb(
         ${options?.groupId ?? null}::uuid,
         ${options?.tagId ?? null}::uuid,
         ${options?.keepInTouch ?? false},
-        ${PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD}::real
+        ${PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD}::real,
+        ${options?.tagIds && options.tagIds.length > 0 ? options.tagIds : null}::uuid[]
       ) AS count
     `;
     const count = rows[0]?.count;

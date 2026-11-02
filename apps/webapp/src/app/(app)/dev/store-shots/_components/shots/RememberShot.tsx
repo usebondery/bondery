@@ -1,6 +1,6 @@
 "use client";
 
-import type { Activity, Contact, InteractionParticipant } from "@bondery/schemas";
+import type { Activity, InteractionParticipant, PersonPreview } from "@bondery/schemas";
 import { Box } from "@mantine/core";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
 import { STORE_SHOT_COPY } from "../../_lib/copy";
@@ -9,18 +9,18 @@ import { StoreShotFrame } from "../StoreShotFrame";
 
 const NOOP = () => {};
 
-function resolveParticipants(activity: Activity): Contact[] {
+function resolveParticipants(activity: Activity): PersonPreview[] {
   return (activity.participants ?? [])
     .filter((participant): participant is InteractionParticipant => typeof participant !== "string")
-    .map(
-      (participant) =>
-        ({
-          avatar: participant.avatar,
-          firstName: participant.firstName,
-          id: participant.id,
-          lastName: participant.lastName,
-        }) as Contact,
-    );
+    .map((participant) => ({
+      avatar: participant.avatar,
+      firstName: participant.firstName,
+      headline: participant.headline,
+      id: participant.id,
+      lastName: participant.lastName,
+      location: participant.location,
+      middleName: participant.middleName,
+    }));
 }
 
 export function RememberShot() {
@@ -34,6 +34,7 @@ export function RememberShot() {
         w={620}
       >
         <InteractionsList
+          actionsLabel="Actions"
           activities={STORE_SHOT_ACTIVITIES}
           deleteLabel="Delete"
           duplicateLabel="Duplicate"

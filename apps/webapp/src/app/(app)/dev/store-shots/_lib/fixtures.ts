@@ -188,8 +188,11 @@ function participant(person: StoreShotPerson): InteractionParticipant {
   return {
     avatar: person.avatar,
     firstName: person.firstName,
+    headline: person.headline,
     id: person.id,
     lastName: person.lastName,
+    location: person.location,
+    middleName: person.middleName,
   };
 }
 

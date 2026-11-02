@@ -10,14 +10,14 @@ export function useApiKeyPermissionOptions(): DescribedSelectOption[] {
   return [
     {
       description: t("PermissionReadDescription"),
-      icon: <IconEye size={16} stroke={1.5} />,
       label: t("PermissionReadLabel"),
+      leftSection: <IconEye size={16} stroke={1.5} />,
       value: "read",
     },
     {
       description: t("PermissionFullDescription"),
-      icon: <IconShieldCheck size={16} stroke={1.5} />,
       label: t("PermissionFullLabel"),
+      leftSection: <IconShieldCheck size={16} stroke={1.5} />,
       value: "full",
     },
   ];
