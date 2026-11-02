@@ -6,7 +6,7 @@
  * Keep rows (tokens FK to `oauth_client`). Disable, revoke tokens, delete consents.
  */
 import { prisma } from "@bondery/db";
-import { CIMD_CLIENT_DISCOVERY_ID, resolveTrustedOAuthClientIds } from "../auth/index.js";
+import { CIMD_CLIENT_DISCOVERY_ID, resolveTrustedOAuthClientIds } from "../auth/auth-public.js";
 
 export type DisableDcrOAuthClientsResult = {
   clientIds: string[];

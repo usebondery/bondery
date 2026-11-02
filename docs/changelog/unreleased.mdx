@@ -55,6 +55,8 @@ hidden: true
 ### 🔄 Changed
 
 - Repo: Switch pnpm from hoisted installs to isolated installs. Expo packages stay selectively public-hoisted for Metro and autolinking.
+- Website: The MCP Server Card at `/mcp-server-card.json` follows the draft Server Card extension. It declares `$schema`, a reverse-DNS `name` (`com.usebondery/mcp`), a description of 100 characters or fewer, and `remotes[]` with `streamable-http` and the 2026-07-28 protocol version. It drops the unversioned `tools[]` list, so agents read the live `tools/list`.
+- Website: The Server Card and `/.well-known/ard.json` allow cross-origin reads (`Access-Control-Allow-Origin: *`) and answer preflight with `204`. Browser-based agents can fetch both without a proxy.
 - Webapp and Website: Ship Next.js containers from `output: 'standalone'` (traced runtime only). No full monorepo `node_modules` in the runner.
 - Docker: Disable pnpm’s global virtual store inside image builds so package binaries resolve under BuildKit store mounts. Local installs still use the virtual store for Turbopack.
 - Mobile: Metro and Expo autolinking follow the isolated layout (`nodeModulesPaths` plus `experiments.autolinkingModuleResolution`).

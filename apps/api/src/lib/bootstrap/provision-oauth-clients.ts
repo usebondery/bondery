@@ -13,7 +13,7 @@ import {
   OAUTH_PROVIDER_SCOPES,
   resolveApiResourceIdentifiers,
   resolveMcpResourceIdentifiers,
-} from "../auth/index.js";
+} from "../auth/auth-public.js";
 import { chromeExtensionRedirectUris } from "./chrome-extension-redirect-uris.js";
 import { disableDcrOAuthClients } from "./disable-dcr-oauth-clients.js";
 
