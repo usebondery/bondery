@@ -78,12 +78,27 @@ services:
       timeout: 5s
     image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-production}
     pre_start:
+      # Hooks inherit `environment:` but NOT `env_file:` (verified on Compose v5).
+      # Anything release-migrate needs from .env must be listed here.
       - command:
           - node
           - apps/api/dist/cli/release-migrate.js
+        environment:
+          BONDERY_PRIVATE_BETTER_AUTH_SECRETS: ${BONDERY_PRIVATE_BETTER_AUTH_SECRETS:?BONDERY_PRIVATE_BETTER_AUTH_SECRETS must be set}
+          BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS: ${BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS:-}
+          BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET: ${BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET:-}
+          BONDERY_INFRA_CHROME_EXTENSION_ID: ${BONDERY_INFRA_CHROME_EXTENSION_ID:-}
+          BONDERY_PUBLIC_OAUTH_CLIENT_ID: ${BONDERY_PUBLIC_OAUTH_CLIENT_ID:-}
+          BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID: ${BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID:-}
       - command:
           - node
           - apps/api/dist/cli/ensure-storage-buckets.js
+        environment:
+          BONDERY_PRIVATE_S3_ENDPOINT: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8333
+          BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
+          BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
+          BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
+          BONDERY_PUBLIC_STORAGE_URL: https://${BONDERY_INFRA_STORAGE_DOMAIN:?BONDERY_INFRA_STORAGE_DOMAIN must be set}
     pull_policy: always
     labels:
       - traefik.enable=true
