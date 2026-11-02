@@ -7,14 +7,15 @@ import {
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, Contact } from "@bondery/schemas";
-import { Button, Center, Stack, Text } from "@mantine/core";
+import type { Activity, Contact, PersonPreview } from "@bondery/schemas";
+import { Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconCopy, IconTrash } from "@tabler/icons-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { InteractionsList } from "@/components/interactions/InteractionsList";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
+import { ShellScrollLoadMore } from "@/components/shell/ShellScrollLoadMore";
 import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import {
@@ -47,6 +48,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isFetchNextPageError,
   } = useContactInteractionsInfiniteQuery(personId);
   const activities = interactionsData?.pages.flatMap((page) => page.activities) ?? [];
   const hasMore = hasNextPage ?? false;
@@ -105,25 +107,28 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     });
   };
 
-  const resolveParticipants = (activity: Activity): Contact[] => {
-    return (activity.participants || [])
-      .map((participant) => {
-        const participantId = typeof participant === "string" ? participant : participant.id;
-        const knownContact = contactsById.get(participantId);
-        if (knownContact) {
-          return knownContact;
-        }
-        if (!participantId || typeof participant === "string") {
-          return null;
-        }
-        return {
+  const resolveParticipants = (activity: Activity): PersonPreview[] => {
+    return (activity.participants || []).flatMap((participant) => {
+      const participantId = typeof participant === "string" ? participant : participant.id;
+      const knownContact = contactsById.get(participantId);
+      if (knownContact) {
+        return [knownContact];
+      }
+      if (!participantId || typeof participant === "string") {
+        return [];
+      }
+      return [
+        {
           avatar: participant.avatar || null,
           firstName: participant.firstName || t("UnknownPerson"),
+          headline: participant.headline,
           id: participantId,
           lastName: participant.lastName || null,
-        } as Contact;
-      })
-      .filter((participant): participant is Contact => Boolean(participant));
+          location: participant.location,
+          middleName: participant.middleName,
+        },
+      ];
+    });
   };
 
   const handleDelete = (activity: Activity) => {
@@ -204,6 +209,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   return (
     <Stack gap="xl">
       <InteractionsList
+        actionsLabel={t("TableColumnActions")}
         activities={sortedActivities}
         deleteLabel={t("DeleteAction")}
         duplicateLabel={t("DuplicateAction")}
@@ -221,19 +227,17 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         resolveParticipants={resolveParticipants}
       />
 
-      {hasMore ? (
-        <Center>
-          <Button
-            loading={isFetchingNextPage}
-            onClick={() => {
-              void fetchNextPage();
-            }}
-            variant="light"
-          >
-            {t("LoadMoreBatch")}
-          </Button>
-        </Center>
-      ) : null}
+      <ShellScrollLoadMore
+        errorLabel={t("LoadMoreError")}
+        fallbackLabel={t("LoadMoreBatch")}
+        hasMore={hasMore}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchNextPageError={isFetchNextPageError}
+        onLoadMore={() => {
+          void fetchNextPage();
+        }}
+        retryLabel={t("LoadMoreRetry")}
+      />
 
       {activities.length === 0 && (
         <Text c="dimmed" py="xl" size="sm" ta="center">

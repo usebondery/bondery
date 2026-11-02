@@ -13,6 +13,10 @@ import {
 } from "@/lib/api/domains/interactions";
 import type { InteractionsListResult } from "@/lib/api/resources/interactions";
 import {
+  type InteractionsTimelineFilter,
+  interactionsInfiniteParams,
+} from "@/lib/query/interactionsListParams";
+import {
   invalidateContactInteractions,
   invalidateInteractionDomain,
   invalidateKeepInTouchCount,
@@ -35,18 +39,17 @@ export function useInteractionsListQuery(params?: InteractionsListParams) {
   });
 }
 
-export function useInteractionsInfiniteQuery(): UseInfiniteQueryResult<
-  InfiniteData<InteractionsListResult>,
-  Error
-> {
-  const infiniteParams = { limit: INTERACTIONS_PAGE_SIZE };
+export function useInteractionsInfiniteQuery(
+  filter: InteractionsTimelineFilter = {},
+): UseInfiniteQueryResult<InfiniteData<InteractionsListResult>, Error> {
+  const infiniteParams = interactionsInfiniteParams(filter, INTERACTIONS_PAGE_SIZE);
 
   return useInfiniteQuery<InteractionsListResult>({
     getNextPageParam: nextPaginatedOffset,
     initialPageParam: 0,
     queryFn: async ({ pageParam }) =>
       getInteractionsList({
-        limit: INTERACTIONS_PAGE_SIZE,
+        ...infiniteParams,
         offset: pageParam as number,
       }),
     queryKey: interactionKeys.infinite(infiniteParams),

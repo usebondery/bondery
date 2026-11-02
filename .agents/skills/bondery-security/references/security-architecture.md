@@ -48,7 +48,6 @@ Auth is wired **only** through shells in `apps/api/src/lib/platform/route-areas.
 |-------|------|----------|---------------|
 | `integrationRoutes` | Session or API key + route policy | Allowed | `integration` |
 | `sessionRoutes` | Session only | Denied | `session` |
-| `adminRoutes` | Session + platform admin role | Denied | `session` |
 | `internalRoutes` | Service secret bearer | Denied | `internal` |
 | `openApiAreaRoutes` | Custom (webhook HMAC, WS ticket) | N/A | varies |
 | `composite` | Per-subtree | Varies | varies |

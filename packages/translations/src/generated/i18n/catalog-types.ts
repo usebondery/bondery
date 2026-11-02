@@ -81,6 +81,7 @@ export type AppNavigationCatalog = {
   Chat: string;
   ChatMode: string;
   FixAndMerge: string;
+  Graph: string;
   Groups: string;
   Home: string;
   Interactions: string;
@@ -125,7 +126,9 @@ export type CommonCatalog = {
     createMore: string;
     info: string;
     loading: string;
+    loadingMore: string;
     openMenu: string;
+    opensInNewTab: string;
   };
   actions: {
     back: string;
@@ -158,7 +161,6 @@ export type CommonCatalog = {
       account_failed_to_upload_profile_photo: string;
       account_invalid: string;
       account_photo_invalid_format: string;
-      admin_required: string;
       api: string;
       api_key_failed: string;
       api_key_limit_exceeded: string;
@@ -796,6 +798,47 @@ export type GlossaryCatalog = {
   };
 };
 
+export type GraphPageCatalog = {
+  AllFamiliesHidden: string;
+  CanvasLabel: string;
+  CenterMyself: string;
+  ClearFocus: string;
+  CompanySwatch: string;
+  EmptyNoLinksBody: string;
+  EmptyNoLinksTitle: string;
+  EmptyNoPeopleBody: string;
+  EmptyNoPeopleTitle: string;
+  Families: {
+    family: string;
+    friends: string;
+    other: string;
+    partners: string;
+    work: string;
+  };
+  Fit: string;
+  GoToPeople: string;
+  HelpLabel: string;
+  HubMembersLabel: string;
+  HubsEmpty: string;
+  LegendLabel: string;
+  NoSearchResults: string;
+  OpenPerson: string;
+  SchoolSwatch: string;
+  SearchLabel: string;
+  SearchPlaceholder: string;
+  Sentence: string;
+  SentenceOther: string;
+  Title: string;
+  ToggleGroups: string;
+  ToggleHubs: string;
+  Truncated: string;
+  UnlinkedPartial: string;
+  UnlinkedTitle: string;
+  ZoomIn: string;
+  ZoomOut: string;
+  ZoomReset: string;
+};
+
 export type GroupDetailPageCatalog = {
   AddPeopleToGroup: string;
   ColorLabel: string;
@@ -1008,6 +1051,34 @@ export type HomePageCatalog = {
 
 export type ChatPageCatalog = {
   actionsButton: string;
+  activity: {
+    create_contact: string;
+    create_group: string;
+    create_interaction: string;
+    create_relationship: string;
+    create_tag: string;
+    delete_contact: string;
+    delete_group: string;
+    delete_interaction: string;
+    delete_relationship: string;
+    delete_tag: string;
+    delete_tags: string;
+    deleteConfirmAction: string;
+    deleteConfirmHint: string;
+    genericDelete: string;
+    genericRead: string;
+    genericWrite: string;
+    lookedUp: string;
+    regenerate: string;
+    stopped: string;
+    stoppedMayHaveSaved: string;
+    update_contact: string;
+    update_important_dates: string;
+    update_interaction: string;
+    update_keep_in_touch: string;
+    update_relationship: string;
+    withName: string;
+  };
   ageDaysShort: string;
   ageHoursShort: string;
   ageLessThanMinuteShort: string;
@@ -1019,10 +1090,29 @@ export type ChatPageCatalog = {
   deleteSessionError: string;
   deleteSessionSuccess: string;
   description: string;
+  dictateBusy: string;
+  dictateDenied: string;
+  dictateFailed: string;
+  dictateFinishing: string;
+  dictateInsecure: string;
+  dictateLanguageUnsupported: string;
+  dictateNetwork: string;
+  dictateNoMicrophone: string;
+  dictateNoService: string;
+  dictateOffline: string;
+  dictateRequesting: string;
+  dictateSendBlocked: string;
+  dictateServiceOff: string;
+  dictateStart: string;
+  dictateStop: string;
   followUpPlaceholder: string;
   heroPrompt: string;
   inputPlaceholder: string;
   last30Days: string;
+  modelAutoHint: string;
+  modelHaikuHint: string;
+  modelPickerLabel: string;
+  modelSonnetHint: string;
   newSession: string;
   noSessions: string;
   older: string;
@@ -1058,7 +1148,17 @@ export type ChatPageCatalog = {
   };
   send: string;
   sessions: string;
-  thinking: string;
+  speakError: string;
+  speakMessage: string;
+  speakPause: string;
+  speakPreparing: string;
+  speakResume: string;
+  speakTokenGroup: string;
+  speakTokenInteraction: string;
+  speakTokenPerson: string;
+  speakTokenTag: string;
+  speakUnsupported: string;
+  stop: string;
   title: string;
   tryAskingMe: string;
   untitledSession: string;
@@ -1085,7 +1185,6 @@ export type CheckoutCatalog = {
 };
 
 export type InteractionsPageCatalog = {
-  ActivitiesDeleted: string;
   ActivityCreated: string;
   ActivityDeleted: string;
   ActivityDetailNotePlaceholder: string;
@@ -1099,6 +1198,7 @@ export type InteractionsPageCatalog = {
   Cancel: string;
   CreateActivityFailed: string;
   CreateNewPersonFallback: string;
+  DateFilter: string;
   DatePresetLastMonth: string;
   DatePresetLastWeek: string;
   DatePresetLastYear: string;
@@ -1111,11 +1211,6 @@ export type InteractionsPageCatalog = {
   DeleteConfirmMessage: string;
   DeleteConfirmTitle: string;
   DeleteFailed: string;
-  DeleteSelectedAction: string;
-  DeleteSelectedConfirmMessage: string;
-  DeleteSelectedConfirmTitle: string;
-  DeletingSelectedDescription: string;
-  DeletingSelectedTitle: string;
   DescriptionPlaceholder: string;
   DuplicateAction: string;
   DuplicateFailed: string;
@@ -1123,6 +1218,7 @@ export type InteractionsPageCatalog = {
     LoadingDescription: string;
   };
   EditAction: string;
+  EndDateLabel: string;
   ErrorTitle: string;
   FrequencyBiannually: string;
   FrequencyBiweekly: string;
@@ -1131,7 +1227,7 @@ export type InteractionsPageCatalog = {
   FrequencyWeekly: string;
   FrequencyYearly: string;
   HeaderDescription: string;
-  HiddenColumnsSection: string;
+  InvalidDateRange: string;
   KeepInTouchFrequency: string;
   KeepInTouchNone: string;
   KeepInTouchUpdated: string;
@@ -1144,46 +1240,32 @@ export type InteractionsPageCatalog = {
   LastInteractionViaActivity: string;
   LoadingMoreLabel: string;
   LoadMoreBatch: string;
+  LoadMoreError: string;
   LoadMorePickerError: string;
   LoadMoreRetry: string;
   MorePeople: string;
   NextDue: string;
-  NoActivitiesFiltered: string;
   NoActivitiesFound: string;
   NoActivitiesWithPerson: string;
   NoAttendees: string;
   NoContactsFound: string;
-  NoHiddenColumns: string;
   NoInteractionRecorded: string;
+  NoMatchingActivities: string;
+  NoMatchingSearch: string;
   Note: string;
-  NoVisibleColumns: string;
   PageTitle: string;
   PickDate: string;
+  ResetFilters: string;
   SaveChanges: string;
   SearchingLabel: string;
   SearchPlaceholder: string;
-  SelectedCountTemplate: string;
-  SortButton: string;
-  SortDateNewest: string;
-  SortDateOldest: string;
-  SortParticipantsLeast: string;
-  SortParticipantsMost: string;
+  StartDateLabel: string;
   SuccessTitle: string;
   TableColumnActions: string;
-  TableColumnDate: string;
-  TableColumnNotes: string;
-  TableColumnParticipants: string;
-  TableColumnTitle: string;
-  TableColumnType: string;
-  TableView: string;
-  TimelineView: string;
   Title: string;
   TitlePlaceholder: string;
-  TotalCountTemplate: string;
   Type: string;
   UnknownPerson: string;
-  VisibleColumnsButton: string;
-  VisibleColumnsSection: string;
   WhoAreYouMeeting: string;
 };
 
@@ -1332,9 +1414,9 @@ export type MagicLinkEmailCatalog = {
 };
 
 export type MapCommonCatalog = {
+  AttributionLabel: string;
+  AttributionTooltip: string;
   Location: string;
-  ShowFlatMap: string;
-  ShowGlobe: string;
   ZoomControls: string;
   ZoomIn: string;
   ZoomOut: string;
@@ -2009,7 +2091,12 @@ export type PeoplePageCatalog = {
   LoadMoreError: string;
   NoContactsFound: string;
   NoContactsMatchSearch: string;
+  Filter: string;
+  ResetFilters: string;
   SearchPlaceholder: string;
+  TagFilterLabel: string;
+  TagFilterNoResults: string;
+  TagFilterPlaceholder: string;
   ThisContactFallback: string;
   Title: string;
 };
@@ -2044,6 +2131,7 @@ export type PersonRelationshipsCatalog = {
   RemoveAction: string;
   SearchingLabel: string;
   SearchPlaceholder: string;
+  ShowOnGraph: string;
   SuccessTitle: string;
   Title: string;
   Types: {
@@ -2841,6 +2929,7 @@ export type TagsSettingsCatalog = {
   SavingDescription: string;
   SavingTitle: string;
   SearchingLabel: string;
+  TagExists: string;
   Title: string;
 };
 
@@ -2942,6 +3031,7 @@ export interface Catalog {
   "FeedbackEmail": FeedbackEmailCatalog;
   "FeedbackPage": FeedbackPageCatalog;
   "FixContactsPage": FixContactsPageCatalog;
+  "GraphPage": GraphPageCatalog;
   "GroupDetailPage": GroupDetailPageCatalog;
   "GroupsPage": GroupsPageCatalog;
   "HomePage": HomePageCatalog;

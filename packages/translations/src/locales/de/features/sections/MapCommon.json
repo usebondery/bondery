@@ -1,7 +1,7 @@
 {
+  "AttributionLabel": "Kartenquellen",
+  "AttributionTooltip": "OpenStreetMap-Mitwirkende. Kacheln von OpenFreeMap.",
   "Location": "Standort",
-  "ShowFlatMap": "Als Karte anzeigen",
-  "ShowGlobe": "Als Globus anzeigen",
   "ZoomControls": "Kartenzoom",
   "ZoomIn": "Hineinzoomen",
   "ZoomOut": "Herauszoomen"

@@ -10,7 +10,8 @@ Platform-specific mechanics: [mobile/lists-selection.md](../mobile/lists-selecti
 
 | Primitive | Use when |
 |-----------|----------|
-| **`DataTable`** (web) | Sortable, searchable, selectable tabular data — People, Interactions, import previews |
+| **`DataTable`** (web) | Sortable, searchable, selectable tabular data — People, import previews |
+| **Timeline cards** (web) | Interaction history on the Interactions page, a person tab, and the home preview |
 | **Card grid** (web) | Visual browse — Groups |
 | **`FlashList`** (mobile) | Sectioned contact lists, large local-first datasets |
 | **Simple stack** | Short fixed lists (< ~10 items), settings rows |
@@ -60,9 +61,22 @@ When rows are selectable:
 
 ## Pagination
 
-- **Paginated API** (`hasMore` from server — see [api-design.md](../../../bondery-api/references/api-design.md)): use **Load more** in `DataTable`, not fake pagination.
-- Server `hasMore` is the single source of truth — do not infer from client page size.
-- Infinite query pattern: `useContactsInfiniteQuery` on People.
+- A paginated API uses server `pagination.hasMore`. See [api-design.md](../../../bondery-api/references/api-design.md). A shell `DataTable` list loads the next page with the shell intersection sentinel. Do not render a Load more button in `DataTable`. Do not use fake page numbers.
+- Server `hasMore` is the source of truth. Do not infer the next page from the client page size.
+- People uses `useContactsInfiniteQuery`. Group members use `useGroupMembersInfiniteQuery`.
+- The interactions timeline is not a `DataTable`. It uses the same sentinel.
+
+---
+
+## Load more
+
+Use one rule for the scroller that owns the list.
+
+- A dropdown scroller calls `onBottomReached` on `ScrollArea.Autosize`.
+- A shell page list uses one intersection sentinel. The observer root is the shell viewport. The root is not `window`. People, group members, the interactions timeline, and the person interactions tab use this sentinel.
+- When the shell viewport is missing, show one explicit button. When the next page fails, show an explicit retry link. The observer does not retry by itself.
+- A short preview stays a fixed first page. The home preview stays that first page.
+- Virtualize a list only when the mounted row count is the problem. Do not add a second page scroller.
 
 ---
 

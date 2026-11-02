@@ -22,17 +22,19 @@ jobs:
 
       - uses: ./.github/actions/shared/setup-pnpm
 
-      - uses: biomejs/setup-biome@v2
-        with:
-          version: 2.5.15
-
       - name: Biome
-        run: biome ci .
+        run: |
+          set +e
+          pnpm exec biome ci --colors=off --max-diagnostics=none --reporter=default --reporter=json --reporter-file="${RUNNER_TEMP}/biome-report.json" .
+          status=$?
+          set -e
+          node scripts/check/biome-step-summary.mjs "${RUNNER_TEMP}/biome-report.json"
+          exit "$status"
 
       - name: Check package imports
         run: pnpm run check:package-imports
 
-  contracts:
+  env:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -48,36 +50,100 @@ jobs:
 
       - uses: ./.github/actions/shared/setup-pnpm
 
+      - name: Env sync and version sync
+        run: |
+          status=0
+          pnpm run env:check || status=1
+          pnpm run check:versions || status=1
+          exit "$status"
+
+  openapi:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/shared/setup-pnpm
+
       - uses: ./.github/actions/shared/turbo-remote-cache
         with:
           turbo_token: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
           turbo_team: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
 
-      - name: Build API workspace deps for contract checks
+      - name: Build API workspace deps for OpenAPI checks
         env:
           DATABASE_URL: postgresql://postgres:password@127.0.0.1:54322/bondery
         run: pnpm -r --filter "api^..." run build
 
-      - name: Check env sync (examples + turbo)
-        run: pnpm run env:check
+      - name: OpenAPI and docs checks
+        run: |
+          status=0
+          pnpm run check:openapi || status=1
+          pnpm run check:docs || status=1
+          exit "$status"
 
-      - name: Check product version sync
-        run: pnpm run check:versions
+  schema-contracts:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
-      - name: Docs checks
-        run: pnpm run check:docs
+      - uses: ./.github/actions/shared/setup-pnpm
 
-      - name: OpenAPI checks
-        run: pnpm run check:openapi
+      - uses: ./.github/actions/shared/turbo-remote-cache
+        with:
+          turbo_token: ${{ secrets.BONDERY_OPS_TURBO_TOKEN }}
+          turbo_team: ${{ vars.BONDERY_OPS_TURBO_TEAM }}
 
-      - name: Schema contracts
-        run: pnpm run check:contracts
+      - name: Build API workspace deps for schema contracts
+        env:
+          DATABASE_URL: postgresql://postgres:password@127.0.0.1:54322/bondery
+        run: pnpm -r --filter "api^..." run build
+
+      - name: Schema contracts and API error checks
+        run: |
+          status=0
+          pnpm run check:contracts || status=1
+          pnpm run check:api-errors || status=1
+          exit "$status"
+
+  translations:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/shared/setup-pnpm
 
       - name: Translation checks
         run: pnpm run check:i18n
 
-      - name: API error checks
-        run: pnpm run check:api-errors
+  # Ruleset context stays `contracts`. This job fails when any parallel check fails.
+  contracts:
+    needs: [env, openapi, schema-contracts, translations]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require parallel contract checks
+        run: |
+          set -euo pipefail
+          echo "env=${{ needs.env.result }}"
+          echo "openapi=${{ needs.openapi.result }}"
+          echo "schema-contracts=${{ needs.schema-contracts.result }}"
+          echo "translations=${{ needs.translations.result }}"
+          test "${{ needs.env.result }}" = "success"
+          test "${{ needs.openapi.result }}" = "success"
+          test "${{ needs.schema-contracts.result }}" = "success"
+          test "${{ needs.translations.result }}" = "success"
 
   types:
     runs-on: ubuntu-latest
@@ -147,6 +213,7 @@ jobs:
         run: pnpm run test:api:sync
 
   website-docker-build:
+    needs: [lint, types, contracts]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -197,6 +264,7 @@ jobs:
           cache_scope: website
 
   api-docker-build:
+    needs: [lint, types, contracts]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -245,6 +313,7 @@ jobs:
           cache_scope: api
 
   webapp-docker-build:
+    needs: [lint, types, contracts]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

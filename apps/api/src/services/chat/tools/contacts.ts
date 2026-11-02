@@ -29,7 +29,7 @@ export function createContactTools(ctx: DomainContext) {
     }),
     delete_contact: chatTool(ctx, {
       description:
-        "Delete a contact you own. Cannot delete your own card. Confirm with the user in the thread before calling.",
+        "Delete a contact you own. Cannot delete your own card. The app shows a confirm before this runs.",
       execute: (args) => executeDeleteContact(ctx, args),
       inputSchema: deleteContactInputSchema,
     }),

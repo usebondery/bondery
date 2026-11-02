@@ -3,6 +3,7 @@
  * Handles AI chat assistant streaming responses
  */
 
+import type { ChatModelId, ChatTurnIntent } from "@bondery/schemas";
 import { chatRequestSchema } from "@bondery/schemas";
 import { standardErrorResponses } from "@bondery/schemas/http/responses";
 import type { UIMessage } from "ai";
@@ -18,7 +19,15 @@ import {
 } from "../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { AI_TIER } from "../../lib/platform/rate-limit.js";
-import { runChatAgent } from "../../services/chat/agent.js";
+import {
+  createChatActivityTracker,
+  markWriteInterrupted,
+  runChatAgent,
+} from "../../services/chat/agent.js";
+import {
+  hasToolApprovalDecision,
+  stripToolPartsForModel,
+} from "../../services/chat/message-parts.js";
 import { resolveAnthropicApiKey } from "../../services/chat/provider.js";
 import { checkAndIncrementQuota } from "../../services/chat/quota.js";
 import {
@@ -27,6 +36,7 @@ import {
   setChatSessionTitleIfEmpty,
 } from "../../services/chat/sessions.js";
 import { generateSessionTitle } from "../../services/chat/title.js";
+import { resolveChatTurn } from "../../services/chat/turn.js";
 
 export const chatRoutes: AppRoutePlugin = async (fastify) => {
   fastify.addHook("onRoute", (routeOptions) => {
@@ -60,58 +70,131 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
     },
     async (
       request: FastifyRequest<{
-        Body: { messages: UIMessage[]; sessionId: string };
+        Body: {
+          intent?: ChatTurnIntent;
+          messages: UIMessage[];
+          model?: ChatModelId;
+          sessionId: string;
+        };
       }>,
       reply,
     ) => {
       const ctx = domainContextFromRequest(request);
-      const { messages, sessionId } = request.body;
+      const { messages, model, sessionId } = request.body;
+
+      // A tool decision is read from the payload, not from a client flag: the
+      // SDK resumes the turn as soon as the decision is recorded, so a flag can
+      // be one render behind. An explicit intent still wins for a retry.
+      const intent: ChatTurnIntent =
+        request.body.intent === "retry"
+          ? "retry"
+          : hasToolApprovalDecision(messages)
+            ? "approval"
+            : (request.body.intent ?? "message");
 
       if (!sessionId) {
         throw badRequest("sessionId is required", "bad_request");
       }
 
-      const lastUserMessage = messages[messages.length - 1];
+      const lastUserMessage = [...messages].reverse().find((message) => message.role === "user");
       if (!lastUserMessage) {
         throw badRequest("messages is required", "validation_error");
       }
 
+      const turn = await resolveChatTurn(ctx, sessionId, messages, intent);
+
       const apiKey = resolveAnthropicApiKey(fastify.config.BONDERY_PRIVATE_ANTHROPIC_API_KEY);
       if (!apiKey) {
         request.log.error("Chat Anthropic API key is missing or still the env example placeholder");
-        await persistUserChatMessage(ctx, sessionId, lastUserMessage);
+        if (turn.insertUserMessage) {
+          await persistUserChatMessage(ctx, sessionId, lastUserMessage);
+        }
         throw serviceUnavailable();
       }
 
-      const quota = await checkAndIncrementQuota(ctx);
-      if (!quota.allowed) {
-        throw forbidden("Chat quota exceeded", "chat_quota_exceeded", {
-          limit: quota.limit,
-          messagesUsed: quota.messagesUsed,
-          plan: quota.plan,
-          resetAt: quota.resetAt,
-        });
+      if (turn.chargeQuota) {
+        const quota = await checkAndIncrementQuota(ctx);
+        if (!quota.allowed) {
+          throw forbidden("Chat quota exceeded", "chat_quota_exceeded", {
+            limit: quota.limit,
+            messagesUsed: quota.messagesUsed,
+            plan: quota.plan,
+            resetAt: quota.resetAt,
+          });
+        }
       }
 
-      await persistUserChatMessage(ctx, sessionId, lastUserMessage);
+      if (turn.insertUserMessage) {
+        await persistUserChatMessage(ctx, sessionId, lastUserMessage);
+      }
 
-      const modelMessages = await convertToModelMessages(messages).catch((err: unknown) => {
+      const modelMessages = await convertToModelMessages(
+        stripToolPartsForModel(messages, { keepApproval: intent === "approval" }),
+      ).catch((err: unknown) => {
         request.log.error(err, "Failed to convert chat messages");
         throw badRequest("Invalid chat messages", "validation_error");
       });
 
-      const result = runChatAgent(modelMessages, ctx, apiKey);
+      // The browser aborts the fetch on Stop. Propagate that to the model call
+      // so a stopped turn does not keep spending tokens.
+      const abortController = new AbortController();
+      request.raw.on("aborted", () => abortController.abort());
+      reply.raw.on("close", () => {
+        if (!reply.raw.writableEnded) {
+          abortController.abort();
+        }
+      });
+
+      const tracker = createChatActivityTracker();
+      const result = runChatAgent(modelMessages, ctx, {
+        abortSignal: abortController.signal,
+        apiKey,
+        modelId: model,
+        tracker,
+      });
+
+      // Persist once. Stop and failure keep the partial text; a normal finish
+      // marks the row complete.
+      let persisted = false;
+      const persistOnce = async (status: "complete" | "incomplete") => {
+        if (persisted) {
+          return;
+        }
+        persisted = true;
+
+        let text = tracker.text;
+        if (!text) {
+          text = await Promise.resolve(result.text).catch(() => "");
+        }
+
+        await persistAssistantChatMessage(
+          ctx,
+          sessionId,
+          {
+            activities: tracker.activities,
+            status,
+            text,
+            writeMayHaveLanded: tracker.writeInterrupted,
+          },
+          { reuseIncomplete: turn.reuseAssistantRow },
+        );
+      };
 
       const persistAssistant = Promise.resolve(result.text)
         .then(async (fullText) => {
-          if (fullText) {
-            await persistAssistantChatMessage(ctx, sessionId, fullText);
+          tracker.text = fullText;
+          await persistOnce("complete");
+
+          // A title only belongs to the first turn of a session.
+          if (!turn.insertUserMessage) {
+            return;
           }
-          const userText =
-            lastUserMessage.parts
-              ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
-              .map((p) => p.text)
-              .join(" ") ?? "";
+
+          const userText = lastUserMessage.parts
+            ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
+            .map((p) => p.text)
+            .join(" ");
+
           if (userText) {
             try {
               const title = await generateSessionTitle(userText, apiKey);
@@ -124,12 +207,27 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
           }
         })
         .catch((err: unknown) => {
+          // A stopped turn rejects the text promise. The partial row is already
+          // written by the stream's own end callback.
+          if (abortController.signal.aborted) {
+            return;
+          }
+
           request.log.error(err, "Failed to persist assistant chat message");
         });
 
       reply.hijack();
       try {
-        await result.pipeUIMessageStreamToResponse(reply.raw);
+        await result.pipeUIMessageStreamToResponse(reply.raw, {
+          onEnd: ({ isAborted, isCancelled }) => {
+            if (!isAborted && !isCancelled) {
+              return;
+            }
+
+            markWriteInterrupted(tracker);
+            void persistOnce("incomplete");
+          },
+        });
       } catch (err) {
         request.log.error(err, "Chat stream failed");
       }

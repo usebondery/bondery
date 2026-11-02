@@ -36,6 +36,7 @@ import {
   getContactsSelectableList,
   getContactTags,
   getMapPins,
+  getRelationshipGraph,
   type ImportantDateInput,
   type MapAddressPinsResult,
   type MapContactPinsResult,
@@ -49,6 +50,7 @@ import {
   uploadContactPhoto,
 } from "@/lib/api/domains/contacts";
 import { getInteractionsList } from "@/lib/api/domains/interactions";
+import { isMissingContactError } from "@/lib/api/isMissingContactError";
 import type { ContactsDataResult } from "@/lib/api/resources/contacts";
 import type { InteractionsListResult } from "@/lib/api/resources/interactions";
 import { refreshAppShell } from "@/lib/app/refreshAppShell";
@@ -70,7 +72,7 @@ import {
   invalidateKeepInTouchCount,
   invalidateSettings,
 } from "@/lib/query/invalidation";
-import { contactKeys } from "@/lib/query/keys";
+import { contactKeys, interactionKeys } from "@/lib/query/keys";
 import { throwIfPageCannotRender } from "@/lib/query/pageLoadFailure";
 import { nextPaginatedOffset } from "@/lib/query/paginatedInfiniteQuery";
 import { PERSON_INTERACTIONS } from "@/lib/query/personPageQueryParams";
@@ -100,6 +102,8 @@ async function invalidateAfterContactUpdate(
   await Promise.all([
     invalidateContactDetail(queryClient, contactId),
     invalidateContactLists(queryClient),
+    // Interactions embed a participant snapshot (name, avatar, headline, location).
+    queryClient.invalidateQueries({ queryKey: interactionKeys.all }),
     ...(patchAffectsMapPins(patch) ? [invalidateContactMapPins(queryClient)] : []),
     ...(patchAffectsKeepInTouch(patch)
       ? [
@@ -294,6 +298,23 @@ export function useMapPinsQuery(
     queryKey: contactKeys.mapPins(mode, cameraKey),
     staleTime: MAP_PINS_STALE_TIME_MS,
     throwOnError: throwIfPageCannotRender,
+  });
+}
+
+export function useRelationshipGraphQuery(focus: string | null, enabled = true) {
+  return useQuery({
+    enabled,
+    queryFn: () => getRelationshipGraph(focus),
+    queryKey: contactKeys.relationshipGraph(focus),
+    throwOnError: (error, query) => {
+      if (query.state.data !== undefined) {
+        return false;
+      }
+      if (isMissingContactError(error)) {
+        return true;
+      }
+      return throwIfPageCannotRender(error, query);
+    },
   });
 }
 

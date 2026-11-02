@@ -7,6 +7,12 @@ import { pollUntil } from "../pollUntil";
 import type { EducationEntry } from "./education";
 import { fetchFullEducation, fetchFullWorkHistory, fetchVoyagerProfileMeta } from "./fetchDetails";
 import {
+  beginVoyagerDump,
+  finishVoyagerDump,
+  isVoyagerDumpEnabled,
+  type VoyagerCoverageRow,
+} from "./fetchDetails/voyagerDump";
+import {
   displayNameFromLinkedInHandle,
   ensureProfileSectionsLoaded,
   extractSduiBio,
@@ -87,6 +93,121 @@ function applyCompanyDomLogos(entries: WorkEntry[], sdui: WorkEntry[]): WorkEntr
   });
 }
 
+function keptPreferDom(dom?: string, voyager?: string): "dom" | "voyager" | "none" {
+  if (dom) {
+    return "dom";
+  }
+  if (voyager) {
+    return "voyager";
+  }
+  return "none";
+}
+
+function keptText(dom?: string, voyager?: string): "dom" | "voyager" | "none" {
+  if (voyager && dom) {
+    return voyager.length >= dom.length ? "voyager" : "dom";
+  }
+  if (voyager) {
+    return "voyager";
+  }
+  if (dom) {
+    return "dom";
+  }
+  return "none";
+}
+
+function keptCount(voyagerCount: number, domCount: number): "voyager" | "dom" | "none" {
+  if (voyagerCount > 0) {
+    return "voyager";
+  }
+  if (domCount > 0) {
+    return "dom";
+  }
+  return "none";
+}
+
+function setFlag(value: string | undefined): string {
+  return value ? "set" : "";
+}
+
+function coverageRows(input: {
+  domBio?: string;
+  domEduCount: number;
+  domIdentity: SduiIdentity | null;
+  domWorkCount: number;
+  keptBio?: string;
+  usedHandleName: boolean;
+  voyagerBio?: string;
+  voyagerEduCount: number;
+  voyagerIdentity: SduiIdentity | null;
+  voyagerLocation?: string;
+  voyagerWorkCount: number;
+}): VoyagerCoverageRow[] {
+  const dom = input.domIdentity;
+  const voyager = input.voyagerIdentity;
+  const nameKept = (field: "firstName" | "lastName"): string => {
+    const side = keptPreferDom(dom?.[field], voyager?.[field]);
+    if (side !== "none") {
+      return side;
+    }
+    if (input.usedHandleName) {
+      return "handle";
+    }
+    return "none";
+  };
+
+  return [
+    {
+      dom: String(input.domWorkCount),
+      field: "work",
+      kept: keptCount(input.voyagerWorkCount, input.domWorkCount),
+      voyager: String(input.voyagerWorkCount),
+    },
+    {
+      dom: String(input.domEduCount),
+      field: "education",
+      kept: keptCount(input.voyagerEduCount, input.domEduCount),
+      voyager: String(input.voyagerEduCount),
+    },
+    {
+      dom: input.domBio ? `${input.domBio.length}c` : "",
+      field: "bio",
+      kept: input.keptBio ? keptText(input.domBio, input.voyagerBio) : "none",
+      voyager: input.voyagerBio ? `${input.voyagerBio.length}c` : "",
+    },
+    {
+      dom: dom?.firstName ?? "",
+      field: "firstName",
+      kept: nameKept("firstName"),
+      voyager: voyager?.firstName ?? "",
+    },
+    {
+      dom: dom?.lastName ?? "",
+      field: "lastName",
+      kept: nameKept("lastName"),
+      voyager: voyager?.lastName ?? "",
+    },
+    {
+      dom: dom?.headline ?? "",
+      field: "headline",
+      kept: keptPreferDom(dom?.headline, voyager?.headline),
+      voyager: voyager?.headline ?? "",
+    },
+    {
+      dom: setFlag(dom?.profilePhotoUrl),
+      field: "photo",
+      kept: keptPreferDom(dom?.profilePhotoUrl, voyager?.profilePhotoUrl),
+      voyager: setFlag(voyager?.profilePhotoUrl),
+    },
+    {
+      dom: "",
+      field: "location",
+      kept: input.voyagerLocation ? "voyager" : "none",
+      voyager: input.voyagerLocation ?? "",
+    },
+  ];
+}
+
 function applySchoolDomLogos(entries: EducationEntry[], sdui: EducationEntry[]): EducationEntry[] {
   const byName = new Map<string, string>();
   for (const entry of sdui) {
@@ -107,9 +228,11 @@ export async function scrapeLinkedInProfile(
   handle: string,
   options?: { skipNetworkLogos?: boolean },
 ): Promise<CachedProfile> {
-  const cached = profileCache.get(handle);
-  if (cached) {
-    return cached;
+  if (!isVoyagerDumpEnabled()) {
+    const cached = profileCache.get(handle);
+    if (cached) {
+      return cached;
+    }
   }
   const inflight = inflightScrapes.get(handle);
   if (inflight) {
@@ -119,107 +242,129 @@ export async function scrapeLinkedInProfile(
   const skipNetworkLogos = options?.skipNetworkLogos ?? false;
 
   const promise = (async () => {
-    const sectionsPromise = ensureProfileSectionsLoaded();
+    beginVoyagerDump(handle);
+    let coverage: VoyagerCoverageRow[] = [];
+    try {
+      const sectionsPromise = ensureProfileSectionsLoaded();
 
-    const earlyDomWork = extractSduiWorkHistory();
-    const domLogosByCompany = new Map<string, string>();
-    for (const dw of earlyDomWork) {
-      if (dw.companyLogoUrl && dw.companyName) {
-        domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+      const earlyDomWork = extractSduiWorkHistory();
+      const domLogosByCompany = new Map<string, string>();
+      for (const dw of earlyDomWork) {
+        if (dw.companyLogoUrl && dw.companyName) {
+          domLogosByCompany.set(dw.companyName.toLowerCase(), dw.companyLogoUrl);
+        }
       }
-    }
 
-    const earlyDomEdu = extractSduiEducation();
-    const domLogosBySchool = new Map<string, string>();
-    for (const de of earlyDomEdu) {
-      if (de.schoolLogoUrl && de.schoolName) {
-        domLogosBySchool.set(de.schoolName.toLowerCase(), de.schoolLogoUrl);
+      const earlyDomEdu = extractSduiEducation();
+      const domLogosBySchool = new Map<string, string>();
+      for (const de of earlyDomEdu) {
+        if (de.schoolLogoUrl && de.schoolName) {
+          domLogosBySchool.set(de.schoolName.toLowerCase(), de.schoolLogoUrl);
+        }
       }
-    }
 
-    const [workResult, eduResult, metaResult] = await Promise.allSettled([
-      fetchFullWorkHistory(handle, domLogosByCompany, skipNetworkLogos),
-      fetchFullEducation(handle, skipNetworkLogos, domLogosBySchool),
-      fetchVoyagerProfileMeta(handle),
-    ]);
-    const fetchedWork = workResult.status === "fulfilled" ? workResult.value : [];
-    const fetchedEdu = eduResult.status === "fulfilled" ? eduResult.value : [];
-    const voyagerMeta =
-      metaResult.status === "fulfilled"
-        ? metaResult.value
-        : { bio: undefined, identity: null, location: undefined };
-    if (workResult.status === "rejected") {
-      extLog.warn("[linkedin][scrape] work history fetch failed", workResult.reason);
-    }
-    if (eduResult.status === "rejected") {
-      extLog.warn("[linkedin][scrape] education fetch failed", eduResult.reason);
-    }
-    if (metaResult.status === "rejected") {
-      extLog.warn("[linkedin][scrape] profile meta fetch failed", metaResult.reason);
-    }
+      const [workResult, eduResult, metaResult] = await Promise.allSettled([
+        fetchFullWorkHistory(handle, domLogosByCompany, skipNetworkLogos),
+        fetchFullEducation(handle, skipNetworkLogos, domLogosBySchool),
+        fetchVoyagerProfileMeta(handle),
+      ]);
+      const fetchedWork = workResult.status === "fulfilled" ? workResult.value : [];
+      const fetchedEdu = eduResult.status === "fulfilled" ? eduResult.value : [];
+      const voyagerMeta =
+        metaResult.status === "fulfilled"
+          ? metaResult.value
+          : { bio: undefined, identity: null, location: undefined };
+      if (workResult.status === "rejected") {
+        extLog.warn("[linkedin][scrape] work history fetch failed", workResult.reason);
+      }
+      if (eduResult.status === "rejected") {
+        extLog.warn("[linkedin][scrape] education fetch failed", eduResult.reason);
+      }
+      if (metaResult.status === "rejected") {
+        extLog.warn("[linkedin][scrape] profile meta fetch failed", metaResult.reason);
+      }
 
-    await sectionsPromise;
+      await sectionsPromise;
 
-    const sduiIdentity = extractSduiIdentity(undefined, handle);
-    const sduiWork = extractSduiWorkHistory();
-    const sduiEdu = extractSduiEducation();
-    const workHistory = applyCompanyDomLogos(
-      fetchedWork.length > 0 ? fetchedWork : sduiWork,
-      sduiWork,
-    );
-    const educationHistory = applySchoolDomLogos(
-      fetchedEdu.length > 0 ? fetchedEdu : sduiEdu,
-      sduiEdu,
-    );
-    const identity = mergeIdentities(sduiIdentity, voyagerMeta.identity);
-    const handleName = identity ? null : displayNameFromLinkedInHandle(handle);
-    let linkedinBio = pickLongerText(voyagerMeta.bio, extractSduiBio());
-    if (!linkedinBio) {
-      await pollUntil(
-        () => Boolean(extractSduiBio()),
-        5_000,
-        () => {
-          window.scrollTo(0, 480);
-        },
+      const sduiIdentity = extractSduiIdentity(undefined, handle);
+      const sduiWork = extractSduiWorkHistory();
+      const sduiEdu = extractSduiEducation();
+      const workHistory = applyCompanyDomLogos(
+        fetchedWork.length > 0 ? fetchedWork : sduiWork,
+        sduiWork,
       );
-      linkedinBio = extractSduiBio();
-    }
+      const educationHistory = applySchoolDomLogos(
+        fetchedEdu.length > 0 ? fetchedEdu : sduiEdu,
+        sduiEdu,
+      );
+      const identity = mergeIdentities(sduiIdentity, voyagerMeta.identity);
+      const handleName = identity ? null : displayNameFromLinkedInHandle(handle);
+      let domBio = extractSduiBio();
+      let linkedinBio = pickLongerText(voyagerMeta.bio, domBio);
+      if (!linkedinBio) {
+        await pollUntil(
+          () => Boolean(extractSduiBio()),
+          5_000,
+          () => {
+            window.scrollTo(0, 480);
+          },
+        );
+        domBio = extractSduiBio();
+        linkedinBio = domBio;
+      }
 
-    const profile: CachedProfile = {
-      educationHistory,
-      firstName: identity?.firstName ?? handleName?.firstName,
-      headline: identity?.headline,
-      lastName: identity?.lastName ?? handleName?.lastName,
-      linkedinBio,
-      location: voyagerMeta.location,
-      middleName: identity?.middleName ?? handleName?.middleName,
-      profilePhotoUrl: identity?.profilePhotoUrl,
-      workHistory,
-    };
+      const profile: CachedProfile = {
+        educationHistory,
+        firstName: identity?.firstName ?? handleName?.firstName,
+        headline: identity?.headline,
+        lastName: identity?.lastName ?? handleName?.lastName,
+        linkedinBio,
+        location: voyagerMeta.location,
+        middleName: identity?.middleName ?? handleName?.middleName,
+        profilePhotoUrl: identity?.profilePhotoUrl,
+        workHistory,
+      };
 
-    extLog.debug(
-      `[linkedin][scrape] ${handle}: ${workHistory.length} work (${fetchedWork.length > 0 ? "voyager" : "dom"}),` +
-        ` ${educationHistory.length} edu (${fetchedEdu.length > 0 ? "voyager" : "dom"}),` +
-        ` location=${voyagerMeta.location ? `"${voyagerMeta.location}"` : "none"}` +
-        ` bio=${linkedinBio ? `${linkedinBio.length}c` : "none"}`,
-    );
+      extLog.debug(
+        `[linkedin][scrape] ${handle}: ${workHistory.length} work (${fetchedWork.length > 0 ? "voyager" : "dom"}),` +
+          ` ${educationHistory.length} edu (${fetchedEdu.length > 0 ? "voyager" : "dom"}),` +
+          ` location=${voyagerMeta.location ? `"${voyagerMeta.location}"` : "none"}` +
+          ` bio=${linkedinBio ? `${linkedinBio.length}c` : "none"}`,
+      );
 
-    if (workHistory.length === 0 && educationHistory.length === 0) {
-      extLog.warn("[linkedin][scrape] empty work and education", {
-        handle,
-        hasIdentity: Boolean(identity),
-        hasJsessionId: /(?:^|;\s*)JSESSIONID=/.test(document.cookie),
-        hasTopcard: Boolean(getTopcard()),
-        voyagerEduEmpty: fetchedEdu.length === 0,
-        voyagerWorkEmpty: fetchedWork.length === 0,
+      if (workHistory.length === 0 && educationHistory.length === 0) {
+        extLog.warn("[linkedin][scrape] empty work and education", {
+          handle,
+          hasIdentity: Boolean(identity),
+          hasJsessionId: /(?:^|;\s*)JSESSIONID=/.test(document.cookie),
+          hasTopcard: Boolean(getTopcard()),
+          voyagerEduEmpty: fetchedEdu.length === 0,
+          voyagerWorkEmpty: fetchedWork.length === 0,
+        });
+      }
+
+      if (shouldCacheProfile(profile)) {
+        profileCache.set(handle, profile);
+      }
+
+      coverage = coverageRows({
+        domBio,
+        domEduCount: sduiEdu.length,
+        domIdentity: sduiIdentity,
+        domWorkCount: sduiWork.length,
+        keptBio: linkedinBio,
+        usedHandleName: Boolean(handleName),
+        voyagerBio: voyagerMeta.bio,
+        voyagerEduCount: fetchedEdu.length,
+        voyagerIdentity: voyagerMeta.identity,
+        voyagerLocation: voyagerMeta.location,
+        voyagerWorkCount: fetchedWork.length,
       });
-    }
 
-    if (shouldCacheProfile(profile)) {
-      profileCache.set(handle, profile);
+      return profile;
+    } finally {
+      finishVoyagerDump(handle, coverage);
     }
-
-    return profile;
   })();
 
   inflightScrapes.set(handle, promise);

@@ -57,12 +57,13 @@ export function LocationLookupInput({
   onSuggestionSelect,
   onBlur,
 }: LocationLookupInputProps) {
-  const [options, setOptions] = useState<string[]>([]);
+  const [options, setOptions] = useState<Array<{ label: string; value: string }>>([]);
   const [selectedFlag, setSelectedFlag] = useState<string | null>(() =>
     extractCountryCodeFromLabel(value),
   );
   const [loading, setLoading] = useState(false);
-  const suggestionsByLabel = useRef<Record<string, ContactAddressEntry>>({});
+  const suggestionsByKey = useRef<Record<string, ContactAddressEntry>>({});
+  const optionFlagByKey = useRef<Record<string, string>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
   /** Tracks whether the user has actively changed the input value. */
   const userHasTyped = useRef(false);
@@ -87,7 +88,8 @@ export function LocationLookupInput({
       const text = value.trim();
       if (text.length < GEOCODE_SUGGEST_MIN_QUERY_LENGTH) {
         setOptions([]);
-        suggestionsByLabel.current = {};
+        suggestionsByKey.current = {};
+        optionFlagByKey.current = {};
         optionFlagByLabel.current = {};
         return;
       }
@@ -107,17 +109,27 @@ export function LocationLookupInput({
 
           const dictionary: Record<string, ContactAddressEntry> = {};
           const flags: Record<string, string> = {};
-          const labels: string[] = [];
+          const flagsByLabel: Record<string, string> = {};
+          const labels: Array<{ label: string; value: string }> = [];
+          const seen = new Set<string>();
 
           for (const item of items) {
             const displayLabel = geocodeSuggestionDisplayLabel(item);
-            dictionary[displayLabel] = item;
-            flags[displayLabel] = getSuggestionCountryFlag(item);
-            labels.push(displayLabel);
+            const key = geocodeSuggestionDisplayKey(item);
+            if (seen.has(key)) {
+              continue;
+            }
+            seen.add(key);
+            const flag = getSuggestionCountryFlag(item);
+            dictionary[key] = item;
+            flags[key] = flag;
+            flagsByLabel[displayLabel] ??= flag;
+            labels.push({ label: displayLabel, value: key });
           }
 
-          suggestionsByLabel.current = dictionary;
-          optionFlagByLabel.current = flags;
+          suggestionsByKey.current = dictionary;
+          optionFlagByKey.current = flags;
+          optionFlagByLabel.current = flagsByLabel;
           setOptions(labels);
         } catch (error) {
           if (error instanceof Error && error.name === "AbortError") {
@@ -125,7 +137,8 @@ export function LocationLookupInput({
           }
           if (activeQueryRef.current === text) {
             setOptions([]);
-            suggestionsByLabel.current = {};
+            suggestionsByKey.current = {};
+            optionFlagByKey.current = {};
             optionFlagByLabel.current = {};
           }
         } finally {
@@ -160,24 +173,24 @@ export function LocationLookupInput({
         onChange(v);
         setSelectedFlag(optionFlagByLabel.current[v] ?? null);
       }}
-      onOptionSubmit={(selectedLabel) => {
-        const selected = suggestionsByLabel.current[selectedLabel];
+      onOptionSubmit={(selectedKey) => {
+        const selected = suggestionsByKey.current[selectedKey];
         if (!selected) {
           return;
         }
 
-        onChange(selectedLabel);
-        setSelectedFlag(optionFlagByLabel.current[selectedLabel] ?? null);
+        onChange(geocodeSuggestionDisplayLabel(selected));
+        setSelectedFlag(optionFlagByKey.current[selectedKey] ?? null);
         onSuggestionSelect(selected);
       }}
       placeholder={placeholder}
       renderOption={({ option }) => (
         <Group gap="xs" wrap="nowrap">
           <span
-            className={`fi fi-${optionFlagByLabel.current[option.value] || "aq"}`}
+            className={`fi fi-${optionFlagByKey.current[option.value] || "aq"}`}
             style={{ flexShrink: 0, width: 18 }}
           />
-          <span>{option.value}</span>
+          <span>{option.label}</span>
         </Group>
       )}
       rightSection={

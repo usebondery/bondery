@@ -62,9 +62,9 @@ export const peopleTagSchema = z.object({
 
 export const createTagSchema = tagEditableFieldsSchema;
 
-/** API payload for creating a tag. */
-export const createTagInputSchema = z.object({
-  label: tagLabelSchema,
+/** API payload for creating a tag. `color` is optional; the API picks one when omitted. */
+export const createTagInputSchema = tagEditableFieldsSchema.partial({
+  color: true,
 }) satisfies z.ZodType<CreateTagInput>;
 
 export const updateTagSchema = createTagSchema.partial() satisfies z.ZodType<UpdateTagInput>;
@@ -77,6 +77,7 @@ export const tagUpdateResponseSchema = tagResponseSchema satisfies z.ZodType<Tag
 
 export const addContactsToTagResponseSchema = z.object({
   addedCount: z.number(),
+  skippedCount: z.number(),
 }) satisfies z.ZodType<AddContactsToTagResponse>;
 
 export const removeContactsFromTagResponseSchema = z.object({

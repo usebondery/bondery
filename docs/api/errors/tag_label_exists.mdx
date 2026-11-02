@@ -1,0 +1,32 @@
+---
+title: tag_label_exists
+description: Tag Label Already Exists
+---
+
+## When this happens
+
+A tag with the same label already exists for this account. The check ignores letter case, so `Investors` and `investors` collide. Affects **Tags** operations.
+
+## What your integration should do
+
+Read the existing tag with `GET /tags`, or update the existing tag with `PATCH /tags/:id`. Do not retry the create request with the same label.
+
+## What end users should see
+
+Translate with `common.errors.api.tag_label_exists` when a string exists; otherwise show the label field error "A tag with this name already exists." Never surface the raw API `message`.
+
+## Response fields
+
+| Property | Value |
+|----------|-------|
+| **Type** | `conflict_error` |
+| **HTTP status** | 409 |
+| **code** | `tag_label_exists` |
+| **doc_url** | `/docs/api/errors/tag_label_exists` |
+
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+
+## Source references
+
+- `apps/api/src/domains/tags/create-tag.ts`
+- `apps/api/src/domains/tags/update-tag.ts`

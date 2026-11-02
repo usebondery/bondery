@@ -117,7 +117,7 @@ In-app chat registers the same tool names as MCP (`create_interaction`, not `log
 | Contact groups/tags | `GET /contacts/:id/groups`, `GET /contacts/:id/tags` | `get_contact_groups`, `get_contact_tags` |
 | LinkedIn work/education | `GET /contacts/:id/linkedin-data` | `get_contact_linkedin` (read of stored bio, work, and education; enrich upsert stays REST) |
 | Groups | `GET/POST/PATCH/DELETE /groups`, membership routes | `search_groups`, `get_groups`, `get_group`, `create_group`, `update_group`, `delete_group`, `get_group_contacts`, `create_group_membership`, `delete_group_membership` |
-| Tags | `GET/POST/PATCH/DELETE /tags`, membership routes | `search_tags`, `get_tags`, `get_tag`, `create_tag`, `update_tag`, `delete_tag`, `get_tag_contacts`, `create_tag_membership`, `delete_tag_membership` |
+| Tags | `GET/POST/PATCH/DELETE /tags`, membership routes | `search_tags`, `get_tags`, `get_tag`, `create_tag`, `update_tag`, `delete_tag`, `delete_tags` (at most 25), `get_tag_contacts`, `create_tag_membership`, `delete_tag_membership` |
 | Relationships | Nested contact relationship routes | `get_relationships`, `create_relationship`, `update_relationship`, `delete_relationship` |
 | Keep-in-touch | Contact fields + overdue count | `get_keep_in_touch_count`, `get_keep_in_touch_contacts`, `update_keep_in_touch` (also on `update_contact`) |
 | Share contact | `GET /contacts/:id/share-preview`, `POST /contacts/share` | `get_contact_share`, `create_contact_share` (protocol confirm; outbound email is irreversible) |
@@ -131,7 +131,7 @@ In-app chat registers the same tool names as MCP (`create_interaction`, not `log
 
 Auth: REST uses session cookies, bearer, or API keys. MCP uses OAuth 2.1 + PKCE with `mcp:read` / `mcp:write` only.
 
-Do not wrap over MCP: bulk `DELETE` with `ids[]`, `contactFilter` / `memberFilter` membership, avatar previews, or import defaults.
+Do not wrap over MCP: bulk `DELETE` of people, groups, or interactions, `contactFilter` / `memberFilter` membership, avatar previews, or import defaults. Tag bulk delete is the exception: `delete_tags` takes `tagIds` (at most 25) and still confirms.
 
 ## Checklist
 
@@ -143,5 +143,5 @@ Do not wrap over MCP: bulk `DELETE` with `ids[]`, `contactFilter` / `memberFilte
 - [ ] Write tools match `isMcpWriteToolName` (`/^(create|update|delete)_/`) and require `mcp:write` in `mcpAuthHandler` (do not filter `tools/list` by scope)
 - [ ] Every `registerTool` sets `title` plus all four annotation hints via `mcp-tool-meta`
 - [ ] Every `delete_*` tool uses `confirm-delete` (HMAC `requestState`; ownership/not-found **before** elicit). `create_contact_share` uses the same confirm helper (outbound email is irreversible).
-- [ ] User docs + `mcp-server-card.json` list the same names
+- [ ] User docs list every tool name. The Server Card does not: a `$schema` card has no `tools[]`
 - [ ] `pnpm --filter api run check:mcp-tool-names` passes

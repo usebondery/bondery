@@ -11,9 +11,9 @@ Accepted (2026-07-28)
 
 ## Context
 
-Internal KPI routes (`/admin/stats/*`) were gated by `user_settings.is_admin`, a
-column maintained outside Better Auth. Bondery already uses Better Auth for
-sessions and is adopting more of its plugin surface.
+Internal KPI routes were gated by `user_settings.is_admin`, a column maintained
+outside Better Auth. Bondery already uses Better Auth for sessions and is
+adopting more of its plugin surface.
 
 ## Decision
 
@@ -22,8 +22,8 @@ sessions and is adopting more of its plugin surface.
 - Drop `user_settings.is_admin` after backfilling `user.role` from existing rows.
 - Disable impersonation by omitting `impersonate` and `impersonate-admins` from
   the custom admin role permissions.
-- `verifyAdmin` checks `isPlatformAdmin(userId)` (Prisma: `role = admin`,
-  `!banned`).
+- `isPlatformAdmin(userId)` (Prisma: `role = admin`, `!banned`) is the single
+  operator check.
 - Deploy-time promotion via `BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS` and
   `provision-platform-admins`.
 

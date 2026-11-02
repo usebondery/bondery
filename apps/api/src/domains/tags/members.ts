@@ -5,10 +5,14 @@ export async function addTagMembers(
   ctx: DomainContext,
   tagId: string,
   personIds: string[],
-): Promise<{ data: { addedCount: number }; txid: string; serverSequence: number }> {
+): Promise<{
+  data: { addedCount: number; skippedCount: number };
+  txid: string;
+  serverSequence: number;
+}> {
   const result = await upsertPeopleTagMemberships(ctx, tagId, personIds);
   return {
-    data: { addedCount: result.addedCount },
+    data: { addedCount: result.addedCount, skippedCount: result.skippedCount },
     serverSequence: result.serverSequence,
     txid: result.txid,
   };

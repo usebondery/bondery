@@ -1,5 +1,5 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { CreateTagInput, Tag, TagWithCount, UpdateTagInput } from "@bondery/schemas";
+import type { Tag, TagWithCount, UpdateTagInput } from "@bondery/schemas";
 import { clientApiJson } from "@/lib/api/client";
 import {
   buildTagDetailPath,
@@ -33,7 +33,7 @@ export async function getTagMembers(
   return parseTagMembers(raw, params?.limit ?? 50);
 }
 
-export async function createTag(body: CreateTagInput): Promise<Tag> {
+export async function createTag(body: { label: string; color?: string }): Promise<Tag> {
   const raw = await clientApiJson<{ tag?: Tag }>(API_ROUTES.TAGS, {
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },

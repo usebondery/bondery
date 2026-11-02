@@ -1,8 +1,8 @@
-import { docs } from "collections/server";
 import type * as PageTree from "fumadocs-core/page-tree";
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 import { openapiPlugin } from "fumadocs-openapi/server";
+import { docs } from "@/lib/collections";
 
 export const source = loader(
   {

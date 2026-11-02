@@ -12,7 +12,6 @@ import {
   Badge,
   Box,
   Group,
-  Loader,
   Paper,
   SegmentedControl,
   Skeleton,
@@ -48,6 +47,8 @@ import { openDeleteContactsModal } from "@/components/contacts/openDeleteContact
 import { type MapCamera, PeopleMap, type PeopleMapFocus } from "@/components/map/PeopleMap";
 import {
   type MapGeolocationFailureStatus,
+  type MapSelfLocation,
+  readMapGeolocationIfGranted,
   useMapGeolocation,
 } from "@/components/map/useMapGeolocation";
 import { LocationLookupInput } from "@/components/shell/LocationLookupInput";
@@ -84,6 +85,8 @@ const MAP_CORNER_RADIUS_PX = 12;
 const MAP_CHROME_Z_INDEX = 5;
 /** Default camera when URL has no valid latitude/longitude/zoom (Atlantic overview). */
 const DEFAULT_MAP_CAMERA: MapCamera = { latitude: 35, longitude: -25, zoom: 3 };
+/** Camera zoom after a silent granted GPS probe. */
+const GRANTED_LOCATION_ZOOM = 14;
 
 interface MapClientProps {
   view: MapView;
@@ -126,26 +129,26 @@ export function MapClient({ view }: MapClientProps) {
     isDisabled: isMyLocationDisabled,
     isPrompting: isMyLocationPrompting,
     requestLocation,
-    selfLocation,
+    selfLocation: requestedSelfLocation,
     status: geolocationStatus,
   } = useMapGeolocation();
 
-  // Initial mount only — do not soft-control the live camera from URL updates.
-  const [initialCamera] = useState(
-    () => parseMapCameraSearchParams(searchParams) ?? DEFAULT_MAP_CAMERA,
+  // URL camera is source of truth after first paint. Probe GPS only for an empty URL.
+  const [resolvedCamera, setResolvedCamera] = useState<MapCamera | null>(() =>
+    parseMapCameraSearchParams(searchParams),
   );
+  const [grantedSelfLocation, setGrantedSelfLocation] = useState<MapSelfLocation | null>(null);
 
   const [locationQuery, setLocationQuery] = useState("");
   const [mapFocus, setMapFocus] = useState<PeopleMapFocus | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [visibleMarkerIds, setVisibleMarkerIds] = useState<string[]>([]);
 
-  // Live camera from URL after pan/zoom; fall back to mount camera when URL has none yet.
-  const pinsCamera = parseMapCameraSearchParams(searchParams) ?? initialCamera;
+  const selfLocation = requestedSelfLocation ?? grantedSelfLocation;
+  // Live camera from URL after pan/zoom; hold pin queries until camera is non-null.
+  const pinsCamera = parseMapCameraSearchParams(searchParams) ?? resolvedCamera;
 
-  const { locationPins, addressPins, isFetching, isLoading, isPlaceholderData } =
-    useMapViewportPins(view, pinsCamera);
-  const showPinsFetching = isFetching && !isLoading && !isPlaceholderData;
+  const { locationPins, addressPins, isFetching } = useMapViewportPins(view, pinsCamera);
 
   const geolocationFailureMessage = (status: MapGeolocationFailureStatus): string => {
     switch (status) {
@@ -208,6 +211,45 @@ export function MapClient({ view }: MapClientProps) {
     }
     router.replace(routeWithQuery(pathname, params));
   }, DEBOUNCE_MS.mapViewport);
+
+  useEffect(() => {
+    if (resolvedCamera !== null) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      const location = await readMapGeolocationIfGranted();
+      if (cancelled) {
+        return;
+      }
+
+      const camera: MapCamera = location
+        ? {
+            latitude: location.latitude,
+            longitude: location.longitude,
+            zoom: GRANTED_LOCATION_ZOOM,
+          }
+        : DEFAULT_MAP_CAMERA;
+
+      if (location) {
+        setGrantedSelfLocation(location);
+      }
+      setResolvedCamera(camera);
+
+      const params = new URLSearchParams(searchParams.toString());
+      applyMapCameraToSearchParams(params, camera);
+      if (!params.has("view")) {
+        params.set("view", view);
+      }
+      router.replace(routeWithQuery(pathname, params));
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname, resolvedCamera, router, searchParams, view]);
 
   useEffect(() => {
     setVisibleMarkerIds([]);
@@ -459,44 +501,50 @@ export function MapClient({ view }: MapClientProps) {
         />
 
         <Box aria-busy={!mapReady} pos="relative">
-          <PeopleMap
-            center={[initialCamera.latitude, initialCamera.longitude]}
-            disableAutoFit
-            focus={mapFocus}
-            height={MAP_HEIGHT_PX}
-            markers={markers}
-            myLocationControl={{
-              ariaLabel: isMyLocationPrompting ? t("MyLocationLocating") : t("MyLocation"),
-              disabled: isMyLocationDisabled,
-              disabledTooltip: myLocationDisabledTooltip,
-              loading: isMyLocationPrompting,
-              onClick: handleMyLocation,
-            }}
-            onCameraChange={handleCameraChange}
-            onReady={() => {
-              setMapReady(true);
-            }}
-            onVisibleMarkerIdsChange={setVisibleMarkerIds}
-            selfLocation={selfLocation}
-            selfMarker={
-              selfLocation
-                ? {
-                    ariaLabel: t("MyLocationMarker"),
-                    avatarUrl,
-                    displayName,
-                  }
-                : null
-            }
-            zoom={initialCamera.zoom}
-          />
+          {resolvedCamera === null || !mapReady ? (
+            <Skeleton height={MAP_HEIGHT_PX} radius={MAP_CORNER_RADIUS_PX} />
+          ) : null}
 
-          {!mapReady ? (
-            <Skeleton
-              height={MAP_HEIGHT_PX}
-              radius={MAP_CORNER_RADIUS_PX}
-              style={{ inset: 0, position: "absolute", zIndex: MAP_CHROME_Z_INDEX }}
-              width="100%"
-            />
+          {resolvedCamera ? (
+            <Box
+              h={MAP_HEIGHT_PX}
+              left={mapReady ? undefined : 0}
+              pos={mapReady ? "relative" : "absolute"}
+              top={mapReady ? undefined : 0}
+              w="100%"
+            >
+              <PeopleMap
+                center={[resolvedCamera.latitude, resolvedCamera.longitude]}
+                disableAutoFit
+                fetchingStatus={isFetching ? t("RefreshingPins") : null}
+                focus={mapFocus}
+                height={MAP_HEIGHT_PX}
+                markers={markers}
+                myLocationControl={{
+                  ariaLabel: isMyLocationPrompting ? t("MyLocationLocating") : t("MyLocation"),
+                  disabled: isMyLocationDisabled,
+                  disabledTooltip: myLocationDisabledTooltip,
+                  loading: isMyLocationPrompting,
+                  onClick: handleMyLocation,
+                }}
+                onCameraChange={handleCameraChange}
+                onReady={() => {
+                  setMapReady(true);
+                }}
+                onVisibleMarkerIdsChange={setVisibleMarkerIds}
+                selfLocation={selfLocation}
+                selfMarker={
+                  selfLocation
+                    ? {
+                        ariaLabel: t("MyLocationMarker"),
+                        avatarUrl,
+                        displayName,
+                      }
+                    : null
+                }
+                zoom={resolvedCamera.zoom}
+              />
+            </Box>
           ) : null}
 
           {mapReady ? (
@@ -551,131 +599,114 @@ export function MapClient({ view }: MapClientProps) {
               </Stack>
             </Paper>
           ) : null}
-
-          {mapReady && showPinsFetching ? (
-            <Paper
-              left="50%"
-              pos="absolute"
-              px="sm"
-              py={6}
-              radius="md"
-              shadow="sm"
-              style={{ transform: "translateX(-50%)", zIndex: MAP_CHROME_Z_INDEX }}
-              top={12}
-              withBorder
-            >
-              <Group gap="xs" wrap="nowrap">
-                <Loader aria-hidden size="xs" />
-                <Text size="xs">{t("RefreshingPins")}</Text>
-              </Group>
-            </Paper>
-          ) : null}
         </Box>
 
-        {view === "addresses" ? (
-          <Paper p="md" radius="md" shadow="sm" withBorder>
-            <ContactsTable
-              allSelected={allSelected}
-              columnsForMenu={columns}
-              contacts={filteredAddressRows}
-              isHeaderShown={true}
-              noContactsFound={t("NoAddressesFound")}
-              noContactsMatchSearch={t("NoAddressesMatchSearch")}
-              onSearchChange={handleTableSearch}
-              onSelectAll={handleSelectAll}
-              onSelectOne={handleSelectOne}
-              renderLocationCell={(contact) => {
-                const type = (contact as ContactTableRow)._addressType;
-                const addr = contact.location || "—";
-                return (
-                  <Group gap={6} style={{ minWidth: 0 }} wrap="nowrap">
-                    <Badge
-                      color={ADDRESS_TYPE_COLOR[type ?? "other"] ?? "gray"}
-                      size="xs"
-                      style={{ flexShrink: 0 }}
-                      variant="light"
-                    >
-                      {type}
-                    </Badge>
-                    <Tooltip label={addr}>
-                      <Text lineClamp={1} size="sm">
-                        {addr}
-                      </Text>
-                    </Tooltip>
-                  </Group>
-                );
-              }}
-              searchLoading={showPinsFetching}
-              selectedIds={selectedIds}
-              setColumnsForMenu={setColumns}
-              setSortOrderForMenu={setSortOrder}
-              showSelection
-              someSelected={someSelected}
-              sortOrderForMenu={sortOrder}
-              standardActions={{
-                onAddToGroupsOne: (contactId) =>
-                  openAddPeopleToGroupSelectionModal({
-                    personIds: [contactId],
-                  }),
-                onAddToGroupsSelected: (contactIds) =>
-                  openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
-                onCreateInteractionSelected: (contactIds) => {
-                  openNewActivityModal({
-                    contacts: filteredAddressRows,
-                    initialParticipantIds: contactIds,
-                  });
-                },
-                onDeleteOne: handleDeleteContact,
-                onDeleteSelected: handleBulkDelete,
-                onMergeOne: (contactId) => openMergeModal(contactId),
-                onMergeSelected: (leftContactId, rightContactId) =>
-                  openMergeModal(leftContactId, rightContactId, true),
-              }}
-              visibleColumns={visibleColumns}
-            />
-          </Paper>
-        ) : (
-          <Paper p="md" radius="md" shadow="sm" withBorder>
-            <ContactsTable
-              allSelected={allSelected}
-              columnsForMenu={columns}
-              contacts={filteredPins as Contact[]}
-              isHeaderShown={true}
-              noContactsFound={t("NoContactsFound")}
-              noContactsMatchSearch={t("NoContactsMatchSearch")}
-              onSearchChange={handleTableSearch}
-              onSelectAll={handleSelectAll}
-              onSelectOne={handleSelectOne}
-              searchLoading={showPinsFetching}
-              selectedIds={selectedIds}
-              setColumnsForMenu={setColumns}
-              setSortOrderForMenu={setSortOrder}
-              showSelection
-              someSelected={someSelected}
-              sortOrderForMenu={sortOrder}
-              standardActions={{
-                onAddToGroupsOne: (contactId) =>
-                  openAddPeopleToGroupSelectionModal({
-                    personIds: [contactId],
-                  }),
-                onAddToGroupsSelected: (contactIds) =>
-                  openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
-                onCreateInteractionSelected: (contactIds) => {
-                  openNewActivityModal({
-                    contacts: filteredPins as Contact[],
-                    initialParticipantIds: contactIds,
-                  });
-                },
-                onDeleteOne: handleDeleteContact,
-                onDeleteSelected: handleBulkDelete,
-                onMergeOne: (contactId) => openMergeModal(contactId),
-                onMergeSelected: (leftContactId, rightContactId) =>
-                  openMergeModal(leftContactId, rightContactId, true),
-              }}
-              visibleColumns={visibleColumns}
-            />
-          </Paper>
-        )}
+        {mapReady ? (
+          view === "addresses" ? (
+            <Paper p="md" radius="md" shadow="sm" withBorder>
+              <ContactsTable
+                allSelected={allSelected}
+                columnsForMenu={columns}
+                contacts={filteredAddressRows}
+                isHeaderShown={true}
+                noContactsFound={t("NoAddressesFound")}
+                noContactsMatchSearch={t("NoAddressesMatchSearch")}
+                onSearchChange={handleTableSearch}
+                onSelectAll={handleSelectAll}
+                onSelectOne={handleSelectOne}
+                renderLocationCell={(contact) => {
+                  const type = (contact as ContactTableRow)._addressType;
+                  const addr = contact.location || "—";
+                  return (
+                    <Group gap={6} style={{ minWidth: 0 }} wrap="nowrap">
+                      <Badge
+                        color={ADDRESS_TYPE_COLOR[type ?? "other"] ?? "gray"}
+                        size="xs"
+                        style={{ flexShrink: 0 }}
+                        variant="light"
+                      >
+                        {type}
+                      </Badge>
+                      <Tooltip label={addr}>
+                        <Text lineClamp={1} size="sm">
+                          {addr}
+                        </Text>
+                      </Tooltip>
+                    </Group>
+                  );
+                }}
+                searchLoading={isFetching}
+                selectedIds={selectedIds}
+                setColumnsForMenu={setColumns}
+                setSortOrderForMenu={setSortOrder}
+                showSelection
+                someSelected={someSelected}
+                sortOrderForMenu={sortOrder}
+                standardActions={{
+                  onAddToGroupsOne: (contactId) =>
+                    openAddPeopleToGroupSelectionModal({
+                      personIds: [contactId],
+                    }),
+                  onAddToGroupsSelected: (contactIds) =>
+                    openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
+                  onCreateInteractionSelected: (contactIds) => {
+                    openNewActivityModal({
+                      contacts: filteredAddressRows,
+                      initialParticipantIds: contactIds,
+                    });
+                  },
+                  onDeleteOne: handleDeleteContact,
+                  onDeleteSelected: handleBulkDelete,
+                  onMergeOne: (contactId) => openMergeModal(contactId),
+                  onMergeSelected: (leftContactId, rightContactId) =>
+                    openMergeModal(leftContactId, rightContactId, true),
+                }}
+                visibleColumns={visibleColumns}
+              />
+            </Paper>
+          ) : (
+            <Paper p="md" radius="md" shadow="sm" withBorder>
+              <ContactsTable
+                allSelected={allSelected}
+                columnsForMenu={columns}
+                contacts={filteredPins as Contact[]}
+                isHeaderShown={true}
+                noContactsFound={t("NoContactsFound")}
+                noContactsMatchSearch={t("NoContactsMatchSearch")}
+                onSearchChange={handleTableSearch}
+                onSelectAll={handleSelectAll}
+                onSelectOne={handleSelectOne}
+                searchLoading={isFetching}
+                selectedIds={selectedIds}
+                setColumnsForMenu={setColumns}
+                setSortOrderForMenu={setSortOrder}
+                showSelection
+                someSelected={someSelected}
+                sortOrderForMenu={sortOrder}
+                standardActions={{
+                  onAddToGroupsOne: (contactId) =>
+                    openAddPeopleToGroupSelectionModal({
+                      personIds: [contactId],
+                    }),
+                  onAddToGroupsSelected: (contactIds) =>
+                    openAddPeopleToGroupSelectionModal({ personIds: contactIds }),
+                  onCreateInteractionSelected: (contactIds) => {
+                    openNewActivityModal({
+                      contacts: filteredPins as Contact[],
+                      initialParticipantIds: contactIds,
+                    });
+                  },
+                  onDeleteOne: handleDeleteContact,
+                  onDeleteSelected: handleBulkDelete,
+                  onMergeOne: (contactId) => openMergeModal(contactId),
+                  onMergeSelected: (leftContactId, rightContactId) =>
+                    openMergeModal(leftContactId, rightContactId, true),
+                }}
+                visibleColumns={visibleColumns}
+              />
+            </Paper>
+          )
+        ) : null}
       </Stack>
     </PageWrapper>
   );

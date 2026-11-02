@@ -719,9 +719,18 @@ components:
                     type: string
                   firstName:
                     type: string
+                  headline:
+                    nullable: true
+                    type: string
                   id:
                     type: string
                   lastName:
+                    nullable: true
+                    type: string
+                  location:
+                    nullable: true
+                    type: string
+                  middleName:
                     nullable: true
                     type: string
                   updatedAt:
@@ -730,8 +739,11 @@ components:
                 required:
                   - avatar
                   - firstName
+                  - headline
                   - id
                   - lastName
+                  - location
+                  - middleName
                 additionalProperties: false
             - type: array
               items:
@@ -779,8 +791,11 @@ components:
         participants:
           - avatar: null
             firstName: Ada
+            headline: Mathematician
             id: 550e8400-e29b-41d4-a716-446655440000
             lastName: Lovelace
+            location: London, UK
+            middleName: null
         title: Coffee catch-up
         type: Coffee
         updatedAt: 2026-01-15T12:00:00.000Z
@@ -858,8 +873,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -1171,8 +1186,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -1491,8 +1506,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -1642,8 +1657,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -1775,6 +1790,14 @@ paths:
               - createdAtDesc
           in: query
           name: sort
+        - schema:
+            maxItems: 20
+            type: array
+            items:
+              type: string
+              format: uuid
+          in: query
+          name: tag_ids
       security: &a1
         - bearerAuth: []
         - apiKeyAuth: []
@@ -2142,8 +2165,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -2526,8 +2549,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -2643,6 +2666,12 @@ paths:
                             - interactionDesc
                             - createdAtAsc
                             - createdAtDesc
+                        tagIds:
+                          maxItems: 20
+                          type: array
+                          items:
+                            type: string
+                            format: uuid
                   required:
                     - filter
       security: *a1
@@ -2689,8 +2718,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -2822,6 +2851,14 @@ paths:
               - createdAtDesc
           in: query
           name: sort
+        - schema:
+            maxItems: 20
+            type: array
+            items:
+              type: string
+              format: uuid
+          in: query
+          name: tag_ids
       security: *a1
       responses:
         "200":
@@ -2924,8 +2961,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -3103,8 +3140,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -3343,8 +3380,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -3572,8 +3609,355 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
+                  message: Forbidden
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authorization_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "404":
+          description: Resource not found
+          content:
+            application/json:
+              example:
+                error:
+                  code: contact_not_found
+                  doc_url: https://usebondery.com/docs/api/errors/contact_not_found
+                  message: Contact not found
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: not_found_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "426":
+          description: Upgrade required
+          content:
+            application/json:
+              example:
+                error:
+                  code: sync_protocol_mismatch
+                  doc_url: https://usebondery.com/docs/api/errors/sync_protocol_mismatch
+                  message: Sync protocol version mismatch
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  details:
+                    clientVersion: null
+                    requiredVersion: 2
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "429":
+          description: Too many requests
+          content:
+            application/json:
+              example:
+                error:
+                  code: rate_limit_exceeded
+                  doc_url: https://usebondery.com/docs/api/errors/rate_limit_exceeded
+                  message: Rate limit exceeded. Retry in 42 seconds.
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: rate_limit_error
+                  retry_after: 42
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "500":
+          description: Internal server error
+          content:
+            application/json:
+              example:
+                error:
+                  code: internal_server_error
+                  doc_url: https://usebondery.com/docs/api/errors/internal_server_error
+                  message: Internal Server Error
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: api_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "503":
+          description: Service unavailable
+          content:
+            application/json:
+              example:
+                error:
+                  code: service_unavailable
+                  doc_url: https://usebondery.com/docs/api/errors/service_unavailable
+                  message: Service unavailable
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: service_unavailable_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+  /contacts/relationship-graph:
+    get:
+      tags:
+        - Contacts
+      description: People linked by a relationship, and the links between them. Each person includes headline and location.
+        hubs=1 adds company and school circles. groups=1 adds group backgrounds.
+      parameters:
+        - schema:
+            type: string
+            enum:
+              - low
+              - medium
+              - high
+          in: query
+          name: avatarQuality
+        - schema:
+            type: string
+            enum:
+              - small
+              - medium
+              - large
+          in: query
+          name: avatarSize
+        - schema:
+            allOf:
+              - $ref: "#/components/schemas/ContactId"
+          in: query
+          name: focus
+        - schema:
+            type: string
+            enum:
+              - "1"
+          in: query
+          name: groups
+        - schema:
+            type: string
+            enum:
+              - "1"
+          in: query
+          name: hubs
+      security: *a1
+      responses:
+        "200":
+          description: Relationship graph
+          content:
+            application/json:
+              example:
+                graph:
+                  edges:
+                    - id: 6ba7b812-9dad-11d1-80b4-00c04fd430c8
+                      relationshipType: friend
+                      sourcePersonId: 550e8400-e29b-41d4-a716-446655440000
+                      targetPersonId: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
+                  groups: []
+                  hubs: []
+                  nodes:
+                    - avatar: null
+                      firstName: Ada
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      lastName: Lovelace
+                      middleName: null
+                      myself: false
+                    - avatar: null
+                      firstName: Charles
+                      id: 6ba7b811-9dad-11d1-80b4-00c04fd430c8
+                      lastName: Babbage
+                      middleName: null
+                      myself: false
+                  truncated: false
+                  unlinked: []
+                  unlinkedCount: 0
+              schema:
+                type: object
+                properties:
+                  graph:
+                    type: object
+                    properties:
+                      edges:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            relationshipType:
+                              type: string
+                              enum:
+                                - parent
+                                - child
+                                - spouse
+                                - partner
+                                - sibling
+                                - friend
+                                - colleague
+                                - neighbor
+                                - guardian
+                                - dependent
+                                - other
+                            sourcePersonId:
+                              type: string
+                            targetPersonId:
+                              type: string
+                          required:
+                            - id
+                            - relationshipType
+                            - sourcePersonId
+                            - targetPersonId
+                          additionalProperties: false
+                      groups:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            color:
+                              nullable: true
+                              type: string
+                            emoji:
+                              nullable: true
+                              type: string
+                            id:
+                              type: string
+                            label:
+                              type: string
+                            personIds:
+                              type: array
+                              items:
+                                type: string
+                          required:
+                            - color
+                            - emoji
+                            - id
+                            - label
+                            - personIds
+                          additionalProperties: false
+                      hubs:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            kind:
+                              type: string
+                              enum:
+                                - company
+                                - school
+                            label:
+                              type: string
+                            logoUrl:
+                              nullable: true
+                              type: string
+                            memberCount:
+                              type: integer
+                              minimum: 0
+                              maximum: 9007199254740991
+                            personIds:
+                              type: array
+                              items:
+                                type: string
+                          required:
+                            - id
+                            - kind
+                            - label
+                            - logoUrl
+                            - memberCount
+                            - personIds
+                          additionalProperties: false
+                      nodes:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            avatar:
+                              nullable: true
+                              type: string
+                            firstName:
+                              type: string
+                            headline:
+                              nullable: true
+                              type: string
+                            id:
+                              type: string
+                            lastName:
+                              nullable: true
+                              type: string
+                            location:
+                              nullable: true
+                              type: string
+                            middleName:
+                              nullable: true
+                              type: string
+                            myself:
+                              type: boolean
+                          required:
+                            - avatar
+                            - firstName
+                            - headline
+                            - id
+                            - lastName
+                            - location
+                            - middleName
+                            - myself
+                          additionalProperties: false
+                      truncated:
+                        type: boolean
+                      unlinked:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            firstName:
+                              type: string
+                            id:
+                              type: string
+                            lastName:
+                              nullable: true
+                              type: string
+                          required:
+                            - firstName
+                            - id
+                            - lastName
+                          additionalProperties: false
+                      unlinkedCount:
+                        type: integer
+                        minimum: 0
+                        maximum: 9007199254740991
+                    required:
+                      - edges
+                      - groups
+                      - hubs
+                      - nodes
+                      - truncated
+                      - unlinked
+                      - unlinkedCount
+                    additionalProperties: false
+                required:
+                  - graph
+                additionalProperties: false
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              example:
+                error:
+                  code: validation_error
+                  doc_url: https://usebondery.com/docs/api/errors/validation_error
+                  message: body.email Invalid input
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: invalid_request_error
+                  param: body.email
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "401":
+          description: Authentication required
+          content:
+            application/json:
+              example:
+                error:
+                  code: auth_required
+                  doc_url: https://usebondery.com/docs/api/errors/auth_required
+                  message: Unauthorized - Please log in
+                  request_id: 00000000-0000-0000-0000-000000000000
+                  type: authentication_error
+              schema:
+                $ref: "#/components/schemas/ApiError"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                error:
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -3820,8 +4204,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -4012,8 +4396,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -4390,8 +4774,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -4574,8 +4958,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -4778,8 +5162,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -4954,8 +5338,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -5114,8 +5498,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -5260,8 +5644,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -5416,8 +5800,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -5551,8 +5935,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -5694,8 +6078,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -5833,8 +6217,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -6083,8 +6467,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -6293,8 +6677,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -6523,8 +6907,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -6672,8 +7056,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -6868,8 +7252,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -7119,8 +7503,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -7348,8 +7732,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -7525,8 +7909,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -7782,8 +8166,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -7914,8 +8298,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -8192,8 +8576,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -8450,8 +8834,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -8587,8 +8971,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -8724,8 +9108,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -8867,8 +9251,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9080,8 +9464,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9212,8 +9596,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9350,8 +9734,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9492,8 +9876,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9650,8 +10034,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9809,8 +10193,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -9942,8 +10326,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -10074,8 +10458,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -10286,8 +10670,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -10507,8 +10891,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -10719,8 +11103,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -10940,8 +11324,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -11315,8 +11699,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -11691,8 +12075,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -11913,8 +12297,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -12074,8 +12458,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -12214,8 +12598,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -12358,8 +12742,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -12520,8 +12904,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -12650,8 +13034,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -12783,6 +13167,14 @@ paths:
               - createdAtDesc
           in: query
           name: sort
+        - schema:
+            maxItems: 20
+            type: array
+            items:
+              type: string
+              format: uuid
+          in: query
+          name: tag_ids
         - schema:
             $ref: "#/components/schemas/ContactId"
           in: path
@@ -13150,8 +13542,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -13263,6 +13655,12 @@ paths:
                             - interactionDesc
                             - createdAtAsc
                             - createdAtDesc
+                        tagIds:
+                          maxItems: 20
+                          type: array
+                          items:
+                            type: string
+                            format: uuid
                     excludePersonIds:
                       type: array
                       items:
@@ -13336,8 +13734,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -13453,6 +13851,12 @@ paths:
                             - interactionDesc
                             - createdAtAsc
                             - createdAtDesc
+                        tagIds:
+                          maxItems: 20
+                          type: array
+                          items:
+                            type: string
+                            format: uuid
                   required:
                     - memberFilter
       parameters:
@@ -13514,8 +13918,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -13731,8 +14135,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -13810,7 +14214,7 @@ paths:
     post:
       tags:
         - Tags
-      description: Create a new tag (color auto-assigned).
+      description: Create a new tag. Color is optional; the API picks one when omitted.
       requestBody:
         required: true
         content:
@@ -13818,6 +14222,9 @@ paths:
             schema:
               type: object
               properties:
+                color:
+                  type: string
+                  pattern: ^#?[0-9a-fA-F]{6}$
                 label:
                   type: string
                   minLength: 1
@@ -13881,8 +14288,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14021,8 +14428,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14164,8 +14571,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14322,8 +14729,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14452,8 +14859,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14586,6 +14993,14 @@ paths:
           in: query
           name: sort
         - schema:
+            maxItems: 20
+            type: array
+            items:
+              type: string
+              format: uuid
+          in: query
+          name: tag_ids
+        - schema:
             $ref: "#/components/schemas/ContactId"
           in: path
           name: id
@@ -14673,8 +15088,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14788,8 +15203,11 @@ paths:
                 properties:
                   addedCount:
                     type: number
+                  skippedCount:
+                    type: number
                 required:
                   - addedCount
+                  - skippedCount
                 additionalProperties: false
         "400":
           description: Invalid request
@@ -14824,8 +15242,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -14974,8 +15392,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -15078,6 +15496,11 @@ paths:
           in: query
           name: contactId
         - schema:
+            type: string
+            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+          in: query
+          name: end_date
+        - schema:
             default: 50
             type: integer
             minimum: 1
@@ -15091,6 +15514,15 @@ paths:
             maximum: 9007199254740991
           in: query
           name: offset
+        - schema:
+            type: string
+          in: query
+          name: search
+        - schema:
+            type: string
+            pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+          in: query
+          name: start_date
       security: *a1
       responses:
         "200":
@@ -15106,8 +15538,11 @@ paths:
                     participants:
                       - avatar: null
                         firstName: Ada
+                        headline: Mathematician
                         id: 550e8400-e29b-41d4-a716-446655440000
                         lastName: Lovelace
+                        location: London, UK
+                        middleName: null
                     title: Coffee catch-up
                     type: Coffee
                     updatedAt: 2026-01-15T12:00:00.000Z
@@ -15165,8 +15600,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -15303,8 +15738,11 @@ paths:
                   participants:
                     - avatar: null
                       firstName: Ada
+                      headline: Mathematician
                       id: 550e8400-e29b-41d4-a716-446655440000
                       lastName: Lovelace
+                      location: London, UK
+                      middleName: null
                   title: Coffee catch-up
                   type: Coffee
                   updatedAt: 2026-01-15T12:00:00.000Z
@@ -15326,8 +15764,38 @@ paths:
                         type: array
                         items:
                           type: object
-                          properties: {}
-                          additionalProperties: {}
+                          properties:
+                            avatar:
+                              nullable: true
+                              type: string
+                            firstName:
+                              type: string
+                            headline:
+                              nullable: true
+                              type: string
+                            id:
+                              type: string
+                            lastName:
+                              nullable: true
+                              type: string
+                            location:
+                              nullable: true
+                              type: string
+                            middleName:
+                              nullable: true
+                              type: string
+                            updatedAt:
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                          required:
+                            - avatar
+                            - firstName
+                            - headline
+                            - id
+                            - lastName
+                            - location
+                            - middleName
+                          additionalProperties: false
                       title:
                         nullable: true
                         type: string
@@ -15385,8 +15853,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -15504,8 +15972,11 @@ paths:
                   participants:
                     - avatar: null
                       firstName: Ada
+                      headline: Mathematician
                       id: 550e8400-e29b-41d4-a716-446655440000
                       lastName: Lovelace
+                      location: London, UK
+                      middleName: null
                   title: Coffee catch-up
                   type: Coffee
                   updatedAt: 2026-01-15T12:00:00.000Z
@@ -15527,8 +15998,38 @@ paths:
                         type: array
                         items:
                           type: object
-                          properties: {}
-                          additionalProperties: {}
+                          properties:
+                            avatar:
+                              nullable: true
+                              type: string
+                            firstName:
+                              type: string
+                            headline:
+                              nullable: true
+                              type: string
+                            id:
+                              type: string
+                            lastName:
+                              nullable: true
+                              type: string
+                            location:
+                              nullable: true
+                              type: string
+                            middleName:
+                              nullable: true
+                              type: string
+                            updatedAt:
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                          required:
+                            - avatar
+                            - firstName
+                            - headline
+                            - id
+                            - lastName
+                            - location
+                            - middleName
+                          additionalProperties: false
                       title:
                         nullable: true
                         type: string
@@ -15586,8 +16087,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -15739,8 +16240,11 @@ paths:
                   participants:
                     - avatar: null
                       firstName: Ada
+                      headline: Mathematician
                       id: 550e8400-e29b-41d4-a716-446655440000
                       lastName: Lovelace
+                      location: London, UK
+                      middleName: null
                   title: Coffee catch-up
                   type: Coffee
                   updatedAt: 2026-01-15T12:00:00.000Z
@@ -15762,8 +16266,38 @@ paths:
                         type: array
                         items:
                           type: object
-                          properties: {}
-                          additionalProperties: {}
+                          properties:
+                            avatar:
+                              nullable: true
+                              type: string
+                            firstName:
+                              type: string
+                            headline:
+                              nullable: true
+                              type: string
+                            id:
+                              type: string
+                            lastName:
+                              nullable: true
+                              type: string
+                            location:
+                              nullable: true
+                              type: string
+                            middleName:
+                              nullable: true
+                              type: string
+                            updatedAt:
+                              type: string
+                              pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                          required:
+                            - avatar
+                            - firstName
+                            - headline
+                            - id
+                            - lastName
+                            - location
+                            - middleName
+                          additionalProperties: false
                       title:
                         nullable: true
                         type: string
@@ -15821,8 +16355,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -15951,8 +16485,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -16141,8 +16675,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -16414,8 +16948,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -16562,8 +17096,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -16741,8 +17275,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -16874,8 +17408,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -17060,8 +17594,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -17205,8 +17739,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -17337,8 +17871,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -17505,8 +18039,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -17630,8 +18164,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -17915,8 +18449,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -18109,8 +18643,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -18242,8 +18776,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -18397,8 +18931,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -18668,8 +19202,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -18931,8 +19465,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -19064,8 +19598,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -19195,8 +19729,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -19351,8 +19885,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -19521,8 +20055,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -19704,8 +20238,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -19896,8 +20430,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -20020,8 +20554,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -20194,8 +20728,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -20319,8 +20853,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -20531,8 +21065,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -20746,8 +21280,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -21935,8 +22469,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -22073,8 +22607,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -22325,8 +22859,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -22480,8 +23014,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -22568,23 +23102,37 @@ paths:
             schema:
               type: object
               properties:
+                intent:
+                  type: string
+                  enum:
+                    - message
+                    - retry
+                    - approval
                 messages:
                   type: array
                   items:
                     type: object
                     additionalProperties: {}
+                model:
+                  type: string
+                  enum:
+                    - auto
+                    - anthropic/claude-haiku-5.5
+                    - anthropic/claude-sonnet-5.5
                 sessionId:
                   type: string
               required:
                 - messages
                 - sessionId
             example:
+              intent: message
               messages:
                 - id: msg-1
                   parts:
                     - text: Who should I follow up with?
                       type: text
                   role: user
+              model: anthropic/claude-haiku-5.5
               sessionId: ff0e8400-e29b-41d4-a716-446655440009
       security: *a2
       responses:
@@ -22627,8 +23175,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -22810,8 +23358,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -22965,8 +23513,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -23140,8 +23688,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -23263,8 +23811,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -23454,8 +24002,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -23694,8 +24242,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -23826,8 +24374,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -23957,8 +24505,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -24112,8 +24660,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error
@@ -24243,8 +24791,8 @@ paths:
             application/json:
               example:
                 error:
-                  code: admin_required
-                  doc_url: https://usebondery.com/docs/api/errors/admin_required
+                  code: api_key_route_forbidden
+                  doc_url: https://usebondery.com/docs/api/errors/api_key_route_forbidden
                   message: Forbidden
                   request_id: 00000000-0000-0000-0000-000000000000
                   type: authorization_error

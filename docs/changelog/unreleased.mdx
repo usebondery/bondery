@@ -15,11 +15,25 @@ hidden: true
 - Website: Hosts Apple and Android associated-domain files for native passkeys. Operators set `BONDERY_PUBLIC_IOS_APP_TEAM_ID` and `BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS`. Missing values return 404 instead of inventing IDs.
 - API: MCP consent list items include `logoUri` (HTTPS client icon from OAuth metadata, or null).
 - Webapp: Connected AI assistants in Settings show each client’s logo when one is available.
-- Webapp: MapLibre people map with OSM tiles, clustering, globe or flat projection, and my-location.
+- Webapp: MapLibre people map with OpenFreeMap Liberty tiles, clustering, globe projection with an atmosphere, compact attribution, my-location, and a granted-location default on `/map`.
 - Webapp: The people map keeps pan and zoom in the URL (`latitude`, `longitude`, `zoom`). Back from a person restores that camera and reuses cached pins for it.
 - Webapp: Hovering a person pin on the map shows the shared person preview card.
-- Webapp: Globe projection shows a sky atmosphere; flat map turns it off.
 - Webapp: Contact table bulk actions include Log interaction. It opens the log-interaction form with the selected people already set as participants on the people list, a group, and the map.
+- Webapp: The interactions timeline loads the next page as you scroll. Search and a start and end date filter that list. The home preview stays the first page.
+- Webapp: Chat replies have a read-aloud control. The browser reads the message, names each person, group, tag, and interaction chip, and speaks dates as month names. A second message stops the first.
+- Webapp: The chat composer has a dictation control. Speak the message and the browser writes it into the field at the caret. A Chromium browser sends the audio to its own speech service, and the control says so when that service does not answer.
+- Webapp: Chat replies style external links with the host favicon and an external-link marker, the same way blog posts do. A screen reader announces that the link opens in a new tab.
+- Webapp: Chat user messages have a copy button.
+- API: `GET /interactions` accepts `search`, `start_date`, and `end_date`.
+- Webapp: The People page has a tag filter. Select several tags to show contacts with any of them.
+- Webapp and API: A tag keeps the color you pick when you create it. The editor no longer sends a second request.
+- API: `POST /tags` accepts an optional `color`. `GET /contacts` and `GET /contacts/select` accept `tag_ids` as one comma-separated value.
+- API: MCP and in-app chat can delete up to 25 tags in one `delete_tags` call. The host or the chat confirm still runs first. People who had those tags stay.
+- Webapp: Graph at `/app/graph` shows people, saved relationships, shared companies and schools, and a circle behind a group of at least three people. You sit in the middle. A line to you means the person is in your account. Search fades other names. Hover lights a person and the marks tied to them. Click keeps a preview. Double-click opens the person. Show on graph on a person page opens that view. A narrow screen lists the same links as short sentences. The picture stops at 500 people, 1,000 relationships, and 40 companies or schools.
+- API: `GET /contacts/relationship-graph` returns that picture. `hubs=1` adds companies and schools. `groups=1` adds group circles. `focus` returns one person and their neighbors.
+- Webapp: People, a group's members, and a person's interactions load the next page as you scroll. Those lists no longer show a Load more button. Import tables and the map table stay as they are.
+- Webapp: Chat can stop a reply and retry one that stopped or failed. Stop keeps the text already written, and the reply says when a change may already be saved. A retry stays hidden after a turn that changed your people. A delete asks before it runs, and the reply lists the steps it took.
+- Webapp: The chat composer offers Auto, Haiku, or Sonnet for the next message. The choice stays in this browser for that chat.
 
 ### 🐛 Fixed
 
@@ -37,6 +51,8 @@ hidden: true
 - Mobile: Tapping a disabled GitHub, LinkedIn, or email button shows a toast instead of helper text under the button.
 - Mobile: GitHub and LinkedIn sign-in reach the API on Android. Loopback URLs use the emulator host or the Metro LAN host, and OAuth returns to `bondery://auth/callback`.
 - API and clients: Contact avatars cache-bust on photo upload time instead of the contact record `updatedAt`.
+- API and webapp: A tag label is unique per account, ignoring letter case. A second tag with the same label returns `409 tag_label_exists`, and the tag editor shows the error under the label field.
+- API: Adding or removing contacts on a tag reports the affected count. `POST /tags/:id/contacts` also returns `skippedCount`.
 
 ### 🔄 Changed
 
@@ -51,15 +67,29 @@ hidden: true
 - Website: Stops hosting MCP Inspector Client ID Metadata at `/.well-known/oauth/client-metadata/inspector.json`. Local Inspector uses the public MCPJam CIMD instead.
 - Webapp and Website: Turn on Next.js typed routes. In-app links and redirects use typed `route*` / `href*` / `redirect*` helpers.
 - Chrome extension: Opens the webapp through shared navigation helpers.
+- Chrome extension: A LinkedIn save uses the full job and school lists when LinkedIn returns them. Logos still come from the page. The bio keeps the longer text. Location comes from that profile payload.
+- Mobile: The people list no longer has a letter rail on the right.
+- Mobile: Contacts search is by name only. The placeholder matches the web people list.
+- Mobile: The plus button creates a person. The extra add menu is gone.
+- Mobile: Legal settings uses a gavel icon.
+- Mobile: Native login uses a purple hero with the Bondery logotype and a bottom sheet that fills about 70% of the screen. The sheet heading is Welcome. Email sign-in replaces the other buttons, matching web login. Web login is unchanged.
+- Mobile: Native login marks the last sign-in method, matching web login.
+- Mobile: The launch splash uses Bondery purple and the brand icon.
+- Mobile: Native login centers the description, buttons, and terms as one group.
+- Mobile: Theme in Settings is a system, light, or dark control. Account delete confirms in a bottom sheet.
+- Mobile: Settings screens use a shared layout and refreshed account, legal, tags, groups, and technical sections.
 
 ### 📝 Documentation
 
 - Contributing: Local setup, architecture, auth, and MCP docs teach Portless HTTPS on `*.usebondery.test`. Classic `localhost` ports stay as the escape hatch.
+- Docs: The Graph concept page explains the picture, search, focus, and the draw limits.
 
 ### Breaking
 
 - **pnpm install layout:** After you pull, delete every `node_modules` directory (repo root, apps, and packages) and run `pnpm install`. A clean install is required when moving from hoisted to isolated linking.
 - **Local web URLs:** Daily web and API work uses Portless HTTPS on `*.usebondery.test` (not `*.usebondery.localhost` and not `http://localhost:2663x`). Stop the old Portless proxy. Run `portless trust` and `portless hosts sync` (Admin on Windows). Clear stale `*.usebondery.localhost` hosts entries. Refresh development env (`pnpm env:development` / Infisical) so `BONDERY_PUBLIC_*_URL` values match. Register OAuth callbacks at `https://api.usebondery.test/auth/callback/...`. Keep classic `http://localhost:26631/...` only for `dev:classic`. See [Local development setup](/docs/contributing/local-setup).
+- **Chat delete confirm:** Ship the webapp and the API together. An older webapp cannot answer the delete confirmation the API now pauses on. The delete does not run until the new webapp answers.
+- **Duplicate tag labels:** The next migration merges tags that share a label, ignoring letter case. It keeps the oldest tag, moves people onto it, and deletes the copies. A person who was on more than one copy keeps one membership.
 
 ### 📦 Dependencies
 
@@ -68,13 +98,4 @@ hidden: true
 ### 🤖 CI
 
 - Docker: Ignore host `out/` turbo-prune leftovers in the build context. Bump the pnpm BuildKit store cache id to `bondery-pnpm-store-v4`.
-- Mobile: The people list no longer has a letter rail on the right.
-- Mobile: Contacts search is by name only. The placeholder matches the web people list.
-- Mobile: The plus button creates a person. The extra add menu is gone.
-- Mobile: Legal settings uses a gavel icon.
-- Mobile: Native login uses a purple hero with the Bondery logotype and a bottom sheet that fills about 70% of the screen. The sheet heading is Welcome. Email sign-in replaces the other buttons, matching web login. Web login is unchanged.
-- Mobile: Native login marks the last sign-in method, matching web login.
-- Mobile: The launch splash now uses Bondery purple and the brand icon.
-- Mobile: Native login copy uses Tamagui `Text`. The sheet centers the description, buttons, and terms as one group.
-- Mobile: Theme in Settings is a system, light, or dark control. Account delete confirms in a bottom sheet.
-- Mobile: Settings screens use a shared layout and refreshed account, legal, tags, groups, and technical sections.
+- Verify: Lint uses the repo Biome binary and writes a step summary. Env, OpenAPI, schema contracts, and translation checks run in parallel. The `contracts` job fails when any of those checks fail.

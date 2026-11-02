@@ -45,10 +45,9 @@ export function useContactsTableCopy() {
     overrides: Partial<DataTableLabels> & {
       searchPlaceholder?: string;
       emptyStateMessage?: string;
-      loadMoreLabel?: string;
     },
   ): DataTableLabels => {
-    const { emptyStateMessage, loadMoreLabel, searchPlaceholder, ...rest } = overrides;
+    const { emptyStateMessage, searchPlaceholder, ...rest } = overrides;
     return {
       actionsAriaLabel: t("ActionsAriaLabel"),
       clearAllTotalTemplate: t("ClearAllTotalTemplate"),
@@ -60,7 +59,6 @@ export function useContactsTableCopy() {
         visibleSection: t("VisibleColumnsSection"),
       },
       emptyStateMessage: emptyStateMessage ?? "",
-      loadMoreLabel,
       searchPlaceholder: searchPlaceholder ?? t("SearchPlaceholder"),
       selectAllTotalTemplate: t("SelectAllTotalTemplate"),
       selectedCountTemplate: t("SelectedCountTemplate"),

@@ -24,4 +24,33 @@ describe("interactionsListQuerySchema", () => {
       }),
     );
   });
+
+  it("accepts trimmed search and inclusive ISO start_date and end_date", () => {
+    const parsed = interactionsListQuerySchema.parse({
+      end_date: "2026-06-15T21:59:59.999Z",
+      search: "  networking  ",
+      start_date: "2026-06-15T00:00:00.000Z",
+    });
+
+    assert.equal(parsed.search, "networking");
+    assert.equal(parsed.start_date, "2026-06-15T00:00:00.000Z");
+    assert.equal(parsed.end_date, "2026-06-15T21:59:59.999Z");
+  });
+
+  it("rejects start_date after end_date", () => {
+    assert.throws(() =>
+      interactionsListQuerySchema.parse({
+        end_date: "2026-06-01T00:00:00.000Z",
+        start_date: "2026-06-02T00:00:00.000Z",
+      }),
+    );
+  });
+
+  it("rejects a bad datetime", () => {
+    assert.throws(() =>
+      interactionsListQuerySchema.parse({
+        start_date: "2026-06-15",
+      }),
+    );
+  });
 });

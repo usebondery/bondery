@@ -21,8 +21,10 @@ import ContactsTable, {
 } from "@/components/contacts/ContactsTableV2";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
+import { ShellScrollLoadMore } from "@/components/shell/ShellScrollLoadMore";
 import { usePatchDocumentTitle } from "@/lib/documentTitle";
 import {
+  useCommonTranslations,
   useGroupDetailPageTranslations,
   usePeoplePageTranslations,
 } from "@/lib/i18n/generated/hooks";
@@ -49,6 +51,7 @@ interface GroupClientProps {
 export function GroupClient({ groupId }: GroupClientProps) {
   const tGroupDetail = useGroupDetailPageTranslations();
   const tPeople = usePeoplePageTranslations();
+  const tCommon = useCommonTranslations();
   const { columnDefinitions } = useContactsTableCopy();
   const router = useRouter();
   const pathname = usePathname();
@@ -69,6 +72,7 @@ export function GroupClient({ groupId }: GroupClientProps) {
     data: membersData,
     fetchNextPage,
     hasNextPage,
+    isFetchNextPageError,
     isFetchingNextPage,
   } = useGroupMembersInfiniteQuery(groupId, listFilter);
   const { data: previewData } = useGroupMembersQuery(groupId, GROUP_CARD_PREVIEW);
@@ -257,11 +261,6 @@ export function GroupClient({ groupId }: GroupClientProps) {
             hasMore={hasMore}
             isAllTotalSelected={isAllTotalSelected}
             isHeaderShown={true}
-            loadMoreAction={{
-              label: tPeople("LoadMoreBatch"),
-              loading: isFetchingNextPage,
-              onClick: handleLoadMore,
-            }}
             menuActions={menuActions}
             noContactsFound={tGroupDetail("NoContactsFound")}
             noContactsMatchSearch={tGroupDetail("NoContactsMatchSearch")}
@@ -295,6 +294,15 @@ export function GroupClient({ groupId }: GroupClientProps) {
             }}
             totalCount={totalAvailableCount}
             visibleColumns={visibleColumns}
+          />
+          <ShellScrollLoadMore
+            errorLabel={tPeople("LoadMoreError")}
+            fallbackLabel={tPeople("LoadMoreBatch")}
+            hasMore={hasMore}
+            isFetchingNextPage={isFetchingNextPage}
+            isFetchNextPageError={isFetchNextPageError}
+            onLoadMore={handleLoadMore}
+            retryLabel={tCommon("actions.retry")}
           />
         </Paper>
       </Stack>

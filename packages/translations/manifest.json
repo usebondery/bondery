@@ -104,6 +104,10 @@
       "path": "features/pages/FixContactsPage.json",
       "platforms": ["web"]
     },
+    "GraphPage": {
+      "path": "features/pages/GraphPage.json",
+      "platforms": ["web"]
+    },
     "GroupDetailPage": {
       "path": "features/pages/GroupDetailPage.json",
       "platforms": ["web"]

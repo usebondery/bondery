@@ -39,11 +39,22 @@ export {
   type SortOption,
 } from "#DataTable/index.js";
 export {
+  type DatePickerPresetLabels,
+  DatePickerWithPresets,
+  type DatePickerWithPresetsProps,
+} from "#DatePickerWithPresets/index.js";
+export {
   DescribedSelect,
   type DescribedSelectOption,
   type DescribedSelectProps,
 } from "#DescribedSelect/index.js";
 export { DotsMenuButton, type DotsMenuButtonProps } from "#DotsMenuButton/index.js";
+export {
+  DropdownOption,
+  type DropdownOptionLayout,
+  DropdownOptionMenu,
+  type DropdownOptionProps,
+} from "#DropdownOption/index.js";
 export { DropzoneContent, type DropzoneContentProps } from "#Dropzone/index.js";
 export {
   ALL_EMOJIS,
@@ -51,6 +62,13 @@ export {
   EmojiPickerDropdownContent,
   getRandomEmoji,
 } from "#EmojiPicker/index.js";
+export {
+  DEFAULT_NEW_TAB_LABEL,
+  ExternalLink,
+  type ExternalLinkProps,
+  faviconUrlForHost,
+  linkHostname,
+} from "#ExternalLink/index.js";
 export { HelpButton, type HelpButtonProps } from "#HelpButton/index.js";
 export {
   Kbd,
@@ -126,6 +144,6 @@ export {
 } from "#peoplePicker/peoplePickerPagedList.js";
 export { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
 export { ThemePicker, type ThemePickerProps, type ThemePreference } from "#ThemePicker/index.js";
-export { TypePicker, type TypePickerOption } from "#TypePicker/index.js";
+export { ToolbarMenuButton, type ToolbarMenuButtonProps } from "#ToolbarMenuButton/index.js";
 export { bonderyTheme, primaryColor } from "#theme.js";
 export { UserCard, type UserCardProps } from "#UserCard/index.js";

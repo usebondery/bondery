@@ -1,0 +1,16 @@
+/*
+  Desktop: notes take the wide column and meta the narrow one. On phone the
+  single column stacks meta first. Use a literal breakpoint because custom
+  properties are not valid in @media queries.
+*/
+.grid {
+  display: grid;
+  gap: var(--mantine-spacing-md);
+  grid-template-areas: "meta" "notes";
+}
+
+@media (min-width: 48em) {
+  .grid {
+    grid-template-areas: "notes" "meta";
+  }
+}

@@ -33,7 +33,6 @@ const FORBIDDEN_IN_ROUTES = [
   "registerApiKeyProtectedHooks",
   "registerSessionAuthHooks",
   "registerNativeSessionAuthHooks",
-  "registerAdminAuthHooks",
   "registerInternalAuthHooks",
   "fastify.auth([fastify.verify",
 ] as const;

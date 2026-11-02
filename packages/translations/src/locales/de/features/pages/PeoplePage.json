@@ -37,13 +37,18 @@
     "Title_other": "{count} Kontakte löschen?",
     "TitleAllMatching": "Alle passenden Kontakte löschen?"
   },
+  "Filter": "Filter",
   "HeaderDescription": "Überblick über alle deine Kontakte.",
   "ImportContacts": "Kontakte importieren",
   "LoadMoreBatch": "Weitere 50 Kontakte laden",
   "LoadMoreError": "Weitere Kontakte konnten nicht geladen werden. Bitte versuche es erneut.",
   "NoContactsFound": "Du hast noch keine Kontakte hinzugefügt.",
   "NoContactsMatchSearch": "Kein passender Kontakt gefunden.",
+  "ResetFilters": "Zurücksetzen",
   "SearchPlaceholder": "Nach Name suchen...",
+  "TagFilterLabel": "Tags",
+  "TagFilterNoResults": "Keine Tags gefunden",
+  "TagFilterPlaceholder": "Nach Tag filtern",
   "ThisContactFallback": "diesen Kontakt",
   "Title": "Personen"
 }

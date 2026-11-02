@@ -196,6 +196,7 @@ export const EXAMPLE_UPDATE_CHAT_SESSION_REQUEST = {
 
 /** POST /api/chat body. */
 export const EXAMPLE_CHAT_REQUEST = {
+  intent: "message",
   messages: [
     {
       id: "msg-1",
@@ -203,6 +204,7 @@ export const EXAMPLE_CHAT_REQUEST = {
       role: "user",
     },
   ],
+  model: "anthropic/claude-haiku-5.5",
   sessionId: EXAMPLE_CHAT_SESSION.id,
 };
 

@@ -77,11 +77,6 @@ export function registerSessionAuthHooks(fastify: AppFastifyInstance): void {
   fastify.addHook("onRequest", fastify.auth([fastify.verifySession]));
 }
 
-/** Admin session auth (bearer only, requires platform admin role). */
-export function registerAdminAuthHooks(fastify: AppFastifyInstance): void {
-  fastify.addHook("onRequest", fastify.auth([fastify.verifyAdmin]));
-}
-
 /** Service-role bearer auth for server-to-server internal routes. */
 export function registerInternalAuthHooks(fastify: AppFastifyInstance): void {
   fastify.addHook("onRequest", fastify.auth([fastify.verifyServiceSecret]));

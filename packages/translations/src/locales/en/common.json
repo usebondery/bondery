@@ -6,7 +6,9 @@
     "createMore": "After creating, stay in this dialog to add another",
     "info": "Info",
     "loading": "Loading",
-    "openMenu": "Open menu"
+    "loadingMore": "Loading more…",
+    "openMenu": "Open menu",
+    "opensInNewTab": "opens in new tab"
   },
   "actions": {
     "back": "Back",
@@ -39,7 +41,6 @@
       "account_failed_to_upload_profile_photo": "Account failed to upload profile photo.",
       "account_invalid": "Account invalid.",
       "account_photo_invalid_format": "Account photo invalid format.",
-      "admin_required": "Admin required.",
       "api": "Api key session mint failed.",
       "api_key_failed": "Api key failed.",
       "api_key_limit_exceeded": "Api key limit exceeded.",

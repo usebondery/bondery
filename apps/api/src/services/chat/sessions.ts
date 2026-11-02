@@ -1,5 +1,10 @@
 import type { Prisma } from "@bondery/db";
-import type { ChatMessage, ChatSession } from "@bondery/schemas";
+import {
+  type ChatMessage,
+  type ChatSession,
+  type ChatToolActivity,
+  chatMessageContentSchema,
+} from "@bondery/schemas";
 import type { UIMessage } from "ai";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
@@ -69,7 +74,7 @@ export async function deleteChatSession(ctx: DomainContext, sessionId: string): 
   }
 }
 
-function userMessageText(userMessage: UIMessage): string {
+export function userMessageText(userMessage: UIMessage): string {
   return (
     userMessage.parts
       ?.filter((p): p is { type: "text"; text: string } => p.type === "text")
@@ -121,11 +126,25 @@ export async function persistUserChatMessage(
   }
 }
 
-/** Persist the assistant reply after the stream completes. */
+export interface AssistantMessageContent {
+  activities?: ChatToolActivity[];
+  status: "complete" | "incomplete";
+  text: string;
+  writeMayHaveLanded?: boolean;
+}
+
+/**
+ * Persist an assistant turn exactly once.
+ *
+ * A stopped or failed reply stores what arrived so far with `status:
+ * "incomplete"`. A retry replaces that row instead of adding a second one.
+ * Returns the row id of an existing incomplete row when `reuse` is set.
+ */
 export async function persistAssistantChatMessage(
   ctx: DomainContext,
   sessionId: string,
-  assistantText: string,
+  content: AssistantMessageContent,
+  options: { reuseIncomplete?: boolean } = {},
 ): Promise<void> {
   const db = domainDb(ctx);
 
@@ -133,9 +152,34 @@ export async function persistAssistantChatMessage(
     return;
   }
 
-  const assistantContent = { text: assistantText } satisfies Prisma.InputJsonValue;
+  const assistantContent: Prisma.InputJsonObject = {
+    ...(content.activities && content.activities.length > 0
+      ? {
+          activities: content.activities.map((activity) => ({
+            ...(activity.displayName ? { displayName: activity.displayName } : {}),
+            kind: activity.kind,
+            tool: activity.tool,
+          })),
+        }
+      : {}),
+    ...(content.writeMayHaveLanded ? { writeMayHaveLanded: true } : {}),
+    status: content.status,
+    text: content.text,
+  };
 
   try {
+    if (options.reuseIncomplete) {
+      const incomplete = await findIncompleteAssistantMessage(ctx, sessionId);
+
+      if (incomplete) {
+        await db.chatMessage.update({
+          data: { content: assistantContent },
+          where: { id: incomplete.id },
+        });
+        return;
+      }
+    }
+
     await db.chatMessage.create({
       data: {
         content: assistantContent,
@@ -146,6 +190,28 @@ export async function persistAssistantChatMessage(
   } catch (error) {
     ctx.log?.error({ err: error }, "Failed to save assistant chat message");
   }
+}
+
+/** The last assistant row when it is still marked incomplete. */
+export async function findIncompleteAssistantMessage(
+  ctx: DomainContext,
+  sessionId: string,
+): Promise<{ content: unknown; id: string } | undefined> {
+  const db = domainDb(ctx);
+
+  const row = await db.chatMessage.findFirst({
+    orderBy: { createdAt: "desc" },
+    select: { content: true, id: true },
+    where: { role: "assistant", sessionId },
+  });
+
+  if (!row) {
+    return undefined;
+  }
+
+  const parsed = chatMessageContentSchema.safeParse(row.content);
+
+  return parsed.success && parsed.data.status === "incomplete" ? row : undefined;
 }
 
 export async function setChatSessionTitleIfEmpty(

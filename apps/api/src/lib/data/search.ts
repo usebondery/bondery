@@ -17,7 +17,7 @@ export async function searchPeopleIds(
   query: string,
   limit: number,
   offset = 0,
-  options?: { groupId?: string; tagId?: string; keepInTouch?: boolean },
+  options?: { groupId?: string; tagId?: string; tagIds?: string[]; keepInTouch?: boolean },
 ): Promise<{ ranked: RankedPerson[] | null; error: string | null }> {
   return searchPeopleIdsWithDb(prisma, userId, query, limit, offset, options);
 }
@@ -37,7 +37,7 @@ export function restoreRankedOrder<T extends { id: string }>(items: T[], rankedI
 export async function countSearchPeopleIds(
   userId: string,
   query: string,
-  options?: { groupId?: string; tagId?: string; keepInTouch?: boolean },
+  options?: { groupId?: string; tagId?: string; tagIds?: string[]; keepInTouch?: boolean },
 ): Promise<{ count: number | null; error: string | null }> {
   return countSearchPeopleIdsWithDb(prisma, userId, query, options);
 }

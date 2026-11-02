@@ -1,4 +1,4 @@
-import { Group, Skeleton } from "@mantine/core";
+import { Flex, Group, Skeleton } from "@mantine/core";
 
 interface PageHeaderSkeletonProps {
   /**
@@ -29,23 +29,35 @@ export function PageHeaderSkeleton({
   const hasActions = Boolean(primaryActionWidth ?? secondaryActionWidth);
 
   return (
-    <Group gap="sm" justify={hasActions ? "space-between" : "flex-start"} mb="xl">
-      {/* Left: page icon + title + help icon */}
-      <Group gap="sm">
+    <Flex
+      align={{ base: "stretch", sm: "center" }}
+      direction={{ base: "column", sm: "row" }}
+      gap="sm"
+      justify={hasActions ? { base: "flex-start", sm: "space-between" } : "flex-start"}
+      mb="xl"
+    >
+      <Group gap="sm" wrap="wrap">
         <Skeleton height={32} radius="sm" width={32} />
         <Skeleton height={32} radius="sm" width={160} />
         <Skeleton height={28} radius="xl" width={28} />
       </Group>
 
-      {/* Right: optional action buttons */}
-      {hasActions && (
-        <Group gap="sm">
-          {secondaryActionWidth && (
-            <Skeleton height={36} radius="sm" width={secondaryActionWidth} />
-          )}
-          {primaryActionWidth && <Skeleton height={36} radius="sm" width={primaryActionWidth} />}
-        </Group>
-      )}
-    </Group>
+      {hasActions ? (
+        <Flex
+          align={{ base: "stretch", sm: "center" }}
+          direction={{ base: "column", sm: "row" }}
+          gap="sm"
+          justify="flex-end"
+          w={{ base: "100%", sm: "auto" }}
+        >
+          {secondaryActionWidth ? (
+            <Skeleton height={36} radius="sm" w={{ base: "100%", sm: secondaryActionWidth }} />
+          ) : null}
+          {primaryActionWidth ? (
+            <Skeleton height={36} radius="sm" w={{ base: "100%", sm: primaryActionWidth }} />
+          ) : null}
+        </Flex>
+      ) : null}
+    </Flex>
   );
 }

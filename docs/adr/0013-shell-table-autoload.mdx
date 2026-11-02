@@ -1,0 +1,38 @@
+---
+title: "ADR 0013: Shell table autoload"
+hidden: true
+---
+
+# ADR 0013: Shell table autoload
+
+**Status:** Accepted  
+**Date:** 2026-11-01
+
+## Context
+
+ADR 0012 point 9 loads the next page of the interactions timeline with one intersection sentinel. The observer root is the shell viewport. The root is not `window`.
+
+People and group members use `DataTable`. That table rendered a Load more button. The table lives in `packages/mantine-next`. The shell viewport lives in the webapp. `mantine-next` must not import from `apps/webapp`.
+
+## Decision
+
+1. `ShellScrollLoadMore` stays the only next-page control for shell lists. Do not rename it.
+2. The observer root is `useShellScrollViewport()`. `rootMargin` stays `0px 0px 240px 0px`. `shouldRequestNextPage` stays the gate. Server `pagination.hasMore` stays the source of truth.
+3. People and group members render the sentinel as the next sibling after `ContactsTable`. The sentinel stays inside the same `Paper`. It stays outside the table `Box` that sets `overflowX: "auto"`. That box is not the page scroller. `AppShellMainScrollArea` stays the only vertical scroller.
+4. `DataTable` does not render a Load more button. It does not accept `hasMore`, `onLoadMore`, `loadMoreLoading`, or `loadMoreLabel`.
+5. When the shell viewport is missing, the sentinel shows the caller fallback button. When the next page fails, the sentinel shows the caller error line and a retry link. The observer does not retry by itself.
+6. Import tables and the map table do not paginate. They do not render the sentinel.
+7. Page size stays 50 for contacts and 20 for interactions. Query keys, `nextPaginatedOffset`, and API pagination stay the same.
+8. Select-all-total stays a flag. A new page does not clear `selectedIds`, `isAllTotalSelected`, or `excludedIds`.
+
+## Alternatives
+
+- A `DataTable` observer. Rejected. `mantine-next` must not know the shell viewport.
+- Keep the Load more button for import tables. Rejected. Those tables do not paginate.
+- A second page scroller. Rejected. `AppShellMainScrollArea` already scrolls.
+
+## Consequences
+
+- When the sentinel enters the shell viewport, People and group members load the next page.
+- A short list shows no sentinel chrome.
+- The home preview stays the first page. People pickers, mentions, and mobile lists keep their current controls.

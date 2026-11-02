@@ -88,6 +88,42 @@ export const EXAMPLE_MAP_PINS_RESPONSE = {
   ],
 };
 
+export const EXAMPLE_RELATIONSHIP_GRAPH_RESPONSE = {
+  graph: {
+    edges: [
+      {
+        id: "6ba7b812-9dad-11d1-80b4-00c04fd430c8",
+        relationshipType: "friend" as const,
+        sourcePersonId: EXAMPLE_CONTACT_ID,
+        targetPersonId: EXAMPLE_CONTACT_ID_2,
+      },
+    ],
+    groups: [],
+    hubs: [],
+    nodes: [
+      {
+        avatar: null,
+        firstName: "Ada",
+        id: EXAMPLE_CONTACT_ID,
+        lastName: "Lovelace",
+        middleName: null,
+        myself: false,
+      },
+      {
+        avatar: null,
+        firstName: "Charles",
+        id: EXAMPLE_CONTACT_ID_2,
+        lastName: "Babbage",
+        middleName: null,
+        myself: false,
+      },
+    ],
+    truncated: false,
+    unlinked: [],
+    unlinkedCount: 0,
+  },
+};
+
 export const EXAMPLE_MAP_ADDRESS_PINS_RESPONSE = {
   pins: [
     {

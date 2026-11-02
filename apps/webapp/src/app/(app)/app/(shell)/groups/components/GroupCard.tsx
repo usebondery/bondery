@@ -242,7 +242,7 @@ export function GroupCard(props: GroupCardProps) {
   const compact = variant !== "default";
   const maxWidth = fullWidth ? "100%" : GROUP_CARD_MAX_WIDTH_BY_VARIANT[variant];
   const resolvedHighlightColor = highlightColor || (selected ? "primary" : undefined);
-  const className = `w-full ${interactive ? "card-scale-effect" : ""}`.trim();
+  const className = "card-press-effect w-full";
 
   // ── Action card ─────────────────────────────────────
 

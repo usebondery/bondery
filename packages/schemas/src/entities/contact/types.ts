@@ -58,6 +58,13 @@ export interface ContactPreview {
   lastName: string | null;
 }
 
+/** Identity plus the optional display lines that hover cards render. */
+export interface PersonPreview extends ContactPreview {
+  headline?: string | null;
+  location?: string | null;
+  middleName?: string | null;
+}
+
 /** Lean contact shape for pickers, comboboxes, and activity participant selection. */
 export interface ContactSelectable extends ContactPreview {
   headline: string | null;
@@ -244,6 +251,59 @@ export interface ContactRelationshipsResponse {
   relationships: ContactRelationshipWithPeople[];
 }
 
+export interface RelationshipGraphNode {
+  avatar: string | null;
+  firstName: string;
+  headline: string | null;
+  id: string;
+  lastName: string | null;
+  location: string | null;
+  middleName: string | null;
+  myself: boolean;
+}
+
+export interface RelationshipGraphEdge {
+  id: string;
+  relationshipType: RelationshipType;
+  sourcePersonId: string;
+  targetPersonId: string;
+}
+
+export interface RelationshipGraphUnlinkedPerson {
+  firstName: string;
+  id: string;
+  lastName: string | null;
+}
+
+export interface RelationshipGraphHub {
+  id: string;
+  kind: "company" | "school";
+  label: string;
+  logoUrl: string | null;
+  memberCount: number;
+  personIds: string[];
+}
+
+export interface RelationshipGraphGroup {
+  color: string | null;
+  emoji: string | null;
+  id: string;
+  label: string;
+  personIds: string[];
+}
+
+export interface RelationshipGraphResponse {
+  graph: {
+    edges: RelationshipGraphEdge[];
+    groups: RelationshipGraphGroup[];
+    hubs: RelationshipGraphHub[];
+    nodes: RelationshipGraphNode[];
+    truncated: boolean;
+    unlinked: RelationshipGraphUnlinkedPerson[];
+    unlinkedCount: number;
+  };
+}
+
 export type ContactSortOrder =
   | "nameAsc"
   | "nameDesc"
@@ -257,6 +317,8 @@ export type ContactSortOrder =
 export interface ContactsFilter {
   search?: string;
   sort?: ContactSortOrder;
+  /** Contact matches any listed tag id (OR). */
+  tagIds?: string[];
 }
 
 export type DeleteContactsRequest =

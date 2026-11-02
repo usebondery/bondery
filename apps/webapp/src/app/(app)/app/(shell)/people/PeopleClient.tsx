@@ -3,6 +3,7 @@
 
 import { getUserFacingError } from "@bondery/helpers/api";
 import { formatContactName } from "@bondery/helpers/contact";
+import { parseTagIdsQueryParam, TAG_IDS_QUERY_PARAM } from "@bondery/helpers/globals/webapp-query";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import { Paper } from "@mantine/core";
 import { useDebouncedCallback } from "@mantine/hooks";
@@ -28,6 +29,7 @@ import ContactsTable, {
 import { openDeleteContactModal } from "@/components/contacts/openDeleteContactModal";
 import { openDeleteContactsModal } from "@/components/contacts/openDeleteContactsModal";
 import { useBatchEnrichFromLinkedIn } from "@/components/extension/useBatchEnrichFromLinkedIn";
+import { ShellScrollLoadMore } from "@/components/shell/ShellScrollLoadMore";
 import { useResponsiveColumns } from "@/hooks/useResponsiveColumns";
 import { downloadContactVcard } from "@/lib/api/domains/contacts";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
@@ -45,6 +47,7 @@ import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
 import { parseContactsListParams } from "@/lib/query/contactsListParams";
 import { useContactsInfiniteQuery } from "@/lib/query/hooks/useContacts";
+import { TagFilterSelect } from "./components/chrome/TagFilterSelect";
 import { openAddPeopleToGroupSelectionModal } from "./components/modals/AddPeopleToGroupSelectionModal";
 import { openMergeWithModal } from "./components/modals/MergeWithModal";
 import { openShareContactModal } from "./components/modals/ShareContactModal";
@@ -111,10 +114,11 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   const listFilter = parseContactsListParams({
     search: searchParams.get("search") ?? undefined,
     sort: searchParams.get("sort") ?? undefined,
+    tagIds: parseTagIdsQueryParam(searchParams.getAll(TAG_IDS_QUERY_PARAM)),
   });
   const searchDefaultValue = listFilter.search ?? "";
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isFetching } =
+  const { data, fetchNextPage, hasNextPage, isFetchNextPageError, isFetching, isFetchingNextPage } =
     useContactsInfiniteQuery(listFilter);
 
   const contacts = data?.pages.flatMap((page) => page.contacts) ?? [];
@@ -310,20 +314,11 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
     }
   };
 
-  const handleLoadMore = async () => {
+  const handleLoadMore = () => {
     if (isFetchingNextPage || !hasNextPage) {
       return;
     }
-    try {
-      await fetchNextPage();
-    } catch {
-      notifications.show(
-        errorNotificationTemplate({
-          description: t("LoadMoreError"),
-          title: tCommon("feedback.errorTitle"),
-        }),
-      );
-    }
+    void fetchNextPage();
   };
 
   const handleDeleteSelected = (ids: string[]) => {
@@ -332,7 +327,11 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
       filterPayload: isAllTotalSelected
         ? {
             excludeIds: Array.from(excludedIds),
-            filter: { search: listFilter.search, sort: listFilter.sort },
+            filter: {
+              search: listFilter.search,
+              sort: listFilter.sort,
+              ...(listFilter.tagIds ? { tagIds: listFilter.tagIds } : {}),
+            },
           }
         : undefined,
       onDeleted: async () => {
@@ -370,11 +369,6 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
         hasMore={hasMore}
         isAllTotalSelected={isAllTotalSelected}
         isHeaderShown={true}
-        loadMoreAction={{
-          label: t("LoadMoreBatch"),
-          loading: isFetchingNextPage,
-          onClick: handleLoadMore,
-        }}
         menuActions={[
           {
             icon: <IconShare size={16} />,
@@ -463,8 +457,18 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
           onMergeSelected: (leftContactId, rightContactId) =>
             openMergeModal(leftContactId, rightContactId, true),
         }}
+        toolbarExtra={<TagFilterSelect />}
         totalCount={totalAvailableCount}
         visibleColumns={effectiveColumns}
+      />
+      <ShellScrollLoadMore
+        errorLabel={t("LoadMoreError")}
+        fallbackLabel={t("LoadMoreBatch")}
+        hasMore={hasMore}
+        isFetchingNextPage={isFetchingNextPage}
+        isFetchNextPageError={isFetchNextPageError}
+        onLoadMore={handleLoadMore}
+        retryLabel={tCommon("actions.retry")}
       />
     </Paper>
   );

@@ -65,7 +65,7 @@ export async function updateTag(
       throw error;
     }
     if (isUniqueViolation(error)) {
-      throw new DomainError("Tag label already exists", 409, "conflict");
+      throw new DomainError("Tag label already exists", 409, "tag_label_exists");
     }
     throw internal("tag_failed", error instanceof Error ? error.message : "tag_failed");
   }

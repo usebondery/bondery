@@ -58,6 +58,8 @@ interface PeopleMapProps {
   center?: [number, number];
   disableAutoFit?: boolean;
   disableChipNavigation?: boolean;
+  /** Pin-query status on the map control overlay. Null hides the chip. */
+  fetchingStatus?: string | null;
   focus?: PeopleMapFocus | null;
   height?: number;
   hideZoomControls?: boolean;
@@ -97,6 +99,7 @@ export function PeopleMap({
   onReady,
   disableAutoFit = false,
   disableChipNavigation = false,
+  fetchingStatus = null,
   myLocationControl = null,
   selfLocation = null,
   selfMarker = null,
@@ -106,6 +109,7 @@ export function PeopleMap({
       center={center}
       disableAutoFit={disableAutoFit}
       disableChipNavigation={disableChipNavigation}
+      fetchingStatus={fetchingStatus}
       focus={focus}
       height={height}
       hideZoomControls={hideZoomControls}

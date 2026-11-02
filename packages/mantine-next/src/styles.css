@@ -126,6 +126,18 @@ ol {
   transform: scale(var(--scale-grow));
 }
 
+.card-press-effect {
+  transition:
+    transform var(--transition-time) var(--transition-ease),
+    filter var(--transition-time) var(--transition-ease);
+}
+
+.card-press-effect:active,
+button:active .card-press-effect {
+  transform: scale(var(--scale-shrink));
+  filter: var(--active-filter);
+}
+
 .selectable-card {
   transition:
     background-color var(--transition-time) var(--transition-ease),
@@ -145,6 +157,16 @@ ol {
 
 .mantine-Combobox-option:hover {
   background-color: var(--mantine-primary-color-light);
+}
+
+/* Select options use `mantine-Select-option`, not the Combobox class. */
+:is(.mantine-Select-option, .mantine-Combobox-option) [data-option-muted] {
+  color: var(--mantine-color-dimmed);
+}
+
+:is(.mantine-Select-option, .mantine-Combobox-option):where([data-combobox-selected])
+  [data-option-muted] {
+  color: var(--mantine-color-white);
 }
 
 .peoplePickerOptions {

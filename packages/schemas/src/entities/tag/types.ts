@@ -24,6 +24,7 @@ export interface PeopleTag {
 }
 
 export interface CreateTagInput {
+  color?: string;
   label: string;
 }
 
@@ -37,6 +38,7 @@ export type TagUpdateResponse = TagResponse;
 
 export interface AddContactsToTagResponse {
   addedCount: number;
+  skippedCount: number;
 }
 
 export interface RemoveContactsFromTagResponse {

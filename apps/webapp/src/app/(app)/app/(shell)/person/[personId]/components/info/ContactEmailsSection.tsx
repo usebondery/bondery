@@ -4,9 +4,10 @@
 import {
   ActionIconButton,
   ActionIconLink,
+  DescribedSelect,
+  type DescribedSelectOption,
   errorNotificationTemplate,
   successNotificationTemplate,
-  TypePicker,
 } from "@bondery/mantine-next";
 import {
   type ContactType,
@@ -31,7 +32,7 @@ import { createDraftEmail, MAX_EMAIL_ENTRIES } from "../../utils/contactInfoUtil
 
 interface ContactEmailsSectionProps {
   emails: EmailEntry[];
-  emailTypeOptions: Array<{ emoji: string; label: string; value: string }>;
+  emailTypeOptions: DescribedSelectOption[];
   labels: ContactInfoLabels;
   onEmailsChange: (emails: EmailEntry[]) => void;
   onSave: (payload?: { emails?: EmailEntry[] }) => void;
@@ -186,10 +187,15 @@ export function ContactEmailsSection({
               value={email.value}
             />
 
-            <TypePicker
-              ariaLabel={text.typeLabel}
+            <DescribedSelect
+              aria-label={text.typeLabel}
               data={emailTypeOptions}
-              onChange={(value) => handleEmailTypeChange(index, value as ContactType)}
+              onChange={(value) => {
+                if (!value) {
+                  return;
+                }
+                handleEmailTypeChange(index, value as ContactType);
+              }}
               size="sm"
               style={{ flex: "0 0 110px" }}
               value={email.type}
@@ -285,16 +291,19 @@ export function ContactEmailsSection({
               value={draftEmail.value}
             />
 
-            <TypePicker
-              ariaLabel={text.typeLabel}
+            <DescribedSelect
+              aria-label={text.typeLabel}
               data={emailTypeOptions}
               disabled={savingField === "emails"}
-              onChange={(value) =>
+              onChange={(value) => {
+                if (!value) {
+                  return;
+                }
                 setDraftEmail((previous) => ({
                   ...previous,
-                  type: (value as ContactType) || "home",
-                }))
-              }
+                  type: value as ContactType,
+                }));
+              }}
               size="sm"
               style={{ flex: "0 0 110px" }}
               value={draftEmail.type}

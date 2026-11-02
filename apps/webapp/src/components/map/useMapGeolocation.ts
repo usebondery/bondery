@@ -29,6 +29,12 @@ export type MapGeolocationResult =
 const GEO_TIMEOUT_MS = 10_000;
 const GEO_MAXIMUM_AGE_MS = 60_000;
 
+const GEO_POSITION_OPTIONS: PositionOptions = {
+  enableHighAccuracy: false,
+  maximumAge: GEO_MAXIMUM_AGE_MS,
+  timeout: GEO_TIMEOUT_MS,
+};
+
 function detectInitialStatus(): MapGeolocationStatus {
   if (typeof window === "undefined") {
     return "idle";
@@ -50,6 +56,69 @@ function mapPositionError(error: GeolocationPositionError): MapGeolocationFailur
     return "timeout";
   }
   return "unavailable";
+}
+
+function getCurrentMapPosition(geolocation: Geolocation): Promise<MapGeolocationResult> {
+  return new Promise((resolve) => {
+    geolocation.getCurrentPosition(
+      (position) => {
+        resolve({
+          location: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          },
+          ok: true,
+        });
+      },
+      (error) => {
+        resolve({ ok: false, status: mapPositionError(error) });
+      },
+      GEO_POSITION_OPTIONS,
+    );
+  });
+}
+
+/**
+ * Read GPS only when the browser already granted geolocation.
+ * Does not show a permission prompt. Safari without `permissions.query` is not granted.
+ */
+export async function readMapGeolocationIfGranted(): Promise<MapSelfLocation | null> {
+  const view = globalThis.window;
+  if (view === undefined) {
+    return null;
+  }
+  if (!view.isSecureContext) {
+    return null;
+  }
+
+  const geoNavigator = view.navigator ?? globalThis.navigator;
+  if (!geoNavigator?.geolocation) {
+    return null;
+  }
+
+  const permissionState = await queryGeolocationPermission(geoNavigator);
+  if (permissionState !== "granted") {
+    return null;
+  }
+
+  const result = await getCurrentMapPosition(geoNavigator.geolocation);
+  return result.ok ? result.location : null;
+}
+
+async function queryGeolocationPermission(
+  geoNavigator: Navigator,
+): Promise<PermissionState | null> {
+  const query = geoNavigator.permissions?.query;
+  if (typeof query !== "function") {
+    return null;
+  }
+
+  try {
+    const status = await query.call(geoNavigator.permissions, { name: "geolocation" });
+    return status.state;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -75,28 +144,14 @@ export function useMapGeolocation() {
 
     setStatus("prompting");
 
-    return new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const location: MapSelfLocation = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-          setSelfLocation(location);
-          setStatus("ready");
-          resolve({ location, ok: true });
-        },
-        (error) => {
-          const failureStatus = mapPositionError(error);
-          setStatus(failureStatus);
-          resolve({ ok: false, status: failureStatus });
-        },
-        {
-          enableHighAccuracy: false,
-          maximumAge: GEO_MAXIMUM_AGE_MS,
-          timeout: GEO_TIMEOUT_MS,
-        },
-      );
+    return getCurrentMapPosition(navigator.geolocation).then((result) => {
+      if (result.ok) {
+        setSelfLocation(result.location);
+        setStatus("ready");
+        return result;
+      }
+      setStatus(result.status);
+      return result;
     });
   }, []);
 

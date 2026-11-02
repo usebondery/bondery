@@ -4,6 +4,7 @@
 
 import { extLog } from "../../../../lib/log";
 import { extractProfileUrnFromComponentKey } from "../sduiProfile";
+import { logVoyagerExchange } from "./voyagerDump";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -222,6 +223,7 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
   const csrfToken = getCsrfToken();
   if (!csrfToken) {
     extLog.warn("[linkedin][fetchDetails] No JSESSIONID cookie — cannot call Voyager API");
+    logVoyagerExchange({ path, status: "no-jsession" });
     return null;
   }
 
@@ -247,12 +249,16 @@ export async function voyagerFetch(path: string): Promise<Record<string, unknown
 
     if (!response.ok) {
       extLog.warn(`[linkedin][fetchDetails] Voyager ${response.status} for ${path}`);
+      logVoyagerExchange({ path, status: response.status });
       return null;
     }
 
-    return (await response.json()) as Record<string, unknown>;
+    const body = (await response.json()) as Record<string, unknown>;
+    logVoyagerExchange({ body, path, status: response.status });
+    return body;
   } catch (error) {
     extLog.warn(`[linkedin][fetchDetails] Voyager error for ${path}:`, error);
+    logVoyagerExchange({ error, path, status: "error" });
     return null;
   } finally {
     window.clearTimeout(timeoutId);

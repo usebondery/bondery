@@ -5,7 +5,6 @@
 
 import type { RouteOptions } from "fastify";
 import {
-  registerAdminAuthHooks,
   registerApiKeyProtectedHooks,
   registerInternalAuthHooks,
   registerSessionAuthHooks,
@@ -85,15 +84,6 @@ export function nativeSessionRoutes(plugin: AppRoutePlugin): AppRoutePlugin {
   return async (fastify) => {
     fastify.addHook("onRoute", stampOpenApiArea("session"));
     registerNativeSessionAuthHooks(fastify);
-    await fastify.register(plugin);
-  };
-}
-
-/** Admin routes: session + platform admin role (OpenAPI area remains session/bearer-only). */
-export function adminRoutes(plugin: AppRoutePlugin): AppRoutePlugin {
-  return async (fastify) => {
-    fastify.addHook("onRoute", stampOpenApiArea("session"));
-    registerAdminAuthHooks(fastify);
     await fastify.register(plugin);
   };
 }

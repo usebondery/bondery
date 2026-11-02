@@ -17,6 +17,9 @@ interface ChatPersonChipProps {
 /**
  * PersonChip wrapper used inside AI chat messages.
  * Fetches all display data (name, avatar, headline, location) by person ID.
+ *
+ * The name comes from `PersonChip`, which joins the same three name fields as
+ * `inlineTokenLabel`. The chip and the voice therefore agree.
  */
 export function ChatPersonChip({ personId }: ChatPersonChipProps) {
   const { data: contact } = useChatContactQuery(personId);

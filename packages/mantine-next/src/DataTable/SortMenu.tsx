@@ -1,13 +1,17 @@
 "use client";
 
-import { Button, Menu, MenuDropdown, MenuItem, MenuTarget } from "@mantine/core";
+import { MenuDropdown, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
 import { useState } from "react";
 import type { SortMenuLabels, SortOption } from "#DataTable/types.js";
+import { DropdownOption, DropdownOptionMenu } from "#DropdownOption/index.js";
+import { ToolbarMenuButton } from "#ToolbarMenuButton/ToolbarMenuButton.js";
 
 export interface SortMenuProps<TSortKey extends string> {
   /** Currently selected sort key */
   currentSort: TSortKey;
+  /** True when `currentSort` is not the caller's default sort. */
+  isActive?: boolean;
   /** Localized labels */
   labels: SortMenuLabels;
   /** Callback when sort changes */
@@ -25,6 +29,7 @@ export interface SortMenuProps<TSortKey extends string> {
 export function SortMenu<TSortKey extends string>({
   sortOptions,
   currentSort,
+  isActive = false,
   onSortChange,
   labels,
   width = 220,
@@ -32,28 +37,26 @@ export function SortMenu<TSortKey extends string>({
   const [opened, setOpened] = useState(false);
 
   return (
-    <Menu onChange={setOpened} opened={opened} shadow="md" width={width}>
+    <DropdownOptionMenu onChange={setOpened} opened={opened} width={width}>
       <MenuTarget>
-        <Button
-          className={opened ? "button-scale-effect-active" : undefined}
+        <ToolbarMenuButton
+          isActive={isActive}
           leftSection={<IconArrowsSort size={16} />}
-          variant="light"
+          opened={opened}
         >
           {labels.buttonLabel}
-        </Button>
+        </ToolbarMenuButton>
       </MenuTarget>
       <MenuDropdown>
         {sortOptions.map((option) => (
-          <MenuItem
-            bg={currentSort === option.key ? "var(--mantine-primary-color-light)" : undefined}
+          <DropdownOption
             key={option.key}
-            onClick={() => onSortChange(option.key)}
-            rightSection={currentSort === option.key ? "✓" : ""}
-          >
-            {option.label}
-          </MenuItem>
+            label={option.label}
+            onSelect={() => onSortChange(option.key)}
+            selected={currentSort === option.key}
+          />
         ))}
       </MenuDropdown>
-    </Menu>
+    </DropdownOptionMenu>
   );
 }

@@ -114,8 +114,6 @@ export interface DataTableLabels {
   columnVisibility: ColumnVisibilityLabels;
   /** Message shown when no data matches filters */
   emptyStateMessage: string;
-  /** Label for "Load more" button */
-  loadMoreLabel?: string;
   /** Placeholder text for search input */
   searchPlaceholder: string;
   /** Template for "select all" link (e.g., "Select all {count} people") */
@@ -156,19 +154,15 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
   /** Custom aria-label generator for row selection checkbox */
   getRowSelectionAriaLabel?: (row: TRow) => string;
 
-  // --- Pagination ---
-  /** Whether more data can be loaded */
-  hasMore?: boolean;
-
   // --- Customization ---
   /** Custom header content to render after built-in controls */
   headerContent?: ReactNode;
+  /** True when `currentSort` is not the caller's default sort. */
+  isSortActive?: boolean;
 
   // --- Labels ---
   /** All localized labels */
   labels: DataTableLabels;
-  /** Whether load more is in progress */
-  loadMoreLoading?: boolean;
   /** Set of row IDs that cannot be selected */
   nonSelectableIds?: Set<string>;
   /** Tooltip shown on non-selectable rows */
@@ -177,8 +171,6 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
   // --- Columns ---
   /** Callback when columns change (visibility/order) - enables column menu when provided */
   onColumnsChange?: (columns: DataColumnConfig<TRow>[]) => void;
-  /** Callback to load more data */
-  onLoadMore?: () => void;
   /** Callback when search value changes */
   onSearchChange?: (value: string) => void;
   /** Callback for toggling all rows (compatibility mode) */
@@ -219,6 +211,8 @@ export interface DataTableProps<TRow, TSortKey extends string = string> {
   sortOptions?: SortOption<TSortKey>[];
   /** Top offset for sticky header */
   stickyHeaderOffset?: number;
+  /** Control rendered in the toolbar, after search and before column and sort menus. */
+  toolbarExtra?: ReactNode;
   /** Total number of items available (across all pages) */
   totalCount?: number;
 }

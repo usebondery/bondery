@@ -26,7 +26,6 @@ Registered in `apps/api/src/lib/platform/auth/strategies.ts`:
 |----------|-----|
 | `verifySession` | Session or OAuth resource JWT |
 | `verifyAuth` | Session, OAuth JWT, or API key |
-| `verifyAdmin` | Session + `user.role = admin` (Better Auth platform admin) |
 | `verifyServiceSecret` | `BONDERY_PRIVATE_SERVICE_SECRET` bearer |
 
 ### JWT vs opaque bearer (no fallback)

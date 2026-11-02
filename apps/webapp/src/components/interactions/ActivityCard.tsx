@@ -1,9 +1,8 @@
 "use client";
 
-import { ActionIconButton } from "@bondery/mantine-next";
-import type { Activity } from "@bondery/schemas";
+import { ActionIconButton, PersonChip } from "@bondery/mantine-next";
+import type { Activity, PersonPreview } from "@bondery/schemas";
 import {
-  Badge,
   Box,
   Group,
   Menu,
@@ -13,31 +12,38 @@ import {
   Paper,
   Stack,
   Text,
+  Tooltip,
 } from "@mantine/core";
 import { IconCopy, IconDotsVertical, IconEdit, IconTrash } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { MouseEvent } from "react";
 import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 
 interface ActivityCardProps {
+  actionsLabel: string;
   activity: Activity;
   deleteLabel: string;
   duplicateLabel: string;
   editLabel: string;
-  leftSection?: ReactNode;
   onDelete: () => void;
   onDuplicate: () => void;
   onEdit: () => void;
   onOpen: () => void;
+  participants: PersonPreview[];
+}
+
+function stopCardOpen(event: MouseEvent) {
+  event.stopPropagation();
 }
 
 export function ActivityCard({
+  actionsLabel,
   activity,
   editLabel,
   duplicateLabel,
   deleteLabel,
-  leftSection,
+  participants,
   onOpen,
   onEdit,
   onDuplicate,
@@ -51,90 +57,107 @@ export function ActivityCard({
 
   return (
     <Paper
-      className="max-w-md"
+      className="w-full"
       onClick={onOpen}
       p={0}
       radius="md"
       shadow="none"
-      style={{ cursor: "pointer", position: "relative", transition: "border-color 0.2s" }}
+      style={{ cursor: "pointer", overflow: "hidden" }}
       withBorder
     >
-      <Menu position="bottom-end" shadow="md">
-        <MenuTarget>
-          <ActionIconButton
-            aria-label={editLabel}
-            icon={<IconDotsVertical />}
-            onClick={(event) => event.stopPropagation()}
-            style={{ position: "absolute", right: 8, top: 8, zIndex: 1 }}
-            variant="subtle"
-          />
-        </MenuTarget>
-        <MenuDropdown>
-          <MenuItem
-            leftSection={<IconEdit size={14} />}
-            onClick={(event) => {
-              event.stopPropagation();
-              onEdit();
+      <Group align="stretch" gap={0} wrap="nowrap">
+        <Tooltip label={typeLabel}>
+          <Box
+            bg={`${typeConfig.color}.1`}
+            style={{
+              alignItems: "center",
+              display: "flex",
+              flexShrink: 0,
+              fontSize: 16,
+              justifyContent: "center",
+              width: 40,
             }}
           >
-            {editLabel}
-          </MenuItem>
-          <MenuItem
-            leftSection={<IconCopy size={14} />}
-            onClick={(event) => {
-              event.stopPropagation();
-              onDuplicate();
-            }}
-          >
-            {duplicateLabel}
-          </MenuItem>
-          <MenuItem
-            color="red"
-            leftSection={<IconTrash size={14} />}
-            onClick={(event) => {
-              event.stopPropagation();
-              onDelete();
-            }}
-          >
-            {deleteLabel}
-          </MenuItem>
-        </MenuDropdown>
-      </Menu>
+            {typeConfig.emoji}
+          </Box>
+        </Tooltip>
 
-      <Group align="stretch" gap={"md"} p="sm" wrap="nowrap">
-        {leftSection ? (
-          <Box className="flex justify-center items-center shrink-0 min-w-20">{leftSection}</Box>
-        ) : null}
+        <Stack gap="xs" p="sm" style={{ flex: 1, minWidth: 0 }}>
+          <Group align="flex-start" gap="xs" justify="space-between" wrap="nowrap">
+            <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
+              <Text fw={700} size="md">
+                {activity.title || typeLabel}
+              </Text>
+              <Text c="dimmed" size="xs">
+                {formatter.dateTime(date, {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                })}
+              </Text>
+              {activity.description ? (
+                <Text c="dimmed" size="xs">
+                  {activity.description}
+                </Text>
+              ) : null}
+            </Stack>
 
-        <Stack gap="2" style={{ flex: 1 }}>
-          <Group align="center" gap="xs" wrap="nowrap">
-            <Text c="dimmed" size="xs">
-              {formatter.dateTime(date, {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
-            </Text>
-            <Badge
-              color={typeConfig.color}
-              leftSection={typeConfig.emoji}
-              radius="xl"
-              size="xs"
-              variant="light"
-            >
-              {typeLabel}
-            </Badge>
+            <Box onClick={stopCardOpen} onMouseDown={stopCardOpen}>
+              <Menu position="bottom-end" shadow="md">
+                <MenuTarget>
+                  <ActionIconButton
+                    aria-label={actionsLabel}
+                    icon={<IconDotsVertical />}
+                    variant="subtle"
+                  />
+                </MenuTarget>
+                <MenuDropdown>
+                  <MenuItem
+                    leftSection={<IconEdit size={14} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onEdit();
+                    }}
+                  >
+                    {editLabel}
+                  </MenuItem>
+                  <MenuItem
+                    leftSection={<IconCopy size={14} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDuplicate();
+                    }}
+                  >
+                    {duplicateLabel}
+                  </MenuItem>
+                  <MenuItem
+                    color="red"
+                    leftSection={<IconTrash size={14} />}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onDelete();
+                    }}
+                  >
+                    {deleteLabel}
+                  </MenuItem>
+                </MenuDropdown>
+              </Menu>
+            </Box>
           </Group>
 
-          <Text fw={700} size="md">
-            {activity.title || typeLabel}
-          </Text>
-
-          {activity.description && (
-            <Text c="dimmed" size="xs">
-              {activity.description}
-            </Text>
-          )}
+          {participants.length > 0 ? (
+            <Group gap="xs" onClick={stopCardOpen} onMouseDown={stopCardOpen} wrap="wrap">
+              {participants.map((participant) => (
+                <PersonChip
+                  isClickable
+                  key={participant.id}
+                  person={participant}
+                  showHoverCard
+                  size="sm"
+                />
+              ))}
+            </Group>
+          ) : null}
         </Stack>
       </Group>
     </Paper>

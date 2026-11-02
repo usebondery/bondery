@@ -13,6 +13,7 @@ import { useState } from "react";
 import type { SortOrder } from "@/lib/contacts/table-types";
 import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { DEFAULT_CONTACTS_SORT } from "@/lib/query/contactsListParams";
 import type {
   BulkSelectionAction,
   ContactsTableV2Props,
@@ -75,7 +76,6 @@ export type {
   ColumnConfig,
   ColumnKey,
   ContactTableRow,
-  LoadMoreAction,
   MenuAction,
   SortOrder,
   StandardContactActions,
@@ -89,6 +89,7 @@ export default function ContactsTableV2({
   searchPlaceholder,
   searchDefaultValue,
   searchValue,
+  toolbarExtra,
   onSearchChange,
   searchLoading,
   columnsForMenu,
@@ -106,7 +107,6 @@ export default function ContactsTableV2({
   standardActions,
   menuActions,
   bulkSelectionActions,
-  loadMoreAction,
   hasMore,
   totalCount,
   onSelectAllTotal,
@@ -264,7 +264,6 @@ export default function ContactsTableV2({
 
   const labels: DataTableLabels = buildTableLabels({
     emptyStateMessage: searchIsActive ? noContactsMatchSearch : noContactsFound,
-    loadMoreLabel: loadMoreAction?.label,
     searchPlaceholder,
   });
 
@@ -281,10 +280,9 @@ export default function ContactsTableV2({
       excludedIds={excludedIds}
       getRowId={(contact: ContactTableRow) => contact._rowKey ?? contact.id}
       getRowSelectionAriaLabel={(contact) => `Select ${formatContactName(contact)}`}
-      hasMore={Boolean(loadMoreAction && hasMore)}
       headerContent={null}
+      isSortActive={sortOrderForMenu !== undefined && sortOrderForMenu !== DEFAULT_CONTACTS_SORT}
       labels={labels}
-      loadMoreLoading={loadMoreAction?.loading}
       nonSelectableIds={nonSelectableIds}
       nonSelectableTooltip={nonSelectableTooltip}
       onColumnsChange={
@@ -302,7 +300,6 @@ export default function ContactsTableV2({
             }
           : undefined
       }
-      onLoadMore={loadMoreAction?.onClick}
       onSearchChange={handleSearchChange}
       onSelectAll={showSelection ? onSelectAll : undefined}
       onSelectAllTotal={onSelectAllTotal}
@@ -317,6 +314,7 @@ export default function ContactsTableV2({
       someSelected={someSelected}
       sortOptions={sortOrderForMenu && setSortOrderForMenu ? sortOptions : undefined}
       stickyHeaderOffset={headerStickyTop}
+      toolbarExtra={toolbarExtra}
       totalCount={totalCount}
     />
   );

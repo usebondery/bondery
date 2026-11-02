@@ -1,0 +1,98 @@
+---
+title: "ADR 0015: Chat dictation"
+hidden: true
+---
+
+# ADR 0015: Chat dictation
+
+**Status:** Accepted
+**Date:** 2026-11-02
+
+## Context
+
+The chat composer accepts typed text only. A user on a phone, or a user who
+thinks faster than they type, wants to speak the message. Read-aloud shipped
+first, with a `SpeechEngine` seam (ADR 0014). Dictation is the other direction
+of the same idea.
+
+The Web Speech API exposes `SpeechRecognition` and the prefixed
+`webkitSpeechRecognition`. Support is asymmetric with `SpeechSynthesis`:
+
+- Chrome and Edge implement it. Chrome sends the audio to a remote speech
+  service. It is not an on-device model.
+- Firefox does not implement it.
+- Safari implements `webkitSpeechRecognition` with partial behaviour.
+- The constructor is absent from TypeScript's DOM library, so a local
+  declaration is needed.
+
+Dictation differs from read-aloud in three ways that shape the design. It needs
+a microphone permission. It emits a stream of guesses rather than accepting one
+finished string. And it carries a privacy posture that read-aloud does not,
+because the audio may leave the device.
+
+## Decision
+
+1. The UI never touches `SpeechRecognition`. Three layers separate it:
+   `ChatDictateButton`, the session hook `useDictation`, and a `DictationEngine`
+   interface. `getDictationEngine()` is the only swap point.
+2. Dictation is browser-only. A browser without the constructor hides the
+   control. An insecure origin, a blocked permission, or no microphone shows a
+   disabled control with a reason. The feature never falls back to a server.
+3. There is no in-product disclosure card. The browser permission prompt is the
+   disclosure. The app adds a second prompt that a user cannot act on.
+4. Interim text writes into the composer value. Final and interim results merge
+   at a caret anchor captured at session start.
+5. `composeDictationValue()` is pure. It takes no React state, so it is unit
+   tested without a browser.
+6. A manual edit ends the session. Two writers into one string corrupt the
+   anchor. The user keeps every character they typed.
+7. A restart waits for `onend`. The browser releases the capture first. A
+   restart from `onerror` aborts that capture, and the microphone indicator
+   flashes. A session that heard speech restarts after a short delay. A
+   session that ends at once, or a service drop, spends a fault budget of
+   four and then stops. A transcript clears that budget. A fatal error never
+   restarts.
+8. The session is component-scoped, not a module singleton. Read-aloud needed a
+   singleton because the reader outlives a per-message render. The microphone
+   must die with its composer instead.
+9. No vendor enters the server path. Bondery never receives the audio.
+
+## Alternatives
+
+- **A disclosure card before the browser prompt.** Rejected. The browser prompt
+  already asks for the microphone, and a second confirmation reads as friction.
+- **A preview layer for interim text.** Rejected. Send would need async flush
+  logic, and the visible text could disagree with the field value.
+- **A module singleton store, copying `useSpeechReader`.** Rejected. The
+  microphone must not outlive its composer.
+- **Merging two writers into one string when the user types mid-session.**
+  Rejected. The injected span becomes ambiguous after an edit.
+- **`getUserMedia` plus a cloud provider now.** Rejected for this change. It
+  adds a subprocessor row, a DPA review, a key, and a cost. The interface keeps
+  that path open.
+- **A punctuation model or an LLM cleanup pass.** Rejected. It adds latency,
+  cost, and a second privacy question for a cosmetic gain. Only capitalisation
+  is adjusted.
+- **Blame the user's connection for a `network` error.** Rejected. The
+  recognizer reports `network` when its own service drops, even on a working
+  connection. The hook restarts the session instead.
+
+## Consequences
+
+- Firefox users cannot dictate. The control is absent, not broken.
+- Chrome and Edge may send microphone audio to their speech service. The
+  browser vendor, not Bondery, makes that call. Bondery cannot log, retain,
+  or redirect the audio.
+- Brave exposes the same API and then reports a network failure, because it
+  has no speech service. The app leaves the microphone closed and says so.
+  An installed on-device language pack is used when the browser has one.
+- A user who types during dictation must press the mic again. No typed text is
+  lost.
+- A dropped speech service restarts after the capture ends, while the fault
+  budget lasts. An exhausted budget shows one message and stops. Starting a
+  capture does not clear that budget.
+- Czech and German accuracy depends on the browser's speech service.
+- A cloud provider later replaces one function. The merge helper, the hook, and
+  the button stay unchanged.
+- Undo after a dictation insert does not restore the previous field, because a
+  programmatic value set clears the browser undo stack.

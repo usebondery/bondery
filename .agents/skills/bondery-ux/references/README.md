@@ -22,7 +22,7 @@ Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile
 | [avatars.md](./common/avatars.md) | Contact photos, initials fallback |
 | [empty-states.md](./common/empty-states.md) | Zero data, no results — what happened + what to do |
 | [loading-states.md](./common/loading-states.md) | Skeletons vs inline loaders |
-| [lists-and-selection.md](./common/lists-and-selection.md) | Searchable lists, selection, bulk actions, pagination |
+| [lists-and-selection.md](./common/lists-and-selection.md) | Searchable lists, selection, bulk actions, pagination, load more |
 | [search-and-discovery.md](./common/search-and-discovery.md) | Find principles (in-page vs global) |
 | [ux-writing.md](./common/ux-writing.md) | Voice, errors, empty copy, destructive confirms |
 | [feedback-and-confirmations.md](./common/feedback-and-confirmations.md) | Toasts, when to skip success feedback |
@@ -48,9 +48,12 @@ Webapp on a phone is **not** this folder — see [desktop/mobile-pwa-shell.md](.
 |------|--------|
 | [global-find.md](./desktop/global-find.md) | Command palette, people spotlight, `HOTKEYS` |
 | [keyboard-shortcuts.md](./desktop/keyboard-shortcuts.md) | `Kbd` display, `parseShortcutKeys` |
-| [modals.md](./desktop/modals.md) | Web modals, loading jobs, `ModalFooter`, blocking dismiss |
+| [modals.md](./desktop/modals.md) | Web modals, loading jobs, `ModalFooter`, blocking dismiss, full-width fields |
+| [date-inputs.md](./desktop/date-inputs.md) | Start and end dates must not cross. The field shows the selected day |
+| [filter-menus.md](./desktop/filter-menus.md) | Filter menus put Reset at the top and clear every filter in the menu |
 | [create-more.md](./desktop/create-more.md) | Repeatable create modals, Create more switch |
 | [tooltips.md](./desktop/tooltips.md) | Mantine Tooltip: theme `multiline`, `withArrow`, `w: 300` |
+| [pointer.md](./desktop/pointer.md) | Drag cursor: `grab` at rest, `grabbing` while dragging |
 | [mobile-pwa-shell.md](./desktop/mobile-pwa-shell.md) | Phone/PWA: thin header menu → existing navbar overlay |
 
 ## Product

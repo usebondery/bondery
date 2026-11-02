@@ -18,6 +18,7 @@ Mobile sheet implementation: [../mobile/forms.md](../mobile/forms.md). Mobile ph
 
 - Mantine forms: disable submit until `form.isValid()` or equivalent `canSubmit`.
 - Modal primary: `actionLoading` + `disabled` on invalid.
+- Start date and end date: the later field disables days before the start day. The earlier field disables days after the end day. See [date-inputs.md](../desktop/date-inputs.md).
 
 ---
 

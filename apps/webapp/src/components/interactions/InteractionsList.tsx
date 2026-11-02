@@ -1,15 +1,15 @@
 "use client";
 
-import { PersonAvatarGroup } from "@bondery/mantine-next";
-import type { Activity, Contact } from "@bondery/schemas";
-import { Stack, Text, ThemeIcon, Timeline } from "@mantine/core";
-import { getActivityTypeConfig } from "@/lib/contacts/activityTypes";
+import type { Activity, PersonPreview } from "@bondery/schemas";
+import { Stack, Text, Timeline } from "@mantine/core";
+import type { CSSProperties } from "react";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { ActivityCard } from "./ActivityCard";
 
 const TIMELINE_BORDER_COLOR = "var(--mantine-color-default-border)";
 
 interface InteractionsListProps {
+  actionsLabel: string;
   activities: Activity[];
   deleteLabel: string;
   duplicateLabel: string;
@@ -18,7 +18,7 @@ interface InteractionsListProps {
   onDuplicate: (activity: Activity) => void;
   onEdit: (activity: Activity) => void;
   onOpen: (activity: Activity) => void;
-  resolveParticipants: (activity: Activity) => Contact[];
+  resolveParticipants: (activity: Activity) => PersonPreview[];
 }
 
 /**
@@ -26,6 +26,7 @@ interface InteractionsListProps {
  * Keeps home and timeline pages visually consistent.
  */
 export function InteractionsList({
+  actionsLabel,
   activities,
   resolveParticipants,
   editLabel,
@@ -62,57 +63,26 @@ export function InteractionsList({
           </Text>
           <Timeline
             active={monthActivities.length}
-            bulletSize={32}
+            bulletSize={12}
             lineWidth={2}
-            style={{ "--tl-color": TIMELINE_BORDER_COLOR } as React.CSSProperties}
-            styles={{
-              itemBullet: {
-                backgroundColor: "transparent",
-                border: "none",
-                padding: 0,
-              },
-            }}
+            style={{ "--tl-color": TIMELINE_BORDER_COLOR } as CSSProperties}
           >
             {monthActivities.map((activity) => {
               const participants = resolveParticipants(activity);
-              const typeConfig = getActivityTypeConfig(activity.type);
-              const visibleParticipants = participants.slice(0, 3);
 
               return (
-                <Timeline.Item
-                  bullet={
-                    <ThemeIcon color={typeConfig.color} radius="xl" size={32} variant="white">
-                      {typeConfig.emoji}
-                    </ThemeIcon>
-                  }
-                  key={activity.id}
-                >
+                <Timeline.Item key={activity.id}>
                   <ActivityCard
+                    actionsLabel={actionsLabel}
                     activity={activity}
                     deleteLabel={deleteLabel}
                     duplicateLabel={duplicateLabel}
                     editLabel={editLabel}
-                    leftSection={
-                      <PersonAvatarGroup
-                        isClickable
-                        maxDisplayCount={3}
-                        people={visibleParticipants.map((participant) => ({
-                          avatar: participant.avatar,
-                          firstName: participant.firstName,
-                          headline: participant.headline,
-                          id: participant.id,
-                          lastName: participant.lastName,
-                          middleName: participant.middleName,
-                        }))}
-                        size="md"
-                        totalCount={participants.length}
-                        wrap
-                      />
-                    }
                     onDelete={() => onDelete(activity)}
                     onDuplicate={() => onDuplicate(activity)}
                     onEdit={() => onEdit(activity)}
                     onOpen={() => onOpen(activity)}
+                    participants={participants}
                   />
                 </Timeline.Item>
               );

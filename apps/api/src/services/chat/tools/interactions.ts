@@ -22,8 +22,7 @@ export function createInteractionTools(ctx: DomainContext) {
       inputSchema: createInteractionInputSchema,
     }),
     delete_interaction: chatTool(ctx, {
-      description:
-        "Delete an interaction you own. Confirm with the user in the thread before calling.",
+      description: "Delete an interaction you own. The app shows a confirm before this runs.",
       execute: (args) => executeDeleteInteraction(ctx, args),
       inputSchema: deleteInteractionInputSchema,
     }),

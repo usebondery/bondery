@@ -61,9 +61,6 @@ export function DataTable<TRow, TSortKey extends string = string>({
   onColumnsChange,
   rowActions,
   bulkActions,
-  hasMore,
-  onLoadMore,
-  loadMoreLoading,
   totalCount,
   onSelectAllTotal,
   allTotalSelected,
@@ -72,6 +69,8 @@ export function DataTable<TRow, TSortKey extends string = string>({
   stickyHeaderOffset = 0,
   labels,
   headerContent,
+  toolbarExtra,
+  isSortActive = false,
   className,
 }: DataTableProps<TRow, TSortKey>) {
   const [openedMenuRowId, setOpenedMenuRowId] = useState<string | null>(null);
@@ -249,6 +248,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   // --- Header controls ---
   const hasHeaderControls =
     onSearchChange !== undefined ||
+    toolbarExtra != null ||
     onColumnsChange !== undefined ||
     (sortOptions && currentSort && onSortChange);
 
@@ -262,6 +262,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
           placeholder={labels.searchPlaceholder}
         />
       ) : null}
+      {toolbarExtra}
       {onColumnsChange !== undefined ? (
         <ColumnVisibilityMenu
           columns={columns}
@@ -272,6 +273,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
       {sortOptions && currentSort !== undefined && onSortChange ? (
         <SortMenu
           currentSort={currentSort}
+          isActive={isSortActive}
           labels={labels.sort}
           onSortChange={onSortChange}
           sortOptions={sortOptions}
@@ -390,14 +392,6 @@ export function DataTable<TRow, TSortKey extends string = string>({
           </TableTbody>
         </Table>
       </Box>
-
-      {hasMore && onLoadMore ? (
-        <Group justify="center" pt="sm">
-          <Button loading={loadMoreLoading} onClick={onLoadMore} variant="light">
-            {labels.loadMoreLabel ?? "Load more"}
-          </Button>
-        </Group>
-      ) : null}
     </>
   );
 }

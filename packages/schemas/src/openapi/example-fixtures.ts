@@ -88,6 +88,7 @@ export const OPENAPI_SCHEMA_EXAMPLES: Record<string, unknown> = {
   redirectResponseSchema: responses.EXAMPLE_REDIRECT_RESPONSE,
   refreshMergeRecommendationsResponseSchema:
     responses.EXAMPLE_REFRESH_MERGE_RECOMMENDATIONS_RESPONSE,
+  relationshipGraphResponseSchema: responses.EXAMPLE_RELATIONSHIP_GRAPH_RESPONSE,
   reminderDigestRequestSchema: requests.EXAMPLE_REMINDER_DIGEST_REQUEST,
   reminderDigestResponseSchema: responses.EXAMPLE_REMINDER_DIGEST_RESPONSE,
   removeContactsFromTagResponseSchema: responses.EXAMPLE_REMOVE_CONTACTS_FROM_TAG_RESPONSE,

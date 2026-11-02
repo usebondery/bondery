@@ -125,6 +125,7 @@
     "test:e2e:install-deps": "node scripts/install-playwright-deps.mjs",
     "test:merge": "tsx --test src/lib/merge/*.test.ts",
     "test:runtime-config": "tsx --test src/lib/platform/runtimeConfig.server.test.ts",
+    "test:speech": "tsx --test src/lib/speech/*.test.ts src/lib/speech/dictation/*.test.ts",
     "test:sync": "tsx --test src/lib/sync/sync-wake-client.test.ts",
     "test:theme": "tsx --test src/lib/theme/theme.test.ts"
   },

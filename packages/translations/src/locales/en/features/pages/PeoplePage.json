@@ -37,13 +37,18 @@
     "Title_other": "Delete {count} contacts?",
     "TitleAllMatching": "Delete all matching contacts?"
   },
+  "Filter": "Filter",
   "HeaderDescription": "Overview of all your contacts.",
   "ImportContacts": "Import contacts",
   "LoadMoreBatch": "Load another 50 contacts",
   "LoadMoreError": "Failed to load more contacts. Please try again.",
   "NoContactsFound": "You haven't added any contacts yet.",
   "NoContactsMatchSearch": "No such contact found.",
+  "ResetFilters": "Reset",
   "SearchPlaceholder": "Search by name...",
+  "TagFilterLabel": "Tags",
+  "TagFilterNoResults": "No tags found",
+  "TagFilterPlaceholder": "Filter by tag",
   "ThisContactFallback": "this contact",
   "Title": "People"
 }

@@ -141,8 +141,11 @@ export const EXAMPLE_INTERACTION = {
     {
       avatar: null,
       firstName: "Ada",
+      headline: "Mathematician",
       id: EXAMPLE_CONTACT_ID,
       lastName: "Lovelace",
+      location: "London, UK",
+      middleName: null,
     },
   ],
   title: "Coffee catch-up",

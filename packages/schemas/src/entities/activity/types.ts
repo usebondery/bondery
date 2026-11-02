@@ -17,8 +17,11 @@ export type InteractionType =
 export interface InteractionParticipant {
   avatar: string | null;
   firstName: string;
+  headline: string | null;
   id: string;
   lastName: string | null;
+  location: string | null;
+  middleName: string | null;
   updatedAt?: string;
 }
 

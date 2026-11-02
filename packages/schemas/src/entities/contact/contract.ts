@@ -44,6 +44,13 @@ import type {
   mapAddressPinsResponseSchema,
   mapPinSchema,
   mapPinsResponseSchema,
+  personPreviewSchema,
+  relationshipGraphEdgeSchema,
+  relationshipGraphGroupSchema,
+  relationshipGraphHubSchema,
+  relationshipGraphNodeSchema,
+  relationshipGraphResponseSchema,
+  relationshipGraphUnlinkedPersonSchema,
   relationshipTypeSchema,
   shareableFieldSchema,
   updateContactIdentitySchema,
@@ -95,6 +102,13 @@ import type {
   MapAddressPinsResponse,
   MapPin,
   MapPinsResponse,
+  PersonPreview,
+  RelationshipGraphEdge,
+  RelationshipGraphGroup,
+  RelationshipGraphHub,
+  RelationshipGraphNode,
+  RelationshipGraphResponse,
+  RelationshipGraphUnlinkedPerson,
   RelationshipType,
   ShareableField,
   UpdateContactIdentityFormInput,
@@ -107,6 +121,7 @@ import type {
 type _RelationshipType = Assert<IsEqual<RelationshipType, z.infer<typeof relationshipTypeSchema>>>;
 type _Contact = Assert<IsEqual<Contact, z.infer<typeof contactSchema>>>;
 type _ContactPreview = Assert<IsEqual<ContactPreview, z.infer<typeof contactPreviewSchema>>>;
+type _PersonPreview = Assert<IsEqual<PersonPreview, z.infer<typeof personPreviewSchema>>>;
 type _ContactSelectable = Assert<
   IsEqual<ContactSelectable, z.infer<typeof contactSelectableSchema>>
 >;
@@ -162,6 +177,24 @@ type _UpdateContactRelationshipInput = Assert<
 >;
 type _ContactRelationshipsResponse = Assert<
   IsEqual<ContactRelationshipsResponse, z.infer<typeof contactRelationshipsResponseSchema>>
+>;
+type _RelationshipGraphNode = Assert<
+  IsEqual<RelationshipGraphNode, z.infer<typeof relationshipGraphNodeSchema>>
+>;
+type _RelationshipGraphEdge = Assert<
+  IsEqual<RelationshipGraphEdge, z.infer<typeof relationshipGraphEdgeSchema>>
+>;
+type _RelationshipGraphUnlinkedPerson = Assert<
+  IsEqual<RelationshipGraphUnlinkedPerson, z.infer<typeof relationshipGraphUnlinkedPersonSchema>>
+>;
+type _RelationshipGraphHub = Assert<
+  IsEqual<RelationshipGraphHub, z.infer<typeof relationshipGraphHubSchema>>
+>;
+type _RelationshipGraphGroup = Assert<
+  IsEqual<RelationshipGraphGroup, z.infer<typeof relationshipGraphGroupSchema>>
+>;
+type _RelationshipGraphResponse = Assert<
+  IsEqual<RelationshipGraphResponse, z.infer<typeof relationshipGraphResponseSchema>>
 >;
 type _ContactSortOrder = Assert<IsEqual<ContactSortOrder, z.infer<typeof contactSortOrderSchema>>>;
 type _ContactsFilter = Assert<IsEqual<ContactsFilter, z.infer<typeof contactsFilterSchema>>>;

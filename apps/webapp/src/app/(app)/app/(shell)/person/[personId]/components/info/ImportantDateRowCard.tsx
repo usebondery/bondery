@@ -1,8 +1,8 @@
 "use client";
 
-import { ActionIconButton } from "@bondery/mantine-next";
+import { ActionIconButton, DescribedSelect } from "@bondery/mantine-next";
 import type { ImportantDateType } from "@bondery/schemas";
-import { Card, Group, Loader, Select, TextInput, Tooltip } from "@mantine/core";
+import { Card, Group, Loader, TextInput } from "@mantine/core";
 import { IconBell, IconCalendarEvent, IconTrash } from "@tabler/icons-react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { getDateFormat, normalizePickerDate } from "../../utils/importantDateUtils";
@@ -69,6 +69,20 @@ export function ImportantDateRowCard({
   leftAction,
 }: ImportantDateRowCardProps) {
   const dateFormat = getDateFormat(date);
+  const dateTypeOptions = typeOptions.map((option) => {
+    if (!option.disabled) {
+      return option;
+    }
+
+    const disabledTooltip =
+      option.value === "birthday"
+        ? disabledBirthdateTypeHint
+        : option.value === "nameday"
+          ? disabledNamedateTypeHint
+          : disabledTypeHint;
+
+    return { ...option, disabledTooltip };
+  });
 
   return (
     <Card p="sm" radius="md" shadow="none" withBorder>
@@ -86,30 +100,12 @@ export function ImportantDateRowCard({
           valueFormat={dateFormat}
         />
 
-        <Select
+        <DescribedSelect
           className="max-w-40"
-          data={typeOptions}
+          data={dateTypeOptions}
           disabled={disabled}
           onChange={onTypeChange}
           placeholder={typePlaceholder}
-          renderOption={({ option }) => {
-            if (!option.disabled) {
-              return option.label;
-            }
-
-            const disabledHint =
-              option.value === "birthday"
-                ? disabledBirthdateTypeHint
-                : option.value === "nameday"
-                  ? disabledNamedateTypeHint
-                  : disabledTypeHint;
-
-            return (
-              <Tooltip label={disabledHint}>
-                <span>{option.label}</span>
-              </Tooltip>
-            );
-          }}
           size="sm"
           value={type}
         />
@@ -133,7 +129,7 @@ export function ImportantDateRowCard({
         />
 
         {!hideNotifySelect ? (
-          <Select
+          <DescribedSelect
             className="max-w-52"
             data={notifyOptions}
             disabled={disabled}

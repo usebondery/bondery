@@ -26,6 +26,36 @@
   width: 100%;
 }
 
+/*
+  Every filled row uses the primary color: hover, keyboard-active, and selected.
+  Text inside must follow, otherwise the dimmed bracket text and the trailing
+  clock stay gray on a purple fill. Mirrors the people-picker rule in
+  `packages/mantine-next/src/styles.css`.
+*/
+.optionsScroll
+  .mantine-Combobox-option:is(
+    :hover,
+    :focus-visible,
+    [data-combobox-selected],
+    [data-combobox-active]
+  )
+  :is(.mantine-Text-root, span) {
+  color: var(--mantine-color-white);
+}
+
+/* Opacity carries the muted look on a filled row instead of a gray color. */
+.optionsScroll
+  .mantine-Combobox-option:is(
+    :hover,
+    :focus-visible,
+    [data-combobox-selected],
+    [data-combobox-active]
+  )
+  [data-muted="true"] {
+  color: var(--mantine-color-white);
+  opacity: 0.85;
+}
+
 /* Flush search, options, and scrollbar to the dropdown end edge (Mantine Select pattern). */
 .dropdown:has(.optionsScroll) {
   padding-inline-end: 0;

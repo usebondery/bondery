@@ -7,7 +7,7 @@ export type ResolveContactPersonIdsExplicitBody = {
 };
 
 export type ResolveContactPersonIdsFilterBody = {
-  contactFilter: { search?: string; sort?: string };
+  contactFilter: { search?: string; sort?: string; tagIds?: string[] };
   excludePersonIds?: string[];
 };
 
@@ -73,9 +73,23 @@ export async function resolveContactPersonIds(
   if ("contactFilter" in body && body.contactFilter) {
     const search =
       typeof body.contactFilter.search === "string" ? body.contactFilter.search.trim() : "";
+    const tagIds =
+      Array.isArray(body.contactFilter.tagIds) && body.contactFilter.tagIds.length > 0
+        ? body.contactFilter.tagIds
+        : undefined;
+    const tagWhere = tagIds ? { tags: { some: { tagId: { in: tagIds } } } } : {};
 
     if (search) {
-      const { ranked, error: rpcError } = await searchPeopleIdsWithDb(db, userId, search, 10000, 0);
+      const { ranked, error: rpcError } = await searchPeopleIdsWithDb(
+        db,
+        userId,
+        search,
+        10000,
+        0,
+        {
+          tagIds,
+        },
+      );
 
       if (rpcError) {
         throw internal("contact_ids_search_failed", rpcError);
@@ -87,7 +101,7 @@ export async function resolveContactPersonIds(
 
     const rows = await db.people.findMany({
       select: { id: true },
-      where: { myself: false, userId },
+      where: { myself: false, userId, ...tagWhere },
     });
 
     const excludeSet = new Set(body.excludePersonIds ?? []);

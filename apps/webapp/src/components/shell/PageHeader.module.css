@@ -1,0 +1,16 @@
+/*
+  Phone: actions stack full width, except the back icon button, which stays
+  compact and aligns to the end edge. Use a literal breakpoint because custom
+  properties are not valid in @media queries. Match Mantine classes through
+  attribute selectors so CSS-module hashing cannot rewrite them.
+*/
+@media (max-width: 47.99em) {
+  .actions > * {
+    width: 100%;
+  }
+
+  .actions > [class*="mantine-ActionIcon-root"] {
+    align-self: flex-end;
+    width: auto;
+  }
+}

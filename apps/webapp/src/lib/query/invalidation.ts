@@ -63,6 +63,7 @@ export async function invalidateContactRelationships(
   id: string,
 ): Promise<void> {
   await queryClient.invalidateQueries({ queryKey: contactKeys.relationships(id) });
+  await queryClient.invalidateQueries({ queryKey: [...contactKeys.all, "relationship-graph"] });
 }
 
 export async function invalidateContactImportantDates(

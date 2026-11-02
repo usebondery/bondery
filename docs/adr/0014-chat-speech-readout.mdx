@@ -1,0 +1,46 @@
+---
+title: "ADR 0014: Chat speech readout"
+hidden: true
+---
+
+# ADR 0014: Chat speech readout
+
+**Status:** Accepted  
+**Date:** 2026-11-01
+
+## Context
+
+Chat replies are text only. A user cannot listen to a long answer. The reply holds inline chips: people, groups, tags, interactions, and dates. A chip shows a label and an icon. A voice has no chip.
+
+The browser exposes `window.speechSynthesis`. It is free and needs no server. It also differs by browser. Chrome stops one utterance after about 15 seconds. Chrome drops an utterance that is garbage collected. Safari can stay paused after a resume. A cancel still fires a late end event.
+
+A cloud text-to-speech provider may replace the browser later. The provider costs money and adds a vendor to the subprocessor list. The decision must not lock the UI to the browser API.
+
+## Decision
+
+1. The UI never touches `speechSynthesis`. Three layers separate it: the presentational button, the shared reader store, and a `SpeechEngine` interface. `getSpeechEngine()` is the only swap point. A cloud adapter implements the same members, so the text builder and the UI stay the same at swap time.
+2. Speech is browser-only today. A browser without `SpeechSynthesis` shows a disabled button with an explanation. The feature does not fall back to a server.
+3. `toSpeechText(parts, resolve)` is pure. It takes no React state and no query client. The engine receives a finished string, never a token.
+4. The adapter splits text into chunks of about 180 characters on sentence boundaries. Chrome cuts a single utterance at about 15 seconds. Chunks keep a long reply whole.
+5. Chips resolve through the TanStack Query cache, not the DOM. Chips already fetch their records, so a visible message is normally warm and speech starts at once with no request. A cold miss uses `ensureQueryData` once per distinct token. A failed lookup drops that one token and keeps the sentence.
+6. `inlineTokenLabel` is the single label source for chips and speech. A chip and a voice cannot disagree. The spoken prefixes (`Contact {name}`, `Group {name}`, and so on) live in translations, because Czech and German need their own word order.
+7. The server does not store a spoken variant. The spoken text follows the reader locale, the current chip labels, and the user timezone. A stored string goes stale on the first rename. It also doubles assistant storage for no gain.
+8. One message owns the reader at a time. A module singleton read through `useSyncExternalStore` holds the state, so two messages never both show Pause. A non-owner message reads idle. A message unmount cancels speech.
+9. The speak button appears only when the message is settled and the speech text is non-empty. A message of chips alone therefore offers no button that would speak nothing.
+
+## Alternatives
+
+- Speak the raw message text. Rejected. The user hears `[[bp:person:...]]` wire text and no names.
+- Read the chip labels from the DOM. Rejected. It couples speech to layout and breaks for an off-screen chip.
+- One `useState` per message. Rejected. Each message would speak at the same time.
+- Store a spoken variant with the message. Rejected. It goes stale and costs storage.
+- A cloud provider now. Rejected for this change. The interface keeps that path open.
+- Speech for user messages. Rejected. A user knows what they wrote.
+
+## Consequences
+
+- A browser without speech support shows a disabled control. No vendor and no privacy-policy edit is needed.
+- The first word waits on a cold cache. The button shows a preparing state during that wait.
+- A stale cache speaks the previous name. The next query refresh heals it.
+- A future cloud provider replaces one function and keeps every other layer.
+- Rate, volume, and voice choice are out of scope. So are mobile and analytics events.

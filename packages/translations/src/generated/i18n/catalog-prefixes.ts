@@ -50,13 +50,15 @@ export type FixContactsPagePrefix = never;
 
 export type GlossaryPrefix = "entities" | "features" | "product";
 
+export type GraphPagePrefix = "Families";
+
 export type GroupDetailPagePrefix = "RemoveContact" | "RemoveContacts" | "Table";
 
 export type GroupsPagePrefix = "AddGroupModal" | "AddPeopleModal" | "DeleteGroup" | "DuplicateGroup" | "EditGroupModal" | "SortMenu" | "Table";
 
 export type HomePagePrefix = "ExtensionNudge" | "ProgressRail" | "ProgressRail.Tasks" | "Stats";
 
-export type ChatPagePrefix = "SuggestedPrompts";
+export type ChatPagePrefix = "activity" | "SuggestedPrompts";
 
 export type CheckoutPrefix = never;
 
@@ -174,6 +176,7 @@ export interface NamespacePrefixes {
   "FeedbackPage": FeedbackPagePrefix;
   "FixContactsPage": FixContactsPagePrefix;
   "glossary": GlossaryPrefix;
+  "GraphPage": GraphPagePrefix;
   "GroupDetailPage": GroupDetailPagePrefix;
   "GroupsPage": GroupsPagePrefix;
   "HomePage": HomePagePrefix;

@@ -36,6 +36,8 @@ export const HOTKEYS = {
   ADD_PERSON: "c",
   /** Open the command palette (Ctrl+K / ⌘+K) */
   COMMAND_PALETTE: "mod+k",
+  /** Start or stop dictation in the chat composer */
+  DICTATE: "mod+shift+m",
   /** Open the "Find person" spotlight */
   FIND_PERSON: "f",
   /** Open the "Log interaction" modal */

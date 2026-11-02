@@ -51,7 +51,7 @@ One component owns the button row — do not nest in another `Group`.
 | `backLabel` + `onBack` | Import wizards |
 | `cancelLabel` + `onCancel` | Dismiss |
 | `actionLabel` / `actionType="submit"` | Primary |
-| `createMoreLabel` + `onCreateMoreChange` (+ `createMoreChecked`, `createMoreDisabled`, `createMoreAriaDescription`) | Left-cluster switch for repetitive **create** only. App passes the translated label. Do not combine with `dangerLabel` / `backLabel`. See [create-more.md](./create-more.md). |
+| `createMoreLabel` + `onCreateMoreChange` (+ `createMoreChecked`, `createMoreDisabled`, `createMoreAriaDescription`) | Switch for repetitive **create** only. Below `sm` it sits above Cancel + primary. From `sm` up it sits in the left cluster. App passes the translated label. Do not combine with `dangerLabel` / `backLabel`. See [create-more.md](./create-more.md). |
 
 ---
 
@@ -69,9 +69,24 @@ First input in a text modal: Mantine `autoFocus` or `useFocusTrap`.
 
 ---
 
+## Field layout
+
+Stack inputs at full width on `base`.
+
+Put two or more inputs on one row only from `sm` up, and only when each control still has enough width.
+
+Use `SimpleGrid` with `cols={{ base: 1, sm: 2 }}` (or `Flex` `direction={{ base: "column", sm: "row" }}`).
+
+Do not use `Group grow` for a row that must work on a phone.
+
+Keep long fields (title, notes, people pickers) at full width on every breakpoint.
+
+---
+
 ## What to avoid
 
 - `<Modal>` in feature code
 - `modals.updateModal` for dismiss flags
 - Editable fields during `isBlocking`
 - X visible while footer shows loading
+- Side-by-side inputs below `sm`

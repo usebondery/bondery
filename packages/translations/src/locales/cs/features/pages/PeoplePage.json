@@ -37,13 +37,18 @@
     "Title_other": "Smazat {count} kontaktů?",
     "TitleAllMatching": "Smazat všechny odpovídající kontakty?"
   },
+  "Filter": "Filtr",
   "HeaderDescription": "V Lidech můžete spravovat kontakty, upravovat detaily a spouštět hromadné akce.",
   "ImportContacts": "Importovat kontakty",
   "LoadMoreBatch": "Načíst dalších 50 kontaktů",
   "LoadMoreError": "Nepodařilo se načíst další kontakty. Zkuste to prosím znovu.",
   "NoContactsFound": "Zatím jste nepřidali žádné kontakty.",
   "NoContactsMatchSearch": "Žádný takový kontakt nenalezen.",
+  "ResetFilters": "Resetovat",
   "SearchPlaceholder": "Hledat podle jména...",
+  "TagFilterLabel": "Štítky",
+  "TagFilterNoResults": "Žádné štítky nenalezeny",
+  "TagFilterPlaceholder": "Filtrovat podle štítku",
   "ThisContactFallback": "tento kontakt",
   "Title": "Lidé"
 }

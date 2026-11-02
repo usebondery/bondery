@@ -29,7 +29,9 @@ Maps checkable factual claims in published legal documents to implementation sta
 | We do not sell personal information | Intro | `implemented` | No sale code paths |
 | User is controller for contact data; Bondery is processor | §2 | `policy-only` | Architectural statement; enforce via tenant isolation (`bondery-security`) |
 | Extension only activates on user click | §4 | `implemented` | Extension architecture (`check-extension-patterns.ts`) |
-| No biometric data processed | §4 | `implemented` | No biometric collection in schemas |
+| No biometric data processed | §4 | `implemented` | No biometric collection in schemas. Voice input is disclosed separately in §3(i) |
+| Voice input uses the browser engine; Bondery does not receive audio | §3(i) | `implemented` | No audio route, upload, or storage in `apps/api` or the webapp. Client-only `SpeechRecognition` in `lib/speech/dictation/browserDictationEngine.ts` |
+| Read aloud runs on the device; no audio leaves the device | §3(i) | `implemented` | `SpeechSynthesis` in `lib/speech/browserSpeechEngine.ts`; no server route |
 | GitHub/LinkedIn sign-in: email, name, provider ID only | §5 | `implemented` | Better Auth providers (`lib/auth/index.ts`) |
 | Data deleted immediately on account delete | §8 | `implemented` | `services/me/account.ts`, Prisma cascades |
 | Backups purged within 30 days after deletion | §8 | **unimplemented** | No automated backup-purge job found |

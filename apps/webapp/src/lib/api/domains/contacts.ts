@@ -30,6 +30,7 @@ import {
   buildContactsSelectPath,
   buildContactTagsPath,
   buildMapPinsPath,
+  buildRelationshipGraphPath,
   type ContactInteractionsParams,
   type ContactsApiResponse,
   type ContactsDataResult,
@@ -50,6 +51,8 @@ import {
   parseContactTags,
   parseMapAddressPins,
   parseMapContactPins,
+  parseRelationshipGraph,
+  type RelationshipGraphResult,
 } from "@/lib/api/resources/contacts";
 import type { AvatarPreset } from "@/lib/contacts/avatarParams";
 
@@ -136,6 +139,13 @@ export async function getMapPins(
   return mode === "contact"
     ? parseMapContactPins(raw as { pins?: MapPin[] })
     : parseMapAddressPins(raw as { pins?: AddressPin[] });
+}
+
+export async function getRelationshipGraph(focus: string | null): Promise<RelationshipGraphResult> {
+  const raw = await clientApiJson<{ graph?: RelationshipGraphResult }>(
+    buildRelationshipGraphPath(focus),
+  );
+  return parseRelationshipGraph(raw);
 }
 
 export async function getContactGroups(contactId: string): Promise<GroupWithCount[]> {

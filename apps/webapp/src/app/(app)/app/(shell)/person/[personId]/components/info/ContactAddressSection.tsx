@@ -4,7 +4,11 @@
 import { buildManualContactAddress } from "@bondery/helpers/address";
 import { formatContactName } from "@bondery/helpers/contact";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
-import { ActionIconButton, errorNotificationTemplate, TypePicker } from "@bondery/mantine-next";
+import {
+  ActionIconButton,
+  DescribedSelect,
+  errorNotificationTemplate,
+} from "@bondery/mantine-next";
 import {
   CONTACT_LIMITS,
   type Contact,
@@ -41,13 +45,13 @@ interface ContactAddressSectionProps {
 export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddressSectionProps) {
   const t = useContactAddressTranslations();
   const typeOptions = ADDRESS_TYPE_OPTIONS.map((option) => ({
-    emoji: option.emoji,
     label:
       option.value === "home"
         ? t("TypeHome")
         : option.value === "work"
           ? t("TypeWork")
           : t("TypeOther"),
+    leftSection: <span>{option.emoji}</span>,
     value: option.value,
   }));
 
@@ -296,8 +300,8 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
                     value={draft.value}
                   />
 
-                  <TypePicker
-                    ariaLabel={t("TypeLabel")}
+                  <DescribedSelect
+                    aria-label={t("TypeLabel")}
                     data={getTypeData()}
                     disabled={isSaving}
                     onChange={(value) => {

@@ -15,6 +15,8 @@ export async function POST(request: Request) {
     body: JSON.stringify(body),
     headers: { "Content-Type": "application/json" },
     method: "POST",
+    // Stop aborts the browser fetch. Forward it so the API stops the model.
+    signal: request.signal,
   });
 
   const headers = new Headers();

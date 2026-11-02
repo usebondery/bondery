@@ -62,12 +62,12 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
     {
       schema: {
         body: createTagInputSchema,
-        description: "Create a new tag (color auto-assigned).",
+        description: "Create a new tag. Color is optional; the API picks one when omitted.",
         response: withCreatedResponse(tagResponseSchema, "Tag created"),
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: createTagInputSchema }, async (ctx, { body }, reply) => {
-      const { data } = await createTag(ctx, { label: body.label });
+      const { data } = await createTag(ctx, { color: body.color, label: body.label });
       return reply.status(201).send({ tag: data.tag });
     }),
   );
@@ -173,7 +173,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
       { body: tagMembershipRequestSchema, params: uuidParamSchema },
       async (ctx, { body, params }) => {
         const { data } = await addTagMembers(ctx, params.id, body.personIds);
-        return { addedCount: data.addedCount };
+        return { addedCount: data.addedCount, skippedCount: data.skippedCount };
       },
     ),
   );

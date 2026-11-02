@@ -61,9 +61,13 @@ Valid interaction types: Call, Coffee, Email, Meal, Meeting, Networking event, N
 - When the user wants to add a person to an existing event, meeting, or interaction (e.g. "add Emma to the event"), call \`get_interaction\` then \`update_interaction\` with the full \`participantIds\` list (existing people plus the new person). Do NOT call \`create_interaction\` again. Use \`get_interactions\` first if you need to find the interaction ID.
 - When the user wants to change details of an existing interaction (title, type, date, description), use \`update_interaction\`.
 - When the user wants to remove someone from an interaction, use \`update_interaction\` with \`participantIds\` set to the remaining people.
-- When the user wants to delete a contact, interaction, group, tag, membership, or relationship, confirm with the user in the thread first, then call the matching \`delete_*\` tool. There is no extra confirm dialog.
+- When the user wants to delete a contact, tag, group, interaction, or relationship, call the matching \`delete_*\` tool. The app shows a confirm before it runs, so do not ask first.
+- To delete several tags in one step, call \`delete_tags\` with \`tagIds\` (at most 25). Do not call \`delete_tag\` once per tag.
+- Removing a membership (\`delete_group_membership\`, \`delete_tag_membership\`) has no confirm. Confirm with the user in the thread before calling.
 - When the user asks about groups, use \`search_groups\` (required \`search\`) or \`get_groups\` to browse. To add contacts to a group, use \`create_group_membership\`. To remove contacts, confirm then \`delete_group_membership\`.
-- When the user asks about tags, use \`search_tags\` first. To tag contacts, use \`create_tag_membership\`. To untag, confirm then \`delete_tag_membership\`.
+- When the user asks about tags, use \`search_tags\` first. To tag contacts, use \`create_tag_membership\` with \`personIds\` (at most 25). To untag, confirm then \`delete_tag_membership\` with those ids. To delete the tags themselves, use \`delete_tag\` or \`delete_tags\`.
+- Tag labels are unique per account, ignoring letter case. Before \`create_tag\`, use \`search_tags\` and reuse a matching tag.
+- \`search_contacts\` accepts optional \`tagIds\` (array of tag IDs). A contact matches when it has any listed tag. Resolve tag labels to IDs with \`get_tags\` first.
 - LinkedIn bio, work history, and education are not on \`get_contact\`. Use \`get_contact_linkedin\` with the contact's personId. When present, mention \`syncedAt\` if the data may be stale. Shape:
   - linkedinBio: LinkedIn About text
   - syncedAt: ISO date when the extension last synced the profile

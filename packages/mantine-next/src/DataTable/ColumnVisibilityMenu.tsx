@@ -15,7 +15,7 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import { Box, Button, Divider, Menu, MenuDropdown, MenuTarget, Text } from "@mantine/core";
+import { Box, Divider, Menu, MenuDropdown, MenuTarget, Text } from "@mantine/core";
 import { IconEye } from "@tabler/icons-react";
 import { useState } from "react";
 import {
@@ -23,6 +23,7 @@ import {
   type SortableColumnItemColumn,
 } from "#DataTable/SortableColumnItem.js";
 import type { ColumnVisibilityLabels } from "#DataTable/types.js";
+import { ToolbarMenuButton } from "#ToolbarMenuButton/ToolbarMenuButton.js";
 
 export interface ColumnVisibilityMenuProps<TColumn extends SortableColumnItemColumn> {
   /** Array of column configurations */
@@ -97,13 +98,13 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
   return (
     <Menu onChange={setOpened} opened={opened} width={width}>
       <MenuTarget>
-        <Button
-          className={opened ? "button-scale-effect-active" : undefined}
+        <ToolbarMenuButton
+          isActive={hiddenColumns.length > 0}
           leftSection={<IconEye size={16} />}
-          variant="light"
+          opened={opened}
         >
           {labels.buttonLabel}
-        </Button>
+        </ToolbarMenuButton>
       </MenuTarget>
       <MenuDropdown>
         <Box p="xs">

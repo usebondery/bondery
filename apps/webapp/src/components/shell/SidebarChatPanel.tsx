@@ -28,11 +28,7 @@ import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { routeChatSession } from "@/lib/navigation/route/chat";
 import { useChatSessionsQuery } from "@/lib/query/hooks/useChat";
-import {
-  ITEM_PADDING,
-  NAV_LINK_ITEM_BORDER_RADIUS,
-  SIDEBAR_NAV_STACK_CLASSNAME,
-} from "./NavLinkItem";
+import { ITEM_PADDING, NAV_LINK_ITEM_BORDER_RADIUS } from "./NavLinkItem";
 
 /** Matches DotsMenuButton `size="sm"` (`--ai-size-sm`) so age vs dots does not change row height. */
 const SESSION_ROW_TRAILING_SLOT_HEIGHT_PX = 22;
@@ -235,7 +231,7 @@ export function SidebarChatPanel() {
                 </Text>
               </UnstyledButton>
               <Collapse expanded={isOpen} w="100%">
-                <Stack className={SIDEBAR_NAV_STACK_CLASSNAME}>
+                <Stack gap={4}>
                   {group.sessions.map((session) => {
                     const isActive =
                       pathname === `${WEBAPP_ROUTES.CHAT}/${session.id}` ||

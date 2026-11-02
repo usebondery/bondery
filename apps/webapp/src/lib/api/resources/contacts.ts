@@ -1,4 +1,8 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import {
+  serializeTagIdsQueryParam,
+  TAG_IDS_QUERY_PARAM,
+} from "@bondery/helpers/globals/webapp-query";
 import type {
   Activity,
   AddressPin,
@@ -9,6 +13,7 @@ import type {
   ImportantDate,
   MapPin,
   PaginationMeta,
+  RelationshipGraphResponse,
   Tag,
 } from "@bondery/schemas";
 import { missingResourceError } from "@/lib/api/missingResourceError";
@@ -56,6 +61,8 @@ export interface ContactsListParams {
   offset?: number;
   search?: string;
   sort?: SortOrder;
+  /** Contact matches any listed tag id (OR). */
+  tagIds?: string[];
 }
 
 export interface ContactsApiResponse {
@@ -74,9 +81,18 @@ export interface ContactsSelectableApiResponse {
   pagination?: PaginationMeta;
 }
 
+/** Writes one `tag_ids=id1,id2` value. */
+function appendTagIdsParams(params: URLSearchParams, tagIds: string[] | undefined): void {
+  const value = serializeTagIdsQueryParam(tagIds ?? []);
+  if (value) {
+    params.set(TAG_IDS_QUERY_PARAM, value);
+  }
+}
+
 export function buildContactsListPath({
   search,
   sort,
+  tagIds,
   limit = 50,
   offset = 0,
   avatarPreset = "small",
@@ -90,6 +106,7 @@ export function buildContactsListPath({
   if (sort) {
     params.set("sort", sort);
   }
+  appendTagIdsParams(params, tagIds);
   appendAvatarParams(params, avatarPreset);
   return `${API_ROUTES.CONTACTS}?${params.toString()}`;
 }
@@ -97,6 +114,7 @@ export function buildContactsListPath({
 export function buildContactsSelectPath({
   search,
   sort,
+  tagIds,
   limit = 50,
   offset = 0,
   avatarPreset = "small",
@@ -110,6 +128,7 @@ export function buildContactsSelectPath({
   if (sort) {
     params.set("sort", sort);
   }
+  appendTagIdsParams(params, tagIds);
   appendAvatarParams(params, avatarPreset);
   return `${API_ROUTES.CONTACTS_SELECT}?${params.toString()}`;
 }
@@ -236,6 +255,32 @@ export function parseMapContactPins(raw: { pins?: MapPin[] }): MapContactPinsRes
 
 export function parseMapAddressPins(raw: { pins?: AddressPin[] }): MapAddressPinsResult {
   return { pins: raw.pins ?? [] };
+}
+
+export type RelationshipGraphResult = RelationshipGraphResponse["graph"];
+
+export function buildRelationshipGraphPath(focus: string | null): string {
+  const params = new URLSearchParams();
+  if (focus) {
+    params.set("focus", focus);
+  }
+  params.set("groups", "1");
+  params.set("hubs", "1");
+  appendAvatarParams(params, "small");
+  return `${API_ROUTES.CONTACTS_RELATIONSHIP_GRAPH}?${params.toString()}`;
+}
+
+export function parseRelationshipGraph(raw: {
+  graph?: RelationshipGraphResult;
+}): RelationshipGraphResult {
+  if (!raw.graph) {
+    throw new Error("Relationship graph response is missing");
+  }
+  return {
+    ...raw.graph,
+    groups: raw.graph.groups ?? [],
+    hubs: raw.graph.hubs ?? [],
+  };
 }
 
 export function buildContactGroupsPath(contactId: string): string {

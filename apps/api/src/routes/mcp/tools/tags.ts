@@ -16,10 +16,12 @@ import { notFound } from "../../../lib/platform/errors/http-errors.js";
 import {
   createTagInputSchema,
   deleteTagInputSchema,
+  deleteTagsInputSchema,
   executeCreateTag,
   executeCreateTagMembership,
   executeDeleteTag,
   executeDeleteTagMembership,
+  executeDeleteTags,
   executeGetTag,
   executeGetTagContacts,
   executeGetTags,
@@ -126,6 +128,41 @@ export function registerTagMcpTools(
           onConfirm: async () => mcpJsonResult(await executeDeleteTag(ctx, { tagId })),
           preview: `Delete tag ${tag.label} (${tag.id})? This does not delete the people who had it.`,
           toolName: "delete_tag",
+          userId: ctx.user.id,
+        });
+      }),
+  );
+
+  server.registerTool(
+    "delete_tags",
+    {
+      ...mcpToolMeta("delete", "Delete tags"),
+      description:
+        "Delete up to 25 tags after the host confirms. Does not delete the people who had them. Fails if any id is missing. Requires mcp:write.",
+      inputSchema: deleteTagsInputSchema,
+      outputSchema: messageResponseSchema,
+    },
+    async ({ tagIds }, extra) =>
+      runMcpWriteTool(claims, ctx, async () => {
+        const uniqueIds = [...new Set(tagIds)];
+        const tags = await db.tag.findMany({
+          select: { id: true, label: true },
+          where: { id: { in: uniqueIds }, userId: ctx.user.id },
+        });
+        if (tags.length !== uniqueIds.length) {
+          throw notFound("Tag not found", "tag_not_found");
+        }
+        const labelById = new Map(tags.map((tag) => [tag.id, tag.label]));
+        const labels = uniqueIds.map((id) => labelById.get(id) ?? id);
+        const listed =
+          labels.length <= 3 ? labels.join(", ") : `${labels.slice(0, 3).join(", ")}, …`;
+        const countLabel = labels.length === 1 ? "tag" : `${labels.length} tags`;
+        return confirmMcpDelete({
+          args: { tagIds },
+          extra,
+          onConfirm: async () => mcpJsonResult(await executeDeleteTags(ctx, { tagIds })),
+          preview: `Delete ${countLabel} ${listed}? This does not delete the people who had them.`,
+          toolName: "delete_tags",
           userId: ctx.user.id,
         });
       }),

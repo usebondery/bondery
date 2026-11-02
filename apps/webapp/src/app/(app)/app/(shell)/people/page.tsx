@@ -1,3 +1,4 @@
+import { parseTagIdsQueryParam, TAG_IDS_QUERY_PARAM } from "@bondery/helpers/globals/webapp-query";
 import { Stack } from "@mantine/core";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
@@ -29,7 +30,11 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
 export default async function PeoplePage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; sort?: string }>;
+  searchParams: Promise<{
+    search?: string;
+    sort?: string;
+    [TAG_IDS_QUERY_PARAM]?: string | string[];
+  }>;
 }) {
   // Await only the fast parts - params and cookies. The contacts DB query is
   // deferred to PeopleTableLoader so this component returns JSX immediately
@@ -39,6 +44,7 @@ export default async function PeoplePage({
   const filter = parseContactsListParams({
     search: params.search,
     sort: params.sort,
+    tagIds: parseTagIdsQueryParam(params[TAG_IDS_QUERY_PARAM]),
   });
 
   // Read column visibility preferences from cookie so the streamed PeopleClient

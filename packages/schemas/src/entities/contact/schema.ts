@@ -59,6 +59,13 @@ import type {
   MapAddressPinsResponse,
   MapPin,
   MapPinsResponse,
+  PersonPreview,
+  RelationshipGraphEdge,
+  RelationshipGraphGroup,
+  RelationshipGraphHub,
+  RelationshipGraphNode,
+  RelationshipGraphResponse,
+  RelationshipGraphUnlinkedPerson,
   RelationshipType,
   ShareableField,
   UpdateContactIdentityInput,
@@ -124,6 +131,13 @@ export const contactPreviewSchema = contactSchema.pick({
   id: true,
   lastName: true,
 }) satisfies z.ZodType<ContactPreview>;
+
+/** Identity plus the optional display lines that hover cards render. */
+export const personPreviewSchema = contactPreviewSchema.extend({
+  headline: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  middleName: z.string().nullable().optional(),
+}) satisfies z.ZodType<PersonPreview>;
 
 /** Lean contact shape for pickers, comboboxes, and activity participant selection. */
 export const contactSelectableSchema = contactPreviewSchema.extend({
@@ -339,6 +353,59 @@ export const contactRelationshipsResponseSchema = makeCollectionResponseSchema(
   contactRelationshipWithPeopleSchema,
 ) satisfies z.ZodType<ContactRelationshipsResponse>;
 
+export const relationshipGraphNodeSchema = z.object({
+  avatar: z.string().nullable(),
+  firstName: z.string(),
+  headline: z.string().nullable(),
+  id: z.string(),
+  lastName: z.string().nullable(),
+  location: z.string().nullable(),
+  middleName: z.string().nullable(),
+  myself: z.boolean(),
+}) satisfies z.ZodType<RelationshipGraphNode>;
+
+export const relationshipGraphEdgeSchema = z.object({
+  id: z.string(),
+  relationshipType: relationshipTypeSchema,
+  sourcePersonId: z.string(),
+  targetPersonId: z.string(),
+}) satisfies z.ZodType<RelationshipGraphEdge>;
+
+export const relationshipGraphUnlinkedPersonSchema = z.object({
+  firstName: z.string(),
+  id: z.string(),
+  lastName: z.string().nullable(),
+}) satisfies z.ZodType<RelationshipGraphUnlinkedPerson>;
+
+export const relationshipGraphHubSchema = z.object({
+  id: z.string(),
+  kind: z.enum(["company", "school"]),
+  label: z.string(),
+  logoUrl: z.string().nullable(),
+  memberCount: z.number().int().nonnegative(),
+  personIds: z.array(z.string()),
+}) satisfies z.ZodType<RelationshipGraphHub>;
+
+export const relationshipGraphGroupSchema = z.object({
+  color: z.string().nullable(),
+  emoji: z.string().nullable(),
+  id: z.string(),
+  label: z.string(),
+  personIds: z.array(z.string()),
+}) satisfies z.ZodType<RelationshipGraphGroup>;
+
+export const relationshipGraphResponseSchema = z.object({
+  graph: z.object({
+    edges: z.array(relationshipGraphEdgeSchema),
+    groups: z.array(relationshipGraphGroupSchema),
+    hubs: z.array(relationshipGraphHubSchema),
+    nodes: z.array(relationshipGraphNodeSchema),
+    truncated: z.boolean(),
+    unlinked: z.array(relationshipGraphUnlinkedPersonSchema),
+    unlinkedCount: z.number().int().nonnegative(),
+  }),
+}) satisfies z.ZodType<RelationshipGraphResponse>;
+
 export const contactSortOrderSchema = z.enum([
   "nameAsc",
   "nameDesc",
@@ -353,6 +420,7 @@ export const contactSortOrderSchema = z.enum([
 export const contactsFilterSchema: z.ZodType<ContactsFilter> = z.object({
   search: z.string().optional(),
   sort: contactSortOrderSchema.optional(),
+  tagIds: z.array(z.string().uuid()).max(20).optional(),
 });
 
 export const deleteContactsRequestSchema: z.ZodType<DeleteContactsRequest> = z.union([

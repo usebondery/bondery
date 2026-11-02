@@ -3,7 +3,12 @@
 import { Avatar, Badge, type BadgeProps, type MantineColor } from "@mantine/core";
 import type { ReactNode } from "react";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
-import { type PersonChipSize, personChipBadgeStyles, personChipSizes } from "./personChipLayout.js";
+import {
+  type PersonChipSize,
+  personChipBadgeStyles,
+  personChipBadgeVars,
+  personChipSizes,
+} from "./personChipLayout.js";
 
 export interface PersonChipProps {
   avatar?: string | null;
@@ -87,6 +92,7 @@ export function PersonChip({
         size,
       })}
       variant={badgeVariant}
+      vars={personChipBadgeVars(size)}
     >
       {fullName}
     </Badge>

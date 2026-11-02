@@ -38,7 +38,7 @@ export const myRoutes: AppRoutePlugin = async (fastify) => {
 };
 ```
 
-Register the plugin in [`register-all.ts`](../../apps/api/src/routes/register-all.ts) with the correct `area` (`integration`, `session`, `admin`, `internal`, `webhook`, or `composite`). Area shells in [`lib/platform/route-areas.ts`](../../apps/api/src/lib/platform/route-areas.ts) attach auth hooks and `openApiArea` — route modules must not call `registerApiKeyProtectedHooks`, `registerSessionAuthHooks`, or `applyOpenApiRouteMeta` directly.
+Register the plugin in [`register-all.ts`](../../apps/api/src/routes/register-all.ts) with the correct `area` (`integration`, `session`, `internal`, `webhook`, or `composite`). Area shells in [`lib/platform/route-areas.ts`](../../apps/api/src/lib/platform/route-areas.ts) attach auth hooks and `openApiArea` — route modules must not call `registerApiKeyProtectedHooks`, `registerSessionAuthHooks`, or `applyOpenApiRouteMeta` directly.
 
 Nested route modules (e.g. `contacts/enrichment/*`) inherit metadata from the parent shell — only add `description` and `response` there.
 
@@ -166,7 +166,6 @@ Auth and `openApiArea` are applied by **area shells** when routes mount in [`reg
 |-----------------------|-------|----------|
 | `integration` | `integrationRoutes` | Allowed (`read` / `full`) |
 | `session` | `sessionRoutes` | Denied (session bearer only) |
-| `admin` | `adminRoutes` | Denied (admin bearer only) |
 | `internal` | `internalRoutes` | Denied (service secret) |
 | `webhook` | `openApiAreaRoutes("internal", …)` | HMAC in handler |
 | `composite` | passthrough | Plugin composes sub-shells (sync HTTP vs WS) |

@@ -1,0 +1,36 @@
+---
+title: "ADR 0009: Relationship graph"
+hidden: true
+---
+
+# ADR 0009: Relationship graph
+
+**Status:** Accepted  
+**Date:** 2026-10-25
+
+## Context
+
+The About tab stores who one person is to another person. That list does not show the whole book. A graph makes those links visible. The About tab stays the only editor.
+
+## Decision
+
+1. Add a read-only Graph page at `/app/graph`.
+2. Load the book with `GET /contacts/relationship-graph`.
+3. A node is a person who appears on a relationship row. An edge is one row.
+4. The global view stops at 500 people and 1000 rows. Either limit sets `truncated`.
+5. `?focus=` returns that person and direct neighbors. A missing person returns `contact_not_found`.
+6. The client draws one line per person pair and keeps every type. Positions last until reload.
+7. Add indexes on `(userId, sourcePersonId)` and `(userId, targetPersonId)`. Do not add a unique constraint.
+
+## Alternatives
+
+- Neighbors beyond one step. Rejected. This slice includes only direct neighbors.
+- Saved positions and force sliders. Rejected. This slice does not store layout.
+- A unique constraint on relationship rows. Rejected. Duplicate rows can exist. The client collapses them.
+- A canvas on the person page. Rejected. The graph is one route.
+
+## Consequences
+
+- A relationship edit invalidates the graph query.
+- A book past either cap returns a partial graph.
+- Expo and mobile SQLite do not receive this slice.

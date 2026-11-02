@@ -39,7 +39,7 @@ export const ITEM_PADDING = {
 /** `UnstyledButton` / `Group` do not take a `radius` prop — use in `style.borderRadius`. */
 export const NAV_LINK_ITEM_BORDER_RADIUS = "var(--mantine-radius-default)";
 
-/** Tailwind gap between sidebar nav rows (browse links and chat sessions). */
+/** Tailwind gap between sidebar nav rows. */
 export const SIDEBAR_NAV_STACK_CLASSNAME = "gap-2!";
 
 export function NavLinkItem({

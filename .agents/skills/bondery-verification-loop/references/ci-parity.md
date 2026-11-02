@@ -43,7 +43,9 @@ docker build -f apps/api/Dockerfile . --secret id=turbo_token,env=TURBO_TOKEN
 docker build -f apps/webapp/Dockerfile . --secret id=turbo_token,env=TURBO_TOKEN
 ```
 
-Path-filtered PR jobs (parallel siblings of `contract`, not chained):
+`verify.yml` runs `env`, `openapi`, `schema-contracts`, and `translations` in parallel. The required check `contracts` fails when any of them fail. `api-docker-build`, `webapp-docker-build`, and `website-docker-build` start only after `lint`, `types`, and `contracts` succeed.
+
+Path-filtered PR image jobs:
 
 | Job | Trigger paths | Proves |
 |-----|---------------|--------|

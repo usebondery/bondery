@@ -14,6 +14,13 @@ export function selectedComboboxOptionStyle(isSelected: boolean): CSSProperties 
   };
 }
 
+/**
+ * The picker fills every active row with the primary color, so text inside the
+ * row must turn white in the same states. That is handled in
+ * `SearchableComboboxPicker.module.css`, because the active state lives in the
+ * combobox store and surfaces only as `data-combobox-active`.
+ */
+
 export type SearchableComboboxTextVariant = "default" | "selected";
 
 export type SearchableComboboxItemTextProps = {
@@ -46,6 +53,7 @@ export function SearchableComboboxItemText({
           <Text
             c={variant === "selected" ? undefined : "dimmed"}
             component="span"
+            data-muted="true"
             fw={400}
             opacity={variant === "selected" ? 0.85 : undefined}
             size="xs"
@@ -92,6 +100,7 @@ export function SearchableComboboxPickerOption({
           <Text
             c={isSelected ? undefined : "dimmed"}
             component="span"
+            data-muted={isSelected ? undefined : "true"}
             fw={400}
             opacity={isSelected ? 0.85 : undefined}
             size="xs"

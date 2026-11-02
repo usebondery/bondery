@@ -2,10 +2,12 @@ import type { DomainContext } from "../../../domains/_shared/context.js";
 import {
   createTagInputSchema,
   deleteTagInputSchema,
+  deleteTagsInputSchema,
   executeCreateTag,
   executeCreateTagMembership,
   executeDeleteTag,
   executeDeleteTagMembership,
+  executeDeleteTags,
   executeGetTag,
   executeGetTagContacts,
   executeGetTags,
@@ -34,7 +36,7 @@ export function createTagTools(ctx: DomainContext) {
     }),
     delete_tag: chatTool(ctx, {
       description:
-        "Delete a tag. Does not delete the people who had it. Confirm with the user in the thread before calling.",
+        "Delete a tag. Does not delete the people who had it. The app shows a confirm before this runs.",
       execute: (args) => executeDeleteTag(ctx, args),
       inputSchema: deleteTagInputSchema,
     }),
@@ -43,6 +45,12 @@ export function createTagTools(ctx: DomainContext) {
         "Remove a tag from contacts. Does not delete the people or the tag. Confirm with the user in the thread before calling.",
       execute: (args) => executeDeleteTagMembership(ctx, args),
       inputSchema: tagMembershipInputSchema,
+    }),
+    delete_tags: chatTool(ctx, {
+      description:
+        "Delete up to 25 tags. Does not delete the people who had them. The app shows a confirm before this runs. Fails if any id is missing.",
+      execute: (args) => executeDeleteTags(ctx, args),
+      inputSchema: deleteTagsInputSchema,
     }),
     get_tag: chatTool(ctx, {
       description: "Get one tag that belongs to the signed-in user.",

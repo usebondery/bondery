@@ -1,9 +1,12 @@
 "use client";
 
 import type { MantineSpacing } from "@mantine/core";
-import { Button, Group, Stack, Switch, VisuallyHidden } from "@mantine/core";
+import { Button, Flex, Group, Stack, Switch, VisuallyHidden } from "@mantine/core";
 import { IconCheck, IconTrash } from "@tabler/icons-react";
 import { type ReactNode, useId } from "react";
+
+/** Equal-width actions below `sm`. Hug content from `sm` up. */
+const MOBILE_EQUAL_BUTTON_FLEX = { base: 1, sm: "none" } as const;
 
 export interface ModalFooterProps {
   actionColor?: string;
@@ -98,11 +101,12 @@ export function ModalFooter({
 
   const leftSlot =
     showDanger || showBack ? (
-      <Group gap="sm">
+      <Group gap="sm" w={{ base: "100%", sm: "auto" }} wrap="nowrap">
         {showDanger ? (
           <Button
             color="red"
             disabled={dangerDisabled}
+            flex={MOBILE_EQUAL_BUTTON_FLEX}
             leftSection={resolvedDangerLeftSection}
             onClick={onDanger}
             type="button"
@@ -114,6 +118,7 @@ export function ModalFooter({
         {showBack ? (
           <Button
             disabled={backDisabled}
+            flex={MOBILE_EQUAL_BUTTON_FLEX}
             leftSection={backLeftSection}
             onClick={onBack}
             variant="default"
@@ -140,19 +145,29 @@ export function ModalFooter({
     ) : null;
 
   return (
-    <Group
-      align="center"
+    <Flex
+      align={{ base: "stretch", sm: "center" }}
+      direction={{ base: "column", sm: "row" }}
       gap="sm"
-      justify={showDanger || showBack || showCreateMore ? "space-between" : "flex-end"}
+      justify={
+        showDanger || showBack || showCreateMore
+          ? { base: "flex-start", sm: "space-between" }
+          : "flex-end"
+      }
       mt={mt}
-      wrap="nowrap"
+      w="100%"
     >
       {leftSlot}
 
       {showRightCluster ? (
-        <Group gap="sm" justify="flex-end" ml={showCreateMore ? "auto" : undefined} wrap="nowrap">
+        <Group gap="sm" justify="flex-end" w={{ base: "100%", sm: "auto" }} wrap="nowrap">
           {showCancel ? (
-            <Button disabled={cancelDisabled} onClick={onCancel} variant="default">
+            <Button
+              disabled={cancelDisabled}
+              flex={MOBILE_EQUAL_BUTTON_FLEX}
+              onClick={onCancel}
+              variant="default"
+            >
               {cancelLabel}
             </Button>
           ) : null}
@@ -161,6 +176,7 @@ export function ModalFooter({
             <Button
               color={actionColor}
               disabled={actionDisabled}
+              flex={MOBILE_EQUAL_BUTTON_FLEX}
               leftSection={resolvedActionLeftSection}
               loading={actionLoading}
               onClick={onAction}
@@ -173,6 +189,6 @@ export function ModalFooter({
           ) : null}
         </Group>
       ) : null}
-    </Group>
+    </Flex>
   );
 }

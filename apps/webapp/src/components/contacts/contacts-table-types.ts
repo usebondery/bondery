@@ -56,12 +56,6 @@ export interface StandardContactActions {
   onMergeSelected?: (leftContactId: string, rightContactId: string) => void;
 }
 
-export interface LoadMoreAction {
-  label: string;
-  loading?: boolean;
-  onClick: () => void;
-}
-
 export interface ContactsTableV2Props {
   allSelected?: boolean;
   bulkSelectionActions?: BulkSelectionAction[];
@@ -74,7 +68,6 @@ export interface ContactsTableV2Props {
   headerStickyTop?: number;
   isAllTotalSelected?: boolean;
   isHeaderShown?: boolean;
-  loadMoreAction?: LoadMoreAction;
   menuActions?: MenuAction[];
   noContactsFound: string;
   noContactsMatchSearch: string;
@@ -97,6 +90,8 @@ export interface ContactsTableV2Props {
   someSelected?: boolean;
   sortOrderForMenu?: import("@/lib/contacts/table-types").SortOrder;
   standardActions?: StandardContactActions;
+  /** Rendered in the table toolbar after search. */
+  toolbarExtra?: ReactNode;
   totalCount?: number;
   visibleColumns: ColumnKey[] | ColumnConfig[];
 }

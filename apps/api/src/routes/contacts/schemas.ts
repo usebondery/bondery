@@ -1,3 +1,4 @@
+import { contactIdSchema } from "@bondery/schemas";
 import { avatarTransformQuerySchema } from "@bondery/schemas/http";
 import { z } from "zod";
 
@@ -22,3 +23,11 @@ export const mapBoundsQuerySchema = z.object({
 
 export const mapPinsQuerySchema = mapBoundsQuerySchema;
 export const mapAddressPinsQuerySchema = mapBoundsQuerySchema;
+
+export const relationshipGraphQuerySchema = z.object({
+  avatarQuality: avatarTransformQuerySchema.shape.avatarQuality,
+  avatarSize: avatarTransformQuerySchema.shape.avatarSize,
+  focus: contactIdSchema.optional(),
+  groups: z.enum(["1"]).optional(),
+  hubs: z.enum(["1"]).optional(),
+});

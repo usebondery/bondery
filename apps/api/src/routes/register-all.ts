@@ -11,7 +11,6 @@ import { registerHealthRoutes } from "../lib/health/routes.js";
 import { registerMobileManifestRoute } from "../lib/mobile/manifest-route.js";
 import type { AppFastifyInstance, AppRoutePlugin } from "../lib/platform/fastify-types.js";
 import {
-  adminRoutes,
   integrationRoutes,
   internalRoutes,
   nativeSessionRoutes,
@@ -55,7 +54,6 @@ type RouteMountArea =
   | "integration"
   | "session"
   | "nativeSession"
-  | "admin"
   | "internal"
   | "webhook"
   | "mcp"
@@ -68,7 +66,6 @@ type RouteMount = {
 };
 
 const SHELLS: Record<RouteMountArea, (plugin: AppRoutePlugin) => AppRoutePlugin> = {
-  admin: adminRoutes,
   /** Plugin composes sub-shells internally (e.g. sync HTTP vs WS ticket auth). */
   composite: (plugin) => plugin,
   integration: integrationRoutes,

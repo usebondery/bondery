@@ -5,6 +5,7 @@ export const DOC_LINKS = {
   "bondery.chrome-extension.enriching-contact": { path: "apps/chrome-extension", hash: "enriching-contact" },
   "bondery.mcp": { path: "bondery/mcp" },
   "concepts.chat": { path: "concepts/chat" },
+  "concepts.graph": { path: "concepts/graph" },
   "concepts.groups": { path: "concepts/groups" },
   "concepts.interactions": { path: "concepts/interactions" },
   "concepts.map": { path: "concepts/map" },
