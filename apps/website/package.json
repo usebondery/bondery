@@ -86,5 +86,5 @@
     "test:api-samples": "tsx --test src/components/docs/api/api-sample-request.test.ts",
     "test:cors": "tsx --test src/lib/discovery-cors.test.ts"
   },
-  "version": "1.11.1-rc.1"
+  "version": "1.11.1-rc.2"
 }
