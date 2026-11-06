@@ -18,14 +18,22 @@ export function proxy(request: NextRequest) {
   const plausibleOrigin = getPlausibleCspOrigin();
 
   /**
-   * `require-trusted-types-for` blocks the React dev runtime and HMR client:
-   * they call `eval()` and set `script.src` with plain strings, so the directive
-   * stays in production only.
+   * `require-trusted-types-for 'script'` is omitted. React hydration sets
+   * `innerHTML` and `script.src` with plain strings, so the directive stops
+   * the client render and leaves an empty body. No Trusted Types policy exists
+   * in the website today. Add the directive again only together with a policy.
+   *
+   * `style-src` needs `'unsafe-inline'`. Mantine writes 261 inline `style`
+   * attributes, and the server sends 30 `<style>` tags without a nonce, so a
+   * nonce-only rule drops every page style.
+   *
+   * `script-src` keeps the nonce with `'strict-dynamic'`. That is the rule that
+   * stops injected scripts, and it works today.
    */
   const cspHeader = `
     default-src 'self';
     script-src 'self' 'nonce-${nonce}' 'strict-dynamic' ${plausibleOrigin}${isDev ? " 'unsafe-eval'" : ""};
-    style-src 'self' ${isDev ? "'unsafe-inline'" : `'nonce-${nonce}'`};
+    style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data: https://icons.duckduckgo.com;
     font-src 'self';
     connect-src 'self' https://api.github.com ${plausibleOrigin};
@@ -33,7 +41,6 @@ export function proxy(request: NextRequest) {
     base-uri 'self';
     form-action 'self';
     frame-ancestors 'none';
-    ${isDev ? "" : "require-trusted-types-for 'script';"}
     upgrade-insecure-requests;
   `;
 

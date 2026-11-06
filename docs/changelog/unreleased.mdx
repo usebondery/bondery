@@ -24,6 +24,7 @@ last_updated: 2026-11-06
 ### 🐛 Fixed
 
 - Webapp: the settings dialog no longer loads a second syntax highlighter. Code highlighting comes from `@bondery/mantine-next`, so a snippet uses one theme and one bundle.
+- Website: the security policy no longer blocks the page. `require-trusted-types-for` stopped React from hydrating and left an empty body, and a nonce-only `style-src` dropped every Mantine style. The policy keeps its script nonce and `'strict-dynamic'`, and it now sends a header at all: the config export used a name Next.js ignores, so no policy had ever reached a browser.
 
 ### 🔄 Changed
 
