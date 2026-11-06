@@ -27,6 +27,7 @@ export const meMcpConsentsRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "List MCP OAuth consents for the authenticated user.",
         response: withOkResponse(mcpConsentsListResponseSchema, "MCP consent list"),
+        summary: "List MCP consents",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -46,6 +47,7 @@ export const meMcpConsentsRoutes: AppRoutePlugin = async (fastify) => {
           ...noContentResponse,
           ...standardErrorResponses,
         },
+        summary: "Revoke an MCP consent",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params, request }, reply) => {

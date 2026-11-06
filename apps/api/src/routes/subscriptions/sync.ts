@@ -36,6 +36,7 @@ export async function subscriptionSyncRoutes(fastify: FastifyInstance): Promise<
       schema: {
         description: "Sync subscription state from Stripe for the authenticated user.",
         response: withOkResponse(subscriptionSyncResponseSchema, "Subscription sync result"),
+        summary: "Sync subscription state",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => syncSubscriptionFromStripe(ctx)),

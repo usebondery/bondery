@@ -1,6 +1,40 @@
 @import "tailwindcss";
-@import "fumadocs-ui/css/neutral.css";
-@import "fumadocs-ui/css/preset.css";
+
+@custom-variant dark (
+  &:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *)
+);
+
+:root {
+  /* Site header height. Measured from the rendered header: the mobile header drops the
+     desktop nav row, so it is shorter. */
+  --site-header-height: 4.25rem;
+
+  /* Distance the sticky header moves below its flow position (`top-6` on the header). */
+  --site-header-sticky-shift: 1.5rem;
+
+  /* Where the stuck header ends. Content and sticky rails must start below this line. */
+  --site-header-sticky-bottom: calc(var(--site-header-sticky-shift) + var(--site-header-height));
+
+  /* Space between the header and the first content block. `PageTopSpacer` owns these.
+     The header keeps its height in flow, so the spacer only clears the sticky shift
+     plus the wanted gap. */
+  --page-top-spacer: calc(var(--site-header-sticky-shift) + var(--mantine-spacing-xl));
+  --page-top-spacer-large: calc(var(--site-header-sticky-shift) + var(--mantine-spacing-xl) * 2.5);
+}
+
+/* The header swaps its desktop nav row for a burger at the Mantine `sm` breakpoint
+   (48em), so its height changes there, not at `md`. */
+@media (min-width: 48em) {
+  :root {
+    --site-header-height: 4.75rem;
+  }
+}
+
+/* A side slot that renders nothing leaves no track and no gap, so the center takes
+   the full width. */
+[data-site-shell-right]:not(:has(*)) {
+  display: none;
+}
 
 /* Scan branding package for Tailwind classes */
 @source "@bondery/branding/**/*.{ts,tsx}";

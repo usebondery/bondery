@@ -46,6 +46,7 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
           ...withOkResponse(checkoutResponseSchema, "Checkout session client secret"),
           ...conflictResponse,
         },
+        summary: "Start checkout",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request: FastifyRequest, reply: FastifyReply) => {

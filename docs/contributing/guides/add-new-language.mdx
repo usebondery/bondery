@@ -1,15 +1,16 @@
 ---
 title: Add a new language
-icon: Languages
-description: Ship a new UI locale across webapp, mobile, extension, and API error strings.
+icon: Language
+description: Add a UI locale across the web app, the mobile app, the extension, and the API error strings. English is the reference that each must match.
+last_updated: 2026-11-04
 ---
-
-This guide walks through adding a locale to Bondery. English (`en`) is the reference — every namespace file must exist for the new locale before CI passes.
 
 <Steps>
 <Step>
 
 ## Register the locale
+
+English (`en`) is the reference. Every namespace file must exist for the new locale before CI passes.
 
 Add an entry to [`packages/schemas/locale/supported-locales.json`](../../../packages/schemas/locale/supported-locales.json):
 
@@ -26,9 +27,10 @@ Keep `default` as `en`. If the locale needs a Postgres enum value, the `postgres
 
 Duplicate the English tree:
 
-```bash
-cp -r packages/translations/src/locales/en packages/translations/src/locales/fr
-```
+<PlatformCode
+  posix={`cp -r packages/translations/src/locales/en packages/translations/src/locales/fr`}
+  windows={`Copy-Item -Recurse packages/translations/src/locales/en packages/translations/src/locales/fr`}
+/>
 
 Every JSON path under `en/` must exist for the new code. CI compares file trees and fails on missing or extra files.
 

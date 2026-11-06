@@ -1,6 +1,6 @@
-﻿import { ModalsProvider } from "@mantine/modals";
+﻿import { CodeHighlightProvider } from "@bondery/mantine-next";
+import { ModalsProvider } from "@mantine/modals";
 import { getResources, getT, initServerI18next } from "next-i18next/server";
-import { CodeHighlightProvider } from "@/components/CodeHighlightProvider";
 import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
 import i18nConfig from "@/i18n.config";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";

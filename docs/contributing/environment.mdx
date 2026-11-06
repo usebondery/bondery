@@ -1,6 +1,8 @@
 ---
 title: "Environment configuration"
+description: One naming scheme for every env var, and one root file for local development. See the prefixes, who may read each value, and how to add one.
 icon: Settings
+last_updated: 2026-10-23
 ---
 
 Bondery uses one naming scheme everywhere and one root file for local development.
@@ -37,6 +39,14 @@ Optional flags read only when `NODE_ENV=development` during `pnpm run dev`. Comp
 |----------|-------------|
 | `BONDERY_DEV_SKIP_RELEASE_MIGRATE` | Skip migrate + `functions.sql` + OAuth + platform admin promotion on API dev boot |
 | `BONDERY_DEV_SKIP_STORAGE_BUCKETS` | Skip SeaweedFS bucket ensure on API dev boot |
+
+### Docs `last_updated`
+
+Every `docs/**/*.mdx` page carries a hand-authored `last_updated` date, for example `last_updated: 2026-09-30`. The docs footer renders it as "Last updated September 30, 2026". `pnpm run check:docs:frontmatter` fails when a page has no date or the date is not a real calendar day.
+
+The date is authored, not derived from Git, for two reasons. A typo fix changes the file but not the content, so the date must stay put. And a derived date needs Git history or a GitHub token in every website build.
+
+Set the date when a page changes in substance. Leave it alone for spelling, formatting, and link repairs.
 
 ## Local happy path
 

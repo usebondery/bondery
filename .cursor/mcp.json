@@ -24,6 +24,9 @@
     "bondery": {
       "type": "http",
       "url": "http://localhost:26631/mcp"
+    },
+    "dashboard-icons": {
+      "url": "https://dashboardicons.com/api/mcp"
     }
   }
 }

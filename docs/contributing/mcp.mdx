@@ -1,10 +1,9 @@
 ---
 title: "Inspect the MCP server"
-description: Use the MCP Inspector (2026-07-28) to connect, authorize, and call Bondery MCP tools locally.
+description: Debug the Bondery MCP server with MCP Inspector. Connect to the Streamable HTTP endpoint, authorize, and call tools against the 2026-07-28 protocol.
 icon: Search
+last_updated: 2026-11-04
 ---
-
-# Inspect the MCP server
 
 [MCP Inspector](https://modelcontextprotocol.io/docs/2026-07-28/tools/inspector) is the reference client for debugging MCP servers. Use it to exercise Bondery’s Streamable HTTP endpoint (`{API}/mcp`) with the **2026-07-28** protocol. Cursor’s HTTP client still negotiates `2025-11-25` and cannot complete initialize against this server.
 
@@ -77,9 +76,10 @@ Namespace proof is HTTP: `GET https://usebondery.com/.well-known/mcp-registry-au
 
 Publish with [`.github/workflows/publish-mcp-registry.yml`](../../.github/workflows/publish-mcp-registry.yml) (`workflow_dispatch`, or production tags `vX.Y.Z` — not RC). Sequence: marketing website live with the proof URL → Infisical key set → run the workflow. Confirm with:
 
-```bash
-curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=com.usebondery/mcp"
-```
+<PlatformCode
+  posix={`curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=com.usebondery/mcp"`}
+  windows={`curl.exe "https://registry.modelcontextprotocol.io/v0.1/servers?search=com.usebondery/mcp"`}
+/>
 
 The official registry is still in preview. `server.json` `version` stays in lockstep with root `package.json` via `pnpm run sync-version`.
 

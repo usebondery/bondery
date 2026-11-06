@@ -7,11 +7,27 @@ export {
   renderActionIconGraphic,
 } from "#ActionIconButton/index.js";
 export {
+  BrandMark,
+  CODE_BLOCK_PLATFORM_COOKIE,
+  CODE_BLOCK_SNIPPET_COOKIE,
   CodeBlock,
   type CodeBlockMultiProps,
+  type CodeBlockPlatform,
+  type CodeBlockPlatformsProps,
   type CodeBlockProps,
   type CodeBlockSingleProps,
   type CodeBlockSnippet,
+  CodeHighlightProvider,
+  getCodeBlockPlatform,
+  getCodeBlockSnippet,
+  parseCodeBlockPlatform,
+  parseCodeBlockSnippets,
+  setCodeBlockPlatform,
+  setCodeBlockSnippet,
+  subscribeCodeBlockPlatform,
+  subscribeCodeBlockSnippet,
+  useCodeBlockPlatform,
+  useCodeBlockSnippet,
 } from "#CodeBlock/index.js";
 export { CopyButton, type CopyButtonProps } from "#CopyButton/index.js";
 export {
@@ -77,6 +93,7 @@ export {
   resolveShortcutKeyLabel,
   type ShortcutKeyToken,
 } from "#Kbd/index.js";
+export { LinkCard, type LinkCardProps } from "#LinkCard/index.js";
 export { LogoIcon, type LogoIconProps } from "#LogoIcon/index.js";
 export {
   ModalFooter,
@@ -115,6 +132,7 @@ export {
   personChipBadgeStyles,
   personChipSizes,
 } from "#PersonChip/index.js";
+export { PressableCard, type PressableCardProps } from "#PressableCard/index.js";
 export {
   PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT,
   PEOPLE_PICKER_DROPDOWN_WIDTH,
@@ -143,6 +161,7 @@ export {
   shouldLoadMoreOnArrowDown,
 } from "#peoplePicker/peoplePickerPagedList.js";
 export { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
+export { SearchTrigger, type SearchTriggerProps } from "#SearchTrigger/index.js";
 export { ThemePicker, type ThemePickerProps, type ThemePreference } from "#ThemePicker/index.js";
 export { ToolbarMenuButton, type ToolbarMenuButtonProps } from "#ToolbarMenuButton/index.js";
 export { bonderyTheme, primaryColor } from "#theme.js";

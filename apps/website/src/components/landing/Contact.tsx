@@ -2,6 +2,7 @@ import { SOCIAL_LINKS, SUPPORT_EMAIL } from "@bondery/helpers";
 import { AnchorLink, type AppHref } from "@bondery/mantine-next";
 import { Container, Group, Paper, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { IconBrandDiscord, IconBrandReddit, IconMail } from "@tabler/icons-react";
+import { PageTopSpacer } from "@/components/page-top-spacer";
 
 const CONTACT_METHODS: {
   color: string;
@@ -35,7 +36,8 @@ const CONTACT_METHODS: {
 
 export function Contact() {
   return (
-    <Container className="my-20" size="md">
+    <Container size="md">
+      <PageTopSpacer />
       <Stack align="center" gap="xl">
         <Stack align="center" gap="md">
           <Title order={1} size="h1" ta="center">

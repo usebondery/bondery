@@ -36,6 +36,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(contactResponseSchema, "Contact details"),
+        summary: "Fetch a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -57,6 +58,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
           ...withOkResponse(createContactResponseSchema, "Updated contact"),
           ...syncConflictResponse,
         },
+        summary: "Update a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -80,6 +82,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
         description: "Delete a single contact by ID.",
         params: uuidParamSchema,
         response: withOkResponse(deleteContactResponseSchema, "Contact deleted successfully"),
+        summary: "Delete a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -98,6 +101,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
         description: "List groups a contact belongs to.",
         params: uuidParamSchema,
         response: withOkResponse(contactGroupsResponseSchema, "Groups for the contact"),
+        summary: "List groups for a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -114,6 +118,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
         description: "Preview which fields can be included when sharing a contact by email.",
         params: uuidParamSchema,
         response: withOkResponse(contactSharePreviewResponseSchema, "Shareable contact fields"),
+        summary: "Preview shared fields",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -133,6 +138,7 @@ export function registerContactDetailRoutes(fastify: AppFastifyInstance): void {
           z.string().meta({ description: "vCard file content", example: EXAMPLE_VCARD_EXPORT }),
           "vCard export",
         ),
+        summary: "Export a contact as vCard",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

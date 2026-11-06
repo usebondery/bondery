@@ -3,9 +3,10 @@ import type { MetadataRoute } from "next";
 import { connection } from "next/server";
 import { getAllPosts } from "@/app/blog/_lib";
 import { BLOG_CATEGORIES } from "@/lib/blog/categories";
-import { isUnpublishedChangelogSlug } from "@/lib/changelog";
 import { getWebsiteUrl } from "@/lib/config";
-import { source } from "@/lib/source";
+import { listFolderSlugs } from "@/lib/docs-folders";
+import { isPublishedDocsPage } from "@/lib/docs-visibility";
+import { getFilteredPageTree, source } from "@/lib/source";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
@@ -28,13 +29,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const docEntries: MetadataRoute.Sitemap = source
     .getPages()
-    .filter((page) => !page.data.hidden)
-    .filter((page) => !isUnpublishedChangelogSlug(page.slugs))
+    .filter(isPublishedDocsPage)
     .map((page) => ({
       changeFrequency: "weekly" as const,
       lastModified: now,
       priority: 0.6,
       url: `${origin}${page.url}`,
+    }));
+
+  const docPageUrls = new Set(docEntries.map((entry) => entry.url));
+
+  const folderEntries: MetadataRoute.Sitemap = listFolderSlugs(
+    getFilteredPageTree().children,
+    new Set(source.getPages().map((page) => page.slugs.join("/"))),
+  )
+    .map((slug) => `${origin}/docs/${slug.join("/")}`)
+    .filter((url) => !docPageUrls.has(url))
+    .map((url) => ({
+      changeFrequency: "weekly" as const,
+      lastModified: now,
+      priority: 0.6,
+      url,
     }));
 
   return [
@@ -69,6 +84,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${origin}${WEBSITE_ROUTES.SECURITY}`,
     },
     ...docEntries,
+    ...folderEntries,
     ...blogCategoryEntries,
     ...blogPostEntries,
   ];

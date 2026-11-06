@@ -29,6 +29,7 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
       schema: {
         description: LIVENESS_DESCRIPTION,
         response: withOkResponse(livenessStatusSchema, "Liveness status"),
+        summary: "Check liveness",
         tags: ["Health"],
       } satisfies FastifyZodOpenApiSchema,
     },
@@ -56,6 +57,7 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
             description: "Readiness report when critical dependencies are unavailable",
           },
         },
+        summary: "Check readiness",
         tags: ["Health"],
       } satisfies FastifyZodOpenApiSchema,
     },

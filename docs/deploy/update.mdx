@@ -1,9 +1,12 @@
 ---
 title: Updates
+description: Move a self-hosted stack to a newer image tag. See what the pre_start init containers run, and why an ordinary restart skips the migrations.
 icon: CircleArrowUp
+last_updated: 2026-11-04
 ---
 
 ## Schema migrations
+
 
 The `api` service's `pre_start` init containers apply `prisma migrate deploy`, `functions.sql`, OAuth provisioning, and S3 bucket bootstrap **before** the main API container starts.
 
@@ -15,19 +18,23 @@ Requires Docker Compose **v2.38+**.
 
 By default both services use the floating **`production`** image tag with **`pull_policy: always`** in [`docker-compose.yml`](../../deploy/bondery/docker-compose.yml). That means every `docker compose up -d` (or Dokploy redeploy) **pulls the latest `production` images** from GHCR — you do not need to bump a version in `.env` to receive app updates.
 
-```bash
-./scripts/upgrade.sh
-```
+<PlatformCode
+  posix={`./scripts/upgrade.sh`}
+  windows={`docker compose pull api webapp
+docker compose up -d`}
+/>
 
-This pulls the latest `api`/`webapp` images and runs `docker compose up -d`. When the `api` image changes, Compose recreates `api` and re-runs `pre_start`.
+This pulls the latest `api`/`webapp` images and runs `docker compose up -d`. On Windows, run the two `docker compose` commands from `deploy/bondery`. When the `api` image changes, Compose recreates `api` and re-runs `pre_start`.
 
 ### Pinning a version
 
 Pin semver via `BONDERY_INFRA_VERSION` when you want a frozen rollback target instead of tracking `production` (pins **both** api and webapp):
 
-```bash
-BONDERY_INFRA_VERSION=1.7.4 docker compose up -d api webapp
-```
+<PlatformCode
+  posix={`BONDERY_INFRA_VERSION=1.7.4 docker compose up -d api webapp`}
+  windows={`$env:BONDERY_INFRA_VERSION = "1.7.4"
+docker compose up -d api webapp`}
+/>
 
 Always redeploy api and webapp together when changing the version pin.
 

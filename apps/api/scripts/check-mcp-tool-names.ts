@@ -22,6 +22,8 @@ const toolsDir = join(
 const TOOL_NAME_RE = /registerTool\(\s*"([a-z0-9_]+)"/g;
 const ALLOWED_NAME_RE = /^(create|get|update|delete|search)_[a-z][a-z0-9_]*$/;
 const META_KIND_RE = /mcpToolMeta\(\s*"(create|get|update|delete|search)"/;
+/** Tools that mutate no user data, so they may skip the `mcp:write` gate. */
+const NON_MUTATING_TOOLS = new Set(["create_agent_feedback"]);
 
 for (const entry of readdirSync(toolsDir)) {
   if (!entry.endsWith(".ts") || entry.endsWith(".test.ts")) {
@@ -50,6 +52,21 @@ for (const entry of readdirSync(toolsDir)) {
     }
     if (meta[1] !== verb) {
       check.add(`${entry}: "${name}" must use mcpToolMeta("${verb}"), found "${meta[1]}"`);
+    }
+
+    // A create-named tool that skips the mcp:write gate must be allowlisted,
+    // and a non-mutating tool that keeps the gate is a mistake in the other
+    // direction — an agent that only reads could not report a broken tool.
+    const usesWriteWrapper = /runMcpWriteTool\(/.test(block);
+    const allowlisted = NON_MUTATING_TOOLS.has(name);
+    if (verb !== "get" && verb !== "search" && !allowlisted && !usesWriteWrapper) {
+      check.add(`${entry}: "${name}" is a write tool but does not call runMcpWriteTool`);
+    }
+    if (allowlisted && usesWriteWrapper) {
+      check.add(`${entry}: "${name}" is allowlisted as non-mutating but calls runMcpWriteTool`);
+    }
+    if ((verb === "get" || verb === "search") && usesWriteWrapper) {
+      check.add(`${entry}: "${name}" is a read tool but calls runMcpWriteTool`);
     }
   }
 }

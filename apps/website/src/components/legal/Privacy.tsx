@@ -135,7 +135,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 1 */}
-      <Title id="introduction" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="introduction" mb="md" order={2}>
         1. Introduction
       </Title>
       <Text mb="md">
@@ -172,7 +172,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 2 */}
-      <Title id="data-controller" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="data-controller" mb="md" order={2}>
         2. Data Controller
       </Title>
       <Text mb="md">The data controller responsible for your personal data is:</Text>
@@ -190,7 +190,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 3 */}
-      <Title id="information-we-collect" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="information-we-collect" mb="md" order={2}>
         3. Information We Collect
       </Title>
 
@@ -289,7 +289,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 4 */}
-      <Title id="how-we-use-information" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="how-we-use-information" mb="md" order={2}>
         4. How We Use Your Data
       </Title>
       <Text mb="md">We use the information we collect to:</Text>
@@ -323,7 +323,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 5 */}
-      <Title id="legal-basis" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="legal-basis" mb="md" order={2}>
         5. Legal Basis for Processing
       </Title>
       <Text mb="lg">
@@ -335,7 +335,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 6 */}
-      <Title id="cookies" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="cookies" mb="md" order={2}>
         6. Cookies and Similar Technologies
       </Title>
 
@@ -384,7 +384,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 7 */}
-      <Title id="security" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="security" mb="md" order={2}>
         7. Security
       </Title>
       <Text mb="md">
@@ -404,7 +404,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 8 */}
-      <Title id="data-retention" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="data-retention" mb="md" order={2}>
         8. Data Retention
       </Title>
 
@@ -449,7 +449,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 9 */}
-      <Title id="disclosure" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="disclosure" mb="md" order={2}>
         9. Disclosure of Personal Information
       </Title>
       <Text mb="lg">
@@ -496,7 +496,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 10 */}
-      <Title id="international-transfers" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="international-transfers" mb="md" order={2}>
         10. International Data Transfers
       </Title>
       <Text mb="md">
@@ -516,7 +516,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 11 - Children */}
-      <Title id="children" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="children" mb="md" order={2}>
         11. Children
       </Title>
       <Text mb="lg">
@@ -528,7 +528,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 12 */}
-      <Title id="your-rights" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="your-rights" mb="md" order={2}>
         12. Your Privacy Rights
       </Title>
 
@@ -599,7 +599,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 13 */}
-      <Title id="contact-data-responsibilities" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="contact-data-responsibilities" mb="md" order={2}>
         13. Your Responsibilities for Contact Data
       </Title>
       <Text mb="md">
@@ -630,7 +630,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 14 */}
-      <Title id="third-party-links" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="third-party-links" mb="md" order={2}>
         14. Third-Party Links
       </Title>
       <Text mb="lg">
@@ -646,7 +646,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 15 */}
-      <Title id="subprocessors" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="subprocessors" mb="md" order={2}>
         15. Third-Party Service Providers (Subprocessors)
       </Title>
       <Text mb="lg">
@@ -685,7 +685,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 16 */}
-      <Title id="sign-in-providers" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="sign-in-providers" mb="md" order={2}>
         16. Sign-in Providers (Identity Providers)
       </Title>
       <Text mb="md">
@@ -713,7 +713,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 17 */}
-      <Title id="changes" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="changes" mb="md" order={2}>
         17. Changes to This Privacy Policy
       </Title>
       <Text mb="md">
@@ -733,7 +733,7 @@ export function Privacy() {
       <Divider my="xl" />
 
       {/* Section 18 */}
-      <Title id="contact" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="contact" mb="md" order={2}>
         18. Contact Us
       </Title>
       <Text mb="md">

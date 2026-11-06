@@ -9,7 +9,9 @@ async function main() {
   await generateFiles({
     addGeneratedComment: true,
     groupBy: "route",
-    includeDescription: true,
+    // Keep the operation description in frontmatter. `DocsPage` renders it as the
+    // page description, the same way error pages do. In-body rendering duplicates it.
+    includeDescription: false,
     input: openapi,
     meta: true,
     output: join(repoRoot, "docs/api/api-reference/_generated"),

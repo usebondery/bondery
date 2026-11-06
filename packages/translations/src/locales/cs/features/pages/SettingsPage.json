@@ -58,9 +58,6 @@
     "SaveButton": "Uložit",
     "SecretCodeLabel": "API klíč",
     "TestRequestLabel": "Testovací požadavek",
-    "TestSnippetLinux": "Linux",
-    "TestSnippetMac": "macOS",
-    "TestSnippetWindows": "Windows",
     "Title": "API klíče"
   },
   "Apps": {

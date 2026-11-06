@@ -1,12 +1,11 @@
 ---
 title: "How to write docs"
-description: Guide for humans and agents editing Bondery documentation
-icon: PenLine
+description: "The rules for every page under `docs/`. Covers register, audience, structure, frontmatter, icons, in-app links, and the checks that gate a merge."
+icon: Pencil
+last_updated: 2026-11-04
 ---
 
-# How to write docs
-
-This guide applies to everyone who writes or edits documentation in `docs/` — contributors, maintainers, and AI agents.
+This guide applies to everyone who writes or edits documentation in `docs/` — contributors, maintainers, and AI agents. AI agents should also read the `bondery-docs` skill, which maps each folder to its owner skill and lists the checks that gate a merge.
 
 ## Language
 
@@ -41,7 +40,7 @@ Lead with the reader's goal. A user page explains *what to do*; a contributor pa
 ### Core concept pages (`docs/concepts/`)
 
 - One concept per file
-- Set `icon` in frontmatter to a [Lucide](https://lucide.dev) PascalCase name (e.g. `User`, `Bell`) — see [Icons](#icons) below
+- Set `icon` in frontmatter to a [Tabler](https://tabler.io/icons) name (e.g. `User`, `Bell`) — see [Icons](#icons) below
 - Cross-link related concepts at the bottom
 - Do not duplicate full explanations — link instead
 
@@ -53,9 +52,10 @@ Lead with the reader's goal. A user page explains *what to do*; a contributor pa
 
 ### Changelog partials (`docs/changelog/`)
 
-- **In-flight entries** — edit [`docs/changelog/unreleased.mdx`](../../changelog/unreleased.mdx) (`hidden: true`; unpublished; not in `meta.json`).
-- **Shipped releases** — one file per version at [`docs/changelog/X.Y.Z.mdx`](../../changelog/1.9.2.mdx) (`title: "X.Y.Z"`), listed newest-first in [`docs/changelog/meta.json`](../../changelog/meta.json). Public URL is `/docs/changelog/X.Y.Z`.
-- **Hub page** — [`docs/changelog/index.mdx`](../../changelog/index.mdx) at `/docs/changelog` is an index of version pages (changelog + GitHub Release when the tag exists). Do not inline every release on the hub.
+- **In-flight entries** — edit [`docs/changelog/unreleased.mdx`](../changelog/unreleased.mdx) (`hidden: true`; unpublished; not in `meta.json`). It needs no `description`.
+- **Shipped releases** — one file per version at [`docs/changelog/X.Y.Z.mdx`](../changelog/1.9.2.mdx) (`title: "X.Y.Z"`), listed newest-first in `docs/changelog/meta.json`. Public URL is `/docs/changelog/X.Y.Z`.
+- **Release description** — required on every shipped release page. Write one sentence of 140 to 160 characters that starts with `Bondery X.Y.Z` and names the two or three changes a reader would search for. Do not count categories ("25 new features, 16 fixes"). The title is a bare version, so the sentence has to carry the product name and the version. `pnpm run check:docs:descriptions` fails when the version is missing, the count pattern appears, or the length is outside the band. Full rules: [`bondery-changelog`](../../.agents/skills/bondery-changelog/references/format.md#release-page-description).
+- **Hub page** — [`docs/changelog/index.mdx`](../changelog/index.mdx) at `/docs/changelog` is an index of version pages (changelog + GitHub Release when the tag exists). Do not inline every release on the hub.
 
 ### Architecture decision records (`docs/adr/`)
 
@@ -71,12 +71,17 @@ Lead with the reader's goal. A user page explains *what to do*; a contributor pa
 - Run `pnpm run check:openapi` before release or to validate Redocly rules locally.
 - The docs site renders the OpenAPI reference from `packages/openapi-spec/openapi.yaml` via build-time `generate:api-docs` (Fumadocs OpenAPI).
 - Prose in `api/` should explain auth, base URL, and integration patterns — not duplicate every field.
+- **Every route you name must exist in the spec.** `pnpm run check:docs:api-routes` reads `openapi.yaml` and fails on a route that is not there, on an unknown first segment, and on a full API-origin URL that adds an `/api/` prefix. Two rules follow from it:
+  - Write the API path without `/api/`. The API origin serves `/contacts`, not `/api/contacts`.
+  - Path parameters may use `:id` or `{id}`. The check normalizes both.
+- The webapp origin is the exception. Its BFF catch-all forwards `/api/*` to the API, so `https://app.example.com/api/health/ready` is correct and is not flagged.
 - See [API routes](api-routes.mdx) for the route schema checklist.
 
 ## Formatting conventions
 
 - **File format** — use **MDX only** (`.mdx`). Plain `.md` is not compiled by the docs site. MDX gives us Callouts, Cards, Steps, Files, and other Fumadocs components without a parallel format.
-- **Frontmatter** — `title` (required), optional `icon`, `description`, `docId` / `docSections` for in-app links, `hidden: true` only for pages that should not appear in the sidebar
+- **Frontmatter** — `title` (required), and a `description` (required, 140-160 characters) that reads as one sentence. Optional `icon`, `docId` / `docSections` for in-app links, `hidden: true` only for pages that should not appear in the sidebar
+- **Descriptions** — the same string becomes the lead paragraph, the folder tile, the meta description, the `llms.txt` line, and the markdown page header. Write it as a stand-alone summary that starts with the object noun, never with "This page" or the page title. `pnpm run check:docs:descriptions` blocks under 120 characters or over 160, and warns between 120 and 140
 - **File names** — lowercase, hyphenated (`getting-started.mdx`, `local-setup.mdx`)
 - **Navigation** — sidebar order and grouping come from the nearest `meta.json` only (add, move, or rename pages there)
 - **Code blocks** — include the language tag; show real commands and env var names from the repo
@@ -86,22 +91,63 @@ Lead with the reader's goal. A user page explains *what to do*; a contributor pa
 - **Files** — use `<Files>` / `<Folder>` / `<File>` for repository or directory trees instead of ASCII art
 - **Accordions** — use `<Accordions>` / `<Accordion>` for FAQ-style Q&A sections
 - **BonderyRepo** — use `<BonderyRepo />` for monorepo mentions (wraps `GithubInfo` with `usebondery/bondery`)
-- **Code tabs** — use `<CodeBlockTabs>` when showing the same snippet in multiple languages or runtimes
+- **Desktop OS code**: use `<PlatformCode windows={...} posix={...} />` when a shell command differs per desktop OS. `posix` covers macOS and Linux. Add `macos` or `linux` only when that platform really needs a different line. When all platforms run the same command, keep a plain fence, because a switch with three identical bodies is noise. See [Platform-specific commands](#platform-specific-commands)
+
+### Platform-specific commands
+
+A command needs a switch when the Windows form is not the POSIX form. Common cases are file copy, path separators, environment variables, and `curl`, which PowerShell aliases to `Invoke-WebRequest`.
+
+```mdx
+<PlatformCode
+  posix={`cp .env.example .env`}
+  windows={`Copy-Item .env.example .env`}
+/>
+```
+
+The component renders the tabs in the order Windows, macOS, Linux. It shows only the platforms you pass. It selects the tab that matches the reader's OS. Labels, brand marks, and the default tab come from the shared component, so do not pass them.
+
+A tab click is stored in a cookie (`bondery_code_platform`). Every block on the page and every later page follows that choice, so a reader who picks Linux stays on Linux. Before the first choice, each block follows the detected OS.
+
+Write the Windows tab for PowerShell 5.1 and 7. Use `curl.exe` in place of `curl`. Put an environment variable on its own line, because `VAR=value command` is not PowerShell syntax. Keep the POSIX tab correct in `bash` and `zsh`.
+
+Override `posix` when macOS and Linux diverge:
+
+```mdx
+<PlatformCode
+  posix={`cp .env.example .env`}
+  macos={`cp .env.example .env && open .env`}
+  windows={`Copy-Item .env.example .env`}
+/>
+```
+
+Do not change the command semantics between tabs. Each tab must run the same operation.
+
+### Code block width
+
+A code block is full width by default, so a long command never wraps inside a narrow box. Paragraphs keep a shorter measure for readable lines. When a block holds one short command and should not stretch, pass the shared `docsCodeNarrow` class:
+
+```mdx
+<PlatformCode className="docsCodeNarrow" posix={`pnpm run dev`} windows={`pnpm run dev`} />
+```
+
+Any class whose CSS sets a `max-width` works too. A plain fence has no `className` prop, so use `PlatformCode` or `DocsCodeBlock` when a block needs to stay narrow.
 
 ## Icons
 
-Sidebar icons help readers scan the tree. Use [Lucide](https://lucide.dev) names in PascalCase (`User`, not `user`).
+Sidebar icons help readers scan the tree. Use [Tabler](https://tabler.io/icons) icon names without the `Icon` prefix (`Server`, not `IconServer`).
 
 | Where | Rule | Example |
 |---|---|---|
-| **Top-level folders** (`meta.json`) | One `icon` per section | Guides → `BookOpen`, API → `Webhook` |
+| **Top-level folders** (`meta.json`) | One `icon` per section | API → `Webhook` |
 | **Core concepts** (`docs/concepts/`) | `icon` on every page — maps to a product entity | `people.mdx` → `User` |
-| **Product guides** (`docs/bondery/`, `docs/apps/`) | `icon` on user-facing task pages | Extension → `Puzzle`, Mobile → `Smartphone` |
-| **Welcome & changelog** | `icon` on index pages | Welcome → `House`, Changelog → `RotateCcwClock` (Lucide 1.43 renamed `History`) |
+| **Product guides** (`docs/bondery/`, `docs/apps/`) | `icon` on user-facing task pages | Extension → `Puzzle`, Mobile → `DeviceMobile` |
+| **Welcome & changelog** | `icon` on index pages | Welcome → `Home`, Changelog → `History` |
 | **Self-hosting** (`docs/deploy/`) | `icon` on every page | Requirements → `Server`, Installation → `Download` |
 | **Contributing** | Folder or page `icon` where it helps scan | Environment → `Settings`, Local setup → `Terminal` |
 | **API reference** | Folder + overview pages only; OpenAPI operation pages inherit tag grouping | Auth → `Key` |
 | **Authoring guide** | No icon | `how-to-write-docs` |
+
+The docs site resolves a name through the allow-list in `apps/website/src/components/docs/DocsIcon.tsx`. An unknown name fails the build. Add the Tabler icon to that list when a page needs a new one.
 
 **Do not use emojis in navigation** (sidebar, tabs, or `meta.json`). Emojis are fine in page body content where they already carry meaning (e.g. changelog category headings).
 

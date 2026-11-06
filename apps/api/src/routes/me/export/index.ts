@@ -22,6 +22,7 @@ export const meExportRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Count CRM records included in a Bondery data export for the current user.",
         response: withOkResponse(exportSummaryResponseSchema, "Export summary counts"),
+        summary: "Count export records",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => getExportSummary(ctx)),
@@ -40,6 +41,7 @@ export const meExportRoutes: AppRoutePlugin = async (fastify) => {
           }),
           "Bondery export ZIP",
         ),
+        summary: "Download your data",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, _route, reply) => {

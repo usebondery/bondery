@@ -1,9 +1,10 @@
 ---
 title: "ADR 0005: API pre_start bootstrap"
 hidden: true
+last_updated: 2026-08-28
 ---
 
-# ADR 0005: API `pre_start` bootstrap
+# ADR 0005: API pre_start bootstrap
 
 ## Status
 
@@ -57,7 +58,7 @@ Compose `pre_start` runs when the API service is created, not on ordinary contai
 
 `verifyAuthRuntime()` runs inside `buildServer()` after auth routes are mounted and **before** `listen()`. It calls `fastify.inject({ method: 'GET', url: '/auth/jwks' })` — same integration coverage as an HTTP probe, but in-process (no loopback socket, no Traefik/DNS hairpin to `BONDERY_PUBLIC_API_URL`). The public issuer URL is still logged for operators. Running this in `pre_start` is circular (no Fastify app yet); folding it into `initializeRuntime()` is the wrong seam (infra deps vs in-process auth wiring).
 
-## Why not `pre_start` on `seaweedfs-s3`
+## Why not pre_start on seaweedfs-s3
 
 `pre_start` runs before the service starts — it cannot wait for the S3 gateway healthcheck. The API service already `depends_on: seaweedfs-s3: service_healthy`.
 

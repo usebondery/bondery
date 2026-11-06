@@ -35,24 +35,30 @@ export const contactAddressSheetSchema =
 
 /** Read-model address shape (no input transforms — safe for Fastify response serialization). */
 export const contactAddressReadSchema: z.ZodType<ContactAddressRead> = z.object({
-  addressCity: z.string().nullable(),
-  addressCountry: z.string().nullable(),
-  addressCountryCode: z.string().nullable(),
-  addressFormatted: z.string().nullable(),
-  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
-  addressGranularity: contactAddressGranularitySchema,
-  addressLine1: z.string().nullable(),
-  addressLine2: z.string().nullable(),
-  addressPostalCode: z.string().nullable(),
-  addressState: z.string().nullable(),
-  addressStateCode: z.string().nullable(),
-  geocodeConfidence: contactAddressConfidenceSchema.nullable(),
-  label: z.string().nullable(),
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
-  timezone: z.string().nullable(),
-  type: contactAddressTypeSchema,
-  value: z.string(),
+  addressCity: z.string().nullable().describe("City name"),
+  addressCountry: z.string().nullable().describe("Country name"),
+  addressCountryCode: z.string().nullable().describe("ISO 3166-1 alpha-2 country code"),
+  addressFormatted: z.string().nullable().describe("Full address on one line"),
+  addressGeocodeSource: contactAddressGeocodeSourceSchema
+    .nullable()
+    .describe("How the coordinates were resolved"),
+  addressGranularity: contactAddressGranularitySchema.describe(
+    "Most specific part of the address that is known",
+  ),
+  addressLine1: z.string().nullable().describe("Street and house number"),
+  addressLine2: z.string().nullable().describe("Second address line, such as a unit"),
+  addressPostalCode: z.string().nullable().describe("Postal or ZIP code"),
+  addressState: z.string().nullable().describe("State or region name"),
+  addressStateCode: z.string().nullable().describe("State or region code"),
+  geocodeConfidence: contactAddressConfidenceSchema
+    .nullable()
+    .describe("Whether the geocoder verified this address"),
+  label: z.string().nullable().describe("Custom label for the address"),
+  latitude: z.number().nullable().describe("Latitude in decimal degrees"),
+  longitude: z.number().nullable().describe("Longitude in decimal degrees"),
+  timezone: z.string().nullable().describe("IANA timezone name for this address"),
+  type: contactAddressTypeSchema.describe("Address category"),
+  value: z.string().describe("Display value of the address"),
 });
 
 export const contactAddressEntrySchema = addressCoreInputSchema.extend({

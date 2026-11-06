@@ -135,6 +135,7 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Get user settings, profile info, and linked auth providers.",
         response: withOkResponse(userSettingsResponseSchema, "User settings"),
+        summary: "Fetch settings",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -199,6 +200,7 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
         body: updateSettingsBodySchema,
         description: "Update user settings and preferences.",
         response: withOkResponse(settingsPatchResponseSchema, "Updated settings"),
+        summary: "Update settings",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: updateSettingsBodySchema }, async (ctx, { body }) =>
@@ -215,6 +217,7 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Dismiss the getting-started progress rail on the home page.",
         response: withOkResponse(apiSuccessResponseSchema, "Getting started dismissed"),
+        summary: "Dismiss getting started",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => dismissGettingStarted(ctx)),

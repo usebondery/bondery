@@ -1,6 +1,7 @@
 ---
 title: import_bondery_failed
-description: Import Bondery Failed
+description: The Bondery ZIP import failed. Confirm that the archive is unmodified, is under the size limit, and still holds the folders the export wrote.
+last_updated: 2026-08-27
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show `common.errors.api.import_bondery_failed` (or the Settings import error cop
 | **code** | `import_bondery_failed` |
 | **doc_url** | `/docs/api/errors/import_bondery_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

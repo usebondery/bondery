@@ -1,19 +1,27 @@
 ---
 title: Installation
+description: Install Bondery on your own server with Docker Compose. Create the network, set the env file, then start the stack behind your own proxy today.
 icon: Download
+last_updated: 2026-11-04
 ---
+
+You need a server that meets [Requirements](./requirements.mdx), Docker with Compose v2.38 or newer, and hostnames for the API and the web app. Read [Configuration](./configuration.mdx) before you start, because the stack does not boot without its secrets.
 
 <Steps>
 <Step>
 
 ## Prepare environment
 
-```bash
-docker network create dokploy-network   # once, when using Traefik / Dokploy
+<PlatformCode
+  posix={`docker network create dokploy-network   # once, when using Traefik / Dokploy
 
 cd deploy/bondery
-cp .env.example .env
-```
+cp .env.example .env`}
+  windows={`docker network create dokploy-network   # once, when using Traefik / Dokploy
+
+cd deploy/bondery
+Copy-Item .env.example .env`}
+/>
 
 Fill domains and secrets — see [Configuration](./configuration.mdx) for the full variable list.
 
@@ -28,13 +36,16 @@ docker compose up -d
 
 **Without Traefik** (laptop smoke test):
 
-```bash
-cp docker-compose.override.yml.example docker-compose.override.yml
+<PlatformCode
+  posix={`cp docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
 curl -sf http://localhost:26631/health/live
-curl -sf http://localhost:26632/health/live
-```
-
+curl -sf http://localhost:26632/health/live`}
+  windows={`Copy-Item docker-compose.override.yml.example docker-compose.override.yml
+docker compose up -d
+curl.exe -sf http://localhost:26631/health/live
+curl.exe -sf http://localhost:26632/health/live`}
+/>
 </Step>
 <Step>
 
@@ -51,12 +62,16 @@ Requires Docker Compose **v2.38+** (`pre_start` support). Check with `docker com
 
 ## Verify
 
-```bash
-curl -sf https://api.example.com/health/ready
+<PlatformCode
+  posix={`curl -sf https://api.example.com/health/ready
 curl -sf https://api.example.com/oauth-providers
 curl -sf https://app.example.com/health/ready
-curl -sf https://app.example.com/api/health/ready
-```
+curl -sf https://app.example.com/api/health/ready`}
+  windows={`curl.exe -sf https://api.example.com/health/ready
+curl.exe -sf https://api.example.com/oauth-providers
+curl.exe -sf https://app.example.com/health/ready
+curl.exe -sf https://app.example.com/api/health/ready`}
+/>
 
 GitHub and LinkedIn sign-in are optional. Leave both `BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID` / `_SECRET` (or the LinkedIn pair) empty to keep that method unavailable. After you set **both** values, restart the API — the public bitmap is frozen at boot. Removing a provider locks out people who only sign in with it.
 

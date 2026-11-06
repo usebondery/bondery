@@ -31,15 +31,33 @@ export function getActiveTabKey(pathname: string): TabKey {
   return "product";
 }
 
+/** First URL anywhere under a folder, so nested groups still resolve a slug. */
+function firstUrl(node: PageTree.Node): string | null {
+  if (node.type === "page") {
+    return node.url;
+  }
+  if (node.type !== "folder") {
+    return null;
+  }
+  const own = node.index?.url;
+  if (own) {
+    return own;
+  }
+  for (const child of node.children) {
+    const url = firstUrl(child);
+    if (url) {
+      return url;
+    }
+  }
+  return null;
+}
+
 function nodeSlug(node: PageTree.Node): string | null {
   if (node.type === "separator") {
     return null;
   }
 
-  const url =
-    node.type === "page"
-      ? node.url
-      : (node.index?.url ?? node.children.find((child) => child.type === "page")?.url);
+  const url = firstUrl(node);
 
   if (!url) {
     return null;

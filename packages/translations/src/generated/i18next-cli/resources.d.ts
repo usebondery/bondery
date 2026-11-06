@@ -1241,9 +1241,6 @@ export default interface Resources {
       "SaveButton": "Save",
       "SecretCodeLabel": "API key",
       "TestRequestLabel": "Test request",
-      "TestSnippetLinux": "Linux",
-      "TestSnippetMac": "macOS",
-      "TestSnippetWindows": "Windows",
       "Title": "API keys"
     },
     "Apps": {
@@ -2399,6 +2396,12 @@ export default interface Resources {
     "support": "support"
   },
   "platform/email/FeedbackEmail": {
+    "agentActualHeading": "What the tool returned:",
+    "agentExpectedHeading": "What the agent expected:",
+    "agentKindLabel": "Report kind:",
+    "agentRequestIdLabel": "Request ID:",
+    "agentSourceHeading": "Reported by an AI agent",
+    "agentToolLabel": "Tool:",
     "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
     "generalFeedbackHeading": "General feedback:",
     "heading": "Feedback from {{userEmail}}",

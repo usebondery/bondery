@@ -19,6 +19,7 @@ export function registerMergeAvatarIdentityRoute(fastify: AppFastifyInstance): v
         description: "Check whether two contacts have identical avatar image bytes.",
         querystring: mergeAvatarIdentityQuerySchema,
         response: withOkResponse(mergeAvatarIdentityResponseSchema, "Avatar identity"),
+        summary: "Compare contact avatars",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ query: mergeAvatarIdentityQuerySchema }, async (ctx, { query }) =>

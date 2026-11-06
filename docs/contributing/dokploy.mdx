@@ -1,9 +1,13 @@
 ---
 title: "Dokploy deployment (Bondery production)"
+description: "The Bondery production topology on Dokploy: the Compose apps, the image tags that they pin, and the steps that run before the API container starts."
 icon: Cloud
+last_updated: 2026-11-04
 ---
 
-Canonical production topology — **two** Compose apps:
+## Topology
+
+Bondery production runs on Dokploy, and this page is the canonical topology. It does not apply to the self-host distribution.
 
 <Callout type="info">
 **Bondery production only** — not part of the self-host distribution. Self-hosters follow [Installation](../deploy/installation.mdx).
@@ -18,7 +22,7 @@ Canonical production topology — **two** Compose apps:
 
 Self-hosters use **only** [`deploy/bondery`](../../deploy/bondery/) (api + webapp + redis + Postgres). Marketing lives in ops and is not part of the self-host distribution. Guides: [`deploy/bondery/README.md`](../../deploy/bondery) · [`docs/deploy/installation.mdx`](../deploy/installation.mdx) · [`deploy/ops/README.md`](../../deploy/ops).
 
-## Product Compose application (`deploy/bondery`)
+## Product Compose application
 
 | Setting | Value |
 |---------|-------|
@@ -30,7 +34,7 @@ Self-hosters use **only** [`deploy/bondery`](../../deploy/bondery/) (api + webap
 
 Copy [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example) into Dokploy env (or a compose `.env`):
 
-```bash
+```text
 BONDERY_INFRA_API_DOMAIN=api.usebondery.com
 BONDERY_INFRA_WEBAPP_DOMAIN=app.usebondery.com
 BONDERY_INFRA_WEBSITE_DOMAIN=usebondery.com
@@ -80,7 +84,7 @@ See [workflows README](../../.github/workflows/README.md#dokploy-env-sync-sync-d
 
 Leave Dokploy **Isolated Deployments** off. Production and beta share `dokploy-network`; unique `${BONDERY_INFRA_TRAEFIK_PREFIX}-*` aliases keep Docker DNS from colliding. Optional Isolated Deployments are for operators running unrelated Compose apps, not for Bondery beta vs production.
 
-## Ops Compose application (`deploy/ops` — marketing website)
+## Ops Compose application (marketing website)
 
 | Setting | Value |
 |---------|-------|
@@ -146,15 +150,21 @@ LinkedIn's developer console error `The redirect_uri does not match the register
 
 The webapp is a confidential OAuth client, and the Chrome extension a public OAuth client, of the API's own authorization server. Both are provisioned deterministically from env vars — there is no signed-in-session registration step. Generate values yourself and set them before first deploy:
 
-```bash
-openssl rand -hex 16   # -> BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID
+<PlatformCode
+  posix={`openssl rand -hex 16   # -> BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID
 openssl rand -hex 32   # -> BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET
-openssl rand -hex 16   # -> BONDERY_PUBLIC_OAUTH_CLIENT_ID (extension)
-```
+openssl rand -hex 16   # -> BONDERY_PUBLIC_OAUTH_CLIENT_ID (extension)`}
+  windows={`# -> BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID
+$b = New-Object byte[] 16; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })
+# -> BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET
+$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })
+# -> BONDERY_PUBLIC_OAUTH_CLIENT_ID (extension)
+$b = New-Object byte[] 16; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })`}
+/>
 
 Set `BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID` (api + webapp), `BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET` (webapp), `BONDERY_PUBLIC_OAUTH_CLIENT_ID` (api + extension), plus a `BONDERY_PRIVATE_WEBAPP_SESSION_SECRET` (≥32 chars) for the webapp's own encrypted session cookie. OAuth clients are upserted automatically when `api` `pre_start` runs `release-migrate` (after `prisma migrate deploy`).
 
-## Environment migration (pre-1.7.x → `BONDERY_*`)
+## Environment migration to BONDERY_* names
 
 If the API container crashes with missing `NEXT_PUBLIC_*` or legacy deploy paths, you are on an **old API image**.
 

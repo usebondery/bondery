@@ -28,6 +28,7 @@ export const syncPushRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
         body: syncPushRequestSchema,
         description: "Apply sync mutations from the client device.",
         response: withOkResponse(syncPushResponseSchema, "Sync push results"),
+        summary: "Push sync mutations",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

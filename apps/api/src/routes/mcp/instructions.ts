@@ -26,4 +26,8 @@ Preview a share with get_contact_share, then create_contact_share after the user
 
 Merge, import, export, photos, and billing are not available here — use the Bondery app.
 
-Read-only tokens can search and read. Creating, updating, or deleting needs Full access.`;
+Read-only tokens can search and read. Creating, updating, or deleting needs Full access.
+
+Every tool failure returns a structured error with a code, a message, a request_id, and a doc_url. Read doc_url before you retry: it gives the recovery steps for that code. Do not retry the same failing call with the same arguments.
+
+Report tool problems with create_agent_feedback. Use it when a tool returns a wrong result, an argument or description is unclear, or a capability is missing. Include the toolName, what you expected, what you got, and the request_id from the error. Describe the problem; do not send contact data.`;

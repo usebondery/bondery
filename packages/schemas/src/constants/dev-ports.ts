@@ -46,4 +46,4 @@ export const DEV_URLS = {
   website: "https://usebondery.test",
 } as const;
 
-export const DEV_SYNC_WS_URL = "wss://api.usebondery.test/api/sync/ws";
+export const DEV_SYNC_WS_URL = "wss://api.usebondery.test/sync/ws";

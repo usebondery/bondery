@@ -1,6 +1,8 @@
 ---
 title: Requirements
+description: Server sizes, operating system, DNS, and TLS needs for a self-hosted Bondery. Check the floor profile before you start the installation steps.
 icon: Server
+last_updated: 2026-11-04
 ---
 
 ## Hardware
@@ -9,9 +11,8 @@ icon: Server
 |---------|-----|-----|------|
 | Floor | 2 GB | 2 cores | 30 GB SSD |
 | **Recommended** | **4 GB** | 2 cores | 50 GB SSD |
-| Comfortable prod | 8 GB | 4 cores | 80 GB+ SSD |
 
-The default stack is four containers (`webapp`, `api`, `redis`, `db`) plus Traefik or another reverse proxy. That is much lighter than a full Supabase-style platform — most small teams run comfortably on a 4 GB VPS. Leave headroom if you enable heavy background jobs, large imports, or many concurrent sync clients.
+The default stack is four containers (`webapp`, `api`, `redis`, `db`) plus Traefik or another reverse proxy. Most small teams run comfortably on a 4 GB VPS. Leave headroom if you enable heavy background jobs, large imports, or many concurrent sync clients.
 
 ## Software
 
@@ -21,6 +22,4 @@ The default stack is four containers (`webapp`, `api`, `redis`, `db`) plus Traef
 | DNS | Hostnames for API and webapp (e.g. `api.example.com`, `app.example.com`) |
 | TLS | Traefik (e.g. via Dokploy) or terminate TLS on a reverse proxy |
 
-## Next step
-
-[Installation](./installation.mdx) — bring the stack up and run first-boot migrations.
+The floor profile runs the stack, and the recommended profile leaves room to grow. Both need two hostnames and a TLS certificate. Nothing else is required.

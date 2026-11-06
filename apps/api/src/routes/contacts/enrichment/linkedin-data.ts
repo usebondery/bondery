@@ -28,6 +28,7 @@ export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
         description: "Upsert scraped LinkedIn work history for a contact.",
         params: uuidParamSchema,
         response: withOkResponse(linkedInDataUpsertResponseSchema, "LinkedIn data upserted"),
+        summary: "Save LinkedIn work history",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -44,6 +45,7 @@ export function registerLinkedInDataRoutes(fastify: AppFastifyInstance): void {
         description: "Get LinkedIn work history and education for a contact.",
         params: uuidParamSchema,
         response: withOkResponse(linkedInDataResponseSchema, "LinkedIn data"),
+        summary: "Fetch LinkedIn work history",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) =>

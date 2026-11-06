@@ -1,6 +1,7 @@
 ---
 title: chat_session_failed_to_create_session
-description: Chat Session Failed To Create Session
+description: "Creating the assistant session row failed. Log `request_id`, retry once, and escalate if every new conversation returns this same error code."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `chat_session_failed_to_create_session` |
 | **doc_url** | `/docs/api/errors/chat_session_failed_to_create_session` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

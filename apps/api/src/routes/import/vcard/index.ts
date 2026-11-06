@@ -29,6 +29,7 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Parse a vCard file and preview contacts for import.",
         response: withOkResponse(vcardParseResponseSchema, "Parsed vCard contacts"),
+        summary: "Parse a vCard file",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -78,6 +79,7 @@ export const vcardImportRoutes: AppRoutePlugin = async (fastify) => {
         body: vcardImportCommitRequestSchema,
         description: "Commit a vCard import from previously parsed contacts.",
         response: withOkResponse(vcardImportCommitResponseSchema, "vCard import result"),
+        summary: "Commit a vCard import",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: vcardImportCommitRequestSchema }, async (ctx, { body }) =>

@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { IMPORT_COMMIT_RATE_LIMIT } from "@bondery/schemas/constants";
-import { getErrorDocUrl } from "@bondery/schemas/errors";
+import { buildAgentMessage, getErrorDocUrl } from "@bondery/schemas/errors";
 import type { FastifyRateLimitOptions } from "@fastify/rate-limit";
 import fastifyRateLimit from "@fastify/rate-limit";
 import type { FastifyReply, FastifyRequest } from "fastify";
@@ -109,6 +109,7 @@ function notFoundHandler(request: FastifyRequest, reply: FastifyReply): void {
   const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
   reply.status(404).send({
     error: {
+      agent_message: buildAgentMessage("not_found", "Not found"),
       code: "not_found",
       doc_url: getErrorDocUrl("not_found", website),
       message: "Not found",

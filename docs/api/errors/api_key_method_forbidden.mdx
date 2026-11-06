@@ -1,6 +1,7 @@
 ---
 title: api_key_method_forbidden
-description: Api Key Method Forbidden
+description: A read-only API key called a write method. Use a full-access key instead, or switch the call to GET or HEAD, to reach this integration route.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Explain the integration lacks write permission.
 | **code** | `api_key_method_forbidden` |
 | **doc_url** | `/docs/api/errors/api_key_method_forbidden` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

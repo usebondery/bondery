@@ -14,6 +14,7 @@ export function registerContactLookupRoutes(fastify: AppFastifyInstance): void {
         description: "Find a contact by social platform and handle.",
         querystring: bySocialQuerySchema,
         response: withOkResponse(bySocialLookupResponseSchema, "Matching contact"),
+        summary: "Find a contact by social handle",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

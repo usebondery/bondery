@@ -1,6 +1,7 @@
 ---
 title: service_auth_invalid
-description: Service Auth Invalid
+description: The internal route got a bearer token that does not match the service secret. Send the configured service secret, and never a user session token.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Not shown to end users — fix server configuration.
 | **code** | `service_auth_invalid` |
 | **doc_url** | `/docs/api/errors/service_auth_invalid` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

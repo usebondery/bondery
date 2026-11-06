@@ -1,1 +1,1 @@
-export { formatDateRange, formatDuration } from "#date/date-utils.js";
+export { formatCalendarDate, formatDateRange, formatDuration } from "#date/date-utils.js";

@@ -1,9 +1,11 @@
 ---
 title: "Local development setup"
+description: Run the whole stack locally, from Postgres and Redis to the API and the apps. Follow the dependency order, then open a Portless HTTPS URL to test.
 icon: Terminal
+last_updated: 2026-11-04
 ---
 
-This guide walks you through setting up the full Bondery development environment. Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**.
+Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**. Each service reads from the one before it, so start them in that order.
 
 **Local web URLs** use [Portless](https://github.com/vercel-labs/portless) HTTPS. Root [`portless.json`](../../portless.json) maps hostnames. Open these in the browser:
 
@@ -17,17 +19,6 @@ This guide walks you through setting up the full Bondery development environment
 Apps still listen on fixed loopback ports behind the proxy (`26630` / `26631` / `26632`). Use those ports for Stripe CLI, SSR `BONDERY_INFRA_INTERNAL_API_URL`, Tailscale phone testing, and `dev:classic`. Do not open raw `http://localhost:2663x` for daily web work.
 
 App `dev` scripts set `PORTLESS_TLD=test`. Mailpit SMTP stays on `127.0.0.1:26640` (not Portless).
-
-### Migrate from `*.usebondery.localhost`
-
-If you used the old Portless TLD:
-
-1. Stop the old proxy: from `apps/website`, run `pnpm exec portless proxy stop`.
-2. Start any app with `pnpm run dev` so `PORTLESS_TLD=test` takes effect.
-3. On Windows, open an elevated PowerShell and run `pnpm exec portless hosts sync` from `apps/website`.
-4. Remove stale `*.usebondery.localhost` lines from your hosts file if they remain.
-5. Keep the existing CA trust (`pnpm exec portless trust`). Do not re-run trust unless the CA is missing.
-6. Update OAuth console callbacks to `https://api.usebondery.test/auth/callback/...`.
 
 **Environment variables:** edit root `.env.local` once, then sync — see [Environment configuration](environment.mdx).
 
@@ -61,13 +52,18 @@ For mobile development you also need Expo tooling (installed via root `pnpm inst
 
 ## Clone and install
 
-```bash
-git clone https://github.com/usebondery/bondery.git
+<PlatformCode
+  posix={`git clone https://github.com/usebondery/bondery.git
 cd bondery
-nvm use    # optional — reads .nvmrc (Node 26); pnpm also installs Node from devEngines.runtime
+nvm use    # optional: reads .nvmrc (Node 26); pnpm also installs Node from devEngines.runtime
 pnpm install
-pnpm run setup:dev
-```
+pnpm run setup:dev`}
+  windows={`git clone https://github.com/usebondery/bondery.git
+cd bondery
+fnm use    # optional: reads .nvmrc (Node 26); pnpm also installs Node from devEngines.runtime
+pnpm install
+pnpm run setup:dev`}
+/>
 
 This installs dependencies for all apps and packages in the monorepo, then creates root `.env.local` from the example.
 
@@ -114,7 +110,7 @@ For a full auth walkthrough, see [Authentication](./auth.mdx).
 
 ### Mobile sync (Postgres changelog)
 
-Mobile offline sync uses **custom pull/bootstrap** endpoints on the API (`GET /api/sync/bootstrap`, `GET /api/sync/pull`) backed by `sync_change_log`. No separate sync service is required beyond Postgres + API.
+Mobile offline sync uses **custom pull/bootstrap** endpoints on the API (`GET /sync/bootstrap`, `GET /sync/pull`) backed by `sync_change_log`. No separate sync service is required beyond Postgres + API.
 
 ---
 
@@ -130,9 +126,16 @@ pnpm run start:seaweedfs          # S3 gateway on http://127.0.0.1:8333
 pnpm run setup:seaweedfs      # optional — API dev boot also ensures buckets
 ```
 
-Optional liveness smoke: `curl -s http://127.0.0.1:8333/status`
+Optional liveness smoke. Use `curl.exe` on Windows, because PowerShell aliases `curl` to `Invoke-WebRequest`:
 
-S3-ready (unsigned ListBuckets): `curl -sS -D- http://127.0.0.1:8333/` — expect HTTP 403 and S3 `Error` XML. Empty 200 on `/status` is not sufficient.
+<PlatformCode
+  posix={`curl -s http://127.0.0.1:8333/status
+curl -sS -D- http://127.0.0.1:8333/`}
+  windows={`curl.exe -s http://127.0.0.1:8333/status
+curl.exe -sS -D- http://127.0.0.1:8333/`}
+/>
+
+Expect HTTP 403 and S3 `Error` XML from the second command. Empty 200 on `/status` is not sufficient.
 
 Stop with `pnpm run stop:seaweedfs`.
 

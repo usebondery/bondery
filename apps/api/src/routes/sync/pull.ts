@@ -62,6 +62,7 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
         description: "Incremental sync pull — returns change batches since a server sequence.",
         querystring: syncPullQuerySchema,
         response: withOkResponse(syncPullResponseSchema, "Sync change batches"),
+        summary: "Pull sync changes",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

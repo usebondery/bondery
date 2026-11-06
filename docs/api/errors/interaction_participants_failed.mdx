@@ -1,6 +1,7 @@
 ---
 title: interaction_participants_failed
-description: Interaction Participants Failed
+description: "Writing the interaction participants failed. Log `request_id`, retry the PATCH once, and confirm that each participant id still exists server-side."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `interaction_participants_failed` |
 | **doc_url** | `/docs/api/errors/interaction_participants_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

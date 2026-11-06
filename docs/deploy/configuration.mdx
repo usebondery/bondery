@@ -1,11 +1,13 @@
 ---
 title: Configuration
-icon: SlidersHorizontal
+description: Set the BONDERY_* variables that the stack reads. Copy the generated env example, fill in the core secrets, then review each optional service.
+icon: AdjustmentsHorizontal
+last_updated: 2026-11-04
 ---
 
-Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example) to `.env` — that file is generated from [`packages/helpers/src/env/manifest.ts`](../../packages/helpers/src/env/manifest.ts) (`deployExample` metadata). Do not hand-edit the example; change the manifest and run `pnpm run env -- --write-examples`.
-
 ## Core secrets
+
+Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example) to `.env`. That file is generated from [`packages/helpers/src/env/manifest.ts`](../../packages/helpers/src/env/manifest.ts) (`deployExample` metadata). Do not hand-edit the example. Change the manifest and run `pnpm run env -- --write-examples`.
 
 | Variable | Purpose |
 |----------|---------|
@@ -15,7 +17,7 @@ Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/
 | `BONDERY_PRIVATE_API_KEY_PEPPER` | API key hashing pepper |
 | `BONDERY_PRIVATE_REDIS_URL` | `redis://redis:6379` in the default stack. Stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*` — sessions and verification records, dual-written with Postgres). |
 
-### `DATABASE_URL`
+### Database connection
 
 `DATABASE_URL` is the standard Postgres connection string the API uses for **everything that touches the database**: Prisma ORM (`@bondery/db`), Better Auth sessions, and the **pg-boss** job queue.
 
@@ -35,7 +37,7 @@ Used in: `apps/api` (Prisma client, pg-boss), `packages/db` (migrations), and on
 
 Set hostnames only:
 
-```bash
+```text
 BONDERY_INFRA_API_DOMAIN=api.example.com
 BONDERY_INFRA_WEBAPP_DOMAIN=app.example.com
 ```

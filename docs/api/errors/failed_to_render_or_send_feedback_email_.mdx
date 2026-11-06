@@ -1,6 +1,7 @@
 ---
 title: failed_to_render_or_send_feedback_email_
-description: Failed To Render Or Send Feedback Email 
+description: "The feedback email did not render or send. Log `request_id`, retry once, and confirm the mail service credentials are set on this deployment."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `failed_to_render_or_send_feedback_email_` |
 | **doc_url** | `/docs/api/errors/failed_to_render_or_send_feedback_email_` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

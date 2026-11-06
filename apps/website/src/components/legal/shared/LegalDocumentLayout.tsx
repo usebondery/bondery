@@ -1,8 +1,9 @@
-"use client";
-
-import { Box, Container, Grid, Paper, TableOfContents, Text, Title } from "@mantine/core";
-import Link from "next/link";
+import { Box, Paper, Text, Title } from "@mantine/core";
 import type { ReactNode } from "react";
+import { PageToc } from "@/components/docs/PageToc";
+import { SiteShell } from "@/components/site-shell";
+
+const LEGAL_TOC_SELECTOR = "h2[id]";
 
 interface LegalDocumentLayoutProps {
   children: ReactNode;
@@ -10,54 +11,28 @@ interface LegalDocumentLayoutProps {
   title: string;
 }
 
+/**
+ * Legal document frame: the same columns as a docs page, inside a bordered card.
+ * The rail reads `h2[id]` only, because legal sections are always second level.
+ * Below `lg` the same list renders above the document.
+ */
 export function LegalDocumentLayout({ title, lastUpdated, children }: LegalDocumentLayoutProps) {
   return (
-    <Container py="xl" size="xl">
-      <Grid gap="xl">
-        <Grid.Col span={{ base: 12, md: 3 }} visibleFrom="md">
-          <Box
-            mx="auto"
-            style={{
-              position: "sticky",
-              top: 100,
-              width: "fit-content",
-            }}
-          >
-            <TableOfContents
-              depthOffset={0}
-              getControlProps={({ data }) => ({
-                children: data.value,
-                component: Link,
-                href: `#${data.id}`,
-                onClick: (event) => {
-                  event.preventDefault();
-                  data.getNode().scrollIntoView({ behavior: "smooth", block: "start" });
-                  window.history.replaceState(null, "", `#${data.id}`);
-                },
-              })}
-              minDepthToOffset={0}
-              scrollSpyOptions={{
-                offset: 120,
-                selector: "h2[id]",
-              }}
-              size="sm"
-            />
-          </Box>
-        </Grid.Col>
+    <SiteShell right={<PageToc selector={LEGAL_TOC_SELECTOR} variant="rail" />}>
+      <Paper className="legalDoc" p="xl" radius="md" withBorder>
+        <Title mb="md" order={1}>
+          {title}
+        </Title>
+        <Text c="dimmed" mb="xl" size="sm">
+          Last Updated: {lastUpdated}
+        </Text>
 
-        <Grid.Col span={{ base: 12, md: 9 }}>
-          <Paper p="xl" radius="md" withBorder>
-            <Title mb="md" order={1}>
-              {title}
-            </Title>
-            <Text c="dimmed" mb="xl" size="sm">
-              Last Updated: {lastUpdated}
-            </Text>
+        <Box hiddenFrom="lg" mb="xl">
+          <PageToc selector={LEGAL_TOC_SELECTOR} variant="inline" />
+        </Box>
 
-            {children}
-          </Paper>
-        </Grid.Col>
-      </Grid>
-    </Container>
+        {children}
+      </Paper>
+    </SiteShell>
   );
 }

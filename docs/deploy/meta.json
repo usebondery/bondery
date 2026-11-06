@@ -1,4 +1,5 @@
 {
+  "description": "Run Bondery on your own server. Size the machine, install the Docker Compose stack, set the environment variables and secrets, then update it.",
   "pages": ["requirements", "installation", "configuration", "secrets", "update", "backups"],
   "title": "Self-hosting"
 }

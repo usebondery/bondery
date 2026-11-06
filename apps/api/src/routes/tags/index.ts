@@ -49,6 +49,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         description: "List all tags with contact counts and optional member previews.",
         querystring: previewListQuerySchema,
         response: withOkResponse(tagsListResponseSchema, "Tag list"),
+        summary: "List tags",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -64,6 +65,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         body: createTagInputSchema,
         description: "Create a new tag. Color is optional; the API picks one when omitted.",
         response: withCreatedResponse(tagResponseSchema, "Tag created"),
+        summary: "Create a tag",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: createTagInputSchema }, async (ctx, { body }, reply) => {
@@ -79,6 +81,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         body: idsRequestBodySchema,
         description: "Delete multiple tags by ID.",
         response: withOkResponse(messageResponseSchema, "Tags deleted successfully"),
+        summary: "Delete tags",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: idsRequestBodySchema }, async (ctx, { body }) => {
@@ -96,6 +99,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         description: "Get a single tag by ID.",
         params: uuidParamSchema,
         response: withOkResponse(tagResponseSchema, "Tag details"),
+        summary: "Fetch a tag",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -113,6 +117,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         description: "Update a tag label or color.",
         params: uuidParamSchema,
         response: withOkResponse(tagUpdateResponseSchema, "Tag updated"),
+        summary: "Update a tag",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -134,6 +139,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         description: "Delete a single tag by ID.",
         params: uuidParamSchema,
         response: withOkResponse(messageResponseSchema, "Tag deleted successfully"),
+        summary: "Delete a tag",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
@@ -150,6 +156,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         params: uuidParamSchema,
         querystring: peopleListQuerySchema,
         response: withOkResponse(tagMembersListResponseSchema, "Tag members"),
+        summary: "List tagged contacts",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -167,6 +174,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         description: "Add contacts to a tag.",
         params: uuidParamSchema,
         response: withOkResponse(addContactsToTagResponseSchema, "Contacts added to tag"),
+        summary: "Add contacts to a tag",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -186,6 +194,7 @@ export const tagRoutes: AppRoutePlugin = async (fastify) => {
         description: "Remove contacts from a tag.",
         params: uuidParamSchema,
         response: withOkResponse(removeContactsFromTagResponseSchema, "Contacts removed from tag"),
+        summary: "Remove contacts from a tag",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(

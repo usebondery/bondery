@@ -24,6 +24,7 @@ export const meOnboardingImportFollowupRoutes: AppRoutePlugin = async (fastify) 
         description:
           "Record import follow-up intent after onboarding (awaiting export or dismissed).",
         response: withOkResponse(apiSuccessResponseSchema, "Import follow-up updated"),
+        summary: "Record import follow-up",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: updateImportFollowupBodySchema }, async (ctx, { body }) =>

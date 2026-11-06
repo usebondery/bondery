@@ -19,6 +19,7 @@ export const shareRoutes: AppRoutePlugin = async (fastify) => {
         body: shareContactRequestSchema,
         description: "Share a contact via email with selected fields.",
         response: withOkResponse(apiSuccessResponseSchema, "Contact shared successfully"),
+        summary: "Share a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

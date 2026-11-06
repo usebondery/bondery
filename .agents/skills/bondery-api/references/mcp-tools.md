@@ -86,6 +86,14 @@ Success `structuredContent` is the same resource-keyed JSON as REST (`outputSche
 
 Do not union `apiErrorResponseSchema` into every MCP `outputSchema`. HTTP MCP auth/protocol errors stay JSON-RPC. Cancelled confirms stay success `{ message, cancelled }`.
 
+Every error body carries `agent_message`, a required field on `apiErrorBodySchema`. It states the `message` content plus the HOW step from `agent-messages.ts`, so an agent can repair the call without a human. REST and MCP both get it.
+
+On agent surfaces (`toAgentToolErrorResponse`, used by MCP tools and in-app chat tools) `message` is set equal to `agent_message`, because a model reads `message` first. REST keeps the terse `message`.
+
+Argument validation runs inside the SDK, before the tool body, and answers a plain string. `tool-error-response.ts` rewrites those results — and unknown tool names — into the same envelope at the HTTP boundary.
+
+`create_agent_feedback` is the agent's defect channel. Any scope may call it; it writes no CRM data. See `bondery-ux` → [agent-interfaces.md](../../bondery-ux/references/common/agent-interfaces.md).
+
 ## Instructions vs prompts
 
 `MCP_SERVER_INSTRUCTIONS` (`apps/api/src/routes/mcp/instructions.ts`) is the server `instructions` string on initialize. Hosts inject it as always-on policy (search before create, cap 25, no dump, Full access for writes). Do not duplicate that policy in every prompt.
@@ -144,4 +152,7 @@ Do not wrap over MCP: bulk `DELETE` of people, groups, or interactions, `contact
 - [ ] Every `registerTool` sets `title` plus all four annotation hints via `mcp-tool-meta`
 - [ ] Every `delete_*` tool uses `confirm-delete` (HMAC `requestState`; ownership/not-found **before** elicit). `create_contact_share` uses the same confirm helper (outbound email is irreversible).
 - [ ] User docs list every tool name. The Server Card does not: a `$schema` card has no `tools[]`
+- [ ] Every tool failure goes through `runMcpTool` / `runMcpWriteTool`, never a plain string
+- [ ] New failure code has a hint in `agent-messages.ts`, or the docs-link fallback is acceptable
+- [ ] `create_agent_feedback` stays callable without `mcp:write` (`mcp-write-name.ts` allowlist)
 - [ ] `pnpm --filter api run check:mcp-tool-names` passes

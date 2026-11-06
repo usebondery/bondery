@@ -58,9 +58,6 @@
     "SaveButton": "Save",
     "SecretCodeLabel": "API key",
     "TestRequestLabel": "Test request",
-    "TestSnippetLinux": "Linux",
-    "TestSnippetMac": "macOS",
-    "TestSnippetWindows": "Windows",
     "Title": "API keys"
   },
   "Apps": {

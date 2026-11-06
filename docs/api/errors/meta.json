@@ -1,7 +1,6 @@
 {
-  "icon": "CircleAlert",
+  "icon": "AlertCircle",
   "pages": [
-    "index",
     "account_failed_to_delete_account",
     "account_failed_to_generate_avatar_url",
     "account_failed_to_update_account",

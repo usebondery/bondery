@@ -1,6 +1,7 @@
 ---
 title: auth_required
-description: Auth Required
+description: The request carried no session and no API key. Send a session cookie or a bearer token, or use an API key on an integration route only, never a protected one.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Prompt sign-in (`common.errors.api.auth_required`).
 | **code** | `auth_required` |
 | **doc_url** | `/docs/api/errors/auth_required` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

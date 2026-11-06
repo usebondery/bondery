@@ -23,6 +23,7 @@ export const meOnboardingRoutes: AppRoutePlugin = async (fastify) => {
         description:
           "Mark onboarding as completed. Idempotent — only sets onboarding_completed_at if currently null.",
         response: withOkResponse(apiSuccessResponseSchema, "Onboarding completed"),
+        summary: "Complete onboarding",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => completeOnboarding(ctx)),

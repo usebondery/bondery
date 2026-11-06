@@ -1,6 +1,7 @@
 ---
 title: settings_no_fields
-description: Settings No Fields
+description: The settings PATCH carried no mutable field. Send at least one supported field, and confirm the session user owns the settings row before it.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.settings_no_fields` when a string exists; othe
 | **code** | `settings_no_fields` |
 | **doc_url** | `/docs/api/errors/settings_no_fields` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

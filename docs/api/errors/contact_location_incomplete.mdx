@@ -1,6 +1,7 @@
 ---
 title: contact_location_incomplete
-description: Contact Location Incomplete
+description: The location is missing the coordinates the map needs. Geocode the address through the suggest endpoint before you save the contact location.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_location_incomplete` when a string exi
 | **code** | `contact_location_incomplete` |
 | **doc_url** | `/docs/api/errors/contact_location_incomplete` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

@@ -2,6 +2,7 @@ import { formatMetadataTitle } from "@bondery/helpers";
 import { Container, SimpleGrid, Stack, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { PageTopSpacer } from "@/components/page-top-spacer";
 import { BLOG_CATEGORIES, getBlogCategoryTitle } from "@/lib/blog/categories";
 import { BlogCard, CategorySwitcher } from "../_components";
 import type { PostCategory } from "../_lib";
@@ -58,7 +59,8 @@ export default async function BlogCategoryPage({ params }: Props) {
   const posts = getPostsByCategory(category as PostCategory);
 
   return (
-    <Container pb="xl" pt={60} size="md">
+    <Container pb="xl" size="md">
+      <PageTopSpacer size="large" />
       <Stack align="center" gap="xl">
         <Title order={1}>Blog</Title>
 

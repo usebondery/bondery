@@ -18,6 +18,7 @@ export function registerKeepInTouchRoutes(fastify: AppFastifyInstance): void {
         description:
           "Count keep-in-touch contacts that are overdue (missing last interaction or past due date).",
         response: withOkResponse(keepInTouchCountResponseSchema, "Keep in touch overdue count"),
+        summary: "Count overdue keep-in-touch contacts",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => getKeepInTouchOverdueCount(ctx)),

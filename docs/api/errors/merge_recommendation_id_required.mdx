@@ -1,6 +1,7 @@
 ---
 title: merge_recommendation_id_required
-description: Merge Recommendation Id Required
+description: The request had no recommendation id. Confirm the recommendation still exists, because it expires once you accept it or decline it in the app.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.merge_recommendation_id_required` when a strin
 | **code** | `merge_recommendation_id_required` |
 | **doc_url** | `/docs/api/errors/merge_recommendation_id_required` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

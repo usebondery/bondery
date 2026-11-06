@@ -117,6 +117,12 @@ export function buildWelcomeCopy(bundle: Record<string, unknown>): WelcomeEmailC
 
 export function buildFeedbackCopy(bundle: Record<string, unknown>): FeedbackEmailCopy {
   return {
+    agentActualHeading: readCopyString(bundle, "agentActualHeading"),
+    agentExpectedHeading: readCopyString(bundle, "agentExpectedHeading"),
+    agentKindLabel: readCopyString(bundle, "agentKindLabel"),
+    agentRequestIdLabel: readCopyString(bundle, "agentRequestIdLabel"),
+    agentSourceHeading: readCopyString(bundle, "agentSourceHeading"),
+    agentToolLabel: readCopyString(bundle, "agentToolLabel"),
     description: readCopyString(bundle, "description"),
     generalFeedbackHeading: readCopyString(bundle, "generalFeedbackHeading"),
     heading: readCopyString(bundle, "heading"),

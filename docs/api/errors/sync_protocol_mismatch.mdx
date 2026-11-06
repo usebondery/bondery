@@ -1,6 +1,7 @@
 ---
 title: sync_protocol_mismatch
-description: Sync Protocol Mismatch
+description: The client sent an unsupported sync protocol version. Upgrade the app to a build that speaks the current protocol before you push any edits.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Prompt an app update.
 | **code** | `sync_protocol_mismatch` |
 | **doc_url** | `/docs/api/errors/sync_protocol_mismatch` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

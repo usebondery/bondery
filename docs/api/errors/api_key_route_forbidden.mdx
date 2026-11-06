@@ -1,6 +1,7 @@
 ---
 title: api_key_route_forbidden
-description: Api Key Route Forbidden
+description: A valid API key called a route that only a session may use. Call an integration route instead, and check which routes accept API keys at all.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Explain this action is not available via API keys.
 | **code** | `api_key_route_forbidden` |
 | **doc_url** | `/docs/api/errors/api_key_route_forbidden` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

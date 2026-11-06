@@ -162,9 +162,10 @@
     "check:types": "tsc --noEmit",
     "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs branding",
+    "generate:brand-marks": "tsx scripts/generate-brand-marks.ts",
     "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.0"
+  "version": "1.11.1-rc.1"
 }

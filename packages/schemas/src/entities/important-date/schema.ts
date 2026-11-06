@@ -39,22 +39,26 @@ export const importantDateNotifyDaysSchema: z.ZodType<ImportantDateNotifyDaysBef
 const importantDateNotifyDaysWireSchema = z.number().int().nullable();
 
 const importantDateCoreSchema = z.object({
-  date: isoDateSchema,
-  type: importantDateTypeSchema,
+  date: isoDateSchema.describe(
+    "Date in `YYYY-MM-DD` form. The year is ignored for yearly repeats.",
+  ),
+  type: importantDateTypeSchema.describe("Kind of important date, such as birthday or anniversary"),
 });
 
-const importantDateNoteSchema = z.string().nullable();
+const importantDateNoteSchema = z.string().nullable().describe("Free-text note for this date");
 
 const importantDateBaseFieldsSchema = importantDateCoreSchema.extend({
   note: importantDateNoteSchema,
-  notifyDaysBefore: importantDateNotifyDaysWireSchema,
+  notifyDaysBefore: importantDateNotifyDaysWireSchema.describe(
+    "Days before the date to send a reminder. Null disables reminders.",
+  ),
 });
 
 export const importantDateSchema: z.ZodType<ImportantDate> = entityIdentitySchema
   .extend({
-    personId: z.string(),
+    personId: z.string().describe("Contact this date belongs to"),
     ...importantDateBaseFieldsSchema.shape,
-    notifyOn: z.string().nullable(),
+    notifyOn: z.string().nullable().describe("Computed date on which the reminder fires"),
   })
   .extend(entityAuditSchema.shape);
 

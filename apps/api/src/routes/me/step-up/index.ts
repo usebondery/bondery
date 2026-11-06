@@ -19,6 +19,7 @@ export const meStepUpRoutes: AppRoutePlugin = async (fastify) => {
         description:
           "Mint a one-shot step-up token. Requires a fresh Better Auth session cookie; JWT-only callers are rejected.",
         response: withCreatedResponse(stepUpTokenResponseSchema, "Step-up token"),
+        summary: "Mint a step-up token",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, _route, reply) => {

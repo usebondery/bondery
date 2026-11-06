@@ -41,6 +41,7 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "List API keys for the authenticated user.",
         response: withOkResponse(apiKeysListResponseSchema, "API key list"),
+        summary: "List API keys",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -60,6 +61,7 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
           ...withCreatedResponse(apiKeyCreatedSchema, "API key created"),
           ...conflictResponse,
         },
+        summary: "Create an API key",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: createApiKeyInputSchema }, async (ctx, { body, request }, reply) => {
@@ -78,6 +80,7 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
         description: "Update an API key label.",
         params: uuidParamSchema,
         response: withOkResponse(apiKeyListItemSchema, "Updated API key"),
+        summary: "Rename an API key",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -97,6 +100,7 @@ export const meApiKeysRoutes: AppRoutePlugin = async (fastify) => {
           ...noContentResponse,
           ...standardErrorResponses,
         },
+        summary: "Revoke an API key",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params, request }, reply) => {

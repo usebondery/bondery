@@ -23,12 +23,28 @@ type ArdCatalogManifest = {
   updatedAt: string;
 };
 
+/**
+ * ARD trust envelope. ARD requires only `identity`, and binds its trust domain to
+ * the publisher segment of the entry identifier (`urn:air:<publisher>:...`).
+ * `identity` is a claim, not proof: no DID document or signature is published yet,
+ * so this stays unsigned and must not carry compliance attestations.
+ */
+type ArdTrustManifest = {
+  identity: string;
+  identityType: string;
+  provenance: {
+    relation: string;
+    sourceId: string;
+  }[];
+};
+
 type ArdManifestEntry = {
   description: string;
   displayName: string;
   identifier: string;
   representativeQueries: string[];
   tags: string[];
+  trustManifest: ArdTrustManifest;
   type: string;
   updatedAt: string;
   url: string;
@@ -37,8 +53,15 @@ type ArdManifestEntry = {
 
 const manifest: ArdCatalogManifest = catalog;
 
+const SOURCE_REPOSITORY = "https://github.com/usebondery/bondery";
+
 function catalogVersion(): string {
   return readBuildMetadata().version ?? websitePackage.version;
+}
+
+/** Publisher identity shared by the host object and every entry trust manifest. */
+function publisherIdentity(publisherHost: string): string {
+  return `did:web:${publisherHost}`;
 }
 
 export const dynamic = "force-dynamic";
@@ -47,6 +70,7 @@ export function GET() {
   const origin = WEBSITE_URL.replace(/\/+$/, "");
   const publisherHost = new URL(WEBSITE_URL).hostname;
   const version = catalogVersion();
+  const identity = publisherIdentity(publisherHost);
 
   const entries: ArdManifestEntry[] = manifest.entries.map((entry) => ({
     description: entry.description,
@@ -54,6 +78,16 @@ export function GET() {
     identifier: `urn:air:${publisherHost}:${entry.kind}`,
     representativeQueries: entry.representativeQueries,
     tags: entry.tags,
+    trustManifest: {
+      identity,
+      identityType: "did",
+      provenance: [
+        {
+          relation: "publishedFrom",
+          sourceId: SOURCE_REPOSITORY,
+        },
+      ],
+    },
     type: entry.type,
     updatedAt: manifest.updatedAt,
     url: `${origin}${entry.path}`,
@@ -66,7 +100,7 @@ export function GET() {
       host: {
         displayName: WEBAPP_NAME,
         documentationUrl: `${origin}/docs`,
-        identifier: `did:web:${publisherHost}`,
+        identifier: identity,
       },
       specVersion: ARD_SPEC_VERSION,
     },

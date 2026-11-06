@@ -1,5 +1,6 @@
 {
-  "icon": "BookOpen",
+  "description": "Step-by-step REST API integrations. Import contacts from a vCard file or from your own data, with parse, preview, and commit examples inside.",
+  "icon": "Book",
   "pages": ["bulk-import-contacts"],
   "title": "Guides"
 }

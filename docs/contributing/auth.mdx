@@ -1,10 +1,9 @@
 ---
 title: Authentication
-description: How Bondery auth works locally — OAuth clients, env vars, and bootstrap commands.
+description: The API is the single OAuth 2.1 authorization server. See how the web app, the mobile app, and the extension sign in as first-party clients.
 icon: Shield
+last_updated: 2026-11-04
 ---
-
-# Authentication
 
 The **API** is Bondery's single OAuth 2.1 authorization server. The webapp, mobile app, and Chrome extension are **first-party OAuth clients** of that server — they do not talk to GitHub or LinkedIn directly.
 
@@ -53,8 +52,8 @@ Unauthenticated `GET`/`HEAD` `/mcp` return the same RFC 9728 `WWW-Authenticate` 
 
 Add these to root `.env.local`. You invent the values — nothing external issues them.
 
-```bash
-# Webapp confidential OAuth client
+<PlatformCode
+  posix={`# Webapp confidential OAuth client
 openssl rand -hex 16   # BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID
 openssl rand -hex 32   # BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET
 
@@ -65,12 +64,29 @@ openssl rand -hex 16   # BONDERY_PUBLIC_OAUTH_CLIENT_ID
 openssl rand -hex 32   # BONDERY_PRIVATE_WEBAPP_SESSION_SECRET
 
 # Better Auth signing (version 1 bootstrap)
-openssl rand -hex 32   # BONDERY_PRIVATE_BETTER_AUTH_SECRETS=1:<value>
-```
+openssl rand -hex 32   # BONDERY_PRIVATE_BETTER_AUTH_SECRETS=1:<value>`}
+  windows={`# Webapp confidential OAuth client
+# BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID
+$b = New-Object byte[] 16; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })
+# BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET
+$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })
+
+# Chrome extension public OAuth client
+# BONDERY_PUBLIC_OAUTH_CLIENT_ID
+$b = New-Object byte[] 16; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })
+
+# Webapp encrypted session cookie key
+# BONDERY_PRIVATE_WEBAPP_SESSION_SECRET
+$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })
+
+# Better Auth signing (version 1 bootstrap)
+# BONDERY_PRIVATE_BETTER_AUTH_SECRETS=1:<value>
+$b = New-Object byte[] 32; [Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($b); -join ($b | ForEach-Object { $_.ToString('x2') })`}
+/>
 
 Example `.env.local` fragment:
 
-```bash
+```text
 BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID="a1b2c3d4e5f6789012345678abcdef01"
 BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET="<64-char hex from openssl>"
 BONDERY_PUBLIC_OAUTH_CLIENT_ID="fedcba0987654321fedcba0987654321"
@@ -148,25 +164,25 @@ Canonical definitions live in [`packages/helpers/src/env/manifest.ts`](../../pac
 
 ## Common errors
 
-### `oauth_resource` / `oauth_client` table does not exist
+### OAuth tables do not exist
 
-Migrations have not been applied. Run `pnpm run db:migrate:deploy`, then re-run provisioning.
+`oauth_resource` or `oauth_client` is missing from the database. Migrations have not been applied. Run `pnpm run db:migrate:deploy`, then re-run provisioning.
 
-### `Environment variable not found: DATABASE_URL` during migrate
+### Missing DATABASE_URL during migrate
 
-Run migrations from the repo root with the `@bondery/db` workspace script (it loads `packages/db/.env.local`). If that file is missing, run `pnpm run env` first.
+The error reads `Environment variable not found: DATABASE_URL`. Run migrations from the repo root with the `@bondery/db` workspace script (it loads `packages/db/.env.local`). If that file is missing, run `pnpm run env` first.
 
 ### Redirect URI mismatch (Chrome extension)
 
 Your extension ID changed or the OAuth client was wiped (e.g. after `prisma migrate reset`). Update `BONDERY_INFRA_CHROME_EXTENSION_ID`, run `pnpm run env`, then `pnpm run provision:oauth-clients`. See [Chrome Extension OAuth Setup](../../.agents/workflows/CHROME-EXTENSION-OAUTH.md).
 
-### `invalid_target` / requested resource is not configured
+### Invalid target error on sign-in
 
-The authorization server matches the RFC 8707 `resource` parameter to `oauth_resource.identifier` exactly. Daily web env uses Portless `https://api.usebondery.test`. Chrome identity may still fetch `http://127.0.0.1:26631` while `localhost` and `127.0.0.1` stay different identifiers. Re-run `pnpm run provision:oauth-clients` so Portless and classic loopback aliases are registered and linked, then restart the API. The extension must still send `resource` = `BONDERY_PUBLIC_API_URL` (not the rewritten fetch host).
+The error text is `invalid_target`, or "requested resource is not configured". The authorization server matches the RFC 8707 `resource` parameter to `oauth_resource.identifier` exactly. Daily web env uses Portless `https://api.usebondery.test`. Chrome identity may still fetch `http://127.0.0.1:26631`, and `localhost` and `127.0.0.1` stay different identifiers. Re-run `pnpm run provision:oauth-clients` so Portless and classic loopback aliases are registered and linked, then restart the API. The extension must still send `resource` = `BONDERY_PUBLIC_API_URL` (not the rewritten fetch host).
 
-### CORS blocked on `sign-in/social` with `200 (OK)` but no `Access-Control-Allow-Origin`
+### CORS blocked on sign-in/social
 
-The auth handler writes responses via `reply.hijack()`, which bypasses Fastify's CORS plugin. The API merges CORS headers onto Better Auth responses directly — ensure you are on a build that includes this fix, then restart the API.
+The request returns `200 (OK)` but carries no `Access-Control-Allow-Origin`. The auth handler writes responses via `reply.hijack()`, which bypasses Fastify's CORS plugin. The API merges CORS headers onto Better Auth responses directly. Check that your build includes this fix, then restart the API.
 
 If the error persists after restart, check the setup table below.
 

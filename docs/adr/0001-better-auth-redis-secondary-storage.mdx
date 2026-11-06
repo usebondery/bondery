@@ -1,6 +1,7 @@
 ---
 title: "ADR 0001: Better Auth Redis Secondary Storage"
 hidden: true
+last_updated: 2026-07-30
 ---
 
 # ADR 0001: Better Auth Redis Secondary Storage
@@ -27,7 +28,7 @@ Better Auth 1.7 supports `secondaryStorage` for sessions, verification codes, an
 
 ## Postgres fallback (verified)
 
-Better Auth `findSession` ([`internal-adapter.mjs`](../../node_modules/better-auth/dist/db/internal-adapter.mjs)) reads Redis first; when `storeSessionInDatabase: true` and the Redis key is missing, it falls through to Postgres. Pre-rollout sessions and DB-only rows remain valid without a custom read-through wrapper.
+Better Auth `findSession` (in the `better-auth` package, at `dist/db/internal-adapter.mjs`) reads Redis first; when `storeSessionInDatabase: true` and the Redis key is missing, it falls through to Postgres. Pre-rollout sessions and DB-only rows remain valid without a custom read-through wrapper.
 
 ## Consequences
 

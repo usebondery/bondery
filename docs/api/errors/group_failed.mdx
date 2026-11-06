@@ -1,6 +1,7 @@
 ---
 title: group_failed
-description: Group Failed
+description: "The group operation failed after validation passed. Log `request_id`, retry once, and confirm the group row still exists for this account user."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `group_failed` |
 | **doc_url** | `/docs/api/errors/group_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

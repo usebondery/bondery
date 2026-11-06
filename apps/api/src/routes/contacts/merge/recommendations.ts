@@ -46,6 +46,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
           mergeRecommendationsCountResponseSchema,
           "Merge recommendations count",
         ),
+        summary: "Count merge recommendations",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -61,6 +62,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
         description: "List merge recommendations for duplicate contacts.",
         querystring: mergeRecommendationsQuerySchema,
         response: withOkResponse(mergeRecommendationsResponseSchema, "Merge recommendations"),
+        summary: "List merge recommendations",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -151,6 +153,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
           refreshMergeRecommendationsResponseSchema,
           "Merge recommendations refreshed",
         ),
+        summary: "Refresh merge recommendations",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -180,6 +183,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
           declineMergeRecommendationResponseSchema,
           "Merge recommendation declined",
         ),
+        summary: "Decline a merge recommendation",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {
@@ -198,6 +202,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
           declineMergeRecommendationResponseSchema,
           "Merge recommendation restored",
         ),
+        summary: "Restore a merge recommendation",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {

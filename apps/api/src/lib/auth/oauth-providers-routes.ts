@@ -18,6 +18,7 @@ export function registerOAuthProvidersRoutes(fastify: AppFastifyInstance): void 
       schema: {
         description: DESCRIPTION,
         response: withOkResponse(oauthProvidersResponseSchema, "Configured social OAuth providers"),
+        summary: "List sign-in providers",
         tags: ["Auth"],
       } satisfies FastifyZodOpenApiSchema,
     },

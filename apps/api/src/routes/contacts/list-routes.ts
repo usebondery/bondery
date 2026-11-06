@@ -14,6 +14,7 @@ export function registerContactListRoutes(fastify: AppFastifyInstance): void {
         description: "List contacts with pagination, search, sort, and list stats.",
         querystring: peopleListQuerySchema,
         response: withOkResponse(contactsListResponseSchema, "Paginated contact list"),
+        summary: "List contacts",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -33,6 +34,7 @@ export function registerContactListRoutes(fastify: AppFastifyInstance): void {
           contactsSelectableListResponseSchema,
           "Paginated selectable contact list",
         ),
+        summary: "List contacts for pickers",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

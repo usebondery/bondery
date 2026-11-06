@@ -1,6 +1,7 @@
 ---
 title: extension_username_required
-description: Extension Username Required
+description: The extension call carried no profile handle. Sign in through the extension popup, confirm the handle appears, then retry the enrich request.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.extension_username_required` when a string exi
 | **code** | `extension_username_required` |
 | **doc_url** | `/docs/api/errors/extension_username_required` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

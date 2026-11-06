@@ -1,12 +1,13 @@
 ---
 title: Internationalization (i18n)
-description: How Bondery loads, types, and validates translated copy across apps.
-icon: Languages
+description: How translated copy loads, types, and validates across the apps. See the generated namespace hooks and the checks that keep locales in step.
+icon: Language
+last_updated: 2026-11-04
 ---
 
-User-facing strings live in `@bondery/translations`. Each app calls **generated namespace hooks** — not generic `t(key, { ns })` — so TypeScript can autocomplete keys and prefixes.
-
 ## Locales
+
+User-facing strings live in `@bondery/translations`. Each app calls **generated namespace hooks**, not a generic `t(key, { ns })`, so TypeScript can autocomplete keys and prefixes.
 
 | Code | Language | Role |
 |------|----------|--------|
@@ -120,9 +121,9 @@ Hooks are regenerated from `manifest.json` when you run `pnpm run build -w @bond
 
 Most call sites should use generated hooks and literal keys. Use these only when keys are computed at runtime.
 
-### `LooseTranslateFn`
+### Loose translate function
 
-For utilities that map runtime values to keys (interaction types, slash commands, social tooltips):
+`LooseTranslateFn` is for utilities that map runtime values to keys (interaction types, slash commands, social tooltips):
 
 ```typescript
 import type { LooseTranslateFn } from "@bondery/translations";
@@ -132,9 +133,9 @@ const t = useInteractionTypesTranslations() as LooseTranslateFn;
 t(dynamicKey);
 ```
 
-### `transT` — `<Trans>` component
+### Trans component helper
 
-`next-i18next` / `react-i18next` `<Trans>` expects a plain `TFunction`. Cast namespace-scoped `t`:
+`transT` adapts namespace-scoped translations for the `<Trans>` component. `next-i18next` and `react-i18next` `<Trans>` expect a plain `TFunction`, so cast namespace-scoped `t`:
 
 ```typescript
 import { transT } from "@/lib/i18n/transT";
@@ -144,9 +145,9 @@ const t = useSettingsPageTranslations("DataManagement.DeleteAccount");
 <Trans t={transT(t)} i18nKey="ConfirmLabel" />
 ```
 
-### `optionalPluralFragment`
+### Optional plural fragment
 
-Plural fragments used as interpolation values inside a parent sentence:
+`optionalPluralFragment` builds plural fragments used as interpolation values inside a parent sentence:
 
 ```typescript
 import { optionalPluralFragment } from "@/lib/i18n/optionalPluralFragment";

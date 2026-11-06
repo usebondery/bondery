@@ -175,7 +175,7 @@ export const CHROME_EXTENSION_URL =
  * production git tag — never the version being shipped, never Chrome 4-part.
  * Do not hand-edit. Set to "0.0.0" only to disable enforcement locally.
  */
-export const MIN_EXTENSION_VERSION: string = "1.10.2";
+export const MIN_EXTENSION_VERSION: string = "1.11.0";
 
 /** One-shot account-delete nonce. Browser → BFF and BFF → API must forward it. */
 export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
@@ -183,7 +183,27 @@ export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
 
-export const GITHUB_REPO_URL = "https://api.github.com/repos/usebondery/bondery";
+/**
+ * Repository identity. Every other GitHub URL below derives from this, so a
+ * rename touches one line.
+ */
+export const GITHUB_REPO_SLUG = "usebondery/bondery" as const;
+
+/** Repository web URL, for humans and for `blob` / `tree` links. */
+export const GITHUB_REPO_WEB_URL = `https://github.com/${GITHUB_REPO_SLUG}`;
+
+/** GitHub REST base for this repository. */
+export const GITHUB_REPO_URL = `https://api.github.com/repos/${GITHUB_REPO_SLUG}`;
+
+/** Default branch, the target of every `blob` and `tree` link. */
+export const GITHUB_DEFAULT_BRANCH = "main" as const;
+
+/** Base for `blob` links to files on the default branch. */
+export const GITHUB_BLOB_BASE = `${GITHUB_REPO_WEB_URL}/blob/${GITHUB_DEFAULT_BRANCH}`;
+
+/** Base for `blob` links to files in the `docs` directory. */
+export const DOCS_GITHUB_BLOB_BASE = `${GITHUB_BLOB_BASE}/docs`;
+
 export const PUBLIC_ROADMAP_PLANE_URL =
   "https://sites.plane.so/issues/8a364296fbbc4c858adeb1952a72a451";
 export const ROADMAP_URL = "https://usebondery.com/roadmap";

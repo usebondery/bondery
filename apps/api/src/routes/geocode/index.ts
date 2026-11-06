@@ -32,6 +32,7 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
         description: "Returns mapped address/place autocomplete entries from Mapy.com",
         querystring: geocodeSuggestQuerySchema,
         response: withOkResponse(geocodeSuggestResponseWireSchema, "Address suggestions"),
+        summary: "Suggest addresses",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -105,6 +106,7 @@ export const geocodeRoutes: AppRoutePlugin = async (fastify) => {
         description: "Returns the IANA timezone for a latitude/longitude pair from Mapy.com",
         querystring: geocodeTimezoneQuerySchema,
         response: withOkResponse(geocodeTimezoneResponseWireSchema, "Timezone lookup result"),
+        summary: "Resolve a timezone",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

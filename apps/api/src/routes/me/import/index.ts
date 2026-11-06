@@ -22,6 +22,7 @@ export const meImportRoutes: AppRoutePlugin = async (fastify) => {
         description:
           "Import a Bondery export ZIP into the current account. Additive only — existing rows are never updated or deleted.",
         response: withOkResponse(importResultResponseSchema, "Bondery import result counts"),
+        summary: "Import Bondery data",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

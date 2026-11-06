@@ -1,4 +1,10 @@
 {
+  "agentActualHeading": "Was das Tool zurückgegeben hat:",
+  "agentExpectedHeading": "Was der Agent erwartet hat:",
+  "agentKindLabel": "Art der Meldung:",
+  "agentRequestIdLabel": "Anfrage-ID:",
+  "agentSourceHeading": "Von einem KI-Agenten gemeldet",
+  "agentToolLabel": "Tool:",
   "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
   "generalFeedbackHeading": "Allgemeines Feedback:",
   "heading": "Feedback von {{userEmail}}",

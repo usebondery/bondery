@@ -21,6 +21,7 @@ export function registerManifestRoute(fastify: AppFastifyInstance): void {
           "`latestVersion` is the current production CalVer for a non-blocking update nudge. " +
           "Not a health probe — use `GET /health/live` for liveness.",
         response: withOkResponse(extensionManifestSchema, "Extension manifest"),
+        summary: "Fetch the extension manifest",
         tags: ["Extension"],
       } satisfies FastifyZodOpenApiSchema,
     },

@@ -62,9 +62,14 @@
     "check:api-errors:client-display": "node scripts/check/check-api-errors-client-display.mjs",
     "check:api-errors:translations": "node scripts/check/check-api-errors-translations.mjs",
     "check:contracts": "pnpm --filter @bondery/schemas run check:contracts",
-    "check:docs": "pnpm run check:docs:links && pnpm run check:docs:mdx",
+    "check:docs": "pnpm run check:docs:links && pnpm run check:docs:mdx && pnpm run check:docs:targets && pnpm run check:docs:frontmatter && pnpm run check:docs:descriptions && pnpm run check:docs:api-routes",
+    "check:docs:api-routes": "node scripts/check/check-docs-api-routes.mjs",
+    "check:docs:descriptions": "node scripts/check/check-docs-descriptions.mjs",
+    "check:docs:descriptions:strict": "node scripts/check/check-docs-descriptions.mjs --strict",
+    "check:docs:frontmatter": "node scripts/check/check-docs-frontmatter.mjs",
     "check:docs:links": "node scripts/check/check-docs-links.mjs",
     "check:docs:mdx": "pnpm --filter website run check:docs:mdx",
+    "check:docs:targets": "pnpm --filter website run check:docs:targets",
     "check:env": "turbo run check:env --concurrency=1",
     "check:extension-patterns": "pnpm --filter chrome-extension run check:extension-patterns",
     "check:i18n": "pnpm run check:i18n:structure && pnpm run check:i18n:types && pnpm run check:i18n:usage && pnpm run check:i18n:lint",
@@ -142,5 +147,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.11.0"
+  "version": "1.11.1-rc.1"
 }

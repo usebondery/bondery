@@ -1,4 +1,4 @@
-import { getErrorDocUrl } from "@bondery/schemas/errors";
+import { buildAgentMessage, getErrorDocUrl } from "@bondery/schemas/errors";
 import {
   SQLITE_SCHEMA_HEADER,
   SQLITE_SCHEMA_VERSION,
@@ -23,6 +23,7 @@ function sendProtocolMismatch(
 ): void {
   reply.status(426).send({
     error: {
+      agent_message: buildAgentMessage(params.code, params.message),
       code: params.code,
       details: params.details,
       doc_url: getErrorDocUrl(params.code, websiteBaseUrl()),

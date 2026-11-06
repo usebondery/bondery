@@ -1,4 +1,4 @@
-import { HELP_DOCS_URL, SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
+import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 import { AnchorLink, type AppHref, hrefAssert } from "@bondery/mantine-next";
 import { Box, Divider, Flex, Paper, Title } from "@mantine/core";
 import {
@@ -10,6 +10,8 @@ import {
 } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
+import { siteFrameProps } from "@/components/site-shell";
+import { routeAssert } from "@/lib/navigation/route/assert";
 
 type LinkItem = {
   key: string;
@@ -52,17 +54,12 @@ export function Footer() {
   return (
     <Box component="footer" my={"xl"}>
       <Paper
-        maw={1440}
-        mx="auto"
+        {...siteFrameProps}
         p={"xl"}
         radius="md"
         shadow="md"
         style={{
           backgroundColor: "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))",
-        }}
-        w={{
-          base: "calc(100% - var(--mantine-spacing-xs) * 2)",
-          md: "calc(100% - var(--mantine-spacing-xl) * 2)",
         }}
         withBorder
       >
@@ -72,12 +69,7 @@ export function Footer() {
               links={[
                 { href: "/#features", key: "features", title: "Features" },
                 { href: "/#pricing", key: "pricing", title: "Pricing" },
-                {
-                  href: hrefAssert(HELP_DOCS_URL),
-                  key: "help-docs",
-                  target: "_blank",
-                  title: "Help Docs",
-                },
+                { href: routeAssert(WEBSITE_ROUTES.DOCS), key: "docs", title: "Docs" },
                 {
                   href: hrefAssert("/roadmap"),
                   key: "roadmap",

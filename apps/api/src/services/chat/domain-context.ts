@@ -1,6 +1,10 @@
 import type { ApiErrorResponse } from "@bondery/schemas/errors";
-import { toApiErrorResponse } from "../../lib/platform/errors/to-api-error-response.js";
+import { toAgentToolErrorResponse } from "../../lib/platform/errors/to-api-error-response.js";
 
+/**
+ * In-app chat tool failure. The reader is a model, so it gets the same
+ * recovery step as an MCP tool.
+ */
 export function formatToolDomainError(error: unknown, requestId: string): ApiErrorResponse {
-  return toApiErrorResponse(error, requestId);
+  return toAgentToolErrorResponse(error, requestId);
 }

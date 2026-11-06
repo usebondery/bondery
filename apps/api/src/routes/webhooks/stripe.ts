@@ -54,6 +54,7 @@ export async function stripeWebhookRoutes(fastify: FastifyInstance): Promise<voi
       schema: {
         description: "Receive and process a Stripe billing webhook event.",
         response: withOkResponse(webhookAckResponseSchema, "Webhook acknowledged"),
+        summary: "Receive a Stripe webhook",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request: FastifyRequest, reply: FastifyReply) => {

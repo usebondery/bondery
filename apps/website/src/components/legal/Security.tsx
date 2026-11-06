@@ -10,7 +10,7 @@ export function Security() {
 
       <Divider my="xl" />
 
-      <Title id="report" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="report" mb="md" order={2}>
         1. How to report
       </Title>
       <Text mb="lg">
@@ -20,7 +20,7 @@ export function Security() {
 
       <Divider my="xl" />
 
-      <Title id="encryption" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="encryption" mb="md" order={2}>
         2. Encryption
       </Title>
       <Text mb="lg">
@@ -30,7 +30,7 @@ export function Security() {
 
       <Divider my="xl" />
 
-      <Title id="privacy" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="privacy" mb="md" order={2}>
         3. Privacy
       </Title>
       <Text mb="lg">

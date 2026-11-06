@@ -1,6 +1,6 @@
 "use client";
 
-import { Box, Table } from "@mantine/core";
+import { Table } from "@mantine/core";
 import { Children, cloneElement, isValidElement, type ReactElement, type ReactNode } from "react";
 
 const TABLE_PART = {
@@ -46,27 +46,28 @@ function mapTableChildren(children: ReactNode): ReactNode {
 
 export function MdxTable({ children }: { children?: ReactNode }) {
   return (
-    <Box my="lg">
-      <Table.ScrollContainer minWidth={500}>
-        <Table
-          highlightOnHover
-          horizontalSpacing="md"
-          striped
-          styles={{
-            th: {
-              backgroundColor: "var(--mantine-primary-color-light)",
-              color: "var(--mantine-primary-color-light-color)",
-              fontWeight: 600,
-            },
-          }}
-          verticalSpacing="sm"
-          withColumnBorders
-          withRowBorders
-          withTableBorder
-        >
-          {mapTableChildren(children)}
-        </Table>
-      </Table.ScrollContainer>
-    </Box>
+    // `type="native"`: the default `ScrollArea` reserves a 12px `padding-bottom`
+    // for a horizontal scrollbar even when the table never overflows, which made
+    // every "table → paragraph" gap 32px instead of the prose rhythm's 20px.
+    <Table.ScrollContainer minWidth={500} type="native">
+      <Table
+        highlightOnHover
+        horizontalSpacing="md"
+        striped
+        styles={{
+          th: {
+            backgroundColor: "var(--mantine-primary-color-light)",
+            color: "var(--mantine-primary-color-light-color)",
+            fontWeight: 600,
+          },
+        }}
+        verticalSpacing="sm"
+        withColumnBorders
+        withRowBorders
+        withTableBorder
+      >
+        {mapTableChildren(children)}
+      </Table>
+    </Table.ScrollContainer>
   );
 }

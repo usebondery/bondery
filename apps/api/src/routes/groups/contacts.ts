@@ -35,6 +35,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         params: uuidParamSchema,
         querystring: peopleListQuerySchema,
         response: withOkResponse(groupContactsListResponseSchema, "Group members"),
+        summary: "List group members",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -55,6 +56,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         description: "Add contacts to a group by IDs or contact filter.",
         params: uuidParamSchema,
         response: withOkResponse(addContactsToGroupResponseSchema, "Contacts added to group"),
+        summary: "Add contacts to a group",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -118,6 +120,7 @@ export function registerGroupContactRoutes(fastify: AppFastifyInstance): void {
         description: "Remove contacts from a group by IDs or member filter.",
         params: uuidParamSchema,
         response: withOkResponse(removeGroupMembersResponseSchema, "Contacts removed from group"),
+        summary: "Remove contacts from a group",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(

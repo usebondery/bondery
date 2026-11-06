@@ -1,9 +1,13 @@
 ---
 title: "API routes"
+description: Every Fastify route is part of the published contract. See the canonical route shape, the schema rules, and how OpenAPI stays fresh on change.
 icon: Route
+last_updated: 2026-11-04
 ---
 
-Every Fastify route in `apps/api/src/routes/` is part of the published API contract. Docs are **compiled** from Zod schemas — never hand-written per endpoint. OpenAPI (`packages/openapi-spec/openapi.yaml`) is committed; the pre-commit hook regenerates it on API/schema changes. CI enforces freshness. Don't rely on deploy to regenerate.
+## Contract rule
+
+Every Fastify route in `apps/api/src/routes/` is part of the published API contract. Docs are **compiled** from Zod schemas, never hand-written per endpoint. OpenAPI (`packages/openapi-spec/openapi.yaml`) is committed; the pre-commit hook regenerates it on API or schema changes. CI enforces freshness. Do not rely on deploy to regenerate.
 
 See [schemas.md](./schemas.mdx) for which `@bondery/schemas` subpaths each app may import.
 
@@ -50,10 +54,10 @@ The docs site renders endpoints in **Fastify registration order** — there is n
 
 | Tier | Name | Examples |
 |------|------|----------|
-| 1 | Collection | `GET/POST/DELETE /api/contacts` |
+| 1 | Collection | `GET/POST/DELETE /contacts` |
 | 2 | Static siblings | `/map-pins`, `/by-social`, `/important-dates/upcoming` |
-| 3 | Single resource | `GET/PATCH/DELETE /api/contacts/{id}` |
-| 4 | Sub-resources | `/api/contacts/{id}/groups`, `/api/groups/{id}/contacts` |
+| 3 | Single resource | `GET/PATCH/DELETE /contacts/{id}` |
+| 4 | Sub-resources | `/contacts/{id}/groups`, `/groups/{id}/contacts` |
 | 5 | Auxiliary | merge, enrich-queue, mcp-consents (`AUXILIARY_FIRST_SEGMENTS` in `@bondery/schemas/openapi/route-order`) |
 
 Same tier → alphabetical by path segment.
@@ -120,7 +124,7 @@ Guidelines:
 - **Update** (`PATCH`/`PUT`): show a small partial payload (one to three fields).
 - **Wire shape**: examples are what the client sends (pre-transform input).
 - **Shared bodies** (`idsRequestBodySchema`, `tagMembershipRequestSchema`, …): one example reused across routes.
-- **No JSON example**: multipart uploads (`POST …/photo`) and body-less creates (`POST /api/chat/sessions`) — document in `description` instead.
+- **No JSON example**: multipart uploads (`POST …/photo`) and body-less creates (`POST /chat/sessions`) — document in `description` instead.
 
 ## OpenAPI error response examples
 
@@ -187,7 +191,9 @@ The API uses four code layers under `apps/api/src/`. Each layer has a single res
 | Services | `services/` | App features and read queries: me, billing, chat, interactions, notifications, `*/queries.ts` list/detail reads. |
 | Lib | `lib/` | Infrastructure subsystems — see [`lib/README.md`](../../apps/api/src/lib). No `.ts` files at `lib/` root. |
 
-#### `lib/` subsystems
+#### Lib subsystems
+
+The `lib/` folder groups the API's infrastructure into subsystems.
 
 | Folder | Responsibility |
 |--------|----------------|
@@ -204,9 +210,9 @@ The API uses four code layers under `apps/api/src/`. Each layer has a single res
 
 | Task | Layer |
 |------|-------|
-| `POST /api/contacts` create | `domains/contacts/` + thin route |
-| `GET /api/contacts` list/search | `services/contacts/queries.ts` + thin route |
-| `POST /api/me/feedback` email | `services/notifications/` + thin route |
+| `POST /contacts` create | `domains/contacts/` + thin route |
+| `GET /contacts` list/search | `services/contacts/queries.ts` + thin route |
+| `POST /me/feedback` email | `services/notifications/` + thin route |
 | AI chat agent, tools, quota | `services/chat/` |
 | Offline sync push dispatch | `lib/sync/apply-mutation.ts` → `domains/` |
 | Shared contact channel parsing | `lib/contacts/` (used by domains and services) |

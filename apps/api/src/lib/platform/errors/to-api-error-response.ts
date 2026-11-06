@@ -2,6 +2,7 @@ import {
   type ApiErrorBody,
   type ApiErrorResponse,
   type ApiErrorType,
+  buildAgentMessage,
   getErrorDefinition,
   getErrorDocUrl,
   isApiErrorCode,
@@ -36,6 +37,7 @@ export function buildApiErrorBody(params: {
   const type = definition?.type ?? params.type;
 
   const body: ApiErrorBody = {
+    agent_message: buildAgentMessage(code, params.message),
     code,
     doc_url: getErrorDocUrl(code, websiteBaseUrl()),
     message: params.message,
@@ -60,7 +62,12 @@ function wrap(body: ApiErrorBody): ApiErrorResponse {
   return { error: body };
 }
 
-/** Nested Stripe-style error body shared by REST, MCP tools, and in-app chat tools. */
+/**
+ * Nested Stripe-style error body shared by REST, MCP tools, and in-app chat tools.
+ *
+ * `message` stays developer-facing for every caller. `agent_message` is built
+ * from it plus the recovery hint, so an agent can always repair the call.
+ */
 export function toApiErrorResponse(error: unknown, requestId: string): ApiErrorResponse {
   if (error instanceof DomainError) {
     if (isServerError(error.statusCode)) {
@@ -95,4 +102,17 @@ export function toApiErrorResponse(error: unknown, requestId: string): ApiErrorR
       type: "api_error",
     }),
   );
+}
+
+/**
+ * Tool failure for an agent surface (MCP and in-app chat).
+ *
+ * Keeps the developer `message` and promotes the recovery step into
+ * `message` too, because a model reads `message` first and may never look at
+ * `agent_message`.
+ */
+export function toAgentToolErrorResponse(error: unknown, requestId: string): ApiErrorResponse {
+  const body = toApiErrorResponse(error, requestId);
+  body.error.message = body.error.agent_message;
+  return body;
 }

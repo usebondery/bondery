@@ -33,6 +33,7 @@ export async function subscriptionPortalRoutes(fastify: FastifyInstance): Promis
           },
           ...standardErrorResponses,
         },
+        summary: "Open the billing portal",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request: FastifyRequest, reply: FastifyReply) => {

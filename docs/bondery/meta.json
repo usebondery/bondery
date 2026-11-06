@@ -1,5 +1,6 @@
 {
-  "icon": "ListChecks",
+  "description": "Task guides for the daily work around your network. Import contacts from LinkedIn or Instagram, export a ZIP file, and connect AI assistants.",
+  "icon": "ListCheck",
   "pages": ["import", "export", "mcp"],
   "title": "How-to guides"
 }

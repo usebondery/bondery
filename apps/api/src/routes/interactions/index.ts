@@ -46,6 +46,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         description: "List interactions with pagination.",
         querystring: interactionsListQuerySchema,
         response: withOkResponse(interactionsListResponseSchema, "Paginated interactions"),
+        summary: "List interactions",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ query: interactionsListQuerySchema }, async (ctx, { query, request }) =>
@@ -63,6 +64,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         body: createInteractionInputSchema,
         description: "Create a new interaction.",
         response: withCreatedResponse(interactionResponseSchema, "Interaction created"),
+        summary: "Create an interaction",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: createInteractionInputSchema }, async (ctx, { body }, reply) => {
@@ -90,6 +92,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(interactionResponseSchema, "Interaction details"),
+        summary: "Fetch an interaction",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -119,6 +122,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(interactionResponseSchema, "Updated interaction"),
+        summary: "Update an interaction",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -158,6 +162,7 @@ export const interactionRoutes: AppRoutePlugin = async (fastify) => {
         description: "Delete an interaction by ID.",
         params: uuidParamSchema,
         response: withOkResponse(messageResponseSchema, "Interaction deleted successfully"),
+        summary: "Delete an interaction",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {

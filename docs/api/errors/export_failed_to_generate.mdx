@@ -1,6 +1,7 @@
 ---
 title: export_failed_to_generate
-description: Export Failed To Generate
+description: Building the export ZIP failed. Retry once; if the failure repeats, check bucket access and the size of the account graph before escalating.
+last_updated: 2026-08-27
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show `common.errors.api.export_failed_to_generate` (or the Settings export error
 | **code** | `export_failed_to_generate` |
 | **doc_url** | `/docs/api/errors/export_failed_to_generate` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

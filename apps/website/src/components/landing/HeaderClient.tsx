@@ -12,6 +12,7 @@ import { Box, Burger, Drawer, Flex, Group, Paper, Stack } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { Logo } from "@/components/Logo";
+import { siteFrameProps } from "@/components/site-shell";
 import { routeAssert } from "@/lib/navigation/route/assert";
 
 const navLinks: { href: AppHref; label: string }[] = [
@@ -31,18 +32,7 @@ export function HeaderClient({ initialStars, webappUrl }: HeaderClientProps) {
 
   return (
     <Box className="sticky top-6 z-50 " component="header">
-      <Paper
-        className="rounded-full!"
-        maw={1440}
-        mx="auto"
-        px={"xs"}
-        py={"md"}
-        shadow="md"
-        w={{
-          base: "calc(100% - var(--mantine-spacing-xs) * 2)",
-          md: "calc(100% - var(--mantine-spacing-xl) * 2)",
-        }}
-      >
+      <Paper className="rounded-full!" {...siteFrameProps} px={"xs"} py={"md"} shadow="md">
         <Flex align="center" px="md" visibleFrom="sm">
           <Box style={{ flex: 1 }}>
             <Logo size={32} />

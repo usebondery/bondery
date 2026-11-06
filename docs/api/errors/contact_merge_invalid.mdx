@@ -1,6 +1,7 @@
 ---
 title: contact_merge_invalid
-description: Contact Merge Invalid
+description: The merge request failed validation. Send two distinct contact ids that both belong to the authenticated account, then retry the merge once.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_merge_invalid` when a string exists; o
 | **code** | `contact_merge_invalid` |
 | **doc_url** | `/docs/api/errors/contact_merge_invalid` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

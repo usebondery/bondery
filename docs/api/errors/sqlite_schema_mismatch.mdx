@@ -1,6 +1,7 @@
 ---
 title: sqlite_schema_mismatch
-description: Sqlite Schema Mismatch
+description: The device SQLite schema is behind the server. Ship a new app build or run the local migrations, then bootstrap sync again on that same device.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Prompt the user to update the mobile app.
 | **code** | `sqlite_schema_mismatch` |
 | **doc_url** | `/docs/api/errors/sqlite_schema_mismatch` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

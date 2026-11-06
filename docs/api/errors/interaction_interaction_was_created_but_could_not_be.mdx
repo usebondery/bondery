@@ -1,6 +1,7 @@
 ---
 title: interaction_interaction_was_created_but_could_not_be
-description: Interaction Interaction Was Created But Could Not Be
+description: The interaction was created but the response read failed. Re-fetch it by id before you retry, so you do not log the same meeting a second time.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `interaction_interaction_was_created_but_could_not_be` |
 | **doc_url** | `/docs/api/errors/interaction_interaction_was_created_but_could_not_be` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

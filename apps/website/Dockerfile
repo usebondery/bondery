@@ -34,8 +34,8 @@ RUN --mount=type=cache,id=bondery-pnpm-store-v4,target=/pnpm/store,sharing=locke
     pnpm install --frozen-lockfile --ignore-scripts --no-runtime --store-dir "${PNPM_STORE_DIR}"
 # --force: a remote-cache hit skips pnpm syncInjectedDepsAfterScripts, so
 # dependents cannot resolve workspace packages (TS2307 / missing scripts).
-# `turbo_token` feeds the Turborepo remote cache during static generation; BuildKit
-# secrets never persist in a layer.
+# `turbo_token` feeds the Turborepo remote cache during static generation;
+# BuildKit secrets never persist in a layer.
 RUN --mount=type=secret,id=turbo_token \
     export TURBO_TOKEN="$(cat /run/secrets/turbo_token 2>/dev/null || true)" && \
     pnpm exec turbo build --filter=website --force

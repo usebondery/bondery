@@ -20,6 +20,7 @@ export function registerMobileManifestRoute(fastify: AppFastifyInstance): void {
           "Public mobile app configuration. `latestVersion` is the current production CalVer for a non-blocking update check. " +
           "Not a health probe — use `GET /health/live` for liveness.",
         response: withOkResponse(mobileManifestSchema, "Mobile manifest"),
+        summary: "Fetch mobile manifest",
         tags: ["Mobile"],
       } satisfies FastifyZodOpenApiSchema,
     },

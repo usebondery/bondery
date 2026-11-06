@@ -1,11 +1,13 @@
 ---
 title: "Schemas package imports"
-icon: Boxes
+description: Keep @bondery/schemas imports narrow per consumer, so the web app never loads API-only OpenAPI fixtures at runtime. See the allowed import matrix.
+icon: BoxMultiple
+last_updated: 2026-11-04
 ---
 
-`@bondery/schemas` is the shared contract layer (types, Zod schemas, constants). Keep imports narrow by consumer so the webapp never loads API-only OpenAPI fixture graphs at runtime.
-
 ## Import policy
+
+`@bondery/schemas` is the shared contract layer: types, Zod schemas, and constants. Keep imports narrow by consumer, so the webapp never loads API-only OpenAPI fixture graphs at runtime.
 
 | Consumer | Allowed imports |
 |----------|-----------------|

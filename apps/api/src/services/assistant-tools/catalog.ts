@@ -1,5 +1,6 @@
 /** Canonical assistant tool names shared by MCP and in-app chat (sorted). */
 export const ASSISTANT_TOOL_NAMES = [
+  "create_agent_feedback",
   "create_contact",
   "create_contact_share",
   "create_group",

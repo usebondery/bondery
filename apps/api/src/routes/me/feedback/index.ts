@@ -27,6 +27,7 @@ export const meFeedbackRoutes: AppRoutePlugin = async (fastify) => {
         body: feedbackFormSchema,
         description: "Submit user feedback and send a notification email.",
         response: withOkResponse(apiSuccessResponseSchema, "Feedback submitted"),
+        summary: "Send feedback",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

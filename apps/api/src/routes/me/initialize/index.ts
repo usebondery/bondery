@@ -24,6 +24,7 @@ export const meInitializeRoutes: AppRoutePlugin = async (fastify) => {
         response: {
           ...noContentResponse,
         },
+        summary: "Initialize a new account",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, _route, reply) => {

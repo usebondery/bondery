@@ -71,7 +71,7 @@ const EXAMPLE_GEOCODE_TIMEZONE_RESPONSE = {
 
 /** UUID path parameter (e.g. `:id`). */
 export const uuidParamSchema = z.object({
-  id: contactIdSchema,
+  id: contactIdSchema.describe("Contact identifier"),
 }) satisfies z.ZodType<UuidParam>;
 
 /** Bulk ID body: `{ ids: string[] }` with at least one element. */
@@ -83,19 +83,39 @@ export const idsRequestBodySchema = z
 
 /** Optional pagination query params (limit: 1–200, default 50; offset: ≥0, default 0). */
 export const paginationQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(200)
+    .optional()
+    .default(50)
+    .describe("Maximum number of records to return. Defaults to 50, maximum 200."),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .default(0)
+    .describe("Number of records to skip before returning results. Defaults to 0."),
 }) satisfies z.ZodType<PaginationQuery>;
 
 /** Optional search query param. */
 export const searchQuerySchema = z.object({
-  search: z.string().optional(),
+  search: z
+    .string()
+    .optional()
+    .describe("Case-insensitive text search across the primary display fields."),
 }) satisfies z.ZodType<SearchQuery>;
 
 /** Optional avatar transform query parameters. */
 export const avatarTransformQuerySchema = z.object({
-  avatarQuality: avatarQualitySchema.optional(),
-  avatarSize: avatarSizeSchema.optional(),
+  avatarQuality: avatarQualitySchema
+    .optional()
+    .describe("Image quality for contact avatars. Higher quality returns larger files."),
+  avatarSize: avatarSizeSchema
+    .optional()
+    .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views."),
 }) satisfies z.ZodType<AvatarTransformQuery>;
 
 /** Public query name for the people-list tag filter. */
@@ -125,33 +145,66 @@ const tagIdsQuerySchema = z.preprocess((value) => {
 
 /** People list query — pagination, search, sort, keep-in-touch filter, and avatar transforms. */
 export const peopleListQuerySchema = z.object({
-  avatarQuality: avatarQualitySchema.optional(),
-  avatarSize: avatarSizeSchema.optional(),
-  keepInTouch: z.coerce.boolean().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
-  search: z.string().optional(),
-  sort: contactSortOrderSchema.optional(),
-  [TAG_IDS_QUERY_PARAM]: tagIdsQuerySchema,
+  avatarQuality: avatarQualitySchema
+    .optional()
+    .describe("Image quality for contact avatars. Higher quality returns larger files."),
+  avatarSize: avatarSizeSchema
+    .optional()
+    .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views."),
+  keepInTouch: z.coerce
+    .boolean()
+    .optional()
+    .describe("Return only contacts whose keep-in-touch reminder is due."),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(200)
+    .optional()
+    .default(50)
+    .describe("Maximum number of records to return. Defaults to 50, maximum 200."),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .default(0)
+    .describe("Number of records to skip before returning results. Defaults to 0."),
+  search: z
+    .string()
+    .optional()
+    .describe("Case-insensitive text search across name, email, and phone."),
+  sort: contactSortOrderSchema.optional().describe("Result ordering. Defaults to name ascending."),
+  [TAG_IDS_QUERY_PARAM]: tagIdsQuerySchema.describe(
+    "Filter to contacts that carry any of these tag ids. Separate ids with commas.",
+  ),
 }) satisfies z.ZodType<PeopleListQuery>;
 
 /** GET /api/geocode/suggest query string. */
 export const geocodeSuggestQuerySchema = z.object({
-  mode: z.enum(["address", "place"]).optional().default("address"),
-  search: z.string().trim().min(3).max(200),
+  mode: z
+    .enum(["address", "place"])
+    .optional()
+    .default("address")
+    .describe("Search mode: `address` for postal addresses, `place` for points of interest"),
+  search: z.string().trim().min(3).max(200).describe("Text to look up, at least 3 characters"),
 }) satisfies z.ZodType<GeocodeSuggestQuery>;
 
 /** GET /api/geocode/timezone query string. */
 export const geocodeTimezoneQuerySchema = z.object({
-  lat: z.coerce.number().min(-90).max(90),
-  lon: z.coerce.number().min(-180).max(180),
+  lat: z.coerce.number().min(-90).max(90).describe("Latitude in decimal degrees"),
+  lon: z.coerce.number().min(-180).max(180).describe("Longitude in decimal degrees"),
 }) satisfies z.ZodType<GeocodeTimezoneQuery>;
 
 /** Tags/groups list query with optional preview limit and avatar transforms. */
 export const previewListQuerySchema = z.object({
-  avatarQuality: avatarQualitySchema.optional(),
-  avatarSize: avatarSizeSchema.optional(),
-  previewLimit: z.string().optional(),
+  avatarQuality: avatarQualitySchema
+    .optional()
+    .describe("Image quality for contact avatars. Higher quality returns larger files."),
+  avatarSize: avatarSizeSchema
+    .optional()
+    .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views."),
+  previewLimit: z.string().optional().describe("Number of preview members to include on each row"),
 }) satisfies z.ZodType<PreviewListQuery>;
 
 /** RFC 3339 datetime with timezone offset. Avoid Zod `iso.datetime` (Turbopack SSR TDZ). */
@@ -165,14 +218,37 @@ const interactionInstantSchema = z.string().regex(ISO_DATETIME_OFFSET_PATTERN, {
 /** Interactions list query — pagination, text search, inclusive date range, and avatar transforms. */
 export const interactionsListQuerySchema = z
   .object({
-    avatarQuality: avatarQualitySchema.optional(),
-    avatarSize: avatarSizeSchema.optional(),
-    contactId: contactIdSchema.optional(),
-    end_date: interactionInstantSchema.optional(),
-    limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-    offset: z.coerce.number().int().min(0).optional().default(0),
-    search: z.string().trim().optional(),
-    start_date: interactionInstantSchema.optional(),
+    avatarQuality: avatarQualitySchema.optional().describe("Image quality for participant avatars"),
+    avatarSize: avatarSizeSchema.optional().describe("Rendered avatar size for participants"),
+    contactId: contactIdSchema
+      .optional()
+      .describe("Return only interactions that include this contact"),
+    end_date: interactionInstantSchema
+      .optional()
+      .describe("Inclusive upper bound on the interaction date, as ISO 8601 with offset"),
+    limit: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(200)
+      .optional()
+      .default(50)
+      .describe("Maximum number of records to return. Defaults to 50, maximum 200."),
+    offset: z.coerce
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .default(0)
+      .describe("Number of records to skip before returning results. Defaults to 0."),
+    search: z
+      .string()
+      .trim()
+      .optional()
+      .describe("Case-insensitive search across interaction title and description."),
+    start_date: interactionInstantSchema
+      .optional()
+      .describe("Inclusive lower bound on the interaction date, as ISO 8601 with offset"),
   })
   .superRefine((value, ctx) => {
     if (!value.start_date || !value.end_date) {
@@ -189,41 +265,90 @@ export const interactionsListQuerySchema = z
 
 /** Chat session messages list query. */
 export const chatMessagesQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
-  sort: z.literal("createdAtAsc").optional(),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(200)
+    .optional()
+    .default(50)
+    .describe("Maximum number of messages to return. Defaults to 50, maximum 200."),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .default(0)
+    .describe("Number of messages to skip before returning results. Defaults to 0."),
+  sort: z
+    .literal("createdAtAsc")
+    .optional()
+    .describe("Message ordering. Oldest first is the only supported order."),
 }) satisfies z.ZodType<ChatMessagesQuery>;
 
 export const chatSessionIdParamSchema = z.object({
-  sessionId: z.string(),
+  sessionId: z.string().describe("Chat session identifier"),
 }) satisfies z.ZodType<ChatSessionIdParam>;
 
 /** Merge recommendations list query. */
 export const mergeRecommendationsQuerySchema = z.object({
-  avatarQuality: avatarQualitySchema.optional(),
-  avatarSize: avatarSizeSchema.optional(),
-  declined: z.string().optional(),
-  limit: z.coerce.number().int().min(1).max(200).optional().default(50),
-  offset: z.coerce.number().int().min(0).optional().default(0),
+  avatarQuality: avatarQualitySchema
+    .optional()
+    .describe("Image quality for contact avatars. Higher quality returns larger files."),
+  avatarSize: avatarSizeSchema
+    .optional()
+    .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views."),
+  declined: z.string().optional().describe("Set to `1` to include declined recommendations"),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(200)
+    .optional()
+    .default(50)
+    .describe("Maximum number of records to return. Defaults to 50, maximum 200."),
+  offset: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .default(0)
+    .describe("Number of records to skip before returning results. Defaults to 0."),
 }) satisfies z.ZodType<MergeRecommendationsQuery>;
 
 /** GET /api/contacts/merge/avatars query. */
 export const mergeAvatarIdentityQuerySchema = z.object({
-  leftPersonId: contactIdSchema,
-  rightPersonId: contactIdSchema,
+  leftPersonId: contactIdSchema.describe("First contact to compare"),
+  rightPersonId: contactIdSchema.describe("Second contact to compare"),
 }) satisfies z.ZodType<MergeAvatarIdentityQuery>;
 
 /** Sync pull long-poll query. */
 export const syncPullQuerySchema = z.object({
-  limit: z.coerce.number().int().min(1).max(100).optional(),
-  since: z.coerce.number().int().nonnegative(),
-  waitMs: z.coerce.number().int().min(0).max(30_000).optional(),
+  limit: z.coerce
+    .number()
+    .int()
+    .min(1)
+    .max(100)
+    .optional()
+    .describe("Maximum number of changes to return in this batch"),
+  since: z.coerce
+    .number()
+    .int()
+    .nonnegative()
+    .describe("Last server sequence the client has applied"),
+  waitMs: z.coerce
+    .number()
+    .int()
+    .min(0)
+    .max(30_000)
+    .optional()
+    .describe("Long-poll window in milliseconds. Zero returns immediately."),
 }) satisfies z.ZodType<SyncPullQuery>;
 
 /** Contact + relationship path params. */
 export const contactRelationshipIdParamSchema = z.object({
-  id: contactIdSchema,
-  relationshipId: contactIdSchema,
+  id: contactIdSchema.describe("Contact identifier"),
+  relationshipId: contactIdSchema.describe("Relationship identifier"),
 }) satisfies z.ZodType<ContactRelationshipIdParam>;
 
 /** PUT /api/contacts/:id/important-dates body. */

@@ -1,6 +1,7 @@
 ---
 title: contact_merge_failed
-description: Contact Merge Failed
+description: "The merge transaction failed between the two contacts. Log `request_id`, retry once, and confirm neither contact blocks the merge of the other."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `contact_merge_failed` |
 | **doc_url** | `/docs/api/errors/contact_merge_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

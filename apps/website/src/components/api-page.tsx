@@ -1,5 +1,3 @@
 "use client";
 
-import { createOpenAPIPage } from "fumadocs-openapi/ui";
-
-export const OpenAPIPage = createOpenAPIPage();
+export { DocsApiPage as OpenAPIPage } from "@/components/docs/api/DocsApiPage";

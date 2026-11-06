@@ -1,5 +1,6 @@
 {
-  "icon": "MonitorSmartphone",
+  "description": "The ways to use Bondery: the web app, the Chrome extension, the mobile app, and the MCP server for AI assistants, plus the REST API. Pick one.",
+  "icon": "Devices",
   "pages": ["webapp", "chrome-extension", "mobile-app", "mcp-server", "api"],
   "title": "Apps"
 }

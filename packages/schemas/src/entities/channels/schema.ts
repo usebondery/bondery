@@ -27,10 +27,18 @@ function refinePhoneEntryDigits(
 }
 
 export const phoneEntryEntitySchema = z.object({
-  preferred: z.boolean(),
-  prefix: z.string().trim().min(1, { error: "Country code is required" }),
-  type: channelTypeSchema,
-  value: z.string().trim().min(1, { error: "Phone number is required" }),
+  preferred: z.boolean().describe("True when this is the contact's primary phone number"),
+  prefix: z
+    .string()
+    .trim()
+    .min(1, { error: "Country code is required" })
+    .describe("Country calling code, digits only"),
+  type: channelTypeSchema.describe("Phone category, such as home or work"),
+  value: z
+    .string()
+    .trim()
+    .min(1, { error: "Phone number is required" })
+    .describe("Phone number in local or international form"),
 }) satisfies z.ZodType<PhoneEntry>;
 
 const phoneEntryBaseSchema = phoneEntryEntitySchema.omit({ preferred: true });
@@ -39,9 +47,9 @@ const phoneEntryOptionalPreferredSchema = phoneEntryBaseSchema.extend({
 });
 
 export const emailEntryEntitySchema = z.object({
-  preferred: z.boolean(),
-  type: channelTypeSchema,
-  value: z.string().trim().min(1, { error: "Email is required" }),
+  preferred: z.boolean().describe("True when this is the contact's primary email address"),
+  type: channelTypeSchema.describe("Email category, such as home or work"),
+  value: z.string().trim().min(1, { error: "Email is required" }).describe("Email address"),
 }) satisfies z.ZodType<EmailEntry>;
 
 const emailEntryBaseSchema = emailEntryEntitySchema.omit({ preferred: true });
