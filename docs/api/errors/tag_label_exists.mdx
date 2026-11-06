@@ -1,6 +1,7 @@
 ---
 title: tag_label_exists
-description: Tag Label Already Exists
+description: A tag with this label already exists for the account. Labels ignore letter case, so read the existing tag or patch it instead of creating again.
+last_updated: 2026-11-02
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.tag_label_exists` when a string exists; otherw
 | **code** | `tag_label_exists` |
 | **doc_url** | `/docs/api/errors/tag_label_exists` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

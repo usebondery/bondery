@@ -1,6 +1,7 @@
 ---
 title: relationship_already_exists
-description: Relationship Already Exists
+description: This relationship already exists between the two contacts. Read the existing relationship and patch that row instead of creating another one.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.relationship_already_exists` when a string exi
 | **code** | `relationship_already_exists` |
 | **doc_url** | `/docs/api/errors/relationship_already_exists` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

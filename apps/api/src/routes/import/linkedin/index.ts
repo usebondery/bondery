@@ -29,6 +29,7 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Parse a LinkedIn CSV export and preview contacts for import.",
         response: withOkResponse(linkedInParseResponseSchema, "Parsed LinkedIn contacts"),
+        summary: "Parse a LinkedIn export",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -136,6 +137,7 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
         body: linkedInImportCommitRequestSchema,
         description: "Commit a LinkedIn import from previously parsed contacts.",
         response: withOkResponse(linkedInImportCommitResponseSchema, "LinkedIn import result"),
+        summary: "Commit a LinkedIn import",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: linkedInImportCommitRequestSchema }, async (ctx, { body }) =>

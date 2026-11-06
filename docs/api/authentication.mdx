@@ -2,89 +2,154 @@
 title: Authentication
 icon: Key
 docId: api.authentication
-description: Authenticate REST API requests with sessions or long-lived API keys.
+description: API keys authenticate scripts and servers, session tokens authenticate the app, and AI assistants use OAuth. See the route and scope each one accepts.
+last_updated: 2026-11-06
 ---
 
-The Bondery API supports two authentication methods depending on how you call it. AI assistants use [MCP](/docs/bondery/mcp) with OAuth 2.1 — not these REST credentials.
+Every request needs one credential. Pick it from the work you are doing, not from the feature you want.
 
-Replace `https://api.usebondery.com` with your self-hosted API domain when applicable.
+## Choose a credential
 
-## Session authentication
+| You are building | Use | Read |
+| --- | --- | --- |
+| A script, cron job, CI step, or your own server | **API key** | [Use an API key](#1-api-key) |
+| A call from a signed-in Bondery app session | **Session token** | [Use a session token](#2-session-token) |
+| An AI assistant that works in your contacts | **MCP OAuth** | [Connect an AI assistant](#3-mcp-and-ai-assistants) |
 
-Use this when building on top of the webapp or mobile app, or when you have a Better Auth access token.
+Replace `https://api.usebondery.com` with your own API origin when you self-host. See [Self-hosting](../deploy/installation.mdx).
 
-1. Sign in at [app.usebondery.com](https://app.usebondery.com) (or your instance).
-2. The browser sends session cookies automatically, or you can send the access token in the `Authorization` header.
+## 1. API key
 
-```bash
-curl -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  https://api.usebondery.com/api/contacts
-```
+An API key is a long-lived credential for unattended callers. It belongs to your account, and it keeps working until you delete it.
 
-Session auth works on **all** authenticated endpoints, including profile settings, chat, subscriptions, and API key management.
+### Create a key
 
-## Create an API key
+<Steps>
+<Step>
 
-Use **API keys** for scripts, automation tools, and server-side integrations. Send the key as a `Bearer` token on every request.
+Sign in at [app.usebondery.com](https://app.usebondery.com), or your own instance.
 
-1. Sign in to the webapp ([app.usebondery.com](https://app.usebondery.com) or your instance).
-2. Open **Settings → API keys**.
-3. Click **Create API key**, choose a label and permission level, then copy the key when it is shown.
+</Step>
+<Step>
+
+Open **Settings → API keys**.
+
+</Step>
+<Step>
+
+Click **Create API key**. Choose a label, choose a permission level, then copy the key.
+
+</Step>
+</Steps>
 
 <Callout type="warn">
-The full key is shown **once**. Store it in a secrets manager. Bondery only keeps a masked prefix for identification.
+The full key appears once. Store it in a secrets manager. Bondery keeps only a masked prefix for identification.
 </Callout>
 
-Each account can have up to **5** keys. Deleting a key takes effect immediately.
+An account holds up to **5** keys. A deleted key stops working at once.
+
+### Send the key
+
+A key starts with `bondery_key_`. Send it as a bearer token on every request.
+
+<PlatformCode
+  posix={`curl "https://api.usebondery.com/contacts" \\
+  -H "Authorization: Bearer bondery_key_<keyId>_<secret>"`}
+  windows={`curl.exe "https://api.usebondery.com/contacts" -H "Authorization: Bearer bondery_key_<keyId>_<secret>"`}
+/>
 
 <Callout type="info">
-**Local development:** ensure Postgres, Redis, and `BONDERY_PRIVATE_BETTER_AUTH_SECRETS` are configured — see [Local development setup](../contributing/local-setup.mdx).
+**Running the API locally:** start Postgres and Redis, and set `BONDERY_PRIVATE_BETTER_AUTH_SECRETS`. See [Local development setup](../contributing/local-setup.mdx).
 </Callout>
 
-## Send the key
+### Pick a permission level
 
-Keys use the `bondery_key_` prefix:
+The level is fixed when you create the key. Create a second key when you need a different level.
 
-```
-bondery_key_<keyId>_<secret>
-```
-
-```bash
-curl -H "Authorization: Bearer bondery_key_abc123_your_secret_here" \
-  https://api.usebondery.com/api/contacts
-```
-
-## Permission levels
-
-Access level is fixed when the key is created. Create a new key if you need a different level.
-
-| Level | HTTP methods | Use when |
+| Level | Allows | Use for |
 | --- | --- | --- |
-| **Read only** | `GET`, `HEAD` | Listing or exporting data without writes |
-| **Full access** | All methods | Imports, creates, updates, and deletes |
+| **Read only** | `GET`, `HEAD` | Reporting, exports, read-only sync |
+| **Full access** | Every method | Imports, creates, updates, deletes |
 
-A read-only key that calls `POST`, `PATCH`, or `DELETE` receives **403** with `api_key_method_forbidden`.
+A read-only key that calls a write method receives **403** with `api_key_method_forbidden`. Create a full-access key instead of widening an old one.
 
-## Which routes accept API keys
+## 2. Session token
 
-Only routes marked for integrations (`openApiArea: integration`) accept API keys. That includes contacts, groups, tags, interactions, contact share, import endpoints, and geocode. The full contract is in the [API reference](./api-reference/index.mdx).
+A session token carries the identity of a person who just signed in. It suits first-party clients: the webapp, the mobile app, and the browser extension.
 
-API keys **do not** work on session-only routes: account settings, API key and MCP consent management, merge, relationships, per-contact enrichment, sync, chat, subscriptions, webhooks, or extension internals. A valid key on those paths returns **403** (`api_key_route_forbidden`). `POST /mcp` also rejects API keys.
+Session auth reaches **every** authenticated route, including settings, API key management, chat, and billing. An API key cannot.
 
-## Error codes
+### Get a token
 
-| HTTP | `code` | When |
+Sign in through the app. The app then holds one of two credentials:
+
+- a Better Auth session cookie, which the browser sends on its own
+- an OAuth access token with the `api:access` scope, which you send as a bearer token
+
+There is no public client registration for third-party apps. Use an [API key](#1-api-key) for your own integration.
+
+### Send a token
+
+<PlatformCode
+  posix={`curl "https://api.usebondery.com/me/settings" \\
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"`}
+  windows={`curl.exe "https://api.usebondery.com/me/settings" -H "Authorization: Bearer YOUR_ACCESS_TOKEN"`}
+/>
+
+A bearer token must be a real JWT. A malformed value never falls back to the session cookie.
+
+## 3. MCP and AI assistants
+
+AI assistants do not use either credential above. They connect to `POST /mcp` with **OAuth 2.1 and PKCE**, and they receive the `mcp:read` and `mcp:write` scopes.
+
+An MCP token only calls MCP tools. It cannot call the REST API, and a REST API key cannot call `/mcp`. The two surfaces stay separate on purpose.
+
+Connect a client, pick a consent level, and revoke access in **Settings → AI assistants**. The full walkthrough is in [Connect AI assistants](../bondery/mcp.mdx).
+
+## Which routes accept which credential
+
+API keys reach the integration routes only. Grouped by tag:
+
+| Routes | API key | Session token |
 | --- | --- | --- |
-| `401` | `invalid_api_key` | Malformed key, wrong secret, deleted key, or dev pepper mismatch |
-| `401` | `auth_required` | No credentials on a session-only route |
-| `403` | `api_key_route_forbidden` | Valid key on a non-integration route |
+| Contacts: list, read, create, update, delete, select, by social handle, map pins, relationship graph, upcoming dates, vCard, groups, share preview | Yes | Yes |
+| Contacts: import LinkedIn, Instagram, and vCard (parse and commit) | Yes | Yes |
+| Contacts: share by email | Yes | Yes |
+| Contacts: merge, merge recommendations, relationships, important dates, enrichment, enrichment queue, photo, keep-in-touch | No | Yes |
+| Groups and tags, including membership | Yes | Yes |
+| Interactions | Yes | Yes |
+| Geocode: suggest, timezone | Yes | Yes |
+| Account: profile, settings, session, photo, API keys, MCP consents, onboarding, feedback | No | Yes |
+| Sync: bootstrap, pull, push, WebSocket ticket | No | Yes |
+| Chat and chat sessions | No | Yes |
+| Subscriptions: checkout, portal, sync | No | Yes |
+| Browser extension internals | No | Yes |
+| Health, mobile manifest, OAuth provider list, Stripe webhook | Neither | Neither |
+
+A valid API key on a session-only route returns **403** with `api_key_route_forbidden`. When this table is not specific enough, open the route in the [API reference](./api-reference/index.mdx) and check its security badges.
+
+## Errors
+
+| HTTP | `code` | Cause |
+| --- | --- | --- |
+| `401` | `auth_required` | No credential on a protected route |
+| `401` | `invalid_api_key` | Malformed key, wrong secret, or deleted key |
+| `403` | `api_key_route_forbidden` | Valid key on a session-only route |
 | `403` | `api_key_method_forbidden` | Read-only key used for a write |
-| `409` | `api_key_limit_exceeded` | Account already has 5 keys |
+| `409` | `api_key_limit_exceeded` | The account already holds 5 keys |
 
-See [Error codes](./errors/index.mdx) for the full catalog.
+Every response also carries `agent_message`, which states the recovery step for an AI agent. See [Error codes](./errors/index.mdx) for the full catalog.
 
-## Security
+## Keep credentials safe
 
-- Do not commit API keys or paste them in public channels.
-- Prefer **read-only** keys when an integration only reads data.
-- Rotate by creating a new key, updating the integration, then deleting the old one.
+- Never commit a key or paste it into a public channel.
+- Give each integration its own key, so you can delete one without breaking the others.
+- Prefer **Read only** unless the integration writes.
+- Rotate in three steps: create the new key, move the integration, delete the old key.
+
+## Related
+
+- [Introduction](./index.mdx): base URL and where to go next
+- [Bulk import contacts](./guides/bulk-import-contacts.mdx): a full parse then commit flow
+- [API reference](./api-reference/index.mdx): generated route and schema pages
+- [Connect AI assistants](../bondery/mcp.mdx): MCP setup and tool list

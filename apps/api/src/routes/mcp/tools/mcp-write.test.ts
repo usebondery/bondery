@@ -16,4 +16,8 @@ describe("isMcpWriteToolName", () => {
     assert.equal(isMcpWriteToolName("get_keep_in_touch_count"), false);
     assert.equal(isMcpWriteToolName("get_contact_linkedin"), false);
   });
+
+  it("lets a Read only token report a defect", () => {
+    assert.equal(isMcpWriteToolName("create_agent_feedback"), false);
+  });
 });

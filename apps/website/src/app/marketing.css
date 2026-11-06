@@ -1,4 +1,10 @@
-/* Mantine styles for marketing pages and docs API reference UI only. */
+/* Mantine styles for marketing pages and docs. */
 @import "@mantine/core/styles.css";
 @import "@mantine/notifications/styles.css";
+@import "@mantine/code-highlight/styles.css";
+@import "@mantine/spotlight/styles.css";
 @import "@bondery/mantine-next/styles";
+
+.legalDoc :where(h2, h3, h4) {
+  scroll-margin-top: 120px;
+}

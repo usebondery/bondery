@@ -1,6 +1,7 @@
 ---
 title: contact_ids_filter_failed
-description: Contact Ids Filter Failed
+description: Filtering the supplied contact ids failed. Verify each id is a UUID that belongs to the authenticated account before you send the request again.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `contact_ids_filter_failed` |
 | **doc_url** | `/docs/api/errors/contact_ids_filter_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

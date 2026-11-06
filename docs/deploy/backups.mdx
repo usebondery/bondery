@@ -1,13 +1,16 @@
 ---
 title: Backups
-icon: DatabaseBackup
+description: Back up Postgres and the SeaweedFS buckets, then restore each one. Keep daily dumps off-box, and rehearse a restore at least once per quarter.
+icon: Archive
+last_updated: 2026-11-04
 ---
+
+Two stores hold data that you cannot recreate. Postgres holds the records, and SeaweedFS holds the images. Back up both.
 
 | Data | How |
 |------|-----|
 | Postgres | `docker compose exec -T db pg_dump -U postgres bondery > backup-$(date +%F).sql` |
 | SeaweedFS buckets | Snapshot `avatars` and `linkedin-logos` via S3 tools against `BONDERY_PRIVATE_S3_ENDPOINT` |
-| Redis | Volume `redis-data` — rate limits and sync wake only; safe to recreate |
 
 ## Restore checklist
 

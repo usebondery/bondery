@@ -1,5 +1,6 @@
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { createContactTools } from "./tools/contacts.js";
+import { createFeedbackTools } from "./tools/feedback.js";
 import { createGroupTools } from "./tools/groups.js";
 import { createImportantDateTools } from "./tools/important-dates.js";
 import { createInteractionTools } from "./tools/interactions.js";
@@ -18,5 +19,6 @@ export function createChatTools(ctx: DomainContext) {
     ...createImportantDateTools(ctx),
     ...createKeepInTouchTools(ctx),
     ...createRelationshipTools(ctx),
+    ...createFeedbackTools(ctx),
   };
 }

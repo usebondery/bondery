@@ -1,6 +1,7 @@
 ---
 title: account_failed_to_upload_profile_photo
-description: Account Failed To Upload Profile Photo
+description: "The profile photo upload to the bucket failed. Log `request_id`, retry once, and escalate if the avatar stays empty for every signed-in user."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `account_failed_to_upload_profile_photo` |
 | **doc_url** | `/docs/api/errors/account_failed_to_upload_profile_photo` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

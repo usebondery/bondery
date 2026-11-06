@@ -1,6 +1,7 @@
 ---
 title: settings_failed_to_create_default_settings
-description: Settings Failed To Create Default Settings
+description: "Creating the default settings row failed. Log `request_id` and retry once; escalate if every new account hits this error code during sign-up."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `settings_failed_to_create_default_settings` |
 | **doc_url** | `/docs/api/errors/settings_failed_to_create_default_settings` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

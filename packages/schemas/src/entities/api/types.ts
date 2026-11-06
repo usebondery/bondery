@@ -35,7 +35,17 @@ export interface ShareContactRequest {
 export interface FeedbackFormInput {
   generalFeedback: string;
   npsReason: string;
-  npsScore: number;
+  npsScore?: number;
+}
+
+export interface AgentFeedbackRequest {
+  actual: string;
+  expected: string;
+  generalFeedback?: string;
+  kind: "bug" | "feature_request" | "friction";
+  npsScore?: number;
+  requestId?: string;
+  toolName: string;
 }
 
 export interface InputMaxLengths {

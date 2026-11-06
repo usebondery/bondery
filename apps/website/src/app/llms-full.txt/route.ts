@@ -1,14 +1,15 @@
-import { getLLMText } from "@/lib/get-llm-text";
-import { source } from "@/lib/source";
+import { connection } from "next/server";
+import { renderDocsFull } from "@/lib/get-llm-text";
 
 export const revalidate = false;
 
 export async function GET() {
-  const pages = source.getPages();
-  const scanned = await Promise.all(pages.map(getLLMText));
+  // Read the public origin at request time; the build bakes a placeholder URL.
+  await connection();
 
-  return new Response(scanned.join("\n\n"), {
+  return new Response(await renderDocsFull(), {
     headers: {
+      "Cache-Control": "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400",
       "Content-Type": "text/plain; charset=utf-8",
     },
   });

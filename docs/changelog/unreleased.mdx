@@ -1,12 +1,31 @@
 ---
 title: "Changelog Unreleased"
 hidden: true
+last_updated: 2026-11-06
 ---
 
 ## [Unreleased]
 
 ### ✨ Added
 
+- Docs: every page now opens with a full `description`. The string fills the paragraph under the title, the folder tile, the search and social preview, and the `llms.txt` line. `pnpm run check:docs:descriptions` keeps it between 140 and 160 characters, and warns between 120 and 140.
+- Docs: every shipped changelog page now has a `description` that names its version and the notable changes in that release. The check requires the version number, the product name, and 140 to 160 characters, so a counted summary such as "25 new features" fails. Only `unreleased.mdx` is exempt, because it is never published.
+- Docs: the welcome page answers "what do you want to do" first. It links each task and each product concept, and it no longer shows the repository tile.
+- Docs: each page now shows its real last edit date, for example "Last updated September 30, 2026". The date comes from a new `last_updated` frontmatter field, and `pnpm run check:docs:frontmatter` keeps every page valid.
+- Docs: pages carry `LinkCard` and `PressableCard` blocks for related reading, and the docs chrome adds a search dialog, a mobile navigation drawer, a table of contents, and previous and next footer links.
+- Docs: code samples switch between `curl` and PowerShell, and between request snippets per language. The API reference shows a copyable request for each endpoint.
+- Docs: the API reference and the error catalogue render from the OpenAPI spec. `pnpm run check:docs:api-routes` and `pnpm run check:docs:targets` keep route names and internal links valid.
+- Website: Every entry in `/.well-known/ard.json` carries a `trustManifest`. It names `did:web:<site host>` as the `identity` and records that the artifact is published from the Bondery repository. The field is a claim, not proof, because Bondery publishes no DID document or signature yet, so the catalog stays unsigned and lists no compliance attestations.
+- Website: The docs move to `/docs` on the marketing site, so one host serves the product, the changelog, and the documentation.
+- API: every error body gains `agent_message`. It states what failed and how to repair the call, so an AI agent can recover without guessing, and tool errors use it as `message`.
+- API: MCP servers can call `create_agent_feedback` to report a wrong result or an unclear tool. A report reaches the same inbox as `POST /me/feedback` and does not require a write token.
+- Webapp: the API key dialog shows a test request for Linux and macOS with `curl` and for Windows with PowerShell, matching the platform tabs used in the docs.
+
 ### 🐛 Fixed
 
+- Webapp: the settings dialog no longer loads a second syntax highlighter. Code highlighting comes from `@bondery/mantine-next`, so a snippet uses one theme and one bundle.
+
 ### 🔄 Changed
+
+- Docs: `pnpm run check:docs` now runs the target, frontmatter, description, and API route checks after the link and MDX checks.
+- Deploy: `deploy/bondery` stages separate `docker-compose.production.yml` and `docker-compose.self-hosted.yml` copies. `docker-compose.yml` stays the Dokploy and self-host entrypoint until the split is proven on staging.

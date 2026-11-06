@@ -38,30 +38,37 @@ import type {
 } from "./types.js";
 
 const groupEditableFieldsSchema = z.object({
-  color: hexColorSchema,
-  emoji: z.string().trim().min(1, { error: "Emoji is required" }),
-  label: labelFieldSchema(GROUP_LABEL_MAX_LENGTH),
+  color: hexColorSchema.describe("Hex color used for the group chip"),
+  emoji: z
+    .string()
+    .trim()
+    .min(1, { error: "Emoji is required" })
+    .describe("Emoji shown on the group chip"),
+  label: labelFieldSchema(GROUP_LABEL_MAX_LENGTH).describe("Group name"),
 });
 
 export const groupSchema = entityIdentitySchema
   .extend({
-    color: z.string().nullable(),
-    emoji: z.string().nullable(),
-    label: z.string(),
+    color: z.string().nullable().describe("Hex color used for the group chip"),
+    emoji: z.string().nullable().describe("Emoji shown on the group chip"),
+    label: z.string().describe("Group name"),
   })
   .extend(entityAuditSchema.shape) satisfies z.ZodType<Group>;
 
 export const groupWithCountSchema = groupSchema.extend({
-  contactCount: z.number(),
-  previewContacts: z.array(contactPreviewSchema).optional(),
+  contactCount: z.number().describe("Number of contacts in this group"),
+  previewContacts: z
+    .array(contactPreviewSchema)
+    .optional()
+    .describe("Small sample of members, for previews"),
 }) satisfies z.ZodType<GroupWithCount>;
 
 export const peopleGroupSchema = z.object({
-  created_at: createdAtSchema,
-  groupId: z.string(),
-  id: z.string(),
-  personId: z.string(),
-  userId: z.string(),
+  created_at: createdAtSchema.describe("Time this membership was created"),
+  groupId: z.string().describe("Group identifier"),
+  id: z.string().describe("Membership identifier"),
+  personId: z.string().describe("Contact identifier"),
+  userId: z.string().describe("Owner account identifier"),
 }) satisfies z.ZodType<PeopleGroup>;
 
 export const createGroupSchema = groupEditableFieldsSchema satisfies z.ZodType<CreateGroupInput>;

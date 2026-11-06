@@ -1,10 +1,13 @@
 ---
 title: Error codes
-icon: CircleAlert
-description: Machine-readable error codes returned by the Bondery API.
+icon: AlertCircle
+description: "Every error code the Bondery API returns, grouped by domain. Key your product UI off `code`, never off the human-readable `message` string here."
+last_updated: 2026-07-28
 ---
 
-Every failed API response uses a nested `{ error: { type, code, message, ... } }` envelope. Use `code` for client-side translation — never show `message` in product UI.
+Every failed API response uses a nested `{ error: { type, code, message, agent_message, ... } }` envelope. Use `code` for client-side translation — never show `message` in product UI.
+
+`agent_message` is the recovery instruction for an AI agent: what failed, why, and how to fix the call. Every response carries it, so an assistant can repair its own call without a human. It is not for product UI.
 
 Browse codes by type in the sidebar, or pick one below.
 

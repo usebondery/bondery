@@ -1,6 +1,7 @@
 ---
 title: contact_share_email_render_failed
-description: Contact Share Email Render Failed
+description: "Rendering the contact share email failed. Log `request_id`, retry once, and verify the email templates are present in the running API build."
+last_updated: 2026-09-29
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `contact_share_email_render_failed` |
 | **doc_url** | `/docs/api/errors/contact_share_email_render_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

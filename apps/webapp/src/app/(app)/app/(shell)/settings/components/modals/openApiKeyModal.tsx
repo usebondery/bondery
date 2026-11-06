@@ -11,7 +11,6 @@ import {
 import type { ApiKeyCreated, ApiKeyPermission } from "@bondery/schemas";
 import { API_KEY_LIMITS } from "@bondery/schemas";
 import { Alert, Anchor, Stack, Text, TextInput } from "@mantine/core";
-import { useOs } from "@mantine/hooks";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconAlertTriangle, IconFileText, IconKey } from "@tabler/icons-react";
@@ -21,10 +20,7 @@ import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { useCreateApiKeyMutation } from "@/lib/query/hooks/useApiKeys";
 import { useApiKeyPermissionOptions } from "../../hooks/useApiKeyPermissionOptions";
-import {
-  resolveDefaultTestSnippetId,
-  useApiKeyTestSnippets,
-} from "../../hooks/useApiKeyTestSnippets";
+import { useApiKeyTestCommands } from "../../hooks/useApiKeyTestCommands";
 
 interface OpenApiKeyModalOptions {
   apiBaseUrl: string;
@@ -45,10 +41,8 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
 
   const createMutation = useCreateApiKeyMutation();
   const permissionOptions = useApiKeyPermissionOptions();
-  const testSnippets = useApiKeyTestSnippets(apiBaseUrl, fullKey);
+  const testCommands = useApiKeyTestCommands(apiBaseUrl, fullKey);
   const docsUrl = docHref("api.authentication");
-  const os = useOs();
-  const defaultTestSnippetId = resolveDefaultTestSnippetId(os);
 
   const trimmedLabel = label.trim();
   const isBlocking = createMutation.isPending || isMinting;
@@ -155,8 +149,7 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
         <CodeBlock
           copiedLabel={t("CopiedButton")}
           copyLabel={t("CopyButton")}
-          defaultSnippetId={defaultTestSnippetId}
-          snippets={testSnippets}
+          platforms={testCommands}
         />
         <Anchor href={docsUrl} rel="noopener noreferrer" size="sm" target="_blank">
           {t("LearnMoreApiDocs")}

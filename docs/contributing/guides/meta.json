@@ -1,5 +1,6 @@
 {
-  "icon": "BookOpen",
+  "description": "Task-focused how-tos for contributors, from adding a UI locale across every app to the checks that each change must pass before it can merge.",
+  "icon": "Book",
   "pages": ["add-new-language"],
   "title": "Guides"
 }

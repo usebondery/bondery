@@ -1,5 +1,6 @@
 import { Blockquote, Code, List, ListItem, Text, Title } from "@mantine/core";
 import type { MDXComponents } from "mdx/types";
+import { DocsMdxPre } from "@/components/docs/DocsMdxPre";
 import { MdxTable } from "@/components/mdx-table";
 import { RichAnchor } from "@/components/RichAnchor";
 
@@ -40,6 +41,7 @@ export function useMDXComponents(components: MDXComponents): MDXComponents {
         {children}
       </Text>
     ),
+    pre: DocsMdxPre,
     ul: ({ children }) => (
       <List listStyleType="disc" mb="md" size="lg" spacing="sm" withPadding>
         {children}

@@ -1,6 +1,7 @@
 ---
 title: interaction_not_found
-description: Interaction Not Found
+description: The interaction id does not exist or is not visible to this caller. Confirm the id belongs to the authenticated account before you retry it.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.interaction_not_found` when a string exists; o
 | **code** | `interaction_not_found` |
 | **doc_url** | `/docs/api/errors/interaction_not_found` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

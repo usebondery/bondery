@@ -1,6 +1,7 @@
 ---
 title: merge_recommendation_not_found
-description: Merge Recommendation Not Found
+description: The recommendation id does not exist, or it expired after an accept or a decline. Refresh the recommendation list, then act on the current id.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.merge_recommendation_not_found` when a string 
 | **code** | `merge_recommendation_not_found` |
 | **doc_url** | `/docs/api/errors/merge_recommendation_not_found` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

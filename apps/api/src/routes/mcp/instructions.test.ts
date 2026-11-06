@@ -13,4 +13,11 @@ describe("MCP_SERVER_INSTRUCTIONS", () => {
     assert.match(MCP_SERVER_INSTRUCTIONS, /Full access/);
     assert.doesNotMatch(MCP_SERVER_INSTRUCTIONS, /own contact card/);
   });
+
+  it("teaches recovery from an error and the feedback tool", () => {
+    assert.match(MCP_SERVER_INSTRUCTIONS, /doc_url/);
+    assert.match(MCP_SERVER_INSTRUCTIONS, /create_agent_feedback/);
+    assert.match(MCP_SERVER_INSTRUCTIONS, /request_id/);
+    assert.match(MCP_SERVER_INSTRUCTIONS, /do not send contact data/i);
+  });
 });

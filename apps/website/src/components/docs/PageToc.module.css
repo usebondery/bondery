@@ -1,0 +1,54 @@
+.list {
+  border-left: 2px solid transparent;
+  position: relative;
+}
+
+.list::before {
+  background: var(--mantine-color-default-border);
+  border-radius: 999px;
+  content: "";
+  inset-block: 0;
+  left: -2px;
+  position: absolute;
+  width: 2px;
+}
+
+.link {
+  border-end-end-radius: var(--mantine-radius-xl);
+  border-end-start-radius: 0;
+  border-start-end-radius: var(--mantine-radius-xl);
+  border-start-start-radius: 0;
+  color: var(--mantine-color-dimmed);
+  display: block;
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.35;
+  padding-block: 6px;
+  padding-inline-end: 8px;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.link:hover {
+  background: var(--mantine-color-default-hover);
+  color: var(--mantine-color-text);
+}
+
+.linkActive,
+.linkActive:hover {
+  background: var(--mantine-primary-color-light);
+  color: var(--mantine-color-text);
+  font-weight: 500;
+}
+
+.indicator {
+  background: var(--mantine-primary-color-filled);
+  border-radius: 999px;
+  left: -2px;
+  position: absolute;
+  top: 0;
+  transition:
+    height 150ms ease,
+    transform 150ms ease;
+  width: 2px;
+  z-index: 1;
+}

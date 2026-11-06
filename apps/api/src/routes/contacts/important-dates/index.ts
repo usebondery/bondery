@@ -63,6 +63,7 @@ export function registerUpcomingImportantDateRoutes(fastify: AppFastifyInstance)
         description: "List upcoming important-date reminders with notifications configured.",
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(upcomingRemindersResponseSchema, "Upcoming reminders"),
+        summary: "List upcoming important dates",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -83,6 +84,7 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
         description: "Get important dates for a contact.",
         params: uuidParamSchema,
         response: withOkResponse(importantDatesListResponseSchema, "Important dates"),
+        summary: "List important dates",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -105,6 +107,7 @@ export function registerContactImportantDateRoutes(fastify: AppFastifyInstance):
           ...withOkResponse(importantDatesListResponseSchema, "Important dates replaced"),
           ...conflictResponse,
         },
+        summary: "Replace important dates",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(

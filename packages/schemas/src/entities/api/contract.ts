@@ -1,6 +1,7 @@
 import type { z } from "zod";
 import type { Assert, IsEqual } from "#internal/type-equality.js";
 import type {
+  agentFeedbackRequestSchema,
   apiSuccessResponseSchema,
   avatarQualitySchema,
   avatarSizeSchema,
@@ -14,6 +15,7 @@ import type {
   shareContactRequestSchema,
 } from "./schema.js";
 import type {
+  AgentFeedbackRequest,
   ApiSuccessResponse,
   AvatarQuality,
   AvatarSize,
@@ -45,6 +47,9 @@ type _ShareContactRequest = Assert<
   IsEqual<ShareContactRequest, z.infer<typeof shareContactRequestSchema>>
 >;
 type _FeedbackFormInput = Assert<IsEqual<FeedbackFormInput, z.infer<typeof feedbackFormSchema>>>;
+type _AgentFeedbackRequest = Assert<
+  IsEqual<AgentFeedbackRequest, z.infer<typeof agentFeedbackRequestSchema>>
+>;
 type _InputMaxLengths = Assert<IsEqual<InputMaxLengths, z.infer<typeof inputMaxLengthsSchema>>>;
 type _AvatarUploadConfig = Assert<
   IsEqual<AvatarUploadConfig, z.infer<typeof avatarUploadConfigSchema>>

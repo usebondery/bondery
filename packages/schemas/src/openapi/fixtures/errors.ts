@@ -1,4 +1,5 @@
 import { SYNC_PROTOCOL_VERSION } from "#sync/protocol.js";
+import { buildAgentMessage } from "#errors/agent-messages.js";
 import { EXAMPLE_CONTACT } from "./entities.js";
 
 const EXAMPLE_REQUEST_ID = "00000000-0000-0000-0000-000000000000";
@@ -22,6 +23,7 @@ function exampleError(params: {
 }) {
   return {
     error: {
+      agent_message: buildAgentMessage(params.code, params.message),
       code: params.code,
       doc_url: `${EXAMPLE_DOC_BASE}/docs/api/errors/${params.code}`,
       message: params.message,

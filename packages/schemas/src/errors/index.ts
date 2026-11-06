@@ -1,3 +1,4 @@
+export { agentRecoveryHint, buildAgentMessage } from "./agent-messages.js";
 export {
   API_ERROR_CODE_ENTRIES,
   API_ERROR_CODES,

@@ -3,6 +3,7 @@ import { Container, Flex, Stack, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { useMDXComponents as getBlogMdxComponents } from "@/components/blog-mdx";
+import { PageTopSpacer } from "@/components/page-top-spacer";
 import { getTeamMember } from "@/data/team";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { getCspNonce } from "@/lib/seo/nonce";
@@ -101,7 +102,8 @@ export default async function BlogPostPage({ params }: Props) {
         id={`schema-blog-posting-${slug}`}
         nonce={nonce}
       />
-      <Container pb="xl" pt={60} size="sm">
+      <Container pb="xl" size="sm">
+        <PageTopSpacer size="large" />
         <Stack gap="xl">
           <Stack align="center" gap="xs">
             <Title order={1} ta="center">

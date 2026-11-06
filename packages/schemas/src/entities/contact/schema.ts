@@ -94,34 +94,48 @@ export const relationshipTypeSchema = z.enum([
 
 export const contactSchema = entityIdentitySchema
   .extend({
-    addresses: z.array(contactAddressReadSchema).nullable().optional(),
-    avatar: z.string().nullable(),
-    emails: z.array(emailEntryEntitySchema).nullable(),
-    facebook: z.string().nullable(),
-    firstName: z.string(),
-    gisPoint: z.unknown().nullable(),
-    headline: z.string().nullable(),
-    importantDates: z.array(importantDateSchema).nullable().optional(),
-    instagram: z.string().nullable(),
-    keepFrequencyDays: z.number().nullable(),
-    language: z.string().nullable(),
-    lastInteraction: nullableDateTimeSchema,
-    lastInteractionActivityId: z.string().nullable(),
-    lastName: z.string().nullable(),
-    latitude: z.number().nullable(),
-    linkedin: z.string().nullable(),
-    location: z.string().nullable(),
-    longitude: z.number().nullable(),
-    middleName: z.string().nullable(),
-    myself: z.boolean().nullable(),
-    notes: z.string().nullable(),
-    notesUpdatedAt: nullableDateTimeSchema.optional(),
-    phones: z.array(phoneEntryEntitySchema).nullable(),
-    position: z.unknown().nullable().optional(),
-    signal: z.string().nullable(),
-    timezone: z.string().nullable(),
-    website: z.string().nullable(),
-    whatsapp: z.string().nullable(),
+    addresses: z
+      .array(contactAddressReadSchema)
+      .nullable()
+      .optional()
+      .describe("Postal addresses for this contact"),
+    avatar: z.string().nullable().describe("Avatar image URL, or null when unset"),
+    emails: z.array(emailEntryEntitySchema).nullable().describe("Email addresses for this contact"),
+    facebook: z.string().nullable().describe("Facebook profile URL or handle"),
+    firstName: z.string().describe("Given name"),
+    gisPoint: z.unknown().nullable().describe("PostGIS point for map placement"),
+    headline: z.string().nullable().describe("Short role or description line"),
+    importantDates: z
+      .array(importantDateSchema)
+      .nullable()
+      .optional()
+      .describe("Birthdays and other recurring dates"),
+    instagram: z.string().nullable().describe("Instagram profile URL or handle"),
+    keepFrequencyDays: z
+      .number()
+      .nullable()
+      .describe("Days between keep-in-touch reminders. Null disables reminders."),
+    language: z.string().nullable().describe("Preferred language tag"),
+    lastInteraction: nullableDateTimeSchema.describe("Timestamp of the most recent interaction"),
+    lastInteractionActivityId: z
+      .string()
+      .nullable()
+      .describe("Identifier of the most recent interaction"),
+    lastName: z.string().nullable().describe("Family name"),
+    latitude: z.number().nullable().describe("Latitude in decimal degrees"),
+    linkedin: z.string().nullable().describe("LinkedIn profile URL"),
+    location: z.string().nullable().describe("Free-text location"),
+    longitude: z.number().nullable().describe("Longitude in decimal degrees"),
+    middleName: z.string().nullable().describe("Middle name"),
+    myself: z.boolean().nullable().describe("True when this contact is the account owner"),
+    notes: z.string().nullable().describe("Free-text notes"),
+    notesUpdatedAt: nullableDateTimeSchema.optional().describe("Timestamp of the last notes edit"),
+    phones: z.array(phoneEntryEntitySchema).nullable().describe("Phone numbers for this contact"),
+    position: z.unknown().nullable().optional().describe("Custom position payload"),
+    signal: z.string().nullable().describe("Signal username"),
+    timezone: z.string().nullable().describe("IANA timezone name"),
+    website: z.string().nullable().describe("Personal or company website URL"),
+    whatsapp: z.string().nullable().describe("WhatsApp number"),
   })
   .extend(entityAuditSchema.shape) satisfies z.ZodType<Contact>;
 
@@ -202,28 +216,46 @@ export const contactRelationshipWithPeopleSchema = contactRelationshipSchema.ext
 
 /** Writable contact fields shared by create and the applied update path. */
 export const contactWritableFieldsSchema = z.object({
-  addresses: z.array(contactAddressReadSchema).nullable().optional(),
-  emails: z.array(emailEntryEntitySchema).nullable().optional(),
-  facebook: z.string().nullable().optional(),
-  firstName: z.string().optional(),
-  gisPoint: z.unknown().nullable().optional(),
-  headline: z.string().nullable().optional(),
-  instagram: z.string().nullable().optional(),
-  keepFrequencyDays: z.number().nullable().optional(),
-  language: z.string().nullable().optional(),
-  lastInteraction: nullableDateTimeSchema.optional(),
-  lastName: z.string().nullable().optional(),
-  latitude: z.number().nullable().optional(),
-  linkedin: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
-  longitude: z.number().nullable().optional(),
-  middleName: z.string().nullable().optional(),
-  notes: z.string().nullable().optional(),
-  phones: z.array(phoneEntryEntitySchema).nullable().optional(),
-  signal: z.string().nullable().optional(),
-  timezone: z.string().nullable().optional(),
-  website: z.string().nullable().optional(),
-  whatsapp: z.string().nullable().optional(),
+  addresses: z
+    .array(contactAddressReadSchema)
+    .nullable()
+    .optional()
+    .describe("Postal addresses. Replaces the full set when present."),
+  emails: z
+    .array(emailEntryEntitySchema)
+    .nullable()
+    .optional()
+    .describe("Email addresses. Replaces the full set when present."),
+  facebook: z.string().nullable().optional().describe("Facebook profile URL or handle"),
+  firstName: z.string().optional().describe("Given name"),
+  gisPoint: z.unknown().nullable().optional().describe("PostGIS point for map placement"),
+  headline: z.string().nullable().optional().describe("Short role or description line"),
+  instagram: z.string().nullable().optional().describe("Instagram profile URL or handle"),
+  keepFrequencyDays: z
+    .number()
+    .nullable()
+    .optional()
+    .describe("Days between keep-in-touch reminders. Null disables reminders."),
+  language: z.string().nullable().optional().describe("Preferred language tag"),
+  lastInteraction: nullableDateTimeSchema
+    .optional()
+    .describe("Timestamp of the most recent interaction"),
+  lastName: z.string().nullable().optional().describe("Family name"),
+  latitude: z.number().nullable().optional().describe("Latitude in decimal degrees"),
+  linkedin: z.string().nullable().optional().describe("LinkedIn profile URL"),
+  location: z.string().nullable().optional().describe("Free-text location"),
+  longitude: z.number().nullable().optional().describe("Longitude in decimal degrees"),
+  middleName: z.string().nullable().optional().describe("Middle name"),
+  notes: z.string().nullable().optional().describe("Free-text notes"),
+  phones: z
+    .array(phoneEntryEntitySchema)
+    .nullable()
+    .optional()
+    .describe("Phone numbers. Replaces the full set when present."),
+  signal: z.string().nullable().optional().describe("Signal username"),
+  timezone: z.string().nullable().optional().describe("IANA timezone name"),
+  website: z.string().nullable().optional().describe("Personal or company website URL"),
+  whatsapp: z.string().nullable().optional().describe("WhatsApp number"),
 }) satisfies z.ZodType<ContactWritableFields>;
 
 export const createContactApiInputSchema = contactWritableFieldsSchema.extend({
@@ -232,7 +264,9 @@ export const createContactApiInputSchema = contactWritableFieldsSchema.extend({
 
 /** POST /api/contacts body (optional client-supplied id). */
 export const createContactBodySchema = createContactApiInputSchema.extend({
-  id: contactIdSchema.optional(),
+  id: contactIdSchema
+    .optional()
+    .describe("Client-supplied contact id. The API generates one when omitted."),
 }) satisfies z.ZodType<CreateContactBody>;
 
 /** PATCH /api/contacts/:id — identity fields edited from mobile identity sheet. */

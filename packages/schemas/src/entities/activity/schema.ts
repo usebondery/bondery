@@ -32,48 +32,60 @@ export const interactionTypeSchema: z.ZodType<InteractionType> = z.enum([
 ]);
 
 export const interactionParticipantSchema: z.ZodType<InteractionParticipant> = z.object({
-  avatar: z.string().nullable(),
-  firstName: z.string(),
-  headline: z.string().nullable(),
-  id: z.string(),
-  lastName: z.string().nullable(),
-  location: z.string().nullable(),
-  middleName: z.string().nullable(),
+  avatar: z.string().nullable().describe("Avatar image URL, or null when unset"),
+  firstName: z.string().describe("Given name"),
+  headline: z.string().nullable().describe("Short role or description line"),
+  id: z.string().describe("Contact identifier"),
+  lastName: z.string().nullable().describe("Family name"),
+  location: z.string().nullable().describe("Free-text location"),
+  middleName: z.string().nullable().describe("Middle name"),
   updatedAt: updatedAtSchema.optional(),
 });
 
 export const interactionSchema: z.ZodType<Interaction> = entityIdentitySchema
   .extend({
-    date: createdAtSchema,
-    description: z.string().nullable(),
-    participants: z.union([z.array(interactionParticipantSchema), z.array(z.string())]).optional(),
-    title: z.string().nullable(),
-    type: interactionTypeSchema,
+    date: createdAtSchema.describe("When the interaction happened"),
+    description: z.string().nullable().describe("Free-text notes about the interaction"),
+    participants: z
+      .union([z.array(interactionParticipantSchema), z.array(z.string())])
+      .optional()
+      .describe("People who took part, as objects or contact ids"),
+    title: z.string().nullable().describe("Short summary line"),
+    type: interactionTypeSchema.describe("Interaction category"),
   })
   .extend(entityAuditSchema.shape);
 
 export const createInteractionInputSchema: z.ZodType<CreateInteractionInput> = z.object({
-  date: createdAtSchema,
-  description: z.string().optional(),
-  participantIds: z.array(z.string()),
-  title: z.string().optional(),
-  type: interactionTypeSchema,
+  date: createdAtSchema.describe("When the interaction happened"),
+  description: z.string().optional().describe("Free-text notes about the interaction"),
+  participantIds: z.array(z.string()).describe("Contact ids of the people who took part"),
+  title: z.string().optional().describe("Short summary line"),
+  type: interactionTypeSchema.describe("Interaction category"),
 });
 
 export const interactionFormSchema: z.ZodType<InteractionFormInput> = z.object({
-  date: z.string().min(1, { error: "Please select a date" }),
-  description: z.string(),
-  participantIds: z.array(z.string()).min(1, { error: "Please select at least one contact" }),
-  title: z.string().trim().min(1, { error: "Title is required" }),
-  type: z.string().min(1, { error: "Please select a type" }),
+  date: z
+    .string()
+    .min(1, { error: "Please select a date" })
+    .describe("When the interaction happened"),
+  description: z.string().describe("Free-text notes about the interaction"),
+  participantIds: z
+    .array(z.string())
+    .min(1, { error: "Please select at least one contact" })
+    .describe("Contact ids of the people who took part"),
+  title: z.string().trim().min(1, { error: "Title is required" }).describe("Short summary line"),
+  type: z.string().min(1, { error: "Please select a type" }).describe("Interaction category"),
 });
 
 export const updateInteractionInputSchema: z.ZodType<UpdateInteractionInput> = z.object({
-  date: createdAtSchema.optional(),
-  description: z.string().optional(),
-  participantIds: z.array(z.string()).optional(),
-  title: z.string().optional(),
-  type: interactionTypeSchema.optional(),
+  date: createdAtSchema.optional().describe("When the interaction happened"),
+  description: z.string().optional().describe("Free-text notes about the interaction"),
+  participantIds: z
+    .array(z.string())
+    .optional()
+    .describe("Contact ids of the people who took part"),
+  title: z.string().optional().describe("Short summary line"),
+  type: interactionTypeSchema.optional().describe("Interaction category"),
 });
 
 export const interactionsListResponseSchema: z.ZodType<InteractionsListResponse> =
@@ -81,12 +93,12 @@ export const interactionsListResponseSchema: z.ZodType<InteractionsListResponse>
 
 const interactionDetailSchema = z
   .object({
-    date: createdAtSchema,
-    description: z.string().nullable(),
-    id: z.string(),
-    participants: z.array(interactionParticipantSchema),
-    title: z.string().nullable(),
-    type: z.string(),
+    date: createdAtSchema.describe("When the interaction happened"),
+    description: z.string().nullable().describe("Free-text notes about the interaction"),
+    id: z.string().describe("Interaction identifier"),
+    participants: z.array(interactionParticipantSchema).describe("People who took part"),
+    title: z.string().nullable().describe("Short summary line"),
+    type: z.string().describe("Interaction category"),
   })
   .extend(entityAuditSchema.shape);
 

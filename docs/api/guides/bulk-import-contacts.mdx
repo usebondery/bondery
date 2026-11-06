@@ -1,17 +1,22 @@
 ---
 title: Bulk import custom contacts
 icon: Upload
-description: Import contacts from vCard files or your own data using the REST API.
+description: Import contacts from a vCard file or your own data over the REST API. Parse the rows first, preview them, then commit the ones you want to keep.
+last_updated: 2026-11-06
 ---
-
-Use the import endpoints when you have contact data outside LinkedIn or Instagram exports — for example a vCard (`.vcf`) export from another app, or contacts you build programmatically.
-
-The flow is always **parse → preview → commit**. Parsing validates and normalizes rows; committing writes selected contacts to the account.
 
 ## Prerequisites
 
-- A [full-access API key](../authentication.mdx) or a user session token
+Use the import endpoints when you have contact data outside LinkedIn or Instagram exports. A vCard (`.vcf`) export from another app is the simplest source, or you can build contacts programmatically.
+
+The flow is always **parse, preview, commit**. Parsing validates and normalizes rows. Committing writes the selected contacts to the account.
+
+You need:
+
+- A [full-access API key](../authentication.mdx) or a session token
 - Contacts shaped like the API import schemas (vCard is the simplest starting point)
+
+All paths below are relative to your API origin. `https://api.usebondery.com` is the hosted origin.
 
 ## vCard import
 
@@ -20,38 +25,40 @@ The flow is always **parse → preview → commit**. Parsing validates and norma
 
 ### Parse the file
 
-`POST /api/contacts/import/vcard/parse`
+`POST /contacts/import/vcard/parse`
 
-Send the vCard file as `multipart/form-data` (field name per the OpenAPI spec). The response lists parsed contacts with validation metadata so you can preview before writing anything.
+Send the vCard file as `multipart/form-data`. The route reads every uploaded file part, so the field name is free. The response lists parsed contacts with validation metadata, so you can preview before writing anything.
 
-```bash
-curl -X POST "https://api.usebondery.com/api/contacts/import/vcard/parse" \
-  -H "Authorization: Bearer bondery_key_<keyId>_<secret>" \
-  -F "file=@contacts.vcf"
-```
+<PlatformCode
+  posix={`curl -X POST "https://api.usebondery.com/contacts/import/vcard/parse" \\
+  -H "Authorization: Bearer bondery_key_<keyId>_<secret>" \\
+  -F "file=@contacts.vcf"`}
+  windows={`curl.exe -X POST "https://api.usebondery.com/contacts/import/vcard/parse" -H "Authorization: Bearer bondery_key_<keyId>_<secret>" -F "file=@contacts.vcf"`}
+/>
 
 </Step>
 <Step>
 
 ### Review the preview
 
-Check each contact in the response. Drop invalid rows or duplicates before commit. The webapp import UI follows the same parse/commit pattern.
+Check each contact in the response. Drop invalid rows or duplicates before commit. The webapp import UI follows the same parse and commit pattern.
 
 </Step>
 <Step>
 
 ### Commit selected contacts
 
-`POST /api/contacts/import/vcard/commit`
+`POST /contacts/import/vcard/commit`
 
-Send the contacts you want to import in the request body. Each commit accepts up to **25** contacts per request — batch larger imports in chunks.
+Send the contacts you want to import in the request body. Each commit accepts up to **25** contacts per request, so batch larger imports in chunks.
 
-```bash
-curl -X POST "https://api.usebondery.com/api/contacts/import/vcard/commit" \
-  -H "Authorization: Bearer bondery_key_<keyId>_<secret>" \
-  -H "Content-Type: application/json" \
-  -d '{"contacts": [/* parsed contact objects from step 1 */]}'
-```
+<PlatformCode
+  posix={`curl -X POST "https://api.usebondery.com/contacts/import/vcard/commit" \\
+  -H "Authorization: Bearer bondery_key_<keyId>_<secret>" \\
+  -H "Content-Type: application/json" \\
+  -d '{"contacts": [/* contacts from the parse response */]}'`}
+  windows={`curl.exe -X POST "https://api.usebondery.com/contacts/import/vcard/commit" -H "Authorization: Bearer bondery_key_<keyId>_<secret>" -H "Content-Type: application/json" -d '{"contacts": [/* contacts from the parse response */]}'`}
+/>
 
 Repeat until all batches are committed.
 
@@ -64,21 +71,21 @@ For native platform ZIP exports, use the dedicated endpoints instead of vCard:
 
 | Platform | Parse | Commit |
 |---|---|---|
-| LinkedIn | `POST /api/contacts/import/linkedin/parse` | `POST /api/contacts/import/linkedin/commit` |
-| Instagram | `POST /api/contacts/import/instagram/parse` | `POST /api/contacts/import/instagram/commit` |
+| LinkedIn | `POST /contacts/import/linkedin/parse` | `POST /contacts/import/linkedin/commit` |
+| Instagram | `POST /contacts/import/instagram/parse` | `POST /contacts/import/instagram/commit` |
 
 See the [Import guide](../../bondery/import.mdx) for what each export contains and how the webapp presents previews.
 
 ## Create contacts one at a time
 
-For small scripts, `POST /api/contacts` creates a single contact without the import pipeline. Prefer parse/commit when you have many rows or need the same validation as the webapp importer.
+For small scripts, `POST /contacts` creates a single contact without the import pipeline. Prefer parse and commit when you have many rows, or when you need the same validation as the webapp importer.
 
 ## Errors
 
-Import failures return the standard API error envelope. Look up `error.code` in [Error codes](/docs/api/errors) — common cases include `validation_error` and `auth_required`.
+Import failures return the standard API error envelope. Look up `error.code` in [Error codes](/docs/api/errors). Common cases include `validation_error`, `auth_required`, and `rate_limit_exceeded`.
 
 ## Related
 
-* [Authentication](../authentication.mdx)
-* [API reference](../api-reference/index.mdx) — full request/response schemas
-* [Import contacts (webapp)](../../bondery/import.mdx)
+- [Authentication](../authentication.mdx)
+- [API reference](../api-reference/index.mdx): full request and response schemas
+- [Import contacts (webapp)](../../bondery/import.mdx)

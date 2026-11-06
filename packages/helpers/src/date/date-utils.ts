@@ -130,3 +130,43 @@ export function formatDuration(startDate: string | null, endDate: string | null)
 
   return parts.join(", ");
 }
+
+/** Parse a `YYYY-MM-DD` calendar date as UTC midnight, so no timezone shifts the day. */
+function parseCalendarDate(value: string): Date | undefined {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    return undefined;
+  }
+
+  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00.000Z`);
+
+  // `new Date` rolls impossible days forward (2026-02-30 becomes 2026-03-02),
+  // so compare the round trip to reject a date that does not exist.
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    return undefined;
+  }
+
+  return date;
+}
+
+/**
+ * Formats a `YYYY-MM-DD` calendar date for display, e.g. `September 30, 2026`.
+ *
+ * The value is a calendar date with no time, so the format timezone is UTC.
+ * A local zone would shift the day for anyone west of UTC.
+ *
+ * @param value Calendar date, e.g. `2026-09-30`.
+ * @param locale BCP 47 locale tag. Defaults to `en-US`, the marketing site locale.
+ * @returns The formatted date, or `null` when the input is not a real date.
+ */
+export function formatCalendarDate(value: string, locale = "en-US"): string | null {
+  const date = parseCalendarDate(value);
+  if (!date) {
+    return null;
+  }
+
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "long",
+    timeZone: "UTC",
+  }).format(date);
+}

@@ -23,6 +23,7 @@ export function registerContactMutationRoutes(fastify: AppFastifyInstance): void
         description:
           "Create a new contact. Optional phones, emails, socials, notes, and profile fields.",
         response: withCreatedResponse(createContactResponseSchema, "Contact created"),
+        summary: "Create a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {
@@ -42,6 +43,7 @@ export function registerContactMutationRoutes(fastify: AppFastifyInstance): void
         body: deleteContactsRequestSchema,
         description: "Delete multiple contacts by IDs or by filter with optional exclusions.",
         response: withOkResponse(deleteContactsResponseSchema, "Contacts deleted successfully"),
+        summary: "Delete contacts",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: deleteContactsRequestSchema }, async (ctx, { body }) => {

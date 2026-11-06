@@ -19,6 +19,7 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
         description: "Upload a contact photo.",
         params: uuidParamSchema,
         response: withOkResponse(photoUploadResponseSchema, "Photo uploaded"),
+        summary: "Upload a contact photo",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params, request }, _reply) => {
@@ -53,6 +54,7 @@ export function registerPhotoRoutes(fastify: AppFastifyInstance): void {
         description: "Delete a contact photo.",
         params: uuidParamSchema,
         response: withOkResponse(apiSuccessResponseSchema, "Photo deleted"),
+        summary: "Delete a contact photo",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {

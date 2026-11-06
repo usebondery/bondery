@@ -19,6 +19,7 @@ Also see [mobile/forms.md](./mobile/forms.md) (technical RHF patterns for mobile
 |------|--------|
 | [i18n.md](./common/i18n.md) | Translations, locales, hooks, CI |
 | [api-errors-display.md](./common/api-errors-display.md) | Client error notifications |
+| [agent-interfaces.md](./common/agent-interfaces.md) | Agent tool errors: WHAT/WHY/HOW, doc link, bug-report channel |
 | [avatars.md](./common/avatars.md) | Contact photos, initials fallback |
 | [empty-states.md](./common/empty-states.md) | Zero data, no results — what happened + what to do |
 | [loading-states.md](./common/loading-states.md) | Skeletons vs inline loaders |

@@ -37,6 +37,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         description: "List all groups with contact counts and optional member previews.",
         querystring: previewListQuerySchema,
         response: withOkResponse(groupsListResponseSchema, "Group list"),
+        summary: "List groups",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -52,6 +53,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         body: createGroupSchema,
         description: "Create a new group.",
         response: withCreatedResponse(groupResponseSchema, "Group created"),
+        summary: "Create a group",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: createGroupSchema }, async (ctx, { body }, reply) => {
@@ -71,6 +73,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         body: idsRequestBodySchema,
         description: "Delete multiple groups by ID.",
         response: withOkResponse(messageResponseSchema, "Groups deleted successfully"),
+        summary: "Delete groups",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: idsRequestBodySchema }, async (ctx, { body }) => {
@@ -88,6 +91,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         description: "Get a single group by ID.",
         params: uuidParamSchema,
         response: withOkResponse(groupResponseSchema, "Group details"),
+        summary: "Fetch a group",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -105,6 +109,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         description: "Update a group by ID.",
         params: uuidParamSchema,
         response: withOkResponse(groupResponseSchema, "Updated group"),
+        summary: "Update a group",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -127,6 +132,7 @@ export const groupRoutes: AppRoutePlugin = async (fastify) => {
         description: "Delete a single group by ID.",
         params: uuidParamSchema,
         response: withOkResponse(messageResponseSchema, "Group deleted successfully"),
+        summary: "Delete a group",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: uuidParamSchema }, async (ctx, { params }) => {

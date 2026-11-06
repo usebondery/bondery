@@ -21,7 +21,7 @@ const docsCatchAll = join(
   "website",
   "src",
   "app",
-  "(chromeless)",
+  "(marketing)",
   "docs",
   "[[...slug]]",
   "page.tsx",
@@ -29,9 +29,7 @@ const docsCatchAll = join(
 const errorsMdxRoot = join(repoRoot, "docs", "api", "errors");
 
 if (!existsSync(docsCatchAll)) {
-  check.add(
-    "Missing docs catch-all at apps/website/src/app/(chromeless)/docs/[[...slug]]/page.tsx",
-  );
+  check.add("Missing docs catch-all at apps/website/src/app/(marketing)/docs/[[...slug]]/page.tsx");
 }
 
 if (!existsSync(join(errorsMdxRoot, "index.mdx"))) {

@@ -20,7 +20,7 @@ export {
   getContactChannelTypeEmoji,
   SHAREABLE_FIELDS,
 } from "#contact/index.js";
-export { formatDateRange, formatDuration } from "#date/index.js";
+export { formatCalendarDate, formatDateRange, formatDuration } from "#date/index.js";
 export { DOC_LINKS, type DocId, docHref } from "#docs/index.js";
 export type {
   CreateContactFromFullNameInput,
@@ -51,9 +51,14 @@ export {
   CHANGELOG_URL,
   CHROME_EXTENSION_URL,
   contactsPathWithGroupId,
+  DOCS_GITHUB_BLOB_BASE,
   formatLegalAddressLine,
   formatMetadataTitle,
+  GITHUB_BLOB_BASE,
+  GITHUB_DEFAULT_BRANCH,
+  GITHUB_REPO_SLUG,
   GITHUB_REPO_URL,
+  GITHUB_REPO_WEB_URL,
   HELP_DOCS_URL,
   IMPORTANT_DATE_TYPE_META,
   LEGAL_ENTITY,

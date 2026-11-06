@@ -1,0 +1,163 @@
+/* Highlight.js token colors (GitHub light and dark) for `CodeBlock`.
+   The colors ship with `@bondery/mantine-next`, so every app renders code the same way. */
+
+.hljs {
+  color: #24292e;
+}
+
+[data-mantine-color-scheme="dark"] .hljs {
+  color: #c9d1d9;
+}
+
+.hljs-doctag,
+.hljs-keyword,
+.hljs-meta .hljs-keyword,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-variable.language_ {
+  color: #d73a49;
+}
+
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-title.function_ {
+  color: #6f42c1;
+}
+
+.hljs-attr,
+.hljs-attribute,
+.hljs-literal,
+.hljs-meta,
+.hljs-number,
+.hljs-operator,
+.hljs-selector-attr,
+.hljs-selector-class,
+.hljs-selector-id,
+.hljs-variable {
+  color: #005cc5;
+}
+
+.hljs-regexp,
+.hljs-string,
+.hljs-meta .hljs-string {
+  color: #032f62;
+}
+
+.hljs-built_in,
+.hljs-symbol {
+  color: #e36209;
+}
+
+.hljs-comment,
+.hljs-code,
+.hljs-formula {
+  color: #6a737d;
+}
+
+.hljs-name,
+.hljs-quote,
+.hljs-selector-pseudo,
+.hljs-selector-tag {
+  color: #22863a;
+}
+
+.hljs-section {
+  color: #005cc5;
+  font-weight: 700;
+}
+
+.hljs-bullet {
+  color: #735c0f;
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
+}
+
+.hljs-addition {
+  background-color: #f0fff4;
+  color: #22863a;
+}
+
+.hljs-deletion {
+  background-color: #ffeef0;
+  color: #b31d28;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-doctag,
+[data-mantine-color-scheme="dark"] .hljs-keyword,
+[data-mantine-color-scheme="dark"] .hljs-meta .hljs-keyword,
+[data-mantine-color-scheme="dark"] .hljs-template-tag,
+[data-mantine-color-scheme="dark"] .hljs-template-variable,
+[data-mantine-color-scheme="dark"] .hljs-type,
+[data-mantine-color-scheme="dark"] .hljs-variable.language_ {
+  color: #ff7b72;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-title,
+[data-mantine-color-scheme="dark"] .hljs-title.class_,
+[data-mantine-color-scheme="dark"] .hljs-title.class_.inherited__,
+[data-mantine-color-scheme="dark"] .hljs-title.function_ {
+  color: #d2a8ff;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-attr,
+[data-mantine-color-scheme="dark"] .hljs-attribute,
+[data-mantine-color-scheme="dark"] .hljs-literal,
+[data-mantine-color-scheme="dark"] .hljs-meta,
+[data-mantine-color-scheme="dark"] .hljs-number,
+[data-mantine-color-scheme="dark"] .hljs-operator,
+[data-mantine-color-scheme="dark"] .hljs-selector-attr,
+[data-mantine-color-scheme="dark"] .hljs-selector-class,
+[data-mantine-color-scheme="dark"] .hljs-selector-id,
+[data-mantine-color-scheme="dark"] .hljs-variable {
+  color: #79c0ff;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-regexp,
+[data-mantine-color-scheme="dark"] .hljs-string,
+[data-mantine-color-scheme="dark"] .hljs-meta .hljs-string {
+  color: #a5d6ff;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-built_in,
+[data-mantine-color-scheme="dark"] .hljs-symbol {
+  color: #ffa657;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-comment,
+[data-mantine-color-scheme="dark"] .hljs-code,
+[data-mantine-color-scheme="dark"] .hljs-formula {
+  color: #8b949e;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-name,
+[data-mantine-color-scheme="dark"] .hljs-quote,
+[data-mantine-color-scheme="dark"] .hljs-selector-pseudo,
+[data-mantine-color-scheme="dark"] .hljs-selector-tag {
+  color: #7ee787;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-section {
+  color: #1f6feb;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-bullet {
+  color: #f2cc60;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-addition {
+  background-color: #033a16;
+  color: #aff5b4;
+}
+
+[data-mantine-color-scheme="dark"] .hljs-deletion {
+  background-color: #67060c;
+  color: #ffdcd7;
+}

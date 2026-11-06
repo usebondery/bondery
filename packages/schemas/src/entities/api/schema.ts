@@ -39,11 +39,9 @@ export const avatarQualitySchema = z.enum([
   "high",
 ]) satisfies z.ZodType<AvatarQuality>;
 
-export const avatarSizeSchema = z.enum([
-  "small",
-  "medium",
-  "large",
-]) satisfies z.ZodType<AvatarSize>;
+export const avatarSizeSchema: z.ZodType<AvatarSize> = z
+  .enum(["small", "medium", "large"])
+  .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views.");
 
 export const avatarTransformOptionsSchema = z.object({
   quality: avatarQualitySchema.optional(),
@@ -61,8 +59,27 @@ export const shareContactRequestSchema = z.object({
 export const feedbackFormSchema = z.object({
   generalFeedback: z.string(),
   npsReason: z.string(),
-  npsScore: z.number().min(0).max(10),
+  npsScore: z.number().min(0).max(10).optional(),
 }) satisfies z.ZodType<FeedbackFormInput>;
+
+/** Agent-reported defect. Structured so we can triage without a human retype. */
+export const agentFeedbackRequestSchema = z.object({
+  actual: z.string().max(2000).describe("What the tool returned"),
+  expected: z.string().max(2000).describe("What you expected the tool to return"),
+  generalFeedback: z.string().max(4000).optional().describe("Anything else the team should know"),
+  kind: z
+    .enum(["bug", "friction", "feature_request"])
+    .describe(
+      "bug = wrong result or crash; friction = confusing argument or description; feature_request = missing tool",
+    ),
+  npsScore: z.number().min(0).max(10).optional().describe("Optional 0-10 satisfaction score"),
+  requestId: z
+    .string()
+    .max(200)
+    .optional()
+    .describe("The request_id from the error response, when this report is about a failure"),
+  toolName: z.string().max(100).describe("The tool that misbehaved"),
+});
 
 export const inputMaxLengthsSchema = z.object({
   dateName: z.number(),

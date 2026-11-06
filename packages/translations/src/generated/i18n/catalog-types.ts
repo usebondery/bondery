@@ -293,6 +293,7 @@ export type CommonCatalog = {
       sync_protocol_mismatch: string;
       tag: string;
       tag_failed: string;
+      tag_label_exists: string;
       tag_not_found: string;
       user: string;
       user_lookup_failed: string;
@@ -716,6 +717,12 @@ export type ExtensionVersionCheckCatalog = {
 };
 
 export type FeedbackEmailCatalog = {
+  agentActualHeading: string;
+  agentExpectedHeading: string;
+  agentKindLabel: string;
+  agentRequestIdLabel: string;
+  agentSourceHeading: string;
+  agentToolLabel: string;
   description: string;
   generalFeedbackHeading: string;
   heading: string;
@@ -2085,13 +2092,13 @@ export type PeoplePageCatalog = {
     Title_other: string;
     TitleAllMatching: string;
   };
+  Filter: string;
   HeaderDescription: string;
   ImportContacts: string;
   LoadMoreBatch: string;
   LoadMoreError: string;
   NoContactsFound: string;
   NoContactsMatchSearch: string;
-  Filter: string;
   ResetFilters: string;
   SearchPlaceholder: string;
   TagFilterLabel: string;
@@ -2240,9 +2247,6 @@ export type SettingsPageCatalog = {
     SaveButton: string;
     SecretCodeLabel: string;
     TestRequestLabel: string;
-    TestSnippetLinux: string;
-    TestSnippetMac: string;
-    TestSnippetWindows: string;
     Title: string;
   };
   Apps: {

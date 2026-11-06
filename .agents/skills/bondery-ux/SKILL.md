@@ -2,11 +2,13 @@
 name: bondery-ux
 description: >
   Bondery UX patterns — empty states, loading, lists, forms, modals, i18n, keyboard shortcuts,
-  tooltips, avatars, product flows (onboarding, import, navigation resume), webapp phone/PWA shell nav.
+  tooltips, avatars, product flows (onboarding, import, navigation resume), webapp phone/PWA shell nav,
+  and agent-facing interfaces (MCP tool errors, docs links, agent bug reports).
   Use when building or reviewing UI in webapp or mobile, writing user-facing copy, or choosing
-  interaction patterns, including create more, repeatable create, stay open after create, or PWA sidebar menu.
+  interaction patterns, including create more, repeatable create, stay open after create, PWA sidebar menu,
+  or when designing how an AI agent recovers from a tool error or reports a defect.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   namespace: bondery
 ---
 
@@ -19,6 +21,7 @@ metadata:
 - Writing user-facing copy or adding translations
 - Displaying keyboard shortcuts, tooltips, avatars, or API error messages
 - Product flows: onboarding, imports, outage/session recovery
+- Designing errors and recovery for tools that an AI agent calls (MCP, in-app chat)
 
 ## Reading order
 
@@ -42,6 +45,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - Repetitive web create modals include Create more (or pass `repeatable: false` for nested pickers) — see [create-more.md](references/desktop/create-more.md)
 - Webapp phone/PWA opens the existing sidebar via a thin `AppShellHeader` menu — never Expo tabs/FAB, never a `PageHeader` burger — see [mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md)
 - Expo native: do not stack sibling routes on rapid taps; block navigation while a transition or destination load is in flight — see [navigation.md](references/mobile/navigation.md)
+- Agent tools (MCP, chat) return a structured error with WHAT, WHY, and HOW, plus `doc_url` — never a bare failure string. See [agent-interfaces.md](references/common/agent-interfaces.md)
 
 ## Decision tree
 
@@ -52,6 +56,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 | Lists and selection | [references/common/lists-and-selection.md](references/common/lists-and-selection.md) |
 | UX writing voice | [references/common/ux-writing.md](references/common/ux-writing.md) |
 | API error display | [references/common/api-errors-display.md](references/common/api-errors-display.md) |
+| Agent / MCP tool errors, docs link, bug reports | [references/common/agent-interfaces.md](references/common/agent-interfaces.md) |
 | Avatars | [references/common/avatars.md](references/common/avatars.md) |
 | Web modals / command palette | [references/desktop/modals.md](references/desktop/modals.md), [global-find.md](references/desktop/global-find.md) |
 | Webapp phone / PWA shell nav | [references/desktop/mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md) |
@@ -72,6 +77,8 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - [ ] All new user-visible strings in `en`, `cs`, `de` translation files
 - [ ] No hardcoded English literals in components (exceptions: logs, test IDs, brand names)
 - [ ] API errors shown via `getUserFacingError` — not server `message`
+- [ ] New API error code has a `/docs/api/errors/{code}` page with an imperative recovery step
+- [ ] Agent-facing tool failures return WHAT, WHY, HOW, and `doc_url` — not a plain string
 - [ ] Empty, loading, and error states handled (not just happy path)
 - [ ] Platform-appropriate pattern (Expo sheet vs web modal; webapp phone uses [mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md), not Expo tabs)
 - [ ] A shell `DataTable` list uses the shell sentinel and server `pagination.hasMore`. Do not render a Load more button in `DataTable`. Do not derive the next page from the client page size.

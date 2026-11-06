@@ -16,9 +16,6 @@ import {
 } from "@/lib/seo/schemas/site";
 
 export const metadata: Metadata = {
-  alternates: {
-    canonical: "/",
-  },
   description: SITE_DESCRIPTION,
   metadataBase: new URL(WEBSITE_URL),
   openGraph: {

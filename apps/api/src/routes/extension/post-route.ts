@@ -18,6 +18,7 @@ export function registerPostRoute(fastify: AppFastifyInstance): void {
         body: redirectBodySchema,
         description: "Create or find a contact from browser extension scraped data.",
         response: withOkResponse(redirectResponseSchema, "Extension contact result"),
+        summary: "Save a contact from the extension",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: redirectBodySchema }, async (ctx, { body }) =>

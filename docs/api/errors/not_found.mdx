@@ -1,6 +1,7 @@
 ---
 title: not_found
-description: Not Found
+description: The path or the resource does not exist. Treat it as a missing resource, confirm the id and the user scope, and do not retry the call blindly.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show a friendly not-found message (`common.errors.api.not_found`).
 | **code** | `not_found` |
 | **doc_url** | `/docs/api/errors/not_found` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

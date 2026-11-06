@@ -33,6 +33,7 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
       schema: {
         description: "Count contacts with a LinkedIn handle but no synced LinkedIn profile data.",
         response: withOkResponse(enrichQueueCountResponseSchema, "Eligible enrichment count"),
+        summary: "Count queued enrichments",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => getEnrichQueueEligibleCount(ctx)),
@@ -44,6 +45,7 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
       schema: {
         description: "Return enrichment queue item counts grouped by status.",
         response: withOkResponse(enrichQueueStatusCountsSchema, "Enrichment queue status"),
+        summary: "Fetch enrichment queue status",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -76,6 +78,7 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
         body: enrichQueueInitBodySchema,
         description: "Initialize a new enrichment run for one contact or all eligible contacts.",
         response: withOkResponse(enrichQueueInitResponseSchema, "Enrichment queue initialized"),
+        summary: "Start an enrichment run",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: enrichQueueInitBodySchema }, async (ctx, { body }) =>
@@ -89,6 +92,7 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
       schema: {
         description: "Return the next batch of pending enrichment queue items.",
         response: withOkResponse(enrichQueueNextBatchResponseSchema, "Next enrichment batch"),
+        summary: "Fetch the next enrichment batch",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -151,6 +155,7 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
         description: "Mark an enrichment queue item as completed or failed.",
         params: uuidParamSchema,
         response: withOkResponse(apiSuccessResponseSchema, "Queue item updated"),
+        summary: "Update an enrichment item",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -166,6 +171,7 @@ export function registerEnrichQueueRoutes(fastify: AppFastifyInstance): void {
       schema: {
         description: "Cancel the enrichment run by deleting pending queue items.",
         response: withOkResponse(apiSuccessResponseSchema, "Enrichment queue cancelled"),
+        summary: "Cancel the enrichment run",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => cancelEnrichQueue(ctx)),

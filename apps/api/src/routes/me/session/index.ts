@@ -24,6 +24,7 @@ export const meSessionRoutes: AppRoutePlugin = async (fastify) => {
         description:
           "Get layout session context: display identity, locale inputs, and onboarding state.",
         response: withOkResponse(userSessionResponseSchema, "User session"),
+        summary: "Fetch session context",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => {

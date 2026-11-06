@@ -20,8 +20,8 @@ import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 import { getContactTags } from "../../../services/contacts/queries.js";
 
 const contactTagIdParamsSchema = z.object({
-  id: z.string(),
-  tagId: z.string(),
+  id: z.string().describe("Contact identifier"),
+  tagId: z.string().describe("Tag identifier"),
 });
 
 export function registerTagRoutes(fastify: AppFastifyInstance): void {
@@ -32,6 +32,7 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         description: "List tags assigned to a contact.",
         params: uuidParamSchema,
         response: withOkResponse(contactTagListResponseSchema, "Contact tags"),
+        summary: "List tags for a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -48,6 +49,7 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         description: "Add a tag to a contact.",
         params: uuidParamSchema,
         response: withOkResponse(tagResponseSchema, "Tag added to contact"),
+        summary: "Add a tag to a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -66,6 +68,7 @@ export function registerTagRoutes(fastify: AppFastifyInstance): void {
         description: "Remove a tag from a contact.",
         params: contactTagIdParamsSchema,
         response: withOkResponse(messageResponseSchema, "Tag removed from contact"),
+        summary: "Remove a tag from a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: contactTagIdParamsSchema }, async (ctx, { params }) => {

@@ -21,6 +21,7 @@ export function registerEnrichRoutes(fastify: AppFastifyInstance): void {
         description: "Update a contact with scraped LinkedIn profile data.",
         params: uuidParamSchema,
         response: withOkResponse(apiSuccessResponseSchema, "Contact enriched"),
+        summary: "Enrich a contact from LinkedIn",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(

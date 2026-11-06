@@ -48,6 +48,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         description: "List chat sessions for the authenticated user.",
         querystring: paginationQuerySchema,
         response: withOkResponse(chatSessionsListResponseSchema, "Paginated chat sessions"),
+        summary: "List chat sessions",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, { request }, reply) => {
@@ -91,6 +92,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Create a new chat session.",
         response: withCreatedResponse(chatSessionCreatedResponseSchema, "Chat session created"),
+        summary: "Create a chat session",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, _route, reply) => {
@@ -108,6 +110,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         description: "Update a chat session title.",
         params: chatSessionIdParamSchema,
         response: withOkResponse(chatSessionResponseSchema, "Chat session updated"),
+        summary: "Rename a chat session",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -129,6 +132,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
           ...noContentResponse,
           ...standardErrorResponses,
         },
+        summary: "Delete a chat session",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: chatSessionIdParamSchema }, async (ctx, { params }, reply) => {
@@ -145,6 +149,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
         params: chatSessionIdParamSchema,
         querystring: chatMessagesQuerySchema,
         response: withOkResponse(chatMessagesListResponseSchema, "Paginated chat messages"),
+        summary: "List chat messages",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(

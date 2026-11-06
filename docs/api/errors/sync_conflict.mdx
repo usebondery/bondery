@@ -1,6 +1,7 @@
 ---
 title: sync_conflict
-description: Sync Conflict
+description: The push used a base revision the server has moved past. Pull the latest server state, merge the client edits, then push the mutation again.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Explain the record changed elsewhere (`common.errors.api.sync_conflict`).
 | **code** | `sync_conflict` |
 | **doc_url** | `/docs/api/errors/sync_conflict` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

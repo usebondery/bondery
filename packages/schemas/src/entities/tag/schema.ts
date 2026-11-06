@@ -36,28 +36,31 @@ import type {
 const tagLabelSchema = labelFieldSchema(GROUP_LABEL_MAX_LENGTH);
 
 const tagEditableFieldsSchema = z.object({
-  color: hexColorSchema,
-  label: tagLabelSchema,
+  color: hexColorSchema.describe("Hex color used for the tag chip"),
+  label: tagLabelSchema.describe("Tag name"),
 });
 
 export const tagSchema = entityIdentitySchema
   .extend({
-    color: z.string().nullable(),
-    label: z.string(),
+    color: z.string().nullable().describe("Hex color used for the tag chip"),
+    label: z.string().describe("Tag name"),
   })
   .extend(entityAuditSchema.shape) satisfies z.ZodType<Tag>;
 
 export const tagWithCountSchema = tagSchema.extend({
-  contactCount: z.number(),
-  previewContacts: z.array(contactPreviewSchema).optional(),
+  contactCount: z.number().describe("Number of contacts with this tag"),
+  previewContacts: z
+    .array(contactPreviewSchema)
+    .optional()
+    .describe("Small sample of tagged contacts, for previews"),
 }) satisfies z.ZodType<TagWithCount>;
 
 export const peopleTagSchema = z.object({
-  created_at: createdAtSchema,
-  id: z.string(),
-  personId: z.string(),
-  tagId: z.string(),
-  userId: z.string(),
+  created_at: createdAtSchema.describe("Time this tag was applied"),
+  id: z.string().describe("Membership identifier"),
+  personId: z.string().describe("Contact identifier"),
+  tagId: z.string().describe("Tag identifier"),
+  userId: z.string().describe("Owner account identifier"),
 }) satisfies z.ZodType<PeopleTag>;
 
 export const createTagSchema = tagEditableFieldsSchema;

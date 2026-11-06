@@ -1,6 +1,7 @@
 ---
 title: relationship_invalid
-description: Relationship Invalid
+description: The relationship payload failed validation. Send two known contact ids and a relationship type, and never send the same id at both ends of it.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.relationship_invalid` when a string exists; ot
 | **code** | `relationship_invalid` |
 | **doc_url** | `/docs/api/errors/relationship_invalid` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

@@ -1,6 +1,7 @@
 ---
 title: import_failed
-description: Import Failed
+description: "The import run failed after parsing. Log `request_id`, retry the commit once, and confirm the account is still under the daily import limit."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `import_failed` |
 | **doc_url** | `/docs/api/errors/import_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

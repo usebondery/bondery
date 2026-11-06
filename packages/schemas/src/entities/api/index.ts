@@ -1,4 +1,5 @@
 export {
+  agentFeedbackRequestSchema,
   apiSuccessResponseSchema,
   avatarQualitySchema,
   avatarSizeSchema,
@@ -14,6 +15,7 @@ export {
   shareContactRequestSchema,
 } from "./schema.js";
 export type {
+  AgentFeedbackRequest,
   ApiSuccessResponse,
   AvatarQuality,
   AvatarSize,

@@ -1,13 +1,15 @@
 ---
 title: "Architecture"
-icon: Layers
+description: How the Turborepo monorepo fits together. Find the app and package boundaries, the dependency graph, and where the shared types and env live.
+icon: Stack2
+last_updated: 2026-11-04
 ---
-
-Bondery is a monorepo managed with [Turborepo](https://turbo.build/repo) and npm workspaces. Apps and shared packages share tooling, types, and translations; Turborepo orchestrates dev, build, lint, and type-check across the tree.
 
 <BonderyRepo />
 
 ## Mental model
+
+The monorepo uses [Turborepo](https://turbo.build/repo) and npm workspaces. Apps and shared packages share tooling, types, and translations. Turborepo orchestrates dev, build, lint, and type-check across the tree.
 
 | Layer | Role |
 |---|---|
@@ -17,7 +19,7 @@ Bondery is a monorepo managed with [Turborepo](https://turbo.build/repo) and npm
 
 [Better Auth](https://www.better-auth.com/) runs on the API (`/auth/*`). Clients obtain session cookies or bearer tokens and attach them to API requests. The API uses Prisma (`@bondery/db`) to read and write Postgres — authorization is enforced in application code, not database RLS.
 
-Domain mutations (create/update/delete contacts, groups, tags, etc.) live in `apps/api/src/domains/`. REST routes and `POST /api/sync/push` call the same functions so web, mobile, and future clients stay consistent.
+Domain mutations (create/update/delete contacts, groups, tags, etc.) live in `apps/api/src/domains/`. REST routes and `POST /sync/push` call the same functions so web, mobile, and future clients stay consistent.
 
 ## Repository structure
 
@@ -25,7 +27,7 @@ Domain mutations (create/update/delete contacts, groups, tags, etc.) live in `ap
 
 ## Apps
 
-### `apps/webapp` — Web application
+### Web application
 
 **Source:** [`apps/webapp`](https://github.com/usebondery/bondery/tree/main/apps/webapp) · **Local dev:** [https://app.usebondery.test](https://app.usebondery.test) (Portless; loopback `26632`)
 
@@ -48,11 +50,11 @@ Server components and client hooks call the Fastify API with the user's session 
 
 ---
 
-### `apps/api` — REST API server
+### REST API server
 
 **Source:** [`apps/api`](https://github.com/usebondery/bondery/tree/main/apps/api) · **Local dev:** [https://api.usebondery.test](https://api.usebondery.test) (Portless; loopback `26631`) · **Production:** [api.usebondery.com](https://api.usebondery.com)
 
-Mobile sync WebSocket: `wss://api.usebondery.test/api/sync/ws` (same Portless API host).
+Mobile sync WebSocket: `wss://api.usebondery.test/sync/ws` (same Portless API host).
 
 Central backend for all product data and privileged operations.
 
@@ -62,7 +64,7 @@ Central backend for all product data and privileged operations.
 | Language | TypeScript |
 | Database | Postgres via [Prisma](https://www.prisma.io/) (`@bondery/db`) |
 | Domain layer | `src/domains/*` — shared by REST routes and sync push |
-| Sync | Changelog pull/bootstrap (`GET /api/sync/pull`, `GET /api/sync/bootstrap`), mutation push (`POST /api/sync/push`) |
+| Sync | Changelog pull/bootstrap (`GET /sync/pull`, `GET /sync/bootstrap`), mutation push (`POST /sync/push`) |
 | Email | [Nodemailer](https://nodemailer.com/) + [React Email](https://react.email/) templates |
 | API contract | Zod schemas in `@bondery/schemas` → generated `packages/openapi-spec/openapi.yaml` → build-time Fumadocs OpenAPI MDX |
 
@@ -83,7 +85,7 @@ Every authenticated request validates the Better Auth session or API key. List e
 
 ---
 
-### `apps/mobile` — Mobile application
+### Mobile application
 
 **Source:** [`apps/mobile`](https://github.com/usebondery/bondery/tree/main/apps/mobile) · **Local dev (Metro):** port `26634` · [http://localhost:26634](http://localhost:26634)
 
@@ -95,8 +97,8 @@ Native iOS and Android client built with Expo. Offline-capable via local SQLite 
 | Language | TypeScript |
 | UI | Uniwind kit in `apps/mobile/src/components/ui` (login, settings). [Tamagui](https://tamagui.dev/) remains for contacts sheets. |
 | Local database | [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) |
-| Read sync | `GET /api/sync/bootstrap` + `GET /api/sync/pull` (batched `sync_change_log`) |
-| Write sync | REST when online; `pending_mutations` outbox → `POST /api/sync/push` when offline |
+| Read sync | `GET /sync/bootstrap` + `GET /sync/pull` (batched `sync_change_log`) |
+| Write sync | REST when online; `pending_mutations` outbox → `POST /sync/push` when offline |
 | Authentication | Better Auth (OAuth via API) |
 | Localization | i18next via `@bondery/translations` (`useMobileTranslations`) |
 
@@ -104,7 +106,7 @@ See [Local development setup](local-setup.mdx#7-mobile-application-appsmobile) f
 
 ---
 
-### `apps/website` — Marketing site
+### Marketing site
 
 **Source:** [`apps/website`](https://github.com/usebondery/bondery/tree/main/apps/website) · **Local dev:** [https://usebondery.test](https://usebondery.test) (Portless; loopback `26630`)
 
@@ -118,7 +120,7 @@ Public landing page at [usebondery.com](https://usebondery.com).
 
 ---
 
-### `apps/chrome-extension` — Browser extension
+### Browser extension
 
 **Source:** [`apps/chrome-extension`](https://github.com/usebondery/bondery/tree/main/apps/chrome-extension) · **Local dev (WXT HMR):** port `26633` · [http://localhost:26633](http://localhost:26633)
 
@@ -134,7 +136,7 @@ Saves contacts from social networks while browsing.
 
 ---
 
-### `packages/db` — Database
+### Database package
 
 **Source:** [`packages/db`](https://github.com/usebondery/bondery/tree/main/packages/db)
 
@@ -179,13 +181,17 @@ All compilable packages extend `@bondery/typescript-config` (NodeNext, `declarat
 
 **Build:** `rimraf dist && tsc` per package. **Exports:** run `pnpm run sync-exports` after adding public subpaths. **Go-to-definition:** `declarationMap` maps from `dist/*.d.ts` back to `src/`.
 
-### `packages/schemas`
+### Schemas
+
+**Source:** [`packages/schemas`](https://github.com/usebondery/bondery/tree/main/packages/schemas)
 
 Single source of truth for Zod schemas, inferred TypeScript types, and the mobile sync protocol (`src/sync/`). Import domain types from here — do not redefine them in apps. Database row shapes come from `@bondery/db` (Prisma).
 
 Supported UI locales are declared in [`packages/schemas/locale/supported-locales.json`](https://github.com/usebondery/bondery/blob/main/packages/schemas/locale/supported-locales.json) and exported as `SUPPORTED_LOCALES`, `DEFAULT_LOCALE`, and `APP_LOCALE_METADATA` from `@bondery/schemas/locale`.
 
-### `packages/translations`
+### Translations
+
+**Source:** [`packages/translations`](https://github.com/usebondery/bondery/tree/main/packages/translations)
 
 User-facing copy for webapp, website, mobile, and the Chrome extension. Built on **[i18next](https://www.i18next.com/)** with **[react-i18next](https://react.i18next.com/)** (web) / **expo-localization** + i18next (mobile). Namespace layout and preload groups live in `manifest.json`; CI runs **[i18next-cli](https://github.com/i18next/i18next-cli)** for types and lint, and custom scanners (`check:i18n:*`) for structure, used keys, and locale parity.
 
@@ -208,25 +214,35 @@ Markdown docs cannot import TypeScript modules; keep `supported-locales.json` in
 
 See also [`packages/translations/README.md`](https://github.com/usebondery/bondery/blob/main/packages/translations).
 
-### `packages/helpers`
+### Helpers
+
+**Source:** [`packages/helpers`](https://github.com/usebondery/bondery/tree/main/packages/helpers)
 
 Shared pure utilities, `API_ROUTES`, global URL constants, and platform helpers used across apps.
 
-### `packages/emails`
+### Emails
+
+**Source:** [`packages/emails`](https://github.com/usebondery/bondery/tree/main/packages/emails)
 
 React Email templates rendered and sent by the API. Files live in `src/templates/{account,billing,internal,notifications}/` and share `EmailWrapper` / `EmailBody` chrome. Import from `@bondery/emails`. Details: [`.agents/skills/bondery-emails`](../../.agents/skills/bondery-emails/SKILL.md).
 
 **Local dev:** port `26639` · `pnpm run dev:emails` → [http://localhost:26639](http://localhost:26639). Runs alongside the Chrome extension dev server (`26633`) without a port conflict.
 
-### `packages/mantine-next`
+### Mantine components
+
+**Source:** [`packages/mantine-next`](https://github.com/usebondery/bondery/tree/main/packages/mantine-next)
 
 Reusable Mantine-based components (avatars, data tables, modals) shared by webapp and website.
 
-### `packages/branding`
+### Branding
+
+**Source:** [`packages/branding`](https://github.com/usebondery/bondery/tree/main/packages/branding)
 
 Logos, icon assets, and React icon components.
 
-### `packages/vcard`
+### vCard
+
+**Source:** [`packages/vcard`](https://github.com/usebondery/bondery/tree/main/packages/vcard)
 
 vCard generation used by API export and share flows.
 
@@ -260,9 +276,9 @@ The API validates the session and serves per-user changelog batches from `sync_c
 
 | Path | Purpose |
 |---|---|
-| `GET /api/sync/bootstrap` | Initial SQLite snapshot |
-| `GET /api/sync/pull` | Incremental batched changes |
-| `POST /api/sync/push` | Apply offline mutation outbox |
+| `GET /sync/bootstrap` | Initial SQLite snapshot |
+| `GET /sync/pull` | Incremental batched changes |
+| `POST /sync/push` | Apply offline mutation outbox |
 
 Protocol version headers (`X-Bondery-Sync-Protocol`, `X-Bondery-SQLite-Schema`) gate compatibility. Full design: [Sync architecture (mobile)](sync-architecture.mdx).
 

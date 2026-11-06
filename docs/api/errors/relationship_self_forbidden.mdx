@@ -1,6 +1,7 @@
 ---
 title: relationship_self_forbidden
-description: Relationship Self Forbidden
+description: The request related a contact to itself. Send two different contact ids, and keep the Myself profile out of the pair at either end of the link.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.relationship_self_forbidden` when a string exi
 | **code** | `relationship_self_forbidden` |
 | **doc_url** | `/docs/api/errors/relationship_self_forbidden` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

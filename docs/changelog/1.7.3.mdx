@@ -1,5 +1,7 @@
 ---
 title: "1.7.3"
+description: Bondery 1.7.3 moves every app onto branded BONDERY_* env names, one root .env.local file, and the shared 2663x local development port block.
+last_updated: 2026-11-04
 ---
 
 ## [1.7.3] - 20.07.2026
@@ -13,9 +15,9 @@ title: "1.7.3"
 
 ### 📝 Documentation
 
-- New [environment configuration](../../contributing/environment.mdx) guide; local setup and Dokploy docs updated for the env migration.
+- New [environment configuration](../contributing/environment.mdx) guide; local setup and Dokploy docs updated for the env migration.
 
 ### Breaking
 
-- **Local / deploy env rename:** Apps and Compose no longer use product `NEXT_PUBLIC_*` / legacy deploy paths under `deploy/api`. Migrate to `BONDERY_*` via [environment.md](../../contributing/environment.mdx) and `deploy/bondery/.env.example`.
+- **Local / deploy env rename:** Apps and Compose no longer use product `NEXT_PUBLIC_*` / legacy deploy paths under `deploy/api`. Migrate to `BONDERY_*` via [environment.md](../contributing/environment.mdx) and `deploy/bondery/.env.example`.
 - **Local dev ports (Dial BOND):** Bondery apps use the `2663x` port block (`26630` website, `26631` API, `26632` webapp, `26633` extension, `26634` mobile Metro, `26639` email preview). Local Postgres uses **54322**.

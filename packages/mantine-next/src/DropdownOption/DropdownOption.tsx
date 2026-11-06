@@ -1,7 +1,7 @@
 "use client";
 
 import { Box, Group, Menu, Text } from "@mantine/core";
-import { IconCheck } from "@tabler/icons-react";
+import { IconCheck, IconExternalLink } from "@tabler/icons-react";
 import type { CSSProperties, ReactNode } from "react";
 
 /**
@@ -24,6 +24,10 @@ export interface DropdownOptionProps {
   /** Secondary text. Placed per `layout`. */
   description?: string;
   disabled?: boolean;
+  /**
+   * The choice opens a new tab. Draws an external-link mark immediately after the label.
+   */
+  external?: boolean;
   /** Mark shown before the text. A plain string is treated as an emoji. */
   icon?: ReactNode;
   label: string;
@@ -69,6 +73,7 @@ export function DropdownOption({
   badge,
   description,
   disabled = false,
+  external = false,
   icon,
   label,
   layout = "inline",
@@ -98,6 +103,11 @@ export function DropdownOption({
               <Text c={toneColor} fw={description ? 500 : undefined} size="sm">
                 {label}
               </Text>
+              {external ? (
+                <Box c="dimmed" style={{ display: "flex", flexShrink: 0 }}>
+                  <IconExternalLink aria-hidden size={14} />
+                </Box>
+              ) : null}
               {badge ? <SecondaryText>{badge}</SecondaryText> : null}
               {!isStacked && description ? <SecondaryText>{description}</SecondaryText> : null}
             </Group>

@@ -1,6 +1,7 @@
 ---
 title: session_settings_missing
-description: Session Settings Missing
+description: "The settings row for the session user could not be read. Log `request_id` and retry once; escalate if new accounts are created with no row here."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `session_settings_missing` |
 | **doc_url** | `/docs/api/errors/session_settings_missing` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

@@ -4,6 +4,12 @@ import type { ApiErrorBody, ApiErrorResponse } from "./types.js";
 
 export const apiErrorBodySchema = z
   .object({
+    agent_message: z
+      .string()
+      .min(1)
+      .describe(
+        "Recovery instruction for an AI agent: what failed, why, and how to fix the call. Always present.",
+      ),
     code: z.string(),
     details: z.record(z.string(), z.unknown()).optional(),
     doc_url: z.string().url(),

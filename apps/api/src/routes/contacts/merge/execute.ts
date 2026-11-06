@@ -19,6 +19,7 @@ export function registerMergeExecuteRoute(fastify: AppFastifyInstance): void {
         body: mergeContactsBodySchema,
         description: "Merge two duplicate contacts; the left contact survives.",
         response: withOkResponse(mergeContactsResponseSchema, "Contacts merged"),
+        summary: "Merge two contacts",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: mergeContactsBodySchema }, async (ctx, { body }) => {

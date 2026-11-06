@@ -1,6 +1,7 @@
----
+﻿---
 title: service_auth_required
-description: Service Auth Required
+description: No bearer token reached this internal route. Server-to-server calls need the service secret, not a session cookie and never a user API key here.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Not shown to end users — fix server configuration.
 | **code** | `service_auth_required` |
 | **doc_url** | `/docs/api/errors/service_auth_required` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

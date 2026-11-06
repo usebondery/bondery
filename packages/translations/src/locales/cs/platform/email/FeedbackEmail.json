@@ -1,4 +1,10 @@
 {
+  "agentActualHeading": "Co nástroj vrátil:",
+  "agentExpectedHeading": "Co agent očekával:",
+  "agentKindLabel": "Typ hlášení:",
+  "agentRequestIdLabel": "ID požadavku:",
+  "agentSourceHeading": "Nahlášeno AI agentem",
+  "agentToolLabel": "Nástroj:",
   "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
   "generalFeedbackHeading": "Obecná zpětná vazba:",
   "heading": "Zpětná vazba od {{userEmail}}",

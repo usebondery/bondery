@@ -1,5 +1,6 @@
 {
-  "icon": "Layers",
+  "description": "The objects a Bondery account is built from: people, yourself, groups, relationships, interactions, reminders, tags, the map, merge, and chat.",
+  "icon": "Stack2",
   "pages": [
     "people",
     "myself",

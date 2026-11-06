@@ -53,6 +53,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         body: updateAccountInputSchema,
         description: "Update user account metadata (name fields).",
         response: withOkResponse(userAccountResponseSchema, "Updated account"),
+        summary: "Update the account",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: updateAccountInputSchema }, async (ctx, { body }) =>
@@ -70,6 +71,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         description:
           "Delete the authenticated user account and associated storage. Requires a one-shot `X-Bondery-Step-Up` token from `POST /me/step-up`.",
         response: withOkResponse(apiSuccessResponseSchema, "Account deleted"),
+        summary: "Delete the account",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, { request }) => {
@@ -88,6 +90,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
         description: "Fetch the authenticated user's myself contact profile.",
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(contactResponseSchema, "Myself contact"),
+        summary: "Fetch your profile",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ query: avatarTransformQuerySchema }, async (ctx, { query }) => {
@@ -128,6 +131,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Upload a profile photo for the authenticated user.",
         response: withOkResponse(profilePhotoResponseSchema, "Profile photo uploaded"),
+        summary: "Upload your photo",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, { request }) => {
@@ -150,6 +154,7 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Delete the authenticated user's profile photo.",
         response: withOkResponse(apiSuccessResponseSchema, "Profile photo deleted"),
+        summary: "Delete your photo",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx) => deleteProfilePhoto(ctx)),

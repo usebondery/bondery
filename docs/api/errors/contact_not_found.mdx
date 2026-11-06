@@ -1,6 +1,7 @@
 ---
 title: contact_not_found
-description: Contact Not Found
+description: The contact id does not exist or is not visible to this caller. Confirm the id belongs to the authenticated account before you retry the call.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_not_found` when a string exists; other
 | **code** | `contact_not_found` |
 | **doc_url** | `/docs/api/errors/contact_not_found` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

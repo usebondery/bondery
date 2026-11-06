@@ -1,6 +1,7 @@
 ---
 title: account_photo_invalid_format
-description: Account Photo Invalid Format
+description: A photo with an unsupported format or an oversized payload was rejected. Convert the image to a supported type and keep it under the upload limit.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.account_photo_invalid_format` when a string ex
 | **code** | `account_photo_invalid_format` |
 | **doc_url** | `/docs/api/errors/account_photo_invalid_format` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

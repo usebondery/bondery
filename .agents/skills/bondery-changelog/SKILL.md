@@ -25,11 +25,12 @@ metadata:
 
 1. **One product changelog** — [`docs/changelog/index.mdx`](../../../docs/changelog/index.mdx) at `/docs/changelog` indexes shipped versions. Edit [`docs/changelog/unreleased.mdx`](../../../docs/changelog/unreleased.mdx) for in-flight work (unpublished; not in the sidebar).
 2. **Write for users and operators** — explain the outcome and affected area, not implementation trivia or commit history. Prose craft is Orwell-Hemingway in [`bondery-writing`](../bondery-writing/SKILL.md).
-3. **Curate manually** — commit prefixes help classify changes, but no script generates the product changelog.
+3. **Curate manually** — commit prefixes help classify changes, but no script generates the product changelog. A generated description of the form "N new features, N fixes" is rejected by the check.
 4. **Keep `Unreleased` at the top** — collect notable work there until a release is cut.
-5. **Newest release first** — use `## [X.Y.Z] - DD.MM.YYYY` and Bondery's calendar version scheme; sidebar order comes from [`docs/changelog/meta.json`](../../../docs/changelog/meta.json). The hub at `/docs/changelog` is an index of version pages (`/docs/changelog/X.Y.Z`), not a concatenated feed.
-6. **Call out breaking changes** — migrations, environment/config changes, port changes, and temporary client/server incompatibilities need a `Breaking` section with an upgrade path.
-7. **Keep ownership separate** — deployment sequencing stays in the release workflow; API compatibility rules stay in `bondery-api`.
+5. **Every shipped release page needs a `description`** — one sentence of 140 to 160 characters that names the version and the changes a reader would search for. The title is only a version number, so the sentence must stand alone. `pnpm run check:docs:descriptions` enforces this. See [references/format.md](references/format.md#release-page-description).
+6. **Newest release first** — use `## [X.Y.Z] - DD.MM.YYYY` and Bondery's calendar version scheme; sidebar order comes from [`docs/changelog/meta.json`](../../../docs/changelog/meta.json). The hub at `/docs/changelog` is an index of version pages (`/docs/changelog/X.Y.Z`), not a concatenated feed.
+7. **Call out breaking changes** — migrations, environment/config changes, port changes, and temporary client/server incompatibilities need a `Breaking` section with an upgrade path.
+8. **Keep ownership separate** — deployment sequencing stays in the release workflow; API compatibility rules stay in `bondery-api`.
 
 Routine internal refactors, test-only changes, and formatting do not need product changelog entries unless they materially affect contributors, self-hosters, release safety, or user behavior.
 
@@ -51,6 +52,7 @@ Full local-reference index: [references/README.md](references/README.md).
 ## Changelog checklist (before handoff)
 
 - [ ] Only `docs/changelog/unreleased.mdx` was edited (or a release cut touched `docs/changelog/X.Y.Z.mdx` and prepended `X.Y.Z` to `docs/changelog/meta.json`)
+- [ ] The release page has a `description` of 140 to 160 characters that starts with `Bondery X.Y.Z` and names the notable changes
 - [ ] The entry describes a notable user, operator, contributor, security, or release outcome
 - [ ] The entry is under `Unreleased` or the correct newest-first dated version
 - [ ] Category and commit prefix match the change

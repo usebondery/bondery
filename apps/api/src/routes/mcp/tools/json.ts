@@ -6,7 +6,7 @@ import {
 } from "@modelcontextprotocol/server";
 import { isInsufficientScopeError } from "better-auth/oauth2";
 import type { DomainContext } from "../../../domains/_shared/context.js";
-import { toApiErrorResponse } from "../../../lib/platform/errors/to-api-error-response.js";
+import { toAgentToolErrorResponse } from "../../../lib/platform/errors/to-api-error-response.js";
 
 export type McpToolRunResult = CallToolResult | InputRequiredResult;
 
@@ -22,6 +22,16 @@ export function mcpJsonResult(value: unknown, isError = false): CallToolResult {
   };
 }
 
+/**
+ * Runs a tool body and converts any failure to the agent-facing error envelope.
+ *
+ * A failure answers WHAT, WHY, and HOW plus `doc_url`, so the model can repair
+ * the call without a human. REST keeps the bare message — only agent surfaces
+ * get the recovery step.
+ *
+ * Argument validation runs inside the SDK, before this function. The HTTP
+ * layer converts those failures instead; see `tool-error-response.ts`.
+ */
 export async function runMcpTool(
   ctx: DomainContext,
   run: () => Promise<McpToolRunResult>,
@@ -37,6 +47,6 @@ export async function runMcpTool(
     if (isInsufficientScopeError(error)) {
       throw error;
     }
-    return mcpJsonResult(toApiErrorResponse(error, requestId), true);
+    return mcpJsonResult(toAgentToolErrorResponse(error, requestId), true);
   }
 }

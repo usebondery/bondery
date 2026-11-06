@@ -17,7 +17,9 @@ import { domainContextFromUser } from "../../lib/platform/domain-context.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { MCP_TIER } from "../../lib/platform/rate-limit.js";
 import { MCP_SERVER_INSTRUCTIONS } from "./instructions.js";
+import { rewriteMcpFetchResponse } from "./tool-error-response.js";
 import { registerContactMcpTools } from "./tools/contacts.js";
+import { registerFeedbackMcpTools } from "./tools/feedback.js";
 import { registerGroupMcpTools } from "./tools/groups.js";
 import { registerImportantDateMcpTools } from "./tools/important-dates.js";
 import { registerInteractionMcpTools } from "./tools/interactions.js";
@@ -52,6 +54,7 @@ const mcpHttpHandler = createMcpHandler(
       { instructions: MCP_SERVER_INSTRUCTIONS },
     );
     registerContactMcpTools(server, ctx, claims);
+    registerFeedbackMcpTools(server, ctx);
     registerGroupMcpTools(server, ctx, claims);
     registerImportantDateMcpTools(server, ctx, claims);
     registerInteractionMcpTools(server, ctx, claims);
@@ -187,7 +190,8 @@ export const mcpRoutes: AppRoutePlugin = async (fastify) => {
     },
     async (request, reply) => {
       const response = await mcpAuthHandler(toFetchRequest(request));
-      await sendFetchResponse(request, reply, response);
+      const rewritten = await rewriteMcpFetchResponse(response, request.id);
+      await sendFetchResponse(request, reply, rewritten);
     },
   );
 

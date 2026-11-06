@@ -21,6 +21,7 @@ export const syncWsTicketRoutes: AppRoutePlugin = async (fastify): Promise<void>
       schema: {
         description: "Issue a short-lived WebSocket ticket for sync wake notifications.",
         response: withOkResponse(syncWsTicketResponseSchema, "WebSocket ticket"),
+        summary: "Fetch a sync WebSocket ticket",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

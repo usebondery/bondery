@@ -1,5 +1,7 @@
 ---
 title: "1.8.0"
+description: Bondery 1.8.0 replaces Supabase Auth with Better Auth and Prisma, moves billing to Stripe, and renames every health probe to /health/live and /health/ready.
+last_updated: 2026-11-04
 ---
 
 ## [1.8.0] - 01.08.2026
@@ -68,6 +70,6 @@ title: "1.8.0"
 
 ### Breaking
 
-- **Auth and database stack:** Supabase Auth and the Supabase JS client are removed from webapp and mobile. Self-hosters must run `pnpm run setup:dev`, apply Prisma migrations, set `BONDERY_PRIVATE_BETTER_AUTH_SECRETS`, and configure Better Auth OAuth secrets per [environment configuration](../../contributing/environment.mdx).
+- **Auth and database stack:** Supabase Auth and the Supabase JS client are removed from webapp and mobile. Self-hosters must run `pnpm run setup:dev`, apply Prisma migrations, set `BONDERY_PRIVATE_BETTER_AUTH_SECRETS`, and configure Better Auth OAuth secrets per [environment configuration](../contributing/environment.mdx).
 - **Platform admin:** `user_settings.is_admin` is dropped; grant operator access via `user.role = admin` or `BONDERY_PRIVATE_PLATFORM_ADMIN_USER_IDS`.
-- **Supabase Compose services:** The bundled Supabase stack is replaced by Postgres + Prisma. Update `deploy/bondery/.env` and follow [installation](../../deploy/installation.mdx) for the new bootstrap flow.
+- **Supabase Compose services:** The bundled Supabase stack is replaced by Postgres + Prisma. Update `deploy/bondery/.env` and follow [installation](../deploy/installation.mdx) for the new bootstrap flow.

@@ -17,11 +17,19 @@ import {
 import { internal } from "../../lib/platform/errors/http-errors.js";
 
 export type SendFeedbackEmailInput = {
+  /** Agent-facing defect report. `toolName` marks the report as agent-authored. */
+  agentReport?: {
+    actual: string;
+    expected: string;
+    kind: string;
+    requestId?: string;
+    toolName: string;
+  };
+  generalFeedback?: string;
+  npsReason?: string;
+  npsScore?: number;
   userEmail: string;
   userId: string;
-  npsScore: number;
-  npsReason?: string;
-  generalFeedback?: string;
 };
 
 export async function sendFeedbackEmail(
@@ -43,6 +51,7 @@ export async function sendFeedbackEmail(
     const { html, text } = await renderEmailParts(
       FeedbackEmail({
         ...emailDocumentProps(lng, subject),
+        agentReport: input.agentReport,
         copy,
         generalFeedback: input.generalFeedback || undefined,
         npsReason: input.npsReason || undefined,

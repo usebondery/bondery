@@ -1,6 +1,7 @@
 ---
 title: service_unavailable
-description: Service Unavailable
+description: The API returned 503. Retry with backoff, then check Postgres, Redis, and the health endpoints if the status persists for more than one retry.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show temporary outage copy (`common.errors.api.service_unavailable`).
 | **code** | `service_unavailable` |
 | **doc_url** | `/docs/api/errors/service_unavailable` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

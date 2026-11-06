@@ -1,0 +1,222 @@
+/* One reading measure for the page. The head, the standfirst under it, and the
+   foot are siblings of `.docsProse`, not children, so the variable lives on the
+   wrapper they share and every consumer inherits it.
+
+   The unit is `rem`, not `ch`. `ch` resolves against the element's own font size,
+   so `78ch` on a 26px `h2` grew to 1369px while a 16px paragraph stopped at 758px.
+   Every page showed that ragged right edge. 47.35rem is the same 758px for body
+   text at the default 16px root size. */
+.docsPage {
+  --docs-measure: 47.35rem;
+}
+
+.docsPageDescription,
+.docsPageFoot,
+.docsPageHead {
+  max-width: var(--docs-measure);
+  min-width: 0;
+}
+
+/* The prose box takes the whole column. Each direct child limits itself to
+   `--docs-measure` for a readable line length, except a code block, which is full
+   width by default. Give one a `max-width` through its `className` to narrow it. */
+.docsProse {
+  min-width: 0;
+}
+
+.docsProse a.pressableCard,
+.docsProse a.pressableCard:hover {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Scroll offset lives on the heading element (`DocsHeading` sets it inline), so the
+   anchors resolve without a second source of truth here. A bare `<a id>` anchor
+   placed after a heading has zero height; give it the same offset so the heading
+   it belongs to is not hidden under the sticky header. */
+.docsProse > a[id] {
+  display: block;
+  scroll-margin-top: 120px;
+}
+
+/* Narrow a code block that holds one short command, so it does not stretch to the
+   full column. Pass it as `className` on `<PlatformCode>`. */
+.docsCodeNarrow {
+  max-width: 34rem;
+}
+
+/* Docs cards grid. Columns live here, not in a responsive `cols` prop, because
+   that prop makes Mantine inject an inline `<style>` sibling into the prose. A
+   style tag breaks the adjacent-sibling rhythm rules below. */
+.docsGrid {
+  display: grid;
+  gap: var(--mantine-spacing-md);
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 48em) {
+  .docsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* The hash link hangs in the gutter, so it takes no space in the heading.
+   Declared before the rhythm block: it is a positioning concern, and the rhythm
+   rules below carry higher specificity. */
+.docsHeading {
+  position: relative;
+}
+
+.docsHeadingAnchor {
+  color: var(--mantine-color-dimmed);
+  inset-block-start: 0.15em;
+  inset-inline-end: 100%;
+  margin-inline-end: var(--mantine-spacing-xs);
+  opacity: 0;
+  position: absolute;
+}
+
+.docsHeading:hover .docsHeadingAnchor,
+.docsHeading:focus-within .docsHeadingAnchor {
+  opacity: 1;
+}
+
+/* The gutter is too narrow for the icon on small screens and on touch devices. */
+@media (max-width: 61.99em), (hover: none) {
+  .docsHeadingAnchor {
+    display: none;
+  }
+}
+
+/* ── Docs prose vertical rhythm ─────────────────────────────────────────────
+   `Typography` spaces blocks by the previous element's `margin-bottom`, so a
+   block's own `margin-top` is ignored. That model cannot stay consistent: `p`
+   gets 20px, `table` and `ul` get 16px, and any component that adds its own
+   margin doubles the gap.
+
+   Own the rhythm instead. Neutralise every block margin, then apply exactly one
+   gap per adjacency. Components stay margin-free, so wrapping one never drifts.
+
+   Components must not set `margin` in an inline `style` prop. An inline margin
+   wins over every rule below, which silently removes the gap the rhythm wants.
+   `DocsSteps` did exactly that and glued the step list to its heading. Set layout
+   in the component and spacing here instead.
+
+   `.docsRhythm` scopes the rhythm to a container, so a nested block (`<Step>`)
+   gets the same treatment as the article. The class is written twice to raise
+   specificity above `Typography`'s own selectors: a flat `.docsRhythm` would tie
+   with `.m_d08caa0 :where(p)` and lose to the list rule, which carries an extra
+   attribute selector. */
+
+.docsRhythm.docsRhythm
+:where(p, h1, h2, h3, h4, h5, h6, ul, ol, pre, hr, blockquote, table, img, details) {
+  margin-block: 0;
+}
+
+/* Reading measure per block, not per container. Every direct child keeps a
+   comfortable line length. A code block is the exception: it is full width by
+   default, so long commands stay readable. Give one a `max-width` through its
+   `className` when it should stay narrow. */
+.docsRhythm.docsRhythm > *:not([data-code-block]) {
+  max-width: var(--docs-measure);
+}
+
+/* Default gap between body blocks. */
+.docsRhythm.docsRhythm > * + * {
+  margin-block-start: var(--mantine-spacing-lg);
+}
+
+/* A section starts further down than a paragraph. */
+.docsRhythm.docsRhythm > * + .docsHeading {
+  margin-block-start: var(--mantine-spacing-xl);
+}
+
+/* Mantine scales h3 and h4 to 0.8 of that. */
+.docsRhythm.docsRhythm > * + h3.docsHeading,
+.docsRhythm.docsRhythm > * + h4.docsHeading {
+  margin-block-start: calc(0.8 * var(--mantine-spacing-xl));
+}
+
+/* Text sits close under its own heading. */
+.docsRhythm.docsRhythm > .docsHeading + * {
+  margin-block-start: var(--mantine-spacing-xs);
+}
+
+/* ── Docs steps ─────────────────────────────────────────────────────────────
+   The marker is an `xl` ThemeIcon, so its box is 44px and its centre is half that.
+   The connector runs from the marker's bottom edge to the next marker's top edge,
+   which is one list gap below, and uses the same rounded cap as the TOC rail. */
+.docsSteps {
+  --docs-step-gap: var(--mantine-spacing-md);
+  --docs-step-marker: 44px;
+
+  display: grid;
+  gap: var(--docs-step-gap);
+  /* An explicit `minmax(0, 1fr)` column stops the implicit track from sizing to
+     max-content. Without it the row keeps a code block's intrinsic width and the
+     page scrolls sideways below ~660px. */
+  grid-template-columns: minmax(0, 1fr);
+  list-style: none;
+  padding: 0;
+}
+
+.docsSteps .docsStep {
+  /* A grid item defaults to `min-width: auto`, so it refuses to shrink below its
+     content and the `minmax(0, 1fr)` above has no effect without this. */
+  min-width: 0;
+  position: relative;
+}
+
+/* The body takes the rest of the row, so a full-width code block fills the step.
+   Without this the flex item shrinks to its content and leaves the column empty. */
+.docsSteps .docsStepBody {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.docsSteps .docsStep:not(:last-child)::after {
+  background: var(--mantine-color-default-border);
+  border-radius: 999px;
+  bottom: calc(-1 * var(--docs-step-gap));
+  content: "";
+  left: calc(var(--docs-step-marker) / 2);
+  position: absolute;
+  top: var(--docs-step-marker);
+  transform: translateX(-50%);
+  width: 2px;
+}
+
+/* Sidebar column keeps the header and footer side gap. `75em` is the Mantine `lg`
+   breakpoint, the same cutoff as the aside's `visibleFrom="lg"`. */
+[data-docs-body] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 75em) {
+  [data-docs-body] {
+    grid-template-columns:
+      calc(var(--docs-sidebar-width) + var(--mantine-spacing-xl))
+      minmax(0, 1fr);
+  }
+}
+
+.docsPageRail {
+  display: none;
+}
+
+@media (min-width: 62em) {
+  .docsPageWithRail {
+    display: grid;
+    gap: var(--mantine-spacing-lg);
+    grid-template-columns: minmax(0, 1fr) 15rem;
+  }
+
+  .docsPageWithRail > * {
+    min-width: 0;
+  }
+
+  .docsPageRail {
+    display: block;
+  }
+}

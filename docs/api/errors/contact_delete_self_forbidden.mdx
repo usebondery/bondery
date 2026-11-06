@@ -1,6 +1,7 @@
 ---
 title: contact_delete_self_forbidden
-description: Contact Delete Self Forbidden
+description: The request tried to delete the contact marked as Myself. Exclude the Myself id from the delete set, and keep the profile record fully intact.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_delete_self_forbidden` when a string e
 | **code** | `contact_delete_self_forbidden` |
 | **doc_url** | `/docs/api/errors/contact_delete_self_forbidden` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

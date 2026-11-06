@@ -1,6 +1,7 @@
 ---
 title: contact_delete_invalid_body
-description: Contact Delete Invalid Body
+description: The delete request body failed validation. Send the contact ids array the schema expects, and confirm each id belongs to this authenticated account.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_delete_invalid_body` when a string exi
 | **code** | `contact_delete_invalid_body` |
 | **doc_url** | `/docs/api/errors/contact_delete_invalid_body` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

@@ -11,7 +11,7 @@ export function Terms() {
 
       <Divider my="xl" />
 
-      <Title id="status" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="status" mb="md" order={2}>
         1. Draft Status
       </Title>
       <Text mb="lg">
@@ -21,7 +21,7 @@ export function Terms() {
 
       <Divider my="xl" />
 
-      <Title id="scope" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="scope" mb="md" order={2}>
         2. Planned Coverage
       </Title>
       <Text mb="lg">
@@ -31,7 +31,7 @@ export function Terms() {
 
       <Divider my="xl" />
 
-      <Title id="timeline" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="timeline" mb="md" order={2}>
         3. Publication Timeline
       </Title>
       <Text mb="lg">
@@ -41,7 +41,7 @@ export function Terms() {
 
       <Divider my="xl" />
 
-      <Title id="contact" mb="md" order={2} style={{ scrollMarginTop: 120 }}>
+      <Title id="contact" mb="md" order={2}>
         4. Contact
       </Title>
       <Text mb="lg">For legal questions, contact us at team@usebondery.com.</Text>

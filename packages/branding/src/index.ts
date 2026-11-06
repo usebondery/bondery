@@ -5,6 +5,12 @@
  */
 
 export {
+  BRAND_MARKS,
+  type BrandMarkName,
+  THEMED_BRAND_MARKS,
+  type ThemedBrandMarkName,
+} from "#brandMarks.generated.js";
+export {
   BRAND_PRIMARY_COLOR,
   BRAND_PRIMARY_HOVER,
   BRAND_PRIMARY_PRESS,

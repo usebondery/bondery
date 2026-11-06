@@ -66,6 +66,7 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
           },
           ...standardErrorResponses,
         },
+        summary: "Stream a chat reply",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (

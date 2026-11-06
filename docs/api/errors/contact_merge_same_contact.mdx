@@ -1,6 +1,7 @@
 ---
 title: contact_merge_same_contact
-description: Contact Merge Same Contact
+description: "The merge named the same contact twice. Pick two different ids: the primary contact that you want to keep, and the duplicate to fold into it."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_merge_same_contact` when a string exis
 | **code** | `contact_merge_same_contact` |
 | **doc_url** | `/docs/api/errors/contact_merge_same_contact` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

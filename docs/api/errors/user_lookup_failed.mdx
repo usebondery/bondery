@@ -1,6 +1,7 @@
 ---
 title: user_lookup_failed
-description: User Lookup Failed
+description: "The user lookup behind this route failed. Log `request_id`, retry once, and confirm the session user row exists in Postgres for this account."
+last_updated: 2026-07-29
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `user_lookup_failed` |
 | **doc_url** | `/docs/api/errors/user_lookup_failed` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

@@ -1,6 +1,16 @@
-import { GithubInfo } from "fumadocs-ui/components/github-info";
+import { GITHUB_REPO_WEB_URL } from "@bondery/helpers";
+import { LinkCard } from "@bondery/mantine-next";
+import { IconBrandGithub } from "@tabler/icons-react";
 
-/** Bondery monorepo card — use for repository mentions in docs. */
+/** Tile that opens the Bondery repository. */
 export function BonderyRepo() {
-  return <GithubInfo owner="usebondery" repo="bondery" />;
+  return (
+    <LinkCard
+      description="Source code, issues, and pull requests."
+      external
+      href={GITHUB_REPO_WEB_URL}
+      icon={<IconBrandGithub size={18} />}
+      title="Bondery on GitHub"
+    />
+  );
 }

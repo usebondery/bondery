@@ -25,6 +25,7 @@ export const syncBootstrapRoutes: AppRoutePlugin = async (fastify): Promise<void
         description:
           "Full sync bootstrap — returns all user tables and the latest server sequence.",
         response: withOkResponse(syncBootstrapResponseSchema, "Sync bootstrap snapshot"),
+        summary: "Bootstrap sync",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request, reply) => {

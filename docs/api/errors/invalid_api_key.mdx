@@ -1,6 +1,7 @@
 ---
 title: invalid_api_key
-description: Invalid Api Key
+description: "The bearer token looks like a Bondery API key but did not validate. Check the whole `bondery_key_<id>_<secret>` string, and match the pepper."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show a generic authentication failure — do not leak whether the id or secret f
 | **code** | `invalid_api_key` |
 | **doc_url** | `/docs/api/errors/invalid_api_key` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

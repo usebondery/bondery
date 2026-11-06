@@ -1,11 +1,15 @@
 ---
 title: "Export your Bondery data"
-icon: Download
+description: Download a ZIP of your people, groups, tags, and interactions, then read it back into Bondery later. See what the export still leaves out of it.
+icon: FileExport
+last_updated: 2026-11-04
 ---
 
-You can download a ZIP of your Bondery data from **Settings → Export**. The same export is available from the command palette (**Export data**).
+## Download the export
 
-Use this when you want a copy of your people, groups, tags, and interactions. You can import this ZIP back into Bondery later from **Settings → Import → Bondery JSON**. Keep the ZIP as-is — do not rename or rearrange the files inside it.
+Download the ZIP from **Settings → Export**. The same export is available from the command palette (**Export data**). Keep the ZIP as it is. Do not rename or rearrange the files inside it.
+
+Import the ZIP back into Bondery later from **Settings → Import → Bondery JSON**.
 
 ## Bondery export vs vCard
 
@@ -43,72 +47,3 @@ Servers that still cap ZIP archives at 32 entries reject avatar-rich ZIPs. Upgra
 This is not a complete account dump (no chat, billing, or API keys).
 
 API: `GET /me/export` (ZIP), `GET /me/export/summary` (counts), `POST /me/import` (ZIP).
-
----
-
-## Format appendix (self-hosters)
-
-`bonderyVersion` is the Bondery app version (from `apps/api/package.json`). That is the schema version.
-
-**manifest.json**
-
-```json
-{
-  "format": "bondery-export",
-  "schemaType": "Manifest",
-  "bonderyVersion": "1.9.1",
-  "exportedAt": "2026-08-19T00:00:00.000Z",
-  "counts": {
-    "people": 0,
-    "groups": 0,
-    "tags": 0,
-    "interactions": 0,
-    "relationships": 0
-  },
-  "includedTypes": [
-    "Myself",
-    "People",
-    "Groups",
-    "Tags",
-    "Interactions",
-    "Relationships"
-  ],
-  "files": [{ "name": "people.json", "schemaType": "People", "count": 0 }]
-}
-```
-
-**Each data file**
-
-```json
-{
-  "bonderyVersion": "1.9.1",
-  "schemaType": "People",
-  "records": []
-}
-```
-
-`schemaType` values: `Myself`, `People`, `Groups`, `Tags`, `Interactions`, `Relationships`, `Manifest`.
-
-Group and tag records include a `members` array:
-
-```json
-{
-  "bonderyVersion": "1.9.1",
-  "schemaType": "Groups",
-  "records": [
-    {
-      "id": "…",
-      "label": "Friends",
-      "color": "#aabbcc",
-      "emoji": "👋",
-      "createdAt": "2026-08-19T00:00:00.000Z",
-      "updatedAt": "2026-08-19T00:00:00.000Z",
-      "members": [
-        { "id": "…", "personId": "…", "createdAt": "2026-08-19T00:00:00.000Z" }
-      ]
-    }
-  ]
-}
-```
-
-Import writes `members` as `people_groups` / `people_tags` rows.

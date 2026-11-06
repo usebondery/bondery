@@ -1,6 +1,7 @@
 ---
 title: import_bondery_invalid
-description: Import Bondery Invalid
+description: "The uploaded file is not a valid Bondery export. Upload the whole `bondery-export-YYYY-MM-DD.zip` without renaming, unpacking, or editing it."
+last_updated: 2026-08-27
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show `common.errors.api.import_bondery_invalid` (or the Settings import error co
 | **code** | `import_bondery_invalid` |
 | **doc_url** | `/docs/api/errors/import_bondery_invalid` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

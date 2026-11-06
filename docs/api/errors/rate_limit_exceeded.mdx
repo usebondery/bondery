@@ -1,6 +1,7 @@
 ---
 title: rate_limit_exceeded
-description: Rate Limit Exceeded
+description: "The rate limiter blocked the request. Back off, then retry with an exponential delay, and read `Retry-After` whenever the header is present."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Ask the user to wait (`common.errors.api.rate` or rate-limit copy).
 | **code** | `rate_limit_exceeded` |
 | **doc_url** | `/docs/api/errors/rate_limit_exceeded` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

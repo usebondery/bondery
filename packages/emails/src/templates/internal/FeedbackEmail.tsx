@@ -6,6 +6,12 @@ import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { descriptionStyle, EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
 
 export interface FeedbackEmailCopy {
+  agentActualHeading: string;
+  agentExpectedHeading: string;
+  agentKindLabel: string;
+  agentRequestIdLabel: string;
+  agentSourceHeading: string;
+  agentToolLabel: string;
   description: string;
   generalFeedbackHeading: string;
   heading: string;
@@ -20,11 +26,20 @@ export interface FeedbackEmailCopy {
   userIdLabel: string;
 }
 
+export interface FeedbackEmailAgentReport {
+  actual: string;
+  expected: string;
+  kind: string;
+  requestId?: string;
+  toolName: string;
+}
+
 export interface FeedbackEmailProps extends EmailDocumentProps {
+  agentReport?: FeedbackEmailAgentReport;
   copy?: FeedbackEmailCopy;
   generalFeedback?: string;
   npsReason?: string;
-  npsScore: number;
+  npsScore?: number;
   timestamp: string;
   userEmail: string;
   userId: string;
@@ -51,13 +66,14 @@ function FieldBlock({ label, value }: { label: string; value: string }) {
 }
 
 export default function FeedbackEmail({
+  agentReport,
   chrome,
   copy = defaultFeedbackCopy,
   dir,
   generalFeedback,
   lang,
   npsReason,
-  npsScore = 8,
+  npsScore,
   timestamp = "2026-01-01T12:00:00.000Z",
   title,
   userEmail = "user@example.com",
@@ -65,13 +81,17 @@ export default function FeedbackEmail({
   websiteUrl,
 }: FeedbackEmailProps) {
   const heading = copy.heading.replace("{{userEmail}}", userEmail);
+  const scoreText = npsScore === undefined ? copy.notProvided : String(npsScore);
   const description = copy.description
-    .replace("{{npsScore}}", String(npsScore))
+    .replace("{{npsScore}}", scoreText)
     .replace("{{timestamp}}", timestamp);
   const preview = clipEmailPreview(
-    copy.preview.replace("{{userEmail}}", userEmail).replace("{{npsScore}}", String(npsScore)),
+    copy.preview.replace("{{userEmail}}", userEmail).replace("{{npsScore}}", scoreText),
   );
-  const npsScoreValue = copy.npsScoreValue.replace("{{npsScore}}", String(npsScore));
+  const npsScoreValue =
+    npsScore === undefined
+      ? copy.notProvided
+      : copy.npsScoreValue.replace("{{npsScore}}", String(npsScore));
   const submittedAt = copy.submittedAt.replace("{{timestamp}}", timestamp);
 
   return (
@@ -94,6 +114,21 @@ export default function FeedbackEmail({
       >
         <FieldBlock label={copy.userEmailLabel} value={userEmail} />
         <FieldBlock label={copy.userIdLabel} value={userId} />
+        {agentReport ? (
+          <>
+            <Text style={{ ...descriptionStyle, fontWeight: 600, marginBottom: "8px" }}>
+              {copy.agentSourceHeading}
+            </Text>
+            <FieldBlock label={copy.agentToolLabel} value={agentReport.toolName} />
+            <FieldBlock label={copy.agentKindLabel} value={agentReport.kind} />
+            <FieldBlock label={copy.agentExpectedHeading} value={agentReport.expected} />
+            <FieldBlock label={copy.agentActualHeading} value={agentReport.actual} />
+            <FieldBlock
+              label={copy.agentRequestIdLabel}
+              value={agentReport.requestId || copy.notProvided}
+            />
+          </>
+        ) : null}
         <FieldBlock label={copy.npsScoreLabel} value={npsScoreValue} />
         <Text style={{ ...descriptionStyle, fontWeight: 600, marginBottom: "8px" }}>
           {copy.npsReasonHeading}

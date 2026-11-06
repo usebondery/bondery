@@ -1,6 +1,7 @@
 ---
 title: contact_ids_empty
-description: Contact Ids Empty
+description: The request sent an empty contact id list. Send at least one contact id in the body, and keep the Myself profile id out of any bulk operation.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.contact_ids_empty` when a string exists; other
 | **code** | `contact_ids_empty` |
 | **doc_url** | `/docs/api/errors/contact_ids_empty` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

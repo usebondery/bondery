@@ -36,11 +36,12 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: [
       "@tabler/icons-react",
-      "lucide-react",
       "@bondery/mantine-next",
+      "@mantine/code-highlight",
       "@mantine/core",
       "@mantine/hooks",
       "@mantine/notifications",
+      "@mantine/spotlight",
     ],
     turbopackPluginRuntimeStrategy: "workerThreads",
     turbopackRustReactCompiler: true,
@@ -95,9 +96,6 @@ const nextConfig: NextConfig = {
   pageExtensions: ["ts", "tsx", "md", "mdx"],
   poweredByHeader: false,
   reactCompiler: true,
-  // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
-  // live in src/app/**/route.ts so they can import @bondery/helpers.
-  // Public URLs: server reads BONDERY_PUBLIC_*; client leaves get them as RSC props.
   async redirects() {
     return [
       {
@@ -117,16 +115,17 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)
+  // live in src/app/**/route.ts so they can import @bondery/helpers.
+  // Public URLs: server reads BONDERY_PUBLIC_*; client leaves get them as RSC props.
+  async rewrites() {
+    return [
+      { destination: "/llms.mdx/docs/content.md", source: "/docs.md" },
+      { destination: "/llms.mdx/docs/:path*/content.md", source: "/docs/:path*.md" },
+    ];
+  },
   serverExternalPackages: ["@takumi-rs/core"],
   turbopack: {
-    // Docs MDX lives at repo `docs/` and imports app deps (e.g. lucide-react).
-    // Isolated installs keep those under apps/website/node_modules only.
-    // Turbopack resolveAlias rejects absolute Windows paths ("windows imports
-    // are not implemented yet"). Alias targets are relative to the app project
-    // dir (`apps/website`), even when `root` is the monorepo.
-    resolveAlias: {
-      "lucide-react": "./node_modules/lucide-react",
-    },
     root: monorepoRoot,
   },
   typedRoutes: true,

@@ -7,9 +7,11 @@
  * `verify-access-jwt.ts`) so inject tests and hairpin-unfriendly hosts work.
  */
 import { createResourceServerChallenge } from "@better-auth/oauth-provider";
+import { buildAgentMessage } from "@bondery/schemas/errors";
 import { isInsufficientScopeError } from "better-auth/oauth2";
 import { APIError } from "better-call";
 import type { JWTPayload } from "jose";
+import { URLS } from "../platform/config.js";
 import { assertActiveCimdMcpOAuthClient } from "./assert-mcp-oauth-client.js";
 import {
   MCP_READ_SCOPE,
@@ -20,6 +22,12 @@ import {
 import { verifyBonderyAccessJwt } from "./verify-access-jwt.js";
 
 export const MCP_CHALLENGE_SCOPES = [MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
+
+/** Product docs page an agent reads when MCP auth or scope fails. */
+export function mcpDocsUrl(): string {
+  const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  return `${website}/docs/bondery/mcp`;
+}
 
 /**
  * RFC 9728 + JSON-RPC 401 used when MCP Bearer is missing or invalid.
@@ -37,10 +45,22 @@ export function mcpUnauthorizedChallenge(
   }
   const headers = new Headers(challenge.headers);
   headers.set("Content-Type", "application/json");
+  // JSON-RPC keeps its numeric error code (the protocol requires it), so
+  // `agent_message` rides in `error.data` where it cannot break the envelope.
+  const agentMessage =
+    challenge.statusCode === 403
+      ? "This tool needs Full access. Ask the user to reconnect with Full access, then retry the call."
+      : buildAgentMessage("auth_required", "MCP authorization failed");
   return new Response(
     JSON.stringify({
       error: {
         code: -32000,
+        data: {
+          agent_message: agentMessage,
+          doc_url: mcpDocsUrl(),
+          how_to_fix:
+            "Reconnect this client and approve access. A write tool needs Full access (mcp:write).",
+        },
         message: challenge.message,
       },
       id: null,

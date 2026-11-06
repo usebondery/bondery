@@ -57,6 +57,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         params: uuidParamSchema,
         querystring: avatarTransformQuerySchema,
         response: withOkResponse(contactRelationshipsResponseSchema, "Contact relationships"),
+        summary: "List relationships for a contact",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -76,6 +77,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
           ...withCreatedResponse(contactRelationshipResponseSchema, "Relationship created"),
           ...conflictResponse,
         },
+        summary: "Create a relationship",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -103,6 +105,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
           ...withOkResponse(contactRelationshipResponseSchema, "Relationship updated"),
           ...conflictResponse,
         },
+        summary: "Update a relationship",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(
@@ -127,6 +130,7 @@ export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
         description: "Delete a relationship for a contact.",
         params: contactRelationshipIdParamSchema,
         response: withOkResponse(messageResponseSchema, "Relationship deleted"),
+        summary: "Delete a relationship",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ params: contactRelationshipIdParamSchema }, async (ctx, { params }) => {

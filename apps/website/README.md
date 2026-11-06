@@ -37,15 +37,6 @@ Do not run `pnpm run dev -w website`. pnpm forwards `-w website` into the script
 
 `dev` sets `PORTLESS_TLD=test`. Mailpit UI (after `pnpm run start:mailpit` from the repo root): `https://mail.usebondery.test`.
 
-### Migrate from `*.usebondery.localhost`
-
-1. Stop the old proxy: `pnpm exec portless proxy stop`.
-2. Start with `pnpm run dev` (`PORTLESS_TLD=test`).
-3. On Windows, run elevated `pnpm exec portless hosts sync`.
-4. Clear stale `*.usebondery.localhost` hosts entries if they remain.
-5. Keep `pnpm exec portless trust` (do not re-trust unless the CA is missing).
-6. Point OAuth callbacks at `https://api.usebondery.test/auth/callback/...`.
-
 **HSTS note:** `next.config.ts` sends Strict-Transport-Security. After you visit the Portless HTTPS host, the browser may keep requiring HTTPS for that hostname until you clear HSTS for it.
 
 ### Classic localhost (escape hatch)

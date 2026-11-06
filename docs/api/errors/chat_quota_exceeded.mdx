@@ -1,6 +1,7 @@
 ---
 title: chat_quota_exceeded
-description: Chat Quota Exceeded
+description: The assistant allowance for this plan is spent. Raise the plan limit, or wait for the quota window to reset before sending another chat message.
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Translate with `common.errors.api.chat_quota_exceeded` when a string exists; oth
 | **code** | `chat_quota_exceeded` |
 | **doc_url** | `/docs/api/errors/chat_quota_exceeded` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

@@ -29,7 +29,13 @@ function LinkFavicon({ host, src }: { host: string; src: string }) {
   const [failed, setFailed] = useState(() => failedFaviconHosts.has(host));
 
   if (failed) {
-    return <IconWorld aria-hidden size={FAVICON_SIZE} style={{ flexShrink: 0 }} />;
+    return (
+      <IconWorld
+        aria-hidden
+        size={FAVICON_SIZE}
+        style={{ alignSelf: "center", display: "block", flexShrink: 0, margin: 0 }}
+      />
+    );
   }
 
   return (
@@ -45,7 +51,7 @@ function LinkFavicon({ host, src }: { host: string; src: string }) {
         setFailed(true);
       }}
       src={src}
-      style={{ borderRadius: 2, flexShrink: 0 }}
+      style={{ alignSelf: "center", borderRadius: 2, display: "block", flexShrink: 0, margin: 0 }}
       width={FAVICON_SIZE}
     />
   );
@@ -93,7 +99,11 @@ export function ExternalLink({
       <span>{children}</span>
       {showExternalIcon ? (
         <>
-          <IconExternalLink aria-hidden size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
+          <IconExternalLink
+            aria-hidden
+            size={14}
+            style={{ alignSelf: "center", flexShrink: 0, margin: 0, opacity: 0.6 }}
+          />
           <VisuallyHidden>{` ${newTabLabel}`}</VisuallyHidden>
         </>
       ) : null}

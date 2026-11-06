@@ -7,7 +7,6 @@ import "@mantine/dropzone/styles.css";
 import "@mantine/spotlight/styles.css";
 import "@mantine/nprogress/styles.css";
 import "@mantine/code-highlight/styles.css";
-import "@/components/code-highlight-hljs.css";
 import "flag-icons/css/flag-icons.min.css";
 import "@bondery/mantine-next/styles";
 import { ColorSchemeScript, mantineHtmlProps } from "@mantine/core";

@@ -17,6 +17,7 @@ export function registerContactMapRoutes(fastify: AppFastifyInstance): void {
           mapAddressPinsResponseSchema,
           "Address map pins within the bounding box",
         ),
+        summary: "List address map pins",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -32,6 +33,7 @@ export function registerContactMapRoutes(fastify: AppFastifyInstance): void {
         description: "Fetch lightweight map pins for contacts within a bounding box.",
         querystring: mapPinsQuerySchema,
         response: withOkResponse(mapPinsResponseSchema, "Map pins within the bounding box"),
+        summary: "List contact map pins",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

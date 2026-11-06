@@ -1,0 +1,204 @@
+/* Docs navigation rail. One row is 32px tall, so a long tree stays scannable in the
+   19rem column. Group labels own the spacing between sections. */
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-bottom: var(--mantine-spacing-xs);
+}
+
+/* The label is a heading for the rows below it, so it starts on the same left line as
+   the row surface. Rows use full-bleed backgrounds, so any inline inset here reads as a
+   gap between the group title and the list it names. */
+.groupLabel {
+  color: var(--mantine-color-dimmed);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  line-height: 1.4;
+  padding-block: 1.125rem 0.375rem;
+  padding-inline: 0;
+  text-transform: uppercase;
+}
+
+/* The first group needs a lead-in, because it follows the section switcher. */
+.nav > .groupLabel:first-child {
+  padding-top: 0.375rem;
+}
+
+/* Children of a folder indent as a block, so nested rows never re-apply an indent.
+   The rail must hold three levels plus a method badge, so each level is 10px. */
+.nest {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-left: 0.1875rem;
+  margin-top: 1px;
+  padding-left: 0.4375rem;
+}
+
+.row,
+.rowPlain {
+  align-items: center;
+  border-radius: var(--mantine-radius-sm);
+  display: flex;
+  flex: 1 1 auto;
+  font-size: var(--mantine-font-size-sm);
+  gap: 0.5rem;
+  line-height: 1.45;
+  min-height: 2rem;
+  min-width: 0;
+  padding: 0.3125rem 0.625rem;
+  position: relative;
+  text-decoration: none;
+  transition: background-color 120ms ease;
+}
+
+.row {
+  color: var(--mantine-color-text);
+}
+
+.row:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+/* Tint plus a short rule: the same language as the "On this page" rail. The label
+   stays at full text contrast, because the tint alone already marks the row. */
+.row[data-active="true"] {
+  background: var(--mantine-primary-color-light);
+  color: var(--mantine-color-bright);
+  font-weight: 500;
+}
+
+.row[data-active="true"]:hover {
+  background: var(--mantine-primary-color-light-hover);
+}
+
+.row[data-active="true"]::before,
+.folder[data-active="true"]::before {
+  background: var(--mantine-primary-color-filled);
+  border-radius: 999px;
+  content: "";
+  height: 1rem;
+  left: 0.125rem;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+}
+
+/* Slot for the row icon. It renders only when a row has an icon, so a row without one
+   starts its label at the row edge instead of holding an empty gap. */
+.icon {
+  align-items: center;
+  color: var(--mantine-color-dimmed);
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  min-width: 1.0625rem;
+}
+
+.icon svg {
+  height: 1rem;
+  width: 1rem;
+  stroke-width: 1.7;
+}
+
+.row[data-active="true"] .icon,
+.folder[data-active="true"] .icon {
+  color: inherit;
+}
+
+.label {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The method chip trails the title, so no verb length can move the title edge.
+   All chips share one right edge, because the label above absorbs the slack. */
+.badgeSlot {
+  align-items: center;
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.badgeSlot > * {
+  font-size: 0.5625rem;
+  height: 1rem;
+  letter-spacing: 0;
+  padding-inline: 0.21875rem;
+}
+
+/* Endpoint rows are three levels deep and hold the longest titles. They give up a
+   little type size only. The row geometry stays the same, so the title column
+   advances by exactly one indent step per level. */
+.nest .nest .row,
+.nest .nest .rowPlain {
+  font-size: 0.8125rem;
+}
+
+/* A folder row is a link plus its own toggle, so the container owns the states. */
+.folder {
+  align-items: center;
+  border-radius: var(--mantine-radius-sm);
+  display: flex;
+  position: relative;
+  transition: background-color 120ms ease;
+}
+
+.folder:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+.folder[data-active="true"] {
+  background: var(--mantine-primary-color-light);
+  color: var(--mantine-color-bright);
+}
+
+.folder[data-active="true"] .icon {
+  color: var(--mantine-primary-color-filled);
+}
+
+.folder[data-active="true"]:hover {
+  background: var(--mantine-primary-color-light-hover);
+}
+
+/* Ancestor of the current page: the trail stays readable without competing
+   with the active row. */
+.folder[data-ancestor="true"] > .rowPlain,
+.folder[data-ancestor="true"] > .row {
+  font-weight: 500;
+}
+
+.toggle {
+  align-items: center;
+  border-radius: var(--mantine-radius-xs);
+  color: var(--mantine-color-dimmed);
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: center;
+  margin-right: 0.25rem;
+  padding: 0.25rem;
+}
+
+.toggle:hover {
+  background: var(--mantine-color-default-hover);
+  color: var(--mantine-color-text);
+}
+
+.chevron {
+  transition: transform 150ms ease;
+}
+
+.chevron[data-expanded="true"] {
+  transform: rotate(90deg);
+}
+
+.scroll {
+  min-height: 0;
+}

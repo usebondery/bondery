@@ -74,6 +74,7 @@ export const subscriptionRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Get the authenticated user's subscription status and chat quota.",
         response: withOkResponse(subscriptionStatusResponseSchema, "Subscription status"),
+        summary: "Fetch your subscription",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {

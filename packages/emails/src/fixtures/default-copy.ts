@@ -47,6 +47,12 @@ export const defaultAccountDeletedCopy: AccountDeletedEmailCopy = {
 };
 
 export const defaultFeedbackCopy: FeedbackEmailCopy = {
+  agentActualHeading: "What the tool returned:",
+  agentExpectedHeading: "What the agent expected:",
+  agentKindLabel: "Report kind:",
+  agentRequestIdLabel: "Request ID:",
+  agentSourceHeading: "Reported by an AI agent",
+  agentToolLabel: "Tool:",
   description: "NPS {{npsScore}} / 10 · {{timestamp}}",
   generalFeedbackHeading: "General feedback:",
   heading: "Feedback from {{userEmail}}",

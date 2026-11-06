@@ -1,6 +1,8 @@
 ---
 title: "API container (GHCR + external Redis)"
+description: Run the API image from GHCR against an external Redis and Postgres. Covers the container env contract, health checks, and the deploy pipeline.
 icon: Container
+last_updated: 2026-11-04
 ---
 
 <Callout type="info">
@@ -43,7 +45,7 @@ Three layers — do not confuse them:
 
 **No minor-line tags** (e.g. `1.7`) — only full `X.Y.Z` semver.
 
-### Channel tag naming (`beta` vs alternatives)
+### Channel tag naming
 
 | Tag | Who uses it | Fits Bondery? |
 |-----|-------------|---------------|
@@ -58,7 +60,7 @@ Three layers — do not confuse them:
 
 ## GHCR package UI
 
-### OS tab: `linux/amd64` and `unknown/unknown`
+### OS tab labels
 
 | OS | What it is |
 |----|------------|
@@ -85,7 +87,7 @@ Images are **`linux/amd64` only** (Hetzner CX32).
 
 Packages are **public** so self-hosters can pull without GitHub credentials.
 
-### `release` branch
+### Release branch
 
 Production git tags must point at commits on `release`.
 
@@ -109,13 +111,18 @@ See the [`bondery-release`](../../.agents/skills/bondery-release/SKILL.md) skill
 
 ## Unified Compose
 
-```bash
-docker network create dokploy-network   # once
+<PlatformCode
+  posix={`docker network create dokploy-network   # once
 cd deploy/bondery
 cp .env.example .env
 # Fill secrets; set BONDERY_INFRA_VERSION to semver or omit for :production
-docker compose up -d api webapp
-```
+docker compose up -d api webapp`}
+  windows={`docker network create dokploy-network   # once
+cd deploy/bondery
+Copy-Item .env.example .env
+# Fill secrets; set BONDERY_INFRA_VERSION to semver or omit for :production
+docker compose up -d api webapp`}
+/>
 
 Attach Traefik only via committed labels (`BONDERY_INFRA_API_DOMAIN` / `BONDERY_INFRA_WEBAPP_DOMAIN`). Never expose Redis.
 
@@ -125,7 +132,7 @@ Full Dokploy runbook: [dokploy.md](./dokploy.mdx).
 
 Use when Redis is already managed outside this stack.
 
-### Dokploy — Docker Image fields
+### Dokploy Docker Image fields
 
 Use the **full image reference**. If you enter only `usebondery/api:production`, Docker pulls from **Docker Hub**, not GHCR.
 
@@ -154,8 +161,8 @@ docker pull ghcr.io/usebondery/api:1.7.0
 
 ## Local smoke test
 
-```bash
-cd deploy/bondery && cp .env.example .env
+<PlatformCode
+  posix={`cd deploy/bondery && cp .env.example .env
 # add secrets, then:
 docker network create dokploy-network || true
 cp docker-compose.override.yml.example docker-compose.override.yml
@@ -163,7 +170,17 @@ docker compose up -d
 
 # Or build the API image locally (external Redis style)
 docker build -f apps/api/Dockerfile -t api:local .
-docker run --rm -p 26631:26631 --env-file apps/api/.env.production.local api:local
-```
+docker run --rm -p 26631:26631 --env-file apps/api/.env.production.local api:local`}
+  windows={`cd deploy/bondery
+Copy-Item .env.example .env
+# add secrets, then:
+docker network create dokploy-network   # reports an existing network on a re-run; safe to ignore
+Copy-Item docker-compose.override.yml.example docker-compose.override.yml
+docker compose up -d
+
+# Or build the API image locally (external Redis style)
+docker build -f apps/api/Dockerfile -t api:local .
+docker run --rm -p 26631:26631 --env-file apps/api/.env.production.local api:local`}
+/>
 
 Boot validates required env via `assertRequiredEnvAtStartup` (same list as `pnpm run check:env -w api`) before Fastify listens.

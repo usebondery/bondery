@@ -1,5 +1,6 @@
 import {
   type ApiErrorCode,
+  buildAgentMessage,
   getErrorDefinition,
   getErrorDocUrl,
   isApiErrorCode,
@@ -25,6 +26,7 @@ export function buildNestedErrorResponse(params: BuildNestedErrorResponseParams)
 
   const body = {
     error: {
+      agent_message: buildAgentMessage(code, params.message),
       code,
       doc_url: getErrorDocUrl(code, websiteBaseUrl()),
       message: params.message,

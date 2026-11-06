@@ -1,0 +1,175 @@
+# Self-hosted Bondery stack: webapp + API + Redis + Postgres + SeaweedFS.
+#
+# Status: copy of docker-compose.yml. The split is staged and not active yet.
+# Until the hosted variant proves itself on the staging deploy, docker-compose.yml
+# stays the entrypoint for Dokploy and for self-hosters. Do not point Dokploy at
+# this file yet.
+#
+# Local laptop Redis: deploy/bondery/docker-compose.dev-redis.yml (port 26636) — do not use this file for DX.
+# Local laptop Postgres: deploy/bondery/docker-compose.dev-db.yml or packages/db migrations.
+#
+# Advanced external Redis: run the API image alone with BONDERY_PRIVATE_REDIS_URL set to your host.
+# See README.md and docs/deploy/api-container.md.
+#
+# Prerequisite (Traefik / Dokploy): docker network create dokploy-network
+# Host-port self-host (no Traefik): copy docker-compose.override.yml.example → docker-compose.override.yml
+#
+# Shared-network DNS: every service on dokploy-network publishes
+# ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-{api|webapp|storage}. Look those
+# names up — never the Compose service names api / webapp / seaweedfs-s3
+# (they collide when production and beta share dokploy-network).
+# db / redis / Seaweed cluster also get prefix aliases on private `internal`.
+#
+# Public HTTPS URLs are derived from *_DOMAIN (Traefik Host rules). Override only if you need
+# non-HTTPS or non-standard ports (uncommon behind Traefik + Let's Encrypt).
+#
+# Dokploy entrypoint: this file (includes docker-compose.postgres.yml + docker-compose.seaweedfs.yml).
+
+include:
+  - path: docker-compose.postgres.yml
+  - path: docker-compose.seaweedfs.yml
+
+services:
+  redis:
+    command: redis-server --appendonly yes --save 60 1
+    healthcheck:
+      interval: 5s
+      retries: 5
+      start_period: 5s
+      test: ["CMD", "redis-cli", "ping"]
+      timeout: 3s
+    image: redis:8.10
+    networks:
+      internal:
+        aliases:
+          - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  api:
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      seaweedfs-s3:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
+      BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
+      BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
+      BONDERY_PRIVATE_REDIS_URL: ${BONDERY_PRIVATE_REDIS_URL:-redis://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379}
+      DATABASE_URL: postgresql://postgres:${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}@${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-db:5432/bondery
+      BONDERY_PRIVATE_S3_ENDPOINT: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8333
+      BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
+      BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
+      BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
+      BONDERY_PUBLIC_STORAGE_URL: https://${BONDERY_INFRA_STORAGE_DOMAIN:?BONDERY_INFRA_STORAGE_DOMAIN must be set}
+      BONDERY_INFRA_GIT_SHA: ${BONDERY_INFRA_GIT_SHA:-}
+      BONDERY_INFRA_VERSION: ${BONDERY_INFRA_VERSION:-}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 45s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:26631/health/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      timeout: 5s
+    image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-production}
+    pre_start:
+      # Hooks inherit `environment:` but NOT `env_file:` (verified on Compose v5).
+      # Anything release-migrate needs from .env must be listed here.
+      - command:
+          - node
+          - apps/api/dist/cli/release-migrate.js
+        environment:
+          BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS: ${BONDERY_PRIVATE_PLATFORM_ADMIN_EMAILS:-}
+          BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET: ${BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET:-}
+          BONDERY_INFRA_CHROME_EXTENSION_ID: ${BONDERY_INFRA_CHROME_EXTENSION_ID:-}
+          BONDERY_PUBLIC_OAUTH_CLIENT_ID: ${BONDERY_PUBLIC_OAUTH_CLIENT_ID:-}
+          BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID: ${BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID:-}
+      - command:
+          - node
+          - apps/api/dist/cli/ensure-storage-buckets.js
+        environment:
+          BONDERY_PRIVATE_S3_ENDPOINT: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8333
+          BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
+          BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
+          BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
+          BONDERY_PUBLIC_STORAGE_URL: https://${BONDERY_INFRA_STORAGE_DOMAIN:?BONDERY_INFRA_STORAGE_DOMAIN must be set}
+    pull_policy: always
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.rule=Host(`${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}`)"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.entrypoints=websecure"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.tls.certResolver=letsencrypt"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.port=26631"
+    networks:
+      dokploy-network:
+        aliases:
+          - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api
+      internal:
+        aliases:
+          - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api
+    restart: unless-stopped
+
+  webapp:
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      BONDERY_INFRA_INTERNAL_API_URL: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api:26631
+      BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
+      BONDERY_PUBLIC_POSTHOG_HOST: ${BONDERY_PUBLIC_POSTHOG_HOST:-}
+      BONDERY_PUBLIC_POSTHOG_KEY: ${BONDERY_PUBLIC_POSTHOG_KEY:-}
+      BONDERY_PUBLIC_STRIPE_PUBLISHABLE_KEY: ${BONDERY_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+      BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID: ${BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID:?BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID must be set}
+      BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET: ${BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET:?BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET must be set}
+      BONDERY_PRIVATE_WEBAPP_SESSION_SECRET: ${BONDERY_PRIVATE_WEBAPP_SESSION_SECRET:?BONDERY_PRIVATE_WEBAPP_SESSION_SECRET must be set}
+      BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
+      BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
+      BONDERY_INFRA_GIT_SHA: ${BONDERY_INFRA_GIT_SHA:-}
+      BONDERY_INFRA_VERSION: ${BONDERY_INFRA_VERSION:-}
+    healthcheck:
+      interval: 30s
+      retries: 3
+      start_period: 20s
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:26632/health/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      timeout: 5s
+    image: ghcr.io/usebondery/webapp:${BONDERY_INFRA_VERSION:-production}
+    pull_policy: always
+    labels:
+      - traefik.enable=true
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.rule=Host(`${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}`)"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.entrypoints=websecure"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.tls.certResolver=letsencrypt"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp.loadbalancer.server.port=26632"
+    networks:
+      dokploy-network:
+        aliases:
+          - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp
+    restart: unless-stopped
+
+networks:
+  dokploy-network:
+    external: true
+  internal:
+    driver: bridge
+
+volumes:
+  redis-data:

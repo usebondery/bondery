@@ -16,7 +16,7 @@ import {
   MIN_EXTENSION_VERSION,
 } from "@bondery/helpers";
 import { BETTER_AUTH_BASE_PATH, publicOAuthDiscoveryPaths } from "@bondery/helpers/globals/paths";
-import { getErrorDocUrl } from "@bondery/schemas/errors";
+import { buildAgentMessage, getErrorDocUrl } from "@bondery/schemas/errors";
 import { URLS } from "../platform/config.js";
 import { unauthorized } from "../platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
@@ -104,6 +104,7 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
         .header("Upgrade", "X-Bondery-Extension-Version")
         .send({
           error: {
+            agent_message: buildAgentMessage("extension_outdated", "Extension update required"),
             code: "extension_outdated",
             details: {
               minVersion: MIN_EXTENSION_VERSION,

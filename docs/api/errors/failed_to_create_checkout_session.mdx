@@ -1,6 +1,7 @@
 ---
 title: failed_to_create_checkout_session
-description: Failed To Create Checkout Session
+description: "Stripe rejected or dropped the Checkout session create call. Log `request_id`, retry once, and check the Stripe dashboard for the matching request."
+last_updated: 2026-07-28
 ---
 
 ## When this happens
@@ -24,7 +25,7 @@ Show generic retry copy (`common.errors.api.internal` or `common.errors.apiTempo
 | **code** | `failed_to_create_checkout_session` |
 | **doc_url** | `/docs/api/errors/failed_to_create_checkout_session` |
 
-The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation).
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
 
 ## Source references
 

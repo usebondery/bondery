@@ -46,6 +46,7 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
       schema: {
         description: "Parse an Instagram export and preview contacts for import.",
         response: withOkResponse(instagramParseResponseSchema, "Parsed Instagram contacts"),
+        summary: "Parse an Instagram export",
       } satisfies FastifyZodOpenApiSchema,
     },
     async (request) => {
@@ -151,6 +152,7 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
         body: instagramImportCommitRequestSchema,
         description: "Commit an Instagram import from previously parsed contacts.",
         response: withOkResponse(instagramImportCommitResponseSchema, "Instagram import result"),
+        summary: "Commit an Instagram import",
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute({ body: instagramImportCommitRequestSchema }, async (ctx, { body }) =>
