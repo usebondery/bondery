@@ -116,7 +116,7 @@ pnpm run dev:stripe
 
 | Edit | Do not edit |
 | --- | --- |
-| Root [`.env.local`](../../.env.local) (gitignored) | `apps/*/.env*.local` (generated) |
+| Root `.env.local` (gitignored, created from [`.env.local.example`](../../.env.local.example)) | `apps/*/.env*.local` (generated) |
 | Manifest [`packages/helpers/src/env/manifest.ts`](../../packages/helpers/src/env/manifest.ts) | Generated `*.example` files (headers say “do not edit”) |
 
 Templates: [`.env.local.example`](../../.env.local.example) (local dev) · [`deploy/bondery/.env.example`](../../deploy/bondery/.env.example) (self-host compose) · [`deploy/ops/.env.example`](../../deploy/ops/.env.example) (ops marketing stack).
