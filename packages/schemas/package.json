@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "zod": "^4.6.5",
+    "zod": "^4.6.6",
     "zod-openapi": "^6.0.2"
   },
   "description": "Canonical types, Zod validation schemas, and constants for Bondery. Contract layer — no runtime business logic.",
