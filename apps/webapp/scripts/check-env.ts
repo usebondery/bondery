@@ -1,8 +1,10 @@
+import { createRequire } from "node:module";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkEnvVariables, getRequiredVarsForTarget } from "@bondery/helpers/env";
-import { loadEnvConfig } from "@next/env";
 import { WEBAPP_RUNTIME_REQUIRED_ENV } from "../src/lib/platform/runtimeConfig.env.js";
+
+const { loadEnvConfig } = createRequire(import.meta.url)("@next/env") as typeof import("@next/env");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
