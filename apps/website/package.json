@@ -81,5 +81,5 @@
     "test:cors": "tsx --test src/lib/discovery-cors.test.ts",
     "test:proxy": "tsx --test src/lib/security/proxy.test.ts"
   },
-  "version": "1.11.1-rc.2"
+  "version": "1.11.1-rc.3"
 }
