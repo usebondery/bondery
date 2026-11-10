@@ -20,13 +20,13 @@ export const subscriptionStatusValueSchema: z.ZodType<SubscriptionStatusValue> =
 /** Subscription table row shape (internal). */
 export const subscriptionSchema: z.ZodType<Subscription> = z
   .object({
-    cancelAtPeriodEnd: z.boolean(),
-    currentPeriodEnd: nullableDateTimeSchema,
-    id: z.string(),
-    status: subscriptionStatusValueSchema,
-    stripeCustomerId: z.string(),
-    stripeSubscriptionId: z.string(),
-    userId: z.string(),
+    cancelAtPeriodEnd: z.boolean().describe("True when the plan cancels at period end"),
+    currentPeriodEnd: nullableDateTimeSchema.describe("End of the current billing period"),
+    id: z.string().describe("Subscription identifier"),
+    status: subscriptionStatusValueSchema.describe("Local subscription status"),
+    stripeCustomerId: z.string().describe("Stripe customer identifier"),
+    stripeSubscriptionId: z.string().describe("Stripe subscription identifier"),
+    userId: z.string().describe("Owner account identifier"),
   })
   .extend(entityAuditSchema.shape);
 
@@ -45,19 +45,19 @@ export const billingSubscriptionStatusSchema: z.ZodType<BillingSubscriptionStatu
 export const billingIntervalSchema: z.ZodType<BillingInterval> = z.enum(["month", "year"]);
 
 export const subscriptionStatusSchema: z.ZodType<SubscriptionStatus> = z.object({
-  aiMessageLimit: z.number(),
-  aiMessagesUsed: z.number(),
-  aiMonthlyResetAt: nullableDateTimeSchema,
-  amount: z.number().nullable(),
-  billingStatus: billingSubscriptionStatusSchema.nullable(),
-  cancelAtPeriodEnd: z.boolean(),
-  canUseChat: z.boolean(),
-  currency: z.string().nullable(),
-  currentPeriodEnd: nullableDateTimeSchema,
-  paymentBlocked: z.boolean(),
-  plan: planTierSchema,
-  productName: z.string().nullable(),
-  recurringInterval: billingIntervalSchema.nullable(),
-  trialEndsAt: nullableDateTimeSchema,
-  upgradesEnabled: z.boolean(),
+  aiMessageLimit: z.number().describe("Chat message quota for the current period"),
+  aiMessagesUsed: z.number().describe("Chat messages used in the current period"),
+  aiMonthlyResetAt: nullableDateTimeSchema.describe("When the chat quota resets"),
+  amount: z.number().nullable().describe("Plan price in the smallest currency unit"),
+  billingStatus: billingSubscriptionStatusSchema.nullable().describe("Stripe subscription status"),
+  cancelAtPeriodEnd: z.boolean().describe("True when the plan cancels at period end"),
+  canUseChat: z.boolean().describe("True when the account can send chat messages"),
+  currency: z.string().nullable().describe("ISO 4217 currency code"),
+  currentPeriodEnd: nullableDateTimeSchema.describe("End of the current billing period"),
+  paymentBlocked: z.boolean().describe("True when payment failure blocks paid features"),
+  plan: planTierSchema.describe("Current plan tier"),
+  productName: z.string().nullable().describe("Display name of the billed product"),
+  recurringInterval: billingIntervalSchema.nullable().describe("Billing interval"),
+  trialEndsAt: nullableDateTimeSchema.describe("When the trial ends"),
+  upgradesEnabled: z.boolean().describe("True when the account can change plan"),
 });

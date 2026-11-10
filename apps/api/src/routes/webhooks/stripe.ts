@@ -14,7 +14,7 @@ import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type Stripe from "stripe";
 import { z } from "zod";
 import { badRequest, internal } from "../../lib/platform/errors/http-errors.js";
-import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { withUnmeteredOkResponse } from "../../lib/platform/openapi/responses.js";
 import { getStripeClient } from "../../services/billing/stripe.js";
 import {
   isStripeWebhookEventProcessed,
@@ -32,7 +32,7 @@ import { handleTrialWillEnd } from "../../services/billing/webhook-handlers/tria
 
 const webhookAckResponseSchema = z
   .object({
-    received: z.boolean(),
+    received: z.boolean().describe("True when the webhook was accepted"),
   })
   .meta({ example: EXAMPLE_WEBHOOK_ACK_RESPONSE });
 
@@ -53,7 +53,7 @@ export async function stripeWebhookRoutes(fastify: FastifyInstance): Promise<voi
       config: { rateLimit: false },
       schema: {
         description: "Receive and process a Stripe billing webhook event.",
-        response: withOkResponse(webhookAckResponseSchema, "Webhook acknowledged"),
+        response: withUnmeteredOkResponse(webhookAckResponseSchema, "Webhook acknowledged"),
         summary: "Receive a Stripe webhook",
       } satisfies FastifyZodOpenApiSchema,
     },

@@ -4,10 +4,12 @@ Bondery API contracts, transport, and mobile sync.
 
 | File | Topic |
 |------|--------|
+| [api-design.md](./api-design.md) | Response tiers, URLs, offset pagination, stable page order |
 | [health-probes.md](./health-probes.md) | Liveness, readiness, BFF health proxy, extension manifest |
 | [status-codes.md](./status-codes.md) | HTTP status code reference |
 | [api-usage.md](./api-usage.md) | Transport wrappers, 401/outage, webapp domains |
 | [api-mutations.md](./api-mutations.md) | Create/update return full objects |
+| [idempotency-keys.md](./idempotency-keys.md) | `Idempotency-Key` on authenticated `POST` and `PATCH` |
 | [api-errors.md](./api-errors.md) | Stripe-style error catalog and server throw patterns |
 | [fastify-routes.md](./fastify-routes.md) | Zod schemas, OpenAPI, logging |
 | [api-route-ordering.md](./api-route-ordering.md) | Published doc order, path tiers |

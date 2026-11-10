@@ -246,6 +246,7 @@ export type UserWhereInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogListRelationFilter
   syncChangeLogs?: Prisma.SyncChangeLogListRelationFilter
   syncMutationReceipts?: Prisma.SyncMutationReceiptListRelationFilter
+  idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
   syncUserSequence?: Prisma.XOR<Prisma.SyncUserSequenceNullableScalarRelationFilter, Prisma.SyncUserSequenceWhereInput> | null
   oauthClients?: Prisma.OauthClientListRelationFilter
   oauthRefreshTokens?: Prisma.OauthRefreshTokenListRelationFilter
@@ -281,6 +282,7 @@ export type UserOrderByWithRelationInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogOrderByRelationAggregateInput
   syncChangeLogs?: Prisma.SyncChangeLogOrderByRelationAggregateInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptOrderByRelationAggregateInput
+  idempotencyKeys?: Prisma.IdempotencyKeyOrderByRelationAggregateInput
   syncUserSequence?: Prisma.SyncUserSequenceOrderByWithRelationInput
   oauthClients?: Prisma.OauthClientOrderByRelationAggregateInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenOrderByRelationAggregateInput
@@ -319,6 +321,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   reminderDispatchLogs?: Prisma.ReminderDispatchLogListRelationFilter
   syncChangeLogs?: Prisma.SyncChangeLogListRelationFilter
   syncMutationReceipts?: Prisma.SyncMutationReceiptListRelationFilter
+  idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
   syncUserSequence?: Prisma.XOR<Prisma.SyncUserSequenceNullableScalarRelationFilter, Prisma.SyncUserSequenceWhereInput> | null
   oauthClients?: Prisma.OauthClientListRelationFilter
   oauthRefreshTokens?: Prisma.OauthRefreshTokenListRelationFilter
@@ -388,6 +391,7 @@ export type UserCreateInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -423,6 +427,7 @@ export type UserUncheckedCreateInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -458,6 +463,7 @@ export type UserUpdateInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -493,6 +499,7 @@ export type UserUncheckedUpdateInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -876,6 +883,20 @@ export type UserUpdateOneRequiredWithoutSyncMutationReceiptsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSyncMutationReceiptsInput, Prisma.UserUpdateWithoutSyncMutationReceiptsInput>, Prisma.UserUncheckedUpdateWithoutSyncMutationReceiptsInput>
 }
 
+export type UserCreateNestedOneWithoutIdempotencyKeysInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyKeysInput, Prisma.UserUncheckedCreateWithoutIdempotencyKeysInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutIdempotencyKeysInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutIdempotencyKeysNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyKeysInput, Prisma.UserUncheckedCreateWithoutIdempotencyKeysInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutIdempotencyKeysInput
+  upsert?: Prisma.UserUpsertWithoutIdempotencyKeysInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutIdempotencyKeysInput, Prisma.UserUpdateWithoutIdempotencyKeysInput>, Prisma.UserUncheckedUpdateWithoutIdempotencyKeysInput>
+}
+
 export type UserCreateNestedOneWithoutSyncUserSequenceInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutSyncUserSequenceInput, Prisma.UserUncheckedCreateWithoutSyncUserSequenceInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutSyncUserSequenceInput
@@ -945,6 +966,7 @@ export type UserCreateWithoutSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -979,6 +1001,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1029,6 +1052,7 @@ export type UserUpdateWithoutSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -1063,6 +1087,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1097,6 +1122,7 @@ export type UserCreateWithoutAccountsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -1131,6 +1157,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1181,6 +1208,7 @@ export type UserUpdateWithoutAccountsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -1215,6 +1243,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1249,6 +1278,7 @@ export type UserCreateWithoutPasskeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -1283,6 +1313,7 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1333,6 +1364,7 @@ export type UserUpdateWithoutPasskeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -1367,6 +1399,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1401,6 +1434,7 @@ export type UserCreateWithoutGroupsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -1435,6 +1469,7 @@ export type UserUncheckedCreateWithoutGroupsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1485,6 +1520,7 @@ export type UserUpdateWithoutGroupsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -1519,6 +1555,7 @@ export type UserUncheckedUpdateWithoutGroupsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1553,6 +1590,7 @@ export type UserCreateWithoutInteractionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -1587,6 +1625,7 @@ export type UserUncheckedCreateWithoutInteractionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1637,6 +1676,7 @@ export type UserUpdateWithoutInteractionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -1671,6 +1711,7 @@ export type UserUncheckedUpdateWithoutInteractionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1705,6 +1746,7 @@ export type UserCreateWithoutLinkedinEnrichQueueInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -1739,6 +1781,7 @@ export type UserUncheckedCreateWithoutLinkedinEnrichQueueInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1789,6 +1832,7 @@ export type UserUpdateWithoutLinkedinEnrichQueueInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -1823,6 +1867,7 @@ export type UserUncheckedUpdateWithoutLinkedinEnrichQueueInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1858,6 +1903,7 @@ export type UserCreateWithoutOauthClientsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1892,6 +1938,7 @@ export type UserUncheckedCreateWithoutOauthClientsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1942,6 +1989,7 @@ export type UserUpdateWithoutOauthClientsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1976,6 +2024,7 @@ export type UserUncheckedUpdateWithoutOauthClientsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2010,6 +2059,7 @@ export type UserCreateWithoutOauthRefreshTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2044,6 +2094,7 @@ export type UserUncheckedCreateWithoutOauthRefreshTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2094,6 +2145,7 @@ export type UserUpdateWithoutOauthRefreshTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2128,6 +2180,7 @@ export type UserUncheckedUpdateWithoutOauthRefreshTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2162,6 +2215,7 @@ export type UserCreateWithoutOauthAccessTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -2196,6 +2250,7 @@ export type UserUncheckedCreateWithoutOauthAccessTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2246,6 +2301,7 @@ export type UserUpdateWithoutOauthAccessTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -2280,6 +2336,7 @@ export type UserUncheckedUpdateWithoutOauthAccessTokensInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2314,6 +2371,7 @@ export type UserCreateWithoutOauthConsentsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -2348,6 +2406,7 @@ export type UserUncheckedCreateWithoutOauthConsentsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2398,6 +2457,7 @@ export type UserUpdateWithoutOauthConsentsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -2432,6 +2492,7 @@ export type UserUncheckedUpdateWithoutOauthConsentsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2465,6 +2526,7 @@ export type UserCreateWithoutPeopleInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -2499,6 +2561,7 @@ export type UserUncheckedCreateWithoutPeopleInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2549,6 +2612,7 @@ export type UserUpdateWithoutPeopleInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -2583,6 +2647,7 @@ export type UserUncheckedUpdateWithoutPeopleInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2617,6 +2682,7 @@ export type UserCreateWithoutPeopleMergeRecommendationsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -2651,6 +2717,7 @@ export type UserUncheckedCreateWithoutPeopleMergeRecommendationsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2701,6 +2768,7 @@ export type UserUpdateWithoutPeopleMergeRecommendationsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -2735,6 +2803,7 @@ export type UserUncheckedUpdateWithoutPeopleMergeRecommendationsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2769,6 +2838,7 @@ export type UserCreateWithoutApikeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -2803,6 +2873,7 @@ export type UserUncheckedCreateWithoutApikeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2853,6 +2924,7 @@ export type UserUpdateWithoutApikeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -2887,6 +2959,7 @@ export type UserUncheckedUpdateWithoutApikeysInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2921,6 +2994,7 @@ export type UserCreateWithoutChatSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -2955,6 +3029,7 @@ export type UserUncheckedCreateWithoutChatSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3005,6 +3080,7 @@ export type UserUpdateWithoutChatSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -3039,6 +3115,7 @@ export type UserUncheckedUpdateWithoutChatSessionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3073,6 +3150,7 @@ export type UserCreateWithoutSubscriptionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -3107,6 +3185,7 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3157,6 +3236,7 @@ export type UserUpdateWithoutSubscriptionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -3191,6 +3271,7 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3225,6 +3306,7 @@ export type UserCreateWithoutReminderDispatchLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -3259,6 +3341,7 @@ export type UserUncheckedCreateWithoutReminderDispatchLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3309,6 +3392,7 @@ export type UserUpdateWithoutReminderDispatchLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -3343,6 +3427,7 @@ export type UserUncheckedUpdateWithoutReminderDispatchLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3377,6 +3462,7 @@ export type UserCreateWithoutSyncChangeLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -3411,6 +3497,7 @@ export type UserUncheckedCreateWithoutSyncChangeLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3461,6 +3548,7 @@ export type UserUpdateWithoutSyncChangeLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -3495,6 +3583,7 @@ export type UserUncheckedUpdateWithoutSyncChangeLogsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3529,6 +3618,7 @@ export type UserCreateWithoutSyncMutationReceiptsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -3563,6 +3653,7 @@ export type UserUncheckedCreateWithoutSyncMutationReceiptsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3613,6 +3704,7 @@ export type UserUpdateWithoutSyncMutationReceiptsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -3647,6 +3739,163 @@ export type UserUncheckedUpdateWithoutSyncMutationReceiptsInput = {
   peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutIdempotencyKeysInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutIdempotencyKeysInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleUncheckedCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutIdempotencyKeysInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyKeysInput, Prisma.UserUncheckedCreateWithoutIdempotencyKeysInput>
+}
+
+export type UserUpsertWithoutIdempotencyKeysInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutIdempotencyKeysInput, Prisma.UserUncheckedUpdateWithoutIdempotencyKeysInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutIdempotencyKeysInput, Prisma.UserUncheckedCreateWithoutIdempotencyKeysInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutIdempotencyKeysInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutIdempotencyKeysInput, Prisma.UserUncheckedUpdateWithoutIdempotencyKeysInput>
+}
+
+export type UserUpdateWithoutIdempotencyKeysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutIdempotencyKeysInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUncheckedUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3682,6 +3931,7 @@ export type UserCreateWithoutSyncUserSequenceInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3716,6 +3966,7 @@ export type UserUncheckedCreateWithoutSyncUserSequenceInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3766,6 +4017,7 @@ export type UserUpdateWithoutSyncUserSequenceInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3800,6 +4052,7 @@ export type UserUncheckedUpdateWithoutSyncUserSequenceInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3833,6 +4086,7 @@ export type UserCreateWithoutUserSettingsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -3867,6 +4121,7 @@ export type UserUncheckedCreateWithoutUserSettingsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3917,6 +4172,7 @@ export type UserUpdateWithoutUserSettingsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -3951,6 +4207,7 @@ export type UserUncheckedUpdateWithoutUserSettingsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3985,6 +4242,7 @@ export type UserCreateWithoutTagsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
@@ -4019,6 +4277,7 @@ export type UserUncheckedCreateWithoutTagsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4069,6 +4328,7 @@ export type UserUpdateWithoutTagsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
@@ -4103,6 +4363,7 @@ export type UserUncheckedUpdateWithoutTagsInput = {
   reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4131,6 +4392,7 @@ export type UserCountOutputType = {
   reminderDispatchLogs: number
   syncChangeLogs: number
   syncMutationReceipts: number
+  idempotencyKeys: number
   oauthClients: number
   oauthRefreshTokens: number
   oauthAccessTokens: number
@@ -4153,6 +4415,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   reminderDispatchLogs?: boolean | UserCountOutputTypeCountReminderDispatchLogsArgs
   syncChangeLogs?: boolean | UserCountOutputTypeCountSyncChangeLogsArgs
   syncMutationReceipts?: boolean | UserCountOutputTypeCountSyncMutationReceiptsArgs
+  idempotencyKeys?: boolean | UserCountOutputTypeCountIdempotencyKeysArgs
   oauthClients?: boolean | UserCountOutputTypeCountOauthClientsArgs
   oauthRefreshTokens?: boolean | UserCountOutputTypeCountOauthRefreshTokensArgs
   oauthAccessTokens?: boolean | UserCountOutputTypeCountOauthAccessTokensArgs
@@ -4277,6 +4540,13 @@ export type UserCountOutputTypeCountSyncMutationReceiptsArgs<ExtArgs extends run
 /**
  * UserCountOutputType without action
  */
+export type UserCountOutputTypeCountIdempotencyKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.IdempotencyKeyWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
 export type UserCountOutputTypeCountOauthClientsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OauthClientWhereInput
 }
@@ -4331,6 +4601,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   reminderDispatchLogs?: boolean | Prisma.User$reminderDispatchLogsArgs<ExtArgs>
   syncChangeLogs?: boolean | Prisma.User$syncChangeLogsArgs<ExtArgs>
   syncMutationReceipts?: boolean | Prisma.User$syncMutationReceiptsArgs<ExtArgs>
+  idempotencyKeys?: boolean | Prisma.User$idempotencyKeysArgs<ExtArgs>
   syncUserSequence?: boolean | Prisma.User$syncUserSequenceArgs<ExtArgs>
   oauthClients?: boolean | Prisma.User$oauthClientsArgs<ExtArgs>
   oauthRefreshTokens?: boolean | Prisma.User$oauthRefreshTokensArgs<ExtArgs>
@@ -4399,6 +4670,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   reminderDispatchLogs?: boolean | Prisma.User$reminderDispatchLogsArgs<ExtArgs>
   syncChangeLogs?: boolean | Prisma.User$syncChangeLogsArgs<ExtArgs>
   syncMutationReceipts?: boolean | Prisma.User$syncMutationReceiptsArgs<ExtArgs>
+  idempotencyKeys?: boolean | Prisma.User$idempotencyKeysArgs<ExtArgs>
   syncUserSequence?: boolean | Prisma.User$syncUserSequenceArgs<ExtArgs>
   oauthClients?: boolean | Prisma.User$oauthClientsArgs<ExtArgs>
   oauthRefreshTokens?: boolean | Prisma.User$oauthRefreshTokensArgs<ExtArgs>
@@ -4428,6 +4700,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     reminderDispatchLogs: Prisma.$ReminderDispatchLogPayload<ExtArgs>[]
     syncChangeLogs: Prisma.$SyncChangeLogPayload<ExtArgs>[]
     syncMutationReceipts: Prisma.$SyncMutationReceiptPayload<ExtArgs>[]
+    idempotencyKeys: Prisma.$IdempotencyKeyPayload<ExtArgs>[]
     syncUserSequence: Prisma.$SyncUserSequencePayload<ExtArgs> | null
     oauthClients: Prisma.$OauthClientPayload<ExtArgs>[]
     oauthRefreshTokens: Prisma.$OauthRefreshTokenPayload<ExtArgs>[]
@@ -4856,6 +5129,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   reminderDispatchLogs<T extends Prisma.User$reminderDispatchLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reminderDispatchLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReminderDispatchLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncChangeLogs<T extends Prisma.User$syncChangeLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$syncChangeLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SyncChangeLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncMutationReceipts<T extends Prisma.User$syncMutationReceiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$syncMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SyncMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  idempotencyKeys<T extends Prisma.User$idempotencyKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$idempotencyKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncUserSequence<T extends Prisma.User$syncUserSequenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$syncUserSequenceArgs<ExtArgs>>): Prisma.Prisma__SyncUserSequenceClient<runtime.Types.Result.GetResult<Prisma.$SyncUserSequencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   oauthClients<T extends Prisma.User$oauthClientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthClientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthRefreshTokens<T extends Prisma.User$oauthRefreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthRefreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5670,6 +5944,30 @@ export type User$syncMutationReceiptsArgs<ExtArgs extends runtime.Types.Extensio
   take?: number
   skip?: number
   distinct?: Prisma.SyncMutationReceiptScalarFieldEnum | Prisma.SyncMutationReceiptScalarFieldEnum[]
+}
+
+/**
+ * User.idempotencyKeys
+ */
+export type User$idempotencyKeysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the IdempotencyKey
+   */
+  select?: Prisma.IdempotencyKeySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the IdempotencyKey
+   */
+  omit?: Prisma.IdempotencyKeyOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.IdempotencyKeyInclude<ExtArgs> | null
+  where?: Prisma.IdempotencyKeyWhereInput
+  orderBy?: Prisma.IdempotencyKeyOrderByWithRelationInput | Prisma.IdempotencyKeyOrderByWithRelationInput[]
+  cursor?: Prisma.IdempotencyKeyWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.IdempotencyKeyScalarFieldEnum | Prisma.IdempotencyKeyScalarFieldEnum[]
 }
 
 /**

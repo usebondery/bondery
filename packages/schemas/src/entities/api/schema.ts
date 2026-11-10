@@ -18,48 +18,46 @@ import type {
 } from "./types.js";
 
 export const apiSuccessResponseSchema = z.object({
-  message: z.string().optional(),
-  success: z.boolean(),
+  message: z.string().optional().describe("Human-readable result message"),
+  success: z.boolean().describe("True when the operation completed"),
 }) satisfies z.ZodType<ApiSuccessResponse>;
 
 export const photoUploadResponseSchema = z.object({
-  avatarUrl: z.string().nullable().optional(),
-  error: z.string().optional(),
-  success: z.boolean(),
+  avatarUrl: z.string().nullable().optional().describe("Avatar image URL after the upload"),
+  error: z.string().optional().describe("Failure message, when success is false"),
+  success: z.boolean().describe("True when the upload completed"),
 }) satisfies z.ZodType<PhotoUploadResponse>;
 
 export const imageValidationResultSchema = z.object({
-  error: z.string().optional(),
-  isValid: z.boolean(),
+  error: z.string().optional().describe("Failure message, when the image is not valid"),
+  isValid: z.boolean().describe("True when the image passes validation"),
 }) satisfies z.ZodType<ImageValidationResult>;
 
-export const avatarQualitySchema = z.enum([
-  "low",
-  "medium",
-  "high",
-]) satisfies z.ZodType<AvatarQuality>;
+export const avatarQualitySchema = z
+  .enum(["low", "medium", "high"])
+  .describe("Image quality for contact avatars") satisfies z.ZodType<AvatarQuality>;
 
 export const avatarSizeSchema: z.ZodType<AvatarSize> = z
   .enum(["small", "medium", "large"])
   .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views.");
 
 export const avatarTransformOptionsSchema = z.object({
-  quality: avatarQualitySchema.optional(),
+  quality: avatarQualitySchema.optional().describe("Image quality for contact avatars"),
   size: avatarSizeSchema.optional(),
 }) satisfies z.ZodType<AvatarTransformOptions>;
 
 export const shareContactRequestSchema = z.object({
   message: shareContactEmailSchema.shape.message,
-  personId: contactIdSchema,
+  personId: contactIdSchema.describe("Contact identifier to share"),
   recipientEmails: shareContactEmailSchema.shape.recipients,
-  selectedFields: z.array(shareableFieldSchema),
-  sendCopy: z.boolean().default(true),
+  selectedFields: z.array(shareableFieldSchema).describe("Contact fields to include in the share"),
+  sendCopy: z.boolean().default(true).describe("True to send a copy to the account owner"),
 }) satisfies z.ZodType<ShareContactRequest>;
 
 export const feedbackFormSchema = z.object({
-  generalFeedback: z.string(),
-  npsReason: z.string(),
-  npsScore: z.number().min(0).max(10).optional(),
+  generalFeedback: z.string().describe("Free-text product feedback"),
+  npsReason: z.string().describe("Reason for the NPS score"),
+  npsScore: z.number().min(0).max(10).optional().describe("Optional 0-10 satisfaction score"),
 }) satisfies z.ZodType<FeedbackFormInput>;
 
 /** Agent-reported defect. Structured so we can triage without a human retype. */

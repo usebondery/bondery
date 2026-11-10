@@ -4,6 +4,11 @@ export type OpenApiRouteArea = "integration" | "session" | "internal";
 
 declare module "fastify" {
   interface FastifyContextConfig {
+    /**
+     * When false, a present Idempotency-Key is rejected.
+     * SSE routes cannot store a body to replay.
+     */
+    idempotency?: boolean;
     /** Drives OpenAPI security and API key route policy. */
     openApiArea?: OpenApiRouteArea;
   }

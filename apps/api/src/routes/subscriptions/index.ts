@@ -24,8 +24,8 @@ import {
 
 const subscriptionStatusResponseSchema = z
   .object({
-    data: subscriptionStatusSchema,
-    success: z.boolean(),
+    data: subscriptionStatusSchema.describe("Subscription status for this account"),
+    success: z.boolean().describe("True when the request completed"),
   })
   .meta({ example: EXAMPLE_SUBSCRIPTION_STATUS_RESPONSE });
 

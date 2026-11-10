@@ -12,10 +12,10 @@ import type {
 } from "./types.js";
 
 export const upcomingReminderSchema = z.object({
-  importantDate: importantDateSchema,
-  notificationSent: z.boolean(),
-  notificationSentAt: nullableDateTimeSchema,
-  person: contactPreviewSchema,
+  importantDate: importantDateSchema.describe("Important date this reminder belongs to"),
+  notificationSent: z.boolean().describe("True when the reminder email was sent"),
+  notificationSentAt: nullableDateTimeSchema.describe("Time the reminder email was sent"),
+  person: contactPreviewSchema.describe("Contact this reminder belongs to"),
 }) satisfies z.ZodType<UpcomingReminder>;
 
 export const reminderDigestItemSchema = z.object({
@@ -59,5 +59,5 @@ export const reminderDigestResponseSchema = z.object({
 }) satisfies z.ZodType<ReminderDigestResponse>;
 
 export const upcomingRemindersResponseSchema = z.object({
-  reminders: z.array(upcomingReminderSchema),
+  reminders: z.array(upcomingReminderSchema).describe("Upcoming important-date reminders"),
 }) satisfies z.ZodType<UpcomingRemindersResponse>;

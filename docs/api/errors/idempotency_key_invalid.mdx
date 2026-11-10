@@ -1,0 +1,33 @@
+---
+title: idempotency_key_invalid
+description: "The Idempotency-Key value must be 1 to 255 printable ASCII characters and must not contain spaces. Send a valid key, then retry the same call."
+last_updated: 2026-11-10
+---
+
+## When this happens
+
+The `Idempotency-Key` header is present, but the value is empty, too long, or not printable ASCII.
+
+## What your integration should do
+
+Send a new key of 1 to 255 characters. Use letters, digits, or symbols. Do not include spaces. Retry the same call.
+
+## What end users should see
+
+Show `common.errors.api.idempotency_key_invalid`.
+
+## Response fields
+
+| Property | Value |
+|----------|-------|
+| **Type** | `invalid_request_error` |
+| **HTTP status** | 400 |
+| **code** | `idempotency_key_invalid` |
+| **doc_url** | `/docs/api/errors/idempotency_key_invalid` |
+
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
+
+## Source references
+
+- `apps/api/src/lib/platform/idempotency.ts`
+- `apps/api/src/lib/platform/idempotency-policy.ts`

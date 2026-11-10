@@ -82,7 +82,7 @@ export function registerRecommendationRoutes(fastify: AppFastifyInstance): void 
 
       const [recommendationRows, totalCount] = await Promise.all([
         db.peopleMergeRecommendation.findMany({
-          orderBy: [{ score: "desc" }, { createdAt: "desc" }],
+          orderBy: [{ score: "desc" }, { createdAt: "desc" }, { id: "desc" }],
           select: {
             id: true,
             leftPersonId: true,

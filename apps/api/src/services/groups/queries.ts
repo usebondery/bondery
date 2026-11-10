@@ -31,20 +31,27 @@ export type PreviewListQuery = AvatarTransformQuery & {
 
 type GroupListContext = Pick<DomainContext, "db" | "log" | "user">;
 
-function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByWithRelationInput {
+/**
+ * Orders the people list for one page request.
+ *
+ * `id` is the last key so the order is total. Without it, rows that share the
+ * sort value can swap places between two `skip`/`take` queries, so one row
+ * appears on both pages and another is never returned.
+ */
+function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByWithRelationInput[] {
   switch (sort) {
     case "nameDesc":
-      return { firstName: "desc" };
+      return [{ firstName: "desc" }, { id: "asc" }];
     case "surnameAsc":
-      return { lastName: { nulls: "first", sort: "asc" } };
+      return [{ lastName: { nulls: "first", sort: "asc" } }, { id: "asc" }];
     case "surnameDesc":
-      return { lastName: { nulls: "last", sort: "desc" } };
+      return [{ lastName: { nulls: "last", sort: "desc" } }, { id: "asc" }];
     case "interactionAsc":
-      return { lastInteraction: { nulls: "first", sort: "asc" } };
+      return [{ lastInteraction: { nulls: "first", sort: "asc" } }, { id: "asc" }];
     case "interactionDesc":
-      return { lastInteraction: { nulls: "last", sort: "desc" } };
+      return [{ lastInteraction: { nulls: "last", sort: "desc" } }, { id: "asc" }];
     default:
-      return { firstName: "asc" };
+      return [{ firstName: "asc" }, { id: "asc" }];
   }
 }
 

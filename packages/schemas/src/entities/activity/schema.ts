@@ -16,20 +16,22 @@ import type {
   UpdateInteractionInput,
 } from "./types.js";
 
-export const interactionTypeSchema: z.ZodType<InteractionType> = z.enum([
-  "Call",
-  "Coffee",
-  "Email",
-  "Meal",
-  "Meeting",
-  "Networking event",
-  "Note",
-  "Other",
-  "Party/Social",
-  "Text/Messaging",
-  "Competition/Hackathon",
-  "Custom",
-]);
+export const interactionTypeSchema: z.ZodType<InteractionType> = z
+  .enum([
+    "Call",
+    "Coffee",
+    "Email",
+    "Meal",
+    "Meeting",
+    "Networking event",
+    "Note",
+    "Other",
+    "Party/Social",
+    "Text/Messaging",
+    "Competition/Hackathon",
+    "Custom",
+  ])
+  .describe("Interaction category");
 
 export const interactionParticipantSchema: z.ZodType<InteractionParticipant> = z.object({
   avatar: z.string().nullable().describe("Avatar image URL, or null when unset"),
@@ -103,5 +105,5 @@ const interactionDetailSchema = z
   .extend(entityAuditSchema.shape);
 
 export const interactionResponseSchema = z.object({
-  interaction: interactionDetailSchema,
+  interaction: interactionDetailSchema.describe("Interaction record"),
 });

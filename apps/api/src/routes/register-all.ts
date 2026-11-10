@@ -42,6 +42,7 @@ import { meOnboardingRoutes } from "./me/onboarding/index.js";
 import { meSessionRoutes } from "./me/session/index.js";
 import { meSettingsRoutes } from "./me/settings/index.js";
 import { meStepUpRoutes } from "./me/step-up/index.js";
+import { cspReportRoutes } from "./security/csp-report.js";
 import { subscriptionCheckoutRoutes } from "./subscriptions/checkout.js";
 import { subscriptionRoutes } from "./subscriptions/index.js";
 import { subscriptionPortalRoutes } from "./subscriptions/portal.js";
@@ -55,6 +56,7 @@ type RouteMountArea =
   | "session"
   | "nativeSession"
   | "internal"
+  | "publicInternal"
   | "webhook"
   | "mcp"
   | "composite";
@@ -72,6 +74,11 @@ const SHELLS: Record<RouteMountArea, (plugin: AppRoutePlugin) => AppRoutePlugin>
   internal: internalRoutes,
   mcp: (plugin) => openApiAreaRoutes("internal", plugin),
   nativeSession: nativeSessionRoutes,
+  /**
+   * OpenAPI-hidden route with NO auth hooks. For endpoints a browser must
+   * reach without a secret, such as CSP violation reports.
+   */
+  publicInternal: (plugin) => openApiAreaRoutes("internal", plugin),
   session: sessionRoutes,
   webhook: (plugin) => openApiAreaRoutes("internal", plugin),
 };
@@ -126,6 +133,7 @@ const ROUTE_MOUNTS: RouteMount[] = [
   { area: "session", plugin: subscriptionPortalRoutes, prefix: API_ROUTES.SUBSCRIPTIONS_PORTAL },
   { area: "session", plugin: subscriptionSyncRoutes, prefix: API_ROUTES.SUBSCRIPTIONS_SYNC },
   { area: "webhook", plugin: stripeWebhookRoutes, prefix: API_ROUTES.WEBHOOKS_STRIPE },
+  { area: "publicInternal", plugin: cspReportRoutes, prefix: API_ROUTES.SECURITY_CSP_REPORT },
 ];
 
 export async function registerAllRoutes(fastify: AppFastifyInstance): Promise<void> {

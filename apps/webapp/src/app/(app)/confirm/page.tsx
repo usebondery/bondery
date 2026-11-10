@@ -49,6 +49,7 @@ export default async function ConfirmPage({ searchParams }: ConfirmPageProps) {
   return (
     <Suspense fallback={null}>
       <ConfirmClient
+        accountEmail={session.user.email ?? ""}
         hasReturned={hasReturned}
         lastUsedLoginMethod={lastUsedLoginMethod}
         oauthProviders={oauthProviders}

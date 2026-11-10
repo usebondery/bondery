@@ -136,6 +136,45 @@ The collection key varies (`contacts`, `interactions`, `sessions`, `messages`, `
 - Clients must use `pagination.hasMore` for “load more” UI — do not re-derive from `items.length` vs `totalCount` (breaks during search).
 - Use `buildPaginatedResponse` / `buildPaginationMeta` in `apps/api/src/lib/data/pagination.ts`.
 - Filter bodies use `search`, not `q` (`contactsFilter.search`, `memberFilter.search`, `contactFilter.search`).
+- Every `ORDER BY` ends with a unique column, usually `id`. See [Stable page order](#stable-page-order).
+
+### Stable page order
+
+Offset pagination runs one query for each page. Each query sorts the full match set again. When two rows share the sort value, PostgreSQL can return them in a different order for the next query. One row then crosses the page boundary. It appears on two pages, and another row disappears from the result.
+
+End the `ORDER BY` with a unique column, usually `id`. The sort then has no ties, and `offset` pages cannot overlap.
+
+```ts
+// GOOD — total order, stable across page requests
+orderBy: [{ firstName: "asc" }, { id: "asc" }]
+
+// BAD — ties have no defined order
+orderBy: { firstName: "asc" }
+```
+
+The rule covers every paginated query, including Prisma `skip`/`take` and raw SQL `limit`/`offset`:
+
+| Query | Tiebreaker |
+|---|---|
+| `services/contacts/query-people-page.ts` | `{ id: "asc" }` on every sort |
+| `services/groups/queries.ts`, `services/tags/queries.ts` | `{ id: "asc" }` on every sort |
+| `services/interactions/queries.ts` | `{ id: "desc" }` after `date desc` |
+| `routes/chat/sessions.ts` | `{ id }` after `updatedAt desc` and `createdAt asc` |
+| `routes/contacts/merge/recommendations.ts` | `{ id: "desc" }` after `score`, `createdAt` |
+| `packages/db/prisma/sql/functions.sql` → `search_people_ids` | `p.id asc` after `rank desc, first_name asc` |
+
+Cursor pagination has the same need. `fetchSyncChangeLogRows` orders by `server_sequence, change_index`, and a unique index covers that pair, so it is already safe.
+
+A repeated row reaches the client as two rows with one `id`. React then logs `Encountered two children with the same key`, because the table uses the contact id as the row key.
+
+Measured on a 1361-contact account with 50-row pages: `nameAsc` repeated 12 rows across adjacent pages, `surnameAsc` repeated 43, and `interactionAsc` repeated 92. The `id` key removed every repeat. `EXPLAIN` showed the same plan and sort memory, so the key costs nothing.
+
+To check a new list, fetch two adjacent pages and compare ids:
+
+```sql
+-- Any duplicate row means the ORDER BY is incomplete.
+select count(*) from page_a join page_b using (id);
+```
 
 ### Search
 
@@ -235,6 +274,7 @@ GitBook API reference order follows Fastify route registration order. Path tiers
 - [ ] Resource URL follows naming conventions (plural, kebab-case, static-before-dynamic)
 - [ ] Paginated responses use nested `pagination` with server `hasMore`
 - [ ] Offset pagination only — no cursor params
+- [ ] Every paginated `ORDER BY` ends with a unique column (`id`) — no tied rows across pages
 - [ ] `search` param (not `q`); sort enum from `contactSortOrderSchema` where applicable
 - [ ] Product deep-link actions use `next_action` from `NEXT_ACTIONS` — see [url-query-params.md](./url-query-params.md)
 - [ ] Zod response schema uses resource-keyed factory (`makePaginatedListResponseSchema`, etc.)

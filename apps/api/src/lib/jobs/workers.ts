@@ -8,3 +8,11 @@ export async function runEnrichQueueCleanup(log: FastifyBaseLogger): Promise<voi
   `;
   log.info({ deleted: rows[0]?.count ?? 0 }, "Enrich queue cleanup complete");
 }
+
+/** Nightly idempotency-key cleanup. Calls delete_expired_idempotency_keys(). */
+export async function runIdempotencyKeyCleanup(log: FastifyBaseLogger): Promise<void> {
+  const rows = await prisma.$queryRaw<{ count: number }[]>`
+    SELECT delete_expired_idempotency_keys() AS count
+  `;
+  log.info({ deleted: rows[0]?.count ?? 0 }, "Idempotency key cleanup complete");
+}

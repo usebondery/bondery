@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { applyApiBootEnv } from "@bondery/helpers/env";
 import { stringify } from "yaml";
 import { patchOpenApiErrorSchemas } from "./patch-openapi-error-schemas.js";
+import { patchOpenApiRateLimitHeaders } from "./patch-openapi-rate-limit-headers.js";
 import { patchOpenApiRequestExamples } from "./patch-openapi-request-examples.js";
 
 applyApiBootEnv();
@@ -27,6 +28,7 @@ async function main() {
   const spec = server.swagger();
   patchOpenApiErrorSchemas(spec);
   patchOpenApiRequestExamples(spec);
+  patchOpenApiRateLimitHeaders(spec);
   const yamlContent = stringify(spec, { lineWidth: 120 });
 
   const outputPath = resolve(__dirname, "../../../packages/openapi-spec/openapi.yaml");

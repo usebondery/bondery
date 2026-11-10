@@ -1,11 +1,16 @@
 import type { FastifyBaseLogger } from "fastify";
 import { getBoss } from "./boss.js";
-import { runEnrichQueueCleanup } from "./workers.js";
+import { runEnrichQueueCleanup, runIdempotencyKeyCleanup } from "./workers.js";
 
 const ENRICH_CLEANUP_QUEUE = "enrich-queue-cleanup";
 const HOURLY_REMINDER_QUEUE = "reminder-digest-hourly";
+const IDEMPOTENCY_CLEANUP_QUEUE = "idempotency-key-cleanup";
 
-const JOB_QUEUES = [HOURLY_REMINDER_QUEUE, ENRICH_CLEANUP_QUEUE] as const;
+const JOB_QUEUES = [
+  HOURLY_REMINDER_QUEUE,
+  ENRICH_CLEANUP_QUEUE,
+  IDEMPOTENCY_CLEANUP_QUEUE,
+] as const;
 
 /** pg-boss requires queues to exist before workers or schedules attach. */
 export async function ensureJobQueues(): Promise<void> {
@@ -22,6 +27,11 @@ export async function registerJobWorkers(log: FastifyBaseLogger): Promise<void> 
     log.info("Running enrich queue cleanup job");
     await runEnrichQueueCleanup(log);
   });
+
+  await boss.work(IDEMPOTENCY_CLEANUP_QUEUE, async () => {
+    log.info("Running idempotency key cleanup job");
+    await runIdempotencyKeyCleanup(log);
+  });
 }
 
 export async function registerJobSchedules(log: FastifyBaseLogger): Promise<void> {
@@ -32,6 +42,9 @@ export async function registerJobSchedules(log: FastifyBaseLogger): Promise<void
 
   // Nightly enrich-queue cleanup at 02:30 UTC
   await boss.schedule(ENRICH_CLEANUP_QUEUE, "30 2 * * *", {}, { tz: "UTC" });
+
+  // Nightly idempotency-key cleanup at 02:45 UTC
+  await boss.schedule(IDEMPOTENCY_CLEANUP_QUEUE, "45 2 * * *", {}, { tz: "UTC" });
 
   log.info({ queues: [...JOB_QUEUES] }, "pg-boss schedules registered");
 }

@@ -5,7 +5,16 @@ import { fileURLToPath } from "node:url";
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const repoRoot = path.resolve(packageRoot, "../..");
 const localesRoot = path.join(packageRoot, "src/locales");
-const mirrorRoot = path.join(packageRoot, ".i18next-cli-mirror");
+/**
+ * The mirror is build-time input for `i18next-cli` only. Nothing at runtime
+ * reads it and it is not copied into `dist`.
+ *
+ * Keep it OUTSIDE the package directory. This package is a workspace dependency
+ * injected into the pnpm store (`injectWorkspacePackages: true`), so pnpm
+ * hardlinks its files. Writing generated files inside the package breaks those
+ * hardlinks and aborts install with `ERR_PNPM_INJECTED_DEPS_SYNC_LINK`.
+ */
+const mirrorRoot = path.join(repoRoot, ".temp/i18next-cli-mirror");
 const manifestPath = path.join(packageRoot, "manifest.json");
 const catalogPath = path.join(repoRoot, "packages/schemas/locale/supported-locales.json");
 

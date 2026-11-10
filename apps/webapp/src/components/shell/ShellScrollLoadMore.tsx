@@ -1,8 +1,9 @@
 "use client";
 
 import { Button, Center, Group, Loader, Text, UnstyledButton } from "@mantine/core";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { resolveLoadMoreBranch } from "./resolveLoadMoreBranch";
 import { useShellScrollViewport } from "./ShellScrollViewportContext";
 import { shouldRequestNextPage } from "./shouldRequestNextPage";
 
@@ -37,6 +38,17 @@ export function ShellScrollLoadMore({
   const targetRef = useRef<HTMLDivElement>(null);
   const onLoadMoreRef = useRef(onLoadMore);
   onLoadMoreRef.current = onLoadMore;
+  /**
+   * The shell viewport lives in client state, so the server always sees `null`.
+   * A streamed boundary can hydrate after that state is set, which would make
+   * the client pick a different branch than the server HTML. Gate the fallback
+   * on mount so the hydration render matches the server in both cases.
+   */
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   useEffect(() => {
     const root = viewport;
@@ -60,7 +72,15 @@ export function ShellScrollLoadMore({
     return () => observer.disconnect();
   }, [hasMore, isFetchNextPageError, isFetchingNextPage, viewport]);
 
-  if (isFetchNextPageError) {
+  const branch = resolveLoadMoreBranch({
+    hasMore,
+    hasMounted,
+    hasViewport: viewport !== null,
+    isFetchingNextPage,
+    isFetchNextPageError,
+  });
+
+  if (branch === "error") {
     return (
       <Group gap="xs" justify="center" wrap="nowrap">
         <Text size="sm">{errorLabel}</Text>
@@ -73,10 +93,11 @@ export function ShellScrollLoadMore({
     );
   }
 
-  if (!viewport) {
-    if (!hasMore) {
-      return null;
-    }
+  if (branch === "none") {
+    return null;
+  }
+
+  if (branch === "fallback") {
     return (
       <Center>
         <Button loading={isFetchingNextPage} onClick={onLoadMore} variant="light">
@@ -84,10 +105,6 @@ export function ShellScrollLoadMore({
         </Button>
       </Center>
     );
-  }
-
-  if (!hasMore && !isFetchingNextPage) {
-    return null;
   }
 
   return (

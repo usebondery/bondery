@@ -29,6 +29,7 @@ metadata:
 - Success responses are **resource-keyed** (`{ contact }`, `{ contacts, pagination }`) — not `{ data }`
 - Errors use `{ error: { code, type, message, doc_url, ... } }` — catalog codes only, snake_case
 - Paginated lists use **offset** pagination (`limit`, `offset`) — no cursor / `page_token` / `after_id`
+- Paginated `ORDER BY` ends with a unique column (`id`) — tied rows repeat across pages — see `references/api-design.md#stable-page-order`
 - Query param is `search`, not `q`
 - Expo mobile shareable query params are snake_case (`group_id` on `/contacts`) — see `references/url-query-params.md`
 - Webapp product deep links use `next_action=intended_action` (snake_case names and values) — not one-off flags — see [references/url-query-params.md](references/url-query-params.md)
@@ -36,6 +37,8 @@ metadata:
 - Fastify routes use Zod + `fastify-zod-openapi` — not TypeBox
 - Registration order is published doc order — see `references/api-route-ordering.md`
 - MCP tool names are `{create|get|update|delete|search}_{resource}` — never `list_*` or `log_*` — see `references/mcp-tools.md`
+- Limited responses emit `RateLimit` and `RateLimit-Policy`. See [references/rate-limits.md](references/rate-limits.md).
+- If `Idempotency-Key` matches the same user and the same raw request, authenticated `POST` and `PATCH` replay the saved response. See [references/idempotency-keys.md](references/idempotency-keys.md).
 
 ## Decision tree
 
@@ -51,6 +54,7 @@ metadata:
 | Mobile sync | [references/sync-architecture.md](references/sync-architecture.md) |
 | Health / liveness / readiness probes | [references/health-probes.md](references/health-probes.md) |
 | Rate limits | [references/rate-limits.md](references/rate-limits.md) |
+| Idempotency keys | [references/idempotency-keys.md](references/idempotency-keys.md) |
 | Versioning policy | [references/versioning.md](references/versioning.md) |
 | MCP tools / prompts | [references/mcp-tools.md](references/mcp-tools.md) |
 | Query param names (`search`, `next_action`, `redirect`, Expo `group_id`) | [references/url-query-params.md](references/url-query-params.md) |
@@ -66,7 +70,9 @@ For client error display and i18n, see the `bondery-ux` skill (`references/commo
 - [ ] Zod schema from `@bondery/schemas`; route exported as `AppRoutePlugin`
 - [ ] `applyOpenApiRouteMeta(routeOptions, { area })` on every top-level route plugin
 - [ ] `description` + `response` on every route schema (`withOkResponse` / `withCreatedResponse`)
+- [ ] Every inline OpenAPI property and every parameter has a `description` (Zod `.describe()`). `check:openapi` fails when one is missing.
 - [ ] Paginated list uses nested `pagination` with server-computed `hasMore` (offset only)
+- [ ] Paginated `ORDER BY` ends with a unique column (`id`) so pages cannot repeat a row — see `references/api-design.md#stable-page-order`
 - [ ] Create returns `201` + full resource object; mutations per `references/api-mutations.md`
 - [ ] New error code → catalog + `/docs/api/errors/{code}` + `en`/`cs`/`de` translations
 - [ ] `pnpm run generate:openapi -w api` — confirm doc order in diff
@@ -74,4 +80,6 @@ For client error display and i18n, see the `bondery-ux` skill (`references/commo
 - [ ] `check-route-errors`, `pnpm run check:api-errors` pass at repo root
 - [ ] Auth, tenant scoping, webhooks, or uploads touched → `bondery-security` checklist satisfied
 - [ ] MCP tools follow `{create|get|update|delete|search}_{resource}` — see `references/mcp-tools.md`
+- [ ] Limited responses emit `RateLimit` and `RateLimit-Policy`. See `references/rate-limits.md`.
+- [ ] The global hook covers a new `POST` or `PATCH`. An exemption sets `idempotency: false`. Name the exemption and the reason in `references/idempotency-keys.md`.
 - [ ] Product deep-link actions use `next_action` from `NEXT_ACTIONS` — see `references/url-query-params.md`

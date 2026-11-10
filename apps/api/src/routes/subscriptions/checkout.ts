@@ -9,6 +9,7 @@
 
 import { prisma } from "@bondery/db";
 import { WEBAPP_ROUTES } from "@bondery/helpers";
+import { IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
 import { conflictResponse } from "@bondery/schemas/http/responses";
 import { EXAMPLE_CHECKOUT_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
@@ -16,12 +17,16 @@ import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { z } from "zod";
 import { getAuth } from "../../lib/platform/auth/strategies.js";
 import { conflict, forbidden, internal } from "../../lib/platform/errors/http-errors.js";
+import {
+  readValidIdempotencyKey,
+  stripeIdempotencyKey,
+} from "../../lib/platform/idempotency-policy.js";
 import { withOkResponse } from "../../lib/platform/openapi/responses.js";
 import { getStripeClient } from "../../services/billing/stripe.js";
 
 const checkoutResponseSchema = z
   .object({
-    clientSecret: z.string(),
+    clientSecret: z.string().describe("Stripe Checkout client secret for the payment session"),
   })
   .meta({ example: EXAMPLE_CHECKOUT_RESPONSE });
 
@@ -73,25 +78,32 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
 
       const returnUrl = `${fastify.config.BONDERY_PUBLIC_WEBAPP_URL}${WEBAPP_ROUTES.SETTINGS}?checkout=success`;
 
+      const clientKey = readValidIdempotencyKey(
+        request.headers[IDEMPOTENCY_KEY_HEADER.toLowerCase()],
+      );
+
       try {
         const stripe = getStripeClient();
-        const session = await stripe.checkout.sessions.create({
-          allow_promotion_codes: true,
-          customer_email: user.email ?? undefined,
-          line_items: [{ price: priceId, quantity: 1 }],
-          metadata: {
-            bondery_user_id: user.id,
-          },
-          mode: "subscription",
-          return_url: returnUrl,
-          subscription_data: {
+        const session = await stripe.checkout.sessions.create(
+          {
+            allow_promotion_codes: true,
+            customer_email: user.email ?? undefined,
+            line_items: [{ price: priceId, quantity: 1 }],
             metadata: {
               bondery_user_id: user.id,
             },
-            trial_period_days: 15,
+            mode: "subscription",
+            return_url: returnUrl,
+            subscription_data: {
+              metadata: {
+                bondery_user_id: user.id,
+              },
+              trial_period_days: 15,
+            },
+            ui_mode: "embedded_page",
           },
-          ui_mode: "embedded_page",
-        });
+          clientKey ? { idempotencyKey: stripeIdempotencyKey(user.id, clientKey) } : undefined,
+        );
 
         if (!session.client_secret) {
           throw new Error("Stripe checkout session missing client_secret");

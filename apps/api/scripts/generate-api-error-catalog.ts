@@ -224,6 +224,9 @@ function typeFor(status: number): string {
   if (status === 409) {
     return "conflict_error";
   }
+  if (status === 422) {
+    return "invalid_request_error";
+  }
   if (status === 426) {
     return "invalid_request_error";
   }

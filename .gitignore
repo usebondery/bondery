@@ -33,9 +33,6 @@ apps/webapp/public/maplibre/
 /build
 **/dist/
 
-# i18next-cli ephemeral locale mirror (canonical files stay nested under src/locales)
-packages/translations/.i18next-cli-mirror/
-
 # misc
 .DS_Store
 *.pem

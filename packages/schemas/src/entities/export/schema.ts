@@ -65,36 +65,36 @@ export const exportCountsSchema: z.ZodType<ExportCounts> = z.object({
 });
 
 export const exportSummarySchema: z.ZodType<ExportSummary> = z.object({
-  bonderyVersion: z.string().min(1),
-  groups: z.number().int().nonnegative(),
-  interactions: z.number().int().nonnegative(),
-  people: z.number().int().nonnegative(),
-  relationships: z.number().int().nonnegative(),
-  tags: z.number().int().nonnegative(),
+  bonderyVersion: z.string().min(1).describe("Bondery version that wrote this export"),
+  groups: z.number().int().nonnegative().describe("Number of groups in the export"),
+  interactions: z.number().int().nonnegative().describe("Number of interactions in the export"),
+  people: z.number().int().nonnegative().describe("Number of contacts in the export"),
+  relationships: z.number().int().nonnegative().describe("Number of relationships in the export"),
+  tags: z.number().int().nonnegative().describe("Number of tags in the export"),
 });
 
 export const exportSummaryResponseSchema: z.ZodType<ExportSummaryResponse> = z.object({
-  exportSummary: exportSummarySchema,
+  exportSummary: exportSummarySchema.describe("Counts of records in a full export"),
 });
 
 export const importTypeResultSchema: z.ZodType<ImportTypeResult> = z.object({
-  inserted: z.number().int().nonnegative(),
-  skipped: z.number().int().nonnegative(),
+  inserted: z.number().int().nonnegative().describe("Number of new records written"),
+  skipped: z.number().int().nonnegative().describe("Number of records not written"),
 });
 
 export const importResultSchema: z.ZodType<ImportResult> = z.object({
-  groupMemberships: importTypeResultSchema,
-  groups: importTypeResultSchema,
-  interactions: importTypeResultSchema,
-  people: importTypeResultSchema,
-  photos: importTypeResultSchema,
-  relationships: importTypeResultSchema,
-  tagMemberships: importTypeResultSchema,
-  tags: importTypeResultSchema,
+  groupMemberships: importTypeResultSchema.describe("Group membership import result"),
+  groups: importTypeResultSchema.describe("Group import result"),
+  interactions: importTypeResultSchema.describe("Interaction import result"),
+  people: importTypeResultSchema.describe("Contact import result"),
+  photos: importTypeResultSchema.describe("Photo import result"),
+  relationships: importTypeResultSchema.describe("Relationship import result"),
+  tagMemberships: importTypeResultSchema.describe("Tag membership import result"),
+  tags: importTypeResultSchema.describe("Tag import result"),
 });
 
 export const importResultResponseSchema: z.ZodType<ImportResultResponse> = z.object({
-  importResult: importResultSchema,
+  importResult: importResultSchema.describe("Counts of records written from this import"),
 });
 
 export const exportManifestFileEntrySchema: z.ZodType<ExportManifestFileEntry> = z.object({

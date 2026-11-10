@@ -57,7 +57,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
 
       const [sessions, totalCount] = await Promise.all([
         db.chatSession.findMany({
-          orderBy: { updatedAt: "desc" },
+          orderBy: [{ updatedAt: "desc" }, { id: "desc" }],
           skip: offset,
           take: limit,
           where: { userId: ctx.user.id },
@@ -170,7 +170,7 @@ export const chatSessionRoutes: AppRoutePlugin = async (fastify) => {
 
         const [messages, totalCount] = await Promise.all([
           db.chatMessage.findMany({
-            orderBy: { createdAt: "asc" },
+            orderBy: [{ createdAt: "asc" }, { id: "asc" }],
             skip: offset,
             take: limit,
             where: { sessionId },

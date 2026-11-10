@@ -6,17 +6,17 @@ import type { UserSessionData, UserSessionResponse } from "./types.js";
 
 /** Wire shape for GET /api/me/session — layout shell + routing inputs only. */
 export const userSessionDataSchema = z.object({
-  avatarUrl: z.string().nullable(),
+  avatarUrl: z.string().nullable().describe("Avatar image URL, or null when unset"),
   colorScheme: colorSchemePreferenceSchema,
-  displayName: z.string(),
-  isPlatformAdmin: z.boolean(),
+  displayName: z.string().describe("Display name"),
+  isPlatformAdmin: z.boolean().describe("True when this account is a platform admin"),
   language: supportedLocaleSchema,
-  onboardingCompletedAt: nullableDateTimeSchema.nullable(),
+  onboardingCompletedAt: nullableDateTimeSchema.nullable().describe("Time onboarding completed"),
   timeFormat: timeFormatPreferenceSchema,
-  timezone: z.string(),
+  timezone: z.string().describe("IANA timezone name"),
 }) satisfies z.ZodType<UserSessionData>;
 
 export const userSessionResponseSchema = z.object({
-  data: userSessionDataSchema,
-  success: z.literal(true),
+  data: userSessionDataSchema.describe("Session fields for the app shell"),
+  success: z.literal(true).describe("True when the session load completed"),
 }) satisfies z.ZodType<UserSessionResponse>;

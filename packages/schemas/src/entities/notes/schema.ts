@@ -8,5 +8,6 @@ export const contactNotesUpdateSchema = z.object({
     .max(CONTACT_FIELD_MAX_LENGTHS.notesHtml, {
       error: `Notes must be at most ${CONTACT_FIELD_MAX_LENGTHS.notesHtml} characters`,
     })
-    .nullable(),
+    .nullable()
+    .describe("Free-text notes. Null clears notes."),
 }) satisfies z.ZodType<ContactNotesUpdateOutput>;

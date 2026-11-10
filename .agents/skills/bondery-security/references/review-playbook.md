@@ -81,6 +81,10 @@ Existing test infrastructure:
 | Global rate limit 300/min | Redis-backed in production |
 | Prisma queries without RLS | App-layer scoping is the model — flag missing `userId`, not missing RLS |
 | Legacy `supabase-db` migrations | Not active API path unless explicitly touched |
+| API CSP disabled | JSON API returns no HTML |
+| `require-trusted-types-for` report-only | Enforced, it aborted React hydration. Report-only collects evidence first — see [headers-csp-and-cors.md](./headers-csp-and-cors.md#trusted-types) |
+| `style-src 'unsafe-inline'` in the enforced policy | Mantine writes inline styles. `script-src` still carries the nonce |
+| CSP report endpoint unauthenticated | A browser cannot send a secret. Rate limited, body-capped, and never echoed |
 
 ## False-positive controls
 
@@ -98,6 +102,8 @@ Existing test infrastructure:
 - Secrets in source code or client bundles
 - Webhook handlers that parse JSON before signature verification
 - `dangerouslySetInnerHTML` or unsanitized HTML storage without documented threat model
+- A wrong `config` export name in `proxy.ts`. Next.js ignores `proxyConfig` without an error, so the matcher and every header are silently dropped.
+- A policy shipped without verification. Read the live header with `curl -sSI`. An unchanged local policy string proves nothing about what a browser receives.
 
 ## Review checklist
 

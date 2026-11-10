@@ -47,6 +47,7 @@ Shared packages follow the [Turborepo compiled-package model](https://turborepo.
 - **Exports:** `types` → `src/`, `default` → `dist/`; run `pnpm run sync-exports` after adding public subpaths.
 - **Internal imports:** `#*` hash paths with `.js` suffix (not `tsconfig` paths).
 - **Build:** `rimraf dist && tsc` (+ rewrite hash imports); **compile:** incremental `tsc` then rewrite `#` imports in `dist`; **dev:** `tsc --watch` plus rewrite after each emit (`scripts/pkg/tsc-watch-and-rewrite.mjs`). Next.js cannot resolve `#` specifiers in compiled files. pnpm `injectWorkspacePackages` copies packages into app `node_modules`; rewrite also copies `dist` into those copies. `syncInjectedDepsAfterScripts` covers `build` and `compile` only.
+- **Generated files:** Write them outside `packages/*`. `injectWorkspacePackages` hardlinks each package into the pnpm store so `pnpm deploy` can copy it into the API image. pnpm re-syncs only `dist/` after `build` and `compile`. Another generated path inside a package breaks that hardlink (`ERR_PNPM_INJECTED_DEPS_SYNC_LINK`). `pnpm run check:injected-packages` fails when a package ignores or contains another generated path.
 - **Persistent app `#dev`:** orchestrate with `turbo run`, not `turbo watch`. Watch re-executes the task and kills `next dev` / `tsx watch` on any tracked write. Package incremental rebuilds come from `with` `tsc --watch` plus rewrite.
 - **Apps:** consume `dist/` via exports — no `transpilePackages`, no `packages/*/src` aliases (mobile Metro resolves workspace packages from `src/` separately).
 
@@ -113,7 +114,7 @@ Boolean props prefixed with `is` or `has` (e.g., `isActive`, `hasPermission`).
 
 - [ ] Package boundary respected — schemas does not import helpers; helpers may import schemas
 - [ ] New public package subpath has `sync-exports` run and `dist/` build verified
-- [ ] Postgres extensions created with `WITH SCHEMA extensions`
+- [ ] Generated files stay outside `packages/*` (`pnpm run check:injected-packages`)- [ ] Postgres extensions created with `WITH SCHEMA extensions`
 - [ ] Extension function references schema-qualified as `extensions.*`
 - [ ] No new dependencies without justification in plan or PR
 - [ ] Mobile tier-1 changes respect sync patterns (`check-sync-patterns` locally)

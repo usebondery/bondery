@@ -24,18 +24,19 @@ Do not run `pnpm run dev -w website`. pnpm forwards `-w website` into the script
 
 ### First-time Portless setup
 
-1. **Install** — `portless` is a local `devDependency` of `website` / `webapp` / `api`. Hostnames and ports live in each app’s `"portless"` key (and root [`portless.json`](../../portless.json) when Portless runs from the monorepo root). From the repo root, run `pnpm install` if needed. Do not install Portless globally.
-2. **Trust the local CA (first run)** — from `apps/website`, run `pnpm exec portless trust`.
-3. **Windows hosts (required once)** — Windows does not auto-resolve `*.usebondery.test`. Open an **elevated** PowerShell, `cd` to `apps/website`, then either:
-   - run `pnpm run dev` once so Portless can write hosts, or
-   - after a failed start: `pnpm exec portless hosts sync`
-   Without Admin, Portless logs `Could not write hosts file` and the name will not resolve.
+1. **Install** — `portless` is a devDependency of the **workspace root**, because no app runs the Portless wrapper. `scripts/dev/portless-alias.mjs` calls that copy directly. Hostnames and ports come from `DEV_URLS` / `DEV_PORTS` in `@bondery/schemas/constants/dev-ports`. From the repo root, run `pnpm install` if needed. Do not install Portless globally.
+2. **Trust the local CA (first run)** — from the repo root, run `pnpm exec portless trust`.
+3. **Windows hosts (required once)** — Windows does not auto-resolve `*.usebondery.test`. Open an **elevated** PowerShell, then from the repo root run:
+   - `pnpm exec portless hosts sync` to write the hosts file.
+   Without Admin, Portless logs `Failed to update hosts file` and the names will not resolve in the browser.
 4. **Env** — local examples use Portless URLs. Sync with `pnpm run env:development` after updating root `.env.local`, or copy from `.env.development.local.example`.
 5. **OAuth consoles** — register Portless callbacks on the API host, e.g. `https://api.usebondery.test/auth/callback/github` (and `/linkedin`). Keep classic `http://localhost:26631/auth/callback/...` as an escape hatch if you use `dev:classic`.
 6. **If the proxy timed out** — `pnpm exec portless proxy start --foreground` or `pnpm exec portless doctor`, then retry.
 7. **Open** — `https://usebondery.test`
 
-`dev` sets `PORTLESS_TLD=test`. Mailpit UI (after `pnpm run start:mailpit` from the repo root): `https://mail.usebondery.test`.
+`dev` registers the `usebondery.test` alias, then runs `next dev` on `26630`. Mailpit UI (after `pnpm run start:mailpit` from the repo root): `https://mail.usebondery.test`.
+
+Aliases are static (`pid 0` in `~/.portless/routes.json`), so they stay registered after a dev server stops. The hosts file only needs one write per hostname.
 
 **HSTS note:** `next.config.ts` sends Strict-Transport-Security. After you visit the Portless HTTPS host, the browser may keep requiring HTTPS for that hostname until you clear HSTS for it.
 

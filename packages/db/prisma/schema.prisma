@@ -6,8 +6,9 @@
 // `npx @better-auth/cli generate` when the plugin list changes, then reconcile.
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {

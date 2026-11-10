@@ -142,7 +142,7 @@ export function DocsApiSchema({ name, schema }: DocsApiSchemaProps) {
       // Show read-only and write-only fields. The defaults hide both.
       readOnly: true,
       renderCodeblock: ({ code, lang }) => <DocsCodeBlock code={code} language={lang} />,
-      renderMarkdown: (markdown) => <Text>{markdown}</Text>,
+      renderMarkdown: (markdown) => <Text component="span">{markdown}</Text>,
       root,
       translations: {},
       writeOnly: true,

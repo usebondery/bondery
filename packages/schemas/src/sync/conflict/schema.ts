@@ -7,9 +7,15 @@ import type { SyncConflictErrorResponse } from "./types.js";
 export const syncConflictErrorResponseSchema: z.ZodType<SyncConflictErrorResponse> =
   apiErrorResponseSchema
     .extend({
-      error: apiErrorResponseSchema.shape.error.extend({
-        code: z.literal("sync_conflict"),
-        details: z.object({ contact: contactSchema }),
-      }),
+      error: apiErrorResponseSchema.shape.error
+        .extend({
+          code: z.literal("sync_conflict").describe("Machine-readable error code"),
+          details: z
+            .object({
+              contact: contactSchema.describe("Current server contact that caused the conflict"),
+            })
+            .describe("Conflict details"),
+        })
+        .describe("Error payload"),
     })
     .meta({ id: "SyncConflictError" });

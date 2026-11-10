@@ -2,7 +2,7 @@ import { syncWsTicketResponseSchema } from "@bondery/schemas/sync";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { getAuth } from "../../lib/platform/auth/strategies.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
-import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { withUnmeteredOkResponse } from "../../lib/platform/openapi/responses.js";
 import { requireSyncWakeRuntime } from "../../lib/sync/wake/index.js";
 
 export const syncWsTicketRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
@@ -20,7 +20,7 @@ export const syncWsTicketRoutes: AppRoutePlugin = async (fastify): Promise<void>
       },
       schema: {
         description: "Issue a short-lived WebSocket ticket for sync wake notifications.",
-        response: withOkResponse(syncWsTicketResponseSchema, "WebSocket ticket"),
+        response: withUnmeteredOkResponse(syncWsTicketResponseSchema, "WebSocket ticket"),
         summary: "Fetch a sync WebSocket ticket",
       } satisfies FastifyZodOpenApiSchema,
     },

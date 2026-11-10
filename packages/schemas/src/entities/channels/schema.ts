@@ -43,7 +43,10 @@ export const phoneEntryEntitySchema = z.object({
 
 const phoneEntryBaseSchema = phoneEntryEntitySchema.omit({ preferred: true });
 const phoneEntryOptionalPreferredSchema = phoneEntryBaseSchema.extend({
-  preferred: z.boolean().optional(),
+  preferred: z
+    .boolean()
+    .optional()
+    .describe("True when this is the contact's primary phone number"),
 });
 
 export const emailEntryEntitySchema = z.object({
@@ -54,7 +57,10 @@ export const emailEntryEntitySchema = z.object({
 
 const emailEntryBaseSchema = emailEntryEntitySchema.omit({ preferred: true });
 const emailEntryOptionalPreferredSchema = emailEntryBaseSchema.extend({
-  preferred: z.boolean().optional(),
+  preferred: z
+    .boolean()
+    .optional()
+    .describe("True when this is the contact's primary email address"),
 });
 
 /** Mobile phone sheet — subset of phone fields; pick must run before refinements. */
@@ -101,7 +107,8 @@ export const shareContactEmailSchema = z.object({
       error: `Message must be at most ${SHARE_CONTACT_EMAIL_MAX_MESSAGE_LENGTH} characters`,
     })
     .transform((value) => value || undefined)
-    .optional(),
+    .optional()
+    .describe("Optional note included in the share email"),
   recipients: z
     .array(emailAddressSchema)
     .min(1, { error: "At least one recipient is required" })
@@ -116,5 +123,6 @@ export const shareContactEmailSchema = z.object({
           message: "Duplicate recipient emails are not allowed",
         });
       }
-    }),
+    })
+    .describe("Email addresses that receive the shared contact"),
 }) satisfies z.ZodType<ShareContactEmailInput>;

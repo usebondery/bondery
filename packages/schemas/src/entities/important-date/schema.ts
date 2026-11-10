@@ -77,7 +77,7 @@ const importantDateNotifyDaysInputSchema = z.preprocess((value) => {
 
 /** One row in PUT /api/contacts/:id/important-dates body. */
 export const importantDateInputSchema: z.ZodType<ImportantDateInputValidated> = z.object({
-  id: z.string().optional(),
+  id: z.string().optional().describe("Existing date identifier. Omit to create a new date."),
   ...importantDateCoreSchema.shape,
   note: z
     .string()
@@ -87,8 +87,11 @@ export const importantDateInputSchema: z.ZodType<ImportantDateInputValidated> = 
     })
     .transform((value) => value || null)
     .nullable()
-    .optional(),
-  notifyDaysBefore: importantDateNotifyDaysInputSchema.optional(),
+    .optional()
+    .describe("Free-text note for this date"),
+  notifyDaysBefore: importantDateNotifyDaysInputSchema
+    .optional()
+    .describe("Days before the date to send a reminder. Null disables reminders."),
 });
 
 export const importantDateSheetSchema = z

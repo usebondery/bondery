@@ -55,6 +55,37 @@ Override via `config: { rateLimit: TIER }` on route options.
 }
 ```
 
+## Response headers
+
+Limited responses emit [draft-ietf-httpapi-ratelimit-headers-11](https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-11).
+
+This draft is not an RFC. RFC 9237 is a different document.
+
+Do not set `enableDraftSpec`. That option emits `ratelimit-limit`, `ratelimit-remaining`, and `ratelimit-reset`.
+
+`@fastify/rate-limit` remains the counter. The API also sends `x-ratelimit-*`.
+
+Each limited response sends one policy. A route tier replaces the global policy.
+
+```http
+RateLimit-Policy: "default";q=300;w=60
+RateLimit: "default";r=12;t=47
+```
+
+`q` is the quota. `w` is the window in whole seconds. `r` is the remaining requests. `t` is the seconds until reset.
+
+An integrator reads `RateLimit` and `RateLimit-Policy` on each limited API response. On 429, the integrator reads `Retry-After`.
+
+On 429, `r` is `0`. `Retry-After` equals `t`. The JSON field `error.retry_after` equals `t`.
+
+`Retry-After` is present on 429 only.
+
+The policy name matches the tier object. Names: `default`, `ai`, `enrich`, `geocode`, `export`, `import`, `health`, `mcp`, `csp_report`, `not_found`.
+
+`csp_report` and `not_found` both use quota 60 and window 60. Use the tier object to choose the name.
+
+If `x-ratelimit-limit` is absent, the API sends no `RateLimit` header. This covers `rateLimit: false`, `OPTIONS`, and a Redis skip.
+
 ## Industry reference tiers (not Bondery defaults)
 
 Use these for judgment when designing new public or partner-facing endpoints — Bondery does not implement these tiers today:
@@ -71,4 +102,5 @@ Use these for judgment when designing new public or partner-facing endpoints —
 - [ ] New expensive route has an appropriate tier override (not just global 300/min)
 - [ ] Health/status/webhook routes explicitly exempted if needed
 - [ ] 429 uses `rate_limit_exceeded` catalog code with `retry_after`
+- [ ] Limited responses emit `RateLimit` and `RateLimit-Policy`
 - [ ] Production has Redis configured for distributed rate limiting
