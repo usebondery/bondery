@@ -55,6 +55,7 @@ const API_FIRST_SEGMENTS = new Set([
   "me",
   "mobile",
   "oauth-providers",
+  "security",
   "subscriptions",
   "sync",
   "tags",
@@ -74,7 +75,13 @@ const NON_API_PATHS = new Set(["files", "runtime-config.json", "status"]);
  * routes. Better Auth owns the `/auth/*` tree and publishes it as metadata
  * rather than as OpenAPI operations.
  */
-const ROUTES_OUTSIDE_SPEC = new Set(["POST /mcp", "GET /mcp", "DELETE /mcp"]);
+const ROUTES_OUTSIDE_SPEC = new Set([
+  "POST /mcp",
+  "GET /mcp",
+  "DELETE /mcp",
+  // Browser CSP reports. Hidden from the published spec because the caller cannot authenticate.
+  "POST /security/csp-report",
+]);
 const EXTERNAL_PATH_PREFIXES = ["/auth/"];
 
 /** Prefix the webapp BFF adds in front of an API path. */
