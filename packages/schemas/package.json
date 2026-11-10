@@ -1147,5 +1147,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.1-rc.3"
+  "version": "1.11.1"
 }

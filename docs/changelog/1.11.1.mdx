@@ -1,0 +1,41 @@
+---
+title: "1.11.1"
+description: Bondery 1.11.1 adds Idempotency-Key on POST and PATCH, sends a Content-Security-Policy from the website and webapp, and fixes the confirm-it-is-you screen.
+last_updated: 2026-11-10
+---
+
+## [1.11.1] - 10.11.2026
+
+### ✨ Added
+
+- API: a POST or PATCH can send `Idempotency-Key`. The same call returns the saved response. A different call with that key is rejected. Checkout sends Stripe a key derived from the user id and the client key.
+- Docs: every page now opens with a full `description`. The string fills the paragraph under the title, the folder tile, the search and social preview, and the `llms.txt` line. `pnpm run check:docs:descriptions` keeps it between 140 and 160 characters, and warns between 120 and 140.
+- Docs: every shipped changelog page now has a `description` that names its version and the notable changes in that release. The check requires the version number, the product name, and 140 to 160 characters, so a counted summary such as "25 new features" fails. Only `unreleased.mdx` is exempt, because it is never published.
+- Docs: the welcome page answers "what do you want to do" first. It links each task and each product concept, and it no longer shows the repository tile.
+- Docs: each page now shows its real last edit date, for example "Last updated September 30, 2026". The date comes from a new `last_updated` frontmatter field, and `pnpm run check:docs:frontmatter` keeps every page valid.
+- Docs: pages carry `LinkCard` and `PressableCard` blocks for related reading, and the docs chrome adds a search dialog, a mobile navigation drawer, a table of contents, and previous and next footer links.
+- Docs: code samples switch between `curl` and PowerShell, and between request snippets per language. The API reference shows a copyable request for each endpoint.
+- Docs: the API reference and the error catalogue render from the OpenAPI spec. `pnpm run check:docs:api-routes` and `pnpm run check:docs:targets` keep route names and internal links valid.
+- Website: Every entry in `/.well-known/ard.json` carries a `trustManifest`. It names `did:web:<site host>` as the `identity` and records that the artifact is published from the Bondery repository. The field is a claim, not proof, because Bondery publishes no DID document or signature yet, so the catalog stays unsigned and lists no compliance attestations.
+- Website: The docs move to `/docs` on the marketing site, so one host serves the product, the changelog, and the documentation.
+- API: every error body gains `agent_message`. It states what failed and how to repair the call, so an AI agent can recover without guessing, and tool errors use it as `message`.
+- API: MCP servers can call `create_agent_feedback` to report a wrong result or an unclear tool. A report reaches the same inbox as `POST /me/feedback` and does not require a write token.
+- Webapp: the API key dialog shows a test request for Linux and macOS with `curl` and for Windows with PowerShell, matching the platform tabs used in the docs.
+
+### 🐛 Fixed
+
+- Webapp: the settings dialog no longer loads a second syntax highlighter. Code highlighting comes from `@bondery/mantine-next`, so a snippet uses one theme and one bundle.
+- Webapp: the confirm-it-is-you screen reports a failed confirmation as a notification. It no longer pushes the login methods down with a red block. The screen also keeps the Continue with email button when the settings read fails. Without it, the screen showed no sign-in method at all.
+- Webapp: a missing Better Auth session on the confirm-it-is-you screen says the confirmation expired. It no longer claims a different account signed in.
+- Website: the security policy no longer blocks the page. `require-trusted-types-for` stopped React from hydrating and left an empty body, and a nonce-only `style-src` dropped every Mantine style. The policy keeps its script nonce and `'strict-dynamic'`, and it now sends a header at all: the config export used a name Next.js ignores, so no policy had ever reached a browser.
+
+### 🔒 Security
+
+- Website and webapp: both sites now send a Content-Security-Policy on every page, plus `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`, and `Cross-Origin-Opener-Policy`. The webapp had no policy before, and its proxy ignored the route matcher. Violations are reported to `POST /security/csp-report` and forwarded to PostHog. A stricter policy runs in report-only mode until the collected violations show it is safe to enforce.
+
+### 🔄 Changed
+
+- Docs: `pnpm run check:docs` now runs the target, frontmatter, description, and API route checks after the link and MDX checks.
+- Deploy: `deploy/bondery` stages separate `docker-compose.production.yml` and `docker-compose.self-hosted.yml` copies. `docker-compose.yml` stays the Dokploy and self-host entrypoint until the split is proven on staging.
+- Security headers: one shared module now builds the policy for every app, so the website and the webapp cannot drift apart. `pnpm run check:security-headers` fails the build when a proxy exports the wrong config name, writes its own directives, or allows `'unsafe-inline'` in `script-src`. Violation reports go to `${BONDERY_PUBLIC_API_URL}/security/csp-report`, derived from the API URL rather than configured separately. Reporting is on by default; a self-host install sets `BONDERY_PUBLIC_CSP_REPORT_ENABLED=false` to send none.
+- Dev: the local Portless hostnames are now static aliases. `scripts/dev/portless-alias.mjs` registers `usebondery.test`, `app.usebondery.test`, `api.usebondery.test`, and `mail.usebondery.test` with pid 0, so the hosts file stays complete after a dev server stops. The website and webapp no longer run under the Portless wrapper, and the unused root `portless.json` is gone. Hostnames and ports come from `DEV_URLS` and `DEV_PORTS`, and `pnpm run check:dev-hostnames` fails when `next.config.ts` or an env example drifts from them.
