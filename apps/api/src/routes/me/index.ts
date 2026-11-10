@@ -31,8 +31,12 @@ import {
 
 const profilePhotoResponseSchema = z
   .object({
-    data: z.object({ avatarUrl: z.string() }),
-    success: z.boolean(),
+    data: z
+      .object({
+        avatarUrl: z.string().describe("Avatar image URL after the upload"),
+      })
+      .describe("Updated profile photo"),
+    success: z.boolean().describe("True when the upload completed"),
   })
   .meta({ example: EXAMPLE_PROFILE_PHOTO_RESPONSE });
 

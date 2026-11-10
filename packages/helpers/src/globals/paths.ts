@@ -141,6 +141,7 @@ export const API_ROUTES = {
   ME_STEP_UP: "/me/step-up",
   MOBILE: "/mobile",
   OAUTH_PROVIDERS: "/oauth-providers",
+  SECURITY_CSP_REPORT: "/security/csp-report",
   SUBSCRIPTIONS: "/subscriptions",
   SUBSCRIPTIONS_CHECKOUT: "/subscriptions/checkout",
   SUBSCRIPTIONS_PORTAL: "/subscriptions/portal",
@@ -179,6 +180,9 @@ export const MIN_EXTENSION_VERSION: string = "1.11.0";
 
 /** One-shot account-delete nonce. Browser → BFF and BFF → API must forward it. */
 export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
+
+/** Optional key for safe POST and PATCH retries. */
+export const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key" as const;
 
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
 export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;

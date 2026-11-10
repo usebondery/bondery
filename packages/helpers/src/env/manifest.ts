@@ -531,6 +531,28 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     secret: false,
     targets: [t("api")],
   },
+  {
+    canonical: "BONDERY_PUBLIC_CSP_REPORT_ENABLED",
+    deployExample: { group: "Public hostnames", include: true, value: "true" },
+    description:
+      "Send CSP violation reports to `${BONDERY_PUBLIC_API_URL}/security/csp-report` (true | false). Default on. A self-host install set `false` to send no reports. The endpoint is derived from the API URL, so it cannot disagree with the API it posts to.",
+    exampleValue: "true",
+    group: "Public URLs",
+    requiredIn: [],
+    secret: false,
+    syncable: true,
+    targets: [t("webapp"), t("website")],
+  },
+  {
+    canonical: "BONDERY_PUBLIC_CSP_TRUSTED_TYPES",
+    description:
+      "REMOVED. Trusted Types is always report-only and needs no registered policy. This variable has no effect and is kept only so an existing deployment value does not fail the env check.",
+    exampleValue: "",
+    group: "Feature flags",
+    requiredIn: [],
+    secret: false,
+    targets: [t("webapp"), t("website")],
+  },
 
   // --- Database ---
   {
@@ -729,7 +751,7 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     requiredIn: ["development", "production"],
     secret: false,
     syncable: true,
-    targets: [t("api"), t("mobile")],
+    targets: [t("api"), t("mobile"), t("webapp")],
   },
   {
     canonical: "BONDERY_PRIVATE_S3_ENDPOINT",

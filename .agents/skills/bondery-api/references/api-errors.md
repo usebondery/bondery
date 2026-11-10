@@ -44,7 +44,8 @@ Throw via helpers or `new DomainError(...)` with catalog codes. Never put intern
 
 - Validation (`RequestValidationError`) → 400, `code: "validation_error"`, optional `param`
 - Sync conflict → 409, `code: "sync_conflict"`, `details.contact` with full contact
-- Rate limit → 429, `code: "rate_limit_exceeded"`, `retry_after`
+- Rate limit → 429, `code: "rate_limit_exceeded"`, `retry_after` (equals `Retry-After` and `RateLimit` `t`)
+- Idempotency → [idempotency-keys.md](./idempotency-keys.md): `idempotency_key_invalid`, `idempotency_key_unsupported`, `idempotency_key_mismatch`, `idempotency_key_in_progress`, `idempotency_response_omitted`
 
 Standard error responses on routes: `standardErrorResponses` in `packages/schemas/src/http/responses.ts` (400, 401, 403, 404, 426, 429, 500, 503).
 

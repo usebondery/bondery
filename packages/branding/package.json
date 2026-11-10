@@ -33,6 +33,24 @@
       "node": "./dist/*.js",
       "types": "./src/*.ts"
     },
+    "./brandMarks.generated": {
+      "default": "./dist/brandMarks.generated.js",
+      "import": "./dist/brandMarks.generated.js",
+      "node": "./dist/brandMarks.generated.js",
+      "types": "./src/brandMarks.generated.ts"
+    },
+    "./colors": {
+      "default": "./dist/colors.js",
+      "import": "./dist/colors.js",
+      "node": "./dist/colors.js",
+      "types": "./src/colors.ts"
+    },
+    "./colors.test": {
+      "default": "./dist/colors.test.js",
+      "import": "./dist/colors.test.js",
+      "node": "./dist/colors.test.js",
+      "types": "./src/colors.test.ts"
+    },
     "./icon-generator": {
       "default": "./scripts/generate-icons.ts",
       "types": "./scripts/icon-generator.d.ts"
@@ -127,6 +145,12 @@
       "node": "./dist/spacing.js",
       "types": "./src/spacing.ts"
     },
+    "./spacing.test": {
+      "default": "./dist/spacing.test.js",
+      "import": "./dist/spacing.test.js",
+      "node": "./dist/spacing.test.js",
+      "types": "./src/spacing.test.ts"
+    },
     "./typography": {
       "default": "./dist/typography.js",
       "import": "./dist/typography.js",
@@ -167,5 +191,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.1-rc.2"
+  "version": "1.11.1-rc.3"
 }

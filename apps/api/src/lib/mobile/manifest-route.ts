@@ -4,7 +4,7 @@ import { readRuntimeProductVersion } from "@bondery/helpers/infra/build-metadata
 import { latestProductionCalver } from "@bondery/helpers/version/calver";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
-import { withOkResponse } from "../platform/openapi/responses.js";
+import { withUnmeteredOkResponse } from "../platform/openapi/responses.js";
 import { mobileManifestSchema } from "./schemas.js";
 
 const require = createRequire(import.meta.url);
@@ -19,7 +19,7 @@ export function registerMobileManifestRoute(fastify: AppFastifyInstance): void {
         description:
           "Public mobile app configuration. `latestVersion` is the current production CalVer for a non-blocking update check. " +
           "Not a health probe — use `GET /health/live` for liveness.",
-        response: withOkResponse(mobileManifestSchema, "Mobile manifest"),
+        response: withUnmeteredOkResponse(mobileManifestSchema, "Mobile manifest"),
         summary: "Fetch mobile manifest",
         tags: ["Mobile"],
       } satisfies FastifyZodOpenApiSchema,

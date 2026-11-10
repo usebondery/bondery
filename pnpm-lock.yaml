@@ -64,6 +64,9 @@ importers:
       lefthook:
         specifier: ^2.1.15
         version: 2.1.15
+      portless:
+        specifier: ^0.15.8
+        version: 0.15.8
       turbo:
         specifier: ^2.11.6
         version: 2.11.6
@@ -812,9 +815,6 @@ importers:
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
-      portless:
-        specifier: ^0.15.8
-        version: 0.15.8
       postcss:
         specifier: ^8.5.28
         version: 8.5.28
@@ -972,9 +972,6 @@ importers:
       next-validate-link:
         specifier: ^1.6.7
         version: 1.6.7(@types/mdast@4.0.4)(@types/unist@3.0.3)(supports-color@8.1.1)
-      portless:
-        specifier: ^0.15.8
-        version: 0.15.8
       postcss:
         specifier: ^8.5.28
         version: 8.5.28

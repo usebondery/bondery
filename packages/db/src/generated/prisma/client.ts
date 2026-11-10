@@ -249,6 +249,11 @@ export type SyncChangeLog = Prisma.SyncChangeLogModel
  */
 export type SyncMutationReceipt = Prisma.SyncMutationReceiptModel
 /**
+ * Model IdempotencyKey
+ * 
+ */
+export type IdempotencyKey = Prisma.IdempotencyKeyModel
+/**
  * Model SyncUserSequence
  * 
  */
@@ -260,7 +265,12 @@ export type SyncUserSequence = Prisma.SyncUserSequenceModel
 export type UserSettings = Prisma.UserSettingsModel
 /**
  * Model Tag
- * 
+ * Labels are unique per user, ignoring letter case.
+ * The unique index `tags_user_id_label_lower_key` on `(user_id, lower(label))`
+ * exists in SQL only, because Prisma cannot express functional indexes.
+ * Migration: `20261102120000_tag_label_unique_ci`.
+ * Do not add `@@unique([userId, label])` here. It would create a second,
+ * weaker index and drift from the migration.
  */
 export type Tag = Prisma.TagModel
 /**

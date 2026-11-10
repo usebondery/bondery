@@ -69,7 +69,7 @@ async function collectSourceFiles(dir) {
         return collectSourceFiles(fullPath);
       }
       if (/\.(ts|tsx)$/.test(entry)) {
-        if (fullPath.includes("/generated/")) {
+        if (fullPath.replaceAll("\\", "/").includes("/generated/")) {
           return [];
         }
         return [fullPath];

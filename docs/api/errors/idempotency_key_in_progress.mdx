@@ -1,0 +1,32 @@
+---
+title: idempotency_key_in_progress
+description: "A request with this Idempotency-Key is still in progress. Read Retry-After, wait at least that many seconds, then send the same request again."
+last_updated: 2026-11-10
+---
+
+## When this happens
+
+Another request with the same `Idempotency-Key` still holds the lease. The API has not stored a response yet.
+
+## What your integration should do
+
+Read the `Retry-After` header. Wait at least that many seconds. Send the same request with the same key. Do not change the body.
+
+## What end users should see
+
+Show `common.errors.api.idempotency_key_in_progress`.
+
+## Response fields
+
+| Property | Value |
+|----------|-------|
+| **Type** | `conflict_error` |
+| **HTTP status** | 409 |
+| **code** | `idempotency_key_in_progress` |
+| **doc_url** | `/docs/api/errors/idempotency_key_in_progress` |
+
+The API `message` field is for developers debugging in logs. Product UI must key off `code` (and `details` for validation). `agent_message` states the same failure plus how to fix the call, for an AI agent.
+
+## Source references
+
+- `apps/api/src/lib/platform/idempotency.ts`

@@ -1,7 +1,9 @@
 import {
   createdResponse,
   okResponse,
+  okResponseWithoutRateLimit,
   standardErrorResponses,
+  standardErrorResponsesWithoutRateLimit,
 } from "@bondery/schemas/http/responses";
 import type { z } from "zod";
 
@@ -10,6 +12,17 @@ export function withOkResponse<T extends z.ZodType>(schema: T, description: stri
   return {
     ...okResponse(schema, description),
     ...standardErrorResponses,
+  };
+}
+
+/**
+ * HTTP 200 and standard errors for a route with `rateLimit: false`.
+ * These responses omit draft rate-limit headers.
+ */
+export function withUnmeteredOkResponse<T extends z.ZodType>(schema: T, description: string) {
+  return {
+    ...okResponseWithoutRateLimit(schema, description),
+    ...standardErrorResponsesWithoutRateLimit,
   };
 }
 

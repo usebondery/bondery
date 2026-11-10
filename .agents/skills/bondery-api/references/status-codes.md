@@ -23,7 +23,7 @@ Mapper: `apps/api/src/lib/platform/errors/map-to-response.ts`. Throw helpers: `a
 | **404 Not Found** | Resource does not exist | `notFound()`, not-found handler → `not_found` |
 | **409 Conflict** | Duplicate entry, state conflict | `conflict()`, `sync_conflict` |
 | **426 Upgrade Required** | Client must upgrade | Extension version check, sync protocol mismatch |
-| **429 Too Many Requests** | Rate limit exceeded | `rate_limit_exceeded` + `retry_after` — see [rate-limits.md](./rate-limits.md) |
+| **429 Too Many Requests** | Rate limit exceeded | `rate_limit_exceeded` + `retry_after`. `Retry-After` equals `RateLimit` `t`. See [rate-limits.md](./rate-limits.md) |
 
 ## Server errors
 

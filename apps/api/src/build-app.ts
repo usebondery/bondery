@@ -4,7 +4,8 @@
  */
 
 import { createRequire } from "node:module";
-import { BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
+import { BONDERY_STEP_UP_HEADER, IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
+import { PERMISSIONS_POLICY } from "@bondery/helpers/security/headers";
 import { openApiDocumentOpts } from "@bondery/schemas/openapi/document-opts";
 import { registerOpenApiComponentSchemas } from "@bondery/schemas/openapi/registry";
 import fastifyAuth from "@fastify/auth";
@@ -30,6 +31,8 @@ import { registerExtensionVersionCheck } from "./lib/extension/version-check.js"
 import { registerAuthStrategies } from "./lib/platform/auth/strategies.js";
 import { mapErrorToResponse } from "./lib/platform/errors/map-to-response.js";
 import type { AppFastifyInstance } from "./lib/platform/fastify-types.js";
+import { registerIdempotency } from "./lib/platform/idempotency.js";
+import { IDEMPOTENCY_REPLAYED_HEADER } from "./lib/platform/idempotency-policy.js";
 import logger from "./lib/platform/logger.js";
 import { swaggerOpenApiConfig } from "./openapi/swagger-config.js";
 import { registerAllRoutes } from "./routes/register-all.js";
@@ -131,6 +134,17 @@ export async function buildApp(): Promise<AppFastifyInstance> {
       environment === "production" ? { includeSubDomains: true, maxAge: 31536000 } : false,
   });
 
+  /**
+   * Helmet has no `Permissions-Policy` option. A JSON API has no page to
+   * delegate features from, but sending the same value as the website and webapp
+   * keeps the header set uniform across the estate and costs nothing.
+   *
+   * The value comes from the shared module so the three cannot drift apart.
+   */
+  fastify.addHook("onSend", async (_request, reply) => {
+    reply.header("Permissions-Policy", PERMISSIONS_POLICY);
+  });
+
   const extraOrigins = fastify.config.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS
     ? fastify.config.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS.split(",")
         .map((o: string) => o.trim())
@@ -148,8 +162,10 @@ export async function buildApp(): Promise<AppFastifyInstance> {
       "Authorization",
       "X-Bondery-Extension-Version",
       BONDERY_STEP_UP_HEADER,
+      IDEMPOTENCY_KEY_HEADER,
     ],
     credentials: true,
+    exposedHeaders: ["RateLimit", "RateLimit-Policy", "Retry-After", IDEMPOTENCY_REPLAYED_HEADER],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     origin: ALLOWED_ORIGINS,
   });
@@ -174,6 +190,8 @@ export async function buildApp(): Promise<AppFastifyInstance> {
     openapi: swaggerOpenApiConfig as unknown as OpenAPIV3.Document,
     ...fastifyZodOpenApiTransformers,
   });
+
+  registerIdempotency(fastify);
 
   await registerAllRoutes(fastify);
 

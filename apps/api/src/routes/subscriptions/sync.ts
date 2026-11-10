@@ -13,12 +13,12 @@ import { syncSubscriptionFromStripe } from "../../services/billing/sync.js";
 const subscriptionSyncResponseSchema = z
   .union([
     z.object({
-      source: z.enum(["pending", "stripe_api"]),
-      synced: z.literal(true),
+      source: z.enum(["pending", "stripe_api"]).describe("Where the subscription data came from"),
+      synced: z.literal(true).describe("True when the local subscription was updated"),
     }),
     z.object({
-      reason: z.string(),
-      synced: z.literal(false),
+      reason: z.string().describe("Why the sync did not run"),
+      synced: z.literal(false).describe("False when no subscription update ran"),
     }),
   ])
   .meta({ example: EXAMPLE_SUBSCRIPTION_SYNC_SKIPPED_RESPONSE });

@@ -34,6 +34,12 @@ jobs:
       - name: Check package imports
         run: pnpm run check:package-imports
 
+      - name: Check injected packages stay free of generated files
+        run: pnpm run check:injected-packages
+
+      - name: Check security headers come from the shared CSP builder
+        run: pnpm run check:security-headers
+
   env:
     runs-on: ubuntu-latest
     permissions:
@@ -211,6 +217,21 @@ jobs:
 
       - name: API sync unit tests
         run: pnpm run test:api:sync
+
+      # Assert the CSP and CORS headers the proxies emit. A wrong `config`
+      # export name or a drifted allowlist produces no error and no header, so
+      # these run on every pull request. They need the built `@bondery/helpers`.
+      - name: Website CSP and proxy tests
+        run: pnpm --filter website run test:proxy
+
+      - name: Webapp CSP and proxy tests
+        run: pnpm --filter webapp run test:proxy
+
+      - name: Webapp shell list tests
+        run: pnpm --filter webapp run test:shell
+
+      - name: Website discovery CORS tests
+        run: pnpm --filter website run test:cors
 
   website-docker-build:
     needs: [lint, types, contracts]

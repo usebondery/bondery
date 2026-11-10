@@ -7,7 +7,7 @@ last_updated: 2026-11-04
 
 Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**. Each service reads from the one before it, so start them in that order.
 
-**Local web URLs** use [Portless](https://github.com/vercel-labs/portless) HTTPS. Root [`portless.json`](../../portless.json) maps hostnames. Open these in the browser:
+**Local web URLs** use [Portless](https://github.com/vercel-labs/portless) HTTPS. `scripts/dev/portless-alias.mjs` registers every hostname as a static alias (hostnames and ports come from `packages/schemas/src/constants/dev-ports.ts`). Open these in the browser:
 
 | App | Local URL |
 |---|---|
@@ -18,7 +18,9 @@ Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) Sea
 
 Apps still listen on fixed loopback ports behind the proxy (`26630` / `26631` / `26632`). Use those ports for Stripe CLI, SSR `BONDERY_INFRA_INTERNAL_API_URL`, Tailscale phone testing, and `dev:classic`. Do not open raw `http://localhost:2663x` for daily web work.
 
-App `dev` scripts set `PORTLESS_TLD=test`. Mailpit SMTP stays on `127.0.0.1:26640` (not Portless).
+Aliases use `PORTLESS_TLD=test` and are stored with `pid 0`, so they survive a dev server restart and the hosts file stays complete. Each app's `dev` script re-registers its own alias, then starts the server. Mailpit SMTP stays on `127.0.0.1:26640` (not Portless).
+
+Portless only manages the hostnames in `~/.portless/routes.json`. If a hostname does not resolve, run `node scripts/dev/portless-alias.mjs` from the repo root, then `pnpm exec portless hosts sync` from the repo root in an **elevated** shell (Windows needs Administrator to write the hosts file).
 
 **Environment variables:** edit root `.env.local` once, then sync — see [Environment configuration](environment.mdx).
 
@@ -240,14 +242,14 @@ Keep `BONDERY_PRIVATE_API_KEY_PEPPER` stable. If you change it after creating ke
 
 ### Start
 
-First Portless trust (once per machine): from `apps/api`, run `pnpm exec portless trust`. On Windows, run the first `pnpm run dev` from an elevated PowerShell so Portless can write hosts, or run `pnpm exec portless hosts sync`.
+First Portless trust (once per machine): from the repo root, run `pnpm exec portless trust`. `portless` is a devDependency of the workspace root, so run it from there. On Windows, run it from an elevated PowerShell so Portless can write hosts, or run `pnpm exec portless hosts sync`.
 
 ```bash
 cd apps/api
 pnpm run dev
 ```
 
-`dev` runs Portless. Open [https://api.usebondery.test](https://api.usebondery.test). The process listens on loopback `26631` behind the proxy. Escape hatch: `pnpm run dev:classic`.
+`dev` registers the API alias, then starts the server on loopback `26631`. Open [https://api.usebondery.test](https://api.usebondery.test).
 
 ---
 
@@ -493,7 +495,7 @@ Lint the whole repo from the root: `pnpm run lint` (Biome).
 
 ## Quick reference
 
-URL and port registry: [architecture.mdx](architecture.mdx#apps). Hostnames: root [`portless.json`](../../portless.json).
+URL and port registry: [architecture.mdx](architecture.mdx#apps). Hostnames: `DEV_URLS` in [`packages/schemas/src/constants/dev-ports.ts`](../../packages/schemas/src/constants/dev-ports.ts).
 
 | App | Source | Local URL / port | Start command |
 |---|---|---|---|

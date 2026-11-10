@@ -102,7 +102,9 @@ as $$
       or extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.middle_name, '')))) > p_threshold
       or extensions.word_similarity(q.normalized, immutable_unaccent(lower(coalesce(p.last_name, '')))) > p_threshold
     )
-  order by rank desc, p.first_name asc
+  -- p.id breaks ties so offset pages never repeat a row. See the pagination
+  -- rule in .agents/skills/bondery-api/references/api-design.md.
+  order by rank desc, p.first_name asc, p.id asc
   limit p_limit offset p_offset;
 $$;
 
@@ -615,4 +617,182 @@ $$;
 
 drop function if exists get_funnel_periods();
 drop function if exists get_total_users_growth();
+
+-- ---------------------------------------------------------------------------
+-- HTTP idempotency keys
+-- Two API instances can race on one user and key.
+-- INSERT ON CONFLICT DO NOTHING claims a free key.
+-- The loser locks the row. It then replays, rejects, waits, or replaces an expired lease.
+-- ---------------------------------------------------------------------------
+
+create or replace function claim_idempotency_key(
+  p_user_id uuid,
+  p_key text,
+  p_request_hash text,
+  p_lease_seconds int
+)
+returns table (
+  outcome text,
+  status_code int,
+  response_body jsonb,
+  response_omitted boolean
+)
+language plpgsql
+as $$
+declare
+  v_row idempotency_keys%rowtype;
+  v_inserted int;
+begin
+  loop
+    insert into idempotency_keys (
+      user_id,
+      key,
+      request_hash,
+      status,
+      locked_until
+    )
+    values (
+      p_user_id,
+      p_key,
+      p_request_hash,
+      'processing',
+      now() + (p_lease_seconds * interval '1 second')
+    )
+    on conflict (user_id, key) do nothing;
+
+    get diagnostics v_inserted = row_count;
+    if v_inserted > 0 then
+      return query
+      select 'claimed'::text, null::int, null::jsonb, false;
+      return;
+    end if;
+
+    select *
+    into v_row
+    from idempotency_keys
+    where user_id = p_user_id
+      and key = p_key
+    for update;
+
+    exit when found;
+  end loop;
+
+  if v_row.status = 'complete'
+     and v_row.expires_at is not null
+     and v_row.expires_at > now() then
+    if v_row.request_hash = p_request_hash then
+      return query
+      select
+        'replay'::text,
+        v_row.status_code,
+        v_row.response_body,
+        v_row.response_omitted;
+      return;
+    end if;
+
+    return query
+    select 'mismatch'::text, null::int, null::jsonb, false;
+    return;
+  end if;
+
+  if v_row.status = 'processing' and v_row.locked_until > now() then
+    return query
+    select 'in_progress'::text, null::int, null::jsonb, false;
+    return;
+  end if;
+
+  -- Expired complete row, or a processing lease that already ended.
+  update idempotency_keys
+  set
+    request_hash = p_request_hash,
+    status = 'processing',
+    locked_until = now() + (p_lease_seconds * interval '1 second'),
+    status_code = null,
+    response_body = null,
+    response_omitted = false,
+    expires_at = null
+  where user_id = p_user_id
+    and key = p_key;
+
+  return query
+  select 'claimed'::text, null::int, null::jsonb, false;
+end;
+$$;
+
+create or replace function complete_idempotency_key(
+  p_user_id uuid,
+  p_key text,
+  p_status_code int,
+  p_response_body jsonb,
+  p_response_omitted boolean
+)
+returns boolean
+language sql
+as $$
+  with updated as (
+    update idempotency_keys
+    set
+      status = 'complete',
+      status_code = p_status_code,
+      response_body = case when p_response_omitted then null else p_response_body end,
+      response_omitted = p_response_omitted,
+      expires_at = now() + interval '24 hours',
+      locked_until = now()
+    where user_id = p_user_id
+      and key = p_key
+      and status = 'processing'
+    returning 1
+  )
+  select exists (select 1 from updated);
+$$;
+
+create or replace function release_idempotency_key(
+  p_user_id uuid,
+  p_key text
+)
+returns boolean
+language sql
+as $$
+  with deleted as (
+    delete from idempotency_keys
+    where user_id = p_user_id
+      and key = p_key
+      and status = 'processing'
+    returning 1
+  )
+  select exists (select 1 from deleted);
+$$;
+
+create or replace function refresh_idempotency_lease(
+  p_user_id uuid,
+  p_key text,
+  p_lease_seconds int
+)
+returns boolean
+language sql
+as $$
+  with updated as (
+    update idempotency_keys
+    set locked_until = now() + (p_lease_seconds * interval '1 second')
+    where user_id = p_user_id
+      and key = p_key
+      and status = 'processing'
+      and locked_until > now()
+    returning 1
+  )
+  select exists (select 1 from updated);
+$$;
+
+create or replace function delete_expired_idempotency_keys()
+returns int
+language sql
+as $$
+  with deleted as (
+    delete from idempotency_keys
+    where expires_at < now()
+       or (status = 'processing' and locked_until < now() - interval '24 hours')
+    returning 1
+  )
+  select count(*)::int from deleted;
+$$;
 

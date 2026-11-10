@@ -56,6 +56,19 @@ const nextConfig: NextConfig = {
       : {}),
   },
   async headers() {
+    /**
+     * `frame-ancestors 'none'` in `src/proxy.ts` supersedes X-Frame-Options and
+     * covers every route the proxy matches. The paths below are exactly what its
+     * matcher excludes, so they are the only ones that still need XFO. One owner
+     * per path, so the two cannot drift apart.
+     */
+    const PROXY_EXCLUDED_PATHS = [
+      "/api/:path*",
+      "/_next/static/:path*",
+      "/_next/image",
+      "/favicon.ico",
+    ];
+
     return [
       {
         headers: [
@@ -64,16 +77,21 @@ const nextConfig: NextConfig = {
             value: "max-age=31536000; includeSubDomains; preload",
           },
           {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
             key: "Cross-Origin-Opener-Policy",
             value: "same-origin",
           },
         ],
         source: "/:path*",
       },
+      ...PROXY_EXCLUDED_PATHS.map((source) => ({
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+        ],
+        source,
+      })),
     ];
   },
   images: {
@@ -122,6 +140,7 @@ const nextConfig: NextConfig = {
     return [
       { destination: "/llms.mdx/docs/content.md", source: "/docs.md" },
       { destination: "/llms.mdx/docs/:path*/content.md", source: "/docs/:path*.md" },
+      { destination: "/openapi.yaml", source: "/api/openapi.yaml" },
     ];
   },
   serverExternalPackages: ["@takumi-rs/core"],

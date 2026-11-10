@@ -436,6 +436,7 @@ export const ModelName = {
   ReminderDispatchLog: 'ReminderDispatchLog',
   SyncChangeLog: 'SyncChangeLog',
   SyncMutationReceipt: 'SyncMutationReceipt',
+  IdempotencyKey: 'IdempotencyKey',
   SyncUserSequence: 'SyncUserSequence',
   UserSettings: 'UserSettings',
   Tag: 'Tag',
@@ -455,7 +456,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "jwks" | "passkey" | "group" | "peopleGroup" | "interaction" | "interactionParticipant" | "peopleLinkedin" | "peopleWorkHistory" | "peopleEducationHistory" | "linkedinEnrichQueue" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "people" | "peoplePhone" | "peopleEmail" | "peopleSocial" | "peopleAddress" | "peopleImportantDate" | "peopleRelationship" | "peopleMergeRecommendation" | "geocodeCache" | "apikey" | "chatSession" | "chatMessage" | "subscription" | "pendingSubscription" | "stripeWebhookEvent" | "reminderDispatchLog" | "syncChangeLog" | "syncMutationReceipt" | "syncUserSequence" | "userSettings" | "tag" | "peopleTag"
+    modelProps: "user" | "session" | "account" | "verification" | "jwks" | "passkey" | "group" | "peopleGroup" | "interaction" | "interactionParticipant" | "peopleLinkedin" | "peopleWorkHistory" | "peopleEducationHistory" | "linkedinEnrichQueue" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "people" | "peoplePhone" | "peopleEmail" | "peopleSocial" | "peopleAddress" | "peopleImportantDate" | "peopleRelationship" | "peopleMergeRecommendation" | "geocodeCache" | "apikey" | "chatSession" | "chatMessage" | "subscription" | "pendingSubscription" | "stripeWebhookEvent" | "reminderDispatchLog" | "syncChangeLog" | "syncMutationReceipt" | "idempotencyKey" | "syncUserSequence" | "userSettings" | "tag" | "peopleTag"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3345,6 +3346,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    IdempotencyKey: {
+      payload: Prisma.$IdempotencyKeyPayload<ExtArgs>
+      fields: Prisma.IdempotencyKeyFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.IdempotencyKeyFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.IdempotencyKeyFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>
+        }
+        findFirst: {
+          args: Prisma.IdempotencyKeyFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.IdempotencyKeyFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>
+        }
+        findMany: {
+          args: Prisma.IdempotencyKeyFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>[]
+        }
+        create: {
+          args: Prisma.IdempotencyKeyCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>
+        }
+        createMany: {
+          args: Prisma.IdempotencyKeyCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.IdempotencyKeyCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>[]
+        }
+        delete: {
+          args: Prisma.IdempotencyKeyDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>
+        }
+        update: {
+          args: Prisma.IdempotencyKeyUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>
+        }
+        deleteMany: {
+          args: Prisma.IdempotencyKeyDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.IdempotencyKeyUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.IdempotencyKeyUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>[]
+        }
+        upsert: {
+          args: Prisma.IdempotencyKeyUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$IdempotencyKeyPayload>
+        }
+        aggregate: {
+          args: Prisma.IdempotencyKeyAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateIdempotencyKey>
+        }
+        groupBy: {
+          args: Prisma.IdempotencyKeyGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IdempotencyKeyGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.IdempotencyKeyCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.IdempotencyKeyCountAggregateOutputType> | number
+        }
+      }
+    }
     SyncUserSequence: {
       payload: Prisma.$SyncUserSequencePayload<ExtArgs>
       fields: Prisma.SyncUserSequenceFieldRefs
@@ -4332,6 +4407,22 @@ export const SyncMutationReceiptScalarFieldEnum = {
 export type SyncMutationReceiptScalarFieldEnum = (typeof SyncMutationReceiptScalarFieldEnum)[keyof typeof SyncMutationReceiptScalarFieldEnum]
 
 
+export const IdempotencyKeyScalarFieldEnum = {
+  userId: 'userId',
+  key: 'key',
+  requestHash: 'requestHash',
+  status: 'status',
+  lockedUntil: 'lockedUntil',
+  statusCode: 'statusCode',
+  responseBody: 'responseBody',
+  responseOmitted: 'responseOmitted',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type IdempotencyKeyScalarFieldEnum = (typeof IdempotencyKeyScalarFieldEnum)[keyof typeof IdempotencyKeyScalarFieldEnum]
+
+
 export const SyncUserSequenceScalarFieldEnum = {
   userId: 'userId',
   lastSequence: 'lastSequence'
@@ -4756,6 +4847,7 @@ export type GlobalOmitConfig = {
   reminderDispatchLog?: Prisma.ReminderDispatchLogOmit
   syncChangeLog?: Prisma.SyncChangeLogOmit
   syncMutationReceipt?: Prisma.SyncMutationReceiptOmit
+  idempotencyKey?: Prisma.IdempotencyKeyOmit
   syncUserSequence?: Prisma.SyncUserSequenceOmit
   userSettings?: Prisma.UserSettingsOmit
   tag?: Prisma.TagOmit

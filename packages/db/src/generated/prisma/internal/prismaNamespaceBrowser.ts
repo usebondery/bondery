@@ -90,6 +90,7 @@ export const ModelName = {
   ReminderDispatchLog: 'ReminderDispatchLog',
   SyncChangeLog: 'SyncChangeLog',
   SyncMutationReceipt: 'SyncMutationReceipt',
+  IdempotencyKey: 'IdempotencyKey',
   SyncUserSequence: 'SyncUserSequence',
   UserSettings: 'UserSettings',
   Tag: 'Tag',
@@ -762,6 +763,22 @@ export const SyncMutationReceiptScalarFieldEnum = {
 } as const
 
 export type SyncMutationReceiptScalarFieldEnum = (typeof SyncMutationReceiptScalarFieldEnum)[keyof typeof SyncMutationReceiptScalarFieldEnum]
+
+
+export const IdempotencyKeyScalarFieldEnum = {
+  userId: 'userId',
+  key: 'key',
+  requestHash: 'requestHash',
+  status: 'status',
+  lockedUntil: 'lockedUntil',
+  statusCode: 'statusCode',
+  responseBody: 'responseBody',
+  responseOmitted: 'responseOmitted',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt'
+} as const
+
+export type IdempotencyKeyScalarFieldEnum = (typeof IdempotencyKeyScalarFieldEnum)[keyof typeof IdempotencyKeyScalarFieldEnum]
 
 
 export const SyncUserSequenceScalarFieldEnum = {

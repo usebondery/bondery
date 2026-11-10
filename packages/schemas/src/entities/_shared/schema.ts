@@ -92,8 +92,8 @@ export function makeListResponseSchema<K extends string, S extends z.ZodTypeAny>
   itemSchema: S,
 ) {
   return z.object({
-    [key]: z.array(itemSchema),
-    totalCount: z.number(),
+    [key]: z.array(itemSchema).describe("Matching records"),
+    totalCount: z.number().describe("Total records that match the query"),
   }) as z.ZodObject<Record<K, z.ZodArray<S>> & { totalCount: z.ZodNumber }>;
 }
 
@@ -102,7 +102,7 @@ export function makePaginatedListResponseSchema<K extends string, S extends z.Zo
   itemSchema: S,
 ) {
   return z.object({
-    [key]: z.array(itemSchema),
+    [key]: z.array(itemSchema).describe("Records on this page"),
     pagination: paginationMetaSchema,
   }) as z.ZodObject<Record<K, z.ZodArray<S>> & { pagination: typeof paginationMetaSchema }>;
 }
@@ -112,7 +112,7 @@ export function makeCollectionResponseSchema<K extends string, S extends z.ZodTy
   itemSchema: S,
 ) {
   return z.object({
-    [key]: z.array(itemSchema),
+    [key]: z.array(itemSchema).describe("Matching records"),
   }) as z.ZodObject<Record<K, z.ZodArray<S>>>;
 }
 
@@ -121,7 +121,10 @@ export function withCountAndPreviewSchema<
   P extends z.ZodTypeAny,
 >(baseSchema: S, previewSchema: P) {
   return baseSchema.extend({
-    contactCount: z.number(),
-    previewContacts: z.array(previewSchema).optional(),
+    contactCount: z.number().describe("Number of contacts in this collection"),
+    previewContacts: z
+      .array(previewSchema)
+      .optional()
+      .describe("Small sample of members, for previews"),
   });
 }

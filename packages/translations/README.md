@@ -92,7 +92,9 @@ Defined in [`packages/schemas/locale/supported-locales.json`](https://github.com
 
 ## i18next-cli (lint, types, status)
 
-Nested locale files stay canonical; [`i18next.config.ts`](./i18next.config.ts) points `extract.output` at a gitignored flat mirror (`.i18next-cli-mirror/`) built by `scripts/sync-locale-mirror.mjs` so `i18next-cli status` can resolve namespaces.
+Nested locale files stay canonical; [`i18next.config.ts`](./i18next.config.ts) points `extract.output` at a gitignored flat mirror (`.temp/i18next-cli-mirror/`, at the repo root) built by `scripts/sync-locale-mirror.mjs` so `i18next-cli status` can resolve namespaces.
+
+The mirror must stay **outside** this package. It is build-time input only and never reaches `dist`, but this package is a workspace dependency injected into the pnpm store (`injectWorkspacePackages: true`). pnpm hardlinks the package files, so writing generated files inside the package directory breaks those hardlinks and aborts install with `ERR_PNPM_INJECTED_DEPS_SYNC_LINK`.
 
 From the repo root:
 

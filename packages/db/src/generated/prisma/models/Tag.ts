@@ -14,7 +14,12 @@ import type * as Prisma from "../internal/prismaNamespace.js"
 
 /**
  * Model Tag
- * 
+ * Labels are unique per user, ignoring letter case.
+ * The unique index `tags_user_id_label_lower_key` on `(user_id, lower(label))`
+ * exists in SQL only, because Prisma cannot express functional indexes.
+ * Migration: `20261102120000_tag_label_unique_ci`.
+ * Do not add `@@unique([userId, label])` here. It would create a second,
+ * weaker index and drift from the migration.
  */
 export type TagModel = runtime.Types.Result.DefaultSelection<Prisma.$TagPayload>
 

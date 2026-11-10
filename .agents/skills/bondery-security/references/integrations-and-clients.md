@@ -42,15 +42,11 @@ AI chat routes use `AI_TIER` rate limit (20 req/min).
 
 ## CORS and trusted origins
 
-`apps/api/src/lib/platform/trusted-origins.ts`:
-- Origins: webapp URL, website URL, `bondery://`, `BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS`
-- Dev: `localhost` / `127.0.0.1` wildcards
-- `credentials: true`; headers: `Content-Type`, `Authorization`, `X-Bondery-Extension-Version`
-- **Requests with no `Origin` header are allowed** — intentional for non-browser clients
+The allowlist and the reason it is not authorization live in
+[headers-csp-and-cors.md](./headers-csp-and-cors.md#cors). The code is
+`apps/api/src/lib/platform/trusted-origins.ts`.
 
 Better Auth responses need manual CORS merge via `withCorsHeaders` (`auth/routes.ts`) because of `reply.hijack()`.
-
-CORS is **not** authorization — it controls browser cross-origin access only.
 
 ## Chrome extension boundaries
 

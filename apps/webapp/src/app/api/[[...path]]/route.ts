@@ -1,4 +1,4 @@
-import { BONDERY_STEP_UP_HEADER } from "@bondery/helpers/globals/paths";
+import { BONDERY_STEP_UP_HEADER, IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
 import type { NextRequest } from "next/server";
 import { bffProxyFetch } from "@/lib/api/bffProxy";
 import { buildNestedErrorResponse } from "@/lib/api/buildNestedErrorResponse";
@@ -41,6 +41,11 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
     headers.set(BONDERY_STEP_UP_HEADER, stepUp);
   }
 
+  const idempotencyKey = request.headers.get(IDEMPOTENCY_KEY_HEADER);
+  if (idempotencyKey) {
+    headers.set(IDEMPOTENCY_KEY_HEADER, idempotencyKey);
+  }
+
   const init: RequestInit = {
     headers,
     method: request.method,
@@ -67,7 +72,11 @@ async function proxyToApi(request: NextRequest, pathSegments: string[]) {
     "Cache-Control",
     "Connection",
     "Content-Disposition",
+    "Idempotent-Replayed",
     "Location",
+    "RateLimit",
+    "RateLimit-Policy",
+    "Retry-After",
     "x-vercel-ai-ui-message-stream",
   ]) {
     const value = apiResponse.headers.get(name);

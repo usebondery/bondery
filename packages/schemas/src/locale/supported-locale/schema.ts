@@ -18,7 +18,9 @@ if (rawLocaleCodes.length === 0) {
 const localeCodes = rawLocaleCodes as [string, ...string[]];
 
 /** Bondery UI locales with shipped translation namespaces. */
-export const supportedLocaleSchema: z.ZodType<SupportedLocale> = z.enum(localeCodes);
+export const supportedLocaleSchema: z.ZodType<SupportedLocale> = z
+  .enum(localeCodes)
+  .describe("Bondery UI locale code");
 
 export const SUPPORTED_LOCALES = rawLocaleCodes as readonly SupportedLocale[];
 

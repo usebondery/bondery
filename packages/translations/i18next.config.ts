@@ -25,7 +25,7 @@ function fromPackage(...segments: string[]) {
   return relative(repoRoot, join(packageRoot, ...segments)).replace(/\\/g, "/");
 }
 
-const mirrorRoot = fromPackage(".i18next-cli-mirror");
+const mirrorRoot = fromRepo(".temp/i18next-cli-mirror");
 const localesEnRoot = fromPackage("src/locales/en");
 const typesOutDir = fromPackage("src/generated/i18next-cli");
 

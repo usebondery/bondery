@@ -34,22 +34,43 @@ const settingsPatchResponseSchema = z
   .object({
     data: z
       .object({
-        colorScheme: z.string().nullable().optional(),
-        defaultPhoneCountry: z.string().nullable().optional(),
-        groupSortOrder: z.string().nullable().optional(),
+        colorScheme: z.string().nullable().optional().describe("Color scheme preference"),
+        defaultPhoneCountry: z
+          .string()
+          .nullable()
+          .optional()
+          .describe("ISO 3166-1 alpha-2 default calling-code country"),
+        groupSortOrder: z.string().nullable().optional().describe("Sort order for the groups list"),
         language: supportedLocaleSchema.optional(),
-        leftSwipeAction: z.string().nullable().optional(),
-        productAnalyticsEnabled: z.boolean().nullable().optional(),
-        reminderSendHour: z.string().nullable().optional(),
-        rightSwipeAction: z.string().nullable().optional(),
-        tagSortOrder: z.string().nullable().optional(),
-        timeFormat: z.string().nullable().optional(),
-        timezone: z.string().nullable().optional(),
+        leftSwipeAction: z
+          .string()
+          .nullable()
+          .optional()
+          .describe("Swipe action on a contact row, left direction"),
+        productAnalyticsEnabled: z
+          .boolean()
+          .nullable()
+          .optional()
+          .describe("True when product analytics collection is on"),
+        reminderSendHour: z
+          .string()
+          .nullable()
+          .optional()
+          .describe("Local time of day to send reminder emails"),
+        rightSwipeAction: z
+          .string()
+          .nullable()
+          .optional()
+          .describe("Swipe action on a contact row, right direction"),
+        tagSortOrder: z.string().nullable().optional().describe("Sort order for the tags list"),
+        timeFormat: z.string().nullable().optional().describe("Clock format preference"),
+        timezone: z.string().nullable().optional().describe("IANA timezone name"),
       })
       .nullable()
-      .optional(),
-    skipped: z.boolean().optional(),
-    success: z.boolean(),
+      .optional()
+      .describe("Updated settings. Null when the patch was skipped."),
+    skipped: z.boolean().optional().describe("True when the patch did not apply"),
+    success: z.boolean().describe("True when the request completed"),
   })
   .meta({ example: EXAMPLE_SETTINGS_PATCH_RESPONSE });
 

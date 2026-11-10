@@ -5,7 +5,7 @@ import type { GeocodeSuggestResponse, GeocodeTimezoneResponse } from "../geocode
 /** Parsed geocode suggest API response (web-safe — no entity barrel imports). */
 export const geocodeSuggestResponseSchema: z.ZodType<GeocodeSuggestResponse> = z
   .object({
-    addresses: z.array(contactAddressReadSchema),
+    addresses: z.array(contactAddressReadSchema).describe("Suggested addresses"),
   })
   .meta({
     example: {
@@ -36,6 +36,6 @@ export const geocodeSuggestResponseSchema: z.ZodType<GeocodeSuggestResponse> = z
 
 export const geocodeTimezoneResponseSchema: z.ZodType<GeocodeTimezoneResponse> = z
   .object({
-    timezone: z.string().nullable(),
+    timezone: z.string().nullable().describe("IANA timezone name for these coordinates"),
   })
   .meta({ example: { timezone: "Europe/London" } });

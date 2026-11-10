@@ -8,15 +8,17 @@ export const oauthProviderIdSchema = z.enum([
 
 export const oauthProvidersBitmapSchema = z
   .object({
-    email: z.boolean(),
-    github: z.boolean(),
-    linkedin: z.boolean(),
+    email: z.boolean().describe("True when email sign-in is available"),
+    github: z.boolean().describe("True when GitHub sign-in is available"),
+    linkedin: z.boolean().describe("True when LinkedIn sign-in is available"),
   })
   .strict() satisfies z.ZodType<OAuthProvidersBitmap>;
 
 export const oauthProvidersResponseSchema = z
   .object({
-    oauthProviders: oauthProvidersBitmapSchema,
+    oauthProviders: oauthProvidersBitmapSchema.describe(
+      "Sign-in providers enabled for this deployment",
+    ),
   })
   .strict()
   .meta({

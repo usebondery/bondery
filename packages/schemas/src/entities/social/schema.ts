@@ -11,10 +11,11 @@ export const socialPlatformSchema = z.enum([
 ]) satisfies z.ZodType<SocialPlatform>;
 
 export const socialHandleInputSchema = z.object({
-  platform: socialPlatformSchema,
+  platform: socialPlatformSchema.describe("Social network"),
   value: z
     .string()
     .trim()
     .min(1, { error: "Value is required" })
-    .max(200, { error: "Value must be at most 200 characters" }),
+    .max(200, { error: "Value must be at most 200 characters" })
+    .describe("Profile URL or handle"),
 }) satisfies z.ZodType<SocialHandleInput>;

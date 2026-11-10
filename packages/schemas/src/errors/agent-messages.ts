@@ -28,6 +28,16 @@ const AGENT_RECOVERY_HINTS: Partial<Record<ApiErrorCode, string>> = {
     "Tell the user. The server cannot send email until the operator configures it.",
   extension_outdated: "Ask the user to update the browser extension, then retry the call.",
   group_not_found: "Call get_groups or search_groups and retry with a groupId from the results.",
+  idempotency_key_in_progress:
+    "Read the Retry-After header, wait that many seconds, then retry the same call with the same Idempotency-Key.",
+  idempotency_key_invalid:
+    "Send an Idempotency-Key of 1 to 255 printable ASCII characters with no spaces, then retry the call.",
+  idempotency_key_mismatch:
+    "Send a new Idempotency-Key. This key already belongs to a different request.",
+  idempotency_key_unsupported:
+    "Remove the Idempotency-Key header and retry the call. This route does not store a replay.",
+  idempotency_response_omitted:
+    "Send a new Idempotency-Key and retry the call. The original response was not stored.",
   important_date_duplicate: "Remove the duplicate date from the list and retry the same call.",
   interaction_not_found:
     "Call get_interactions with the personId and retry with an interactionId from the results.",

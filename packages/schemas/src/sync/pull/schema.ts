@@ -17,24 +17,33 @@ export const syncChangeOperationSchema: z.ZodType<SyncChangeOperation> = z.enum(
 ]);
 
 export const syncChangeSchema: z.ZodType<SyncChange> = z.object({
-  entityId: z.string().uuid(),
-  operation: syncChangeOperationSchema,
-  table: syncTableKeySchema,
-  value: z.record(z.string(), z.unknown()).nullable(),
+  entityId: z.string().uuid().describe("Identifier of the changed record"),
+  operation: syncChangeOperationSchema.describe("Change operation"),
+  table: syncTableKeySchema.describe("Sync table this change belongs to"),
+  value: z.record(z.string(), z.unknown()).nullable().describe("New row values. Null for delete."),
 });
 
 export const syncBatchSchema: z.ZodType<SyncBatch> = z.object({
-  changes: z.array(syncChangeSchema).min(1),
-  serverSequence: z.number().int().positive(),
+  changes: z.array(syncChangeSchema).min(1).describe("Changes in this sequence batch"),
+  serverSequence: z.number().int().positive().describe("Server sequence of this batch"),
 });
 
 export const syncPullResponseSchema: z.ZodType<SyncPullResponse> = z.object({
-  batches: z.array(syncBatchSchema),
-  nextServerSequence: z.number().int().nonnegative(),
-  requiresBootstrap: z.boolean().optional(),
+  batches: z.array(syncBatchSchema).describe("Change batches after the requested sequence"),
+  nextServerSequence: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe("Next server sequence the client should pull from"),
+  requiresBootstrap: z
+    .boolean()
+    .optional()
+    .describe("True when the client must run bootstrap before pull"),
 });
 
-const syncTableRowsSchema = z.array(z.record(z.string(), z.unknown()));
+const syncTableRowsSchema = z
+  .array(z.record(z.string(), z.unknown()))
+  .describe("Snapshot rows for this table");
 
 /** Explicit object shape — z.record(z.enum(...)) breaks fast-json-stringify (invalid JSON). */
 const bootstrapTablesShape = Object.fromEntries(
@@ -45,6 +54,10 @@ export const syncBootstrapTablesSchema: z.ZodType<SyncBootstrapTables> =
   z.object(bootstrapTablesShape);
 
 export const syncBootstrapResponseSchema: z.ZodType<SyncBootstrapResponse> = z.object({
-  nextServerSequence: z.number().int().nonnegative(),
-  tables: syncBootstrapTablesSchema,
+  nextServerSequence: z
+    .number()
+    .int()
+    .nonnegative()
+    .describe("Next server sequence the client should pull from"),
+  tables: syncBootstrapTablesSchema.describe("Full table snapshots for this account"),
 });

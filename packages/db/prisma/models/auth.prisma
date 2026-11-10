@@ -33,6 +33,7 @@ model User {
   reminderDispatchLogs      ReminderDispatchLog[]
   syncChangeLogs            SyncChangeLog[]
   syncMutationReceipts      SyncMutationReceipt[]
+  idempotencyKeys           IdempotencyKey[]
   syncUserSequence          SyncUserSequence?
 
   oauthClients       OauthClient[]

@@ -63,13 +63,7 @@ Schemas live in `@bondery/schemas`. Error catalog codes only (snake_case).
 
 ### Security headers
 
-| App | CSP | Other |
-|-----|-----|-------|
-| Website | Strict nonce CSP via `proxy.ts` | HSTS, `X-Frame-Options: DENY`, COOP |
-| Webapp | **None** (nonce read in layout but not set) | HSTS, `X-Frame-Options: DENY`, COOP |
-| API | Disabled (JSON API) | HSTS in prod, `crossOriginResourcePolicy: cross-origin` |
-
-**Review trigger:** webapp CSP gap — layout expects `x-nonce` but `proxy.ts` only handles token refresh.
+See [headers-csp-and-cors.md](./headers-csp-and-cors.md) for the per-surface header matrix, the shared CSP builder, and the reporting endpoint. Do not restate the table here.
 
 ## Error handling (no data leakage)
 

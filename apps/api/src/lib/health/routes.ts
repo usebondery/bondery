@@ -2,7 +2,7 @@ import { buildLivenessStatus } from "@bondery/helpers/infra/build-metadata";
 import { EXAMPLE_HEALTH_UNHEALTHY_RESPONSE } from "@bondery/schemas/openapi/fixtures/responses";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
-import { withOkResponse } from "../platform/openapi/responses.js";
+import { withOkResponse, withUnmeteredOkResponse } from "../platform/openapi/responses.js";
 import { HEALTH_TIER } from "../platform/rate-limit.js";
 import { getHealthReport } from "./check.js";
 import { healthReportSchema, livenessStatusSchema } from "./schemas.js";
@@ -28,7 +28,7 @@ export function registerHealthRoutes(fastify: AppFastifyInstance): void {
       config: { rateLimit: false },
       schema: {
         description: LIVENESS_DESCRIPTION,
-        response: withOkResponse(livenessStatusSchema, "Liveness status"),
+        response: withUnmeteredOkResponse(livenessStatusSchema, "Liveness status"),
         summary: "Check liveness",
         tags: ["Health"],
       } satisfies FastifyZodOpenApiSchema,

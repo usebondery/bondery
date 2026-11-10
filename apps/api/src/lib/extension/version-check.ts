@@ -33,7 +33,9 @@ function isPublicInfraPath(url: string): boolean {
     path === `${API_ROUTES.MOBILE}/manifest` ||
     path === API_ROUTES.OAUTH_PROVIDERS ||
     path === API_ROUTES.API_REFERENCE ||
-    path === API_ROUTES.DOCS_API
+    path === API_ROUTES.DOCS_API ||
+    // CSP reports arrive from a browser with no credentials to add.
+    path === API_ROUTES.SECURITY_CSP_REPORT
   );
 }
 
@@ -66,6 +68,16 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
   fastify.addHook("onRequest", async (request, reply) => {
     // No enforcement when the minimum is the default "0.0.0"
     if (!MIN_EXTENSION_VERSION || MIN_EXTENSION_VERSION === "0.0.0") {
+      return;
+    }
+
+    /**
+     * Only guard routes that exist. An `onRequest` hook runs before routing
+     * resolves, so without this check a request for an unknown path is answered
+     * `401 auth_required` instead of `404 not_found`. That hides real 404s from
+     * clients and makes port scanners look like auth failures.
+     */
+    if (!request.routeOptions?.url) {
       return;
     }
 

@@ -66,6 +66,19 @@ const nextConfig: NextConfig = {
       : {}),
   },
   async headers() {
+    /**
+     * `frame-ancestors 'none'` in `src/proxy.ts` supersedes X-Frame-Options and
+     * covers every route the proxy matches. The paths below are exactly what its
+     * matcher excludes, so they are the only ones that still need XFO. One owner
+     * per path, so the two cannot drift apart.
+     */
+    const PROXY_EXCLUDED_PATHS = [
+      "/_next/static/:path*",
+      "/_next/image",
+      "/favicon.ico",
+      "/:path*.:ext(svg|png|jpg|jpeg|gif|webp)",
+    ];
+
     return [
       {
         headers: [
@@ -84,16 +97,21 @@ const nextConfig: NextConfig = {
             value: "max-age=31536000; includeSubDomains; preload",
           },
           {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
             key: "Cross-Origin-Opener-Policy",
             value: "same-origin",
           },
         ],
         source: "/:path*",
       },
+      ...PROXY_EXCLUDED_PATHS.map((source) => ({
+        headers: [
+          {
+            key: "X-Frame-Options",
+            value: "DENY",
+          },
+        ],
+        source,
+      })),
     ];
   },
   images: {

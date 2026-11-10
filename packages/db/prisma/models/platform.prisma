@@ -165,6 +165,24 @@ model SyncMutationReceipt {
   @@map("sync_mutation_receipts")
 }
 
+model IdempotencyKey {
+  userId          String    @map("user_id") @db.Uuid
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key             String
+  requestHash     String    @map("request_hash")
+  status          String
+  lockedUntil     DateTime  @map("locked_until")
+  statusCode      Int?      @map("status_code")
+  responseBody    Json?     @map("response_body")
+  responseOmitted Boolean   @default(false) @map("response_omitted")
+  expiresAt       DateTime? @map("expires_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  @@id([userId, key])
+  @@index([expiresAt], where: { expiresAt: { not: null } })
+  @@map("idempotency_keys")
+}
+
 model SyncUserSequence {
   userId       String @id @map("user_id") @db.Uuid
   user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)

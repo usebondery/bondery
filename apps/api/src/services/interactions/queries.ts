@@ -55,7 +55,8 @@ export async function listInteractions(
   try {
     const [rows, count] = await Promise.all([
       db.interaction.findMany({
-        orderBy: { date: "desc" },
+        // `id` breaks date ties so `skip`/`take` pages cannot repeat a row.
+        orderBy: [{ date: "desc" }, { id: "desc" }],
         select: { id: true },
         skip: offset,
         take: limit,

@@ -611,6 +611,12 @@
       "node": "./dist/errors/index.js",
       "types": "./src/errors/index.ts"
     },
+    "./errors/agent-messages": {
+      "default": "./dist/errors/agent-messages.js",
+      "import": "./dist/errors/agent-messages.js",
+      "node": "./dist/errors/agent-messages.js",
+      "types": "./src/errors/agent-messages.ts"
+    },
     "./errors/api-error-codes.generated": {
       "default": "./dist/errors/api-error-codes.generated.js",
       "import": "./dist/errors/api-error-codes.generated.js",
@@ -1141,5 +1147,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.1-rc.2"
+  "version": "1.11.1-rc.3"
 }

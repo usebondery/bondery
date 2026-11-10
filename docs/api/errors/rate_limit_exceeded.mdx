@@ -1,7 +1,7 @@
 ---
 title: rate_limit_exceeded
-description: "The rate limiter blocked the request. Back off, then retry with an exponential delay, and read `Retry-After` whenever the header is present."
-last_updated: 2026-07-28
+description: "The rate limiter blocked the request. Read RateLimit on each limited response. On 429, wait for Retry-After, then retry."
+last_updated: 2026-11-10
 ---
 
 ## When this happens
@@ -10,7 +10,18 @@ Redis-backed rate limiter blocked the request.
 
 ## What your integration should do
 
-Backoff and retry with exponential delay. Inspect `Retry-After` when present.
+Read `RateLimit` and `RateLimit-Policy` on each limited response. `r` is the remaining requests. `t` is the seconds until reset. Slow down while `r` is low.
+
+On 429, read `Retry-After`. It equals `t` and `error.retry_after`. Wait that many seconds. Then retry the same call.
+
+```http
+RateLimit-Policy: "default";q=300;w=60
+RateLimit: "default";r=12;t=47
+```
+
+`q` is the quota. `w` is the window in seconds. A route can send a different policy name, such as `ai` or `export`.
+
+`Retry-After` is present on 429 only.
 
 ## What end users should see
 

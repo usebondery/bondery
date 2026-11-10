@@ -65,17 +65,47 @@
       "node": "./dist/CodeBlock/CodeBlock.js",
       "types": "./src/CodeBlock/CodeBlock.tsx"
     },
+    "./CodeBlock/CodeHighlightProvider": {
+      "default": "./dist/CodeBlock/CodeHighlightProvider.js",
+      "import": "./dist/CodeBlock/CodeHighlightProvider.js",
+      "node": "./dist/CodeBlock/CodeHighlightProvider.js",
+      "types": "./src/CodeBlock/CodeHighlightProvider.tsx"
+    },
     "./CodeBlock/platformPreference": {
       "default": "./dist/CodeBlock/platformPreference.js",
       "import": "./dist/CodeBlock/platformPreference.js",
       "node": "./dist/CodeBlock/platformPreference.js",
       "types": "./src/CodeBlock/platformPreference.ts"
     },
+    "./CodeBlock/platformPreference.test": {
+      "default": "./dist/CodeBlock/platformPreference.test.js",
+      "import": "./dist/CodeBlock/platformPreference.test.js",
+      "node": "./dist/CodeBlock/platformPreference.test.js",
+      "types": "./src/CodeBlock/platformPreference.test.ts"
+    },
+    "./CodeBlock/snippetPreference": {
+      "default": "./dist/CodeBlock/snippetPreference.js",
+      "import": "./dist/CodeBlock/snippetPreference.js",
+      "node": "./dist/CodeBlock/snippetPreference.js",
+      "types": "./src/CodeBlock/snippetPreference.ts"
+    },
+    "./CodeBlock/snippetPreference.test": {
+      "default": "./dist/CodeBlock/snippetPreference.test.js",
+      "import": "./dist/CodeBlock/snippetPreference.test.js",
+      "node": "./dist/CodeBlock/snippetPreference.test.js",
+      "types": "./src/CodeBlock/snippetPreference.test.ts"
+    },
     "./CodeBlock/useCodeBlockPlatform": {
       "default": "./dist/CodeBlock/useCodeBlockPlatform.js",
       "import": "./dist/CodeBlock/useCodeBlockPlatform.js",
       "node": "./dist/CodeBlock/useCodeBlockPlatform.js",
       "types": "./src/CodeBlock/useCodeBlockPlatform.ts"
+    },
+    "./CodeBlock/useCodeBlockSnippet": {
+      "default": "./dist/CodeBlock/useCodeBlockSnippet.js",
+      "import": "./dist/CodeBlock/useCodeBlockSnippet.js",
+      "node": "./dist/CodeBlock/useCodeBlockSnippet.js",
+      "types": "./src/CodeBlock/useCodeBlockSnippet.ts"
     },
     "./CopyButton": {
       "default": "./dist/CopyButton/index.js",
@@ -161,6 +191,18 @@
       "node": "./dist/DataTable/types.js",
       "types": "./src/DataTable/types.ts"
     },
+    "./DatePickerWithPresets": {
+      "default": "./dist/DatePickerWithPresets/index.js",
+      "import": "./dist/DatePickerWithPresets/index.js",
+      "node": "./dist/DatePickerWithPresets/index.js",
+      "types": "./src/DatePickerWithPresets/index.ts"
+    },
+    "./DatePickerWithPresets/DatePickerWithPresets": {
+      "default": "./dist/DatePickerWithPresets/DatePickerWithPresets.js",
+      "import": "./dist/DatePickerWithPresets/DatePickerWithPresets.js",
+      "node": "./dist/DatePickerWithPresets/DatePickerWithPresets.js",
+      "types": "./src/DatePickerWithPresets/DatePickerWithPresets.tsx"
+    },
     "./DescribedSelect": {
       "default": "./dist/DescribedSelect/index.js",
       "import": "./dist/DescribedSelect/index.js",
@@ -184,6 +226,24 @@
       "import": "./dist/DotsMenuButton/DotsMenuButton.js",
       "node": "./dist/DotsMenuButton/DotsMenuButton.js",
       "types": "./src/DotsMenuButton/DotsMenuButton.tsx"
+    },
+    "./DropdownOption": {
+      "default": "./dist/DropdownOption/index.js",
+      "import": "./dist/DropdownOption/index.js",
+      "node": "./dist/DropdownOption/index.js",
+      "types": "./src/DropdownOption/index.ts"
+    },
+    "./DropdownOption/DropdownOption": {
+      "default": "./dist/DropdownOption/DropdownOption.js",
+      "import": "./dist/DropdownOption/DropdownOption.js",
+      "node": "./dist/DropdownOption/DropdownOption.js",
+      "types": "./src/DropdownOption/DropdownOption.tsx"
+    },
+    "./DropdownOption/DropdownOptionMenu": {
+      "default": "./dist/DropdownOption/DropdownOptionMenu.js",
+      "import": "./dist/DropdownOption/DropdownOptionMenu.js",
+      "node": "./dist/DropdownOption/DropdownOptionMenu.js",
+      "types": "./src/DropdownOption/DropdownOptionMenu.tsx"
     },
     "./Dropzone": {
       "default": "./dist/Dropzone/index.js",
@@ -227,6 +287,24 @@
       "node": "./dist/ExternalLink/index.js",
       "types": "./src/ExternalLink/index.ts"
     },
+    "./ExternalLink/ExternalLink": {
+      "default": "./dist/ExternalLink/ExternalLink.js",
+      "import": "./dist/ExternalLink/ExternalLink.js",
+      "node": "./dist/ExternalLink/ExternalLink.js",
+      "types": "./src/ExternalLink/ExternalLink.tsx"
+    },
+    "./ExternalLink/faviconUrl": {
+      "default": "./dist/ExternalLink/faviconUrl.js",
+      "import": "./dist/ExternalLink/faviconUrl.js",
+      "node": "./dist/ExternalLink/faviconUrl.js",
+      "types": "./src/ExternalLink/faviconUrl.ts"
+    },
+    "./ExternalLink/faviconUrl.test": {
+      "default": "./dist/ExternalLink/faviconUrl.test.js",
+      "import": "./dist/ExternalLink/faviconUrl.test.js",
+      "node": "./dist/ExternalLink/faviconUrl.test.js",
+      "types": "./src/ExternalLink/faviconUrl.test.ts"
+    },
     "./HelpButton": {
       "default": "./dist/HelpButton/index.js",
       "import": "./dist/HelpButton/index.js",
@@ -256,6 +334,18 @@
       "import": "./dist/Kbd/resolveShortcutKeyLabel.js",
       "node": "./dist/Kbd/resolveShortcutKeyLabel.js",
       "types": "./src/Kbd/resolveShortcutKeyLabel.ts"
+    },
+    "./LinkCard": {
+      "default": "./dist/LinkCard/index.js",
+      "import": "./dist/LinkCard/index.js",
+      "node": "./dist/LinkCard/index.js",
+      "types": "./src/LinkCard/index.ts"
+    },
+    "./LinkCard/LinkCard": {
+      "default": "./dist/LinkCard/LinkCard.js",
+      "import": "./dist/LinkCard/LinkCard.js",
+      "node": "./dist/LinkCard/LinkCard.js",
+      "types": "./src/LinkCard/LinkCard.tsx"
     },
     "./LogoIcon": {
       "default": "./dist/LogoIcon/index.js",
@@ -461,6 +551,18 @@
       "node": "./dist/PersonChip/personChipLayout.js",
       "types": "./src/PersonChip/personChipLayout.ts"
     },
+    "./PressableCard": {
+      "default": "./dist/PressableCard/index.js",
+      "import": "./dist/PressableCard/index.js",
+      "node": "./dist/PressableCard/index.js",
+      "types": "./src/PressableCard/index.ts"
+    },
+    "./PressableCard/PressableCard": {
+      "default": "./dist/PressableCard/PressableCard.js",
+      "import": "./dist/PressableCard/PressableCard.js",
+      "node": "./dist/PressableCard/PressableCard.js",
+      "types": "./src/PressableCard/PressableCard.tsx"
+    },
     "./peoplePicker": {
       "default": "./dist/peoplePicker/index.js",
       "import": "./dist/peoplePicker/index.js",
@@ -515,6 +617,18 @@
       "node": "./dist/peoplePicker/usePeoplePickerPagedList.js",
       "types": "./src/peoplePicker/usePeoplePickerPagedList.ts"
     },
+    "./SearchTrigger": {
+      "default": "./dist/SearchTrigger/index.js",
+      "import": "./dist/SearchTrigger/index.js",
+      "node": "./dist/SearchTrigger/index.js",
+      "types": "./src/SearchTrigger/index.ts"
+    },
+    "./SearchTrigger/SearchTrigger": {
+      "default": "./dist/SearchTrigger/SearchTrigger.js",
+      "import": "./dist/SearchTrigger/SearchTrigger.js",
+      "node": "./dist/SearchTrigger/SearchTrigger.js",
+      "types": "./src/SearchTrigger/SearchTrigger.tsx"
+    },
     "./styles": {
       "default": "./src/styles.css",
       "style": "./src/styles.css",
@@ -538,11 +652,29 @@
       "node": "./dist/ThemePicker/ThemePicker.js",
       "types": "./src/ThemePicker/ThemePicker.tsx"
     },
+    "./ToolbarMenuButton": {
+      "default": "./dist/ToolbarMenuButton/index.js",
+      "import": "./dist/ToolbarMenuButton/index.js",
+      "node": "./dist/ToolbarMenuButton/index.js",
+      "types": "./src/ToolbarMenuButton/index.ts"
+    },
+    "./ToolbarMenuButton/ToolbarMenuButton": {
+      "default": "./dist/ToolbarMenuButton/ToolbarMenuButton.js",
+      "import": "./dist/ToolbarMenuButton/ToolbarMenuButton.js",
+      "node": "./dist/ToolbarMenuButton/ToolbarMenuButton.js",
+      "types": "./src/ToolbarMenuButton/ToolbarMenuButton.tsx"
+    },
     "./theme": {
       "default": "./dist/theme.js",
       "import": "./dist/theme.js",
       "node": "./dist/theme.js",
       "types": "./src/theme.ts"
+    },
+    "./theme.test": {
+      "default": "./dist/theme.test.js",
+      "import": "./dist/theme.test.js",
+      "node": "./dist/theme.test.js",
+      "types": "./src/theme.test.ts"
     },
     "./UserCard": {
       "default": "./dist/UserCard/index.js",
@@ -598,5 +730,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.1-rc.2"
+  "version": "1.11.1-rc.3"
 }

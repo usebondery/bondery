@@ -106,6 +106,18 @@
       "node": "./dist/api/types.js",
       "types": "./src/api/types.ts"
     },
+    "./auth/associated-domains": {
+      "default": "./dist/auth/associated-domains.js",
+      "import": "./dist/auth/associated-domains.js",
+      "node": "./dist/auth/associated-domains.js",
+      "types": "./src/auth/associated-domains.ts"
+    },
+    "./auth/associated-domains.test": {
+      "default": "./dist/auth/associated-domains.test.js",
+      "import": "./dist/auth/associated-domains.test.js",
+      "node": "./dist/auth/associated-domains.test.js",
+      "types": "./src/auth/associated-domains.test.ts"
+    },
     "./auth/oauth-client-logo-uri": {
       "default": "./dist/auth/oauth-client-logo-uri.js",
       "import": "./dist/auth/oauth-client-logo-uri.js",
@@ -130,6 +142,18 @@
       "node": "./dist/auth/oauth-providers.test.js",
       "types": "./src/auth/oauth-providers.test.ts"
     },
+    "./auth/parse-auth-callback-search": {
+      "default": "./dist/auth/parse-auth-callback-search.js",
+      "import": "./dist/auth/parse-auth-callback-search.js",
+      "node": "./dist/auth/parse-auth-callback-search.js",
+      "types": "./src/auth/parse-auth-callback-search.ts"
+    },
+    "./auth/parse-auth-callback-search.test": {
+      "default": "./dist/auth/parse-auth-callback-search.test.js",
+      "import": "./dist/auth/parse-auth-callback-search.test.js",
+      "node": "./dist/auth/parse-auth-callback-search.test.js",
+      "types": "./src/auth/parse-auth-callback-search.test.ts"
+    },
     "./auth/platform-admin": {
       "default": "./dist/auth/platform-admin.js",
       "import": "./dist/auth/platform-admin.js",
@@ -147,6 +171,18 @@
       "import": "./dist/auth/resolve-cookie-domain.test.js",
       "node": "./dist/auth/resolve-cookie-domain.test.js",
       "types": "./src/auth/resolve-cookie-domain.test.ts"
+    },
+    "./auth/resolve-webauthn-origins": {
+      "default": "./dist/auth/resolve-webauthn-origins.js",
+      "import": "./dist/auth/resolve-webauthn-origins.js",
+      "node": "./dist/auth/resolve-webauthn-origins.js",
+      "types": "./src/auth/resolve-webauthn-origins.ts"
+    },
+    "./auth/resolve-webauthn-origins.test": {
+      "default": "./dist/auth/resolve-webauthn-origins.test.js",
+      "import": "./dist/auth/resolve-webauthn-origins.test.js",
+      "node": "./dist/auth/resolve-webauthn-origins.test.js",
+      "types": "./src/auth/resolve-webauthn-origins.test.ts"
     },
     "./auth/resolve-webauthn-rp": {
       "default": "./dist/auth/resolve-webauthn-rp.js",
@@ -370,6 +406,12 @@
       "node": "./dist/globals/important-dates.js",
       "types": "./src/globals/important-dates.ts"
     },
+    "./globals/mobile-query": {
+      "default": "./dist/globals/mobile-query.js",
+      "import": "./dist/globals/mobile-query.js",
+      "node": "./dist/globals/mobile-query.js",
+      "types": "./src/globals/mobile-query.ts"
+    },
     "./globals/paths": {
       "default": "./dist/globals/paths.js",
       "import": "./dist/globals/paths.js",
@@ -550,6 +592,12 @@
       "node": "./dist/notes/markdownToHtml.js",
       "types": "./src/notes/markdownToHtml.ts"
     },
+    "./notes/notes-mentions.test": {
+      "default": "./dist/notes/notes-mentions.test.js",
+      "import": "./dist/notes/notes-mentions.test.js",
+      "node": "./dist/notes/notes-mentions.test.js",
+      "types": "./src/notes/notes-mentions.test.ts"
+    },
     "./notes/personMentionFormat": {
       "default": "./dist/notes/personMentionFormat.js",
       "import": "./dist/notes/personMentionFormat.js",
@@ -568,6 +616,30 @@
       "node": "./dist/phone/country-codes.js",
       "types": "./src/phone/country-codes.ts"
     },
+    "./phone/phone-default-country": {
+      "default": "./dist/phone/phone-default-country.js",
+      "import": "./dist/phone/phone-default-country.js",
+      "node": "./dist/phone/phone-default-country.js",
+      "types": "./src/phone/phone-default-country.ts"
+    },
+    "./phone/phone-entry-schema": {
+      "default": "./dist/phone/phone-entry-schema.js",
+      "import": "./dist/phone/phone-entry-schema.js",
+      "node": "./dist/phone/phone-entry-schema.js",
+      "types": "./src/phone/phone-entry-schema.ts"
+    },
+    "./phone/phone-normalize": {
+      "default": "./dist/phone/phone-normalize.js",
+      "import": "./dist/phone/phone-normalize.js",
+      "node": "./dist/phone/phone-normalize.js",
+      "types": "./src/phone/phone-normalize.ts"
+    },
+    "./phone/phone-normalize.test": {
+      "default": "./dist/phone/phone-normalize.test.js",
+      "import": "./dist/phone/phone-normalize.test.js",
+      "node": "./dist/phone/phone-normalize.test.js",
+      "types": "./src/phone/phone-normalize.test.ts"
+    },
     "./phone/phone-utils": {
       "default": "./dist/phone/phone-utils.js",
       "import": "./dist/phone/phone-utils.js",
@@ -579,6 +651,12 @@
       "import": "./dist/phone/prefix-options.js",
       "node": "./dist/phone/prefix-options.js",
       "types": "./src/phone/prefix-options.ts"
+    },
+    "./phone/prefix-options.test": {
+      "default": "./dist/phone/prefix-options.test.js",
+      "import": "./dist/phone/prefix-options.test.js",
+      "node": "./dist/phone/prefix-options.test.js",
+      "types": "./src/phone/prefix-options.test.ts"
     },
     "./phone/types": {
       "default": "./dist/phone/types.js",
@@ -598,11 +676,65 @@
       "node": "./dist/platform/linkedin-utils.js",
       "types": "./src/platform/linkedin-utils.ts"
     },
+    "./search": {
+      "default": "./dist/search/index.js",
+      "import": "./dist/search/index.js",
+      "node": "./dist/search/index.js",
+      "types": "./src/search/index.ts"
+    },
+    "./search/matches-search-query": {
+      "default": "./dist/search/matches-search-query.js",
+      "import": "./dist/search/matches-search-query.js",
+      "node": "./dist/search/matches-search-query.js",
+      "types": "./src/search/matches-search-query.ts"
+    },
+    "./search/matches-search-query.test": {
+      "default": "./dist/search/matches-search-query.test.js",
+      "import": "./dist/search/matches-search-query.test.js",
+      "node": "./dist/search/matches-search-query.test.js",
+      "types": "./src/search/matches-search-query.test.ts"
+    },
     "./security": {
       "default": "./dist/security/index.js",
       "import": "./dist/security/index.js",
       "node": "./dist/security/index.js",
       "types": "./src/security/index.ts"
+    },
+    "./security/csp": {
+      "default": "./dist/security/csp.js",
+      "import": "./dist/security/csp.js",
+      "node": "./dist/security/csp.js",
+      "types": "./src/security/csp.ts"
+    },
+    "./security/csp-report-endpoint": {
+      "default": "./dist/security/csp-report-endpoint.js",
+      "import": "./dist/security/csp-report-endpoint.js",
+      "node": "./dist/security/csp-report-endpoint.js",
+      "types": "./src/security/csp-report-endpoint.ts"
+    },
+    "./security/csp-report-endpoint.test": {
+      "default": "./dist/security/csp-report-endpoint.test.js",
+      "import": "./dist/security/csp-report-endpoint.test.js",
+      "node": "./dist/security/csp-report-endpoint.test.js",
+      "types": "./src/security/csp-report-endpoint.test.ts"
+    },
+    "./security/csp.test": {
+      "default": "./dist/security/csp.test.js",
+      "import": "./dist/security/csp.test.js",
+      "node": "./dist/security/csp.test.js",
+      "types": "./src/security/csp.test.ts"
+    },
+    "./security/headers": {
+      "default": "./dist/security/headers.js",
+      "import": "./dist/security/headers.js",
+      "node": "./dist/security/headers.js",
+      "types": "./src/security/headers.ts"
+    },
+    "./security/headers.test": {
+      "default": "./dist/security/headers.test.js",
+      "import": "./dist/security/headers.test.js",
+      "node": "./dist/security/headers.test.js",
+      "types": "./src/security/headers.test.ts"
     },
     "./security/mcp-registry-auth": {
       "default": "./dist/security/mcp-registry-auth.js",
@@ -615,6 +747,18 @@
       "import": "./dist/security/mcp-registry-auth.test.js",
       "node": "./dist/security/mcp-registry-auth.test.js",
       "types": "./src/security/mcp-registry-auth.test.ts"
+    },
+    "./security/nonce": {
+      "default": "./dist/security/nonce.js",
+      "import": "./dist/security/nonce.js",
+      "node": "./dist/security/nonce.js",
+      "types": "./src/security/nonce.ts"
+    },
+    "./security/nonce.test": {
+      "default": "./dist/security/nonce.test.js",
+      "import": "./dist/security/nonce.test.js",
+      "node": "./dist/security/nonce.test.js",
+      "types": "./src/security/nonce.test.ts"
     },
     "./security/pgp-public-key": {
       "default": "./dist/security/pgp-public-key.js",
@@ -675,6 +819,18 @@
       "import": "./dist/socials/socials-helpers.test.js",
       "node": "./dist/socials/socials-helpers.test.js",
       "types": "./src/socials/socials-helpers.test.ts"
+    },
+    "./sync/affected-tables": {
+      "default": "./dist/sync/affected-tables.js",
+      "import": "./dist/sync/affected-tables.js",
+      "node": "./dist/sync/affected-tables.js",
+      "types": "./src/sync/affected-tables.ts"
+    },
+    "./sync/affected-tables.test": {
+      "default": "./dist/sync/affected-tables.test.js",
+      "import": "./dist/sync/affected-tables.test.js",
+      "node": "./dist/sync/affected-tables.test.js",
+      "types": "./src/sync/affected-tables.test.ts"
     },
     "./text": {
       "default": "./dist/text/index.js",
@@ -753,5 +909,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.1-rc.2"
+  "version": "1.11.1-rc.3"
 }

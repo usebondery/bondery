@@ -1,6 +1,7 @@
 "use client";
 
-import { API_ROUTES } from "@bondery/helpers/globals/paths";
+import { API_ROUTES, IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
+import { generateId } from "@bondery/helpers/ids/generate-id";
 import {
   errorNotificationTemplate,
   successNotificationTemplate,
@@ -77,6 +78,8 @@ export function useEmbeddedCheckout({
   const checkoutRef = useRef<StripeEmbeddedCheckout | null>(null);
   const pollTimerRef = useRef<number | null>(null);
   const openGenerationRef = useRef(0);
+  /** One Checkout open. A second click reuses this key until close, success, or a terminal error. */
+  const idempotencyKeyRef = useRef<string | null>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useCheckoutTranslations();
@@ -97,6 +100,7 @@ export function useEmbeddedCheckout({
 
   const closeCheckout = () => {
     openGenerationRef.current += 1;
+    idempotencyKeyRef.current = null;
     stopPolling();
     teardownCheckout(checkoutRef.current);
     checkoutRef.current = null;
@@ -132,11 +136,18 @@ export function useEmbeddedCheckout({
     checkoutRef.current = null;
     setIsLoading(true);
 
+    let idempotencyKey = idempotencyKeyRef.current;
+    if (idempotencyKey === null) {
+      idempotencyKey = generateId();
+      idempotencyKeyRef.current = idempotencyKey;
+    }
+
     let clientSecret: string;
     try {
       const checkoutSession = await clientApiJson<{ clientSecret: string }>(
         API_ROUTES.SUBSCRIPTIONS_CHECKOUT,
         {
+          headers: { [IDEMPOTENCY_KEY_HEADER]: idempotencyKey },
           method: "POST",
         },
       );
@@ -145,7 +156,8 @@ export function useEmbeddedCheckout({
       if (generation !== openGenerationRef.current) {
         return;
       }
-      if (error instanceof ApiError && error.status === 409) {
+      idempotencyKeyRef.current = null;
+      if (error instanceof ApiError && error.status === 409 && error.code === "conflict") {
         notifications.show(
           warningNotificationTemplate({
             description: t("alreadySubscribedMessage"),
@@ -178,6 +190,7 @@ export function useEmbeddedCheckout({
     }
 
     if (!stripe) {
+      idempotencyKeyRef.current = null;
       showCheckoutError();
       setIsLoading(false);
       return;
@@ -190,6 +203,7 @@ export function useEmbeddedCheckout({
     }
 
     if (!mountNode) {
+      idempotencyKeyRef.current = null;
       showCheckoutError();
       setIsLoading(false);
       setIsModalOpen(false);

@@ -45,6 +45,7 @@ Do **not** activate for routine UI refactors, copy changes, or non-security API 
 8. **5xx errors are sanitized** — Client sees generic message; details only in server logs (`map-to-response.ts`).
 9. **AI tool arguments are untrusted** — Zod-validate and scope to user-owned domain context; model output never grants authority.
 10. **No secrets or PII in logs or client bundles** — Redact tokens, cookies, passwords, and contact PII from structured logs.
+11. **CSP is built in exactly one place** — Every policy comes from `@bondery/helpers/security`. No app hand-writes a directive, and `script-src` never carries `'unsafe-inline'`. `pnpm run check:security-headers` enforces both.
 
 ## Decision tree
 
@@ -53,6 +54,7 @@ Do **not** activate for routine UI refactors, copy changes, or non-security API 
 | Trust boundaries, route shells, tenant isolation | [references/security-architecture.md](references/security-architecture.md) |
 | Better Auth, sessions, API keys, OAuth, client tokens | [references/auth-and-sessions.md](references/auth-and-sessions.md) |
 | Input validation, uploads, XSS, errors, public files | [references/input-storage-and-output.md](references/input-storage-and-output.md) |
+| Security headers, CSP, Trusted Types, CORS, reporting | [references/headers-csp-and-cors.md](references/headers-csp-and-cors.md) |
 | Webhooks, WS, AI tools, extension/mobile bridges | [references/integrations-and-clients.md](references/integrations-and-clients.md) |
 | Secrets, env, deploy, Redis, supply chain | [references/secrets-deployment-and-supply-chain.md](references/secrets-deployment-and-supply-chain.md) |
 | Security review process, severity, false positives | [references/review-playbook.md](references/review-playbook.md) |
@@ -102,6 +104,9 @@ pnpm run check:types -w chrome-extension
 - [ ] Webhook handler verifies signature on raw body before JSON parse
 - [ ] Upload routes enforce MIME whitelist + magic-byte validation (+ intended size limit)
 - [ ] 5xx responses use catalog/generic messages — no stack traces to client
+- [ ] Policy headers come from `@bondery/helpers/security`; `proxy.ts` exports `config`
+- [ ] `pnpm run check:security-headers` passes if a proxy or policy changed
+- [ ] CORS changes go through `trusted-origins.ts` and are not treated as authorization
 - [ ] Negative tests for unauthenticated, unauthorized, and cross-tenant access where applicable
 - [ ] `pnpm run check:types -w api` passes if API routes changed
 - [ ] Known gaps documented as review triggers, not silently assumed safe — see reference files

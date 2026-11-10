@@ -12,7 +12,7 @@ import {
 } from "@bondery/mantine-next";
 import { loginEmailFormSchema } from "@bondery/schemas";
 import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
-import { Alert, Button, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
+import { Button, Stack, Text, TextInput, Title, Tooltip } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconMail, IconMailForward } from "@tabler/icons-react";
@@ -43,7 +43,6 @@ type SocialLoginCardProps = {
   cancelHref?: string;
   continueUrl: string;
   description?: string;
-  errorMessage?: string | null;
   getPasskeyTestId?: string;
   getProviderTestId?: (providerKey: string) => string | undefined;
   lastUsedLoginMethod: string | null;
@@ -70,7 +69,6 @@ export function SocialLoginCard({
   cancelHref,
   continueUrl,
   description,
-  errorMessage,
   getPasskeyTestId,
   getProviderTestId,
   lastUsedLoginMethod,
@@ -311,12 +309,6 @@ export function SocialLoginCard({
             {body}
           </Text>
         </Stack>
-
-        {errorMessage ? (
-          <Alert color="red" variant="light">
-            {errorMessage}
-          </Alert>
-        ) : null}
 
         {showProviders && !authorizationWindowInvalid ? (
           <Stack gap="xs" w="100%">

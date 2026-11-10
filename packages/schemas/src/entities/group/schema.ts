@@ -79,26 +79,26 @@ export const updateGroupSchema =
 export const addContactsToGroupRequestSchema = z.union([
   personIdsSelectionSchema,
   z.object({
-    contactFilter: contactsFilterSchema,
+    contactFilter: contactsFilterSchema.describe("Filter that selects contacts to add"),
     excludePersonIds: excludePersonIdsSchema,
   }),
 ]) satisfies z.ZodType<AddContactsToGroupRequest>;
 
 export const addContactsToGroupResponseSchema = messageResponseSchema.extend({
-  addedCount: z.number(),
-  skippedCount: z.number(),
+  addedCount: z.number().describe("Number of contacts added"),
+  skippedCount: z.number().describe("Number of contacts already in the group"),
 }) satisfies z.ZodType<AddContactsToGroupResponse>;
 
 export const removeGroupMembersRequestSchema = z.union([
   personIdsSelectionSchema,
   z.object({
     excludePersonIds: excludePersonIdsSchema,
-    memberFilter: contactsFilterSchema,
+    memberFilter: contactsFilterSchema.describe("Filter that selects members to remove"),
   }),
 ]) satisfies z.ZodType<RemoveGroupMembersRequest>;
 
 export const removeGroupMembersResponseSchema = messageResponseSchema.extend({
-  removedCount: z.number().optional(),
+  removedCount: z.number().optional().describe("Number of contacts removed"),
 }) satisfies z.ZodType<RemoveGroupMembersResponse>;
 
 export const groupsListResponseSchema = makeListResponseSchema(
@@ -115,14 +115,16 @@ export const groupContactsListResponseSchema = makePaginatedListResponseSchema(
   "contacts",
   contactListItemSchema,
 ).extend({
-  group: z.object({
-    id: z.string(),
-    label: z.string(),
-  }),
+  group: z
+    .object({
+      id: z.string().describe("Group identifier"),
+      label: z.string().describe("Group name"),
+    })
+    .describe("Group this page belongs to"),
 }) satisfies z.ZodType<GroupContactsListResponse>;
 
 export const groupResponseSchema = z.object({
-  group: groupSchema,
+  group: groupSchema.describe("Group record"),
 }) satisfies z.ZodType<GroupResponse>;
 
 export const contactGroupsResponseSchema = makeCollectionResponseSchema(

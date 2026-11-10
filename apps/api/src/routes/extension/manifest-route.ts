@@ -4,7 +4,7 @@ import { readRuntimeProductVersion } from "@bondery/helpers/infra/build-metadata
 import { latestProductionCalver } from "@bondery/helpers/version/calver";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import type { AppFastifyInstance } from "../../lib/platform/fastify-types.js";
-import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { withUnmeteredOkResponse } from "../../lib/platform/openapi/responses.js";
 import { extensionManifestSchema } from "./schemas.js";
 
 const require = createRequire(import.meta.url);
@@ -20,7 +20,7 @@ export function registerManifestRoute(fastify: AppFastifyInstance): void {
           "Public Chrome extension configuration. `minVersion` is the HTTP 426 floor (previous production CalVer). " +
           "`latestVersion` is the current production CalVer for a non-blocking update nudge. " +
           "Not a health probe — use `GET /health/live` for liveness.",
-        response: withOkResponse(extensionManifestSchema, "Extension manifest"),
+        response: withUnmeteredOkResponse(extensionManifestSchema, "Extension manifest"),
         summary: "Fetch the extension manifest",
         tags: ["Extension"],
       } satisfies FastifyZodOpenApiSchema,

@@ -7,7 +7,7 @@ import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { notifyPasskeyLoginError } from "@/lib/auth/notify-passkey-login-error";
@@ -25,6 +25,7 @@ import { usePasskeysQuery } from "@/lib/query/hooks/usePasskeys";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 
 type ConfirmClientProps = {
+  accountEmail: string;
   hasReturned: boolean;
   lastUsedLoginMethod: string | null;
   oauthProviders: OAuthProvidersBitmap | null;
@@ -67,22 +68,32 @@ function shouldOfferSocial(
   return true;
 }
 
-function readBffIdentity(settings: Record<string, unknown> | undefined): BffIdentity {
-  const email = typeof settings?.email === "string" ? settings.email : "";
+function readBffIdentity(
+  settings: Record<string, unknown> | undefined,
+  fallbackEmail: string,
+): BffIdentity {
+  const settingsEmail = typeof settings?.email === "string" ? settings.email : "";
   const identities = Array.isArray(settings?.identities)
     ? (settings.identities as Array<{ user_id?: string }>)
     : [];
   return {
-    email,
+    // The server-side session always carries the account email. Fall back to it
+    // so a failed settings read cannot leave the picker with no email method.
+    email: settingsEmail || fallbackEmail,
     userId: identities[0]?.user_id ?? null,
   };
 }
 
 async function checkConfirmIdentity(bff: BffIdentity): Promise<ConfirmIdentityStatus> {
   const ba = await getBetterAuthSessionIdentity();
+  if (!ba) {
+    // No Better Auth session at all — the user must sign in again. This is not
+    // a different account, so do not claim an identity mismatch.
+    return "stale";
+  }
   const match = baIdentityMatchesBff({
-    baEmail: ba?.email ?? null,
-    baUserId: ba?.id ?? null,
+    baEmail: ba.email,
+    baUserId: ba.id,
     bffEmail: bff.email,
     bffUserId: bff.userId,
   });
@@ -96,6 +107,7 @@ async function checkConfirmIdentity(bff: BffIdentity): Promise<ConfirmIdentitySt
 }
 
 export function ConfirmClient({
+  accountEmail,
   hasReturned,
   lastUsedLoginMethod,
   oauthProviders,
@@ -105,7 +117,6 @@ export function ConfirmClient({
   const t = useLoginPageTranslations();
   const tCommon = useCommonTranslations();
   const [busyAction, setBusyAction] = useState<LoginBusyAction>(null);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [methodPickerOpen, setMethodPickerOpen] = useState(!hasReturned);
   const returnHandledRef = useRef(false);
   const runtimeConfig = useWebappRuntimeConfig();
@@ -118,7 +129,7 @@ export function ConfirmClient({
   const origin = typeof window === "undefined" ? runtimeConfig.webappUrl : window.location.origin;
   const magicLinkUrls = buildReconfirmMagicLinkUrls(origin, purpose, targetId);
   const settingsUrl = buildReconfirmSettingsUrl(origin, purpose, targetId);
-  const bff = readBffIdentity(settingsResult?.data);
+  const bff = readBffIdentity(settingsResult?.data, accountEmail);
   const providers = Array.isArray(settingsResult?.data?.providers)
     ? (settingsResult.data.providers as string[])
     : [];
@@ -131,36 +142,66 @@ export function ConfirmClient({
     allowedOAuthProviders.push("linkedin");
   }
 
-  const identityErrorCopy = (status: ConfirmIdentityStatus) =>
-    status === "mismatch" ? t("ConfirmMismatch") : t("ConfirmStillStale");
+  const showIdentityError = useCallback(
+    (status: ConfirmIdentityStatus) => {
+      notifications.show({
+        id: `confirm-identity-${status}`,
+        ...errorNotificationTemplate({
+          description: status === "mismatch" ? t("ConfirmMismatch") : t("ConfirmStillStale"),
+          title: t("ConfirmTitle"),
+        }),
+      });
+    },
+    [t],
+  );
 
   useEffect(() => {
     if (!hasReturned || returnHandledRef.current || settingsPending) {
       return;
     }
-    if (searchParams.get("error")) {
+    const queryError = searchParams.get("error");
+    if (queryError) {
       returnHandledRef.current = true;
+      // A failed return used to fall through to the picker with no message, so a
+      // rejected link looked like a dead button. Say what happened.
+      notifications.show({
+        id: `confirm-return-error-${queryError}`,
+        ...errorNotificationTemplate({
+          description: getAuthUserFacingError({ code: queryError }, tCommon),
+          title: t("AuthenticationError"),
+        }),
+      });
       setMethodPickerOpen(true);
       return;
     }
     if (!settingsResult?.data) {
       returnHandledRef.current = true;
-      setErrorMessage(t("ConfirmMismatch"));
+      showIdentityError("stale");
       setMethodPickerOpen(true);
       return;
     }
 
     returnHandledRef.current = true;
     void (async () => {
-      const status = await checkConfirmIdentity(readBffIdentity(settingsResult.data));
+      const status = await checkConfirmIdentity(readBffIdentity(settingsResult.data, accountEmail));
       if (status === "ok") {
         window.location.assign(settingsUrl);
         return;
       }
-      setErrorMessage(status === "mismatch" ? t("ConfirmMismatch") : t("ConfirmStillStale"));
+      showIdentityError(status);
       setMethodPickerOpen(true);
     })();
-  }, [hasReturned, searchParams, settingsPending, settingsResult, settingsUrl, t]);
+  }, [
+    hasReturned,
+    searchParams,
+    settingsPending,
+    settingsResult,
+    settingsUrl,
+    showIdentityError,
+    accountEmail,
+    tCommon,
+    t,
+  ]);
 
   const goToSettingsIfFresh = async (): Promise<boolean> => {
     const status = await checkConfirmIdentity(bff);
@@ -168,13 +209,12 @@ export function ConfirmClient({
       window.location.assign(settingsUrl);
       return true;
     }
-    setErrorMessage(identityErrorCopy(status));
+    showIdentityError(status);
     return false;
   };
 
   const handleOAuthLogin = async (provider: "github" | "linkedin") => {
     try {
-      setErrorMessage(null);
       setBusyAction(provider);
       const { error } = await authClient.signIn.social({
         callbackURL: magicLinkUrls.callbackURL,
@@ -204,7 +244,6 @@ export function ConfirmClient({
 
   const handlePasskeyLogin = async () => {
     try {
-      setErrorMessage(null);
       setBusyAction("passkey");
       const { error } = await authClient.signIn.passkey();
       if (error) {
@@ -221,7 +260,6 @@ export function ConfirmClient({
 
   const handleEmailSubmit = async (email: string): Promise<boolean> => {
     try {
-      setErrorMessage(null);
       setBusyAction("email");
       const { error } = await authClient.signIn.magicLink({
         callbackURL: magicLinkUrls.callbackURL,
@@ -263,7 +301,6 @@ export function ConfirmClient({
       cancelHref={WEBAPP_ROUTES.SETTINGS}
       continueUrl={magicLinkUrls.callbackURL}
       description={t("ConfirmDescription")}
-      errorMessage={errorMessage}
       getPasskeyTestId="confirm-passkey"
       getProviderTestId={(providerKey) =>
         providerKey === "github" ? "confirm-github" : `confirm-${providerKey}`

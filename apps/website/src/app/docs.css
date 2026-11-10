@@ -60,20 +60,15 @@
   }
 }
 
-/* The hash link hangs in the gutter, so it takes no space in the heading.
-   Declared before the rhythm block: it is a positioning concern, and the rhythm
-   rules below carry higher specificity. */
-.docsHeading {
-  position: relative;
-}
-
+/* The hash link follows the heading text on the same line. It keeps its box while
+   hidden, so hover never reflows the heading. `vertical-align` lifts the icon off
+   the text baseline to the optical centre of the cap height. Declared before the
+   rhythm block: the rhythm rules below carry higher specificity. */
 .docsHeadingAnchor {
   color: var(--mantine-color-dimmed);
-  inset-block-start: 0.15em;
-  inset-inline-end: 100%;
-  margin-inline-end: var(--mantine-spacing-xs);
+  margin-inline-start: var(--mantine-spacing-xs);
   opacity: 0;
-  position: absolute;
+  vertical-align: 0.12em;
 }
 
 .docsHeading:hover .docsHeadingAnchor,
@@ -81,7 +76,9 @@
   opacity: 1;
 }
 
-/* The gutter is too narrow for the icon on small screens and on touch devices. */
+/* A narrow measure leaves no room for the icon after the text, and the icon would
+   wrap to its own line. Without hover it never becomes visible at all. In both
+   cases the heading keeps its text only. */
 @media (max-width: 61.99em), (hover: none) {
   .docsHeadingAnchor {
     display: none;

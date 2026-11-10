@@ -51,7 +51,7 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
   fastify.post(
     "/",
     {
-      config: { rateLimit: AI_TIER },
+      config: { idempotency: false, rateLimit: AI_TIER },
       schema: {
         body: chatRequestSchema,
         description: "Stream an AI chat assistant response as Server-Sent Events.",

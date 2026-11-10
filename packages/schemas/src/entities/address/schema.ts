@@ -10,7 +10,9 @@ import type {
 
 const optionalTrimmedString = nullableTrimmedStringSchema();
 
-export const contactAddressTypeSchema = z.enum(["home", "work", "other"]);
+export const contactAddressTypeSchema = z
+  .enum(["home", "work", "other"])
+  .describe("Address category");
 
 export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
 
@@ -25,9 +27,14 @@ const addressCoreInputSchema = z.object({
     .max(CONTACT_FIELD_MAX_LENGTHS.addressLabel, {
       error: `Label must be at most ${CONTACT_FIELD_MAX_LENGTHS.addressLabel} characters`,
     })
-    .transform((value) => value || null),
-  type: contactAddressTypeSchema,
-  value: z.string().trim().min(1, { error: "Address is required" }),
+    .transform((value) => value || null)
+    .describe("Custom label for the address"),
+  type: contactAddressTypeSchema.describe("Address category"),
+  value: z
+    .string()
+    .trim()
+    .min(1, { error: "Address is required" })
+    .describe("Display value of the address"),
 });
 
 export const contactAddressSheetSchema =
@@ -62,22 +69,28 @@ export const contactAddressReadSchema: z.ZodType<ContactAddressRead> = z.object(
 });
 
 export const contactAddressEntrySchema = addressCoreInputSchema.extend({
-  addressCity: optionalTrimmedString,
-  addressCountry: optionalTrimmedString,
-  addressCountryCode: optionalTrimmedString,
-  addressFormatted: optionalTrimmedString,
-  addressGeocodeSource: contactAddressGeocodeSourceSchema.nullable(),
-  addressGranularity: contactAddressGranularitySchema,
-  addressLine1: optionalTrimmedString,
-  addressLine2: optionalTrimmedString,
-  addressPostalCode: optionalTrimmedString,
-  addressState: optionalTrimmedString,
-  addressStateCode: optionalTrimmedString,
-  geocodeConfidence: contactAddressConfidenceSchema.nullable(),
-  label: optionalTrimmedString,
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
-  timezone: optionalTrimmedString,
+  addressCity: optionalTrimmedString.describe("City name"),
+  addressCountry: optionalTrimmedString.describe("Country name"),
+  addressCountryCode: optionalTrimmedString.describe("ISO 3166-1 alpha-2 country code"),
+  addressFormatted: optionalTrimmedString.describe("Full address on one line"),
+  addressGeocodeSource: contactAddressGeocodeSourceSchema
+    .nullable()
+    .describe("How the coordinates were resolved"),
+  addressGranularity: contactAddressGranularitySchema.describe(
+    "Most specific part of the address that is known",
+  ),
+  addressLine1: optionalTrimmedString.describe("Street and house number"),
+  addressLine2: optionalTrimmedString.describe("Second address line, such as a unit"),
+  addressPostalCode: optionalTrimmedString.describe("Postal or ZIP code"),
+  addressState: optionalTrimmedString.describe("State or region name"),
+  addressStateCode: optionalTrimmedString.describe("State or region code"),
+  geocodeConfidence: contactAddressConfidenceSchema
+    .nullable()
+    .describe("Whether the geocoder verified this address"),
+  label: optionalTrimmedString.describe("Custom label for the address"),
+  latitude: z.number().nullable().describe("Latitude in decimal degrees"),
+  longitude: z.number().nullable().describe("Longitude in decimal degrees"),
+  timezone: optionalTrimmedString.describe("IANA timezone name for this address"),
 }) satisfies z.ZodType<ContactAddressEntryOutput>;
 
 export const geocodeSuggestAddressSchema = contactAddressEntrySchema;

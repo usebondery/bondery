@@ -10,4 +10,5 @@ export const hexColorSchema = z
   .transform((value) => {
     const normalized = value.startsWith("#") ? value : `#${value}`;
     return normalized.toLowerCase();
-  }) satisfies z.ZodType<HexColor>;
+  })
+  .describe("Hex color, such as `#4f46e5`") satisfies z.ZodType<HexColor>;

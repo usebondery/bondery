@@ -16,28 +16,28 @@ export const apiKeyBaActionSchema: z.ZodType<ApiKeyBaAction> = z.enum(API_KEY_BA
 export const apiKeyPermissionSchema: z.ZodType<ApiKeyPermission> = z.enum(API_KEY_PERMISSIONS);
 
 export const createApiKeyInputSchema: z.ZodType<CreateApiKeyInput> = z.object({
-  label: labelFieldSchema(API_KEY_LIMITS.labelMaxLength),
-  permission: apiKeyPermissionSchema.default("read"),
+  label: labelFieldSchema(API_KEY_LIMITS.labelMaxLength).describe("Display name for this API key"),
+  permission: apiKeyPermissionSchema.default("read").describe("Access level for this API key"),
 });
 
 export const updateApiKeyLabelInputSchema: z.ZodType<UpdateApiKeyLabelInput> = z.object({
-  label: labelFieldSchema(API_KEY_LIMITS.labelMaxLength),
+  label: labelFieldSchema(API_KEY_LIMITS.labelMaxLength).describe("Display name for this API key"),
 });
 
 export const apiKeyListItemSchema = z.object({
   createdAt: createdAtSchema,
-  id: z.string().uuid(),
-  keyPrefix: z.string(),
-  label: z.string(),
-  lastUsedAt: nullableDateTimeSchema,
-  permission: apiKeyPermissionSchema,
+  id: z.string().uuid().describe("API key identifier"),
+  keyPrefix: z.string().describe("Visible prefix of the secret"),
+  label: z.string().describe("Display name for this API key"),
+  lastUsedAt: nullableDateTimeSchema.describe("Time this key was last used"),
+  permission: apiKeyPermissionSchema.describe("Access level for this API key"),
 }) satisfies z.ZodType<ApiKeyListItem>;
 
 export const apiKeyCreatedSchema = apiKeyListItemSchema.extend({
-  secret: z.string(),
+  secret: z.string().describe("Full API key secret. Shown only at creation time."),
 }) satisfies z.ZodType<ApiKeyCreated>;
 
 export const apiKeysListResponseSchema: z.ZodType<ApiKeysListResponse> = z.object({
-  apiKeys: z.array(apiKeyListItemSchema),
-  totalCount: z.number(),
+  apiKeys: z.array(apiKeyListItemSchema).describe("API keys for this account"),
+  totalCount: z.number().describe("Total records that match the query"),
 });

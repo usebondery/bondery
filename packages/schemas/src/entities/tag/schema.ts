@@ -73,18 +73,18 @@ export const createTagInputSchema = tagEditableFieldsSchema.partial({
 export const updateTagSchema = createTagSchema.partial() satisfies z.ZodType<UpdateTagInput>;
 
 export const tagResponseSchema = z.object({
-  tag: tagSchema,
+  tag: tagSchema.describe("Tag record"),
 }) satisfies z.ZodType<TagResponse>;
 
 export const tagUpdateResponseSchema = tagResponseSchema satisfies z.ZodType<TagUpdateResponse>;
 
 export const addContactsToTagResponseSchema = z.object({
-  addedCount: z.number(),
-  skippedCount: z.number(),
+  addedCount: z.number().describe("Number of contacts tagged"),
+  skippedCount: z.number().describe("Number of contacts that already had this tag"),
 }) satisfies z.ZodType<AddContactsToTagResponse>;
 
 export const removeContactsFromTagResponseSchema = z.object({
-  removedCount: z.number(),
+  removedCount: z.number().describe("Number of contacts untagged"),
 }) satisfies z.ZodType<RemoveContactsFromTagResponse>;
 
 export const tagContactsListResponseSchema = makePaginatedListResponseSchema(
@@ -116,7 +116,7 @@ export const tagMembershipRequestSchema =
   personIdsSelectionSchema satisfies z.ZodType<TagMembershipRequest>;
 
 export const contactTagBodySchema = z.object({
-  tagId: z.string().min(1),
+  tagId: z.string().min(1).describe("Tag identifier"),
 }) satisfies z.ZodType<ContactTagBody>;
 
 export const deleteTagsRequestSchema = idsRequestSchema satisfies z.ZodType<DeleteTagsRequest>;

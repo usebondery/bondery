@@ -265,6 +265,11 @@ export type CommonCatalog = {
       onboarding_failed_to_dismiss_getting_started: string;
       onboarding_failed_to_update_import_follow_up: string;
       rate: string;
+      idempotency_key_in_progress: string;
+      idempotency_key_invalid: string;
+      idempotency_key_mismatch: string;
+      idempotency_key_unsupported: string;
+      idempotency_response_omitted: string;
       rate_limit_exceeded: string;
       relationship: string;
       relationship_already_exists: string;

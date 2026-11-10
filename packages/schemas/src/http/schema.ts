@@ -77,7 +77,7 @@ export const uuidParamSchema = z.object({
 /** Bulk ID body: `{ ids: string[] }` with at least one element. */
 export const idsRequestBodySchema = z
   .object({
-    ids: z.array(contactIdSchema).min(1),
+    ids: z.array(contactIdSchema).min(1).describe("Identifiers to operate on"),
   })
   .meta({ example: EXAMPLE_IDS_REQUEST });
 
@@ -354,7 +354,7 @@ export const contactRelationshipIdParamSchema = z.object({
 /** PUT /api/contacts/:id/important-dates body. */
 export const importantDatesReplaceBodySchema = z
   .object({
-    dates: replaceImportantDatesSchema,
+    dates: replaceImportantDatesSchema.describe("Important dates to store. Replaces the full set."),
   })
   .meta({
     example: EXAMPLE_REPLACE_IMPORTANT_DATES_REQUEST,
@@ -363,7 +363,7 @@ export const importantDatesReplaceBodySchema = z
 /** Wire geocode response schemas (no Zod transforms — safe for Fastify serializers). */
 export const geocodeSuggestResponseWireSchema = z
   .object({
-    addresses: z.array(contactAddressReadSchema),
+    addresses: z.array(contactAddressReadSchema).describe("Suggested addresses"),
   })
   .meta({
     example: EXAMPLE_GEOCODE_SUGGEST_RESPONSE,
@@ -371,7 +371,7 @@ export const geocodeSuggestResponseWireSchema = z
 
 export const geocodeTimezoneResponseWireSchema = z
   .object({
-    timezone: z.string().nullable(),
+    timezone: z.string().nullable().describe("IANA timezone name for these coordinates"),
   })
   .meta({
     example: EXAMPLE_GEOCODE_TIMEZONE_RESPONSE,
