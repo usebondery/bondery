@@ -10,8 +10,8 @@
   Keep the window open while you browse. Ctrl+C stops the tunnel.
 
 .PARAMETER SshTarget
-  SSH login for the PC WSL, for example sveetya@100.125.211.35.
-  Defaults to BONDERY_DEV_SSH_TARGET.
+  SSH login for the PC WSL. Defaults to BONDERY_DEV_SSH_TARGET, then to the
+  online Linux Tailscale peer (MagicDNS name, not a remembered IP).
 
 .PARAMETER InstallOnly
   Write hosts and trust the CA. Do not start the tunnel.
@@ -41,6 +41,113 @@ $FallbackHostnames = @(
 
 function Get-RepoRoot {
   return (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
+}
+
+function Get-TailscaleExe {
+  $cmd = Get-Command tailscale.exe -ErrorAction SilentlyContinue
+  if ($cmd) {
+    return $cmd.Source
+  }
+  $candidates = @(
+    (Join-Path $env:ProgramFiles "Tailscale\tailscale.exe"),
+    (Join-Path ${env:ProgramFiles(x86)} "Tailscale\tailscale.exe")
+  )
+  foreach ($path in $candidates) {
+    if ($path -and (Test-Path $path)) {
+      return $path
+    }
+  }
+  throw "tailscale.exe not found. Install Tailscale or pass -SshTarget."
+}
+
+function Get-MagicDnsName {
+  param([string]$Value)
+  return ([string]$Value).Trim().TrimEnd(".")
+}
+
+function Get-InferredSshUser {
+  param(
+    [string]$HostName,
+    [string]$DnsName
+  )
+  $source = if ($HostName) { $HostName } else { (Get-MagicDnsName $DnsName).Split(".")[0] }
+  $first = ($source -split "[^A-Za-z0-9]+")[0]
+  return $first.ToLower()
+}
+
+function Get-OnlineLinuxPeers {
+  param($Status)
+  if (-not $Status.Peer) {
+    return @()
+  }
+  return @(
+    $Status.Peer.PSObject.Properties.Value |
+      Where-Object { $_.Online -and ([string]$_.OS).ToLower() -eq "linux" }
+  )
+}
+
+function Get-LinuxDevPeer {
+  param($Peers)
+  if ($Peers.Count -eq 1) {
+    return $Peers[0]
+  }
+  $wsl = @(
+    $Peers | Where-Object {
+      $name = "$( $_.HostName ) $( Get-MagicDnsName $_.DNSName )"
+      $name -match "wsl"
+    }
+  )
+  if ($wsl.Count -eq 1) {
+    return $wsl[0]
+  }
+  $names = ($Peers | ForEach-Object { Get-MagicDnsName $_.DNSName }) -join ", "
+  throw "Found $($Peers.Count) online Linux Tailscale peers ($names). Set BONDERY_DEV_SSH_TARGET."
+}
+
+function Resolve-TailscaleSshTarget {
+  $fromNode = $null
+  $repoRoot = Get-RepoRoot
+  $helper = Join-Path $repoRoot "scripts\dev\connect-remote-portless.mjs"
+  $node = Get-Command node -ErrorAction SilentlyContinue
+  if ($node -and (Test-Path $helper)) {
+    Push-Location $repoRoot
+    try {
+      $output = & node $helper target 2>$null
+      if ($LASTEXITCODE -eq 0 -and $output) {
+        $fromNode = ([string]$output).Trim()
+      }
+    } finally {
+      Pop-Location
+    }
+  }
+  if ($fromNode) {
+    return $fromNode
+  }
+
+  $status = & (Get-TailscaleExe) status --json | ConvertFrom-Json
+  if (-not $status.Self) {
+    throw "Tailscale status has no Self node. Is Tailscale running?"
+  }
+  $node = $status.Self
+  if (([string]$status.Self.OS).ToLower() -ne "linux") {
+    $peers = Get-OnlineLinuxPeers -Status $status
+    if ($peers.Count -eq 0) {
+      throw "No online Linux Tailscale peer. Start WSL Tailscale on the PC."
+    }
+    $node = Get-LinuxDevPeer -Peers $peers
+  }
+  $hostName = Get-MagicDnsName $node.DNSName
+  if (-not $hostName) {
+    throw "Tailscale node has no MagicDNS name. Enable MagicDNS on the tailnet."
+  }
+  $user = $env:BONDERY_DEV_SSH_USER
+  if (-not $user) {
+    $user = Get-InferredSshUser -HostName $node.HostName -DnsName $hostName
+  }
+  if (-not $user) {
+    throw "Could not infer the SSH user. Set BONDERY_DEV_SSH_USER."
+  }
+  return "$user@$hostName"
 }
 
 function Get-PortlessHostnames {
@@ -145,7 +252,8 @@ if ($RemoveHosts) {
 }
 
 if (-not $SshTarget) {
-  throw "Pass -SshTarget user@host or set BONDERY_DEV_SSH_TARGET."
+  $SshTarget = Resolve-TailscaleSshTarget
+  Write-Host "SSH target: $SshTarget"
 }
 
 $hostnames = Get-PortlessHostnames
