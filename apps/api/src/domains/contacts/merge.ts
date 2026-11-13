@@ -149,14 +149,14 @@ export async function mergeContacts(
       if (gisPointEwkt) {
         await db.$executeRaw`
           UPDATE people
-          SET gis_point = ST_GeogFromText(${gisPointEwkt}),
+          SET "gisPoint" = ST_GeogFromText(${gisPointEwkt}),
               updated_at = NOW()
           WHERE id = ${leftPersonId}::uuid AND user_id = ${user.id}::uuid
         `;
       } else {
         await db.$executeRaw`
           UPDATE people
-          SET gis_point = NULL,
+          SET "gisPoint" = NULL,
               updated_at = NOW()
           WHERE id = ${leftPersonId}::uuid AND user_id = ${user.id}::uuid
         `;

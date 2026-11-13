@@ -98,6 +98,7 @@
     "dev:emails": "turbo run @bondery/emails#preview --concurrency 20",
     "dev:extension": "turbo run webapp#dev api#dev chrome-extension#dev website#dev --concurrency 20",
     "dev:mobile": "turbo run api#dev mobile#dev --concurrency 20",
+    "dev:remote-portless": "node scripts/dev/connect-remote-portless.mjs share",
     "dev:stripe": "node --import tsx scripts/ops/dev-stripe.ts",
     "dev:webapp": "turbo run webapp#dev --concurrency 20",
     "dev:webapp-api": "turbo run webapp#dev api#dev --concurrency 20",
@@ -125,7 +126,9 @@
     "prepare": "lefthook install --reset-hooks-path",
     "provision:oauth-clients": "pnpm --filter api run provision-oauth-clients:dev",
     "provision:platform-admins": "pnpm --filter api run provision-platform-admins:dev",
+    "provision:reviewer": "pnpm --filter api run provision-reviewer:dev",
     "release-migrate": "pnpm --filter @bondery/db run release-migrate",
+    "revoke:reviewer": "pnpm --filter api run revoke-reviewer:dev",
     "setup:dev": "node --import tsx scripts/dev/setup-dev.ts",
     "setup:seaweedfs": "pnpm run build:api && node --env-file=.env.local apps/api/dist/cli/ensure-storage-buckets.js",
     "setup:stripe": "node --import tsx scripts/ops/setup-stripe.ts",
@@ -151,5 +154,5 @@
     "turbo:clean": "turbo daemon clean",
     "update:aaguid-catalog": "node --import tsx scripts/updater/refresh-aaguid-catalog.ts"
   },
-  "version": "1.11.1"
+  "version": "1.11.2-rc.2"
 }

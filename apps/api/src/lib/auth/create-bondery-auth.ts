@@ -35,7 +35,7 @@ import {
   resolveApiResourceIdentifiers,
   resolveAuthErrorPageUrl,
   resolveBetterAuthIssuerUrl,
-  resolveMcpResourceIdentifier,
+  resolveMcpPluginResource,
   resolveMcpResourceIdentifiers,
   resolveTrustedOAuthClientIds,
   resolveUseSecureCookies,
@@ -58,6 +58,7 @@ import {
   resolveSignupMethodFromProviderId,
   SIGNUP_METHOD,
 } from "./resolve-signup-method.js";
+import { reviewerMagicLinkRedirect } from "./reviewer-magic-link.js";
 import { createBetterAuthSecondaryStorage } from "./secondary-storage.js";
 import { sendMagicLink } from "./send-magic-link.js";
 import { SESSION_FRESH_AGE_SECONDS } from "./session-freshness.js";
@@ -258,7 +259,7 @@ export function createBonderyAuth() {
         // Canonical MCP resource. mcp() also appends this identifier to
         // `resources` if missing. REST identifiers stay in `resources` with
         // REST-only allowedScopes; first-party provisioner links only REST.
-        resource: resolveMcpResourceIdentifier(),
+        resource: resolveMcpPluginResource(),
         resources: [
           ...resolveApiResourceIdentifiers().map((identifier) => ({
             allowedScopes: [...OAUTH_PROVIDER_SCOPES],
@@ -319,6 +320,7 @@ export function createBonderyAuth() {
         sendMagicLink,
         storeToken: "hashed",
       }),
+      reviewerMagicLinkRedirect(),
       lastLoginMethod({
         // Better Auth 1.7.1 already maps `/magic-link/verify` → `"magic-link"`.
         storeInDatabase: false,

@@ -37,7 +37,7 @@ export const CONTACT_SELECT = `
   myself,
   language,
   timezone,
-  gisPoint:gis_point,
+  gisPoint:"gisPoint",
   latitude,
   longitude,
   updatedAt:updated_at,

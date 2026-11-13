@@ -1,0 +1,44 @@
+---
+title: "ADR 0027: Reviewer access grants"
+hidden: true
+last_updated: 2026-11-13
+---
+
+# ADR 0027: Reviewer access grants
+
+**Status:** Accepted  \n**Date:** 2026-11-13
+
+## Context
+
+App directory reviews, such as the Claude connector listing, need a working account. A reviewer has no reachable mailbox, so the API cannot email a magic link. The first implementation read one address from `BONDERY_AUTH_REVIEWER_EMAIL` and returned the verify URL in the sign-in response.
+
+That env var is an access grant with no expiry and no revocation. A session lives 30 days and the cookie refreshes daily, so clearing the env var leaves live sessions and live MCP OAuth tokens. The address also spread across the env manifest, three example files, `deploy/bondery/.env.example`, Infisical, and Dokploy.
+
+## Decision
+
+1. Hold reviewer access in a `reviewer_access` table keyed on `user_id`. One row per reviewer.
+2. Store `label`, `expires_at`, `revoked_at`, `created_by`, and `note`. Do not add `user.role` values and do not add a `user.demo` boolean.
+3. Gate the SMTP bypass on `revoked_at IS NULL`, `expires_at > now()`, and `user.banned = false`. Any other outcome falls through to the normal SMTP path with an identical response.
+4. Provision with a per-invocation CLI (`pnpm run provision:reviewer -- --email ... --label ...`). Re-running refreshes the window.
+5. Revoke with `pnpm run revoke:reviewer -- --email ...`, or the nightly `reviewer-access-sweep` job at 03:15 UTC.
+6. Revocation sets `banned = true`, deletes sessions and API keys, and deletes OAuth access tokens, refresh tokens, and consents. The ban is the load-bearing step because Better Auth enforces it in `session.create.before`.
+7. Give each reviewer a separate `User` row and its own imported sample data. Never share one reviewer tenant.
+8. Default window is 30 days, matching the session lifetime. The CLI rejects more than 90 days.
+9. Remove `BONDERY_AUTH_REVIEWER_EMAIL` from the env manifest, `turbo.json`, and every example file.
+
+## Alternatives
+
+- **Env var.** Rejected. It cannot revoke a live session or an OAuth token, and it has no expiry or audit trail.
+- **`user.role = "reviewer"`.** Rejected. `role` drives the Better Auth admin plugin and `isPlatformAdmin`. A future `role` check would turn it into a privilege bug.
+- **`user.demo = true`.** Rejected. No expiry, no label, no author, and an app concept inside the auth model.
+- **Comma-separated env list.** Rejected. No per-reviewer revoke, expiry, or label.
+- **Admin API.** Rejected. One more authenticated surface to secure, used a few times per year.
+- **Constant-time email compare.** Removed. There is no secret to compare. The real controls are address entropy, the existing 8-per-15-minute send limit, and `expires_at`.
+
+## Consequences
+
+- A reviewer is an ordinary account with an extra grant row. The grant never grants admin permission.
+- Ending a window needs the sweep job or the CLI. Deleting the row alone does not ban the user.
+- An expired grant degrades to a normal account. The reviewer cannot reach mail, so sign-in fails at verification with no distinguishing response.
+- The verify URL is still returned in the sign-in body over HTTPS. Anyone who knows the address can sign in, so use a random local-part and never publish the address.
+- Reviewer sample data stays after revocation. Deletion is a separate retention decision.

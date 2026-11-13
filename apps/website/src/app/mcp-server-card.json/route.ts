@@ -53,7 +53,7 @@ export function GET() {
       },
       title: SERVER_TITLE,
       version,
-      websiteUrl: `${origin}/docs/bondery/mcp`,
+      websiteUrl: `${origin}/docs/apps/mcp-server`,
     },
     {
       headers: withDiscoveryCors({

@@ -26,7 +26,7 @@ export const MCP_CHALLENGE_SCOPES = [MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
 /** Product docs page an agent reads when MCP auth or scope fails. */
 export function mcpDocsUrl(): string {
   const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
-  return `${website}/docs/bondery/mcp`;
+  return `${website}/docs/apps/mcp-server`;
 }
 
 /**

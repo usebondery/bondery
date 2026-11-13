@@ -438,6 +438,7 @@ export const ModelName = {
   SyncMutationReceipt: 'SyncMutationReceipt',
   IdempotencyKey: 'IdempotencyKey',
   SyncUserSequence: 'SyncUserSequence',
+  ReviewerAccess: 'ReviewerAccess',
   UserSettings: 'UserSettings',
   Tag: 'Tag',
   PeopleTag: 'PeopleTag'
@@ -456,7 +457,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "jwks" | "passkey" | "group" | "peopleGroup" | "interaction" | "interactionParticipant" | "peopleLinkedin" | "peopleWorkHistory" | "peopleEducationHistory" | "linkedinEnrichQueue" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "people" | "peoplePhone" | "peopleEmail" | "peopleSocial" | "peopleAddress" | "peopleImportantDate" | "peopleRelationship" | "peopleMergeRecommendation" | "geocodeCache" | "apikey" | "chatSession" | "chatMessage" | "subscription" | "pendingSubscription" | "stripeWebhookEvent" | "reminderDispatchLog" | "syncChangeLog" | "syncMutationReceipt" | "idempotencyKey" | "syncUserSequence" | "userSettings" | "tag" | "peopleTag"
+    modelProps: "user" | "session" | "account" | "verification" | "jwks" | "passkey" | "group" | "peopleGroup" | "interaction" | "interactionParticipant" | "peopleLinkedin" | "peopleWorkHistory" | "peopleEducationHistory" | "linkedinEnrichQueue" | "oauthClient" | "oauthResource" | "oauthClientResource" | "oauthRefreshToken" | "oauthAccessToken" | "oauthConsent" | "oauthClientAssertion" | "people" | "peoplePhone" | "peopleEmail" | "peopleSocial" | "peopleAddress" | "peopleImportantDate" | "peopleRelationship" | "peopleMergeRecommendation" | "geocodeCache" | "apikey" | "chatSession" | "chatMessage" | "subscription" | "pendingSubscription" | "stripeWebhookEvent" | "reminderDispatchLog" | "syncChangeLog" | "syncMutationReceipt" | "idempotencyKey" | "syncUserSequence" | "reviewerAccess" | "userSettings" | "tag" | "peopleTag"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -3494,6 +3495,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReviewerAccess: {
+      payload: Prisma.$ReviewerAccessPayload<ExtArgs>
+      fields: Prisma.ReviewerAccessFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReviewerAccessFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReviewerAccessFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>
+        }
+        findFirst: {
+          args: Prisma.ReviewerAccessFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReviewerAccessFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>
+        }
+        findMany: {
+          args: Prisma.ReviewerAccessFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>[]
+        }
+        create: {
+          args: Prisma.ReviewerAccessCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>
+        }
+        createMany: {
+          args: Prisma.ReviewerAccessCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReviewerAccessCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>[]
+        }
+        delete: {
+          args: Prisma.ReviewerAccessDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>
+        }
+        update: {
+          args: Prisma.ReviewerAccessUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReviewerAccessDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReviewerAccessUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReviewerAccessUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReviewerAccessUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewerAccessPayload>
+        }
+        aggregate: {
+          args: Prisma.ReviewerAccessAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReviewerAccess>
+        }
+        groupBy: {
+          args: Prisma.ReviewerAccessGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewerAccessGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReviewerAccessCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewerAccessCountAggregateOutputType> | number
+        }
+      }
+    }
     UserSettings: {
       payload: Prisma.$UserSettingsPayload<ExtArgs>
       fields: Prisma.UserSettingsFieldRefs
@@ -4431,6 +4506,22 @@ export const SyncUserSequenceScalarFieldEnum = {
 export type SyncUserSequenceScalarFieldEnum = (typeof SyncUserSequenceScalarFieldEnum)[keyof typeof SyncUserSequenceScalarFieldEnum]
 
 
+export const ReviewerAccessScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  label: 'label',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdBy: 'createdBy',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewerAccessScalarFieldEnum = (typeof ReviewerAccessScalarFieldEnum)[keyof typeof ReviewerAccessScalarFieldEnum]
+
+
 export const UserSettingsScalarFieldEnum = {
   id: 'id',
   userId: 'userId',
@@ -4849,6 +4940,7 @@ export type GlobalOmitConfig = {
   syncMutationReceipt?: Prisma.SyncMutationReceiptOmit
   idempotencyKey?: Prisma.IdempotencyKeyOmit
   syncUserSequence?: Prisma.SyncUserSequenceOmit
+  reviewerAccess?: Prisma.ReviewerAccessOmit
   userSettings?: Prisma.UserSettingsOmit
   tag?: Prisma.TagOmit
   peopleTag?: Prisma.PeopleTagOmit

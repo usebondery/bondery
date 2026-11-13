@@ -160,7 +160,7 @@ export async function commitVCardImport(
         if (picked.timezone) {
           await db.$executeRaw`
             UPDATE people
-            SET gis_point = ST_GeogFromText(${ewkt}),
+            SET "gisPoint" = ST_GeogFromText(${ewkt}),
                 location = ${locationLabel},
                 timezone = ${picked.timezone},
                 updated_at = NOW()
@@ -169,7 +169,7 @@ export async function commitVCardImport(
         } else {
           await db.$executeRaw`
             UPDATE people
-            SET gis_point = ST_GeogFromText(${ewkt}),
+            SET "gisPoint" = ST_GeogFromText(${ewkt}),
                 location = ${locationLabel},
                 updated_at = NOW()
             WHERE id = ${personId}::uuid AND user_id = ${user.id}::uuid

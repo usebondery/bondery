@@ -259,6 +259,18 @@ export type IdempotencyKey = Prisma.IdempotencyKeyModel
  */
 export type SyncUserSequence = Prisma.SyncUserSequenceModel
 /**
+ * Model ReviewerAccess
+ * External reviewer access grant (Anthropic, Google, ...).
+ * 
+ * A row here is the sole gate for SMTP-bypass magic-link sign-in. Reviewers
+ * have no reachable mailbox, so the API returns the verify URL in the sign-in
+ * response instead of sending mail.
+ * 
+ * Revocation is `revoked_at` plus the ban and token sweep in
+ * `revoke-expired-reviewers.ts`. Never model this as `user.role`.
+ */
+export type ReviewerAccess = Prisma.ReviewerAccessModel
+/**
  * Model UserSettings
  * 
  */

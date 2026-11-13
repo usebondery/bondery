@@ -9,6 +9,7 @@ import { useState } from "react";
 import { type LoginBusyAction, SocialLoginCard } from "@/components/auth/SocialLoginCard";
 import { createWebappAuthClient } from "@/lib/auth/client";
 import { setLocalePreferencesCookie } from "@/lib/auth/detectLocale";
+import { magicLinkResultNavigates } from "@/lib/auth/magic-link-result";
 import { buildOAuthLoginMagicLinkUrls } from "@/lib/auth/magic-link-urls";
 import { notifyPasskeyLoginError } from "@/lib/auth/notify-passkey-login-error";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
@@ -107,7 +108,7 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
       setBusyAction("email");
       await setLocalePreferencesCookie();
 
-      const { error } = await authClient.signIn.magicLink({
+      const { data, error } = await authClient.signIn.magicLink({
         callbackURL: magicLinkUrls.callbackURL,
         email,
         errorCallbackURL: magicLinkUrls.errorCallbackURL,
@@ -120,6 +121,10 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
             title: t("AuthenticationError"),
           }),
         );
+        return false;
+      }
+
+      if (magicLinkResultNavigates(data)) {
         return false;
       }
 

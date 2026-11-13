@@ -1,3 +1,16 @@
+export function isLoopbackHostname(hostname: string): boolean {
+  if (hostname === "localhost" || hostname === "[::1]" || hostname === "::1") {
+    return true;
+  }
+
+  const ipv4Octets = hostname.split(".");
+  return (
+    ipv4Octets.length === 4 &&
+    ipv4Octets[0] === "127" &&
+    ipv4Octets.every((octet) => /^\d+$/.test(octet) && Number(octet) <= 255)
+  );
+}
+
 /**
  * `localhost` and `127.0.0.1` are different RFC 8707 resource identifiers.
  * Local env uses `localhost`; Chrome identity and Node IPv4 fetches use

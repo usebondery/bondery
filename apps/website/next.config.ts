@@ -131,6 +131,11 @@ const nextConfig: NextConfig = {
         permanent: true,
         source: "/docs/deploy/get-started",
       },
+      {
+        destination: "/docs/apps/mcp-server",
+        permanent: true,
+        source: "/docs/bondery/mcp",
+      },
     ];
   },
   // Outbound redirects (status, help, docs, login, auth/callback, oauth/consent, app)

@@ -92,6 +92,7 @@ export const ModelName = {
   SyncMutationReceipt: 'SyncMutationReceipt',
   IdempotencyKey: 'IdempotencyKey',
   SyncUserSequence: 'SyncUserSequence',
+  ReviewerAccess: 'ReviewerAccess',
   UserSettings: 'UserSettings',
   Tag: 'Tag',
   PeopleTag: 'PeopleTag'
@@ -787,6 +788,22 @@ export const SyncUserSequenceScalarFieldEnum = {
 } as const
 
 export type SyncUserSequenceScalarFieldEnum = (typeof SyncUserSequenceScalarFieldEnum)[keyof typeof SyncUserSequenceScalarFieldEnum]
+
+
+export const ReviewerAccessScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  email: 'email',
+  label: 'label',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdBy: 'createdBy',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewerAccessScalarFieldEnum = (typeof ReviewerAccessScalarFieldEnum)[keyof typeof ReviewerAccessScalarFieldEnum]
 
 
 export const UserSettingsScalarFieldEnum = {

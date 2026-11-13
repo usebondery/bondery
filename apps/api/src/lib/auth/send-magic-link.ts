@@ -11,6 +11,7 @@ import {
   rememberMagicLinkIdentifier,
 } from "./magic-link-redis.js";
 import { resolveAuthLocale } from "./resolve-auth-locale.js";
+import { skipSmtpForReviewerSignIn } from "./reviewer-magic-link.js";
 
 export type MagicLinkSendPayload = {
   email: string;
@@ -39,6 +40,8 @@ async function deleteStoredVerification(
     return;
   }
 
+  // Better Auth stores `magic-link:` plus the hash. Callers pass the hash.
+  await ctx.context.internalAdapter.deleteVerificationByIdentifier(`magic-link:${identifier}`);
   await ctx.context.internalAdapter.deleteVerificationByIdentifier(identifier);
 }
 
@@ -70,6 +73,10 @@ export const sendMagicLink: SendMagicLinkFn = async ({ email, token, url }, ctx)
   }
 
   await rememberMagicLinkIdentifier(emailHash, storedIdentifier);
+
+  if (await skipSmtpForReviewerSignIn({ ctx, email, url })) {
+    return;
+  }
 
   if (sendCaptureForTests) {
     sendCaptureForTests({ email, token, url });

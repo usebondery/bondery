@@ -12,6 +12,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseCalver, previousProductionCalver, readGitTags, toCoreCalver } from "./calver.mjs";
+import { formatWrittenFiles, writeFormattedJson } from "./write-formatted-json.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const checkOnly = process.argv.includes("--check");
@@ -62,7 +63,7 @@ function updatePackageJsonVersion(relPath, version) {
   }
   if (!checkOnly) {
     pkg.version = version;
-    writeFileSync(abs, `${JSON.stringify(pkg, null, 2)}\n`);
+    writeFormattedJson(abs, pkg, { cwd: root });
   }
   return true;
 }
@@ -114,11 +115,10 @@ function updateServerJsonVersion(version) {
   }
   if (!checkOnly) {
     server.version = version;
-    writeFileSync(abs, `${JSON.stringify(server, null, 2)}\n`);
+    writeFormattedJson(abs, server, { cwd: root });
   }
   return true;
 }
-
 function updateMinExtensionVersion(minVersion) {
   const rel = "packages/helpers/src/globals/paths.ts";
   const abs = join(root, rel);
@@ -174,6 +174,14 @@ function main() {
     );
     return;
   }
+
+  // Always format, not only when a version changed. A run that changes nothing
+  // still repairs a JSON file left misformatted by an earlier generator, so the
+  // next `pnpm check` cannot fail on formatting this script is responsible for.
+  formatWrittenFiles(
+    PACKAGE_JSON_PATHS.map((rel) => join(root, rel)).concat([join(root, "server.json")]),
+    { cwd: root },
+  );
 
   if (changes.length > 0) {
     console.log(`Synced version ${version} (MIN ${minVersion}, native ${nativeVersion}) to:`);
