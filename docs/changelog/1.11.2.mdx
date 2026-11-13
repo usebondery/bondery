@@ -1,0 +1,16 @@
+---
+title: "1.11.2"
+description: Bondery 1.11.2 adds reviewer accounts that expire, saves map coordinates on import and merge, and publishes one MCP page for Claude and Cursor.
+last_updated: 2026-11-13
+---
+
+## [1.11.2] - 13.11.2026
+
+### ✨ Added
+
+- API: reviewer access is a grant with an expiry, a label, and a revocation time. Grant it with `pnpm run provision:reviewer` and end it with `pnpm run revoke:reviewer`. Revoking bans the account and drops its sessions, API keys, and OAuth tokens. A nightly sweep at 03:15 UTC bans every grant that has expired.
+- Docs: the MCP page is titled MCP and lives at `/docs/apps/mcp`. It explains the protocol in plain language before any setup, says what you can ask before how it works, and keeps the full tool list as a reference. `/docs/apps/mcp-server` and `/docs/bondery/mcp` redirect there.
+
+### 🐛 Fixed
+
+- API: coordinates now save on import, merge, enrichment, and contact edits. Imported and merged contacts had been left without a map point. Existing contacts with missing coordinates fill in after the next import or edit.
