@@ -429,7 +429,16 @@
     "UpdatingReminderTime": "Erinnerungszeit wird aktualisiert...",
     "UpdatingTheme": "Design wird aktualisiert...",
     "UpdatingTimeFormat": "Zeitformat wird aktualisiert...",
-    "UpdatingTimezone": "Zeitzone wird aktualisiert..."
+    "UpdatingTimezone": "Zeitzone wird aktualisiert...",
+    "DateFormat": "Datumsformat",
+    "DateFormatTooltip": "Steuert die Anzeige von Kalenderdaten. Uhrzeiten folgen weiter Ihrem Zeitformat.",
+    "DateFormatLocale": "Sprache folgen ({preview})",
+    "DateFormatMdy": "Monat zuerst ({preview})",
+    "DateFormatDmy": "Tag zuerst ({preview})",
+    "DateFormatYmd": "Jahr zuerst ({preview})",
+    "DateFormatUpdateError": "Datumsformat konnte nicht aktualisiert werden",
+    "DateFormatUpdateSuccess": "Datumsformat aktualisiert",
+    "UpdatingDateFormat": "Datumsformat wird aktualisiert..."
   },
   "Profile": {
     "AttachProfilePhoto": "Nur Bilddateien sind erlaubt, und die Datei darf 5 MB nicht überschreiten",

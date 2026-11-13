@@ -437,7 +437,16 @@
     "UpdatingReminderTime": "Aktualizace času upozornění...",
     "UpdatingTheme": "Aktualizace motivu...",
     "UpdatingTimeFormat": "Aktualizace formátu času...",
-    "UpdatingTimezone": "Aktualizace časového pásma..."
+    "UpdatingTimezone": "Aktualizace časového pásma...",
+    "DateFormat": "Formát data",
+    "DateFormatTooltip": "Určuje zobrazení kalendářních dat. Časy zůstávají podle formátu hodin.",
+    "DateFormatLocale": "Podle jazyka ({preview})",
+    "DateFormatMdy": "Měsíc první ({preview})",
+    "DateFormatDmy": "Den první ({preview})",
+    "DateFormatYmd": "Rok první ({preview})",
+    "DateFormatUpdateError": "Nepodařilo se aktualizovat formát data",
+    "DateFormatUpdateSuccess": "Formát data byl aktualizován",
+    "UpdatingDateFormat": "Aktualizace formátu data..."
   },
   "Profile": {
     "AttachProfilePhoto": "Připojte svou profilovou fotku, soubor nesmí přesáhnout 5MB",

@@ -1143,7 +1143,8 @@
     "check:types": "tsc --noEmit",
     "compile": "tsc && node scripts/copy-locale-json.mjs && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs schemas",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs schemas",
-    "prepare": "pnpm run build"
+    "prepare": "pnpm run build",
+    "test": "tsx --test src/**/*.test.ts"
   },
   "type": "module",
   "types": "./src/index.ts",

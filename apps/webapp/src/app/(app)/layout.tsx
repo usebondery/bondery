@@ -31,13 +31,14 @@ export const dynamic = "force-dynamic";
  * Shared layout for the (app) route group.
  */
 export default async function AppGroupLayout({ children }: { children: React.ReactNode }) {
-  const { locale, timezone, timeFormat } = await resolveLocaleSettings();
+  const { locale, timezone, timeFormat, dateFormat } = await resolveLocaleSettings();
   await preloadWebNamespaces(locale, ["web.shell"]);
   const { i18n } = await getT("common", { lng: locale });
   const resources = getResources(i18n);
 
   return (
     <LocaleProvider
+      dateFormat={dateFormat}
       locale={locale}
       resources={resources}
       timeFormat={timeFormat}

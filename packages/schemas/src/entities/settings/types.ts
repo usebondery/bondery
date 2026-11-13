@@ -1,6 +1,7 @@
 import type { SupportedLocale } from "#locale/supported-locale/types.js";
 
 export type ColorSchemePreference = "light" | "dark" | "auto";
+export type DateFormatPreference = "locale" | "mdy" | "dmy" | "ymd";
 export type TimeFormatPreference = "24h" | "12h";
 export type SwipeActionPreference = "call" | "message" | "email";
 export type GroupSortOrderPreference =
@@ -17,6 +18,7 @@ export interface UserSettings {
   aiMessagesUsed?: number;
   avatarUrl: string | null;
   colorScheme: ColorSchemePreference;
+  dateFormat: string;
   defaultPhoneCountry: string | null;
   gettingStartedDismissedAt?: string | null;
   groupSortOrder: string;
@@ -37,6 +39,7 @@ export interface UserSettings {
 
 export interface UpdateUserSettingsInput {
   colorScheme?: ColorSchemePreference;
+  dateFormat?: DateFormatPreference;
   defaultPhoneCountry?: string | null;
   groupSortOrder?: GroupSortOrderPreference;
   language?: SupportedLocale;

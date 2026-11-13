@@ -25,7 +25,7 @@ describe("dictationLanguageTag", () => {
   });
 
   it("falls back to English for an unknown locale", () => {
-    const unknown = "fr" as unknown as Parameters<typeof dictationLanguageTag>[0];
+    const unknown = "ja" as unknown as Parameters<typeof dictationLanguageTag>[0];
     assert.equal(dictationLanguageTag(unknown), DICTATION_FALLBACK_LANGUAGE_TAG);
   });
 });

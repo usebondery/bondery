@@ -552,6 +552,7 @@ export const EXAMPLE_SETTINGS_PATCH_RESPONSE = {
     rightSwipeAction: "email",
     tagSortOrder: "count-desc",
     timeFormat: "24h",
+    dateFormat: "locale",
     timezone: "Europe/London",
   },
   success: true,

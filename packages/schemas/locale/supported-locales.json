@@ -2,8 +2,8 @@
   "default": "en",
   "postgresEnum": "supported_locale",
   "supported": [
-    { "code": "en", "flag": "gb", "nativeName": "English" },
-    { "code": "cs", "flag": "cz", "nativeName": "čeština" },
-    { "code": "de", "flag": "de", "nativeName": "Deutsch" }
+    { "code": "en", "dir": "ltr", "flag": "gb", "intl": "en-US", "nativeName": "English" },
+    { "code": "cs", "dir": "ltr", "flag": "cz", "intl": "cs-CZ", "nativeName": "čeština" },
+    { "code": "de", "dir": "ltr", "flag": "de", "intl": "de-DE", "nativeName": "Deutsch" }
   ]
 }

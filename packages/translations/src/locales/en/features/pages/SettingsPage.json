@@ -429,7 +429,16 @@
     "UpdatingReminderTime": "Updating reminder time...",
     "UpdatingTheme": "Updating theme...",
     "UpdatingTimeFormat": "Updating time format...",
-    "UpdatingTimezone": "Updating timezone..."
+    "UpdatingTimezone": "Updating timezone...",
+    "DateFormat": "Date format",
+    "DateFormatTooltip": "Controls how calendar dates are shown. Times still follow your clock format.",
+    "DateFormatLocale": "Follow language ({preview})",
+    "DateFormatMdy": "Month first ({preview})",
+    "DateFormatDmy": "Day first ({preview})",
+    "DateFormatYmd": "Year first ({preview})",
+    "DateFormatUpdateError": "Failed to update date format",
+    "DateFormatUpdateSuccess": "Date format updated",
+    "UpdatingDateFormat": "Updating date format..."
   },
   "Profile": {
     "AttachProfilePhoto": "Only image files are allowed, and the file must not exceed 5MB",

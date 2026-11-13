@@ -24,13 +24,20 @@ const SETTINGS_STALE_TIME_MS = 15 * 60_000;
 function applySettingsPatchToShell(patch: UpdateSettingsPatch): void {
   const timezone = "timezone" in patch ? patch.timezone : undefined;
   const timeFormat = "timeFormat" in patch ? patch.timeFormat : undefined;
+  const dateFormat = "dateFormat" in patch ? patch.dateFormat : undefined;
   const language = "language" in patch ? patch.language : undefined;
   const colorScheme = "colorScheme" in patch ? patch.colorScheme : undefined;
 
-  if (timezone !== undefined || timeFormat !== undefined || language !== undefined) {
+  if (
+    timezone !== undefined ||
+    timeFormat !== undefined ||
+    dateFormat !== undefined ||
+    language !== undefined
+  ) {
     applyUserLocaleFromRef({
       ...(timezone !== undefined ? { timezone } : {}),
       ...(timeFormat !== undefined ? { timeFormat } : {}),
+      ...(dateFormat !== undefined ? { dateFormat } : {}),
       ...(language !== undefined ? { locale: language } : {}),
     });
   }

@@ -368,7 +368,7 @@ const NameFields = function NameFields({
   const [hoveredField, setHoveredField] = useState<NameField | null>(null);
 
   return (
-    <Group gap={"xs"} grow wrap="nowrap">
+    <Group dir="auto" gap={"xs"} grow wrap="nowrap">
       {nameFieldConfigs.map((config) => (
         <InlineEditableInput
           aria-label={config.placeholder}

@@ -1,6 +1,11 @@
+export type LocaleTextDirection = "ltr" | "rtl";
+
 export interface AppLocaleMetadata {
   code: string;
+  dir: LocaleTextDirection;
   flag: string;
+  /** BCP 47 tag for Intl, speech, and dayjs region rules. */
+  intl: string;
   nativeName: string;
 }
 

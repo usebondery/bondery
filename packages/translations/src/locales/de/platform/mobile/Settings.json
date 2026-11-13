@@ -79,5 +79,11 @@
   "TimezoneUpdatedDescription": "Zeitzone wurde aktualisiert.",
   "Title": "Einstellungen",
   "ToastSavedHeadline": "Einstellungen aktualisiert",
-  "Website": "Website"
+  "Website": "Website",
+  "DateFormatSelectLabel": "Datumsformat",
+  "DateFormatLocale": "Sprache folgen (13 Nov 2026)",
+  "DateFormatMdy": "Monat zuerst (11/13/2026)",
+  "DateFormatDmy": "Tag zuerst (13/11/2026)",
+  "DateFormatYmd": "Jahr zuerst (2026-11-13)",
+  "DateFormatUpdatedDescription": "Datumsformat aktualisiert"
 }

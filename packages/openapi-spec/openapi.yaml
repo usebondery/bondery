@@ -22314,6 +22314,7 @@ paths:
                   language: en
                   onboardingCompletedAt: 2026-01-15T12:00:00.000Z
                   timeFormat: 24h
+                  dateFormat: locale
                   timezone: Europe/London
                 success: true
               schema:
@@ -22351,6 +22352,14 @@ paths:
                         description: Time onboarding completed
                         type: string
                         pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
+                      dateFormat:
+                        type: string
+                        enum:
+                          - locale
+                          - mdy
+                          - dmy
+                          - ymd
+                        description: Calendar date order preference, independent of UI language
                       timeFormat:
                         type: string
                         enum:
@@ -22367,6 +22376,7 @@ paths:
                       - isPlatformAdmin
                       - language
                       - onboardingCompletedAt
+                      - dateFormat
                       - timeFormat
                       - timezone
                     additionalProperties: false
@@ -22900,6 +22910,7 @@ paths:
                   rightSwipeAction: email
                   tagSortOrder: count-desc
                   timeFormat: 24h
+                  dateFormat: locale
                   timezone: Europe/London
                 success: true
               schema:
@@ -22952,6 +22963,9 @@ paths:
                       tagSortOrder:
                         type: string
                         description: Sort order for the tags list
+                      dateFormat:
+                        type: string
+                        description: Calendar date order preference
                       timeFormat:
                         type: string
                         description: Clock format preference
@@ -23038,6 +23052,7 @@ paths:
                       - reminderSendHour
                       - rightSwipeAction
                       - tagSortOrder
+                      - dateFormat
                       - timeFormat
                       - timezone
                       - avatarUrl
@@ -23237,6 +23252,14 @@ paths:
                     - alpha-asc
                     - alpha-desc
                   description: Sort order for the tags list
+                dateFormat:
+                  type: string
+                  enum:
+                    - locale
+                    - mdy
+                    - dmy
+                    - ymd
+                  description: Calendar date order preference, independent of UI language
                 timeFormat:
                   type: string
                   enum:
@@ -23266,6 +23289,7 @@ paths:
             example:
               colorScheme: dark
               timeFormat: 24h
+              dateFormat: locale
       security: *a2
       responses:
         "200":
@@ -23287,6 +23311,7 @@ paths:
                   rightSwipeAction: email
                   tagSortOrder: count-desc
                   timeFormat: 24h
+                  dateFormat: locale
                   timezone: Europe/London
                 success: true
               schema:
@@ -23299,6 +23324,10 @@ paths:
                     properties:
                       colorScheme:
                         description: Color scheme preference
+                        nullable: true
+                        type: string
+                      dateFormat:
+                        description: Calendar date order preference
                         nullable: true
                         type: string
                       defaultPhoneCountry:
@@ -23364,6 +23393,7 @@ paths:
                     rightSwipeAction: email
                     tagSortOrder: count-desc
                     timeFormat: 24h
+                    dateFormat: locale
                     timezone: Europe/London
                   success: true
         "400":

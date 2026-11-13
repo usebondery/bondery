@@ -1,5 +1,6 @@
 import { bonderyTheme } from "@bondery/mantine-next";
-import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
+import { dirForLocale } from "@bondery/schemas/locale";
+import { DirectionProvider, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { getResources, getT } from "next-i18next/server";
@@ -26,18 +27,26 @@ export default async function StoreShotsLayout({ children }: { children: ReactNo
   }
 
   const locale = "en";
+  const textDirection = dirForLocale(locale);
   await preloadWebNamespaces(locale, ["web.interactions", "web.groups", "web.map"]);
   const { i18n } = await getT("common", { lng: locale });
   const resources = getResources(i18n);
 
   return (
-    <LocaleProvider locale={locale} resources={resources} timeFormat="24h" timezone="Europe/Prague">
-      <MantineProvider
-        cssVariablesResolver={v8CssVariablesResolver}
-        forceColorScheme="light"
-        theme={bonderyTheme}
-      >
-        <style>{`
+    <LocaleProvider
+      dateFormat="locale"
+      locale={locale}
+      resources={resources}
+      timeFormat="24h"
+      timezone="Europe/Prague"
+    >
+      <DirectionProvider initialDirection={textDirection}>
+        <MantineProvider
+          cssVariablesResolver={v8CssVariablesResolver}
+          forceColorScheme="light"
+          theme={bonderyTheme}
+        >
+          <style>{`
         nextjs-portal,
         .tsqd-open-btn-container,
         .tsqd-parent-container {
@@ -80,8 +89,9 @@ export default async function StoreShotsLayout({ children }: { children: ReactNo
           display: none !important;
         }
       `}</style>
-        {children}
-      </MantineProvider>
+          {children}
+        </MantineProvider>
+      </DirectionProvider>
     </LocaleProvider>
   );
 }

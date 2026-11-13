@@ -79,5 +79,11 @@
   "TimezoneUpdatedDescription": "Časové pásmo bylo aktualizováno.",
   "Title": "Nastavení",
   "ToastSavedHeadline": "Nastavení aktualizováno",
-  "Website": "Web"
+  "Website": "Web",
+  "DateFormatSelectLabel": "Formát data",
+  "DateFormatLocale": "Podle jazyka (13 Nov 2026)",
+  "DateFormatMdy": "Měsíc první (11/13/2026)",
+  "DateFormatDmy": "Den první (13/11/2026)",
+  "DateFormatYmd": "Rok první (2026-11-13)",
+  "DateFormatUpdatedDescription": "Formát data byl aktualizován"
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { buildIntlLocaleTag, formatOrderedDate } from "@bondery/schemas/locale";
 import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 import {
   type DateFormatterLike,
@@ -7,22 +8,41 @@ import {
   formatRelativeTime,
 } from "@/lib/i18n/formatRelativeTime";
 
-function getIntlLocale(locale: string, timeFormat: "12h" | "24h"): string {
-  return timeFormat === "12h" ? `${locale}-u-hc-h12` : `${locale}-u-hc-h23`;
+function hasTimeComponent(opts?: Intl.DateTimeFormatOptions): boolean {
+  if (!opts) {
+    return false;
+  }
+  return (
+    opts.hour !== undefined ||
+    opts.minute !== undefined ||
+    opts.second !== undefined ||
+    opts.timeStyle !== undefined
+  );
 }
 
 /**
  * Replaces next-intl useFormatter with Intl APIs driven by user locale preferences.
  */
 export function useDateFormatter() {
-  const { locale, timezone, timeFormat } = useUserLocale();
-  const intlLocale = getIntlLocale(locale, timeFormat);
+  const { locale, timezone, timeFormat, dateFormat } = useUserLocale();
+  const intlLocale = buildIntlLocaleTag(locale, timeFormat);
 
   return {
     dateTime: (date: Date, opts?: Intl.DateTimeFormatOptions & { timeZone?: string }) => {
       const { timeZone, ...rest } = opts ?? {};
+      const resolvedZone = timeZone ?? timezone;
+
+      if (!hasTimeComponent(rest)) {
+        return formatOrderedDate({
+          date,
+          dateFormat,
+          intlLocaleTag: intlLocale,
+          timeZone: resolvedZone,
+        });
+      }
+
       return new Intl.DateTimeFormat(intlLocale, {
-        timeZone: timeZone ?? timezone,
+        timeZone: resolvedZone,
         ...rest,
       }).format(date);
     },

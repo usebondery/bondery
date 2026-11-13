@@ -174,6 +174,7 @@ export const EXAMPLE_UPDATE_ACCOUNT_REQUEST = {
 export const EXAMPLE_UPDATE_SETTINGS_REQUEST = {
   colorScheme: "dark" as const,
   timeFormat: "24h" as const,
+  dateFormat: "locale" as const,
 };
 
 /** PATCH /api/me/onboarding/import-followup body. */

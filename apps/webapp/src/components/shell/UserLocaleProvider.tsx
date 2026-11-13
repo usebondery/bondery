@@ -1,5 +1,7 @@
 "use client";
 
+import type { DateFormatPreference } from "@bondery/schemas";
+import { coerceDateFormatPreference } from "@bondery/schemas/locale";
 import {
   i18nConfig,
   resourceLoader,
@@ -11,11 +13,13 @@ import type { Resource } from "i18next";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { I18nProvider } from "next-i18next/client";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
+import "@/lib/i18n/loadDayjsLocales";
 
 export interface UserLocaleSettings {
   applyUserLocale: (
-    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
+    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
   ) => void;
+  dateFormat: DateFormatPreference;
   locale: SupportedLocale;
   timeFormat: "24h" | "12h";
   timezone: string;
@@ -27,7 +31,7 @@ const UserLocaleContext = createContext<UserLocaleSettings | null>(null);
 let applyUserLocaleRef: UserLocaleSettings["applyUserLocale"] | null = null;
 
 export function applyUserLocaleFromRef(
-  patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
+  patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
 ): void {
   applyUserLocaleRef?.(patch);
 }
@@ -47,6 +51,7 @@ export function useCurrentLocale(): SupportedLocale {
 
 interface LocaleProviderProps {
   children: ReactNode;
+  dateFormat: DateFormatPreference;
   locale: SupportedLocale;
   resources: Resource;
   timeFormat: "24h" | "12h";
@@ -62,20 +67,23 @@ export function LocaleProvider({
   locale: initialLocale,
   timezone: initialTimezone,
   timeFormat: initialTimeFormat,
+  dateFormat: initialDateFormat,
   resources,
 }: LocaleProviderProps) {
   const [locale, setLocale] = useState(initialLocale);
   const [timezone, setTimezone] = useState(initialTimezone);
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
+  const [dateFormat, setDateFormat] = useState<DateFormatPreference>(initialDateFormat);
 
   useEffect(() => {
     setLocale(initialLocale);
     setTimezone(initialTimezone);
     setTimeFormat(initialTimeFormat);
-  }, [initialLocale, initialTimezone, initialTimeFormat]);
+    setDateFormat(initialDateFormat);
+  }, [initialLocale, initialTimezone, initialTimeFormat, initialDateFormat]);
 
   const applyUserLocale = (
-    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat">>,
+    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
   ) => {
     if (patch.locale) {
       setLocale(patch.locale);
@@ -85,6 +93,9 @@ export function LocaleProvider({
     }
     if (patch.timeFormat) {
       setTimeFormat(patch.timeFormat);
+    }
+    if (patch.dateFormat) {
+      setDateFormat(patch.dateFormat);
     }
   };
 
@@ -99,7 +110,9 @@ export function LocaleProvider({
   }, []);
 
   return (
-    <UserLocaleContext.Provider value={{ applyUserLocale, locale, timeFormat, timezone }}>
+    <UserLocaleContext.Provider
+      value={{ applyUserLocale, dateFormat, locale, timeFormat, timezone }}
+    >
       <I18nProvider
         defaultNS={i18nConfig.defaultNS}
         fallbackLng={i18nConfig.fallbackLng}

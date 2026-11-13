@@ -10,6 +10,7 @@ export {
   DEFAULT_LOCALE,
   getNamespaceManifest,
   i18nConfig,
+  intlTagForLocale,
   manifest,
   type NamespaceEntry,
   namespaceFilePath,
