@@ -2,7 +2,6 @@
   "$schema": "https://v2-10-1.turborepo.dev/schema.json",
   "concurrency": "20",
   "globalPassThroughEnv": [
-    "BONDERY_AUTH_REVIEWER_EMAIL",
     "BONDERY_DEV_SKIP_RELEASE_MIGRATE",
     "BONDERY_DEV_SKIP_STORAGE_BUCKETS",
     "BONDERY_EXTENSION_FLAVOR",
@@ -130,7 +129,6 @@
     "api#build": {
       "dependsOn": ["^build"],
       "env": [
-        "BONDERY_AUTH_REVIEWER_EMAIL",
         "BONDERY_INFRA_CHROME_EXTENSION_ID",
         "BONDERY_INFRA_GIT_SHA",
         "BONDERY_INFRA_STORAGE_DOMAIN",
@@ -209,7 +207,6 @@
     "api#dev": {
       "cache": false,
       "env": [
-        "BONDERY_AUTH_REVIEWER_EMAIL",
         "BONDERY_INFRA_CHROME_EXTENSION_ID",
         "BONDERY_INFRA_GIT_SHA",
         "BONDERY_INFRA_STORAGE_DOMAIN",

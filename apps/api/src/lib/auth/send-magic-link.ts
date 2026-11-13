@@ -74,7 +74,7 @@ export const sendMagicLink: SendMagicLinkFn = async ({ email, token, url }, ctx)
 
   await rememberMagicLinkIdentifier(emailHash, storedIdentifier);
 
-  if (await skipSmtpForReviewerSignIn({ ctx, email, token, url })) {
+  if (await skipSmtpForReviewerSignIn({ ctx, email, url })) {
     return;
   }
 

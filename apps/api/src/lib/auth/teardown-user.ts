@@ -44,7 +44,7 @@ async function deleteUserStorageFiles(userId: string): Promise<void> {
   }
 }
 
-async function deleteOAuthArtifactsForUser(userId: string): Promise<void> {
+export async function deleteOAuthArtifactsForUser(userId: string): Promise<void> {
   await prisma.$transaction([
     prisma.oauthAccessToken.deleteMany({ where: { userId } }),
     prisma.oauthRefreshToken.deleteMany({ where: { userId } }),

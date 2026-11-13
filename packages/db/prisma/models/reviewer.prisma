@@ -1,0 +1,32 @@
+/// External reviewer access grant (Anthropic, Google, ...).
+///
+/// A row here is the sole gate for SMTP-bypass magic-link sign-in. Reviewers
+/// have no reachable mailbox, so the API returns the verify URL in the sign-in
+/// response instead of sending mail.
+///
+/// Revocation is `revoked_at` plus the ban and token sweep in
+/// `revoke-expired-reviewers.ts`. Never model this as `user.role`.
+model ReviewerAccess {
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @unique @map("user_id") @db.Uuid
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Informational copy for operators. `user.email` stays authoritative.
+  email String
+
+  /// Operator-facing label: "Anthropic", "Google".
+  label String
+
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+
+  /// Operator email or "cli". Required, no default.
+  createdBy String  @map("created_by")
+  note      String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([expiresAt])
+  @@map("reviewer_access")
+}

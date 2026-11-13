@@ -248,6 +248,7 @@ export type UserWhereInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptListRelationFilter
   idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
   syncUserSequence?: Prisma.XOR<Prisma.SyncUserSequenceNullableScalarRelationFilter, Prisma.SyncUserSequenceWhereInput> | null
+  reviewerAccess?: Prisma.XOR<Prisma.ReviewerAccessNullableScalarRelationFilter, Prisma.ReviewerAccessWhereInput> | null
   oauthClients?: Prisma.OauthClientListRelationFilter
   oauthRefreshTokens?: Prisma.OauthRefreshTokenListRelationFilter
   oauthAccessTokens?: Prisma.OauthAccessTokenListRelationFilter
@@ -284,6 +285,7 @@ export type UserOrderByWithRelationInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptOrderByRelationAggregateInput
   idempotencyKeys?: Prisma.IdempotencyKeyOrderByRelationAggregateInput
   syncUserSequence?: Prisma.SyncUserSequenceOrderByWithRelationInput
+  reviewerAccess?: Prisma.ReviewerAccessOrderByWithRelationInput
   oauthClients?: Prisma.OauthClientOrderByRelationAggregateInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenOrderByRelationAggregateInput
   oauthAccessTokens?: Prisma.OauthAccessTokenOrderByRelationAggregateInput
@@ -323,6 +325,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   syncMutationReceipts?: Prisma.SyncMutationReceiptListRelationFilter
   idempotencyKeys?: Prisma.IdempotencyKeyListRelationFilter
   syncUserSequence?: Prisma.XOR<Prisma.SyncUserSequenceNullableScalarRelationFilter, Prisma.SyncUserSequenceWhereInput> | null
+  reviewerAccess?: Prisma.XOR<Prisma.ReviewerAccessNullableScalarRelationFilter, Prisma.ReviewerAccessWhereInput> | null
   oauthClients?: Prisma.OauthClientListRelationFilter
   oauthRefreshTokens?: Prisma.OauthRefreshTokenListRelationFilter
   oauthAccessTokens?: Prisma.OauthAccessTokenListRelationFilter
@@ -393,6 +396,7 @@ export type UserCreateInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -429,6 +433,7 @@ export type UserUncheckedCreateInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -465,6 +470,7 @@ export type UserUpdateInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -501,6 +507,7 @@ export type UserUncheckedUpdateInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -911,6 +918,20 @@ export type UserUpdateOneRequiredWithoutSyncUserSequenceNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutSyncUserSequenceInput, Prisma.UserUpdateWithoutSyncUserSequenceInput>, Prisma.UserUncheckedUpdateWithoutSyncUserSequenceInput>
 }
 
+export type UserCreateNestedOneWithoutReviewerAccessInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewerAccessInput, Prisma.UserUncheckedCreateWithoutReviewerAccessInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewerAccessInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutReviewerAccessNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutReviewerAccessInput, Prisma.UserUncheckedCreateWithoutReviewerAccessInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutReviewerAccessInput
+  upsert?: Prisma.UserUpsertWithoutReviewerAccessInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReviewerAccessInput, Prisma.UserUpdateWithoutReviewerAccessInput>, Prisma.UserUncheckedUpdateWithoutReviewerAccessInput>
+}
+
 export type UserCreateNestedOneWithoutUserSettingsInput = {
   create?: Prisma.XOR<Prisma.UserCreateWithoutUserSettingsInput, Prisma.UserUncheckedCreateWithoutUserSettingsInput>
   connectOrCreate?: Prisma.UserCreateOrConnectWithoutUserSettingsInput
@@ -968,6 +989,7 @@ export type UserCreateWithoutSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1003,6 +1025,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1054,6 +1077,7 @@ export type UserUpdateWithoutSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1089,6 +1113,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1124,6 +1149,7 @@ export type UserCreateWithoutAccountsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1159,6 +1185,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1210,6 +1237,7 @@ export type UserUpdateWithoutAccountsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1245,6 +1273,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1280,6 +1309,7 @@ export type UserCreateWithoutPasskeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1315,6 +1345,7 @@ export type UserUncheckedCreateWithoutPasskeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1366,6 +1397,7 @@ export type UserUpdateWithoutPasskeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1401,6 +1433,7 @@ export type UserUncheckedUpdateWithoutPasskeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1436,6 +1469,7 @@ export type UserCreateWithoutGroupsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1471,6 +1505,7 @@ export type UserUncheckedCreateWithoutGroupsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1522,6 +1557,7 @@ export type UserUpdateWithoutGroupsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1557,6 +1593,7 @@ export type UserUncheckedUpdateWithoutGroupsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1592,6 +1629,7 @@ export type UserCreateWithoutInteractionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1627,6 +1665,7 @@ export type UserUncheckedCreateWithoutInteractionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1678,6 +1717,7 @@ export type UserUpdateWithoutInteractionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1713,6 +1753,7 @@ export type UserUncheckedUpdateWithoutInteractionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1748,6 +1789,7 @@ export type UserCreateWithoutLinkedinEnrichQueueInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -1783,6 +1825,7 @@ export type UserUncheckedCreateWithoutLinkedinEnrichQueueInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -1834,6 +1877,7 @@ export type UserUpdateWithoutLinkedinEnrichQueueInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -1869,6 +1913,7 @@ export type UserUncheckedUpdateWithoutLinkedinEnrichQueueInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -1905,6 +1950,7 @@ export type UserCreateWithoutOauthClientsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
@@ -1940,6 +1986,7 @@ export type UserUncheckedCreateWithoutOauthClientsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
@@ -1991,6 +2038,7 @@ export type UserUpdateWithoutOauthClientsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
@@ -2026,6 +2074,7 @@ export type UserUncheckedUpdateWithoutOauthClientsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
@@ -2061,6 +2110,7 @@ export type UserCreateWithoutOauthRefreshTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
@@ -2096,6 +2146,7 @@ export type UserUncheckedCreateWithoutOauthRefreshTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
@@ -2147,6 +2198,7 @@ export type UserUpdateWithoutOauthRefreshTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
@@ -2182,6 +2234,7 @@ export type UserUncheckedUpdateWithoutOauthRefreshTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
@@ -2217,6 +2270,7 @@ export type UserCreateWithoutOauthAccessTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
@@ -2252,6 +2306,7 @@ export type UserUncheckedCreateWithoutOauthAccessTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
@@ -2303,6 +2358,7 @@ export type UserUpdateWithoutOauthAccessTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
@@ -2338,6 +2394,7 @@ export type UserUncheckedUpdateWithoutOauthAccessTokensInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
@@ -2373,6 +2430,7 @@ export type UserCreateWithoutOauthConsentsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2408,6 +2466,7 @@ export type UserUncheckedCreateWithoutOauthConsentsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2459,6 +2518,7 @@ export type UserUpdateWithoutOauthConsentsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2494,6 +2554,7 @@ export type UserUncheckedUpdateWithoutOauthConsentsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2528,6 +2589,7 @@ export type UserCreateWithoutPeopleInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2563,6 +2625,7 @@ export type UserUncheckedCreateWithoutPeopleInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2614,6 +2677,7 @@ export type UserUpdateWithoutPeopleInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2649,6 +2713,7 @@ export type UserUncheckedUpdateWithoutPeopleInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2684,6 +2749,7 @@ export type UserCreateWithoutPeopleMergeRecommendationsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2719,6 +2785,7 @@ export type UserUncheckedCreateWithoutPeopleMergeRecommendationsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2770,6 +2837,7 @@ export type UserUpdateWithoutPeopleMergeRecommendationsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2805,6 +2873,7 @@ export type UserUncheckedUpdateWithoutPeopleMergeRecommendationsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2840,6 +2909,7 @@ export type UserCreateWithoutApikeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -2875,6 +2945,7 @@ export type UserUncheckedCreateWithoutApikeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -2926,6 +2997,7 @@ export type UserUpdateWithoutApikeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -2961,6 +3033,7 @@ export type UserUncheckedUpdateWithoutApikeysInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -2996,6 +3069,7 @@ export type UserCreateWithoutChatSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3031,6 +3105,7 @@ export type UserUncheckedCreateWithoutChatSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3082,6 +3157,7 @@ export type UserUpdateWithoutChatSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3117,6 +3193,7 @@ export type UserUncheckedUpdateWithoutChatSessionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3152,6 +3229,7 @@ export type UserCreateWithoutSubscriptionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3187,6 +3265,7 @@ export type UserUncheckedCreateWithoutSubscriptionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3238,6 +3317,7 @@ export type UserUpdateWithoutSubscriptionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3273,6 +3353,7 @@ export type UserUncheckedUpdateWithoutSubscriptionsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3308,6 +3389,7 @@ export type UserCreateWithoutReminderDispatchLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3343,6 +3425,7 @@ export type UserUncheckedCreateWithoutReminderDispatchLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3394,6 +3477,7 @@ export type UserUpdateWithoutReminderDispatchLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3429,6 +3513,7 @@ export type UserUncheckedUpdateWithoutReminderDispatchLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3464,6 +3549,7 @@ export type UserCreateWithoutSyncChangeLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3499,6 +3585,7 @@ export type UserUncheckedCreateWithoutSyncChangeLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3550,6 +3637,7 @@ export type UserUpdateWithoutSyncChangeLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3585,6 +3673,7 @@ export type UserUncheckedUpdateWithoutSyncChangeLogsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3620,6 +3709,7 @@ export type UserCreateWithoutSyncMutationReceiptsInput = {
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3655,6 +3745,7 @@ export type UserUncheckedCreateWithoutSyncMutationReceiptsInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3706,6 +3797,7 @@ export type UserUpdateWithoutSyncMutationReceiptsInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3741,6 +3833,7 @@ export type UserUncheckedUpdateWithoutSyncMutationReceiptsInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3776,6 +3869,7 @@ export type UserCreateWithoutIdempotencyKeysInput = {
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3811,6 +3905,7 @@ export type UserUncheckedCreateWithoutIdempotencyKeysInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -3862,6 +3957,7 @@ export type UserUpdateWithoutIdempotencyKeysInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -3897,6 +3993,7 @@ export type UserUncheckedUpdateWithoutIdempotencyKeysInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -3932,6 +4029,7 @@ export type UserCreateWithoutSyncUserSequenceInput = {
   syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -3967,6 +4065,7 @@ export type UserUncheckedCreateWithoutSyncUserSequenceInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4018,6 +4117,7 @@ export type UserUpdateWithoutSyncUserSequenceInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4053,6 +4153,167 @@ export type UserUncheckedUpdateWithoutSyncUserSequenceInput = {
   syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutReviewerAccessInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutReviewerAccessInput = {
+  id?: string
+  name?: string | null
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  role?: string | null
+  banned?: boolean | null
+  banReason?: string | null
+  banExpires?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  passkeys?: Prisma.PasskeyUncheckedCreateNestedManyWithoutUserInput
+  userSettings?: Prisma.UserSettingsUncheckedCreateNestedOneWithoutUserInput
+  people?: Prisma.PeopleUncheckedCreateNestedManyWithoutUserInput
+  groups?: Prisma.GroupUncheckedCreateNestedManyWithoutUserInput
+  tags?: Prisma.TagUncheckedCreateNestedManyWithoutUserInput
+  interactions?: Prisma.InteractionUncheckedCreateNestedManyWithoutUserInput
+  apikeys?: Prisma.ApikeyUncheckedCreateNestedManyWithoutUserInput
+  chatSessions?: Prisma.ChatSessionUncheckedCreateNestedManyWithoutUserInput
+  subscriptions?: Prisma.SubscriptionUncheckedCreateNestedManyWithoutUserInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedCreateNestedManyWithoutUserInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedCreateNestedManyWithoutUserInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedCreateNestedManyWithoutUserInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedCreateNestedManyWithoutUserInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
+  oauthConsents?: Prisma.OauthConsentUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutReviewerAccessInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewerAccessInput, Prisma.UserUncheckedCreateWithoutReviewerAccessInput>
+}
+
+export type UserUpsertWithoutReviewerAccessInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutReviewerAccessInput, Prisma.UserUncheckedUpdateWithoutReviewerAccessInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutReviewerAccessInput, Prisma.UserUncheckedCreateWithoutReviewerAccessInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutReviewerAccessInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutReviewerAccessInput, Prisma.UserUncheckedUpdateWithoutReviewerAccessInput>
+}
+
+export type UserUpdateWithoutReviewerAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
+  oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
+  oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
+  oauthConsents?: Prisma.OauthConsentUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutReviewerAccessInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  role?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banned?: Prisma.NullableBoolFieldUpdateOperationsInput | boolean | null
+  banReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  banExpires?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  passkeys?: Prisma.PasskeyUncheckedUpdateManyWithoutUserNestedInput
+  userSettings?: Prisma.UserSettingsUncheckedUpdateOneWithoutUserNestedInput
+  people?: Prisma.PeopleUncheckedUpdateManyWithoutUserNestedInput
+  groups?: Prisma.GroupUncheckedUpdateManyWithoutUserNestedInput
+  tags?: Prisma.TagUncheckedUpdateManyWithoutUserNestedInput
+  interactions?: Prisma.InteractionUncheckedUpdateManyWithoutUserNestedInput
+  apikeys?: Prisma.ApikeyUncheckedUpdateManyWithoutUserNestedInput
+  chatSessions?: Prisma.ChatSessionUncheckedUpdateManyWithoutUserNestedInput
+  subscriptions?: Prisma.SubscriptionUncheckedUpdateManyWithoutUserNestedInput
+  linkedinEnrichQueue?: Prisma.LinkedinEnrichQueueUncheckedUpdateManyWithoutUserNestedInput
+  peopleMergeRecommendations?: Prisma.PeopleMergeRecommendationUncheckedUpdateManyWithoutUserNestedInput
+  reminderDispatchLogs?: Prisma.ReminderDispatchLogUncheckedUpdateManyWithoutUserNestedInput
+  syncChangeLogs?: Prisma.SyncChangeLogUncheckedUpdateManyWithoutUserNestedInput
+  syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
+  idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
+  syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4088,6 +4349,7 @@ export type UserCreateWithoutUserSettingsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -4123,6 +4385,7 @@ export type UserUncheckedCreateWithoutUserSettingsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4174,6 +4437,7 @@ export type UserUpdateWithoutUserSettingsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4209,6 +4473,7 @@ export type UserUncheckedUpdateWithoutUserSettingsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4244,6 +4509,7 @@ export type UserCreateWithoutTagsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenCreateNestedManyWithoutUserInput
@@ -4279,6 +4545,7 @@ export type UserUncheckedCreateWithoutTagsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedCreateNestedManyWithoutUserInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedCreateNestedManyWithoutUserInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedCreateNestedOneWithoutUserInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedCreateNestedOneWithoutUserInput
   oauthClients?: Prisma.OauthClientUncheckedCreateNestedManyWithoutUserInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedCreateNestedManyWithoutUserInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedCreateNestedManyWithoutUserInput
@@ -4330,6 +4597,7 @@ export type UserUpdateWithoutTagsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUpdateManyWithoutUserNestedInput
@@ -4365,6 +4633,7 @@ export type UserUncheckedUpdateWithoutTagsInput = {
   syncMutationReceipts?: Prisma.SyncMutationReceiptUncheckedUpdateManyWithoutUserNestedInput
   idempotencyKeys?: Prisma.IdempotencyKeyUncheckedUpdateManyWithoutUserNestedInput
   syncUserSequence?: Prisma.SyncUserSequenceUncheckedUpdateOneWithoutUserNestedInput
+  reviewerAccess?: Prisma.ReviewerAccessUncheckedUpdateOneWithoutUserNestedInput
   oauthClients?: Prisma.OauthClientUncheckedUpdateManyWithoutUserNestedInput
   oauthRefreshTokens?: Prisma.OauthRefreshTokenUncheckedUpdateManyWithoutUserNestedInput
   oauthAccessTokens?: Prisma.OauthAccessTokenUncheckedUpdateManyWithoutUserNestedInput
@@ -4603,6 +4872,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   syncMutationReceipts?: boolean | Prisma.User$syncMutationReceiptsArgs<ExtArgs>
   idempotencyKeys?: boolean | Prisma.User$idempotencyKeysArgs<ExtArgs>
   syncUserSequence?: boolean | Prisma.User$syncUserSequenceArgs<ExtArgs>
+  reviewerAccess?: boolean | Prisma.User$reviewerAccessArgs<ExtArgs>
   oauthClients?: boolean | Prisma.User$oauthClientsArgs<ExtArgs>
   oauthRefreshTokens?: boolean | Prisma.User$oauthRefreshTokensArgs<ExtArgs>
   oauthAccessTokens?: boolean | Prisma.User$oauthAccessTokensArgs<ExtArgs>
@@ -4672,6 +4942,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   syncMutationReceipts?: boolean | Prisma.User$syncMutationReceiptsArgs<ExtArgs>
   idempotencyKeys?: boolean | Prisma.User$idempotencyKeysArgs<ExtArgs>
   syncUserSequence?: boolean | Prisma.User$syncUserSequenceArgs<ExtArgs>
+  reviewerAccess?: boolean | Prisma.User$reviewerAccessArgs<ExtArgs>
   oauthClients?: boolean | Prisma.User$oauthClientsArgs<ExtArgs>
   oauthRefreshTokens?: boolean | Prisma.User$oauthRefreshTokensArgs<ExtArgs>
   oauthAccessTokens?: boolean | Prisma.User$oauthAccessTokensArgs<ExtArgs>
@@ -4702,6 +4973,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     syncMutationReceipts: Prisma.$SyncMutationReceiptPayload<ExtArgs>[]
     idempotencyKeys: Prisma.$IdempotencyKeyPayload<ExtArgs>[]
     syncUserSequence: Prisma.$SyncUserSequencePayload<ExtArgs> | null
+    reviewerAccess: Prisma.$ReviewerAccessPayload<ExtArgs> | null
     oauthClients: Prisma.$OauthClientPayload<ExtArgs>[]
     oauthRefreshTokens: Prisma.$OauthRefreshTokenPayload<ExtArgs>[]
     oauthAccessTokens: Prisma.$OauthAccessTokenPayload<ExtArgs>[]
@@ -5131,6 +5403,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   syncMutationReceipts<T extends Prisma.User$syncMutationReceiptsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$syncMutationReceiptsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SyncMutationReceiptPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   idempotencyKeys<T extends Prisma.User$idempotencyKeysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$idempotencyKeysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$IdempotencyKeyPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   syncUserSequence<T extends Prisma.User$syncUserSequenceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$syncUserSequenceArgs<ExtArgs>>): Prisma.Prisma__SyncUserSequenceClient<runtime.Types.Result.GetResult<Prisma.$SyncUserSequencePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  reviewerAccess<T extends Prisma.User$reviewerAccessArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$reviewerAccessArgs<ExtArgs>>): Prisma.Prisma__ReviewerAccessClient<runtime.Types.Result.GetResult<Prisma.$ReviewerAccessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   oauthClients<T extends Prisma.User$oauthClientsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthClientsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthClientPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthRefreshTokens<T extends Prisma.User$oauthRefreshTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthRefreshTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthRefreshTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   oauthAccessTokens<T extends Prisma.User$oauthAccessTokensArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$oauthAccessTokensArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OauthAccessTokenPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -5987,6 +6260,25 @@ export type User$syncUserSequenceArgs<ExtArgs extends runtime.Types.Extensions.I
    */
   include?: Prisma.SyncUserSequenceInclude<ExtArgs> | null
   where?: Prisma.SyncUserSequenceWhereInput
+}
+
+/**
+ * User.reviewerAccess
+ */
+export type User$reviewerAccessArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewerAccess
+   */
+  select?: Prisma.ReviewerAccessSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewerAccess
+   */
+  omit?: Prisma.ReviewerAccessOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewerAccessInclude<ExtArgs> | null
+  where?: Prisma.ReviewerAccessWhereInput
 }
 
 /**

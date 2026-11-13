@@ -19,29 +19,6 @@ import { loadTestEnv } from "./load-test-env.js";
 
 loadTestEnv();
 
-const reviewerEmailAtStart = process.env.BONDERY_AUTH_REVIEWER_EMAIL;
-
-function restoreReviewerEmail(): void {
-  if (reviewerEmailAtStart === undefined) {
-    delete process.env.BONDERY_AUTH_REVIEWER_EMAIL;
-    return;
-  }
-  process.env.BONDERY_AUTH_REVIEWER_EMAIL = reviewerEmailAtStart;
-}
-
-async function withReviewerEmail<T>(email: string | undefined, run: () => Promise<T>): Promise<T> {
-  if (email === undefined) {
-    delete process.env.BONDERY_AUTH_REVIEWER_EMAIL;
-  } else {
-    process.env.BONDERY_AUTH_REVIEWER_EMAIL = email;
-  }
-  try {
-    return await run();
-  } finally {
-    restoreReviewerEmail();
-  }
-}
-
 const { createTestApp } = await import("./create-test-app.js");
 const { resolveApiResourceIdentifier } = await import("../lib/auth/index.js");
 const { setMagicLinkSendCaptureForTests } = await import("../lib/auth/send-magic-link.js");
@@ -98,6 +75,7 @@ describe("loginEmailFormSchema", () => {
 describe("magic-link auth", () => {
   let app: FastifyInstance;
   const createdUserIds: string[] = [];
+  const createdReviewerAccessIds: string[] = [];
   let lastSend: MagicLinkSendPayload | null = null;
 
   before(async () => {
@@ -108,12 +86,14 @@ describe("magic-link auth", () => {
   afterEach(() => {
     lastSend = null;
     setMagicLinkSendCaptureForTests(null);
-    restoreReviewerEmail();
   });
 
   after(async () => {
     setMagicLinkSendCaptureForTests(null);
     await app.close();
+    if (createdReviewerAccessIds.length > 0) {
+      await prisma.reviewerAccess.deleteMany({ where: { id: { in: createdReviewerAccessIds } } });
+    }
     if (createdUserIds.length > 0) {
       await prisma.user.deleteMany({ where: { id: { in: createdUserIds } } });
     }
@@ -125,6 +105,44 @@ describe("magic-link auth", () => {
     setMagicLinkSendCaptureForTests((payload) => {
       lastSend = payload;
     });
+  }
+
+  /**
+   * Seed a reviewer account with an active grant.
+   * `overrides` drive the expired and revoked cases.
+   */ async function createReviewer(options: {
+    email: string;
+    label?: string;
+    expiresAt?: Date;
+    revokedAt?: Date | null;
+    banned?: boolean;
+  }): Promise<{ id: string; reviewerAccessId: string }> {
+    const id = generateId();
+    await prisma.user.create({
+      data: {
+        banned: options.banned ?? false,
+        email: options.email,
+        emailVerified: true,
+        id,
+        name: `${options.label ?? "Reviewer"} Reviewer`,
+      },
+    });
+    createdUserIds.push(id);
+
+    const grant = await prisma.reviewerAccess.create({
+      data: {
+        createdBy: "test",
+        email: options.email,
+        expiresAt: options.expiresAt ?? new Date(Date.now() + 24 * 60 * 60 * 1000),
+        id: generateId(),
+        label: options.label ?? "Reviewer",
+        revokedAt: options.revokedAt ?? null,
+        userId: id,
+      },
+    });
+    createdReviewerAccessIds.push(grant.id);
+
+    return { id, reviewerAccessId: grant.id };
   }
 
   /** Stable per-email IP so Better Auth's 5/60 send+verify limit is not shared across cases. */
@@ -324,38 +342,19 @@ describe("magic-link auth", () => {
     }
   });
 
-  async function verificationKeyCount(): Promise<number> {
-    const redis = requireRedisCommands();
-    const keys = await redis.keys(`${BETTER_AUTH_REDIS_KEY_PREFIX}verification:*`);
-    return keys.length;
-  }
-
-  it("sends mail when the reviewer address is unset", async () => {
-    const email = `magic-link-unset-${generateId()}@example.test`;
-    const response = await withReviewerEmail(undefined, () => postMagicLink(email));
-    assert.equal(response.statusCode, 200, response.body);
-    assert.equal(response.json().redirect, undefined);
-    assert.equal(lastSend?.email, email);
-  });
-
-  it("sends mail for an address that is not the reviewer", async () => {
-    const reviewer = `reviewer-${generateId()}@example.test`;
+  it("sends mail for an address with no reviewer grant", async () => {
     const email = `magic-link-other-${generateId()}@example.test`;
-    const response = await withReviewerEmail(reviewer, () => postMagicLink(email));
+    const response = await postMagicLink(email);
     assert.equal(response.statusCode, 200, response.body);
     assert.equal(response.json().redirect, undefined);
     assert.equal(lastSend?.email, email);
   });
 
-  it("skips mail and returns the verify URL for an existing reviewer", async () => {
+  it("skips mail and returns the verify URL for an active reviewer", async () => {
     const email = `reviewer-ready-${generateId()}@example.test`;
-    const id = generateId();
-    await prisma.user.create({
-      data: { email, emailVerified: true, id, name: "Reviewer" },
-    });
-    createdUserIds.push(id);
+    const { id } = await createReviewer({ email, label: "Anthropic" });
 
-    const response = await withReviewerEmail(email, () => postMagicLink(email));
+    const response = await postMagicLink(email);
     assert.equal(response.statusCode, 200, response.body);
     assert.equal(lastSend, null);
 
@@ -375,27 +374,68 @@ describe("magic-link auth", () => {
     assert.equal(users[0]?.id, id);
   });
 
-  it("does not send mail or create a user when the reviewer row is missing", async () => {
-    const email = `reviewer-missing-${generateId()}@example.test`;
-    const keysBefore = await verificationKeyCount();
-    const rowsBefore = await prisma.verification.count();
+  it("sends mail when the reviewer grant expired", async () => {
+    const email = `reviewer-expired-${generateId()}@example.test`;
+    await createReviewer({ email, expiresAt: new Date(Date.now() - 1000), label: "Google" });
 
-    const response = await withReviewerEmail(email, () => postMagicLink(email));
-    assert.notEqual(response.statusCode, 200);
-    assert.match(response.body, /EMAIL_SEND_FAILED/);
-    assert.equal(lastSend, null);
+    const response = await postMagicLink(email);
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().redirect, undefined);
+    assert.equal(lastSend?.email, email);
+  });
+
+  it("sends mail when the reviewer grant was revoked", async () => {
+    const email = `reviewer-revoked-${generateId()}@example.test`;
+    await createReviewer({ email, label: "Google", revokedAt: new Date() });
+
+    const response = await postMagicLink(email);
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().redirect, undefined);
+    assert.equal(lastSend?.email, email);
+  });
+
+  it("sends mail when the reviewer account is banned", async () => {
+    const email = `reviewer-banned-${generateId()}@example.test`;
+    await createReviewer({ banned: true, email, label: "Google" });
+
+    const response = await postMagicLink(email);
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().redirect, undefined);
+    assert.equal(lastSend?.email, email);
+  });
+
+  it("keeps two reviewers in separate tenants", async () => {
+    const anthropicEmail = `reviewer-anthropic-${generateId()}@example.test`;
+    const googleEmail = `reviewer-google-${generateId()}@example.test`;
+    const anthropic = await createReviewer({ email: anthropicEmail, label: "Anthropic" });
+    const google = await createReviewer({ email: googleEmail, label: "Google" });
+
+    const anthropicResponse = await postMagicLink(anthropicEmail);
+    const googleResponse = await postMagicLink(googleEmail);
+    assert.equal(anthropicResponse.json().redirect, true);
+    assert.equal(googleResponse.json().redirect, true);
+
+    const anthropicPeople = await prisma.people.count({ where: { userId: anthropic.id } });
+    const googlePeople = await prisma.people.count({ where: { userId: google.id } });
+    assert.equal(anthropicPeople, 0);
+    assert.equal(googlePeople, 0);
+
+    const overlap = await prisma.people.count({
+      where: { myself: false, userId: { in: [anthropic.id, google.id] } },
+    });
+    assert.equal(overlap, 0);
+  });
+
+  it("treats an unprovisioned address exactly like any other address", async () => {
+    const email = `reviewer-missing-${generateId()}@example.test`;
+
+    const response = await postMagicLink(email);
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().redirect, undefined);
+    assert.equal(lastSend?.email, email);
 
     const user = await prisma.user.findUnique({ where: { email } });
     assert.equal(user, null);
-    assert.equal(await verificationKeyCount(), keysBefore);
-    assert.equal(await prisma.verification.count(), rowsBefore);
-
-    const redis = requireRedisCommands();
-    const keys = await redis.keys(`${BETTER_AUTH_REDIS_KEY_PREFIX}verification:*`);
-    for (const key of keys) {
-      const value = await redis.get(key);
-      assert.equal(value?.includes(email) ?? false, false);
-    }
   });
 
   it("returns 429 after eight sign-in emails for the same address", async () => {

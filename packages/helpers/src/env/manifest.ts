@@ -671,23 +671,6 @@ export const ENV_MANIFEST: EnvVarDef[] = [
     targets: [t("api")],
   },
   {
-    canonical: "BONDERY_AUTH_REVIEWER_EMAIL",
-    deployExample: {
-      commented: true,
-      group: "Better Auth",
-      include: true,
-      value: "",
-    },
-    description:
-      "Optional reviewer magic-link address. Empty disables reviewer sign-in. The value stays in Infisical.",
-    dokploySync: { targets: ["services"] },
-    exampleValue: "",
-    group: "Auth",
-    requiredIn: [],
-    secret: true,
-    targets: [t("api")],
-  },
-  {
     boot: { value: "test-extension-oauth-client" },
     canonical: "BONDERY_PUBLIC_OAUTH_CLIENT_ID",
     deployExample: { group: "Chrome extension OAuth", include: true, value: "" },
