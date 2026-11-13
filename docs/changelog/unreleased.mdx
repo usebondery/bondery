@@ -1,7 +1,16 @@
 ---
 title: "Changelog Unreleased"
 hidden: true
-last_updated: 2026-11-10
+last_updated: 2026-11-13
 ---
 
 ## [Unreleased]
+
+### ✨ Added
+
+- API: reviewer access is now a grant row with an expiry, a label, and a revocation timestamp, instead of a magic-link bypass read from one environment variable. Use `pnpm run provision:reviewer` to grant access and `pnpm run revoke:reviewer` to end it early. Revoking bans the account and drops its sessions, API keys, and OAuth tokens, so a live session cannot outlast the grant. A nightly sweep at 03:15 UTC bans every grant that has expired.
+- Docs: the MCP page is titled MCP and lives at one address. It explains the protocol in plain language before any setup, answers what you can do with it before how it works, and keeps the full tool list as a reference appendix. The old `/docs/bondery/mcp` address redirects to it.
+
+### 🐛 Fixed
+
+- API: coordinates now save on import, merge, enrichment, and contact edits. The geography columns are quoted camelCase, so the writes had been failing and the error was swallowed, which left imported and merged contacts without a map point. Existing contacts with missing coordinates fill in after the next import or edit.
