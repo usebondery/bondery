@@ -33,6 +33,7 @@
       "node": "./dist/*.js",
       "types": "./src/*.ts"
     },
+    "./assets/anthropic.svg": "./src/assets/brands/anthropic.svg",
     "./brandMarks.generated": {
       "default": "./dist/brandMarks.generated.js",
       "import": "./dist/brandMarks.generated.js",
@@ -102,6 +103,12 @@
       "import": "./dist/react/index.js",
       "node": "./dist/react/index.js",
       "types": "./src/react/index.ts"
+    },
+    "./react/AnthropicIcon": {
+      "default": "./dist/react/AnthropicIcon.js",
+      "import": "./dist/react/AnthropicIcon.js",
+      "node": "./dist/react/AnthropicIcon.js",
+      "types": "./src/react/AnthropicIcon.tsx"
     },
     "./react/BonderyDynamicLogotype": {
       "default": "./dist/react/BonderyDynamicLogotype.js",
@@ -182,9 +189,9 @@
     "react": "^19.2.7"
   },
   "scripts": {
-    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding && node scripts/copy-brand-assets.mjs",
     "check:types": "tsc --noEmit",
-    "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding",
+    "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding && node scripts/copy-brand-assets.mjs",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs branding",
     "generate:brand-marks": "tsx scripts/generate-brand-marks.ts",
     "test": "tsx --test src/**/*.test.ts"

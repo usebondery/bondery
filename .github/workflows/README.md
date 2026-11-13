@@ -17,6 +17,7 @@ release/
   bondery.yml              -> release.yml           vX.Y.Z unified production (skips -rc)
   rc.yml                   -> rc-release.yml        vX.Y.Z-rc.N prerelease + staging zip; no CWS
   mcp-registry.yml         -> publish-mcp-registry.yml  workflow_dispatch or vX.Y.Z (skips -rc)
+  claude-plugin.yml        -> publish-claude-plugin.yml  vX.Y.Z fast-forwards `claude-plugin` when the plugin folder changed
 
 smoke/
   bondery-stack.yml        -> smoke-bondery-stack.yml  manual workflow_dispatch drill
@@ -131,6 +132,12 @@ If you change lockfile layout or pnpm major version, bump the BuildKit cache id 
 | `BONDERY_PUBLIC_OAUTH_CLIENT_ID` | Extension PKCE OAuth client id (must not equal the webapp BFF client) |
 
 **MCP Registry** (`publish-mcp-registry.yml`): publishes root `server.json` as `com.usebondery/mcp` (`https://api.usebondery.com/mcp`). Auth is HTTP (`mcp-publisher login http --domain usebondery.com`). `GET https://usebondery.com/.well-known/mcp-registry-auth` must already return **200** `text/plain` with no redirect (marketing website on `release`; the registry client does not follow redirects). Publish uses Infisical **production** `BONDERY_OPS_MCP_REGISTRY_PRIVATE_KEY` (never GitHub secrets, never Dokploy). Development and staging have distinct seeds under the same name; they are not used to publish. First publish: merge → website CD → curl 200 on the proof URL → Infisical OIDC allows this workflow → `workflow_dispatch`. Later production tags `vX.Y.Z` republish (RC tags are skipped).
+
+**Claude plugin** (`publish-claude-plugin.yml`): the Claude directory follows one git ref, `claude-plugin`. A new tag does not move a ref the directory already tracks, so the workflow fast-forwards that branch to the `vX.Y.Z` commit when the folder changed. Production tags `vX.Y.Z` may move `claude-plugin`; RC tags never do. `workflow_dispatch` takes a `vX.Y.Z` tag and checks out that tag. The run needs `contents: write` and nothing else: no Infisical, no registry key. It fails when `llm-plugins/claude/.claude-plugin/plugin.json` still carries an RC string, and it treats a version-only bump as a green skip so no review opens. The plugin folder is content, not a pnpm workspace package. `verify.yml` runs `pnpm run check:llm-plugins` on every pull request. Portal Submit and Publish stay human steps.
+
+**Claude plugin manifest.** The source of truth is `llm-plugins/src/plugin.config.json`. The config has no version. `node scripts/pkg/build-llm-plugins.mjs` writes `llm-plugins/claude` and `llm-plugins/openai`. `pnpm run sync-version` runs that builder in write mode. The builder stamps the root `package.json` version on both manifests. OpenAI has no git ref.
+
+The Claude manifest sets `icon`, `documentationUrl`, `supportUrl`, `privacyPolicyUrl`, and `termsOfServiceUrl`. `apps/website/scripts/generate-icons.ts` writes `llm-plugins/src/assets/icon.png` on website `prebuild` and `predev`. The builder copies that file into both packages. These fields are absent: `dependencies`, `defaultEnabled`, `metadata`, `userConfig`, and every component key. `skills/` and `.mcp.json` use their default paths. `pnpm run check:llm-plugins` checks that a listing field points inside the bundle or uses `https://`.
 
 **Ops checklist (Infisical UI — before relying on Infisical-only CI):**
 

@@ -57,6 +57,7 @@ Do not duplicate content across skills — link and keep a single source of trut
 | Transactional email, templates, SMTP/Plunk | `bondery-emails` |
 | 1:1 GitHub/email/review replies (founder voice) | `bondery-support-replies` |
 | Chrome extension runtime, WXT/MV3, CWS listing graphics | `bondery-chrome-extension` |
+| LLM plugin packages, Claude directory, OpenAI plugin ZIP | `bondery-llm-plugins` |
 
 ## Agent configuration
 

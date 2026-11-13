@@ -1,0 +1,133 @@
+name: Publish - Claude plugin
+
+# Claude's directory follows one git ref. A new vX.Y.Z tag does not move a ref
+# it already tracks, so this workflow fast-forwards `claude-plugin` to the tag
+# commit when the plugin folder or its version changed.
+#
+# A version-only bump must not open a directory review, so the folder diff
+# ignores the `version` field. Nothing to publish is a green skip.
+#
+# The tag commit must already carry a clean X.Y.Z. RC tags are skipped, and an
+# RC string in the manifest fails the run instead of reaching the directory.
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Production tag to publish (vX.Y.Z, no -rc)
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-claude-plugin
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch' || !contains(github.ref_name, '-rc.')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          persist-credentials: true
+          ref: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref }}
+
+      - name: Require a production tag and read the version
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            TAG="${INPUT_TAG}"
+          fi
+          if ! printf '%s' "$TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::Tag '$TAG' is not vX.Y.Z. RC tags and other refs are not published."
+            exit 1
+          fi
+          echo "PLUGIN_TAG=$TAG" >> "$GITHUB_ENV"
+          echo "PLUGIN_VERSION=${TAG#v}" >> "$GITHUB_ENV"
+
+      - name: Fail when the manifest still carries an RC string
+        run: |
+          set -euo pipefail
+          MANIFEST="llm-plugins/claude/.claude-plugin/plugin.json"
+          VERSION=$(node -e 'process.stdout.write(JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).version ?? "")' "$MANIFEST")
+          echo "Manifest version: $VERSION (tag $PLUGIN_VERSION)"
+          case "$VERSION" in
+            *-rc.*)
+              echo "::error::$MANIFEST still reports $VERSION. The tag commit must carry a clean $PLUGIN_VERSION."
+              exit 1
+              ;;
+          esac
+          if [ "$VERSION" != "$PLUGIN_VERSION" ]; then
+            echo "::error::$MANIFEST reports $VERSION but the tag is $PLUGIN_VERSION."
+            exit 1
+          fi
+
+      - name: Check the plugin shape
+        run: node scripts/check/check-llm-plugins.mjs
+
+      - name: Compare the plugin folder with the published branch
+        id: diff
+        run: |
+          set -euo pipefail
+          PLUGIN="llm-plugins/claude"
+          mkdir -p "$RUNNER_TEMP/tag" "$RUNNER_TEMP/branch"
+
+          if ! git cat-file -e "HEAD:$PLUGIN" 2>/dev/null; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "$PLUGIN is not in $PLUGIN_TAG. Nothing to publish."
+            exit 0
+          fi
+
+          if git fetch origin "+refs/heads/claude-plugin:refs/remotes/origin/claude-plugin" 2>/dev/null; then
+            # A branch without the plugin path reads as "everything is new".
+            git archive refs/remotes/origin/claude-plugin "$PLUGIN" 2>/dev/null \
+              | tar -x -C "$RUNNER_TEMP/branch" 2>/dev/null \
+              || echo "claude-plugin has no $PLUGIN yet."
+          else
+            echo "claude-plugin branch does not exist yet. This run seeds it."
+          fi
+
+          git archive HEAD "$PLUGIN" | tar -x -C "$RUNNER_TEMP/tag"
+
+          # The manifest version moves on every release and must not open a review.
+          node - "$RUNNER_TEMP/tag/$PLUGIN/.claude-plugin/plugin.json" "$RUNNER_TEMP/branch/$PLUGIN/.claude-plugin/plugin.json" <<'NODE'
+          const fs = require("node:fs");
+          for (const path of process.argv.slice(2)) {
+            if (!fs.existsSync(path)) continue;
+            const manifest = JSON.parse(fs.readFileSync(path, "utf8"));
+            manifest.version = "0.0.0";
+            fs.writeFileSync(path, `${JSON.stringify(manifest, null, 2)}\n`);
+          }
+          NODE
+
+          if diff -r "$RUNNER_TEMP/tag/$PLUGIN" "$RUNNER_TEMP/branch/$PLUGIN" > "$RUNNER_TEMP/plugin.diff"; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No plugin change at $PLUGIN_TAG. Nothing to publish."
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            cat "$RUNNER_TEMP/plugin.diff"
+          fi
+
+      - name: Fast-forward the claude-plugin branch
+        if: steps.diff.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          SHA=$(git rev-parse HEAD)
+          # No --force: the branch must already contain the tag commit ancestry.
+          git push origin "${SHA}:refs/heads/claude-plugin"
+          echo "Published $PLUGIN_TAG ($SHA) to claude-plugin."
+
+      - name: Report a version-only release
+        if: steps.diff.outputs.changed != 'true'
+        run: echo "Plugin content is unchanged at $PLUGIN_TAG. The directory keeps its current version."

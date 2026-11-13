@@ -1,7 +1,21 @@
 ---
 title: "Changelog Unreleased"
 hidden: true
-last_updated: 2026-11-10
+last_updated: 2026-11-13
 ---
 
 ## [Unreleased]
+
+### ✨ Added
+
+- Website: the Terms of Service page now carries the full agreement instead of a placeholder. It covers accounts, your ownership of your contacts, acceptable use, the free plan and Premium with its 15-day trial, the EU 14-day withdrawal right, AI assistants, self-hosting under AGPL-3.0, disclaimers, liability limits, and Czech law with the courts of Brno. The page links to the Privacy Policy for data handling.
+- Plugins: one source, `llm-plugins/src`, now generates the Claude plugin folder and the OpenAI plugin folder. The OpenAI package is ready for a later directory upload.
+- Plugins: the Claude plugin manifest now sets `termsOfServiceUrl`, so the directory listing links the Terms of Service next to the privacy policy. The plugin README links both.
+- Plugins: a Claude plugin for hosted Bondery ships `llm-plugins/claude`. It gives Claude five jobs: catch up before a meeting, get to know someone, save a conversation, find who to reach out to, and share a contact. Install the plugin, then connect and sign in. The plugin folder is content, not a workspace package. Its manifest carries the directory listing fields: icon, documentation link, support link, privacy policy link, and terms of service link.
+- Branding: the website icon generator writes `llm-plugins/src/assets/icon.png`. The plugin builder copies that icon into the Claude and OpenAI packages, so it cannot drift from the brand.
+- CI: `pnpm run check:llm-plugins` fails a pull request when the Claude plugin manifest drifts from the root version, when the license is not a regular AGPL-3.0 file, or when the bundle carries build files, env files, scripts, or secrets.
+- CI: `publish-claude-plugin.yml` fast-forwards the `claude-plugin` branch to a production tag when `llm-plugins/claude` changed. The version field is ignored in that comparison, so a version-only release opens no directory review. RC tags never move the branch.
+
+### 🔄 Changed
+
+- Docs: the MCP server page leads with the Claude plugin install and keeps the custom-connector steps for self-hosted API origins.

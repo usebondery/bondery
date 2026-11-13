@@ -1,8 +1,8 @@
 ---
 title: "MCP server"
 icon: Robot
-description: AI assistants search your contacts, summarize their history, and log interactions for you. Works in Claude, Cursor, and other MCP clients today.
-last_updated: 2026-11-10
+description: AI assistants search your contacts, summarize their history, and log interactions for you. Install the Bondery plugin in Claude, or connect any MCP client.
+last_updated: 2026-11-13
 ---
 
 ## What you can ask
@@ -25,12 +25,33 @@ The assistant cannot dump your full address book, merge duplicates, import Linke
 
 ## How to connect
 
+### Claude
+
+Claude's directory carries Bondery as a plugin. Install it, then connect and sign in:
+
+1. Install the **Bondery** plugin in Claude.
+2. Open **Connectors**.
+3. Choose **Connect** on the Bondery connector.
+4. Choose **Use Claude's published identity**.
+5. Sign in to your Bondery account.
+6. Approve **Read only** or **Full access**.
+
+Install does not sign you in. **Register automatically** cannot sign in either. If Claude asks again after the connect step, sign in again.
+
+On a Team or Enterprise plan, an Owner adds the connector once. Each member then signs in with their own account.
+
+The plugin adds five jobs: catch up before a meeting, get to know someone, save a conversation, find who to reach out to, and share a contact. Catch up, get to know, and reach out only read. Saving and sharing write, and they need **Full access**.
+
+The Claude package and the OpenAI package are both generated from `llm-plugins/src`.
+
+### Any MCP client
+
 1. In Bondery, open **Settings → AI assistants**
 2. Copy the **MCP URL** (or the **mcp.json** snippet)
 3. Add it in Claude Desktop or another MCP client that supports HTTP + OAuth with Client ID Metadata Documents (CIMD)
 4. Sign in with your Bondery account and choose **Read only** or **Full access**
 
-On hosted Bondery the URL is `https://api.usebondery.com/mcp`. Self-hosters use `{apiBaseUrl}/mcp` from the same Settings card. The hosted server is listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `com.usebondery/mcp`.
+On hosted Bondery the URL is `https://api.usebondery.com/mcp`. Self-hosters use `{apiBaseUrl}/mcp` from the same Settings card, as a custom connector in Claude or an entry in any other MCP client. The hosted server is listed in the [MCP Registry](https://registry.modelcontextprotocol.io) as `com.usebondery/mcp`. The Claude directory is a different directory.
 
 Assistants authenticate with **OAuth**, not API keys. Setup details, the tool list, and client notes: [Connect AI assistants (MCP)](../bondery/mcp.mdx).
 

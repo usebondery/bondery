@@ -1,14 +1,19 @@
-import { Box, Container, Grid, GridCol, Stack, Text, Title } from "@mantine/core";
+import { AnthropicIcon } from "@bondery/branding/react";
+import { ButtonLink } from "@bondery/mantine-next";
+import { Box, Container, Grid, GridCol, Group, Stack, Text, Title } from "@mantine/core";
+import { IconPlug } from "@tabler/icons-react";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { AnimatedPeople } from "./AnimatedPeople";
+import { AssistantBriefingAnimation } from "./AssistantBriefingAnimation";
 import { PrivacyCodeAnimation } from "./PrivacyCodeAnimation";
 import { SyncedConnectionsAnimation } from "./SyncedConnectionsAnimation";
-import { TimelineAnimation } from "./TimelineAnimation";
 
 type FeatureSectionProps = {
   title: string;
   description: string;
   imagePosition: "left" | "right";
   imagePlaceholder: React.ReactNode;
+  action?: React.ReactNode;
 };
 
 const FeatureSection = ({
@@ -16,6 +21,7 @@ const FeatureSection = ({
   description,
   imagePosition,
   imagePlaceholder,
+  action,
 }: FeatureSectionProps) => {
   const content = (
     <Stack gap="xl" h="100%" justify="center">
@@ -33,6 +39,7 @@ const FeatureSection = ({
         <Text c="dimmed" size="lg">
           {description}
         </Text>
+        {action ? <Box mt="lg">{action}</Box> : null}
       </Box>
     </Stack>
   );
@@ -116,10 +123,29 @@ export function Features() {
       />
 
       <FeatureSection
-        description="When was the last time you forgot something important about a person? With Bondery, keep all the details in one place and get reminded about them. From birthdays to follow-ups after conversations."
-        imagePlaceholder={<TimelineAnimation />}
+        action={
+          <Group gap="sm">
+            <ButtonLink
+              href={routeAssert("/docs/apps/mcp-server")}
+              leftSection={<AnthropicIcon color="white" size={18} />}
+              size="md"
+            >
+              Add to Claude
+            </ButtonLink>
+            <ButtonLink
+              href={routeAssert("/docs/bondery/mcp")}
+              leftSection={<IconPlug size={18} />}
+              size="md"
+              variant="default"
+            >
+              Other MCP clients
+            </ButtonLink>
+          </Group>
+        }
+        description="Your assistant answers the questions you ask a good friend: who should I catch up with, what did we talk about. Bondery gives it your contacts, and it saves the person you just met. Install the Bondery plugin in Claude, or connect any MCP client."
+        imagePlaceholder={<AssistantBriefingAnimation />}
         imagePosition="right"
-        title="Never forget what matters"
+        title="Ask your assistant. It knows your people."
       />
 
       <FeatureSection

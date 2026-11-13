@@ -3,6 +3,9 @@
  * Propagate root package.json version to workspace packages and mobile native fields.
  * Derives MIN_EXTENSION_VERSION from the previous production git tag.
  * Regenerates env examples via env:sync (deploy pin stays last production CalVer).
+ * In write mode, run the LLM plugin builder so both generated manifests match.
+ * --check does not write.
+ * --check does not run the builder.
  *
  *   pnpm run sync-version
  *   pnpm run sync-version -- --check   # dry-run; exit 1 on drift
@@ -119,6 +122,14 @@ function updateServerJsonVersion(version) {
   return true;
 }
 
+/** Write mode only. Plugin version checks live in check:llm-plugins. */
+function buildLlmPlugins() {
+  execSync("node scripts/pkg/build-llm-plugins.mjs", {
+    cwd: root,
+    stdio: "inherit",
+  });
+}
+
 function updateMinExtensionVersion(minVersion) {
   const rel = "packages/helpers/src/globals/paths.ts";
   const abs = join(root, rel);
@@ -184,6 +195,8 @@ function main() {
   } else {
     console.log(`Version ${version} already synced across targets (MIN ${minVersion})`);
   }
+
+  buildLlmPlugins();
 }
 
 main();

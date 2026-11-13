@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
  * CI guard: root package.json version must match all sync targets and deploy pin.
+ * Plugin manifest versions are checked by check:llm-plugins, not here.
  */
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";

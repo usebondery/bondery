@@ -19,6 +19,8 @@ export {
   BRAND_SURFACES,
 } from "#colors.js";
 export {
+  ANTHROPIC_MARK_COLOR,
+  AnthropicIcon,
   BonderyDynamicLogotype,
   BonderyIcon,
   BonderyIconWhite,

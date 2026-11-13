@@ -61,6 +61,7 @@ jobs:
           status=0
           pnpm run env:check || status=1
           pnpm run check:versions || status=1
+          pnpm run check:llm-plugins || status=1
           exit "$status"
 
   openapi:

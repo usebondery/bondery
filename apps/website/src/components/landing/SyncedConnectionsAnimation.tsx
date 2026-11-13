@@ -1,226 +1,380 @@
 "use client";
 
 import { LogoIcon } from "@bondery/mantine-next";
-import { Card, useMantineColorScheme, useMantineTheme } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
+import { Box, Card, Group, Text } from "@mantine/core";
 import { IconApi, IconBrandInstagram, IconBrandLinkedin } from "@tabler/icons-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import NextImage from "next/image";
 import { useEffect, useState } from "react";
 
-const SATELLITES = [
-  {
-    ariaLabel: "LinkedIn",
-    color: "#0A66C2",
-    icon: IconBrandLinkedin,
-    id: "linkedin",
-    label: "Profile update",
-  },
-  {
-    ariaLabel: "Instagram",
-    color: "#E4405F",
-    icon: IconBrandInstagram,
-    id: "instagram",
-    label: "Instagram import",
-  },
-  {
-    ariaLabel: "API",
-    color: "#7C3AED",
-    icon: IconApi,
-    id: "api",
-    label: "API write",
-  },
-] as const;
+type SourceId = "api" | "instagram" | "linkedin";
 
-function satelliteAngle(index: number): number {
-  return ((index + 1) / 4) * 2 * Math.PI - Math.PI / 2;
+type Source = {
+  color: string;
+  icon: typeof IconApi;
+  id: SourceId;
+  label: string;
+};
+
+const SOURCES: readonly Source[] = [
+  { color: "#0A66C2", icon: IconBrandLinkedin, id: "linkedin", label: "LinkedIn" },
+  { color: "#E4405F", icon: IconBrandInstagram, id: "instagram", label: "Instagram" },
+  { color: "#7C3AED", icon: IconApi, id: "api", label: "API" },
+];
+
+const SOURCE_BY_ID = new Map(SOURCES.map((source) => [source.id, source]));
+
+type Person = {
+  detail: string;
+  name: string;
+  photo: string;
+  sources: readonly SourceId[];
+};
+
+const PEOPLE: readonly Person[] = [
+  {
+    detail: "Product designer · Berlin",
+    name: "Anna Kowalski",
+    photo: "/images/persons/person_job.jpg",
+    sources: ["linkedin", "api"],
+  },
+  {
+    detail: "Met at Web Summit",
+    name: "Marek Novák",
+    photo: "/images/persons/person_buddy.jpg",
+    sources: ["instagram"],
+  },
+  {
+    detail: "Climbing partner · Brno",
+    name: "Lucie Dvořáková",
+    photo: "/images/persons/person_birthday.jpg",
+    sources: ["instagram", "linkedin"],
+  },
+  {
+    detail: "Founder · Prague",
+    name: "Tomáš Horák",
+    photo: "/images/persons/person_restaurant.jpg",
+    sources: ["api"],
+  },
+];
+
+const VISIBLE_CARDS = 3;
+const CARD_INTERVAL_MS = 2000;
+const HAIRLINE = "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4))";
+const SURFACE = "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))";
+const PILL_SURFACE = "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7))";
+
+type PreviewCard = { id: number; person: Person };
+
+/** Newest first. Each entry carries its own id so enter and exit animations stay distinct. */
+function buildInitialCards(): PreviewCard[] {
+  return Array.from({ length: VISIBLE_CARDS }, (_, index) => ({
+    id: index,
+    person: PEOPLE[index % PEOPLE.length] as Person,
+  }));
 }
 
 export function SyncedConnectionsAnimation() {
-  const theme = useMantineTheme();
-  const { colorScheme } = useMantineColorScheme();
-  const isMobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const reduceMotion = useReducedMotion();
-
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [cards, setCards] = useState<PreviewCard[]>(buildInitialCards);
 
   useEffect(() => {
     if (reduceMotion) {
       return;
     }
 
+    let nextId = VISIBLE_CARDS;
+
     const interval = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % SATELLITES.length);
-    }, 4000);
+      setCards((previous) => [
+        { id: nextId, person: PEOPLE[nextId % PEOPLE.length] as Person },
+        ...previous.slice(0, VISIBLE_CARDS - 1),
+      ]);
+      nextId += 1;
+    }, CARD_INTERVAL_MS);
+
     return () => clearInterval(interval);
   }, [reduceMotion]);
-
-  const radius = isMobile ? 90 : 130;
-  const centerSize = 80;
-  const satelliteSize = 48;
-
-  const activeSat = SATELLITES[activeIndex];
 
   return (
     <Card
       className="bg-transparent border-none shadow-none overflow-visible relative flex items-center justify-center p-0"
-      padding="xl"
+      padding="md"
       radius="lg"
-      style={{
-        aspectRatio: "4/3",
-        fontSize: "1rem",
-        maxWidth: 500,
-        width: "100%",
-      }}
+      style={{ aspectRatio: "4/3", maxWidth: 500, minHeight: 380, width: "100%" }}
     >
-      <div
-        aria-hidden="true"
-        className="absolute top-0 left-0 right-0 flex justify-center z-30 pointer-events-none h-12"
-      >
-        <AnimatePresence mode="wait">
-          <motion.div
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="flex items-center gap-3 px-4 py-2 bg-white dark:bg-zinc-800 rounded-full shadow-lg border border-gray-100 dark:border-zinc-700 mt-2"
-            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            initial={{ opacity: 0, scale: 0.9, y: -10 }}
-            key={activeSat.id}
-            transition={{ duration: 0.3 }}
-          >
-            <div
-              className="w-6 h-6 rounded-full flex items-center justify-center text-white"
-              style={{ backgroundColor: activeSat.color }}
-            >
-              <activeSat.icon size={14} />
-            </div>
-            <span className="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">
-              {activeSat.label}
-            </span>
-          </motion.div>
-        </AnimatePresence>
-      </div>
+      <Box style={{ width: "100%" }}>
+        <Group justify="space-between" wrap="nowrap">
+          {SOURCES.map((source) => (
+            <SourceChip key={source.id} source={source} />
+          ))}
+        </Group>
 
-      <div className="relative w-full h-full flex items-center justify-center">
-        <motion.div
-          className="relative z-20 bg-white dark:bg-zinc-800 rounded-2xl shadow-xl flex items-center justify-center border border-gray-100 dark:border-zinc-700"
-          style={{ height: centerSize, width: centerSize }}
-          transition={{ damping: 17, stiffness: 400, type: "spring" }}
-          whileHover={reduceMotion ? undefined : { scale: 1.1 }}
-        >
-          <LogoIcon className="text-zinc-900 dark:text-white" size={48} />
+        <InboundStreams animated={!reduceMotion} />
 
-          <AnimatePresence>
-            {!reduceMotion && (
-              <motion.div
-                animate={{ opacity: [0, 0.3, 0], scale: [1, 1.4, 1.6] }}
-                className="absolute inset-0 rounded-2xl -z-10"
-                initial={{ opacity: 0, scale: 0.8 }}
-                key={`pulse-${activeIndex}`}
-                style={{ backgroundColor: activeSat.color }}
-                transition={{ delay: 1, duration: 0.8, ease: "easeOut" }}
-              />
-            )}
-          </AnimatePresence>
-        </motion.div>
+        <Group justify="center">
+          <Hub animated={!reduceMotion} />
+        </Group>
 
-        <svg
-          className="absolute left-1/2 top-1/2 overflow-visible pointer-events-none z-10"
-          style={{
-            height: 600,
-            marginLeft: -300,
-            marginTop: -300,
-            width: 600,
-          }}
-          viewBox="-300 -300 600 600"
-        >
-          {SATELLITES.map((sat, index) => {
-            const angle = satelliteAngle(index);
-            const x = Math.cos(angle) * radius;
-            const y = Math.sin(angle) * radius;
-            const isActive = activeIndex === index;
+        <OutboundStream animated={!reduceMotion} />
 
-            return (
-              <motion.line
-                animate={{
-                  opacity: isActive ? 1 : 0.3,
-                  stroke: isActive ? sat.color : colorScheme === "dark" ? "#52525b" : "#d1d5db",
-                }}
-                initial={{ opacity: 0.3 }}
-                key={`line-${sat.id}`}
-                stroke={isActive ? sat.color : colorScheme === "dark" ? "#52525b" : "#d1d5db"}
-                strokeWidth={isActive ? 2 : 1}
-                transition={{ duration: 0.3 }}
-                x1={0}
-                x2={x}
-                y1={0}
-                y2={y}
-              />
-            );
-          })}
-        </svg>
-
-        {SATELLITES.map((sat, index) => {
-          const angle = satelliteAngle(index);
-          const x = Math.cos(angle) * radius;
-          const y = Math.sin(angle) * radius;
-          const isActive = index === activeIndex;
-
-          return (
-            <div className="absolute left-1/2 top-1/2" key={sat.id} style={{ height: 0, width: 0 }}>
-              <AnimatePresence>
-                {isActive && !reduceMotion && (
-                  <motion.div
-                    animate={{
-                      opacity: [1, 1, 0],
-                      scale: [1, 1, 0],
-                      x: [x, 0],
-                      y: [y, 0],
-                    }}
-                    className="absolute w-3 h-3 rounded-full z-10 shadow-sm pointer-events-none"
-                    exit={{ opacity: 0 }}
-                    initial={{ opacity: 0, scale: 0, x: x, y: y }}
-                    style={{
-                      backgroundColor: sat.color,
-                      marginLeft: -6,
-                      marginTop: -6,
-                    }}
-                    transition={{
-                      duration: 1,
-                      ease: "easeInOut",
-                    }}
-                  />
-                )}
-              </AnimatePresence>
-
-              <motion.button
-                animate={{
-                  opacity: isActive ? 1 : 0.8,
-                  scale: isActive ? 1.2 : 1,
-                }}
-                aria-label={sat.ariaLabel}
-                aria-pressed={isActive}
-                className="absolute bg-white dark:bg-zinc-800 rounded-full shadow-lg flex items-center justify-center border border-gray-100 dark:border-zinc-700 z-20 cursor-pointer p-0"
-                onClick={() => setActiveIndex(index)}
-                style={{
-                  height: satelliteSize,
-                  marginLeft: -satelliteSize / 2,
-                  marginTop: -satelliteSize / 2,
-                  width: satelliteSize,
-                  x: x,
-                  y: y,
-                }}
-                transition={{ duration: 0.3 }}
-                type="button"
-                whileHover={reduceMotion ? undefined : { opacity: 1, scale: 1.2, zIndex: 30 }}
-              >
-                <sat.icon
-                  color={isActive ? sat.color : "#9ca3af"}
-                  size={24}
-                  style={{ transition: "color 0.3s" }}
+        <Box style={{ position: "relative" }}>
+          <Box component="ul" style={{ listStyle: "none", margin: 0, padding: 0 }}>
+            <AnimatePresence initial={false} mode="popLayout">
+              {cards.map((card, index) => (
+                <PersonPreview
+                  animated={!reduceMotion}
+                  isNewest={index === 0}
+                  key={card.id}
+                  person={card.person}
                 />
-              </motion.button>
-            </div>
-          );
-        })}
-      </div>
+              ))}
+            </AnimatePresence>
+          </Box>
+
+          <Box
+            aria-hidden="true"
+            style={{
+              background: `linear-gradient(to top, light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8)), transparent)`,
+              bottom: -4,
+              height: 26,
+              left: 0,
+              pointerEvents: "none",
+              position: "absolute",
+              right: 0,
+            }}
+          />
+        </Box>
+      </Box>
     </Card>
+  );
+}
+
+function SourceChip({ source }: { source: Source }) {
+  return (
+    <Group
+      gap={5}
+      style={{
+        border: `1px solid ${HAIRLINE}`,
+        borderRadius: 999,
+        flexShrink: 0,
+        padding: "3px 9px",
+      }}
+      wrap="nowrap"
+    >
+      <source.icon color={source.color} size={12} />
+      <Text fw={600} style={{ fontSize: 10, lineHeight: 1.2 }}>
+        {source.label}
+      </Text>
+    </Group>
+  );
+}
+
+/** Three streams converge on the hub. Dots travel the diagonal, then repeat, so flow never stops. */
+function InboundStreams({ animated }: { animated: boolean }) {
+  const paths = [
+    { delay: 0, from: 16.7 },
+    { delay: 0.5, from: 50 },
+    { delay: 1, from: 83.3 },
+  ];
+
+  return (
+    <Box style={{ height: 56, position: "relative", width: "100%" }}>
+      <svg
+        aria-hidden="true"
+        preserveAspectRatio="none"
+        style={{ height: "100%", inset: 0, position: "absolute", width: "100%" }}
+        viewBox="0 0 100 56"
+      >
+        {paths.map((path) => (
+          <line
+            key={`line-${path.from}`}
+            stroke={HAIRLINE}
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+            x1={path.from}
+            x2={50}
+            y1={0}
+            y2={56}
+          />
+        ))}
+
+        {animated
+          ? paths.map((path) => (
+              <motion.circle
+                animate={{ cx: [path.from, 50], cy: [0, 56], opacity: [0, 1, 1, 0] }}
+                fill="var(--mantine-primary-color-filled)"
+                initial={false}
+                key={`dot-${path.from}`}
+                r={2.4}
+                transition={{
+                  delay: path.delay,
+                  duration: 1.5,
+                  ease: "easeIn",
+                  repeat: Number.POSITIVE_INFINITY,
+                  repeatDelay: 0.4,
+                  times: [0, 1],
+                }}
+              />
+            ))
+          : null}
+      </svg>
+    </Box>
+  );
+}
+
+function Hub({ animated }: { animated: boolean }) {
+  return (
+    <Box style={{ position: "relative", zIndex: 1 }}>
+      {animated ? (
+        <motion.div
+          animate={{ opacity: [0.35, 0, 0.35], scale: [1, 1.45, 1] }}
+          aria-hidden="true"
+          style={{
+            border: "1px solid var(--mantine-primary-color-filled)",
+            borderRadius: 14,
+            inset: 0,
+            position: "absolute",
+          }}
+          transition={{ duration: 2.6, ease: "easeOut", repeat: Number.POSITIVE_INFINITY }}
+        />
+      ) : null}
+
+      <Box
+        style={{
+          alignItems: "center",
+          backgroundColor: SURFACE,
+          border: `1px solid ${HAIRLINE}`,
+          borderRadius: 12,
+          boxShadow: "var(--mantine-shadow-md)",
+          display: "flex",
+          height: 44,
+          justifyContent: "center",
+          position: "relative",
+          width: 44,
+        }}
+      >
+        <LogoIcon size={24} />
+      </Box>
+    </Box>
+  );
+}
+
+/** The hub hands the finished contact down to the list. */
+function OutboundStream({ animated }: { animated: boolean }) {
+  return (
+    <Box style={{ height: 28, position: "relative", width: "100%" }}>
+      <svg
+        aria-hidden="true"
+        preserveAspectRatio="none"
+        style={{ height: "100%", inset: 0, position: "absolute", width: "100%" }}
+        viewBox="0 0 100 28"
+      >
+        <line
+          stroke={HAIRLINE}
+          strokeWidth={1}
+          vectorEffect="non-scaling-stroke"
+          x1={50}
+          x2={50}
+          y1={0}
+          y2={28}
+        />
+
+        {animated ? (
+          <motion.circle
+            animate={{ cy: [0, 28], opacity: [0, 1, 1, 0] }}
+            cx={50}
+            fill="var(--mantine-primary-color-filled)"
+            initial={false}
+            r={2.4}
+            transition={{
+              duration: 1.2,
+              ease: "easeIn",
+              repeat: Number.POSITIVE_INFINITY,
+            }}
+          />
+        ) : null}
+      </svg>
+    </Box>
+  );
+}
+
+function PersonPreview({
+  animated,
+  isNewest,
+  person,
+}: {
+  animated: boolean;
+  isNewest: boolean;
+  person: Person;
+}) {
+  return (
+    <motion.li
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96, y: 8 }}
+      initial={animated ? { opacity: 0, scale: 0.96, y: -12 } : { opacity: 1, scale: 1, y: 0 }}
+      layout={animated}
+      style={{ paddingBottom: 6 }}
+      transition={{ damping: 26, stiffness: 300, type: "spring" }}
+    >
+      <Card
+        padding={8}
+        radius="md"
+        shadow={isNewest ? "sm" : undefined}
+        style={{
+          borderColor: isNewest
+            ? "light-dark(var(--mantine-primary-color-2), var(--mantine-primary-color-8))"
+            : undefined,
+        }}
+        withBorder
+      >
+        <Group gap={9} wrap="nowrap">
+          <NextImage
+            alt=""
+            className="rounded-lg object-cover"
+            height={34}
+            src={person.photo}
+            style={{ flexShrink: 0 }}
+            width={34}
+          />
+
+          <Box style={{ flex: 1, minWidth: 0 }}>
+            <Text fw={600} style={{ fontSize: 11.5, lineHeight: 1.35 }} truncate>
+              {person.name}
+            </Text>
+            <Text c="dimmed" style={{ fontSize: 10, lineHeight: 1.35 }} truncate>
+              {person.detail}
+            </Text>
+          </Box>
+
+          <Group aria-hidden="true" gap={4} style={{ flexShrink: 0 }} wrap="nowrap">
+            {person.sources.map((sourceId) => {
+              const source = SOURCE_BY_ID.get(sourceId);
+              if (!source) {
+                return null;
+              }
+
+              return (
+                <Box
+                  key={sourceId}
+                  style={{
+                    alignItems: "center",
+                    backgroundColor: PILL_SURFACE,
+                    border: `1px solid ${HAIRLINE}`,
+                    borderRadius: 999,
+                    display: "flex",
+                    height: 18,
+                    justifyContent: "center",
+                    width: 18,
+                  }}
+                >
+                  <source.icon color={source.color} size={10} />
+                </Box>
+              );
+            })}
+          </Group>
+        </Group>
+      </Card>
+    </motion.li>
   );
 }

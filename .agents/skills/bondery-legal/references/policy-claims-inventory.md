@@ -4,7 +4,7 @@ Maps checkable factual claims in published legal documents to implementation sta
 
 **Sources:**
 - Privacy: `apps/website/src/components/legal/Privacy.tsx` (August 18, 2026)
-- Terms: `apps/website/src/components/legal/Terms.tsx` (February 18, 2026 — **draft placeholder**)
+- Terms: `apps/website/src/components/legal/Terms.tsx` (November 13, 2026 — **counsel review pending**)
 
 | Status | Meaning |
 |--------|---------|
@@ -17,10 +17,19 @@ Maps checkable factual claims in published legal documents to implementation sta
 
 | Claim | Location | Status | Notes |
 |-------|----------|--------|-------|
-| Final contractual terms | `Terms.tsx` | **unimplemented** | Explicit placeholder: "does not yet represent the final contractual terms" |
-| Acceptable use, liability, governing law | `Terms.tsx` | **unimplemented** | Listed as future content |
+| Final contractual terms | `Terms.tsx` | **policy-only** | Full text published November 13, 2026. **Awaiting counsel sign-off** — substantive terms (governing law, liability, withdrawal right) drafted by an agent under `escalation-boundaries.md` and not reviewed by counsel. |
+| Age minimum 16 | `Terms.tsx` §2 | `policy-only` | Matches Privacy §11. No signup age gate in webapp, mobile, or API. |
+| Premium $10 USD/month, 15-day trial | `Terms.tsx` §6 | `implemented` | `apps/api/src/routes/subscriptions/checkout.ts` sets `trial_period_days: 15`; price on website `Pricing.tsx` |
+| Cancel keeps access to period end | `Terms.tsx` §6(d) | `implemented` | `cancel_at_period_end` in `services/billing/stripe-helpers.ts` |
+| Non-payment downgrades, does not delete | `Terms.tsx` §6(e) | `policy-only` | Stripe dunning moves the mirror to `canceled`; no data deletion path exists |
+| 14-day EU withdrawal right, waiver on start | `Terms.tsx` §7 | `policy-only` | No checkout UI records the waiver. **Counsel item** — the waiver needs a recorded acceptance to be effective. |
+| Czech law, courts of Brno, no arbitration | `Terms.tsx` §17 | `policy-only` | Chosen per product decision. **Counsel item** — jurisdiction and liability wording. |
+| Liability cap: 12 months of fees or 100 EUR | `Terms.tsx` §14 | `policy-only` | Not mirrored in any contract artifact yet |
+| Self-host is operator's own responsibility | `Terms.tsx` §9 | `implemented` | Matches [self-host-vs-cloud.md](./self-host-vs-cloud.md); AGPL-3.0 in root `LICENSE` |
+| Contact-data controller split | `Terms.tsx` §4(b) | `policy-only` | Architectural statement, same as Privacy §13 |
+| Sub-processor obligations | — | n/a | Deferred to Privacy §15. Table is still `drifted` — see below. |
 
-**Escalate:** ToS finalization is a standing leadership/legal item — not an agent task.
+**Escalate:** the published text is a draft for counsel review. Treat the items marked **Counsel item** as open, and do not present the page as legally reviewed.
 
 ## Privacy Policy — data practices
 

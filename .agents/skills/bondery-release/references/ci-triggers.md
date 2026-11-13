@@ -13,8 +13,11 @@ This file interprets CI for release captains. If anything conflicts, trust the w
 | Website CD | push `release` | `deploy-website.yml` | Promote `:sha` → `:production` or build fallback; smoke; Dokploy ops webhook |
 | **RC** | tag `vX.Y.Z-rc.N` | `rc-release.yml` | Prerelease + staging zip; **verify** `:sha` / `:X.Y.Z-rc.N` / `:beta` digests match; **no CWS**; does not retag `:beta` |
 | **Production** | tag `vX.Y.Z` | `release.yml` | Draft then publish GitHub release (no zip); promote last named `:X.Y.Z-rc.N` → `:X.Y.Z`; smoke; **always CWS**; `:production` + `:latest` after gate |
+| **Claude plugin** | tag `vX.Y.Z` | `publish-claude-plugin.yml` | Fast-forward `claude-plugin` to the tag commit when `llm-plugins/claude` changed (version field ignored); green skip otherwise |
 
-`release.yml` still matches `v*.*.*` (includes RC tags) but **skips** refs containing `-rc.`. Do not loosen `shared-release-validate.yml` `^v[0-9]+\.[0-9]+\.[0-9]+$`.
+`release.yml` still matches `v*.*.*` (includes RC tags) but **skips** refs containing `-rc.`. Do not loosen `shared-release-validate.yml` `^v[0-9]+\.[0-9]+\.[0-9]+$`. `publish-claude-plugin.yml` skips RC refs the same way, so only production tags may move `claude-plugin`.
+
+Both packages are generated from `llm-plugins/src/plugin.config.json`. OpenAI has no git ref.
 
 ## Promote-first semantics
 

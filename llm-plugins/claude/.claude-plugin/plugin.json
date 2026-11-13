@@ -1,0 +1,19 @@
+{
+  "author": {
+    "name": "Bondery",
+    "url": "https://usebondery.com"
+  },
+  "description": "A personal relationship manager (PRM) for the people who matter. Brief yourself before a meeting, get to know someone, save a conversation, and know who to reach out to.",
+  "displayName": "Bondery",
+  "documentationUrl": "https://usebondery.com/docs/bondery/mcp",
+  "homepage": "https://usebondery.com",
+  "icon": "./assets/icon.png",
+  "keywords": ["crm", "personal-crm", "relationships", "contacts", "mcp"],
+  "license": "AGPL-3.0",
+  "name": "bondery",
+  "privacyPolicyUrl": "https://usebondery.com/privacy",
+  "repository": "https://github.com/usebondery/bondery",
+  "supportUrl": "https://usebondery.com/docs/getting-help-and-troubleshooting",
+  "termsOfServiceUrl": "https://usebondery.com/terms",
+  "version": "1.11.1"
+}
