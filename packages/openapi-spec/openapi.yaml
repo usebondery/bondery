@@ -22334,6 +22334,14 @@ paths:
                           - dark
                           - auto
                         description: Color scheme preference
+                      dateFormat:
+                        type: string
+                        enum:
+                          - locale
+                          - mdy
+                          - dmy
+                          - ymd
+                        description: Calendar date order preference, independent of UI language
                       displayName:
                         type: string
                         description: Display name
@@ -22352,14 +22360,6 @@ paths:
                         description: Time onboarding completed
                         type: string
                         pattern: ^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$
-                      dateFormat:
-                        type: string
-                        enum:
-                          - locale
-                          - mdy
-                          - dmy
-                          - ymd
-                        description: Calendar date order preference, independent of UI language
                       timeFormat:
                         type: string
                         enum:
@@ -22372,11 +22372,11 @@ paths:
                     required:
                       - avatarUrl
                       - colorScheme
+                      - dateFormat
                       - displayName
                       - isPlatformAdmin
                       - language
                       - onboardingCompletedAt
-                      - dateFormat
                       - timeFormat
                       - timezone
                     additionalProperties: false
@@ -22930,6 +22930,9 @@ paths:
                           - dark
                           - auto
                         description: Color scheme preference
+                      dateFormat:
+                        type: string
+                        description: Calendar date order preference
                       defaultPhoneCountry:
                         nullable: true
                         description: ISO 3166-1 alpha-2 default calling-code country
@@ -22963,9 +22966,6 @@ paths:
                       tagSortOrder:
                         type: string
                         description: Sort order for the tags list
-                      dateFormat:
-                        type: string
-                        description: Calendar date order preference
                       timeFormat:
                         type: string
                         description: Clock format preference
@@ -23044,6 +23044,7 @@ paths:
                           type: string
                     required:
                       - colorScheme
+                      - dateFormat
                       - defaultPhoneCountry
                       - groupSortOrder
                       - language
@@ -23052,7 +23053,6 @@ paths:
                       - reminderSendHour
                       - rightSwipeAction
                       - tagSortOrder
-                      - dateFormat
                       - timeFormat
                       - timezone
                       - avatarUrl
@@ -23214,6 +23214,14 @@ paths:
                     - dark
                     - auto
                   description: Color scheme preference
+                dateFormat:
+                  type: string
+                  enum:
+                    - locale
+                    - mdy
+                    - dmy
+                    - ymd
+                  description: Calendar date order preference, independent of UI language
                 groupSortOrder:
                   type: string
                   enum:
@@ -23252,14 +23260,6 @@ paths:
                     - alpha-asc
                     - alpha-desc
                   description: Sort order for the tags list
-                dateFormat:
-                  type: string
-                  enum:
-                    - locale
-                    - mdy
-                    - dmy
-                    - ymd
-                  description: Calendar date order preference, independent of UI language
                 timeFormat:
                   type: string
                   enum:

@@ -2,18 +2,18 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "bondery": {
+      "type": "streamable-http",
+      "url": "https://api.usebondery.com/mcp",
       "extensions": {
         "com.openai": {
           "auth": {
+            "type": "oauth",
             "client": {
               "mode": "cimd"
-            },
-            "type": "oauth"
+            }
           }
         }
-      },
-      "type": "streamable-http",
-      "url": "https://api.usebondery.com/mcp"
+      }
     }
   }
 }
