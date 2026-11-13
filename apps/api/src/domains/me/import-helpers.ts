@@ -87,14 +87,14 @@ export async function setGisPoint(
   if (table === "people") {
     await db.$executeRaw`
       UPDATE people
-      SET gis_point = ST_GeogFromText(${ewkt})
+      SET "gisPoint" = ST_GeogFromText(${ewkt})
       WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
     `;
     return;
   }
   await db.$executeRaw`
     UPDATE people_addresses
-    SET gis_point = ST_GeogFromText(${ewkt})
+    SET "gisPoint" = ST_GeogFromText(${ewkt})
     WHERE id = ${id}::uuid AND user_id = ${userId}::uuid
   `;
 }
