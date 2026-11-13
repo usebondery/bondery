@@ -5,9 +5,10 @@
  *
  * Run after adding new public subpaths: pnpm run sync-exports
  */
-import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeFormattedJson } from "./write-formatted-json.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -180,6 +181,6 @@ for (const [relPath, config] of Object.entries(PACKAGE_CONFIGS)) {
   pkg.imports = HASH_IMPORTS;
   pkg.main = "./dist/index.js";
   pkg.types = "./src/index.ts";
-  await writeFile(pkgPath, `${JSON.stringify(pkg, null, 2)}\n`);
+  writeFormattedJson(pkgPath, pkg, { cwd: root });
   console.log(`Updated ${relPath}`);
 }
