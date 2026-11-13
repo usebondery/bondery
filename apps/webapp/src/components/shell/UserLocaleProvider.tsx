@@ -1,7 +1,6 @@
 "use client";
 
 import type { DateFormatPreference } from "@bondery/schemas";
-import { coerceDateFormatPreference } from "@bondery/schemas/locale";
 import {
   i18nConfig,
   resourceLoader,
