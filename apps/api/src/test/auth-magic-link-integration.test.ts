@@ -9,6 +9,7 @@ import { createHash, randomBytes } from "node:crypto";
 import { after, afterEach, before, describe, it } from "node:test";
 import { prisma } from "@bondery/db";
 import { generateId } from "@bondery/helpers/ids";
+import { loginEmailFormSchema } from "@bondery/schemas";
 import type { FastifyInstance } from "fastify";
 import { hashMagicLinkStoredIdentifier } from "../lib/auth/magic-link-redis.js";
 import { BETTER_AUTH_REDIS_KEY_PREFIX } from "../lib/auth/secondary-storage.js";
@@ -17,6 +18,29 @@ import { requireRedisCommands, shutdownRedis } from "../lib/data/redis.js";
 import { loadTestEnv } from "./load-test-env.js";
 
 loadTestEnv();
+
+const reviewerEmailAtStart = process.env.BONDERY_AUTH_REVIEWER_EMAIL;
+
+function restoreReviewerEmail(): void {
+  if (reviewerEmailAtStart === undefined) {
+    delete process.env.BONDERY_AUTH_REVIEWER_EMAIL;
+    return;
+  }
+  process.env.BONDERY_AUTH_REVIEWER_EMAIL = reviewerEmailAtStart;
+}
+
+async function withReviewerEmail<T>(email: string | undefined, run: () => Promise<T>): Promise<T> {
+  if (email === undefined) {
+    delete process.env.BONDERY_AUTH_REVIEWER_EMAIL;
+  } else {
+    process.env.BONDERY_AUTH_REVIEWER_EMAIL = email;
+  }
+  try {
+    return await run();
+  } finally {
+    restoreReviewerEmail();
+  }
+}
 
 const { createTestApp } = await import("./create-test-app.js");
 const { resolveApiResourceIdentifier } = await import("../lib/auth/index.js");
@@ -64,6 +88,13 @@ function extractSessionTokenFromSetCookie(header: string | string[] | undefined)
   return fallback?.[1] ? decodeURIComponent(fallback[1]) : null;
 }
 
+describe("loginEmailFormSchema", () => {
+  it("accepts a .test address", () => {
+    const parsed = loginEmailFormSchema.parse({ email: "Reviewer@Example.test" });
+    assert.equal(parsed.email, "reviewer@example.test");
+  });
+});
+
 describe("magic-link auth", () => {
   let app: FastifyInstance;
   const createdUserIds: string[] = [];
@@ -77,6 +108,7 @@ describe("magic-link auth", () => {
   afterEach(() => {
     lastSend = null;
     setMagicLinkSendCaptureForTests(null);
+    restoreReviewerEmail();
   });
 
   after(async () => {
@@ -253,7 +285,9 @@ describe("magic-link auth", () => {
 
     const hashed = hashMagicLinkStoredIdentifier(lastSend.token);
     const redis = requireRedisCommands();
-    const stored = await redis.get(`${BETTER_AUTH_REDIS_KEY_PREFIX}verification:${hashed}`);
+    const stored = await redis.get(
+      `${BETTER_AUTH_REDIS_KEY_PREFIX}verification:magic-link:${hashed}`,
+    );
     assert.ok(stored, "expected hashed verification in Redis");
     assert.doesNotMatch(stored, new RegExp(escapeRegExp(lastSend.token)));
 
@@ -287,6 +321,80 @@ describe("magic-link auth", () => {
     const user = await prisma.user.findUnique({ where: { email } });
     if (user) {
       createdUserIds.push(user.id);
+    }
+  });
+
+  async function verificationKeyCount(): Promise<number> {
+    const redis = requireRedisCommands();
+    const keys = await redis.keys(`${BETTER_AUTH_REDIS_KEY_PREFIX}verification:*`);
+    return keys.length;
+  }
+
+  it("sends mail when the reviewer address is unset", async () => {
+    const email = `magic-link-unset-${generateId()}@example.test`;
+    const response = await withReviewerEmail(undefined, () => postMagicLink(email));
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().redirect, undefined);
+    assert.equal(lastSend?.email, email);
+  });
+
+  it("sends mail for an address that is not the reviewer", async () => {
+    const reviewer = `reviewer-${generateId()}@example.test`;
+    const email = `magic-link-other-${generateId()}@example.test`;
+    const response = await withReviewerEmail(reviewer, () => postMagicLink(email));
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(response.json().redirect, undefined);
+    assert.equal(lastSend?.email, email);
+  });
+
+  it("skips mail and returns the verify URL for an existing reviewer", async () => {
+    const email = `reviewer-ready-${generateId()}@example.test`;
+    const id = generateId();
+    await prisma.user.create({
+      data: { email, emailVerified: true, id, name: "Reviewer" },
+    });
+    createdUserIds.push(id);
+
+    const response = await withReviewerEmail(email, () => postMagicLink(email));
+    assert.equal(response.statusCode, 200, response.body);
+    assert.equal(lastSend, null);
+
+    const body = response.json() as { redirect?: boolean; status?: boolean; url?: string };
+    assert.equal(body.status, true);
+    assert.equal(body.redirect, true);
+    assert.match(body.url ?? "", /\/magic-link\/verify\?/);
+    assert.match(body.url ?? "", /[?&]token=/);
+    assert.ok(body.url);
+
+    const verifyResponse = await getVerify(body.url, email);
+    assert.equal(verifyResponse.statusCode, 302);
+    assert.equal(verifyResponse.headers.location, CALLBACK_URL);
+
+    const users = await prisma.user.findMany({ where: { email } });
+    assert.equal(users.length, 1);
+    assert.equal(users[0]?.id, id);
+  });
+
+  it("does not send mail or create a user when the reviewer row is missing", async () => {
+    const email = `reviewer-missing-${generateId()}@example.test`;
+    const keysBefore = await verificationKeyCount();
+    const rowsBefore = await prisma.verification.count();
+
+    const response = await withReviewerEmail(email, () => postMagicLink(email));
+    assert.notEqual(response.statusCode, 200);
+    assert.match(response.body, /EMAIL_SEND_FAILED/);
+    assert.equal(lastSend, null);
+
+    const user = await prisma.user.findUnique({ where: { email } });
+    assert.equal(user, null);
+    assert.equal(await verificationKeyCount(), keysBefore);
+    assert.equal(await prisma.verification.count(), rowsBefore);
+
+    const redis = requireRedisCommands();
+    const keys = await redis.keys(`${BETTER_AUTH_REDIS_KEY_PREFIX}verification:*`);
+    for (const key of keys) {
+      const value = await redis.get(key);
+      assert.equal(value?.includes(email) ?? false, false);
     }
   });
 

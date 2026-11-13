@@ -3,7 +3,7 @@ title: "Connect AI assistants (MCP)"
 description: Copy your MCP URL from Settings and sign in with OAuth so Claude Desktop, Cursor, and other MCP clients can search contacts and manage CRM records.
 icon: Sparkles
 docId: bondery.mcp
-last_updated: 2026-11-02
+last_updated: 2026-11-10
 ---
 
 [MCP](https://modelcontextprotocol.io) is how AI assistants call tools on a server you control. Bondery exposes a small set of CRM tools over HTTP. Clients authenticate with **OAuth 2.1 and PKCE**. They do not use API keys.
@@ -74,7 +74,7 @@ Tool names use **create, get, update, delete, search** — the same verbs as RES
 | `update_keep_in_touch` | Full access | Set or clear cadence and/or last interaction |
 | `create_agent_feedback` | Read and Full access | Report a problem with the tools: what you expected, what you got, and the `request_id`. Writes no CRM data |
 
-There is no dump of your full address book. With Full access, deletes (including people and interactions) and sending a contact share email ask the host to confirm. Clients that never retry that confirmation cannot delete or send. You cannot delete your own contact card.
+There is no dump of your full address book. With Full access, Claude asks before it creates, updates, or deletes. Deletes and sending a contact share email also ask the host to confirm. Clients that never retry that confirmation cannot delete or send. You cannot delete your own contact card.
 
 On the consent screen, **Read only** is `mcp:read`. **Full access** adds `mcp:write`. The default is Read only.
 

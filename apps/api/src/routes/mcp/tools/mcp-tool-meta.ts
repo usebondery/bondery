@@ -9,7 +9,7 @@ type McpToolHints = Pick<
 
 const HINTS: Record<McpToolKind, Required<McpToolHints>> = {
   create: {
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: false,
     openWorldHint: false,
     readOnlyHint: false,
@@ -33,7 +33,7 @@ const HINTS: Record<McpToolKind, Required<McpToolHints>> = {
     readOnlyHint: true,
   },
   update: {
-    destructiveHint: false,
+    destructiveHint: true,
     idempotentHint: true,
     openWorldHint: false,
     readOnlyHint: false,

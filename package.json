@@ -125,6 +125,7 @@
     "prepare": "lefthook install --reset-hooks-path",
     "provision:oauth-clients": "pnpm --filter api run provision-oauth-clients:dev",
     "provision:platform-admins": "pnpm --filter api run provision-platform-admins:dev",
+    "provision:reviewer-account": "pnpm --filter api run provision-reviewer-account:dev",
     "release-migrate": "pnpm --filter @bondery/db run release-migrate",
     "setup:dev": "node --import tsx scripts/dev/setup-dev.ts",
     "setup:seaweedfs": "pnpm run build:api && node --env-file=.env.local apps/api/dist/cli/ensure-storage-buckets.js",
