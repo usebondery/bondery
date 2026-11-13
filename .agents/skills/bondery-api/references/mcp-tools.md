@@ -2,7 +2,7 @@
 
 Bondery’s MCP HTTP server (`POST /mcp`) is a small assistant-facing surface over the same domain as REST. It is not a second REST API and never grants REST `api:access`.
 
-When adding or renaming MCP tools, follow this file. Product copy for users lives in [`docs/bondery/mcp.mdx`](../../../../docs/bondery/mcp.mdx).
+When adding or renaming MCP tools, follow this file. Product copy for users lives in [`docs/apps/mcp.mdx`](../../../../docs/apps/mcp.mdx).
 
 ## Tool names
 
