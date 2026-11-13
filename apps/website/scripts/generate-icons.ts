@@ -22,22 +22,29 @@ const icons = [
 
 const svgPath = join(__dirname, "../../../packages/branding/src/assets/icon.svg");
 
-await generateIcons({
-  baseDir: __dirname,
-  icons,
-  svgPath,
-});
+async function main(): Promise<void> {
+  await generateIcons({
+    baseDir: __dirname,
+    icons,
+    svgPath,
+  });
 
-// Copy the source icon into llm-plugins/claude and llm-plugins/openai.
-const repoRoot = join(__dirname, "../../..");
-const build = spawnSync(process.execPath, [join(repoRoot, "scripts/pkg/build-llm-plugins.mjs")], {
-  cwd: repoRoot,
-  stdio: "inherit",
-});
-if (build.error) {
-  console.error(build.error.message);
+  // Copy the source icon into llm-plugins/claude and llm-plugins/openai.
+  const repoRoot = join(__dirname, "../../..");
+  const build = spawnSync(process.execPath, [join(repoRoot, "scripts/pkg/build-llm-plugins.mjs")], {
+    cwd: repoRoot,
+    stdio: "inherit",
+  });
+  if (build.error) {
+    console.error(build.error.message);
+    process.exit(1);
+  }
+  if (build.status !== 0) {
+    process.exit(build.status ?? 1);
+  }
+}
+
+void main().catch((error: unknown) => {
+  console.error(error);
   process.exit(1);
-}
-if (build.status !== 0) {
-  process.exit(build.status ?? 1);
-}
+});
