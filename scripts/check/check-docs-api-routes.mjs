@@ -71,7 +71,7 @@ const NON_API_PATHS = new Set(["files", "runtime-config.json", "status"]);
 
 /**
  * Routes that exist in code but are hidden from the published spec, so the spec
- * cannot be the only source of truth. `docs/apps/mcp-server.mdx` documents the MCP
+ * cannot be the only source of truth. `docs/apps/mcp.mdx` documents the MCP
  * routes. Better Auth owns the `/auth/*` tree and publishes it as metadata
  * rather than as OpenAPI operations.
  */

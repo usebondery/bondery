@@ -132,9 +132,24 @@ const nextConfig: NextConfig = {
         source: "/docs/deploy/get-started",
       },
       {
-        destination: "/docs/apps/mcp-server",
+        destination: "/docs/apps/mcp",
+        permanent: true,
+        source: "/docs/apps/mcp-server",
+      },
+      {
+        destination: "/docs/apps/mcp.md",
+        permanent: true,
+        source: "/docs/apps/mcp-server.md",
+      },
+      {
+        destination: "/docs/apps/mcp",
         permanent: true,
         source: "/docs/bondery/mcp",
+      },
+      {
+        destination: "/docs/apps/mcp.md",
+        permanent: true,
+        source: "/docs/bondery/mcp.md",
       },
     ];
   },

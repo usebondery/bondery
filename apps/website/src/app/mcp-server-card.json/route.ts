@@ -53,7 +53,7 @@ export function GET() {
       },
       title: SERVER_TITLE,
       version,
-      websiteUrl: `${origin}/docs/apps/mcp-server`,
+      websiteUrl: `${origin}/docs/apps/mcp`,
     },
     {
       headers: withDiscoveryCors({

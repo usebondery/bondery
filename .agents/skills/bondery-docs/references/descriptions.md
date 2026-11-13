@@ -114,16 +114,14 @@ scans a list of ten lines sees those words first, and picks the line that matche
 Two pages under the same folder must not start with the same three words. A tile grid of six
 paragraphs that all open with `This page explains` gives the reader nothing to choose with.
 
-Consider the two MCP pages. They answer different questions.
+MCP is one page: `docs/apps/mcp.mdx`. Do not add `docs/apps/mcp-server.mdx` or `docs/bondery/mcp.mdx`.
 
 | Page | Current length | Current text |
 |------|----------------|--------------|
-| `docs/apps/mcp-server.mdx` | 153 | The Bondery MCP server is the interface AI assistants use to search your contacts, read their history, and log interactions on your behalf today. |
-| `docs/bondery/mcp.mdx` | 134 | Connect Claude, Cursor, or another MCP client to your Bondery account. Copy the MCP URL from Settings, then approve the OAuth sign-in. |
+| `docs/apps/mcp.mdx` | 153 | Let Claude, Cursor, or another AI assistant search your Bondery contacts, brief you before a meeting, and log what you talked about. Setup takes one URL. |
+| `docs/api/authentication.mdx` | 147 | Authenticate Bondery REST API calls with a session token or a long-lived API key, and learn which routes accept which credential type in each flow. |
 
-The first page is a concept page. It answers "what is the MCP server and what can an assistant
-do with it". The second page is a setup task. It answers "how do I connect a client". Both
-sentences must say which one they are. Re-measure both after any rewrite.
+The MCP page answers what an assistant can do and how to connect. The authentication page answers how a script calls the REST API. Both sentences must say which job they cover. Re-measure both after any rewrite.
 
 ## Banned words and patterns
 
@@ -179,11 +177,9 @@ Real pages, measured before this guide applied.
 |------|--------|---------------|-------|--------------|
 | `docs/api/index.mdx` | Overview of the Bondery REST API for integrations and automation. | 65 | Start with the Bondery REST API. Find the base URL, the authentication model, the integration guides, and the generated route reference pages. | 146 |
 | `docs/api/authentication.mdx` | Authenticate REST API requests with sessions or long-lived API keys. | 68 | Authenticate Bondery REST API calls with a session token or a long-lived API key, and learn which routes accept which credential type in each flow. | 147 |
-| `docs/apps/mcp-server.mdx` | Let Claude, Cursor, and other AI assistants look up contacts, brief you before meetings, and log interactions in Bondery. | 121 | The Bondery MCP server is the interface AI assistants use to search your contacts, read their history, and log interactions on your behalf today. | 153 |
-| `docs/bondery/mcp.mdx` | Copy your MCP URL from Settings and sign in with OAuth so Claude Desktop, Cursor, and other MCP clients can search contacts and manage CRM records. | 142 | Connect Claude, Cursor, or another MCP client to your Bondery account. Copy the MCP URL from Settings, then approve the OAuth sign-in. | 134 |
+| `docs/apps/mcp.mdx` | Let Claude, Cursor, and other AI assistants look up contacts, brief you before meetings, and log interactions in Bondery. | 121 | Let Claude, Cursor, or another AI assistant search your Bondery contacts, brief you before a meeting, and log what you talked about. Setup takes one URL. | 153 |
 
-Check the two MCP rows together. The concept page now opens with the server, and the setup page
-opens with the connection task. A reader can tell them apart from the tile grid alone.
+MCP stays on `docs/apps/mcp.mdx` only. Do not split setup onto a second page.
 
 ## Verification loop
 

@@ -104,7 +104,7 @@ AI assistants do not use either credential above. They connect to `POST /mcp` wi
 
 An MCP token only calls MCP tools. It cannot call the REST API, and a REST API key cannot call `/mcp`. The two surfaces stay separate on purpose.
 
-Connect a client, pick a consent level, and revoke access in **Settings → AI assistants**. The full walkthrough is in [MCP](../apps/mcp-server.mdx).
+Connect a client, pick a consent level, and revoke access in **Settings → AI assistants**. The full walkthrough is in [MCP](../apps/mcp.mdx).
 
 ## Which routes accept which credential
 
@@ -152,4 +152,4 @@ Every response also carries `agent_message`, which states the recovery step for 
 - [Introduction](./index.mdx): base URL and where to go next
 - [Bulk import contacts](./guides/bulk-import-contacts.mdx): a full parse then commit flow
 - [API reference](./api-reference/index.mdx): generated route and schema pages
-- [MCP](../apps/mcp-server.mdx): MCP setup and tool list
+- [MCP](../apps/mcp.mdx): MCP setup and tool list
