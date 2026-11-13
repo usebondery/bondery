@@ -103,6 +103,7 @@
     "dev:webapp-api": "turbo run webapp#dev api#dev --concurrency 20",
     "dev:webapp-api-emails": "turbo run webapp#dev api#dev @bondery/emails#preview --concurrency 20",
     "dev:website": "turbo run website#dev --concurrency 20",
+    "dev:remote-portless": "node scripts/dev/connect-remote-portless.mjs share",
     "env": "node --import tsx scripts/env/env.ts --all",
     "env:check": "pnpm --filter @bondery/helpers run build && node --import tsx scripts/env/env.ts --check",
     "env:development": "node --import tsx scripts/env/env.ts --development",

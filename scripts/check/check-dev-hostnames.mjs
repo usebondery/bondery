@@ -133,6 +133,37 @@ function checkAliasScript() {
 }
 
 /**
+ * The laptop tunnel script must name every Portless HTTPS host.
+ */
+function checkRemotePortlessScript() {
+  const files = [
+    "scripts/dev/connect-remote-portless.mjs",
+    "scripts/dev/connect-remote-portless.ps1",
+  ];
+  for (const relativePath of files) {
+    const filePath = join(ROOT, relativePath);
+    let source;
+    try {
+      source = read(filePath);
+    } catch {
+      check.add(`${relativePath} is missing.`);
+      continue;
+    }
+    if (relativePath.endsWith(".mjs")) {
+      if (!source.includes("DEV_URLS")) {
+        check.add(`${relativePath} no longer derives hostnames from DEV_URLS.`);
+      }
+      continue;
+    }
+    for (const hostname of EXPECTED_HOSTS) {
+      if (!source.includes(hostname)) {
+        check.add(`${relativePath} does not name ${hostname}.`);
+      }
+    }
+  }
+}
+
+/**
  * Env examples must not name a dev hostname that no longer exists.
  */
 function checkEnvExamples() {
@@ -171,6 +202,7 @@ function checkEnvExamples() {
 
 checkDevUrls();
 checkAliasScript();
+checkRemotePortlessScript();
 checkAllowedDevOrigins();
 checkEnvExamples();
 check.ok();
