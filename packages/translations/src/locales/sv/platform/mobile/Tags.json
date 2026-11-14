@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Kunde inte skapa etiketten. Försök igen.",
+  "CreateTag": "Skapa etikett",
+  "DeleteFailed": "Kunde inte ta bort etiketten. Försök igen.",
+  "EditFailed": "Kunde inte spara etiketten. Försök igen.",
+  "EditTagsSearchPlaceholder": "Sök etiketter...",
+  "LoadFailed": "Kunde inte ladda etiketter",
+  "NoTagsYet": "Inga etiketter än",
+  "NoTagsYetHint": "Etiketter hjälper dig organisera och hitta kontakter."
+}

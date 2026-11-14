@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "kapcsolat",
+    "contactPlural": "kapcsolatok",
+    "group": "csoport",
+    "interaction": "interakció",
+    "interactionPlural": "interakciók",
+    "network": "hálózat",
+    "person": "személy",
+    "person_one": "{count} személy",
+    "person_other": "{count} személy",
+    "tag": "címke"
+  },
+  "features": {
+    "aiAssistant": "AI-asszisztens",
+    "fixAndMerge": "Javítás és egyesítés",
+    "keepInTouch": "Maradj kapcsolatban"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

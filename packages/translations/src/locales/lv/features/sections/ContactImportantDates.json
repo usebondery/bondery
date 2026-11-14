@@ -1,0 +1,32 @@
+{
+  "AddAction": "Pievienot datumu",
+  "AddHint": "Lai pievienotu jaunu datumu, norādi visu informāciju.",
+  "AddImportantDate": "Pievienot svarīgu datumu",
+  "BirthdayDateLabel": "Atlasīt dzimšanas dienu",
+  "DatePlaceholder": "Atlasīt datumu",
+  "DeleteAction": "Dzēst",
+  "DraftIncompleteError": "Lai pievienotu jaunu datumu, norādi visu informāciju.",
+  "Empty": "Vēl nav svarīgu datumu.",
+  "ErrorTitle": "Kļūda",
+  "NotePlaceholder": "Izvēles piezīme",
+  "NotifyDayBefore": "Paziņot {count} dienu iepriekš",
+  "NotifyDaysBefore": "Paziņot {count} dienas iepriekš",
+  "NotifyMe": "Paziņot man",
+  "NotifyNone": "Nepaziņot",
+  "SuccessTitle": "Panākumi",
+  "Title": "Svarīgi datumi",
+  "TypeDisabledBirthdateHint": "{firstName} jau ir definējis dzimšanas datumu",
+  "TypeDisabledHint": "{firstName} jau ir definējis dzimšanas vai vārda dienu",
+  "TypeDisabledNamedateHint": "{firstName} jau ir definējis nosaukuma datumu",
+  "TypePlaceholder": "Atlasīt veidu",
+  "Types": {
+    "anniversary": "gadadiena",
+    "birthday": "Dzimšanas diena",
+    "graduation": "Izlaidums",
+    "nameday": "Vārda diena",
+    "other": "Cits"
+  },
+  "UniqueTypeError": "Var pievienot tikai vienu {type}.",
+  "UpdateError": "Neizdevās atjaunināt svarīgus datumus",
+  "UpdateSuccess": "Svarīgi datumi ir veiksmīgi atjaunināti"
+}

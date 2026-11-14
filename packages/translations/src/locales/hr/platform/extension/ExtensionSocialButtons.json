@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Greška proširenja: pokušaj ponovno",
+    "OpenInBondery": "Otvoriti u Bonderyju",
+    "SignInRequired": "Moraš se prijaviti: klikni ikonu Bonderyja",
+    "SomethingWrong": "Nešto je pošlo po zlu"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Greška proširenja: pokušaj ponovno",
+    "OpenInBondery": "Otvoriti u Bonderyju",
+    "SignInRequired": "Moraš se prijaviti: klikni ikonu Bonderyja",
+    "SomethingWrong": "Nešto je pošlo po zlu"
+  }
+}

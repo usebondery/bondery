@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} delade den här kontakten med dig",
+  "footerNotes": "Skickat med Bondery. Svara på det här mejlet för att nå {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adress",
+    "email": "E-post",
+    "facebook": "Facebook",
+    "importantDates": "Viktiga datum",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Plats",
+    "notes": "Anteckningar",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Webbplats",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-post och mer inuti",
+  "replyCta": "Svara till {{senderName}}",
+  "subject": "{{senderName}} delade en kontakt med dig • {{contactName}}"
+}

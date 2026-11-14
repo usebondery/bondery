@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Tutti i contatti con un profilo LinkedIn sono già stati arricchiti.",
+  "AllEnrichedTitle": "Tutti i contatti arricchiti",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Arricchimento in corso:",
+  "EligibleLabel_one": "{count} persona potrebbe essere arricchita",
+  "EligibleLabel_other": "{count} persone potrebbero essere arricchite",
+  "Enrich": "Arricchire",
+  "EnrichAll": "Arricchire tutto",
+  "HelpTooltip": "Porta nell'ultima versione i dati del profilo LinkedIn in questo contatto. Clicca per capire come funziona l'arricchimento.",
+  "Pause": "Mettere in pausa",
+  "PausingTooltip": "Completamento del contatto corrente, poi pausa…",
+  "PersonEligibleLabel": "Questo contatto può essere arricchito da LinkedIn",
+  "ProcessingPerson": "Arricchimento di {name}…",
+  "ProgressLabel": "Arricchimento: {completed} di {totalEligible} completati",
+  "ProgressLabelWithFailed": "Arricchimento: {completed} di {totalEligible} completati ({failed} non riusciti)",
+  "Resume": "Riprendere",
+  "ResumeLabel": "Arricchimento interrotto: {completed} fatto, {pending} rimanenti",
+  "SkipRemaining": "Saltare i rimanenti",
+  "Tooltip": "Questi contatti hanno un profilo LinkedIn ma non sono ancora stati arricchiti. Arricchili per ottenere l'ultimo storico lavorativo, istruzione e bio."
+}

@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Személyek hozzáadása a csoporthoz",
+  "ColorLabel": "Szín",
+  "ContactCount": "Kapcsolatok",
+  "DetailPageTitle": "Csoport adatai",
+  "Empty": "Ehhez a csoporthoz még nincs kapcsolat.",
+  "HeaderDescription": "A kiválasztott csoport tagjainak áttekintése.",
+  "NoContactsFound": "Ehhez a csoporthoz még nincs kapcsolat.",
+  "NoContactsMatchSearch": "Nincs ilyen kapcsolat.",
+  "RemoveContact": {
+    "ErrorDescription": "A kapcsolat eltávolítása a csoportból nem sikerült. Próbáld újra.",
+    "LoadingDescription": "Csoporttagok frissítése…",
+    "LoadingTitle": "Kapcsolat eltávolítása",
+    "SuccessDescription": "A kapcsolat eltávolítása a csoportból sikerült"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "A kapcsolatok eltávolítása a csoportból nem sikerült. Próbáld újra.",
+    "LoadingDescription": "Csoporttagok frissítése…",
+    "LoadingTitle": "Kapcsolatok eltávolítása",
+    "SuccessDescription": "{count} kapcsolat eltávolítása a csoportból sikerült"
+  },
+  "RemoveFromGroup": "Eltávolítás a csoportból",
+  "Subtitle": "Ehhez a csoporthoz rendelt kapcsolatok.",
+  "Table": {
+    "Avatar": "Profilkép",
+    "LastInteraction": "Utolsó interakció",
+    "Location": "Hely",
+    "Name": "Név",
+    "Socials": "Közösségi profilok",
+    "Title": "Bevezető"
+  },
+  "ThisContactFallback": "ez a kapcsolat",
+  "Title": "Csoport: {label}"
+}

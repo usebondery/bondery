@@ -1,0 +1,20 @@
+{
+  "cta": "Atvērt atgādinājumus",
+  "dateTypes": {
+    "anniversary": "gadadiena",
+    "birthday": "Dzimšanas diena",
+    "graduation": "Izlaidums",
+    "nameday": "Vārda diena",
+    "other": "Svarīgs datums"
+  },
+  "dayMany": "{{count}} dienas",
+  "dayOne": "1 diena",
+  "description": "Par {{headingDate}}. Atvērt personu, lai skatītu detalizētu informāciju vai nosūtītu piezīmi.",
+  "headingMany": "Tuvojas {{count}} atgādinājumi",
+  "headingOne": "Tuvojas 1 atgādinājums",
+  "preview": "{{firstPersonName}} {{firstTypeLabel}} {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}} {{firstTypeLabel}} {{firstRemainingLabel}} un vēl {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} notiks {{remainingLabel}} {{dateLabel}}.",
+  "subject": "Bondery atgādinājumi par {{targetDate}}",
+  "whyReceiving": "Tu to saņēmāt, jo ieslēdzāt atgādinājumus šiem datumiem."
+}

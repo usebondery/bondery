@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Verificăm din nou în {seconds}s…",
+  "Description": "Contul tău este în siguranță și ești încă conectat. Continuăm verificarea; de obicei durează puțin.",
+  "MetadataTitle": "Serviciu indisponibil",
+  "Retry": "Reîncearcă",
+  "StatusChecking": "Se verifică conexiunea…",
+  "StatusDegraded": "Unele funcții pot fi lente acum",
+  "StatusOffline": "Bondery este temporar indisponibil",
+  "StatusOnline": "Din nou online. Te redirecționăm…",
+  "StatusPageLink": "Vezi pagina de stare",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Detalii tehnice",
+  "TechnicalHttpStatus": "Status HTTP: {status}",
+  "TechnicalUnreachable": "inaccesibil",
+  "Title": "Avem probleme la conectare"
+}

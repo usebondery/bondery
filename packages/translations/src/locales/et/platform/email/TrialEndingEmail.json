@@ -1,0 +1,9 @@
+{
+  "body": "Pärast seda uueneb tellimus automaatselt, kui sa seda ei tühista.",
+  "cta": "Halda tellimust",
+  "endDateFallback": "peagi",
+  "heading": "Sinu Premium prooviperiood lõpeb {{endDate}}",
+  "preview": "Tellimus uueneb, kui sa seda ei tühista",
+  "subject": "Sinu Bondery Premium prooviperiood lõpeb peagi",
+  "whyReceiving": "Sa said selle, sest sul on Bondery Premium prooviperiood."
+}

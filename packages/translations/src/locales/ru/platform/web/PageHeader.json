@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "исправлении и объединении",
+    "GroupDetail": "этой группе",
+    "Groups": "группах",
+    "Home": "главной странице",
+    "KeepInTouch": "поддержании связи",
+    "Map": "карте",
+    "People": "людях",
+    "PersonDetails": "данных человека",
+    "Timeline": "взаимодействиях"
+  },
+  "HelpLabel": "Подробнее",
+  "LearnMoreAbout": "Подробнее о {concept}"
+}

@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Akcia",
+  "CannotDeleteMyself": "Nemożesz usunąć svoju vlastnú vizitku",
+  "CannotMergeMyself": "Nemożesz zlúčiť svoju vlastnú vizitku s ostatnými",
+  "DeleteContact": "Usuń kontakt",
+  "DownloadVCard": "Pobierz vCard",
+  "ExportError": "Błąd",
+  "ExportErrorDescription": "Nie udało się eksportować kontakt. Spróbuj ponownie.",
+  "ExportSuccess": "Sukces",
+  "ExportSuccessDescription": "Kontakt bol exportovaný ako vCard"
+}

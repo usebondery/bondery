@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "İşlemler",
+  "AddPerson": "Kişi ekle",
+  "AddPersonDescription": "Ağına yeni bir kişi",
+  "ContactUs": "Bize ulaş",
+  "ContactUsDescription": "Bondery ekibine yaz",
+  "Documentation": "Belgeler",
+  "DocumentationDescription": "Bondery belgeleri",
+  "ExportData": "Verileri dışa aktar",
+  "ExportDataDescription": "Bondery verilerinin bir kopyasını kaydet",
+  "FindPerson": "Kişi bul",
+  "FindPersonDescription": "Ağında ada göre ara",
+  "GoToDescription": "Şuraya git: {label}",
+  "HelpGroup": "Yardım",
+  "ImportData": "Verileri içe aktar",
+  "ImportDataDescription": "Bondery JSON ZIP dosyasını içe aktar",
+  "LogInteraction": "Etkileşim kaydet",
+  "LogInteractionDescription": "Yeni bir buluşma, arama veya mesaj kaydet",
+  "NavigateGroup": "Gezinme",
+  "NothingFound": "Sonuç yok",
+  "SearchPlaceholder": "İşlem veya gezinme ara…"
+}

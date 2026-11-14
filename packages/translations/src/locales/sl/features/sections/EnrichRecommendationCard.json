@@ -1,0 +1,23 @@
+{
+  "AllEnrichedDescription": "Vsi stiki s profilom LinkedIn so že obogateni.",
+  "AllEnrichedTitle": "Vsi stiki so obogateni",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Trenutno obogatujem:",
+  "EligibleLabel_few": "{count} osebe lahko obogatiš",
+  "EligibleLabel_one": "{count} osebo lahko obogatiš",
+  "EligibleLabel_other": "{count} oseb lahko obogatiš",
+  "EligibleLabel_two": "{count} osebi lahko obogatiš",
+  "Enrich": "Obogati",
+  "EnrichAll": "Obogati vse",
+  "HelpTooltip": "V stik pritegne najnovejše podatke profila LinkedIn. Klikni, da izveš, kako obogatitev deluje.",
+  "Pause": "Premor",
+  "PausingTooltip": "Dokončujem trenutni stik, nato premor …",
+  "PersonEligibleLabel": "Ta stik lahko obogatiš iz LinkedIna",
+  "ProcessingPerson": "Obogatujem {name} …",
+  "ProgressLabel": "Obogatitev: {completed} od {totalEligible} končanih",
+  "ProgressLabelWithFailed": "Obogatitev: {completed} od {totalEligible} končanih ({failed} ni uspelo)",
+  "Resume": "Nadaljuj",
+  "ResumeLabel": "Obogatitev prekinjena: {completed} končanih, {pending} preostalih",
+  "SkipRemaining": "Preskoči preostale",
+  "Tooltip": "Ti stiki imajo profil LinkedIn, vendar še niso obogateni. Obogati jih in pridobi zadnjo delovno zgodovino, izobrazbo in biografijo."
+}

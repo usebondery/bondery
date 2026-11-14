@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Odpri Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Poveži svoj račun in shranjuj stike iz družabnih omrežij.",
+    "SignIn": "Prijavi se",
+    "Title": "Prijavi se v Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Dodaj interakcijo s to osebo"
+  },
+  "Settings": {
+    "ApiServer": "API strežnik",
+    "SignOut": "Odjavi se"
+  },
+  "UpdateRequired": {
+    "Description": "Razširitev Bondery je zastarela in morda ne bo delovala pravilno. Posodobi jo za nadaljevanje.",
+    "OpenExtensionsPage": "Odpri stran z razširitvami",
+    "Title": "Potrebna posodobitev"
+  },
+  "Welcome": {
+    "ConnectButton": "Poveži svoj račun Bondery"
+  }
+}

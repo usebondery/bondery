@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} ha condiviso questo contatto con te",
+  "footerNotes": "Inviato con Bondery. Rispondi a questa email per contattare {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Indirizzo",
+    "email": "E-Mail",
+    "facebook": "Facebook",
+    "importantDates": "Date importanti",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Posizione",
+    "notes": "Note",
+    "phone": "Telefono",
+    "signal": "Signal",
+    "website": "Sito web",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefono, email e altri dettagli all'interno",
+  "replyCta": "Rispondere a {{senderName}}",
+  "subject": "{{senderName}} ha condiviso un contatto con te • {{contactName}}"
+}

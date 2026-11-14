@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "{seconds} sn sonra yeniden deneniyor…",
+  "Description": "Hesabın güvende ve hâlâ oturum açmış durumdasın. Sürekli deniyoruz; bu genelde kısa sürer.",
+  "MetadataTitle": "Hizmet kullanılamıyor",
+  "Retry": "Yeniden dene",
+  "StatusChecking": "Bağlantı denetleniyor…",
+  "StatusDegraded": "Bazı özellikler şu an daha yavaş olabilir",
+  "StatusOffline": "Bondery geçici olarak kullanılamıyor",
+  "StatusOnline": "Yeniden çevrimiçi. Yönlendiriliyorsun…",
+  "StatusPageLink": "Durum sayfasını aç",
+  "TechnicalBackendStatus": "Arka uç: {status}",
+  "TechnicalDetails": "Teknik ayrıntılar",
+  "TechnicalHttpStatus": "HTTP durumu: {status}",
+  "TechnicalUnreachable": "ulaşılamıyor",
+  "Title": "Bağlantı sorunu var"
+}

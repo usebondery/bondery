@@ -1,0 +1,16 @@
+{
+  "Description": "Aita meil Bonderyt paremaks teha ja jaga oma mõtteid. <3",
+  "ErrorMessage": "Tagasiside saatmine ei õnnestunud. Proovi uuesti.",
+  "ErrorTitle": "Viga",
+  "GeneralFeedbackLabel": "Kas tahad jagada tagasisidet, näpunäiteid või vigu?",
+  "GeneralFeedbackPlaceholder": "Mulle meeldib/mei meeldi see osa… Tahaksin näha seda lisatud… Mul on olnud raskusi…",
+  "NpsLabel": "Skaalal 0–10, kui tõenäoliselt soovitad Bonderyt sõbral või kolleegile?",
+  "NpsReasonLabel": "Miks valisid skoori {score}?",
+  "NpsReasonPlaceholder": "Sest see funktsioon oli kasulik/vigane/puudus…",
+  "SubmitButton": "Saada tagasiside arendajatele",
+  "SubmittingMessage": "Oota, kuni saadame sinu tagasisidet",
+  "SubmittingTitle": "Saadan tagasisidet…",
+  "SuccessMessage": "Sinu tagasiside on kätte saadud",
+  "SuccessTitle": "Aitäh!",
+  "Title": "Tagasiside"
+}

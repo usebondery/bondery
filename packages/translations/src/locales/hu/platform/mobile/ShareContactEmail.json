@@ -1,0 +1,22 @@
+{
+  "AddButton": "Hozzáadás",
+  "Description": "Az alábbi címzettek megkapják az adatokat. Te is kapsz másolatot.",
+  "DuplicateEmail": "Ez a cím már hozzá van adva",
+  "ErrorDescription": "Ellenőrizd a kapcsolatot, és próbáld újra.",
+  "ErrorHeadline": "A kapcsolat küldése nem sikerült",
+  "InvalidEmail": "Adj meg érvényes e-mail-címet",
+  "MaxRecipients": "Legfeljebb 10 címzettet adhatsz hozzá",
+  "MaxRecipientsHint": "Maximum 10 címzett",
+  "MessagePlaceholder": "Megjegyzés (opcionális)",
+  "NoRecipients": "Adj meg legalább egy címzettet",
+  "RecipientsLabel": "Címzettek",
+  "RecipientsPlaceholder": "Címzett e-mail-címe",
+  "RemoveRecipient": "Eltávolítás: {email}",
+  "SendButton": "Küldés",
+  "SendButtonMany": "Küldés {count} személynek",
+  "SendButtonOne": "Küldés 1 személynek",
+  "SuccessDescription": "A címzettek hamarosan megkapják.",
+  "SuccessHeadline": "Kapcsolat elküldve",
+  "Title": "Kapcsolat e-mailben: {name}",
+  "WhatsIncluded": "Kapcsolati adatok, közösségi linkek és jegyzetek."
+}

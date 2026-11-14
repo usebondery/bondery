@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Registrer interaksjon",
+  "AddPerson": "Opprett person",
+  "ExtensionNudge": {
+    "Description": "Importer kontakter direkte fra LinkedIn- og Instagram-profiler, og hold nettverket oppdatert uten ekstra innsats.",
+    "InstallButton": "Installer utvidelsen",
+    "Title": "Få mer ut av Bondery med Chrome-utvidelsen vår"
+  },
+  "HeaderDescription": "På Hjem får du en rask oversikt over nettverket, påminnelser og nylige interaksjoner.",
+  "NoRecentlyAdded": "Ingen personer lagt til ennå.",
+  "NoRecentlyInteracted": "Ingen nylige interaksjoner ennå.",
+  "NotificationInDays": "Om {count} dager",
+  "NotificationSent": "Allerede sendt",
+  "NotificationToday": "I dag",
+  "NotificationTomorrow": "I morgen",
+  "NotificationTooltipInDays": "Du får et varsel om {count} dager",
+  "NotificationTooltipSentAt": "Varsel ble allerede sendt {sentAt}",
+  "NotificationTooltipToday": "Du får et varsel i dag",
+  "NotificationTooltipTomorrow": "Du får et varsel i morgen",
+  "NoUpcomingReminders": "Ingen kommende påminnelser de neste 30 dagene.",
+  "ProgressRail": {
+    "AwaitingExport": "{platform}-eksporten er på vei. Eksporten kommer vanligvis om 5–15 minutter.",
+    "ChoosePlatform": "Velg en plattform å importere fra",
+    "Dismiss": "Skjul",
+    "HaveZipFile": "Jeg har filen",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} av {total} fullført",
+    "SkipImport": "Hopp over import",
+    "Tasks": {
+      "AddContacts": "Legg til de første kontaktene",
+      "ImportContacts": "Importer kontakter",
+      "LogInteraction": "Registrer den første interaksjonen",
+      "SetReminder": "Sett en påminnelse"
+    },
+    "Title": "Kom i gang"
+  },
+  "RecentlyAddedTitle": "Nylig lagt til",
+  "RecentlyAddedTooltip": "De 5 sist lagt til personene i nettverket ditt.",
+  "RecentlyInteractedTitle": "Nylig interagert",
+  "RecentlyInteractedTooltip": "De 5 personene du sist hadde interaksjon med.",
+  "Stats": {
+    "InteractionsTitle": "Interaksjoner denne måneden",
+    "InteractionsTooltip": "Antall interaksjoner du registrerte i {month}.",
+    "NewContactsTitle": "Nye kontakter i år",
+    "NewContactsTooltip": "Hvor mange personer som ble lagt til i nettverket ditt i {year}.",
+    "TotalContactsTitle": "Kontakter totalt",
+    "TotalContactsTooltip": "Antall personer i nettverket ditt i Bondery."
+  },
+  "TimelinePreviewTitle": "Interaksjoner",
+  "TimelinePreviewTooltip": "Dine 5 siste interaksjoner. Klikk for å se alle interaksjoner.",
+  "Title": "Hjem",
+  "UnknownPerson": "Ukjent person",
+  "UpcomingRemindersMonthInfo": "Viser påminnelser med varsler som forfaller de neste 30 dagene.",
+  "UpcomingRemindersTitle": "Kommende påminnelser",
+  "UpcomingRemindersTooltip": "Dette er dine kommende påminnelser som forfaller de neste 30 dagene."
+}

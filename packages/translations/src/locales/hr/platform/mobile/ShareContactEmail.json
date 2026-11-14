@@ -1,0 +1,22 @@
+{
+  "AddButton": "Dodati",
+  "Description": "Poslat ćemo njihove podatke osobama u nastavku. Dobit ćeš i kopiju.",
+  "DuplicateEmail": "Ova adresa je već dodana",
+  "ErrorDescription": "Provjeri vezu i pokušaj ponovno.",
+  "ErrorHeadline": "Slanje kontakta nije uspjelo",
+  "InvalidEmail": "Unesi valjanu adresu e-pošte",
+  "MaxRecipients": "Možeš dodati do 10 primatelja",
+  "MaxRecipientsHint": "Najviše 10 primatelja",
+  "MessagePlaceholder": "Dodaj bilješku (neobavezno)",
+  "NoRecipients": "Dodaj barem jednog primatelja",
+  "RecipientsLabel": "Za",
+  "RecipientsPlaceholder": "E-pošta primatelja",
+  "RemoveRecipient": "Ukloniti {email}",
+  "SendButton": "Poslati",
+  "SendButtonMany": "Poslati {count} osoba",
+  "SendButtonOne": "Poslati 1 osobu",
+  "SuccessDescription": "Primatelji će uskoro dobiti poruku.",
+  "SuccessHeadline": "Kontakt je poslan",
+  "Title": "E-pošta kontakta osobe {name}",
+  "WhatsIncluded": "Uključuje kontakt podatke, društvene poveznice i bilješke."
+}

@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Додайте фото для цього контакту",
+  "Cancel": "Скасувати",
+  "ConfirmPhoto": "Подтвердить фото",
+  "DragImageHere": "Перетягніть зображення сюди або натисніть для вибору",
+  "InvalidFile": "Недопустимий файл",
+  "PhotoUpdateError": "Не вдалося оновити фото контакту",
+  "PhotoUpdateSuccess": "Фото контакту оновлено",
+  "PleaseWait": "Зачекайте",
+  "TitleModal": "Завантажити фото контакту",
+  "UpdateError": "Помилка",
+  "UpdateProfilePhoto": "Оновити фото контакту",
+  "UpdateSuccess": "Готово",
+  "UploadingPhoto": "Завантажка…"
+}

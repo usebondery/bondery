@@ -1,0 +1,20 @@
+{
+  "cta": "Otvori podsetnike",
+  "dateTypes": {
+    "anniversary": "Godišnjica",
+    "birthday": "Rođendan",
+    "graduation": "Diploma",
+    "nameday": "Slava",
+    "other": "Važan datum"
+  },
+  "dayMany": "{{count}} dana",
+  "dayOne": "1 dan",
+  "description": "Za {{headingDate}}. Otvori osobu za detalje ili pošalji poruku.",
+  "headingMany": "Stiže {{count}} podsetnika",
+  "headingOne": "Stiže 1 podsetnik",
+  "preview": "{{firstPersonName}} — {{firstTypeLabel}} za {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}} — {{firstTypeLabel}} za {{firstRemainingLabel}} i još {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} stiže za {{remainingLabel}}, {{dateLabel}}.",
+  "subject": "Bondery podsetnici za {{targetDate}}",
+  "whyReceiving": "Dobijaš ovo jer si uključio podsetnike za ove datume."
+}

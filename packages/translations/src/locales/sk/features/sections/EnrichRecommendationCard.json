@@ -1,0 +1,22 @@
+{
+  "AllEnrichedDescription": "Všetky kontakty s profilom LinkedIn už boli obohatené.",
+  "AllEnrichedTitle": "Všetky kontakty sú obohatené",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Práve sa obohacuje:",
+  "EligibleLabel_few": "{count} osoby môžu byť obohatené",
+  "EligibleLabel_one": "{count} osoba môže byť obohatená",
+  "EligibleLabel_other": "{count} osôb môže byť obohatených",
+  "Enrich": "Obohatiť",
+  "EnrichAll": "Obohatiť všetko",
+  "HelpTooltip": "Stiahne do kontaktu aktuálne údaje z profilu LinkedIn. Kliknite a zistite, ako obohatenie funguje.",
+  "Pause": "Pozastaviť",
+  "PausingTooltip": "Dokončujem aktuálny kontakt, potom sa zastavím...",
+  "PersonEligibleLabel": "Tento kontakt možno obohatiť z LinkedIn",
+  "ProcessingPerson": "Obohacuje sa {name}...",
+  "ProgressLabel": "Obohatenie: {completed} z {totalEligible} hotovo",
+  "ProgressLabelWithFailed": "Obohatenie: {completed} z {totalEligible} hotovo ({failed} zlyhalo)",
+  "Resume": "Pokračovať",
+  "ResumeLabel": "Obohatenie bolo prerušené: {completed} hotovo, {pending} zostáva",
+  "SkipRemaining": "Preskočiť zvyšok",
+  "Tooltip": "Tieto kontakty majú profil LinkedIn, ale zatiaľ neboli obohatené. Obohaťte ich a stiahnite pracovné skúsenosti, vzdelanie a bio."
+}

@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Tilläggsfel – försök igen",
+    "OpenInBondery": "Öppna i Bondery",
+    "SignInRequired": "Inloggning krävs – klicka på Bondery-ikonen",
+    "SomethingWrong": "Något gick fel"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Tilläggsfel – försök igen",
+    "OpenInBondery": "Öppna i Bondery",
+    "SignInRequired": "Inloggning krävs – klicka på Bondery-ikonen",
+    "SomethingWrong": "Något gick fel"
+  }
+}

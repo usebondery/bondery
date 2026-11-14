@@ -1,0 +1,22 @@
+{
+  "AddError": "Oznaka nije mogla da se doda",
+  "AddNewTagTooltip": "Kreiraj novi dan",
+  "AddSuccess": "Uspešno dodato",
+  "AddTagTooltip": "Dodaj oznaku",
+  "CreateError": "Oznaka nije mogla da se kreira",
+  "CreateNewTagEmpty": "Kreiraj novi dan",
+  "CreateNewTagOption": "Novi dan \"{label}Креирате",
+  "CreateTagCancel": "Abbrechen",
+  "CreateTagConfirm": "Kreiraj i dodaj",
+  "CreateTagMessage": "dan{name}\" još ne postoji. Želiš li da ga kreiraš i dodaš ovom kontaktu?",
+  "CreateTagTitle": "Kreirati novi dan?",
+  "Label": "Tags",
+  "NoTagsFound": "Keine Tags gefunden",
+  "Placeholder": "Dodaj oznake...",
+  "RemoveError": "Oznaka nije mogla biti uklonjena",
+  "RemoveTagTooltip": "Ukloni oznaku",
+  "SearchPlaceholder": "Pretraži ili kreiraj oznaku...",
+  "TagAlreadyAddedMessage": "dan{name}„ već je dodat ovom kontaktu.",
+  "TagAlreadyAddedTitle": "Oznaka je već dodata",
+  "TagAlreadyAppliedTooltip": "Dan je već dodeljen"
+}

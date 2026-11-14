@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Voeg een foto toe voor dit contact",
+  "Cancel": "Annuleren",
+  "ConfirmPhoto": "Foto bevestigen",
+  "DragImageHere": "Sleep een afbeelding hierheen of klik om te kiezen",
+  "InvalidFile": "Ongeldig bestand",
+  "PhotoUpdateError": "Kan contactfoto niet bijwerken",
+  "PhotoUpdateSuccess": "Contactfoto bijgewerkt",
+  "PleaseWait": "Even geduld",
+  "TitleModal": "Contactfoto uploaden",
+  "UpdateError": "Fout",
+  "UpdateProfilePhoto": "Contactfoto bijwerken",
+  "UpdateSuccess": "Gelukt",
+  "UploadingPhoto": "Uploaden..."
+}

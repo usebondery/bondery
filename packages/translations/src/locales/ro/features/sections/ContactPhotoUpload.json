@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Atașează o fotografie pentru acest contact",
+  "Cancel": "Anula",
+  "ConfirmPhoto": "Confirmă fotografia",
+  "DragImageHere": "Trage imaginea aici sau fă clic ca să selectezi",
+  "InvalidFile": "Fișier invalid",
+  "PhotoUpdateError": "Nu s-a putut actualiza fotografia contactului",
+  "PhotoUpdateSuccess": "Fotografia contactului a fost actualizată",
+  "PleaseWait": "Așteaptă",
+  "TitleModal": "Încarcă fotografia contactului",
+  "UpdateError": "Eroare",
+  "UpdateProfilePhoto": "Actualizează fotografia contactului",
+  "UpdateSuccess": "Succes",
+  "UploadingPhoto": "Se încarcă…"
+}

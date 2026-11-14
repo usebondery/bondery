@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Skriv inn en gyldig e-postadresse",
+    "invalidTitle": "Ugyldig e-post"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Fornavn kan ha maks {max} tegn",
+      "required": "Fornavn er påkrevd"
+    },
+    "generic": {
+      "maxLength": "Verdien kan ha maks {max} tegn"
+    },
+    "headline": {
+      "maxLength": "Overskrift kan ha maks {max} tegn"
+    },
+    "label": {
+      "maxLength": "{field} kan ha maks {max} tegn",
+      "required": "{field} er påkrevd"
+    },
+    "lastName": {
+      "maxLength": "Etternavn kan ha maks {max} tegn"
+    },
+    "location": {
+      "maxLength": "Sted kan ha maks {max} tegn"
+    },
+    "middleName": {
+      "maxLength": "Mellomnavn kan ha maks {max} tegn"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Tittel er påkrevd"
+  },
+  "title": "Valideringsfeil"
+}

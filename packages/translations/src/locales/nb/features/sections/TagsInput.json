@@ -1,0 +1,22 @@
+{
+  "AddError": "Kunne ikke legge til etiketten",
+  "AddNewTagTooltip": "Opprett ny etikett",
+  "AddSuccess": "Etikett lagt til",
+  "AddTagTooltip": "Legg til etikett",
+  "CreateError": "Kunne ikke opprette etiketten",
+  "CreateNewTagEmpty": "Opprett ny etikett",
+  "CreateNewTagOption": "Opprett ny etikett «{label}»",
+  "CreateTagCancel": "Avbryt",
+  "CreateTagConfirm": "Opprett og legg til",
+  "CreateTagMessage": "Etiketten «{name}» finnes ikke ennå. Vil du opprette den og legge den til denne kontakten?",
+  "CreateTagTitle": "Opprette ny etikett?",
+  "Label": "Etiketter",
+  "NoTagsFound": "Ingen etiketter funnet",
+  "Placeholder": "Legg til etiketter …",
+  "RemoveError": "Kunne ikke fjerne etiketten",
+  "RemoveTagTooltip": "Fjern etikett",
+  "SearchPlaceholder": "Søk eller opprett etikett …",
+  "TagAlreadyAddedMessage": "Etiketten «{name}» er allerede lagt til denne kontakten.",
+  "TagAlreadyAddedTitle": "Etikett allerede lagt til",
+  "TagAlreadyAppliedTooltip": "Etikett allerede brukt"
+}

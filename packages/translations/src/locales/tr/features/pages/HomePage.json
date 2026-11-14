@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Etkileşim kaydet",
+  "AddPerson": "Kişi oluştur",
+  "ExtensionNudge": {
+    "Description": "Kişileri doğrudan LinkedIn ve Instagram profillerinden içe aktar ve ağını kolayca güncel tut.",
+    "InstallButton": "Uzantıyı yükle",
+    "Title": "Chrome uzantımızla Bondery’yi hızlandır"
+  },
+  "HeaderDescription": "Ana sayfada ağın, hatırlatıcılar ve son etkileşimlere hızlı genel bakış alırsın.",
+  "NoRecentlyAdded": "Henüz eklenen kişi yok.",
+  "NoRecentlyInteracted": "Henüz yeni etkileşim yok.",
+  "NotificationInDays": "{count} gün içinde",
+  "NotificationSent": "Zaten gönderildi",
+  "NotificationToday": "Bugün",
+  "NotificationTomorrow": "Yarın",
+  "NotificationTooltipInDays": "{count} gün içinde bildirim alırsın",
+  "NotificationTooltipSentAt": "Bildirim zaten gönderildi: {sentAt}",
+  "NotificationTooltipToday": "Bugün bildirim alırsın",
+  "NotificationTooltipTomorrow": "Yarın bildirim alırsın",
+  "NoUpcomingReminders": "Önümüzdeki 30 günde yaklaşan hatırlatıcı yok.",
+  "ProgressRail": {
+    "AwaitingExport": "{platform} dışa aktarması yolda. Dışa aktarmalar genelde 5–15 dakikada gelir.",
+    "ChoosePlatform": "Nereden içe aktaracağını seç",
+    "Dismiss": "Gizle",
+    "HaveZipFile": "Dosyam var",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} / {total} tamam",
+    "SkipImport": "İçe aktarmayı atla",
+    "Tasks": {
+      "AddContacts": "İlk kişilerini ekle",
+      "ImportContacts": "Kişilerini içe aktar",
+      "LogInteraction": "İlk etkileşimi kaydet",
+      "SetReminder": "Hatırlatıcı ayarla"
+    },
+    "Title": "Başlarken"
+  },
+  "RecentlyAddedTitle": "Yakın zamanda eklenen",
+  "RecentlyAddedTooltip": "Ağına en son eklenen 5 kişi.",
+  "RecentlyInteractedTitle": "Yakın zamanda etkileşim",
+  "RecentlyInteractedTooltip": "En son etkileşimde bulunduğun 5 kişi.",
+  "Stats": {
+    "InteractionsTitle": "Bu ayki etkileşimler",
+    "InteractionsTooltip": "{month} ayında kaydettiğin etkileşim sayısı.",
+    "NewContactsTitle": "Bu yıl yeni kişiler",
+    "NewContactsTooltip": "Bu yıl ({year}) ağına kaç kişi eklendi.",
+    "TotalContactsTitle": "Toplam kişi",
+    "TotalContactsTooltip": "Bondery ağında kaç kişi var."
+  },
+  "TimelinePreviewTitle": "Etkileşimler",
+  "TimelinePreviewTooltip": "Son 5 etkileşim. Tümünü görmek için tıkla.",
+  "Title": "Ana sayfa",
+  "UnknownPerson": "Bilinmeyen kişi",
+  "UpcomingRemindersMonthInfo": "Önümüzdeki 30 günde sona erecek hatırlatıcıları gösteriyoruz.",
+  "UpcomingRemindersTitle": "Yaklaşan hatırlatıcılar",
+  "UpcomingRemindersTooltip": "Bunlar önümüzdeki 30 günde sona erecek hatırlatıcıların."
+}

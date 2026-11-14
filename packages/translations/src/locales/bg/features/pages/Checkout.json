@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "You already have an active Premium subscription.",
+  "alreadySubscribedTitle": "Already subscribed",
+  "errorMessage": "Something went wrong. Please try again.",
+  "errorTitle": "Checkout failed",
+  "errorUnauthorized": "Please log in and try again.",
+  "intervalAnnual": "Annual",
+  "intervalMonthly": "Monthly",
+  "paymentBlockedAction": "Update billing",
+  "paymentBlockedMessage": "We could not process your payment after several attempts. Update your billing details to restore Premium access.",
+  "paymentBlockedTitle": "Payment required",
+  "successMessage": "Enjoy 300 AI messages a month and all Premium features.",
+  "successTitle": "You're now Premium!",
+  "upgradePendingMessage": "Your account will upgrade to Premium shortly.",
+  "upgradePendingTitle": "Payment received",
+  "upgradesDisabledTooltip": "Premium upgrades are not available yet. Check back soon.",
+  "upgradeToPremium": "Upgrade to Premium"
+}

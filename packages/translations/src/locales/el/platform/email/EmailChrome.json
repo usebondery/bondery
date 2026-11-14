@@ -1,0 +1,8 @@
+{
+  "documentation": "τεκμηρίωση",
+  "help": "Χρειάζεσαι βοήθεια; Επίσκεψου το {{support}} ή διάβασε την {{documentation}}.",
+  "internalNote": "Εσωτερικές λειτουργίες · δεν αποστέλλεται στον πελάτη",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Διαχειρίσου αυτές τις ειδοποιήσεις στο Bondery",
+  "support": "υποστήριξη"
+}

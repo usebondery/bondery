@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Milliselt platvormilt sa eksporti tellisid?",
+    "Description": "Too olemasolev võrgustik Bonderysse LinkedInist, Instagramist või lisa kontaktid käsitsi.",
+    "Finish": "Alusta",
+    "Instagram": "Impordi Instagramist",
+    "InstagramDescription": "Laadi üles oma Instagrami jälgijate ja jälgimiste andmed.",
+    "LinkedIn": "Impordi LinkedInist",
+    "LinkedInDescription": "Laadi üles oma LinkedIni ühenduste ekspordifail.",
+    "ManualAdd": "Loo käsitsi",
+    "SkipImport": "Jäta import vahele",
+    "SuccessDescription": "{imported} imporditud, {updated} uuendatud, {skipped} vahele jäetud.",
+    "SuccessTitle": "Import lõpetatud!",
+    "Title": "Impordi kontaktid",
+    "WaitingForExport": "Ootan eksporti"
+  },
+  "Intent": {
+    "both": "Mõlemad",
+    "Description": "Kasutame seda, et Bondery sinu jaoks isikupärastada.",
+    "personal": "Sõbrad ja pere",
+    "professional": "Tööalane",
+    "Title": "Kuidas sa Bonderyt kasutad?"
+  },
+  "Loading": {
+    "Message": "Seadistan sinu jaoks…"
+  },
+  "MetadataTitle": "Sissejuhatus",
+  "Welcome": {
+    "LetsGo": "Alustame",
+    "Subtitle": "Meeldiv kohtuda. Seadistame sinu isikliku CRM-i.",
+    "TitleGeneric": "Tere tulemast Bonderysse! 😊",
+    "TitleWithName": "Tere tulemast, {name}! 😊"
+  }
+}

@@ -40,5 +40,6 @@ describe("email-i18n", () => {
 
     assert.match(formatEmailDate(date, "en"), /2026/);
     assert.match(formatEmailDateFromIso("2026-07-30", "de"), /2026/);
+    assert.match(formatEmailDate(date, "hu"), /^2026/);
   });
 });

@@ -1,0 +1,11 @@
+{
+  "About": "Acerca de",
+  "Education": "Formación",
+  "LastDataUpdate": "Última actualización de datos: {date}",
+  "NoEducation": "No hay historial de formación disponible",
+  "NoWorkHistory": "No hay historial laboral disponible",
+  "Present": "Actualidad",
+  "ShowLess": "Mostrar menos",
+  "ShowMore": "Mostrar más",
+  "WorkHistory": "Experiencia laboral"
+}

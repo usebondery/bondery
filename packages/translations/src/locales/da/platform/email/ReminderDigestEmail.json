@@ -1,0 +1,20 @@
+{
+  "cta": "Åbn påmindelser",
+  "dateTypes": {
+    "anniversary": "Årsdag",
+    "birthday": "Fødselsdag",
+    "graduation": "Dimission",
+    "nameday": "Navnedag",
+    "other": "Vigtig dato"
+  },
+  "dayMany": "{{count}} dage",
+  "dayOne": "1 dag",
+  "description": "For {{headingDate}}. Åbn en person for at se detaljer eller sende en besked.",
+  "headingMany": "{{count}} påmindelser på vej",
+  "headingOne": "1 påmindelse på vej",
+  "preview": "{{firstPersonName}}s {{firstTypeLabel}} om {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}}s {{firstTypeLabel}} om {{firstRemainingLabel}} og {{remainingCount}} mere",
+  "reminderLine": "{{emoji}} {{typeLabel}} er på vej om {{remainingLabel}} den {{dateLabel}}.",
+  "subject": "Bondery-påmindelser for {{targetDate}}",
+  "whyReceiving": "Du modtager denne e-mail, fordi du har slået påmindelser til for disse datoer."
+}

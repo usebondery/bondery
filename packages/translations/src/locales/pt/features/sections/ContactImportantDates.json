@@ -1,0 +1,32 @@
+{
+  "AddAction": "Adicionar data",
+  "AddHint": "Para adicionar uma nova data, preencha toda a informação.",
+  "AddImportantDate": "Adicionar data importante",
+  "BirthdayDateLabel": "Selecionar aniversário",
+  "DatePlaceholder": "Selecionar data",
+  "DeleteAction": "Eliminar",
+  "DraftIncompleteError": "Para adicionar uma nova data, preencha toda a informação.",
+  "Empty": "Ainda sem datas importantes.",
+  "ErrorTitle": "Erro",
+  "NotePlaceholder": "Nota opcional",
+  "NotifyDayBefore": "Notificar {count} dia antes",
+  "NotifyDaysBefore": "Notificar {count} dias antes",
+  "NotifyMe": "Notificar-me",
+  "NotifyNone": "Não notificar",
+  "SuccessTitle": "Sucesso",
+  "Title": "Datas importantes",
+  "TypeDisabledBirthdateHint": "{firstName} já tem data de nascimento definida",
+  "TypeDisabledHint": "{firstName} já tem data de nascimento ou dia do nome definido",
+  "TypeDisabledNamedateHint": "{firstName} já tem dia do nome definido",
+  "TypePlaceholder": "Selecionar tipo",
+  "Types": {
+    "anniversary": "Aniversário de relação",
+    "birthday": "Aniversário",
+    "graduation": "Formatura",
+    "nameday": "Dia do nome",
+    "other": "Outro"
+  },
+  "UniqueTypeError": "Só pode adicionar um {type}.",
+  "UpdateError": "Não foi possível atualizar as datas importantes",
+  "UpdateSuccess": "Datas importantes atualizadas"
+}

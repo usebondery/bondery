@@ -1,0 +1,13 @@
+{
+  "Create": "Añadir a Bondery",
+  "Creating": "Creando persona...",
+  "ErrorDescription": "Algo ha salido mal al crear a esta persona.",
+  "ErrorTitle": "No se ha podido crear la persona",
+  "FullNameLabel": "Nombre completo",
+  "FullNamePlaceholder": "p. ej. Laura García",
+  "InvalidName": "Añade un nombre válido",
+  "NameRequired": "Añade un nombre",
+  "SuccessDescription": "La nueva persona se ha añadido a tus contactos.",
+  "SuccessTitle": "Persona creada",
+  "Title": "Crear persona"
+}

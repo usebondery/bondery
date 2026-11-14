@@ -1,0 +1,9 @@
+{
+  "body": "Po tem se bo naročnina samodejno obnovila, razen če jo prekličeš.",
+  "cta": "Upravljaj naročnino",
+  "endDateFallback": "kmalu",
+  "heading": "Tvoje preizkusno obdobje Premium se konča {{endDate}}",
+  "preview": "Naročnina se obnovi, razen če jo prekličeš",
+  "subject": "Tvoje preizkusno obdobje Bondery Premium se kmalu konča",
+  "whyReceiving": "To prejemaš, ker imaš preizkusno obdobje Bondery Premium."
+}

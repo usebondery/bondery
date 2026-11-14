@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "düzelt ve birleştir",
+    "GroupDetail": "bu grup",
+    "Groups": "Gruplar",
+    "Home": "Ana sayfa",
+    "KeepInTouch": "İletişimde kal",
+    "Map": "harita",
+    "People": "Kişiler",
+    "PersonDetails": "kişi ayrıntıları",
+    "Timeline": "Etkileşimler"
+  },
+  "HelpLabel": "Daha fazla bilgi",
+  "LearnMoreAbout": "Şunun hakkında daha fazla bilgi: {concept}"
+}

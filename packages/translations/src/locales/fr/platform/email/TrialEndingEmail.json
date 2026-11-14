@@ -1,0 +1,9 @@
+{
+  "body": "Ensuite, votre abonnement se renouvelle automatiquement sauf si vous l’annulez.",
+  "cta": "Gérer l’abonnement",
+  "endDateFallback": "bientôt",
+  "heading": "Votre essai Premium se termine le {{endDate}}",
+  "preview": "Votre abonnement se renouvelle si vous n’annulez pas",
+  "subject": "Votre essai Bondery Premium se termine bientôt",
+  "whyReceiving": "Vous recevez cet e-mail parce que vous avez un essai Bondery Premium."
+}

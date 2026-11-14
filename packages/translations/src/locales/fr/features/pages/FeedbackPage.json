@@ -1,0 +1,16 @@
+{
+  "Description": "Aidez-nous à améliorer Bondery en partageant vos idées. <3",
+  "ErrorMessage": "Impossible d’envoyer le retour. Réessayez.",
+  "ErrorTitle": "Erreur",
+  "GeneralFeedbackLabel": "Des retours, suggestions ou bogues à partager\u00a0?",
+  "GeneralFeedbackPlaceholder": "J’adore/déteste cette partie de l’app… J’aimerais que… J’ai eu du mal avec…",
+  "NpsLabel": "Sur une échelle de 0 à 10, quelle est la probabilité que vous recommandiez Bondery à un ami ou un collègue\u00a0?",
+  "NpsReasonLabel": "Pourquoi avez-vous choisi la note {score}\u00a0?",
+  "NpsReasonPlaceholder": "Parce que cette fonction est utile / défectueuse / manquante…",
+  "SubmitButton": "Envoyer le retour à l’équipe",
+  "SubmittingMessage": "Veuillez patienter pendant l’envoi",
+  "SubmittingTitle": "Envoi du retour…",
+  "SuccessMessage": "Votre retour a bien été reçu",
+  "SuccessTitle": "Merci\u00a0!",
+  "Title": "Retour d’expérience"
+}

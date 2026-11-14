@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Laienduse viga — proovi uuesti",
+    "OpenInBondery": "Ava Bonderys",
+    "SignInRequired": "Sisselogimine on vajalik — klõpsa Bondery ikoonil",
+    "SomethingWrong": "Midagi läks valesti"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Laienduse viga — proovi uuesti",
+    "OpenInBondery": "Ava Bonderys",
+    "SignInRequired": "Sisselogimine on vajalik — klõpsa Bondery ikoonil",
+    "SomethingWrong": "Midagi läks valesti"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "body": "Bundan sonra aboneliğin, iptal etmediğin sürece otomatik olarak yenilenir.",
+  "cta": "Aboneliği yönet",
+  "endDateFallback": "yakında",
+  "heading": "Premium deneme süren {{endDate}} tarihinde bitiyor",
+  "preview": "İptal etmezsen aboneliğin yenilenir",
+  "subject": "Bondery Premium deneme süren yakında bitiyor",
+  "whyReceiving": "Bu e-postayı, Bondery Premium deneme süresi kullandığın için aldın."
+}

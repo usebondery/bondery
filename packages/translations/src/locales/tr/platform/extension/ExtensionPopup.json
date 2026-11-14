@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Bondery’i aç"
+  },
+  "LoggedOut": {
+    "Description": "Sosyal sayfalardan kişi kaydetmek için hesabını bağla.",
+    "SignIn": "Oturum aç",
+    "Title": "Bondery’de oturum aç"
+  },
+  "PersonActions": {
+    "AddInteraction": "Bu kişiye etkileşim ekle"
+  },
+  "Settings": {
+    "ApiServer": "API sunucusu",
+    "SignOut": "Oturumu kapat"
+  },
+  "UpdateRequired": {
+    "Description": "Bondery uzantın güncel değil ve düzgün çalışmayabilir. Devam etmek için güncelle.",
+    "OpenExtensionsPage": "Uzantılar sayfasını aç",
+    "Title": "Güncelleme gerekli"
+  },
+  "Welcome": {
+    "ConnectButton": "Bondery hesabını bağla"
+  }
+}

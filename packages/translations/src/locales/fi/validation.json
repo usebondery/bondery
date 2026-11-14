@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Anna kelvollinen sähköpostiosoite",
+    "invalidTitle": "Virheellinen sähköposti"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Etunimi saa olla enintään {max} merkkiä",
+      "required": "Etunimi vaaditaan"
+    },
+    "generic": {
+      "maxLength": "Arvo saa olla enintään {max} merkkiä"
+    },
+    "headline": {
+      "maxLength": "Otsikko saa olla enintään {max} merkkiä"
+    },
+    "label": {
+      "maxLength": "Kentän {field} arvo saa olla enintään {max} merkkiä",
+      "required": "Kenttä {field} vaaditaan"
+    },
+    "lastName": {
+      "maxLength": "Sukunimi saa olla enintään {max} merkkiä"
+    },
+    "location": {
+      "maxLength": "Sijainti saa olla enintään {max} merkkiä"
+    },
+    "middleName": {
+      "maxLength": "Toinen etunimi saa olla enintään {max} merkkiä"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Otsikko vaaditaan"
+  },
+  "title": "Validointivirhe"
+}

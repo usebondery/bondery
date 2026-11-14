@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "korjaa ja yhdistä",
+    "GroupDetail": "tämä ryhmä",
+    "Groups": "ryhmät",
+    "Home": "koti",
+    "KeepInTouch": "pidä yhteyttä",
+    "Map": "kartta",
+    "People": "henkilöt",
+    "PersonDetails": "henkilötiedot",
+    "Timeline": "vuorovaikutukset"
+  },
+  "HelpLabel": "Lue lisää",
+  "LearnMoreAbout": "Lue lisää: {concept}"
+}

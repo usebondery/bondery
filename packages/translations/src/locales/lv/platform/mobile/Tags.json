@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Nevarēja izveidot tagu. Mēģināt vēlreiz.",
+  "CreateTag": "Izveidot tagu",
+  "DeleteFailed": "Nevarēja izdzēst atzīmi. Mēģināt vēlreiz.",
+  "EditFailed": "Nevarēja saglabāt atzīmi. Mēģināt vēlreiz.",
+  "EditTagsSearchPlaceholder": "Meklēt tagus...",
+  "LoadFailed": "Nevarēja ielādēt etiķetes",
+  "NoTagsYet": "Vēl nav atzīmju",
+  "NoTagsYetHint": "Etiķetes palīdz sakārtot un atrast kontaktus."
+}

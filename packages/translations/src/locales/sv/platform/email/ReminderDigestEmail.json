@@ -1,0 +1,20 @@
+{
+  "cta": "Öppna påminnelser",
+  "dateTypes": {
+    "anniversary": "Årsdag",
+    "birthday": "Födelsedag",
+    "graduation": "Examen",
+    "nameday": "Namnsdag",
+    "other": "Viktigt datum"
+  },
+  "dayMany": "{{count}} dagar",
+  "dayOne": "1 dag",
+  "description": "För {{headingDate}}. Öppna en person för detaljer eller skicka ett meddelande.",
+  "headingMany": "{{count}} påminnelser väntar",
+  "headingOne": "1 påminnelse väntar",
+  "preview": "{{firstPersonName}}s {{firstTypeLabel}} om {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}}s {{firstTypeLabel}} om {{firstRemainingLabel}} och {{remainingCount}} till",
+  "reminderLine": "{{emoji}} {{typeLabel}} om {{remainingLabel}} den {{dateLabel}}.",
+  "subject": "Bondery-påminnelser för {{targetDate}}",
+  "whyReceiving": "Du får det här mejlet eftersom du aktiverat påminnelser för dessa datum."
+}

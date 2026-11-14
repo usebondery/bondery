@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} ți-a partajat acest contact",
+  "footerNotes": "Trimis cu Bondery. Răspunde la acest e-mail ca să ajungi la {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adresă",
+    "email": "Email",
+    "facebook": "Facebook",
+    "importantDates": "Date importante",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Locație",
+    "notes": "Note",
+    "phone": "Phone",
+    "signal": "Signal",
+    "website": "Website",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-mail și alte detalii în interior",
+  "replyCta": "Răspunde lui {{senderName}}",
+  "subject": "{{senderName}} ți-a partajat un contact • {{contactName}}"
+}

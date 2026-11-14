@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Krāsu kods ir kopēts starpliktuvē",
+  "CopyAccessibilityLabel": "Kopēt krāsu kodu",
+  "CopyFailedMessage": "Nevarēja nokopēt krāsu kodu. Mēģināt vēlreiz.",
+  "CustomColorLabel": "Pielāgota krāsa",
+  "HexPlaceholder": "#RRGBBB",
+  "InvalidHex": "Ievadīt derīgu sešstūra krāsu (piem., #AE3EC9)",
+  "SheetTitle": "Krāsa",
+  "SwatchesLabel": "Ātras krāsas",
+  "TriggerAccessibilityHint": "Atver krāsu atlasītāju"
+}

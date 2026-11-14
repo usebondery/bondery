@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Melyik platformról kérted az exportot?",
+    "Description": "Hozd be a meglévő hálózatodat a Bonderybe LinkedInről, Instagramról, vagy add hozzá kézzel.",
+    "Finish": "Kezdés",
+    "Instagram": "Import Instagramról",
+    "InstagramDescription": "Töltsd fel Instagram követő/követés adataidat.",
+    "LinkedIn": "Import LinkedInről",
+    "LinkedInDescription": "Töltsd fel a LinkedIn kapcsolat-export fájlt.",
+    "ManualAdd": "Kézi létrehozás",
+    "SkipImport": "Import kihagyása",
+    "SuccessDescription": "Importálva: {imported}, frissítve: {updated}, kihagyva: {skipped}.",
+    "SuccessTitle": "Az import kész!",
+    "Title": "Kapcsolatok importálása",
+    "WaitingForExport": "Várom az exportot"
+  },
+  "Intent": {
+    "both": "Mindkettő",
+    "Description": "Ezt arra használjuk, hogy személyre szabjuk a Bonderyt.",
+    "personal": "Barátok és család",
+    "professional": "Szakmai",
+    "Title": "Hogyan használod a Bonderyt?"
+  },
+  "Loading": {
+    "Message": "Beállítjuk neked…"
+  },
+  "MetadataTitle": "Első lépések",
+  "Welcome": {
+    "LetsGo": "Gyerünk",
+    "Subtitle": "Örülünk, hogy itt vagy. Állítsuk be a személyes PRM-edet.",
+    "TitleGeneric": "Üdv a Bonderyben! 😊",
+    "TitleWithName": "Üdv, {name}! 😊"
+  }
+}

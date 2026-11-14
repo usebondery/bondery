@@ -1,0 +1,20 @@
+{
+  "cta": "Herinneringen openen",
+  "dateTypes": {
+    "anniversary": "Jubileum",
+    "birthday": "Verjaardag",
+    "graduation": "Afstuderen",
+    "nameday": "Naamdag",
+    "other": "Belangrijke datum"
+  },
+  "dayMany": "{{count}} dagen",
+  "dayOne": "1 dag",
+  "description": "Voor {{headingDate}}. Open een persoon voor details of stuur een bericht.",
+  "headingMany": "{{count}} aankomende herinneringen",
+  "headingOne": "1 aankomende herinnering",
+  "preview": "{{firstTypeLabel}} van {{firstPersonName}} over {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} van {{firstPersonName}} over {{firstRemainingLabel}} en nog {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} komt over {{remainingLabel}} op {{dateLabel}}.",
+  "subject": "Bondery-herinneringen voor {{targetDate}}",
+  "whyReceiving": "Je ontvangt dit omdat je herinneringen voor deze datums hebt ingeschakeld."
+}

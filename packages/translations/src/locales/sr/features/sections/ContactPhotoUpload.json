@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Dodaj fotografiju za ovaj kontakt",
+  "Cancel": "Abbrechen",
+  "ConfirmPhoto": "Potvrdite fotografiju",
+  "DragImageHere": "Prevucite sliku ovde ili kliknite da biste je izabrali",
+  "InvalidFile": "Ungültige Datei",
+  "PhotoUpdateError": "Fotografija kontakta nije mogla da se ažurira",
+  "PhotoUpdateSuccess": "Fotografija kontakta je uspešno ažurirana",
+  "PleaseWait": "Bitte warten",
+  "TitleModal": "Otpremi fotografiju kontakta",
+  "UpdateError": "Fehler",
+  "UpdateProfilePhoto": "Ažuriraj fotografiju kontakta",
+  "UpdateSuccess": "Erfolg",
+  "UploadingPhoto": "Otprema se..."
+}

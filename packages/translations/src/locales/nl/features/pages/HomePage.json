@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Interactie registreren",
+  "AddPerson": "Persoon aanmaken",
+  "ExtensionNudge": {
+    "Description": "Importeer contacten rechtstreeks van LinkedIn- en Instagram-profielen en houd je netwerk moeiteloos up-to-date.",
+    "InstallButton": "Extensie installeren",
+    "Title": "Geef Bondery een boost met onze Chrome-extensie"
+  },
+  "HeaderDescription": "Op Home zie je snel een overzicht van je netwerk, herinneringen en recente interacties.",
+  "NoRecentlyAdded": "Nog geen personen toegevoegd.",
+  "NoRecentlyInteracted": "Nog geen recente interacties.",
+  "NotificationInDays": "Over {count} dagen",
+  "NotificationSent": "Al verstuurd",
+  "NotificationToday": "Vandaag",
+  "NotificationTomorrow": "Morgen",
+  "NotificationTooltipInDays": "Je krijgt een melding over {count} dagen",
+  "NotificationTooltipSentAt": "Melding is al verstuurd om {sentAt}",
+  "NotificationTooltipToday": "Je krijgt vandaag een melding",
+  "NotificationTooltipTomorrow": "Je krijgt morgen een melding",
+  "NoUpcomingReminders": "Geen aankomende herinneringen in de komende 30 dagen.",
+  "ProgressRail": {
+    "AwaitingExport": "Je {platform}-export is onderweg. Exporten komen meestal binnen 5–15 minuten aan.",
+    "ChoosePlatform": "Kies een platform om uit te importeren",
+    "Dismiss": "Sluiten",
+    "HaveZipFile": "Ik heb het bestand",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} van {total} voltooid",
+    "SkipImport": "Import overslaan",
+    "Tasks": {
+      "AddContacts": "Voeg je eerste contacten toe",
+      "ImportContacts": "Importeer je contacten",
+      "LogInteraction": "Registreer je eerste interactie",
+      "SetReminder": "Stel een herinnering in"
+    },
+    "Title": "Aan de slag"
+  },
+  "RecentlyAddedTitle": "Recent toegevoegd",
+  "RecentlyAddedTooltip": "De 5 meest recent toegevoegde personen in je netwerk.",
+  "RecentlyInteractedTitle": "Recent interactie",
+  "RecentlyInteractedTooltip": "De 5 personen waarmee je het laatst interactie had.",
+  "Stats": {
+    "InteractionsTitle": "Interacties deze maand",
+    "InteractionsTooltip": "Het aantal interacties dat je in de maand {month} hebt geregistreerd.",
+    "NewContactsTitle": "Nieuwe contacten dit jaar",
+    "NewContactsTooltip": "Hoeveel personen dit jaar ({year}) aan je netwerk zijn toegevoegd.",
+    "TotalContactsTitle": "Totaal contacten",
+    "TotalContactsTooltip": "Het aantal personen in je netwerk op Bondery."
+  },
+  "TimelinePreviewTitle": "Interacties",
+  "TimelinePreviewTooltip": "Je 5 meest recente interacties. Klik om alle interacties te zien.",
+  "Title": "Home",
+  "UnknownPerson": "Onbekende persoon",
+  "UpcomingRemindersMonthInfo": "Herinneringen met melding in de komende 30 dagen.",
+  "UpcomingRemindersTitle": "Aankomende herinneringen",
+  "UpcomingRemindersTooltip": "Je aankomende herinneringen in de komende 30 dagen."
+}

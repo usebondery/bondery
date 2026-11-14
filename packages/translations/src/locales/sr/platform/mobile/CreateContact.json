@@ -1,0 +1,13 @@
+{
+  "Create": "Dodaj u Bondery",
+  "Creating": "Kreiranje osobe...",
+  "ErrorDescription": "Nešto nije u redu pri kreiranju ove osobe.",
+  "ErrorTitle": "Osoba nije kreirana",
+  "FullNameLabel": "Puno ime",
+  "FullNamePlaceholder": "npr. Jana Petrović",
+  "InvalidName": "Dodaj ispravno ime",
+  "NameRequired": "Dodaj ime",
+  "SuccessDescription": "Nova osoba je dodata u tvoje kontakte.",
+  "SuccessTitle": "Osoba kreirana",
+  "Title": "Kreiraj osobu"
+}

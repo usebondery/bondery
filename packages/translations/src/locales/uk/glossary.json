@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "contact": "контакт",
+    "contactPlural": "контакти",
+    "group": "група",
+    "interaction": "взаємодія",
+    "interactionPlural": "взаємодії",
+    "network": "мережа",
+    "person": "особа",
+    "person_few": "{count} особи",
+    "person_many": "{count} осіб",
+    "person_one": "{count} особа",
+    "person_other": "{count} особи",
+    "tag": "мітка"
+  },
+  "features": {
+    "aiAssistant": "ШІ-асистент",
+    "fixAndMerge": "Виправити й об’єднати",
+    "keepInTouch": "Підтримувати зв’язок"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

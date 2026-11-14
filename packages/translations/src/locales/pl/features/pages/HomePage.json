@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Zalogować interakcję",
+  "AddPerson": "Utworzyć osobę",
+  "ExtensionNudge": {
+    "Description": "Importuj kontakty prosto z profili LinkedIn i Instagramu i utrzymuj sieć na bieżąco bez wysiłku.",
+    "InstallButton": "Zainstalować rozszerzenie",
+    "Title": "Wzmocnij Bondery naszym rozszerzeniem Chrome"
+  },
+  "HeaderDescription": "Na stronie głównej masz szybki przegląd sieci, przypomnień i ostatnich interakcji.",
+  "NoRecentlyAdded": "Nie dodano jeszcze żadnych osób.",
+  "NoRecentlyInteracted": "Brak ostatnich interakcji.",
+  "NotificationInDays": "Za {count} dni",
+  "NotificationSent": "Już wysłano",
+  "NotificationToday": "Dziś",
+  "NotificationTomorrow": "Jutro",
+  "NotificationTooltipInDays": "Powiadomimy Cię za {count} dni",
+  "NotificationTooltipSentAt": "Powiadomienie wysłano już o {sentAt}",
+  "NotificationTooltipToday": "Powiadomimy Cię dziś",
+  "NotificationTooltipTomorrow": "Powiadomimy Cię jutro",
+  "NoUpcomingReminders": "Brak nadchodzących przypomnień w ciągu 30 dni.",
+  "ProgressRail": {
+    "AwaitingExport": "Twój eksport {platform} jest w drodze. Zwykle trwa to 5–15 minut.",
+    "ChoosePlatform": "Wybierz platformę do importu",
+    "Dismiss": "Zamknąć",
+    "HaveZipFile": "Mam plik",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "Ukończono {completed} z {total}",
+    "SkipImport": "Pominąć import",
+    "Tasks": {
+      "AddContacts": "Dodać pierwsze kontakty",
+      "ImportContacts": "Importować kontakty",
+      "LogInteraction": "Zalogować pierwszą interakcję",
+      "SetReminder": "Ustawić przypomnienie"
+    },
+    "Title": "Pierwsze kroki"
+  },
+  "RecentlyAddedTitle": "Ostatnio dodane",
+  "RecentlyAddedTooltip": "5 ostatnio dodanych osób w Twojej sieci.",
+  "RecentlyInteractedTitle": "Ostatnie interakcje",
+  "RecentlyInteractedTooltip": "5 osób, z którymi ostatnio była interakcja.",
+  "Stats": {
+    "InteractionsTitle": "Interakcje w tym miesiącu",
+    "InteractionsTooltip": "Liczba interakcji w miesiącu {month}.",
+    "NewContactsTitle": "Nowe kontakty w tym roku",
+    "NewContactsTooltip": "Ile osób dodano do sieci w bieżącym roku ({year}).",
+    "TotalContactsTitle": "Wszystkie kontakty",
+    "TotalContactsTooltip": "Liczba osób w Twojej sieci w Bondery."
+  },
+  "TimelinePreviewTitle": "Interakcje",
+  "TimelinePreviewTooltip": "Twoje 5 ostatnich interakcji. Kliknij, aby zobaczyć wszystkie.",
+  "Title": "Strona główna",
+  "UnknownPerson": "Nieznana osoba",
+  "UpcomingRemindersMonthInfo": "Pokazujemy przypomnienia z powiadomieniami w ciągu 30 dni.",
+  "UpcomingRemindersTitle": "Nadchodzące przypomnienia",
+  "UpcomingRemindersTooltip": "Nadchodzące przypomnienia w ciągu 30 dni."
+}

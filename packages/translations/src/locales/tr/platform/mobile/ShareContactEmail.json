@@ -1,0 +1,22 @@
+{
+  "AddButton": "Ekle",
+  "Description": "Aşağıdaki alıcılar ayrıntıları alır. Sen de bir kopya alırsın.",
+  "DuplicateEmail": "Bu adres zaten eklendi",
+  "ErrorDescription": "Bağlantını kontrol et ve yeniden dene.",
+  "ErrorHeadline": "Kişi gönderilemedi",
+  "InvalidEmail": "Geçerli bir e-posta adresi gir",
+  "MaxRecipients": "En fazla 10 alıcı ekleyebilirsin",
+  "MaxRecipientsHint": "En fazla 10 alıcı",
+  "MessagePlaceholder": "Not (isteğe bağlı)",
+  "NoRecipients": "En az bir alıcı gir",
+  "RecipientsLabel": "Alıcılar",
+  "RecipientsPlaceholder": "Alıcı e-postası",
+  "RemoveRecipient": "Kaldır: {email}",
+  "SendButton": "Gönder",
+  "SendButtonMany": "{count} kişiye gönder",
+  "SendButtonOne": "1 kişiye gönder",
+  "SuccessDescription": "Alıcılar kısa sürede alır.",
+  "SuccessHeadline": "Kişi gönderildi",
+  "Title": "E-posta ile kişi: {name}",
+  "WhatsIncluded": "Kişi bilgileri, sosyal bağlantılar ve notlar."
+}

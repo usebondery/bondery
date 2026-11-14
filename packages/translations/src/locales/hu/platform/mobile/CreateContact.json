@@ -1,0 +1,13 @@
+{
+  "Create": "Hozzáadás a Bonderyhez",
+  "Creating": "Személy létrehozása...",
+  "ErrorDescription": "Hiba történt a személy létrehozása közben.",
+  "ErrorTitle": "Nem sikerült létrehozni a személyt",
+  "FullNameLabel": "Teljes név",
+  "FullNamePlaceholder": "pl. Anna Kovács",
+  "InvalidName": "Adj meg érvényes nevet",
+  "NameRequired": "Adj meg egy nevet",
+  "SuccessDescription": "Az új személy bekerült a kapcsolataid közé.",
+  "SuccessTitle": "Személy létrehozva",
+  "Title": "Személy létrehozása"
+}

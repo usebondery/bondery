@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Otvoriti Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Poveži račun da spremaš kontakte s društvenih mreža.",
+    "SignIn": "Prijaviti se",
+    "Title": "Prijavi se u Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Dodati interakciju s ovom osobom"
+  },
+  "Settings": {
+    "ApiServer": "API poslužitelj",
+    "SignOut": "Odjaviti se"
+  },
+  "UpdateRequired": {
+    "Description": "Tvoje Bondery proširenje je zastarjelo i možda ne radi ispravno. Ažuriraj ga da nastaviš.",
+    "OpenExtensionsPage": "Otvoriti stranicu proširenja",
+    "Title": "Potrebno ažuriranje"
+  },
+  "Welcome": {
+    "ConnectButton": "Povezati Bondery račun"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Deschide Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Conectează contul ca să salvezi contacte din rețelele sociale.",
+    "SignIn": "Conectare",
+    "Title": "Conectează-te la Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Adaugă interacțiune cu această persoană"
+  },
+  "Settings": {
+    "ApiServer": "Server API",
+    "SignOut": "Deconectare"
+  },
+  "UpdateRequired": {
+    "Description": "Extensia Bondery este învechită și poate să nu funcționeze corect. Actualizeaz-o ca să continui.",
+    "OpenExtensionsPage": "Deschide pagina de extensii",
+    "Title": "Actualizare necesară"
+  },
+  "Welcome": {
+    "ConnectButton": "Conectează contul Bondery"
+  }
+}

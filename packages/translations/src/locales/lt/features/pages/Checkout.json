@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Jau turi aktyvią Premium prenumeratą.",
+  "alreadySubscribedTitle": "Jau prenumeruoji",
+  "errorMessage": "Kažkas nepavyko. Bandyk dar kartą.",
+  "errorTitle": "Apmokėjimas nepavyko",
+  "errorUnauthorized": "Prisijunk ir bandyk dar kartą.",
+  "intervalAnnual": "Metinė",
+  "intervalMonthly": "Mėnesinė",
+  "paymentBlockedAction": "Atnaujinti apmokėjimą",
+  "paymentBlockedMessage": "Po kelių bandymų nepavyko apdoroti mokėjimo. Atnaujink apmokėjimo duomenis, kad atkurtum Premium prieigą.",
+  "paymentBlockedTitle": "Reikalingas mokėjimas",
+  "successMessage": "Mėgaukis 300 AI žinučių per mėnesį ir visomis Premium funkcijomis.",
+  "successTitle": "Dabar esi Premium!",
+  "upgradePendingMessage": "Tavo paskyra netrukus bus atnaujinta į Premium.",
+  "upgradePendingTitle": "Mokėjimas gautas",
+  "upgradesDisabledTooltip": "Premium atnaujinimai dar nepasiekiami. Užsuk netrukus.",
+  "upgradeToPremium": "Atnaujinti į Premium"
+}

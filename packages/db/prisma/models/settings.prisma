@@ -8,8 +8,32 @@ enum ColorScheme {
 
 enum SupportedLocale {
   en
+  bg
   cs
+  da
   de
+  el
+  es
+  et
+  fi
+  fr
+  hr
+  hu
+  it
+  lt
+  lv
+  nb
+  nl
+  pl
+  pt
+  ro
+  ru
+  sk
+  sl
+  sr
+  sv
+  tr
+  uk
 
   @@map("supported_locale")
 }

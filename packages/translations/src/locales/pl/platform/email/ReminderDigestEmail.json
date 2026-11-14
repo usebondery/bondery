@@ -1,0 +1,20 @@
+{
+  "cta": "Otwórz przypomnienia",
+  "dateTypes": {
+    "anniversary": "Rocznica",
+    "birthday": "Urodziny",
+    "graduation": "Obrona pracy",
+    "nameday": "Svátek",
+    "other": "Dúležité dátum"
+  },
+  "dayMany": "{{count}} dní",
+  "dayOne": "1 den",
+  "description": "For {{headingDate}}. Open a person to see details or send a note.",
+  "headingMany": "{{count}} pripomienok sa blíži",
+  "headingOne": "1 pripomienka sa blíži",
+  "preview": "{{firstosobaName}} — {{firstTypeLabel}} za {{firstRemainingLabel}}",
+  "previewMore": "{{firstosobaName}} — {{firstTypeLabel}} za {{firstRemainingLabel}} a ješte {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} sa blíži za {{remainingLabel}} dne {{dateLabel}}.",
+  "subject": "Pripomienky Bondery na {{targetDate}}",
+  "whyReceiving": "You're receiving this because you turned on reminders for these dates."
+}

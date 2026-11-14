@@ -1,0 +1,22 @@
+{
+  "AddError": "Impossible d’ajouter l’étiquette",
+  "AddNewTagTooltip": "Créer une étiquette",
+  "AddSuccess": "Étiquette ajoutée",
+  "AddTagTooltip": "Ajouter une étiquette",
+  "CreateError": "Impossible de créer l’étiquette",
+  "CreateNewTagEmpty": "Créer une étiquette",
+  "CreateNewTagOption": "Créer l’étiquette « {label} »",
+  "CreateTagCancel": "Annuler",
+  "CreateTagConfirm": "Créer et ajouter",
+  "CreateTagMessage": "L’étiquette « {name} » n’existe pas encore. Voulez-vous la créer et l’ajouter à ce contact ?",
+  "CreateTagTitle": "Créer une étiquette ?",
+  "Label": "Étiquettes",
+  "NoTagsFound": "Aucune étiquette trouvée",
+  "Placeholder": "Ajouter des étiquettes…",
+  "RemoveError": "Impossible de retirer l’étiquette",
+  "RemoveTagTooltip": "Retirer l’étiquette",
+  "SearchPlaceholder": "Rechercher ou créer une étiquette…",
+  "TagAlreadyAddedMessage": "L’étiquette « {name} » est déjà sur ce contact.",
+  "TagAlreadyAddedTitle": "Étiquette déjà ajoutée",
+  "TagAlreadyAppliedTooltip": "Étiquette déjà appliquée"
+}

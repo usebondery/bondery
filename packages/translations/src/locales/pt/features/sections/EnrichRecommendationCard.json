@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Todos os contactos com perfil LinkedIn já foram enriquecidos.",
+  "AllEnrichedTitle": "Todos os contactos enriquecidos",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "A enriquecer:",
+  "EligibleLabel_one": "{count} pessoa pode ser enriquecida",
+  "EligibleLabel_other": "{count} pessoas podem ser enriquecidas",
+  "Enrich": "Enriquecer",
+  "EnrichAll": "Enriquecer todos",
+  "HelpTooltip": "Obter os dados mais recentes do perfil LinkedIn neste contacto. Clique para saber como funciona o enriquecimento.",
+  "Pause": "Pausar",
+  "PausingTooltip": "A concluir o contacto atual e a pausar...",
+  "PersonEligibleLabel": "Este contacto pode ser enriquecido a partir do LinkedIn",
+  "ProcessingPerson": "A enriquecer {name}...",
+  "ProgressLabel": "A enriquecer: {completed} de {totalEligible} concluídos",
+  "ProgressLabelWithFailed": "A enriquecer: {completed} de {totalEligible} concluídos ({failed} falharam)",
+  "Resume": "Retomar",
+  "ResumeLabel": "Enriquecimento interrompido: {completed} concluídos, {pending} em falta",
+  "SkipRemaining": "Ignorar restantes",
+  "Tooltip": "Estes contactos têm perfil LinkedIn mas ainda não foram enriquecidos. Enriqueça para obter histórico profissional, formação e biografia atualizados."
+}

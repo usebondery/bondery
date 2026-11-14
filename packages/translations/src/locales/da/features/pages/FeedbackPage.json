@@ -1,0 +1,16 @@
+{
+  "Description": "Hjælp oss förbättra Bondery genom att dela dina tankar. <3",
+  "ErrorMessage": "Kunde ikke sende feedback. FörSøg igen.",
+  "ErrorTitle": "Fel",
+  "GeneralFeedbackLabel": "Har du feedback, tips eller buggar att dela?",
+  "GeneralFeedbackPlaceholder": "Jag kan lide okan lide den her delen av appen.. Jag vile vilja att det her lades till.. Jag hade problem med..",
+  "NpsLabel": "På en skalla 0–10: Hur sannolikt er det att du rekommenderar Bondery till en ven eller kollega?",
+  "NpsReasonLabel": "Varför valde du betyget {score}?",
+  "NpsReasonPlaceholder": "For at jag tyckte den her funktionen var brugbar/felaktig/saknades...",
+  "SubmitButton": "Send feedback till utvecfærdigna",
+  "SubmittingMessage": "Vent medan vi sender din feedback",
+  "SubmittingTitle": "Sendr feedback…",
+  "SuccessMessage": "Din feedback har tagits emot",
+  "SuccessTitle": "Tack!",
+  "Title": "Feedback"
+}

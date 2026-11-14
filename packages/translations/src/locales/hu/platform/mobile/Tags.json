@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Nem sikerült létrehozni a címkét. Próbáld újra.",
+  "CreateTag": "Címke létrehozása",
+  "DeleteFailed": "Nem sikerült törölni a címkét. Próbáld újra.",
+  "EditFailed": "Nem sikerült menteni a címkét. Próbáld újra.",
+  "EditTagsSearchPlaceholder": "Címkék keresése...",
+  "LoadFailed": "Nem sikerült betölteni a címkéket",
+  "NoTagsYet": "Még nincs címke",
+  "NoTagsYetHint": "A címkékkel rendszerezheted és megtalálhatod a kapcsolataidat."
+}

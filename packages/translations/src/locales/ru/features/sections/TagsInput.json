@@ -1,0 +1,22 @@
+{
+  "AddError": "Не удалось добавить тег",
+  "AddNewTagTooltip": "Создать тег",
+  "AddSuccess": "Тег успешно добавлен",
+  "AddTagTooltip": "Добавить тег",
+  "CreateError": "Не удалось создать тег",
+  "CreateNewTagEmpty": "Создать тег",
+  "CreateNewTagOption": "Создать тег „{label}”",
+  "CreateTagCancel": "Отменить",
+  "CreateTagConfirm": "Создать и добавить",
+  "CreateTagMessage": "Тега „{name}” ещё нет. Создать его и добавить к этому контакту?",
+  "CreateTagTitle": "Создать тег?",
+  "Label": "Теги",
+  "NoTagsFound": "Теги не найдены",
+  "Placeholder": "Добавить теги…",
+  "RemoveError": "Не удалось удалить тег",
+  "RemoveTagTooltip": "Удалить тег",
+  "SearchPlaceholder": "Искать или создать тег…",
+  "TagAlreadyAddedMessage": "Тег „{name}” уже добавлен к этому контакту.",
+  "TagAlreadyAddedTitle": "Тег уже добавлен",
+  "TagAlreadyAppliedTooltip": "Тег уже применён"
+}

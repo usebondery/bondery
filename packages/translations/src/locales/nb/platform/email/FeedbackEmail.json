@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Det verktøyet returnerte:",
+  "agentExpectedHeading": "Det agenten forventet:",
+  "agentKindLabel": "Rapporttype:",
+  "agentRequestIdLabel": "Forespørsels-ID:",
+  "agentSourceHeading": "Rapportert av en AI-agent",
+  "agentToolLabel": "Verktøy:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Generell tilbakemelding:",
+  "heading": "Tilbakemelding fra {{userEmail}}",
+  "notProvided": "(Ikke oppgitt)",
+  "npsReasonHeading": "Hvorfor valgte du denne poengsummen?",
+  "npsScoreLabel": "NPS-poengsum:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Ny tilbakemelding fra {{userEmail}} — NPS-poengsum: {{npsScore}}",
+  "replyCta": "Svar {{userEmail}}",
+  "subject": "Ny tilbakemelding om Bondery",
+  "submittedAt": "Sendt inn: {{timestamp}}",
+  "userEmailLabel": "Brukerens e-post:",
+  "userIdLabel": "Bruker-ID:"
+}

@@ -1,0 +1,9 @@
+{
+  "body": "Po to prenumerata atsinaujins automatiškai, nebent ją atšauksi.",
+  "cta": "Valdyti prenumeratą",
+  "endDateFallback": "netrukus",
+  "heading": "Tavo Premium bandomasis laikotarpis baigiasi {{endDate}}",
+  "preview": "Prenumerata atsinaujins, nebent atšauksi",
+  "subject": "Tavo Bondery Premium bandomasis laikotarpis netrukus baigsis",
+  "whyReceiving": "Gavai tai, nes turi Bondery Premium bandomąjį laikotarpį."
+}

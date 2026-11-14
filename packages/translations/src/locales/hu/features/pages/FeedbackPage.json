@@ -1,0 +1,16 @@
+{
+  "Description": "Segíts jobbá tenni a Bonderyt: oszd meg a gondolataidat. <3",
+  "ErrorMessage": "A visszajelzés küldése nem sikerült. Próbáld újra.",
+  "ErrorTitle": "Hiba",
+  "GeneralFeedbackLabel": "Van visszajelzésed, ötleted vagy hibajelentésed?",
+  "GeneralFeedbackPlaceholder": "Szeretem/nem szeretem ezt a részt… Szeretném, ha lenne… Problémám volt ezzel…",
+  "NpsLabel": "0-tól 10-ig: Mennyire valószínű, hogy ajánlanád a Bonderyt egy barátodnak vagy kollégádnak?",
+  "NpsReasonLabel": "Miért adtál {score} pontot?",
+  "NpsReasonPlaceholder": "Mert hasznosnak/hibásnak/hiányzónak találtam ezt a funkciót…",
+  "SubmitButton": "Visszajelzés küldése a fejlesztőknek",
+  "SubmittingMessage": "Várd meg, amíg elküldjük a visszajelzésedet",
+  "SubmittingTitle": "Visszajelzés küldése...",
+  "SuccessMessage": "Megkaptuk a visszajelzésedet",
+  "SuccessTitle": "Köszönjük!",
+  "Title": "Visszajelzés"
+}

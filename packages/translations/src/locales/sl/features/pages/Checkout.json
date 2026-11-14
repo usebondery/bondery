@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Už máte aktívne predplatné Premium.",
+  "alreadySubscribedTitle": "Už predplatené",
+  "errorMessage": "Nečo sa pokazilo. Poskusi to znova.",
+  "errorTitle": "Platba sa nezdarila",
+  "errorUnauthorized": "Prijavi sa a poskusi to znova.",
+  "intervalAnnual": "Roční",
+  "intervalMonthly": "Mesíční",
+  "paymentBlockedAction": "Aktualizovat platbu",
+  "paymentBlockedMessage": "Po niekolkých pokusech sa nám ni uspelo spracovat platbu. Posodobi fakturačné údaje pre obnovenie Premium.",
+  "paymentBlockedTitle": "Vyžadována platba",
+  "successMessage": "Užite si 300 AI správ mesačne a vse Premium funkcie.",
+  "successTitle": "Nyní ste Premium!",
+  "upgradePendingMessage": "Váš účet čoskoro prejde na Premium.",
+  "upgradePendingTitle": "Platba prijata",
+  "upgradesDisabledTooltip": "Upgrade na Premium zatial nie je k dispozícii. Poskusi to neskor.",
+  "upgradeToPremium": "Prejst na Premium"
+}

@@ -1,3 +1,5 @@
+import { buildIntlLocaleTag } from "@bondery/schemas/locale";
+
 /** Epoch year used for recurring dates without a year (matches web + vCard convention). */
 export const YEARLESS_SENTINEL = 1904;
 
@@ -45,15 +47,7 @@ export function toImportantDateIso(value: ImportantDateWheelValue): string {
 }
 
 export function resolveDateLocale(language: string): string {
-  if (language.startsWith("cs")) {
-    return "cs-CZ";
-  }
-
-  if (language.startsWith("de")) {
-    return "de-DE";
-  }
-
-  return "en-US";
+  return buildIntlLocaleTag(language, "24h");
 }
 
 export function formatImportantDate(iso: string, locale = "en-US"): string {

@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Darbības",
+  "AddPerson": "Pievienot personu",
+  "AddPersonDescription": "Izveidot jaunu kontaktu savā tīklā",
+  "ContactUs": "Uzturi kontaktu ar mums",
+  "ContactUsDescription": "Uzturi kontaktu ar Bondery komandu",
+  "Documentation": "Dokumentācija",
+  "DocumentationDescription": "Izlasīt Bondery dokumentus",
+  "ExportData": "Eksportēt datus",
+  "ExportDataDescription": "Saglabāt savu Bondery datu kopiju",
+  "FindPerson": "Atrodi personu",
+  "FindPersonDescription": "Meklēt tīklā pēc nosaukuma",
+  "GoToDescription": "Dodies uz {label}",
+  "HelpGroup": "Palīdzība",
+  "ImportData": "Importēt datus",
+  "ImportDataDescription": "Importēt Bondery JSON ZIP",
+  "LogInteraction": "Žurnāla mijiedarbība",
+  "LogInteractionDescription": "Rakstīt jaunu sapulci, zvanu vai ziņojumu",
+  "NavigateGroup": "Naviģēt",
+  "NothingFound": "Nav atrasta neviena darbība",
+  "SearchPlaceholder": "Meklēšanas darbības vai navigācija…"
+}

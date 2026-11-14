@@ -1,0 +1,9 @@
+{
+  "body": "Derefter förnyas prenumerationen automatiskt om du ikke siger upp den.",
+  "cta": "Hantera prenumeration",
+  "endDateFallback": "snart",
+  "heading": "Din Premium-testperiod slutar {{endDate}}",
+  "preview": "Prenumerationen förnyas om du ikke siger upp",
+  "subject": "Din Bondery Premium-testperiod slutar snart",
+  "whyReceiving": "Du modtager denne e-mail, fordi du har en Bondery Premium-prøveperiode."
+}

@@ -1,0 +1,9 @@
+{
+  "body": "After that, your subscription will renew automatically unless you cancel.",
+  "cta": "Manage subscription",
+  "endDateFallback": "soon",
+  "heading": "Your Premium trial ends on {{endDate}}",
+  "preview": "Your subscription renews unless you cancel",
+  "subject": "Your Bondery Premium trial is ending soon",
+  "whyReceiving": "You're receiving this because you have a Bondery Premium trial."
+}

@@ -1,0 +1,13 @@
+{
+  "Create": "Lägg till i Bondery",
+  "Creating": "Opretr person…",
+  "ErrorDescription": "Något gick fel ner personen vile oprets.",
+  "ErrorTitle": "Kunde ikke opret person",
+  "FullNameLabel": "Fuldstændigt navn",
+  "FullNamePlaceholder": "t.ex. Anna Svensson",
+  "InvalidName": "Ange ett giltigt navn",
+  "NameRequired": "Ange ett navn",
+  "SuccessDescription": "Den nya personen lades till bland dina kontakter.",
+  "SuccessTitle": "Person oprettet",
+  "Title": "Opret person"
+}

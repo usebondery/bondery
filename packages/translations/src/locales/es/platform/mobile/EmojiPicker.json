@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Actividades",
+    "Animals": "Animales",
+    "Buildings": "Edificios",
+    "Celebrations": "Celebraciones",
+    "Food": "Comida",
+    "Hearts": "Corazones",
+    "Humans": "Personas",
+    "Miscellaneous": "Varios",
+    "Nature": "Naturaleza",
+    "Objects": "Objetos",
+    "Sports": "Deportes",
+    "Travel": "Viajes",
+    "Work": "Trabajo"
+  },
+  "EmptySearch": "No se han encontrado emojis",
+  "RandomAccessibilityLabel": "Elegir un emoji al azar",
+  "SearchPlaceholder": "Buscar emojis…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Abre el selector de emojis"
+}

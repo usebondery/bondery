@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Renk kodu panoya kopyalandı",
+  "CopyAccessibilityLabel": "Renk kodunu kopyala",
+  "CopyFailedMessage": "Renk kodu kopyalanamadı. Yeniden dene.",
+  "CustomColorLabel": "Özel renk",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Geçerli bir onaltılık renk gir (ör. #AE3EC9)",
+  "SheetTitle": "Renk",
+  "SwatchesLabel": "Hızlı renkler",
+  "TriggerAccessibilityHint": "Renk seçiciyi aç"
+}

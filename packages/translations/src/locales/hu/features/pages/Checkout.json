@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Már van aktív Premium előfizetésed.",
+  "alreadySubscribedTitle": "Már előfizettél",
+  "errorMessage": "Valami hiba történt. Próbáld újra.",
+  "errorTitle": "A fizetés nem sikerült",
+  "errorUnauthorized": "Jelentkezz be, majd próbáld újra.",
+  "intervalAnnual": "Éves",
+  "intervalMonthly": "Havi",
+  "paymentBlockedAction": "Számlázás frissítése",
+  "paymentBlockedMessage": "Több próbálkozás után sem tudtuk feldolgozni a fizetést. Frissítsd a számlázási adataidat a Premium visszaállításához.",
+  "paymentBlockedTitle": "Fizetés szükséges",
+  "successMessage": "Élvezd a havi 300 AI-üzenetet és az összes Premium funkciót.",
+  "successTitle": "Mostantól Premium vagy!",
+  "upgradePendingMessage": "A fiókod hamarosan Premiumra vált.",
+  "upgradePendingTitle": "Fizetés megérkezett",
+  "upgradesDisabledTooltip": "A Premium frissítés még nem érhető el. Nézz vissza hamarosan.",
+  "upgradeToPremium": "Frissítés Premiumra"
+}

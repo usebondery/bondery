@@ -1,0 +1,20 @@
+{
+  "cta": "Ava meeldetuletused",
+  "dateTypes": {
+    "anniversary": "Aastapäev",
+    "birthday": "Sünnipäev",
+    "graduation": "Lõpetamine",
+    "nameday": "Nimipäev",
+    "other": "Oluline kuupäev"
+  },
+  "dayMany": "{{count}} päeva",
+  "dayOne": "1 päev",
+  "description": "Kuupäevaks {{headingDate}}. Ava inimene, et näha detaile või saata märge.",
+  "headingMany": "Tulekul on {{count}} meeldetuletust",
+  "headingOne": "Tulekul on 1 meeldetuletus",
+  "preview": "{{firstPersonName}} {{firstTypeLabel}} {{firstRemainingLabel}} pärast",
+  "previewMore": "{{firstPersonName}} {{firstTypeLabel}} {{firstRemainingLabel}} pärast ja veel {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} tuleb {{remainingLabel}} pärast, kuupäeval {{dateLabel}}.",
+  "subject": "Bondery meeldetuletused kuupäevaks {{targetDate}}",
+  "whyReceiving": "Sa said selle, sest lülitasid nende kuupäevade meeldetuletused sisse."
+}

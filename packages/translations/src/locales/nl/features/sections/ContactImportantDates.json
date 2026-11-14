@@ -1,0 +1,32 @@
+{
+  "AddAction": "Datum toevoegen",
+  "AddHint": "Vul alle gegevens in om een datum toe te voegen.",
+  "AddImportantDate": "Belangrijke datum toevoegen",
+  "BirthdayDateLabel": "Verjaardag kiezen",
+  "DatePlaceholder": "Datum kiezen",
+  "DeleteAction": "Verwijderen",
+  "DraftIncompleteError": "Vul alle gegevens in om een datum toe te voegen.",
+  "Empty": "Nog geen belangrijke datums.",
+  "ErrorTitle": "Fout",
+  "NotePlaceholder": "Optionele notitie",
+  "NotifyDayBefore": "Herinner {count} dag van tevoren",
+  "NotifyDaysBefore": "Herinner {count} dagen van tevoren",
+  "NotifyMe": "Herinner mij",
+  "NotifyNone": "Niet herinneren",
+  "SuccessTitle": "Gelukt",
+  "Title": "Belangrijke datums",
+  "TypeDisabledBirthdateHint": "{firstName} heeft al een verjaardag",
+  "TypeDisabledHint": "{firstName} heeft al een verjaardag of naamdag",
+  "TypeDisabledNamedateHint": "{firstName} heeft al een naamdag",
+  "TypePlaceholder": "Type kiezen",
+  "Types": {
+    "anniversary": "Jubileum",
+    "birthday": "Verjaardag",
+    "graduation": "Afstuderen",
+    "nameday": "Naamdag",
+    "other": "Anders"
+  },
+  "UniqueTypeError": "Je kunt maar één {type} toevoegen.",
+  "UpdateError": "Kan belangrijke datums niet bijwerken",
+  "UpdateSuccess": "Belangrijke datums bijgewerkt"
+}

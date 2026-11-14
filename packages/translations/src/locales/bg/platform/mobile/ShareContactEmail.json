@@ -1,0 +1,22 @@
+{
+  "AddButton": "Add",
+  "Description": "We'll send their details to the people below. You'll get a copy too.",
+  "DuplicateEmail": "This address is already added",
+  "ErrorDescription": "Check your connection and try again.",
+  "ErrorHeadline": "Couldn't send contact",
+  "InvalidEmail": "Enter a valid email address",
+  "MaxRecipients": "You can add up to 10 recipients",
+  "MaxRecipientsHint": "10 recipients maximum",
+  "MessagePlaceholder": "Add a note (optional)",
+  "NoRecipients": "Add at least one recipient",
+  "RecipientsLabel": "To",
+  "RecipientsPlaceholder": "Recipient email address",
+  "RemoveRecipient": "Remove {email}",
+  "SendButton": "Send",
+  "SendButtonMany": "Send to {count} people",
+  "SendButtonOne": "Send to 1 person",
+  "SuccessDescription": "Your recipients will receive it shortly.",
+  "SuccessHeadline": "Contact sent",
+  "Title": "Email {name}'s contact",
+  "WhatsIncluded": "Includes contact info, social links, and notes on file."
+}

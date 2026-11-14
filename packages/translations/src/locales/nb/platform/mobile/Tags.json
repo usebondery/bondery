@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Kunne ikke opprette etiketten. Prøv igjen.",
+  "CreateTag": "Opprett etikett",
+  "DeleteFailed": "Kunne ikke slette etiketten. Prøv igjen.",
+  "EditFailed": "Kunne ikke lagre etiketten. Prøv igjen.",
+  "EditTagsSearchPlaceholder": "Søk etter etiketter...",
+  "LoadFailed": "Kunne ikke laste etikettene",
+  "NoTagsYet": "Ingen etiketter ennå",
+  "NoTagsYetHint": "Etiketter hjelper deg å organisere og finne kontakter."
+}

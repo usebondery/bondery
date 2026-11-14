@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} pasidalino šiuo kontaktu su tavimi",
+  "footerNotes": "Išsiųsta su Bondery. Atsakyk į šį laišką, kad susisiektum su {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adresas",
+    "email": "El. paštas",
+    "facebook": "Facebook",
+    "importantDates": "Svarbios datos",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Vieta",
+    "notes": "Užrašai",
+    "phone": "Telefonas",
+    "signal": "Signal",
+    "website": "Svetainė",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefonas, el. paštas ir kitos detalės viduje",
+  "replyCta": "Atsakyti {{senderName}}",
+  "subject": "{{senderName}} pasidalino kontaktu su tavimi • {{contactName}}"
+}

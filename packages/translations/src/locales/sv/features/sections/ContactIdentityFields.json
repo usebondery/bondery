@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "kontakt",
+  "FieldUpdated": "{label} uppdaterad",
+  "FirstNamePlaceholder": "Förnamn",
+  "FirstNameSuccessLabel": "Förnamn",
+  "HeadlinePlaceholder": "Rubrik",
+  "HeadlineSuccessLabel": "Rubrik",
+  "LastNamePlaceholder": "Efternamn",
+  "LastNameSuccessLabel": "Efternamn",
+  "LocationPlaceholder": "Plats",
+  "LocationSuccessLabel": "Plats",
+  "LocationUpdated": "Plats uppdaterad",
+  "MiddleNamePlaceholder": "Mellannamn",
+  "MiddleNameSuccessLabel": "Mellannamn",
+  "NameFieldUpdated": "{label} uppdaterad",
+  "SavedTitle": "Sparat",
+  "UpdateFieldFailed": "Kunde inte uppdatera {field}"
+}

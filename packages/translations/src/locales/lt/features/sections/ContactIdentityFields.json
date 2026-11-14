@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kontaktas",
+  "FieldUpdated": "{label} atnaujinta",
+  "FirstNamePlaceholder": "Vardas",
+  "FirstNameSuccessLabel": "Vardas",
+  "HeadlinePlaceholder": "Antraštė",
+  "HeadlineSuccessLabel": "Antraštė",
+  "LastNamePlaceholder": "Pavardė",
+  "LastNameSuccessLabel": "Pavardė",
+  "LocationPlaceholder": "Vieta",
+  "LocationSuccessLabel": "Vieta",
+  "LocationUpdated": "Vieta atnaujinta",
+  "MiddleNamePlaceholder": "Antras vardas",
+  "MiddleNameSuccessLabel": "Antras vardas",
+  "NameFieldUpdated": "{label} vardas atnaujintas",
+  "SavedTitle": "Išsaugota",
+  "UpdateFieldFailed": "Nepavyko atnaujinti lauką {field}"
+}

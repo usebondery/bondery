@@ -1,0 +1,30 @@
+{
+  "Approve": "Jóváhagyás",
+  "ChromeExtensionClientName": "Bondery Chrome-bővítmény",
+  "Deny": "Elutasítás",
+  "Description": "A(z) {clientName} hozzáférést kér a Bondery-fiókodhoz.",
+  "ErrorTitle": "Engedélyezési hiba",
+  "InvalidRequest": "Érvénytelen engedélyezési kérés.",
+  "LoopbackWarning": "Ez az alkalmazás ezen a számítógépen fut (localhost). Csak akkor folytasd, ha te indítottad.",
+  "MissingAuthorizationId": "Hiányzik az engedélyezési kérés. Próbáld újra az alkalmazásból.",
+  "PermissionFullDescription": "Kapcsolatok és adataik létrehozása, frissítése és törlése is.",
+  "PermissionFullLabel": "Teljes hozzáférés",
+  "PermissionLabel": "Hozzáférés",
+  "PermissionReadDescription": "Kapcsolatok és adataik keresése és olvasása.",
+  "PermissionReadLabel": "Csak olvasás",
+  "RequestedPermissions": "Kért jogosultságok",
+  "Scopes": {
+    "api:access": "A Bondery API használata a nevedben",
+    "email": "E-mail-címed megtekintése",
+    "mcp:read": "Kapcsolataid és adataik megtekintése",
+    "mcp:write": "Kapcsolatok és adataik létrehozása, frissítése és törlése",
+    "offline_access": "Bejelentkezve maradsz, amíg vissza nem vonod a hozzáférést",
+    "openid": "Személyazonosságod ellenőrzése",
+    "phone": "Telefonszámod megtekintése",
+    "profile": "Profilinformációid megtekintése"
+  },
+  "Title": "Alkalmazás engedélyezése",
+  "UnexpectedError": "Váratlan hiba történt. Próbáld újra.",
+  "UnknownClientName": "Ismeretlen alkalmazás",
+  "WebappClientName": "Bondery"
+}

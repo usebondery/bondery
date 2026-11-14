@@ -1,0 +1,13 @@
+{
+  "Create": "Lisää Bonderyyn",
+  "Creating": "Luodaan henkilöä…",
+  "ErrorDescription": "Henkilön luonnissa tapahtui virhe.",
+  "ErrorTitle": "Henkilöä ei voitu luoda",
+  "FullNameLabel": "Koko nimi",
+  "FullNamePlaceholder": "esim. Maija Meikäläinen",
+  "InvalidName": "Anna kelvollinen nimi",
+  "NameRequired": "Anna nimi",
+  "SuccessDescription": "Uusi henkilö lisättiin yhteystietoihisi.",
+  "SuccessTitle": "Henkilö luotu",
+  "Title": "Luo henkilö"
+}

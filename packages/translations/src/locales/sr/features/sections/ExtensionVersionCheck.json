@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Server je odbio zahtev jer je tvoj dodatak zastareo. Ažuriraj ga.",
+  "ApiRejectedTitle": "Verzija je zastarela",
+  "UpdateButton": "Ažuriraj",
+  "UpdateRequiredDescription": "Tvoj Bondery dodatak je zastareo i možda neće raditi ispravno. Ažuriraj je da bi nastavio/la.",
+  "UpdateRequiredTitle": "Potrebno je ažuriranje",
+  "WebappNotificationDescription": "Tvoj Bondery Chrome dodatak treba da se ažurira da bi nastavio da funkcioniše ispravno.",
+  "WebappNotificationTitle": "Dostupno je ažuriranje proširenja"
+}

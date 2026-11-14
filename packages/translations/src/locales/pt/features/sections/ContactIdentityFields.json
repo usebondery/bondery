@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Contacto",
+  "FieldUpdated": "{label} atualizado",
+  "FirstNamePlaceholder": "Nome próprio",
+  "FirstNameSuccessLabel": "Nome próprio",
+  "HeadlinePlaceholder": "Título profissional",
+  "HeadlineSuccessLabel": "Título profissional",
+  "LastNamePlaceholder": "Apelido",
+  "LastNameSuccessLabel": "Apelido",
+  "LocationPlaceholder": "Localização",
+  "LocationSuccessLabel": "Localização",
+  "LocationUpdated": "Localização atualizada",
+  "MiddleNamePlaceholder": "Nome do meio",
+  "MiddleNameSuccessLabel": "Nome do meio",
+  "NameFieldUpdated": "Campo «{label}» atualizado",
+  "SavedTitle": "Guardado",
+  "UpdateFieldFailed": "Não foi possível atualizar {field}"
+}

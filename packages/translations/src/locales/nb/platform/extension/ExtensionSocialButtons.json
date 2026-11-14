@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Feil i utvidelsen. Prøv igjen",
+    "OpenInBondery": "Åpne i Bondery",
+    "SignInRequired": "Logg inn: klikk Bondery-ikonet",
+    "SomethingWrong": "Noe gikk galt"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Feil i utvidelsen. Prøv igjen",
+    "OpenInBondery": "Åpne i Bondery",
+    "SignInRequired": "Logg inn: klikk Bondery-ikonet",
+    "SomethingWrong": "Noe gikk galt"
+  }
+}

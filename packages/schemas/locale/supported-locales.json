@@ -3,7 +3,31 @@
   "postgresEnum": "supported_locale",
   "supported": [
     { "code": "en", "dir": "ltr", "flag": "gb", "intl": "en-US", "nativeName": "English" },
+    { "code": "bg", "dir": "ltr", "flag": "bg", "intl": "bg-BG", "nativeName": "български" },
     { "code": "cs", "dir": "ltr", "flag": "cz", "intl": "cs-CZ", "nativeName": "čeština" },
-    { "code": "de", "dir": "ltr", "flag": "de", "intl": "de-DE", "nativeName": "Deutsch" }
+    { "code": "da", "dir": "ltr", "flag": "dk", "intl": "da-DK", "nativeName": "dansk" },
+    { "code": "de", "dir": "ltr", "flag": "de", "intl": "de-DE", "nativeName": "Deutsch" },
+    { "code": "el", "dir": "ltr", "flag": "gr", "intl": "el-GR", "nativeName": "Ελληνικά" },
+    { "code": "es", "dir": "ltr", "flag": "es", "intl": "es-ES", "nativeName": "español" },
+    { "code": "et", "dir": "ltr", "flag": "ee", "intl": "et-EE", "nativeName": "eesti" },
+    { "code": "fi", "dir": "ltr", "flag": "fi", "intl": "fi-FI", "nativeName": "suomi" },
+    { "code": "fr", "dir": "ltr", "flag": "fr", "intl": "fr-FR", "nativeName": "français" },
+    { "code": "hr", "dir": "ltr", "flag": "hr", "intl": "hr-HR", "nativeName": "hrvatski" },
+    { "code": "hu", "dir": "ltr", "flag": "hu", "intl": "hu-HU", "nativeName": "magyar" },
+    { "code": "it", "dir": "ltr", "flag": "it", "intl": "it-IT", "nativeName": "italiano" },
+    { "code": "lt", "dir": "ltr", "flag": "lt", "intl": "lt-LT", "nativeName": "lietuvių" },
+    { "code": "lv", "dir": "ltr", "flag": "lv", "intl": "lv-LV", "nativeName": "latviešu" },
+    { "code": "nb", "dir": "ltr", "flag": "no", "intl": "nb-NO", "nativeName": "norsk bokmål" },
+    { "code": "nl", "dir": "ltr", "flag": "nl", "intl": "nl-NL", "nativeName": "Nederlands" },
+    { "code": "pl", "dir": "ltr", "flag": "pl", "intl": "pl-PL", "nativeName": "polski" },
+    { "code": "pt", "dir": "ltr", "flag": "pt", "intl": "pt-PT", "nativeName": "português" },
+    { "code": "ro", "dir": "ltr", "flag": "ro", "intl": "ro-RO", "nativeName": "română" },
+    { "code": "ru", "dir": "ltr", "flag": "ru", "intl": "ru-RU", "nativeName": "русский" },
+    { "code": "sk", "dir": "ltr", "flag": "sk", "intl": "sk-SK", "nativeName": "slovenčina" },
+    { "code": "sl", "dir": "ltr", "flag": "si", "intl": "sl-SI", "nativeName": "slovenščina" },
+    { "code": "sr", "dir": "ltr", "flag": "rs", "intl": "sr-Latn-RS", "nativeName": "srpski" },
+    { "code": "sv", "dir": "ltr", "flag": "se", "intl": "sv-SE", "nativeName": "svenska" },
+    { "code": "tr", "dir": "ltr", "flag": "tr", "intl": "tr-TR", "nativeName": "Türkçe" },
+    { "code": "uk", "dir": "ltr", "flag": "ua", "intl": "uk-UA", "nativeName": "українська" }
   ]
 }

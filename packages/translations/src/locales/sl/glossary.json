@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "contact": "stik",
+    "contactPlural": "stiki",
+    "group": "skupina",
+    "interaction": "interakcija",
+    "interactionPlural": "interakcije",
+    "network": "omrežje",
+    "person": "oseba",
+    "person_few": "{count} osebe",
+    "person_one": "{count} oseba",
+    "person_other": "{count} oseb",
+    "person_two": "{count} osebi",
+    "tag": "oznaka"
+  },
+  "features": {
+    "aiAssistant": "AI asistent",
+    "fixAndMerge": "Popravi in združi",
+    "keepInTouch": "Ostani v stiku"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

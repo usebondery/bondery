@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Aktiviteter",
+    "Animals": "Dyr",
+    "Buildings": "Bygninger",
+    "Celebrations": "Feiringer",
+    "Food": "Mat",
+    "Hearts": "Hjerter",
+    "Humans": "Mennesker",
+    "Miscellaneous": "Diverse",
+    "Nature": "Natur",
+    "Objects": "Objekter",
+    "Sports": "Sport",
+    "Travel": "Reise",
+    "Work": "Arbeid"
+  },
+  "EmptySearch": "Ingen emoji funnet",
+  "RandomAccessibilityLabel": "Velg tilfeldig emoji",
+  "SearchPlaceholder": "Søk etter emoji …",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Åpner emoji-velgeren"
+}

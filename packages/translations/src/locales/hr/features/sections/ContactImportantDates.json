@@ -1,0 +1,32 @@
+{
+  "AddAction": "Dodati datum",
+  "AddHint": "Za novi datum unesi sve podatke.",
+  "AddImportantDate": "Dodati važan datum",
+  "BirthdayDateLabel": "Odaberi rođendan",
+  "DatePlaceholder": "Odaberi datum",
+  "DeleteAction": "Izbrisati",
+  "DraftIncompleteError": "Za novi datum unesi sve podatke.",
+  "Empty": "Još nema važnih datuma.",
+  "ErrorTitle": "Greška",
+  "NotePlaceholder": "Neobavezna bilješka",
+  "NotifyDayBefore": "Obavijesti {count} dan ranije",
+  "NotifyDaysBefore": "Obavijesti {count} dana ranije",
+  "NotifyMe": "Obavijesti me",
+  "NotifyNone": "Ne obavještavaj",
+  "SuccessTitle": "Uspjeh",
+  "Title": "Važni datumi",
+  "TypeDisabledBirthdateHint": "{firstName} već ima rođendan",
+  "TypeDisabledHint": "{firstName} već ima rođendan ili imendan",
+  "TypeDisabledNamedateHint": "{firstName} već ima imendan",
+  "TypePlaceholder": "Odaberi vrstu",
+  "Types": {
+    "anniversary": "Godišnjica",
+    "birthday": "Rođendan",
+    "graduation": "Matura / diplomiranje",
+    "nameday": "Imendan",
+    "other": "Ostalo"
+  },
+  "UniqueTypeError": "Može se dodati samo jedan {type}.",
+  "UpdateError": "Ažuriranje važnih datuma nije uspjelo",
+  "UpdateSuccess": "Važni datumi su uspješno ažurirani"
+}

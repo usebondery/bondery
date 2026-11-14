@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Adj fényképet ehhez a kapcsolathoz",
+  "Cancel": "Mégse",
+  "ConfirmPhoto": "Fénykép megerősítése",
+  "DragImageHere": "Húzd ide a képet, vagy kattints a kiválasztáshoz",
+  "InvalidFile": "Érvénytelen fájl",
+  "PhotoUpdateError": "A kapcsolat fényképe nem frissült",
+  "PhotoUpdateSuccess": "A kapcsolat fényképe frissült",
+  "PleaseWait": "Várj",
+  "TitleModal": "Kapcsolat fényképe feltöltése",
+  "UpdateError": "Hiba",
+  "UpdateProfilePhoto": "Kapcsolat fényképe frissítése",
+  "UpdateSuccess": "Siker",
+  "UploadingPhoto": "Feltöltés..."
+}

@@ -1,0 +1,30 @@
+{
+  "Approve": "Godkjenn",
+  "ChromeExtensionClientName": "Bondery Chrome-utvidelse",
+  "Deny": "Avslå",
+  "Description": "{clientName} ber om tilgang til Bondery-kontoen din.",
+  "ErrorTitle": "Autorisasjonsfeil",
+  "InvalidRequest": "Ugyldig autorisasjonsforespørsel.",
+  "LoopbackWarning": "Denne appen kjører på denne datamaskinen (localhost). Fortsett bare hvis du startet den.",
+  "MissingAuthorizationId": "Autorisasjonsforespørsel mangler. Prøv igjen fra appen.",
+  "PermissionFullDescription": "Opprette, oppdatere og slette kontakter og tilhørende data også.",
+  "PermissionFullLabel": "Full tilgang",
+  "PermissionLabel": "Tilgang",
+  "PermissionReadDescription": "Søke i og lese kontakter og tilhørende data.",
+  "PermissionReadLabel": "Kun lesing",
+  "RequestedPermissions": "Forespurte tillatelser",
+  "Scopes": {
+    "api:access": "Bruke Bondery API på dine vegne",
+    "email": "Se e-postadressen din",
+    "mcp:read": "Se kontakter og tilhørende data",
+    "mcp:write": "Opprette, oppdatere og slette kontakter og tilhørende data",
+    "offline_access": "Holde økten aktiv til du trekker tilbake tilgang",
+    "openid": "Bekrefte identiteten din",
+    "phone": "Se telefonnummeret ditt",
+    "profile": "Se profilinformasjonen din"
+  },
+  "Title": "Godkjenn app",
+  "UnexpectedError": "Det oppstod en uventet feil. Prøv igjen.",
+  "UnknownClientName": "Ukjent app",
+  "WebappClientName": "Bondery"
+}

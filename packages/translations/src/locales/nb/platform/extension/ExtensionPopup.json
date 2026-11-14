@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Åpne Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Koble til kontoen for å lagre kontakter fra sosiale medier.",
+    "SignIn": "Logg inn",
+    "Title": "Logg inn på Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Legg til interaksjon med denne personen"
+  },
+  "Settings": {
+    "ApiServer": "API-server",
+    "SignOut": "Logg ut"
+  },
+  "UpdateRequired": {
+    "Description": "Bondery-utvidelsen er utdatert og fungerer kanskje ikke som den skal. Oppdater for å fortsette.",
+    "OpenExtensionsPage": "Åpne utvidelsessiden",
+    "Title": "Oppdatering kreves"
+  },
+  "Welcome": {
+    "ConnectButton": "Koble til Bondery-konto"
+  }
+}

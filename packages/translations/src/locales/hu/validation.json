@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Adj meg érvényes e-mail címet",
+    "invalidTitle": "Érvénytelen e-mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "A keresztnév legfeljebb {max} karakter lehet",
+      "required": "A keresztnév kötelező"
+    },
+    "generic": {
+      "maxLength": "Az érték legfeljebb {max} karakter lehet"
+    },
+    "headline": {
+      "maxLength": "A bemutatkozás legfeljebb {max} karakter lehet"
+    },
+    "label": {
+      "maxLength": "A(z) {field} legfeljebb {max} karakter lehet",
+      "required": "A(z) {field} kötelező"
+    },
+    "lastName": {
+      "maxLength": "A vezetéknév legfeljebb {max} karakter lehet"
+    },
+    "location": {
+      "maxLength": "A hely legfeljebb {max} karakter lehet"
+    },
+    "middleName": {
+      "maxLength": "A második keresztnév legfeljebb {max} karakter lehet"
+    }
+  },
+  "interaction": {
+    "titleRequired": "A cím kötelező"
+  },
+  "title": "Érvényesítési hiba"
+}

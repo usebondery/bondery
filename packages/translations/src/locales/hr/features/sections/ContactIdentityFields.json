@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kontakt",
+  "FieldUpdated": "{label} je ažuriran",
+  "FirstNamePlaceholder": "Ime",
+  "FirstNameSuccessLabel": "Ime",
+  "HeadlinePlaceholder": "Naslov",
+  "HeadlineSuccessLabel": "Naslov",
+  "LastNamePlaceholder": "Prezime",
+  "LastNameSuccessLabel": "Prezime",
+  "LocationPlaceholder": "Lokacija",
+  "LocationSuccessLabel": "Lokacija",
+  "LocationUpdated": "Lokacija je ažurirana",
+  "MiddleNamePlaceholder": "Srednje ime",
+  "MiddleNameSuccessLabel": "Srednje ime",
+  "NameFieldUpdated": "{label} (ime) je ažurirano",
+  "SavedTitle": "Spremljeno",
+  "UpdateFieldFailed": "Ažuriranje polja {field} nije uspjelo"
+}

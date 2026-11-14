@@ -1,0 +1,20 @@
+{
+  "cta": "Ouvrir les rappels",
+  "dateTypes": {
+    "anniversary": "anniversaire",
+    "birthday": "anniversaire de naissance",
+    "graduation": "diplôme",
+    "nameday": "fête",
+    "other": "date importante"
+  },
+  "dayMany": "{{count}} jours",
+  "dayOne": "1 jour",
+  "description": "Pour le {{headingDate}}. Ouvrez une personne pour les détails ou envoyez un message.",
+  "headingMany": "{{count}} rappels à venir",
+  "headingOne": "1 rappel à venir",
+  "preview": "{{firstTypeLabel}} de {{firstPersonName}} dans {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} de {{firstPersonName}} dans {{firstRemainingLabel}} et {{remainingCount}} autres",
+  "reminderLine": "{{emoji}} {{typeLabel}} dans {{remainingLabel}}, le {{dateLabel}}.",
+  "subject": "Rappels Bondery pour le {{targetDate}}",
+  "whyReceiving": "Vous recevez cet e-mail parce que vous avez activé les rappels pour ces dates."
+}

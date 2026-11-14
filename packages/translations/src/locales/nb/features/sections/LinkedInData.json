@@ -1,0 +1,11 @@
+{
+  "About": "Om",
+  "Education": "Utdanning",
+  "LastDataUpdate": "Siste dataoppdatering: {date}",
+  "NoEducation": "Ingen utdanningshistorikk tilgjengelig",
+  "NoWorkHistory": "Ingen arbeidshistorikk tilgjengelig",
+  "Present": "Nåværende",
+  "ShowLess": "Vis mindre",
+  "ShowMore": "Vis mer",
+  "WorkHistory": "Arbeidshistorikk"
+}

@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Darbības",
+  "CannotDeleteMyself": "Tu nevari izdzēst savu kontakta kartīti",
+  "CannotMergeMyself": "Tu nevari apvienot savu kontakta kartīti ar citiem",
+  "DeleteContact": "Dzēst kontaktu",
+  "DownloadVCard": "Lejupielādēt vCard",
+  "ExportError": "Kļūda",
+  "ExportErrorDescription": "Neizdevās eksportēt kontaktu. Mēģini vēlreiz.",
+  "ExportSuccess": "Panākumi",
+  "ExportSuccessDescription": "Kontakts eksportēta kā vCard"
+}

@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "salabot un apvienot",
+    "GroupDetail": "šī grupa",
+    "Groups": "Grupas",
+    "Home": "Sākums",
+    "KeepInTouch": "Uzturi kontaktu",
+    "Map": "karti",
+    "People": "Personas",
+    "PersonDetails": "personas dati",
+    "Timeline": "Mijiedarbība"
+  },
+  "HelpLabel": "Uzzini vairāk",
+  "LearnMoreAbout": "Uzzini vairāk par {concept}"
+}

@@ -66,6 +66,18 @@ describe("buildAlphabetContactSections", () => {
     );
   });
 
+  it("keeps Polish Ł separate from L", () => {
+    assert.equal(getContactSectionLetter(contact("Łukasz"), "pl"), "Ł");
+  });
+
+  it("keeps Slovak Ľ separate from L", () => {
+    assert.equal(getContactSectionLetter(contact("Ľubomír"), "sk"), "Ľ");
+  });
+
+  it("keeps Hungarian ő separate from o", () => {
+    assert.equal(getContactSectionLetter(contact("Őrs"), "hu"), "Ő");
+  });
+
   it("orders Č after C in Czech", () => {
     const sections = buildAlphabetContactSections(
       [contact("Čestmír", "c-caron"), contact("Cyril", "c")],

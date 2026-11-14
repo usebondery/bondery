@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Värikoodi kopioitu leikepöydälle",
+  "CopyAccessibilityLabel": "Kopioi värikoodi",
+  "CopyFailedMessage": "Värikoodin kopiointi epäonnistui. Yritä uudelleen.",
+  "CustomColorLabel": "Mukautettu väri",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Anna kelvollinen heksaväri (esim. #AE3EC9)",
+  "SheetTitle": "Väri",
+  "SwatchesLabel": "Pikavärit",
+  "TriggerAccessibilityHint": "Avaa värinvalitsimen"
+}

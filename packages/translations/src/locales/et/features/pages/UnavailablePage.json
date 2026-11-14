@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Uus kontroll {seconds} s pärast…",
+  "Description": "Sinu konto on turvaline ja sa oled endiselt sisse logitud. Kontrollime ühendust edasi — see võtab tavaliselt vaid hetke.",
+  "MetadataTitle": "Teenus pole saadaval",
+  "Retry": "Proovi uuesti",
+  "StatusChecking": "Kontrollin ühendust…",
+  "StatusDegraded": "Mõned funktsioonid võivad praegu aeglasemad olla",
+  "StatusOffline": "Bondery pole ajutiselt saadaval",
+  "StatusOnline": "Tagasi võrgus. Suunan edasi…",
+  "StatusPageLink": "Ava olekuleht",
+  "TechnicalBackendStatus": "Taustateenus: {status}",
+  "TechnicalDetails": "Tehnilised detailid",
+  "TechnicalHttpStatus": "HTTP olek: {status}",
+  "TechnicalUnreachable": "pole kättesaadav",
+  "Title": "Ühendusprobleem"
+}

@@ -1,0 +1,9 @@
+{
+  "body": "După aceea, abonamentul se va reînnoi automat dacă nu îl anulezi.",
+  "cta": "Gestionează abonamentul",
+  "endDateFallback": "curând",
+  "heading": "Perioada de probă Premium se termină pe {{endDate}}",
+  "preview": "Abonamentul se reînnoiește dacă nu îl anulezi",
+  "subject": "Perioada de probă Bondery Premium se termină curând",
+  "whyReceiving": "Primești acest e-mail pentru că ai o perioadă de probă Bondery Premium."
+}

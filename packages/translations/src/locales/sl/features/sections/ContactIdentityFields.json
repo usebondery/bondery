@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Stik",
+  "FieldUpdated": "{label} aktualizované",
+  "FirstNamePlaceholder": "Meno",
+  "FirstNameSuccessLabel": "Meno",
+  "HeadlinePlaceholder": "Nadpis",
+  "HeadlineSuccessLabel": "Nadpis",
+  "LastNamePlaceholder": "Príjmení",
+  "LastNameSuccessLabel": "Príjmení",
+  "LocationPlaceholder": "Lokalita",
+  "LocationSuccessLabel": "Lokalita",
+  "LocationUpdated": "Lokalita aktualizovaná",
+  "MiddleNamePlaceholder": "Prostrední meno",
+  "MiddleNameSuccessLabel": "Prostrední",
+  "NameFieldUpdated": "{label} meno aktualizované",
+  "SavedTitle": "Uložené",
+  "UpdateFieldFailed": "Ni bilo mogoče aktualizovat {field}"
+}

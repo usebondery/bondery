@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Ce a returnat instrumentul:",
+  "agentExpectedHeading": "Ce aștepta agentul:",
+  "agentKindLabel": "Tip raport:",
+  "agentRequestIdLabel": "ID cerere:",
+  "agentSourceHeading": "Raportat de un agent IA",
+  "agentToolLabel": "Instrument:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Feedback general:",
+  "heading": "Feedback de la {{userEmail}}",
+  "notProvided": "(Nepus)",
+  "npsReasonHeading": "De ce au ales acest scor?",
+  "npsScoreLabel": "Scor NPS:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Feedback nou de la {{userEmail}} - scor NPS: {{npsScore}}",
+  "replyCta": "Răspunde lui {{userEmail}}",
+  "subject": "Feedback nou despre Bondery",
+  "submittedAt": "Trimis la: {{timestamp}}",
+  "userEmailLabel": "E-mail utilizator:",
+  "userIdLabel": "ID utilizator:"
+}

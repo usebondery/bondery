@@ -1,0 +1,22 @@
+{
+  "AddButton": "Добавить",
+  "Description": "Мы отправим данные людям ниже. Вы также получите копию.",
+  "DuplicateEmail": "Этот адрес уже добавлен",
+  "ErrorDescription": "Проверьте соединение и попробуйте снова.",
+  "ErrorHeadline": "Не удалось отправить контакт",
+  "InvalidEmail": "Введите корректный адрес эл. почты",
+  "MaxRecipients": "Можно добавить до 10 получателей",
+  "MaxRecipientsHint": "Максимум 10 получателей",
+  "MessagePlaceholder": "Добавить заметку (необязательно)",
+  "NoRecipients": "Добавьте хотя бы одного получателя",
+  "RecipientsLabel": "Кому",
+  "RecipientsPlaceholder": "Адрес эл. почты получателя",
+  "RemoveRecipient": "Удалить {email}",
+  "SendButton": "Отправить",
+  "SendButtonMany": "Отправить {count} получателям",
+  "SendButtonOne": "Отправить 1 человеку",
+  "SuccessDescription": "Получатели скоро его получат.",
+  "SuccessHeadline": "Контакт отправлен",
+  "Title": "Отправить контакт {name} по эл. почте",
+  "WhatsIncluded": "Включает контактные данные, ссылки на соцсети и сохранённые заметки."
+}

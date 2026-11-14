@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Toimingud",
+  "AddPerson": "Lisa inimene",
+  "AddPersonDescription": "Loo oma võrgustikku uus kontakt",
+  "ContactUs": "Võta ühendust",
+  "ContactUsDescription": "Kirjuta Bondery meeskonnale",
+  "Documentation": "Dokumentatsioon",
+  "DocumentationDescription": "Loe Bondery dokumentatsiooni",
+  "ExportData": "Ekspordi andmed",
+  "ExportDataDescription": "Salvesta koopia oma Bondery andmetest",
+  "FindPerson": "Leia inimene",
+  "FindPersonDescription": "Otsi võrgustikust nime järgi",
+  "GoToDescription": "Mine: {label}",
+  "HelpGroup": "Abi",
+  "ImportData": "Impordi andmed",
+  "ImportDataDescription": "Impordi Bondery JSON ZIP",
+  "LogInteraction": "Salvesta suhtlus",
+  "LogInteractionDescription": "Kirjuta üles uus kohtumine, kõne või sõnum",
+  "NavigateGroup": "Navigeerimine",
+  "NothingFound": "Toiminguid ei leitud",
+  "SearchPlaceholder": "Otsi toiminguid või navigeeri…"
+}

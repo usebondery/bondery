@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentáció",
+  "help": "Segítség kell? Látogass el a {{support}} oldalra, vagy olvasd a {{documentation}} anyagot.",
+  "internalNote": "Belső üzemeltetés · nem megy ki az ügyfélnek",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Ezeket az értesítéseket a Bonderyben kezelheted",
+  "support": "támogatás"
+}

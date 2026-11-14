@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Serveris atmetė užklausą, nes plėtinys pasenęs. Atnaujink.",
+  "ApiRejectedTitle": "Versija per sena",
+  "UpdateButton": "Atnaujinti",
+  "UpdateRequiredDescription": "Tavo Bondery plėtinys pasenęs ir gali neveikti tinkamai. Atnaujink, kad galėtum tęsti.",
+  "UpdateRequiredTitle": "Reikalingas atnaujinimas",
+  "WebappNotificationDescription": "Tavo Bondery Chrome plėtinį reikia atnaujinti, kad toliau veiktų tinkamai.",
+  "WebappNotificationTitle": "Galimas plėtinio atnaujinimas"
+}

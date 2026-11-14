@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Zaten aktif bir Premium aboneliğin var.",
+  "alreadySubscribedTitle": "Zaten abonesin",
+  "errorMessage": "Bir şeyler ters gitti. Yeniden dene.",
+  "errorTitle": "Ödeme başarısız",
+  "errorUnauthorized": "Oturum aç, sonra yeniden dene.",
+  "intervalAnnual": "Yıllık",
+  "intervalMonthly": "Aylık",
+  "paymentBlockedAction": "Faturalamayı güncelle",
+  "paymentBlockedMessage": "Birkaç denemeden sonra ödemeyi işleyemedik. Premium’u geri almak için fatura bilgilerini güncelle.",
+  "paymentBlockedTitle": "Ödeme gerekli",
+  "successMessage": "Aylık 300 yapay zeka mesajının ve tüm Premium özelliklerin tadını çıkar.",
+  "successTitle": "Artık Premium’sun!",
+  "upgradePendingMessage": "Hesabın kısa süre içinde Premium’a geçecek.",
+  "upgradePendingTitle": "Ödeme alındı",
+  "upgradesDisabledTooltip": "Premium yükseltmesi henüz yok. Yakında tekrar bak.",
+  "upgradeToPremium": "Premium’a yükselt"
+}

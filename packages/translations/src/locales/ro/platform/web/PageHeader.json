@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "repară și unește",
+    "GroupDetail": "acest grup",
+    "Groups": "Grupuri",
+    "Home": "Acasă",
+    "KeepInTouch": "Păstrează legătura",
+    "Map": "harta",
+    "People": "Persoane",
+    "PersonDetails": "detaliile persoanei",
+    "Timeline": "Interacțiuni"
+  },
+  "HelpLabel": "Află mai multe",
+  "LearnMoreAbout": "Află mai multe despre {concept}"
+}

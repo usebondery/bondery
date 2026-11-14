@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Z której platformy jest eksport?",
+    "Description": "Przenieś istniejącą sieć do Bondery z LinkedIn, Instagramu lub dodaj kontakty ręcznie.",
+    "Finish": "Zacznij",
+    "Instagram": "Importować z Instagramu",
+    "InstagramDescription": "Prześlij dane obserwujących i obserwowanych z Instagramu.",
+    "LinkedIn": "Importować z LinkedIn",
+    "LinkedInDescription": "Prześlij plik eksportu połączeń z LinkedIn.",
+    "ManualAdd": "Utworzyć ręcznie",
+    "SkipImport": "Pominąć import",
+    "SuccessDescription": "Zaimportowano: {imported}, zaktualizowano: {updated}, pominięto: {skipped}.",
+    "SuccessTitle": "Import zakończony!",
+    "Title": "Importować kontakty",
+    "WaitingForExport": "Czekam na eksport"
+  },
+  "Intent": {
+    "both": "Oba",
+    "Description": "Wykorzystamy to, by dopasować Bondery do Ciebie.",
+    "personal": "Przyjaciele i rodzina",
+    "professional": "Zawodowo",
+    "Title": "Jak będziesz korzystać z Bondery?"
+  },
+  "Loading": {
+    "Message": "Przygotowujemy wszystko dla Ciebie…"
+  },
+  "MetadataTitle": "Wdrożenie",
+  "Welcome": {
+    "LetsGo": "Zaczynamy",
+    "Subtitle": "Miło Cię poznać. Skonfigurujmy Twój osobisty CRM.",
+    "TitleGeneric": "Witaj w Bondery! 😊",
+    "TitleWithName": "Witaj, {name}! 😊"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "Description": "Ajută-ne să îmbunătățim Bondery împărtășind ideile tale. <3",
+  "ErrorMessage": "Nu s-a putut trimite feedbackul. Încearcă din nou.",
+  "ErrorTitle": "Eroare",
+  "GeneralFeedbackLabel": "Ai feedback, sugestii sau bug-uri de împărtășit?",
+  "GeneralFeedbackPlaceholder": "Îmi place/nu îmi place această parte din aplicație… Mi-ar plăcea să… Am avut dificultăți cu…",
+  "NpsLabel": "Pe o scară de la 0 la 10, cât de probabil e să recomanzi Bondery unui prieten sau coleg?",
+  "NpsReasonLabel": "De ce ai ales nota {score}?",
+  "NpsReasonPlaceholder": "Pentru că această funcție e utilă / defectă / lipsește…",
+  "SubmitButton": "Trimite feedbackul echipei",
+  "SubmittingMessage": "Așteaptă în timp ce trimitem",
+  "SubmittingTitle": "Se trimite feedbackul…",
+  "SuccessMessage": "Feedbackul tău a fost primit",
+  "SuccessTitle": "Mulțumim!",
+  "Title": "Feedback"
+}

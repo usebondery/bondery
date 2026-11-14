@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Ką grąžino įrankis:",
+  "agentExpectedHeading": "Ko agentas tikėjosi:",
+  "agentKindLabel": "Ataskaitos tipas:",
+  "agentRequestIdLabel": "Užklausos ID:",
+  "agentSourceHeading": "Pranešė AI agentas",
+  "agentToolLabel": "Įrankis:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Bendras atsiliepimas:",
+  "heading": "Atsiliepimas nuo {{userEmail}}",
+  "notProvided": "(Nepateikta)",
+  "npsReasonHeading": "Kodėl pasirinko šį balą?",
+  "npsScoreLabel": "NPS balas:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Naujas atsiliepimas nuo {{userEmail}} – NPS balas: {{npsScore}}",
+  "replyCta": "Atsakyti {{userEmail}}",
+  "subject": "Naujas atsiliepimas apie Bondery",
+  "submittedAt": "Pateikta: {{timestamp}}",
+  "userEmailLabel": "Naudotojo el. paštas:",
+  "userIdLabel": "Naudotojo ID:"
+}

@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} jakoi tämän yhteystiedon kanssasi",
+  "footerNotes": "Lähetetty Bonderysta. Vastaa tähän sähköpostiin tavoittaaksesi {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Osoite",
+    "email": "Sähköposti",
+    "facebook": "Facebook",
+    "importantDates": "Tärkeät päivämäärät",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Sijainti",
+    "notes": "Muistiinpanot",
+    "phone": "Puhelin",
+    "signal": "Signal",
+    "website": "Verkkosivusto",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Puhelin, sähköposti ja muut tiedot viestin sisällä",
+  "replyCta": "Vastaa käyttäjälle {{senderName}}",
+  "subject": "{{senderName}} jakoi yhteystiedon kanssasi • {{contactName}}"
+}

@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Provjeravam ponovno za {seconds} s…",
+  "Description": "Račun je siguran i i dalje si prijavljen/a. Nastavit ćemo provjeravati; obično je kratko.",
+  "MetadataTitle": "Usluga nije dostupna",
+  "Retry": "Pokušati ponovno",
+  "StatusChecking": "Provjeravam vezu…",
+  "StatusDegraded": "Neke značajke mogu sada raditi sporije",
+  "StatusOffline": "Bondery je privremeno nedostupan",
+  "StatusOnline": "Ponovno online. Vraćam se…",
+  "StatusPageLink": "Pogledati stranicu statusa",
+  "TechnicalBackendStatus": "Pozadina: {status}",
+  "TechnicalDetails": "Tehnički detalji",
+  "TechnicalHttpStatus": "HTTP status: {status}",
+  "TechnicalUnreachable": "nedostupan",
+  "Title": "Imamo poteškoća sa spajanjem"
+}

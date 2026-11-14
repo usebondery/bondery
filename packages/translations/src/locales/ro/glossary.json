@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "contact": "contact",
+    "contactPlural": "contacte",
+    "group": "grup",
+    "interaction": "interacțiune",
+    "interactionPlural": "interacțiuni",
+    "network": "rețea",
+    "person": "persoană",
+    "person_few": "{count} persoane",
+    "person_one": "{count} persoană",
+    "person_other": "{count} de persoane",
+    "tag": "etichetă"
+  },
+  "features": {
+    "aiAssistant": "Asistent AI",
+    "fixAndMerge": "Repară și unește",
+    "keepInTouch": "Păstrează legătura"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

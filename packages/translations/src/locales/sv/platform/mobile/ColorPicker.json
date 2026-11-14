@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Färgkod kopierad till urklipp",
+  "CopyAccessibilityLabel": "Kopiera färgkod",
+  "CopyFailedMessage": "Kunde inte kopiera färgkoden. Försök igen.",
+  "CustomColorLabel": "Egen färg",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Ange en giltig hex-färg (t.ex. #AE3EC9)",
+  "SheetTitle": "Färg",
+  "SwatchesLabel": "Snabbval",
+  "TriggerAccessibilityHint": "Öppnar färgväljaren"
+}

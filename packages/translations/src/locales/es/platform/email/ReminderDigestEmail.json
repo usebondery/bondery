@@ -1,0 +1,20 @@
+{
+  "cta": "Abrir recordatorios",
+  "dateTypes": {
+    "anniversary": "Aniversario",
+    "birthday": "Cumpleaños",
+    "graduation": "Graduación",
+    "nameday": "Santo",
+    "other": "Fecha importante"
+  },
+  "dayMany": "{{count}} días",
+  "dayOne": "1 día",
+  "description": "Para el {{headingDate}}. Abre una persona para ver los detalles o enviarle una nota.",
+  "headingMany": "Se acercan {{count}} recordatorios",
+  "headingOne": "Se acerca 1 recordatorio",
+  "preview": "{{firstTypeLabel}} de {{firstPersonName}} en {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} de {{firstPersonName}} en {{firstRemainingLabel}} y {{remainingCount}} más",
+  "reminderLine": "{{emoji}} {{typeLabel}}: faltan {{remainingLabel}} ({{dateLabel}}).",
+  "subject": "Recordatorios de Bondery para el {{targetDate}}",
+  "whyReceiving": "Recibes este correo porque has activado los recordatorios de estas fechas."
+}

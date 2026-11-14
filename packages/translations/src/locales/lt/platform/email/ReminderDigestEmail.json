@@ -1,0 +1,20 @@
+{
+  "cta": "Atidaryti priminimus",
+  "dateTypes": {
+    "anniversary": "Jubiliejus",
+    "birthday": "Gimtadienis",
+    "graduation": "Absolvavimas",
+    "nameday": "Vardų diena",
+    "other": "Svarbi data"
+  },
+  "dayMany": "{{count}} dienų",
+  "dayOne": "1 diena",
+  "description": "{{headingDate}} datai. Atidaryk žmogų, kad pamatytum detales arba išsiųsk žinutę.",
+  "headingMany": "Artėja {{count}} priminimų",
+  "headingOne": "Artėja 1 priminimas",
+  "preview": "{{firstPersonName}} – {{firstTypeLabel}} po {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}} – {{firstTypeLabel}} po {{firstRemainingLabel}} ir dar {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} artėja po {{remainingLabel}}, {{dateLabel}}.",
+  "subject": "Bondery priminimai {{targetDate}}",
+  "whyReceiving": "Gavai tai, nes įjungė priminimus šioms datoms."
+}
