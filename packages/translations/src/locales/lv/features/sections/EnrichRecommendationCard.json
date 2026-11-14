@@ -1,0 +1,22 @@
+{
+  "AllEnrichedDescription": "Visas kontaktus ar profilu LinkedIn jau ir bagātinātas.",
+  "AllEnrichedTitle": "Visi kontakti ir bagātināti",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Pašlaik bagātina:",
+  "EligibleLabel_one": "{count} persona var papildināt",
+  "EligibleLabel_other": "{count} personas var papildināt",
+  "EligibleLabel_zero": "{count} personas var papildināt",
+  "Enrich": "Bagātināt",
+  "EnrichAll": "Bagātināt visu",
+  "HelpTooltip": "Iegūsti jaunākos LinkedIn profila datus šim kontaktam. Noklikšķini, lai uzzinātu, kā darbojas papildināšana.",
+  "Pause": "Pauze",
+  "PausingTooltip": "Pašreizējā kontakta pabeigšana, pēc tam pauze...",
+  "PersonEligibleLabel": "Šo kontaktu var bagātināt no LinkedIn",
+  "ProcessingPerson": "Bagātināt {name}...",
+  "ProgressLabel": "Bagātināšana: {completed} no {totalEligible} pabeigta",
+  "ProgressLabelWithFailed": "Bagātināšana: {completed} no {totalEligible} pabeigta ({failed} neizdevās)",
+  "Resume": "Atsākt",
+  "ResumeLabel": "Bagātināšana pārtraukta: {completed} pabeigts, {pending} atlikuši",
+  "SkipRemaining": "Izlaist atlikušo",
+  "Tooltip": "Šīm kontaktiem ir LinkedIn profils, taču tās vēl nav bagātinātas. Papildināt viņus, lai iegūtu jaunāko darba vēsturi, izglītību un biogrāfiju."
+}

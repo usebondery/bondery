@@ -189,7 +189,7 @@ export function RelationshipGraph({
   }
 
   return (
-    <Box h="100%" pos="relative" w="100%">
+    <Box dir="ltr" h="100%" pos="relative" w="100%">
       <Box h="100%" ref={hostRef} w="100%" />
       <Box
         ref={markerLayerRef}

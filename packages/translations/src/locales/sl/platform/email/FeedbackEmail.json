@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Co nástroj vrátil:",
+  "agentExpectedHeading": "Co agent očekával:",
+  "agentKindLabel": "Typ hlášení:",
+  "agentRequestIdLabel": "ID požiadavku:",
+  "agentSourceHeading": "Nahlášeno AI agentem",
+  "agentToolLabel": "Nástroj:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Obecná spatná vazba:",
+  "heading": "Nazajná vazba od {{userEmail}}",
+  "notProvided": "(Neuvedeno)",
+  "npsReasonHeading": "Proč zvolili toto skóre?",
+  "npsScoreLabel": "NPS skóre:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Nová spatná vazba od {{userEmail}} – NPS skóre: {{npsScore}}",
+  "replyCta": "Odpovedet {{userEmail}}",
+  "subject": "Nová spatná vazba k Bondery",
+  "submittedAt": "Odoslané: {{timestamp}}",
+  "userEmailLabel": "E-mail používatela:",
+  "userIdLabel": "ID používatela:"
+}

@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Kleurcode gekopieerd naar klembord",
+  "CopyAccessibilityLabel": "Kleurcode kopiëren",
+  "CopyFailedMessage": "Kan kleurcode niet kopiëren. Probeer het opnieuw.",
+  "CustomColorLabel": "Eigen kleur",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Voer een geldige hex-kleur in (bijv. #AE3EC9)",
+  "SheetTitle": "Kleur",
+  "SwatchesLabel": "Snelle kleuren",
+  "TriggerAccessibilityHint": "Opent kleurkiezer"
+}

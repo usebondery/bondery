@@ -6,6 +6,12 @@ import {
   getTimezoneSelectOptions,
   resolveToCanonicalTimezone,
 } from "@bondery/helpers/locale";
+import type { DateFormatPreference } from "@bondery/schemas";
+import {
+  buildIntlLocaleTag,
+  coerceDateFormatPreference,
+  formatOrderedDate,
+} from "@bondery/schemas/locale";
 import { coerceSupportedLocale } from "@bondery/translations";
 import { IconBell } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
@@ -37,6 +43,8 @@ import { SettingsAsyncState } from "./components/SettingsAsyncState";
 
 type TimeFormatValue = "24h" | "12h";
 type ReminderHourValue = `${string}:00:00`;
+
+const DATE_FORMAT_PREVIEW = new Date(Date.UTC(2026, 10, 13, 12, 0, 0));
 
 function normalizeReminderHour(value?: string): ReminderHourValue {
   const hour = Number.parseInt(value?.split(":")[0] ?? "", 10);
@@ -73,6 +81,7 @@ export function SettingsLanguageScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [timezone, setTimezone] = useState<string>(getDeviceTimezone());
   const [timeFormat, setTimeFormat] = useState<TimeFormatValue>("24h");
+  const [dateFormat, setDateFormat] = useState<DateFormatPreference>("locale");
   const [reminderSendHour, setReminderSendHour] = useState<ReminderHourValue>("08:00:00");
 
   async function loadSettings() {
@@ -93,6 +102,7 @@ export function SettingsLanguageScreen() {
       }
       setTimezone(nextTimezone);
       setTimeFormat(nextTimeFormat);
+      setDateFormat(coerceDateFormatPreference(response.data.dateFormat));
       setReminderSendHour(normalizeReminderHour(response.data.reminderSendHour));
     } catch (err) {
       setLoadError(resolveDisplayedError(err, t));
@@ -115,7 +125,9 @@ export function SettingsLanguageScreen() {
       </Text>
     ),
     value: language.value as MobileLocale,
-  }));
+  })).toSorted((left, right) =>
+    left.label.localeCompare(right.label, locale, { sensitivity: "base" }),
+  );
 
   const timezoneOptions = getTimezoneSelectOptions(timezone).map((timezoneOption) => ({
     label: timezoneOption.label,
@@ -132,6 +144,24 @@ export function SettingsLanguageScreen() {
     searchKeywords: `${timezoneOption.value} ${timezoneOption.offsetLabel}`,
     value: timezoneOption.value,
   }));
+
+  const intlLocaleTag = buildIntlLocaleTag(locale, timeFormat);
+
+  const dateFormatOptions: Array<{ value: DateFormatPreference; label: string }> = [
+    {
+      label: tMobileSettings("DateFormatLocale", {
+        preview: formatOrderedDate({
+          date: DATE_FORMAT_PREVIEW,
+          dateFormat: "locale",
+          intlLocaleTag,
+        }),
+      }),
+      value: "locale",
+    },
+    { label: tMobileSettings("DateFormatMdy"), value: "mdy" },
+    { label: tMobileSettings("DateFormatDmy"), value: "dmy" },
+    { label: tMobileSettings("DateFormatYmd"), value: "ymd" },
+  ];
 
   const timeFormatOptions: Array<{ value: TimeFormatValue; label: string }> = [
     {
@@ -177,6 +207,22 @@ export function SettingsLanguageScreen() {
       await updateSettings({ timezone: nextTimezone });
     } catch (err) {
       setTimezone(previousTimezone);
+      showErrorToast(err);
+    }
+  };
+
+  const handleDateFormatChange = async (nextDateFormat: DateFormatPreference) => {
+    if (nextDateFormat === dateFormat) {
+      return;
+    }
+
+    const previousDateFormat = dateFormat;
+    setDateFormat(nextDateFormat);
+
+    try {
+      await updateSettings({ dateFormat: nextDateFormat });
+    } catch (err) {
+      setDateFormat(previousDateFormat);
       showErrorToast(err);
     }
   };
@@ -261,6 +307,15 @@ export function SettingsLanguageScreen() {
               searchable="auto"
               searchPlaceholder={tSettingsPage("Profile.TimezoneSearch")}
               value={timezone}
+            />
+
+            <Select
+              data={dateFormatOptions}
+              label={tMobileSettings("DateFormatSelectLabel")}
+              onChange={(nextDateFormat) => {
+                void handleDateFormatChange(nextDateFormat as DateFormatPreference);
+              }}
+              value={dateFormat}
             />
 
             <Select

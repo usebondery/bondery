@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "opschonen en samenvoegen",
+    "GroupDetail": "deze groep",
+    "Groups": "Groepen",
+    "Home": "Home",
+    "KeepInTouch": "Houd contact",
+    "Map": "de kaart",
+    "People": "Personen",
+    "PersonDetails": "persoonsgegevens",
+    "Timeline": "Interacties"
+  },
+  "HelpLabel": "Meer info",
+  "LearnMoreAbout": "Meer over {concept}"
+}

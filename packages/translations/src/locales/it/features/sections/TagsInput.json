@@ -1,0 +1,22 @@
+{
+  "AddError": "Impossibile aggiungere l'etichetta",
+  "AddNewTagTooltip": "Creare un'etichetta",
+  "AddSuccess": "Etichetta aggiunta",
+  "AddTagTooltip": "Aggiungere un'etichetta",
+  "CreateError": "Impossibile creare l'etichetta",
+  "CreateNewTagEmpty": "Creare un'etichetta",
+  "CreateNewTagOption": "Creare l'etichetta «{label}»",
+  "CreateTagCancel": "Annullare",
+  "CreateTagConfirm": "Creare e aggiungere",
+  "CreateTagMessage": "L'etichetta «{name}» non esiste ancora. Vuoi crearla e aggiungerla a questo contatto?",
+  "CreateTagTitle": "Creare un'etichetta?",
+  "Label": "Etichette",
+  "NoTagsFound": "Nessuna etichetta trovata",
+  "Placeholder": "Aggiungi etichette…",
+  "RemoveError": "Impossibile rimuovere l'etichetta",
+  "RemoveTagTooltip": "Rimuovere l'etichetta",
+  "SearchPlaceholder": "Cercare o creare un'etichetta…",
+  "TagAlreadyAddedMessage": "L'etichetta «{name}» è già su questo contatto.",
+  "TagAlreadyAddedTitle": "Etichetta già aggiunta",
+  "TagAlreadyAppliedTooltip": "Etichetta già applicata"
+}

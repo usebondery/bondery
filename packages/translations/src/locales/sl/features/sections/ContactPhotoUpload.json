@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Pripni fotografijo za ta stik",
+  "Cancel": "Prekliči",
+  "ConfirmPhoto": "Potrdi fotografijo",
+  "DragImageHere": "Povleci sliko sem ali klikni za izbiro",
+  "InvalidFile": "Neveljavna datoteka",
+  "PhotoUpdateError": "Fotografije stika ni bilo mogoče posodobiti",
+  "PhotoUpdateSuccess": "Fotografija stika je uspešno posodobljena",
+  "PleaseWait": "Počakaj",
+  "TitleModal": "Naloži fotografijo stika",
+  "UpdateError": "Napaka",
+  "UpdateProfilePhoto": "Posodobi fotografijo stika",
+  "UpdateSuccess": "Uspeh",
+  "UploadingPhoto": "Nalaganje …"
+}

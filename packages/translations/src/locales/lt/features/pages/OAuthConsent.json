@@ -1,0 +1,30 @@
+{
+  "Approve": "Patvirtinti",
+  "ChromeExtensionClientName": "Bondery Chrome plėtinys",
+  "Deny": "Atmesti",
+  "Description": "{clientName} prašo prieigos prie tavo Bondery paskyros.",
+  "ErrorTitle": "Autorizacijos klaida",
+  "InvalidRequest": "Netinkama autorizacijos užklausa.",
+  "LoopbackWarning": "Ši programa veikia šiame kompiuteryje (localhost). Tęsk tik jei ją paleidai pats.",
+  "MissingAuthorizationId": "Trūksta autorizacijos užklausos. Bandyk dar kartą iš programos.",
+  "PermissionFullDescription": "Taip pat kurti, atnaujinti ir trinti kontaktus bei jų duomenis.",
+  "PermissionFullLabel": "Visiška prieiga",
+  "PermissionLabel": "Prieiga",
+  "PermissionReadDescription": "Ieškoti ir skaityti kontaktus bei jų duomenis.",
+  "PermissionReadLabel": "Tik skaitymas",
+  "RequestedPermissions": "Prašomos teisės",
+  "Scopes": {
+    "api:access": "Naudoti Bondery API tavo vardu",
+    "email": "Matyti tavo el. pašto adresą",
+    "mcp:read": "Matyti kontaktus ir jų duomenis",
+    "mcp:write": "Kurti, atnaujinti ir trinti kontaktus bei jų duomenis",
+    "offline_access": "Likti prisijungus, kol atšauksi prieigą",
+    "openid": "Patvirtinti tavo tapatybę",
+    "phone": "Matyti tavo telefono numerį",
+    "profile": "Matyti tavo profilio informaciją"
+  },
+  "Title": "Autorizuoti programą",
+  "UnexpectedError": "Įvyko netikėta klaida. Bandyk dar kartą.",
+  "UnknownClientName": "Nežinoma programa",
+  "WebappClientName": "Bondery"
+}

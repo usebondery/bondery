@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Aktiviteetit",
+    "Animals": "Eläimet",
+    "Buildings": "Rakennukset",
+    "Celebrations": "Juhlat",
+    "Food": "Ruoka",
+    "Hearts": "Sydämet",
+    "Humans": "Ihmiset",
+    "Miscellaneous": "Sekalaiset",
+    "Nature": "Luonto",
+    "Objects": "Esineet",
+    "Sports": "Urheilu",
+    "Travel": "Matkailu",
+    "Work": "Työ"
+  },
+  "EmptySearch": "Emojeja ei löydy",
+  "RandomAccessibilityLabel": "Valitse satunnainen emoji",
+  "SearchPlaceholder": "Hae emojeja…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Avaa emojivalitsimen"
+}

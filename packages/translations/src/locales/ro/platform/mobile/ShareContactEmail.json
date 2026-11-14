@@ -1,0 +1,22 @@
+{
+  "AddButton": "Adaugă",
+  "Description": "Trimitem detaliile persoanelor de mai jos. Primești și tu o copie.",
+  "DuplicateEmail": "Această adresă este deja adăugată",
+  "ErrorDescription": "Verifică conexiunea și încearcă din nou.",
+  "ErrorHeadline": "Nu s-a putut trimite contactul",
+  "InvalidEmail": "Introdu o adresă de e-mail validă",
+  "MaxRecipients": "Poți adăuga maximum 10 destinatari",
+  "MaxRecipientsHint": "Maximum 10 destinatari",
+  "MessagePlaceholder": "Adaugă o notă (opțional)",
+  "NoRecipients": "Adaugă cel puțin un destinatar",
+  "RecipientsLabel": "Către",
+  "RecipientsPlaceholder": "Adresa de e-mail a destinatarului",
+  "RemoveRecipient": "Elimină {email}",
+  "SendButton": "Trimite",
+  "SendButtonMany": "Trimite către {count} persoane",
+  "SendButtonOne": "Trimite către 1 persoană",
+  "SuccessDescription": "Destinatarii tăi îl vor primi în curând.",
+  "SuccessHeadline": "Contact trimis",
+  "Title": "Trimite contactul lui {name} prin e-mail",
+  "WhatsIncluded": "Include informații de contact, linkuri sociale și note din fișă."
+}

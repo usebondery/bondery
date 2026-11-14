@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "All contacts with a LinkedIn profile have already been enriched.",
+  "AllEnrichedTitle": "All contacts enriched",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Currently enriching:",
+  "EligibleLabel_one": "{count} person could be enriched",
+  "EligibleLabel_other": "{count} people could be enriched",
+  "Enrich": "Enrich",
+  "EnrichAll": "Enrich all",
+  "HelpTooltip": "Pull the latest LinkedIn profile data into this contact. Click to learn how enrichment works.",
+  "Pause": "Pause",
+  "PausingTooltip": "Finishing current contact, then pausing...",
+  "PersonEligibleLabel": "This contact could be enriched from LinkedIn",
+  "ProcessingPerson": "Enriching {name}...",
+  "ProgressLabel": "Enriching: {completed} of {totalEligible} completed",
+  "ProgressLabelWithFailed": "Enriching: {completed} of {totalEligible} completed ({failed} failed)",
+  "Resume": "Resume",
+  "ResumeLabel": "Enrichment interrupted: {completed} done, {pending} remaining",
+  "SkipRemaining": "Skip remaining",
+  "Tooltip": "These contacts have a LinkedIn profile but haven't been enriched yet. Enrich them to pull their latest work history, education and bio."
+}

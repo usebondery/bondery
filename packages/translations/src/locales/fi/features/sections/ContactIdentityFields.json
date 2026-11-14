@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Yhteystieto",
+  "FieldUpdated": "{label} päivitetty",
+  "FirstNamePlaceholder": "Etunimi",
+  "FirstNameSuccessLabel": "Etunimi",
+  "HeadlinePlaceholder": "Otsikko",
+  "HeadlineSuccessLabel": "Otsikko",
+  "LastNamePlaceholder": "Sukunimi",
+  "LastNameSuccessLabel": "Sukunimi",
+  "LocationPlaceholder": "Sijainti",
+  "LocationSuccessLabel": "Sijainti",
+  "LocationUpdated": "Sijainti päivitetty",
+  "MiddleNamePlaceholder": "Toinen etunimi",
+  "MiddleNameSuccessLabel": "Toinen etunimi",
+  "NameFieldUpdated": "{label} päivitetty",
+  "SavedTitle": "Tallennettu",
+  "UpdateFieldFailed": "Kenttää {field} ei voitu päivittää"
+}

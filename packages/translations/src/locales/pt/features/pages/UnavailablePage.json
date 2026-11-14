@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "A verificar novamente em {seconds}s…",
+  "Description": "A conta está segura e a sessão continua ativa. Vamos continuar a verificar; isto costuma ser breve.",
+  "MetadataTitle": "Serviço indisponível",
+  "Retry": "Tentar novamente",
+  "StatusChecking": "A verificar ligação…",
+  "StatusDegraded": "Algumas funcionalidades podem estar lentas neste momento",
+  "StatusOffline": "O Bondery está temporariamente indisponível",
+  "StatusOnline": "De volta online. A redirecionar…",
+  "StatusPageLink": "Ver página de estado",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Detalhes técnicos",
+  "TechnicalHttpStatus": "Estado HTTP: {status}",
+  "TechnicalUnreachable": "inacessível",
+  "Title": "Estamos com dificuldades na ligação"
+}

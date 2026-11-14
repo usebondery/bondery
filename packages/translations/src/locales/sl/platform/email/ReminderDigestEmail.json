@@ -1,0 +1,20 @@
+{
+  "cta": "Odpri opomnike",
+  "dateTypes": {
+    "anniversary": "Obletnica",
+    "birthday": "Rojstni dan",
+    "graduation": "Matura",
+    "nameday": "God",
+    "other": "Pomemben datum"
+  },
+  "dayMany": "{{count}} dni",
+  "dayOne": "1 dan",
+  "description": "Za {{headingDate}}. Odpri osebo za podrobnosti ali pošlji sporočilo.",
+  "headingMany": "{{count}} bližnjih opomnikov",
+  "headingOne": "1 bližnji opomnik",
+  "preview": "{{firstPersonName}} — {{firstTypeLabel}} čez {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}} — {{firstTypeLabel}} čez {{firstRemainingLabel}} in še {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} pride čez {{remainingLabel}} na {{dateLabel}}.",
+  "subject": "Opomniki Bondery za {{targetDate}}",
+  "whyReceiving": "To prejemaš, ker si vklopil opomnike za te datume."
+}

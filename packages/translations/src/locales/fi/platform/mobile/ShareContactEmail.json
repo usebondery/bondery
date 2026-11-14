@@ -1,0 +1,22 @@
+{
+  "AddButton": "Lisää",
+  "Description": "Lähetämme tiedot alla oleville henkilöille. Saat myös kopion.",
+  "DuplicateEmail": "Tämä osoite on jo lisätty",
+  "ErrorDescription": "Tarkista yhteys ja yritä uudelleen.",
+  "ErrorHeadline": "Yhteystietoa ei voitu lähettää",
+  "InvalidEmail": "Anna kelvollinen sähköpostiosoite",
+  "MaxRecipients": "Voit lisätä enintään 10 vastaanottajaa",
+  "MaxRecipientsHint": "Enintään 10 vastaanottajaa",
+  "MessagePlaceholder": "Lisää viesti (valinnainen)",
+  "NoRecipients": "Lisää vähintään yksi vastaanottaja",
+  "RecipientsLabel": "Vastaanottajat",
+  "RecipientsPlaceholder": "Vastaanottajan sähköpostiosoite",
+  "RemoveRecipient": "Poista {email}",
+  "SendButton": "Lähetä",
+  "SendButtonMany": "Lähetä {count} henkilölle",
+  "SendButtonOne": "Lähetä yhdelle henkilölle",
+  "SuccessDescription": "Vastaanottajat saavat sen pian.",
+  "SuccessHeadline": "Yhteystieto lähetetty",
+  "Title": "Lähetä henkilön {name} yhteystieto sähköpostilla",
+  "WhatsIncluded": "Sisältää yhteystiedot, some-linkit ja tallennetut muistiinpanot."
+}

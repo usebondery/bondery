@@ -1,0 +1,20 @@
+{
+  "cta": "Avaa muistutukset",
+  "dateTypes": {
+    "anniversary": "Vuosipäivä",
+    "birthday": "Syntymäpäivä",
+    "graduation": "Valmistuminen",
+    "nameday": "Nimipäivä",
+    "other": "Tärkeä päivämäärä"
+  },
+  "dayMany": "{{count}} päivää",
+  "dayOne": "1 päivä",
+  "description": "Päivälle {{headingDate}}. Avaa henkilö nähdäksesi tiedot tai lähetä viesti.",
+  "headingMany": "{{count}} muistutusta erääntyy",
+  "headingOne": "1 muistutus erääntyy",
+  "preview": "{{firstPersonName}}: {{firstTypeLabel}} {{firstRemainingLabel}} kuluttua",
+  "previewMore": "{{firstPersonName}}: {{firstTypeLabel}} {{firstRemainingLabel}} kuluttua ja {{remainingCount}} muuta",
+  "reminderLine": "{{emoji}} {{typeLabel}} {{remainingLabel}} kuluttua päivänä {{dateLabel}}.",
+  "subject": "Bondery-muistutukset {{targetDate}}",
+  "whyReceiving": "Saat tämän sähköpostin, koska olet ottanut muistutukset käyttöön näille päiville."
+}

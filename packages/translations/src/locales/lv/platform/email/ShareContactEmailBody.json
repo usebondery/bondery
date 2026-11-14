@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} kopīgoja ar tev šo kontaktu",
+  "footerNotes": "Nosūtīts ar Bondery. Atbildēt uz šo e-pasta ziņojumu, lai sazinātos ar {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adrese",
+    "email": "E-pasts",
+    "facebook": "Facebook",
+    "importantDates": "Svarīgi datumi",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Atrašanās vieta",
+    "notes": "Piezīmes",
+    "phone": "Tālrunis",
+    "signal": "Signal",
+    "website": "Tīmekļa vietne",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Tālrunis, e-pasts un cita informācija iekšā",
+  "replyCta": "Atbildēt uz {{senderName}}",
+  "subject": "{{senderName}} kopīgoja ar tev kontaktu • {{contactName}}"
+}

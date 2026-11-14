@@ -1,0 +1,30 @@
+{
+  "Approve": "Odobriti",
+  "ChromeExtensionClientName": "Bondery Chrome proširenje",
+  "Deny": "Odbiti",
+  "Description": "{clientName} traži pristup tvom Bondery računu.",
+  "ErrorTitle": "Greška autorizacije",
+  "InvalidRequest": "Nevaljan zahtjev za autorizaciju.",
+  "LoopbackWarning": "Ova aplikacija radi na ovom računalu (localhost). Nastavi samo ako si je ti pokrenuo.",
+  "MissingAuthorizationId": "Nedostaje zahtjev za autorizaciju. Pokušaj ponovno iz aplikacije.",
+  "PermissionFullDescription": "Također stvarati, ažurirati i brisati kontakte i njihove podatke.",
+  "PermissionFullLabel": "Puni pristup",
+  "PermissionLabel": "Pristup",
+  "PermissionReadDescription": "Pretraživati i čitati kontakte i njihove podatke.",
+  "PermissionReadLabel": "Samo čitanje",
+  "RequestedPermissions": "Tražene dozvole",
+  "Scopes": {
+    "api:access": "Koristiti Bondery API u tvoje ime",
+    "email": "Vidjeti adresu e-pošte",
+    "mcp:read": "Vidjeti kontakte i njihove podatke",
+    "mcp:write": "Stvarati, ažurirati i brisati kontakte i njihove podatke",
+    "offline_access": "Ostati prijavljen dok ne povučeš pristup",
+    "openid": "Potvrditi identitet",
+    "phone": "Vidjeti telefonski broj",
+    "profile": "Vidjeti podatke profila"
+  },
+  "Title": "Autorizirati aplikaciju",
+  "UnexpectedError": "Dogodila se neočekivana greška. Pokušaj ponovno.",
+  "UnknownClientName": "Nepoznata aplikacija",
+  "WebappClientName": "Bondery"
+}

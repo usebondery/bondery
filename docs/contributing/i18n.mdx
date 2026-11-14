@@ -2,22 +2,46 @@
 title: Internationalization (i18n)
 description: How translated copy loads, types, and validates across the apps. See the generated namespace hooks and the checks that keep locales in step.
 icon: Language
-last_updated: 2026-11-04
+last_updated: 2026-11-13
 ---
 
 ## Locales
 
 User-facing strings live in `@bondery/translations`. Each app calls **generated namespace hooks**, not a generic `t(key, { ns })`, so TypeScript can autocomplete keys and prefixes.
 
-| Code | Language | Role |
-|------|----------|--------|
-| `en` | English | Reference locale (`DEFAULT_LOCALE`) |
-| `cs` | Czech | |
-| `de` | German | |
+| Code | Language | Region tag | Role |
+|------|----------|------------|------|
+| `en` | English | `en-US` | Reference locale (`DEFAULT_LOCALE`) |
+| `bg` | Bulgarian | `bg-BG` | |
+| `cs` | Czech | `cs-CZ` | |
+| `da` | Danish | `da-DK` | |
+| `de` | German | `de-DE` | |
+| `el` | Greek | `el-GR` | |
+| `es` | Spanish | `es-ES` | Spain |
+| `et` | Estonian | `et-EE` | |
+| `fi` | Finnish | `fi-FI` | |
+| `fr` | French | `fr-FR` | |
+| `hr` | Croatian | `hr-HR` | |
+| `hu` | Hungarian | `hu-HU` | |
+| `it` | Italian | `it-IT` | |
+| `lt` | Lithuanian | `lt-LT` | |
+| `lv` | Latvian | `lv-LV` | |
+| `nb` | Norwegian | `nb-NO` | Bokmål |
+| `nl` | Dutch | `nl-NL` | Netherlands |
+| `pl` | Polish | `pl-PL` | |
+| `pt` | Portuguese | `pt-PT` | Portugal |
+| `ro` | Romanian | `ro-RO` | |
+| `ru` | Russian | `ru-RU` | |
+| `sk` | Slovak | `sk-SK` | |
+| `sl` | Slovenian | `sl-SI` | |
+| `sr` | Serbian | `sr-Latn-RS` | Latin |
+| `sv` | Swedish | `sv-SE` | |
+| `tr` | Turkish | `tr-TR` | |
+| `uk` | Ukrainian | `uk-UA` | |
 
 Source of truth: [`packages/schemas/locale/supported-locales.json`](../../packages/schemas/locale/supported-locales.json). Exported as `SUPPORTED_LOCALES` from `@bondery/schemas/locale`.
 
-To add a language, follow [Add a new language](./guides/add-new-language.mdx).
+To add a language, follow the `bondery-i18n` skill. The short page [Add a new language](./guides/add-new-language.mdx) points at that skill.
 
 ## Layout
 
@@ -192,7 +216,7 @@ This rebuilds `Catalog` types, prefix unions, i18next augmentations, and per-app
 | `pnpm run check:i18n` | All i18n CI gates below (umbrella) |
 | `pnpm run check:i18n:structure` | Locale file parity, manifest rules, Languages exonyms |
 | `pnpm run check:i18n:types` | Generated i18next-cli types are current |
-| `pnpm run check:i18n:usage` | Every key used in code (including `TypedTrans` `i18nKey`) exists in all locales; cs/de key parity vs en |
+| `pnpm run check:i18n:usage` | Every key used in code (including `TypedTrans` `i18nKey`) exists in all locales; secondary locales match English keys |
 | `pnpm run check:i18n:lint` | No unexpected hardcoded UI strings (webapp + mobile) |
 
 API error code translations use `pnpm run check:api-errors:translations` (part of `check:api-errors`), not `check:i18n`.

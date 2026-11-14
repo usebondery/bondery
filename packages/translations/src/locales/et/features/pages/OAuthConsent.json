@@ -1,0 +1,30 @@
+{
+  "Approve": "Kiida heaks",
+  "ChromeExtensionClientName": "Bondery Chrome'i laiendus",
+  "Deny": "Keela",
+  "Description": "{clientName} taotleb ligipääsu sinu Bondery kontole.",
+  "ErrorTitle": "Autoriseerimisviga",
+  "InvalidRequest": "Vigane autoriseerimispäring.",
+  "LoopbackWarning": "See rakendus töötab sellel arvutil (localhost). Jätka ainult siis, kui sa ise selle käivitasid.",
+  "MissingAuthorizationId": "Autoriseerimispäring puudub. Proovi rakendusest uuesti.",
+  "PermissionFullDescription": "Loo, uuenda ja kustuta ka kontakte ning nende andmeid.",
+  "PermissionFullLabel": "Full access",
+  "PermissionLabel": "Juurdepääs",
+  "PermissionReadDescription": "Otsi ja loe oma kontakte ning nende andmeid.",
+  "PermissionReadLabel": "Read only",
+  "RequestedPermissions": "Taotletud õigused",
+  "Scopes": {
+    "api:access": "Kasuta Bondery API-t sinu nimel",
+    "email": "Vaata sinu e-posti aadressi",
+    "mcp:read": "Vaata sinu kontakte ja nende andmeid",
+    "mcp:write": "Loo, uuenda ja kustuta kontakte ning nende andmeid",
+    "offline_access": "Hoia sind sisse logituna, kuni sa ligipääsu tühistad",
+    "openid": "Kinnita sinu identiteet",
+    "phone": "Vaata sinu telefoninumbrit",
+    "profile": "Vaata sinu profiili infot"
+  },
+  "Title": "Autoriseeri rakendus",
+  "UnexpectedError": "Ilmnes ootamatu viga. Proovi uuesti.",
+  "UnknownClientName": "Tundmatu rakendus",
+  "WebappClientName": "Bondery"
+}

@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Ievadi derīgu e-pasta adresi",
+    "invalidTitle": "Nederīgs e-pasts"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Vārdam jābūt ne vairāk kā {max} rakstzīmēm",
+      "required": "Jānorāda vārds"
+    },
+    "generic": {
+      "maxLength": "Vērtībai jābūt ne vairāk kā {max} rakstzīmēm"
+    },
+    "headline": {
+      "maxLength": "Virsrakstā nedrīkst būt vairāk par {max} rakstzīmēm"
+    },
+    "label": {
+      "maxLength": "{field} nedrīkst būt garāks par {max} rakstzīmēm",
+      "required": "{field} ir nepieciešams"
+    },
+    "lastName": {
+      "maxLength": "Uzvārds nedrīkst būt garāks par {max} rakstzīmēm"
+    },
+    "location": {
+      "maxLength": "Atrašanās vietai jābūt ne vairāk kā {max} rakstzīmēm"
+    },
+    "middleName": {
+      "maxLength": "Otrajā vārdā drīkst būt ne vairāk kā {max} rakstzīmes"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Nosaukums ir nepieciešams"
+  },
+  "title": "Validācijas kļūda"
+}

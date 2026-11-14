@@ -40,3 +40,24 @@ export function coerceSupportedLocale(raw: string | null | undefined): Supported
   const parsed = supportedLocaleSchema.safeParse(normalized);
   return parsed.success ? parsed.data : DEFAULT_LOCALE;
 }
+
+const intlTagByCode = new Map(APP_LOCALE_METADATA.map((entry) => [entry.code, entry.intl]));
+
+/**
+ * Region tag for Intl, speech, and email dates.
+ * A bare language code is not enough: `pt` resolves toward Brazilian Portuguese.
+ */
+export function intlTagForLocale(locale: string | null | undefined): string {
+  const code = (locale ?? DEFAULT_LOCALE).toLowerCase().split("-")[0] ?? DEFAULT_LOCALE;
+  return intlTagByCode.get(code) ?? intlTagByCode.get(DEFAULT_LOCALE) ?? "en-US";
+}
+
+const dirByCode = new Map(
+  APP_LOCALE_METADATA.map((entry) => [entry.code, entry.dir ?? ("ltr" as const)]),
+);
+
+/** Document direction for a catalog locale. Unknown codes return `ltr`. */
+export function dirForLocale(locale: string | null | undefined): "ltr" | "rtl" {
+  const code = (locale ?? DEFAULT_LOCALE).toLowerCase().split("-")[0] ?? DEFAULT_LOCALE;
+  return dirByCode.get(code) ?? "ltr";
+}

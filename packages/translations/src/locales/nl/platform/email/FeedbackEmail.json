@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Wat de tool teruggaf:",
+  "agentExpectedHeading": "Wat de agent verwachtte:",
+  "agentKindLabel": "Soort melding:",
+  "agentRequestIdLabel": "Request-ID:",
+  "agentSourceHeading": "Gemeld door een AI-agent",
+  "agentToolLabel": "Tool:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Algemene feedback:",
+  "heading": "Feedback van {{userEmail}}",
+  "notProvided": "(Niet opgegeven)",
+  "npsReasonHeading": "Waarom koos die deze score?",
+  "npsScoreLabel": "NPS-score:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Nieuwe feedback van {{userEmail}} - NPS-score: {{npsScore}}",
+  "replyCta": "Antwoorden aan {{userEmail}}",
+  "subject": "Nieuwe feedback over Bondery",
+  "submittedAt": "Ingediend op: {{timestamp}}",
+  "userEmailLabel": "E-mail gebruiker:",
+  "userIdLabel": "Gebruikers-ID:"
+}

@@ -1,0 +1,32 @@
+{
+  "AddAction": "Adaugă dată",
+  "AddHint": "Ca să adaugi o dată nouă, completează toate informațiile.",
+  "AddImportantDate": "Adaugă dată importantă",
+  "BirthdayDateLabel": "Alege ziua de naștere",
+  "DatePlaceholder": "Alege data",
+  "DeleteAction": "Șterge",
+  "DraftIncompleteError": "Ca să adaugi o dată nouă, completează toate informațiile.",
+  "Empty": "Încă nu există date importante.",
+  "ErrorTitle": "Eroare",
+  "NotePlaceholder": "Notă opțională",
+  "NotifyDayBefore": "Notifică cu {count} zi înainte",
+  "NotifyDaysBefore": "Notifică cu {count} zile înainte",
+  "NotifyMe": "Notifică-mă",
+  "NotifyNone": "Nu notifica",
+  "SuccessTitle": "Succes",
+  "Title": "Date importante",
+  "TypeDisabledBirthdateHint": "{firstName} are deja zi de naștere definită",
+  "TypeDisabledHint": "{firstName} are deja zi de naștere sau onomastică definită",
+  "TypeDisabledNamedateHint": "{firstName} are deja onomastică definită",
+  "TypePlaceholder": "Alege tipul",
+  "Types": {
+    "anniversary": "Aniversare",
+    "birthday": "Zi de naștere",
+    "graduation": "Absolvire",
+    "nameday": "Onomastică",
+    "other": "Altele"
+  },
+  "UniqueTypeError": "Se poate adăuga un singur {type}.",
+  "UpdateError": "Nu s-au putut actualiza datele importante",
+  "UpdateSuccess": "Datele importante au fost actualizate"
+}

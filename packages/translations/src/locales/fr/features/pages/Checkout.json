@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Vous avez déjà un abonnement Premium actif.",
+  "alreadySubscribedTitle": "Déjà abonné",
+  "errorMessage": "Une erreur est survenue. Réessayez.",
+  "errorTitle": "Échec du paiement",
+  "errorUnauthorized": "Connectez-vous, puis réessayez.",
+  "intervalAnnual": "Annuel",
+  "intervalMonthly": "Mensuel",
+  "paymentBlockedAction": "Mettre à jour la facturation",
+  "paymentBlockedMessage": "Nous n’avons pas pu traiter votre paiement après plusieurs tentatives. Mettez à jour vos informations de facturation pour rétablir Premium.",
+  "paymentBlockedTitle": "Paiement requis",
+  "successMessage": "Profitez de 300 messages IA par mois et de toutes les fonctions Premium.",
+  "successTitle": "Vous êtes Premium\u00a0!",
+  "upgradePendingMessage": "Votre compte passera bientôt en Premium.",
+  "upgradePendingTitle": "Paiement reçu",
+  "upgradesDisabledTooltip": "Les passages en Premium ne sont pas encore disponibles. Revenez bientôt.",
+  "upgradeToPremium": "Passer à Premium"
+}

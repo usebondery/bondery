@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Serveren avviste forespørselen fordi utvidelsen din er utdatert. Oppdater den.",
+  "ApiRejectedTitle": "Versjonen er for gammel",
+  "UpdateButton": "Oppdater",
+  "UpdateRequiredDescription": "Bondery-utvidelsen din er utdatert og fungerer kanskje ikke som den skal. Oppdater for å fortsette.",
+  "UpdateRequiredTitle": "Oppdatering kreves",
+  "WebappNotificationDescription": "Bondery Chrome-utvidelsen må oppdateres for å fungere som den skal.",
+  "WebappNotificationTitle": "Utvidelsesoppdatering tilgjengelig"
+}

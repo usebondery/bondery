@@ -1,0 +1,11 @@
+{
+  "About": "Névjegy",
+  "Education": "Tanulmányok",
+  "LastDataUpdate": "Utolsó adatfrissítés: {date}",
+  "NoEducation": "Nincsenek elérhető tanulmányok",
+  "NoWorkHistory": "Nincs elérhető szakmai előélet",
+  "Present": "Jelenleg",
+  "ShowLess": "Kevesebb",
+  "ShowMore": "Több",
+  "WorkHistory": "Szakmai előélet"
+}

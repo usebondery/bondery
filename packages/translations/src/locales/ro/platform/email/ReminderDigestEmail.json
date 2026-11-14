@@ -1,0 +1,20 @@
+{
+  "cta": "Deschide mementourile",
+  "dateTypes": {
+    "anniversary": "Aniversare",
+    "birthday": "Zi de naștere",
+    "graduation": "Absolvire",
+    "nameday": "Onomastică",
+    "other": "Dată importantă"
+  },
+  "dayMany": "{{count}} zile",
+  "dayOne": "1 zi",
+  "description": "Pentru {{headingDate}}. Deschide o persoană ca să vezi detalii sau trimite un mesaj.",
+  "headingMany": "{{count}} mementouri în curând",
+  "headingOne": "1 memento în curând",
+  "preview": "{{firstTypeLabel}} lui {{firstPersonName}} peste {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} lui {{firstPersonName}} peste {{firstRemainingLabel}} și încă {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} peste {{remainingLabel}}, pe {{dateLabel}}.",
+  "subject": "Mementouri Bondery pentru {{targetDate}}",
+  "whyReceiving": "Primești acest e-mail pentru că ai activat mementouri pentru aceste date."
+}

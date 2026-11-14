@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Anexar uma fotografia a este contatto",
+  "Cancel": "Annullare",
+  "ConfirmPhoto": "Confirmar fotografia",
+  "DragImageHere": "Arraste uma imagem per aqui ou clique per selezionare",
+  "InvalidFile": "Ficheiro inválido",
+  "PhotoUpdateError": "Impossibile atualizar a fotografia do contatto",
+  "PhotoUpdateSuccess": "Fotografia do contatto atualizada",
+  "PleaseWait": "Aguarde",
+  "TitleModal": "Carregar fotografia do contatto",
+  "UpdateError": "Erro",
+  "UpdateProfilePhoto": "Atualizar fotografia do contatto",
+  "UpdateSuccess": "Concluído",
+  "UploadingPhoto": "A carregar..."
+}

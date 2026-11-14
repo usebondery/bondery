@@ -1,6 +1,7 @@
 export {
   authUserSchema,
   colorSchemePreferenceSchema,
+  dateFormatPreferenceSchema,
   groupSortOrderPreferenceSchema,
   importFollowupPlatformSchema,
   importFollowupStatusSchema,
@@ -21,6 +22,7 @@ export {
 export type {
   AuthUser,
   ColorSchemePreference,
+  DateFormatPreference,
   GroupSortOrderPreference,
   ImportFollowupPlatform,
   ImportFollowupStatus,

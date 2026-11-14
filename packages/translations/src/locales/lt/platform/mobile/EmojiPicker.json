@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Veikla",
+    "Animals": "Gyvūnai",
+    "Buildings": "Pastatai",
+    "Celebrations": "Šventės",
+    "Food": "Maistas",
+    "Hearts": "Širdutės",
+    "Humans": "Žmonės",
+    "Miscellaneous": "Įvairūs",
+    "Nature": "Gamta",
+    "Objects": "Daiktai",
+    "Sports": "Sportas",
+    "Travel": "Kelionės",
+    "Work": "Darbas"
+  },
+  "EmptySearch": "Emoji nerasta",
+  "RandomAccessibilityLabel": "Pasirinkti atsitiktinį emoji",
+  "SearchPlaceholder": "Ieškoti emoji…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Atidaro emoji parinkiklį"
+}

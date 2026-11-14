@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Uusi tarkistus {seconds}\u00a0s kuluttua…",
+  "Description": "Tilisi on turvassa ja olet edelleen kirjautuneena. Tarkistamme yhteyttä vielä; se kestää yleensä vain hetken.",
+  "MetadataTitle": "Palvelu ei ole käytettävissä",
+  "Retry": "Yritä uudelleen",
+  "StatusChecking": "Tarkistetaan yhteyttä…",
+  "StatusDegraded": "Jotkin toiminnot ovat tällä hetkellä hitaita",
+  "StatusOffline": "Bondery ei ole tilapäisesti käytettävissä",
+  "StatusOnline": "Taas verkossa. Ohjataan…",
+  "StatusPageLink": "Näytä tilasivu",
+  "TechnicalBackendStatus": "Taustapalvelu: {status}",
+  "TechnicalDetails": "Tekniset tiedot",
+  "TechnicalHttpStatus": "HTTP-tila: {status}",
+  "TechnicalUnreachable": "ei tavoitettavissa",
+  "Title": "Yhteysongelma"
+}

@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Kaikki LinkedIn-profiililla varustetut yhteystiedot on jo rikastettu.",
+  "AllEnrichedTitle": "Kaikki yhteystiedot rikastettu",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Rikastetaan parhaillaan:",
+  "EligibleLabel_one": "{count} henkilö voidaan rikastaa",
+  "EligibleLabel_other": "{count} henkilöä voidaan rikastaa",
+  "Enrich": "Rikasta",
+  "EnrichAll": "Rikasta kaikki",
+  "HelpTooltip": "Hae uusimmat LinkedIn-profiilitiedot tähän yhteystietoon. Napsauta lukeaksesi miten rikastus toimii.",
+  "Pause": "Keskeytä",
+  "PausingTooltip": "Nykyinen yhteystieto viimeistellään, sitten keskeytetään...",
+  "PersonEligibleLabel": "Tämä yhteystieto voidaan rikastaa LinkedInistä",
+  "ProcessingPerson": "Rikastetaan: {name}...",
+  "ProgressLabel": "Rikastus: {completed}/{totalEligible} valmis",
+  "ProgressLabelWithFailed": "Rikastus: {completed}/{totalEligible} valmis ({failed} epäonnistui)",
+  "Resume": "Jatka",
+  "ResumeLabel": "Rikastus keskeytetty: {completed} valmis, {pending} odottaa",
+  "SkipRemaining": "Ohita loput",
+  "Tooltip": "Näillä yhteystiedoilla on LinkedIn-profiili, mutta niitä ei ole vielä rikastettu. Rikasta ne hakeaksesi uusimman uran, koulutuksen ja esittelyn."
+}

@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Avaa Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Yhdistä tilisi tallentaaksesi yhteystietoja sosiaalisesta mediasta.",
+    "SignIn": "Kirjaudu sisään",
+    "Title": "Kirjautuminen Bonderyyn"
+  },
+  "PersonActions": {
+    "AddInteraction": "Lisää vuorovaikutus tämän henkilön kanssa"
+  },
+  "Settings": {
+    "ApiServer": "API-palvelin",
+    "SignOut": "Kirjaudu ulos"
+  },
+  "UpdateRequired": {
+    "Description": "Bondery-laajennuksesi on vanhentunut eikä välttämättä toimi oikein. Päivitä jatkaaksesi.",
+    "OpenExtensionsPage": "Avaa laajennussivu",
+    "Title": "Päivitys vaaditaan"
+  },
+  "Welcome": {
+    "ConnectButton": "Yhdistä Bondery-tili"
+  }
+}

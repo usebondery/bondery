@@ -3,228 +3,828 @@ import { localeWatchStamp } from "./locale-watch-stamp.js";
 import r0 from "../locales/en/features/pages/AboutPage.json" with { type: "json" };
 import r1 from "../locales/cs/features/pages/AboutPage.json" with { type: "json" };
 import r2 from "../locales/de/features/pages/AboutPage.json" with { type: "json" };
-import r3 from "../locales/en/platform/email/AccountDeletedEmail.json" with { type: "json" };
-import r4 from "../locales/cs/platform/email/AccountDeletedEmail.json" with { type: "json" };
-import r5 from "../locales/de/platform/email/AccountDeletedEmail.json" with { type: "json" };
-import r6 from "../locales/en/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
-import r7 from "../locales/cs/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
-import r8 from "../locales/de/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
-import r9 from "../locales/en/platform/web/AppNavigation.json" with { type: "json" };
-import r10 from "../locales/cs/platform/web/AppNavigation.json" with { type: "json" };
-import r11 from "../locales/de/platform/web/AppNavigation.json" with { type: "json" };
-import r12 from "../locales/en/features/pages/ChatPage.json" with { type: "json" };
-import r13 from "../locales/cs/features/pages/ChatPage.json" with { type: "json" };
-import r14 from "../locales/de/features/pages/ChatPage.json" with { type: "json" };
-import r15 from "../locales/en/features/pages/Checkout.json" with { type: "json" };
-import r16 from "../locales/cs/features/pages/Checkout.json" with { type: "json" };
-import r17 from "../locales/de/features/pages/Checkout.json" with { type: "json" };
-import r18 from "../locales/en/platform/web/CommandPalette.json" with { type: "json" };
-import r19 from "../locales/cs/platform/web/CommandPalette.json" with { type: "json" };
-import r20 from "../locales/de/platform/web/CommandPalette.json" with { type: "json" };
-import r21 from "../locales/en/features/sections/ContactActionMenu.json" with { type: "json" };
-import r22 from "../locales/cs/features/sections/ContactActionMenu.json" with { type: "json" };
-import r23 from "../locales/de/features/sections/ContactActionMenu.json" with { type: "json" };
-import r24 from "../locales/en/features/sections/ContactAddress.json" with { type: "json" };
-import r25 from "../locales/cs/features/sections/ContactAddress.json" with { type: "json" };
-import r26 from "../locales/de/features/sections/ContactAddress.json" with { type: "json" };
-import r27 from "../locales/en/features/sections/ContactIdentityFields.json" with { type: "json" };
-import r28 from "../locales/cs/features/sections/ContactIdentityFields.json" with { type: "json" };
-import r29 from "../locales/de/features/sections/ContactIdentityFields.json" with { type: "json" };
-import r30 from "../locales/en/features/sections/ContactImportantDates.json" with { type: "json" };
-import r31 from "../locales/cs/features/sections/ContactImportantDates.json" with { type: "json" };
-import r32 from "../locales/de/features/sections/ContactImportantDates.json" with { type: "json" };
-import r33 from "../locales/en/features/sections/ContactInfo.json" with { type: "json" };
-import r34 from "../locales/cs/features/sections/ContactInfo.json" with { type: "json" };
-import r35 from "../locales/de/features/sections/ContactInfo.json" with { type: "json" };
-import r36 from "../locales/en/features/pages/ContactPage.json" with { type: "json" };
-import r37 from "../locales/cs/features/pages/ContactPage.json" with { type: "json" };
-import r38 from "../locales/de/features/pages/ContactPage.json" with { type: "json" };
-import r39 from "../locales/en/features/sections/ContactPhotoUpload.json" with { type: "json" };
-import r40 from "../locales/cs/features/sections/ContactPhotoUpload.json" with { type: "json" };
-import r41 from "../locales/de/features/sections/ContactPhotoUpload.json" with { type: "json" };
-import r42 from "../locales/en/features/sections/ContactPreferenceSection.json" with { type: "json" };
-import r43 from "../locales/cs/features/sections/ContactPreferenceSection.json" with { type: "json" };
-import r44 from "../locales/de/features/sections/ContactPreferenceSection.json" with { type: "json" };
-import r45 from "../locales/en/features/sections/ContactsTable.json" with { type: "json" };
-import r46 from "../locales/cs/features/sections/ContactsTable.json" with { type: "json" };
-import r47 from "../locales/de/features/sections/ContactsTable.json" with { type: "json" };
-import r48 from "../locales/en/common.json" with { type: "json" };
-import r49 from "../locales/cs/common.json" with { type: "json" };
-import r50 from "../locales/de/common.json" with { type: "json" };
-import r51 from "../locales/en/platform/email/EmailChrome.json" with { type: "json" };
-import r52 from "../locales/cs/platform/email/EmailChrome.json" with { type: "json" };
-import r53 from "../locales/de/platform/email/EmailChrome.json" with { type: "json" };
-import r54 from "../locales/en/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
-import r55 from "../locales/cs/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
-import r56 from "../locales/de/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
-import r57 from "../locales/en/features/sections/EnrichRecommendationCard.json" with { type: "json" };
-import r58 from "../locales/cs/features/sections/EnrichRecommendationCard.json" with { type: "json" };
-import r59 from "../locales/de/features/sections/EnrichRecommendationCard.json" with { type: "json" };
-import r60 from "../locales/en/platform/extension/ExtensionPopup.json" with { type: "json" };
-import r61 from "../locales/cs/platform/extension/ExtensionPopup.json" with { type: "json" };
-import r62 from "../locales/de/platform/extension/ExtensionPopup.json" with { type: "json" };
-import r63 from "../locales/en/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
-import r64 from "../locales/cs/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
-import r65 from "../locales/de/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
-import r66 from "../locales/en/features/sections/ExtensionVersionCheck.json" with { type: "json" };
-import r67 from "../locales/cs/features/sections/ExtensionVersionCheck.json" with { type: "json" };
-import r68 from "../locales/de/features/sections/ExtensionVersionCheck.json" with { type: "json" };
-import r69 from "../locales/en/platform/email/FeedbackEmail.json" with { type: "json" };
-import r70 from "../locales/cs/platform/email/FeedbackEmail.json" with { type: "json" };
-import r71 from "../locales/de/platform/email/FeedbackEmail.json" with { type: "json" };
-import r72 from "../locales/en/features/pages/FeedbackPage.json" with { type: "json" };
-import r73 from "../locales/cs/features/pages/FeedbackPage.json" with { type: "json" };
-import r74 from "../locales/de/features/pages/FeedbackPage.json" with { type: "json" };
-import r75 from "../locales/en/features/pages/FixContactsPage.json" with { type: "json" };
-import r76 from "../locales/cs/features/pages/FixContactsPage.json" with { type: "json" };
-import r77 from "../locales/de/features/pages/FixContactsPage.json" with { type: "json" };
-import r78 from "../locales/en/features/pages/GraphPage.json" with { type: "json" };
-import r79 from "../locales/cs/features/pages/GraphPage.json" with { type: "json" };
-import r80 from "../locales/de/features/pages/GraphPage.json" with { type: "json" };
-import r81 from "../locales/en/features/pages/GroupDetailPage.json" with { type: "json" };
-import r82 from "../locales/cs/features/pages/GroupDetailPage.json" with { type: "json" };
-import r83 from "../locales/de/features/pages/GroupDetailPage.json" with { type: "json" };
-import r84 from "../locales/en/features/pages/GroupsPage.json" with { type: "json" };
-import r85 from "../locales/cs/features/pages/GroupsPage.json" with { type: "json" };
-import r86 from "../locales/de/features/pages/GroupsPage.json" with { type: "json" };
-import r87 from "../locales/en/glossary.json" with { type: "json" };
-import r88 from "../locales/cs/glossary.json" with { type: "json" };
-import r89 from "../locales/de/glossary.json" with { type: "json" };
-import r90 from "../locales/en/features/pages/HomePage.json" with { type: "json" };
-import r91 from "../locales/cs/features/pages/HomePage.json" with { type: "json" };
-import r92 from "../locales/de/features/pages/HomePage.json" with { type: "json" };
-import r93 from "../locales/en/features/pages/InteractionsPage.json" with { type: "json" };
-import r94 from "../locales/cs/features/pages/InteractionsPage.json" with { type: "json" };
-import r95 from "../locales/de/features/pages/InteractionsPage.json" with { type: "json" };
-import r96 from "../locales/en/features/sections/InteractionTypes.json" with { type: "json" };
-import r97 from "../locales/cs/features/sections/InteractionTypes.json" with { type: "json" };
-import r98 from "../locales/de/features/sections/InteractionTypes.json" with { type: "json" };
-import r99 from "../locales/en/features/pages/KeepInTouch.json" with { type: "json" };
-import r100 from "../locales/cs/features/pages/KeepInTouch.json" with { type: "json" };
-import r101 from "../locales/de/features/pages/KeepInTouch.json" with { type: "json" };
-import r102 from "../locales/en/features/sections/Languages.json" with { type: "json" };
-import r103 from "../locales/cs/features/sections/Languages.json" with { type: "json" };
-import r104 from "../locales/de/features/sections/Languages.json" with { type: "json" };
-import r105 from "../locales/en/features/sections/LinkedInData.json" with { type: "json" };
-import r106 from "../locales/cs/features/sections/LinkedInData.json" with { type: "json" };
-import r107 from "../locales/de/features/sections/LinkedInData.json" with { type: "json" };
-import r108 from "../locales/en/features/pages/LoginPage.json" with { type: "json" };
-import r109 from "../locales/cs/features/pages/LoginPage.json" with { type: "json" };
-import r110 from "../locales/de/features/pages/LoginPage.json" with { type: "json" };
-import r111 from "../locales/en/platform/email/MagicLinkEmail.json" with { type: "json" };
-import r112 from "../locales/cs/platform/email/MagicLinkEmail.json" with { type: "json" };
-import r113 from "../locales/de/platform/email/MagicLinkEmail.json" with { type: "json" };
-import r114 from "../locales/en/features/sections/MapCommon.json" with { type: "json" };
-import r115 from "../locales/cs/features/sections/MapCommon.json" with { type: "json" };
-import r116 from "../locales/de/features/sections/MapCommon.json" with { type: "json" };
-import r117 from "../locales/en/features/pages/MapPage.json" with { type: "json" };
-import r118 from "../locales/cs/features/pages/MapPage.json" with { type: "json" };
-import r119 from "../locales/de/features/pages/MapPage.json" with { type: "json" };
-import r120 from "../locales/en/features/modals/MergeWithModal.json" with { type: "json" };
-import r121 from "../locales/cs/features/modals/MergeWithModal.json" with { type: "json" };
-import r122 from "../locales/de/features/modals/MergeWithModal.json" with { type: "json" };
-import r123 from "../locales/en/platform/mobile/Auth.json" with { type: "json" };
-import r124 from "../locales/cs/platform/mobile/Auth.json" with { type: "json" };
-import r125 from "../locales/de/platform/mobile/Auth.json" with { type: "json" };
-import r126 from "../locales/en/platform/mobile/ColorPicker.json" with { type: "json" };
-import r127 from "../locales/cs/platform/mobile/ColorPicker.json" with { type: "json" };
-import r128 from "../locales/de/platform/mobile/ColorPicker.json" with { type: "json" };
-import r129 from "../locales/en/platform/mobile/ContactDetail.json" with { type: "json" };
-import r130 from "../locales/cs/platform/mobile/ContactDetail.json" with { type: "json" };
-import r131 from "../locales/de/platform/mobile/ContactDetail.json" with { type: "json" };
-import r132 from "../locales/en/platform/mobile/ContactIdentity.json" with { type: "json" };
-import r133 from "../locales/cs/platform/mobile/ContactIdentity.json" with { type: "json" };
-import r134 from "../locales/de/platform/mobile/ContactIdentity.json" with { type: "json" };
-import r135 from "../locales/en/platform/mobile/Contacts.json" with { type: "json" };
-import r136 from "../locales/cs/platform/mobile/Contacts.json" with { type: "json" };
-import r137 from "../locales/de/platform/mobile/Contacts.json" with { type: "json" };
-import r138 from "../locales/en/platform/mobile/CreateContact.json" with { type: "json" };
-import r139 from "../locales/cs/platform/mobile/CreateContact.json" with { type: "json" };
-import r140 from "../locales/de/platform/mobile/CreateContact.json" with { type: "json" };
-import r141 from "../locales/en/platform/mobile/EmojiPicker.json" with { type: "json" };
-import r142 from "../locales/cs/platform/mobile/EmojiPicker.json" with { type: "json" };
-import r143 from "../locales/de/platform/mobile/EmojiPicker.json" with { type: "json" };
-import r144 from "../locales/en/platform/mobile/Groups.json" with { type: "json" };
-import r145 from "../locales/cs/platform/mobile/Groups.json" with { type: "json" };
-import r146 from "../locales/de/platform/mobile/Groups.json" with { type: "json" };
-import r147 from "../locales/en/platform/mobile/Navigation.json" with { type: "json" };
-import r148 from "../locales/cs/platform/mobile/Navigation.json" with { type: "json" };
-import r149 from "../locales/de/platform/mobile/Navigation.json" with { type: "json" };
-import r150 from "../locales/en/platform/mobile/Settings.json" with { type: "json" };
-import r151 from "../locales/cs/platform/mobile/Settings.json" with { type: "json" };
-import r152 from "../locales/de/platform/mobile/Settings.json" with { type: "json" };
-import r153 from "../locales/en/platform/mobile/ShareContactEmail.json" with { type: "json" };
-import r154 from "../locales/cs/platform/mobile/ShareContactEmail.json" with { type: "json" };
-import r155 from "../locales/de/platform/mobile/ShareContactEmail.json" with { type: "json" };
-import r156 from "../locales/en/platform/mobile/Tags.json" with { type: "json" };
-import r157 from "../locales/cs/platform/mobile/Tags.json" with { type: "json" };
-import r158 from "../locales/de/platform/mobile/Tags.json" with { type: "json" };
-import r159 from "../locales/en/features/sections/NotesEditor.json" with { type: "json" };
-import r160 from "../locales/cs/features/sections/NotesEditor.json" with { type: "json" };
-import r161 from "../locales/de/features/sections/NotesEditor.json" with { type: "json" };
-import r162 from "../locales/en/features/sections/NotesSlashCommands.json" with { type: "json" };
-import r163 from "../locales/cs/features/sections/NotesSlashCommands.json" with { type: "json" };
-import r164 from "../locales/de/features/sections/NotesSlashCommands.json" with { type: "json" };
-import r165 from "../locales/en/features/pages/NotFoundPage.json" with { type: "json" };
-import r166 from "../locales/cs/features/pages/NotFoundPage.json" with { type: "json" };
-import r167 from "../locales/de/features/pages/NotFoundPage.json" with { type: "json" };
-import r168 from "../locales/en/features/pages/OAuthConsent.json" with { type: "json" };
-import r169 from "../locales/cs/features/pages/OAuthConsent.json" with { type: "json" };
-import r170 from "../locales/de/features/pages/OAuthConsent.json" with { type: "json" };
-import r171 from "../locales/en/features/pages/Onboarding.json" with { type: "json" };
-import r172 from "../locales/cs/features/pages/Onboarding.json" with { type: "json" };
-import r173 from "../locales/de/features/pages/Onboarding.json" with { type: "json" };
-import r174 from "../locales/en/platform/web/PageHeader.json" with { type: "json" };
-import r175 from "../locales/cs/platform/web/PageHeader.json" with { type: "json" };
-import r176 from "../locales/de/platform/web/PageHeader.json" with { type: "json" };
-import r177 from "../locales/en/features/pages/PeoplePage.json" with { type: "json" };
-import r178 from "../locales/cs/features/pages/PeoplePage.json" with { type: "json" };
-import r179 from "../locales/de/features/pages/PeoplePage.json" with { type: "json" };
-import r180 from "../locales/en/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
-import r181 from "../locales/cs/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
-import r182 from "../locales/de/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
-import r183 from "../locales/en/features/sections/PersonRelationships.json" with { type: "json" };
-import r184 from "../locales/cs/features/sections/PersonRelationships.json" with { type: "json" };
-import r185 from "../locales/de/features/sections/PersonRelationships.json" with { type: "json" };
-import r186 from "../locales/en/features/sections/PersonTabs.json" with { type: "json" };
-import r187 from "../locales/cs/features/sections/PersonTabs.json" with { type: "json" };
-import r188 from "../locales/de/features/sections/PersonTabs.json" with { type: "json" };
-import r189 from "../locales/en/platform/email/ReminderDigestEmail.json" with { type: "json" };
-import r190 from "../locales/cs/platform/email/ReminderDigestEmail.json" with { type: "json" };
-import r191 from "../locales/de/platform/email/ReminderDigestEmail.json" with { type: "json" };
-import r192 from "../locales/en/features/pages/SettingsPage.json" with { type: "json" };
-import r193 from "../locales/cs/features/pages/SettingsPage.json" with { type: "json" };
-import r194 from "../locales/de/features/pages/SettingsPage.json" with { type: "json" };
-import r195 from "../locales/en/platform/email/ShareContactEmailBody.json" with { type: "json" };
-import r196 from "../locales/cs/platform/email/ShareContactEmailBody.json" with { type: "json" };
-import r197 from "../locales/de/platform/email/ShareContactEmailBody.json" with { type: "json" };
-import r198 from "../locales/en/features/modals/ShareContactModal.json" with { type: "json" };
-import r199 from "../locales/cs/features/modals/ShareContactModal.json" with { type: "json" };
-import r200 from "../locales/de/features/modals/ShareContactModal.json" with { type: "json" };
-import r201 from "../locales/en/features/pages/SingleContactPage.json" with { type: "json" };
-import r202 from "../locales/cs/features/pages/SingleContactPage.json" with { type: "json" };
-import r203 from "../locales/de/features/pages/SingleContactPage.json" with { type: "json" };
-import r204 from "../locales/en/features/sections/Socials.json" with { type: "json" };
-import r205 from "../locales/cs/features/sections/Socials.json" with { type: "json" };
-import r206 from "../locales/de/features/sections/Socials.json" with { type: "json" };
-import r207 from "../locales/en/features/sections/TagsInput.json" with { type: "json" };
-import r208 from "../locales/cs/features/sections/TagsInput.json" with { type: "json" };
-import r209 from "../locales/de/features/sections/TagsInput.json" with { type: "json" };
-import r210 from "../locales/en/features/sections/TagsSettings.json" with { type: "json" };
-import r211 from "../locales/cs/features/sections/TagsSettings.json" with { type: "json" };
-import r212 from "../locales/de/features/sections/TagsSettings.json" with { type: "json" };
-import r213 from "../locales/en/platform/email/TrialEndingEmail.json" with { type: "json" };
-import r214 from "../locales/cs/platform/email/TrialEndingEmail.json" with { type: "json" };
-import r215 from "../locales/de/platform/email/TrialEndingEmail.json" with { type: "json" };
-import r216 from "../locales/en/features/pages/UnavailablePage.json" with { type: "json" };
-import r217 from "../locales/cs/features/pages/UnavailablePage.json" with { type: "json" };
-import r218 from "../locales/de/features/pages/UnavailablePage.json" with { type: "json" };
-import r219 from "../locales/en/validation.json" with { type: "json" };
-import r220 from "../locales/cs/validation.json" with { type: "json" };
-import r221 from "../locales/de/validation.json" with { type: "json" };
-import r222 from "../locales/en/platform/email/WelcomeEmail.json" with { type: "json" };
-import r223 from "../locales/cs/platform/email/WelcomeEmail.json" with { type: "json" };
-import r224 from "../locales/de/platform/email/WelcomeEmail.json" with { type: "json" };
+import r3 from "../locales/es/features/pages/AboutPage.json" with { type: "json" };
+import r4 from "../locales/fr/features/pages/AboutPage.json" with { type: "json" };
+import r5 from "../locales/hu/features/pages/AboutPage.json" with { type: "json" };
+import r6 from "../locales/pl/features/pages/AboutPage.json" with { type: "json" };
+import r7 from "../locales/pt/features/pages/AboutPage.json" with { type: "json" };
+import r8 from "../locales/ru/features/pages/AboutPage.json" with { type: "json" };
+import r9 from "../locales/sk/features/pages/AboutPage.json" with { type: "json" };
+import r10 from "../locales/uk/features/pages/AboutPage.json" with { type: "json" };
+import r11 from "../locales/en/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r12 from "../locales/cs/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r13 from "../locales/de/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r14 from "../locales/es/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r15 from "../locales/fr/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r16 from "../locales/hu/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r17 from "../locales/pl/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r18 from "../locales/pt/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r19 from "../locales/ru/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r20 from "../locales/sk/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r21 from "../locales/uk/platform/email/AccountDeletedEmail.json" with { type: "json" };
+import r22 from "../locales/en/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r23 from "../locales/cs/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r24 from "../locales/de/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r25 from "../locales/es/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r26 from "../locales/fr/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r27 from "../locales/hu/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r28 from "../locales/pl/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r29 from "../locales/pt/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r30 from "../locales/ru/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r31 from "../locales/sk/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r32 from "../locales/uk/features/modals/AddPeopleToGroupSelectionModal.json" with { type: "json" };
+import r33 from "../locales/en/platform/web/AppNavigation.json" with { type: "json" };
+import r34 from "../locales/cs/platform/web/AppNavigation.json" with { type: "json" };
+import r35 from "../locales/de/platform/web/AppNavigation.json" with { type: "json" };
+import r36 from "../locales/es/platform/web/AppNavigation.json" with { type: "json" };
+import r37 from "../locales/fr/platform/web/AppNavigation.json" with { type: "json" };
+import r38 from "../locales/hu/platform/web/AppNavigation.json" with { type: "json" };
+import r39 from "../locales/pl/platform/web/AppNavigation.json" with { type: "json" };
+import r40 from "../locales/pt/platform/web/AppNavigation.json" with { type: "json" };
+import r41 from "../locales/ru/platform/web/AppNavigation.json" with { type: "json" };
+import r42 from "../locales/sk/platform/web/AppNavigation.json" with { type: "json" };
+import r43 from "../locales/uk/platform/web/AppNavigation.json" with { type: "json" };
+import r44 from "../locales/en/features/pages/ChatPage.json" with { type: "json" };
+import r45 from "../locales/cs/features/pages/ChatPage.json" with { type: "json" };
+import r46 from "../locales/de/features/pages/ChatPage.json" with { type: "json" };
+import r47 from "../locales/es/features/pages/ChatPage.json" with { type: "json" };
+import r48 from "../locales/fr/features/pages/ChatPage.json" with { type: "json" };
+import r49 from "../locales/hu/features/pages/ChatPage.json" with { type: "json" };
+import r50 from "../locales/pl/features/pages/ChatPage.json" with { type: "json" };
+import r51 from "../locales/pt/features/pages/ChatPage.json" with { type: "json" };
+import r52 from "../locales/ru/features/pages/ChatPage.json" with { type: "json" };
+import r53 from "../locales/sk/features/pages/ChatPage.json" with { type: "json" };
+import r54 from "../locales/uk/features/pages/ChatPage.json" with { type: "json" };
+import r55 from "../locales/en/features/pages/Checkout.json" with { type: "json" };
+import r56 from "../locales/cs/features/pages/Checkout.json" with { type: "json" };
+import r57 from "../locales/de/features/pages/Checkout.json" with { type: "json" };
+import r58 from "../locales/es/features/pages/Checkout.json" with { type: "json" };
+import r59 from "../locales/fr/features/pages/Checkout.json" with { type: "json" };
+import r60 from "../locales/hu/features/pages/Checkout.json" with { type: "json" };
+import r61 from "../locales/pl/features/pages/Checkout.json" with { type: "json" };
+import r62 from "../locales/pt/features/pages/Checkout.json" with { type: "json" };
+import r63 from "../locales/ru/features/pages/Checkout.json" with { type: "json" };
+import r64 from "../locales/sk/features/pages/Checkout.json" with { type: "json" };
+import r65 from "../locales/uk/features/pages/Checkout.json" with { type: "json" };
+import r66 from "../locales/en/platform/web/CommandPalette.json" with { type: "json" };
+import r67 from "../locales/cs/platform/web/CommandPalette.json" with { type: "json" };
+import r68 from "../locales/de/platform/web/CommandPalette.json" with { type: "json" };
+import r69 from "../locales/es/platform/web/CommandPalette.json" with { type: "json" };
+import r70 from "../locales/fr/platform/web/CommandPalette.json" with { type: "json" };
+import r71 from "../locales/hu/platform/web/CommandPalette.json" with { type: "json" };
+import r72 from "../locales/pl/platform/web/CommandPalette.json" with { type: "json" };
+import r73 from "../locales/pt/platform/web/CommandPalette.json" with { type: "json" };
+import r74 from "../locales/ru/platform/web/CommandPalette.json" with { type: "json" };
+import r75 from "../locales/sk/platform/web/CommandPalette.json" with { type: "json" };
+import r76 from "../locales/uk/platform/web/CommandPalette.json" with { type: "json" };
+import r77 from "../locales/en/features/sections/ContactActionMenu.json" with { type: "json" };
+import r78 from "../locales/cs/features/sections/ContactActionMenu.json" with { type: "json" };
+import r79 from "../locales/de/features/sections/ContactActionMenu.json" with { type: "json" };
+import r80 from "../locales/es/features/sections/ContactActionMenu.json" with { type: "json" };
+import r81 from "../locales/fr/features/sections/ContactActionMenu.json" with { type: "json" };
+import r82 from "../locales/hu/features/sections/ContactActionMenu.json" with { type: "json" };
+import r83 from "../locales/pl/features/sections/ContactActionMenu.json" with { type: "json" };
+import r84 from "../locales/pt/features/sections/ContactActionMenu.json" with { type: "json" };
+import r85 from "../locales/ru/features/sections/ContactActionMenu.json" with { type: "json" };
+import r86 from "../locales/sk/features/sections/ContactActionMenu.json" with { type: "json" };
+import r87 from "../locales/uk/features/sections/ContactActionMenu.json" with { type: "json" };
+import r88 from "../locales/en/features/sections/ContactAddress.json" with { type: "json" };
+import r89 from "../locales/cs/features/sections/ContactAddress.json" with { type: "json" };
+import r90 from "../locales/de/features/sections/ContactAddress.json" with { type: "json" };
+import r91 from "../locales/es/features/sections/ContactAddress.json" with { type: "json" };
+import r92 from "../locales/fr/features/sections/ContactAddress.json" with { type: "json" };
+import r93 from "../locales/hu/features/sections/ContactAddress.json" with { type: "json" };
+import r94 from "../locales/pl/features/sections/ContactAddress.json" with { type: "json" };
+import r95 from "../locales/pt/features/sections/ContactAddress.json" with { type: "json" };
+import r96 from "../locales/ru/features/sections/ContactAddress.json" with { type: "json" };
+import r97 from "../locales/sk/features/sections/ContactAddress.json" with { type: "json" };
+import r98 from "../locales/uk/features/sections/ContactAddress.json" with { type: "json" };
+import r99 from "../locales/en/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r100 from "../locales/cs/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r101 from "../locales/de/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r102 from "../locales/es/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r103 from "../locales/fr/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r104 from "../locales/hu/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r105 from "../locales/pl/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r106 from "../locales/pt/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r107 from "../locales/ru/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r108 from "../locales/sk/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r109 from "../locales/uk/features/sections/ContactIdentityFields.json" with { type: "json" };
+import r110 from "../locales/en/features/sections/ContactImportantDates.json" with { type: "json" };
+import r111 from "../locales/cs/features/sections/ContactImportantDates.json" with { type: "json" };
+import r112 from "../locales/de/features/sections/ContactImportantDates.json" with { type: "json" };
+import r113 from "../locales/es/features/sections/ContactImportantDates.json" with { type: "json" };
+import r114 from "../locales/fr/features/sections/ContactImportantDates.json" with { type: "json" };
+import r115 from "../locales/hu/features/sections/ContactImportantDates.json" with { type: "json" };
+import r116 from "../locales/pl/features/sections/ContactImportantDates.json" with { type: "json" };
+import r117 from "../locales/pt/features/sections/ContactImportantDates.json" with { type: "json" };
+import r118 from "../locales/ru/features/sections/ContactImportantDates.json" with { type: "json" };
+import r119 from "../locales/sk/features/sections/ContactImportantDates.json" with { type: "json" };
+import r120 from "../locales/uk/features/sections/ContactImportantDates.json" with { type: "json" };
+import r121 from "../locales/en/features/sections/ContactInfo.json" with { type: "json" };
+import r122 from "../locales/cs/features/sections/ContactInfo.json" with { type: "json" };
+import r123 from "../locales/de/features/sections/ContactInfo.json" with { type: "json" };
+import r124 from "../locales/es/features/sections/ContactInfo.json" with { type: "json" };
+import r125 from "../locales/fr/features/sections/ContactInfo.json" with { type: "json" };
+import r126 from "../locales/hu/features/sections/ContactInfo.json" with { type: "json" };
+import r127 from "../locales/pl/features/sections/ContactInfo.json" with { type: "json" };
+import r128 from "../locales/pt/features/sections/ContactInfo.json" with { type: "json" };
+import r129 from "../locales/ru/features/sections/ContactInfo.json" with { type: "json" };
+import r130 from "../locales/sk/features/sections/ContactInfo.json" with { type: "json" };
+import r131 from "../locales/uk/features/sections/ContactInfo.json" with { type: "json" };
+import r132 from "../locales/en/features/pages/ContactPage.json" with { type: "json" };
+import r133 from "../locales/cs/features/pages/ContactPage.json" with { type: "json" };
+import r134 from "../locales/de/features/pages/ContactPage.json" with { type: "json" };
+import r135 from "../locales/es/features/pages/ContactPage.json" with { type: "json" };
+import r136 from "../locales/fr/features/pages/ContactPage.json" with { type: "json" };
+import r137 from "../locales/hu/features/pages/ContactPage.json" with { type: "json" };
+import r138 from "../locales/pl/features/pages/ContactPage.json" with { type: "json" };
+import r139 from "../locales/pt/features/pages/ContactPage.json" with { type: "json" };
+import r140 from "../locales/ru/features/pages/ContactPage.json" with { type: "json" };
+import r141 from "../locales/sk/features/pages/ContactPage.json" with { type: "json" };
+import r142 from "../locales/uk/features/pages/ContactPage.json" with { type: "json" };
+import r143 from "../locales/en/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r144 from "../locales/cs/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r145 from "../locales/de/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r146 from "../locales/es/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r147 from "../locales/fr/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r148 from "../locales/hu/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r149 from "../locales/pl/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r150 from "../locales/pt/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r151 from "../locales/ru/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r152 from "../locales/sk/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r153 from "../locales/uk/features/sections/ContactPhotoUpload.json" with { type: "json" };
+import r154 from "../locales/en/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r155 from "../locales/cs/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r156 from "../locales/de/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r157 from "../locales/es/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r158 from "../locales/fr/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r159 from "../locales/hu/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r160 from "../locales/pl/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r161 from "../locales/pt/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r162 from "../locales/ru/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r163 from "../locales/sk/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r164 from "../locales/uk/features/sections/ContactPreferenceSection.json" with { type: "json" };
+import r165 from "../locales/en/features/sections/ContactsTable.json" with { type: "json" };
+import r166 from "../locales/cs/features/sections/ContactsTable.json" with { type: "json" };
+import r167 from "../locales/de/features/sections/ContactsTable.json" with { type: "json" };
+import r168 from "../locales/es/features/sections/ContactsTable.json" with { type: "json" };
+import r169 from "../locales/fr/features/sections/ContactsTable.json" with { type: "json" };
+import r170 from "../locales/hu/features/sections/ContactsTable.json" with { type: "json" };
+import r171 from "../locales/pl/features/sections/ContactsTable.json" with { type: "json" };
+import r172 from "../locales/pt/features/sections/ContactsTable.json" with { type: "json" };
+import r173 from "../locales/ru/features/sections/ContactsTable.json" with { type: "json" };
+import r174 from "../locales/sk/features/sections/ContactsTable.json" with { type: "json" };
+import r175 from "../locales/uk/features/sections/ContactsTable.json" with { type: "json" };
+import r176 from "../locales/en/common.json" with { type: "json" };
+import r177 from "../locales/cs/common.json" with { type: "json" };
+import r178 from "../locales/de/common.json" with { type: "json" };
+import r179 from "../locales/es/common.json" with { type: "json" };
+import r180 from "../locales/fr/common.json" with { type: "json" };
+import r181 from "../locales/hu/common.json" with { type: "json" };
+import r182 from "../locales/pl/common.json" with { type: "json" };
+import r183 from "../locales/pt/common.json" with { type: "json" };
+import r184 from "../locales/ru/common.json" with { type: "json" };
+import r185 from "../locales/sk/common.json" with { type: "json" };
+import r186 from "../locales/uk/common.json" with { type: "json" };
+import r187 from "../locales/en/platform/email/EmailChrome.json" with { type: "json" };
+import r188 from "../locales/cs/platform/email/EmailChrome.json" with { type: "json" };
+import r189 from "../locales/de/platform/email/EmailChrome.json" with { type: "json" };
+import r190 from "../locales/es/platform/email/EmailChrome.json" with { type: "json" };
+import r191 from "../locales/fr/platform/email/EmailChrome.json" with { type: "json" };
+import r192 from "../locales/hu/platform/email/EmailChrome.json" with { type: "json" };
+import r193 from "../locales/pl/platform/email/EmailChrome.json" with { type: "json" };
+import r194 from "../locales/pt/platform/email/EmailChrome.json" with { type: "json" };
+import r195 from "../locales/ru/platform/email/EmailChrome.json" with { type: "json" };
+import r196 from "../locales/sk/platform/email/EmailChrome.json" with { type: "json" };
+import r197 from "../locales/uk/platform/email/EmailChrome.json" with { type: "json" };
+import r198 from "../locales/en/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r199 from "../locales/cs/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r200 from "../locales/de/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r201 from "../locales/es/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r202 from "../locales/fr/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r203 from "../locales/hu/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r204 from "../locales/pl/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r205 from "../locales/pt/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r206 from "../locales/ru/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r207 from "../locales/sk/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r208 from "../locales/uk/features/sections/EnrichFromLinkedIn.json" with { type: "json" };
+import r209 from "../locales/en/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r210 from "../locales/cs/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r211 from "../locales/de/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r212 from "../locales/es/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r213 from "../locales/fr/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r214 from "../locales/hu/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r215 from "../locales/pl/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r216 from "../locales/pt/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r217 from "../locales/ru/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r218 from "../locales/sk/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r219 from "../locales/uk/features/sections/EnrichRecommendationCard.json" with { type: "json" };
+import r220 from "../locales/en/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r221 from "../locales/cs/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r222 from "../locales/de/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r223 from "../locales/es/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r224 from "../locales/fr/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r225 from "../locales/hu/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r226 from "../locales/pl/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r227 from "../locales/pt/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r228 from "../locales/ru/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r229 from "../locales/sk/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r230 from "../locales/uk/platform/extension/ExtensionPopup.json" with { type: "json" };
+import r231 from "../locales/en/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r232 from "../locales/cs/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r233 from "../locales/de/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r234 from "../locales/es/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r235 from "../locales/fr/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r236 from "../locales/hu/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r237 from "../locales/pl/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r238 from "../locales/pt/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r239 from "../locales/ru/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r240 from "../locales/sk/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r241 from "../locales/uk/platform/extension/ExtensionSocialButtons.json" with { type: "json" };
+import r242 from "../locales/en/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r243 from "../locales/cs/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r244 from "../locales/de/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r245 from "../locales/es/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r246 from "../locales/fr/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r247 from "../locales/hu/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r248 from "../locales/pl/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r249 from "../locales/pt/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r250 from "../locales/ru/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r251 from "../locales/sk/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r252 from "../locales/uk/features/sections/ExtensionVersionCheck.json" with { type: "json" };
+import r253 from "../locales/en/platform/email/FeedbackEmail.json" with { type: "json" };
+import r254 from "../locales/cs/platform/email/FeedbackEmail.json" with { type: "json" };
+import r255 from "../locales/de/platform/email/FeedbackEmail.json" with { type: "json" };
+import r256 from "../locales/es/platform/email/FeedbackEmail.json" with { type: "json" };
+import r257 from "../locales/fr/platform/email/FeedbackEmail.json" with { type: "json" };
+import r258 from "../locales/hu/platform/email/FeedbackEmail.json" with { type: "json" };
+import r259 from "../locales/pl/platform/email/FeedbackEmail.json" with { type: "json" };
+import r260 from "../locales/pt/platform/email/FeedbackEmail.json" with { type: "json" };
+import r261 from "../locales/ru/platform/email/FeedbackEmail.json" with { type: "json" };
+import r262 from "../locales/sk/platform/email/FeedbackEmail.json" with { type: "json" };
+import r263 from "../locales/uk/platform/email/FeedbackEmail.json" with { type: "json" };
+import r264 from "../locales/en/features/pages/FeedbackPage.json" with { type: "json" };
+import r265 from "../locales/cs/features/pages/FeedbackPage.json" with { type: "json" };
+import r266 from "../locales/de/features/pages/FeedbackPage.json" with { type: "json" };
+import r267 from "../locales/es/features/pages/FeedbackPage.json" with { type: "json" };
+import r268 from "../locales/fr/features/pages/FeedbackPage.json" with { type: "json" };
+import r269 from "../locales/hu/features/pages/FeedbackPage.json" with { type: "json" };
+import r270 from "../locales/pl/features/pages/FeedbackPage.json" with { type: "json" };
+import r271 from "../locales/pt/features/pages/FeedbackPage.json" with { type: "json" };
+import r272 from "../locales/ru/features/pages/FeedbackPage.json" with { type: "json" };
+import r273 from "../locales/sk/features/pages/FeedbackPage.json" with { type: "json" };
+import r274 from "../locales/uk/features/pages/FeedbackPage.json" with { type: "json" };
+import r275 from "../locales/en/features/pages/FixContactsPage.json" with { type: "json" };
+import r276 from "../locales/cs/features/pages/FixContactsPage.json" with { type: "json" };
+import r277 from "../locales/de/features/pages/FixContactsPage.json" with { type: "json" };
+import r278 from "../locales/es/features/pages/FixContactsPage.json" with { type: "json" };
+import r279 from "../locales/fr/features/pages/FixContactsPage.json" with { type: "json" };
+import r280 from "../locales/hu/features/pages/FixContactsPage.json" with { type: "json" };
+import r281 from "../locales/pl/features/pages/FixContactsPage.json" with { type: "json" };
+import r282 from "../locales/pt/features/pages/FixContactsPage.json" with { type: "json" };
+import r283 from "../locales/ru/features/pages/FixContactsPage.json" with { type: "json" };
+import r284 from "../locales/sk/features/pages/FixContactsPage.json" with { type: "json" };
+import r285 from "../locales/uk/features/pages/FixContactsPage.json" with { type: "json" };
+import r286 from "../locales/en/features/pages/GraphPage.json" with { type: "json" };
+import r287 from "../locales/cs/features/pages/GraphPage.json" with { type: "json" };
+import r288 from "../locales/de/features/pages/GraphPage.json" with { type: "json" };
+import r289 from "../locales/es/features/pages/GraphPage.json" with { type: "json" };
+import r290 from "../locales/fr/features/pages/GraphPage.json" with { type: "json" };
+import r291 from "../locales/hu/features/pages/GraphPage.json" with { type: "json" };
+import r292 from "../locales/pl/features/pages/GraphPage.json" with { type: "json" };
+import r293 from "../locales/pt/features/pages/GraphPage.json" with { type: "json" };
+import r294 from "../locales/ru/features/pages/GraphPage.json" with { type: "json" };
+import r295 from "../locales/sk/features/pages/GraphPage.json" with { type: "json" };
+import r296 from "../locales/uk/features/pages/GraphPage.json" with { type: "json" };
+import r297 from "../locales/en/features/pages/GroupDetailPage.json" with { type: "json" };
+import r298 from "../locales/cs/features/pages/GroupDetailPage.json" with { type: "json" };
+import r299 from "../locales/de/features/pages/GroupDetailPage.json" with { type: "json" };
+import r300 from "../locales/es/features/pages/GroupDetailPage.json" with { type: "json" };
+import r301 from "../locales/fr/features/pages/GroupDetailPage.json" with { type: "json" };
+import r302 from "../locales/hu/features/pages/GroupDetailPage.json" with { type: "json" };
+import r303 from "../locales/pl/features/pages/GroupDetailPage.json" with { type: "json" };
+import r304 from "../locales/pt/features/pages/GroupDetailPage.json" with { type: "json" };
+import r305 from "../locales/ru/features/pages/GroupDetailPage.json" with { type: "json" };
+import r306 from "../locales/sk/features/pages/GroupDetailPage.json" with { type: "json" };
+import r307 from "../locales/uk/features/pages/GroupDetailPage.json" with { type: "json" };
+import r308 from "../locales/en/features/pages/GroupsPage.json" with { type: "json" };
+import r309 from "../locales/cs/features/pages/GroupsPage.json" with { type: "json" };
+import r310 from "../locales/de/features/pages/GroupsPage.json" with { type: "json" };
+import r311 from "../locales/es/features/pages/GroupsPage.json" with { type: "json" };
+import r312 from "../locales/fr/features/pages/GroupsPage.json" with { type: "json" };
+import r313 from "../locales/hu/features/pages/GroupsPage.json" with { type: "json" };
+import r314 from "../locales/pl/features/pages/GroupsPage.json" with { type: "json" };
+import r315 from "../locales/pt/features/pages/GroupsPage.json" with { type: "json" };
+import r316 from "../locales/ru/features/pages/GroupsPage.json" with { type: "json" };
+import r317 from "../locales/sk/features/pages/GroupsPage.json" with { type: "json" };
+import r318 from "../locales/uk/features/pages/GroupsPage.json" with { type: "json" };
+import r319 from "../locales/en/glossary.json" with { type: "json" };
+import r320 from "../locales/cs/glossary.json" with { type: "json" };
+import r321 from "../locales/de/glossary.json" with { type: "json" };
+import r322 from "../locales/es/glossary.json" with { type: "json" };
+import r323 from "../locales/fr/glossary.json" with { type: "json" };
+import r324 from "../locales/hu/glossary.json" with { type: "json" };
+import r325 from "../locales/pl/glossary.json" with { type: "json" };
+import r326 from "../locales/pt/glossary.json" with { type: "json" };
+import r327 from "../locales/ru/glossary.json" with { type: "json" };
+import r328 from "../locales/sk/glossary.json" with { type: "json" };
+import r329 from "../locales/uk/glossary.json" with { type: "json" };
+import r330 from "../locales/en/features/pages/HomePage.json" with { type: "json" };
+import r331 from "../locales/cs/features/pages/HomePage.json" with { type: "json" };
+import r332 from "../locales/de/features/pages/HomePage.json" with { type: "json" };
+import r333 from "../locales/es/features/pages/HomePage.json" with { type: "json" };
+import r334 from "../locales/fr/features/pages/HomePage.json" with { type: "json" };
+import r335 from "../locales/hu/features/pages/HomePage.json" with { type: "json" };
+import r336 from "../locales/pl/features/pages/HomePage.json" with { type: "json" };
+import r337 from "../locales/pt/features/pages/HomePage.json" with { type: "json" };
+import r338 from "../locales/ru/features/pages/HomePage.json" with { type: "json" };
+import r339 from "../locales/sk/features/pages/HomePage.json" with { type: "json" };
+import r340 from "../locales/uk/features/pages/HomePage.json" with { type: "json" };
+import r341 from "../locales/en/features/pages/InteractionsPage.json" with { type: "json" };
+import r342 from "../locales/cs/features/pages/InteractionsPage.json" with { type: "json" };
+import r343 from "../locales/de/features/pages/InteractionsPage.json" with { type: "json" };
+import r344 from "../locales/es/features/pages/InteractionsPage.json" with { type: "json" };
+import r345 from "../locales/fr/features/pages/InteractionsPage.json" with { type: "json" };
+import r346 from "../locales/hu/features/pages/InteractionsPage.json" with { type: "json" };
+import r347 from "../locales/pl/features/pages/InteractionsPage.json" with { type: "json" };
+import r348 from "../locales/pt/features/pages/InteractionsPage.json" with { type: "json" };
+import r349 from "../locales/ru/features/pages/InteractionsPage.json" with { type: "json" };
+import r350 from "../locales/sk/features/pages/InteractionsPage.json" with { type: "json" };
+import r351 from "../locales/uk/features/pages/InteractionsPage.json" with { type: "json" };
+import r352 from "../locales/en/features/sections/InteractionTypes.json" with { type: "json" };
+import r353 from "../locales/cs/features/sections/InteractionTypes.json" with { type: "json" };
+import r354 from "../locales/de/features/sections/InteractionTypes.json" with { type: "json" };
+import r355 from "../locales/es/features/sections/InteractionTypes.json" with { type: "json" };
+import r356 from "../locales/fr/features/sections/InteractionTypes.json" with { type: "json" };
+import r357 from "../locales/hu/features/sections/InteractionTypes.json" with { type: "json" };
+import r358 from "../locales/pl/features/sections/InteractionTypes.json" with { type: "json" };
+import r359 from "../locales/pt/features/sections/InteractionTypes.json" with { type: "json" };
+import r360 from "../locales/ru/features/sections/InteractionTypes.json" with { type: "json" };
+import r361 from "../locales/sk/features/sections/InteractionTypes.json" with { type: "json" };
+import r362 from "../locales/uk/features/sections/InteractionTypes.json" with { type: "json" };
+import r363 from "../locales/en/features/pages/KeepInTouch.json" with { type: "json" };
+import r364 from "../locales/cs/features/pages/KeepInTouch.json" with { type: "json" };
+import r365 from "../locales/de/features/pages/KeepInTouch.json" with { type: "json" };
+import r366 from "../locales/es/features/pages/KeepInTouch.json" with { type: "json" };
+import r367 from "../locales/fr/features/pages/KeepInTouch.json" with { type: "json" };
+import r368 from "../locales/hu/features/pages/KeepInTouch.json" with { type: "json" };
+import r369 from "../locales/pl/features/pages/KeepInTouch.json" with { type: "json" };
+import r370 from "../locales/pt/features/pages/KeepInTouch.json" with { type: "json" };
+import r371 from "../locales/ru/features/pages/KeepInTouch.json" with { type: "json" };
+import r372 from "../locales/sk/features/pages/KeepInTouch.json" with { type: "json" };
+import r373 from "../locales/uk/features/pages/KeepInTouch.json" with { type: "json" };
+import r374 from "../locales/en/features/sections/Languages.json" with { type: "json" };
+import r375 from "../locales/cs/features/sections/Languages.json" with { type: "json" };
+import r376 from "../locales/de/features/sections/Languages.json" with { type: "json" };
+import r377 from "../locales/es/features/sections/Languages.json" with { type: "json" };
+import r378 from "../locales/fr/features/sections/Languages.json" with { type: "json" };
+import r379 from "../locales/hu/features/sections/Languages.json" with { type: "json" };
+import r380 from "../locales/pl/features/sections/Languages.json" with { type: "json" };
+import r381 from "../locales/pt/features/sections/Languages.json" with { type: "json" };
+import r382 from "../locales/ru/features/sections/Languages.json" with { type: "json" };
+import r383 from "../locales/sk/features/sections/Languages.json" with { type: "json" };
+import r384 from "../locales/uk/features/sections/Languages.json" with { type: "json" };
+import r385 from "../locales/en/features/sections/LinkedInData.json" with { type: "json" };
+import r386 from "../locales/cs/features/sections/LinkedInData.json" with { type: "json" };
+import r387 from "../locales/de/features/sections/LinkedInData.json" with { type: "json" };
+import r388 from "../locales/es/features/sections/LinkedInData.json" with { type: "json" };
+import r389 from "../locales/fr/features/sections/LinkedInData.json" with { type: "json" };
+import r390 from "../locales/hu/features/sections/LinkedInData.json" with { type: "json" };
+import r391 from "../locales/pl/features/sections/LinkedInData.json" with { type: "json" };
+import r392 from "../locales/pt/features/sections/LinkedInData.json" with { type: "json" };
+import r393 from "../locales/ru/features/sections/LinkedInData.json" with { type: "json" };
+import r394 from "../locales/sk/features/sections/LinkedInData.json" with { type: "json" };
+import r395 from "../locales/uk/features/sections/LinkedInData.json" with { type: "json" };
+import r396 from "../locales/en/features/pages/LoginPage.json" with { type: "json" };
+import r397 from "../locales/cs/features/pages/LoginPage.json" with { type: "json" };
+import r398 from "../locales/de/features/pages/LoginPage.json" with { type: "json" };
+import r399 from "../locales/es/features/pages/LoginPage.json" with { type: "json" };
+import r400 from "../locales/fr/features/pages/LoginPage.json" with { type: "json" };
+import r401 from "../locales/hu/features/pages/LoginPage.json" with { type: "json" };
+import r402 from "../locales/pl/features/pages/LoginPage.json" with { type: "json" };
+import r403 from "../locales/pt/features/pages/LoginPage.json" with { type: "json" };
+import r404 from "../locales/ru/features/pages/LoginPage.json" with { type: "json" };
+import r405 from "../locales/sk/features/pages/LoginPage.json" with { type: "json" };
+import r406 from "../locales/uk/features/pages/LoginPage.json" with { type: "json" };
+import r407 from "../locales/en/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r408 from "../locales/cs/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r409 from "../locales/de/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r410 from "../locales/es/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r411 from "../locales/fr/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r412 from "../locales/hu/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r413 from "../locales/pl/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r414 from "../locales/pt/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r415 from "../locales/ru/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r416 from "../locales/sk/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r417 from "../locales/uk/platform/email/MagicLinkEmail.json" with { type: "json" };
+import r418 from "../locales/en/features/sections/MapCommon.json" with { type: "json" };
+import r419 from "../locales/cs/features/sections/MapCommon.json" with { type: "json" };
+import r420 from "../locales/de/features/sections/MapCommon.json" with { type: "json" };
+import r421 from "../locales/es/features/sections/MapCommon.json" with { type: "json" };
+import r422 from "../locales/fr/features/sections/MapCommon.json" with { type: "json" };
+import r423 from "../locales/hu/features/sections/MapCommon.json" with { type: "json" };
+import r424 from "../locales/pl/features/sections/MapCommon.json" with { type: "json" };
+import r425 from "../locales/pt/features/sections/MapCommon.json" with { type: "json" };
+import r426 from "../locales/ru/features/sections/MapCommon.json" with { type: "json" };
+import r427 from "../locales/sk/features/sections/MapCommon.json" with { type: "json" };
+import r428 from "../locales/uk/features/sections/MapCommon.json" with { type: "json" };
+import r429 from "../locales/en/features/pages/MapPage.json" with { type: "json" };
+import r430 from "../locales/cs/features/pages/MapPage.json" with { type: "json" };
+import r431 from "../locales/de/features/pages/MapPage.json" with { type: "json" };
+import r432 from "../locales/es/features/pages/MapPage.json" with { type: "json" };
+import r433 from "../locales/fr/features/pages/MapPage.json" with { type: "json" };
+import r434 from "../locales/hu/features/pages/MapPage.json" with { type: "json" };
+import r435 from "../locales/pl/features/pages/MapPage.json" with { type: "json" };
+import r436 from "../locales/pt/features/pages/MapPage.json" with { type: "json" };
+import r437 from "../locales/ru/features/pages/MapPage.json" with { type: "json" };
+import r438 from "../locales/sk/features/pages/MapPage.json" with { type: "json" };
+import r439 from "../locales/uk/features/pages/MapPage.json" with { type: "json" };
+import r440 from "../locales/en/features/modals/MergeWithModal.json" with { type: "json" };
+import r441 from "../locales/cs/features/modals/MergeWithModal.json" with { type: "json" };
+import r442 from "../locales/de/features/modals/MergeWithModal.json" with { type: "json" };
+import r443 from "../locales/es/features/modals/MergeWithModal.json" with { type: "json" };
+import r444 from "../locales/fr/features/modals/MergeWithModal.json" with { type: "json" };
+import r445 from "../locales/hu/features/modals/MergeWithModal.json" with { type: "json" };
+import r446 from "../locales/pl/features/modals/MergeWithModal.json" with { type: "json" };
+import r447 from "../locales/pt/features/modals/MergeWithModal.json" with { type: "json" };
+import r448 from "../locales/ru/features/modals/MergeWithModal.json" with { type: "json" };
+import r449 from "../locales/sk/features/modals/MergeWithModal.json" with { type: "json" };
+import r450 from "../locales/uk/features/modals/MergeWithModal.json" with { type: "json" };
+import r451 from "../locales/en/platform/mobile/Auth.json" with { type: "json" };
+import r452 from "../locales/cs/platform/mobile/Auth.json" with { type: "json" };
+import r453 from "../locales/de/platform/mobile/Auth.json" with { type: "json" };
+import r454 from "../locales/es/platform/mobile/Auth.json" with { type: "json" };
+import r455 from "../locales/fr/platform/mobile/Auth.json" with { type: "json" };
+import r456 from "../locales/hu/platform/mobile/Auth.json" with { type: "json" };
+import r457 from "../locales/pl/platform/mobile/Auth.json" with { type: "json" };
+import r458 from "../locales/pt/platform/mobile/Auth.json" with { type: "json" };
+import r459 from "../locales/ru/platform/mobile/Auth.json" with { type: "json" };
+import r460 from "../locales/sk/platform/mobile/Auth.json" with { type: "json" };
+import r461 from "../locales/uk/platform/mobile/Auth.json" with { type: "json" };
+import r462 from "../locales/en/platform/mobile/ColorPicker.json" with { type: "json" };
+import r463 from "../locales/cs/platform/mobile/ColorPicker.json" with { type: "json" };
+import r464 from "../locales/de/platform/mobile/ColorPicker.json" with { type: "json" };
+import r465 from "../locales/es/platform/mobile/ColorPicker.json" with { type: "json" };
+import r466 from "../locales/fr/platform/mobile/ColorPicker.json" with { type: "json" };
+import r467 from "../locales/hu/platform/mobile/ColorPicker.json" with { type: "json" };
+import r468 from "../locales/pl/platform/mobile/ColorPicker.json" with { type: "json" };
+import r469 from "../locales/pt/platform/mobile/ColorPicker.json" with { type: "json" };
+import r470 from "../locales/ru/platform/mobile/ColorPicker.json" with { type: "json" };
+import r471 from "../locales/sk/platform/mobile/ColorPicker.json" with { type: "json" };
+import r472 from "../locales/uk/platform/mobile/ColorPicker.json" with { type: "json" };
+import r473 from "../locales/en/platform/mobile/ContactDetail.json" with { type: "json" };
+import r474 from "../locales/cs/platform/mobile/ContactDetail.json" with { type: "json" };
+import r475 from "../locales/de/platform/mobile/ContactDetail.json" with { type: "json" };
+import r476 from "../locales/es/platform/mobile/ContactDetail.json" with { type: "json" };
+import r477 from "../locales/fr/platform/mobile/ContactDetail.json" with { type: "json" };
+import r478 from "../locales/hu/platform/mobile/ContactDetail.json" with { type: "json" };
+import r479 from "../locales/pl/platform/mobile/ContactDetail.json" with { type: "json" };
+import r480 from "../locales/pt/platform/mobile/ContactDetail.json" with { type: "json" };
+import r481 from "../locales/ru/platform/mobile/ContactDetail.json" with { type: "json" };
+import r482 from "../locales/sk/platform/mobile/ContactDetail.json" with { type: "json" };
+import r483 from "../locales/uk/platform/mobile/ContactDetail.json" with { type: "json" };
+import r484 from "../locales/en/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r485 from "../locales/cs/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r486 from "../locales/de/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r487 from "../locales/es/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r488 from "../locales/fr/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r489 from "../locales/hu/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r490 from "../locales/pl/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r491 from "../locales/pt/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r492 from "../locales/ru/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r493 from "../locales/sk/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r494 from "../locales/uk/platform/mobile/ContactIdentity.json" with { type: "json" };
+import r495 from "../locales/en/platform/mobile/Contacts.json" with { type: "json" };
+import r496 from "../locales/cs/platform/mobile/Contacts.json" with { type: "json" };
+import r497 from "../locales/de/platform/mobile/Contacts.json" with { type: "json" };
+import r498 from "../locales/es/platform/mobile/Contacts.json" with { type: "json" };
+import r499 from "../locales/fr/platform/mobile/Contacts.json" with { type: "json" };
+import r500 from "../locales/hu/platform/mobile/Contacts.json" with { type: "json" };
+import r501 from "../locales/pl/platform/mobile/Contacts.json" with { type: "json" };
+import r502 from "../locales/pt/platform/mobile/Contacts.json" with { type: "json" };
+import r503 from "../locales/ru/platform/mobile/Contacts.json" with { type: "json" };
+import r504 from "../locales/sk/platform/mobile/Contacts.json" with { type: "json" };
+import r505 from "../locales/uk/platform/mobile/Contacts.json" with { type: "json" };
+import r506 from "../locales/en/platform/mobile/CreateContact.json" with { type: "json" };
+import r507 from "../locales/cs/platform/mobile/CreateContact.json" with { type: "json" };
+import r508 from "../locales/de/platform/mobile/CreateContact.json" with { type: "json" };
+import r509 from "../locales/es/platform/mobile/CreateContact.json" with { type: "json" };
+import r510 from "../locales/fr/platform/mobile/CreateContact.json" with { type: "json" };
+import r511 from "../locales/hu/platform/mobile/CreateContact.json" with { type: "json" };
+import r512 from "../locales/pl/platform/mobile/CreateContact.json" with { type: "json" };
+import r513 from "../locales/pt/platform/mobile/CreateContact.json" with { type: "json" };
+import r514 from "../locales/ru/platform/mobile/CreateContact.json" with { type: "json" };
+import r515 from "../locales/sk/platform/mobile/CreateContact.json" with { type: "json" };
+import r516 from "../locales/uk/platform/mobile/CreateContact.json" with { type: "json" };
+import r517 from "../locales/en/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r518 from "../locales/cs/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r519 from "../locales/de/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r520 from "../locales/es/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r521 from "../locales/fr/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r522 from "../locales/hu/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r523 from "../locales/pl/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r524 from "../locales/pt/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r525 from "../locales/ru/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r526 from "../locales/sk/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r527 from "../locales/uk/platform/mobile/EmojiPicker.json" with { type: "json" };
+import r528 from "../locales/en/platform/mobile/Groups.json" with { type: "json" };
+import r529 from "../locales/cs/platform/mobile/Groups.json" with { type: "json" };
+import r530 from "../locales/de/platform/mobile/Groups.json" with { type: "json" };
+import r531 from "../locales/es/platform/mobile/Groups.json" with { type: "json" };
+import r532 from "../locales/fr/platform/mobile/Groups.json" with { type: "json" };
+import r533 from "../locales/hu/platform/mobile/Groups.json" with { type: "json" };
+import r534 from "../locales/pl/platform/mobile/Groups.json" with { type: "json" };
+import r535 from "../locales/pt/platform/mobile/Groups.json" with { type: "json" };
+import r536 from "../locales/ru/platform/mobile/Groups.json" with { type: "json" };
+import r537 from "../locales/sk/platform/mobile/Groups.json" with { type: "json" };
+import r538 from "../locales/uk/platform/mobile/Groups.json" with { type: "json" };
+import r539 from "../locales/en/platform/mobile/Navigation.json" with { type: "json" };
+import r540 from "../locales/cs/platform/mobile/Navigation.json" with { type: "json" };
+import r541 from "../locales/de/platform/mobile/Navigation.json" with { type: "json" };
+import r542 from "../locales/es/platform/mobile/Navigation.json" with { type: "json" };
+import r543 from "../locales/fr/platform/mobile/Navigation.json" with { type: "json" };
+import r544 from "../locales/hu/platform/mobile/Navigation.json" with { type: "json" };
+import r545 from "../locales/pl/platform/mobile/Navigation.json" with { type: "json" };
+import r546 from "../locales/pt/platform/mobile/Navigation.json" with { type: "json" };
+import r547 from "../locales/ru/platform/mobile/Navigation.json" with { type: "json" };
+import r548 from "../locales/sk/platform/mobile/Navigation.json" with { type: "json" };
+import r549 from "../locales/uk/platform/mobile/Navigation.json" with { type: "json" };
+import r550 from "../locales/en/platform/mobile/Settings.json" with { type: "json" };
+import r551 from "../locales/cs/platform/mobile/Settings.json" with { type: "json" };
+import r552 from "../locales/de/platform/mobile/Settings.json" with { type: "json" };
+import r553 from "../locales/es/platform/mobile/Settings.json" with { type: "json" };
+import r554 from "../locales/fr/platform/mobile/Settings.json" with { type: "json" };
+import r555 from "../locales/hu/platform/mobile/Settings.json" with { type: "json" };
+import r556 from "../locales/pl/platform/mobile/Settings.json" with { type: "json" };
+import r557 from "../locales/pt/platform/mobile/Settings.json" with { type: "json" };
+import r558 from "../locales/ru/platform/mobile/Settings.json" with { type: "json" };
+import r559 from "../locales/sk/platform/mobile/Settings.json" with { type: "json" };
+import r560 from "../locales/uk/platform/mobile/Settings.json" with { type: "json" };
+import r561 from "../locales/en/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r562 from "../locales/cs/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r563 from "../locales/de/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r564 from "../locales/es/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r565 from "../locales/fr/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r566 from "../locales/hu/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r567 from "../locales/pl/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r568 from "../locales/pt/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r569 from "../locales/ru/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r570 from "../locales/sk/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r571 from "../locales/uk/platform/mobile/ShareContactEmail.json" with { type: "json" };
+import r572 from "../locales/en/platform/mobile/Tags.json" with { type: "json" };
+import r573 from "../locales/cs/platform/mobile/Tags.json" with { type: "json" };
+import r574 from "../locales/de/platform/mobile/Tags.json" with { type: "json" };
+import r575 from "../locales/es/platform/mobile/Tags.json" with { type: "json" };
+import r576 from "../locales/fr/platform/mobile/Tags.json" with { type: "json" };
+import r577 from "../locales/hu/platform/mobile/Tags.json" with { type: "json" };
+import r578 from "../locales/pl/platform/mobile/Tags.json" with { type: "json" };
+import r579 from "../locales/pt/platform/mobile/Tags.json" with { type: "json" };
+import r580 from "../locales/ru/platform/mobile/Tags.json" with { type: "json" };
+import r581 from "../locales/sk/platform/mobile/Tags.json" with { type: "json" };
+import r582 from "../locales/uk/platform/mobile/Tags.json" with { type: "json" };
+import r583 from "../locales/en/features/sections/NotesEditor.json" with { type: "json" };
+import r584 from "../locales/cs/features/sections/NotesEditor.json" with { type: "json" };
+import r585 from "../locales/de/features/sections/NotesEditor.json" with { type: "json" };
+import r586 from "../locales/es/features/sections/NotesEditor.json" with { type: "json" };
+import r587 from "../locales/fr/features/sections/NotesEditor.json" with { type: "json" };
+import r588 from "../locales/hu/features/sections/NotesEditor.json" with { type: "json" };
+import r589 from "../locales/pl/features/sections/NotesEditor.json" with { type: "json" };
+import r590 from "../locales/pt/features/sections/NotesEditor.json" with { type: "json" };
+import r591 from "../locales/ru/features/sections/NotesEditor.json" with { type: "json" };
+import r592 from "../locales/sk/features/sections/NotesEditor.json" with { type: "json" };
+import r593 from "../locales/uk/features/sections/NotesEditor.json" with { type: "json" };
+import r594 from "../locales/en/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r595 from "../locales/cs/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r596 from "../locales/de/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r597 from "../locales/es/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r598 from "../locales/fr/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r599 from "../locales/hu/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r600 from "../locales/pl/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r601 from "../locales/pt/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r602 from "../locales/ru/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r603 from "../locales/sk/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r604 from "../locales/uk/features/sections/NotesSlashCommands.json" with { type: "json" };
+import r605 from "../locales/en/features/pages/NotFoundPage.json" with { type: "json" };
+import r606 from "../locales/cs/features/pages/NotFoundPage.json" with { type: "json" };
+import r607 from "../locales/de/features/pages/NotFoundPage.json" with { type: "json" };
+import r608 from "../locales/es/features/pages/NotFoundPage.json" with { type: "json" };
+import r609 from "../locales/fr/features/pages/NotFoundPage.json" with { type: "json" };
+import r610 from "../locales/hu/features/pages/NotFoundPage.json" with { type: "json" };
+import r611 from "../locales/pl/features/pages/NotFoundPage.json" with { type: "json" };
+import r612 from "../locales/pt/features/pages/NotFoundPage.json" with { type: "json" };
+import r613 from "../locales/ru/features/pages/NotFoundPage.json" with { type: "json" };
+import r614 from "../locales/sk/features/pages/NotFoundPage.json" with { type: "json" };
+import r615 from "../locales/uk/features/pages/NotFoundPage.json" with { type: "json" };
+import r616 from "../locales/en/features/pages/OAuthConsent.json" with { type: "json" };
+import r617 from "../locales/cs/features/pages/OAuthConsent.json" with { type: "json" };
+import r618 from "../locales/de/features/pages/OAuthConsent.json" with { type: "json" };
+import r619 from "../locales/es/features/pages/OAuthConsent.json" with { type: "json" };
+import r620 from "../locales/fr/features/pages/OAuthConsent.json" with { type: "json" };
+import r621 from "../locales/hu/features/pages/OAuthConsent.json" with { type: "json" };
+import r622 from "../locales/pl/features/pages/OAuthConsent.json" with { type: "json" };
+import r623 from "../locales/pt/features/pages/OAuthConsent.json" with { type: "json" };
+import r624 from "../locales/ru/features/pages/OAuthConsent.json" with { type: "json" };
+import r625 from "../locales/sk/features/pages/OAuthConsent.json" with { type: "json" };
+import r626 from "../locales/uk/features/pages/OAuthConsent.json" with { type: "json" };
+import r627 from "../locales/en/features/pages/Onboarding.json" with { type: "json" };
+import r628 from "../locales/cs/features/pages/Onboarding.json" with { type: "json" };
+import r629 from "../locales/de/features/pages/Onboarding.json" with { type: "json" };
+import r630 from "../locales/es/features/pages/Onboarding.json" with { type: "json" };
+import r631 from "../locales/fr/features/pages/Onboarding.json" with { type: "json" };
+import r632 from "../locales/hu/features/pages/Onboarding.json" with { type: "json" };
+import r633 from "../locales/pl/features/pages/Onboarding.json" with { type: "json" };
+import r634 from "../locales/pt/features/pages/Onboarding.json" with { type: "json" };
+import r635 from "../locales/ru/features/pages/Onboarding.json" with { type: "json" };
+import r636 from "../locales/sk/features/pages/Onboarding.json" with { type: "json" };
+import r637 from "../locales/uk/features/pages/Onboarding.json" with { type: "json" };
+import r638 from "../locales/en/platform/web/PageHeader.json" with { type: "json" };
+import r639 from "../locales/cs/platform/web/PageHeader.json" with { type: "json" };
+import r640 from "../locales/de/platform/web/PageHeader.json" with { type: "json" };
+import r641 from "../locales/es/platform/web/PageHeader.json" with { type: "json" };
+import r642 from "../locales/fr/platform/web/PageHeader.json" with { type: "json" };
+import r643 from "../locales/hu/platform/web/PageHeader.json" with { type: "json" };
+import r644 from "../locales/pl/platform/web/PageHeader.json" with { type: "json" };
+import r645 from "../locales/pt/platform/web/PageHeader.json" with { type: "json" };
+import r646 from "../locales/ru/platform/web/PageHeader.json" with { type: "json" };
+import r647 from "../locales/sk/platform/web/PageHeader.json" with { type: "json" };
+import r648 from "../locales/uk/platform/web/PageHeader.json" with { type: "json" };
+import r649 from "../locales/en/features/pages/PeoplePage.json" with { type: "json" };
+import r650 from "../locales/cs/features/pages/PeoplePage.json" with { type: "json" };
+import r651 from "../locales/de/features/pages/PeoplePage.json" with { type: "json" };
+import r652 from "../locales/es/features/pages/PeoplePage.json" with { type: "json" };
+import r653 from "../locales/fr/features/pages/PeoplePage.json" with { type: "json" };
+import r654 from "../locales/hu/features/pages/PeoplePage.json" with { type: "json" };
+import r655 from "../locales/pl/features/pages/PeoplePage.json" with { type: "json" };
+import r656 from "../locales/pt/features/pages/PeoplePage.json" with { type: "json" };
+import r657 from "../locales/ru/features/pages/PeoplePage.json" with { type: "json" };
+import r658 from "../locales/sk/features/pages/PeoplePage.json" with { type: "json" };
+import r659 from "../locales/uk/features/pages/PeoplePage.json" with { type: "json" };
+import r660 from "../locales/en/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r661 from "../locales/cs/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r662 from "../locales/de/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r663 from "../locales/es/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r664 from "../locales/fr/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r665 from "../locales/hu/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r666 from "../locales/pl/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r667 from "../locales/pt/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r668 from "../locales/ru/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r669 from "../locales/sk/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r670 from "../locales/uk/platform/web/PeopleSearchSpotlight.json" with { type: "json" };
+import r671 from "../locales/en/features/sections/PersonRelationships.json" with { type: "json" };
+import r672 from "../locales/cs/features/sections/PersonRelationships.json" with { type: "json" };
+import r673 from "../locales/de/features/sections/PersonRelationships.json" with { type: "json" };
+import r674 from "../locales/es/features/sections/PersonRelationships.json" with { type: "json" };
+import r675 from "../locales/fr/features/sections/PersonRelationships.json" with { type: "json" };
+import r676 from "../locales/hu/features/sections/PersonRelationships.json" with { type: "json" };
+import r677 from "../locales/pl/features/sections/PersonRelationships.json" with { type: "json" };
+import r678 from "../locales/pt/features/sections/PersonRelationships.json" with { type: "json" };
+import r679 from "../locales/ru/features/sections/PersonRelationships.json" with { type: "json" };
+import r680 from "../locales/sk/features/sections/PersonRelationships.json" with { type: "json" };
+import r681 from "../locales/uk/features/sections/PersonRelationships.json" with { type: "json" };
+import r682 from "../locales/en/features/sections/PersonTabs.json" with { type: "json" };
+import r683 from "../locales/cs/features/sections/PersonTabs.json" with { type: "json" };
+import r684 from "../locales/de/features/sections/PersonTabs.json" with { type: "json" };
+import r685 from "../locales/es/features/sections/PersonTabs.json" with { type: "json" };
+import r686 from "../locales/fr/features/sections/PersonTabs.json" with { type: "json" };
+import r687 from "../locales/hu/features/sections/PersonTabs.json" with { type: "json" };
+import r688 from "../locales/pl/features/sections/PersonTabs.json" with { type: "json" };
+import r689 from "../locales/pt/features/sections/PersonTabs.json" with { type: "json" };
+import r690 from "../locales/ru/features/sections/PersonTabs.json" with { type: "json" };
+import r691 from "../locales/sk/features/sections/PersonTabs.json" with { type: "json" };
+import r692 from "../locales/uk/features/sections/PersonTabs.json" with { type: "json" };
+import r693 from "../locales/en/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r694 from "../locales/cs/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r695 from "../locales/de/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r696 from "../locales/es/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r697 from "../locales/fr/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r698 from "../locales/hu/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r699 from "../locales/pl/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r700 from "../locales/pt/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r701 from "../locales/ru/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r702 from "../locales/sk/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r703 from "../locales/uk/platform/email/ReminderDigestEmail.json" with { type: "json" };
+import r704 from "../locales/en/features/pages/SettingsPage.json" with { type: "json" };
+import r705 from "../locales/cs/features/pages/SettingsPage.json" with { type: "json" };
+import r706 from "../locales/de/features/pages/SettingsPage.json" with { type: "json" };
+import r707 from "../locales/es/features/pages/SettingsPage.json" with { type: "json" };
+import r708 from "../locales/fr/features/pages/SettingsPage.json" with { type: "json" };
+import r709 from "../locales/hu/features/pages/SettingsPage.json" with { type: "json" };
+import r710 from "../locales/pl/features/pages/SettingsPage.json" with { type: "json" };
+import r711 from "../locales/pt/features/pages/SettingsPage.json" with { type: "json" };
+import r712 from "../locales/ru/features/pages/SettingsPage.json" with { type: "json" };
+import r713 from "../locales/sk/features/pages/SettingsPage.json" with { type: "json" };
+import r714 from "../locales/uk/features/pages/SettingsPage.json" with { type: "json" };
+import r715 from "../locales/en/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r716 from "../locales/cs/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r717 from "../locales/de/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r718 from "../locales/es/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r719 from "../locales/fr/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r720 from "../locales/hu/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r721 from "../locales/pl/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r722 from "../locales/pt/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r723 from "../locales/ru/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r724 from "../locales/sk/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r725 from "../locales/uk/platform/email/ShareContactEmailBody.json" with { type: "json" };
+import r726 from "../locales/en/features/modals/ShareContactModal.json" with { type: "json" };
+import r727 from "../locales/cs/features/modals/ShareContactModal.json" with { type: "json" };
+import r728 from "../locales/de/features/modals/ShareContactModal.json" with { type: "json" };
+import r729 from "../locales/es/features/modals/ShareContactModal.json" with { type: "json" };
+import r730 from "../locales/fr/features/modals/ShareContactModal.json" with { type: "json" };
+import r731 from "../locales/hu/features/modals/ShareContactModal.json" with { type: "json" };
+import r732 from "../locales/pl/features/modals/ShareContactModal.json" with { type: "json" };
+import r733 from "../locales/pt/features/modals/ShareContactModal.json" with { type: "json" };
+import r734 from "../locales/ru/features/modals/ShareContactModal.json" with { type: "json" };
+import r735 from "../locales/sk/features/modals/ShareContactModal.json" with { type: "json" };
+import r736 from "../locales/uk/features/modals/ShareContactModal.json" with { type: "json" };
+import r737 from "../locales/en/features/pages/SingleContactPage.json" with { type: "json" };
+import r738 from "../locales/cs/features/pages/SingleContactPage.json" with { type: "json" };
+import r739 from "../locales/de/features/pages/SingleContactPage.json" with { type: "json" };
+import r740 from "../locales/es/features/pages/SingleContactPage.json" with { type: "json" };
+import r741 from "../locales/fr/features/pages/SingleContactPage.json" with { type: "json" };
+import r742 from "../locales/hu/features/pages/SingleContactPage.json" with { type: "json" };
+import r743 from "../locales/pl/features/pages/SingleContactPage.json" with { type: "json" };
+import r744 from "../locales/pt/features/pages/SingleContactPage.json" with { type: "json" };
+import r745 from "../locales/ru/features/pages/SingleContactPage.json" with { type: "json" };
+import r746 from "../locales/sk/features/pages/SingleContactPage.json" with { type: "json" };
+import r747 from "../locales/uk/features/pages/SingleContactPage.json" with { type: "json" };
+import r748 from "../locales/en/features/sections/Socials.json" with { type: "json" };
+import r749 from "../locales/cs/features/sections/Socials.json" with { type: "json" };
+import r750 from "../locales/de/features/sections/Socials.json" with { type: "json" };
+import r751 from "../locales/es/features/sections/Socials.json" with { type: "json" };
+import r752 from "../locales/fr/features/sections/Socials.json" with { type: "json" };
+import r753 from "../locales/hu/features/sections/Socials.json" with { type: "json" };
+import r754 from "../locales/pl/features/sections/Socials.json" with { type: "json" };
+import r755 from "../locales/pt/features/sections/Socials.json" with { type: "json" };
+import r756 from "../locales/ru/features/sections/Socials.json" with { type: "json" };
+import r757 from "../locales/sk/features/sections/Socials.json" with { type: "json" };
+import r758 from "../locales/uk/features/sections/Socials.json" with { type: "json" };
+import r759 from "../locales/en/features/sections/TagsInput.json" with { type: "json" };
+import r760 from "../locales/cs/features/sections/TagsInput.json" with { type: "json" };
+import r761 from "../locales/de/features/sections/TagsInput.json" with { type: "json" };
+import r762 from "../locales/es/features/sections/TagsInput.json" with { type: "json" };
+import r763 from "../locales/fr/features/sections/TagsInput.json" with { type: "json" };
+import r764 from "../locales/hu/features/sections/TagsInput.json" with { type: "json" };
+import r765 from "../locales/pl/features/sections/TagsInput.json" with { type: "json" };
+import r766 from "../locales/pt/features/sections/TagsInput.json" with { type: "json" };
+import r767 from "../locales/ru/features/sections/TagsInput.json" with { type: "json" };
+import r768 from "../locales/sk/features/sections/TagsInput.json" with { type: "json" };
+import r769 from "../locales/uk/features/sections/TagsInput.json" with { type: "json" };
+import r770 from "../locales/en/features/sections/TagsSettings.json" with { type: "json" };
+import r771 from "../locales/cs/features/sections/TagsSettings.json" with { type: "json" };
+import r772 from "../locales/de/features/sections/TagsSettings.json" with { type: "json" };
+import r773 from "../locales/es/features/sections/TagsSettings.json" with { type: "json" };
+import r774 from "../locales/fr/features/sections/TagsSettings.json" with { type: "json" };
+import r775 from "../locales/hu/features/sections/TagsSettings.json" with { type: "json" };
+import r776 from "../locales/pl/features/sections/TagsSettings.json" with { type: "json" };
+import r777 from "../locales/pt/features/sections/TagsSettings.json" with { type: "json" };
+import r778 from "../locales/ru/features/sections/TagsSettings.json" with { type: "json" };
+import r779 from "../locales/sk/features/sections/TagsSettings.json" with { type: "json" };
+import r780 from "../locales/uk/features/sections/TagsSettings.json" with { type: "json" };
+import r781 from "../locales/en/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r782 from "../locales/cs/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r783 from "../locales/de/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r784 from "../locales/es/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r785 from "../locales/fr/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r786 from "../locales/hu/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r787 from "../locales/pl/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r788 from "../locales/pt/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r789 from "../locales/ru/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r790 from "../locales/sk/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r791 from "../locales/uk/platform/email/TrialEndingEmail.json" with { type: "json" };
+import r792 from "../locales/en/features/pages/UnavailablePage.json" with { type: "json" };
+import r793 from "../locales/cs/features/pages/UnavailablePage.json" with { type: "json" };
+import r794 from "../locales/de/features/pages/UnavailablePage.json" with { type: "json" };
+import r795 from "../locales/es/features/pages/UnavailablePage.json" with { type: "json" };
+import r796 from "../locales/fr/features/pages/UnavailablePage.json" with { type: "json" };
+import r797 from "../locales/hu/features/pages/UnavailablePage.json" with { type: "json" };
+import r798 from "../locales/pl/features/pages/UnavailablePage.json" with { type: "json" };
+import r799 from "../locales/pt/features/pages/UnavailablePage.json" with { type: "json" };
+import r800 from "../locales/ru/features/pages/UnavailablePage.json" with { type: "json" };
+import r801 from "../locales/sk/features/pages/UnavailablePage.json" with { type: "json" };
+import r802 from "../locales/uk/features/pages/UnavailablePage.json" with { type: "json" };
+import r803 from "../locales/en/validation.json" with { type: "json" };
+import r804 from "../locales/cs/validation.json" with { type: "json" };
+import r805 from "../locales/de/validation.json" with { type: "json" };
+import r806 from "../locales/es/validation.json" with { type: "json" };
+import r807 from "../locales/fr/validation.json" with { type: "json" };
+import r808 from "../locales/hu/validation.json" with { type: "json" };
+import r809 from "../locales/pl/validation.json" with { type: "json" };
+import r810 from "../locales/pt/validation.json" with { type: "json" };
+import r811 from "../locales/ru/validation.json" with { type: "json" };
+import r812 from "../locales/sk/validation.json" with { type: "json" };
+import r813 from "../locales/uk/validation.json" with { type: "json" };
+import r814 from "../locales/en/platform/email/WelcomeEmail.json" with { type: "json" };
+import r815 from "../locales/cs/platform/email/WelcomeEmail.json" with { type: "json" };
+import r816 from "../locales/de/platform/email/WelcomeEmail.json" with { type: "json" };
+import r817 from "../locales/es/platform/email/WelcomeEmail.json" with { type: "json" };
+import r818 from "../locales/fr/platform/email/WelcomeEmail.json" with { type: "json" };
+import r819 from "../locales/hu/platform/email/WelcomeEmail.json" with { type: "json" };
+import r820 from "../locales/pl/platform/email/WelcomeEmail.json" with { type: "json" };
+import r821 from "../locales/pt/platform/email/WelcomeEmail.json" with { type: "json" };
+import r822 from "../locales/ru/platform/email/WelcomeEmail.json" with { type: "json" };
+import r823 from "../locales/sk/platform/email/WelcomeEmail.json" with { type: "json" };
+import r824 from "../locales/uk/platform/email/WelcomeEmail.json" with { type: "json" };
 
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 
@@ -233,376 +833,976 @@ export const resourcesByNamespace = {
     en: r0,
     cs: r1,
     de: r2,
+    es: r3,
+    fr: r4,
+    hu: r5,
+    pl: r6,
+    pt: r7,
+    ru: r8,
+    sk: r9,
+    uk: r10,
   },
   "AccountDeletedEmail": {
-    en: r3,
-    cs: r4,
-    de: r5,
+    en: r11,
+    cs: r12,
+    de: r13,
+    es: r14,
+    fr: r15,
+    hu: r16,
+    pl: r17,
+    pt: r18,
+    ru: r19,
+    sk: r20,
+    uk: r21,
   },
   "AddPeopleToGroupSelectionModal": {
-    en: r6,
-    cs: r7,
-    de: r8,
+    en: r22,
+    cs: r23,
+    de: r24,
+    es: r25,
+    fr: r26,
+    hu: r27,
+    pl: r28,
+    pt: r29,
+    ru: r30,
+    sk: r31,
+    uk: r32,
   },
   "AppNavigation": {
-    en: r9,
-    cs: r10,
-    de: r11,
-  },
-  "ChatPage": {
-    en: r12,
-    cs: r13,
-    de: r14,
-  },
-  "Checkout": {
-    en: r15,
-    cs: r16,
-    de: r17,
-  },
-  "CommandPalette": {
-    en: r18,
-    cs: r19,
-    de: r20,
-  },
-  "ContactActionMenu": {
-    en: r21,
-    cs: r22,
-    de: r23,
-  },
-  "ContactAddress": {
-    en: r24,
-    cs: r25,
-    de: r26,
-  },
-  "ContactIdentityFields": {
-    en: r27,
-    cs: r28,
-    de: r29,
-  },
-  "ContactImportantDates": {
-    en: r30,
-    cs: r31,
-    de: r32,
-  },
-  "ContactInfo": {
     en: r33,
     cs: r34,
     de: r35,
+    es: r36,
+    fr: r37,
+    hu: r38,
+    pl: r39,
+    pt: r40,
+    ru: r41,
+    sk: r42,
+    uk: r43,
   },
-  "ContactPage": {
-    en: r36,
-    cs: r37,
-    de: r38,
+  "ChatPage": {
+    en: r44,
+    cs: r45,
+    de: r46,
+    es: r47,
+    fr: r48,
+    hu: r49,
+    pl: r50,
+    pt: r51,
+    ru: r52,
+    sk: r53,
+    uk: r54,
   },
-  "ContactPhotoUpload": {
-    en: r39,
-    cs: r40,
-    de: r41,
+  "Checkout": {
+    en: r55,
+    cs: r56,
+    de: r57,
+    es: r58,
+    fr: r59,
+    hu: r60,
+    pl: r61,
+    pt: r62,
+    ru: r63,
+    sk: r64,
+    uk: r65,
   },
-  "ContactPreferenceSection": {
-    en: r42,
-    cs: r43,
-    de: r44,
-  },
-  "ContactsTable": {
-    en: r45,
-    cs: r46,
-    de: r47,
-  },
-  "common": {
-    en: r48,
-    cs: r49,
-    de: r50,
-  },
-  "EmailChrome": {
-    en: r51,
-    cs: r52,
-    de: r53,
-  },
-  "EnrichFromLinkedIn": {
-    en: r54,
-    cs: r55,
-    de: r56,
-  },
-  "EnrichRecommendationCard": {
-    en: r57,
-    cs: r58,
-    de: r59,
-  },
-  "ExtensionPopup": {
-    en: r60,
-    cs: r61,
-    de: r62,
-  },
-  "ExtensionSocialButtons": {
-    en: r63,
-    cs: r64,
-    de: r65,
-  },
-  "ExtensionVersionCheck": {
+  "CommandPalette": {
     en: r66,
     cs: r67,
     de: r68,
+    es: r69,
+    fr: r70,
+    hu: r71,
+    pl: r72,
+    pt: r73,
+    ru: r74,
+    sk: r75,
+    uk: r76,
   },
-  "FeedbackEmail": {
-    en: r69,
-    cs: r70,
-    de: r71,
+  "ContactActionMenu": {
+    en: r77,
+    cs: r78,
+    de: r79,
+    es: r80,
+    fr: r81,
+    hu: r82,
+    pl: r83,
+    pt: r84,
+    ru: r85,
+    sk: r86,
+    uk: r87,
   },
-  "FeedbackPage": {
-    en: r72,
-    cs: r73,
-    de: r74,
+  "ContactAddress": {
+    en: r88,
+    cs: r89,
+    de: r90,
+    es: r91,
+    fr: r92,
+    hu: r93,
+    pl: r94,
+    pt: r95,
+    ru: r96,
+    sk: r97,
+    uk: r98,
   },
-  "FixContactsPage": {
-    en: r75,
-    cs: r76,
-    de: r77,
-  },
-  "GraphPage": {
-    en: r78,
-    cs: r79,
-    de: r80,
-  },
-  "GroupDetailPage": {
-    en: r81,
-    cs: r82,
-    de: r83,
-  },
-  "GroupsPage": {
-    en: r84,
-    cs: r85,
-    de: r86,
-  },
-  "glossary": {
-    en: r87,
-    cs: r88,
-    de: r89,
-  },
-  "HomePage": {
-    en: r90,
-    cs: r91,
-    de: r92,
-  },
-  "InteractionsPage": {
-    en: r93,
-    cs: r94,
-    de: r95,
-  },
-  "InteractionTypes": {
-    en: r96,
-    cs: r97,
-    de: r98,
-  },
-  "KeepInTouch": {
+  "ContactIdentityFields": {
     en: r99,
     cs: r100,
     de: r101,
+    es: r102,
+    fr: r103,
+    hu: r104,
+    pl: r105,
+    pt: r106,
+    ru: r107,
+    sk: r108,
+    uk: r109,
   },
-  "Languages": {
-    en: r102,
-    cs: r103,
-    de: r104,
+  "ContactImportantDates": {
+    en: r110,
+    cs: r111,
+    de: r112,
+    es: r113,
+    fr: r114,
+    hu: r115,
+    pl: r116,
+    pt: r117,
+    ru: r118,
+    sk: r119,
+    uk: r120,
   },
-  "LinkedInData": {
-    en: r105,
-    cs: r106,
-    de: r107,
+  "ContactInfo": {
+    en: r121,
+    cs: r122,
+    de: r123,
+    es: r124,
+    fr: r125,
+    hu: r126,
+    pl: r127,
+    pt: r128,
+    ru: r129,
+    sk: r130,
+    uk: r131,
   },
-  "LoginPage": {
-    en: r108,
-    cs: r109,
-    de: r110,
-  },
-  "MagicLinkEmail": {
-    en: r111,
-    cs: r112,
-    de: r113,
-  },
-  "MapCommon": {
-    en: r114,
-    cs: r115,
-    de: r116,
-  },
-  "MapPage": {
-    en: r117,
-    cs: r118,
-    de: r119,
-  },
-  "MergeWithModal": {
-    en: r120,
-    cs: r121,
-    de: r122,
-  },
-  "MobileAuth": {
-    en: r123,
-    cs: r124,
-    de: r125,
-  },
-  "MobileColorPicker": {
-    en: r126,
-    cs: r127,
-    de: r128,
-  },
-  "MobileContactDetail": {
-    en: r129,
-    cs: r130,
-    de: r131,
-  },
-  "MobileContactIdentity": {
+  "ContactPage": {
     en: r132,
     cs: r133,
     de: r134,
+    es: r135,
+    fr: r136,
+    hu: r137,
+    pl: r138,
+    pt: r139,
+    ru: r140,
+    sk: r141,
+    uk: r142,
   },
-  "MobileContacts": {
-    en: r135,
-    cs: r136,
-    de: r137,
+  "ContactPhotoUpload": {
+    en: r143,
+    cs: r144,
+    de: r145,
+    es: r146,
+    fr: r147,
+    hu: r148,
+    pl: r149,
+    pt: r150,
+    ru: r151,
+    sk: r152,
+    uk: r153,
   },
-  "MobileCreateContact": {
-    en: r138,
-    cs: r139,
-    de: r140,
+  "ContactPreferenceSection": {
+    en: r154,
+    cs: r155,
+    de: r156,
+    es: r157,
+    fr: r158,
+    hu: r159,
+    pl: r160,
+    pt: r161,
+    ru: r162,
+    sk: r163,
+    uk: r164,
   },
-  "MobileEmojiPicker": {
-    en: r141,
-    cs: r142,
-    de: r143,
-  },
-  "MobileGroups": {
-    en: r144,
-    cs: r145,
-    de: r146,
-  },
-  "MobileNavigation": {
-    en: r147,
-    cs: r148,
-    de: r149,
-  },
-  "MobileSettings": {
-    en: r150,
-    cs: r151,
-    de: r152,
-  },
-  "MobileShareContactEmail": {
-    en: r153,
-    cs: r154,
-    de: r155,
-  },
-  "MobileTags": {
-    en: r156,
-    cs: r157,
-    de: r158,
-  },
-  "NotesEditor": {
-    en: r159,
-    cs: r160,
-    de: r161,
-  },
-  "NotesSlashCommands": {
-    en: r162,
-    cs: r163,
-    de: r164,
-  },
-  "NotFoundPage": {
+  "ContactsTable": {
     en: r165,
     cs: r166,
     de: r167,
+    es: r168,
+    fr: r169,
+    hu: r170,
+    pl: r171,
+    pt: r172,
+    ru: r173,
+    sk: r174,
+    uk: r175,
   },
-  "OAuthConsent": {
-    en: r168,
-    cs: r169,
-    de: r170,
+  "common": {
+    en: r176,
+    cs: r177,
+    de: r178,
+    es: r179,
+    fr: r180,
+    hu: r181,
+    pl: r182,
+    pt: r183,
+    ru: r184,
+    sk: r185,
+    uk: r186,
   },
-  "Onboarding": {
-    en: r171,
-    cs: r172,
-    de: r173,
+  "EmailChrome": {
+    en: r187,
+    cs: r188,
+    de: r189,
+    es: r190,
+    fr: r191,
+    hu: r192,
+    pl: r193,
+    pt: r194,
+    ru: r195,
+    sk: r196,
+    uk: r197,
   },
-  "PageHeader": {
-    en: r174,
-    cs: r175,
-    de: r176,
-  },
-  "PeoplePage": {
-    en: r177,
-    cs: r178,
-    de: r179,
-  },
-  "PeopleSearchSpotlight": {
-    en: r180,
-    cs: r181,
-    de: r182,
-  },
-  "PersonRelationships": {
-    en: r183,
-    cs: r184,
-    de: r185,
-  },
-  "PersonTabs": {
-    en: r186,
-    cs: r187,
-    de: r188,
-  },
-  "ReminderDigestEmail": {
-    en: r189,
-    cs: r190,
-    de: r191,
-  },
-  "SettingsPage": {
-    en: r192,
-    cs: r193,
-    de: r194,
-  },
-  "ShareContactEmailBody": {
-    en: r195,
-    cs: r196,
-    de: r197,
-  },
-  "ShareContactModal": {
+  "EnrichFromLinkedIn": {
     en: r198,
     cs: r199,
     de: r200,
+    es: r201,
+    fr: r202,
+    hu: r203,
+    pl: r204,
+    pt: r205,
+    ru: r206,
+    sk: r207,
+    uk: r208,
+  },
+  "EnrichRecommendationCard": {
+    en: r209,
+    cs: r210,
+    de: r211,
+    es: r212,
+    fr: r213,
+    hu: r214,
+    pl: r215,
+    pt: r216,
+    ru: r217,
+    sk: r218,
+    uk: r219,
+  },
+  "ExtensionPopup": {
+    en: r220,
+    cs: r221,
+    de: r222,
+    es: r223,
+    fr: r224,
+    hu: r225,
+    pl: r226,
+    pt: r227,
+    ru: r228,
+    sk: r229,
+    uk: r230,
+  },
+  "ExtensionSocialButtons": {
+    en: r231,
+    cs: r232,
+    de: r233,
+    es: r234,
+    fr: r235,
+    hu: r236,
+    pl: r237,
+    pt: r238,
+    ru: r239,
+    sk: r240,
+    uk: r241,
+  },
+  "ExtensionVersionCheck": {
+    en: r242,
+    cs: r243,
+    de: r244,
+    es: r245,
+    fr: r246,
+    hu: r247,
+    pl: r248,
+    pt: r249,
+    ru: r250,
+    sk: r251,
+    uk: r252,
+  },
+  "FeedbackEmail": {
+    en: r253,
+    cs: r254,
+    de: r255,
+    es: r256,
+    fr: r257,
+    hu: r258,
+    pl: r259,
+    pt: r260,
+    ru: r261,
+    sk: r262,
+    uk: r263,
+  },
+  "FeedbackPage": {
+    en: r264,
+    cs: r265,
+    de: r266,
+    es: r267,
+    fr: r268,
+    hu: r269,
+    pl: r270,
+    pt: r271,
+    ru: r272,
+    sk: r273,
+    uk: r274,
+  },
+  "FixContactsPage": {
+    en: r275,
+    cs: r276,
+    de: r277,
+    es: r278,
+    fr: r279,
+    hu: r280,
+    pl: r281,
+    pt: r282,
+    ru: r283,
+    sk: r284,
+    uk: r285,
+  },
+  "GraphPage": {
+    en: r286,
+    cs: r287,
+    de: r288,
+    es: r289,
+    fr: r290,
+    hu: r291,
+    pl: r292,
+    pt: r293,
+    ru: r294,
+    sk: r295,
+    uk: r296,
+  },
+  "GroupDetailPage": {
+    en: r297,
+    cs: r298,
+    de: r299,
+    es: r300,
+    fr: r301,
+    hu: r302,
+    pl: r303,
+    pt: r304,
+    ru: r305,
+    sk: r306,
+    uk: r307,
+  },
+  "GroupsPage": {
+    en: r308,
+    cs: r309,
+    de: r310,
+    es: r311,
+    fr: r312,
+    hu: r313,
+    pl: r314,
+    pt: r315,
+    ru: r316,
+    sk: r317,
+    uk: r318,
+  },
+  "glossary": {
+    en: r319,
+    cs: r320,
+    de: r321,
+    es: r322,
+    fr: r323,
+    hu: r324,
+    pl: r325,
+    pt: r326,
+    ru: r327,
+    sk: r328,
+    uk: r329,
+  },
+  "HomePage": {
+    en: r330,
+    cs: r331,
+    de: r332,
+    es: r333,
+    fr: r334,
+    hu: r335,
+    pl: r336,
+    pt: r337,
+    ru: r338,
+    sk: r339,
+    uk: r340,
+  },
+  "InteractionsPage": {
+    en: r341,
+    cs: r342,
+    de: r343,
+    es: r344,
+    fr: r345,
+    hu: r346,
+    pl: r347,
+    pt: r348,
+    ru: r349,
+    sk: r350,
+    uk: r351,
+  },
+  "InteractionTypes": {
+    en: r352,
+    cs: r353,
+    de: r354,
+    es: r355,
+    fr: r356,
+    hu: r357,
+    pl: r358,
+    pt: r359,
+    ru: r360,
+    sk: r361,
+    uk: r362,
+  },
+  "KeepInTouch": {
+    en: r363,
+    cs: r364,
+    de: r365,
+    es: r366,
+    fr: r367,
+    hu: r368,
+    pl: r369,
+    pt: r370,
+    ru: r371,
+    sk: r372,
+    uk: r373,
+  },
+  "Languages": {
+    en: r374,
+    cs: r375,
+    de: r376,
+    es: r377,
+    fr: r378,
+    hu: r379,
+    pl: r380,
+    pt: r381,
+    ru: r382,
+    sk: r383,
+    uk: r384,
+  },
+  "LinkedInData": {
+    en: r385,
+    cs: r386,
+    de: r387,
+    es: r388,
+    fr: r389,
+    hu: r390,
+    pl: r391,
+    pt: r392,
+    ru: r393,
+    sk: r394,
+    uk: r395,
+  },
+  "LoginPage": {
+    en: r396,
+    cs: r397,
+    de: r398,
+    es: r399,
+    fr: r400,
+    hu: r401,
+    pl: r402,
+    pt: r403,
+    ru: r404,
+    sk: r405,
+    uk: r406,
+  },
+  "MagicLinkEmail": {
+    en: r407,
+    cs: r408,
+    de: r409,
+    es: r410,
+    fr: r411,
+    hu: r412,
+    pl: r413,
+    pt: r414,
+    ru: r415,
+    sk: r416,
+    uk: r417,
+  },
+  "MapCommon": {
+    en: r418,
+    cs: r419,
+    de: r420,
+    es: r421,
+    fr: r422,
+    hu: r423,
+    pl: r424,
+    pt: r425,
+    ru: r426,
+    sk: r427,
+    uk: r428,
+  },
+  "MapPage": {
+    en: r429,
+    cs: r430,
+    de: r431,
+    es: r432,
+    fr: r433,
+    hu: r434,
+    pl: r435,
+    pt: r436,
+    ru: r437,
+    sk: r438,
+    uk: r439,
+  },
+  "MergeWithModal": {
+    en: r440,
+    cs: r441,
+    de: r442,
+    es: r443,
+    fr: r444,
+    hu: r445,
+    pl: r446,
+    pt: r447,
+    ru: r448,
+    sk: r449,
+    uk: r450,
+  },
+  "MobileAuth": {
+    en: r451,
+    cs: r452,
+    de: r453,
+    es: r454,
+    fr: r455,
+    hu: r456,
+    pl: r457,
+    pt: r458,
+    ru: r459,
+    sk: r460,
+    uk: r461,
+  },
+  "MobileColorPicker": {
+    en: r462,
+    cs: r463,
+    de: r464,
+    es: r465,
+    fr: r466,
+    hu: r467,
+    pl: r468,
+    pt: r469,
+    ru: r470,
+    sk: r471,
+    uk: r472,
+  },
+  "MobileContactDetail": {
+    en: r473,
+    cs: r474,
+    de: r475,
+    es: r476,
+    fr: r477,
+    hu: r478,
+    pl: r479,
+    pt: r480,
+    ru: r481,
+    sk: r482,
+    uk: r483,
+  },
+  "MobileContactIdentity": {
+    en: r484,
+    cs: r485,
+    de: r486,
+    es: r487,
+    fr: r488,
+    hu: r489,
+    pl: r490,
+    pt: r491,
+    ru: r492,
+    sk: r493,
+    uk: r494,
+  },
+  "MobileContacts": {
+    en: r495,
+    cs: r496,
+    de: r497,
+    es: r498,
+    fr: r499,
+    hu: r500,
+    pl: r501,
+    pt: r502,
+    ru: r503,
+    sk: r504,
+    uk: r505,
+  },
+  "MobileCreateContact": {
+    en: r506,
+    cs: r507,
+    de: r508,
+    es: r509,
+    fr: r510,
+    hu: r511,
+    pl: r512,
+    pt: r513,
+    ru: r514,
+    sk: r515,
+    uk: r516,
+  },
+  "MobileEmojiPicker": {
+    en: r517,
+    cs: r518,
+    de: r519,
+    es: r520,
+    fr: r521,
+    hu: r522,
+    pl: r523,
+    pt: r524,
+    ru: r525,
+    sk: r526,
+    uk: r527,
+  },
+  "MobileGroups": {
+    en: r528,
+    cs: r529,
+    de: r530,
+    es: r531,
+    fr: r532,
+    hu: r533,
+    pl: r534,
+    pt: r535,
+    ru: r536,
+    sk: r537,
+    uk: r538,
+  },
+  "MobileNavigation": {
+    en: r539,
+    cs: r540,
+    de: r541,
+    es: r542,
+    fr: r543,
+    hu: r544,
+    pl: r545,
+    pt: r546,
+    ru: r547,
+    sk: r548,
+    uk: r549,
+  },
+  "MobileSettings": {
+    en: r550,
+    cs: r551,
+    de: r552,
+    es: r553,
+    fr: r554,
+    hu: r555,
+    pl: r556,
+    pt: r557,
+    ru: r558,
+    sk: r559,
+    uk: r560,
+  },
+  "MobileShareContactEmail": {
+    en: r561,
+    cs: r562,
+    de: r563,
+    es: r564,
+    fr: r565,
+    hu: r566,
+    pl: r567,
+    pt: r568,
+    ru: r569,
+    sk: r570,
+    uk: r571,
+  },
+  "MobileTags": {
+    en: r572,
+    cs: r573,
+    de: r574,
+    es: r575,
+    fr: r576,
+    hu: r577,
+    pl: r578,
+    pt: r579,
+    ru: r580,
+    sk: r581,
+    uk: r582,
+  },
+  "NotesEditor": {
+    en: r583,
+    cs: r584,
+    de: r585,
+    es: r586,
+    fr: r587,
+    hu: r588,
+    pl: r589,
+    pt: r590,
+    ru: r591,
+    sk: r592,
+    uk: r593,
+  },
+  "NotesSlashCommands": {
+    en: r594,
+    cs: r595,
+    de: r596,
+    es: r597,
+    fr: r598,
+    hu: r599,
+    pl: r600,
+    pt: r601,
+    ru: r602,
+    sk: r603,
+    uk: r604,
+  },
+  "NotFoundPage": {
+    en: r605,
+    cs: r606,
+    de: r607,
+    es: r608,
+    fr: r609,
+    hu: r610,
+    pl: r611,
+    pt: r612,
+    ru: r613,
+    sk: r614,
+    uk: r615,
+  },
+  "OAuthConsent": {
+    en: r616,
+    cs: r617,
+    de: r618,
+    es: r619,
+    fr: r620,
+    hu: r621,
+    pl: r622,
+    pt: r623,
+    ru: r624,
+    sk: r625,
+    uk: r626,
+  },
+  "Onboarding": {
+    en: r627,
+    cs: r628,
+    de: r629,
+    es: r630,
+    fr: r631,
+    hu: r632,
+    pl: r633,
+    pt: r634,
+    ru: r635,
+    sk: r636,
+    uk: r637,
+  },
+  "PageHeader": {
+    en: r638,
+    cs: r639,
+    de: r640,
+    es: r641,
+    fr: r642,
+    hu: r643,
+    pl: r644,
+    pt: r645,
+    ru: r646,
+    sk: r647,
+    uk: r648,
+  },
+  "PeoplePage": {
+    en: r649,
+    cs: r650,
+    de: r651,
+    es: r652,
+    fr: r653,
+    hu: r654,
+    pl: r655,
+    pt: r656,
+    ru: r657,
+    sk: r658,
+    uk: r659,
+  },
+  "PeopleSearchSpotlight": {
+    en: r660,
+    cs: r661,
+    de: r662,
+    es: r663,
+    fr: r664,
+    hu: r665,
+    pl: r666,
+    pt: r667,
+    ru: r668,
+    sk: r669,
+    uk: r670,
+  },
+  "PersonRelationships": {
+    en: r671,
+    cs: r672,
+    de: r673,
+    es: r674,
+    fr: r675,
+    hu: r676,
+    pl: r677,
+    pt: r678,
+    ru: r679,
+    sk: r680,
+    uk: r681,
+  },
+  "PersonTabs": {
+    en: r682,
+    cs: r683,
+    de: r684,
+    es: r685,
+    fr: r686,
+    hu: r687,
+    pl: r688,
+    pt: r689,
+    ru: r690,
+    sk: r691,
+    uk: r692,
+  },
+  "ReminderDigestEmail": {
+    en: r693,
+    cs: r694,
+    de: r695,
+    es: r696,
+    fr: r697,
+    hu: r698,
+    pl: r699,
+    pt: r700,
+    ru: r701,
+    sk: r702,
+    uk: r703,
+  },
+  "SettingsPage": {
+    en: r704,
+    cs: r705,
+    de: r706,
+    es: r707,
+    fr: r708,
+    hu: r709,
+    pl: r710,
+    pt: r711,
+    ru: r712,
+    sk: r713,
+    uk: r714,
+  },
+  "ShareContactEmailBody": {
+    en: r715,
+    cs: r716,
+    de: r717,
+    es: r718,
+    fr: r719,
+    hu: r720,
+    pl: r721,
+    pt: r722,
+    ru: r723,
+    sk: r724,
+    uk: r725,
+  },
+  "ShareContactModal": {
+    en: r726,
+    cs: r727,
+    de: r728,
+    es: r729,
+    fr: r730,
+    hu: r731,
+    pl: r732,
+    pt: r733,
+    ru: r734,
+    sk: r735,
+    uk: r736,
   },
   "SingleContactPage": {
-    en: r201,
-    cs: r202,
-    de: r203,
+    en: r737,
+    cs: r738,
+    de: r739,
+    es: r740,
+    fr: r741,
+    hu: r742,
+    pl: r743,
+    pt: r744,
+    ru: r745,
+    sk: r746,
+    uk: r747,
   },
   "Socials": {
-    en: r204,
-    cs: r205,
-    de: r206,
+    en: r748,
+    cs: r749,
+    de: r750,
+    es: r751,
+    fr: r752,
+    hu: r753,
+    pl: r754,
+    pt: r755,
+    ru: r756,
+    sk: r757,
+    uk: r758,
   },
   "TagsInput": {
-    en: r207,
-    cs: r208,
-    de: r209,
+    en: r759,
+    cs: r760,
+    de: r761,
+    es: r762,
+    fr: r763,
+    hu: r764,
+    pl: r765,
+    pt: r766,
+    ru: r767,
+    sk: r768,
+    uk: r769,
   },
   "TagsSettings": {
-    en: r210,
-    cs: r211,
-    de: r212,
+    en: r770,
+    cs: r771,
+    de: r772,
+    es: r773,
+    fr: r774,
+    hu: r775,
+    pl: r776,
+    pt: r777,
+    ru: r778,
+    sk: r779,
+    uk: r780,
   },
   "TrialEndingEmail": {
-    en: r213,
-    cs: r214,
-    de: r215,
+    en: r781,
+    cs: r782,
+    de: r783,
+    es: r784,
+    fr: r785,
+    hu: r786,
+    pl: r787,
+    pt: r788,
+    ru: r789,
+    sk: r790,
+    uk: r791,
   },
   "UnavailablePage": {
-    en: r216,
-    cs: r217,
-    de: r218,
+    en: r792,
+    cs: r793,
+    de: r794,
+    es: r795,
+    fr: r796,
+    hu: r797,
+    pl: r798,
+    pt: r799,
+    ru: r800,
+    sk: r801,
+    uk: r802,
   },
   "validation": {
-    en: r219,
-    cs: r220,
-    de: r221,
+    en: r803,
+    cs: r804,
+    de: r805,
+    es: r806,
+    fr: r807,
+    hu: r808,
+    pl: r809,
+    pt: r810,
+    ru: r811,
+    sk: r812,
+    uk: r813,
   },
   "WelcomeEmail": {
-    en: r222,
-    cs: r223,
-    de: r224,
+    en: r814,
+    cs: r815,
+    de: r816,
+    es: r817,
+    fr: r818,
+    hu: r819,
+    pl: r820,
+    pt: r821,
+    ru: r822,
+    sk: r823,
+    uk: r824,
   },
 } satisfies Record<string, Record<SupportedLocale, Record<string, unknown>>>;
 

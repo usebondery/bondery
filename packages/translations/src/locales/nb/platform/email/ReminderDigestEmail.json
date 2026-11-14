@@ -1,0 +1,20 @@
+{
+  "cta": "Åpne påminnelser",
+  "dateTypes": {
+    "anniversary": "Jubileum",
+    "birthday": "Bursdag",
+    "graduation": "Eksamen",
+    "nameday": "Navnedag",
+    "other": "Viktig dato"
+  },
+  "dayMany": "{{count}} dager",
+  "dayOne": "1 dag",
+  "description": "For {{headingDate}}. Åpne en person for detaljer eller for å sende en melding.",
+  "headingMany": "{{count}} påminnelser nærmer seg",
+  "headingOne": "1 påminnelse nærmer seg",
+  "preview": "{{firstTypeLabel}} for {{firstPersonName}} om {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} for {{firstPersonName}} om {{firstRemainingLabel}} og {{remainingCount}} til",
+  "reminderLine": "{{emoji}} {{typeLabel}} nærmer seg om {{remainingLabel}}, {{dateLabel}}.",
+  "subject": "Bondery-påminnelser for {{targetDate}}",
+  "whyReceiving": "Du mottar dette fordi du har slått på påminnelser for disse datoene."
+}

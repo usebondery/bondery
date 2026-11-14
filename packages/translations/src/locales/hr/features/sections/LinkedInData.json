@@ -1,0 +1,11 @@
+{
+  "About": "O meni",
+  "Education": "Obrazovanje",
+  "LastDataUpdate": "Zadnje ažuriranje podataka: {date}",
+  "NoEducation": "Nema dostupne povijesti obrazovanja",
+  "NoWorkHistory": "Nema dostupne radne povijesti",
+  "Present": "Sada",
+  "ShowLess": "Prikazati manje",
+  "ShowMore": "Prikazati više",
+  "WorkHistory": "Radno iskustvo"
+}

@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Pridat ludí do skupiny",
+  "ColorLabel": "Barva",
+  "ContactCount": "Stiki",
+  "DetailPageTitle": "Detail skupiny",
+  "Empty": "V tej skupini še ni povezanih stikov.",
+  "HeaderDescription": "V tomto pohlade možete upravljaj členov a akcie vybranej skupiny.",
+  "NoContactsFound": "V tej skupini še ni povezanih stikov.",
+  "NoContactsMatchSearch": "Žiadny takový stik nenájdený.",
+  "RemoveContact": {
+    "ErrorDescription": "Stik ni bilo mogoče odstraniti zo skupiny. Poskusi to znova.",
+    "LoadingDescription": "Posodabljanje členov skupiny...",
+    "LoadingTitle": "Odstranjevanje stiku",
+    "SuccessDescription": "Stik bol úspešne odebrán zo skupiny"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Stiki ni bilo mogoče odstraniti zo skupiny. Poskusi to znova.",
+    "LoadingDescription": "Posodabljanje členov skupiny...",
+    "LoadingTitle": "Odstranjevanje stikov",
+    "SuccessDescription": "{count} stik(ú) bolo úspešne odebráno zo skupiny"
+  },
+  "RemoveFromGroup": "Odobrat zo skupiny",
+  "Subtitle": "Stiki prirazené do tejto skupiny.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Poslední interakcije",
+    "Location": "Místo",
+    "Name": "Meno",
+    "Socials": "Sociální siete",
+    "Title": "Nadpis"
+  },
+  "ThisContactFallback": "ta stik",
+  "Title": "Skupina: {label}"
+}

@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} delte denne kontakten med deg",
+  "footerNotes": "Sendt med Bondery. Svar på denne e-posten for å kontakte {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adresse",
+    "email": "E-post",
+    "facebook": "Facebook",
+    "importantDates": "Viktige datoer",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Sted",
+    "notes": "Notater",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Nettsted",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-post og andre detaljer inni",
+  "replyCta": "Svar {{senderName}}",
+  "subject": "{{senderName}} delte en kontakt med deg • {{contactName}}"
+}

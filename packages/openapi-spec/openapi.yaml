@@ -22314,6 +22314,7 @@ paths:
                   language: en
                   onboardingCompletedAt: 2026-01-15T12:00:00.000Z
                   timeFormat: 24h
+                  dateFormat: locale
                   timezone: Europe/London
                 success: true
               schema:
@@ -22333,6 +22334,14 @@ paths:
                           - dark
                           - auto
                         description: Color scheme preference
+                      dateFormat:
+                        type: string
+                        enum:
+                          - locale
+                          - mdy
+                          - dmy
+                          - ymd
+                        description: Calendar date order preference, independent of UI language
                       displayName:
                         type: string
                         description: Display name
@@ -22343,8 +22352,32 @@ paths:
                         type: string
                         enum:
                           - en
+                          - bg
                           - cs
+                          - da
                           - de
+                          - el
+                          - es
+                          - et
+                          - fi
+                          - fr
+                          - hr
+                          - hu
+                          - it
+                          - lt
+                          - lv
+                          - nb
+                          - nl
+                          - pl
+                          - pt
+                          - ro
+                          - ru
+                          - sk
+                          - sl
+                          - sr
+                          - sv
+                          - tr
+                          - uk
                         description: Bondery UI locale code
                       onboardingCompletedAt:
                         nullable: true
@@ -22363,6 +22396,7 @@ paths:
                     required:
                       - avatarUrl
                       - colorScheme
+                      - dateFormat
                       - displayName
                       - isPlatformAdmin
                       - language
@@ -22900,6 +22934,7 @@ paths:
                   rightSwipeAction: email
                   tagSortOrder: count-desc
                   timeFormat: 24h
+                  dateFormat: locale
                   timezone: Europe/London
                 success: true
               schema:
@@ -22919,6 +22954,9 @@ paths:
                           - dark
                           - auto
                         description: Color scheme preference
+                      dateFormat:
+                        type: string
+                        description: Calendar date order preference
                       defaultPhoneCountry:
                         nullable: true
                         description: ISO 3166-1 alpha-2 default calling-code country
@@ -22933,8 +22971,32 @@ paths:
                         type: string
                         enum:
                           - en
+                          - bg
                           - cs
+                          - da
                           - de
+                          - el
+                          - es
+                          - et
+                          - fi
+                          - fr
+                          - hr
+                          - hu
+                          - it
+                          - lt
+                          - lv
+                          - nb
+                          - nl
+                          - pl
+                          - pt
+                          - ro
+                          - ru
+                          - sk
+                          - sl
+                          - sr
+                          - sv
+                          - tr
+                          - uk
                         description: Bondery UI locale code
                       leftSwipeAction:
                         type: string
@@ -23030,6 +23092,7 @@ paths:
                           type: string
                     required:
                       - colorScheme
+                      - dateFormat
                       - defaultPhoneCountry
                       - groupSortOrder
                       - language
@@ -23199,6 +23262,14 @@ paths:
                     - dark
                     - auto
                   description: Color scheme preference
+                dateFormat:
+                  type: string
+                  enum:
+                    - locale
+                    - mdy
+                    - dmy
+                    - ymd
+                  description: Calendar date order preference, independent of UI language
                 groupSortOrder:
                   type: string
                   enum:
@@ -23255,8 +23326,32 @@ paths:
                   type: string
                   enum:
                     - en
+                    - bg
                     - cs
+                    - da
                     - de
+                    - el
+                    - es
+                    - et
+                    - fi
+                    - fr
+                    - hr
+                    - hu
+                    - it
+                    - lt
+                    - lv
+                    - nb
+                    - nl
+                    - pl
+                    - pt
+                    - ro
+                    - ru
+                    - sk
+                    - sl
+                    - sr
+                    - sv
+                    - tr
+                    - uk
                 timezone:
                   description: IANA timezone name
                   type: string
@@ -23266,6 +23361,7 @@ paths:
             example:
               colorScheme: dark
               timeFormat: 24h
+              dateFormat: locale
       security: *a2
       responses:
         "200":
@@ -23287,6 +23383,7 @@ paths:
                   rightSwipeAction: email
                   tagSortOrder: count-desc
                   timeFormat: 24h
+                  dateFormat: locale
                   timezone: Europe/London
                 success: true
               schema:
@@ -23301,6 +23398,10 @@ paths:
                         description: Color scheme preference
                         nullable: true
                         type: string
+                      dateFormat:
+                        description: Calendar date order preference
+                        nullable: true
+                        type: string
                       defaultPhoneCountry:
                         description: ISO 3166-1 alpha-2 default calling-code country
                         nullable: true
@@ -23313,8 +23414,32 @@ paths:
                         type: string
                         enum:
                           - en
+                          - bg
                           - cs
+                          - da
                           - de
+                          - el
+                          - es
+                          - et
+                          - fi
+                          - fr
+                          - hr
+                          - hu
+                          - it
+                          - lt
+                          - lv
+                          - nb
+                          - nl
+                          - pl
+                          - pt
+                          - ro
+                          - ru
+                          - sk
+                          - sl
+                          - sr
+                          - sv
+                          - tr
+                          - uk
                         description: Bondery UI locale code
                       leftSwipeAction:
                         description: Swipe action on a contact row, left direction
@@ -23364,6 +23489,7 @@ paths:
                     rightSwipeAction: email
                     tagSortOrder: count-desc
                     timeFormat: 24h
+                    dateFormat: locale
                     timezone: Europe/London
                   success: true
         "400":

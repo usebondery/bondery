@@ -16,12 +16,13 @@ export async function PreloadedLocaleProvider({
   children: ReactNode;
   groups: string[];
 }) {
-  const { locale, timezone, timeFormat } = await resolveLocaleSettings();
+  const { locale, timezone, timeFormat, dateFormat } = await resolveLocaleSettings();
   await preloadWebNamespaces(locale, groups);
   const { i18n } = await getT("common", { lng: locale });
 
   return (
     <LocaleProvider
+      dateFormat={dateFormat}
       locale={locale}
       resources={getResources(i18n)}
       timeFormat={timeFormat}

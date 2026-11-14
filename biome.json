@@ -38,6 +38,8 @@
       "!**/.dockerignore*",
       "!**/.cursor",
       "!**/.source",
+      "!llm-plugins/claude",
+      "!llm-plugins/openai",
       "!apps/webapp/src/lib/auth/aaguid-catalog/aaguid.json",
       "!apps/webapp/src/lib/auth/aaguid-catalog/better-auth-authenticator-names.json"
     ]

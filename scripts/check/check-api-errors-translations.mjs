@@ -8,6 +8,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { API_ERROR_CODES } from "@bondery/schemas/errors";
+import localeCatalog from "@bondery/schemas/locale/supported-locales.json" with { type: "json" };
 
 import { createCheck } from "./check-report.mjs";
 
@@ -15,7 +16,7 @@ const check = createCheck("check-api-errors-translations");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const localesRoot = join(__dirname, "..", "..", "packages", "translations", "src", "locales");
-const locales = ["en", "cs", "de"];
+const locales = localeCatalog.supported.map((entry) => entry.code);
 
 for (const locale of locales) {
   const common = JSON.parse(readFileSync(join(localesRoot, locale, "common.json"), "utf8"));

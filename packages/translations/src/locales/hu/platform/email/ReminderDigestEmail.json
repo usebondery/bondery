@@ -1,0 +1,20 @@
+{
+  "cta": "Emlékeztetők megnyitása",
+  "dateTypes": {
+    "anniversary": "Évforduló",
+    "birthday": "Születésnap",
+    "graduation": "Érettségi / diploma",
+    "nameday": "Névnap",
+    "other": "Fontos dátum"
+  },
+  "dayMany": "{{count}} nap",
+  "dayOne": "1 nap",
+  "description": "{{headingDate}} napra. Nyisd meg a személyt a részletekért vagy üzenet küldéséhez.",
+  "headingMany": "{{count}} közelgő emlékeztető",
+  "headingOne": "1 közelgő emlékeztető",
+  "preview": "{{firstPersonName}} – {{firstTypeLabel}} {{firstRemainingLabel}} múlva",
+  "previewMore": "{{firstPersonName}} – {{firstTypeLabel}} {{firstRemainingLabel}} múlva, és még {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} {{remainingLabel}} múlva esedékes ({{dateLabel}}).",
+  "subject": "Bondery emlékeztetők – {{targetDate}}",
+  "whyReceiving": "Azért kapod, mert bekapcsoltad az emlékeztetőket ezekhez a dátumokhoz."
+}

@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Fargekode kopiert til utklippstavlen",
+  "CopyAccessibilityLabel": "Kopier fargekode",
+  "CopyFailedMessage": "Kunne ikke kopiere fargekoden. Prøv igjen.",
+  "CustomColorLabel": "Egendefinert farge",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Skriv inn en gyldig heksadesimalfarge (f.eks. #AE3EC9)",
+  "SheetTitle": "Farge",
+  "SwatchesLabel": "Hurtigfarger",
+  "TriggerAccessibilityHint": "Åpner fargevelgeren"
+}

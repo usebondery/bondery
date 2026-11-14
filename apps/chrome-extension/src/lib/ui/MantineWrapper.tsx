@@ -1,8 +1,10 @@
 import { bonderyTheme } from "@bondery/mantine-next/theme";
-import { MantineProvider, v8CssVariablesResolver } from "@mantine/core";
+import { dirForLocale } from "@bondery/schemas/locale";
+import { DirectionProvider, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import type React from "react";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { browser } from "wxt/browser";
+import i18n from "../i18n/i18n";
 import { extLog } from "../log";
 
 /**
@@ -111,18 +113,21 @@ export function MantineWrapper({
   );
 
   const resolvedColorScheme = themePreference === "auto" ? systemColorScheme : themePreference;
+  const textDirection = dirForLocale(i18n.language);
 
   return (
     <ExtensionThemeContext.Provider value={contextValue}>
-      <MantineProvider
-        cssVariablesResolver={v8CssVariablesResolver}
-        forceColorScheme={resolvedColorScheme}
-        theme={bonderyTheme}
-        {...(getRootElement ? { getRootElement } : {})}
-        {...(cssVariablesSelector ? { cssVariablesSelector } : {})}
-      >
-        {children}
-      </MantineProvider>
+      <DirectionProvider initialDirection={textDirection}>
+        <MantineProvider
+          cssVariablesResolver={v8CssVariablesResolver}
+          forceColorScheme={resolvedColorScheme}
+          theme={bonderyTheme}
+          {...(getRootElement ? { getRootElement } : {})}
+          {...(cssVariablesSelector ? { cssVariablesSelector } : {})}
+        >
+          {children}
+        </MantineProvider>
+      </DirectionProvider>
     </ExtensionThemeContext.Provider>
   );
 }

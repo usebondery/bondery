@@ -1,0 +1,14 @@
+{
+  "Call": "Звонок",
+  "Coffee": "Кофе",
+  "CompetitionHackathon": "Соревнование/хакатон",
+  "Custom": "Свой тип",
+  "Email": "Эл. почта",
+  "Meal": "Приём пищи",
+  "Meeting": "Встреча",
+  "NetworkingEvent": "Нетворкинг",
+  "Note": "Заметка",
+  "Other": "Другое",
+  "PartySocial": "Вечеринка/общение",
+  "TextMessaging": "Сообщение"
+}

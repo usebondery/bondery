@@ -1,0 +1,22 @@
+{
+  "AddError": "Не вдалося додати мітка",
+  "AddNewTagTooltip": "Створити мітка",
+  "AddSuccess": "Тег успішале добавлен",
+  "AddTagTooltip": "Додати мітка",
+  "CreateError": "Не вдалося створити мітка",
+  "CreateNewTagEmpty": "Створити мітка",
+  "CreateNewTagOption": "Створити мітка «{label}»",
+  "CreateTagCancel": "Скасувати",
+  "CreateTagConfirm": "Створити і додати",
+  "CreateTagMessage": "Тега «{name}» ще немає. Створити його і додати к цьомуу контакту?",
+  "CreateTagTitle": "Створити мітка?",
+  "Label": "Мітки",
+  "NoTagsFound": "Міток не знайдено",
+  "Placeholder": "Додати мітки…",
+  "RemoveError": "Не вдалося видалити мітка",
+  "RemoveTagTooltip": "Видалити мітка",
+  "SearchPlaceholder": "Шукати або створити мітка…",
+  "TagAlreadyAddedMessage": "Тег «{name}» уже добавлен к цьомуу контакту.",
+  "TagAlreadyAddedTitle": "Тег уже добавлен",
+  "TagAlreadyAppliedTooltip": "Тег уже применєн"
+}

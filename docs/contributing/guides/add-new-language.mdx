@@ -1,95 +1,17 @@
 ---
 title: Add a new language
 icon: Language
-description: Add a UI locale across the web app, the mobile app, the extension, and the API error strings. English is the reference that each must match.
-last_updated: 2026-11-04
+description: Where to start when you add a UI locale. The procedure, plural rules, and locale profiles live in the bondery-i18n skill.
+last_updated: 2026-11-13
 ---
 
-<Steps>
-<Step>
+Add a UI language by following the `bondery-i18n` skill at [`.agents/skills/bondery-i18n/SKILL.md`](../../../.agents/skills/bondery-i18n/SKILL.md).
 
-## Register the locale
+That skill is the procedure. It covers the locale catalog, the Postgres enum, plural forms, the region tag for dates and speech, and the profiles for each shipped language.
 
-English (`en`) is the reference. Every namespace file must exist for the new locale before CI passes.
-
-Add an entry to [`packages/schemas/locale/supported-locales.json`](../../../packages/schemas/locale/supported-locales.json):
-
-```json
-{ "code": "fr", "flag": "fr", "nativeName": "français" }
-```
-
-Keep `default` as `en`. If the locale needs a Postgres enum value, the `postgresEnum` block in that file documents the shared enum name (`supported_locale`).
-
-</Step>
-<Step>
-
-## Copy locale files
-
-Duplicate the English tree:
-
-<PlatformCode
-  posix={`cp -r packages/translations/src/locales/en packages/translations/src/locales/fr`}
-  windows={`Copy-Item -Recurse packages/translations/src/locales/en packages/translations/src/locales/fr`}
-/>
-
-Every JSON path under `en/` must exist for the new code. CI compares file trees and fails on missing or extra files.
-
-Translate values in place — **do not rename keys** or namespaces.
-
-</Step>
-<Step>
-
-## Add exonyms to Languages namespace
-
-Each locale has a `Languages.json` file listing human-readable names for every supported language code. Add the new locale's exonyms to **all** locale folders (`en`, `cs`, `de`, and your new one).
-
-`pnpm run check:i18n:structure` verifies parity against `supported-locales.json`.
-
-</Step>
-<Step>
-
-## Regenerate hooks and types
-
-```bash
-pnpm run build -w @bondery/translations
-```
-
-This updates generated hooks, `Catalog` types, and i18next augmentations. Commit the generated artifacts with your locale JSON.
-
-</Step>
-<Step>
-
-## Translate API error strings
-
-API error messages shown in product UI use the translations package. Add keys for any new error copy under the relevant namespace and run:
-
-```bash
-pnpm run check:api-errors:translations
-```
-
-</Step>
-<Step>
-
-## Verify locally
-
-```bash
-pnpm run i18n:status
-pnpm run check:i18n
-```
-
-Fix any missing keys or hardcoded strings the scanners report. Switch language in the webapp or mobile settings to spot-check UI.
-
-</Step>
-<Step>
-
-## Update docs
-
-Add the locale to the table in [Internationalization (i18n)](../i18n.mdx) and, if user-facing, note it in [Changelog](../../changelog/index.mdx).
-
-</Step>
-</Steps>
+English stays the reference. Do not translate the marketing site, the docs, or the legal pages as part of a UI locale.
 
 ## Related
 
-* [Internationalization (i18n)](../i18n.mdx) — hooks, namespaces, and CI overview
+* [Internationalization (i18n)](../i18n.mdx)
 * [`packages/translations/README.md`](../../../packages/translations/README.md)

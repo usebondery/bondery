@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Erreur d’extension — réessayez",
+    "OpenInBondery": "Ouvrir dans Bondery",
+    "SignInRequired": "Connexion requise — cliquez sur l’icône Bondery",
+    "SomethingWrong": "Une erreur est survenue"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Erreur d’extension — réessayez",
+    "OpenInBondery": "Ouvrir dans Bondery",
+    "SignInRequired": "Connexion requise — cliquez sur l’icône Bondery",
+    "SomethingWrong": "Une erreur est survenue"
+  }
+}

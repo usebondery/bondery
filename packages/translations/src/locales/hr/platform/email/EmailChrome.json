@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentaciju",
+  "help": "Trebaš pomoć? Posjeti {{support}} ili pročitaj našu {{documentation}}.",
+  "internalNote": "Interni ops · ne šalje se kupcu",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Upravljaj ovim obavijestima u Bonderyju",
+  "support": "podršku"
+}

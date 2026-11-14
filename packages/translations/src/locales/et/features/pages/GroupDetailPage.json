@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Lisa inimesed gruppi",
+  "ColorLabel": "Color",
+  "ContactCount": "Kontaktid",
+  "DetailPageTitle": "Grupi üksikasjad",
+  "Empty": "Selle grupiga pole veel ühtegi kontakti seotud.",
+  "HeaderDescription": "Valitud grupi liikmete ülevaade.",
+  "NoContactsFound": "Selle grupiga pole veel ühtegi kontakti seotud.",
+  "NoContactsMatchSearch": "Sellist kontakti ei leitud.",
+  "RemoveContact": {
+    "ErrorDescription": "Kontakti ei õnnestunud grupist eemaldada. Proovi uuesti.",
+    "LoadingDescription": "Uuendan grupi liikmeid…",
+    "LoadingTitle": "Eemaldan kontakti",
+    "SuccessDescription": "Kontakt eemaldati grupist"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Kontakte ei õnnestunud grupist eemaldada. Proovi uuesti.",
+    "LoadingDescription": "Uuendan grupi liikmeid…",
+    "LoadingTitle": "Eemaldan kontakte",
+    "SuccessDescription": "Grupist eemaldati {count} kontakti"
+  },
+  "RemoveFromGroup": "Eemalda grupist",
+  "Subtitle": "Sellele grupile määratud kontaktid.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Viimane suhtlus",
+    "Location": "Asukoht",
+    "Name": "Nimi",
+    "Socials": "Sotsiaalmeedia",
+    "Title": "Headline"
+  },
+  "ThisContactFallback": "see kontakt",
+  "Title": "Grupp: {label}"
+}

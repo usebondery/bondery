@@ -1,0 +1,22 @@
+{
+  "AddButton": "Pievienot",
+  "Description": "Mēs nosūtīsim viņu informāciju tālāk norādītajām personām. Tu arī saņemsi kopiju.",
+  "DuplicateEmail": "Šī adrese jau ir pievienota",
+  "ErrorDescription": "Pārbaudi savienojumu un mēģini vēlreiz.",
+  "ErrorHeadline": "Nevarēja nosūtīt kontaktu",
+  "InvalidEmail": "Ievadīt derīgu e-pasta adresi",
+  "MaxRecipients": "Vari pievienot līdz 10 adresātiem",
+  "MaxRecipientsHint": "Maksimāli 10 adresāti",
+  "MessagePlaceholder": "Pievienot piezīmi (neobligāti)",
+  "NoRecipients": "Pievienot vismaz vienu adresātu",
+  "RecipientsLabel": "Uz",
+  "RecipientsPlaceholder": "Saņēmēja e-pasta adrese",
+  "RemoveRecipient": "Noņemt {email}",
+  "SendButton": "Sūtīt",
+  "SendButtonMany": "Sūtīt {count} personām",
+  "SendButtonOne": "Sūtīt 1 personai",
+  "SuccessDescription": "Tavs adresāti to drīzumā saņems.",
+  "SuccessHeadline": "Kontakts nosūtīta",
+  "Title": "Nosūtīt e-pastu {name} kontaktam",
+  "WhatsIncluded": "Ietver kontaktinformāciju, sociālās saites un piezīmes failā."
+}

@@ -1,0 +1,9 @@
+{
+  "body": "Nakon toga se pretplata automatski obnavlja, osim ako je ne otkažeš.",
+  "cta": "Upravljati pretplatom",
+  "endDateFallback": "uskoro",
+  "heading": "Tvoja Bondery Premium proba završava {{endDate}}",
+  "preview": "Pretplata se obnavlja ako je ne otkažeš",
+  "subject": "Tvoja Bondery Premium proba uskoro završava",
+  "whyReceiving": "Ovo primaš jer imaš Bondery Premium probu."
+}

@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "виправлення й об’єднання",
+    "GroupDetail": "цю групу",
+    "Groups": "групи",
+    "Home": "головну сторінку",
+    "KeepInTouch": "функцію «Підтримувати зв’язок»",
+    "Map": "мапу",
+    "People": "розділ «Люди»",
+    "PersonDetails": "дані особи",
+    "Timeline": "взаємодії"
+  },
+  "HelpLabel": "Докладніше",
+  "LearnMoreAbout": "Дізнатися більше про {concept}"
+}

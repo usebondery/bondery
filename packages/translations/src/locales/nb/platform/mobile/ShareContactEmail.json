@@ -1,0 +1,22 @@
+{
+  "AddButton": "Legg til",
+  "Description": "Vi sender detaljene til personene nedenfor. Du får også en kopi.",
+  "DuplicateEmail": "Denne adressen er allerede lagt til",
+  "ErrorDescription": "Sjekk tilkoblingen og prøv igjen.",
+  "ErrorHeadline": "Kunne ikke sende kontakten",
+  "InvalidEmail": "Skriv inn en gyldig e-postadresse",
+  "MaxRecipients": "Du kan legge til maksimalt 10 mottakere",
+  "MaxRecipientsHint": "Maksimalt 10 mottakere",
+  "MessagePlaceholder": "Legg til melding (valgfritt)",
+  "NoRecipients": "Legg til minst én mottaker",
+  "RecipientsLabel": "Til",
+  "RecipientsPlaceholder": "Mottakerens e-postadresse",
+  "RemoveRecipient": "Fjern {email}",
+  "SendButton": "Send",
+  "SendButtonMany": "Send til {count} personer",
+  "SendButtonOne": "Send til 1 person",
+  "SuccessDescription": "Mottakerne får den snart.",
+  "SuccessHeadline": "Kontakt sendt",
+  "Title": "Send kontakten til {name} på e-post",
+  "WhatsIncluded": "Inkluderer kontaktinfo, sosiale lenker og notater du har logget."
+}

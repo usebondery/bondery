@@ -1,5 +1,6 @@
 import {
   DEFAULT_LOCALE,
+  intlTagForLocale,
   SUPPORTED_LOCALES,
   type SupportedLocale,
 } from "@bondery/schemas/locale/supported-locale";
@@ -19,7 +20,7 @@ export interface TranslationManifest {
 
 export const manifest = manifestJson as TranslationManifest;
 
-export { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale };
+export { DEFAULT_LOCALE, intlTagForLocale, SUPPORTED_LOCALES, type SupportedLocale };
 
 export const ALL_NAMESPACE_NAMES = Object.keys(manifest.namespaces);
 

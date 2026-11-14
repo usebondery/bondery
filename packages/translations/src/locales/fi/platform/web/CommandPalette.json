@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Toiminnot",
+  "AddPerson": "Lisää henkilö",
+  "AddPersonDescription": "Luo uusi yhteystieto verkostoosi",
+  "ContactUs": "Ota yhteyttä",
+  "ContactUsDescription": "Ota yhteyttä Bondery-tiimiin",
+  "Documentation": "Dokumentaatio",
+  "DocumentationDescription": "Lue Bondery-dokumentaatio",
+  "ExportData": "Vie tiedot",
+  "ExportDataDescription": "Tallenna kopio Bondery-tiedoistasi",
+  "FindPerson": "Etsi henkilö",
+  "FindPersonDescription": "Hae verkostostasi nimen perusteella",
+  "GoToDescription": "Siirry: {label}",
+  "HelpGroup": "Ohje",
+  "ImportData": "Tuo tiedot",
+  "ImportDataDescription": "Tuo Bondery JSON -ZIP",
+  "LogInteraction": "Kirjaa vuorovaikutus",
+  "LogInteractionDescription": "Kirjaa uusi tapaaminen, keskustelu tai viesti",
+  "NavigateGroup": "Navigointi",
+  "NothingFound": "Toimintoja ei löytynyt",
+  "SearchPlaceholder": "Hae toimintoja tai siirry…"
+}

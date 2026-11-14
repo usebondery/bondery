@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Oznaka nije kreirana. Pokušaj ponovo.",
+  "CreateTag": "Kreiraj oznaku",
+  "DeleteFailed": "Oznaka nije obrisana. Pokušaj ponovo.",
+  "EditFailed": "Oznaka nije sačuvana. Pokušaj ponovo.",
+  "EditTagsSearchPlaceholder": "Pretraži oznake...",
+  "LoadFailed": "Oznake nisu učitane",
+  "NoTagsYet": "Još nema oznaka",
+  "NoTagsYetHint": "Oznake pomažu da organizuješ i pronađeš kontakte."
+}

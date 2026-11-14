@@ -1,0 +1,22 @@
+{
+  "AddButton": "Lägg till",
+  "Description": "Vi sender uppgifterna till personerna nedan. Du får också en kopia.",
+  "DuplicateEmail": "Den adresseen er redan tillagd",
+  "ErrorDescription": "Kontrollera anslutningen og förSøg igen.",
+  "ErrorHeadline": "Kunde ikke sende kontakt",
+  "InvalidEmail": "Ange en giltig e-postadresse",
+  "MaxRecipients": "Du kan tilføje højest 10 mottagare",
+  "MaxRecipientsHint": "Højest 10 mottagare",
+  "MessagePlaceholder": "Lägg till anteckning (valfritt)",
+  "NoRecipients": "Lägg till minst en mottagare",
+  "RecipientsLabel": "Till",
+  "RecipientsPlaceholder": "Mottagarens e-postadresse",
+  "RemoveRecipient": "Slet {email}",
+  "SendButton": "Send",
+  "SendButtonMany": "Send till {count} personer",
+  "SendButtonOne": "Send till 1 person",
+  "SuccessDescription": "Dina mottagare får den inom kort.",
+  "SuccessHeadline": "Kontakt sended",
+  "Title": "Send kontakt for {name} via e-post",
+  "WhatsIncluded": "Inkluderar kontaktinfo, sociala links og gemde anteckningar."
+}

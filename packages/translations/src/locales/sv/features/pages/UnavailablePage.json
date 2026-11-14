@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Ny kontroll om {seconds} s…",
+  "Description": "Ditt konto är säkert och du är fortfarande inloggad. Vi fortsätter kontrollera anslutningen – det tar oftast bara en stund.",
+  "MetadataTitle": "Tjänsten är otillgänglig",
+  "Retry": "Försök igen",
+  "StatusChecking": "Kontrollerar anslutningen…",
+  "StatusDegraded": "Vissa funktioner är långsamma just nu",
+  "StatusOffline": "Bondery är tillfälligt otillgängligt",
+  "StatusOnline": "Tillbaka online. Du omdirigeras…",
+  "StatusPageLink": "Visa statussida",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Tekniska detaljer",
+  "TechnicalHttpStatus": "HTTP-status: {status}",
+  "TechnicalUnreachable": "otillgänglig",
+  "Title": "Anslutningsproblem"
+}

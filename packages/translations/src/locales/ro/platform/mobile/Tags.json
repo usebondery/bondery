@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Nu s-a putut crea eticheta. Încearcă din nou.",
+  "CreateTag": "Creează etichetă",
+  "DeleteFailed": "Nu s-a putut șterge eticheta. Încearcă din nou.",
+  "EditFailed": "Nu s-a putut salva eticheta. Încearcă din nou.",
+  "EditTagsSearchPlaceholder": "Caută etichete…",
+  "LoadFailed": "Nu s-au putut încărca etichetele",
+  "NoTagsYet": "Încă nu ai etichete",
+  "NoTagsYetHint": "Etichetele te ajută să organizezi și să găsești contacte."
+}

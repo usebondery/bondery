@@ -1,0 +1,22 @@
+{
+  "AddButton": "Lisa",
+  "Description": "Saadame nende andmed allolevatele inimestele. Saad ka ise koopia.",
+  "DuplicateEmail": "See aadress on juba lisatud",
+  "ErrorDescription": "Kontrolli ühendust ja proovi uuesti.",
+  "ErrorHeadline": "Kontakti saatmine ei õnnestunud",
+  "InvalidEmail": "Sisesta kehtiv e-posti aadress",
+  "MaxRecipients": "Saad lisada kuni 10 saajat",
+  "MaxRecipientsHint": "Maksimaalselt 10 saajat",
+  "MessagePlaceholder": "Lisa märge (valikuline)",
+  "NoRecipients": "Lisa vähemalt üks saaja",
+  "RecipientsLabel": "Saajad",
+  "RecipientsPlaceholder": "Saaja e-posti aadress",
+  "RemoveRecipient": "Eemalda {email}",
+  "SendButton": "Saada",
+  "SendButtonMany": "Saada {count} inimesele",
+  "SendButtonOne": "Saada 1 inimesele",
+  "SuccessDescription": "Sinu saajad saavad selle peagi kätte.",
+  "SuccessHeadline": "Kontakt saadetud",
+  "Title": "Saada e-postiga kontakt {name}",
+  "WhatsIncluded": "Sisaldab kontakti infot, sotsiaallinke ja salvestatud märkmeid."
+}

@@ -13,7 +13,12 @@ import {
   loadingNotificationTemplate,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { ColorSchemePreference, TimeFormatPreference } from "@bondery/schemas";
+import type {
+  ColorSchemePreference,
+  DateFormatPreference,
+  TimeFormatPreference,
+} from "@bondery/schemas";
+import { coerceDateFormatPreference } from "@bondery/schemas/locale";
 import type { SupportedLocale } from "@bondery/translations";
 import { coerceSupportedLocale, DEFAULT_LOCALE } from "@bondery/translations";
 import { CardSection, Group, Text } from "@mantine/core";
@@ -32,6 +37,7 @@ import { TimezonePicker } from "@/components/shared/TimezonePicker";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useApplyUserLanguage } from "@/lib/i18n/useApplyUserLanguage";
 import { useSettingsQuery, useUpdateSettingsMutation } from "@/lib/query/hooks/useSettings";
+import { DateFormatPicker } from "./DateFormatPicker";
 import { ReminderTimePicker } from "./ReminderTimePicker";
 import { buildReminderSendHourPayload, reminderSendHourToPickerValue } from "./reminderTimeValue";
 import { SettingsSection } from "./SettingsSection";
@@ -62,6 +68,7 @@ function parseSettingsPreferences(settings: Record<string, unknown>): {
   language: SupportedLocale;
   reminderSendHour: string;
   timeFormat: TimeFormatPreference;
+  dateFormat: DateFormatPreference;
   timezone: string;
 } {
   const timezone = typeof settings.timezone === "string" ? settings.timezone : "UTC";
@@ -71,6 +78,9 @@ function parseSettingsPreferences(settings: Record<string, unknown>): {
       ? settings.reminderSendHour
       : "08:00:00";
   const timeFormat: TimeFormatPreference = settings.timeFormat === "12h" ? "12h" : "24h";
+  const dateFormat = coerceDateFormatPreference(
+    typeof settings.dateFormat === "string" ? settings.dateFormat : "locale",
+  );
   const rawLanguage = typeof settings.language === "string" ? settings.language : DEFAULT_LOCALE;
   const language = coerceSupportedLocale(rawLanguage);
   const colorScheme: ColorSchemePreference =
@@ -82,7 +92,15 @@ function parseSettingsPreferences(settings: Record<string, unknown>): {
   const defaultPhoneCountry =
     typeof settings.defaultPhoneCountry === "string" ? settings.defaultPhoneCountry : null;
 
-  return { colorScheme, defaultPhoneCountry, language, reminderSendHour, timeFormat, timezone };
+  return {
+    colorScheme,
+    dateFormat,
+    defaultPhoneCountry,
+    language,
+    reminderSendHour,
+    timeFormat,
+    timezone,
+  };
 }
 
 export function PreferencesCard() {
@@ -102,6 +120,12 @@ export function PreferencesCard() {
   );
   const [savedTimeFormat, setSavedTimeFormat] = useState<TimeFormatPreference>(
     preferences?.timeFormat ?? "24h",
+  );
+  const [dateFormat, setDateFormat] = useState<DateFormatPreference>(
+    preferences?.dateFormat ?? "locale",
+  );
+  const [savedDateFormat, setSavedDateFormat] = useState<DateFormatPreference>(
+    preferences?.dateFormat ?? "locale",
   );
   const [reminderHour, setReminderHour] = useState(() =>
     reminderSendHourToPickerValue(preferences?.reminderSendHour ?? "08:00:00"),
@@ -126,6 +150,8 @@ export function PreferencesCard() {
     setSavedTimezone(preferences.timezone);
     setTimeFormat(preferences.timeFormat);
     setSavedTimeFormat(preferences.timeFormat);
+    setDateFormat(preferences.dateFormat);
+    setSavedDateFormat(preferences.dateFormat);
     const nextReminderHour = reminderSendHourToPickerValue(preferences.reminderSendHour);
     setReminderHour(nextReminderHour);
     setSavedReminderHour(nextReminderHour);
@@ -248,6 +274,43 @@ export function PreferencesCard() {
       notifications.show(
         errorNotificationTemplate({
           description: t("TimeFormatUpdateError"),
+          title: t("UpdateError"),
+        }),
+      );
+    }
+  };
+
+  const persistDateFormat = async (nextFormat: DateFormatPreference) => {
+    if (nextFormat === savedDateFormat) {
+      return;
+    }
+
+    const loadingNotification = notifications.show({
+      ...loadingNotificationTemplate({
+        description: t("PleaseWait"),
+        title: t("UpdatingDateFormat"),
+      }),
+    });
+
+    try {
+      await updateSettings.mutateAsync({ dateFormat: nextFormat });
+
+      setSavedDateFormat(nextFormat);
+
+      notifications.hide(loadingNotification);
+      notifications.show(
+        successNotificationTemplate({
+          description: t("DateFormatUpdateSuccess"),
+          title: t("UpdateSuccess"),
+        }),
+      );
+    } catch {
+      setDateFormat(savedDateFormat);
+
+      notifications.hide(loadingNotification);
+      notifications.show(
+        errorNotificationTemplate({
+          description: t("DateFormatUpdateError"),
           title: t("UpdateError"),
         }),
       );
@@ -422,6 +485,20 @@ export function PreferencesCard() {
                   void persistTimeFormat(nextFormat);
                 }}
                 value={timeFormat}
+              />
+            </PreferencesField>
+          </PreferencesFieldRow>
+
+          <PreferencesFieldRow>
+            <PreferencesField>
+              <DateFormatPicker
+                description={t("DateFormatTooltip")}
+                label={renderFieldLabel(t("DateFormat"), t("DateFormatTooltip"))}
+                onChange={(nextFormat) => {
+                  setDateFormat(nextFormat);
+                  void persistDateFormat(nextFormat);
+                }}
+                value={dateFormat}
               />
             </PreferencesField>
           </PreferencesFieldRow>

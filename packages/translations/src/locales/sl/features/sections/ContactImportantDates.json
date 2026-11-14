@@ -1,0 +1,32 @@
+{
+  "AddAction": "Pridat dátum",
+  "AddHint": "Če želiš pridat nový dátum, vyplňte vse údaje.",
+  "AddImportantDate": "Pridat doležitý dátum",
+  "BirthdayDateLabel": "Izberi narodeniny",
+  "DatePlaceholder": "Izberi dátum",
+  "DeleteAction": "Izbrisati",
+  "DraftIncompleteError": "Če želiš pridat nový dátum, vyplňte vse údaje.",
+  "Empty": "Zatial žiadne doležité dátumy.",
+  "ErrorTitle": "Chyba",
+  "NotePlaceholder": "Volitelná poznámka",
+  "NotifyDayBefore": "Upozornit {count} deň vopred",
+  "NotifyDaysBefore": "Upozornit {count} dní vopred",
+  "NotifyMe": "Upozornit ma",
+  "NotifyNone": "Neupozorňovat",
+  "SuccessTitle": "Úspech",
+  "Title": "Doležité dátumy",
+  "TypeDisabledBirthdateHint": "{firstName} už má narodeniny",
+  "TypeDisabledHint": "{firstName} že ima rojstni dan ali god",
+  "TypeDisabledNamedateHint": "{firstName} už má meniny",
+  "TypePlaceholder": "Izberi typ",
+  "Types": {
+    "anniversary": "Výročie",
+    "birthday": "Narodeniny",
+    "graduation": "Promócia",
+    "nameday": "Meniny",
+    "other": "Iné"
+  },
+  "UniqueTypeError": "Možno pridat len jeden typ {type}.",
+  "UpdateError": "Doležité dátumy ni bilo mogoče posodobiti",
+  "UpdateSuccess": "Doležité dátumy boli úspešne aktualizované"
+}

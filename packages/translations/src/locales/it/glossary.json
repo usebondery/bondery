@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "contatto",
+    "contactPlural": "contatti",
+    "group": "gruppo",
+    "interaction": "interazione",
+    "interactionPlural": "interazioni",
+    "network": "rete",
+    "person": "persona",
+    "person_one": "{count} persona",
+    "person_other": "{count} persone",
+    "tag": "etichetta"
+  },
+  "features": {
+    "aiAssistant": "Assistente IA",
+    "fixAndMerge": "Correggere e unire",
+    "keepInTouch": "Resta in contatto"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

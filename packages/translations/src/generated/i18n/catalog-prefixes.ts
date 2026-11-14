@@ -8,6 +8,10 @@ export type AddPeopleToGroupSelectionModalPrefix = never;
 
 export type AppNavigationPrefix = never;
 
+export type ChatPagePrefix = "activity" | "SuggestedPrompts";
+
+export type CheckoutPrefix = never;
+
 export type CommandPalettePrefix = never;
 
 export type CommonPrefix = "a11y" | "actions" | "app" | "confirm" | "errors" | "errors.api" | "errors.auth" | "feedback";
@@ -57,10 +61,6 @@ export type GroupDetailPagePrefix = "RemoveContact" | "RemoveContacts" | "Table"
 export type GroupsPagePrefix = "AddGroupModal" | "AddPeopleModal" | "DeleteGroup" | "DuplicateGroup" | "EditGroupModal" | "SortMenu" | "Table";
 
 export type HomePagePrefix = "ExtensionNudge" | "ProgressRail" | "ProgressRail.Tasks" | "Stats";
-
-export type ChatPagePrefix = "activity" | "SuggestedPrompts";
-
-export type CheckoutPrefix = never;
 
 export type InteractionsPagePrefix = "DuplicateInteraction";
 
@@ -155,6 +155,8 @@ export interface NamespacePrefixes {
   "AccountDeletedEmail": AccountDeletedEmailPrefix;
   "AddPeopleToGroupSelectionModal": AddPeopleToGroupSelectionModalPrefix;
   "AppNavigation": AppNavigationPrefix;
+  "ChatPage": ChatPagePrefix;
+  "Checkout": CheckoutPrefix;
   "CommandPalette": CommandPalettePrefix;
   "common": CommonPrefix;
   "ContactActionMenu": ContactActionMenuPrefix;
@@ -180,8 +182,6 @@ export interface NamespacePrefixes {
   "GroupDetailPage": GroupDetailPagePrefix;
   "GroupsPage": GroupsPagePrefix;
   "HomePage": HomePagePrefix;
-  "ChatPage": ChatPagePrefix;
-  "Checkout": CheckoutPrefix;
   "InteractionsPage": InteractionsPagePrefix;
   "InteractionTypes": InteractionTypesPrefix;
   "KeepInTouch": KeepInTouchPrefix;

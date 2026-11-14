@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Code couleur copié dans le presse-papiers",
+  "CopyAccessibilityLabel": "Copier le code couleur",
+  "CopyFailedMessage": "Impossible de copier le code couleur. Réessayez.",
+  "CustomColorLabel": "Couleur personnalisée",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Saisissez une couleur hex valide (p. ex. #AE3EC9)",
+  "SheetTitle": "Couleur",
+  "SwatchesLabel": "Couleurs rapides",
+  "TriggerAccessibilityHint": "Ouvre le sélecteur de couleur"
+}

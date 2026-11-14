@@ -1,0 +1,16 @@
+{
+  "Description": "Padėk mums tobulinti Bondery pasidalindamas mintimis. <3",
+  "ErrorMessage": "Nepavyko pateikti atsiliepimo. Bandyk dar kartą.",
+  "ErrorTitle": "Klaida",
+  "GeneralFeedbackLabel": "Ar yra atsiliepimų, patarimų ar klaidų, kuriomis norėtum pasidalinti?",
+  "GeneralFeedbackPlaceholder": "Man patinka/nepatinka ši programos dalis… Norėčiau matyti… Man buvo sunku…",
+  "NpsLabel": "Nuo 0 iki 10, kaip tikėtina rekomenduotum Bondery draugui ar kolegai?",
+  "NpsReasonLabel": "Kodėl pasirinkai balą {score}?",
+  "NpsReasonPlaceholder": "Nes ši funkcija buvo naudinga/ su klaida/ trūko…",
+  "SubmitButton": "Siųsti atsiliepimą kūrėjams",
+  "SubmittingMessage": "Palauk, kol išsiųsime tavo atsiliepimą",
+  "SubmittingTitle": "Siunčiamas atsiliepimas...",
+  "SuccessMessage": "Tavo atsiliepimas gautas",
+  "SuccessTitle": "Ačiū!",
+  "Title": "Atsiliepimas"
+}

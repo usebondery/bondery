@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Från vilken plattform beställde du exporten?",
+    "Description": "Flytta ditt befintliga nätverk från LinkedIn, Instagram eller manuellt till Bondery.",
+    "Finish": "Kom igång",
+    "Instagram": "Importera från Instagram",
+    "InstagramDescription": "Ladda upp dina Instagram-följare/following-data.",
+    "LinkedIn": "Importera från LinkedIn",
+    "LinkedInDescription": "Ladda upp exportfilen med LinkedIn-kontakter.",
+    "ManualAdd": "Skapa manuellt",
+    "SkipImport": "Hoppa över import",
+    "SuccessDescription": "{imported} importerade, {updated} uppdaterade, {skipped} överhoppade.",
+    "SuccessTitle": "Import klar!",
+    "Title": "Importera kontakter",
+    "WaitingForExport": "Jag väntar på min export"
+  },
+  "Intent": {
+    "both": "Båda",
+    "Description": "Det hjälper oss anpassa Bondery för dig.",
+    "personal": "Vänner och familj",
+    "professional": "Professionellt",
+    "Title": "Hur ska du använda Bondery?"
+  },
+  "Loading": {
+    "Message": "Vi förbereder allt åt dig…"
+  },
+  "MetadataTitle": "Introduktion",
+  "Welcome": {
+    "LetsGo": "Kör",
+    "Subtitle": "Kul att träffas. Låt oss ställa in ditt personliga CRM.",
+    "TitleGeneric": "Välkommen till Bondery! 😊",
+    "TitleWithName": "Välkommen, {name}! 😊"
+  }
+}

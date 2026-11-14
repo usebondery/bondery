@@ -1,8 +1,10 @@
+import { dirForLocale } from "@bondery/schemas/locale";
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { applyNativeTextDirection, reloadAppForLayoutDirection } from "../i18n/documentDirection";
 import i18n from "../i18n/i18n";
 
 export type SwipeAction = "call" | "message" | "email";
@@ -76,7 +78,14 @@ export const useMobilePreferences = create<MobilePreferencesState>()(
             return state;
           }
 
+          const previousDirection = dirForLocale(state.locale);
+          const nextDirection = dirForLocale(locale);
           void i18n.changeLanguage(locale);
+
+          if (previousDirection !== nextDirection && applyNativeTextDirection(nextDirection)) {
+            reloadAppForLayoutDirection();
+          }
+
           return { locale };
         }),
       setRightSwipeAction: (rightSwipeAction: SwipeAction) => set({ rightSwipeAction }),

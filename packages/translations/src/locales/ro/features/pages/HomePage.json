@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Înregistrează o interacțiune",
+  "AddPerson": "Creează o persoană",
+  "ExtensionNudge": {
+    "Description": "Importă contacte direct din profilurile LinkedIn și Instagram și menține rețeaua actualizată fără efort.",
+    "InstallButton": "Instalează extensia",
+    "Title": "Îmbunătățește Bondery cu extensia noastră Chrome"
+  },
+  "HeaderDescription": "În Acasă vezi rapid o privire de ansamblu asupra rețelei, mementourilor și interacțiunilor recente.",
+  "NoRecentlyAdded": "Încă nu ai adăugat persoane.",
+  "NoRecentlyInteracted": "Încă nu ai interacțiuni recente.",
+  "NotificationInDays": "În {count} zile",
+  "NotificationSent": "Deja trimis",
+  "NotificationToday": "Azi",
+  "NotificationTomorrow": "Mâine",
+  "NotificationTooltipInDays": "Vei fi notificat în {count} zile",
+  "NotificationTooltipSentAt": "Notificarea a fost deja trimisă la {sentAt}",
+  "NotificationTooltipToday": "Vei fi notificat azi",
+  "NotificationTooltipTomorrow": "Vei fi notificat mâine",
+  "NoUpcomingReminders": "Niciun memento în următoarele 30 de zile.",
+  "ProgressRail": {
+    "AwaitingExport": "Exportul tău {platform} este în curs. De obicei ajunge în 5–15 minute.",
+    "ChoosePlatform": "Alege o platformă de unde să imporți",
+    "Dismiss": "Ascunde",
+    "HaveZipFile": "Am fișierul",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} din {total} finalizate",
+    "SkipImport": "Sari peste import",
+    "Tasks": {
+      "AddContacts": "Adaugă primele contacte",
+      "ImportContacts": "Importă contactele",
+      "LogInteraction": "Înregistrează prima interacțiune",
+      "SetReminder": "Configurează un memento"
+    },
+    "Title": "Primii pași"
+  },
+  "RecentlyAddedTitle": "Adăugate recent",
+  "RecentlyAddedTooltip": "Cele 5 persoane adăugate cel mai recent în rețeaua ta.",
+  "RecentlyInteractedTitle": "Interacțiuni recente",
+  "RecentlyInteractedTooltip": "Cele 5 persoane cu care ai interacționat cel mai recent.",
+  "Stats": {
+    "InteractionsTitle": "Interacțiunile lunii",
+    "InteractionsTooltip": "Numărul de interacțiuni pe care le-ai înregistrat în luna {month}.",
+    "NewContactsTitle": "Contacte noi anul acesta",
+    "NewContactsTooltip": "Câte persoane au fost adăugate în rețeaua ta în anul {year}.",
+    "TotalContactsTitle": "Total contacte",
+    "TotalContactsTooltip": "Numărul de persoane din rețeaua ta în Bondery."
+  },
+  "TimelinePreviewTitle": "Interacțiuni",
+  "TimelinePreviewTooltip": "Cele 5 interacțiuni cele mai recente. Apasă ca să vezi toate interacțiunile.",
+  "Title": "Acasă",
+  "UnknownPerson": "Persoană necunoscută",
+  "UpcomingRemindersMonthInfo": "Afișăm mementouri cu notificări scadente în următoarele 30 de zile.",
+  "UpcomingRemindersTitle": "Memento-uri viitoare",
+  "UpcomingRemindersTooltip": "Acestea sunt mementourile tale scadente în următoarele 30 de zile."
+}

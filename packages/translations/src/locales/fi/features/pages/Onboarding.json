@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Miltä alustalta pyysit viennin?",
+    "Description": "Tuo olemassa oleva verkostosi LinkedInistä, Instagramista tai manuaalisesti Bonderyyn.",
+    "Finish": "Aloita",
+    "Instagram": "Tuo Instagramista",
+    "InstagramDescription": "Lataa Instagram-seuraajatietosi.",
+    "LinkedIn": "Tuo LinkedInistä",
+    "LinkedInDescription": "Lataa LinkedIn-yhteystietovientisi.",
+    "ManualAdd": "Luo manuaalisesti",
+    "SkipImport": "Ohita tuonti",
+    "SuccessDescription": "{imported} tuotu, {updated} päivitetty, {skipped} ohitettu.",
+    "SuccessTitle": "Tuonti valmis!",
+    "Title": "Tuo yhteystietoja",
+    "WaitingForExport": "Odotan vientiäni"
+  },
+  "Intent": {
+    "both": "Molemmat",
+    "Description": "Tämä auttaa meitä räätälöimään Bonderyn sinulle.",
+    "personal": "Ystävät ja perhe",
+    "professional": "Ammatillinen",
+    "Title": "Miten aiot käyttää Bonderya?"
+  },
+  "Loading": {
+    "Message": "Valmistelemme kaiken puolestasi…"
+  },
+  "MetadataTitle": "Tervetuloa",
+  "Welcome": {
+    "LetsGo": "Aloitetaan",
+    "Subtitle": "Kiva, että olet mukana. Otetaan henkilökohtainen PRM käyttöön.",
+    "TitleGeneric": "Tervetuloa Bonderyyn! 😊",
+    "TitleWithName": "Tervetuloa, {name}! 😊"
+  }
+}

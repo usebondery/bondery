@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Du hast bereits ein aktives Premium-Abonnement.",
+  "alreadySubscribedTitle": "Bereits abonniert",
+  "errorMessage": "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+  "errorTitle": "Checkout fehlgeschlagen",
+  "errorUnauthorized": "Bitte melde dich an und versuch es erneut.",
+  "intervalAnnual": "Jährlich",
+  "intervalMonthly": "Monatlich",
+  "paymentBlockedAction": "Abrechnung aktualisieren",
+  "paymentBlockedMessage": "Wir konnten deine Zahlung nach mehreren Versuchen nicht verarbeiten. Aktualisiere deine Abrechnungsdaten, um Premium wiederherzustellen.",
+  "paymentBlockedTitle": "Zahlung erforderlich",
+  "successMessage": "Genieße 300 KI-Nachrichten pro Monat und alle Premium-Funktionen.",
+  "successTitle": "Du bist jetzt Premium!",
+  "upgradePendingMessage": "Dein Konto wird in Kürze auf Premium hochgestuft.",
+  "upgradePendingTitle": "Zahlung erhalten",
+  "upgradesDisabledTooltip": "Premium-Upgrades sind noch nicht verfügbar. Schau bald wieder vorbei.",
+  "upgradeToPremium": "Auf Premium upgraden"
+}

@@ -285,6 +285,7 @@ export const EXAMPLE_USER_SESSION = {
   language: "en",
   onboardingCompletedAt: EXAMPLE_ISO_TIMESTAMP,
   timeFormat: "24h" as const,
+  dateFormat: "locale" as const,
   timezone: "Europe/London",
 };
 
@@ -317,6 +318,7 @@ export const EXAMPLE_USER_SETTINGS = {
   rightSwipeAction: "email",
   tagSortOrder: "count-desc",
   timeFormat: "24h",
+  dateFormat: "locale",
   timezone: "Europe/London",
 };
 

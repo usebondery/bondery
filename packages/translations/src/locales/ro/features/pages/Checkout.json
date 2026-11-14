@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Ai deja un abonament Premium activ.",
+  "alreadySubscribedTitle": "Deja abonat",
+  "errorMessage": "Ceva nu a mers bine. Încearcă din nou.",
+  "errorTitle": "Plata a eșuat",
+  "errorUnauthorized": "Conectează-te și încearcă din nou.",
+  "intervalAnnual": "Anual",
+  "intervalMonthly": "Lunar",
+  "paymentBlockedAction": "Actualizează facturarea",
+  "paymentBlockedMessage": "Nu am putut procesa plata după mai multe încercări. Actualizează datele de facturare ca să recapeți accesul Premium.",
+  "paymentBlockedTitle": "Plată necesară",
+  "successMessage": "Bucură-te de 300 de mesaje AI pe lună și de toate funcțiile Premium.",
+  "successTitle": "Ai acum Premium!",
+  "upgradePendingMessage": "Contul tău va trece la Premium în curând.",
+  "upgradePendingTitle": "Plată primită",
+  "upgradesDisabledTooltip": "Upgrade-urile Premium nu sunt încă disponibile. Revino curând.",
+  "upgradeToPremium": "Upgrade to Premium"
+}

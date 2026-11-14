@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Műveletek",
+  "CannotDeleteMyself": "A saját profilkártyádat nem törölheted",
+  "CannotMergeMyself": "A saját profilkártyádat nem egyesítheted másokéval",
+  "DeleteContact": "Kapcsolat törlése",
+  "DownloadVCard": "vCard letöltése",
+  "ExportError": "Hiba",
+  "ExportErrorDescription": "Nem sikerült exportálni a kapcsolatot. Próbáld újra.",
+  "ExportSuccess": "Kész",
+  "ExportSuccessDescription": "Kapcsolat exportálva vCard formátumban"
+}

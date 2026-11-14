@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Додати взаємодію",
+  "AddPerson": "Додати особу",
+  "ExtensionNudge": {
+    "Description": "Імпортуйте контакти прямо з профілів LinkedIn і Instagram та тримайте мережу в актуальному стані без зайвих зусиль.",
+    "InstallButton": "Установити розширення",
+    "Title": "Покращте Bondery розширенням Chrome"
+  },
+  "HeaderDescription": "На головній сторінці — швидкий огляд мережі контактів, нагадувань і останніх взаємодій.",
+  "NoRecentlyAdded": "Пок і що не додаале жодної людини.",
+  "NoRecentlyInteracted": "Пок і що немає недавніх взаємодій.",
+  "NotificationInDays": "Через {count} днів",
+  "NotificationSent": "Уже надіслано",
+  "NotificationToday": "Сьогодні",
+  "NotificationTomorrow": "Завтра",
+  "NotificationTooltipInDays": "Сповіщення надійде через {count} днів",
+  "NotificationTooltipSentAt": "Сповіщення вже надіслаале {sentAt}",
+  "NotificationTooltipToday": "Сповіщення надійде сьогодні",
+  "NotificationTooltipTomorrow": "Сповіщення надійде завтра",
+  "NoUpcomingReminders": "Немає нагадувань на найближчі 30 днів.",
+  "ProgressRail": {
+    "AwaitingExport": "Ваш експорт із {platform} уже в дорозі. Зазвичай надходить за 5–15 хвилин.",
+    "ChoosePlatform": "Виберіть платформу для імпорту",
+    "Dismiss": "Закрити",
+    "HaveZipFile": "Маю файл",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} з {total} виконано",
+    "SkipImport": "Пропустити імпорт",
+    "Tasks": {
+      "AddContacts": "Додайте перші контакти",
+      "ImportContacts": "Імпортуйте контакти",
+      "LogInteraction": "Запишіть першу взаємодію",
+      "SetReminder": "Установіть нагадування"
+    },
+    "Title": "Початок роботи"
+  },
+  "RecentlyAddedTitle": "Недавале додані",
+  "RecentlyAddedTooltip": "5 останніх людей у вашій мережі.",
+  "RecentlyInteractedTitle": "Недавале на зв’язку",
+  "RecentlyInteractedTooltip": "5 людей, з якими ви спілкувалися востаннє.",
+  "Stats": {
+    "InteractionsTitle": "Взаємодії цього місяця",
+    "InteractionsTooltip": "Скільк і взаємодій ви провели в {month}.",
+    "NewContactsTitle": "Нові контакти цього року",
+    "NewContactsTooltip": "Скільк і людей додаале до вашої мережі за {year}.",
+    "TotalContactsTitle": "Усього контактів",
+    "TotalContactsTooltip": "Кількість людей у вашій мережі в Bondery."
+  },
+  "TimelinePreviewTitle": "Взаємодії",
+  "TimelinePreviewTooltip": "Останні 5 взаємодій. Натисніть, щоб переглянути всі.",
+  "Title": "Головна",
+  "UnknownPerson": "Невідома особа",
+  "UpcomingRemindersMonthInfo": "Показуємо нагадування, які мають надійти протягом наступних 30 днів.",
+  "UpcomingRemindersTitle": "Майбутні нагадування",
+  "UpcomingRemindersTooltip": "Майбутні нагадування протягом наступних 30 днів."
+}

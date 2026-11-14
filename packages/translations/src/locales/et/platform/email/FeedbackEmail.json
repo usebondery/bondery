@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Mida tööriist tagastas:",
+  "agentExpectedHeading": "Mida agent ootas:",
+  "agentKindLabel": "Aruande liik:",
+  "agentRequestIdLabel": "Päringu ID:",
+  "agentSourceHeading": "Teatas AI-agent",
+  "agentToolLabel": "Tool:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Üldine tagasiside:",
+  "heading": "Tagasiside kasutajalt {{userEmail}}",
+  "notProvided": "(Pole esitatud)",
+  "npsReasonHeading": "Miks nad selle skoori valisid?",
+  "npsScoreLabel": "NPS skoor:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Uus tagasiside kasutajalt {{userEmail}} – NPS skoor: {{npsScore}}",
+  "replyCta": "Vasta kasutajale {{userEmail}}",
+  "subject": "Uus tagasiside Bondery kohta",
+  "submittedAt": "Esitatud: {{timestamp}}",
+  "userEmailLabel": "Kasutaja e-post:",
+  "userIdLabel": "Kasutaja ID:"
+}

@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Dodati osobe u grupu",
+  "ColorLabel": "Boja",
+  "ContactCount": "Kontakti",
+  "DetailPageTitle": "Detalji grupe",
+  "Empty": "Još nema kontakata povezanih s ovom grupom.",
+  "HeaderDescription": "Pregled članova odabrane grupe.",
+  "NoContactsFound": "Još nema kontakata povezanih s ovom grupom.",
+  "NoContactsMatchSearch": "Takav kontakt nije pronađen.",
+  "RemoveContact": {
+    "ErrorDescription": "Uklanjanje kontakta iz grupe nije uspjelo. Pokušaj ponovno.",
+    "LoadingDescription": "Ažuriram članove grupe…",
+    "LoadingTitle": "Uklanjam kontakt",
+    "SuccessDescription": "Kontakt je uspješno uklonjen iz grupe"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Uklanjanje kontakata iz grupe nije uspjelo. Pokušaj ponovno.",
+    "LoadingDescription": "Ažuriram članove grupe…",
+    "LoadingTitle": "Uklanjam kontakte",
+    "SuccessDescription": "Uspješno uklonjeno kontakata iz grupe: {count}"
+  },
+  "RemoveFromGroup": "Ukloniti iz grupe",
+  "Subtitle": "Kontakti dodijeljeni ovoj grupi.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Zadnja interakcija",
+    "Location": "Lokacija",
+    "Name": "Ime",
+    "Socials": "Društvene mreže",
+    "Title": "Naslov"
+  },
+  "ThisContactFallback": "ovaj kontakt",
+  "Title": "Grupa: {label}"
+}

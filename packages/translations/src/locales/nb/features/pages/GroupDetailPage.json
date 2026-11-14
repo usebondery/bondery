@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Legg personer til i gruppen",
+  "ColorLabel": "Farge",
+  "ContactCount": "Kontakter",
+  "DetailPageTitle": "Gruppedetaljer",
+  "Empty": "Ingen kontakter er knyttet til denne gruppen ennå.",
+  "HeaderDescription": "Oversikt over medlemmer i valgt gruppe.",
+  "NoContactsFound": "Ingen kontakter er knyttet til denne gruppen ennå.",
+  "NoContactsMatchSearch": "Ingen kontakter funnet.",
+  "RemoveContact": {
+    "ErrorDescription": "Kunne ikke fjerne kontakten fra gruppen. Prøv igjen.",
+    "LoadingDescription": "Oppdaterer gruppemedlemmer …",
+    "LoadingTitle": "Fjerner kontakt",
+    "SuccessDescription": "Kontakt fjernet fra gruppen"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Kunne ikke fjerne kontaktene fra gruppen. Prøv igjen.",
+    "LoadingDescription": "Oppdaterer gruppemedlemmer …",
+    "LoadingTitle": "Fjerner kontakter",
+    "SuccessDescription": "{count} kontakt(er) fjernet fra gruppen"
+  },
+  "RemoveFromGroup": "Fjern fra gruppe",
+  "Subtitle": "Kontakter tilordnet denne gruppen.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Siste interaksjon",
+    "Location": "Sted",
+    "Name": "Navn",
+    "Socials": "Sosiale medier",
+    "Title": "Tittel"
+  },
+  "ThisContactFallback": "denne kontakten",
+  "Title": "Gruppe: {label}"
+}

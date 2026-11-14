@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Salvesta suhtlus",
+  "AddPerson": "Loo inimene",
+  "ExtensionNudge": {
+    "Description": "Impordi kontakte otse LinkedIni ja Instagrami profiilidest ja hoia võrgustikku vaevata ajakohasena.",
+    "InstallButton": "Paigalda laiendus",
+    "Title": "Kiirenda Bonderyt meie Chrome'i laiendusega"
+  },
+  "HeaderDescription": "Avalehel saad kiire ülevaate võrgustikust, meeldetuletustest ja viimastest suhtlustest.",
+  "NoRecentlyAdded": "Ühtegi inimest pole veel lisatud.",
+  "NoRecentlyInteracted": "Ühtegi värske suhtlust pole veel.",
+  "NotificationInDays": "{count} päeva pärast",
+  "NotificationSent": "Juba saadetud",
+  "NotificationToday": "Täna",
+  "NotificationTomorrow": "Homme",
+  "NotificationTooltipInDays": "Teavituse saad {count} päeva pärast",
+  "NotificationTooltipSentAt": "Teavitus saadeti juba: {sentAt}",
+  "NotificationTooltipToday": "Teavituse saad täna",
+  "NotificationTooltipTomorrow": "Teavituse saad homme",
+  "NoUpcomingReminders": "Järgmise 30 päeva jooksul meeldetuletusi pole.",
+  "ProgressRail": {
+    "AwaitingExport": "Sinu {platform} eksport on teel. Eksport jõuab tavaliselt 5–15 minutiga kohale.",
+    "ChoosePlatform": "Vali, kust impordid",
+    "Dismiss": "Peida",
+    "HaveZipFile": "Mul on fail",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} / {total} valmis",
+    "SkipImport": "Jäta import vahele",
+    "Tasks": {
+      "AddContacts": "Lisa esimesed kontaktid",
+      "ImportContacts": "Impordi kontaktid",
+      "LogInteraction": "Salvesta esimene suhtlus",
+      "SetReminder": "Määra meeldetuletus"
+    },
+    "Title": "Esimesed sammud"
+  },
+  "RecentlyAddedTitle": "Hiljuti lisatud",
+  "RecentlyAddedTooltip": "Viis viimati lisatud inimest sinu võrgustikus.",
+  "RecentlyInteractedTitle": "Hiljuti suheldud",
+  "RecentlyInteractedTooltip": "Viis inimest, kellega viimati suhtlesid.",
+  "Stats": {
+    "InteractionsTitle": "Suhtlused sel kuul",
+    "InteractionsTooltip": "Suhtluste arv, mille salvestasid kuus {month}.",
+    "NewContactsTitle": "Uued kontaktid sel aastal",
+    "NewContactsTooltip": "Mitu inimest lisandus sinu võrgustikku aastal {year}.",
+    "TotalContactsTitle": "Kontakte kokku",
+    "TotalContactsTooltip": "Mitu inimest on sinu Bondery võrgustikus."
+  },
+  "TimelinePreviewTitle": "Suhtlused",
+  "TimelinePreviewTooltip": "Viis viimast suhtlust. Klõpsa kõigi vaatamiseks.",
+  "Title": "Avaleht",
+  "UnknownPerson": "Tundmatu inimene",
+  "UpcomingRemindersMonthInfo": "Näitame järgmise 30 päeva jooksul tähtaegu.",
+  "UpcomingRemindersTitle": "Lähenevad meeldetuletused",
+  "UpcomingRemindersTooltip": "Need on sinu meeldetuletused järgmise 30 päeva jooksul."
+}

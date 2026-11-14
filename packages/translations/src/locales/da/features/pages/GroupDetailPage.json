@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Lägg till personer i gruppeen",
+  "ColorLabel": "Farve",
+  "ContactCount": "Kontakter",
+  "DetailPageTitle": "Gruppedetaljer",
+  "Empty": "Inga kontakter kopplade till gruppeen end.",
+  "HeaderDescription": "Overblik över medlemmar i den valda gruppeen.",
+  "NoContactsFound": "Inga kontakter kopplade till gruppeen end.",
+  "NoContactsMatchSearch": "Ingen matchande kontakt blev fundet.",
+  "RemoveContact": {
+    "ErrorDescription": "Kunde ikke slette kontakten från gruppeen. FörSøg igen.",
+    "LoadingDescription": "Opdaterr gruppemedlemmar...",
+    "LoadingTitle": "Tar bort kontakt",
+    "SuccessDescription": "Kontakten togs bort från gruppeen"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Kunde ikke slette kontakter från gruppeen. FörSøg igen.",
+    "LoadingDescription": "Opdaterr gruppemedlemmar...",
+    "LoadingTitle": "Tar bort kontakter",
+    "SuccessDescription": "{count} kontakt(er) borttagna från gruppeen"
+  },
+  "RemoveFromGroup": "Slet från gruppe",
+  "Subtitle": "Kontakter som tillhör gruppeen.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Sidste interaktion",
+    "Location": "Plats",
+    "Name": "Navn",
+    "Socials": "Sociala medier",
+    "Title": "Rubrik"
+  },
+  "ThisContactFallback": "den her kontakten",
+  "Title": "Gruppe: {label}"
+}

@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Додати людей в групу",
+  "ColorLabel": "Цвет",
+  "ContactCount": "Контакти",
+  "DetailPageTitle": "Сведения о групі",
+  "Empty": "С цієї групой поки що не зв’язаале н і одного контакту.",
+  "HeaderDescription": "Огляд участников вибраній групи.",
+  "NoContactsFound": "С цієї групой поки що не зв’язаале н і одного контакту.",
+  "NoContactsMatchSearch": "Такого контакту не знайдено.",
+  "RemoveContact": {
+    "ErrorDescription": "Не вдалося видалити контактиз групи. Спробуйте ще раз.",
+    "LoadingDescription": "Оновление участников групи…",
+    "LoadingTitle": "Видалення контакту",
+    "SuccessDescription": "Контакт успішале видалеале із групи"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Не вдалося видалити контакти із групи. Спробуйте ще раз.",
+    "LoadingDescription": "Оновление участников групи…",
+    "LoadingTitle": "Видалення контактів",
+    "SuccessDescription": "Из групи успішале видалеале контактів: {count}"
+  },
+  "RemoveFromGroup": "Видалити із групи",
+  "Subtitle": "Контакти, назначенние цієї групі.",
+  "Table": {
+    "Avatar": "Аватар",
+    "LastInteraction": "Післяднее взаємодія",
+    "Location": "Розташування",
+    "Name": "Ім’я",
+    "Socials": "Соцмережі",
+    "Title": "Заголовок"
+  },
+  "ThisContactFallback": "цей контакт",
+  "Title": "Група: {label}"
+}

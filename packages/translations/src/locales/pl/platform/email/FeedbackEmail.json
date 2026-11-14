@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "What the tool returned:",
+  "agentExpectedHeading": "What the agent expected:",
+  "agentKindLabel": "Report kind:",
+  "agentRequestIdLabel": "Request ID:",
+  "agentSourceHeading": "Reported by an AI agent",
+  "agentToolLabel": "Tool:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "General feedback:",
+  "heading": "Feedback from {{userEmail}}",
+  "notProvided": "(Not provided)",
+  "npsReasonHeading": "Why did they pick this score?",
+  "npsScoreLabel": "NPS score:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "New feedback from {{userEmail}} - NPS Score: {{npsScore}}",
+  "replyCta": "Reply to {{userEmail}}",
+  "subject": "New feedback about Bondery",
+  "submittedAt": "Submitted at: {{timestamp}}",
+  "userEmailLabel": "User email:",
+  "userIdLabel": "User ID:"
+}

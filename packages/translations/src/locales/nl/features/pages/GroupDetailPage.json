@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Personen aan groep toevoegen",
+  "ColorLabel": "Kleur",
+  "ContactCount": "Contacten",
+  "DetailPageTitle": "Groepsgegevens",
+  "Empty": "Er zijn nog geen contacten aan deze groep gekoppeld.",
+  "HeaderDescription": "Overzicht van de leden van de geselecteerde groep.",
+  "NoContactsFound": "Er zijn nog geen contacten aan deze groep gekoppeld.",
+  "NoContactsMatchSearch": "Geen zo'n contact gevonden.",
+  "RemoveContact": {
+    "ErrorDescription": "Kan contact niet uit groep verwijderen. Probeer het opnieuw.",
+    "LoadingDescription": "Groepsleden bijwerken...",
+    "LoadingTitle": "Contact verwijderen",
+    "SuccessDescription": "Contact uit groep verwijderd"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Kan contacten niet uit groep verwijderen. Probeer het opnieuw.",
+    "LoadingDescription": "Groepsleden bijwerken...",
+    "LoadingTitle": "Contacten verwijderen",
+    "SuccessDescription": "{count} contact(en) uit groep verwijderd"
+  },
+  "RemoveFromGroup": "Uit groep verwijderen",
+  "Subtitle": "Contacten in deze groep.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Laatste interactie",
+    "Location": "Locatie",
+    "Name": "Naam",
+    "Socials": "Socials",
+    "Title": "Kopregel"
+  },
+  "ThisContactFallback": "dit contact",
+  "Title": "Groep: {label}"
+}

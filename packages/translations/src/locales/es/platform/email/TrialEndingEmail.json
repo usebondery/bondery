@@ -1,0 +1,9 @@
+{
+  "body": "Después, tu suscripción se renovará automáticamente, salvo que la canceles.",
+  "cta": "Gestionar suscripción",
+  "endDateFallback": "pronto",
+  "heading": "Tu prueba de Bondery Premium termina el {{endDate}}",
+  "preview": "Tu suscripción se renueva si no la cancelas",
+  "subject": "Tu prueba de Bondery Premium termina pronto",
+  "whyReceiving": "Recibes este correo porque tienes una prueba de Bondery Premium."
+}

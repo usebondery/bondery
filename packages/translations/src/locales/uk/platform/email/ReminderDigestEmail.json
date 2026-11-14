@@ -1,0 +1,20 @@
+{
+  "cta": "Відкрити нагадування",
+  "dateTypes": {
+    "anniversary": "Річниця",
+    "birthday": "День народження",
+    "graduation": "Завершення курсу/вручення сертифікатів",
+    "nameday": "Іменини",
+    "other": "Важлива дата"
+  },
+  "dayMany": "{{count}} дн.",
+  "dayOne": "1 день",
+  "description": "Для {{headingDate}}. Відкрийте профіль особи, щоб переглянути підробиці або надіслати повідомлення.",
+  "headingMany": "Незабаром з’являться нагадування ({{count}})",
+  "headingOne": "Незабаром надійде 1 нагадування",
+  "preview": "{{firstPersonName}}: {{firstTypeLabel}} у {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}}: {{firstTypeLabel}} у категорії «{{firstRemainingLabel}}» та ще {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} відбудеься {{remainingLabel}} о {{dateLabel}}.",
+  "subject": "Нагадування про зобов’язання для {{targetDate}}",
+  "whyReceiving": "Ви отримали це повідомлення, оскільки ввімкнули нагадування на ці дати."
+}

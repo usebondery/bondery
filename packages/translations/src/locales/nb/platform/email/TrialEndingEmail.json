@@ -1,0 +1,9 @@
+{
+  "body": "Etter det fornyes abonnementet automatisk, med mindre du avbestiller.",
+  "cta": "Administrer abonnement",
+  "endDateFallback": "snart",
+  "heading": "Premium-prøveperioden din slutter {{endDate}}",
+  "preview": "Abonnementet ditt fornyes med mindre du avbestiller",
+  "subject": "Bondery Premium-prøveperioden din er snart over",
+  "whyReceiving": "Du mottar denne e-posten fordi du har en Bondery Premium-prøveperiode."
+}

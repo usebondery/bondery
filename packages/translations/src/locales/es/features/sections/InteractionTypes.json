@@ -1,0 +1,14 @@
+{
+  "Call": "Llamada",
+  "Coffee": "Café",
+  "CompetitionHackathon": "Competición/Hackatón",
+  "Custom": "Personalizada",
+  "Email": "Correo electrónico",
+  "Meal": "Comida",
+  "Meeting": "Reunión",
+  "NetworkingEvent": "Evento de networking",
+  "Note": "Nota",
+  "Other": "Otra",
+  "PartySocial": "Fiesta/Evento social",
+  "TextMessaging": "Mensaje de texto/Mensajería"
+}

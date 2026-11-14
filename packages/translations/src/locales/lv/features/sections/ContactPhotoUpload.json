@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Pievienot šīs kontaktus fotoattēlu",
+  "Cancel": "Atcelt",
+  "ConfirmPhoto": "Apstiprini fotoattēlu",
+  "DragImageHere": "Vilkt attēlu šeit vai noklikšķini, lai atlasītu",
+  "InvalidFile": "Nederīgs fails",
+  "PhotoUpdateError": "Neizdevās atjaunināt kontaktus fotoattēlu",
+  "PhotoUpdateSuccess": "Kontakti fotoattēls ir veiksmīgi atjaunināts",
+  "PleaseWait": "Pagaidi",
+  "TitleModal": "Augšupielādēt kontaktus fotoattēlu",
+  "UpdateError": "Kļūda",
+  "UpdateProfilePhoto": "Atjaunināt kontaktus fotoattēlu",
+  "UpdateSuccess": "Panākumi",
+  "UploadingPhoto": "Notiek augšupielāde..."
+}

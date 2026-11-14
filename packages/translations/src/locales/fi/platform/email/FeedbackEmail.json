@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Mitä työkalu palautti:",
+  "agentExpectedHeading": "Mitä agentti odotti:",
+  "agentKindLabel": "Ilmoituksen tyyppi:",
+  "agentRequestIdLabel": "Pyynnön tunniste:",
+  "agentSourceHeading": "AI-agentin ilmoittama",
+  "agentToolLabel": "Työkalu:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Yleinen palaute:",
+  "heading": "Palaute käyttäjältä {{userEmail}}",
+  "notProvided": "(Ei annettu)",
+  "npsReasonHeading": "Miksi tämä arvosana valittiin?",
+  "npsScoreLabel": "NPS-arvo:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Uutta palautetta käyttäjältä {{userEmail}} – NPS: {{npsScore}}",
+  "replyCta": "Vastaa käyttäjälle {{userEmail}}",
+  "subject": "Uutta Bondery-palautetta",
+  "submittedAt": "Lähetetty: {{timestamp}}",
+  "userEmailLabel": "Käyttäjän sähköposti:",
+  "userIdLabel": "Käyttäjätunniste:"
+}

@@ -1,0 +1,23 @@
+{
+  "entities": {
+    "contact": "kontaktas",
+    "contactPlural": "kontaktai",
+    "group": "grupa",
+    "interaction": "sąveika",
+    "interactionPlural": "sąveikos",
+    "network": "tinklas",
+    "person": "asmuo",
+    "person_few": "{count} asmenys",
+    "person_one": "{count} asmuo",
+    "person_other": "{count} asmenų",
+    "tag": "žyma"
+  },
+  "features": {
+    "aiAssistant": "AI asistentas",
+    "fixAndMerge": "Taisyti ir sujungti",
+    "keepInTouch": "Palaikyk ryšį"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

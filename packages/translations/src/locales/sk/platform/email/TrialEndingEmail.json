@@ -1,0 +1,9 @@
+{
+  "body": "Potom sa predplatné automaticky obnoví, ak ho nezrušíte.",
+  "cta": "Spravovať predplatné",
+  "endDateFallback": "čoskoro",
+  "heading": "Vaša skúšobná verzia Premium končí {{endDate}}",
+  "preview": "Predplatné sa obnoví, ak ho nezrušíte",
+  "subject": "Vaša skúšobná verzia Premium v Bondery čoskoro končí",
+  "whyReceiving": "Tento e-mail dostávate, pretože máte skúšobnú verziu Premium v Bondery."
+}

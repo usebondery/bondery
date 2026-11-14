@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Újraellenőrzés {seconds} mp múlva…",
+  "Description": "A fiókod biztonságban van, és továbbra is be vagy jelentkezve. Folyamatosan ellenőrzünk; ez általában rövid ideig tart.",
+  "MetadataTitle": "Szolgáltatás nem elérhető",
+  "Retry": "Újra",
+  "StatusChecking": "Kapcsolat ellenőrzése…",
+  "StatusDegraded": "Egyes funkciók most lassabbak lehetnek",
+  "StatusOffline": "A Bondery átmenetileg nem elérhető",
+  "StatusOnline": "Újra online. Visszairányítunk…",
+  "StatusPageLink": "Állapotoldal megnyitása",
+  "TechnicalBackendStatus": "Háttérrendszer: {status}",
+  "TechnicalDetails": "Technikai részletek",
+  "TechnicalHttpStatus": "HTTP állapot: {status}",
+  "TechnicalUnreachable": "nem elérhető",
+  "Title": "Gond van a kapcsolódással"
+}

@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Šta je alat vratio:",
+  "agentExpectedHeading": "Šta je agent očekivao:",
+  "agentKindLabel": "Vrsta izveštaja:",
+  "agentRequestIdLabel": "ID zahteva:",
+  "agentSourceHeading": "Prijavio AI agent",
+  "agentToolLabel": "Alat:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Opšta povratna informacija:",
+  "heading": "Povratna informacija od {{userEmail}}",
+  "notProvided": "(Nije navedeno)",
+  "npsReasonHeading": "Zašto su izabrali ovu ocenu?",
+  "npsScoreLabel": "NPS ocena:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Nova povratna informacija od {{userEmail}} — NPS: {{npsScore}}",
+  "replyCta": "Odgovori {{userEmail}}",
+  "subject": "Nova povratna informacija o Bondery-ju",
+  "submittedAt": "Poslato: {{timestamp}}",
+  "userEmailLabel": "Imejl korisnika:",
+  "userIdLabel": "ID korisnika:"
+}

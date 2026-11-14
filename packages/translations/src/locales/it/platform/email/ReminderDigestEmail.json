@@ -1,0 +1,20 @@
+{
+  "cta": "Aprire i promemoria",
+  "dateTypes": {
+    "anniversary": "anniversario",
+    "birthday": "compleanno",
+    "graduation": "laurea",
+    "nameday": "onomastico",
+    "other": "data importante"
+  },
+  "dayMany": "{{count}} giorni",
+  "dayOne": "1 giorno",
+  "description": "Per il {{headingDate}}. Apri una persona per i dettagli o invia un messaggio.",
+  "headingMany": "{{count}} promemoria in arrivo",
+  "headingOne": "1 promemoria in arrivo",
+  "preview": "{{firstTypeLabel}} di {{firstPersonName}} tra {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} di {{firstPersonName}} tra {{firstRemainingLabel}} e altri {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} tra {{remainingLabel}}, il {{dateLabel}}.",
+  "subject": "Promemoria Bondery per il {{targetDate}}",
+  "whyReceiving": "Ricevi questa email perché hai attivato i promemoria per queste date."
+}

@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Toimingud",
+  "CannotDeleteMyself": "Sa ei saa oma profiilikaarti kustutada",
+  "CannotMergeMyself": "Sa ei saa ühendada oma profiilikaarti teistega",
+  "DeleteContact": "Kustuta kontakt",
+  "DownloadVCard": "Laadi alla vCard",
+  "ExportError": "Viga",
+  "ExportErrorDescription": "Kontakti eksport ei õnnestunud. Proovi uuesti.",
+  "ExportSuccess": "Õnnestus",
+  "ExportSuccessDescription": "Kontakt eksporditi vCardina"
+}

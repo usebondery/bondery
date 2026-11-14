@@ -1,0 +1,22 @@
+{
+  "AddButton": "Pridat",
+  "Description": "Údaje odošleme ludom nižšie. Kópiu dostanete aj vy.",
+  "DuplicateEmail": "Táto adresa je už pridaná",
+  "ErrorDescription": "Skontrolujte pripojenie a poskusi to znova.",
+  "ErrorHeadline": "Stik ni bilo mogoče odoslat",
+  "InvalidEmail": "Zadajte platnú e-mailovú adresu",
+  "MaxRecipients": "Možete pridat najviac 10 príjemcov",
+  "MaxRecipientsHint": "Maximálne 10 príjemcov",
+  "MessagePlaceholder": "Poznámka (volitelná)",
+  "NoRecipients": "Dodaj aspoň jedného príjemcu",
+  "RecipientsLabel": "Komu",
+  "RecipientsPlaceholder": "E-mailová adresa príjemcu",
+  "RemoveRecipient": "Odobrat {email}",
+  "SendButton": "Odoslat",
+  "SendButtonMany": "Odoslat {count} príjemcom",
+  "SendButtonOne": "Odoslat 1 príjemcovi",
+  "SuccessDescription": "Príjemci ho dostanú o chvílu.",
+  "SuccessHeadline": "Stik odoslaný",
+  "Title": "Odoslat stik: {name}",
+  "WhatsIncluded": "Meno, stiki, odkazy a poznámky, ktoré máte uložené."
+}

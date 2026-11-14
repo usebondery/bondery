@@ -8,8 +8,32 @@ enum ColorScheme {
 
 enum SupportedLocale {
   en
+  bg
   cs
+  da
   de
+  el
+  es
+  et
+  fi
+  fr
+  hr
+  hu
+  it
+  lt
+  lv
+  nb
+  nl
+  pl
+  pt
+  ro
+  ru
+  sk
+  sl
+  sr
+  sv
+  tr
+  uk
 
   @@map("supported_locale")
 }
@@ -22,6 +46,7 @@ model UserSettings {
   timezone                  String?
   defaultPhoneCountry       String?         @map("default_phone_country") @db.Char(2)
   timeFormat                String          @default("24h") @map("time_format")
+  dateFormat                String          @default("locale") @map("date_format")
   colorScheme               ColorScheme     @default(auto) @map("color_scheme")
   leftSwipeAction           String          @default("none") @map("left_swipe_action")
   rightSwipeAction          String          @default("none") @map("right_swipe_action")

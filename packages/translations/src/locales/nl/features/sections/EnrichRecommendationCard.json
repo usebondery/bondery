@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Alle contacten met een LinkedIn-profiel zijn al verrijkt.",
+  "AllEnrichedTitle": "Alle contacten verrijkt",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Nu aan het verrijken:",
+  "EligibleLabel_one": "{count} persoon kan worden verrijkt",
+  "EligibleLabel_other": "{count} personen kunnen worden verrijkt",
+  "Enrich": "Verrijken",
+  "EnrichAll": "Alles verrijken",
+  "HelpTooltip": "Haal de nieuwste LinkedIn-profielgegevens voor dit contact op. Klik om te zien hoe verrijking werkt.",
+  "Pause": "Pauzeren",
+  "PausingTooltip": "Huidig contact afronden, daarna pauzeren...",
+  "PersonEligibleLabel": "Dit contact kan vanuit LinkedIn worden verrijkt",
+  "ProcessingPerson": "{name} verrijken...",
+  "ProgressLabel": "Verrijken: {completed} van {totalEligible} voltooid",
+  "ProgressLabelWithFailed": "Verrijken: {completed} van {totalEligible} voltooid ({failed} mislukt)",
+  "Resume": "Hervatten",
+  "ResumeLabel": "Verrijking onderbroken: {completed} klaar, {pending} resterend",
+  "SkipRemaining": "Resterende overslaan",
+  "Tooltip": "Deze contacten hebben een LinkedIn-profiel maar zijn nog niet verrijkt. Verrijk ze voor actuele werkgeschiedenis, opleiding en bio."
+}

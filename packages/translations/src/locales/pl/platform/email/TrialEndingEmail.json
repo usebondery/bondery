@@ -1,0 +1,9 @@
+{
+  "body": "Potom sa predprawidłowe automaticky obnoví, ak ho nezrušíte.",
+  "cta": "Zarządzaj predprawidłowe",
+  "endDateFallback": "čoskoro",
+  "heading": "Vaša skúšobná verzia Premium končí {{endDate}}",
+  "preview": "Predprawidłowe sa obnoví, ak ho nezrušíte",
+  "subject": "Vaša skúšobná verzia Premium v Bondery čoskoro končí",
+  "whyReceiving": "You're receiving this because you have a Bondery Premium trial."
+}

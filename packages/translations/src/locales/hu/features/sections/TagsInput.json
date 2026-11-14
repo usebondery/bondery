@@ -1,0 +1,22 @@
+{
+  "AddError": "A címke hozzáadása nem sikerült",
+  "AddNewTagTooltip": "Új címke",
+  "AddSuccess": "A címke hozzáadása sikerült",
+  "AddTagTooltip": "Címke hozzáadása",
+  "CreateError": "A címke létrehozása nem sikerült",
+  "CreateNewTagEmpty": "Új címke",
+  "CreateNewTagOption": "Új címke: „{label}”",
+  "CreateTagCancel": "Mégse",
+  "CreateTagConfirm": "Létrehozás és hozzáadás",
+  "CreateTagMessage": "A(z) „{name}” címke még nem létezik. Létrehozod, és hozzáadod ehhez a kapcsolathoz?",
+  "CreateTagTitle": "Új címke?",
+  "Label": "Címkék",
+  "NoTagsFound": "Nincs címke",
+  "Placeholder": "Címkék hozzáadása…",
+  "RemoveError": "A címke eltávolítása nem sikerült",
+  "RemoveTagTooltip": "Címke eltávolítása",
+  "SearchPlaceholder": "Címke keresése vagy létrehozása…",
+  "TagAlreadyAddedMessage": "A(z) „{name}” címke már hozzá van rendelve ehhez a kapcsolathoz.",
+  "TagAlreadyAddedTitle": "A címke már hozzá van adva",
+  "TagAlreadyAppliedTooltip": "A címke már alkalmazva van"
+}

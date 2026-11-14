@@ -171,6 +171,7 @@ export function ContactEmailsSection({
 
             <TextInput
               aria-label={text.emailPlaceholder}
+              dir="ltr"
               disabled={savingField === "emails"}
               onBlur={saveCurrentEmails}
               onChange={(e) => handleEmailChange(index, e.target.value)}
@@ -274,6 +275,7 @@ export function ContactEmailsSection({
 
             <TextInput
               aria-label={text.emailPlaceholder}
+              dir="ltr"
               disabled={savingField === "emails"}
               onBlur={handleCommitDraftEmail}
               onChange={(event) =>

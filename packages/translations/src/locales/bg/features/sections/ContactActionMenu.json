@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Actions",
+  "CannotDeleteMyself": "You cannot delete your own contact card",
+  "CannotMergeMyself": "You cannot merge your own contact card with others",
+  "DeleteContact": "Delete Contact",
+  "DownloadVCard": "Download vCard",
+  "ExportError": "Error",
+  "ExportErrorDescription": "Failed to export contact. Please try again.",
+  "ExportSuccess": "Success",
+  "ExportSuccessDescription": "Contact exported as vCard"
+}

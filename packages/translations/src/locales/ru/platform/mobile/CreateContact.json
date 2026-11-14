@@ -1,0 +1,13 @@
+{
+  "Create": "Добавить в Bondery",
+  "Creating": "Создание человека…",
+  "ErrorDescription": "При создании этого человека что-то пошло не так.",
+  "ErrorTitle": "Не удалось создать человека",
+  "FullNameLabel": "Полное имя",
+  "FullNamePlaceholder": "например, Анна Иванова",
+  "InvalidName": "Укажите корректное имя",
+  "NameRequired": "Укажите имя",
+  "SuccessDescription": "Новый человек добавлен в ваши контакты.",
+  "SuccessTitle": "Человек создан",
+  "Title": "Создать человека"
+}

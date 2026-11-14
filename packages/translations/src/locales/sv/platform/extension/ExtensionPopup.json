@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Öppna Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Koppla ditt konto för att spara kontakter från sociala medier.",
+    "SignIn": "Logga in",
+    "Title": "Logga in på Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Lägg till interaktion med den här personen"
+  },
+  "Settings": {
+    "ApiServer": "API-server",
+    "SignOut": "Logga ut"
+  },
+  "UpdateRequired": {
+    "Description": "Ditt Bondery-tillägg är inaktuellt och kanske inte fungerar som det ska. Uppdatera det för att fortsätta.",
+    "OpenExtensionsPage": "Öppna tilläggssidan",
+    "Title": "Uppdatering krävs"
+  },
+  "Welcome": {
+    "ConnectButton": "Koppla Bondery-konto"
+  }
+}

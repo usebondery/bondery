@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Otvoriť Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Pripojte účet a ukladajte kontakty zo sociálnych sietí.",
+    "SignIn": "Prihlásiť sa",
+    "Title": "Prihláste sa do Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Pridať interakciu s touto osobou"
+  },
+  "Settings": {
+    "ApiServer": "API server",
+    "SignOut": "Odhlásiť se"
+  },
+  "UpdateRequired": {
+    "Description": "Vaše rozšírenie Bondery je zastaralé a nemusí fungovať správne. Aktualizujte ho, aby ste mohli pokračovať.",
+    "OpenExtensionsPage": "Otvoriť stránku rozšírenie",
+    "Title": "Je vyžadována aktualizácia"
+  },
+  "Welcome": {
+    "ConnectButton": "Pripojiť účet Bondery"
+  }
+}

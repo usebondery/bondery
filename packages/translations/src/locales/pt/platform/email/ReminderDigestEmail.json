@@ -1,0 +1,20 @@
+{
+  "cta": "Abrir lembretes",
+  "dateTypes": {
+    "anniversary": "Aniversário de relação",
+    "birthday": "Aniversário",
+    "graduation": "Formatura",
+    "nameday": "Dia do nome",
+    "other": "Data importante"
+  },
+  "dayMany": "{{count}} dias",
+  "dayOne": "1 dia",
+  "description": "Para {{headingDate}}. Abra uma pessoa para ver detalhes ou enviar uma nota.",
+  "headingMany": "{{count}} lembretes a aproximar-se",
+  "headingOne": "1 lembrete a aproximar-se",
+  "preview": "{{firstTypeLabel}} de {{firstPersonName}} daqui a {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} de {{firstPersonName}} daqui a {{firstRemainingLabel}} e mais {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} aproxima-se daqui a {{remainingLabel}}, a {{dateLabel}}.",
+  "subject": "Lembretes Bondery para {{targetDate}}",
+  "whyReceiving": "Está a receber isto porque ativou lembretes para estas datas."
+}

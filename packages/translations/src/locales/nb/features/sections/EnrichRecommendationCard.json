@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Alle kontakter med LinkedIn-profil er allerede beriket.",
+  "AllEnrichedTitle": "Alle kontakter beriket",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Beriker:",
+  "EligibleLabel_one": "{count} person kan berikes",
+  "EligibleLabel_other": "{count} personer kan berikes",
+  "Enrich": "Berik",
+  "EnrichAll": "Berik alle",
+  "HelpTooltip": "Hent de nyeste profilopplysningene fra LinkedIn for denne kontakten. Klikk for å lære hvordan berikelse fungerer.",
+  "Pause": "Pause",
+  "PausingTooltip": "Fullfører gjeldende kontakt og pauser …",
+  "PersonEligibleLabel": "Denne kontakten kan berikes fra LinkedIn",
+  "ProcessingPerson": "Beriker {name} …",
+  "ProgressLabel": "Beriker: {completed} av {totalEligible} fullført",
+  "ProgressLabelWithFailed": "Beriker: {completed} av {totalEligible} fullført ({failed} mislyktes)",
+  "Resume": "Fortsett",
+  "ResumeLabel": "Berikelse avbrutt: {completed} fullført, {pending} gjenstår",
+  "SkipRemaining": "Hopp over resten",
+  "Tooltip": "Disse kontaktene har LinkedIn-profil, men er ikke beriket ennå. Berik for oppdatert arbeidshistorikk, utdanning og biografi."
+}

@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Silti ei õnnestunud luua. Proovi uuesti.",
+  "CreateTag": "Loo silt",
+  "DeleteFailed": "Silti ei õnnestunud kustutada. Proovi uuesti.",
+  "EditFailed": "Silti ei õnnestunud salvestada. Proovi uuesti.",
+  "EditTagsSearchPlaceholder": "Otsi silte…",
+  "LoadFailed": "Silte ei õnnestunud laadida",
+  "NoTagsYet": "Silte pole veel",
+  "NoTagsYetHint": "Sildid aitavad kontakte korraldada ja leida."
+}

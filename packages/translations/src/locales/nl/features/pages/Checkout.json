@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Je hebt al een actief Premium-abonnement.",
+  "alreadySubscribedTitle": "Al geabonneerd",
+  "errorMessage": "Er ging iets mis. Probeer het opnieuw.",
+  "errorTitle": "Afrekenen mislukt",
+  "errorUnauthorized": "Log in en probeer het opnieuw.",
+  "intervalAnnual": "Jaarlijks",
+  "intervalMonthly": "Maandelijks",
+  "paymentBlockedAction": "Facturatie bijwerken",
+  "paymentBlockedMessage": "We konden je betaling na meerdere pogingen niet verwerken. Werk je facturatiegegevens bij om Premium weer te gebruiken.",
+  "paymentBlockedTitle": "Betaling vereist",
+  "successMessage": "Je hebt 300 AI-berichten per maand en alle Premium-functies.",
+  "successTitle": "Je bent nu Premium!",
+  "upgradePendingMessage": "Je account wordt binnenkort naar Premium geüpgraded.",
+  "upgradePendingTitle": "Betaling ontvangen",
+  "upgradesDisabledTooltip": "Premium-upgrades zijn nog niet beschikbaar. Kom later terug.",
+  "upgradeToPremium": "Upgraden naar Premium"
+}

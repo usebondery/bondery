@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Pripojte fotku pre tento kontakt",
+  "Cancel": "Zrušiť",
+  "ConfirmPhoto": "Potvrdiť fotku",
+  "DragImageHere": "Pretiahnite obrázok sem alebo kliknete pre výber",
+  "InvalidFile": "Neplatný súbor",
+  "PhotoUpdateError": "Nepodarilo sa aktualizovať fotku kontaktu",
+  "PhotoUpdateSuccess": "Fotka kontaktu bola úspešne aktualizovaná",
+  "PleaseWait": "Počkajte",
+  "TitleModal": "Nahrať fotku kontaktu",
+  "UpdateError": "Chyba",
+  "UpdateProfilePhoto": "Aktualizovať fotku kontaktu",
+  "UpdateSuccess": "Úspech",
+  "UploadingPhoto": "Nahrávání..."
+}

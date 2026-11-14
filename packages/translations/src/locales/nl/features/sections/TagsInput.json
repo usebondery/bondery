@@ -1,0 +1,22 @@
+{
+  "AddError": "Kan label niet toevoegen",
+  "AddNewTagTooltip": "Nieuw label aanmaken",
+  "AddSuccess": "Label toegevoegd",
+  "AddTagTooltip": "Label toevoegen",
+  "CreateError": "Kan label niet aanmaken",
+  "CreateNewTagEmpty": "Nieuw label aanmaken",
+  "CreateNewTagOption": "Nieuw label \"{label}\" aanmaken",
+  "CreateTagCancel": "Annuleren",
+  "CreateTagConfirm": "Aanmaken en toevoegen",
+  "CreateTagMessage": "Label \"{name}\" bestaat nog niet. Wil je het aanmaken en aan dit contact toevoegen?",
+  "CreateTagTitle": "Nieuw label aanmaken?",
+  "Label": "Labels",
+  "NoTagsFound": "Geen labels gevonden",
+  "Placeholder": "Labels toevoegen...",
+  "RemoveError": "Kan label niet verwijderen",
+  "RemoveTagTooltip": "Label verwijderen",
+  "SearchPlaceholder": "Label zoeken of aanmaken...",
+  "TagAlreadyAddedMessage": "Label \"{name}\" is al aan dit contact toegevoegd.",
+  "TagAlreadyAddedTitle": "Label al toegevoegd",
+  "TagAlreadyAppliedTooltip": "Label al toegepast"
+}

@@ -1,5 +1,7 @@
 import "server-only";
 
+import type { DateFormatPreference } from "@bondery/schemas";
+import { coerceDateFormatPreference } from "@bondery/schemas/locale";
 import type { SupportedLocale } from "@bondery/translations";
 import { DEFAULT_LOCALE } from "@bondery/translations";
 import { cache } from "react";
@@ -8,12 +10,14 @@ import { fetchBetterAuthSession } from "@/lib/auth/server";
 import { getLocaleFromHeaders } from "./getLocaleFromHeaders";
 
 export interface LocaleSettings {
+  dateFormat: DateFormatPreference;
   locale: SupportedLocale;
   timeFormat: "24h" | "12h";
   timezone: string;
 }
 
 const FALLBACK: LocaleSettings = {
+  dateFormat: "locale",
   locale: DEFAULT_LOCALE,
   timeFormat: "24h",
   timezone: "UTC",
@@ -38,7 +42,7 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
 
     if (!session) {
       const locale = await getLocaleFromHeaders();
-      return { locale, timeFormat: "24h", timezone: "UTC" };
+      return { dateFormat: "locale", locale, timeFormat: "24h", timezone: "UTC" };
     }
 
     const requestSession = await getRequestSession();
@@ -47,6 +51,7 @@ export const resolveLocaleSettings = cache(async (): Promise<LocaleSettings> => 
     }
 
     return {
+      dateFormat: coerceDateFormatPreference(requestSession.shell.dateFormat),
       locale: requestSession.shell.locale,
       timeFormat: requestSession.shell.timeFormat,
       timezone: requestSession.shell.timezone,

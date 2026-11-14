@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Lisää henkilöitä ryhmään",
+  "ColorLabel": "Väri",
+  "ContactCount": "Yhteystiedot",
+  "DetailPageTitle": "Ryhmän tiedot",
+  "Empty": "Tähän ryhmään ei ole vielä linkitetty yhteystietoja.",
+  "HeaderDescription": "Yhteenveto valitun ryhmän jäsenistä.",
+  "NoContactsFound": "Tähän ryhmään ei ole vielä linkitetty yhteystietoja.",
+  "NoContactsMatchSearch": "Vastaavaa yhteystietoa ei löydy.",
+  "RemoveContact": {
+    "ErrorDescription": "Yhteystiedon poisto ryhmästä epäonnistui. Yritä uudelleen.",
+    "LoadingDescription": "Päivitetään ryhmän jäseniä...",
+    "LoadingTitle": "Poistetaan yhteystietoa",
+    "SuccessDescription": "Yhteystieto poistettiin ryhmästä"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Yhteystietojen poisto ryhmästä epäonnistui. Yritä uudelleen.",
+    "LoadingDescription": "Päivitetään ryhmän jäseniä...",
+    "LoadingTitle": "Poistetaan yhteystietoja",
+    "SuccessDescription": "{count} yhteystietoa poistettiin ryhmästä"
+  },
+  "RemoveFromGroup": "Poista ryhmästä",
+  "Subtitle": "Tähän ryhmään kuuluvat yhteystiedot.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Viimeisin vuorovaikutus",
+    "Location": "Sijainti",
+    "Name": "Nimi",
+    "Socials": "Sosiaalinen media",
+    "Title": "Otsikko"
+  },
+  "ThisContactFallback": "tämä yhteystieto",
+  "Title": "Ryhmä: {label}"
+}

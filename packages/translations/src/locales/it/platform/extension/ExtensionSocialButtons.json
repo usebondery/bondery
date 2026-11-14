@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Errore dell'estensione — riprova",
+    "OpenInBondery": "Aprire in Bondery",
+    "SignInRequired": "Accesso richiesto — clicca l'icona Bondery",
+    "SomethingWrong": "Si è verificato un errore"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Errore dell'estensione — riprova",
+    "OpenInBondery": "Aprire in Bondery",
+    "SignInRequired": "Accesso richiesto — clicca l'icona Bondery",
+    "SomethingWrong": "Si è verificato un errore"
+  }
+}

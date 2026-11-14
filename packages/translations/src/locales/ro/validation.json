@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Introdu o adresă de e-mail validă",
+    "invalidTitle": "E-mail nevalid"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Prenumele nu poate depăși {max} caractere",
+      "required": "Prenumele este obligatoriu"
+    },
+    "generic": {
+      "maxLength": "Valoarea nu poate depăși {max} caractere"
+    },
+    "headline": {
+      "maxLength": "Titlul nu poate depăși {max} caractere"
+    },
+    "label": {
+      "maxLength": "{field}: cel mult {max} caractere",
+      "required": "{field}: câmp obligatoriu"
+    },
+    "lastName": {
+      "maxLength": "Numele nu poate depăși {max} caractere"
+    },
+    "location": {
+      "maxLength": "Locația nu poate depăși {max} caractere"
+    },
+    "middleName": {
+      "maxLength": "Al doilea prenume nu poate depăși {max} caractere"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Titlul este obligatoriu"
+  },
+  "title": "Eroare de validare"
+}

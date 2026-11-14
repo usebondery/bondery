@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "kontakt",
+    "contactPlural": "kontaktid",
+    "group": "grupp",
+    "interaction": "suhtlus",
+    "interactionPlural": "suhtlused",
+    "network": "võrgustik",
+    "person": "inimene",
+    "person_one": "{count} inimene",
+    "person_other": "{count} inimest",
+    "tag": "silt"
+  },
+  "features": {
+    "aiAssistant": "AI-assistent",
+    "fixAndMerge": "Paranda ja ühenda",
+    "keepInTouch": "Hoia ühendust"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

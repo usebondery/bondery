@@ -1,0 +1,8 @@
+{
+  "documentation": "belgeler",
+  "help": "Yardım mı lazım? {{support}} sayfasına git veya {{documentation}} oku.",
+  "internalNote": "İç işletim · müşteriye gitmez",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Bu bildirimleri Bondery’de yönetebilirsin",
+  "support": "destek"
+}

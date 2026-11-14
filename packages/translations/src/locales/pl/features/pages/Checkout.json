@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Masz już aktywną subskrypcję Premium.",
+  "alreadySubscribedTitle": "Już subskrybujesz",
+  "errorMessage": "Coś poszło nie tak. Spróbuj ponownie.",
+  "errorTitle": "Płatność nie powiodła się",
+  "errorUnauthorized": "Zaloguj się i spróbuj ponownie.",
+  "intervalAnnual": "Rocznie",
+  "intervalMonthly": "Miesięcznie",
+  "paymentBlockedAction": "Zaktualizować rozliczenia",
+  "paymentBlockedMessage": "Nie udało się przetworzyć płatności po kilku próbach. Zaktualizuj dane rozliczeniowe, aby przywrócić dostęp Premium.",
+  "paymentBlockedTitle": "Wymagana płatność",
+  "successMessage": "Masz 300 wiadomości AI miesięcznie i wszystkie funkcje Premium.",
+  "successTitle": "Masz teraz Premium!",
+  "upgradePendingMessage": "Twoje konto wkrótce przejdzie na Premium.",
+  "upgradePendingTitle": "Płatność otrzymana",
+  "upgradesDisabledTooltip": "Ulepszenie do Premium nie jest jeszcze dostępne. Wróć wkrótce.",
+  "upgradeToPremium": "Przejść na Premium"
+}

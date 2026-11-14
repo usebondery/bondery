@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Värvikood kopeeriti lõikelauale",
+  "CopyAccessibilityLabel": "Kopeeri värvikood",
+  "CopyFailedMessage": "Värvikoodi kopeerimine ei õnnestunud. Proovi uuesti.",
+  "CustomColorLabel": "Kohandatud värv",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Sisesta kehtiv hex-värv (nt #AE3EC9)",
+  "SheetTitle": "Värv",
+  "SwatchesLabel": "Kiirvärvid",
+  "TriggerAccessibilityHint": "Avab värvivalija"
+}

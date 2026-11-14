@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Сервер отклонил запрос: расширение устарело. Обновите его.",
+  "ApiRejectedTitle": "Слишком старая версия",
+  "UpdateButton": "Обновить",
+  "UpdateRequiredDescription": "Расширение Bondery устарело и может работать некорректно. Обновите его, чтобы продолжить.",
+  "UpdateRequiredTitle": "Требуется обновление",
+  "WebappNotificationDescription": "Расширению Bondery для Chrome нужно обновление для корректной работы.",
+  "WebappNotificationTitle": "Доступно обновление расширения"
+}

@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Activiteiten",
+    "Animals": "Dieren",
+    "Buildings": "Gebouwen",
+    "Celebrations": "Feesten",
+    "Food": "Eten",
+    "Hearts": "Harten",
+    "Humans": "Mensen",
+    "Miscellaneous": "Overig",
+    "Nature": "Natuur",
+    "Objects": "Objecten",
+    "Sports": "Sport",
+    "Travel": "Reizen",
+    "Work": "Werk"
+  },
+  "EmptySearch": "Geen emoji's gevonden",
+  "RandomAccessibilityLabel": "Willekeurige emoji kiezen",
+  "SearchPlaceholder": "Emoji's zoeken…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Opent emoji-kiezer"
+}

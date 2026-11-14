@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Du har redan en aktiv Premium-prenumeration.",
+  "alreadySubscribedTitle": "Redan prenumerant",
+  "errorMessage": "Något gick fel. Försök igen.",
+  "errorTitle": "Kassan misslyckades",
+  "errorUnauthorized": "Logga in och försök igen.",
+  "intervalAnnual": "Årsvis",
+  "intervalMonthly": "Månadsvis",
+  "paymentBlockedAction": "Uppdatera fakturering",
+  "paymentBlockedMessage": "Vi kunde inte behandla betalningen efter flera försök. Uppdatera faktureringsuppgifter för att återställa Premium.",
+  "paymentBlockedTitle": "Betalning krävs",
+  "successMessage": "Njut av 300 AI-meddelanden per månad och alla Premium-funktioner.",
+  "successTitle": "Du är Premium nu!",
+  "upgradePendingMessage": "Ditt konto uppgraderas till Premium inom kort.",
+  "upgradePendingTitle": "Betalning mottagen",
+  "upgradesDisabledTooltip": "Premium-uppgraderingar är inte tillgängliga än. Kom tillbaka snart.",
+  "upgradeToPremium": "Uppgradera till Premium"
+}

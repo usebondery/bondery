@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Добавить людей в группу",
+  "ColorLabel": "Цвет",
+  "ContactCount": "Контакты",
+  "DetailPageTitle": "Сведения о группе",
+  "Empty": "С этой группой пока не связано ни одного контакта.",
+  "HeaderDescription": "Обзор участников выбранной группы.",
+  "NoContactsFound": "С этой группой пока не связано ни одного контакта.",
+  "NoContactsMatchSearch": "Такой контакт не найден.",
+  "RemoveContact": {
+    "ErrorDescription": "Не удалось удалить контакт из группы. Повторите попытку.",
+    "LoadingDescription": "Обновление участников группы…",
+    "LoadingTitle": "Удаление контакта",
+    "SuccessDescription": "Контакт успешно удалён из группы"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Не удалось удалить контакты из группы. Повторите попытку.",
+    "LoadingDescription": "Обновление участников группы…",
+    "LoadingTitle": "Удаление контактов",
+    "SuccessDescription": "Из группы успешно удалено контактов: {count}"
+  },
+  "RemoveFromGroup": "Удалить из группы",
+  "Subtitle": "Контакты, назначенные этой группе.",
+  "Table": {
+    "Avatar": "Аватар",
+    "LastInteraction": "Последнее взаимодействие",
+    "Location": "Местоположение",
+    "Name": "Имя",
+    "Socials": "Соцсети",
+    "Title": "Заголовок"
+  },
+  "ThisContactFallback": "этот контакт",
+  "Title": "Группа: {label}"
+}

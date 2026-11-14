@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Wpisz prawidłowy adres e-mail",
+    "invalidTitle": "Nieprawidłowy adres e-mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Imię może mieć najwyżej {max} znaków",
+      "required": "Imię jest wymagane"
+    },
+    "generic": {
+      "maxLength": "Wartość może mieć najwyżej {max} znaków"
+    },
+    "headline": {
+      "maxLength": "Nagłówek może mieć najwyżej {max} znaków"
+    },
+    "label": {
+      "maxLength": "Pole „{field}” może mieć najwyżej {max} znaków",
+      "required": "Pole „{field}” jest wymagane"
+    },
+    "lastName": {
+      "maxLength": "Nazwisko może mieć najwyżej {max} znaków"
+    },
+    "location": {
+      "maxLength": "Lokalizacja może mieć najwyżej {max} znaków"
+    },
+    "middleName": {
+      "maxLength": "Drugie imię może mieć najwyżej {max} znaków"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Tytuł jest wymagany"
+  },
+  "title": "Błąd walidacji"
+}

@@ -1,0 +1,11 @@
+{
+  "About": "Про себе",
+  "Education": "Освіта",
+  "LastDataUpdate": "Останнє оновлення даних: {date}",
+  "NoEducation": "Немає даних про освіту",
+  "NoWorkHistory": "Немає даних про досвід роботи",
+  "Present": "Дотепер",
+  "ShowLess": "Показати менше",
+  "ShowMore": "Показати більше",
+  "WorkHistory": "Досвід роботи"
+}

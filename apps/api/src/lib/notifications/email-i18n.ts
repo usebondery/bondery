@@ -1,9 +1,10 @@
 import {
+  buildIntlLocaleTag,
   coerceSupportedLocale,
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   type SupportedLocale,
-} from "@bondery/schemas/locale/supported-locale";
+} from "@bondery/schemas/locale";
 import { loadNamespace } from "@bondery/translations/loader";
 
 export type EmailCopyValues = Record<string, string | number | boolean | null | undefined>;
@@ -51,8 +52,7 @@ export function formatEmailDate(
   lng: SupportedLocale,
   style: "medium" | "long" = "medium",
 ): string {
-  const locale = lng === "cs" ? "cs-CZ" : lng === "de" ? "de-DE" : "en-US";
-  return date.toLocaleDateString(locale, {
+  return date.toLocaleDateString(buildIntlLocaleTag(lng, "24h"), {
     dateStyle: style,
     timeZone: "UTC",
   });

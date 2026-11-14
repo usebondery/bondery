@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Ο διακομιστής απέρριψε το αίτημα επειδή η επέκταση είναι παλιά. Κάνε ενημέρωση.",
+  "ApiRejectedTitle": "Πολύ παλιά έκδοση",
+  "UpdateButton": "Ενημέρωση",
+  "UpdateRequiredDescription": "Η επέκταση Bondery είναι παλιά και μπορεί να μην λειτουργεί σωστά. Κάνε ενημέρωση για να συνεχίσεις.",
+  "UpdateRequiredTitle": "Απαιτείται ενημέρωση",
+  "WebappNotificationDescription": "Η επέκταση Chrome του Bondery χρειάζεται ενημέρωση για να λειτουργεί σωστά.",
+  "WebappNotificationTitle": "Διαθέσιμη ενημέρωση επέκτασης"
+}

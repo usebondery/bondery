@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Radnje",
+  "CannotDeleteMyself": "Ne možeš izbrisati vlastitu karticu kontakta",
+  "CannotMergeMyself": "Ne možeš spojiti vlastitu karticu kontakta s drugima",
+  "DeleteContact": "Izbrisati kontakt",
+  "DownloadVCard": "Preuzeti vCard",
+  "ExportError": "Greška",
+  "ExportErrorDescription": "Izvoz kontakta nije uspio. Pokušaj ponovno.",
+  "ExportSuccess": "Gotovo",
+  "ExportSuccessDescription": "Kontakt je izvezen kao vCard"
+}

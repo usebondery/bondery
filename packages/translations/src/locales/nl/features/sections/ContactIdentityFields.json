@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Contact",
+  "FieldUpdated": "{label} bijgewerkt",
+  "FirstNamePlaceholder": "Voornaam",
+  "FirstNameSuccessLabel": "Voornaam",
+  "HeadlinePlaceholder": "Kopregel",
+  "HeadlineSuccessLabel": "Kopregel",
+  "LastNamePlaceholder": "Achternaam",
+  "LastNameSuccessLabel": "Achternaam",
+  "LocationPlaceholder": "Locatie",
+  "LocationSuccessLabel": "Locatie",
+  "LocationUpdated": "Locatie bijgewerkt",
+  "MiddleNamePlaceholder": "Tussenvoegsel",
+  "MiddleNameSuccessLabel": "Tussenvoegsel",
+  "NameFieldUpdated": "{label} bijgewerkt",
+  "SavedTitle": "Opgeslagen",
+  "UpdateFieldFailed": "Kan {field} niet bijwerken"
+}

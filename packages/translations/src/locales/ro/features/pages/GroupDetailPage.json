@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Adaugă persoane în grup",
+  "ColorLabel": "Culoare",
+  "ContactCount": "Contacts",
+  "DetailPageTitle": "Detaliile grupului",
+  "Empty": "Încă nu există contacte legate de acest grup.",
+  "HeaderDescription": "Privire de ansamblu asupra membrilor grupului selectat.",
+  "NoContactsFound": "Încă nu există contacte legate de acest grup.",
+  "NoContactsMatchSearch": "Nu există un astfel de contact.",
+  "RemoveContact": {
+    "ErrorDescription": "Nu s-a putut elimina contactul din grup. Încearcă din nou.",
+    "LoadingDescription": "Se actualizează membrii grupului…",
+    "LoadingTitle": "Se elimină contactul",
+    "SuccessDescription": "Contact eliminat din grup"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Nu s-au putut elimina contactele din grup. Încearcă din nou.",
+    "LoadingDescription": "Se actualizează membrii grupului…",
+    "LoadingTitle": "Se elimină contactele",
+    "SuccessDescription": "{count} contact(e) eliminate din grup"
+  },
+  "RemoveFromGroup": "Elimină din grup",
+  "Subtitle": "Contacte atribuite acestui grup.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Ultima interacțiune",
+    "Location": "Locație",
+    "Name": "Nume",
+    "Socials": "Socials",
+    "Title": "Titlu"
+  },
+  "ThisContactFallback": "acest contact",
+  "Title": "Grup: {label}"
+}

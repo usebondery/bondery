@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentaciją",
+  "help": "Reikia pagalbos? Apsilankyk {{support}} arba skaityk mūsų {{documentation}}.",
+  "internalNote": "Vidinė operacijų žyma · ne siunčiama klientui",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Valdyk šiuos pranešimus Bondery",
+  "support": "pagalboje"
+}

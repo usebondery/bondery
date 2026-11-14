@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Open Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Connect your account to save contacts from social media.",
+    "SignIn": "Sign in",
+    "Title": "Sign in to Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Add interaction with this person"
+  },
+  "Settings": {
+    "ApiServer": "API server",
+    "SignOut": "Sign out"
+  },
+  "UpdateRequired": {
+    "Description": "Your Bondery extension is outdated and may not work correctly. Please update to continue.",
+    "OpenExtensionsPage": "Open Extensions Page",
+    "Title": "Update Required"
+  },
+  "Welcome": {
+    "ConnectButton": "Connect your Bondery account"
+  }
+}

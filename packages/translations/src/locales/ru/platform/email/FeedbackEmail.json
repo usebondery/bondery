@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Что вернул инструмент:",
+  "agentExpectedHeading": "Что ожидал агент:",
+  "agentKindLabel": "Тип сообщения:",
+  "agentRequestIdLabel": "ID запроса:",
+  "agentSourceHeading": "Сообщение от ИИ-агента",
+  "agentToolLabel": "Инструмент:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Общий отзыв:",
+  "heading": "Отзыв от {{userEmail}}",
+  "notProvided": "(Не указано)",
+  "npsReasonHeading": "Почему выбрана эта оценка?",
+  "npsScoreLabel": "Оценка NPS:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Новый отзыв от {{userEmail}} — NPS: {{npsScore}}",
+  "replyCta": "Ответить {{userEmail}}",
+  "subject": "Новый отзыв о Bondery",
+  "submittedAt": "Отправлено: {{timestamp}}",
+  "userEmailLabel": "Эл. почта пользователя:",
+  "userIdLabel": "ID пользователя:"
+}

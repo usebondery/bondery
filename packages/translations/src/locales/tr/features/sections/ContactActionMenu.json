@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "İşlemler",
+  "CannotDeleteMyself": "Kendi profil kişini silemezsin",
+  "CannotMergeMyself": "Kendi profil kişini başkalarıyla birleştiremezsin",
+  "DeleteContact": "Kişiyi sil",
+  "DownloadVCard": "vCard indir",
+  "ExportError": "Hata",
+  "ExportErrorDescription": "Kişi dışa aktarılamadı. Yeniden dene.",
+  "ExportSuccess": "Tamam",
+  "ExportSuccessDescription": "Kişi vCard olarak dışa aktarıldı"
+}

@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "javítás és egyesítés",
+    "GroupDetail": "ez a csoport",
+    "Groups": "Csoportok",
+    "Home": "Kezdőlap",
+    "KeepInTouch": "Maradj kapcsolatban",
+    "Map": "térkép",
+    "People": "Személyek",
+    "PersonDetails": "személy adatai",
+    "Timeline": "Interakciók"
+  },
+  "HelpLabel": "Bővebben",
+  "LearnMoreAbout": "Bővebben: {concept}"
+}

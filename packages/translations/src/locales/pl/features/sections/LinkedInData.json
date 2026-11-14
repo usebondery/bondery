@@ -1,0 +1,11 @@
+{
+  "About": "O mne",
+  "Education": "Vzdelanie",
+  "LastDataUpdate": "Poslední aktualizácia dat: {date}",
+  "NoEducation": "Brak vzdelanie k dispozícii",
+  "NoWorkHistory": "Brak pracovné zkušenosti k dispozícii",
+  "Present": "Současnost",
+  "ShowLess": "Show less",
+  "ShowMore": "Show more",
+  "WorkHistory": "Pracovní zkušenosti"
+}

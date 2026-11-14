@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Registruoti sąveiką",
+  "AddPerson": "Sukurti žmogų",
+  "ExtensionNudge": {
+    "Description": "Importuok kontaktus tiesiai iš LinkedIn ir Instagram profilių ir lengvai palaikyk tinklą atnaujintą.",
+    "InstallButton": "Įdiegti plėtinį",
+    "Title": "Sustiprink Bondery su mūsų Chrome plėtiniu"
+  },
+  "HeaderDescription": "Pradžioje greitai peržvelgsi tinklą, priminimus ir naujausias sąveikas.",
+  "NoRecentlyAdded": "Dar nepridėta žmonių.",
+  "NoRecentlyInteracted": "Naujausių sąveikų dar nėra.",
+  "NotificationInDays": "Po {count} dienų",
+  "NotificationSent": "Jau išsiųsta",
+  "NotificationToday": "Šiandien",
+  "NotificationTomorrow": "Rytoj",
+  "NotificationTooltipInDays": "Būsi informuotas po {count} dienų",
+  "NotificationTooltipSentAt": "Pranešimas jau išsiųstas {sentAt}",
+  "NotificationTooltipToday": "Būsi informuotas šiandien",
+  "NotificationTooltipTomorrow": "Būsi informuotas rytoj",
+  "NoUpcomingReminders": "Artimiausių 30 dienų priminimų nėra.",
+  "ProgressRail": {
+    "AwaitingExport": "Tavo {platform} eksportas pakeliui. Paprastai jis ateina per 5–15 min.",
+    "ChoosePlatform": "Pasirink platformą importui",
+    "Dismiss": "Atmesti",
+    "HaveZipFile": "Turiu failą",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} iš {total} atlikta",
+    "SkipImport": "Praleisti importą",
+    "Tasks": {
+      "AddContacts": "Pridėk pirmuosius kontaktus",
+      "ImportContacts": "Importuok kontaktus",
+      "LogInteraction": "Registruok pirmąją sąveiką",
+      "SetReminder": "Nustatyk priminimą"
+    },
+    "Title": "Pradžia"
+  },
+  "RecentlyAddedTitle": "Neseniai pridėti",
+  "RecentlyAddedTooltip": "5 naujausiai pridėti žmonės tavo tinkle.",
+  "RecentlyInteractedTitle": "Neseniai bendrauta",
+  "RecentlyInteractedTooltip": "5 žmonės, su kuriais neseniai sąveikavai.",
+  "Stats": {
+    "InteractionsTitle": "Šio mėnesio sąveikos",
+    "InteractionsTooltip": "Kiek sąveikų užregistravai {month} mėnesį.",
+    "NewContactsTitle": "Nauji kontaktai šiais metais",
+    "NewContactsTooltip": "Kiek žmonių pridėjai prie tinklo einamaisiais ({year}) metais.",
+    "TotalContactsTitle": "Viso kontaktų",
+    "TotalContactsTooltip": "Kiek žmonių tavo Bondery tinkle."
+  },
+  "TimelinePreviewTitle": "Sąveikos",
+  "TimelinePreviewTooltip": "5 naujausios sąveikos. Spustelėk, kad matytum visas.",
+  "Title": "Pradžia",
+  "UnknownPerson": "Nežinomas žmogus",
+  "UpcomingRemindersMonthInfo": "Rodomi priminimai, kurių pranešimai artimiausių 30 dienų.",
+  "UpcomingRemindersTitle": "Artėjantys priminimai",
+  "UpcomingRemindersTooltip": "Artėjantys priminimai, kurių terminas artimiausių 30 dienų."
+}

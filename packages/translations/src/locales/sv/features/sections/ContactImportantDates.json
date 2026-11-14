@@ -1,0 +1,32 @@
+{
+  "AddAction": "Lägg till datum",
+  "AddHint": "Ange all information för att lägga till ett nytt datum.",
+  "AddImportantDate": "Lägg till viktigt datum",
+  "BirthdayDateLabel": "Välj födelsedag",
+  "DatePlaceholder": "Välj datum",
+  "DeleteAction": "Ta bort",
+  "DraftIncompleteError": "Ange all information för att lägga till ett nytt datum.",
+  "Empty": "Inga viktiga datum än.",
+  "ErrorTitle": "Fel",
+  "NotePlaceholder": "Valfri anteckning",
+  "NotifyDayBefore": "Avisera {count} dag före",
+  "NotifyDaysBefore": "Avisera {count} dagar före",
+  "NotifyMe": "Avisera mig",
+  "NotifyNone": "Avisera inte",
+  "SuccessTitle": "Klart",
+  "Title": "Viktiga datum",
+  "TypeDisabledBirthdateHint": "{firstName} har redan ett födelsedatum",
+  "TypeDisabledHint": "{firstName} har redan födelsedag eller namnsdag",
+  "TypeDisabledNamedateHint": "{firstName} har redan en namnsdag",
+  "TypePlaceholder": "Välj typ",
+  "Types": {
+    "anniversary": "Årsdag",
+    "birthday": "Födelsedag",
+    "graduation": "Examen",
+    "nameday": "Namnsdag",
+    "other": "Övrigt"
+  },
+  "UniqueTypeError": "Du kan bara lägga till ett {type}.",
+  "UpdateError": "Kunde inte uppdatera viktiga datum",
+  "UpdateSuccess": "Viktiga datum uppdaterade"
+}

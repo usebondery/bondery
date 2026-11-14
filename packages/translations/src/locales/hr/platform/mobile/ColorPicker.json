@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Kod boje je kopiran u međuspremnik",
+  "CopyAccessibilityLabel": "Kopirati kod boje",
+  "CopyFailedMessage": "Kopiranje koda boje nije uspjelo. Pokušaj ponovno.",
+  "CustomColorLabel": "Prilagođena boja",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Unesi valjan heksadecimalni kod boje (npr. #AE3EC9)",
+  "SheetTitle": "Boja",
+  "SwatchesLabel": "Brze boje",
+  "TriggerAccessibilityHint": "Otvara birač boja"
+}

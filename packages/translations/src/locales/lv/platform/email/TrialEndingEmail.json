@@ -1,0 +1,9 @@
+{
+  "body": "Pēc tam tavs abonements tiks automātiski atjaunots, ja vien neatcelsit.",
+  "cta": "Pārvaldīt abonementu",
+  "endDateFallback": "drīzumā",
+  "heading": "Tavs Premium izmēģinājuma periods beidzas {{endDate}}",
+  "preview": "Tavs abonements tiek atjaunots, ja vien neatceļat",
+  "subject": "Tavs Bondery Premium izmēģinājuma periods drīz beigsies",
+  "whyReceiving": "Tu to saņemat, jo tev ir Bondery Premium izmēģinājuma versija."
+}

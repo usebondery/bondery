@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Handlinger",
+  "AddPerson": "Lägg till person",
+  "AddPersonDescription": "Opret en ny kontakt i ditt netværk",
+  "ContactUs": "Kontakt",
+  "ContactUsDescription": "Kontakt Bondery-teamet",
+  "Documentation": "Dokumentation",
+  "DocumentationDescription": "Læs Bondery-dokumentationen",
+  "ExportData": "Exportera data",
+  "ExportDataDescription": "Gem en kopia av dina Bondery-data",
+  "FindPerson": "Hitta person",
+  "FindPersonDescription": "Sök i netværket efter navn",
+  "GoToDescription": "Gå till {label}",
+  "HelpGroup": "Hjælp",
+  "ImportData": "Importera data",
+  "ImportDataDescription": "Importera en Bondery JSON-ZIP",
+  "LogInteraction": "Log interaktion",
+  "LogInteractionDescription": "Registrer ett nytt møde, samtal eller besked",
+  "NavigateGroup": "Navigering",
+  "NothingFound": "Ingen handlinger fundet",
+  "SearchPlaceholder": "Sök handlinger eller navigera…"
+}

@@ -1,0 +1,16 @@
+{
+  "Description": "Pomozi nam poboljšati Bondery podijelivši mišljenje. <3",
+  "ErrorMessage": "Slanje povratne informacije nije uspjelo. Pokušaj ponovno.",
+  "ErrorTitle": "Greška",
+  "GeneralFeedbackLabel": "Imaš li komentar, prijedlog ili grešku za podijeliti?",
+  "GeneralFeedbackPlaceholder": "Sviđa mi se/ne sviđa mi se ovaj dio aplikacije… Želim da se doda… Imam problem s…",
+  "NpsLabel": "Od 0 do 10, koliko je vjerojatno da ćeš preporučiti Bondery prijatelju ili kolegi?",
+  "NpsReasonLabel": "Zašto je ocjena {score}?",
+  "NpsReasonPlaceholder": "Zato što je značajka korisna/ima grešku/nedostaje…",
+  "SubmitButton": "Poslati povratnu informaciju razvojnom timu",
+  "SubmittingMessage": "Pričekaj dok šaljem tvoju povratnu informaciju",
+  "SubmittingTitle": "Šaljem povratnu informaciju…",
+  "SuccessMessage": "Primili smo tvoju povratnu informaciju",
+  "SuccessTitle": "Hvala!",
+  "Title": "Povratna informacija"
+}

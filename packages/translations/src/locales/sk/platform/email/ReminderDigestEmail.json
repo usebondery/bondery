@@ -1,0 +1,20 @@
+{
+  "cta": "Otvoriť pripomienky",
+  "dateTypes": {
+    "anniversary": "Výročí",
+    "birthday": "Narozeniny",
+    "graduation": "Promoce",
+    "nameday": "Svátek",
+    "other": "Dúležité dátum"
+  },
+  "dayMany": "{{count}} dní",
+  "dayOne": "1 den",
+  "description": "Na {{headingDate}}. Otvorte osobu pre podrobnosti alebo pošlete správu.",
+  "headingMany": "{{count}} pripomienok sa blíži",
+  "headingOne": "1 pripomienka sa blíži",
+  "preview": "{{firstPersonName}} — {{firstTypeLabel}} za {{firstRemainingLabel}}",
+  "previewMore": "{{firstPersonName}} — {{firstTypeLabel}} za {{firstRemainingLabel}} a ješte {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} sa blíži za {{remainingLabel}} dne {{dateLabel}}.",
+  "subject": "Pripomienky Bondery na {{targetDate}}",
+  "whyReceiving": "Tento e-mail dostávate, pretože máte zapnuté pripomienky na tieto dáta."
+}
