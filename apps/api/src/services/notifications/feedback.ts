@@ -41,7 +41,7 @@ export async function sendFeedbackEmail(
   }
 
   const config = requireEmailConfig();
-  const lng = await resolveEmailLocale(input.userId);
+  const lng = (await resolveEmailLocale(input.userId)).locale;
   const bundle = loadEmailNamespace(lng, "FeedbackEmail");
   const copy = buildFeedbackCopy(bundle);
   const timestamp = new Date().toISOString();

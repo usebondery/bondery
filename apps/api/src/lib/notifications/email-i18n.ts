@@ -1,6 +1,12 @@
 import {
-  buildIntlLocaleTag,
+  type DateTimeFormatContext,
+  formatUserDate,
+  type UserDateStyle,
+} from "@bondery/helpers/date";
+import {
+  coerceDateFormatPreference,
   coerceSupportedLocale,
+  coerceTimeFormatPreference,
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   type SupportedLocale,
@@ -9,15 +15,49 @@ import { loadNamespace } from "@bondery/translations/loader";
 
 export type EmailCopyValues = Record<string, string | number | boolean | null | undefined>;
 
+export type EmailFormatContext = DateTimeFormatContext & { locale: SupportedLocale };
+
+export function defaultEmailFormatContext(): EmailFormatContext {
+  return {
+    dateFormat: "locale",
+    locale: DEFAULT_LOCALE,
+    timeFormat: "24h",
+    timeZone: "UTC",
+  };
+}
+
+function contextFromSettingsRow(row: {
+  dateFormat: string | null;
+  language: string | null;
+  timeFormat: string | null;
+  timezone: string | null;
+}): EmailFormatContext {
+  return {
+    dateFormat: coerceDateFormatPreference(row.dateFormat),
+    locale: coerceSupportedLocale(row.language) ?? DEFAULT_LOCALE,
+    timeFormat: coerceTimeFormatPreference(row.timeFormat),
+    timeZone: row.timezone || "UTC",
+  };
+}
+
 export async function resolveEmailLocale(
   userId: string | null | undefined,
-): Promise<SupportedLocale> {
+): Promise<EmailFormatContext> {
   if (!userId) {
-    return DEFAULT_LOCALE;
+    return defaultEmailFormatContext();
   }
 
-  const { getUserSettingsLanguage } = await import("../auth/get-user-settings-language.js");
-  return (await getUserSettingsLanguage(userId)) ?? DEFAULT_LOCALE;
+  const { prisma } = await import("@bondery/db");
+  const settings = await prisma.userSettings.findUnique({
+    select: { dateFormat: true, language: true, timeFormat: true, timezone: true },
+    where: { userId },
+  });
+
+  if (!settings) {
+    return defaultEmailFormatContext();
+  }
+
+  return contextFromSettingsRow(settings);
 }
 
 export function loadEmailNamespace(
@@ -49,26 +89,23 @@ export function readCopyString(
 
 export function formatEmailDate(
   date: Date,
-  lng: SupportedLocale,
-  style: "medium" | "long" = "medium",
+  ctx: EmailFormatContext,
+  style: Extract<UserDateStyle, "medium" | "long"> = "medium",
 ): string {
-  return date.toLocaleDateString(buildIntlLocaleTag(lng, "24h"), {
-    dateStyle: style,
-    timeZone: "UTC",
-  });
+  return formatUserDate(date, { ...ctx, timeZone: "UTC" }, style);
 }
 
 export function formatEmailDateFromIso(
   isoDate: string,
-  lng: SupportedLocale,
-  style: "medium" | "long" = "medium",
+  ctx: EmailFormatContext,
+  style: Extract<UserDateStyle, "medium" | "long"> = "medium",
 ): string {
   const parsed = new Date(`${isoDate}T00:00:00Z`);
   if (Number.isNaN(parsed.getTime())) {
     return isoDate;
   }
 
-  return formatEmailDate(parsed, lng, style);
+  return formatEmailDate(parsed, ctx, style);
 }
 
 export function preloadEmailNamespaces(
@@ -88,25 +125,25 @@ export function getPreloadedCopy(
 
 export async function resolveEmailLocalesForUsers(
   userIds: string[],
-): Promise<Map<string, SupportedLocale>> {
+): Promise<Map<string, EmailFormatContext>> {
   const uniqueIds = [...new Set(userIds)];
-  const localeByUserId = new Map<string, SupportedLocale>(
-    uniqueIds.map((userId) => [userId, DEFAULT_LOCALE]),
+  const formatByUserId = new Map<string, EmailFormatContext>(
+    uniqueIds.map((userId) => [userId, defaultEmailFormatContext()]),
   );
 
   if (uniqueIds.length === 0) {
-    return localeByUserId;
+    return formatByUserId;
   }
 
   const { prisma } = await import("@bondery/db");
   const settings = await prisma.userSettings.findMany({
-    select: { language: true, userId: true },
+    select: { dateFormat: true, language: true, timeFormat: true, timezone: true, userId: true },
     where: { userId: { in: uniqueIds } },
   });
 
   for (const row of settings) {
-    localeByUserId.set(row.userId, coerceSupportedLocale(row.language) ?? DEFAULT_LOCALE);
+    formatByUserId.set(row.userId, contextFromSettingsRow(row));
   }
 
-  return localeByUserId;
+  return formatByUserId;
 }

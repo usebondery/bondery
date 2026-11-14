@@ -216,7 +216,7 @@ export async function shareContact(
     whatsapp: has("whatsapp") ? (enriched.whatsapp ?? undefined) : undefined,
   };
 
-  const lng = await resolveEmailLocale(user.id);
+  const lng = (await resolveEmailLocale(user.id)).locale;
   const bundle = loadEmailNamespace(lng, "ShareContactEmailBody");
   const copy = buildShareContactCopy(bundle);
   const subject = readCopyString(bundle, "subject", {
