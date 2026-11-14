@@ -117,8 +117,12 @@ function checkIdentity(manifest, label) {
       `${label}: license must be "${EXPECTED_LICENSE}" (got ${JSON.stringify(manifest.license)})`,
     );
   }
-  if (manifest.author?.name !== "Bondery" || manifest.author?.url !== "https://usebondery.com") {
-    check.add(`${label}: author must be Bondery at https://usebondery.com`);
+  if (
+    manifest.author?.name !== "Bondery" ||
+    manifest.author?.email !== "team@usebondery.com" ||
+    manifest.author?.url !== "https://usebondery.com"
+  ) {
+    check.add(`${label}: author must be Bondery at team@usebondery.com and https://usebondery.com`);
   }
   const rootVersion = readRootVersion();
   if (!rootVersion) {
@@ -205,10 +209,20 @@ function checkManifest(host) {
     check.add(`${label}: shortDescription must be 30 characters or fewer (got ${length}).`);
   }
   checkHttpsFields(label, iface, OPENAI_URL_FIELDS);
-  for (const field of ["composerIcon", "logo"]) {
-    if (iface[field] !== undefined) {
-      checkBundleFile(label, field, iface[field], pluginDir(host));
-    }
+  for (const field of ["composerIcon", "composerIconDark", "logo", "logoDark"]) {
+    checkBundleFile(label, field, iface[field], pluginDir(host));
+  }
+  const brandColor = iface.brandColor ?? "";
+  const sameBrand = iface.brandColor === iface.brandColorDark;
+  if (!/^#[0-9a-fA-F]{6}$/.test(brandColor) || !sameBrand) {
+    check.add(`${label}: brandColor and brandColorDark must be the same #RRGGBB brand color.`);
+  }
+  if (iface.onboardingSkill !== "./skills/onboarding/SKILL.md") {
+    check.add(`${label}: onboardingSkill must be ./skills/onboarding/SKILL.md.`);
+  }
+  const countries = manifest.extensions?.["com.openai"]?.publication?.countries;
+  if (!Array.isArray(countries)) {
+    check.add(`${label}: publication.countries must be an array. [] means no country limit.`);
   }
 }
 

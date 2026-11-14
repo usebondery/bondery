@@ -1,5 +1,6 @@
 {
   "author": {
+    "email": "team@usebondery.com",
     "name": "Bondery",
     "url": "https://usebondery.com"
   },
@@ -34,6 +35,10 @@
       "developerName": "Bondery",
       "longDescription": "Bondery keeps the people you know, what you talked about, and when you last reached out. It can brief you before a meeting, learn about someone before you meet, save a conversation, show who to reach out to, and email a contact card after you confirm the recipients and fields. Catch up, get to know, and reach out only read. Remember and share write, and they need Full access. You get only the records a tool returns. Bondery does not send your full address book.",
       "mcpType": "streamable-http",
+      "onboardingSkill": "./skills/onboarding/SKILL.md",
+      "publication": {
+        "countries": []
+      },
       "readmeConnect": "## Connect\n\n1. Install the Bondery plugin in ChatGPT or Codex.\n2. Connect the Bondery plugin.\n3. Sign in to your Bondery account.\n4. Approve **Read only** or **Full access**.\n\nInstall does not sign you in. Connect the Bondery plugin in ChatGPT or Codex, then sign in.\n\nEach person signs in with their own account.\n\nTo connect a self-hosted API instead, add `{apiBaseUrl}/mcp` as a custom connector.",
       "review": {
         "commerce": false,

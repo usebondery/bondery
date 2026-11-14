@@ -4,11 +4,16 @@ import { dirname, join, resolve } from "node:path";
 import { describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
-import { loadPluginSource, renderClaudeTree, renderOpenAiTree } from "./build-llm-plugins.mjs";
+import {
+  loadPluginSource,
+  readBrandPrimaryColor,
+  renderClaudeTree,
+  renderOpenAiTree,
+} from "./build-llm-plugins.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const FIXTURE_VERSION = "0.0.0-fixture";
-const SKILLS = ["catch-up", "get-to-know", "reach-out", "remember", "share-person"];
+const SKILLS = ["catch-up", "get-to-know", "onboarding", "reach-out", "remember", "share-person"];
 
 const { config, files } = loadPluginSource(root);
 const claude = renderClaudeTree(config, files, FIXTURE_VERSION);
@@ -37,6 +42,22 @@ describe("llm plugin build", () => {
     assert.equal(Object.hasOwn(auth.client, "clientId"), false);
     assert.equal(Object.hasOwn(auth.client, "clientSecret"), false);
     assert.equal(JSON.stringify(openaiMcp).includes("clientSecret"), false);
+  });
+
+  it("sets brand colors, dark icons, author email, and an unrestricted country list", () => {
+    const brand = readBrandPrimaryColor(root);
+    const manifest = json(openai, "plugin.json");
+    const iface = manifest.extensions["com.openai"].interface;
+    assert.equal(manifest.author.email, "team@usebondery.com");
+    assert.equal(json(claude, ".claude-plugin/plugin.json").author.email, "team@usebondery.com");
+    assert.equal(iface.brandColor, brand);
+    assert.equal(iface.brandColorDark, brand);
+    assert.equal(iface.logoDark, "./assets/icon.png");
+    assert.equal(iface.composerIconDark, "./assets/icon.png");
+    assert.equal(iface.onboardingSkill, "./skills/onboarding/SKILL.md");
+    assert.deepEqual(manifest.extensions["com.openai"].publication.countries, []);
+    assert.match(openai.get("skills/onboarding/SKILL.md").toString("utf8"), /`catch-up`/);
+    assert.match(openai.get("skills/onboarding/SKILL.md").toString("utf8"), /`share-person`/);
   });
 
   it("keeps the OpenAI subtitle within 30 characters", () => {
