@@ -8,7 +8,7 @@ import {
   watch,
   writeFileSync,
 } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, relative, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveTypescriptTsc } from "../../../scripts/pkg/resolve-typescript-tsc.mjs";
 
@@ -18,12 +18,79 @@ const srcLocales = join(packageRoot, "src", "locales");
 const distLocales = join(packageRoot, "dist", "locales");
 const srcManifest = join(packageRoot, "manifest.json");
 const distManifest = join(packageRoot, "dist", "manifest.json");
-const distStamp = join(packageRoot, "dist", "generated", "locale-watch-stamp.js");
 const generateResourceMap = join(packageRoot, "scripts", "generate-resource-map.mjs");
 
+/**
+ * Restart trigger for `tsx watch` in apps/api.
+ *
+ * The API imports locale JSON as modules, so a content edit is visible only
+ * after a process restart. This stamp lives outside every `dist` directory, so
+ * a package build cannot delete it and storm the watcher. The API watches this
+ * one file instead of the 27 email folders.
+ */
+const emailStampPath = resolve(packageRoot, "../../.temp/translations-email-stamp.json");
+
 const POLL_MS = 500;
-const DEBOUNCE_MS = 400;
-const STAMP_REWATCH_MS = 400;
+
+/** Absolute source path to `${size}:${mtimeMs}`. */
+let fingerprints = new Map();
+/** Relative path list of the last observed file set. */
+let fileSet = "";
+/** Paths reported by `fs.watch` since the last sync. */
+let candidates = new Set();
+
+function isEmailLocalePath(absolutePath) {
+  return absolutePath.split(sep).join("/").includes("/platform/email/");
+}
+
+/** Touch the API restart stamp. A changed stamp restarts `tsx watch`. */
+function touchEmailStamp() {
+  try {
+    mkdirSync(resolve(emailStampPath, ".."), { recursive: true });
+    writeFileSync(emailStampPath, `${JSON.stringify({ changedAt: Date.now() })}\n`);
+  } catch (error) {
+    console.error("[translations] could not write email stamp:", error);
+  }
+}
+
+function walkLocaleJson(dir, acc) {
+  if (!existsSync(dir)) {
+    return;
+  }
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      walkLocaleJson(fullPath, acc);
+    } else if (entry.name.endsWith(".json")) {
+      acc.push(fullPath);
+    }
+  }
+}
+
+function fingerprintOf(path) {
+  try {
+    const stats = statSync(path);
+    return `${stats.size}:${stats.mtimeMs}`;
+  } catch {
+    return undefined;
+  }
+}
+
+/** @returns {{ files: string[], map: Map<string, string>, set: string }} */
+function scanLocales() {
+  const files = [];
+  walkLocaleJson(srcLocales, files);
+  files.sort();
+  const map = new Map();
+  for (const file of files) {
+    map.set(file, fingerprintOf(file) ?? "missing");
+  }
+  return {
+    files,
+    map,
+    set: files.map((file) => relative(srcLocales, file).split(sep).join("/")).join("\n"),
+  };
+}
 
 function copyRecursive(src, dest) {
   if (!existsSync(src)) {
@@ -41,44 +108,7 @@ function copyRecursive(src, dest) {
   }
 }
 
-function collectLocaleJson(dir, files) {
-  if (!existsSync(dir)) {
-    return;
-  }
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const fullPath = join(dir, entry.name);
-    if (entry.isDirectory()) {
-      collectLocaleJson(fullPath, files);
-    } else if (entry.name.endsWith(".json")) {
-      files.push(fullPath);
-    }
-  }
-}
-
-function fingerprintLocales() {
-  const files = [];
-  collectLocaleJson(srcLocales, files);
-  files.sort();
-  const lines = [];
-  for (const file of files) {
-    try {
-      const stats = statSync(file);
-      lines.push(`${file}:${stats.size}:${stats.mtimeMs}`);
-    } catch {
-      lines.push(`${file}:missing`);
-    }
-  }
-  if (existsSync(srcManifest)) {
-    const stats = statSync(srcManifest);
-    lines.push(`manifest:${stats.size}:${stats.mtimeMs}`);
-  }
-  return {
-    count: files.length,
-    fileSet: files.map((file) => file.replaceAll("\\", "/")).join("\n"),
-    key: lines.join("\n"),
-  };
-}
-
+/** Initial sync only. Later work goes through `copyOne`. */
 function copyArtifacts() {
   copyRecursive(srcLocales, distLocales);
   if (existsSync(srcManifest)) {
@@ -87,9 +117,21 @@ function copyArtifacts() {
   }
 }
 
-function writeWatchStamp() {
-  mkdirSync(join(packageRoot, "dist", "generated"), { recursive: true });
-  writeFileSync(distStamp, `export const localeWatchStamp = ${Date.now()};\n`);
+/**
+ * Copy one source file to its `dist` path.
+ *
+ * @param {string} absoluteSource
+ * @returns {boolean} true when the copy ran
+ */
+function copyOne(absoluteSource) {
+  const relativePath = relative(srcLocales, absoluteSource);
+  if (relativePath.startsWith("..") || relativePath === "") {
+    return false;
+  }
+  const target = join(distLocales, relativePath);
+  mkdirSync(join(target, ".."), { recursive: true });
+  copyFileSync(absoluteSource, target);
+  return true;
 }
 
 function runResourceMap() {
@@ -102,70 +144,103 @@ function runResourceMap() {
   }
 }
 
-let lastFingerprint = "";
-let lastFileSet = "";
-let syncing = false;
-let pendingReason = null;
-let debounceTimer;
-let stampRewriteTimer;
-
-function maybeSync(reason) {
-  if (syncing) {
-    pendingReason = reason;
-    return;
+/**
+ * Resolve a `fs.watch` filename to absolute source paths.
+ *
+ * Windows sends `\` separators and may send an empty filename. An empty name
+ * means "unknown file", so the caller falls back to a full diff.
+ *
+ * @param {string | Buffer | null | undefined} filename
+ * @returns {string[]}
+ */
+function changedPathsFromWatch(filename) {
+  if (typeof filename !== "string" || filename.length === 0) {
+    return [];
   }
-
-  const snap = fingerprintLocales();
-  if (snap.key === lastFingerprint) {
-    return;
+  const absolute = join(srcLocales, filename);
+  if (absolute.endsWith(".json")) {
+    return [absolute];
   }
-
-  syncing = true;
-  try {
-    const fileSetChanged = snap.fileSet !== lastFileSet;
-    copyArtifacts();
-    if (fileSetChanged) {
-      runResourceMap();
-    }
-    // Delay the JS-byte poke so tsc --watch does not overwrite the stamp with `0`.
-    clearTimeout(stampRewriteTimer);
-    stampRewriteTimer = setTimeout(writeWatchStamp, STAMP_REWATCH_MS);
-    lastFingerprint = snap.key;
-    lastFileSet = snap.fileSet;
-    const extra = fileSetChanged ? ", resource-map" : "";
-    console.log(`[translations] synced ${snap.count} locale JSON → dist (${reason}${extra})`);
-  } catch (error) {
-    console.error("[translations] sync failed:", error);
-  } finally {
-    syncing = false;
-    if (pendingReason) {
-      const nextReason = pendingReason;
-      pendingReason = null;
-      maybeSync(nextReason);
-    }
-  }
+  const nested = [];
+  walkLocaleJson(absolute, nested);
+  return nested;
 }
 
-function scheduleSync(reason) {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(() => {
-    maybeSync(reason);
-  }, DEBOUNCE_MS);
+/**
+ * Copy the changed files and regenerate the resource map when the set changed.
+ *
+ * The watcher reports candidate paths. A candidate is copied only when its
+ * fingerprint differs. Files that `fs.watch` did not report still pass the
+ * same check, so a missed event costs one full stat pass, not a full copy.
+ */
+function sync() {
+  const snapshot = scanLocales();
+  const setChanged = snapshot.set !== fileSet;
+  const watched = [...candidates].filter(Boolean);
+  candidates = new Set();
+
+  const toCopy = [];
+  for (const path of snapshot.map.keys()) {
+    if (snapshot.map.get(path) !== fingerprints.get(path)) {
+      toCopy.push(path);
+    }
+  }
+
+  if (toCopy.length === 0 && !setChanged) {
+    return;
+  }
+
+  let copied = 0;
+  for (const path of toCopy) {
+    if (copyOne(path)) {
+      copied += 1;
+    }
+  }
+  if (existsSync(srcManifest)) {
+    mkdirSync(join(packageRoot, "dist"), { recursive: true });
+    copyFileSync(srcManifest, distManifest);
+  }
+  if (setChanged) {
+    runResourceMap();
+  }
+
+  fingerprints = snapshot.map;
+  fileSet = snapshot.set;
+
+  if (toCopy.some(isEmailLocalePath)) {
+    touchEmailStamp();
+  }
+
+  // Dev webapp reads locale JSON from disk through `diskResourceLoader`.
+  // A content edit needs no JS recompile, so this script writes no
+  // locale-watch-stamp. A stamp write made Turbopack reload the whole app.
+  const names = toCopy.map((path) => relative(srcLocales, path)).join(", ");
+  const source = names || `${watched.length} watched path(s)`;
+  const extra = setChanged ? ", resource-map" : "";
+  console.log(`[translations] copied ${copied} file(s): ${source}${extra}`);
 }
 
 copyArtifacts();
 runResourceMap();
-const initial = fingerprintLocales();
-lastFingerprint = initial.key;
-lastFileSet = initial.fileSet;
-console.log(`[translations] watching ${initial.count} locale JSON files`);
+const initial = scanLocales();
+fingerprints = initial.map;
+fileSet = initial.set;
+console.log(`[translations] watching ${initial.files.length} locale JSON files`);
 
 if (existsSync(srcLocales)) {
   try {
     // Windows often emits `rename` for atomic saves; do not filter to `change`.
     watch(srcLocales, { recursive: true }, (eventType, filename) => {
-      const file = typeof filename === "string" ? filename : "";
-      scheduleSync(file ? `fs.watch ${eventType}: ${file}` : `fs.watch ${eventType}`);
+      const paths = changedPathsFromWatch(filename);
+      if (paths.length === 0) {
+        // Unknown path: keep the empty marker so `sync` diffs every file.
+        candidates.add("");
+        return;
+      }
+      for (const path of paths) {
+        candidates.add(path);
+      }
+      void eventType;
     });
   } catch (error) {
     console.warn("[translations] fs.watch unavailable; poll-only", error);
@@ -173,8 +248,10 @@ if (existsSync(srcLocales)) {
 }
 
 setInterval(() => {
-  if (fingerprintLocales().key !== lastFingerprint) {
-    scheduleSync("poll");
+  try {
+    sync();
+  } catch (error) {
+    console.error("[translations] sync failed:", error);
   }
 }, POLL_MS);
 

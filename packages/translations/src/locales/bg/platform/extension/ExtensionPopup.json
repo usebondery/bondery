@@ -1,25 +1,25 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Open Bondery"
+    "OpenBondery": "Открыть Bondery"
   },
   "LoggedOut": {
-    "Description": "Connect your account to save contacts from social media.",
-    "SignIn": "Sign in",
-    "Title": "Sign in to Bondery"
+    "Description": "Подключите аккаунт, чтобы сохранять контакты из соцсетей.",
+    "SignIn": "Войти",
+    "Title": "Войти в Bondery"
   },
   "PersonActions": {
-    "AddInteraction": "Add interaction with this person"
+    "AddInteraction": "Добавяне взаимодействие с этим човеком"
   },
   "Settings": {
-    "ApiServer": "API server",
-    "SignOut": "Sign out"
+    "ApiServer": "Сервер API",
+    "SignOut": "Выйти"
   },
   "UpdateRequired": {
-    "Description": "Your Bondery extension is outdated and may not work correctly. Please update to continue.",
-    "OpenExtensionsPage": "Open Extensions Page",
-    "Title": "Update Required"
+    "Description": "Расширение Bondery устарело и может работать некорректно. Обновите его, чтобы продолжить.",
+    "OpenExtensionsPage": "Открыть страницу расширений",
+    "Title": "Требуется обновление"
   },
   "Welcome": {
-    "ConnectButton": "Connect your Bondery account"
+    "ConnectButton": "Подключить аккаунт Bondery"
   }
 }

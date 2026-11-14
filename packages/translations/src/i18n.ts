@@ -14,5 +14,3 @@ export {
   type SupportedLocale,
   type TranslationManifest,
 } from "#config.js";
-
-export { loadNamespace, resourceLoader } from "#loader.js";

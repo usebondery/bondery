@@ -1,6 +1,6 @@
 {
-  "LanguageLabel": "Preferred Language",
-  "LanguagePlaceholder": "Select language...",
-  "TimezoneLabel": "Timezone",
-  "TimezonePlaceholder": "Select timezone..."
+  "LanguageLabel": "Бажана мова",
+  "LanguagePlaceholder": "Избери мову...",
+  "TimezoneLabel": "Часовии пояс",
+  "TimezonePlaceholder": "Избери годинии пояс..."
 }

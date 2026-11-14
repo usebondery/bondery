@@ -7,9 +7,11 @@
     "nameday": "Namenstag",
     "other": "Wichtiges Datum"
   },
+  "dayFew": "{{count}} Tage",
   "dayMany": "{{count}} Tage",
   "dayOne": "1 Tag",
   "description": "Für {{headingDate}}. Öffnen Sie eine Person für Details oder senden Sie eine Nachricht.",
+  "headingFew": "{{count}} Erinnerungen stehen an",
   "headingMany": "{{count}} Erinnerungen stehen an",
   "headingOne": "1 Erinnerung steht an",
   "preview": "{{firstPersonName}}s {{firstTypeLabel}} in {{firstRemainingLabel}}",

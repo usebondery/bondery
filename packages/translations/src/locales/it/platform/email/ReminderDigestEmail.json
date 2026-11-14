@@ -7,9 +7,11 @@
     "nameday": "onomastico",
     "other": "data importante"
   },
+  "dayFew": "{{count}} giorni",
   "dayMany": "{{count}} giorni",
   "dayOne": "1 giorno",
   "description": "Per il {{headingDate}}. Apri una persona per i dettagli o invia un messaggio.",
+  "headingFew": "{{count}} promemoria in arrivo",
   "headingMany": "{{count}} promemoria in arrivo",
   "headingOne": "1 promemoria in arrivo",
   "preview": "{{firstTypeLabel}} di {{firstPersonName}} tra {{firstRemainingLabel}}",

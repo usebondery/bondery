@@ -7,9 +7,11 @@
     "nameday": "Navnedag",
     "other": "Vigtig dato"
   },
+  "dayFew": "{{count}} dage",
   "dayMany": "{{count}} dage",
   "dayOne": "1 dag",
   "description": "For {{headingDate}}. Åbn en person for at se detaljer eller sende en besked.",
+  "headingFew": "{{count}} påmindelser på vej",
   "headingMany": "{{count}} påmindelser på vej",
   "headingOne": "1 påmindelse på vej",
   "preview": "{{firstPersonName}}s {{firstTypeLabel}} om {{firstRemainingLabel}}",

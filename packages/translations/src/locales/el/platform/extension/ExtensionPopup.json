@@ -1,25 +1,25 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Ouvrir Bondery"
+    "OpenBondery": "Άνοιγμα Bondery"
   },
   "LoggedOut": {
-    "Description": "Connectez votre compte pour enregistrer des contacts depuis les réseaux sociaux.",
-    "SignIn": "Se connecter",
-    "Title": "Connexion à Bondery"
+    "Description": "Σύνδεσε τον λογαριασμό σου για να αποθηκεύεις επαφές από social media.",
+    "SignIn": "Σύνδεση",
+    "Title": "Σύνδεση στο Bondery"
   },
   "PersonActions": {
-    "AddInteraction": "Ajouter une interaction avec cette personne"
+    "AddInteraction": "Προσθήκη αλληλεπίδρασης με αυτό το άτομο"
   },
   "Settings": {
-    "ApiServer": "Serveur API",
-    "SignOut": "Se déconnecter"
+    "ApiServer": "Διακομιστής API",
+    "SignOut": "Αποσύνδεση"
   },
   "UpdateRequired": {
-    "Description": "Votre extension Bondery est obsolète et peut ne plus fonctionner correctement. Mettez-la à jour pour continuer.",
-    "OpenExtensionsPage": "Ouvrir la page des extensions",
-    "Title": "Mise à jour requise"
+    "Description": "Η επέκταση Bondery είναι παρωχημένη και μπορεί να μην λειτουργεί σωστά. Ενημέρωσέ την για να συνεχίσεις.",
+    "OpenExtensionsPage": "Άνοιγμα σελίδας επεκτάσεων",
+    "Title": "Απαιτείται ενημέρωση"
   },
   "Welcome": {
-    "ConnectButton": "Connecter le compte Bondery"
+    "ConnectButton": "Σύνδεση λογαριασμού Bondery"
   }
 }

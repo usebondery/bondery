@@ -7,9 +7,11 @@
     "nameday": "Naamdag",
     "other": "Belangrijke datum"
   },
+  "dayFew": "{{count}} dagen",
   "dayMany": "{{count}} dagen",
   "dayOne": "1 dag",
   "description": "Voor {{headingDate}}. Open een persoon voor details of stuur een bericht.",
+  "headingFew": "{{count}} aankomende herinneringen",
   "headingMany": "{{count}} aankomende herinneringen",
   "headingOne": "1 aankomende herinnering",
   "preview": "{{firstTypeLabel}} van {{firstPersonName}} over {{firstRemainingLabel}}",

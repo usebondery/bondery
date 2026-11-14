@@ -1,22 +1,22 @@
 {
-  "description": "{{senderName}} shared this contact with you",
-  "footerNotes": "Sent with Bondery. Reply to this email to reach {{senderName}}.",
+  "description": "{{senderName}} поделился с тии этим контактом",
+  "footerNotes": "Отправлено след Bondery. Ответьте на это письмо, чтобы связаться с {{senderName}}.",
   "importantDateLine": "{{label}}: {{date}} ({{type}})",
   "labels": {
-    "address": "Address",
-    "email": "Email",
+    "address": "Адрес",
+    "email": "Эл. почта",
     "facebook": "Facebook",
-    "importantDates": "Important dates",
+    "importantDates": "Важные даты",
     "instagram": "Instagram",
     "linkedin": "LinkedIn",
-    "location": "Location",
-    "notes": "Notes",
-    "phone": "Phone",
+    "location": "Местоположение",
+    "notes": "Заметки",
+    "phone": "Телефон",
     "signal": "Signal",
-    "website": "Website",
+    "website": "Сайт",
     "whatsapp": "WhatsApp"
   },
-  "previewFallback": "Phone, email, and other details inside",
-  "replyCta": "Reply to {{senderName}}",
-  "subject": "{{senderName}} shared a contact with you • {{contactName}}"
+  "previewFallback": "Телефон, эл. почта и другие данные внутри",
+  "replyCta": "Ответить {{senderName}}",
+  "subject": "{{senderName}} поделился контактом • {{contactName}}"
 }

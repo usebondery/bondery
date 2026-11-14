@@ -1,22 +1,22 @@
 {
   "Category": {
-    "Activities": "Activités",
-    "Animals": "Animaux",
-    "Buildings": "Bâtiments",
-    "Celebrations": "Fêtes",
-    "Food": "Nourriture",
-    "Hearts": "Cœurs",
-    "Humans": "Humains",
-    "Miscellaneous": "Divers",
-    "Nature": "Nature",
-    "Objects": "Objets",
-    "Sports": "Sport",
-    "Travel": "Voyage",
-    "Work": "Travail"
+    "Activities": "Δραστηριότητες",
+    "Animals": "Ζώα",
+    "Buildings": "Κτίρια",
+    "Celebrations": "Γιορτές",
+    "Food": "Φαγητό",
+    "Hearts": "Καρδιές",
+    "Humans": "Άνθρωποι",
+    "Miscellaneous": "Διάφορα",
+    "Nature": "Φύση",
+    "Objects": "Αντικείμενα",
+    "Sports": "Αθλητισμός",
+    "Travel": "Ταξίδια",
+    "Work": "Δουλειά"
   },
-  "EmptySearch": "Aucun emoji trouvé",
-  "RandomAccessibilityLabel": "Choisir un emoji au hasard",
-  "SearchPlaceholder": "Rechercher des emojis…",
+  "EmptySearch": "Δεν βρέθηκαν emoji",
+  "RandomAccessibilityLabel": "Τυχαίο emoji",
+  "SearchPlaceholder": "Αναζήτηση emoji…",
   "SheetTitle": "Emoji",
-  "TriggerAccessibilityHint": "Ouvre le sélecteur d’emoji"
+  "TriggerAccessibilityHint": "Ανοίγει τον επιλογέα emoji"
 }

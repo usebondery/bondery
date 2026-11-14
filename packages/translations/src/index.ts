@@ -32,4 +32,3 @@ export type {
   TranslateFn,
   WebNamespace,
 } from "#i18n-types.js";
-export { loadNamespace, resourceLoader } from "#loader.js";

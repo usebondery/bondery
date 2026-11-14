@@ -7,9 +7,11 @@
     "nameday": "İsim günü",
     "other": "Önemli tarih"
   },
+  "dayFew": "{{count}} gün",
   "dayMany": "{{count}} gün",
   "dayOne": "1 gün",
   "description": "{{headingDate}} için. Ayrıntılar veya mesaj göndermek için kişiyi aç.",
+  "headingFew": "{{count}} yaklaşan hatırlatıcı",
   "headingMany": "{{count}} yaklaşan hatırlatıcı",
   "headingOne": "1 yaklaşan hatırlatıcı",
   "preview": "{{firstPersonName}} — {{firstTypeLabel}} {{firstRemainingLabel}} içinde",

@@ -1,22 +1,22 @@
 {
   "Category": {
-    "Activities": "Activities",
-    "Animals": "Animals",
-    "Buildings": "Buildings",
-    "Celebrations": "Celebrations",
-    "Food": "Food",
-    "Hearts": "Hearts",
-    "Humans": "Humans",
-    "Miscellaneous": "Miscellaneous",
-    "Nature": "Nature",
-    "Objects": "Objects",
-    "Sports": "Sports",
-    "Travel": "Travel",
-    "Work": "Work"
+    "Activities": "Aktivity",
+    "Animals": "Zvířata",
+    "Buildings": "Budovy",
+    "Celebrations": "Oslavy",
+    "Food": "Jídlo",
+    "Hearts": "Srdce",
+    "Humans": "Lidé",
+    "Miscellaneous": "Různé",
+    "Nature": "Příroda",
+    "Objects": "Předměty",
+    "Sports": "Sport",
+    "Travel": "Cestování",
+    "Work": "Práce"
   },
-  "EmptySearch": "No emojis found",
-  "RandomAccessibilityLabel": "Pick a random emoji",
-  "SearchPlaceholder": "Search emojis…",
-  "SheetTitle": "Emoji",
-  "TriggerAccessibilityHint": "Opens emoji picker"
+  "EmptySearch": "Žádná emojii nenalezena",
+  "RandomAccessibilityLabel": "Vybrat náhodné emojii",
+  "SearchPlaceholder": "Hledat emojii…",
+  "SheetTitle": "Emojii",
+  "TriggerAccessibilityHint": "Otevře výběr emojii"
 }

@@ -37,9 +37,12 @@ ${imports.join("\n")}
 
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 
-export const resourcesByNamespace = {
+export const resourcesByNamespace: Record<
+  string,
+  Record<SupportedLocale, Record<string, unknown>>
+> = {
 ${mapEntries.join("\n")}
-} satisfies Record<string, Record<SupportedLocale, Record<string, unknown>>>;
+};
 
 void localeWatchStamp;
 `;

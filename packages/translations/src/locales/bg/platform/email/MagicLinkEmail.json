@@ -1,9 +1,9 @@
 {
-  "body": "This sign-in link expires in 15 minutes.",
-  "cta": "Sign in to Bondery",
-  "heading": "Your sign-in link",
-  "ignore": "If you didn't ask for this, you can ignore this email.",
-  "preview": "Expires in 15 minutes",
-  "subject": "Your Bondery sign-in link",
-  "whyReceiving": "You're receiving this because someone (hopefully you) asked to sign in to Bondery with this email."
+  "body": "Эта ссылка для входа истекает след 15 минут.",
+  "cta": "Войти в Bondery",
+  "heading": "Твойа ссылка для входа",
+  "ignore": "Если ти не запрашивали вход, можете проигнорировать это письмо.",
+  "preview": "Истекает след 15 минут",
+  "subject": "Ссылка для входа в Bondery",
+  "whyReceiving": "Ти получили это письмо, потому что кто-то (надеемся, вы) запросил вход в Bondery с этого адреса."
 }

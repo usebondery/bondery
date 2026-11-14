@@ -1,3 +1,8 @@
+export {
+  displayContinentName,
+  displayRegionName,
+  displayTimeZoneCity,
+} from "#locale/display-names.js";
 export type {
   AppLanguageData,
   AppLanguageExonymTranslator,

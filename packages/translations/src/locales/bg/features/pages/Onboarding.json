@@ -1,34 +1,34 @@
 {
   "Import": {
-    "ChoosePlatform": "Which platform did you request?",
-    "Description": "Bring your existing network into Bondery from LinkedIn, Instagram, or add them manually.",
-    "Finish": "Get started",
-    "Instagram": "Import from Instagram",
-    "InstagramDescription": "Upload your Instagram followers/following data.",
-    "LinkedIn": "Import from LinkedIn",
-    "LinkedInDescription": "Upload your LinkedIn connections export file.",
-    "ManualAdd": "Create manually",
-    "SkipImport": "Skip import",
-    "SuccessDescription": "{imported} imported, {updated} updated, {skipped} skipped.",
-    "SuccessTitle": "Import complete!",
-    "Title": "Import your contacts",
-    "WaitingForExport": "I'm waiting for my export"
+    "ChoosePlatform": "С какой платформы ти запросили экспорт?",
+    "Description": "Перенесите существующую мрежа из LinkedIn, Instagram или добавьте вручную.",
+    "Finish": "Начать",
+    "Instagram": "Импорт из Instagram",
+    "InstagramDescription": "Загрузите данные подписчиков Instagram.",
+    "LinkedIn": "Импорт из LinkedIn",
+    "LinkedInDescription": "Загрузите файл экспорта контактов LinkedIn.",
+    "ManualAdd": "Създаване вручную",
+    "SkipImport": "Пропускане импорт",
+    "SuccessDescription": "Импортировано: {imported}, обновлено: {updated}, пропущено: {skipped}.",
+    "SuccessTitle": "Импорт завершён!",
+    "Title": "Импорт контактов",
+    "WaitingForExport": "Жду экспорт"
   },
   "Intent": {
-    "both": "Both",
-    "Description": "We'll use this to personalize Bondery for you.",
-    "personal": "Friends & Family",
-    "professional": "Professional",
-    "Title": "How will you use Bondery?"
+    "both": "И то, и другое",
+    "Description": "Это поможет настройване Bondery под теб.",
+    "personal": "Друзья и семья",
+    "professional": "Работа",
+    "Title": "Как ти будете использовать Bondery?"
   },
   "Loading": {
-    "Message": "Setting things up for you…"
+    "Message": "Настраиваем всё для теб…"
   },
-  "MetadataTitle": "Onboarding",
+  "MetadataTitle": "Знакомство",
   "Welcome": {
-    "LetsGo": "Let's go",
-    "Subtitle": "Pleasure to meet you. Let's set up your personal CRM.",
-    "TitleGeneric": "Welcome to Bondery! 😊",
-    "TitleWithName": "Welcome, {name}! 😊"
+    "LetsGo": "Начать",
+    "Subtitle": "Рады познакомиться. Настроим твойу персональную CRM.",
+    "TitleGeneric": "Добро пожаловать в Bondery! 😊",
+    "TitleWithName": "Добро пожаловать, {name}! 😊"
   }
 }

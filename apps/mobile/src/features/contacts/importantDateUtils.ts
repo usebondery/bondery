@@ -1,3 +1,4 @@
+import { type DateTimeFormatContext, formatUserDate } from "@bondery/helpers/date";
 import { buildIntlLocaleTag } from "@bondery/schemas/locale";
 
 /** Epoch year used for recurring dates without a year (matches web + vCard convention). */
@@ -50,7 +51,7 @@ export function resolveDateLocale(language: string): string {
   return buildIntlLocaleTag(language, "24h");
 }
 
-export function formatImportantDate(iso: string, locale = "en-US"): string {
+export function formatImportantDate(iso: string, ctx: DateTimeFormatContext): string {
   const parsed = fromImportantDateIso(iso);
   const date = new Date(
     parsed.withoutYear ? YEARLESS_SENTINEL : parsed.year,
@@ -58,11 +59,11 @@ export function formatImportantDate(iso: string, locale = "en-US"): string {
     parsed.day,
   );
 
-  return date.toLocaleDateString(locale, {
-    day: "numeric",
-    month: "long",
-    ...(parsed.withoutYear ? {} : { year: "numeric" }),
-  });
+  return formatUserDate(
+    date,
+    { ...ctx, timeZone: undefined },
+    parsed.withoutYear ? "monthDay" : "long",
+  );
 }
 
 export function getMonthLabels(locale: string): string[] {

@@ -1,11 +1,11 @@
 {
-  "About": "About",
-  "Education": "Education",
-  "LastDataUpdate": "Last data update: {date}",
-  "NoEducation": "No education history available",
-  "NoWorkHistory": "No work history available",
-  "Present": "Present",
-  "ShowLess": "Show less",
-  "ShowMore": "Show more",
-  "WorkHistory": "Work History"
+  "About": "О себе",
+  "Education": "Образование",
+  "LastDataUpdate": "Последнее обновление данных: {date}",
+  "NoEducation": "Няма данных об образовании",
+  "NoWorkHistory": "Няма данных об опыте работы",
+  "Present": "По настоящее время",
+  "ShowLess": "Показать меньше",
+  "ShowMore": "Показать больше",
+  "WorkHistory": "Опыт работы"
 }

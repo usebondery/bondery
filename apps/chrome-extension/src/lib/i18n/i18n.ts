@@ -2,11 +2,11 @@ import {
   coerceSupportedLocale,
   DEFAULT_LOCALE,
   i18nConfig,
-  loadNamespace,
   namespacesForPlatform,
   preloadGroup,
   SUPPORTED_LOCALES,
 } from "@bondery/translations";
+import { loadNamespace } from "@bondery/translations/loader";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 

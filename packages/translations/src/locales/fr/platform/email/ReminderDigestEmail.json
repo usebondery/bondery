@@ -7,9 +7,11 @@
     "nameday": "fête",
     "other": "date importante"
   },
+  "dayFew": "{{count}} jours",
   "dayMany": "{{count}} jours",
   "dayOne": "1 jour",
   "description": "Pour le {{headingDate}}. Ouvrez une personne pour les détails ou envoyez un message.",
+  "headingFew": "{{count}} rappels à venir",
   "headingMany": "{{count}} rappels à venir",
   "headingOne": "1 rappel à venir",
   "preview": "{{firstTypeLabel}} de {{firstPersonName}} dans {{firstRemainingLabel}}",

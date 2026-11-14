@@ -1,11 +1,11 @@
 {
-  "ColorCopiedMessage": "Color code copied to clipboard",
-  "CopyAccessibilityLabel": "Copy color code",
-  "CopyFailedMessage": "Couldn't copy color code. Try again.",
-  "CustomColorLabel": "Custom color",
+  "ColorCopiedMessage": "Код цвета скопирован в буфер обмена",
+  "CopyAccessibilityLabel": "Скопировать код цвета",
+  "CopyFailedMessage": "Неуспешно скопировать код цвета. Опитай снова.",
+  "CustomColorLabel": "Свой цвет",
   "HexPlaceholder": "#RRGGBB",
-  "InvalidHex": "Enter a valid hex color (e.g. #AE3EC9)",
-  "SheetTitle": "Color",
-  "SwatchesLabel": "Quick colors",
-  "TriggerAccessibilityHint": "Opens color picker"
+  "InvalidHex": "Введите корректный hex-цвет (например, #AE3EC9)",
+  "SheetTitle": "Цвет",
+  "SwatchesLabel": "Быстрый выбор",
+  "TriggerAccessibilityHint": "Открывает выбор цвета"
 }

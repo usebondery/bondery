@@ -157,7 +157,7 @@ export function remarkRelatedCards() {
         continue;
       }
       const list = nodes[index + 1];
-      if (!list || list.type !== "list") {
+      if (list?.type !== "list") {
         continue;
       }
       const items = (list as List).children;

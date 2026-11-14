@@ -1,15 +1,15 @@
 {
   "Concepts": {
-    "FixAndMerge": "Corriger et fusionner",
-    "GroupDetail": "ce groupe",
-    "Groups": "groupes",
-    "Home": "accueil",
-    "KeepInTouch": "rester en contact",
-    "Map": "la carte",
-    "People": "personnes",
-    "PersonDetails": "détails de la personne",
-    "Timeline": "interactions"
+    "FixAndMerge": "τη διόρθωση και συγχώνευση",
+    "GroupDetail": "αυτή την ομάδα",
+    "Groups": "τις Ομάδες",
+    "Home": "την Αρχική",
+    "KeepInTouch": "το «Μείνε σε επαφή»",
+    "Map": "τον χάρτη",
+    "People": "τα Άτομα",
+    "PersonDetails": "τα στοιχεία ατόμου",
+    "Timeline": "τις Αλληλεπιδράσεις"
   },
-  "HelpLabel": "En savoir plus",
-  "LearnMoreAbout": "En savoir plus sur {concept}"
+  "HelpLabel": "Μάθε περισσότερα",
+  "LearnMoreAbout": "Μάθε περισσότερα για {concept}"
 }

@@ -7,9 +7,11 @@
     "nameday": "God",
     "other": "Pomemben datum"
   },
+  "dayFew": "{{count}} dni",
   "dayMany": "{{count}} dni",
   "dayOne": "1 dan",
   "description": "Za {{headingDate}}. Odpri osebo za podrobnosti ali pošlji sporočilo.",
+  "headingFew": "{{count}} bližnjih opomnikov",
   "headingMany": "{{count}} bližnjih opomnikov",
   "headingOne": "1 bližnji opomnik",
   "preview": "{{firstPersonName}} — {{firstTypeLabel}} čez {{firstRemainingLabel}}",

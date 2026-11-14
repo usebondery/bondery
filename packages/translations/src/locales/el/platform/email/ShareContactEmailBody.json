@@ -1,22 +1,22 @@
 {
-  "description": "{{senderName}} a partagé ce contact avec vous",
-  "footerNotes": "Envoyé avec Bondery. Répondez à cet e-mail pour joindre {{senderName}}.",
-  "importantDateLine": "{{label}} : {{date}} ({{type}})",
+  "description": "Ο/Η {{senderName}} μοιράστηκε αυτή την επαφή μαζί σου",
+  "footerNotes": "Στάλθηκε με Bondery. Απάντησε σε αυτό το email για να επικοινωνήσεις με {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
   "labels": {
-    "address": "Adresse",
-    "email": "E-mail",
+    "address": "Διεύθυνση",
+    "email": "Email",
     "facebook": "Facebook",
-    "importantDates": "Dates importantes",
+    "importantDates": "Σημαντικές ημερομηνίες",
     "instagram": "Instagram",
     "linkedin": "LinkedIn",
-    "location": "Localisation",
-    "notes": "Notes",
-    "phone": "Téléphone",
+    "location": "Τοποθεσία",
+    "notes": "Σημειώσεις",
+    "phone": "Τηλέφωνο",
     "signal": "Signal",
-    "website": "Site web",
+    "website": "Ιστότοπος",
     "whatsapp": "WhatsApp"
   },
-  "previewFallback": "Téléphone, e-mail et autres détails à l’intérieur",
-  "replyCta": "Répondre à {{senderName}}",
-  "subject": "{{senderName}} a partagé un contact avec vous • {{contactName}}"
+  "previewFallback": "Τηλέφωνο, email και άλλα στοιχεία μέσα",
+  "replyCta": "Απάντηση σε {{senderName}}",
+  "subject": "Ο/Η {{senderName}} μοιράστηκε επαφή • {{contactName}}"
 }

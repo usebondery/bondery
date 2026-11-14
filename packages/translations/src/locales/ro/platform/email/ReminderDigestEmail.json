@@ -7,9 +7,11 @@
     "nameday": "Onomastică",
     "other": "Dată importantă"
   },
+  "dayFew": "{{count}} zile",
   "dayMany": "{{count}} zile",
   "dayOne": "1 zi",
   "description": "Pentru {{headingDate}}. Deschide o persoană ca să vezi detalii sau trimite un mesaj.",
+  "headingFew": "{{count}} mementouri în curând",
   "headingMany": "{{count}} mementouri în curând",
   "headingOne": "1 memento în curând",
   "preview": "{{firstTypeLabel}} lui {{firstPersonName}} peste {{firstRemainingLabel}}",

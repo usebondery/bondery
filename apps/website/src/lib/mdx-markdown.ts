@@ -103,7 +103,7 @@ function stepBody(state: State, info: Info, children: unknown[]): string {
   const body = flow(state, info, children);
   const heading = /^#{1,6}\s+(.+?)(?:\s+\[#[^\]]*\])?\s*$/m.exec(body);
 
-  if (!heading || heading.index !== 0) {
+  if (heading?.index !== 0) {
     return body;
   }
 
@@ -139,7 +139,7 @@ function stepsMarkdown(node: JsxNode, state: State, info: Info): string {
 
   for (const [index, child] of (node.children ?? []).entries()) {
     const step = asJsx(child as Node);
-    if (!step || step.name !== "Step") {
+    if (step?.name !== "Step") {
       continue;
     }
     const body = stepBody(state, info, step.children ?? []).replace(/\n(?!\n)/g, "\n   ");

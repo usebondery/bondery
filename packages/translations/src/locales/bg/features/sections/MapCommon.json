@@ -1,8 +1,8 @@
 {
-  "AttributionLabel": "Map attribution",
-  "AttributionTooltip": "OpenStreetMap contributors. Tiles by OpenFreeMap.",
-  "Location": "Location",
-  "ZoomControls": "Map zoom",
-  "ZoomIn": "Zoom in",
-  "ZoomOut": "Zoom out"
+  "AttributionLabel": "Источники карты",
+  "AttributionTooltip": "Участники OpenStreetMap. Тайлы от OpenFreeMap.",
+  "Location": "Местоположение",
+  "ZoomControls": "Масштаб карты",
+  "ZoomIn": "Приблизить",
+  "ZoomOut": "Отдалить"
 }

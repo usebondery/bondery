@@ -1,20 +1,22 @@
 {
-  "cta": "Ouvrir les rappels",
+  "cta": "Άνοιγμα υπενθυμίσεων",
   "dateTypes": {
-    "anniversary": "anniversaire",
-    "birthday": "anniversaire de naissance",
-    "graduation": "diplôme",
-    "nameday": "fête",
-    "other": "date importante"
+    "anniversary": "Επέτειος",
+    "birthday": "Γενέθλια",
+    "graduation": "Αποφοίτηση",
+    "nameday": "Ονομαστική εορτή",
+    "other": "Σημαντική ημερομηνία"
   },
-  "dayMany": "{{count}} jours",
-  "dayOne": "1 jour",
-  "description": "Pour le {{headingDate}}. Ouvrez une personne pour les détails ou envoyez un message.",
-  "headingMany": "{{count}} rappels à venir",
-  "headingOne": "1 rappel à venir",
-  "preview": "{{firstTypeLabel}} de {{firstPersonName}} dans {{firstRemainingLabel}}",
-  "previewMore": "{{firstTypeLabel}} de {{firstPersonName}} dans {{firstRemainingLabel}} et {{remainingCount}} autres",
-  "reminderLine": "{{emoji}} {{typeLabel}} dans {{remainingLabel}}, le {{dateLabel}}.",
-  "subject": "Rappels Bondery pour le {{targetDate}}",
-  "whyReceiving": "Vous recevez cet e-mail parce que vous avez activé les rappels pour ces dates."
+  "dayFew": "{{count}} ημέρες",
+  "dayMany": "{{count}} ημέρες",
+  "dayOne": "1 ημέρα",
+  "description": "Για {{headingDate}}. Άνοιξε ένα άτομο για λεπτομέρειες ή στείλε σημείωση.",
+  "headingFew": "{{count}} επερχόμενες υπενθυμίσεις",
+  "headingMany": "{{count}} επερχόμενες υπενθυμίσεις",
+  "headingOne": "1 επερχόμενη υπενθύμιση",
+  "preview": "{{firstTypeLabel}} του/της {{firstPersonName}} σε {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} του/της {{firstPersonName}} σε {{firstRemainingLabel}} και {{remainingCount}} ακόμη",
+  "reminderLine": "Το {{emoji}} {{typeLabel}} έρχεται σε {{remainingLabel}} στις {{dateLabel}}.",
+  "subject": "Υπενθυμίσεις Bondery για {{targetDate}}",
+  "whyReceiving": "Το λαμβάνεις επειδή ενεργοποίησες υπενθυμίσεις για αυτές τις ημερομηνίες."
 }

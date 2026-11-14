@@ -1,15 +1,15 @@
 {
-  "AttachProfilePhoto": "Attach a photo for this contact",
-  "Cancel": "Cancel",
-  "ConfirmPhoto": "Confirm Photo",
-  "DragImageHere": "Drag image here or click to select",
-  "InvalidFile": "Invalid file",
-  "PhotoUpdateError": "Failed to update contact photo",
-  "PhotoUpdateSuccess": "Contact photo updated successfully",
-  "PleaseWait": "Please wait",
-  "TitleModal": "Upload Contact Photo",
-  "UpdateError": "Error",
-  "UpdateProfilePhoto": "Update Contact Photo",
-  "UpdateSuccess": "Success",
-  "UploadingPhoto": "Uploading..."
+  "AttachProfilePhoto": "Добавьте фото для этого контакта",
+  "Cancel": "Отказ",
+  "ConfirmPhoto": "Подтвердить фото",
+  "DragImageHere": "Перетащите изображение сюда или кликни для выбора",
+  "InvalidFile": "Недопустимый файл",
+  "PhotoUpdateError": "Неуспешно обновить фото контакта",
+  "PhotoUpdateSuccess": "Фото контакта обновлено",
+  "PleaseWait": "Подождите",
+  "TitleModal": "Загрузить фото контакта",
+  "UpdateError": "Грешка",
+  "UpdateProfilePhoto": "Обновить фото контакта",
+  "UpdateSuccess": "Готово",
+  "UploadingPhoto": "Загрузка…"
 }

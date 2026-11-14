@@ -1,6 +1,7 @@
 export {
   buildIntlLocaleTag,
   coerceDateFormatPreference,
+  coerceTimeFormatPreference,
   directionFromDirField,
   fontStackForLocale,
   formatOrderedDate,

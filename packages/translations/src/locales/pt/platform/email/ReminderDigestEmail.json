@@ -7,9 +7,11 @@
     "nameday": "Dia do nome",
     "other": "Data importante"
   },
+  "dayFew": "{{count}} dias",
   "dayMany": "{{count}} dias",
   "dayOne": "1 dia",
   "description": "Para {{headingDate}}. Abra uma pessoa para ver detalhes ou enviar uma nota.",
+  "headingFew": "{{count}} lembretes a aproximar-se",
   "headingMany": "{{count}} lembretes a aproximar-se",
   "headingOne": "1 lembrete a aproximar-se",
   "preview": "{{firstTypeLabel}} de {{firstPersonName}} daqui a {{firstRemainingLabel}}",

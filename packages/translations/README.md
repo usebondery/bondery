@@ -37,17 +37,19 @@ import {
   DEFAULT_LOCALE,
   SUPPORTED_LOCALES,
   i18nConfig,
-  loadNamespace,
   namespacesForPlatform,
   preloadGroup,
-  resourceLoader,
 } from "@bondery/translations";
+
+import { loadNamespace, resourceLoader } from "@bondery/translations/loader";
 ```
 
 Locale codes and `DEFAULT_LOCALE` are defined in `@bondery/schemas` (`supportedLocaleSchema`, `packages/schemas/locale/supported-locales.json`).
 
 - `defaultNS` is `"common"`.
-- `resourceLoader(locale, namespace)` loads one namespace.
+- `resourceLoader(locale, namespace)` loads one namespace. It lives on the
+  `@bondery/translations/loader` subpath because it imports every locale JSON
+  module.
 - `preloadGroup("web.shell")` returns namespace names for route/layout preloading.
 
 ## Direct JSON imports

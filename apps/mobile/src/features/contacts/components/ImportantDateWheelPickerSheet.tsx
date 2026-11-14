@@ -9,6 +9,7 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { CHECKBOX_ROW_MIN_HEIGHT, Checkbox } from "../../../components/ui/Checkbox";
 import { Sheet } from "../../../components/ui/Sheet";
+import { useMobileDateTimeFormatContext } from "../../../lib/preferences/useMobilePreferences";
 import { syncEffectState } from "../../../lib/react/syncEffectState";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -47,6 +48,7 @@ export function ImportantDateWheelPickerSheet({
   const t = useCommonTranslations();
   const { i18n } = useTranslation();
   const colors = useMobileThemeColors();
+  const formatCtx = useMobileDateTimeFormatContext();
   const locale = resolveDateLocale(i18n.language);
 
   const [wheelValue, setWheelValue] = useState<ImportantDateWheelValue>(() =>
@@ -97,7 +99,7 @@ export function ImportantDateWheelPickerSheet({
     void AccessibilityInfo.announceForAccessibility(
       tMobileContactIdentity("DateSetAnnouncement").replace(
         "{date}",
-        formatImportantDate(iso, locale),
+        formatImportantDate(iso, formatCtx),
       ),
     );
     onCancel();

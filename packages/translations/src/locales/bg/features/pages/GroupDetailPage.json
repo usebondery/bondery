@@ -1,34 +1,34 @@
 {
-  "AddPeopleToGroup": "Add people to group",
-  "ColorLabel": "Color",
-  "ContactCount": "Contacts",
-  "DetailPageTitle": "Group's details",
-  "Empty": "No contacts are linked to this group yet.",
-  "HeaderDescription": "Overview of the members of the selected group.",
-  "NoContactsFound": "No contacts are linked to this group yet.",
-  "NoContactsMatchSearch": "No such contact found.",
+  "AddPeopleToGroup": "Добавяне хора в группу",
+  "ColorLabel": "Цвет",
+  "ContactCount": "Контакты",
+  "DetailPageTitle": "Сведения о группе",
+  "Empty": "С этой группой пока не связано ни одного контакта.",
+  "HeaderDescription": "Обзор участников выбранной групи.",
+  "NoContactsFound": "С этой группой пока не связано ни одного контакта.",
+  "NoContactsMatchSearch": "Такой контакт не найден.",
   "RemoveContact": {
-    "ErrorDescription": "Could not remove contact from group. Please try again.",
-    "LoadingDescription": "Updating group members...",
-    "LoadingTitle": "Removing contact",
-    "SuccessDescription": "Contact removed from group successfully"
+    "ErrorDescription": "Неуспешно изтриване контакт из групи. Повторите попытку.",
+    "LoadingDescription": "Обновление участников групи…",
+    "LoadingTitle": "Удаление контакта",
+    "SuccessDescription": "Контакт успешно удалён из групи"
   },
   "RemoveContacts": {
-    "ErrorDescription": "Could not remove contacts from group. Please try again.",
-    "LoadingDescription": "Updating group members...",
-    "LoadingTitle": "Removing contacts",
-    "SuccessDescription": "{count} contact(s) removed from group successfully"
+    "ErrorDescription": "Неуспешно изтриване контакты из групи. Повторите попытку.",
+    "LoadingDescription": "Обновление участников групи…",
+    "LoadingTitle": "Удаление контактов",
+    "SuccessDescription": "Из групи успешно удалено контактов: {count}"
   },
-  "RemoveFromGroup": "Remove from group",
-  "Subtitle": "Contacts assigned to this group.",
+  "RemoveFromGroup": "Изтриване из групи",
+  "Subtitle": "Контакты, назначенные этой группе.",
   "Table": {
-    "Avatar": "Avatar",
-    "LastInteraction": "Last interaction",
-    "Location": "Location",
-    "Name": "Name",
-    "Socials": "Socials",
-    "Title": "Headline"
+    "Avatar": "Аватар",
+    "LastInteraction": "Последнее взаимодействие",
+    "Location": "Местоположение",
+    "Name": "Имя",
+    "Socials": "Соцсети",
+    "Title": "Заголовок"
   },
-  "ThisContactFallback": "this contact",
-  "Title": "Group: {label}"
+  "ThisContactFallback": "этот контакт",
+  "Title": "Група: {label}"
 }

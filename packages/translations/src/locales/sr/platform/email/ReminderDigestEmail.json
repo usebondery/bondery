@@ -7,9 +7,11 @@
     "nameday": "Slava",
     "other": "Važan datum"
   },
+  "dayFew": "{{count}} dana",
   "dayMany": "{{count}} dana",
   "dayOne": "1 dan",
   "description": "Za {{headingDate}}. Otvori osobu za detalje ili pošalji poruku.",
+  "headingFew": "Stiže {{count}} podsetnika",
   "headingMany": "Stiže {{count}} podsetnika",
   "headingOne": "Stiže 1 podsetnik",
   "preview": "{{firstPersonName}} — {{firstTypeLabel}} za {{firstRemainingLabel}}",

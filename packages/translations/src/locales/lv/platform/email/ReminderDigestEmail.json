@@ -7,9 +7,11 @@
     "nameday": "Vārda diena",
     "other": "Svarīgs datums"
   },
+  "dayFew": "{{count}} dienas",
   "dayMany": "{{count}} dienas",
   "dayOne": "1 diena",
   "description": "Par {{headingDate}}. Atvērt personu, lai skatītu detalizētu informāciju vai nosūtītu piezīmi.",
+  "headingFew": "Tuvojas {{count}} atgādinājumi",
   "headingMany": "Tuvojas {{count}} atgādinājumi",
   "headingOne": "Tuvojas 1 atgādinājums",
   "preview": "{{firstPersonName}} {{firstTypeLabel}} {{firstRemainingLabel}}",

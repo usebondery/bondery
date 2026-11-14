@@ -1,11 +1,13 @@
 {
   "AiAssistants": {
+    "AddToClaudeButton": "Add to Claude",
+    "ClientsLabel": "Clienți conectați",
     "CopiedButton": "Copiat!",
     "CopyButton": "Copiază",
-    "Description": "Conectează Claude Desktop, Cursor și alți clienți MCP la contactele tale. Copiază URL-ul MCP sau fragmentul mcp.json în client.",
-    "DocsHelpLabel": "Află cum conectezi asistenții AI prin MCP.",
-    "EmptyTitle": "Niciun asistent AI conectat deocamdată",
+    "Description": "Conectează Claude, Cursor și alți clienți MCP la contactele tale. Instalează pluginul Bondery în Claude, sau copiază URL-ul MCP sau fragmentul mcp.json în client.",
+    "EmptyTitle": "Niciun client conectat deocamdată",
     "GrantedAt": "Conectat {time}",
+    "LearnMoreMcpDocs": "Află mai multe despre conectarea clienților MCP în documentația noastră",
     "McpJsonLabel": "mcp.json",
     "McpUrlLabel": "URL MCP",
     "PermissionField": "Acces",
@@ -15,10 +17,11 @@
     "PermissionReadLabel": "Doar citire",
     "RevokeButton": "Revoca",
     "RevokeConfirm": "Da, revoca",
-    "RevokeMessage": "Acest asistent nu va mai putea obține acces nou. Îl poți reconecta mai târziu aprobându-l din nou.",
+    "RevokeMessage": "Acest client nu va mai putea obține acces nou. Îl poți conecta din nou mai târziu.",
     "RevokeTitle": "Revoci accesul pentru „{name}”?",
-    "RevokeTooltip": "Revocă asistentul",
-    "Title": "Asistenți AI"
+    "RevokeTooltip": "Revocă accesul",
+    "TileTooltip": "Copiază URL-ul MCP sau gestionează clienții conectați.",
+    "Title": "MCP"
   },
   "ApiKeys": {
     "Cancel": "Anula",
@@ -67,7 +70,6 @@
   "DataManagement": {
     "AccountDeleted": "Cont șters",
     "BonderyImport": {
-      "AccountDeleted": "Cont șters",
       "CardTitle": "Bondery JSON",
       "CheckingBody": "De obicei durează câteva secunde.",
       "CheckingTitle": "Se verifică fișierul…",
@@ -392,13 +394,14 @@
   "Preferences": {
     "Dark": "Întunecat",
     "DateFormat": "Format dată",
-    "DateFormatDmy": "Ziua întâi ({preview})",
-    "DateFormatLocale": "Ca în limbă ({preview})",
-    "DateFormatMdy": "Luna întâi ({preview})",
+    "DateFormatDmy": "Ziua întâi",
+    "DateFormatLocale": "Ca în limbă",
+    "DateFormatMdy": "Luna întâi",
+    "DateFormatSearch": "Caută formatul datei…",
     "DateFormatTooltip": "Controlează afișarea datelor din calendar. Ora urmează în continuare formatul ceasului.",
     "DateFormatUpdateError": "Formatul datei nu a putut fi actualizat",
     "DateFormatUpdateSuccess": "Format dată actualizat",
-    "DateFormatYmd": "Anul întâi ({preview})",
+    "DateFormatYmd": "Anul întâi",
     "DefaultPhoneCountry": "Prefix țară implicit",
     "DefaultPhoneCountrySearch": "Caută prefix țară…",
     "DefaultPhoneCountryTooltip": "Folosit când introduci numere de telefon fără prefix internațional.",

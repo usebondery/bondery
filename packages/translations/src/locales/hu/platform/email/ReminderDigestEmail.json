@@ -7,9 +7,11 @@
     "nameday": "Névnap",
     "other": "Fontos dátum"
   },
+  "dayFew": "{{count}} nap",
   "dayMany": "{{count}} nap",
   "dayOne": "1 nap",
   "description": "{{headingDate}} napra. Nyisd meg a személyt a részletekért vagy üzenet küldéséhez.",
+  "headingFew": "{{count}} közelgő emlékeztető",
   "headingMany": "{{count}} közelgő emlékeztető",
   "headingOne": "1 közelgő emlékeztető",
   "preview": "{{firstPersonName}} – {{firstTypeLabel}} {{firstRemainingLabel}} múlva",

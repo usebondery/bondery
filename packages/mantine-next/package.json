@@ -53,6 +53,18 @@
       "node": "./dist/ActionIconButton/actionIconGraphic.js",
       "types": "./src/ActionIconButton/actionIconGraphic.tsx"
     },
+    "./ClockTime": {
+      "default": "./dist/ClockTime/index.js",
+      "import": "./dist/ClockTime/index.js",
+      "node": "./dist/ClockTime/index.js",
+      "types": "./src/ClockTime/index.ts"
+    },
+    "./ClockTime/ClockTime": {
+      "default": "./dist/ClockTime/ClockTime.js",
+      "import": "./dist/ClockTime/ClockTime.js",
+      "node": "./dist/ClockTime/ClockTime.js",
+      "types": "./src/ClockTime/ClockTime.tsx"
+    },
     "./CodeBlock": {
       "default": "./dist/CodeBlock/index.js",
       "import": "./dist/CodeBlock/index.js",

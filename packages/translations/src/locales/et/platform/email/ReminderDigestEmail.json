@@ -7,9 +7,11 @@
     "nameday": "Nimipäev",
     "other": "Oluline kuupäev"
   },
+  "dayFew": "{{count}} päeva",
   "dayMany": "{{count}} päeva",
   "dayOne": "1 päev",
   "description": "Kuupäevaks {{headingDate}}. Ava inimene, et näha detaile või saata märge.",
+  "headingFew": "Tulekul on {{count}} meeldetuletust",
   "headingMany": "Tulekul on {{count}} meeldetuletust",
   "headingOne": "Tulekul on 1 meeldetuletus",
   "preview": "{{firstPersonName}} {{firstTypeLabel}} {{firstRemainingLabel}} pärast",

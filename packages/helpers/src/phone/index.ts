@@ -32,6 +32,7 @@ export {
   findTelephonePrefixOption,
   getTelephonePrefixSearchTexts,
   getTelephoneReactMaskExpression,
+  localizeTelephonePrefixLabel,
   TELEPHONE_PREFIX_OPTIONS,
 } from "#phone/prefix-options.js";
 export type { CountryCode, TelephonePrefixOption } from "#phone/types.js";

@@ -230,7 +230,7 @@ for (const locale of LOCALES) {
 }
 
 function isAllowedExtraKey(key) {
-  return /_(few|many|zero)$/.test(key);
+  return /_(few|many|zero|two)$/.test(key);
 }
 
 for (const [name] of Object.entries(manifest.namespaces)) {

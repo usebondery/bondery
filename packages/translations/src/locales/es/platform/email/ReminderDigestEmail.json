@@ -7,9 +7,11 @@
     "nameday": "Santo",
     "other": "Fecha importante"
   },
+  "dayFew": "{{count}} días",
   "dayMany": "{{count}} días",
   "dayOne": "1 día",
   "description": "Para el {{headingDate}}. Abre una persona para ver los detalles o enviarle una nota.",
+  "headingFew": "Se acercan {{count}} recordatorios",
   "headingMany": "Se acercan {{count}} recordatorios",
   "headingOne": "Se acerca 1 recordatorio",
   "preview": "{{firstTypeLabel}} de {{firstPersonName}} en {{firstRemainingLabel}}",

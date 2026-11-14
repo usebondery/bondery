@@ -7,9 +7,11 @@
     "nameday": "Vardų diena",
     "other": "Svarbi data"
   },
+  "dayFew": "{{count}} dienų",
   "dayMany": "{{count}} dienų",
   "dayOne": "1 diena",
   "description": "{{headingDate}} datai. Atidaryk žmogų, kad pamatytum detales arba išsiųsk žinutę.",
+  "headingFew": "Artėja {{count}} priminimų",
   "headingMany": "Artėja {{count}} priminimų",
   "headingOne": "Artėja 1 priminimas",
   "preview": "{{firstPersonName}} – {{firstTypeLabel}} po {{firstRemainingLabel}}",

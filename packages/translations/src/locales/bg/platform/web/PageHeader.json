@@ -1,15 +1,15 @@
 {
   "Concepts": {
-    "FixAndMerge": "fix and merge",
-    "GroupDetail": "this group",
-    "Groups": "Groups",
-    "Home": "Home",
-    "KeepInTouch": "Поддържай връзка",
-    "Map": "the map",
-    "People": "People",
-    "PersonDetails": "person details",
-    "Timeline": "Interactions"
+    "FixAndMerge": "исправлении и объединении",
+    "GroupDetail": "этой группе",
+    "Groups": "групах",
+    "Home": "главной странице",
+    "KeepInTouch": "поддержании связи",
+    "Map": "карте",
+    "People": "людях",
+    "PersonDetails": "данных човека",
+    "Timeline": "взаимодействиях"
   },
-  "HelpLabel": "Learn more",
-  "LearnMoreAbout": "Learn more about {concept}"
+  "HelpLabel": "Подробнее",
+  "LearnMoreAbout": "Подробнее о {concept}"
 }

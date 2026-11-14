@@ -1,9 +1,9 @@
 {
-  "ApiRejectedDescription": "The server rejected the request because your extension is outdated. Please update.",
-  "ApiRejectedTitle": "Version Too Old",
-  "UpdateButton": "Update",
-  "UpdateRequiredDescription": "Your Bondery extension is outdated and may not work correctly. Please update to continue.",
-  "UpdateRequiredTitle": "Update Required",
-  "WebappNotificationDescription": "Your Bondery Chrome Extension needs an update to keep working properly.",
-  "WebappNotificationTitle": "Extension Update Available"
+  "ApiRejectedDescription": "Сервер отклонил запрос: расширение устарело. Обновите его.",
+  "ApiRejectedTitle": "Слишком старая версия",
+  "UpdateButton": "Обновить",
+  "UpdateRequiredDescription": "Расширение Bondery устарело и может работать некорректно. Обновите его, чтобы продолжить.",
+  "UpdateRequiredTitle": "Требуется обновление",
+  "WebappNotificationDescription": "Расширению Bondery для Chrome нужно обновление для корректной работы.",
+  "WebappNotificationTitle": "Доступно обновление расширения"
 }

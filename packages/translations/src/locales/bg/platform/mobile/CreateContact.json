@@ -1,13 +1,13 @@
 {
-  "Create": "Add to Bondery",
-  "Creating": "Creating person...",
-  "ErrorDescription": "Something went wrong while creating this person.",
-  "ErrorTitle": "Could not create person",
-  "FullNameLabel": "Full name",
-  "FullNamePlaceholder": "e.g. Jane Doe",
-  "InvalidName": "Please add a valid name",
-  "NameRequired": "Please add a name",
-  "SuccessDescription": "The new person was added to your contacts.",
-  "SuccessTitle": "Person created",
-  "Title": "Create person"
+  "Create": "Добавяне в Bondery",
+  "Creating": "Создание човека…",
+  "ErrorDescription": "При создании этого човека что-то пошло не так.",
+  "ErrorTitle": "Неуспешно създаване човека",
+  "FullNameLabel": "Полное имя",
+  "FullNamePlaceholder": "например, Анна Иванова",
+  "InvalidName": "Укажите корректное имя",
+  "NameRequired": "Укажите имя",
+  "SuccessDescription": "Новый човек добавлен в твойи контакты.",
+  "SuccessTitle": "Човек создан",
+  "Title": "Създаване човека"
 }

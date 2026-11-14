@@ -17,6 +17,15 @@ export function coerceDateFormatPreference(raw: string | null | undefined): Date
   return "locale";
 }
 
+const TIME_FORMAT_VALUES = ["24h", "12h"] as const;
+
+export function coerceTimeFormatPreference(raw: string | null | undefined): TimeFormatPreference {
+  if (raw && (TIME_FORMAT_VALUES as readonly string[]).includes(raw)) {
+    return raw as TimeFormatPreference;
+  }
+  return "24h";
+}
+
 /**
  * Single BCP 47 tag for Intl date/number/relative formatters.
  * Pins Gregorian calendar, Latin digits, and hour cycle — never append a second `-u-`.

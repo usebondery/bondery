@@ -45,6 +45,7 @@
       "api_key_failed": "Помилка API-ключа.",
       "api_key_limit_exceeded": "Перевищено ліміт API-ключів.",
       "api_key_method_forbidden": "Для API-ключа заборонений цей HTTP-метод.",
+      "api_key_not_found": "API-ключ не знайдено.",
       "api_key_route_forbidden": "Для API-ключа заборонений цей маршрут.",
       "auth_required": "Увійдіть, щоб продовжити.",
       "bad_request": "Некоректний запит.",

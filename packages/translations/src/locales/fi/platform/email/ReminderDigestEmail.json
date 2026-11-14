@@ -7,9 +7,11 @@
     "nameday": "Nimipäivä",
     "other": "Tärkeä päivämäärä"
   },
+  "dayFew": "{{count}} päivää",
   "dayMany": "{{count}} päivää",
   "dayOne": "1 päivä",
   "description": "Päivälle {{headingDate}}. Avaa henkilö nähdäksesi tiedot tai lähetä viesti.",
+  "headingFew": "{{count}} muistutusta erääntyy",
   "headingMany": "{{count}} muistutusta erääntyy",
   "headingOne": "1 muistutus erääntyy",
   "preview": "{{firstPersonName}}: {{firstTypeLabel}} {{firstRemainingLabel}} kuluttua",
