@@ -3,9 +3,10 @@ import { dirForLocale } from "@bondery/schemas/locale";
 import { DirectionProvider, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
 import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
-import { getResources, getT } from "next-i18next/server";
+import { getT } from "next-i18next/server";
 import type { ReactNode } from "react";
 import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
+import { getRouteResources } from "@/lib/i18n/getRouteResources.server";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 
 export const metadata: Metadata = {
@@ -28,9 +29,13 @@ export default async function StoreShotsLayout({ children }: { children: ReactNo
 
   const locale = "en";
   const textDirection = dirForLocale(locale);
-  await preloadWebNamespaces(locale, ["web.interactions", "web.groups", "web.map"]);
+  const namespaces = await preloadWebNamespaces(locale, [
+    "web.interactions",
+    "web.groups",
+    "web.map",
+  ]);
   const { i18n } = await getT("common", { lng: locale });
-  const resources = getResources(i18n);
+  const resources = getRouteResources(i18n, locale, namespaces);
 
   return (
     <LocaleProvider

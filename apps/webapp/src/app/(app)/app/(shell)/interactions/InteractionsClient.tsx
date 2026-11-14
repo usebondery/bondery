@@ -41,6 +41,7 @@ import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
 import { ShellScrollLoadMore } from "@/components/shell/ShellScrollLoadMore";
 import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { calendarParamFromPicker } from "@/lib/interactions/interactionListRange";
 import { routeWithQuery } from "@/lib/navigation/route/query";
 import { DEBOUNCE_MS, HOTKEYS } from "@/lib/platform/config";
@@ -92,6 +93,8 @@ function InteractionsSearchInput({
 export function InteractionsClient() {
   const t = useInteractionsPageTranslations();
   const tCommon = useCommonTranslations();
+  const formatter = useDateFormatter();
+  const dateValueFormat = formatter.dateInputValueFormat({ withYear: true });
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -369,7 +372,7 @@ export function InteractionsClient() {
                     placeholder={t("PickDate")}
                     popoverProps={{ withinPortal: false }}
                     value={startDate}
-                    valueFormat="YYYY-MM-DD"
+                    valueFormat={dateValueFormat}
                     w={180}
                   />
                   <DatePickerWithPresets
@@ -384,7 +387,7 @@ export function InteractionsClient() {
                     placeholder={t("PickDate")}
                     popoverProps={{ withinPortal: false }}
                     value={endDate}
-                    valueFormat="YYYY-MM-DD"
+                    valueFormat={dateValueFormat}
                     w={180}
                   />
                 </Group>

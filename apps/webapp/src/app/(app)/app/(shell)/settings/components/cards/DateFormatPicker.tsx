@@ -1,80 +1,120 @@
 "use client";
 
 import type { DateFormatPreference } from "@bondery/schemas";
-import { buildIntlLocaleTag, formatOrderedDate } from "@bondery/schemas/locale";
-import { SegmentedControl, Stack, Text } from "@mantine/core";
+import {
+  buildIntlLocaleTag,
+  coerceDateFormatPreference,
+  formatOrderedDate,
+} from "@bondery/schemas/locale";
+import { IconCalendar } from "@tabler/icons-react";
 import type { ReactNode } from "react";
+import { SearchableComboboxPickerOption } from "@/components/shared/SearchableComboboxItem";
+import { SearchableComboboxPicker } from "@/components/shared/SearchableComboboxPicker";
 import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 const PREVIEW_DATE = new Date(Date.UTC(2026, 10, 13, 12, 0, 0));
+const OPTIONS: DateFormatPreference[] = ["locale", "mdy", "dmy", "ymd"];
 
 interface DateFormatPickerProps {
-  description?: string;
+  description?: ReactNode;
+  disabled?: boolean;
   label?: ReactNode;
-  onChange: (nextFormat: DateFormatPreference) => void;
+  loading?: boolean;
+  onBlur?: (value: DateFormatPreference) => void;
+  onChange?: (value: DateFormatPreference) => void;
+  placeholder?: string;
   value: DateFormatPreference;
 }
 
-function previewLabel(
-  preference: DateFormatPreference,
-  intlLocaleTag: string,
-  t: ReturnType<typeof useSettingsPageTranslations>,
-): string {
+function previewFor(preference: DateFormatPreference, intlLocaleTag: string): string {
   if (preference === "locale") {
-    return t("DateFormatLocale", {
-      preview: formatOrderedDate({
-        date: PREVIEW_DATE,
-        dateFormat: "locale",
-        intlLocaleTag,
-      }),
+    return formatOrderedDate({
+      date: PREVIEW_DATE,
+      dateFormat: "locale",
+      intlLocaleTag,
     });
   }
   if (preference === "mdy") {
-    return t("DateFormatMdy", { preview: "11/13/2026" });
+    return "11/13/2026";
   }
   if (preference === "dmy") {
-    return t("DateFormatDmy", { preview: "13/11/2026" });
+    return "13/11/2026";
   }
-  return t("DateFormatYmd", { preview: "2026-11-13" });
+  return "2026-11-13";
 }
 
-export function DateFormatPicker({ value, onChange, label, description }: DateFormatPickerProps) {
+export function DateFormatPicker({
+  value,
+  onChange,
+  onBlur,
+  label,
+  description,
+  placeholder,
+  loading = false,
+  disabled = false,
+}: DateFormatPickerProps) {
   const t = useSettingsPageTranslations("Preferences");
   const { locale, timeFormat } = useUserLocale();
   const intlLocaleTag = buildIntlLocaleTag(locale, timeFormat);
 
-  const options: DateFormatPreference[] = ["locale", "mdy", "dmy", "ymd"];
+  const itemFor = (preference: DateFormatPreference) => {
+    const supporting = previewFor(preference, intlLocaleTag);
+    if (preference === "locale") {
+      return { main: t("DateFormatLocale"), supporting };
+    }
+    if (preference === "mdy") {
+      return { main: t("DateFormatMdy"), supporting };
+    }
+    if (preference === "dmy") {
+      return { main: t("DateFormatDmy"), supporting };
+    }
+    return { main: t("DateFormatYmd"), supporting };
+  };
+
+  const searchPlaceholder = placeholder || t("DateFormatSearch");
+  const selectedItem = itemFor(value);
 
   return (
-    <Stack gap={4}>
-      <Text fw={500} size="sm">
-        {label ?? t("DateFormat")}
-      </Text>
-      {description ? (
-        <Text c="dimmed" size="xs">
-          {description}
-        </Text>
-      ) : null}
-      <SegmentedControl
-        data={options.map((option) => ({
-          label: previewLabel(option, intlLocaleTag, t),
-          value: option,
-        }))}
-        fullWidth
-        onChange={(nextValue) => {
-          if (
-            nextValue !== "locale" &&
-            nextValue !== "mdy" &&
-            nextValue !== "dmy" &&
-            nextValue !== "ymd"
-          ) {
-            return;
+    <SearchableComboboxPicker
+      description={description}
+      disabled={disabled}
+      label={label}
+      loading={loading}
+      onBlur={(next) => {
+        onBlur?.(coerceDateFormatPreference(next));
+      }}
+      onChange={(next) => {
+        onChange?.(coerceDateFormatPreference(next));
+      }}
+      renderOptions={({ query, selectedValue }) => {
+        const normalized = query.trim().toLowerCase();
+        return OPTIONS.filter((option) => {
+          if (!normalized) {
+            return true;
           }
-          onChange(nextValue);
-        }}
-        value={value}
-      />
-    </Stack>
+          const { main, supporting } = itemFor(option);
+          return (
+            main.toLowerCase().includes(normalized) || supporting.toLowerCase().includes(normalized)
+          );
+        }).map((option) => {
+          const { main, supporting } = itemFor(option);
+          return (
+            <SearchableComboboxPickerOption
+              isSelected={option === selectedValue}
+              key={option}
+              main={main}
+              supporting={supporting}
+              value={option}
+            />
+          );
+        });
+      }}
+      searchPlaceholder={searchPlaceholder}
+      targetFallback={selectedItem.main || searchPlaceholder}
+      targetItem={selectedItem}
+      targetLeftSection={<IconCalendar size={16} />}
+      value={value}
+    />
   );
 }

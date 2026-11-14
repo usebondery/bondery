@@ -1,5 +1,4 @@
 export interface DateFormatterLike {
-  dateTime: (date: Date, opts?: Intl.DateTimeFormatOptions & { timeZone?: string }) => string;
   number: (value: number, opts?: Intl.NumberFormatOptions) => string;
   relativeTime: (date: Date, base: Date) => string;
 }

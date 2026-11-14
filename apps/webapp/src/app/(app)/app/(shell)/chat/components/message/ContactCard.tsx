@@ -4,6 +4,8 @@ import { PersonAvatar } from "@bondery/mantine-next";
 import { Badge, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCalendar, IconLanguage, IconMapPin } from "@tabler/icons-react";
 import Link from "next/link";
+import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { routePerson } from "@/lib/navigation/route/person";
 
@@ -29,6 +31,8 @@ interface ContactCardProps {
 }
 
 export function ContactCard({ contact, detailed }: ContactCardProps) {
+  const t = useChatPageTranslations();
+  const formatter = useDateFormatter();
   const link = contact.appLink ? routeAssert(contact.appLink) : routePerson(contact.id);
 
   const tags = (contact.tags ?? []).map((tag) => (typeof tag === "string" ? tag : tag.label));
@@ -99,20 +103,26 @@ export function ContactCard({ contact, detailed }: ContactCardProps) {
               <Group gap={4} wrap="nowrap">
                 <IconCalendar size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" size="xs">
-                  Last interaction: {new Date(contact.lastInteraction).toLocaleDateString()}
+                  {t("contactLastInteraction", {
+                    date: formatter.formatDate(new Date(contact.lastInteraction), "short"),
+                  })}
                 </Text>
               </Group>
             )}
 
             {detailed && contact.phones && contact.phones.length > 0 && (
               <Text c="dimmed" size="xs">
-                Phone: {contact.phones.map((p) => `${p.prefix}${p.value}`).join(", ")}
+                {t("contactPhone", {
+                  value: contact.phones.map((p) => `${p.prefix}${p.value}`).join(", "),
+                })}
               </Text>
             )}
 
             {detailed && contact.emails && contact.emails.length > 0 && (
               <Text c="dimmed" size="xs">
-                Email: {contact.emails.map((e) => e.value).join(", ")}
+                {t("contactEmail", {
+                  value: contact.emails.map((e) => e.value).join(", "),
+                })}
               </Text>
             )}
 

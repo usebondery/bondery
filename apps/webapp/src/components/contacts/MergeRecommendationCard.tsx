@@ -1,7 +1,6 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
   PersonChip,

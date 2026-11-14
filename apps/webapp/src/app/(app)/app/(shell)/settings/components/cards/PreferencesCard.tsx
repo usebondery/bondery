@@ -492,12 +492,12 @@ export function PreferencesCard() {
           <PreferencesFieldRow>
             <PreferencesField>
               <DateFormatPicker
-                description={t("DateFormatTooltip")}
                 label={renderFieldLabel(t("DateFormat"), t("DateFormatTooltip"))}
-                onChange={(nextFormat) => {
-                  setDateFormat(nextFormat);
+                onBlur={(nextFormat) => {
                   void persistDateFormat(nextFormat);
                 }}
+                onChange={setDateFormat}
+                placeholder={t("DateFormatSearch")}
                 value={dateFormat}
               />
             </PreferencesField>

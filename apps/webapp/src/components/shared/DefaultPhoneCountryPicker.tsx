@@ -4,12 +4,15 @@ import { filterBySearchQuery } from "@bondery/helpers";
 import {
   findTelephonePrefixOption,
   getTelephonePrefixSearchTexts,
+  localizeTelephonePrefixLabel,
   TELEPHONE_PREFIX_OPTIONS,
 } from "@bondery/helpers/phone";
+import { intlTagForLocale } from "@bondery/schemas/locale";
 import { IconPhone } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { SearchableComboboxPickerOption } from "@/components/shared/SearchableComboboxItem";
 import { SearchableComboboxPicker } from "@/components/shared/SearchableComboboxPicker";
+import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 
 interface DefaultPhoneCountryPickerProps {
@@ -30,9 +33,13 @@ export function DefaultPhoneCountryPicker({
   disabled = false,
 }: DefaultPhoneCountryPickerProps) {
   const t = useSettingsPageTranslations("Preferences");
+  const intlTag = intlTagForLocale(useCurrentLocale());
   const selected = findTelephonePrefixOption(value);
+  const selectedLabel = selected ? localizeTelephonePrefixLabel(selected, intlTag) : undefined;
   const filteredOptions = (query: string) =>
-    filterBySearchQuery(TELEPHONE_PREFIX_OPTIONS, query, getTelephonePrefixSearchTexts);
+    filterBySearchQuery(TELEPHONE_PREFIX_OPTIONS, query, (option) =>
+      getTelephonePrefixSearchTexts(option, intlTag),
+    );
 
   const searchPlaceholder = placeholder ?? t("DefaultPhoneCountrySearch");
 
@@ -50,7 +57,7 @@ export function DefaultPhoneCountryPicker({
             isSelected={option.value === selectedValue}
             key={option.value}
             main={option.displayPrefix}
-            supporting={option.label}
+            supporting={localizeTelephonePrefixLabel(option, intlTag)}
             value={option.value}
           />
         ))
@@ -62,7 +69,7 @@ export function DefaultPhoneCountryPicker({
           ? {
               flag: selected.flag,
               main: selected.displayPrefix,
-              supporting: selected.label,
+              supporting: selectedLabel,
             }
           : undefined
       }

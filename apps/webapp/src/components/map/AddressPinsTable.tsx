@@ -1,6 +1,5 @@
 "use client";
 
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink } from "@bondery/mantine-next";
 import type { AddressPin } from "@bondery/schemas";
 import { Badge, Center, Paper, Stack, Table, Text, TextInput } from "@mantine/core";

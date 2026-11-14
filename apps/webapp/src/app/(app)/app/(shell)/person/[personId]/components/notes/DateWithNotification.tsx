@@ -4,6 +4,7 @@ import { Checkbox, Group, Loader, Text, TextInput } from "@mantine/core";
 import { IconGift } from "@tabler/icons-react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { useContactImportantDatesTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { INPUT_MAX_LENGTHS } from "@/lib/platform/config";
 
 interface DateWithNotificationProps {
@@ -66,6 +67,7 @@ export default function DateWithNotification({
   notifyLabel,
 }: DateWithNotificationProps) {
   const t = useContactImportantDatesTranslations();
+  const formatter = useDateFormatter();
   const dateFieldName = fieldPrefix ? `${fieldPrefix}-date` : "date";
   const nameFieldName = fieldPrefix ? `${fieldPrefix}-name` : "name";
 
@@ -85,7 +87,7 @@ export default function DateWithNotification({
           rightSection={saving && focusedField === dateFieldName ? <Loader size="xs" /> : null}
           style={{ flex: showNameInput ? 1 : 2 }}
           value={dateValue}
-          valueFormat="MMMM D, YYYY"
+          valueFormat={formatter.dateInputValueFormat({ withYear: true })}
         />
         {showNameInput && (
           <TextInput

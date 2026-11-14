@@ -1,6 +1,7 @@
-import { getResources, getT } from "next-i18next/server";
+import { getT } from "next-i18next/server";
 import type { ReactNode } from "react";
 import { LocaleProvider } from "@/components/shell/UserLocaleProvider";
+import { getRouteResources } from "@/lib/i18n/getRouteResources.server";
 import { preloadWebNamespaces } from "@/lib/i18n/preloadNamespaces.server";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 
@@ -17,14 +18,14 @@ export async function PreloadedLocaleProvider({
   groups: string[];
 }) {
   const { locale, timezone, timeFormat, dateFormat } = await resolveLocaleSettings();
-  await preloadWebNamespaces(locale, groups);
+  const namespaces = await preloadWebNamespaces(locale, groups);
   const { i18n } = await getT("common", { lng: locale });
 
   return (
     <LocaleProvider
       dateFormat={dateFormat}
       locale={locale}
-      resources={getResources(i18n)}
+      resources={getRouteResources(i18n, locale, namespaces)}
       timeFormat={timeFormat}
       timezone={timezone}
     >

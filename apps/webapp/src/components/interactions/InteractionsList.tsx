@@ -44,7 +44,7 @@ export function InteractionsList({
 
     activities.forEach((activity) => {
       const date = new Date(activity.date);
-      const key = formatter.dateTime(date, { month: "long", year: "numeric" });
+      const key = formatter.formatDate(date, "monthYearLong");
       if (!groups[key]) {
         groups[key] = [];
       }

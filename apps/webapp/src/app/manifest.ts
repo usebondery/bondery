@@ -1,6 +1,6 @@
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
 import { PWA_APP_NAME } from "@bondery/helpers";
-import { loadNamespace } from "@bondery/translations/i18n";
+import { loadNamespace } from "@bondery/translations/loader";
 import type { MetadataRoute } from "next";
 import { resolveLocaleSettings } from "@/lib/i18n/resolveLocaleSettings";
 

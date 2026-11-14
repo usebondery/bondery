@@ -41,14 +41,6 @@ export function parseDateString(date: string): Date | null {
   return new Date(year, month - 1, day);
 }
 
-function isRecurringDate(date: Date | null): boolean {
-  return date?.getFullYear() === 1904;
-}
-
-export function getDateFormat(date: Date | null): string {
-  return isRecurringDate(date) ? "MMMM D" : "MMMM D, YYYY";
-}
-
 export function normalizePickerDate(value: Date | string | null): Date | null {
   if (!value) {
     return null;

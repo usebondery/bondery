@@ -1,15 +1,9 @@
 "use client";
 
 import type { DateFormatPreference } from "@bondery/schemas";
-import {
-  i18nConfig,
-  resourceLoader,
-  SUPPORTED_LOCALES,
-  type SupportedLocale,
-} from "@bondery/translations";
+import { i18nConfig, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
 import { DatesProvider } from "@mantine/dates";
 import type { Resource } from "i18next";
-import resourcesToBackend from "i18next-resources-to-backend";
 import { I18nProvider } from "next-i18next/client";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import "@/lib/i18n/loadDayjsLocales";
@@ -84,6 +78,7 @@ export function LocaleProvider({
   const applyUserLocale = (
     patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
   ) => {
+    const localeChanged = patch.locale !== undefined && patch.locale !== locale;
     if (patch.locale) {
       setLocale(patch.locale);
     }
@@ -95,6 +90,12 @@ export function LocaleProvider({
     }
     if (patch.dateFormat) {
       setDateFormat(patch.dateFormat);
+    }
+    // The client bundle holds only the current locale. The strings of another
+    // locale arrive from the server, so a language change reloads the page.
+    // Callers persist the settings mutation before they call this function.
+    if (localeChanged) {
+      window.location.reload();
     }
   };
 
@@ -119,12 +120,10 @@ export function LocaleProvider({
           interpolation: i18nConfig.interpolation,
           keySeparator: i18nConfig.keySeparator,
           nsSeparator: i18nConfig.nsSeparator,
-          partialBundledLanguages: true,
         }}
         language={locale}
         resources={resources}
         supportedLngs={[...SUPPORTED_LOCALES]}
-        use={[resourcesToBackend(resourceLoader)]}
       >
         <DatesProvider settings={{ locale }}>{children}</DatesProvider>
       </I18nProvider>
