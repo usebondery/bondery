@@ -22352,8 +22352,32 @@ paths:
                         type: string
                         enum:
                           - en
+                          - bg
                           - cs
+                          - da
                           - de
+                          - el
+                          - es
+                          - et
+                          - fi
+                          - fr
+                          - hr
+                          - hu
+                          - it
+                          - lt
+                          - lv
+                          - nb
+                          - nl
+                          - pl
+                          - pt
+                          - ro
+                          - ru
+                          - sk
+                          - sl
+                          - sr
+                          - sv
+                          - tr
+                          - uk
                         description: Bondery UI locale code
                       onboardingCompletedAt:
                         nullable: true
@@ -22947,8 +22971,32 @@ paths:
                         type: string
                         enum:
                           - en
+                          - bg
                           - cs
+                          - da
                           - de
+                          - el
+                          - es
+                          - et
+                          - fi
+                          - fr
+                          - hr
+                          - hu
+                          - it
+                          - lt
+                          - lv
+                          - nb
+                          - nl
+                          - pl
+                          - pt
+                          - ro
+                          - ru
+                          - sk
+                          - sl
+                          - sr
+                          - sv
+                          - tr
+                          - uk
                         description: Bondery UI locale code
                       leftSwipeAction:
                         type: string
@@ -23278,8 +23326,32 @@ paths:
                   type: string
                   enum:
                     - en
+                    - bg
                     - cs
+                    - da
                     - de
+                    - el
+                    - es
+                    - et
+                    - fi
+                    - fr
+                    - hr
+                    - hu
+                    - it
+                    - lt
+                    - lv
+                    - nb
+                    - nl
+                    - pl
+                    - pt
+                    - ro
+                    - ru
+                    - sk
+                    - sl
+                    - sr
+                    - sv
+                    - tr
+                    - uk
                 timezone:
                   description: IANA timezone name
                   type: string
@@ -23342,8 +23414,32 @@ paths:
                         type: string
                         enum:
                           - en
+                          - bg
                           - cs
+                          - da
                           - de
+                          - el
+                          - es
+                          - et
+                          - fi
+                          - fr
+                          - hr
+                          - hu
+                          - it
+                          - lt
+                          - lv
+                          - nb
+                          - nl
+                          - pl
+                          - pt
+                          - ro
+                          - ru
+                          - sk
+                          - sl
+                          - sr
+                          - sv
+                          - tr
+                          - uk
                         description: Bondery UI locale code
                       leftSwipeAction:
                         description: Swipe action on a contact row, left direction
