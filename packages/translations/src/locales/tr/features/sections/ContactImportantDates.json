@@ -1,0 +1,32 @@
+{
+  "AddAction": "Tarih ekle",
+  "AddHint": "Yeni tarih için tüm alanları doldur.",
+  "AddImportantDate": "Önemli tarih ekle",
+  "BirthdayDateLabel": "Doğum günü seç",
+  "DatePlaceholder": "Tarih seç",
+  "DeleteAction": "Sil",
+  "DraftIncompleteError": "Yeni tarih için tüm alanları doldur.",
+  "Empty": "Henüz önemli tarih yok.",
+  "ErrorTitle": "Hata",
+  "NotePlaceholder": "İsteğe bağlı not",
+  "NotifyDayBefore": "{count} gün önce bildir",
+  "NotifyDaysBefore": "{count} gün önce bildir",
+  "NotifyMe": "Bildir",
+  "NotifyNone": "Bildirme",
+  "SuccessTitle": "Başarılı",
+  "Title": "Önemli tarihler",
+  "TypeDisabledBirthdateHint": "{firstName} zaten doğum günü eklemiş",
+  "TypeDisabledHint": "{firstName} zaten doğum günü veya isim günü eklemiş",
+  "TypeDisabledNamedateHint": "{firstName} zaten isim günü eklemiş",
+  "TypePlaceholder": "Tür seç",
+  "Types": {
+    "anniversary": "Yıldönümü",
+    "birthday": "Doğum günü",
+    "graduation": "Mezuniyet",
+    "nameday": "İsim günü",
+    "other": "Diğer"
+  },
+  "UniqueTypeError": "Yalnızca bir {type} eklenebilir.",
+  "UpdateError": "Önemli tarihler güncellenemedi",
+  "UpdateSuccess": "Önemli tarihler güncellendi"
+}

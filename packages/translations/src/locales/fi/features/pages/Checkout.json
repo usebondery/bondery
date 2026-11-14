@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Sinulla on jo aktiivinen Premium-tilaus.",
+  "alreadySubscribedTitle": "Jo tilaaja",
+  "errorMessage": "Jotain meni pieleen. Yritä uudelleen.",
+  "errorTitle": "Maksu epäonnistui",
+  "errorUnauthorized": "Kirjaudu sisään ja yritä uudelleen.",
+  "intervalAnnual": "Vuosittain",
+  "intervalMonthly": "Kuukausittain",
+  "paymentBlockedAction": "Päivitä laskutus",
+  "paymentBlockedMessage": "Emme voineet käsitellä maksuasi useiden yritysten jälkeen. Päivitä laskutustietosi palauttaaksesi Premiumin.",
+  "paymentBlockedTitle": "Maksu vaaditaan",
+  "successMessage": "Nauti 300 AI-viestistä kuukaudessa ja kaikista Premium-ominaisuuksista.",
+  "successTitle": "Olet Premium-käyttäjä!",
+  "upgradePendingMessage": "Tilisi päivittyy pian Premiumiksi.",
+  "upgradePendingTitle": "Maksu vastaanotettu",
+  "upgradesDisabledTooltip": "Premium-päivitykset eivät ole vielä käytettävissä. Tule pian takaisin.",
+  "upgradeToPremium": "Päivitä Premiumiin"
+}

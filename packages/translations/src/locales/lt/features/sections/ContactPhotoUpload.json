@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Pridėk šio kontakto nuotrauką",
+  "Cancel": "Atšaukti",
+  "ConfirmPhoto": "Patvirtinti nuotrauką",
+  "DragImageHere": "Vilk nuotrauką čia arba spustelėk, kad pasirinktum",
+  "InvalidFile": "Netinkamas failas",
+  "PhotoUpdateError": "Nepavyko atnaujinti kontakto nuotraukos",
+  "PhotoUpdateSuccess": "Kontakto nuotrauka sėkmingai atnaujinta",
+  "PleaseWait": "Palauk",
+  "TitleModal": "Įkelti kontakto nuotrauką",
+  "UpdateError": "Klaida",
+  "UpdateProfilePhoto": "Atnaujinti kontakto nuotrauką",
+  "UpdateSuccess": "Pavyko",
+  "UploadingPhoto": "Įkeliama..."
+}

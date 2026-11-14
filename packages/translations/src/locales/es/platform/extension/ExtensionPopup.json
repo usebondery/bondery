@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Abrir Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Conecta tu cuenta para guardar contactos de las redes sociales.",
+    "SignIn": "Iniciar sesión",
+    "Title": "Inicia sesión en Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Añadir una interacción con esta persona"
+  },
+  "Settings": {
+    "ApiServer": "Servidor de la API",
+    "SignOut": "Cerrar sesión"
+  },
+  "UpdateRequired": {
+    "Description": "Tu extensión de Bondery está obsoleta y puede que no funcione bien. Actualízala para continuar.",
+    "OpenExtensionsPage": "Abrir la página de extensiones",
+    "Title": "Actualización necesaria"
+  },
+  "Welcome": {
+    "ConnectButton": "Conectar tu cuenta de Bondery"
+  }
+}

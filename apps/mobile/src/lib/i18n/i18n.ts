@@ -1,10 +1,10 @@
 import {
   DEFAULT_LOCALE,
   i18nConfig,
-  loadNamespace,
   namespacesForPlatform,
   SUPPORTED_LOCALES,
 } from "@bondery/translations";
+import { loadNamespace } from "@bondery/translations/loader";
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 

@@ -232,6 +232,11 @@ export type CommonCatalog = {
       group_member_ids_search_failed: string;
       group_not_found: string;
       group_remove_members_invalid_body: string;
+      idempotency_key_in_progress: string;
+      idempotency_key_invalid: string;
+      idempotency_key_mismatch: string;
+      idempotency_key_unsupported: string;
+      idempotency_response_omitted: string;
       import: string;
       import_bondery_failed: string;
       import_bondery_invalid: string;
@@ -265,11 +270,6 @@ export type CommonCatalog = {
       onboarding_failed_to_dismiss_getting_started: string;
       onboarding_failed_to_update_import_follow_up: string;
       rate: string;
-      idempotency_key_in_progress: string;
-      idempotency_key_invalid: string;
-      idempotency_key_mismatch: string;
-      idempotency_key_unsupported: string;
-      idempotency_response_omitted: string;
       rate_limit_exceeded: string;
       relationship: string;
       relationship_already_exists: string;
@@ -586,6 +586,12 @@ export type ContactsTableCatalog = {
   MergeMenu: string;
   NoHiddenColumns: string;
   NoVisibleColumns: string;
+  OtherEmails: string;
+  OtherEmails_one: string;
+  OtherEmails_other: string;
+  OtherPhones: string;
+  OtherPhones_one: string;
+  OtherPhones_other: string;
   SearchPlaceholder: string;
   SelectAllTotalTemplate: string;
   SelectedCountTemplate: string;
@@ -1095,6 +1101,9 @@ export type ChatPageCatalog = {
   ageHoursShort: string;
   ageLessThanMinuteShort: string;
   cancel: string;
+  contactEmail: string;
+  contactLastInteraction: string;
+  contactPhone: string;
   copyMessage: string;
   copyMessageSuccess: string;
   deleteSession: string;
@@ -1338,9 +1347,33 @@ export type KeepInTouchCatalog = {
 };
 
 export type LanguagesCatalog = {
+  bg: string;
   cs: string;
+  da: string;
   de: string;
+  el: string;
   en: string;
+  es: string;
+  et: string;
+  fi: string;
+  fr: string;
+  hr: string;
+  hu: string;
+  it: string;
+  lt: string;
+  lv: string;
+  nb: string;
+  nl: string;
+  pl: string;
+  pt: string;
+  ro: string;
+  ru: string;
+  sk: string;
+  sl: string;
+  sr: string;
+  sv: string;
+  tr: string;
+  uk: string;
 };
 
 export type LinkedInDataCatalog = {
@@ -1761,6 +1794,12 @@ export type MobileSettingsCatalog = {
   AppVersionLatest: string;
   AppVersionUpdateAvailable: string;
   Changelog: string;
+  DateFormatDmy: string;
+  DateFormatLocale: string;
+  DateFormatMdy: string;
+  DateFormatSelectLabel: string;
+  DateFormatUpdatedDescription: string;
+  DateFormatYmd: string;
   Docs: string;
   External: string;
   FollowUs: string;
@@ -2180,9 +2219,11 @@ export type ReminderDigestEmailCatalog = {
     nameday: string;
     other: string;
   };
+  dayFew: string;
   dayMany: string;
   dayOne: string;
   description: string;
+  headingFew: string;
   headingMany: string;
   headingOne: string;
   preview: string;
@@ -2194,12 +2235,14 @@ export type ReminderDigestEmailCatalog = {
 
 export type SettingsPageCatalog = {
   AiAssistants: {
+    AddToClaudeButton: string;
+    ClientsLabel: string;
     CopiedButton: string;
     CopyButton: string;
     Description: string;
-    DocsHelpLabel: string;
     EmptyTitle: string;
     GrantedAt: string;
+    LearnMoreMcpDocs: string;
     McpJsonLabel: string;
     McpUrlLabel: string;
     PermissionField: string;
@@ -2212,6 +2255,7 @@ export type SettingsPageCatalog = {
     RevokeMessage: string;
     RevokeTitle: string;
     RevokeTooltip: string;
+    TileTooltip: string;
     Title: string;
   };
   ApiKeys: {
@@ -2576,6 +2620,15 @@ export type SettingsPageCatalog = {
   };
   Preferences: {
     Dark: string;
+    DateFormat: string;
+    DateFormatDmy: string;
+    DateFormatLocale: string;
+    DateFormatMdy: string;
+    DateFormatSearch: string;
+    DateFormatTooltip: string;
+    DateFormatUpdateError: string;
+    DateFormatUpdateSuccess: string;
+    DateFormatYmd: string;
     DefaultPhoneCountry: string;
     DefaultPhoneCountrySearch: string;
     DefaultPhoneCountryTooltip: string;
@@ -2618,6 +2671,7 @@ export type SettingsPageCatalog = {
     Title: string;
     UpdateError: string;
     UpdateSuccess: string;
+    UpdatingDateFormat: string;
     UpdatingDefaultPhoneCountry: string;
     UpdatingLanguage: string;
     UpdatingReminderTime: string;

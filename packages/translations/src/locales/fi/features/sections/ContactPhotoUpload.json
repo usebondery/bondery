@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Lisää kuva tälle yhteystiedolle",
+  "Cancel": "Peruuta",
+  "ConfirmPhoto": "Vahvista kuva",
+  "DragImageHere": "Vedä kuva tähän tai napsauta valitaksesi",
+  "InvalidFile": "Virheellinen tiedosto",
+  "PhotoUpdateError": "Yhteystiedon kuvan päivitys epäonnistui",
+  "PhotoUpdateSuccess": "Yhteystiedon kuva päivitettiin",
+  "PleaseWait": "Odota",
+  "TitleModal": "Lataa yhteystiedon kuva",
+  "UpdateError": "Virhe",
+  "UpdateProfilePhoto": "Päivitä yhteystiedon kuva",
+  "UpdateSuccess": "Onnistui",
+  "UploadingPhoto": "Ladataan..."
+}

@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Ajoutez une photo pour ce contact",
+  "Cancel": "Annuler",
+  "ConfirmPhoto": "Confirmer la photo",
+  "DragImageHere": "Glissez une image ici ou cliquez pour sélectionner",
+  "InvalidFile": "Fichier non valide",
+  "PhotoUpdateError": "Impossible de mettre à jour la photo du contact",
+  "PhotoUpdateSuccess": "Photo du contact mise à jour",
+  "PleaseWait": "Veuillez patienter",
+  "TitleModal": "Téléverser une photo du contact",
+  "UpdateError": "Erreur",
+  "UpdateProfilePhoto": "Mettre à jour la photo du contact",
+  "UpdateSuccess": "Succès",
+  "UploadingPhoto": "Téléversement…"
+}

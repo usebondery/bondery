@@ -1,0 +1,22 @@
+{
+  "AllEnrichedDescription": "Visi kontaktai su LinkedIn profiliu jau papildyti.",
+  "AllEnrichedTitle": "Visi kontaktai papildyti",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Šiuo metu papildoma:",
+  "EligibleLabel_few": "{count} žmonės gali būti papildyti",
+  "EligibleLabel_one": "{count} žmogus gali būti papildytas",
+  "EligibleLabel_other": "{count} žmonių galima papildyti",
+  "Enrich": "Papildyti",
+  "EnrichAll": "Papildyti visus",
+  "HelpTooltip": "Įtrauk naujausius LinkedIn profilio duomenis į šį kontaktą. Spustelėk, kad sužinotum, kaip veikia papildymas.",
+  "Pause": "Pristabdyti",
+  "PausingTooltip": "Baigiama dabartinis kontaktas, tada pristabdoma...",
+  "PersonEligibleLabel": "Šį kontaktą galima papildyti iš LinkedIn",
+  "ProcessingPerson": "Papildoma {name}...",
+  "ProgressLabel": "Papildoma: {completed} iš {totalEligible} baigta",
+  "ProgressLabelWithFailed": "Papildoma: {completed} iš {totalEligible} baigta ({failed} nepavyko)",
+  "Resume": "Tęsti",
+  "ResumeLabel": "Papildymas nutrauktas: {completed} atlikta, {pending} liko",
+  "SkipRemaining": "Praleisti likusius",
+  "Tooltip": "Šie kontaktai turi LinkedIn profilį, bet dar nepapildyti. Papildyk, kad gautum naujausią darbo istoriją, išsilavinimą ir aprašymą."
+}

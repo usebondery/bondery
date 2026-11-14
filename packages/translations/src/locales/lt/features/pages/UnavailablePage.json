@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Tikrinama vėl po {seconds} s…",
+  "Description": "Tavo paskyra saugi ir vis dar esi prisijungęs. Tikriname toliau — dažniausiai tai trunka akimirką.",
+  "MetadataTitle": "Paslauga nepasiekiama",
+  "Retry": "Bandyti dar kartą",
+  "StatusChecking": "Tikrinamas ryšys…",
+  "StatusDegraded": "Kai kurios funkcijos dabar gali veikti lėčiau",
+  "StatusOffline": "Bondery laikinai nepasiekiamas",
+  "StatusOnline": "Vėl prisijungta. Grąžiname…",
+  "StatusPageLink": "Peržiūrėti būsenos puslapį",
+  "TechnicalBackendStatus": "Backend: {status}",
+  "TechnicalDetails": "Techninė informacija",
+  "TechnicalHttpStatus": "HTTP būsena: {status}",
+  "TechnicalUnreachable": "nepasiekiamas",
+  "Title": "Iškilo ryšio problema"
+}

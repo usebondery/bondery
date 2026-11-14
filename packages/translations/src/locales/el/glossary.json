@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "επαφή",
+    "contactPlural": "επαφές",
+    "group": "ομάδα",
+    "interaction": "αλληλεπίδραση",
+    "interactionPlural": "αλληλεπιδράσεις",
+    "network": "δίκτυο",
+    "person": "άτομο",
+    "person_one": "{count} άτομο",
+    "person_other": "{count} άτομα",
+    "tag": "ετικέτα"
+  },
+  "features": {
+    "aiAssistant": "Βοηθός AI",
+    "fixAndMerge": "Διόρθωση και συγχώνευση",
+    "keepInTouch": "Μείνε σε επαφή"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

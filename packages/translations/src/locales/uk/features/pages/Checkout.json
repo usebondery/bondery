@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "У вас уже є активная підписка Premium.",
+  "alreadySubscribedTitle": "Уже підписаніи",
+  "errorMessage": "Что-то пошло не так. Спробуйте знову.",
+  "errorTitle": "Помилка оформления",
+  "errorUnauthorized": "Увійдіть і спробуйте знову.",
+  "intervalAnnual": "Ежегодно",
+  "intervalMonthly": "Ежемесячно",
+  "paymentBlockedAction": "Оновити оплату",
+  "paymentBlockedMessage": "Не вдалося обробити платіж після нескольких спроб. Оновіть платіжние дані, щоб відновити Premium.",
+  "paymentBlockedTitle": "Требуется оплата",
+  "successMessage": "300 сообщений И І в месяц і усі функції Premium.",
+  "successTitle": "У вас Premium!",
+  "upgradePendingMessage": "Обліковий запис скоро перейдєт на Premium.",
+  "upgradePendingTitle": "Платєж отримен",
+  "upgradesDisabledTooltip": "Переход на Premium поки що недоступний. Загляните позже.",
+  "upgradeToPremium": "Перейти на Premium"
+}

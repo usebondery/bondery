@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Aktivnosti",
+    "Animals": "Životinje",
+    "Buildings": "Zgrade",
+    "Celebrations": "Proslave",
+    "Food": "Hrana",
+    "Hearts": "Srca",
+    "Humans": "Ljudi",
+    "Miscellaneous": "Razno",
+    "Nature": "Priroda",
+    "Objects": "Predmeti",
+    "Sports": "Sport",
+    "Travel": "Putovanja",
+    "Work": "Posao"
+  },
+  "EmptySearch": "Nema pronađenih emojija",
+  "RandomAccessibilityLabel": "Odaberi nasumični emoji",
+  "SearchPlaceholder": "Traži emojije…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Otvara birač emojija"
+}

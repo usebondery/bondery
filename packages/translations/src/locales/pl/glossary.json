@@ -1,0 +1,24 @@
+{
+  "entities": {
+    "contact": "kontakt",
+    "contactPlural": "kontakty",
+    "group": "grupa",
+    "interaction": "interakcja",
+    "interactionPlural": "interakcje",
+    "network": "sieć",
+    "person": "osoba",
+    "person_few": "{count} osoby",
+    "person_many": "{count} osób",
+    "person_one": "{count} osoba",
+    "person_other": "{count} osoby",
+    "tag": "etykieta"
+  },
+  "features": {
+    "aiAssistant": "Asystent AI",
+    "fixAndMerge": "Napraw i scal",
+    "keepInTouch": "Utrzymuj kontakt"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

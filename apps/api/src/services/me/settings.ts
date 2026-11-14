@@ -25,6 +25,7 @@ export function formatSettingsPatchData(result: {
   defaultPhoneCountry?: string | null;
   reminderSendHour?: string | null;
   timeFormat?: string | null;
+  dateFormat?: string | null;
   language?: UserSettingsLanguage | null;
   colorScheme?: ColorScheme | null;
   leftSwipeAction?: string | null;
@@ -35,6 +36,7 @@ export function formatSettingsPatchData(result: {
 }) {
   return {
     colorScheme: result.colorScheme,
+    dateFormat: result.dateFormat,
     defaultPhoneCountry: result.defaultPhoneCountry ?? null,
     groupSortOrder: result.groupSortOrder,
     language: result.language,
@@ -65,6 +67,7 @@ export async function ensureDefaultSettings(ctx: DomainContext) {
       data: {
         aiMessagesMonthResetAt: new Date(),
         colorScheme: "auto",
+        dateFormat: "locale",
         language: DEFAULT_LOCALE as SupportedLocale,
         nextReminderAtUtc: new Date(),
         reminderSendHour: DEFAULT_REMINDER_SEND_HOUR,
@@ -89,6 +92,7 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
     language?: UserSettingsLanguage;
     colorScheme?: ColorScheme;
     timeFormat?: string;
+    dateFormat?: string;
     leftSwipeAction?: string;
     rightSwipeAction?: string;
     groupSortOrder?: string;
@@ -113,6 +117,9 @@ export async function updateUserSettings(ctx: DomainContext, input: UpdateSettin
   }
   if (input.timeFormat !== undefined) {
     updatePayload.timeFormat = input.timeFormat;
+  }
+  if (input.dateFormat !== undefined) {
+    updatePayload.dateFormat = input.dateFormat;
   }
   if (input.leftSwipeAction !== undefined) {
     updatePayload.leftSwipeAction = input.leftSwipeAction;

@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Sunucu isteği reddetti çünkü uzantın güncel değil. Güncelle.",
+  "ApiRejectedTitle": "Sürüm çok eski",
+  "UpdateButton": "Güncelle",
+  "UpdateRequiredDescription": "Bondery uzantın güncel değil ve düzgün çalışmayabilir. Devam etmek için güncelle.",
+  "UpdateRequiredTitle": "Güncelleme gerekli",
+  "WebappNotificationDescription": "Bondery Chrome uzantını düzgün çalışmaya devam etmesi için güncellemen gerekir.",
+  "WebappNotificationTitle": "Uzantı güncellemesi var"
+}

@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} jagas sinuga seda kontakti",
+  "footerNotes": "Saadetud Bonderyga. Vasta sellele e-kirjale, et jõuda {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Aadress",
+    "email": "E-post",
+    "facebook": "Facebook",
+    "importantDates": "Olulised kuupäevad",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Asukoht",
+    "notes": "Märkmed",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Veebileht",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-post ja muud detailid sees",
+  "replyCta": "Vasta {{senderName}}",
+  "subject": "{{senderName}} jagas sinuga kontakti • {{contactName}}"
+}

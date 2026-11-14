@@ -193,6 +193,7 @@ export function ContactPhonesSection({
             <Input
               aria-label={text.phonePlaceholder}
               component={IMaskInput}
+              dir="ltr"
               disabled={savingField === "phones"}
               mask={getTelephoneReactMaskExpression(phone.prefix || "+1")}
               onAccept={(value: string) => handlePhoneChange(index, value)}
@@ -317,6 +318,7 @@ export function ContactPhonesSection({
             <Input
               aria-label={text.phonePlaceholder}
               component={IMaskInput}
+              dir="ltr"
               disabled={savingField === "phones"}
               mask={getTelephoneReactMaskExpression(draftPhone.prefix || "+1")}
               onAccept={(value: string) => handleDraftPhoneChange(value)}

@@ -4,6 +4,7 @@ import { nullableDateTimeSchema } from "../_shared/schema.js";
 import type {
   AuthUser,
   ColorSchemePreference,
+  DateFormatPreference,
   GroupSortOrderPreference,
   ImportFollowupPlatform,
   ImportFollowupStatus,
@@ -26,6 +27,9 @@ export const colorSchemePreferenceSchema: z.ZodType<ColorSchemePreference> = z
 export const timeFormatPreferenceSchema: z.ZodType<TimeFormatPreference> = z
   .enum(["24h", "12h"])
   .describe("Clock format preference");
+export const dateFormatPreferenceSchema: z.ZodType<DateFormatPreference> = z
+  .enum(["locale", "mdy", "dmy", "ymd"])
+  .describe("Calendar date order preference, independent of UI language");
 export const swipeActionPreferenceSchema: z.ZodType<SwipeActionPreference> = z
   .enum(["call", "message", "email"])
   .describe("Swipe action on a contact row");
@@ -83,6 +87,7 @@ export const isoCountryCodeInputSchema = isoCountryCodeStringSchema.transform((v
 
 const mutableUserSettingsInputSchema = z.object({
   colorScheme: colorSchemePreferenceSchema,
+  dateFormat: dateFormatPreferenceSchema,
   defaultPhoneCountry: isoCountryCodeInputSchema
     .nullable()
     .describe("ISO 3166-1 alpha-2 default calling-code country"),
@@ -100,6 +105,7 @@ const mutableUserSettingsInputSchema = z.object({
 /** Wire shape for GET /api/me/settings — DB-backed preference fields. */
 const mutableUserSettingsSchema = z.object({
   colorScheme: colorSchemePreferenceSchema,
+  dateFormat: z.string().describe("Calendar date order preference"),
   defaultPhoneCountry: isoCountryCodeSchema
     .nullable()
     .describe("ISO 3166-1 alpha-2 default calling-code country"),

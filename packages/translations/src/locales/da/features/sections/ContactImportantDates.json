@@ -1,0 +1,32 @@
+{
+  "AddAction": "Lägg till datum",
+  "AddHint": "Ange all information for at tilføje ett nytt datum.",
+  "AddImportantDate": "Lägg till viktigt datum",
+  "BirthdayDateLabel": "Vælg fødselsdag",
+  "DatePlaceholder": "Vælg datum",
+  "DeleteAction": "Slet",
+  "DraftIncompleteError": "Ange all information for at tilføje ett nytt datum.",
+  "Empty": "Inga viktiga datum end.",
+  "ErrorTitle": "Fel",
+  "NotePlaceholder": "Valfri anteckning",
+  "NotifyDayBefore": "Avisera {count} dag före",
+  "NotifyDaysBefore": "Avisera {count} dage före",
+  "NotifyMe": "Avisera mig",
+  "NotifyNone": "Avisera inte",
+  "SuccessTitle": "Færdigt",
+  "Title": "Viktiga datum",
+  "TypeDisabledBirthdateHint": "{firstName} har redan ett fødselsdato",
+  "TypeDisabledHint": "{firstName} har redan fødselsdag eller navnsdag",
+  "TypeDisabledNamedateHint": "{firstName} har redan en navnsdag",
+  "TypePlaceholder": "Vælg typ",
+  "Types": {
+    "anniversary": "Årsdag",
+    "birthday": "Fødselsdag",
+    "graduation": "Examen",
+    "nameday": "Navnsdag",
+    "other": "Øvrigt"
+  },
+  "UniqueTypeError": "Du kan bara tilføje ett {type}.",
+  "UpdateError": "Kunde ikke opdater viktiga datum",
+  "UpdateSuccess": "Viktiga datum opdaterede"
+}

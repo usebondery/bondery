@@ -1,0 +1,13 @@
+{
+  "Create": "Lisa Bonderysse",
+  "Creating": "Loon inimest…",
+  "ErrorDescription": "Selle inimese loomisel läks midagi valesti.",
+  "ErrorTitle": "Inimest ei õnnestunud luua",
+  "FullNameLabel": "Täisnimi",
+  "FullNamePlaceholder": "nt Jane Doe",
+  "InvalidName": "Lisa kehtiv nimi",
+  "NameRequired": "Lisa nimi",
+  "SuccessDescription": "Uus inimene lisati sinu kontaktide hulka.",
+  "SuccessTitle": "Inimene loodud",
+  "Title": "Loo inimene"
+}

@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Активности",
+    "Animals": "Животние",
+    "Buildings": "Здания",
+    "Celebrations": "Праздники",
+    "Food": "Еда",
+    "Hearts": "Сердца",
+    "Humans": "Люди",
+    "Miscellaneous": "Разное",
+    "Nature": "Природа",
+    "Objects": "Предмети",
+    "Sports": "Спорт",
+    "Travel": "Путешествия",
+    "Work": "Робота"
+  },
+  "EmptySearch": "Емодзі не знайдено",
+  "RandomAccessibilityLabel": "Вибрати случайное емодзи",
+  "SearchPlaceholder": "Шукати емодзи…",
+  "SheetTitle": "Емодзи",
+  "TriggerAccessibilityHint": "Откривает вибор емодзи"
+}

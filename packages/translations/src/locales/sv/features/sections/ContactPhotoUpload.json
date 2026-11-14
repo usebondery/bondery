@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Lägg till ett foto för den här kontakten",
+  "Cancel": "Avbryt",
+  "ConfirmPhoto": "Bekräfta foto",
+  "DragImageHere": "Dra bild hit eller klicka för att välja",
+  "InvalidFile": "Ogiltig fil",
+  "PhotoUpdateError": "Kunde inte uppdatera kontaktfotot",
+  "PhotoUpdateSuccess": "Kontaktfotot uppdaterat",
+  "PleaseWait": "Vänta",
+  "TitleModal": "Ladda upp kontaktfoto",
+  "UpdateError": "Fel",
+  "UpdateProfilePhoto": "Uppdatera kontaktfoto",
+  "UpdateSuccess": "Klart",
+  "UploadingPhoto": "Laddar upp…"
+}

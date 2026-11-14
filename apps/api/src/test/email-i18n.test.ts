@@ -37,8 +37,29 @@ describe("email-i18n", () => {
 
   it("formats dates per locale", () => {
     const date = new Date("2026-07-30T00:00:00Z");
+    const en = {
+      dateFormat: "locale" as const,
+      locale: "en" as const,
+      timeFormat: "24h" as const,
+      timeZone: "UTC",
+    };
+    const de = { ...en, locale: "de" as const };
+    const hu = { ...en, locale: "hu" as const };
 
-    assert.match(formatEmailDate(date, "en"), /2026/);
-    assert.match(formatEmailDateFromIso("2026-07-30", "de"), /2026/);
+    assert.match(formatEmailDate(date, en), /2026/);
+    assert.match(formatEmailDateFromIso("2026-07-30", de), /2026/);
+    assert.match(formatEmailDate(date, hu), /^2026/);
+  });
+
+  it("does not use a raw ISO date when the language is not numeric ymd", () => {
+    const ctx = {
+      dateFormat: "locale" as const,
+      locale: "cs" as const,
+      timeFormat: "24h" as const,
+      timeZone: "UTC",
+    };
+    const formatted = formatEmailDateFromIso("2026-07-29", ctx, "long");
+    assert.doesNotMatch(formatted, /^\d{4}-\d{2}-\d{2}$/);
+    assert.match(formatted, /2026/);
   });
 });

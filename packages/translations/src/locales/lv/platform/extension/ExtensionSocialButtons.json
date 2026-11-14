@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Paplašinājuma kļūda — mēģini vēlreiz",
+    "OpenInBondery": "Atvērt Bondery",
+    "SignInRequired": "Nepieciešama pierakstīšanās — noklikšķini uz ikonas Bondery",
+    "SomethingWrong": "Kaut kas nogāja greizi"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Paplašinājuma kļūda — mēģini vēlreiz",
+    "OpenInBondery": "Atvērt Bondery",
+    "SignInRequired": "Nepieciešama pierakstīšanās — noklikšķini uz ikonas Bondery",
+    "SomethingWrong": "Kaut kas nogāja greizi"
+  }
+}

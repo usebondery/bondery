@@ -1,0 +1,30 @@
+{
+  "Approve": "Разрешить",
+  "ChromeExtensionClientName": "Расширение Bondery для Chrome",
+  "Deny": "Отклонить",
+  "Description": "{clientName} запрашивает доступ к вашему аккаунту Bondery.",
+  "ErrorTitle": "Ошибка авторизации",
+  "InvalidRequest": "Некорректный запрос авторизации.",
+  "LoopbackWarning": "Это приложение работает на этом компьютере (localhost). Продолжайте только если запустили его сами.",
+  "MissingAuthorizationId": "Нет запроса авторизации. Повторите из приложения.",
+  "PermissionFullDescription": "Может также создавать, обновлять и удалять контакты и их данные.",
+  "PermissionFullLabel": "Полный доступ",
+  "PermissionLabel": "Доступ",
+  "PermissionReadDescription": "Искать и читать ваши контакты и их данные.",
+  "PermissionReadLabel": "Только чтение",
+  "RequestedPermissions": "Запрашиваемые разрешения",
+  "Scopes": {
+    "api:access": "Использовать API Bondery от вашего имени",
+    "email": "Показывать ваш адрес эл. почты",
+    "mcp:read": "Просматривать контакты и их данные",
+    "mcp:write": "Создавать, обновлять и удалять контакты и их данные",
+    "offline_access": "Оставаться в системе, пока вы не отзовёте доступ",
+    "openid": "Подтверждать вашу личность",
+    "phone": "Показывать ваш номер телефона",
+    "profile": "Показывать данные профиля"
+  },
+  "Title": "Авторизация приложения",
+  "UnexpectedError": "Непредвиденная ошибка. Попробуйте снова.",
+  "UnknownClientName": "Неизвестное приложение",
+  "WebappClientName": "Bondery"
+}

@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Pridať ľudí do skupiny",
+  "ColorLabel": "Barva",
+  "ContactCount": "Kontakty",
+  "DetailPageTitle": "Detail skupiny",
+  "Empty": "Do tejto skupiny zatiaľ nesú pridány žiadne kontakty.",
+  "HeaderDescription": "V tomto pohľade môžete spravovať členov a akcie vybranej skupiny.",
+  "NoContactsFound": "Do tejto skupiny zatiaľ nesú pridány žiadne kontakty.",
+  "NoContactsMatchSearch": "Žiadny takový kontakt nenájdený.",
+  "RemoveContact": {
+    "ErrorDescription": "Kontakt sa nepodarilo odobrať zo skupiny. Skúste to prosím znova.",
+    "LoadingDescription": "Aktualizácia členov skupiny...",
+    "LoadingTitle": "Odoberanie kontaktu",
+    "SuccessDescription": "Kontakt bol úspešne odebrán zo skupiny"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Kontakty sa nepodarilo odobrať zo skupiny. Skúste to prosím znova.",
+    "LoadingDescription": "Aktualizácia členov skupiny...",
+    "LoadingTitle": "Odoberanie kontaktov",
+    "SuccessDescription": "{count} kontakt(ú) bolo úspešne odebráno zo skupiny"
+  },
+  "RemoveFromGroup": "Odobrať zo skupiny",
+  "Subtitle": "Kontakty prirazené do tejto skupiny.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Poslední interakcie",
+    "Location": "Místo",
+    "Name": "Meno",
+    "Socials": "Sociální siete",
+    "Title": "Nadpis"
+  },
+  "ThisContactFallback": "tento kontakt",
+  "Title": "Skupina: {label}"
+}

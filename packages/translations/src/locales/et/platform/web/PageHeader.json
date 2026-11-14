@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "paranda ja ühenda",
+    "GroupDetail": "see grupp",
+    "Groups": "Grupid",
+    "Home": "Avaleht",
+    "KeepInTouch": "Hoia ühendust",
+    "Map": "kaart",
+    "People": "Inimesed",
+    "PersonDetails": "inimese detailid",
+    "Timeline": "Suhtlused"
+  },
+  "HelpLabel": "Lisateave",
+  "LearnMoreAbout": "Loe lähemalt: {concept}"
+}

@@ -89,11 +89,7 @@ export function ActivityCard({
                 {activity.title || typeLabel}
               </Text>
               <Text c="dimmed" size="xs">
-                {formatter.dateTime(date, {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                })}
+                {formatter.formatDate(date, "medium")}
               </Text>
               {activity.description ? (
                 <Text c="dimmed" size="xs">

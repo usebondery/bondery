@@ -1,3 +1,4 @@
+import { displayRegionName } from "#locale/display-names.js";
 import { countryCodes } from "#phone/country-codes.js";
 import { canonicalizeDialCode, formatDialCodeForDisplay } from "#phone/phone-normalize.js";
 import { DEFAULT_PHONE_REACT_MASK_EXPRESSION, type TelephonePrefixOption } from "#phone/types.js";
@@ -51,8 +52,23 @@ export function findTelephonePrefixOption(prefix: string): TelephonePrefixOption
   return TELEPHONE_PREFIX_OPTIONS.find((option) => option.value === value);
 }
 
-export function getTelephonePrefixSearchTexts(option: TelephonePrefixOption): string[] {
+export function localizeTelephonePrefixLabel(
+  option: TelephonePrefixOption,
+  locale?: string,
+): string {
+  if (!locale) {
+    return option.label;
+  }
+
+  return displayRegionName(option.countryCode, locale) ?? option.label;
+}
+
+export function getTelephonePrefixSearchTexts(
+  option: TelephonePrefixOption,
+  locale?: string,
+): string[] {
   return [
+    localizeTelephonePrefixLabel(option, locale),
     option.label,
     option.displayPrefix,
     option.value,

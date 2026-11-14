@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Åbn Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Koppla ditt konto for at gem kontakter från sociala medier.",
+    "SignIn": "Log ind",
+    "Title": "Log ind på Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Lägg till interaktion med den her personen"
+  },
+  "Settings": {
+    "ApiServer": "API-server",
+    "SignOut": "Logga ut"
+  },
+  "UpdateRequired": {
+    "Description": "Ditt Bondery-udvidelse er inaktuellt og kanske ikke fungerar som det skal. Opdater det for at fortsæta.",
+    "OpenExtensionsPage": "Åbn udvidelsessiden",
+    "Title": "Uppdatering kræves"
+  },
+  "Welcome": {
+    "ConnectButton": "Koppla Bondery-konto"
+  }
+}

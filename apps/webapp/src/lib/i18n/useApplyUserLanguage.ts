@@ -7,13 +7,16 @@ import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 /**
  * Applies a user language change across client i18n, locale context, and RSC.
  * Call after the language has been persisted to the API.
+ *
+ * The cookie write runs first. `applyUserLocale` then reloads the page, so the
+ * server render of the new language starts with the new language cookie.
  */
 export function useApplyUserLanguage() {
   const changeLanguage = useChangeLanguage();
   const { applyUserLocale } = useUserLocale();
 
   return async (locale: SupportedLocale) => {
-    applyUserLocale({ locale });
     await changeLanguage(locale);
+    applyUserLocale({ locale });
   };
 }

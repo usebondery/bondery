@@ -40,7 +40,8 @@ Do not duplicate content across skills — link and keep a single source of trut
 |--------|-------------|
 | Cross-cutting code craft, TypeScript, Biome | `bondery-coding-standards` |
 | API contracts, Fastify, sync | `bondery-api` |
-| UI, i18n, error display | `bondery-ux` |
+| UI patterns, empty states, error display | `bondery-ux` |
+| Adding a UI locale, plurals, exonyms, locale profiles | `bondery-i18n` |
 | Monorepo boundaries, extension schema | `bondery-core` |
 | Prisma schema, migrations, Postgres usage (Bondery classic Prisma) | `bondery-database` |
 | Prisma Next (upstream CLI skills; routed from `bondery-database`) | `prisma-next-*` in `.agents/skills/` |

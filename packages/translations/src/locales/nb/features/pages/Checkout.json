@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Du har allerede et aktivt Premium-abonnement.",
+  "alreadySubscribedTitle": "Allerede abonnent",
+  "errorMessage": "Noe gikk galt. Prøv igjen.",
+  "errorTitle": "Betaling mislyktes",
+  "errorUnauthorized": "Logg inn og prøv igjen.",
+  "intervalAnnual": "Årlig",
+  "intervalMonthly": "Månedlig",
+  "paymentBlockedAction": "Oppdater fakturering",
+  "paymentBlockedMessage": "Vi kunne ikke behandle betalingen etter flere forsøk. Oppdater faktureringsopplysningene for å gjenopprette Premium-tilgang.",
+  "paymentBlockedTitle": "Betaling kreves",
+  "successMessage": "Du får 300 AI-meldinger per måned og alle Premium-funksjoner.",
+  "successTitle": "Du er Premium nå!",
+  "upgradePendingMessage": "Kontoen din blir oppgradert til Premium snart.",
+  "upgradePendingTitle": "Betaling mottatt",
+  "upgradesDisabledTooltip": "Premium-oppgraderinger er ikke tilgjengelige ennå. Kom tilbake snart.",
+  "upgradeToPremium": "Oppgrader til Premium"
+}

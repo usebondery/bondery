@@ -1,0 +1,14 @@
+{
+  "Call": "Puhelu",
+  "Coffee": "Kahvi",
+  "CompetitionHackathon": "Kilpailu / hackathon",
+  "Custom": "Mukautettu",
+  "Email": "Sähköposti",
+  "Meal": "Ateria",
+  "Meeting": "Tapaaminen",
+  "NetworkingEvent": "Verkostoitumistapahtuma",
+  "Note": "Muistiinpano",
+  "Other": "Muu",
+  "PartySocial": "Juhla / sosiaalinen",
+  "TextMessaging": "Tekstiviesti / viesti"
+}

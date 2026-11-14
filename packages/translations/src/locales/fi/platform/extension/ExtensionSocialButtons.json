@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Laajennusvirhe — yritä uudelleen",
+    "OpenInBondery": "Avaa Bonderyssa",
+    "SignInRequired": "Kirjautuminen vaaditaan — napsauta Bondery-kuvaketta",
+    "SomethingWrong": "Jotain meni pieleen"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Laajennusvirhe — yritä uudelleen",
+    "OpenInBondery": "Avaa Bonderyssa",
+    "SignInRequired": "Kirjautuminen vaaditaan — napsauta Bondery-kuvaketta",
+    "SomethingWrong": "Jotain meni pieleen"
+  }
+}

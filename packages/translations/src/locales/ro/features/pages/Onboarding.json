@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "De pe ce platformă ai solicitat exportul?",
+    "Description": "Adu-ți rețeaua existentă în Bondery din LinkedIn, Instagram sau adaugă contacte manual.",
+    "Finish": "Începe",
+    "Instagram": "Importă din Instagram",
+    "InstagramDescription": "Încarcă datele tale de urmăritori/urmăriți de pe Instagram.",
+    "LinkedIn": "Importă din LinkedIn",
+    "LinkedInDescription": "Încarcă fișierul de export al conexiunilor LinkedIn.",
+    "ManualAdd": "Creează manual",
+    "SkipImport": "Omite importul",
+    "SuccessDescription": "{imported} importate, {updated} actualizate, {skipped} omise.",
+    "SuccessTitle": "Import finalizat!",
+    "Title": "Importă contactele tale",
+    "WaitingForExport": "Aștept exportul"
+  },
+  "Intent": {
+    "both": "Ambele",
+    "Description": "Folosim asta ca să personalizăm Bondery pentru tine.",
+    "personal": "Prieteni și familie",
+    "professional": "Profesional",
+    "Title": "Cum vei folosi Bondery?"
+  },
+  "Loading": {
+    "Message": "Pregătim totul pentru tine…"
+  },
+  "MetadataTitle": "Onboarding",
+  "Welcome": {
+    "LetsGo": "Hai",
+    "Subtitle": "Îmi pare bine să te cunosc. Să-ți configurăm CRM-ul personal.",
+    "TitleGeneric": "Bun venit la Bondery! 😊",
+    "TitleWithName": "Bun venit, {name}! 😊"
+  }
+}

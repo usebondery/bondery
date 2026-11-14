@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Hvilken plattform ba du om eksport fra?",
+    "Description": "Ta med det eksisterende nettverket ditt inn i Bondery fra LinkedIn, Instagram, eller legg til manuelt.",
+    "Finish": "Kom i gang",
+    "Instagram": "Importer fra Instagram",
+    "InstagramDescription": "Last opp Instagram-data for følgere/følger.",
+    "LinkedIn": "Importer fra LinkedIn",
+    "LinkedInDescription": "Last opp LinkedIn-eksportfilen for forbindelser.",
+    "ManualAdd": "Opprett manuelt",
+    "SkipImport": "Hopp over import",
+    "SuccessDescription": "{imported} importert, {updated} oppdatert, {skipped} hoppet over.",
+    "SuccessTitle": "Import fullført!",
+    "Title": "Importer kontaktene dine",
+    "WaitingForExport": "Jeg venter på eksporten"
+  },
+  "Intent": {
+    "both": "Begge deler",
+    "Description": "Vi bruker dette til å tilpasse Bondery for deg.",
+    "personal": "Venner og familie",
+    "professional": "Profesjonelt",
+    "Title": "Hvordan vil du bruke Bondery?"
+  },
+  "Loading": {
+    "Message": "Gjør klar alt for deg …"
+  },
+  "MetadataTitle": "Onboarding",
+  "Welcome": {
+    "LetsGo": "La oss starte",
+    "Subtitle": "Hyggelig å møte deg. La oss sette opp din personlige CRM.",
+    "TitleGeneric": "Velkommen til Bondery! 😊",
+    "TitleWithName": "Velkommen, {name}! 😊"
+  }
+}

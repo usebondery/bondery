@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Otvori Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Poveži nalog da čuvaš kontakte sa društvenih mreža.",
+    "SignIn": "Prijavi se",
+    "Title": "Prijavi se u Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Dodaj interakciju sa ovom osobom"
+  },
+  "Settings": {
+    "ApiServer": "API server",
+    "SignOut": "Odjavi se"
+  },
+  "UpdateRequired": {
+    "Description": "Bondery ekstenzija je zastarela i možda ne radi ispravno. Ažuriraj je da nastaviš.",
+    "OpenExtensionsPage": "Otvori stranicu ekstenzija",
+    "Title": "Potrebno ažuriranje"
+  },
+  "Welcome": {
+    "ConnectButton": "Poveži Bondery nalog"
+  }
+}

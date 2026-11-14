@@ -1,0 +1,22 @@
+{
+  "AddError": "Nie udało się dodać etykieta",
+  "AddNewTagTooltip": "Utworzyć nový etykieta",
+  "AddSuccess": "Tag added successfully",
+  "AddTagTooltip": "Dodaj etykieta",
+  "CreateError": "Nie udało się utworzyć etykieta",
+  "CreateNewTagEmpty": "Utworzyć nový etykieta",
+  "CreateNewTagOption": "Utworzyć nový etykieta \"{label}\"",
+  "CreateTagCancel": "Anuluj",
+  "CreateTagConfirm": "Utworzyć a dodać",
+  "CreateTagMessage": "Etykieta \"{name}\" ješte neexistuje. Chcesz ho utworzyć a dodać ke kontaktu?",
+  "CreateTagTitle": "Utworzyć nový etykieta?",
+  "Label": "Etykiety",
+  "NoTagsFound": "Brak etykiety nie znaleziono",
+  "Placeholder": "Dodaj etykiety...",
+  "RemoveError": "Nie udało się cofnij etykieta",
+  "RemoveTagTooltip": "Cofnij etykieta",
+  "SearchPlaceholder": "Search or create a tag...",
+  "TagAlreadyAddedMessage": "Etykieta \"{name}\" již bol ke kontaktu pridán.",
+  "TagAlreadyAddedTitle": "Etykieta již pridán",
+  "TagAlreadyAppliedTooltip": "Etykieta je již prirazen"
+}

@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} піделился з вам і цим контактом",
+  "footerNotes": "Надіслаале через Bondery. Відповідайте на це лист, щоб зв’язатися з {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Адрес",
+    "email": "Ел. пошта",
+    "facebook": "Facebook",
+    "importantDates": "Важние дати",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Розташування",
+    "notes": "Нотатки",
+    "phone": "Телефон",
+    "signal": "Signal",
+    "website": "Сайт",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Телефон, ел. пошта і другие дані внутри",
+  "replyCta": "Відповідьить {{senderName}}",
+  "subject": "{{senderName}} піделился контактом • {{contactName}}"
+}

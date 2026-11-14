@@ -74,7 +74,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 
 ## UX checklist (before merge)
 
-- [ ] All new user-visible strings in `en`, `cs`, `de` translation files
+- [ ] All new user-visible strings in every locale in `supported-locales.json`
 - [ ] No hardcoded English literals in components (exceptions: logs, test IDs, brand names)
 - [ ] API errors shown via `getUserFacingError` — not server `message`
 - [ ] New API error code has a `/docs/api/errors/{code}` page with an imperative recovery step

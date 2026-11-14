@@ -1,0 +1,32 @@
+{
+  "AddAction": "Dodaj termin",
+  "AddHint": "Da bi dodao/la novi termin, unesi sve informacije.",
+  "AddImportantDate": "Dodaj važan termin",
+  "BirthdayDateLabel": "Izaberite datum rođenja",
+  "DatePlaceholder": "Izaberite datum",
+  "DeleteAction": "Löschen",
+  "DraftIncompleteError": "Da bi dodao/la novi termin, unesi sve informacije.",
+  "Empty": "Još uvek nema važnih termina.",
+  "ErrorTitle": "Fehler",
+  "NotePlaceholder": "Opciona napomena",
+  "NotifyDayBefore": "{count}Obavestiti dan ranije",
+  "NotifyDaysBefore": "{count}Obavestiti nekoliko dana unapred",
+  "NotifyMe": "Obavesti me",
+  "NotifyNone": "Ne obaveštavaj",
+  "SuccessTitle": "Erfolg",
+  "Title": "Važni datumi",
+  "TypeDisabledBirthdateHint": "{firstName}već je odredio datum rođenja",
+  "TypeDisabledHint": "{firstName}već je odredio datum rođenja ili imendan",
+  "TypeDisabledNamedateHint": "{firstName}već je odredio/la krsnu slavu",
+  "TypePlaceholder": "Izabrati tip",
+  "Types": {
+    "anniversary": "годишњица",
+    "birthday": "Datum rođenja",
+    "graduation": "Kraj",
+    "nameday": "Krsna slava",
+    "other": "Ostalo"
+  },
+  "UniqueTypeError": "Može biti samo jedan{type}se dodaju.",
+  "UpdateError": "Nije bilo moguće ažurirati važne termine",
+  "UpdateSuccess": "Važni datumi su uspešno ažurirani"
+}

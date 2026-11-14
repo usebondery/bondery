@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "O que a ferramenta devolveu:",
+  "agentExpectedHeading": "O que o agente esperava:",
+  "agentKindLabel": "Tipo de relatório:",
+  "agentRequestIdLabel": "ID do pedido:",
+  "agentSourceHeading": "Reportado por um agente de IA",
+  "agentToolLabel": "Ferramenta:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Feedback geral:",
+  "heading": "Feedback de {{userEmail}}",
+  "notProvided": "(Não indicado)",
+  "npsReasonHeading": "Porque escolheu esta pontuação?",
+  "npsScoreLabel": "Pontuação NPS:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Novo feedback de {{userEmail}} — pontuação NPS: {{npsScore}}",
+  "replyCta": "Responder a {{userEmail}}",
+  "subject": "Novo feedback sobre o Bondery",
+  "submittedAt": "Enviado a: {{timestamp}}",
+  "userEmailLabel": "Email do utilizador:",
+  "userIdLabel": "ID do utilizador:"
+}

@@ -24,7 +24,7 @@ function SubscriptionCardContent({
     if (!value) {
       return null;
     }
-    return format.dateTime(new Date(value), { dateStyle: "medium" });
+    return format.formatDate(new Date(value), "medium");
   };
 
   const formatAmount = (amountMinor: number | null, currency: string | null): string | null => {

@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "El servidor ha rechazado la solicitud porque tu extensión está obsoleta. Actualízala.",
+  "ApiRejectedTitle": "Versión demasiado antigua",
+  "UpdateButton": "Actualizar",
+  "UpdateRequiredDescription": "Tu extensión de Bondery está obsoleta y puede que no funcione bien. Actualízala para continuar.",
+  "UpdateRequiredTitle": "Actualización necesaria",
+  "WebappNotificationDescription": "Tu extensión de Bondery para Chrome necesita una actualización para seguir funcionando bien.",
+  "WebappNotificationTitle": "Hay una actualización de la extensión"
+}

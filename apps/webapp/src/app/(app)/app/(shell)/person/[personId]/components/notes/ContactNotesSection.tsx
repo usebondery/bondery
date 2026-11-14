@@ -147,7 +147,7 @@ export function ContactNotesSection({
           </Text>
         )}
       </Group>
-      <RichTextEditor editor={editor}>
+      <RichTextEditor dir="auto" editor={editor}>
         <RichTextEditor.Toolbar
           data-notes-editor-toolbar="true"
           sticky

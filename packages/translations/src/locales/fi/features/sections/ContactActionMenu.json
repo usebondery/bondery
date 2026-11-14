@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Toiminnot",
+  "CannotDeleteMyself": "Et voi poistaa omaa yhteystietokorttiasi",
+  "CannotMergeMyself": "Et voi yhdistää omaa korttiasi muihin",
+  "DeleteContact": "Poista yhteystieto",
+  "DownloadVCard": "Lataa vCard",
+  "ExportError": "Virhe",
+  "ExportErrorDescription": "Yhteystiedon vienti epäonnistui. Yritä uudelleen.",
+  "ExportSuccess": "Onnistui",
+  "ExportSuccessDescription": "Yhteystieto vietiin vCardina"
+}

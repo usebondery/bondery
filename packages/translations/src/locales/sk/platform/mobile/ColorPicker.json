@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Kód farby bol skopírovaný do schránky",
+  "CopyAccessibilityLabel": "Kopírovať kód farby",
+  "CopyFailedMessage": "Kód farby sa nepodarilo skopírovať. Skúste to znova.",
+  "CustomColorLabel": "Vlastná farba",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Zadajte platnú hexadecimálnu farbu (napr. #AE3EC9)",
+  "SheetTitle": "Farba",
+  "SwatchesLabel": "Rýchle farby",
+  "TriggerAccessibilityHint": "Otvorí výber farby"
+}

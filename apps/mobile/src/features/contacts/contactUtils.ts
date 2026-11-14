@@ -1,9 +1,14 @@
 import { abbreviateLocationCountry, formatAddressLabel } from "@bondery/helpers/address";
 import { formatContactName } from "@bondery/helpers/contact";
+import { formatUserDate } from "@bondery/helpers/date";
 import { combinePhoneNumber, formatPhoneNumber } from "@bondery/helpers/phone";
 import type { Contact, ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { MS_PER_DAY } from "../../lib/config";
 import i18n from "../../lib/i18n/i18n";
+import {
+  mobileDateTimeFormatContext,
+  useMobilePreferences,
+} from "../../lib/preferences/useMobilePreferences";
 import { AVATAR_COLOR_PALETTE_HEX } from "../../theme/colors";
 import { formatImportantDate, isYearlessDate, resolveDateLocale } from "./importantDateUtils";
 
@@ -138,17 +143,13 @@ export function formatRelativeDate(dateStr: string): string {
 }
 
 export function formatAbsoluteDate(dateStr: string): string {
-  const locale = resolveDateLocale(i18n.language);
+  const ctx = mobileDateTimeFormatContext(useMobilePreferences.getState());
 
   if (isYearlessDate(dateStr)) {
-    return formatImportantDate(dateStr, locale);
+    return formatImportantDate(dateStr, ctx);
   }
 
-  return new Date(dateStr).toLocaleDateString(locale, {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return formatUserDate(new Date(dateStr), ctx, "short");
 }
 
 /** Relative timestamp for notes "last edited" — fine-grained for recent edits, shared day logic beyond. */

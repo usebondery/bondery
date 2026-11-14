@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Код цвета скопійовано в буфер обміну",
+  "CopyAccessibilityLabel": "Скопировать код цвета",
+  "CopyFailedMessage": "Не вдалося скопировать код цвета. Спробуйте знову.",
+  "CustomColorLabel": "Свой цвет",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Введіть коректний hex-колір (наприклад, #AE3EC9)",
+  "SheetTitle": "Цвет",
+  "SwatchesLabel": "Бистрий вибор",
+  "TriggerAccessibilityHint": "Откривает вибор цвета"
+}

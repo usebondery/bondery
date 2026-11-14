@@ -1,0 +1,16 @@
+{
+  "Description": "Palīdzēt mums uzlabot Bondery, daloties savās domās. <3",
+  "ErrorMessage": "Neizdevās iesniegt atsauksmes. Mēģini vēlreiz.",
+  "ErrorTitle": "Kļūda",
+  "GeneralFeedbackLabel": "Vai vēlies kopīgot atsauksmes, padomus vai kļūdas?",
+  "GeneralFeedbackPlaceholder": "Es mīlu/ienīstu šo lietotnes daļu. Es vēlētos, lai šī lietotnes daļa tiktu pievienota. Man ir problēmas ar...",
+  "NpsLabel": "No 0 līdz 10, cik iespējams, tu ieteiktu Bondery draugam vai kolēģim?",
+  "NpsReasonLabel": "Kāpēc izvēlējāties rezultātu {score}?",
+  "NpsReasonPlaceholder": "Tā kā es atklāju, ka šī funkcija ir noderīga / kļūdaina / trūkst...",
+  "SubmitButton": "Nosūtīt atsauksmes izstrādātājiem",
+  "SubmittingMessage": "Pagaidi, kamēr mēs nosūtīsim tavs atsauksmes",
+  "SubmittingTitle": "Notiek atsauksmju iesniegšana...",
+  "SuccessMessage": "Tavs atsauksmes ir saņemtas",
+  "SuccessTitle": "Paldies!",
+  "Title": "Atsauksmes"
+}

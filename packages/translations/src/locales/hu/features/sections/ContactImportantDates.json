@@ -1,0 +1,32 @@
+{
+  "AddAction": "Dátum hozzáadása",
+  "AddHint": "Új dátumhoz tölts ki minden mezőt.",
+  "AddImportantDate": "Fontos dátum hozzáadása",
+  "BirthdayDateLabel": "Születésnap kiválasztása",
+  "DatePlaceholder": "Dátum kiválasztása",
+  "DeleteAction": "Törlés",
+  "DraftIncompleteError": "Új dátumhoz tölts ki minden mezőt.",
+  "Empty": "Még nincs fontos dátum.",
+  "ErrorTitle": "Hiba",
+  "NotePlaceholder": "Opcionális megjegyzés",
+  "NotifyDayBefore": "Értesítés {count} nappal előtte",
+  "NotifyDaysBefore": "Értesítés {count} nappal előtte",
+  "NotifyMe": "Értesítsen",
+  "NotifyNone": "Ne értesítsen",
+  "SuccessTitle": "Siker",
+  "Title": "Fontos dátumok",
+  "TypeDisabledBirthdateHint": "{firstName} már megadott születésnapot",
+  "TypeDisabledHint": "{firstName} már megadott születésnapot vagy névnapot",
+  "TypeDisabledNamedateHint": "{firstName} már megadott névnapot",
+  "TypePlaceholder": "Típus kiválasztása",
+  "Types": {
+    "anniversary": "Évforduló",
+    "birthday": "Születésnap",
+    "graduation": "Érettségi / diploma",
+    "nameday": "Névnap",
+    "other": "Egyéb"
+  },
+  "UniqueTypeError": "Csak egy {type} adható hozzá.",
+  "UpdateError": "A fontos dátumok frissítése nem sikerült",
+  "UpdateSuccess": "A fontos dátumok frissítése sikerült"
+}

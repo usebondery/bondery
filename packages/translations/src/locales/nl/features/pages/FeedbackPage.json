@@ -1,0 +1,16 @@
+{
+  "Description": "Help ons Bondery te verbeteren door je mening te delen. <3",
+  "ErrorMessage": "Kan feedback niet versturen. Probeer het opnieuw.",
+  "ErrorTitle": "Fout",
+  "GeneralFeedbackLabel": "Feedback, tips of bugs die je wilt delen?",
+  "GeneralFeedbackPlaceholder": "Ik vind dit deel van de app geweldig/slecht… Ik mis deze functie… Ik liep vast bij…",
+  "NpsLabel": "Hoe waarschijnlijk is het dat je Bondery aanbeveelt aan een vriend of collega? (0–10)",
+  "NpsReasonLabel": "Waarom koos je score {score}?",
+  "NpsReasonPlaceholder": "Omdat ik deze functie nuttig/buggig/missend vond…",
+  "SubmitButton": "Feedback naar het team sturen",
+  "SubmittingMessage": "Even geduld terwijl we je feedback versturen",
+  "SubmittingTitle": "Feedback versturen...",
+  "SuccessMessage": "We hebben je feedback ontvangen",
+  "SuccessTitle": "Bedankt!",
+  "Title": "Feedback"
+}

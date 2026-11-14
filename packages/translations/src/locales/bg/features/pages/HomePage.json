@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Записване на взаимодействие",
+  "AddPerson": "Създаване на човек",
+  "ExtensionNudge": {
+    "Description": "Импортирай контакти директно от профили в LinkedIn и Instagram и поддържай мрежата си актуална без усилие.",
+    "InstallButton": "Инсталиране на разширението",
+    "Title": "Повече от Bondery с разширението за Chrome"
+  },
+  "HeaderDescription": "На началната страница виждаш преглед на мрежата, напомнянията и скорошните взаимодействия.",
+  "NoRecentlyAdded": "Все още няма добавени хора.",
+  "NoRecentlyInteracted": "Все още няма скорошни взаимодействия.",
+  "NotificationInDays": "След {count} дни",
+  "NotificationSent": "Вече е изпратено",
+  "NotificationToday": "Днес",
+  "NotificationTomorrow": "Утре",
+  "NotificationTooltipInDays": "Ще получиш известие след {count} дни",
+  "NotificationTooltipSentAt": "Известието вече е изпратено на {sentAt}",
+  "NotificationTooltipToday": "Ще получиш известие днес",
+  "NotificationTooltipTomorrow": "Ще получиш известие утре",
+  "NoUpcomingReminders": "Няма предстоящи напомняния в следващите 30 дни.",
+  "ProgressRail": {
+    "AwaitingExport": "Експортът ти от {platform} е на път. Обикновено пристига за 5–15 минути.",
+    "ChoosePlatform": "Избери платформа за импорт",
+    "Dismiss": "Скриване",
+    "HaveZipFile": "Имам файла",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} от {total} готово",
+    "SkipImport": "Пропускане на импорта",
+    "Tasks": {
+      "AddContacts": "Добавяне на първите контакти",
+      "ImportContacts": "Импортиране на контакти",
+      "LogInteraction": "Записване на първо взаимодействие",
+      "SetReminder": "Настройване на напомняне"
+    },
+    "Title": "Първи стъпки"
+  },
+  "RecentlyAddedTitle": "Наскоро добавени",
+  "RecentlyAddedTooltip": "5-те най-скоро добавени хора в мрежата ти.",
+  "RecentlyInteractedTitle": "Скорошни взаимодействия",
+  "RecentlyInteractedTooltip": "5-те души, с които наскоро си взаимодействал.",
+  "Stats": {
+    "InteractionsTitle": "Взаимодействия този месец",
+    "InteractionsTooltip": "Колко взаимодействия си записал през {month}.",
+    "NewContactsTitle": "Нови контакти тази година",
+    "NewContactsTooltip": "Колко хора са добавени в мрежата ти през {year}.",
+    "TotalContactsTitle": "Общо контакти",
+    "TotalContactsTooltip": "Колко хора има в мрежата ти в Bondery."
+  },
+  "TimelinePreviewTitle": "Взаимодействия",
+  "TimelinePreviewTooltip": "5-те ти най-скорошни взаимодействия. Кликни, за да видиш всички.",
+  "Title": "Начало",
+  "UnknownPerson": "Неизвестен човек",
+  "UpcomingRemindersMonthInfo": "Показват се напомняния с известия за следващите 30 дни.",
+  "UpcomingRemindersTitle": "Предстоящи напомняния",
+  "UpcomingRemindersTooltip": "Напомняния с известия за следващите 30 дни."
+}

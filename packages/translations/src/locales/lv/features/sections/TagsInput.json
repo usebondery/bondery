@@ -1,0 +1,22 @@
+{
+  "AddError": "Neizdevās pievienot atzīmi",
+  "AddNewTagTooltip": "Izveidot jaunu tagu",
+  "AddSuccess": "Etiķetes pievienots veiksmīgi",
+  "AddTagTooltip": "Pievienot tagu",
+  "CreateError": "Neizdevās izveidot tagu",
+  "CreateNewTagEmpty": "Izveidot jaunu tagu",
+  "CreateNewTagOption": "Izveidot jaunu tagu \"{label}\"",
+  "CreateTagCancel": "Atcelt",
+  "CreateTagConfirm": "Izveidot un pievienot",
+  "CreateTagMessage": "Etiķetes \"{name}\" vēl nepastāv. Vai vēlies to izveidot un pievienot šai kontaktam?",
+  "CreateTagTitle": "Vai izveidot jaunu tagu?",
+  "Label": "Etiķetes",
+  "NoTagsFound": "Nav atrasta neviena atzīme",
+  "Placeholder": "Pievienot etiķetes...",
+  "RemoveError": "Neizdevās noņemt atzīmi",
+  "RemoveTagTooltip": "Noņemt atzīmi",
+  "SearchPlaceholder": "Meklēt vai izveido atzīmi...",
+  "TagAlreadyAddedMessage": "Šai kontaktam jau ir pievienota atzīme \"{name}\".",
+  "TagAlreadyAddedTitle": "Etiķetes jau ir pievienots",
+  "TagAlreadyAppliedTooltip": "Etiķetes jau ir lietots"
+}

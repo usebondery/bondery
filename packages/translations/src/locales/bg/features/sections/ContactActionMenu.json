@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Действия",
+  "CannotDeleteMyself": "Нельзя изтриване собственную карточку контакта",
+  "CannotMergeMyself": "Нельзя объединить собственную карточку с другими",
+  "DeleteContact": "Изтриване контакт",
+  "DownloadVCard": "Скачать vCard",
+  "ExportError": "Грешка",
+  "ExportErrorDescription": "Неуспешно экспортировать контакт. Опитай снова.",
+  "ExportSuccess": "Готово",
+  "ExportSuccessDescription": "Контакт экспортирован в vCard"
+}

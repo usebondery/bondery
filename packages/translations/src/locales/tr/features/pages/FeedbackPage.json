@@ -1,0 +1,16 @@
+{
+  "Description": "Bondery’yi daha iyi yapmamıza yardım et; düşüncelerini paylaş. <3",
+  "ErrorMessage": "Geri bildirim gönderilemedi. Yeniden dene.",
+  "ErrorTitle": "Hata",
+  "GeneralFeedbackLabel": "Geri bildirimin, fikrin veya hata raporun var mı?",
+  "GeneralFeedbackPlaceholder": "Şu kısmı sevdim/sevmedim… Şunu isterdim… Burada sorun yaşadım…",
+  "NpsLabel": "0–10: Bondery’yi bir arkadaşına veya iş arkadaşına önerme olasılığın ne?",
+  "NpsReasonLabel": "Neden {score} puan verdin?",
+  "NpsReasonPlaceholder": "Çünkü bu özellik yararlı/hatalı/eksikti…",
+  "SubmitButton": "Geliştiricilere geri bildirim gönder",
+  "SubmittingMessage": "Geri bildirimini gönderirken bekle",
+  "SubmittingTitle": "Geri bildirim gönderiliyor...",
+  "SuccessMessage": "Geri bildirimini aldık",
+  "SuccessTitle": "Teşekkürler!",
+  "Title": "Geri bildirim"
+}

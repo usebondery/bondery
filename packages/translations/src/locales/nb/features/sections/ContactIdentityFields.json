@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kontakt",
+  "FieldUpdated": "{label} oppdatert",
+  "FirstNamePlaceholder": "Fornavn",
+  "FirstNameSuccessLabel": "Fornavn",
+  "HeadlinePlaceholder": "Yrkestittel",
+  "HeadlineSuccessLabel": "Yrkestittel",
+  "LastNamePlaceholder": "Etternavn",
+  "LastNameSuccessLabel": "Etternavn",
+  "LocationPlaceholder": "Sted",
+  "LocationSuccessLabel": "Sted",
+  "LocationUpdated": "Sted oppdatert",
+  "MiddleNamePlaceholder": "Mellomnavn",
+  "MiddleNameSuccessLabel": "Mellomnavn",
+  "NameFieldUpdated": "Feltet «{label}» oppdatert",
+  "SavedTitle": "Lagret",
+  "UpdateFieldFailed": "Kunne ikke oppdatere {field}"
+}

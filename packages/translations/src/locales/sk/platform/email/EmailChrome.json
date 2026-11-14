@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentácii",
+  "help": "Potrebujete pomoc? Navštívte {{support}} alebo si prečítate {{documentation}}.",
+  "internalNote": "Interná prevádzka · zákazníkovi sa neodosiela",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Tyto notifikace spravujte v Bondery",
+  "support": "podporu"
+}

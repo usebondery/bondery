@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Aktivity",
+    "Animals": "Zvířata",
+    "Buildings": "Budovy",
+    "Celebrations": "Oslavy",
+    "Food": "Jídlo",
+    "Hearts": "Srdce",
+    "Humans": "Lidé",
+    "Miscellaneous": "Různé",
+    "Nature": "Příroda",
+    "Objects": "Předměty",
+    "Sports": "Sport",
+    "Travel": "Cestování",
+    "Work": "Práce"
+  },
+  "EmptySearch": "Žádná emojii nenalezena",
+  "RandomAccessibilityLabel": "Vybrat náhodné emojii",
+  "SearchPlaceholder": "Hledat emojii…",
+  "SheetTitle": "Emojii",
+  "TriggerAccessibilityHint": "Otevře výběr emojii"
+}

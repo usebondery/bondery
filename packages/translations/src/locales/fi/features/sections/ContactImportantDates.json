@@ -1,0 +1,32 @@
+{
+  "AddAction": "Lisää päivämäärä",
+  "AddHint": "Lisätäksesi uuden päivämäärän täytä kaikki tiedot.",
+  "AddImportantDate": "Lisää tärkeä päivämäärä",
+  "BirthdayDateLabel": "Valitse syntymäpäivä",
+  "DatePlaceholder": "Valitse päivämäärä",
+  "DeleteAction": "Poista",
+  "DraftIncompleteError": "Lisätäksesi uuden päivämäärän täytä kaikki tiedot.",
+  "Empty": "Ei vielä tärkeitä päivämääriä.",
+  "ErrorTitle": "Virhe",
+  "NotePlaceholder": "Valinnainen muistiinpano",
+  "NotifyDayBefore": "Ilmoita {count} päivä ennen",
+  "NotifyDaysBefore": "Ilmoita {count} päivää ennen",
+  "NotifyMe": "Ilmoita minulle",
+  "NotifyNone": "Älä ilmoita",
+  "SuccessTitle": "Onnistui",
+  "Title": "Tärkeät päivämäärät",
+  "TypeDisabledBirthdateHint": "{firstName} on jo määrittänyt syntymäpäivän",
+  "TypeDisabledHint": "{firstName} on jo määrittänyt syntymäpäivän tai nimipäivän",
+  "TypeDisabledNamedateHint": "{firstName} on jo määrittänyt nimipäivän",
+  "TypePlaceholder": "Valitse tyyppi",
+  "Types": {
+    "anniversary": "Vuosipäivä",
+    "birthday": "Syntymäpäivä",
+    "graduation": "Valmistuminen",
+    "nameday": "Nimipäivä",
+    "other": "Muu"
+  },
+  "UniqueTypeError": "Vain yksi {type} voidaan lisätä.",
+  "UpdateError": "Tärkeiden päivämäärien päivitys epäonnistui",
+  "UpdateSuccess": "Tärkeät päivämäärät päivitettiin"
+}

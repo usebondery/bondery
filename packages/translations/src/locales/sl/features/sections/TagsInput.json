@@ -1,0 +1,22 @@
+{
+  "AddError": "Oznake ni bilo mogoče dodati",
+  "AddNewTagTooltip": "Ustvariti novo oznako",
+  "AddSuccess": "Oznaka je uspešno dodana",
+  "AddTagTooltip": "Dodati oznako",
+  "CreateError": "Oznake ni bilo mogoče ustvariti",
+  "CreateNewTagEmpty": "Ustvariti novo oznako",
+  "CreateNewTagOption": "Ustvariti novo oznako »{label}«",
+  "CreateTagCancel": "Prekliči",
+  "CreateTagConfirm": "Ustvari in dodaj",
+  "CreateTagMessage": "Oznaka »{name}« še ne obstaja. Ali jo želiš ustvariti in dodati temu stiku?",
+  "CreateTagTitle": "Ustvariti novo oznako?",
+  "Label": "Oznake",
+  "NoTagsFound": "Ni najdenih oznak",
+  "Placeholder": "Dodaj oznake …",
+  "RemoveError": "Oznake ni bilo mogoče odstraniti",
+  "RemoveTagTooltip": "Odstraniti oznako",
+  "SearchPlaceholder": "Išči ali ustvari oznako …",
+  "TagAlreadyAddedMessage": "Oznaka »{name}« je že dodana temu stiku.",
+  "TagAlreadyAddedTitle": "Oznaka je že dodana",
+  "TagAlreadyAppliedTooltip": "Oznaka je že uporabljena"
+}

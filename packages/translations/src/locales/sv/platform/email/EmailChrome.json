@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentation",
+  "help": "Behöver du hjälp? Besök {{support}} eller läs vår {{documentation}}.",
+  "internalNote": "Intern drift · skickas inte till kund",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Hantera dessa aviseringar i Bondery",
+  "support": "support"
+}

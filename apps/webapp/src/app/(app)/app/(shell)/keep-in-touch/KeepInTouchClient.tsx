@@ -26,7 +26,6 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { PageHeader } from "@/components/shell/PageHeader";
-import { useCurrentLocale as useLocale } from "@/components/shell/UserLocaleProvider";
 import { useKeepInTouchTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
@@ -89,14 +88,12 @@ function endDateToWindowValue(endDate: string): string {
 
 export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   const t = useKeepInTouchTranslations();
-  const locale = useLocale();
   const formatter = useFormatter();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const patchContact = usePatchContactMutation();
-  const formatDate = (date: Date) =>
-    new Intl.DateTimeFormat(locale || "en-US", { dateStyle: "short" }).format(date);
+  const formatDate = (date: Date) => formatter.formatDate(date, "short");
 
   const activeWindow = endDateToWindowValue(endDate);
 

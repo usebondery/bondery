@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Σφάλμα επέκτασης — δοκίμασε ξανά",
+    "OpenInBondery": "Άνοιγμα στο Bondery",
+    "SignInRequired": "Απαιτείται σύνδεση — πάτα το εικονίδιο Bondery",
+    "SomethingWrong": "Κάτι πήγε στραβά"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Σφάλμα επέκτασης — δοκίμασε ξανά",
+    "OpenInBondery": "Άνοιγμα στο Bondery",
+    "SignInRequired": "Απαιτείται σύνδεση — πάτα το εικονίδιο Bondery",
+    "SomethingWrong": "Κάτι πήγε στραβά"
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "Approve": "Onayla",
+  "ChromeExtensionClientName": "Bondery Chrome uzantısı",
+  "Deny": "Reddet",
+  "Description": "{clientName} Bondery hesabına erişim istiyor.",
+  "ErrorTitle": "Yetkilendirme hatası",
+  "InvalidRequest": "Geçersiz yetkilendirme isteği.",
+  "LoopbackWarning": "Bu uygulama bu bilgisayarda çalışıyor (localhost). Yalnızca sen başlattıysan devam et.",
+  "MissingAuthorizationId": "Yetkilendirme isteği eksik. Uygulamadan yeniden dene.",
+  "PermissionFullDescription": "Kişileri ve verilerini oluşturma, güncelleme ve silme.",
+  "PermissionFullLabel": "Tam erişim",
+  "PermissionLabel": "Erişim",
+  "PermissionReadDescription": "Kişileri ve verilerini arama ve okuma.",
+  "PermissionReadLabel": "Yalnızca okuma",
+  "RequestedPermissions": "İstenen izinler",
+  "Scopes": {
+    "api:access": "Senin adına Bondery API’sini kullanma",
+    "email": "E-posta adresini görme",
+    "mcp:read": "Kişilerini ve verilerini görme",
+    "mcp:write": "Kişileri ve verilerini oluşturma, güncelleme ve silme",
+    "offline_access": "Erişimi iptal edene kadar oturum açık kalma",
+    "openid": "Kimliğini doğrulama",
+    "phone": "Telefon numaranı görme",
+    "profile": "Profil bilgilerini görme"
+  },
+  "Title": "Uygulamayı yetkilendir",
+  "UnexpectedError": "Beklenmeyen hata oluştu. Yeniden dene.",
+  "UnknownClientName": "Bilinmeyen uygulama",
+  "WebappClientName": "Bondery"
+}

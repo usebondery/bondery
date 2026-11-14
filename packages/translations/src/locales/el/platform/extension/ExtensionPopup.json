@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Άνοιγμα Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Σύνδεσε τον λογαριασμό σου για να αποθηκεύεις επαφές από social media.",
+    "SignIn": "Σύνδεση",
+    "Title": "Σύνδεση στο Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Προσθήκη αλληλεπίδρασης με αυτό το άτομο"
+  },
+  "Settings": {
+    "ApiServer": "Διακομιστής API",
+    "SignOut": "Αποσύνδεση"
+  },
+  "UpdateRequired": {
+    "Description": "Η επέκταση Bondery είναι παρωχημένη και μπορεί να μην λειτουργεί σωστά. Ενημέρωσέ την για να συνεχίσεις.",
+    "OpenExtensionsPage": "Άνοιγμα σελίδας επεκτάσεων",
+    "Title": "Απαιτείται ενημέρωση"
+  },
+  "Welcome": {
+    "ConnectButton": "Σύνδεση λογαριασμού Bondery"
+  }
+}

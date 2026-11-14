@@ -1,3 +1,4 @@
+import { coerceDateFormatPreference, coerceTimeFormatPreference } from "@bondery/schemas/locale";
 import { Stack } from "expo-router";
 import { useEffect } from "react";
 import { SyncErrorToasts } from "../../src/components/SyncErrorToasts";
@@ -32,10 +33,13 @@ function PreferencesHydration() {
           return;
         }
         hydrateFromServer({
+          dateFormat: coerceDateFormatPreference(response.data.dateFormat),
           groupSortOrder: response.data.groupSortOrder as GroupSortOrder,
           leftSwipeAction: response.data.leftSwipeAction as SwipeAction,
           rightSwipeAction: response.data.rightSwipeAction as SwipeAction,
           tagSortOrder: response.data.tagSortOrder as TagSortOrder,
+          timeFormat: coerceTimeFormatPreference(response.data.timeFormat),
+          timezone: response.data.timezone || undefined,
         });
       } catch {
         // Ignore hydration errors; local persisted preferences remain in use.

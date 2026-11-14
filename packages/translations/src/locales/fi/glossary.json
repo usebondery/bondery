@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "yhteystieto",
+    "contactPlural": "yhteystiedot",
+    "group": "ryhmä",
+    "interaction": "vuorovaikutus",
+    "interactionPlural": "vuorovaikutukset",
+    "network": "verkosto",
+    "person": "henkilö",
+    "person_one": "{count} henkilö",
+    "person_other": "{count} henkilöä",
+    "tag": "tunniste"
+  },
+  "features": {
+    "aiAssistant": "AI-avustaja",
+    "fixAndMerge": "Korjaa ja yhdistä",
+    "keepInTouch": "Pidä yhteyttä"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

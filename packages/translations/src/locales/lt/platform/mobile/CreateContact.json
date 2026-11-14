@@ -1,0 +1,13 @@
+{
+  "Create": "Pridėti į Bondery",
+  "Creating": "Kuriamas žmogus...",
+  "ErrorDescription": "Kuriant šį žmogų įvyko klaida.",
+  "ErrorTitle": "Nepavyko sukurti žmogaus",
+  "FullNameLabel": "Vardas ir pavardė",
+  "FullNamePlaceholder": "pvz., Ona Onaitė",
+  "InvalidName": "Įvesk galiojantį vardą",
+  "NameRequired": "Įvesk vardą",
+  "SuccessDescription": "Naujas žmogus pridėtas prie kontaktų.",
+  "SuccessTitle": "Žmogus sukurtas",
+  "Title": "Sukurti žmogų"
+}

@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Ange en giltig e-postadress",
+    "invalidTitle": "Ogiltig e-post"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Förnamn får vara högst {max} tecken",
+      "required": "Förnamn krävs"
+    },
+    "generic": {
+      "maxLength": "Värdet får vara högst {max} tecken"
+    },
+    "headline": {
+      "maxLength": "Rubrik får vara högst {max} tecken"
+    },
+    "label": {
+      "maxLength": "{field} får vara högst {max} tecken",
+      "required": "{field} krävs"
+    },
+    "lastName": {
+      "maxLength": "Efternamn får vara högst {max} tecken"
+    },
+    "location": {
+      "maxLength": "Plats får vara högst {max} tecken"
+    },
+    "middleName": {
+      "maxLength": "Mellannamn får vara högst {max} tecken"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Titel krävs"
+  },
+  "title": "Valideringsfel"
+}

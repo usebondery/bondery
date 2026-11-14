@@ -33,8 +33,22 @@ const ZIP_SCRIPT = [
   "        archive.write(path, path.as_posix())",
 ].join("\n");
 
+function sortValue(value) {
+  if (Array.isArray(value)) {
+    return value.map(sortValue);
+  }
+  if (value && typeof value === "object") {
+    const out = {};
+    for (const key of Object.keys(value).sort()) {
+      out[key] = sortValue(value[key]);
+    }
+    return out;
+  }
+  return value;
+}
+
 function stringifyJson(value) {
-  const pretty = JSON.stringify(value, null, 2).replace(
+  const pretty = JSON.stringify(sortValue(value), null, 2).replace(
     /^( *)("[^"]+": )\[\n((?: *"(?:\\.|[^"\\])*",?\n)+) *\]/gm,
     (match, indent, key, body) => {
       const items = [...body.matchAll(/"(?:\\.|[^"\\])*"/g)].map((item) => item[0]);
@@ -81,6 +95,44 @@ export function applyConnectBlock(source, replacement) {
   return next;
 }
 
+function channel(hex) {
+  const value = Number.parseInt(hex, 16) / 255;
+  return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+}
+
+function contrast(hex, background) {
+  const luminance = (color) => {
+    const body = color.slice(1);
+    return (
+      0.2126 * channel(body.slice(0, 2)) +
+      0.7152 * channel(body.slice(2, 4)) +
+      0.0722 * channel(body.slice(4, 6))
+    );
+  };
+  const left = luminance(hex);
+  const right = luminance(background);
+  const lighter = Math.max(left, right);
+  const darker = Math.min(left, right);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+/** `BRAND_PRIMARY_COLOR` from `packages/branding/src/colors.ts`. */
+export function readBrandPrimaryColor(root) {
+  const source = readFileSync(join(root, "packages/branding/src/colors.ts"), "utf8");
+  const block = source.match(/export const BRAND_PRIMARY_SHADES = \[([\s\S]*?)\] as const;/);
+  const index = source.match(/export const BRAND_PRIMARY_COLOR = BRAND_PRIMARY_SHADES\[(\d+)\];/);
+  const shades = block ? [...block[1].matchAll(/"(#[0-9a-fA-F]{6})"/g)].map((item) => item[1]) : [];
+  const color = index ? shades[Number(index[1])] : undefined;
+  if (!/^#[0-9a-fA-F]{6}$/.test(color ?? "")) {
+    throw new Error("BRAND_PRIMARY_COLOR is missing in packages/branding/src/colors.ts.");
+  }
+  const normalized = color.toLowerCase();
+  if (contrast(normalized, "#ffffff") < 2 || contrast(normalized, "#212121") < 2) {
+    throw new Error(`${normalized} fails the 2:1 contrast rule on white or #212121.`);
+  }
+  return normalized;
+}
+
 function requireString(value, label, max) {
   if (typeof value !== "string" || value.trim() === "") {
     throw new Error(`${label} must be a non-empty string.`);
@@ -108,6 +160,10 @@ function validateConfig(config) {
   if (claude?.mcpType !== "http" || openai?.mcpType !== "streamable-http") {
     throw new Error("MCP types must be http and streamable-http.");
   }
+  requireString(config.author?.email, "author.email", 320);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.author.email)) {
+    throw new Error("author.email must be an email address.");
+  }
   requireString(openai?.shortDescription, "shortDescription", 30);
   requireString(openai?.longDescription, "longDescription", 4000);
   requireString(openai?.review?.commerce_description, "commerce_description");
@@ -129,7 +185,23 @@ function validateConfig(config) {
   if (openai.auth?.type !== "oauth" || client.mode !== "cimd" || secret) {
     throw new Error("OpenAI auth must be oauth / cimd with no client id or secret.");
   }
-  const banned = JSON.stringify(openai).includes("Claude") || openai.publication !== undefined;
+  const countries = openai.publication?.countries;
+  const publicationKeys = Object.keys(openai.publication ?? {});
+  const countriesOk = Array.isArray(countries);
+  const publicationOk = publicationKeys.length === 1 && publicationKeys[0] === "countries";
+  if (!countriesOk || !publicationOk) {
+    throw new Error("publication.countries must be an array. Use [] for no country limit.");
+  }
+  for (const code of countries) {
+    if (!/^[A-Z]{2}$/.test(code)) {
+      throw new Error("publication.countries must use uppercase country codes.");
+    }
+  }
+  requireString(openai.onboardingSkill, "onboardingSkill");
+  if (!/^\.\/skills\/[a-z0-9-]+\/SKILL\.md$/.test(openai.onboardingSkill)) {
+    throw new Error("onboardingSkill must be ./skills/<name>/SKILL.md.");
+  }
+  const banned = JSON.stringify(openai).includes("Claude");
   const extraField = openai.review?.demo_recording_url !== undefined;
   if (banned || extraField || openai.review?.commerce !== false) {
     throw new Error("Omit Claude, publication, demo_recording_url, and commerce sales.");
@@ -159,6 +231,7 @@ function requireVersion(version) {
 
 function author(config) {
   return object([
+    ["email", config.author.email],
     ["name", config.author.name],
     ["url", config.author.url],
   ]);
@@ -197,7 +270,7 @@ function caseFields(item, keys) {
   return object(keys.map((key) => [key, item[key]]));
 }
 
-function openAiManifest(config, version) {
+function openAiManifest(config, version, brandColor) {
   const host = config.hosts.openai;
   const { links } = config;
   const interfaceFields = object([
@@ -212,8 +285,13 @@ function openAiManifest(config, version) {
     ["privacyPolicyURL", links.privacy],
     ["termsOfServiceURL", links.terms],
     ["defaultPrompt", host.defaultPrompt],
+    ["brandColor", brandColor],
+    ["brandColorDark", brandColor],
     ["composerIcon", "./assets/icon.png"],
+    ["composerIconDark", "./assets/icon.png"],
     ["logo", "./assets/icon.png"],
+    ["logoDark", "./assets/icon.png"],
+    ["onboardingSkill", host.onboardingSkill],
   ]);
   const review = object([
     [
@@ -238,6 +316,7 @@ function openAiManifest(config, version) {
   ]);
   const extension = object([
     ["interface", interfaceFields],
+    ["publication", { countries: host.publication.countries }],
     ["review", review],
   ]);
   return object([
@@ -311,6 +390,10 @@ function assertCleanTree(tree, label) {
 
 function renderHost(label, config, files, version, manifestRel, manifest, mcpRel, mcp) {
   validateConfig(config);
+  const onboarding = config.hosts.openai.onboardingSkill.slice(2);
+  if (!files.has(onboarding)) {
+    throw new Error(`Missing onboarding skill ${onboarding}.`);
+  }
   requireVersion(version);
   const host = config.hosts[label];
   const tree = new Map();
@@ -342,14 +425,19 @@ export function renderClaudeTree(config, files, version) {
   );
 }
 
-export function renderOpenAiTree(config, files, version) {
+export function renderOpenAiTree(
+  config,
+  files,
+  version,
+  brandColor = readBrandPrimaryColor(repoRoot()),
+) {
   return renderHost(
     "openai",
     config,
     files,
     version,
     "plugin.json",
-    openAiManifest(config, version),
+    openAiManifest(config, version, brandColor),
     "mcp.json",
     openAiMcp(config),
   );

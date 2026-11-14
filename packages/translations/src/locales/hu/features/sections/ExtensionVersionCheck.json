@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "A szerver elutasította a kérést, mert a bővítményed elavult. Frissítsd.",
+  "ApiRejectedTitle": "Túl régi verzió",
+  "UpdateButton": "Frissítés",
+  "UpdateRequiredDescription": "A Bondery-bővítményed elavult, és lehet, hogy nem működik rendesen. A folytatáshoz frissítsd.",
+  "UpdateRequiredTitle": "Frissítés szükséges",
+  "WebappNotificationDescription": "A Bondery Chrome-bővítményedet frissíteni kell, hogy továbbra is rendesen működjön.",
+  "WebappNotificationTitle": "Bővítményfrissítés elérhető"
+}

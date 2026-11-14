@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Έχεις ήδη ενεργή συνδρομή Premium.",
+  "alreadySubscribedTitle": "Υπάρχει ήδη συνδρομή",
+  "errorMessage": "Κάτι πήγε στραβά. Δοκίμασε ξανά.",
+  "errorTitle": "Η πληρωμή απέτυχε",
+  "errorUnauthorized": "Συνδέσου και δοκίμασε ξανά.",
+  "intervalAnnual": "Ετήσια",
+  "intervalMonthly": "Μηνιαία",
+  "paymentBlockedAction": "Ενημέρωση στοιχείων χρέωσης",
+  "paymentBlockedMessage": "Δεν μπορέσαμε να επεξεργαστούμε την πληρωμή σου μετά από αρκετές προσπάθειες. Ενημέρωσε τα στοιχεία χρέωσης για να επανέλθει η πρόσβαση στο Premium.",
+  "paymentBlockedTitle": "Απαιτείται πληρωμή",
+  "successMessage": "Απόλαυσε 300 μηνύματα AI τον μήνα και όλες τις λειτουργίες Premium.",
+  "successTitle": "Έχεις πλέον Premium!",
+  "upgradePendingMessage": "Ο λογαριασμός σου θα αναβαθμιστεί σε Premium σε λίγο.",
+  "upgradePendingTitle": "Η πληρωμή ελήφθη",
+  "upgradesDisabledTooltip": "Οι αναβαθμίσεις σε Premium δεν είναι ακόμα διαθέσιμες. Ξαναδές σύντομα.",
+  "upgradeToPremium": "Αναβάθμιση σε Premium"
+}

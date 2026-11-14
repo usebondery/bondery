@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Zadajte platnú e-mailovú adresu",
+    "invalidTitle": "Neplatný e-mail"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Meno môže mať najviac {max} znakov",
+      "required": "Meno je povinné"
+    },
+    "generic": {
+      "maxLength": "Hodnota môže mať najviac {max} znakov"
+    },
+    "headline": {
+      "maxLength": "Nadpis môže mať najviac {max} znakov"
+    },
+    "label": {
+      "maxLength": "Pole {field} môže mať najviac {max} znakov",
+      "required": "Pole {field} je povinné"
+    },
+    "lastName": {
+      "maxLength": "Priezvisko môže mať najviac {max} znakov"
+    },
+    "location": {
+      "maxLength": "Lokalita môže mať najviac {max} znakov"
+    },
+    "middleName": {
+      "maxLength": "Stredné meno môže mať najviac {max} znakov"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Názov je povinný"
+  },
+  "title": "Chyba overenia"
+}

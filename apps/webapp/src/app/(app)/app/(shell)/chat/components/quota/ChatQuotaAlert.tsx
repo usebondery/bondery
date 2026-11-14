@@ -25,7 +25,7 @@ export function ChatQuotaAlert({
   const format = useFormatter();
 
   if (variant === "premium") {
-    const resetDate = resetAt ? format.dateTime(new Date(resetAt), { dateStyle: "medium" }) : null;
+    const resetDate = resetAt ? format.formatDate(new Date(resetAt), "medium") : null;
     return (
       <Alert
         color="blue"

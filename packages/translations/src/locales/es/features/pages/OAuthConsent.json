@@ -1,0 +1,30 @@
+{
+  "Approve": "Aprobar",
+  "ChromeExtensionClientName": "Extensión de Chrome de Bondery",
+  "Deny": "Denegar",
+  "Description": "{clientName} solicita acceso a tu cuenta de Bondery.",
+  "ErrorTitle": "Error de autorización",
+  "InvalidRequest": "Solicitud de autorización no válida.",
+  "LoopbackWarning": "Esta aplicación se ejecuta en este ordenador (localhost). Continúa solo si la has iniciado tú.",
+  "MissingAuthorizationId": "Falta la solicitud de autorización. Inténtalo de nuevo desde la aplicación.",
+  "PermissionFullDescription": "También crea, actualiza y elimina contactos y sus datos.",
+  "PermissionFullLabel": "Acceso completo",
+  "PermissionLabel": "Acceso",
+  "PermissionReadDescription": "Busca y lee tus contactos y sus datos.",
+  "PermissionReadLabel": "Solo lectura",
+  "RequestedPermissions": "Permisos solicitados",
+  "Scopes": {
+    "api:access": "Usar la API de Bondery en tu nombre",
+    "email": "Ver tu dirección de correo",
+    "mcp:read": "Ver tus contactos y sus datos",
+    "mcp:write": "Crear, actualizar y eliminar contactos y sus datos",
+    "offline_access": "Mantener la sesión hasta que revoques el acceso",
+    "openid": "Verificar tu identidad",
+    "phone": "Ver tu número de teléfono",
+    "profile": "Ver la información de tu perfil"
+  },
+  "Title": "Autorizar aplicación",
+  "UnexpectedError": "Se ha producido un error inesperado. Inténtalo de nuevo.",
+  "UnknownClientName": "Aplicación desconocida",
+  "WebappClientName": "Bondery"
+}

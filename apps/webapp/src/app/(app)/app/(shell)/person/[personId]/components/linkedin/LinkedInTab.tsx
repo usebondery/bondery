@@ -60,7 +60,7 @@ export function LinkedInTab({
       {lastSynced && (
         <Text c="dimmed" size="xs">
           {t("LastDataUpdate", {
-            date: format.dateTime(lastSynced, { dateStyle: "medium" }),
+            date: format.formatDate(lastSynced, "medium"),
           })}
         </Text>
       )}

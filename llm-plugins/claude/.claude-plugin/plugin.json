@@ -1,5 +1,6 @@
 {
   "author": {
+    "email": "team@usebondery.com",
     "name": "Bondery",
     "url": "https://usebondery.com"
   },
@@ -15,5 +16,5 @@
   "repository": "https://github.com/usebondery/bondery",
   "supportUrl": "https://usebondery.com/docs/getting-help-and-troubleshooting",
   "termsOfServiceUrl": "https://usebondery.com/terms",
-  "version": "1.11.1"
+  "version": "1.11.3-rc.1"
 }

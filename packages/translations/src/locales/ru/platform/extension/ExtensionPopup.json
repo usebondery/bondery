@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Открыть Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Подключите аккаунт, чтобы сохранять контакты из соцсетей.",
+    "SignIn": "Войти",
+    "Title": "Войти в Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Добавить взаимодействие с этим человеком"
+  },
+  "Settings": {
+    "ApiServer": "Сервер API",
+    "SignOut": "Выйти"
+  },
+  "UpdateRequired": {
+    "Description": "Расширение Bondery устарело и может работать некорректно. Обновите его, чтобы продолжить.",
+    "OpenExtensionsPage": "Открыть страницу расширений",
+    "Title": "Требуется обновление"
+  },
+  "Welcome": {
+    "ConnectButton": "Подключить аккаунт Bondery"
+  }
+}

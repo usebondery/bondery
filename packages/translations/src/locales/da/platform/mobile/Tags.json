@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Kunde ikke opret etiketen. FörSøg igen.",
+  "CreateTag": "Opret etiket",
+  "DeleteFailed": "Kunde ikke slette etiketen. FörSøg igen.",
+  "EditFailed": "Kunde ikke gem etiketen. FörSøg igen.",
+  "EditTagsSearchPlaceholder": "Sök etiketer...",
+  "LoadFailed": "Kunde ikke ladda etiketer",
+  "NoTagsYet": "Inga etiketer end",
+  "NoTagsYetHint": "Etiketer hjælper dig organisera og hitta kontakter."
+}

@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} s vámi sdílel tento kontakt",
+  "footerNotes": "Odoslané cez Bondery. Odpovedzte na tento e-mail, aby sa spojili s {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adresa",
+    "email": "E-mail",
+    "facebook": "Facebook",
+    "importantDates": "Ważne daty",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Lokalizacja",
+    "notes": "Poznámky",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Strona WWW",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-mail a kolejny údaje uvnitr",
+  "replyCta": "Odpovedet {{senderName}}",
+  "subject": "{{senderName}} s vámi sdílel kontakt • {{contactName}}"
+}

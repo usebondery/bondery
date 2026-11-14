@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "Serveris noraidīja pieprasījumu, jo tavs paplašinājums ir novecojis. Atjaunini.",
+  "ApiRejectedTitle": "Versija pārāk veca",
+  "UpdateButton": "Atjaunināt",
+  "UpdateRequiredDescription": "Tavs Bondery paplašinājums ir novecojis un var nedarboties pareizi. Atjaunini, lai turpinātu.",
+  "UpdateRequiredTitle": "Nepieciešams atjauninājums",
+  "WebappNotificationDescription": "Tavam Bondery Chrome paplašinājumam nepieciešams atjauninājums, lai turpinātu darboties pareizi.",
+  "WebappNotificationTitle": "Pieejams paplašinājuma atjauninājums"
+}

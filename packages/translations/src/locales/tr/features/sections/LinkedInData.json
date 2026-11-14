@@ -1,0 +1,11 @@
+{
+  "About": "Hakkında",
+  "Education": "Eğitim",
+  "LastDataUpdate": "Son veri güncellemesi: {date}",
+  "NoEducation": "Eğitim bilgisi yok",
+  "NoWorkHistory": "İş geçmişi yok",
+  "Present": "Şimdi",
+  "ShowLess": "Daha az göster",
+  "ShowMore": "Daha fazla göster",
+  "WorkHistory": "İş geçmişi"
+}

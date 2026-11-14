@@ -43,6 +43,7 @@ export type UserSettingsMinAggregateOutputType = {
   timezone: string | null
   defaultPhoneCountry: string | null
   timeFormat: string | null
+  dateFormat: string | null
   colorScheme: $Enums.ColorScheme | null
   leftSwipeAction: string | null
   rightSwipeAction: string | null
@@ -71,6 +72,7 @@ export type UserSettingsMaxAggregateOutputType = {
   timezone: string | null
   defaultPhoneCountry: string | null
   timeFormat: string | null
+  dateFormat: string | null
   colorScheme: $Enums.ColorScheme | null
   leftSwipeAction: string | null
   rightSwipeAction: string | null
@@ -99,6 +101,7 @@ export type UserSettingsCountAggregateOutputType = {
   timezone: number
   defaultPhoneCountry: number
   timeFormat: number
+  dateFormat: number
   colorScheme: number
   leftSwipeAction: number
   rightSwipeAction: number
@@ -139,6 +142,7 @@ export type UserSettingsMinAggregateInputType = {
   timezone?: true
   defaultPhoneCountry?: true
   timeFormat?: true
+  dateFormat?: true
   colorScheme?: true
   leftSwipeAction?: true
   rightSwipeAction?: true
@@ -167,6 +171,7 @@ export type UserSettingsMaxAggregateInputType = {
   timezone?: true
   defaultPhoneCountry?: true
   timeFormat?: true
+  dateFormat?: true
   colorScheme?: true
   leftSwipeAction?: true
   rightSwipeAction?: true
@@ -195,6 +200,7 @@ export type UserSettingsCountAggregateInputType = {
   timezone?: true
   defaultPhoneCountry?: true
   timeFormat?: true
+  dateFormat?: true
   colorScheme?: true
   leftSwipeAction?: true
   rightSwipeAction?: true
@@ -310,6 +316,7 @@ export type UserSettingsGroupByOutputType = {
   timezone: string | null
   defaultPhoneCountry: string | null
   timeFormat: string
+  dateFormat: string
   colorScheme: $Enums.ColorScheme
   leftSwipeAction: string
   rightSwipeAction: string
@@ -361,6 +368,7 @@ export type UserSettingsWhereInput = {
   timezone?: Prisma.StringNullableFilter<"UserSettings"> | string | null
   defaultPhoneCountry?: Prisma.StringNullableFilter<"UserSettings"> | string | null
   timeFormat?: Prisma.StringFilter<"UserSettings"> | string
+  dateFormat?: Prisma.StringFilter<"UserSettings"> | string
   colorScheme?: Prisma.EnumColorSchemeFilter<"UserSettings"> | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFilter<"UserSettings"> | string
   rightSwipeAction?: Prisma.StringFilter<"UserSettings"> | string
@@ -390,6 +398,7 @@ export type UserSettingsOrderByWithRelationInput = {
   timezone?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultPhoneCountry?: Prisma.SortOrderInput | Prisma.SortOrder
   timeFormat?: Prisma.SortOrder
+  dateFormat?: Prisma.SortOrder
   colorScheme?: Prisma.SortOrder
   leftSwipeAction?: Prisma.SortOrder
   rightSwipeAction?: Prisma.SortOrder
@@ -422,6 +431,7 @@ export type UserSettingsWhereUniqueInput = Prisma.AtLeast<{
   timezone?: Prisma.StringNullableFilter<"UserSettings"> | string | null
   defaultPhoneCountry?: Prisma.StringNullableFilter<"UserSettings"> | string | null
   timeFormat?: Prisma.StringFilter<"UserSettings"> | string
+  dateFormat?: Prisma.StringFilter<"UserSettings"> | string
   colorScheme?: Prisma.EnumColorSchemeFilter<"UserSettings"> | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFilter<"UserSettings"> | string
   rightSwipeAction?: Prisma.StringFilter<"UserSettings"> | string
@@ -451,6 +461,7 @@ export type UserSettingsOrderByWithAggregationInput = {
   timezone?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultPhoneCountry?: Prisma.SortOrderInput | Prisma.SortOrder
   timeFormat?: Prisma.SortOrder
+  dateFormat?: Prisma.SortOrder
   colorScheme?: Prisma.SortOrder
   leftSwipeAction?: Prisma.SortOrder
   rightSwipeAction?: Prisma.SortOrder
@@ -487,6 +498,7 @@ export type UserSettingsScalarWhereWithAggregatesInput = {
   timezone?: Prisma.StringNullableWithAggregatesFilter<"UserSettings"> | string | null
   defaultPhoneCountry?: Prisma.StringNullableWithAggregatesFilter<"UserSettings"> | string | null
   timeFormat?: Prisma.StringWithAggregatesFilter<"UserSettings"> | string
+  dateFormat?: Prisma.StringWithAggregatesFilter<"UserSettings"> | string
   colorScheme?: Prisma.EnumColorSchemeWithAggregatesFilter<"UserSettings"> | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringWithAggregatesFilter<"UserSettings"> | string
   rightSwipeAction?: Prisma.StringWithAggregatesFilter<"UserSettings"> | string
@@ -514,6 +526,7 @@ export type UserSettingsCreateInput = {
   timezone?: string | null
   defaultPhoneCountry?: string | null
   timeFormat?: string
+  dateFormat?: string
   colorScheme?: $Enums.ColorScheme
   leftSwipeAction?: string
   rightSwipeAction?: string
@@ -543,6 +556,7 @@ export type UserSettingsUncheckedCreateInput = {
   timezone?: string | null
   defaultPhoneCountry?: string | null
   timeFormat?: string
+  dateFormat?: string
   colorScheme?: $Enums.ColorScheme
   leftSwipeAction?: string
   rightSwipeAction?: string
@@ -570,6 +584,7 @@ export type UserSettingsUpdateInput = {
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultPhoneCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   colorScheme?: Prisma.EnumColorSchemeFieldUpdateOperationsInput | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
   rightSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
@@ -599,6 +614,7 @@ export type UserSettingsUncheckedUpdateInput = {
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultPhoneCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   colorScheme?: Prisma.EnumColorSchemeFieldUpdateOperationsInput | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
   rightSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
@@ -627,6 +643,7 @@ export type UserSettingsCreateManyInput = {
   timezone?: string | null
   defaultPhoneCountry?: string | null
   timeFormat?: string
+  dateFormat?: string
   colorScheme?: $Enums.ColorScheme
   leftSwipeAction?: string
   rightSwipeAction?: string
@@ -654,6 +671,7 @@ export type UserSettingsUpdateManyMutationInput = {
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultPhoneCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   colorScheme?: Prisma.EnumColorSchemeFieldUpdateOperationsInput | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
   rightSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
@@ -682,6 +700,7 @@ export type UserSettingsUncheckedUpdateManyInput = {
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultPhoneCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   colorScheme?: Prisma.EnumColorSchemeFieldUpdateOperationsInput | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
   rightSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
@@ -715,6 +734,7 @@ export type UserSettingsCountOrderByAggregateInput = {
   timezone?: Prisma.SortOrder
   defaultPhoneCountry?: Prisma.SortOrder
   timeFormat?: Prisma.SortOrder
+  dateFormat?: Prisma.SortOrder
   colorScheme?: Prisma.SortOrder
   leftSwipeAction?: Prisma.SortOrder
   rightSwipeAction?: Prisma.SortOrder
@@ -748,6 +768,7 @@ export type UserSettingsMaxOrderByAggregateInput = {
   timezone?: Prisma.SortOrder
   defaultPhoneCountry?: Prisma.SortOrder
   timeFormat?: Prisma.SortOrder
+  dateFormat?: Prisma.SortOrder
   colorScheme?: Prisma.SortOrder
   leftSwipeAction?: Prisma.SortOrder
   rightSwipeAction?: Prisma.SortOrder
@@ -776,6 +797,7 @@ export type UserSettingsMinOrderByAggregateInput = {
   timezone?: Prisma.SortOrder
   defaultPhoneCountry?: Prisma.SortOrder
   timeFormat?: Prisma.SortOrder
+  dateFormat?: Prisma.SortOrder
   colorScheme?: Prisma.SortOrder
   leftSwipeAction?: Prisma.SortOrder
   rightSwipeAction?: Prisma.SortOrder
@@ -848,6 +870,7 @@ export type UserSettingsCreateWithoutUserInput = {
   timezone?: string | null
   defaultPhoneCountry?: string | null
   timeFormat?: string
+  dateFormat?: string
   colorScheme?: $Enums.ColorScheme
   leftSwipeAction?: string
   rightSwipeAction?: string
@@ -875,6 +898,7 @@ export type UserSettingsUncheckedCreateWithoutUserInput = {
   timezone?: string | null
   defaultPhoneCountry?: string | null
   timeFormat?: string
+  dateFormat?: string
   colorScheme?: $Enums.ColorScheme
   leftSwipeAction?: string
   rightSwipeAction?: string
@@ -918,6 +942,7 @@ export type UserSettingsUpdateWithoutUserInput = {
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultPhoneCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   colorScheme?: Prisma.EnumColorSchemeFieldUpdateOperationsInput | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
   rightSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
@@ -945,6 +970,7 @@ export type UserSettingsUncheckedUpdateWithoutUserInput = {
   timezone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   defaultPhoneCountry?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   timeFormat?: Prisma.StringFieldUpdateOperationsInput | string
+  dateFormat?: Prisma.StringFieldUpdateOperationsInput | string
   colorScheme?: Prisma.EnumColorSchemeFieldUpdateOperationsInput | $Enums.ColorScheme
   leftSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
   rightSwipeAction?: Prisma.StringFieldUpdateOperationsInput | string
@@ -975,6 +1001,7 @@ export type UserSettingsSelect<ExtArgs extends runtime.Types.Extensions.Internal
   timezone?: boolean
   defaultPhoneCountry?: boolean
   timeFormat?: boolean
+  dateFormat?: boolean
   colorScheme?: boolean
   leftSwipeAction?: boolean
   rightSwipeAction?: boolean
@@ -1004,6 +1031,7 @@ export type UserSettingsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.
   timezone?: boolean
   defaultPhoneCountry?: boolean
   timeFormat?: boolean
+  dateFormat?: boolean
   colorScheme?: boolean
   leftSwipeAction?: boolean
   rightSwipeAction?: boolean
@@ -1033,6 +1061,7 @@ export type UserSettingsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.
   timezone?: boolean
   defaultPhoneCountry?: boolean
   timeFormat?: boolean
+  dateFormat?: boolean
   colorScheme?: boolean
   leftSwipeAction?: boolean
   rightSwipeAction?: boolean
@@ -1062,6 +1091,7 @@ export type UserSettingsSelectScalar = {
   timezone?: boolean
   defaultPhoneCountry?: boolean
   timeFormat?: boolean
+  dateFormat?: boolean
   colorScheme?: boolean
   leftSwipeAction?: boolean
   rightSwipeAction?: boolean
@@ -1083,7 +1113,7 @@ export type UserSettingsSelectScalar = {
   updatedAt?: boolean
 }
 
-export type UserSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "language" | "timezone" | "defaultPhoneCountry" | "timeFormat" | "colorScheme" | "leftSwipeAction" | "rightSwipeAction" | "groupSortOrder" | "tagSortOrder" | "reminderSendHour" | "nextReminderAtUtc" | "onboardingCompletedAt" | "welcomeEmailSentAt" | "gettingStartedDismissedAt" | "importCompletedAt" | "importFollowupPlatform" | "importFollowupStatus" | "aiMessagesUsed" | "aiMessagesThisMonth" | "aiMessagesMonthResetAt" | "productAnalyticsEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["userSettings"]>
+export type UserSettingsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "language" | "timezone" | "defaultPhoneCountry" | "timeFormat" | "dateFormat" | "colorScheme" | "leftSwipeAction" | "rightSwipeAction" | "groupSortOrder" | "tagSortOrder" | "reminderSendHour" | "nextReminderAtUtc" | "onboardingCompletedAt" | "welcomeEmailSentAt" | "gettingStartedDismissedAt" | "importCompletedAt" | "importFollowupPlatform" | "importFollowupStatus" | "aiMessagesUsed" | "aiMessagesThisMonth" | "aiMessagesMonthResetAt" | "productAnalyticsEnabled" | "createdAt" | "updatedAt", ExtArgs["result"]["userSettings"]>
 export type UserSettingsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -1106,6 +1136,7 @@ export type $UserSettingsPayload<ExtArgs extends runtime.Types.Extensions.Intern
     timezone: string | null
     defaultPhoneCountry: string | null
     timeFormat: string
+    dateFormat: string
     colorScheme: $Enums.ColorScheme
     leftSwipeAction: string
     rightSwipeAction: string
@@ -1555,6 +1586,7 @@ export interface UserSettingsFieldRefs {
   readonly timezone: Prisma.FieldRef<"UserSettings", 'String'>
   readonly defaultPhoneCountry: Prisma.FieldRef<"UserSettings", 'String'>
   readonly timeFormat: Prisma.FieldRef<"UserSettings", 'String'>
+  readonly dateFormat: Prisma.FieldRef<"UserSettings", 'String'>
   readonly colorScheme: Prisma.FieldRef<"UserSettings", 'ColorScheme'>
   readonly leftSwipeAction: Prisma.FieldRef<"UserSettings", 'String'>
   readonly rightSwipeAction: Prisma.FieldRef<"UserSettings", 'String'>

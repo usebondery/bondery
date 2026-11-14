@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Actions",
+  "CannotDeleteMyself": "Nu îți poți șterge propria fișă de contact",
+  "CannotMergeMyself": "Nu îți poți uni propria fișă de contact cu altele",
+  "DeleteContact": "Șterge contact",
+  "DownloadVCard": "Descarcă vCard",
+  "ExportError": "Eroare",
+  "ExportErrorDescription": "Nu s-a putut exporta contactul. Încearcă din nou.",
+  "ExportSuccess": "Succes",
+  "ExportSuccessDescription": "Contact exportat ca vCard"
+}

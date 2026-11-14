@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Bu kişiye fotoğraf ekle",
+  "Cancel": "İptal",
+  "ConfirmPhoto": "Fotoğrafı onayla",
+  "DragImageHere": "Görseli buraya sürükle veya seçmek için tıkla",
+  "InvalidFile": "Geçersiz dosya",
+  "PhotoUpdateError": "Kişi fotoğrafı güncellenemedi",
+  "PhotoUpdateSuccess": "Kişi fotoğrafı güncellendi",
+  "PleaseWait": "Bekle",
+  "TitleModal": "Kişi fotoğrafı yükle",
+  "UpdateError": "Hata",
+  "UpdateProfilePhoto": "Kişi fotoğrafını güncelle",
+  "UpdateSuccess": "Başarılı",
+  "UploadingPhoto": "Yükleniyor..."
+}

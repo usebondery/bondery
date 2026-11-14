@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Lisa sellele kontaktile foto",
+  "Cancel": "Tühista",
+  "ConfirmPhoto": "Kinnita foto",
+  "DragImageHere": "Lohista pilt siia või klõpsa valimiseks",
+  "InvalidFile": "Kehtetu fail",
+  "PhotoUpdateError": "Kontakti fotot ei õnnestunud uuendada",
+  "PhotoUpdateSuccess": "Kontakti foto uuendati edukalt",
+  "PleaseWait": "Oota",
+  "TitleModal": "Laadi kontakti foto üles",
+  "UpdateError": "Viga",
+  "UpdateProfilePhoto": "Uuenda kontakti foto",
+  "UpdateSuccess": "Õnnestus",
+  "UploadingPhoto": "Laadin üles..."
+}

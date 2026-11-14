@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Дії",
+  "CannotDeleteMyself": "Не можна видалити власну картку контакту",
+  "CannotMergeMyself": "Не можна об’єднати власну картку контакту з іншими",
+  "DeleteContact": "Видалити контакт",
+  "DownloadVCard": "Завантажити vCard",
+  "ExportError": "Помилка",
+  "ExportErrorDescription": "Не вдалося експортувати контакт. Спробуйте знову.",
+  "ExportSuccess": "Готово",
+  "ExportSuccessDescription": "Контакт експортирован в vCard"
+}

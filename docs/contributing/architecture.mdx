@@ -172,7 +172,7 @@ All compilable packages extend `@bondery/typescript-config` (NodeNext, `declarat
 | [`packages/typescript-config`](https://github.com/usebondery/bondery/tree/main/packages/typescript-config) | Shared `base.json`, `react-library.json`, `nextjs.json` tsconfigs |
 | [`packages/db`](https://github.com/usebondery/bondery/tree/main/packages/db) | Prisma schema, migrations, generated client |
 | [`packages/schemas`](https://github.com/usebondery/bondery/tree/main/packages/schemas) | Zod schemas, types, sync protocol, locale catalog |
-| [`packages/translations`](https://github.com/usebondery/bondery/tree/main/packages/translations) | i18next namespaces and JSON locale files (`en`, `cs`, `de`) |
+| [`packages/translations`](https://github.com/usebondery/bondery/tree/main/packages/translations) | i18next namespaces and JSON locale files (`en`, `cs`, `de`, `es`, `fr`, `hu`, `pl`, `pt`, `ru`, `sk`, `uk`) |
 | [`packages/helpers`](https://github.com/usebondery/bondery/tree/main/packages/helpers) | Shared utilities, `API_ROUTES`, global URLs |
 | [`packages/emails`](https://github.com/usebondery/bondery/tree/main/packages/emails) | React Email templates (`preview` for local dev, `dev` for `tsc --watch`) |
 | [`packages/mantine-next`](https://github.com/usebondery/bondery/tree/main/packages/mantine-next) | Reusable Mantine components for Next.js apps |
@@ -199,9 +199,33 @@ User-facing copy for webapp, website, mobile, and the Chrome extension. Built on
 
 | Code | Language |
 |------|----------|
-| `en` | English (reference / fallback) |
-| `cs` | Czech |
-| `de` | German |
+| `en` | English (reference / fallback, `en-US`) |
+| `bg` | Bulgarian (`bg-BG`) |
+| `cs` | Czech (`cs-CZ`) |
+| `da` | Danish (`da-DK`) |
+| `de` | German (`de-DE`) |
+| `el` | Greek (`el-GR`) |
+| `es` | Spanish, Spain (`es-ES`) |
+| `et` | Estonian (`et-EE`) |
+| `fi` | Finnish (`fi-FI`) |
+| `fr` | French (`fr-FR`) |
+| `hr` | Croatian (`hr-HR`) |
+| `hu` | Hungarian (`hu-HU`) |
+| `it` | Italian (`it-IT`) |
+| `lt` | Lithuanian (`lt-LT`) |
+| `lv` | Latvian (`lv-LV`) |
+| `nb` | Norwegian, Bokmål (`nb-NO`) |
+| `nl` | Dutch, Netherlands (`nl-NL`) |
+| `pl` | Polish (`pl-PL`) |
+| `pt` | Portuguese, Portugal (`pt-PT`) |
+| `ro` | Romanian (`ro-RO`) |
+| `ru` | Russian (`ru-RU`) |
+| `sk` | Slovak (`sk-SK`) |
+| `sl` | Slovenian (`sl-SI`) |
+| `sr` | Serbian, Latin (`sr-Latn-RS`) |
+| `sv` | Swedish (`sv-SE`) |
+| `tr` | Turkish (`tr-TR`) |
+| `uk` | Ukrainian (`uk-UA`) |
 
 In application code, import locale constants from the schemas package (translations re-exports them for convenience):
 

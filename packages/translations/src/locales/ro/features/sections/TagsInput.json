@@ -1,0 +1,22 @@
+{
+  "AddError": "Nu s-a putut adăuga eticheta",
+  "AddNewTagTooltip": "Creează etichetă nouă",
+  "AddSuccess": "Eticheta a fost adăugată",
+  "AddTagTooltip": "Adaugă etichetă",
+  "CreateError": "Nu s-a putut crea eticheta",
+  "CreateNewTagEmpty": "Creează etichetă nouă",
+  "CreateNewTagOption": "Creează eticheta „{label}”",
+  "CreateTagCancel": "Anula",
+  "CreateTagConfirm": "Creează și adaugă",
+  "CreateTagMessage": "Eticheta „{name}” nu există încă. Vrei să o creezi și să o adaugi la acest contact?",
+  "CreateTagTitle": "Creezi etichetă nouă?",
+  "Label": "Etichete",
+  "NoTagsFound": "Nu s-au găsit etichete",
+  "Placeholder": "Adaugă etichete…",
+  "RemoveError": "Nu s-a putut elimina eticheta",
+  "RemoveTagTooltip": "Elimină etichetă",
+  "SearchPlaceholder": "Caută sau creează o etichetă…",
+  "TagAlreadyAddedMessage": "Eticheta „{name}” a fost deja adăugată la acest contact.",
+  "TagAlreadyAddedTitle": "Eticheta există deja",
+  "TagAlreadyAppliedTooltip": "Eticheta este deja aplicată"
+}

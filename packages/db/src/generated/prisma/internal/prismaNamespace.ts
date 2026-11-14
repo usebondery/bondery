@@ -4438,6 +4438,7 @@ export const UserSettingsScalarFieldEnum = {
   timezone: 'timezone',
   defaultPhoneCountry: 'defaultPhoneCountry',
   timeFormat: 'timeFormat',
+  dateFormat: 'dateFormat',
   colorScheme: 'colorScheme',
   leftSwipeAction: 'leftSwipeAction',
   rightSwipeAction: 'rightSwipeAction',

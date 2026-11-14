@@ -1,4 +1,5 @@
-import { loadNamespace, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
+import { loadNamespace } from "@bondery/translations/loader";
 
 /** Curated Better Auth codes shipped in `common.errors.auth`. */
 export const AUTH_ERROR_CODES = [

@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Acties",
+  "CannotDeleteMyself": "Je kunt je eigen contactkaart niet verwijderen",
+  "CannotMergeMyself": "Je kunt je eigen contactkaart niet met anderen samenvoegen",
+  "DeleteContact": "Contact verwijderen",
+  "DownloadVCard": "vCard downloaden",
+  "ExportError": "Fout",
+  "ExportErrorDescription": "Kan contact niet exporteren. Probeer het opnieuw.",
+  "ExportSuccess": "Gelukt",
+  "ExportSuccessDescription": "Contact geëxporteerd als vCard"
+}

@@ -1,0 +1,16 @@
+{
+  "Description": "Hjelp oss å forbedre Bondery ved å dele meningene dine. <3",
+  "ErrorMessage": "Kunne ikke sende tilbakemeldingen. Prøv igjen.",
+  "ErrorTitle": "Feil",
+  "GeneralFeedbackLabel": "Har du tilbakemeldinger, forslag eller feil du vil dele?",
+  "GeneralFeedbackPlaceholder": "Jeg liker / liker ikke denne delen av appen … Jeg ønsker at dette ble lagt til … Jeg slet med …",
+  "NpsLabel": "Fra 0 til 10, hvor sannsynlig er det at du anbefaler Bondery til en venn eller kollega?",
+  "NpsReasonLabel": "Hvorfor valgte du poengsummen {score}?",
+  "NpsReasonPlaceholder": "Fordi jeg syntes denne funksjonen var nyttig / hadde feil / manglet …",
+  "SubmitButton": "Send tilbakemelding til utviklerne",
+  "SubmittingMessage": "Vent mens vi sender tilbakemeldingen",
+  "SubmittingTitle": "Sender tilbakemelding …",
+  "SuccessMessage": "Tilbakemeldingen er mottatt",
+  "SuccessTitle": "Takk!",
+  "Title": "Tilbakemelding"
+}

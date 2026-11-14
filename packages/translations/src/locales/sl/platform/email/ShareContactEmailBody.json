@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} je s teboj delil ta stik",
+  "footerNotes": "Poslano z Bondery. Odgovori na to e-pošto, da stopiš v stik z {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Naslov",
+    "email": "E-pošta",
+    "facebook": "Facebook",
+    "importantDates": "Pomembni datumi",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Lokacija",
+    "notes": "Opombe",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Spletno mesto",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-pošta in druge podrobnosti znotraj",
+  "replyCta": "Odgovori {{senderName}}",
+  "subject": "{{senderName}} je delil stik s teboj • {{contactName}}"
+}

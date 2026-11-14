@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Tev jau ir aktīvs Premium abonements.",
+  "alreadySubscribedTitle": "Jau abonējis",
+  "errorMessage": "Kaut kas nogāja greizi. Mēģini vēlreiz.",
+  "errorTitle": "Izrakstīšanās neizdevās",
+  "errorUnauthorized": "pieraksties un mēģini vēlreiz.",
+  "intervalAnnual": "Gada",
+  "intervalMonthly": "Ikmēneša",
+  "paymentBlockedAction": "Atjaunināt norēķinus",
+  "paymentBlockedMessage": "Mēs nevarējām apstrādāt tavu maksājumu pēc vairākiem mēģinājumiem. Atjaunini norēķinu informāciju, lai atjaunotu Premium piekļuvi.",
+  "paymentBlockedTitle": "Nepieciešams maksājums",
+  "successMessage": "Izbaudi 300 AI ziņojumus mēnesī un visas Premium funkcijas.",
+  "successTitle": "Tu tagad esi Premium!",
+  "upgradePendingMessage": "Tavs konts drīzumā tiks jaunināts uz Premium.",
+  "upgradePendingTitle": "Saņemts maksājums",
+  "upgradesDisabledTooltip": "Premium jauninājumi vēl nav pieejami. Drīzumā pārbaudi vēlreiz.",
+  "upgradeToPremium": "Jaunināt uz Premium"
+}

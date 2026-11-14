@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Tunnisteen luonti epäonnistui. Yritä uudelleen.",
+  "CreateTag": "Luo tunniste",
+  "DeleteFailed": "Tunnisteen poisto epäonnistui. Yritä uudelleen.",
+  "EditFailed": "Tunnisteen tallennus epäonnistui. Yritä uudelleen.",
+  "EditTagsSearchPlaceholder": "Hae tunnisteita…",
+  "LoadFailed": "Tunnisteita ei voitu ladata",
+  "NoTagsYet": "Ei vielä tunnisteita",
+  "NoTagsYetHint": "Tunnisteet auttavat järjestämään ja löytämään yhteystietoja."
+}

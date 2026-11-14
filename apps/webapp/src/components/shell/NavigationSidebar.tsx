@@ -164,14 +164,14 @@ export function NavigationSidebarContent({
       {!isMobileOverlay && (
         <Group justify="flex-start" mb="md">
           <AnchorLink href={routeAssert(WEBAPP_ROUTES.DEFAULT_PAGE_AFTER_LOGIN)} underline="never">
-            <Box darkHidden>
+            <Box darkHidden dir="ltr">
               <BonderyDynamicLogotype
                 height={36}
                 text={collapsed ? undefined : WEBAPP_NAME}
                 theme="light"
               />
             </Box>
-            <Box lightHidden>
+            <Box dir="ltr" lightHidden>
               <BonderyDynamicLogotype
                 height={36}
                 text={collapsed ? undefined : WEBAPP_NAME}
@@ -352,8 +352,8 @@ export function NavigationSidebarContent({
               borderRadius: NAV_LINK_ITEM_BORDER_RADIUS,
               color: isMyselfActive ? "white" : "inherit",
               paddingBottom: "var(--mantine-spacing-xs)",
-              paddingLeft: "var(--sidebar-icon-pl)",
-              paddingRight: "var(--sidebar-icon-pl)",
+              paddingInlineEnd: "var(--sidebar-icon-pl)",
+              paddingInlineStart: "var(--sidebar-icon-pl)",
               paddingTop: "var(--mantine-spacing-xs)",
               textDecoration: "none",
               width: "100%",

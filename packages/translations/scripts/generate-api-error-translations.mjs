@@ -1,5 +1,5 @@
 /**
- * Merge API error catalog into common.json errors.api for en/cs/de.
+ * Merge API error catalog into common.json errors.api for every UI locale.
  *
  * Usage: node packages/translations/scripts/generate-api-error-translations.mjs
  */
@@ -8,12 +8,13 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { API_ERROR_CODE_ENTRIES } from "@bondery/schemas/errors";
+import localeCatalog from "@bondery/schemas/locale/supported-locales.json" with { type: "json" };
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const localesRoot = join(__dirname, "..", "src", "locales");
-const locales = ["en", "cs", "de"];
+const locales = localeCatalog.supported.map((entry) => entry.code);
 
-function userFacingMessage(code, template, locale) {
+function userFacingMessage(code, template, locale, existing) {
   const messages = {
     cs: {
       auth_required: "Pro pokračování se prosím přihlaste.",
@@ -75,6 +76,10 @@ function userFacingMessage(code, template, locale) {
     return messages[locale][code];
   }
 
+  if (typeof existing === "string" && existing.trim().length > 0) {
+    return existing;
+  }
+
   const fallback = template.replace(/\b\w/g, (c) => c.toLowerCase());
   return `${fallback.charAt(0).toUpperCase()}${fallback.slice(1)}.`;
 }
@@ -86,7 +91,12 @@ for (const locale of locales) {
   json.errors.api ??= {};
 
   for (const [code, definition] of Object.entries(API_ERROR_CODE_ENTRIES)) {
-    json.errors.api[code] = userFacingMessage(code, definition.messageTemplate, locale);
+    json.errors.api[code] = userFacingMessage(
+      code,
+      definition.messageTemplate,
+      locale,
+      json.errors.api[code],
+    );
   }
 
   writeFileSync(path, `${JSON.stringify(json, null, 2)}\n`, "utf8");

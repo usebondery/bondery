@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Tegevused",
+    "Animals": "Loomad",
+    "Buildings": "Hooned",
+    "Celebrations": "Tähistused",
+    "Food": "Toit",
+    "Hearts": "Südamed",
+    "Humans": "Inimesed",
+    "Miscellaneous": "Mitmesugust",
+    "Nature": "Loodus",
+    "Objects": "Esemed",
+    "Sports": "Sport",
+    "Travel": "Reisimine",
+    "Work": "Töö"
+  },
+  "EmptySearch": "Ühtegi emojit ei leitud",
+  "RandomAccessibilityLabel": "Vali juhuslik emoji",
+  "SearchPlaceholder": "Otsi emoji…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Avab emoji valija"
+}

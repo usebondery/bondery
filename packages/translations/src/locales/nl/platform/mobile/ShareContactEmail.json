@@ -1,0 +1,22 @@
+{
+  "AddButton": "Toevoegen",
+  "Description": "We sturen hun gegevens naar de personen hieronder. Je krijgt ook een kopie.",
+  "DuplicateEmail": "Dit adres is al toegevoegd",
+  "ErrorDescription": "Controleer je verbinding en probeer het opnieuw.",
+  "ErrorHeadline": "Kan contact niet versturen",
+  "InvalidEmail": "Voer een geldig e-mailadres in",
+  "MaxRecipients": "Je kunt maximaal 10 ontvangers toevoegen",
+  "MaxRecipientsHint": "Maximaal 10 ontvangers",
+  "MessagePlaceholder": "Notitie toevoegen (optioneel)",
+  "NoRecipients": "Voeg minstens één ontvanger toe",
+  "RecipientsLabel": "Aan",
+  "RecipientsPlaceholder": "E-mailadres ontvanger",
+  "RemoveRecipient": "{email} verwijderen",
+  "SendButton": "Versturen",
+  "SendButtonMany": "Versturen naar {count} personen",
+  "SendButtonOne": "Versturen naar 1 persoon",
+  "SuccessDescription": "Je ontvangers krijgen het zo meteen.",
+  "SuccessHeadline": "Contact verstuurd",
+  "Title": "Contact van {name} e-mailen",
+  "WhatsIncluded": "Bevat contactgegevens, social links en notities in het dossier."
+}

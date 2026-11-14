@@ -8,13 +8,14 @@ import {
   successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
-import { Group, Stack, Text } from "@mantine/core";
+import { Box, Group, Stack, Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import {
   IconBrandGithub,
   IconBrandLinkedin,
   IconBrowser,
   IconDeviceDesktop,
+  IconSparkles,
 } from "@tabler/icons-react";
 import { useEffect, useState } from "react";
 import { usePWAInstall } from "@/hooks/usePWAInstall";
@@ -22,12 +23,14 @@ import { ensureFreshIdentity } from "@/lib/auth/reconfirm";
 import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChromeExtension";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
+import { useMcpConsentsQuery } from "@/lib/query/hooks/useMcpConsents";
 import {
   openUnlinkProviderConfirm,
   providerKeyFor,
   runLinkSocialProvider,
 } from "../../settingsAuthActions";
 import { openChromeExtensionModal } from "../modals/openChromeExtensionModal";
+import { openMcpModal } from "../modals/openMcpModal";
 import { openPwaInstallModal } from "../modals/openPwaInstallModal";
 import { IntegrationCard } from "./IntegrationCard";
 
@@ -39,11 +42,13 @@ interface UserIdentity {
 }
 
 interface ProviderIntegrationsProps {
+  apiBaseUrl?: string;
   description?: string;
   hideTitle?: boolean;
   oauthProviders?: OAuthProvidersBitmap | null;
   providers: string[];
   showExtensionProvider?: boolean;
+  showMcpProvider?: boolean;
   showOAuthProviders?: boolean;
   showPWAProvider?: boolean;
   title?: string;
@@ -56,19 +61,31 @@ export function ProviderIntegrations({
   oauthProviders = null,
   showOAuthProviders = true,
   showExtensionProvider = true,
+  showMcpProvider = false,
   showPWAProvider = true,
   hideTitle = false,
   title,
   description,
+  apiBaseUrl,
 }: ProviderIntegrationsProps) {
   const [providers, setProviders] = useState<string[]>(initialProviders);
   const [isExtensionInstalled, setIsExtensionInstalled] = useState(false);
+  const [suppressMcpTooltip, setSuppressMcpTooltip] = useState(false);
 
   const { isChromiumDesktop, isPWAInstalled, isInstalledFromBrowser, install } = usePWAInstall();
 
   const t = useSettingsPageTranslations("Profile");
   const tIntegration = useSettingsPageTranslations("Integration");
+  const tAiAssistants = useSettingsPageTranslations("AiAssistants");
   const tCommon = useCommonTranslations();
+  const mcpConsentsQuery = useMcpConsentsQuery(showMcpProvider);
+  const mcpConsents = mcpConsentsQuery.data;
+  const mcpBadgeLabel =
+    mcpConsents === undefined
+      ? undefined
+      : mcpConsents.length > 0
+        ? tIntegration("Connected")
+        : tIntegration("NotConnected");
 
   useEffect(() => {
     let isMounted = true;
@@ -269,6 +286,32 @@ export function ProviderIntegrations({
               );
             })()
           : null}
+        {showMcpProvider ? (
+          <Box
+            onMouseLeave={() => {
+              setSuppressMcpTooltip(false);
+            }}
+          >
+            <IntegrationCard
+              badgeLabel={mcpBadgeLabel}
+              displayName={tAiAssistants("Title")}
+              icon={IconSparkles}
+              iconColor="grape"
+              isConnected={mcpConsents !== undefined && mcpConsents.length > 0}
+              isDisabled={false}
+              isLinkable={false}
+              onClick={() => {
+                if (!apiBaseUrl) {
+                  return;
+                }
+                setSuppressMcpTooltip(true);
+                openMcpModal({ apiBaseUrl });
+              }}
+              provider="mcp"
+              tooltip={suppressMcpTooltip ? undefined : tAiAssistants("TileTooltip")}
+            />
+          </Box>
+        ) : null}
       </Group>
     </Stack>
   );

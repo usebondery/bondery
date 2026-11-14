@@ -1,0 +1,15 @@
+{
+  "AttachProfilePhoto": "Πρόσθεσε μια φωτογραφία για αυτή την επαφή",
+  "Cancel": "Ακύρωση",
+  "ConfirmPhoto": "Επιβεβαίωση φωτογραφίας",
+  "DragImageHere": "Σύρε μια εικόνα εδώ ή κάνε κλικ για επιλογή",
+  "InvalidFile": "Μη έγκυρο αρχείο",
+  "PhotoUpdateError": "Δεν ενημερώθηκε η φωτογραφία της επαφής",
+  "PhotoUpdateSuccess": "Η φωτογραφία της επαφής ενημερώθηκε",
+  "PleaseWait": "Περίμενε",
+  "TitleModal": "Ανέβασμα φωτογραφίας επαφής",
+  "UpdateError": "Σφάλμα",
+  "UpdateProfilePhoto": "Ενημέρωση φωτογραφίας επαφής",
+  "UpdateSuccess": "Επιτυχία",
+  "UploadingPhoto": "Ανέβασμα..."
+}

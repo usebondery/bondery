@@ -1,0 +1,32 @@
+{
+  "AddAction": "Lisa kuupäev",
+  "AddHint": "Uue kuupäeva lisamiseks täida kõik väljad.",
+  "AddImportantDate": "Lisa oluline kuupäev",
+  "BirthdayDateLabel": "Vali sünnipäev",
+  "DatePlaceholder": "Vali kuupäev",
+  "DeleteAction": "Kustuta",
+  "DraftIncompleteError": "Uue kuupäeva lisamiseks täida kõik väljad.",
+  "Empty": "Olulisi kuupäevi pole veel.",
+  "ErrorTitle": "Viga",
+  "NotePlaceholder": "Valikuline märge",
+  "NotifyDayBefore": "Teavita {count} päev varem",
+  "NotifyDaysBefore": "Teavita {count} päeva varem",
+  "NotifyMe": "Teavita mind",
+  "NotifyNone": "Ära teavita",
+  "SuccessTitle": "Õnnestus",
+  "Title": "Olulised kuupäevad",
+  "TypeDisabledBirthdateHint": "{firstName} on juba sünnipäeva määranud",
+  "TypeDisabledHint": "{firstName} on juba sünnipäeva või nimipäeva määranud",
+  "TypeDisabledNamedateHint": "{firstName} on juba nimipäeva määranud",
+  "TypePlaceholder": "Vali tüüp",
+  "Types": {
+    "anniversary": "Aastapäev",
+    "birthday": "Sünnipäev",
+    "graduation": "Lõpetamine",
+    "nameday": "Nimipäev",
+    "other": "Other"
+  },
+  "UniqueTypeError": "Lisada saab ainult ühe {type}.",
+  "UpdateError": "Oluliste kuupäevade uuendamine ei õnnestunud",
+  "UpdateSuccess": "Olulised kuupäevad uuendati edukalt"
+}

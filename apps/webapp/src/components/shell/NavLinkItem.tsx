@@ -31,8 +31,8 @@ export type NavLinkItemProps = NavLinkItemBaseProps &
  */
 export const ITEM_PADDING = {
   paddingBottom: "var(--mantine-spacing-xs)",
-  paddingLeft: "var(--sidebar-icon-pl)",
-  paddingRight: "var(--sidebar-icon-pl)",
+  paddingInlineEnd: "var(--sidebar-icon-pl)",
+  paddingInlineStart: "var(--sidebar-icon-pl)",
   paddingTop: "var(--mantine-spacing-xs)",
 } as const;
 

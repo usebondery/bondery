@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Ponovna provera za{seconds}s",
+  "Description": "Tvoj nalog je bezbedan i i dalje si prijavljen(a). Nastavljamo da proveravamo vezu – to obično traje samo kratko.",
+  "MetadataTitle": "Usluga nije dostupna",
+  "Retry": "Erneut versuchen",
+  "StatusChecking": "Provera veze…",
+  "StatusDegraded": "Neke funkcije su trenutno spore",
+  "StatusOffline": "Bondery je privremeno nedostupan",
+  "StatusOnline": "Ponovo na mreži. Bićeš preusmeren…",
+  "StatusPageLink": "Prikaži stranicu statusa",
+  "TechnicalBackendStatus": "Позадина{status}",
+  "TechnicalDetails": "Технички детаљи",
+  "TechnicalHttpStatus": "HTTP status:{status}",
+  "TechnicalUnreachable": "nije dostupan",
+  "Title": "Problem sa vezom"
+}

@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "kişi",
+    "contactPlural": "kişiler",
+    "group": "grup",
+    "interaction": "etkileşim",
+    "interactionPlural": "etkileşimler",
+    "network": "ağ",
+    "person": "kişi",
+    "person_one": "{count} kişi",
+    "person_other": "{count} kişi",
+    "tag": "etiket"
+  },
+  "features": {
+    "aiAssistant": "Yapay zeka asistanı",
+    "fixAndMerge": "Düzelt ve birleştir",
+    "keepInTouch": "İletişimde kal"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

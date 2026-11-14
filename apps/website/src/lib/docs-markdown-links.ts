@@ -42,7 +42,7 @@ export type RewriteOptions = {
   sourceBaseUrl: string;
 };
 
-const GITHUB_BLOB = "https://github.com/usebondery/bondery/blob/main/docs";
+const _GITHUB_BLOB = "https://github.com/usebondery/bondery/blob/main/docs";
 
 function stripDocsSuffix(target: string): string {
   return target.replace(/\.mdx?$/i, "").replace(/\/index$/, "");

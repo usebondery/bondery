@@ -5,6 +5,7 @@ export {
   ALL_NAMESPACE_NAMES,
   DEFAULT_LOCALE,
   getNamespaceManifest,
+  intlTagForLocale,
   manifest,
   type NamespaceEntry,
   namespaceFilePath,

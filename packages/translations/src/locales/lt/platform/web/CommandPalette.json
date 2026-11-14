@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Veiksmai",
+  "AddPerson": "Pridėti žmogų",
+  "AddPersonDescription": "Sukurti naują kontaktą tinkle",
+  "ContactUs": "Susisiek su mumis",
+  "ContactUsDescription": "Parašyk Bondery komandai",
+  "Documentation": "Dokumentacija",
+  "DocumentationDescription": "Skaityti Bondery dokumentaciją",
+  "ExportData": "Eksportuoti duomenis",
+  "ExportDataDescription": "Išsaugoti Bondery duomenų kopiją",
+  "FindPerson": "Rasti žmogų",
+  "FindPersonDescription": "Ieškoti tinkle pagal vardą",
+  "GoToDescription": "Eiti į {label}",
+  "HelpGroup": "Pagalba",
+  "ImportData": "Importuoti duomenis",
+  "ImportDataDescription": "Importuoti Bondery JSON ZIP",
+  "LogInteraction": "Įrašyti sąveiką",
+  "LogInteractionDescription": "Užfiksuoti naują susitikimą, skambutį ar žinutę",
+  "NavigateGroup": "Naršyti",
+  "NothingFound": "Veiksmų nerasta",
+  "SearchPlaceholder": "Ieškoti veiksmų arba navigacijos…"
+}

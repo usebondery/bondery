@@ -7,9 +7,11 @@
     "nameday": "Name day",
     "other": "Important date"
   },
+  "dayFew": "{{count}} days",
   "dayMany": "{{count}} days",
   "dayOne": "1 day",
   "description": "For {{headingDate}}. Open a person to see details or send a note.",
+  "headingFew": "{{count}} reminders coming up",
   "headingMany": "{{count}} reminders coming up",
   "headingOne": "1 reminder coming up",
   "preview": "{{firstPersonName}}'s {{firstTypeLabel}} in {{firstRemainingLabel}}",

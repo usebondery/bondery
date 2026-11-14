@@ -1,0 +1,11 @@
+{
+  "About": "Tietoja",
+  "Education": "Koulutus",
+  "LastDataUpdate": "Tietojen viimeisin päivitys: {date}",
+  "NoEducation": "Ei koulutustietoja",
+  "NoWorkHistory": "Ei työhistoriaa",
+  "Present": "Nykyinen",
+  "ShowLess": "Näytä vähemmän",
+  "ShowMore": "Näytä enemmän",
+  "WorkHistory": "Työhistoria"
+}

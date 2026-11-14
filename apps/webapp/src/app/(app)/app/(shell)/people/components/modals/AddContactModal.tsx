@@ -4,7 +4,6 @@
 import { extractUsername } from "@bondery/helpers";
 import { getUserFacingError } from "@bondery/helpers/api";
 import { createContactFromFullNameSchema } from "@bondery/helpers/forms";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { getRandomExampleName } from "@bondery/helpers/name";
 import {
   errorNotificationTemplate,

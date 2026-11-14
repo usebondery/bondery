@@ -20,8 +20,32 @@ export type ColorScheme = (typeof ColorScheme)[keyof typeof ColorScheme]
 
 export const SupportedLocale = {
   en: 'en',
+  bg: 'bg',
   cs: 'cs',
-  de: 'de'
+  da: 'da',
+  de: 'de',
+  el: 'el',
+  es: 'es',
+  et: 'et',
+  fi: 'fi',
+  fr: 'fr',
+  hr: 'hr',
+  hu: 'hu',
+  it: 'it',
+  lt: 'lt',
+  lv: 'lv',
+  nb: 'nb',
+  nl: 'nl',
+  pl: 'pl',
+  pt: 'pt',
+  ro: 'ro',
+  ru: 'ru',
+  sk: 'sk',
+  sl: 'sl',
+  sr: 'sr',
+  sv: 'sv',
+  tr: 'tr',
+  uk: 'uk'
 } as const
 
 export type SupportedLocale = (typeof SupportedLocale)[keyof typeof SupportedLocale]

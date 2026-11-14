@@ -43,10 +43,21 @@ function setConfiguredEmailEnv(): void {
   process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO = "team@usebondery.com";
 }
 
-function buildCtx() {
+function buildCtx(overrides?: Partial<emailI18n.EmailFormatContext>) {
   return {
     defaultTargetDate: "2026-07-29",
-    localeByUserId: new Map([[userId, "en"]]),
+    formatByUserId: new Map([
+      [
+        userId,
+        {
+          dateFormat: "locale" as const,
+          locale: "en" as const,
+          timeFormat: "24h" as const,
+          timeZone: "UTC",
+          ...overrides,
+        },
+      ],
+    ]),
     namespaceCache: emailI18n.preloadEmailNamespaces("ReminderDigestEmail"),
   };
 }
@@ -78,6 +89,24 @@ describe("sendOneUserDigest", () => {
 
     assert.equal(result.ok, true, result.ok ? undefined : result.error);
     assert.equal(advanced, true);
+  });
+
+  it("uses a formatted date in the digest subject, not ISO", async () => {
+    let capturedSubject = "";
+    setSendRenderedEmailOverrideForTests(async (options) => {
+      capturedSubject = options.subject;
+    });
+    prisma.reminderDispatchLog.create = (async () => ({ id: "log-id" })) as typeof originalCreate;
+    prisma.$executeRaw = (async () => 1) as typeof originalExecuteRaw;
+
+    const result = await sendOneUserDigest(
+      reminderUser,
+      buildCtx({ dateFormat: "locale", locale: "de" }),
+    );
+
+    assert.equal(result.ok, true, result.ok ? undefined : result.error);
+    assert.doesNotMatch(capturedSubject, /2026-07-29/);
+    assert.match(capturedSubject, /2026/);
   });
 
   it("does not log or advance when SMTP fails", async () => {

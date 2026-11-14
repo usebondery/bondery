@@ -1,6 +1,10 @@
 import "react-native-get-random-values";
 import "react-native-gesture-handler";
 import "../global.css";
+import { bootstrapDocumentDirectionFromStorage } from "../src/lib/i18n/documentDirection";
+
+void bootstrapDocumentDirectionFromStorage();
+
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";

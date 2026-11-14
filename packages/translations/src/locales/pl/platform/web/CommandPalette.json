@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Akcje",
+  "AddPerson": "Dodaj osobę",
+  "AddPersonDescription": "Utwórz nowy kontakt w swojej sieci",
+  "ContactUs": "Kontakt",
+  "ContactUsDescription": "Napisz do zespołu Bondery",
+  "Documentation": "Dokumentacja",
+  "DocumentationDescription": "Przeczytaj dokumentację Bondery",
+  "ExportData": "Eksportuj dane",
+  "ExportDataDescription": "Zapisz kopię danych Bondery",
+  "FindPerson": "Znajdź osobę",
+  "FindPersonDescription": "Przeszukaj sieć po imieniu",
+  "GoToDescription": "Przejdź do {label}",
+  "HelpGroup": "Pomoc",
+  "ImportData": "Importuj dane",
+  "ImportDataDescription": "Zaimportuj archiwum ZIP z JSON Bondery",
+  "LogInteraction": "Zapisz interakcję",
+  "LogInteractionDescription": "Zapisz nowe spotkanie, rozmowę lub wiadomość",
+  "NavigateGroup": "Nawigacja",
+  "NothingFound": "Nie znaleziono akcji",
+  "SearchPlaceholder": "Szukaj akcji lub przejdź…"
+}

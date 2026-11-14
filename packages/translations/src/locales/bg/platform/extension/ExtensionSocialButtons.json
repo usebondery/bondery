@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Грешка расширения — опитай снова",
+    "OpenInBondery": "Открыть в Bondery",
+    "SignInRequired": "Нужен вход — кликни значок Bondery",
+    "SomethingWrong": "Что-то пошло не так"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Грешка расширения — опитай снова",
+    "OpenInBondery": "Открыть в Bondery",
+    "SignInRequired": "Нужен вход — кликни значок Bondery",
+    "SomethingWrong": "Что-то пошло не так"
+  }
+}

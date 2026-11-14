@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "З якої платформи ви запросили експорт?",
+    "Description": "Перенесите существующую мережа з LinkedIn, Instagram або добавьте вручную.",
+    "Finish": "Начать",
+    "Instagram": "Імпорт из Instagram",
+    "InstagramDescription": "Завантажте дані підписників Instagram.",
+    "LinkedIn": "Імпорт з LinkedIn",
+    "LinkedInDescription": "Завантажте файл експорту контактів LinkedIn.",
+    "ManualAdd": "Створити вручную",
+    "SkipImport": "Пропустить імпорт",
+    "SuccessDescription": "Імпортировано: {imported}, оновлено: {updated}, пропущено: {skipped}.",
+    "SuccessTitle": "Імпорт завершєн!",
+    "Title": "Імпорт контактів",
+    "WaitingForExport": "Жду експорт"
+  },
+  "Intent": {
+    "both": " І то, і інший",
+    "Description": "Це поможет налаштувати Bondery під вас.",
+    "personal": "Друзі і семья",
+    "professional": "Робота",
+    "Title": "Як ви будее використовать Bondery?"
+  },
+  "Loading": {
+    "Message": "Налаштовуємо усе для вас…"
+  },
+  "MetadataTitle": "Знакомство",
+  "Welcome": {
+    "LetsGo": "Начать",
+    "Subtitle": "Раді познакомиться. Налаштуємо вашу особисту CRM.",
+    "TitleGeneric": "Добро пожаловать в Bondery! 😊",
+    "TitleWithName": "Добро пожаловать, {name}! 😊"
+  }
+}

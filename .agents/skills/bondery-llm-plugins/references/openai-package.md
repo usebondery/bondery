@@ -39,7 +39,9 @@ Do not write `.codex-plugin`. Do not write `userConfig`.
 
 ## Icons
 
-Each icon is square. Each side is at least 48 px. The same PNG may be `logo` and `composerIcon`. Both paths are `./assets/icon.png`.
+Each icon is square. Each side is at least 48 px. The mark is a filled tile, so one PNG serves light and dark. `logo`, `logoDark`, `composerIcon`, and `composerIconDark` all use `./assets/icon.png`.
+
+`brandColor` and `brandColorDark` are `BRAND_PRIMARY_COLOR` from `packages/branding/src/colors.ts`. Each color needs 2:1 contrast, light on white and dark on `#212121`. The builder rejects a primary color that fails either check.
 
 ## Checklist
 

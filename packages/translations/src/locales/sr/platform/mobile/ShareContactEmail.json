@@ -1,0 +1,22 @@
+{
+  "AddButton": "Dodaj",
+  "Description": "Poslaćemo njihove podatke osobama ispod. Dobijaš i kopiju.",
+  "DuplicateEmail": "Ova adresa je već dodata",
+  "ErrorDescription": "Proveri vezu i pokušaj ponovo.",
+  "ErrorHeadline": "Kontakt nije poslat",
+  "InvalidEmail": "Unesi ispravnu adresu imejla",
+  "MaxRecipients": "Možeš dodati do 10 primalaca",
+  "MaxRecipientsHint": "Najviše 10 primalaca",
+  "MessagePlaceholder": "Dodaj napomenu (opciono)",
+  "NoRecipients": "Dodaj bar jednog primaoca",
+  "RecipientsLabel": "Za",
+  "RecipientsPlaceholder": "Adresa imejla primaoca",
+  "RemoveRecipient": "Ukloni {email}",
+  "SendButton": "Pošalji",
+  "SendButtonMany": "Pošalji {count} osoba",
+  "SendButtonOne": "Pošalji 1 osobi",
+  "SuccessDescription": "Primaoci će uskoro dobiti poruku.",
+  "SuccessHeadline": "Kontakt poslat",
+  "Title": "Pošalji kontakt osobe {name}",
+  "WhatsIncluded": "Uključuje kontakt podatke, društvene linkove i beleške."
+}

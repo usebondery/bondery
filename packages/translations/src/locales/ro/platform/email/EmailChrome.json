@@ -1,0 +1,8 @@
+{
+  "documentation": "documentation",
+  "help": "Ai nevoie de ajutor? Vizitează {{support}} sau citește {{documentation}}.",
+  "internalNote": "Operațiuni interne · netrimis clientului",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Gestionează aceste notificări în Bondery",
+  "support": "support"
+}

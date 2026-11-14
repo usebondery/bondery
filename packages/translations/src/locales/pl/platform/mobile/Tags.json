@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Etykieta se nepodařilo utworzyć. Spróbuj ponownie.",
+  "CreateTag": "Utworzyć etykieta",
+  "DeleteFailed": "Etykieta se nepodařilo usuń. Spróbuj ponownie.",
+  "EditFailed": "Etykieta se nepodařilo zapisz. Spróbuj ponownie.",
+  "EditTagsSearchPlaceholder": "Hledat štítky...",
+  "LoadFailed": "Štítky se nepodařilo načíst",
+  "NoTagsYet": "Zatím žádné štítky",
+  "NoTagsYetHint": "Štítky vám pomohou organizovat i vyhledávat kontakty."
+}

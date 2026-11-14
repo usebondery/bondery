@@ -20,7 +20,20 @@ export {
   getContactChannelTypeEmoji,
   SHAREABLE_FIELDS,
 } from "#contact/index.js";
-export { formatCalendarDate, formatDateRange, formatDuration } from "#date/index.js";
+export type { DateTimeFormatContext, UserDateField, UserDateStyle } from "#date/index.js";
+export {
+  amPmLabelsForLocale,
+  dateInputValueFormat,
+  formatCalendarDate,
+  formatClockTime,
+  formatDateRange,
+  formatDuration,
+  formatOrderedDate,
+  formatUserDate,
+  formatUserDateField,
+  formatUserDateTime,
+  formatUserTime,
+} from "#date/index.js";
 export { DOC_LINKS, type DocId, docHref } from "#docs/index.js";
 export type {
   CreateContactFromFullNameInput,
