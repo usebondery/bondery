@@ -15,7 +15,7 @@
  *   pnpm run check:changed -- --only biome,types
  */
 import { execFileSync, spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { closeSync, mkdirSync, openSync, readFileSync, unlinkSync, writeSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -41,7 +41,7 @@ export const CHECKS = [
     args: (files) => ["check", "--no-errors-on-unmatched", ...files.filter(isBiomeFile)],
     command: "biome",
     name: "biome",
-    when: (files) => files.some(isBiomeFile),
+    when: (files) => files.some((file) => isBiomeFile(file) || isBiomeRuleFile(file)),
   },
   {
     args: (_files, base) => ["scripts/check/check-no-workarounds.mjs", "--worktree", base],
@@ -59,7 +59,8 @@ export const CHECKS = [
     args: () => ["run", "test:check-scripts"],
     command: "pnpm",
     name: "check-script-tests",
-    when: (files) => files.some((file) => file.startsWith("scripts/check/")),
+    when: (files) =>
+      files.some((file) => file.startsWith("scripts/check/") || file.startsWith("biome/plugins/")),
   },
   {
     args: () => ["run", "check:agent-files"],
@@ -72,6 +73,18 @@ export const CHECKS = [
     command: "pnpm",
     name: "package-imports",
     when: (files) => files.some((file) => file.endsWith("package.json") || CODE_AREAS.test(file)),
+  },
+  {
+    args: () => ["run", "check:input-safety"],
+    command: "pnpm",
+    name: "input-safety",
+    when: (files) =>
+      files.some(
+        (file) =>
+          file.startsWith("apps/api/src/") ||
+          file.startsWith("scripts/check/check-input-safety") ||
+          file.startsWith("biome/plugins/"),
+      ),
   },
   {
     args: () => ["run", "check:docs"],
@@ -120,6 +133,11 @@ export const CHECKS = [
 
 function isBiomeFile(file) {
   return BIOME_FILES.test(file);
+}
+
+/** Biome config or a GritQL plugin: a change can add errors to files the diff did not touch. */
+export function isBiomeRuleFile(file) {
+  return file === "biome.json" || file.startsWith("biome/plugins/");
 }
 
 /** The checks that apply to a set of changed paths. */
@@ -186,7 +204,8 @@ async function runCheck(check, files, base) {
     const biome = require.resolve("@biomejs/biome/bin/biome");
     const targets = files.filter(isBiomeFile);
     // One whole-project run is far faster than many batches once most of the repo changed.
-    if (targets.length > WHOLE_PROJECT_THRESHOLD) {
+    // A changed rule must also re-lint the files the diff did not touch.
+    if (targets.length > WHOLE_PROJECT_THRESHOLD || files.some(isBiomeRuleFile)) {
       ({ code, output } = await capture(process.execPath, [biome, "check", "--colors=off", "."]));
       return { check, code, output, seconds: (Date.now() - started) / 1000 };
     }
@@ -223,6 +242,72 @@ function devSessionRunning() {
   }
 }
 
+/**
+ * One `check:changed` run per checkout at a time.
+ *
+ * Several checks clean and rebuild package `dist` folders. Two runs in the same checkout (two
+ * agent sessions, each with a Stop hook, or a person and an agent) rebuilt the same `dist` at
+ * once and failed with ENOTEMPTY or "Cannot find module". A second run waits for the first. A
+ * lock whose process is gone is replaced.
+ */
+const LOCK_PATH = join(ROOT, ".temp", "check-changed.lock");
+const LOCK_WAIT_MS = 10 * 60_000;
+
+function lockHolderAlive() {
+  try {
+    const { pid } = JSON.parse(readFileSync(LOCK_PATH, "utf8"));
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return error?.code === "EPERM";
+  }
+}
+
+async function acquireRunLock() {
+  mkdirSync(join(ROOT, ".temp"), { recursive: true });
+  const started = Date.now();
+  let announced = false;
+  while (true) {
+    try {
+      const fd = openSync(LOCK_PATH, "wx");
+      writeSync(fd, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
+      closeSync(fd);
+      process.on("exit", releaseRunLock);
+      return;
+    } catch (error) {
+      if (error.code !== "EEXIST") {
+        throw error;
+      }
+    }
+    if (!lockHolderAlive()) {
+      releaseRunLock(true);
+      continue;
+    }
+    if (Date.now() - started > LOCK_WAIT_MS) {
+      throw new Error(`check:changed: another run still holds ${LOCK_PATH} after 10 minutes`);
+    }
+    if (!announced) {
+      console.log("check:changed: another run is in progress in this checkout, waiting for it");
+      announced = true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+  }
+}
+
+function releaseRunLock(force = false) {
+  try {
+    if (!force) {
+      const { pid } = JSON.parse(readFileSync(LOCK_PATH, "utf8"));
+      if (pid !== process.pid) {
+        return;
+      }
+    }
+    unlinkSync(LOCK_PATH);
+  } catch {
+    // Already gone.
+  }
+}
+
 function argValue(flag) {
   const index = process.argv.indexOf(flag);
   return index === -1 ? null : (process.argv[index + 1] ?? null);
@@ -247,6 +332,7 @@ async function main() {
     return;
   }
 
+  await acquireRunLock();
   const readOnly = plan.filter((check) => !check.mutatesDist);
   const mutating = plan.filter((check) => check.mutatesDist);
   const results = await Promise.all(readOnly.map((check) => runCheck(check, files, base)));
