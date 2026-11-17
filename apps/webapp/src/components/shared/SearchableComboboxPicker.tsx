@@ -165,7 +165,11 @@ export function SearchableComboboxPicker({
               type="scroll"
               w="100%"
             >
-              {renderOptions({ query: searchQuery, selectedValue: value })}
+              {/* Build options only while open. A JSX child expression runs on every render
+                  even though the closed dropdown is not mounted. */}
+              {combobox.dropdownOpened
+                ? renderOptions({ query: searchQuery, selectedValue: value })
+                : null}
             </ScrollArea.Autosize>
           </Combobox.Options>
         </Combobox.Dropdown>

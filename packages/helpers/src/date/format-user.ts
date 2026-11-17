@@ -29,6 +29,31 @@ type NumericDateOrder = "mdy" | "dmy" | "ymd";
 
 const CLOCK_PATTERN = /^(\d{1,2}):([0-5]\d)(?::([0-5]\d))?$/;
 
+/**
+ * Shared `Intl.DateTimeFormat` instances. Building one costs far more than formatting with it,
+ * and a timezone picker formats hundreds of clocks every second, so each locale and option set
+ * is built once. Formatters are stateless, so sharing them is safe. The cap keeps a runaway
+ * key space from growing without bound.
+ */
+const DATE_TIME_FORMAT_CACHE_LIMIT = 2000;
+const dateTimeFormats = new Map<string, Intl.DateTimeFormat>();
+
+export function cachedDateTimeFormat(
+  locale: string,
+  options: Intl.DateTimeFormatOptions,
+): Intl.DateTimeFormat {
+  const key = `${locale}|${JSON.stringify(options)}`;
+  let format = dateTimeFormats.get(key);
+  if (!format) {
+    if (dateTimeFormats.size >= DATE_TIME_FORMAT_CACHE_LIMIT) {
+      dateTimeFormats.clear();
+    }
+    format = new Intl.DateTimeFormat(locale, options);
+    dateTimeFormats.set(key, format);
+  }
+  return format;
+}
+
 function intlTag(ctx: DateTimeFormatContext): string {
   return buildIntlLocaleTag(ctx.locale, ctx.timeFormat);
 }
@@ -82,7 +107,7 @@ function formatNamedOverride(
   style: Exclude<UserDateStyle, "numeric">,
   order: NumericDateOrder,
 ): string {
-  const parts = new Intl.DateTimeFormat(intlTag(ctx), {
+  const parts = cachedDateTimeFormat(intlTag(ctx), {
     ...namedFieldOptions(style),
     ...zoneOptions(ctx),
   }).formatToParts(date);
@@ -127,13 +152,13 @@ export function formatUserDate(
 
   if (resolved.dateFormat === "locale") {
     if (style === "short" || style === "medium" || style === "long") {
-      return new Intl.DateTimeFormat(intlTag(resolved), {
+      return cachedDateTimeFormat(intlTag(resolved), {
         dateStyle: style,
         ...zoneOptions(resolved),
       }).format(date);
     }
 
-    return new Intl.DateTimeFormat(intlTag(resolved), {
+    return cachedDateTimeFormat(intlTag(resolved), {
       ...namedFieldOptions(style),
       ...zoneOptions(resolved),
     }).format(date);
@@ -163,7 +188,7 @@ export function formatUserDateField(
     ? { ...ctx, timeZone: options.timeZone }
     : ctx;
 
-  return new Intl.DateTimeFormat(intlTag(resolved), {
+  return cachedDateTimeFormat(intlTag(resolved), {
     ...DATE_FIELD_OPTIONS[field],
     ...zoneOptions(resolved),
   }).format(date);
@@ -182,7 +207,7 @@ function formatTimeOfDate(
     ...zoneOptions(ctx),
   };
 
-  return new Intl.DateTimeFormat(intlTag(ctx), timeOptions).format(date);
+  return cachedDateTimeFormat(intlTag(ctx), timeOptions).format(date);
 }
 
 /**
@@ -253,17 +278,15 @@ export function amPmLabelsForLocale(ctx: DateTimeFormatContext): { am: string; p
   const morning = new Date(Date.UTC(2026, 0, 1, 5, 0, 0));
   const afternoon = new Date(Date.UTC(2026, 0, 1, 17, 0, 0));
   const am =
-    partValue(new Intl.DateTimeFormat(tag, timeOptions).formatToParts(morning), "dayPeriod") ||
-    "AM";
+    partValue(cachedDateTimeFormat(tag, timeOptions).formatToParts(morning), "dayPeriod") || "AM";
   const pm =
-    partValue(new Intl.DateTimeFormat(tag, timeOptions).formatToParts(afternoon), "dayPeriod") ||
-    "PM";
+    partValue(cachedDateTimeFormat(tag, timeOptions).formatToParts(afternoon), "dayPeriod") || "PM";
   return { am, pm };
 }
 
 function localeYearlessDayjsToken(ctx: DateTimeFormatContext): string {
   const sample = new Date(2026, 10, 13);
-  const parts = new Intl.DateTimeFormat(intlTag(ctx), {
+  const parts = cachedDateTimeFormat(intlTag(ctx), {
     day: "numeric",
     month: "long",
   }).formatToParts(sample);

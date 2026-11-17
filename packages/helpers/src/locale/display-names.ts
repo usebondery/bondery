@@ -1,7 +1,8 @@
 import { getTimeZones } from "@vvo/tzdb";
 
 const regionNamesByLocale = new Map<string, Intl.DisplayNames>();
-const timeZoneNamesByLocale = new Map<string, Intl.DisplayNames>();
+/** `null` records a locale whose runtime rejects `type: "timeZone"`, so the throw happens once. */
+const timeZoneNamesByLocale = new Map<string, Intl.DisplayNames | null>();
 
 const CONTINENT_REGION_CODES: Readonly<Record<string, string>> = {
   Africa: "002",
@@ -70,21 +71,48 @@ export function displayContinentName(continent: string, locale: string): string 
   return displayRegionName(regionCode, locale) ?? continent;
 }
 
+/**
+ * `type: "timeZone"` is not part of ECMA-402, and current engines (V8, so Node and Chrome)
+ * reject it. The failure is cached so it costs one throw per locale, not one per timezone.
+ */
 function timeZoneDisplayNames(locale: string): Intl.DisplayNames | undefined {
-  const cached = timeZoneNamesByLocale.get(locale);
-  if (cached) {
-    return cached;
+  if (timeZoneNamesByLocale.has(locale)) {
+    return timeZoneNamesByLocale.get(locale) ?? undefined;
   }
 
+  let names: Intl.DisplayNames | null = null;
   try {
-    const names = new Intl.DisplayNames([locale], {
+    names = new Intl.DisplayNames([locale], {
       type: "timeZone" as Intl.DisplayNamesOptions["type"],
     });
-    timeZoneNamesByLocale.set(locale, names);
-    return names;
   } catch {
-    return undefined;
+    names = null;
   }
+  timeZoneNamesByLocale.set(locale, names);
+  return names ?? undefined;
+}
+
+let englishCityByZone: Map<string, string> | null = null;
+
+/**
+ * English city for every IANA name and alias, built once. `getTimeZones()` rebuilds the whole
+ * tzdb list on each call (about 30 ms), so calling it per timezone made one picker render take
+ * about 20 seconds.
+ */
+function englishCityIndex(): Map<string, string> {
+  if (!englishCityByZone) {
+    englishCityByZone = new Map();
+    for (const timezone of getTimeZones()) {
+      const city = timezone.mainCities[0] ?? timezone.name;
+      englishCityByZone.set(timezone.name, city);
+      for (const alias of timezone.group) {
+        if (!englishCityByZone.has(alias)) {
+          englishCityByZone.set(alias, city);
+        }
+      }
+    }
+  }
+  return englishCityByZone;
 }
 
 function englishTimeZoneCity(iana: string): string | undefined {
@@ -94,11 +122,7 @@ function englishTimeZoneCity(iana: string): string | undefined {
   if (iana === "UTC") {
     return "UTC";
   }
-
-  const match = getTimeZones().find(
-    (timezone) => timezone.name === iana || timezone.group.includes(iana),
-  );
-  return match?.mainCities[0] ?? match?.name;
+  return englishCityIndex().get(iana);
 }
 
 /**

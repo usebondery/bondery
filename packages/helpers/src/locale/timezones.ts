@@ -193,24 +193,36 @@ export interface GroupedTimezoneGroup {
   items: GroupedTimezoneItem[];
 }
 
+const cachedGroupedTimezones = new Map<string, GroupedTimezoneGroup[]>();
+
+/**
+ * Timezones grouped by continent, labels localized for `locale`. Built once per locale and
+ * shared: callers must not mutate the result.
+ */
 export function getGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
+  const cacheKey = locale ?? "";
+  const cached = cachedGroupedTimezones.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const result = buildGroupedTimezones(locale);
+  cachedGroupedTimezones.set(cacheKey, result);
+  return result;
+}
+
+function buildGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
   const grouped: { [continent: string]: GroupedTimezoneItem[] } = {};
 
   TIMEZONES_DATA.forEach((tz) => {
     if (!grouped[tz.continent]) {
       grouped[tz.continent] = [];
     }
+    const label = formatTimezoneLabel(tz, locale);
     grouped[tz.continent].push({
       flag: tz.flag,
-      label: formatTimezoneLabel(tz, locale),
+      label,
       offset: tz.offset,
-      searchHaystack: [
-        formatTimezoneLabel(tz, locale),
-        tz.city,
-        tz.country,
-        tz.countryCode,
-        tz.value,
-      ]
+      searchHaystack: [label, tz.city, tz.country, tz.countryCode, tz.value]
         .join(" ")
         .toLowerCase(),
       value: tz.value,

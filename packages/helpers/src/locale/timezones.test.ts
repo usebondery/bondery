@@ -41,6 +41,15 @@ describe("formatTimezoneLabel", () => {
 });
 
 describe("getGroupedTimezones", () => {
+  it("builds a fresh locale fast and reuses it", () => {
+    // Regression: each label rebuilt the whole tzdb list, so one build took about 20 seconds
+    // and the settings page froze. The budget is generous so a slow CI runner still passes.
+    const started = performance.now();
+    const first = getGroupedTimezones("fr-FR");
+    assert.ok(performance.now() - started < 2000, "first build took too long");
+    assert.equal(getGroupedTimezones("fr-FR"), first);
+  });
+
   it("localizes continent group labels", () => {
     const europe = getGroupedTimezones("de-DE").find((group) => group.group === "Europa");
     assert.ok(europe);
