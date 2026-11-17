@@ -25,7 +25,7 @@ describe("resolveLocaleFromAcceptLanguageHeader", () => {
   });
 
   it("falls back to en for unsupported locale", () => {
-    assert.equal(resolveLocaleFromAcceptLanguageHeader("fr-FR, en"), "en");
+    assert.equal(resolveLocaleFromAcceptLanguageHeader("ja-JP, en"), "en");
   });
 });
 
