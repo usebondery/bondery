@@ -18,3 +18,9 @@ Put scratch files in `.temp/` (gitignored): logs, throwaway scripts, dumps. Neve
 Fix the root cause. Do not ship a stopgap and mention it in the report. Reproduce a failure in isolation, change one variable at a time, and verify through the real path (the supervisor or turbo, not a manual run).
 
 `scripts/check/check-no-workarounds.mjs` enforces this: pre-commit, commit-msg and CI reject "workaround", "hack", "kludge", "band-aid", "for now" and "temporary fix" in added code and commit messages. If a stopgap is truly unavoidable, open an issue and mark the line `allow-workaround(#<issue>)`. The issue owns removing it.
+
+## The loop: write, check, fix, report
+
+After every change, run `pnpm run check:changed` before you report. It runs only the checks your diff can break (Biome, stopgap wording, types for affected packages, docs, i18n, OpenAPI, API errors, env) in parallel, in well under a minute when cached. Fix failures at the cause, re-run, and report only when it passes. In Claude Code a Stop hook enforces this. CI runs the full `pnpm run check`.
+
+Prefer a Biome rule for any code-structure rule (native rules first, GritQL plugins for custom patterns). Use a script only for what Biome cannot do: comment wording, rules scoped to the diff, commit messages and cross-file consistency.

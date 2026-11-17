@@ -14,6 +14,7 @@
  * Usage:
  *   node scripts/check/check-no-workarounds.mjs --staged            # pre-commit
  *   node scripts/check/check-no-workarounds.mjs --base origin/main  # CI and `pnpm run check`
+ *   node scripts/check/check-no-workarounds.mjs --worktree origin/main  # committed, staged, unstaged and new files
  *   node scripts/check/check-no-workarounds.mjs --commit-msg <file> # commit-msg hook
  *   node scripts/check/check-no-workarounds.mjs --commits origin/main..HEAD
  */
@@ -123,6 +124,18 @@ function git(args) {
   return execFileSync("git", args, { cwd: ROOT, encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
 }
 
+/** Untracked files count as fully added, so a brand-new file is scanned too. */
+function untrackedAddedLines() {
+  const names = git(["ls-files", "--others", "--exclude-standard"])
+    .split(String.fromCharCode(10))
+    .filter(Boolean);
+  return names.filter(isCheckedPath).flatMap((path) =>
+    readFileSync(join(ROOT, path), "utf8")
+      .split(String.fromCharCode(10))
+      .map((text, index) => ({ line: index + 1, path, text })),
+  );
+}
+
 function argValue(flag) {
   const index = process.argv.indexOf(flag);
   return index === -1 ? null : (process.argv[index + 1] ?? null);
@@ -134,6 +147,7 @@ function main() {
   const commitMsgFile = argValue("--commit-msg");
   const commitRange = argValue("--commits");
   const baseRef = argValue("--base");
+  const worktreeBase = argValue("--worktree");
 
   if (commitMsgFile) {
     check.violations.push(...findViolations(messageLines(readFileSync(commitMsgFile, "utf8"))));
@@ -152,6 +166,16 @@ function main() {
       }
     }
     check.ok(`commits ${commitRange}`);
+    return;
+  }
+
+  if (worktreeBase) {
+    const mergeBase = git(["merge-base", "HEAD", worktreeBase]).trim();
+    const diff = git(["diff", "-U0", "--no-color", mergeBase]);
+    for (const message of findViolations([...parseAddedLines(diff), ...untrackedAddedLines()])) {
+      check.add(message);
+    }
+    check.ok(`working tree against ${worktreeBase}`);
     return;
   }
 

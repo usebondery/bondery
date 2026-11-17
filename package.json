@@ -63,6 +63,7 @@
     "check:api-errors:catalog": "node scripts/check/check-api-errors-catalog.mjs",
     "check:api-errors:client-display": "node scripts/check/check-api-errors-client-display.mjs",
     "check:api-errors:translations": "node scripts/check/check-api-errors-translations.mjs",
+    "check:changed": "node scripts/check/check-changed.mjs",
     "check:claude-plugin": "node scripts/check/check-claude-plugin.mjs",
     "check:contracts": "pnpm --filter @bondery/schemas run check:contracts",
     "check:dev-hostnames": "node scripts/check/check-dev-hostnames.mjs",
