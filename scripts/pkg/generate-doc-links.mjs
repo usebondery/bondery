@@ -1,5 +1,5 @@
 // Scans docs markdown frontmatter and generates the in-app doc link registry.
-import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
@@ -103,8 +103,14 @@ ${lines.join("\n")}
 export type DocId = keyof typeof DOC_LINKS;
 `;
 
-  writeFileSync(OUTPUT_FILE, output, "utf8");
-  console.log(`Wrote ${sortedIds.length} doc link(s) to ${relative(REPO_ROOT, OUTPUT_FILE)}`);
+  // Write only on a real change. This file is helpers source: touching it unchanged made every
+  // docs check rebuild helpers, every package that depends on it, and restart the dev API.
+  if (existsSync(OUTPUT_FILE) && readFileSync(OUTPUT_FILE, "utf8") === output) {
+    console.log(`Doc links unchanged (${sortedIds.length}) in ${relative(REPO_ROOT, OUTPUT_FILE)}`);
+  } else {
+    writeFileSync(OUTPUT_FILE, output, "utf8");
+    console.log(`Wrote ${sortedIds.length} doc link(s) to ${relative(REPO_ROOT, OUTPUT_FILE)}`);
+  }
 }
 
 main();
