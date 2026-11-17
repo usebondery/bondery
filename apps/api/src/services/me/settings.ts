@@ -73,8 +73,8 @@ export async function ensureDefaultSettings(ctx: DomainContext) {
         userId: user.id,
       },
     });
-  } catch {
-    throw internal("settings_failed_to_create_default_settings");
+  } catch (error) {
+    throw internal("settings_failed_to_create_default_settings", error);
   }
 }
 

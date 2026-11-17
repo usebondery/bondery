@@ -240,8 +240,8 @@ export async function shareContact(
         copy,
       }),
     ));
-  } catch {
-    throw internal("contact_share_email_render_failed");
+  } catch (error) {
+    throw internal("contact_share_email_render_failed", error);
   }
 
   try {
@@ -254,8 +254,8 @@ export async function shareContact(
       text,
       to: recipientEmails.join(", "),
     });
-  } catch {
-    throw internal("contact_share_email_send_failed");
+  } catch (error) {
+    throw internal("contact_share_email_send_failed", error);
   }
 
   return { success: true };

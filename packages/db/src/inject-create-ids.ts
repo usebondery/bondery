@@ -11,7 +11,16 @@ const RELATION_KEYS = new Set([
   "updateMany",
 ]);
 
+/**
+ * True for rows of a model that has no `id` column, recognised by their fields. Prisma
+ * rejects an unknown `id`, so every such model that is written through `create`,
+ * `createMany` or `upsert` needs a rule here.
+ */
 function usesCompositePrimaryKey(record: Record<string, unknown>): boolean {
+  // StripeWebhookEvent: keyed by `eventId`.
+  if ("eventId" in record && "eventType" in record) {
+    return true;
+  }
   if ("interactionId" in record && "personId" in record) {
     return true;
   }

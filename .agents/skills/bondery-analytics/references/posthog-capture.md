@@ -47,7 +47,7 @@ captureServerEvent(userId, "signup_flow:user_create", {
 
 For Fastify routes without Next `after()`:
 
-- Instantiate `PostHog` from `posthog-node` with explicit `flush()` before handler returns, or
+- Use the shared client from `apps/api/src/services/analytics/posthog-client.ts` (`getPosthogClient()`, `null` without a key or in tests) with an explicit `flush()` before the handler returns. Do not construct another `PostHog` instance, or
 - Capture from webapp server actions / route handlers that already have session context
 
 Prefer **one authoritative source** per event — do not duplicate client + server for the same action.

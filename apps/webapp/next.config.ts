@@ -38,6 +38,7 @@ const nextConfig: NextConfig = {
     "*.usebondery.test",
   ],
   experimental: {
+    agentUpgrade: "security",
     optimizePackageImports: [
       "@tabler/icons-react",
       "@bondery/mantine-next",

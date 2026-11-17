@@ -21,7 +21,7 @@ Router and contract enforcer for **Plausible** (marketing) and **PostHog** (prod
 - Wiring Plausible (`apps/website`) or PostHog (`apps/webapp`, API, future mobile)
 - Server vs client capture, `distinct_id`, identity linking (`identify` / `reset`)
 - Analytics env vars, runtime config, CSP for analytics scripts
-- PostHog session replay, feature flags, or logs (when adopted)
+- PostHog API logs and error tracking (enabled), session replay or feature flags (when adopted)
 - Debugging events not appearing (ad blockers, missing env, dev vs prod)
 
 ## When not to use
@@ -86,7 +86,7 @@ PostHog’s generic advice is one project for website + app. **Bondery intention
 | Where / how to capture | [references/posthog-capture.md](references/posthog-capture.md) |
 | Identity, PII, internal users | [references/identity-and-privacy.md](references/identity-and-privacy.md) |
 | Env vars and runtime config | [references/env-and-runtime-config.md](references/env-and-runtime-config.md) |
-| Replay, flags, logs (future) | [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
+| API logs and error tracking (enabled); replay, flags (future) | [references/posthog-flags-replay-logs.md](references/posthog-flags-replay-logs.md) |
 | Prove events work | [references/verification.md](references/verification.md) |
 
 Full index: [references/README.md](references/README.md).

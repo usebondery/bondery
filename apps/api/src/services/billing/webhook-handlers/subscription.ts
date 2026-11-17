@@ -101,7 +101,7 @@ export async function upsertSubscriptionFromStripe(
     return;
   }
 
-  await upsertSubscription(
+  const result = await upsertSubscription(
     userId,
     stripeCustomerId,
     subscription.id,
@@ -111,6 +111,16 @@ export async function upsertSubscriptionFromStripe(
     cancelAtPeriodEnd,
     mirror,
   );
+
+  if (result === "user_missing") {
+    // The account was deleted. Stripe would retry a failure for days and it could never
+    // succeed, so the event is acknowledged. The warning is the record of it.
+    log?.warn(
+      { stripeSubscriptionId: subscription.id, userId },
+      "stripe-webhook: user no longer exists — skipping subscription upsert",
+    );
+    return;
+  }
 
   if (options?.eventType === "customer.subscription.created") {
     void captureSubscriptionCreate(userId, subscription, mirror);

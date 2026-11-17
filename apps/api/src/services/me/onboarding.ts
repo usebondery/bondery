@@ -42,8 +42,8 @@ export async function updateImportFollowup(
       },
       where: { userId: user.id },
     });
-  } catch {
-    throw internal("onboarding_failed_to_update_import_follow_up");
+  } catch (error) {
+    throw internal("onboarding_failed_to_update_import_follow_up", error);
   }
 
   return { success: true };
@@ -58,8 +58,8 @@ export async function dismissGettingStarted(ctx: DomainContext): Promise<{ succe
       data: { gettingStartedDismissedAt: new Date() },
       where: { userId: user.id },
     });
-  } catch {
-    throw internal("onboarding_failed_to_dismiss_getting_started");
+  } catch (error) {
+    throw internal("onboarding_failed_to_dismiss_getting_started", error);
   }
 
   return { success: true };

@@ -1,16 +1,5 @@
-import { PostHog } from "posthog-node";
 import type { CompactedCspReport } from "../../lib/platform/security/csp-report.js";
-
-const posthogKey = process.env.BONDERY_PUBLIC_POSTHOG_KEY ?? "";
-const posthogHost = process.env.BONDERY_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
-
-const posthogClient = posthogKey
-  ? new PostHog(posthogKey, {
-      flushAt: 1,
-      flushInterval: 0,
-      host: posthogHost,
-    })
-  : null;
+import { getPosthogClient } from "./posthog-client.js";
 
 /**
  * Forwards one compacted CSP report to PostHog.
@@ -23,6 +12,7 @@ const posthogClient = posthogKey
  * error, and the endpoint returns `204` either way.
  */
 export async function captureCspReport(report: CompactedCspReport): Promise<void> {
+  const posthogClient = getPosthogClient();
   if (!posthogClient) {
     return;
   }

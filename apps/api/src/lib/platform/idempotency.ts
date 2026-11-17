@@ -86,7 +86,7 @@ export function registerIdempotency(fastify: FastifyInstance): void {
       row = await claimIdempotencyKey(userId, decision.key, requestHash);
     } catch (error) {
       request.log.error({ err: error }, "idempotency claim failed");
-      throw internal("internal_server_error");
+      throw internal("internal_server_error", error);
     }
 
     if (row.outcome === "claimed") {

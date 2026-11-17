@@ -112,7 +112,7 @@ export async function subscriptionCheckoutRoutes(fastify: FastifyInstance): Prom
         return reply.send({ clientSecret: session.client_secret });
       } catch (err) {
         request.log.error({ err, userId: user.id }, "Failed to create Stripe checkout session");
-        throw internal("failed_to_create_checkout_session");
+        throw internal("failed_to_create_checkout_session", err);
       }
     },
   );

@@ -27,9 +27,10 @@ const subprocessors = [
   {
     location: "EU",
     name: "PostHog",
-    notes: "",
+    notes:
+      "Error monitoring receives server error and warning logs with a pseudonymous user identifier. It does not receive contact content.",
     privacy: "https://posthog.com/privacy",
-    useCase: "Product analytics",
+    useCase: "Product analytics and error monitoring",
   },
   {
     location: "EU",

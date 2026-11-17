@@ -36,6 +36,7 @@ import { IDEMPOTENCY_REPLAYED_HEADER } from "./lib/platform/idempotency-policy.j
 import logger from "./lib/platform/logger.js";
 import { swaggerOpenApiConfig } from "./openapi/swagger-config.js";
 import { registerAllRoutes } from "./routes/register-all.js";
+import { captureServerException } from "./services/analytics/capture-server-exception.js";
 
 const require = createRequire(import.meta.url);
 
@@ -111,6 +112,17 @@ export async function buildApp(): Promise<AppFastifyInstance> {
       error as Parameters<typeof mapErrorToResponse>[0],
       request,
     );
+
+    // `mapErrorToResponse` already logged a 5xx. A log line notifies nobody, so a failed
+    // request also becomes an Error tracking issue. 4xx responses are ignored.
+    captureServerException(error, {
+      code: body.error.code,
+      method: request.method,
+      requestId: request.id,
+      route: request.routeOptions?.url ?? "unmatched",
+      statusCode,
+    });
+
     return reply.status(statusCode).send(body);
   });
 

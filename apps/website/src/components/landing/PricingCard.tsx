@@ -1,83 +1,84 @@
-import {
-  Box,
-  Card,
-  CardSection,
-  Divider,
-  Flex,
-  Group,
-  Stack,
-  Text,
-  ThemeIcon,
-  Title,
-} from "@mantine/core";
+import { Card, Divider, Group, List, ListItem, Text, ThemeIcon } from "@mantine/core";
+import { IconCheck } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 
-type PricingFeature = {
-  icon: ReactNode;
-  title: string;
-  description: string;
-};
-
 type PricingCardProps = {
-  title: string;
-  description: string;
-  features: PricingFeature[];
+  name: string;
+  tagline: string;
+  price: string;
+  /** Billing period shown next to the price, for example "/month". */
+  period?: string;
+  features: readonly string[];
   action: ReactNode;
-  price?: string;
+  /** Solid primary-colour border. No badge, no glow. */
+  featured?: boolean;
 };
 
-export function PricingCard({ title, description, features, action, price }: PricingCardProps) {
+/**
+ * One pricing plan: quiet plan name, large tabular price, divider, compact check list, CTA.
+ */
+export function PricingCard({
+  name,
+  tagline,
+  price,
+  period,
+  features,
+  action,
+  featured = false,
+}: PricingCardProps) {
   return (
     <Card
-      h="100%"
-      maw={380}
-      miw={{ base: "100%", sm: 350 }}
+      className="flex h-full flex-col transition-shadow duration-300 hover:shadow-lg"
+      p="xl"
       radius="lg"
-      shadow="lg"
       style={{
-        backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
-        display: "flex",
-        flexDirection: "column",
+        backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-7))",
+        ...(featured ? { border: "1px solid var(--mantine-primary-color-filled)" } : {}),
       }}
       withBorder
     >
-      <Flex align="end" gap="xs" mb="sm">
-        <Title fw="bold" fz="2rem" order={2}>
-          {title}
-        </Title>
-        {price ? (
-          <Text c="dimmed" fz="sm" mb={6}>
-            {price}
+      <Text c="dimmed" fw={500} size="sm">
+        {name}
+      </Text>
+
+      <Group align="baseline" gap={6} mt="xs" wrap="nowrap">
+        <Text
+          c="light-dark(var(--mantine-color-black), var(--mantine-color-white))"
+          className="text-5xl! leading-none! tracking-tight"
+          fw={700}
+          style={{ fontVariantNumeric: "tabular-nums" }}
+        >
+          {price}
+        </Text>
+        {period ? (
+          <Text c="dimmed" size="sm">
+            {period}
           </Text>
         ) : null}
-      </Flex>
-      <Text c="dimmed">{description}</Text>
+      </Group>
 
-      <CardSection my="lg">
-        <Divider />
-      </CardSection>
+      <Text c="dimmed" mt="sm" size="sm">
+        {tagline}
+      </Text>
 
-      <Stack style={{ flex: 1 }}>
+      <Divider my="xl" />
+
+      <List
+        center
+        className="flex-1"
+        icon={
+          <ThemeIcon radius="xl" size={20} variant="light">
+            <IconCheck size={12} stroke={2.5} />
+          </ThemeIcon>
+        }
+        spacing="sm"
+      >
         {features.map((feature) => (
-          <Group align="start" gap="xs" key={feature.title}>
-            <ThemeIcon size="xl" variant="default">
-              {feature.icon}
-            </ThemeIcon>
-            <Stack flex={1} gap={0}>
-              <Text fw={500}>{feature.title}</Text>
-              <Text c="dimmed" fz="sm">
-                {feature.description}
-              </Text>
-            </Stack>
-          </Group>
+          <ListItem key={feature}>{feature}</ListItem>
         ))}
-      </Stack>
+      </List>
 
-      <CardSection my="lg">
-        <Divider />
-      </CardSection>
-
-      <Box mt="auto">{action}</Box>
+      <div className="mt-8">{action}</div>
     </Card>
   );
 }

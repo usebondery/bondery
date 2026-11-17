@@ -73,7 +73,15 @@ export async function handleTrialWillEnd(
     log,
   );
 
-  await markTrialEndingEmailSent(subscription.id);
+  const marked = await markTrialEndingEmailSent(subscription.id);
+  if (marked === 0) {
+    // No subscription row to mark, so a redelivery of this event would send the email again.
+    log?.warn(
+      { stripeSubscriptionId: subscription.id },
+      "stripe-webhook: trial-ending email sent but no subscription row to mark",
+    );
+    return;
+  }
   log?.info(
     { email, stripeSubscriptionId: subscription.id },
     "stripe-webhook: trial-ending email sent",

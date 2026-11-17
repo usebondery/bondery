@@ -44,4 +44,12 @@ describe("injectCreateIds", () => {
 
     assert.equal("id" in result, false);
   });
+
+  it("does not inject id for a Stripe webhook event, which is keyed by eventId", () => {
+    // Regression: an injected `id` made every Stripe webhook answer 500.
+    const row = { eventId: "evt_123", eventType: "invoice.paid" };
+
+    assert.deepEqual(injectCreateIds(row), row);
+    assert.deepEqual(injectCreateIds([row]), [row]);
+  });
 });

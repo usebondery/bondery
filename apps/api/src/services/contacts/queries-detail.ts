@@ -358,7 +358,7 @@ export async function getContactVCardExport(
     });
   } catch (vcardError) {
     ctx.log?.error({ vcardError }, "Failed to generate vCard");
-    throw internal("failed_to_generate_vcard");
+    throw internal("failed_to_generate_vcard", vcardError);
   }
 
   const firstName = mappedContact.firstName || "contact";

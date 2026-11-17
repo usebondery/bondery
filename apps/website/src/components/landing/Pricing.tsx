@@ -1,124 +1,67 @@
 import { ButtonLink } from "@bondery/mantine-next";
-import { Container, Group, Stack, Text, Title } from "@mantine/core";
-import {
-  IconCalendar,
-  IconMessageChatbot,
-  IconNetwork,
-  IconTimelineEvent,
-  IconTopologyStar,
-  IconUsers,
-} from "@tabler/icons-react";
+import { Container } from "@mantine/core";
 import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
+import { Reveal } from "./features/Reveal";
+import { SectionHeader } from "./features/SectionHeader";
 import { PricingCard } from "./PricingCard";
 
+const FREE_FEATURES = [
+  "Unlimited contacts",
+  "Interaction history",
+  "Birthday and date reminders",
+] as const;
+
+const PREMIUM_FEATURES = [
+  "AI Assistant",
+  "Smart search",
+  "Writing copilot",
+  "Priority support",
+] as const;
+
 export function Pricing() {
-  const freeFeatures = [
-    {
-      description: "Create unlimited amount of contacts",
-      icon: <IconUsers />,
-      title: "Contact management",
-    },
-    {
-      description: "Track interactions with your contacts",
-      icon: <IconTimelineEvent />,
-      title: "Log activities",
-    },
-    {
-      description: "Never miss birthdays or important dates",
-      icon: <IconCalendar />,
-      title: "Reminders",
-    },
-  ];
-
-  const premiumFeatures = [
-    {
-      description: "Unlimited AI chat to search, write, and manage contacts",
-      icon: <IconMessageChatbot />,
-      title: "AI Assistant",
-    },
-    {
-      description: "Find the right people with a text query",
-      icon: <IconNetwork />,
-      title: "Smart search",
-    },
-    {
-      description: "Generate personalized outreach drafts",
-      icon: <IconTopologyStar />,
-      title: "Writing copilot",
-    },
-    {
-      description: "Priority of feature requests and questions",
-      icon: <IconUsers />,
-      title: "Priority support",
-    },
-  ];
-
   return (
     <Container
       bg="var(--mantine-color-body)"
       fluid
       id="pricing"
+      px="md"
       py={{
-        base: "calc(var(--mantine-spacing-lg) * 1)",
+        base: "calc(var(--mantine-spacing-lg) * 2)",
         lg: "calc(var(--mantine-spacing-lg) * 3)",
-        xs: "calc(var(--mantine-spacing-lg) * 2)",
       }}
     >
-      <Container size="md">
-        <Stack align="center" gap="xs" mb="xl">
-          <Title className="text-5xl!" fw={"bold"} order={2} ta="center">
-            Simple, Transparent Pricing
-          </Title>
-          <Text c="dimmed" size="xl" style={{ textWrap: "balance" }} ta="center">
-            Start building your network today, completely free.
-          </Text>
-        </Stack>
-      </Container>
+      <Reveal>
+        <SectionHeader title="Simple pricing" />
+      </Reveal>
 
-      <Group
-        align="stretch"
-        gap="xl"
-        justify="center"
-        mt={{
-          base: "calc(var(--mantine-spacing-lg) * 2)",
-          lg: "calc(var(--mantine-spacing-lg) * 3)",
-        }}
-      >
-        <PricingCard
-          action={
-            <ButtonLink
-              fullWidth
-              href={hrefWebappLogin()}
-              leftSection={<IconTopologyStar size={18} />}
-              size="lg"
-              variant="primary"
-            >
-              Get started
-            </ButtonLink>
-          }
-          description="All the core features needed."
-          features={freeFeatures}
-          title="Free"
-        />
-
-        <PricingCard
-          action={
-            <ButtonLink
-              fullWidth
-              href={hrefWebappLogin()}
-              leftSection={<IconTopologyStar size={18} />}
-              size="lg"
-              variant="primary"
-            >
-              Get started
-            </ButtonLink>
-          }
-          description="Advanced features for power users."
-          features={premiumFeatures}
-          price="$10 USD p.m."
-          title="Premium"
-        />
-      </Group>
+      <Reveal className="mx-auto mt-12 w-full max-w-[880px] md:mt-16" delay={0.1}>
+        <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2">
+          <PricingCard
+            action={
+              <ButtonLink fullWidth href={hrefWebappLogin()} size="md" variant="default">
+                Get started
+              </ButtonLink>
+            }
+            features={FREE_FEATURES}
+            name="Free"
+            price="$0"
+            tagline="All the core features."
+          />
+          <PricingCard
+            action={
+              <ButtonLink fullWidth href={hrefWebappLogin()} size="md" variant="primary">
+                Get started
+              </ButtonLink>
+            }
+            featured
+            features={PREMIUM_FEATURES}
+            name="Premium"
+            period="/month"
+            price="$10"
+            tagline="For power users."
+          />
+        </div>
+      </Reveal>
     </Container>
   );
 }

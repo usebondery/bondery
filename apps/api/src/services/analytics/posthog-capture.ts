@@ -1,17 +1,6 @@
-import { PostHog } from "posthog-node";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
-
-const posthogKey = process.env.BONDERY_PUBLIC_POSTHOG_KEY ?? "";
-const posthogHost = process.env.BONDERY_PUBLIC_POSTHOG_HOST ?? "https://eu.i.posthog.com";
-
-const posthogClient = posthogKey
-  ? new PostHog(posthogKey, {
-      flushAt: 1,
-      flushInterval: 0,
-      host: posthogHost,
-    })
-  : null;
+import { getPosthogClient } from "./posthog-client.js";
 
 const analyticsEnabledCache = new Map<string, { enabled: boolean; expiresAt: number }>();
 const ANALYTICS_CACHE_TTL_MS = 60_000;
@@ -50,6 +39,7 @@ export async function captureProductEvent(
   event: string,
   properties?: Record<string, unknown>,
 ): Promise<void> {
+  const posthogClient = getPosthogClient();
   if (!posthogClient) {
     return;
   }

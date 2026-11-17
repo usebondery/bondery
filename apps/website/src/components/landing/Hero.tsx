@@ -28,27 +28,25 @@ export function Hero() {
           <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-12 xl:gap-14">
             <Stack className="items-center lg:items-stretch" gap="lg">
               <Title
-                className="text-4xl font-extrabold leading-tight md:text-5xl lg:text-6xl"
+                className="text-center! text-4xl font-extrabold leading-tight md:text-5xl lg:text-left! lg:text-6xl"
                 order={1}
-                ta={{ base: "center", lg: "left" }}
               >
-                Build stronger bonds that grow your network
+                Everyone you know, in one place your AI can use
               </Title>
 
               <Text
                 c="var(--mantine-color-text)"
+                className="mx-auto! text-center! lg:mx-0! lg:text-left!"
                 maw={540}
                 size="lg"
-                ta={{ base: "center", lg: "left" }}
               >
-                Bondery is an open-source personal CRM that puts everyone you know in one place.
-                Stay in touch on purpose: context, last conversation, reminders to reach out.
+                Bondery merges your contacts, keeps them in sync, and reminds you to stay in touch.
               </Text>
 
               <Flex
                 align="stretch"
+                className="justify-center! lg:justify-start!"
                 gap="md"
-                justify={{ base: "center", lg: "flex-start" }}
                 mt="md"
                 w="100%"
                 wrap="wrap"
