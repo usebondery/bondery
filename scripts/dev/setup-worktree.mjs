@@ -4,23 +4,26 @@
  * (folder-open task) and a plain terminal (`pnpm run setup:worktree`) all call this one script.
  *
  * Flags:
- *   --if-needed  do nothing when dependencies and env files already exist (fast, for hooks)
+ *   --if-needed  skip setup when dependencies and env files exist (fast, for hooks); still seed a
+ *                missing CodeGraph index
  *
  * Env files are gitignored, so a fresh worktree starts without any. This script:
  *   1. installs dependencies
  *   2. seeds root `.env.local` from the primary checkout (keeps locally invented secrets)
  *   3. pulls the shared secrets from Infisical over it (`pnpm run env:pull`)
  *   4. generates the per-app env files (`pnpm run env`)
- *   5. builds the workspace packages so typecheck and the pre-commit hook work
- *   6. seeds the CodeGraph index from the primary checkout, when that checkout has one
+ *   5. seeds the CodeGraph index from the primary checkout, when that checkout has one
+ *   6. builds the workspace packages so typecheck and the pre-commit hook work
  *
- * Steps 3 to 5 warn instead of failing, so a missing `infisical login` never blocks the worktree.
+ * Steps 3 to 6 warn instead of failing, so a missing `infisical login` or CodeGraph CLI never
+ * blocks the worktree.
  * Run it by hand with `pnpm run setup:worktree`.
  */
 
 import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { backup, DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -42,10 +45,48 @@ function findPrimaryRoot() {
     encoding: "utf-8",
   });
   const commonDir = result.status === 0 ? result.stdout.trim() : "";
-  return commonDir.endsWith(".git") ? dirname(commonDir) : null;
+  return commonDir.endsWith(".git") ? resolve(dirname(commonDir)) : null;
 }
 
 const primaryRoot = findPrimaryRoot();
+
+const primaryIndex = primaryRoot ? join(primaryRoot, ".codegraph", "codegraph.db") : null;
+const worktreeIndex = join(repoRoot, ".codegraph", "codegraph.db");
+
+/**
+ * Give this worktree the CodeGraph index of the primary checkout.
+ *
+ * The database is gitignored, so a new worktree has `.codegraph/` without it and CodeGraph reports
+ * "not indexed". Copying and syncing takes about a minute; a fresh index takes far longer. Only an
+ * index the developer already chose to build is copied. The copy uses SQLite's backup API, not a
+ * file copy, because the primary database is live (WAL mode) and a raw copy can be inconsistent.
+ */
+async function seedCodeGraph() {
+  if (existsSync(worktreeIndex)) {
+    console.log("CodeGraph index already present");
+    return;
+  }
+  if (!primaryIndex || primaryRoot === repoRoot || !existsSync(primaryIndex)) {
+    console.log("Primary checkout has no CodeGraph index; skipping");
+    return;
+  }
+  mkdirSync(dirname(worktreeIndex), { recursive: true });
+  const source = new DatabaseSync(primaryIndex, { readOnly: true });
+  try {
+    await backup(source, worktreeIndex);
+  } finally {
+    source.close();
+  }
+  console.log(`Copied the CodeGraph index from ${primaryRoot}`);
+  run("codegraph", ["sync", "."], { optional: true });
+}
+
+const needsCodeGraph = Boolean(
+  primaryIndex &&
+    primaryRoot !== repoRoot &&
+    existsSync(primaryIndex) &&
+    !existsSync(worktreeIndex),
+);
 
 if (
   ifNeeded &&
@@ -53,6 +94,11 @@ if (
   existsSync(join(repoRoot, ".env.local")) &&
   existsSync(join(repoRoot, "apps/api/.env.development.local"))
 ) {
+  // Dependencies and env files exist. A worktree set up before CodeGraph seeding still needs it.
+  if (needsCodeGraph) {
+    step("Seed CodeGraph index");
+    await seedCodeGraph();
+  }
   process.exit(0);
 }
 
@@ -140,20 +186,7 @@ step("Generate per-app env files");
 run("pnpm", ["run", "env"], { optional: true });
 
 step("Seed CodeGraph index");
-// The database is gitignored, so a new worktree has `.codegraph/` without it and CodeGraph reports
-// "not indexed". Copying the primary index and syncing takes about a minute; a fresh index takes
-// far longer. Only an index the developer already chose to build is copied.
-const primaryIndex = primaryRoot ? join(primaryRoot, ".codegraph", "codegraph.db") : null;
-const worktreeIndex = join(repoRoot, ".codegraph", "codegraph.db");
-if (existsSync(worktreeIndex)) {
-  console.log("CodeGraph index already present");
-} else if (primaryIndex && primaryRoot !== repoRoot && existsSync(primaryIndex)) {
-  mkdirSync(dirname(worktreeIndex), { recursive: true });
-  copyFileSync(primaryIndex, worktreeIndex);
-  run("codegraph", ["sync", "."], { optional: true });
-} else {
-  console.log("Primary checkout has no CodeGraph index; skipping");
-}
+await seedCodeGraph();
 
 step("Build workspace packages");
 run("pnpm", ["turbo", "run", "build", "--filter=./packages/*"], {
