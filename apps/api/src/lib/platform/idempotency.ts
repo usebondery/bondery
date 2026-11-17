@@ -178,9 +178,20 @@ function classifyRequest(request: FastifyRequest): ClassifiedRequest {
   return { key: header, kind: "apply", userId: request.authUser.id };
 }
 
+/**
+ * Multipart bodies are not hashed. `@fastify/multipart` reads `request.raw` itself instead of
+ * the preParsing payload, so a tee on that stream has no reader: it paused the socket at 16 KB
+ * and every larger upload hung. The handler streams the parts after the claim, so a hash could
+ * never be ready in time anyway; the key alone identifies a multipart request.
+ */
 function shouldHashBody(request: FastifyRequest): boolean {
   const header = request.headers[IDEMPOTENCY_KEY_HEADER.toLowerCase()];
-  return header !== undefined && isIdempotencyMethod(request.method);
+  const contentType = request.headers["content-type"] ?? "";
+  return (
+    header !== undefined &&
+    isIdempotencyMethod(request.method) &&
+    !contentType.toLowerCase().startsWith("multipart/")
+  );
 }
 
 function sendOmittedReplay(request: FastifyRequest, reply: FastifyReply) {
