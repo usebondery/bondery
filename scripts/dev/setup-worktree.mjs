@@ -18,7 +18,7 @@
  */
 
 import { spawnSync } from "node:child_process";
-import { copyFileSync, existsSync } from "node:fs";
+import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -93,10 +93,47 @@ if (existsSync(targetEnv)) {
   console.log("No primary .env.local to copy; env:pull will create one from the example");
 }
 
+/**
+ * Keys the developer sets for local dev that Infisical holds production values for. env:pull would
+ * overwrite them (the real SMTP host breaks the API's Mailpit-only dev check and could send real
+ * email), so they are read before the pull and written back after it.
+ */
+const LOCAL_ONLY_KEYS = ["BONDERY_PRIVATE_EMAIL_HOST", "BONDERY_PRIVATE_EMAIL_PORT"];
+
+function readLocalOnlyValues() {
+  if (!existsSync(targetEnv)) {
+    return {};
+  }
+  const text = readFileSync(targetEnv, "utf-8");
+  const values = {};
+  for (const key of LOCAL_ONLY_KEYS) {
+    const match = text.match(new RegExp(`^${key}=(.*)$`, "m"));
+    if (match) {
+      values[key] = match[1];
+    }
+  }
+  return values;
+}
+
+function restoreLocalOnlyValues(values) {
+  if (!existsSync(targetEnv) || Object.keys(values).length === 0) {
+    return;
+  }
+  let text = readFileSync(targetEnv, "utf-8");
+  for (const [key, value] of Object.entries(values)) {
+    text = text.replace(new RegExp(`^${key}=.*$`, "m"), () => `${key}=${value}`);
+  }
+  writeFileSync(targetEnv, text);
+  console.log(`Kept local values for ${Object.keys(values).join(", ")}`);
+}
+
 step("Pull shared secrets from Infisical");
+const localOnlyValues = readLocalOnlyValues();
 if (!run("pnpm", ["run", "env:pull"], { optional: true }) && !existsSync(targetEnv)) {
   warnings.push("No .env.local. Run `infisical login`, then `pnpm run env:pull`.");
 }
+
+restoreLocalOnlyValues(localOnlyValues);
 
 step("Generate per-app env files");
 run("pnpm", ["run", "env"], { optional: true });
