@@ -97,7 +97,7 @@
     "check:route-errors": "tsx scripts/check-route-errors.ts",
     "check:route-security": "tsx scripts/check-route-security.ts",
     "check:types": "pnpm run check:api-schema-patterns && pnpm run check:mcp-tool-names && pnpm run check:route-security && pnpm run check:no-route-writes && pnpm run check:redis-singleton && pnpm run check:route-errors && pnpm run check:no-flat-error-responses && pnpm run check:lib-root && pnpm run check:lib-imports && node ../../scripts/dev/tsc-native.mjs --noEmit",
-    "dev": "node ../../scripts/dev/kill-api-dev.mjs && node ../../scripts/dev/portless-alias.mjs api && pnpm run check:env && tsx watch --env-file=.env.development.local --include ../../packages/db/dist/generated/prisma/internal/class.js --include ../../.temp/translations-email-stamp.json --include ../../packages/schemas/dist/entities/contact/schema.js src/index.ts",
+    "dev": "node ../../scripts/dev/kill-api-dev.mjs && node ../../scripts/dev/portless-alias.mjs api && pnpm run check:env && node ../../scripts/dev/ensure-api-watch-files.mjs && node --env-file=.env.development.local --watch --watch-path=./src --watch-path=../../packages/db/dist/generated/prisma/internal/class.js --watch-path=../../.temp/translations-email-stamp.json --watch-path=../../packages/schemas/dist/entities/contact/schema.js --import tsx src/index.ts",
     "generate:openapi": "pnpm --filter @bondery/helpers run build && tsx scripts/generate-openapi.ts",
     "provision-oauth-clients": "tsx scripts/provision-oauth-clients.ts",
     "provision-oauth-clients:dev": "tsx --env-file=.env.development.local scripts/provision-oauth-clients.ts",

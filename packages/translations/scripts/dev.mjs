@@ -21,7 +21,7 @@ const distManifest = join(packageRoot, "dist", "manifest.json");
 const generateResourceMap = join(packageRoot, "scripts", "generate-resource-map.mjs");
 
 /**
- * Restart trigger for `tsx watch` in apps/api.
+ * Restart trigger for the `node --watch` API dev server in apps/api.
  *
  * The API imports locale JSON as modules, so a content edit is visible only
  * after a process restart. This stamp lives outside every `dist` directory, so
@@ -43,7 +43,7 @@ function isEmailLocalePath(absolutePath) {
   return absolutePath.split(sep).join("/").includes("/platform/email/");
 }
 
-/** Touch the API restart stamp. A changed stamp restarts `tsx watch`. */
+/** Touch the API restart stamp. A changed stamp restarts the API. */
 function touchEmailStamp() {
   try {
     mkdirSync(resolve(emailStampPath, ".."), { recursive: true });

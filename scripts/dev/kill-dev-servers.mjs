@@ -24,7 +24,7 @@ const ports = [26630, 26631, 26632];
 const WATCHER_PATTERNS = [
   "tsc-watch-and-rewrite",
   "packages/translations/scripts/dev.mjs",
-  "tsx watch --env-file=.env.development.local",
+  "--env-file=.env.development.local --watch",
 ];
 
 function run(command) {
