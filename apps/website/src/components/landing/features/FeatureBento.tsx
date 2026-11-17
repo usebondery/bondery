@@ -49,11 +49,11 @@ const TILES: BentoTile[] = [
     visual: <TimelineVisual />,
   },
   {
-    description: "Set a cadence. Get nudged when it's due.",
+    description: "Birthdays and anniversaries reach your inbox ahead of time.",
     icon: IconBellRinging,
     id: "keep-in-touch",
     span: "narrow",
-    title: "Reach out on time",
+    title: "Email reminders for key dates",
     visual: <ReminderEmailVisual />,
   },
   {

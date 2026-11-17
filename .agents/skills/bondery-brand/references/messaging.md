@@ -51,7 +51,7 @@ One line each. Ten words or fewer.
 |--------|-----------|--------------|
 | Centralize and merge | Every source you met people through, merged into one list. | All the people you met in one place |
 | Remember | Notes and history on every person. | Remember every conversation |
-| Proactive | Set a cadence. Get nudged when it's due. | Reach out on time |
+| Proactive | Birthdays and anniversaries reach your inbox ahead of time. | Email reminders for key dates |
 | AI context | Give Claude or any MCP client your contact book. | Your network, in your AI |
 | Search | Search your network. See who is in a city before you go. | Find anyone |
 | Stay current | Profiles refresh from the sources you saved them from. | Always up to date |
