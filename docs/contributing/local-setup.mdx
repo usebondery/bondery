@@ -2,7 +2,7 @@
 title: "Local development setup"
 description: Run the whole stack locally, from Postgres and Redis to the API and the apps. Follow the dependency order, then open a Portless HTTPS URL to test.
 icon: Terminal
-last_updated: 2026-11-04
+last_updated: 2026-11-17
 ---
 
 Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) SeaweedFS → API → apps**. Each service reads from the one before it, so start them in that order.
@@ -68,6 +68,8 @@ pnpm run setup:dev`}
 />
 
 This installs dependencies for all apps and packages in the monorepo, then creates root `.env.local` from the example.
+
+**Orca worktrees:** `orca.yaml` runs `pnpm run setup:worktree` in every new worktree. It installs dependencies, copies `.env.local` from the primary checkout, pulls the shared secrets from Infisical (`infisical login` once per machine), generates the per-app env files, and builds the workspace packages. Run `pnpm run setup:worktree` by hand to repeat it.
 
 ---
 

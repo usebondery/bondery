@@ -136,6 +136,7 @@
     "setup:dev": "node --import tsx scripts/dev/setup-dev.ts",
     "setup:seaweedfs": "pnpm run build:api && node --env-file=.env.local apps/api/dist/cli/ensure-storage-buckets.js",
     "setup:stripe": "node --import tsx scripts/ops/setup-stripe.ts",
+    "setup:worktree": "node scripts/dev/orca-worktree-setup.mjs",
     "start:apps": "turbo start",
     "start:mailpit": "docker compose -f deploy/bondery/docker-compose.dev-mail.yml up -d && node scripts/dev/portless-alias.mjs mailpit",
     "start:postgres": "docker compose -f deploy/bondery/docker-compose.dev-db.yml --env-file .env.local up -d",

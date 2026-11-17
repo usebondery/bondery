@@ -1,0 +1,3 @@
+# Orca runs `scripts.setup` in every new worktree. ORCA_ROOT_PATH points at the primary checkout.
+scripts:
+  setup: node scripts/dev/orca-worktree-setup.mjs
