@@ -21,7 +21,7 @@ The headline is the **UVP**. The voice tagline stays as the warm-friend brand li
 | Copy | Reasoning |
 |------|-----------|
 | **Everything you need to build stronger bonds** | We are Bondery. We build the *bonds*, the edges between you and your network. Say the brand verb, not "stay close". |
-| **Everyone you met in one place** | Contacts come from every source you met people through across your life. We unify them. *Met* is history and sources; the hero's *know* is the present. |
+| **All the people you met in one place** | Contacts come from every source you met people through across your life. We unify them. *Met* is history and sources; the hero's *know* is the present. |
 
 Full reasoning: [positioning.md](./positioning.md#name-logic-why-bondery-says-bonds).
 
@@ -49,7 +49,7 @@ One line each. Ten words or fewer.
 
 | Pillar | One-liner | Landing tile |
 |--------|-----------|--------------|
-| Centralize and merge | Every source you met people through, merged into one list. | Everyone you met in one place |
+| Centralize and merge | Every source you met people through, merged into one list. | All the people you met in one place |
 | Remember | Notes and history on every person. | Remember every conversation |
 | Proactive | Set a cadence. Get nudged when it's due. | Reach out on time |
 | AI context | Give Claude or any MCP client your contact book. | Your network, in your AI |
@@ -64,7 +64,7 @@ Claim limits are in [positioning.md](./positioning.md#five-things-bondery-does).
 
 There is no standalone "Works with" strip. The two lists live **inside the tiles** where they mean something.
 
-### Sources (contacts in): inside "Everyone you met in one place"
+### Sources (contacts in): inside "All the people you met in one place"
 
 `features/SourcesVisual.tsx` shows each source flowing into a contact list.
 

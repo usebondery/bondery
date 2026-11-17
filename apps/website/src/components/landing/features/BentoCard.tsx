@@ -9,7 +9,7 @@ export type BentoCardProps = {
   visual: ReactNode;
   badge?: string;
   /**
-   * Real, interactive content shown beside the decorative visual (links, buttons).
+   * Real, interactive content shown below the decorative visual (links, buttons).
    * Rendered outside the `aria-hidden` wrapper so it stays reachable.
    */
   aside?: ReactNode;
@@ -57,16 +57,13 @@ export function BentoCard({
       </div>
 
       <div
-        className="relative flex min-h-56 flex-1 flex-col items-center justify-center gap-6 overflow-hidden px-6 pb-6 lg:flex-row"
+        className="relative flex min-h-56 flex-1 flex-col items-center justify-center gap-6 overflow-hidden px-6 pb-6"
         style={{
           background:
             "linear-gradient(180deg, transparent, light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8)))",
         }}
       >
-        <div
-          aria-hidden="true"
-          className={`flex w-full items-center justify-center ${aside ? "lg:min-w-0 lg:flex-1" : ""}`}
-        >
+        <div aria-hidden="true" className="flex w-full items-center justify-center">
           {visual}
         </div>
         {aside}

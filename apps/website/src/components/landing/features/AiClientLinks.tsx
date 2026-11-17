@@ -1,92 +1,75 @@
 "use client";
 
-import { ActionIconLink, hrefAssert } from "@bondery/mantine-next";
 import { Tooltip } from "@mantine/core";
-import { useMediaQuery } from "@mantine/hooks";
-import {
-  IconAsterisk,
-  IconBrandOpenai,
-  IconFeather,
-  IconPaw,
-  IconPlugConnected,
-} from "@tabler/icons-react";
-import type { ReactElement } from "react";
+import { BrandTileLink, type BrandTileLinkProps } from "./BrandTileLink";
 
-type ClientLink = {
-  label: string;
-  /** Mantine colour name for the light-variant button, as in the webapp's social buttons. */
-  color: string;
-  icon: ReactElement;
-  href: string;
-  external?: boolean;
-};
+type ClientLink = Omit<BrandTileLinkProps, "size">;
 
 /*
  * Claude goes to its connector settings. Everything else goes to the MCP docs: MCP
  * itself, and the "Other assistants" section for the clients that are not Claude.
  *
- * Tabler has a brand icon only for OpenAI. The others use the closest Tabler glyph:
- * an asterisk for Claude's spark, a feather for Hermes (the messenger), a paw for OpenClaw.
+ * Each tile uses the product's real logo on its brand colour (marks from Dashboard Icons and
+ * Simple Icons, see `brand-icons.ts`). Glyphs are masks, so one SVG serves any tile colour.
  */
 const CLIENT_LINKS: readonly ClientLink[] = [
   {
-    color: "orange",
+    background: "#D97757",
     external: true,
+    glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/claude-ai.svg" },
+    glyphScale: 0.62,
     href: "https://claude.ai/customize/connectors",
-    icon: <IconAsterisk />,
     label: "Claude",
   },
   {
-    color: "teal",
+    background: "#FFFFFF",
+    glyph: { color: "#000000", kind: "mask", src: "/images/brands/openai.svg" },
     href: "/docs/apps/mcp#other-clients",
-    icon: <IconBrandOpenai />,
     label: "ChatGPT",
   },
-  { color: "violet", href: "/docs/apps/mcp", icon: <IconPlugConnected />, label: "MCP" },
   {
-    color: "yellow",
+    background: "#16181D",
+    glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/mcp.svg" },
+    href: "/docs/apps/mcp",
+    label: "MCP",
+  },
+  {
+    background: "#16181D",
+    glyph: { color: "#FFFFFF", kind: "mask", src: "/images/brands/hermes.svg" },
     href: "/docs/apps/mcp#other-clients",
-    icon: <IconFeather />,
     label: "Hermes",
   },
-  { color: "red", href: "/docs/apps/mcp#other-clients", icon: <IconPaw />, label: "OpenClaw" },
+  {
+    background: "#16181D",
+    glyph: { kind: "image", src: "/images/brands/openclaw.svg" },
+    glyphScale: 0.7,
+    href: "/docs/apps/mcp#other-clients",
+    label: "OpenClaw",
+  },
 ];
 
 /**
- * The AI clients that work with Bondery, as icon-only links: Mantine light-variant
- * `ActionIcon`s with Tabler icons, like the social buttons in the webapp contacts table.
- * Each is named by an aria-label and a tooltip (hover and keyboard focus). A slim column
- * beside the chat on desktop, a wrapping row beneath it on phones.
+ * The AI clients that work with Bondery, as app-icon tiles in the product's own colours, in one
+ * horizontal row under the chat. Each is named by an aria-label and a tooltip (hover and
+ * keyboard focus).
  */
 export function AiClientLinks() {
-  // The column sits beside the chat from Tailwind `lg` (64rem), so the tooltip goes left there and above on phones.
-  const isColumn = useMediaQuery("(min-width: 64rem)");
-
   return (
-    <nav aria-label="Works with" className="w-full lg:w-auto lg:shrink-0">
+    <nav aria-label="Works with" className="w-full">
       <ul
-        className="m-0 flex list-none flex-row flex-wrap justify-center gap-3 p-0 lg:flex-col"
+        className="m-0 flex list-none flex-row flex-wrap justify-center gap-3 p-0"
         style={{ listStyle: "none" }}
       >
-        {CLIENT_LINKS.map(({ label, color, icon, href, external }) => (
-          <li key={label}>
+        {CLIENT_LINKS.map((client) => (
+          <li key={client.label}>
             <Tooltip
               events={{ focus: true, hover: true, touch: false }}
-              label={label}
-              position={isColumn ? "left" : "top"}
+              label={client.label}
+              position="top"
               withArrow
             >
               <span className="inline-flex">
-                <ActionIconLink
-                  ariaLabel={label}
-                  color={color}
-                  href={hrefAssert(href)}
-                  icon={icon}
-                  radius="md"
-                  size={44}
-                  variant="light"
-                  {...(external ? { rel: "noopener noreferrer", target: "_blank" as const } : {})}
-                />
+                <BrandTileLink {...client} />
               </span>
             </Tooltip>
           </li>

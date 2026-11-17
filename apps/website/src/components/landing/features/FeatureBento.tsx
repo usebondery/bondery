@@ -13,7 +13,7 @@ import { GlobeVisual } from "./GlobeVisual";
 import { Reveal } from "./Reveal";
 import { SourcesVisual } from "./SourcesVisual";
 import { TimelineVisual } from "./TimelineVisual";
-import { KeepInTouchVisual, SyncVisual } from "./visuals";
+import { ReminderEmailVisual, SyncVisual } from "./visuals";
 
 type BentoTile = BentoCardProps & {
   id: string;
@@ -37,7 +37,7 @@ const TILES: BentoTile[] = [
     icon: IconUserPlus,
     id: "sources",
     span: "wide",
-    title: "Everyone you met in one place",
+    title: "All the people you met in one place",
     visual: <SourcesVisual />,
   },
   {
@@ -54,7 +54,7 @@ const TILES: BentoTile[] = [
     id: "keep-in-touch",
     span: "narrow",
     title: "Reach out on time",
-    visual: <KeepInTouchVisual />,
+    visual: <ReminderEmailVisual />,
   },
   {
     aside: <AiClientLinks />,

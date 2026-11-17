@@ -47,7 +47,7 @@ For visual assets (logo, colors, OG images), see `packages/branding` (`@bondery/
 - **PRM** is the standard category label — explain it once where the category is named (SEO title, FAQ, about), then use PRM alone. The **hero leads with the UVP**, not the category
 - **Landing copy is short** — tile titles ≤5 words, descriptions ≤10 words, lists ≤3 items. See [messaging.md](references/messaging.md#landing-copy-rules)
 - **Say "bonds"**, the brand verb. Relationships are edges between you and people; Bondery strengthens them. See [positioning.md](references/positioning.md#name-logic-why-bondery-says-bonds)
-- **Sources live inside the "Everyone you met in one place" tile**, flowing into one list. There is no separate "Works with" strip. AI clients live inside the "Your network, in your AI" tile
+- **Sources live inside the "All the people you met in one place" tile**, flowing into one list. There is no separate "Works with" strip. AI clients live inside the "Your network, in your AI" tile
 - **Mock-ups use real photos from the shared cast**, never initials. See [messaging.md](references/messaging.md#sample-data-the-cast)
 - **Claims must be true today** — check the claim guardrails in [positioning.md](references/positioning.md#five-things-bondery-does). Mark unshipped integrations "Soon"
 - **Not a sales CRM** — positioning against sales tools is valid; never sound like pipeline/lead-gen software
