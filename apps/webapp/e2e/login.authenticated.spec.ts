@@ -47,4 +47,55 @@ test.describe("authenticated session", () => {
     const cookies = await page.context().cookies();
     expect(cookies.some((cookie) => cookie.name === "bondery_webapp_session")).toBe(true);
   });
+
+  test("server-renders every app page without a hydration error", async ({ page }) => {
+    // Regression: headless shell components subscribed to queries during the server render,
+    // so pages below them rendered their loading state on the server and content in the
+    // browser. React reports that as a page error. Only hydration errors count here: a dev API
+    // restart mid-run surfaces as unrelated "Failed to fetch" errors.
+    test.setTimeout(180_000);
+    const pageErrors: string[] = [];
+    page.on("pageerror", (error) =>
+      pageErrors.push(`${page.url()}: ${error.message.slice(0, 200)}`),
+    );
+
+    const paths = [
+      "/app/home",
+      "/app/people",
+      "/app/interactions",
+      "/app/keep-in-touch",
+      "/app/groups",
+      "/app/map",
+      "/app/fix",
+      "/app/settings",
+    ];
+    for (const path of paths) {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+    }
+
+    expect(pageErrors.filter((message) => message.includes("Hydration failed"))).toEqual([]);
+  });
+
+  test("settings stays responsive", async ({ page }) => {
+    // Regression: the timezone picker rebuilt about 500 labels every second, each one scanning
+    // the whole tzdb list, and blocked the main thread for minutes.
+    await page.addInitScript(() => {
+      const target = window as unknown as { __longTaskMs: number };
+      target.__longTaskMs = 0;
+      new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+          target.__longTaskMs += entry.duration;
+        }
+      }).observe({ entryTypes: ["longtask"] });
+    });
+    await page.goto("/app/settings");
+    await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+    await page.waitForTimeout(5_000);
+
+    const longTaskMs = await page.evaluate(
+      () => (window as unknown as { __longTaskMs: number }).__longTaskMs,
+    );
+    expect(longTaskMs).toBeLessThan(5_000);
+  });
 });
