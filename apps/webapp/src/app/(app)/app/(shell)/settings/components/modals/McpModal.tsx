@@ -143,7 +143,7 @@ export function McpModal({ apiBaseUrl, modalId }: McpModalProps) {
         </Text>
 
         <ButtonLink
-          href={hrefAssert(docHref("apps.mcp-server"))}
+          href={hrefAssert(docHref("bondery.mcp"))}
           leftSection={<AnthropicIcon color="white" size={16} />}
           rel="noopener noreferrer"
           size="sm"
