@@ -69,7 +69,7 @@ pnpm run setup:dev`}
 
 This installs dependencies for all apps and packages in the monorepo, then creates root `.env.local` from the example.
 
-**Orca worktrees:** `orca.yaml` runs `pnpm run setup:worktree` in every new worktree. It installs dependencies, copies `.env.local` from the primary checkout, pulls the shared secrets from Infisical (`infisical login` once per machine), generates the per-app env files, and builds the workspace packages. Run `pnpm run setup:worktree` by hand to repeat it.
+**New worktrees (any tool):** `scripts/dev/setup-worktree.mjs` installs dependencies, copies `.env.local` from the primary checkout, pulls the shared secrets from Infisical (`infisical login` once per machine), generates the per-app env files, and builds the workspace packages. It runs automatically in Orca (`orca.yaml`), Cursor (`.cursor/worktrees.json`), Claude Code (a SessionStart hook in `.claude/settings.json`, which skips itself when everything exists), and VS Code (a folder-open task you approve once). Anywhere else, run `pnpm run setup:worktree`.
 
 ---
 

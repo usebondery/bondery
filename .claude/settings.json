@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "node \"$CLAUDE_PROJECT_DIR/scripts/dev/setup-worktree.mjs\" --if-needed 1>&2",
+            "timeout": 900,
+            "type": "command"
+          }
+        ]
+      }
+    ]
+  }
+}

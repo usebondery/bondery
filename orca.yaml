@@ -1,3 +1,4 @@
-# Orca runs `scripts.setup` in every new worktree. ORCA_ROOT_PATH points at the primary checkout.
+# Orca runs `scripts.setup` in every new worktree.
+# Other tools call the same script: .cursor/worktrees.json, .claude/settings.json, .vscode/tasks.json.
 scripts:
-  setup: node scripts/dev/orca-worktree-setup.mjs
+  setup: node scripts/dev/setup-worktree.mjs

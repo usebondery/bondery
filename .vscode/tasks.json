@@ -1,6 +1,23 @@
 {
   "tasks": [
     {
+      "label": "setup: worktree env (if needed)",
+      "type": "shell",
+      "command": "node scripts/dev/setup-worktree.mjs --if-needed",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "dedicated",
+        "group": "setup"
+      },
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "problemMatcher": []
+    },
+    {
       "args": ["scripts/dev/kill-webapp-dev.mjs"],
       "command": "node",
       "label": "dev: kill webapp (port 26632)",
@@ -56,7 +73,9 @@
           "endsPattern": "(started tunnel|Tunnel session established)"
         },
         "owner": "ngrok",
-        "pattern": { "regexp": "^$" }
+        "pattern": {
+          "regexp": "^$"
+        }
       },
       "type": "shell"
     },
@@ -92,7 +111,9 @@
           "endsPattern": "(started tunnel|Tunnel session established)"
         },
         "owner": "ngrok",
-        "pattern": { "regexp": "^$" }
+        "pattern": {
+          "regexp": "^$"
+        }
       },
       "type": "shell"
     },
@@ -128,7 +149,9 @@
           "endsPattern": "(started tunnel|Tunnel session established)"
         },
         "owner": "ngrok",
-        "pattern": { "regexp": "^$" }
+        "pattern": {
+          "regexp": "^$"
+        }
       },
       "type": "shell"
     }

@@ -1,0 +1,3 @@
+# Gitignored files Claude Code copies into new worktrees (claude --worktree).
+# scripts/dev/setup-worktree.mjs refreshes shared secrets from Infisical on top.
+.env.local

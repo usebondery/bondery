@@ -1,5 +1,10 @@
 /**
- * Setup script Orca runs in every new worktree (see `orca.yaml`).
+ * Tool-neutral setup for a fresh git worktree or clone. Orca (`orca.yaml`), Cursor
+ * (`.cursor/worktrees.json`), Claude Code (SessionStart hook in `.claude/settings.json`), VS Code
+ * (folder-open task) and a plain terminal (`pnpm run setup:worktree`) all call this one script.
+ *
+ * Flags:
+ *   --if-needed  do nothing when dependencies and env files already exist (fast, for hooks)
  *
  * Env files are gitignored, so a fresh worktree starts without any. This script:
  *   1. installs dependencies
@@ -18,11 +23,37 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-// biome-ignore lint/suspicious/noUndeclaredEnvVars: set by Orca, not a turbo task input
-const primaryRoot = process.env.ORCA_ROOT_PATH ? resolve(process.env.ORCA_ROOT_PATH) : null;
 const shell = process.platform === "win32";
 
 const warnings = [];
+const ifNeeded = process.argv.includes("--if-needed");
+
+/** Primary checkout: Orca and Conductor set a root path, Cursor sets ROOT_WORKTREE_PATH. */
+function findPrimaryRoot() {
+  // biome-ignore lint/suspicious/noUndeclaredEnvVars: set by worktree tools, not a turbo task input
+  const fromEnv = process.env.ORCA_ROOT_PATH ?? process.env.ROOT_WORKTREE_PATH;
+  if (fromEnv) {
+    return resolve(fromEnv);
+  }
+  // Any tool: the primary checkout owns the shared .git directory.
+  const result = spawnSync("git", ["rev-parse", "--path-format=absolute", "--git-common-dir"], {
+    cwd: repoRoot,
+    encoding: "utf-8",
+  });
+  const commonDir = result.status === 0 ? result.stdout.trim() : "";
+  return commonDir.endsWith(".git") ? dirname(commonDir) : null;
+}
+
+const primaryRoot = findPrimaryRoot();
+
+if (
+  ifNeeded &&
+  existsSync(join(repoRoot, "node_modules")) &&
+  existsSync(join(repoRoot, ".env.local")) &&
+  existsSync(join(repoRoot, "apps/api/.env.development.local"))
+) {
+  process.exit(0);
+}
 
 function step(title) {
   console.log(`\n[worktree-setup] ${title}`);
