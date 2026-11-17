@@ -12,3 +12,9 @@ This block is written and re-added by `turbo` before repository-scoped commands 
 ## Scratch files
 
 Put scratch files in `.temp/` (gitignored): logs, throwaway scripts, dumps. Never commit them, and never leave them at the repo root.
+
+## Root causes, not stopgaps
+
+Fix the root cause. Do not ship a stopgap and mention it in the report. Reproduce a failure in isolation, change one variable at a time, and verify through the real path (the supervisor or turbo, not a manual run).
+
+`scripts/check/check-no-workarounds.mjs` enforces this: pre-commit, commit-msg and CI reject "workaround", "hack", "kludge", "band-aid", "for now" and "temporary fix" in added code and commit messages. If a stopgap is truly unavoidable, open an issue and mark the line `allow-workaround(#<issue>)`. The issue owns removing it.

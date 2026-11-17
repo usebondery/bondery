@@ -40,6 +40,31 @@ jobs:
       - name: Check security headers come from the shared CSP builder
         run: pnpm run check:security-headers
 
+  quality-rules:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: ./.github/actions/shared/setup-pnpm
+
+      - name: Unit tests for check scripts
+        run: pnpm run test:check-scripts
+
+      - name: Reject stopgap wording in added code
+        run: node scripts/check/check-no-workarounds.mjs --base "origin/${BASE_REF}"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
+      - name: Reject stopgap wording in commit messages
+        run: node scripts/check/check-no-workarounds.mjs --commits "origin/${BASE_REF}..HEAD"
+        env:
+          BASE_REF: ${{ github.base_ref }}
+
   env:
     runs-on: ubuntu-latest
     permissions:

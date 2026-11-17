@@ -17,3 +17,9 @@ pre-commit:
     biome:
       glob: "*"
       run: node scripts/check/run-pre-commit-biome.mjs
+    no-workarounds:
+      run: node scripts/check/check-no-workarounds.mjs --staged
+commit-msg:
+  commands:
+    no-workarounds:
+      run: node scripts/check/check-no-workarounds.mjs --commit-msg {1}
