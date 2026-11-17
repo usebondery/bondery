@@ -62,6 +62,12 @@ export const CHECKS = [
     when: (files) => files.some((file) => file.startsWith("scripts/check/")),
   },
   {
+    args: () => ["run", "check:agent-files"],
+    command: "pnpm",
+    name: "agent-files",
+    when: (files) => files.some((file) => /^\.(?:agents|claude|cursor)\//.test(file)),
+  },
+  {
     args: () => ["run", "check:package-imports"],
     command: "pnpm",
     name: "package-imports",

@@ -55,6 +55,9 @@ jobs:
       - name: Unit tests for check scripts
         run: pnpm run test:check-scripts
 
+      - name: Agent and skill mirrors match .agents/
+        run: pnpm run check:agent-files
+
       - name: Reject stopgap wording in added code
         run: node scripts/check/check-no-workarounds.mjs --base "origin/${BASE_REF}"
         env:

@@ -19,6 +19,14 @@ pre-commit:
       run: node scripts/check/run-pre-commit-biome.mjs
     no-workarounds:
       run: node scripts/check/check-no-workarounds.mjs --staged
+    agent-files:
+      glob:
+        - ".agents/agents/**"
+        - ".agents/skills/**"
+        - ".claude/agents/**"
+        - ".claude/skills/**"
+        - ".cursor/agents/**"
+      run: node scripts/dev/sync-agent-files.mjs --stage
 commit-msg:
   commands:
     no-workarounds:

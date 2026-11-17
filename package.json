@@ -49,6 +49,7 @@
   "packageManager": "pnpm@12.11.2",
   "private": true,
   "scripts": {
+    "agents:sync": "node scripts/dev/sync-agent-files.mjs",
     "build": "turbo build",
     "build:api": "turbo build --filter=api",
     "build:chrome-extension": "turbo build --filter=chrome-extension",
@@ -58,7 +59,8 @@
     "build:translations": "turbo build --filter=@bondery/translations",
     "build:webapp": "turbo build --filter=webapp",
     "build:website": "turbo build --filter=website",
-    "check": "biome ci . && pnpm run test:check-scripts && pnpm run check:no-workarounds && pnpm run check:package-imports && pnpm run check:injected-packages && pnpm run check:dev-hostnames && pnpm run check:security-headers && pnpm run env:check && pnpm run check:env && pnpm run check:docs && pnpm run check:openapi && pnpm run test:webapp:runtime-config && pnpm run check:contracts && pnpm run check:types && pnpm run check:i18n && pnpm run check:api-errors && pnpm run test:api:sync",
+    "check": "biome ci . && pnpm run check:agent-files && pnpm run test:check-scripts && pnpm run check:no-workarounds && pnpm run check:package-imports && pnpm run check:injected-packages && pnpm run check:dev-hostnames && pnpm run check:security-headers && pnpm run env:check && pnpm run check:env && pnpm run check:docs && pnpm run check:openapi && pnpm run test:webapp:runtime-config && pnpm run check:contracts && pnpm run check:types && pnpm run check:i18n && pnpm run check:api-errors && pnpm run test:api:sync",
+    "check:agent-files": "node scripts/dev/sync-agent-files.mjs --check",
     "check:api-errors": "pnpm run check:api-errors:catalog && pnpm run check:api-errors:translations && pnpm run check:api-errors:client-display",
     "check:api-errors:catalog": "node scripts/check/check-api-errors-catalog.mjs",
     "check:api-errors:client-display": "node scripts/check/check-api-errors-client-display.mjs",

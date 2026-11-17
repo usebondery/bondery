@@ -24,3 +24,8 @@ Fix the root cause. Do not ship a stopgap and mention it in the report. Reproduc
 After every change, run `pnpm run check:changed` before you report. It runs only the checks your diff can break (Biome, stopgap wording, types for affected packages, docs, i18n, OpenAPI, API errors, env) in parallel, in well under a minute when cached. Fix failures at the cause, re-run, and report only when it passes. In Claude Code a Stop hook enforces this. CI runs the full `pnpm run check`.
 
 Prefer a Biome rule for any code-structure rule (native rules first, GritQL plugins for custom patterns). Use a script only for what Biome cannot do: comment wording, rules scoped to the diff, commit messages and cross-file consistency.
+
+## Agent files: one source
+
+Edit agent definitions in `.agents/agents/` and skills in `.agents/skills/`. Never edit `.claude/agents/`, `.claude/skills/` or `.cursor/agents/`: they are generated mirrors so Claude Code (including inside Orca) and Cursor see the same files. Pre-commit runs `pnpm run agents:sync` and stages the mirrors; `check:agent-files` fails on drift in `check:changed` and CI.
+
