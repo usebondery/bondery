@@ -153,7 +153,7 @@
     "test:api": "pnpm --filter api run test:api",
     "test:api:sync": "pnpm --filter api run test:sync",
     "test:auth": "pnpm --filter api run test:auth",
-    "test:check-scripts": "node --test scripts/check/*.test.mjs",
+    "test:check-scripts": "node --test scripts/check/*.test.mjs apps/webapp/e2e/*.test.mjs",
     "test:mobile:sync": "pnpm --filter mobile run test:sync",
     "test:webapp:runtime-config": "pnpm --filter webapp run test:runtime-config",
     "test:webapp:sync": "pnpm --filter webapp run test:sync",
