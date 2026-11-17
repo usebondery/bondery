@@ -1,21 +1,21 @@
 {
   "tasks": [
     {
-      "label": "setup: worktree env (if needed)",
-      "type": "shell",
       "command": "node scripts/dev/setup-worktree.mjs --if-needed",
+      "label": "setup: worktree env (if needed)",
       "options": {
         "cwd": "${workspaceFolder}"
       },
       "presentation": {
-        "reveal": "silent",
+        "group": "setup",
         "panel": "dedicated",
-        "group": "setup"
+        "reveal": "silent"
       },
+      "problemMatcher": [],
       "runOptions": {
         "runOn": "folderOpen"
       },
-      "problemMatcher": []
+      "type": "shell"
     },
     {
       "args": ["scripts/dev/kill-webapp-dev.mjs"],
