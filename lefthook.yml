@@ -17,6 +17,7 @@ pre-commit:
     biome:
       glob: "*"
       run: node scripts/check/run-pre-commit-biome.mjs
+      stage_fixed: true
     no-workarounds:
       run: node scripts/check/check-no-workarounds.mjs --staged
     agent-files:
