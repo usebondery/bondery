@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Eroare extensie — încearcă din nou",
+    "OpenInBondery": "Open in Bondery",
+    "SignInRequired": "Conectare necesară — fă clic pe pictograma Bondery",
+    "SomethingWrong": "Ceva nu a mers bine"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Eroare extensie — încearcă din nou",
+    "OpenInBondery": "Open in Bondery",
+    "SignInRequired": "Conectare necesară — fă clic pe pictograma Bondery",
+    "SomethingWrong": "Ceva nu a mers bine"
+  }
+}

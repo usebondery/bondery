@@ -1,0 +1,32 @@
+{
+  "AddAction": "Добавяне дату",
+  "AddHint": "Чтобы добавяне дату, укажите все поля.",
+  "AddImportantDate": "Добавяне важную дату",
+  "BirthdayDateLabel": "Избери день рождения",
+  "DatePlaceholder": "Избери дату",
+  "DeleteAction": "Изтриване",
+  "DraftIncompleteError": "Чтобы добавяне дату, укажите все поля.",
+  "Empty": "Важных дат пока няма.",
+  "ErrorTitle": "Грешка",
+  "NotePlaceholder": "Необязательная заметка",
+  "NotifyDayBefore": "Уведомить за {count} день",
+  "NotifyDaysBefore": "Уведомить за {count} дни",
+  "NotifyMe": "Уведомлять меня",
+  "NotifyNone": "Не уведомлять",
+  "SuccessTitle": "Готово",
+  "Title": "Важные даты",
+  "TypeDisabledBirthdateHint": "У {firstName} уже указан день рождения",
+  "TypeDisabledHint": "У {firstName} уже указан день рождения или именины",
+  "TypeDisabledNamedateHint": "У {firstName} уже указаны именины",
+  "TypePlaceholder": "Избери тип",
+  "Types": {
+    "anniversary": "Годовщина",
+    "birthday": "День рождения",
+    "graduation": "Выпуск",
+    "nameday": "Именины",
+    "other": "Другое"
+  },
+  "UniqueTypeError": "Можно добавяне только одну дату типа „{type}”.",
+  "UpdateError": "Неуспешно обновить важные даты",
+  "UpdateSuccess": "Важные даты успешно обновлены"
+}

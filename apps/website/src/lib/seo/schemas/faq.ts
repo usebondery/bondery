@@ -18,11 +18,6 @@ export const FAQ_ITEMS = [
   },
   {
     answer:
-      "End-to-end encryption is planned for the future, but our small team does not yet have the resources to implement robust E2EE correctly without making the user experience too slow. Your data is still protected with our current safeguards (TLS for data in transit and AES encryption for the database at rest).",
-    question: "Why is data not E2EE (yet)?",
-  },
-  {
-    answer:
       "Yes. Bondery is open source and ships a Docker Compose stack for self-hosting. See the self-hosting guide in the docs.",
     docsHref: "/docs/deploy/installation",
     docsLinkLabel: "self-hosting guide in the docs",

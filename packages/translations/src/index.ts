@@ -10,6 +10,7 @@ export {
   DEFAULT_LOCALE,
   getNamespaceManifest,
   i18nConfig,
+  intlTagForLocale,
   manifest,
   type NamespaceEntry,
   namespaceFilePath,
@@ -31,4 +32,3 @@ export type {
   TranslateFn,
   WebNamespace,
 } from "#i18n-types.js";
-export { loadNamespace, resourceLoader } from "#loader.js";

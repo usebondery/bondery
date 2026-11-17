@@ -6,6 +6,7 @@ import type { WorkHistoryEntry } from "@bondery/schemas";
 import { Avatar, Group, Spoiler, Stack, Text } from "@mantine/core";
 import { IconBriefcase } from "@tabler/icons-react";
 import { useLinkedInDataTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 
 interface WorkHistoryCardProps {
   entry: WorkHistoryEntry;
@@ -19,9 +20,10 @@ interface WorkHistoryCardProps {
  */
 export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
   const t = useLinkedInDataTranslations();
+  const formatter = useDateFormatter();
 
-  const dateRange = formatDateRange(entry.startDate, entry.endDate, t("Present"));
-  const duration = formatDuration(entry.startDate, entry.endDate);
+  const dateRange = formatDateRange(entry.startDate, entry.endDate, formatter.ctx, t("Present"));
+  const duration = formatDuration(entry.startDate, entry.endDate, formatter.ctx);
 
   const companyNameElement = entry.companyLinkedinUrl ? (
     <AnchorLink fw={500} href={hrefAssert(entry.companyLinkedinUrl)} size="sm" target="_blank">

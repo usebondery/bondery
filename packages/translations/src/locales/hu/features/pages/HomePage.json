@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Interakció rögzítése",
+  "AddPerson": "Személy létrehozása",
+  "ExtensionNudge": {
+    "Description": "Importálj kapcsolatokat közvetlenül LinkedIn- és Instagram-profilokból, és tartsd naprakészen a hálózatodat könnyedén.",
+    "InstallButton": "Bővítmény telepítése",
+    "Title": "Turbózd fel a Bonderyt a Chrome-bővítményünkkel"
+  },
+  "HeaderDescription": "A Kezdőlapon gyors áttekintést kapsz a hálózatról, az emlékeztetőkről és a legutóbbi interakciókról.",
+  "NoRecentlyAdded": "Még nincs hozzáadott személy.",
+  "NoRecentlyInteracted": "Még nincs friss interakció.",
+  "NotificationInDays": "{count} nap múlva",
+  "NotificationSent": "Már elküldve",
+  "NotificationToday": "Ma",
+  "NotificationTomorrow": "Holnap",
+  "NotificationTooltipInDays": "{count} nap múlva kapsz értesítést",
+  "NotificationTooltipSentAt": "Az értesítést már elküldtük: {sentAt}",
+  "NotificationTooltipToday": "Ma kapsz értesítést",
+  "NotificationTooltipTomorrow": "Holnap kapsz értesítést",
+  "NoUpcomingReminders": "Nincs közelgő emlékeztető a következő 30 napban.",
+  "ProgressRail": {
+    "AwaitingExport": "A(z) {platform}-export úton van. Az exportok általában 5–15 perc alatt megérkeznek.",
+    "ChoosePlatform": "Válaszd ki, honnan importálsz",
+    "Dismiss": "Elrejtés",
+    "HaveZipFile": "Megvan a fájl",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} / {total} kész",
+    "SkipImport": "Import kihagyása",
+    "Tasks": {
+      "AddContacts": "Add hozzá az első kapcsolataidat",
+      "ImportContacts": "Importáld a kapcsolataidat",
+      "LogInteraction": "Rögzítsd az első interakciót",
+      "SetReminder": "Állíts be emlékeztetőt"
+    },
+    "Title": "Első lépések"
+  },
+  "RecentlyAddedTitle": "Nemrég hozzáadva",
+  "RecentlyAddedTooltip": "Az 5 legutóbb hozzáadott személy a hálózatodból.",
+  "RecentlyInteractedTitle": "Nemrég interakció",
+  "RecentlyInteractedTooltip": "Az 5 személy, akikkel legutóbb interakció volt.",
+  "Stats": {
+    "InteractionsTitle": "Interakciók ebben a hónapban",
+    "InteractionsTooltip": "Az interakciók száma, amit a(z) {month} hónapban rögzítettél.",
+    "NewContactsTitle": "Új kapcsolatok idén",
+    "NewContactsTooltip": "Hány személy került a hálózatodba ebben az évben ({year}).",
+    "TotalContactsTitle": "Kapcsolatok összesen",
+    "TotalContactsTooltip": "Hány személy van a Bondery hálózatodban."
+  },
+  "TimelinePreviewTitle": "Interakciók",
+  "TimelinePreviewTooltip": "Az 5 legutóbbi interakció. Kattints az összes megtekintéséhez.",
+  "Title": "Kezdőlap",
+  "UnknownPerson": "Ismeretlen személy",
+  "UpcomingRemindersMonthInfo": "A következő 30 napban esedékes emlékeztetőket mutatjuk.",
+  "UpcomingRemindersTitle": "Közelgő emlékeztetők",
+  "UpcomingRemindersTooltip": "Ezek a következő 30 napban esedékes emlékeztetőid."
+}

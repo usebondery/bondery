@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Activități",
+    "Animals": "Animale",
+    "Buildings": "Clădiri",
+    "Celebrations": "Sărbători",
+    "Food": "Mâncare",
+    "Hearts": "Inimi",
+    "Humans": "Oameni",
+    "Miscellaneous": "Diverse",
+    "Nature": "Natură",
+    "Objects": "Obiecte",
+    "Sports": "Sport",
+    "Travel": "Călătorii",
+    "Work": "Muncă"
+  },
+  "EmptySearch": "Nu s-au găsit emoji-uri",
+  "RandomAccessibilityLabel": "Alege un emoji la întâmplare",
+  "SearchPlaceholder": "Caută emoji-uri…",
+  "SheetTitle": "Emoji",
+  "TriggerAccessibilityHint": "Deschide selectorul de emoji"
+}

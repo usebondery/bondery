@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Extensiefout — probeer het opnieuw",
+    "OpenInBondery": "Openen in Bondery",
+    "SignInRequired": "Inloggen vereist — klik op het Bondery-pictogram",
+    "SomethingWrong": "Er ging iets mis"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Extensiefout — probeer het opnieuw",
+    "OpenInBondery": "Openen in Bondery",
+    "SignInRequired": "Inloggen vereist — klik op het Bondery-pictogram",
+    "SomethingWrong": "Er ging iets mis"
+  }
+}

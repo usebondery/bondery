@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Acties",
+  "AddPerson": "Persoon toevoegen",
+  "AddPersonDescription": "Nieuw contact in je netwerk aanmaken",
+  "ContactUs": "Contact opnemen",
+  "ContactUsDescription": "Neem contact op met het Bondery-team",
+  "Documentation": "Documentatie",
+  "DocumentationDescription": "Lees de Bondery-documentatie",
+  "ExportData": "Gegevens exporteren",
+  "ExportDataDescription": "Kopie van je Bondery-gegevens opslaan",
+  "FindPerson": "Persoon zoeken",
+  "FindPersonDescription": "Zoek in je netwerk op naam",
+  "GoToDescription": "Naar {label}",
+  "HelpGroup": "Hulp",
+  "ImportData": "Gegevens importeren",
+  "ImportDataDescription": "Bondery JSON-ZIP importeren",
+  "LogInteraction": "Interactie registreren",
+  "LogInteractionDescription": "Nieuwe ontmoeting, call of bericht vastleggen",
+  "NavigateGroup": "Navigeren",
+  "NothingFound": "Geen acties gevonden",
+  "SearchPlaceholder": "Acties zoeken of navigeren…"
+}

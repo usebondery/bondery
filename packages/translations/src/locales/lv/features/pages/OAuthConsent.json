@@ -1,0 +1,30 @@
+{
+  "Approve": "Apstiprināt",
+  "ChromeExtensionClientName": "Bondery Chrome paplašinājums",
+  "Deny": "Noraidīt",
+  "Description": "{clientName} pieprasa piekļuvi tavam Bondery kontam.",
+  "ErrorTitle": "Autorizācijas kļūda",
+  "InvalidRequest": "Nederīgs autorizācijas pieprasījums.",
+  "LoopbackWarning": "Šī lietotne darbojas šajā datorā (localhost). Turpini tikai tad, ja tu to palaisi.",
+  "MissingAuthorizationId": "Trūkst autorizācijas pieprasījuma. Mēģini vēlreiz no lietotnes.",
+  "PermissionFullDescription": "Arī izveidot, atjaunināt un dzēst kontaktus un to datus.",
+  "PermissionFullLabel": "Pilna piekļuve",
+  "PermissionLabel": "Piekļuve",
+  "PermissionReadDescription": "Meklēt un lasīt tavus kontaktus un to datus.",
+  "PermissionReadLabel": "Tikai lasīšana",
+  "RequestedPermissions": "Pieprasītās atļaujas",
+  "Scopes": {
+    "api:access": "Izmantot Bondery API tavā vārdā",
+    "email": "Skatīt tavu e-pasta adresi",
+    "mcp:read": "Skatīt tavus kontaktus un to datus",
+    "mcp:write": "Izveidot, atjaunināt un dzēst kontaktus un to datus",
+    "offline_access": "Palikt pierakstītam, kamēr neatcelsi piekļuvi",
+    "openid": "Apstiprināt tavu identitāti",
+    "phone": "Skatīt tavu tālruņa numuru",
+    "profile": "Skatīt tava profila informāciju"
+  },
+  "Title": "Autorizēt lietotni",
+  "UnexpectedError": "Radās neparedzēta kļūda. Mēģini vēlreiz.",
+  "UnknownClientName": "Nezināma lietotne",
+  "WebappClientName": "Bondery"
+}

@@ -13,6 +13,7 @@ import { useState } from "react";
 import type { SortOrder } from "@/lib/contacts/table-types";
 import { useContactsTableTranslations } from "@/lib/i18n/generated/hooks";
 import { useContactsTableCopy } from "@/lib/i18n/useContactsTableCopy";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { DEFAULT_CONTACTS_SORT } from "@/lib/query/contactsListParams";
 import type {
   BulkSelectionAction,
@@ -113,13 +114,13 @@ export default function ContactsTableV2({
   isAllTotalSelected,
   excludedIds,
   disableNameLink,
-  dateLocale,
   noContactsFound,
   noContactsMatchSearch,
   renderLocationCell,
 }: ContactsTableV2Props) {
   const { columnDefinitions, sortOptions, buildTableLabels } = useContactsTableCopy();
   const t = useContactsTableTranslations();
+  const formatter = useDateFormatter();
   const [searchIsActive, setSearchIsActive] = useState(() =>
     Boolean(searchValue ?? searchDefaultValue),
   );
@@ -129,7 +130,7 @@ export default function ContactsTableV2({
     onSearchChange?.(value);
   };
 
-  const dateFormatter = new Intl.DateTimeFormat(dateLocale || "en-US", { dateStyle: "short" });
+  const formatDate = (date: Date) => formatter.formatDate(date, "short");
 
   const selectedIdList = selectedIds ? Array.from(selectedIds) : [];
 
@@ -234,8 +235,8 @@ export default function ContactsTableV2({
   const sourceColumns = columnsForMenu ?? normalizedColumns;
 
   const tableColumns = useContactsTableColumns({
-    dateFormatter,
     disableNameLink,
+    formatDate,
     renderLocationCell,
     sourceColumns,
   });

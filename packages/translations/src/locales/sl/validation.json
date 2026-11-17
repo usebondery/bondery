@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Vnesi veljaven e-poštni naslov",
+    "invalidTitle": "Neveljaven e-poštni naslov"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Ime sme imeti največ {max} znakov",
+      "required": "Ime je obvezno"
+    },
+    "generic": {
+      "maxLength": "Vrednost sme imeti največ {max} znakov"
+    },
+    "headline": {
+      "maxLength": "Naslov sme imeti največ {max} znakov"
+    },
+    "label": {
+      "maxLength": "Polje {field} sme imeti največ {max} znakov",
+      "required": "Polje {field} je obvezno"
+    },
+    "lastName": {
+      "maxLength": "Priimek sme imeti največ {max} znakov"
+    },
+    "location": {
+      "maxLength": "Lokacija sme imeti največ {max} znakov"
+    },
+    "middleName": {
+      "maxLength": "Srednje ime sme imeti največ {max} znakov"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Naslov je obvezen"
+  },
+  "title": "Napaka pri preverjanju"
+}

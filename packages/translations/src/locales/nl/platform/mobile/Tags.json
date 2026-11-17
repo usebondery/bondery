@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Kan label niet aanmaken. Probeer het opnieuw.",
+  "CreateTag": "Label aanmaken",
+  "DeleteFailed": "Kan label niet verwijderen. Probeer het opnieuw.",
+  "EditFailed": "Kan label niet opslaan. Probeer het opnieuw.",
+  "EditTagsSearchPlaceholder": "Labels zoeken...",
+  "LoadFailed": "Kan labels niet laden",
+  "NoTagsYet": "Nog geen labels",
+  "NoTagsYetHint": "Labels helpen je contacten te ordenen en te vinden."
+}

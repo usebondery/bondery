@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Sazināties",
+  "FieldUpdated": "{label} atjaunināts",
+  "FirstNamePlaceholder": "Vārds",
+  "FirstNameSuccessLabel": "Pirmkārt",
+  "HeadlinePlaceholder": "Virsraksts",
+  "HeadlineSuccessLabel": "Virsraksts",
+  "LastNamePlaceholder": "Uzvārds",
+  "LastNameSuccessLabel": "Pēdējais",
+  "LocationPlaceholder": "Atrašanās vieta",
+  "LocationSuccessLabel": "Atrašanās vieta",
+  "LocationUpdated": "Atrašanās vieta atjaunināta",
+  "MiddleNamePlaceholder": "Vidējais vārds",
+  "MiddleNameSuccessLabel": "Vidus",
+  "NameFieldUpdated": "{label} nosaukums atjaunināts",
+  "SavedTitle": "Saglabāts",
+  "UpdateFieldFailed": "Neizdevās atjaunināt {field}"
+}

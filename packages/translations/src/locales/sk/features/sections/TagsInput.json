@@ -1,0 +1,22 @@
+{
+  "AddError": "Nepodarilo sa pridať štítok",
+  "AddNewTagTooltip": "Vytvoriť nový štítok",
+  "AddSuccess": "Štítok úspešne pridán",
+  "AddTagTooltip": "Pridať štítok",
+  "CreateError": "Nepodarilo sa vytvoriť štítok",
+  "CreateNewTagEmpty": "Vytvoriť nový štítok",
+  "CreateNewTagOption": "Vytvoriť nový štítok \"{label}\"",
+  "CreateTagCancel": "Zrušiť",
+  "CreateTagConfirm": "Vytvoriť a pridať",
+  "CreateTagMessage": "Štítok \"{name}\" ješte neexistuje. Chcete ho vytvoriť a pridať ke kontaktu?",
+  "CreateTagTitle": "Vytvoriť nový štítok?",
+  "Label": "Štítky",
+  "NoTagsFound": "Žiadne štítky nenájdené",
+  "Placeholder": "Pridať štítky...",
+  "RemoveError": "Nepodarilo sa odobrať štítok",
+  "RemoveTagTooltip": "Odobrať štítok",
+  "SearchPlaceholder": "Hľadať alebo vytvoriť štítok...",
+  "TagAlreadyAddedMessage": "Štítok \"{name}\" již bol ke kontaktu pridán.",
+  "TagAlreadyAddedTitle": "Štítok již pridán",
+  "TagAlreadyAppliedTooltip": "Štítok je již prirazen"
+}

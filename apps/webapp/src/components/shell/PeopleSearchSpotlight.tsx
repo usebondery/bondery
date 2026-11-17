@@ -1,6 +1,5 @@
 "use client";
 
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { PERSON_SEARCH_OPTION_HIT_CLASS, PersonSearchOptionRow } from "@bondery/mantine-next";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Group, Loader, Text } from "@mantine/core";

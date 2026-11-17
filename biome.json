@@ -38,6 +38,8 @@
       "!**/.dockerignore*",
       "!**/.cursor",
       "!**/.source",
+      "!llm-plugins/claude",
+      "!llm-plugins/openai",
       "!apps/webapp/src/lib/auth/aaguid-catalog/aaguid.json",
       "!apps/webapp/src/lib/auth/aaguid-catalog/better-auth-authenticator-names.json"
     ]
@@ -211,6 +213,44 @@
           },
           "nursery": {
             "useReactCompiler": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/webapp/src/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "paths": {
+                  "@bondery/translations/generated/resources": "Locale JSON belongs to the server. Load namespaces with next-i18next on the server.",
+                  "@bondery/translations/loader": "The loader imports 2,025 locale JSON modules. Use it on the server only, through lib/i18n/diskResourceLoader.server.ts."
+                },
+                "patterns": [
+                  {
+                    "group": ["#generated/resources*", "**/src/generated/resources*"],
+                    "message": "Deep locale JSON graph. Load namespaces through next-i18next on the server."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/webapp/src/i18n.config.ts",
+        "apps/webapp/src/app/manifest.ts",
+        "apps/webapp/src/lib/i18n/diskResourceLoader.server.ts"
+      ],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": "off"
           }
         }
       }

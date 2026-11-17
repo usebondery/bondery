@@ -1,0 +1,22 @@
+{
+  "AddButton": "Adicionar",
+  "Description": "Enviaremos os detalhes às pessoas abaixo. Também receberá uma cópia.",
+  "DuplicateEmail": "Este endereço já foi adicionado",
+  "ErrorDescription": "Verifique a ligação e tente novamente.",
+  "ErrorHeadline": "Não foi possível enviar o contacto",
+  "InvalidEmail": "Introduza um endereço de email válido",
+  "MaxRecipients": "Pode adicionar no máximo 10 destinatários",
+  "MaxRecipientsHint": "Máximo de 10 destinatários",
+  "MessagePlaceholder": "Adicionar nota (opcional)",
+  "NoRecipients": "Adicione pelo menos um destinatário",
+  "RecipientsLabel": "Para",
+  "RecipientsPlaceholder": "Endereço de email do destinatário",
+  "RemoveRecipient": "Remover {email}",
+  "SendButton": "Enviar",
+  "SendButtonMany": "Enviar a {count} pessoas",
+  "SendButtonOne": "Enviar a 1 pessoa",
+  "SuccessDescription": "Os destinatários receberão em breve.",
+  "SuccessHeadline": "Contacto enviado",
+  "Title": "Enviar contacto de {name} por email",
+  "WhatsIncluded": "Inclui informação de contacto, ligações sociais e notas registadas."
+}

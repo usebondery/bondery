@@ -1,0 +1,22 @@
+{
+  "AddError": "Nepavyko pridėti žymos",
+  "AddNewTagTooltip": "Sukurti naują žymą",
+  "AddSuccess": "Žyma sėkmingai pridėta",
+  "AddTagTooltip": "Pridėti žymą",
+  "CreateError": "Nepavyko sukurti žymos",
+  "CreateNewTagEmpty": "Sukurti naują žymą",
+  "CreateNewTagOption": "Sukurti naują žymą „{label}“",
+  "CreateTagCancel": "Atšaukti",
+  "CreateTagConfirm": "Sukurti ir pridėti",
+  "CreateTagMessage": "Žymos „{name}“ dar nėra. Ar nori ją sukurti ir pridėti prie šio kontakto?",
+  "CreateTagTitle": "Sukurti naują žymą?",
+  "Label": "Žymos",
+  "NoTagsFound": "Žymų nerasta",
+  "Placeholder": "Pridėti žymų...",
+  "RemoveError": "Nepavyko pašalinti žymos",
+  "RemoveTagTooltip": "Pašalinti žymą",
+  "SearchPlaceholder": "Ieškoti ar sukurti žymą...",
+  "TagAlreadyAddedMessage": "Žyma „{name}“ jau pridėta prie šio kontakto.",
+  "TagAlreadyAddedTitle": "Žyma jau pridėta",
+  "TagAlreadyAppliedTooltip": "Žyma jau pritaikyta"
+}

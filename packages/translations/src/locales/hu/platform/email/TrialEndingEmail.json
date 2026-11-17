@@ -1,0 +1,9 @@
+{
+  "body": "Ezután az előfizetésed automatikusan megújul, hacsak nem mondod le.",
+  "cta": "Előfizetés kezelése",
+  "endDateFallback": "hamarosan",
+  "heading": "Lejár a Premium próbaidőszakod: {{endDate}}",
+  "preview": "Az előfizetésed megújul, hacsak nem mondod le",
+  "subject": "Hamarosan lejár a Bondery Premium próbaidőszakod",
+  "whyReceiving": "Azért kaptad ezt az e-mailt, mert Bondery Premium próbaidőszakot használsz."
+}

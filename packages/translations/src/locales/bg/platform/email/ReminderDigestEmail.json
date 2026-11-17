@@ -1,0 +1,22 @@
+{
+  "cta": "Открыть напоминания",
+  "dateTypes": {
+    "anniversary": "Годовщина",
+    "birthday": "День рождения",
+    "graduation": "Выпуск",
+    "nameday": "Именины",
+    "other": "Важная дата"
+  },
+  "dayFew": "{{count}} дней",
+  "dayMany": "{{count}} дней",
+  "dayOne": "1 день",
+  "description": "На {{headingDate}}. Откройте човека, чтобы увидеть детали или отправить сообщение.",
+  "headingFew": "Скоро {{count}} напоминаний",
+  "headingMany": "Скоро {{count}} напоминаний",
+  "headingOne": "Скоро 1 напоминание",
+  "preview": "{{firstTypeLabel}} у {{firstPersonName}} след {{firstRemainingLabel}}",
+  "previewMore": "{{firstTypeLabel}} у {{firstPersonName}} след {{firstRemainingLabel}} и ещё {{remainingCount}}",
+  "reminderLine": "{{emoji}} {{typeLabel}} след {{remainingLabel}}, {{dateLabel}}.",
+  "subject": "Напоминания Bondery на {{targetDate}}",
+  "whyReceiving": "Ти получили это письмо, потому что включили напоминания на эти даты."
+}

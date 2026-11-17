@@ -1,0 +1,22 @@
+{
+  "AllEnrichedDescription": "Toate contactele cu profil LinkedIn au fost deja îmbogățite.",
+  "AllEnrichedTitle": "Toate contactele sunt îmbogățite",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Îmbogățire în curs:",
+  "EligibleLabel_few": "{count} persoane pot fi îmbogățite",
+  "EligibleLabel_one": "{count} persoană poate fi îmbogățită",
+  "EligibleLabel_other": "{count} de persoane pot fi îmbogățite",
+  "Enrich": "Îmbogățește",
+  "EnrichAll": "Îmbogățește tot",
+  "HelpTooltip": "Adu ultimele date din profilul LinkedIn în acest contact. Fă clic ca să vezi cum funcționează îmbogățirea.",
+  "Pause": "Pause",
+  "PausingTooltip": "Se termină contactul curent, apoi se pune pe pauză…",
+  "PersonEligibleLabel": "Acest contact poate fi îmbogățit din LinkedIn",
+  "ProcessingPerson": "Se îmbogățește {name}…",
+  "ProgressLabel": "Îmbogățire: {completed} din {totalEligible} finalizate",
+  "ProgressLabelWithFailed": "Îmbogățire: {completed} din {totalEligible} finalizate ({failed} eșuate)",
+  "Resume": "Continuă",
+  "ResumeLabel": "Îmbogățire întreruptă: {completed} gata, {pending} rămase",
+  "SkipRemaining": "Omite restul",
+  "Tooltip": "Aceste contacte au profil LinkedIn dar nu sunt încă îmbogățite. Îmbogățește-le ca să aduci istoricul profesional, educația și biografia la zi."
+}

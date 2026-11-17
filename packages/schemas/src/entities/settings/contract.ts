@@ -3,6 +3,7 @@ import type { Assert, IsEqual } from "#internal/type-equality.js";
 import type {
   authUserSchema,
   colorSchemePreferenceSchema,
+  dateFormatPreferenceSchema,
   groupSortOrderPreferenceSchema,
   importFollowupPlatformSchema,
   importFollowupStatusSchema,
@@ -21,6 +22,7 @@ import type {
 import type {
   AuthUser,
   ColorSchemePreference,
+  DateFormatPreference,
   GroupSortOrderPreference,
   ImportFollowupPlatform,
   ImportFollowupStatus,
@@ -42,6 +44,9 @@ type _ColorSchemePreference = Assert<
 >;
 type _TimeFormatPreference = Assert<
   IsEqual<TimeFormatPreference, z.infer<typeof timeFormatPreferenceSchema>>
+>;
+type _DateFormatPreference = Assert<
+  IsEqual<DateFormatPreference, z.infer<typeof dateFormatPreferenceSchema>>
 >;
 type _SwipeActionPreference = Assert<
   IsEqual<SwipeActionPreference, z.infer<typeof swipeActionPreferenceSchema>>

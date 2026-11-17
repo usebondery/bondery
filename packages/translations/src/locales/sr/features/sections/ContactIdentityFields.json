@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kontakt",
+  "FieldUpdated": "{label}ažurirano",
+  "FirstNamePlaceholder": "Vorname",
+  "FirstNameSuccessLabel": "Vorname",
+  "HeadlinePlaceholder": "Überschrift",
+  "HeadlineSuccessLabel": "Überschrift",
+  "LastNamePlaceholder": "Nachname",
+  "LastNameSuccessLabel": "Nachname",
+  "LocationPlaceholder": "Standort",
+  "LocationSuccessLabel": "Standort",
+  "LocationUpdated": "Lokacija je ažurirana",
+  "MiddleNamePlaceholder": "Zweiter Vorname",
+  "MiddleNameSuccessLabel": "Zweiter Vorname",
+  "NameFieldUpdated": "{label}ažurirano",
+  "SavedTitle": "Sačuvano",
+  "UpdateFieldFailed": "{field}Није било могуће ажурирати квиз."
+}

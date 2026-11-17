@@ -1,0 +1,30 @@
+{
+  "Approve": "Goedkeuren",
+  "ChromeExtensionClientName": "Bondery Chrome-extensie",
+  "Deny": "Weigeren",
+  "Description": "{clientName} vraagt toegang tot je Bondery-account.",
+  "ErrorTitle": "Autorisatiefout",
+  "InvalidRequest": "Ongeldig autorisatieverzoek.",
+  "LoopbackWarning": "Deze app draait op deze computer (localhost). Ga alleen door als jij die hebt gestart.",
+  "MissingAuthorizationId": "Autorisatieverzoek ontbreekt. Probeer het opnieuw vanuit de applicatie.",
+  "PermissionFullDescription": "Kan ook contacten en hun gegevens aanmaken, bijwerken en verwijderen.",
+  "PermissionFullLabel": "Volledige toegang",
+  "PermissionLabel": "Toegang",
+  "PermissionReadDescription": "Zoek en lees je contacten en hun gegevens.",
+  "PermissionReadLabel": "Alleen lezen",
+  "RequestedPermissions": "Gevraagde rechten",
+  "Scopes": {
+    "api:access": "De Bondery API namens je gebruiken",
+    "email": "Je e-mailadres bekijken",
+    "mcp:read": "Je contacten en hun gegevens bekijken",
+    "mcp:write": "Contacten en hun gegevens aanmaken, bijwerken en verwijderen",
+    "offline_access": "Ingelogd blijven tot je toegang intrekt",
+    "openid": "Je identiteit verifiëren",
+    "phone": "Je telefoonnummer bekijken",
+    "profile": "Je profielinformatie bekijken"
+  },
+  "Title": "Applicatie autoriseren",
+  "UnexpectedError": "Er is een onverwachte fout opgetreden. Probeer het opnieuw.",
+  "UnknownClientName": "Onbekende applicatie",
+  "WebappClientName": "Bondery"
+}

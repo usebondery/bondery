@@ -40,7 +40,8 @@ Do not duplicate content across skills — link and keep a single source of trut
 |--------|-------------|
 | Cross-cutting code craft, TypeScript, Biome | `bondery-coding-standards` |
 | API contracts, Fastify, sync | `bondery-api` |
-| UI, i18n, error display | `bondery-ux` |
+| UI patterns, empty states, error display | `bondery-ux` |
+| Adding a UI locale, plurals, exonyms, locale profiles | `bondery-i18n` |
 | Monorepo boundaries, extension schema | `bondery-core` |
 | Prisma schema, migrations, Postgres usage (Bondery classic Prisma) | `bondery-database` |
 | Prisma Next (upstream CLI skills; routed from `bondery-database`) | `prisma-next-*` in `.agents/skills/` |
@@ -57,6 +58,7 @@ Do not duplicate content across skills — link and keep a single source of trut
 | Transactional email, templates, SMTP/Plunk | `bondery-emails` |
 | 1:1 GitHub/email/review replies (founder voice) | `bondery-support-replies` |
 | Chrome extension runtime, WXT/MV3, CWS listing graphics | `bondery-chrome-extension` |
+| LLM plugin packages, Claude directory, OpenAI plugin ZIP | `bondery-llm-plugins` |
 
 ## Agent configuration
 

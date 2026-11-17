@@ -2,7 +2,6 @@ import { IMPORTANT_DATE_TYPE_META } from "@bondery/helpers";
 import type { ImportantDate } from "@bondery/schemas";
 import { IconBell, IconCalendar, IconCalendarPlus, IconPencil } from "@tabler/icons-react-native";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
 import { StyleSheet, Text, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
 import {
@@ -13,11 +12,12 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import { LIMITS } from "../../../lib/config";
+import { useMobileDateTimeFormatContext } from "../../../lib/preferences/useMobilePreferences";
 import { notifications } from "../../../lib/toast/notifications";
 import { useShowErrorToast } from "../../../lib/toast/useShowErrorToast";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
-import { formatImportantDate, resolveDateLocale } from "../importantDateUtils";
+import { formatImportantDate } from "../importantDateUtils";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
 import { contactDetailStyles } from "./contactDetailStyles";
 import { EditImportantDateSheet } from "./EditImportantDateSheet";
@@ -59,8 +59,7 @@ export function ContactImportantDatesSection({
   const tMobileContactIdentity = useMobileContactIdentityTranslations();
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
-  const { i18n } = useTranslation();
-  const dateLocale = resolveDateLocale(i18n.language);
+  const formatCtx = useMobileDateTimeFormatContext();
   const showErrorToast = useShowErrorToast();
   const [sheet, setSheet] = useState<SheetState>({ open: false });
   const errorTitle = t("feedback.errorTitle");
@@ -179,7 +178,7 @@ export function ContactImportantDatesSection({
                 </View>
 
                 <Pressable
-                  accessibilityLabel={`${typeLabel}, ${formatImportantDate(dateEntry.date, dateLocale)}`}
+                  accessibilityLabel={`${typeLabel}, ${formatImportantDate(dateEntry.date, formatCtx)}`}
                   accessibilityRole="button"
                   onPress={() => openEditSheet(sourceIndex)}
                   style={contactDetailStyles.cardPressable}
@@ -189,7 +188,7 @@ export function ContactImportantDatesSection({
                       {meta.emoji} {typeLabel}
                     </Text>
                     <Text style={[contactDetailStyles.infoValue, { color: colors.textPrimary }]}>
-                      {formatImportantDate(dateEntry.date, dateLocale)}
+                      {formatImportantDate(dateEntry.date, formatCtx)}
                     </Text>
                     {dateEntry.note ? (
                       <Text style={[styles.noteText, { color: colors.textMuted }]}>

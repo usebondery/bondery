@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Pridėti žmones į grupę",
+  "ColorLabel": "Spalva",
+  "ContactCount": "Kontaktai",
+  "DetailPageTitle": "Grupės detalės",
+  "Empty": "Su šia grupe dar nesusietas nė vienas kontaktas.",
+  "HeaderDescription": "Pasirinktos grupės narių apžvalga.",
+  "NoContactsFound": "Su šia grupe dar nesusietas nė vienas kontaktas.",
+  "NoContactsMatchSearch": "Tokio kontakto nerasta.",
+  "RemoveContact": {
+    "ErrorDescription": "Nepavyko pašalinti kontakto iš grupės. Bandyk dar kartą.",
+    "LoadingDescription": "Atnaujinami grupės nariai...",
+    "LoadingTitle": "Šalinamas kontaktas",
+    "SuccessDescription": "Kontaktas sėkmingai pašalintas iš grupės"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Nepavyko pašalinti kontaktų iš grupės. Bandyk dar kartą.",
+    "LoadingDescription": "Atnaujinami grupės nariai...",
+    "LoadingTitle": "Šalinami kontaktai",
+    "SuccessDescription": "{count} kontaktas (-ai) sėkmingai pašalinti iš grupės"
+  },
+  "RemoveFromGroup": "Pašalinti iš grupės",
+  "Subtitle": "Šiai grupei priskirti kontaktai.",
+  "Table": {
+    "Avatar": "Avataras",
+    "LastInteraction": "Paskutinė sąveika",
+    "Location": "Vieta",
+    "Name": "Vardas",
+    "Socials": "Socialiniai tinklai",
+    "Title": "Antraštė"
+  },
+  "ThisContactFallback": "šis kontaktas",
+  "Title": "Grupė: {label}"
+}

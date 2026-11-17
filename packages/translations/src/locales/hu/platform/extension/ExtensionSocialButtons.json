@@ -1,0 +1,14 @@
+{
+  "Instagram": {
+    "ExtensionError": "Bővítményhiba – próbáld újra",
+    "OpenInBondery": "Megnyitás a Bonderyben",
+    "SignInRequired": "Jelentkezz be – kattints a Bondery ikonra",
+    "SomethingWrong": "Hiba történt"
+  },
+  "LinkedIn": {
+    "ExtensionError": "Bővítményhiba – próbáld újra",
+    "OpenInBondery": "Megnyitás a Bonderyben",
+    "SignInRequired": "Jelentkezz be – kattints a Bondery ikonra",
+    "SomethingWrong": "Hiba történt"
+  }
+}

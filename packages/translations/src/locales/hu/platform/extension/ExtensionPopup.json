@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Bondery megnyitása"
+  },
+  "LoggedOut": {
+    "Description": "Kapcsold össze a fiókodat, hogy kapcsolatokat ments közösségi oldalakról.",
+    "SignIn": "Bejelentkezés",
+    "Title": "Bejelentkezés a Bonderybe"
+  },
+  "PersonActions": {
+    "AddInteraction": "Interakció hozzáadása ehhez a személyhez"
+  },
+  "Settings": {
+    "ApiServer": "API szerver",
+    "SignOut": "Kijelentkezés"
+  },
+  "UpdateRequired": {
+    "Description": "A Bondery-bővítményed elavult, és lehet, hogy nem működik rendesen. A folytatáshoz frissítsd.",
+    "OpenExtensionsPage": "Bővítmények oldal megnyitása",
+    "Title": "Frissítés szükséges"
+  },
+  "Welcome": {
+    "ConnectButton": "Bondery-fiók összekapcsolása"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "Create": "Pievienot Bondery",
+  "Creating": "Notiek personas izveide...",
+  "ErrorDescription": "Veidojot šo personu, radās problēma.",
+  "ErrorTitle": "Nevarēja izveidot personu",
+  "FullNameLabel": "Pilns vārds",
+  "FullNamePlaceholder": "piem. Džeina Dū",
+  "InvalidName": "pievieno derīgu vārdu",
+  "NameRequired": "pievieno vārdu",
+  "SuccessDescription": "Jaunā persona tika pievienota taviem kontaktiem.",
+  "SuccessTitle": "Persona izveidota",
+  "Title": "Izveidot personu"
+}

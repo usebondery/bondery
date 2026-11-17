@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "S koje platforme si zatražio izvoz?",
+    "Description": "Prenesi postojeću mrežu u Bondery s LinkedIna, Instagrama ili ručno.",
+    "Finish": "Krenuti",
+    "Instagram": "Uvesti s Instagrama",
+    "InstagramDescription": "Učitaj podatke o pratiteljima/praćenjima s Instagrama.",
+    "LinkedIn": "Uvesti s LinkedIna",
+    "LinkedInDescription": "Učitaj LinkedIn izvoz veza.",
+    "ManualAdd": "Stvoriti ručno",
+    "SkipImport": "Preskočiti uvoz",
+    "SuccessDescription": "Uvezeno: {imported}, ažurirano: {updated}, preskočeno: {skipped}.",
+    "SuccessTitle": "Uvoz je dovršen!",
+    "Title": "Uvezi kontakte",
+    "WaitingForExport": "Čekam svoj izvoz"
+  },
+  "Intent": {
+    "both": "Oboje",
+    "Description": "Koristit ćemo ovo da prilagodimo Bondery tebi.",
+    "personal": "Prijatelji i obitelj",
+    "professional": "Poslovno",
+    "Title": "Kako ćeš koristiti Bondery?"
+  },
+  "Loading": {
+    "Message": "Pripremam sve za tebe…"
+  },
+  "MetadataTitle": "Uvod",
+  "Welcome": {
+    "LetsGo": "Krenimo",
+    "Subtitle": "Drago nam je upoznati te. Postavimo tvoj osobni CRM.",
+    "TitleGeneric": "Dobrodošao u Bondery! 😊",
+    "TitleWithName": "Dobrodošao, {name}! 😊"
+  }
+}

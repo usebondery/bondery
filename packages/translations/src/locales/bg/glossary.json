@@ -1,0 +1,22 @@
+{
+  "entities": {
+    "contact": "контакт",
+    "contactPlural": "контакти",
+    "group": "група",
+    "interaction": "взаимодействие",
+    "interactionPlural": "взаимодействия",
+    "network": "мрежа",
+    "person": "човек",
+    "person_one": "{count} човек",
+    "person_other": "{count} души",
+    "tag": "етикет"
+  },
+  "features": {
+    "aiAssistant": "AI асистент",
+    "fixAndMerge": "Коригиране и сливане",
+    "keepInTouch": "Поддържай връзка"
+  },
+  "product": {
+    "name": "Bondery"
+  }
+}

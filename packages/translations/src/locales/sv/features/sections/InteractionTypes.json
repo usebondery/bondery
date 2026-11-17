@@ -1,0 +1,14 @@
+{
+  "Call": "Samtal",
+  "Coffee": "Kaffe",
+  "CompetitionHackathon": "Tävling/hackathon",
+  "Custom": "Anpassad",
+  "Email": "E-post",
+  "Meal": "Måltid",
+  "Meeting": "Möte",
+  "NetworkingEvent": "Nätverksevent",
+  "Note": "Anteckning",
+  "Other": "Övrigt",
+  "PartySocial": "Fest/socialt",
+  "TextMessaging": "SMS/meddelande"
+}

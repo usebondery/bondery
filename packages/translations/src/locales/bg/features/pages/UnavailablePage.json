@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Повторная проверка след {seconds} с…",
+  "Description": "Твой аккаунт в безопасности, ти по-прежнему вошли в систему. Мы продолжаем проверку — обычно это занимает немного времени.",
+  "MetadataTitle": "Служба недоступна",
+  "Retry": "Повторить",
+  "StatusChecking": "Проверка соединения…",
+  "StatusDegraded": "Некоторые функции сейчас работают медленно",
+  "StatusOffline": "Bondery временно недоступен",
+  "StatusOnline": "Снова в сети. Перенаправляем теб…",
+  "StatusPageLink": "Страница статуса",
+  "TechnicalBackendStatus": "Бэкенд: {status}",
+  "TechnicalDetails": "Технические сведения",
+  "TechnicalHttpStatus": "HTTP-статус: {status}",
+  "TechnicalUnreachable": "недоступен",
+  "Title": "Проблема с подключением"
+}

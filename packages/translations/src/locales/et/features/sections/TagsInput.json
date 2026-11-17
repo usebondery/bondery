@@ -1,0 +1,22 @@
+{
+  "AddError": "Sildi lisamine ei õnnestunud",
+  "AddNewTagTooltip": "Loo uus silt",
+  "AddSuccess": "Silt lisati edukalt",
+  "AddTagTooltip": "Lisa silt",
+  "CreateError": "Sildi loomine ei õnnestunud",
+  "CreateNewTagEmpty": "Loo uus silt",
+  "CreateNewTagOption": "Loo uus silt „{label}“",
+  "CreateTagCancel": "Tühista",
+  "CreateTagConfirm": "Loo ja lisa",
+  "CreateTagMessage": "Silt „{name}“ pole veel olemas. Kas tahad selle luua ja sellele kontaktile lisada?",
+  "CreateTagTitle": "Kas luua uus silt?",
+  "Label": "Sildid",
+  "NoTagsFound": "Silte ei leitud",
+  "Placeholder": "Lisa silte…",
+  "RemoveError": "Sildi eemaldamine ei õnnestunud",
+  "RemoveTagTooltip": "Eemalda silt",
+  "SearchPlaceholder": "Otsi või loo silt…",
+  "TagAlreadyAddedMessage": "Silt „{name}“ on sellele kontaktile juba lisatud.",
+  "TagAlreadyAddedTitle": "Silt on juba lisatud",
+  "TagAlreadyAppliedTooltip": "Silt on juba rakendatud"
+}

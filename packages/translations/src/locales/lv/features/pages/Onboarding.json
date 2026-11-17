@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Kuru platformu tu pieprasījāt?",
+    "Description": "Pievienot savu esošo tīklu Bondery no LinkedIn, Instagram vai pievieno tos manuāli.",
+    "Finish": "Sākt darbu",
+    "Instagram": "Importēt no Instagram",
+    "InstagramDescription": "Augšupielādēt savus Instagram sekotājus/sekojošos datus.",
+    "LinkedIn": "Importēt no LinkedIn",
+    "LinkedInDescription": "Augšupielādēt savu LinkedIn savienojumu eksporta failu.",
+    "ManualAdd": "Izveidot manuāli",
+    "SkipImport": "Izlaist importēšanu",
+    "SuccessDescription": "{imported} importēts, {updated} atjaunināts, {skipped} izlaists.",
+    "SuccessTitle": "Importēšana ir pabeigta!",
+    "Title": "Importēt savus kontaktus",
+    "WaitingForExport": "Gaidu savu eksportu"
+  },
+  "Intent": {
+    "both": "Abi",
+    "Description": "Mēs to izmantosim, lai personalizētu Bondery tavs vietā.",
+    "personal": "Draugi un ģimene",
+    "professional": "Profesionāls",
+    "Title": "Kā tu izmantosit Bondery?"
+  },
+  "Loading": {
+    "Message": "Notiek lietu iestatīšana tavs vietā…"
+  },
+  "MetadataTitle": "Uzņemšana",
+  "Welcome": {
+    "LetsGo": "Ejam",
+    "Subtitle": "Prieks iepazīties. Iestatīsim tavs personaīgo CRM.",
+    "TitleGeneric": "Laipni lūdzam Bondery! 😊",
+    "TitleWithName": "Laipni lūdzam, {name}! 😊"
+  }
+}

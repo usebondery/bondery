@@ -1,0 +1,22 @@
+{
+  "description": "{{senderName}} seninle bir kişi paylaştı",
+  "footerNotes": "Bondery tarafından gönderildi. {{senderName}} ile iletişim kurmak için bu e-postayı yanıtla.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adres",
+    "email": "E-posta",
+    "facebook": "Facebook",
+    "importantDates": "Önemli tarihler",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Konum",
+    "notes": "Notlar",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Web sitesi",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-posta ve daha fazlası mesajda",
+  "replyCta": "{{senderName}} kişisine yanıtla",
+  "subject": "{{senderName}} seninle bir kişi paylaştı • {{contactName}}"
+}

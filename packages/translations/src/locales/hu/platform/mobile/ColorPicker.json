@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "A színkód a vágólapra került",
+  "CopyAccessibilityLabel": "Színkód másolása",
+  "CopyFailedMessage": "A színkód másolása nem sikerült. Próbáld újra.",
+  "CustomColorLabel": "Egyéni szín",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Adj meg érvényes hex színt (pl. #AE3EC9)",
+  "SheetTitle": "Szín",
+  "SwatchesLabel": "Gyors színek",
+  "TriggerAccessibilityHint": "Színválasztó megnyitása"
+}

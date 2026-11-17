@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Ενέργειες",
+  "CannotDeleteMyself": "Δεν μπορείς να διαγράψεις τη δική σου κάρτα επαφής",
+  "CannotMergeMyself": "Δεν μπορείς να συγχωνεύσεις τη δική σου κάρτα επαφής με άλλες",
+  "DeleteContact": "Διαγραφή επαφής",
+  "DownloadVCard": "Λήψη vCard",
+  "ExportError": "Σφάλμα",
+  "ExportErrorDescription": "Η εξαγωγή της επαφής απέτυχε. Δοκίμασε ξανά.",
+  "ExportSuccess": "Επιτυχία",
+  "ExportSuccessDescription": "Η επαφή εξήχθη ως vCard"
+}

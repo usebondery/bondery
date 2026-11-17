@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Действия",
+  "AddPerson": "Добавяне човека",
+  "AddPersonDescription": "Създаване новый контакт в твойей сети",
+  "ContactUs": "Связаться с нами",
+  "ContactUsDescription": "Связаться с командой Bondery",
+  "Documentation": "Документация",
+  "DocumentationDescription": "Прочитать документацию Bondery",
+  "ExportData": "Экспортировать данные",
+  "ExportDataDescription": "Запазване копию данных Bondery",
+  "FindPerson": "Найти човека",
+  "FindPersonDescription": "Искать в твойей сети по имени",
+  "GoToDescription": "Перейти: {label}",
+  "HelpGroup": "Помощь",
+  "ImportData": "Импортиране данные",
+  "ImportDataDescription": "Импортиране ZIP-файл Bondery JSON",
+  "LogInteraction": "Записване взаимодействие",
+  "LogInteractionDescription": "Записване новую встречу, звонок или сообщение",
+  "NavigateGroup": "Навигация",
+  "NothingFound": "Действия не найдены",
+  "SearchPlaceholder": "Найти действие или перейти…"
+}

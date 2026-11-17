@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Ava Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Ühenda oma konto, et salvestada kontakte sotsiaalmeediast.",
+    "SignIn": "Logi sisse",
+    "Title": "Logi sisse Bonderysse"
+  },
+  "PersonActions": {
+    "AddInteraction": "Lisa suhtlus selle inimesega"
+  },
+  "Settings": {
+    "ApiServer": "API server",
+    "SignOut": "Logi välja"
+  },
+  "UpdateRequired": {
+    "Description": "Sinu Bondery laiendus on aegunud ja ei pruugi õigesti töötada. Jätkamiseks uuenda.",
+    "OpenExtensionsPage": "Ava laienduste leht",
+    "Title": "Uuendus on kohustuslik"
+  },
+  "Welcome": {
+    "ConnectButton": "Ühenda Bondery konto"
+  }
+}

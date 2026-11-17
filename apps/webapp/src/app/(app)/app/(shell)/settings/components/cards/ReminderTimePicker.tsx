@@ -5,6 +5,7 @@ import { TimePicker } from "@mantine/dates";
 import { IconBell } from "@tabler/icons-react";
 import type { ReactNode } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
 import { parseReminderPickerInput } from "./reminderTimeValue";
 
 interface ReminderTimePickerProps {
@@ -25,6 +26,7 @@ export function ReminderTimePicker({
   description,
 }: ReminderTimePickerProps) {
   const t = useSettingsPageTranslations("Preferences");
+  const formatter = useDateFormatter();
 
   const presetGroups = [
     {
@@ -54,6 +56,7 @@ export function ReminderTimePicker({
       <Group align="flex-end" grow wrap="wrap">
         <div style={{ flex: 1, minWidth: 220 }}>
           <TimePicker
+            amPmLabels={formatter.amPmLabels()}
             format={timeFormat}
             key={timeFormat}
             leftSection={<IconBell size={16} />}

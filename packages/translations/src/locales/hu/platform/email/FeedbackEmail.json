@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Mit adott vissza az eszköz:",
+  "agentExpectedHeading": "Mit várt az ügynök:",
+  "agentKindLabel": "Jelentés típusa:",
+  "agentRequestIdLabel": "Kérés azonosító:",
+  "agentSourceHeading": "AI-ügynök jelentette",
+  "agentToolLabel": "Eszköz:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Általános visszajelzés:",
+  "heading": "Visszajelzés tőle: {{userEmail}}",
+  "notProvided": "(Nincs megadva)",
+  "npsReasonHeading": "Miért ezt a pontszámot adta?",
+  "npsScoreLabel": "NPS pontszám:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Új visszajelzés tőle: {{userEmail}} – NPS: {{npsScore}}",
+  "replyCta": "Válasz erre: {{userEmail}}",
+  "subject": "Új visszajelzés a Bonderyről",
+  "submittedAt": "Beküldve: {{timestamp}}",
+  "userEmailLabel": "Felhasználó e-mail:",
+  "userIdLabel": "Felhasználó azonosító:"
+}

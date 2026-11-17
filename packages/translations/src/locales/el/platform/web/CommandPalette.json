@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Ενέργειες",
+  "AddPerson": "Προσθήκη ατόμου",
+  "AddPersonDescription": "Δημιούργησε μια νέα επαφή στο δίκτυό σου",
+  "ContactUs": "Επικοινώνησε μαζί μας",
+  "ContactUsDescription": "Επικοινώνησε με την ομάδα του Bondery",
+  "Documentation": "Τεκμηρίωση",
+  "DocumentationDescription": "Διάβασε την τεκμηρίωση του Bondery",
+  "ExportData": "Εξαγωγή δεδομένων",
+  "ExportDataDescription": "Αποθήκευσε ένα αντίγραφο των δεδομένων σου στο Bondery",
+  "FindPerson": "Εύρεση ατόμου",
+  "FindPersonDescription": "Ψάξε στο δίκτυό σου με όνομα",
+  "GoToDescription": "Μετάβαση: {label}",
+  "HelpGroup": "Βοήθεια",
+  "ImportData": "Εισαγωγή δεδομένων",
+  "ImportDataDescription": "Εισαγωγή ενός ZIP Bondery JSON",
+  "LogInteraction": "Καταγραφή αλληλεπίδρασης",
+  "LogInteractionDescription": "Κατάγραψε μια νέα συνάντηση, κλήση ή μήνυμα",
+  "NavigateGroup": "Πλοήγηση",
+  "NothingFound": "Δεν βρέθηκαν ενέργειες",
+  "SearchPlaceholder": "Αναζήτηση ενεργειών ή πλοήγηση…"
+}

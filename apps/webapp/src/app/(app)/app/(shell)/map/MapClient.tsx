@@ -507,6 +507,7 @@ export function MapClient({ view }: MapClientProps) {
 
           {resolvedCamera ? (
             <Box
+              dir="ltr"
               h={MAP_HEIGHT_PX}
               left={mapReady ? undefined : 0}
               pos={mapReady ? "relative" : "absolute"}

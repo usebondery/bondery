@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Otwórz Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Połącz konto, aby zapisywać kontakty z mediów społecznościowych.",
+    "SignIn": "Zaloguj się",
+    "Title": "Zaloguj się do Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Dodaj interakcję z tą osobą"
+  },
+  "Settings": {
+    "ApiServer": "Serwer API",
+    "SignOut": "Wyloguj się"
+  },
+  "UpdateRequired": {
+    "Description": "Rozszerzenie Bondery jest nieaktualne i może nie działać prawidłowo. Zaktualizuj je, aby kontynuować.",
+    "OpenExtensionsPage": "Otwórz stronę rozszerzeń",
+    "Title": "Wymagana aktualizacja"
+  },
+  "Welcome": {
+    "ConnectButton": "Połącz konto Bondery"
+  }
+}

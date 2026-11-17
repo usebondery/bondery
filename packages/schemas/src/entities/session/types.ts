@@ -1,9 +1,14 @@
 import type { SupportedLocale } from "#locale/supported-locale/types.js";
-import type { ColorSchemePreference, TimeFormatPreference } from "../settings/types.js";
+import type {
+  ColorSchemePreference,
+  DateFormatPreference,
+  TimeFormatPreference,
+} from "../settings/types.js";
 
 export interface UserSessionData {
   avatarUrl: string | null;
   colorScheme: ColorSchemePreference;
+  dateFormat: DateFormatPreference;
   displayName: string;
   isPlatformAdmin: boolean;
   language: SupportedLocale;

@@ -38,6 +38,7 @@ Writing: default plans and replies use ASD-100 via `bondery-writing` (always-on)
 12. Identify what already exists — never rebuild something the codebase already provides
 13. When the task spans unfamiliar or independent areas, use the `agent` tool to explore them in parallel
 14. Record brief **Current State Findings** before designing: the patterns being extended or replaced, relevant constraints, and technical debt that affects this plan
+15. If the task touches `llm-plugins`, read `bondery-llm-plugins` (`/.agents/skills/bondery-llm-plugins/SKILL.md`) first.
 
 ## Step 0.5: Resolve Ambiguity Before Planning
 

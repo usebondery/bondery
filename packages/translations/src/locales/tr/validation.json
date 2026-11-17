@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Geçerli bir e-posta adresi gir",
+    "invalidTitle": "Geçersiz e-posta"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Ad en fazla {max} karakter olabilir",
+      "required": "Ad gerekli"
+    },
+    "generic": {
+      "maxLength": "Değer en fazla {max} karakter olabilir"
+    },
+    "headline": {
+      "maxLength": "Başlık en fazla {max} karakter olabilir"
+    },
+    "label": {
+      "maxLength": "{field} en fazla {max} karakter olabilir",
+      "required": "{field} gerekli"
+    },
+    "lastName": {
+      "maxLength": "Soyad en fazla {max} karakter olabilir"
+    },
+    "location": {
+      "maxLength": "Konum en fazla {max} karakter olabilir"
+    },
+    "middleName": {
+      "maxLength": "İkinci ad en fazla {max} karakter olabilir"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Başlık gerekli"
+  },
+  "title": "Doğrulama hatası"
+}

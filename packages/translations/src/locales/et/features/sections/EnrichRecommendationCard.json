@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "Kõik LinkedIni profiiliga kontaktid on juba rikastatud.",
+  "AllEnrichedTitle": "Kõik kontaktid on rikastatud",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Praegu rikastan:",
+  "EligibleLabel_one": "{count} inimest saaks rikastada",
+  "EligibleLabel_other": "{count} inimest saaks rikastada",
+  "Enrich": "Rikasta",
+  "EnrichAll": "Rikasta kõik",
+  "HelpTooltip": "Tõmba LinkedIni profiili värskeimad andmed sellesse kontakti. Klõpsa, et õppida, kuidas rikastamine töötab.",
+  "Pause": "Peata",
+  "PausingTooltip": "Lõpetan praeguse kontakti, seejärel pean…",
+  "PersonEligibleLabel": "Seda kontakti saaks LinkedInist rikastada",
+  "ProcessingPerson": "Rikastan {name}…",
+  "ProgressLabel": "Rikastan: {completed}/{totalEligible} valmis",
+  "ProgressLabelWithFailed": "Rikastan: {completed}/{totalEligible} valmis ({failed} ebaõnnestus)",
+  "Resume": "Jätka",
+  "ResumeLabel": "Rikastamine katkes: {completed} valmis, {pending} jäänud",
+  "SkipRemaining": "Jäta ülejäänud vahele",
+  "Tooltip": "Neil kontaktidel on LinkedIn profiil, aga nad pole veel rikastatud. Rikasta, et tõmmata värske tööajalugu, haridus ja bio."
+}

@@ -1,0 +1,22 @@
+{
+  "description": "Kontakt koji je {{senderName}} podijelio s tobom",
+  "footerNotes": "Poslano putem Bonderyja. Odgovori na ovu e-poštu da dosegneš {{senderName}}.",
+  "importantDateLine": "{{label}}: {{date}} ({{type}})",
+  "labels": {
+    "address": "Adresa",
+    "email": "E-pošta",
+    "facebook": "Facebook",
+    "importantDates": "Važni datumi",
+    "instagram": "Instagram",
+    "linkedin": "LinkedIn",
+    "location": "Lokacija",
+    "notes": "Bilješke",
+    "phone": "Telefon",
+    "signal": "Signal",
+    "website": "Web-stranica",
+    "whatsapp": "WhatsApp"
+  },
+  "previewFallback": "Telefon, e-pošta i ostali podaci unutra",
+  "replyCta": "Odgovoriti {{senderName}}",
+  "subject": "Kontakt od {{senderName}} • {{contactName}}"
+}

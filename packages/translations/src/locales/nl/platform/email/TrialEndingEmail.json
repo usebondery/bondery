@@ -1,0 +1,9 @@
+{
+  "body": "Daarna wordt je abonnement automatisch verlengd, tenzij je opzegt.",
+  "cta": "Abonnement beheren",
+  "endDateFallback": "binnenkort",
+  "heading": "Je Premium-proefperiode eindigt op {{endDate}}",
+  "preview": "Je abonnement wordt verlengd tenzij je opzegt",
+  "subject": "Je Bondery Premium-proefperiode loopt binnenkort af",
+  "whyReceiving": "Je ontvangt dit omdat je een Bondery Premium-proefperiode hebt."
+}

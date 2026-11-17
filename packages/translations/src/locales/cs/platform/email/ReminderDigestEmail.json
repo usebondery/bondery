@@ -7,9 +7,11 @@
     "nameday": "Svátek",
     "other": "Důležité datum"
   },
+  "dayFew": "{{count}} dní",
   "dayMany": "{{count}} dní",
   "dayOne": "1 den",
   "description": "Na {{headingDate}}. Otevřete osobu pro podrobnosti nebo pošlete vzkaz.",
+  "headingFew": "{{count}} připomínek se blíží",
   "headingMany": "{{count}} připomínek se blíží",
   "headingOne": "1 připomínka se blíží",
   "preview": "{{firstPersonName}} — {{firstTypeLabel}} za {{firstRemainingLabel}}",

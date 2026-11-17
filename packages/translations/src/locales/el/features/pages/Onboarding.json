@@ -1,0 +1,34 @@
+{
+  "Import": {
+    "ChoosePlatform": "Από ποια πλατφόρμα ζήτησες εξαγωγή;",
+    "Description": "Φέρε το υπάρχον δίκτυό σου στο Bondery από το LinkedIn ή το Instagram, ή πρόσθεσε τις επαφές χειροκίνητα.",
+    "Finish": "Ξεκίνα",
+    "Instagram": "Εισαγωγή από Instagram",
+    "InstagramDescription": "Ανέβασε τα δεδομένα του Instagram με τους ακολούθους σου και όσους ακολουθείς.",
+    "LinkedIn": "Εισαγωγή από LinkedIn",
+    "LinkedInDescription": "Ανέβασε το αρχείο εξαγωγής των συνδέσεών σου στο LinkedIn.",
+    "ManualAdd": "Χειροκίνητη δημιουργία",
+    "SkipImport": "Παράλειψη εισαγωγής",
+    "SuccessDescription": "Εισήχθησαν {imported}, ενημερώθηκαν {updated}, παραλείφθηκαν {skipped}.",
+    "SuccessTitle": "Η εισαγωγή ολοκληρώθηκε!",
+    "Title": "Εισήγαγε τις επαφές σου",
+    "WaitingForExport": "Περιμένω την εξαγωγή μου"
+  },
+  "Intent": {
+    "both": "Και τα δύο",
+    "Description": "Θα το χρησιμοποιήσουμε για να προσαρμόσουμε το Bondery σε εσένα.",
+    "personal": "Φίλοι και οικογένεια",
+    "professional": "Επαγγελματικά",
+    "Title": "Πώς θα χρησιμοποιείς το Bondery;"
+  },
+  "Loading": {
+    "Message": "Τα ετοιμάζουμε όλα για εσένα…"
+  },
+  "MetadataTitle": "Καλωσόρισμα",
+  "Welcome": {
+    "LetsGo": "Πάμε",
+    "Subtitle": "Χαρά μας που σε γνωρίζουμε. Ας ρυθμίσουμε το προσωπικό σου CRM.",
+    "TitleGeneric": "Καλώς ήρθες στο Bondery! 😊",
+    "TitleWithName": "Καλώς ήρθες, {name}! 😊"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "AddError": "Tunnisteen lisäys epäonnistui",
+  "AddNewTagTooltip": "Luo uusi tunniste",
+  "AddSuccess": "Tunniste lisättiin",
+  "AddTagTooltip": "Lisää tunniste",
+  "CreateError": "Tunnisteen luonti epäonnistui",
+  "CreateNewTagEmpty": "Luo uusi tunniste",
+  "CreateNewTagOption": "Luo uusi tunniste \"{label}\"",
+  "CreateTagCancel": "Peruuta",
+  "CreateTagConfirm": "Luo ja lisää",
+  "CreateTagMessage": "Tunnistetta \"{name}\" ei ole vielä. Haluatko luoda sen ja lisätä tälle yhteystiedolle?",
+  "CreateTagTitle": "Luodaanko uusi tunniste?",
+  "Label": "Tunnisteet",
+  "NoTagsFound": "Tunnisteita ei löydy",
+  "Placeholder": "Lisää tunnisteita...",
+  "RemoveError": "Tunnisteen poisto epäonnistui",
+  "RemoveTagTooltip": "Poista tunniste",
+  "SearchPlaceholder": "Hae tai luo tunniste...",
+  "TagAlreadyAddedMessage": "Tunniste \"{name}\" on jo lisätty tälle yhteystiedolle.",
+  "TagAlreadyAddedTitle": "Tunniste on jo lisätty",
+  "TagAlreadyAppliedTooltip": "Tunniste on jo käytössä"
+}

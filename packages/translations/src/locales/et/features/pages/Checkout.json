@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Sul on juba aktiivne Premium tellimus.",
+  "alreadySubscribedTitle": "Juba tellitud",
+  "errorMessage": "Midagi läks valesti. Proovi uuesti.",
+  "errorTitle": "Makse ebaõnnestus",
+  "errorUnauthorized": "Logi sisse ja proovi uuesti.",
+  "intervalAnnual": "Aastane",
+  "intervalMonthly": "Igakuine",
+  "paymentBlockedAction": "Uuenda arveldust",
+  "paymentBlockedMessage": "Me ei õnnestunud pärast mitut katset makset töödelda. Uuenda arveldusandmeid, et taastada Premium ligipääs.",
+  "paymentBlockedTitle": "Makse on vajalik",
+  "successMessage": "Naudi kuus 300 AI sõnumit ja kõiki Premium funktsioone.",
+  "successTitle": "Oled nüüd Premium kasutaja!",
+  "upgradePendingMessage": "Sinu konto uueneb peagi Premiumile.",
+  "upgradePendingTitle": "Makse laekus",
+  "upgradesDisabledTooltip": "Premium uuendused pole veel saadaval. Vaata peagi uuesti.",
+  "upgradeToPremium": "Uuenda Premiumile"
+}

@@ -1,0 +1,11 @@
+{
+  "ActionsButton": "Aktionen",
+  "CannotDeleteMyself": "Ne možeš da izbrišeš sopstvenu karticu za kontakt",
+  "CannotMergeMyself": "Ne možeš da spojiš svoju vizitkartu sa drugim vizitkartama",
+  "DeleteContact": "& Обриши контакт",
+  "DownloadVCard": "Preuzmi vCard",
+  "ExportError": "Fehler",
+  "ExportErrorDescription": "Kontakt nije mogao da se izveze. Pokušaj ponovo.",
+  "ExportSuccess": "Erfolg",
+  "ExportSuccessDescription": "Kontakt je izvezen kao vCard"
+}

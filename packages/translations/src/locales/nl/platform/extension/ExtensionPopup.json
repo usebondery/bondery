@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Bondery openen"
+  },
+  "LoggedOut": {
+    "Description": "Koppel je account om contacten van socials op te slaan.",
+    "SignIn": "Inloggen",
+    "Title": "Inloggen bij Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Interactie met deze persoon toevoegen"
+  },
+  "Settings": {
+    "ApiServer": "API-server",
+    "SignOut": "Afmelden"
+  },
+  "UpdateRequired": {
+    "Description": "Je Bondery-extensie is verouderd en werkt mogelijk niet goed. Werk bij om door te gaan.",
+    "OpenExtensionsPage": "Extensiepagina openen",
+    "Title": "Update vereist"
+  },
+  "Welcome": {
+    "ConnectButton": "Je Bondery-account koppelen"
+  }
+}

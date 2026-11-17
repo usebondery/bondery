@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Añadir personas al grupo",
+  "ColorLabel": "Color",
+  "ContactCount": "Contactos",
+  "DetailPageTitle": "Detalles del grupo",
+  "Empty": "Aún no hay contactos vinculados a este grupo.",
+  "HeaderDescription": "Vista general de los miembros del grupo seleccionado.",
+  "NoContactsFound": "Aún no hay contactos vinculados a este grupo.",
+  "NoContactsMatchSearch": "No se ha encontrado ese contacto.",
+  "RemoveContact": {
+    "ErrorDescription": "No se ha podido quitar el contacto del grupo. Inténtalo de nuevo.",
+    "LoadingDescription": "Actualizando miembros del grupo...",
+    "LoadingTitle": "Quitando contacto",
+    "SuccessDescription": "Contacto quitado del grupo correctamente"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "No se han podido quitar los contactos del grupo. Inténtalo de nuevo.",
+    "LoadingDescription": "Actualizando miembros del grupo...",
+    "LoadingTitle": "Quitando contactos",
+    "SuccessDescription": "{count} contacto(s) quitado(s) del grupo correctamente"
+  },
+  "RemoveFromGroup": "Quitar del grupo",
+  "Subtitle": "Contactos asignados a este grupo.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Última interacción",
+    "Location": "Ubicación",
+    "Name": "Nombre",
+    "Socials": "Redes sociales",
+    "Title": "Titular"
+  },
+  "ThisContactFallback": "este contacto",
+  "Title": "Grupo: {label}"
+}

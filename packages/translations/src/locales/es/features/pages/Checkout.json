@@ -1,0 +1,18 @@
+{
+  "alreadySubscribedMessage": "Ya tienes una suscripción Premium activa.",
+  "alreadySubscribedTitle": "Ya estás suscrito",
+  "errorMessage": "Algo ha fallado. Inténtalo de nuevo.",
+  "errorTitle": "Error en el pago",
+  "errorUnauthorized": "Inicia sesión e inténtalo de nuevo.",
+  "intervalAnnual": "Anual",
+  "intervalMonthly": "Mensual",
+  "paymentBlockedAction": "Actualizar facturación",
+  "paymentBlockedMessage": "No hemos podido procesar tu pago tras varios intentos. Actualiza tus datos de facturación para recuperar el acceso Premium.",
+  "paymentBlockedTitle": "Pago requerido",
+  "successMessage": "Disfruta de 300 mensajes de IA al mes y todas las funciones Premium.",
+  "successTitle": "¡Ya eres Premium!",
+  "upgradePendingMessage": "Tu cuenta pasará a Premium en breve.",
+  "upgradePendingTitle": "Pago recibido",
+  "upgradesDisabledTooltip": "Las mejoras a Premium aún no están disponibles. Vuelve pronto.",
+  "upgradeToPremium": "Mejorar a Premium"
+}

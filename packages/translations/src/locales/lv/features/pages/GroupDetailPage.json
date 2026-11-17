@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Pievienot personas grupai",
+  "ColorLabel": "Krāsa",
+  "ContactCount": "Kontakti",
+  "DetailPageTitle": "Grupas detaļas",
+  "Empty": "Ar šo grupu vēl nav saistīta neviena kontakts.",
+  "HeaderDescription": "Pārskats par atlasītās grupas dalībniekiem.",
+  "NoContactsFound": "Ar šo grupu vēl nav saistīta neviena kontakts.",
+  "NoContactsMatchSearch": "Tāds kontakts nav atrasts.",
+  "RemoveContact": {
+    "ErrorDescription": "Nevarēja noņemt kontaktu no grupas. Mēģini vēlreiz.",
+    "LoadingDescription": "Notiek grupas dalībnieku atjaunināšana...",
+    "LoadingTitle": "Kontakta noņemšana",
+    "SuccessDescription": "Kontakts veiksmīgi noņemta no grupas"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Nevarēja noņemt kontaktus no grupas. Mēģini vēlreiz.",
+    "LoadingDescription": "Notiek grupas dalībnieku atjaunināšana...",
+    "LoadingTitle": "Kontaktu noņemšana",
+    "SuccessDescription": "{count} kontakts(-as) veiksmīgi noņemtas no grupas"
+  },
+  "RemoveFromGroup": "Noņemt no grupas",
+  "Subtitle": "Šai grupai piešķirtās kontaktus.",
+  "Table": {
+    "Avatar": "Iemiesojums",
+    "LastInteraction": "Pēdējā mijiedarbība",
+    "Location": "Atrašanās vieta",
+    "Name": "Vārds",
+    "Socials": "Sociālie tīkli",
+    "Title": "Virsraksts"
+  },
+  "ThisContactFallback": "šo kontaktu",
+  "Title": "Grupa: {label}"
+}

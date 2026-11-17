@@ -1,0 +1,30 @@
+{
+  "Approve": "Schváliť",
+  "ChromeExtensionClientName": "Rozšírenie Bondery pre Chrome",
+  "Deny": "Zamietnuť",
+  "Description": "{clientName} žiada o prístup k vášmu účtu Bondery.",
+  "ErrorTitle": "Chyba autorizácie",
+  "InvalidRequest": "Neplatná autorizačná požiadavka.",
+  "LoopbackWarning": "Táto aplikácia beží na tomto počítači (localhost). Pokračujte, len ak ste ju spustili vy.",
+  "MissingAuthorizationId": "Chýba autorizačná požiadavka. Skúste to prosím znova z aplikácie.",
+  "PermissionFullDescription": "Môže tiež zakladať, upravovať a mazať kontakty a ich údaje.",
+  "PermissionFullLabel": "Plný prístup",
+  "PermissionLabel": "Prístup",
+  "PermissionReadDescription": "Vyhľadávanie a čítanie vašich kontaktov a ich údajov.",
+  "PermissionReadLabel": "Len na čítanie",
+  "RequestedPermissions": "Požadované oprávnenia",
+  "Scopes": {
+    "api:access": "Používať Bondery API vo vašom mene",
+    "email": "Zobraziť vašu e-mailovú adresu",
+    "mcp:read": "Zobraziť vaše kontakty a ich údaje",
+    "mcp:write": "Zakladať, upravovať a mazať kontakty a ich údaje",
+    "offline_access": "Zostať prihlásený, kým prístup neodoberiete",
+    "openid": "Overiť vašu identitu",
+    "phone": "Zobraziť vaše telefónne číslo",
+    "profile": "Zobraziť informácie o vašom profile"
+  },
+  "Title": "Autorizácia aplikácie",
+  "UnexpectedError": "Došlo k neočakávanej chybe. Skúste to prosím znova.",
+  "UnknownClientName": "Neznáma aplikácia",
+  "WebappClientName": "Bondery"
+}

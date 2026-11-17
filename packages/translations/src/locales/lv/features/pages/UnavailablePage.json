@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Pārbaude vēlreiz pēc {seconds}s…",
+  "Description": "Tavs konts ir drošībā, un tu joprojām esi pierakstījies. Mēs turpināsim pārbaudīt, parasti tas ir īss.",
+  "MetadataTitle": "Pakalpojums nav pieejams",
+  "Retry": "Mēģināt vēlreiz",
+  "StatusChecking": "Notiek savienojuma pārbaude…",
+  "StatusDegraded": "Dažas funkcijas pašlaik var darboties lēni",
+  "StatusOffline": "Bondery īslaicīgi nav pieejams",
+  "StatusOnline": "Atpakaļ tiešsaistē. Atgriežas…",
+  "StatusPageLink": "Skatīt statusa lapu",
+  "TechnicalBackendStatus": "Aizmugursistēma: {status}",
+  "TechnicalDetails": "Tehniskās detaļas",
+  "TechnicalHttpStatus": "HTTP statuss: {status}",
+  "TechnicalUnreachable": "nesasniedzams",
+  "Title": "Mums ir problēmas ar savienojuma izveidi"
+}

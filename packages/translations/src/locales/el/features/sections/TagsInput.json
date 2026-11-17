@@ -1,0 +1,22 @@
+{
+  "AddError": "Δεν προστέθηκε η ετικέτα",
+  "AddNewTagTooltip": "Δημιουργία νέας ετικέτας",
+  "AddSuccess": "Η ετικέτα προστέθηκε",
+  "AddTagTooltip": "Προσθήκη ετικέτας",
+  "CreateError": "Δεν δημιουργήθηκε η ετικέτα",
+  "CreateNewTagEmpty": "Δημιουργία νέας ετικέτας",
+  "CreateNewTagOption": "Δημιουργία νέας ετικέτας «{label}»",
+  "CreateTagCancel": "Ακύρωση",
+  "CreateTagConfirm": "Δημιουργία και προσθήκη",
+  "CreateTagMessage": "Η ετικέτα «{name}» δεν υπάρχει ακόμα. Θέλεις να τη δημιουργήσεις και να την προσθέσεις σε αυτή την επαφή;",
+  "CreateTagTitle": "Δημιουργία νέας ετικέτας;",
+  "Label": "Ετικέτες",
+  "NoTagsFound": "Δεν βρέθηκαν ετικέτες",
+  "Placeholder": "Πρόσθεσε ετικέτες...",
+  "RemoveError": "Δεν αφαιρέθηκε η ετικέτα",
+  "RemoveTagTooltip": "Αφαίρεση ετικέτας",
+  "SearchPlaceholder": "Αναζήτηση ή δημιουργία ετικέτας...",
+  "TagAlreadyAddedMessage": "Η ετικέτα «{name}» έχει ήδη προστεθεί σε αυτή την επαφή.",
+  "TagAlreadyAddedTitle": "Η ετικέτα έχει ήδη προστεθεί",
+  "TagAlreadyAppliedTooltip": "Η ετικέτα έχει ήδη εφαρμοστεί"
+}

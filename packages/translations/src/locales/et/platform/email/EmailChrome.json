@@ -1,0 +1,8 @@
+{
+  "documentation": "dokumentatsioon",
+  "help": "Vajad abi? Külasta {{support}} või loe meie {{documentation}}.",
+  "internalNote": "Sisemine ops · klientidele ei saadeta",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Halda neid teavitusi Bonderys",
+  "support": "tugi"
+}

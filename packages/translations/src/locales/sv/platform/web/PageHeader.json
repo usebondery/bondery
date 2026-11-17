@@ -1,0 +1,15 @@
+{
+  "Concepts": {
+    "FixAndMerge": "Åtgärda och slå ihop",
+    "GroupDetail": "den här gruppen",
+    "Groups": "grupper",
+    "Home": "hem",
+    "KeepInTouch": "Håll kontakten",
+    "Map": "kartan",
+    "People": "personer",
+    "PersonDetails": "personuppgifter",
+    "Timeline": "interaktioner"
+  },
+  "HelpLabel": "Läs mer",
+  "LearnMoreAbout": "Läs mer om {concept}"
+}

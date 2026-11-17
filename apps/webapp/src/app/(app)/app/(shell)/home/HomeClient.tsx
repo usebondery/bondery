@@ -81,8 +81,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   const { data: recentlyAdded } = useRecentlyAddedContactsQuery();
   const { data: recentlyInteracted } = useRecentlyInteractedContactsQuery();
   const formatter = useFormatter();
-  const currentMonth = formatter.dateTime(new Date(), { month: "long" });
-  const currentYear = formatter.dateTime(new Date(), { year: "numeric" });
+  const currentMonth = formatter.formatDateField(new Date(), "monthLong");
+  const currentYear = formatter.formatDateField(new Date(), "yearNumeric");
 
   const contactsById = new Map((timelineContacts ?? []).map((contact) => [contact.id, contact]));
 

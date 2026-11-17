@@ -4,10 +4,11 @@
 export const SETTINGS_CREDENTIAL_ICON_PX = 18;
 
 type SettingsCredentialIconImgProps = {
+  onError?: () => void;
   src: string;
 };
 
-export function SettingsCredentialIconImg({ src }: SettingsCredentialIconImgProps) {
+export function SettingsCredentialIconImg({ onError, src }: SettingsCredentialIconImgProps) {
   return (
     // Catalog icons are often data: SVG URIs — next/image cannot optimize them.
     // biome-ignore lint/performance/noImgElement: small brand icons; external HTTPS URLs
@@ -15,6 +16,7 @@ export function SettingsCredentialIconImg({ src }: SettingsCredentialIconImgProp
       alt=""
       aria-hidden
       height={SETTINGS_CREDENTIAL_ICON_PX}
+      onError={onError}
       src={src}
       width={SETTINGS_CREDENTIAL_ICON_PX}
     />

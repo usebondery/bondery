@@ -1,0 +1,21 @@
+{
+  "AllEnrichedDescription": "LinkedIn profili olan tüm kişiler zaten zenginleştirildi.",
+  "AllEnrichedTitle": "Tüm kişiler zenginleştirildi",
+  "Badge": "LinkedIn",
+  "CurrentlyEnriching": "Şu an zenginleştiriliyor:",
+  "EligibleLabel_one": "{count} kişi zenginleştirilebilir",
+  "EligibleLabel_other": "{count} kişi zenginleştirilebilir",
+  "Enrich": "Zenginleştir",
+  "EnrichAll": "Tümünü zenginleştir",
+  "HelpTooltip": "Bu kişi için en güncel LinkedIn profil verilerini yükle. Zenginleştirme hakkında daha fazla bilgi için tıkla.",
+  "Pause": "Duraklat",
+  "PausingTooltip": "Mevcut kişi bitiyor, sonra duraklatılıyor…",
+  "PersonEligibleLabel": "Bu kişi LinkedIn’den zenginleştirilebilir",
+  "ProcessingPerson": "Zenginleştiriliyor: {name}…",
+  "ProgressLabel": "Zenginleştirme: {completed} / {totalEligible} tamam",
+  "ProgressLabelWithFailed": "Zenginleştirme: {completed} / {totalEligible} tamam ({failed} başarısız)",
+  "Resume": "Sürdür",
+  "ResumeLabel": "Zenginleştirme durdu: {completed} tamam, {pending} kaldı",
+  "SkipRemaining": "Kalanı atla",
+  "Tooltip": "Bu kişilerin LinkedIn profili var ama henüz zenginleştirilmedi. Güncel iş geçmişi, eğitim ve özet için zenginleştir."
+}

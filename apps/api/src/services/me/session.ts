@@ -1,5 +1,12 @@
-import type { ColorSchemePreference, UserSessionData } from "@bondery/schemas";
-import { DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
+import type {
+  ColorSchemePreference,
+  DateFormatPreference,
+  UserSessionData,
+} from "@bondery/schemas";
+import {
+  coerceDateFormatPreference,
+  DEFAULT_LOCALE,
+} from "@bondery/schemas/locale/supported-locale";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
 import { isPlatformAdmin } from "../../lib/auth/is-platform-admin.js";
@@ -25,6 +32,7 @@ export async function getUserSession(ctx: DomainContext): Promise<UserSessionDat
   const settings = await db.userSettings.findUnique({
     select: {
       colorScheme: true,
+      dateFormat: true,
       language: true,
       onboardingCompletedAt: true,
       timeFormat: true,
@@ -42,6 +50,7 @@ export async function getUserSession(ctx: DomainContext): Promise<UserSessionDat
   return {
     avatarUrl,
     colorScheme: parseColorScheme(settings.colorScheme),
+    dateFormat: coerceDateFormatPreference(settings.dateFormat) as DateFormatPreference,
     displayName: firstName?.trim() || user.email || "User",
     isPlatformAdmin: await isPlatformAdmin(user.id),
     language: settings.language ?? DEFAULT_LOCALE,

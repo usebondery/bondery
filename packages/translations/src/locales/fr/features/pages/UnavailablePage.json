@@ -1,0 +1,16 @@
+{
+  "CheckingAgain": "Nouvelle vérification dans {seconds}\u00a0s…",
+  "Description": "Votre compte est en sécurité et vous êtes toujours connecté. Nous vérifions encore la connexion\u00a0; cela ne prend en général qu’un instant.",
+  "MetadataTitle": "Service indisponible",
+  "Retry": "Réessayer",
+  "StatusChecking": "Vérification de la connexion…",
+  "StatusDegraded": "Certaines fonctions sont lentes pour le moment",
+  "StatusOffline": "Bondery est temporairement indisponible",
+  "StatusOnline": "De nouveau en ligne. Redirection…",
+  "StatusPageLink": "Voir la page d’état",
+  "TechnicalBackendStatus": "Backend\u00a0: {status}",
+  "TechnicalDetails": "Détails techniques",
+  "TechnicalHttpStatus": "Statut HTTP\u00a0: {status}",
+  "TechnicalUnreachable": "inaccessible",
+  "Title": "Problème de connexion"
+}

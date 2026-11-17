@@ -1,0 +1,22 @@
+{
+  "AddError": "Kunde inte lägga till etikett",
+  "AddNewTagTooltip": "Skapa ny etikett",
+  "AddSuccess": "Etikett tillagd",
+  "AddTagTooltip": "Lägg till etikett",
+  "CreateError": "Kunde inte skapa etikett",
+  "CreateNewTagEmpty": "Skapa ny etikett",
+  "CreateNewTagOption": "Skapa ny etikett \"{label}\"",
+  "CreateTagCancel": "Avbryt",
+  "CreateTagConfirm": "Skapa och lägg till",
+  "CreateTagMessage": "Etiketten \"{name}\" finns inte än. Vill du skapa den och lägga till på kontakten?",
+  "CreateTagTitle": "Skapa ny etikett?",
+  "Label": "Etiketter",
+  "NoTagsFound": "Inga etiketter hittades",
+  "Placeholder": "Lägg till etiketter...",
+  "RemoveError": "Kunde inte ta bort etikett",
+  "RemoveTagTooltip": "Ta bort etikett",
+  "SearchPlaceholder": "Sök eller skapa etikett...",
+  "TagAlreadyAddedMessage": "Etiketten \"{name}\" är redan tillagd på kontakten.",
+  "TagAlreadyAddedTitle": "Etikett redan tillagd",
+  "TagAlreadyAppliedTooltip": "Etikett redan tilldelad"
+}

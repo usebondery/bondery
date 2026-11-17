@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Ο κωδικός χρώματος αντιγράφηκε στο πρόχειρο",
+  "CopyAccessibilityLabel": "Αντιγραφή κωδικού χρώματος",
+  "CopyFailedMessage": "Δεν αντιγράφηκε ο κωδικός χρώματος. Δοκίμασε ξανά.",
+  "CustomColorLabel": "Προσαρμοσμένο χρώμα",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Βάλε έγκυρο χρώμα hex (π.χ. #AE3EC9)",
+  "SheetTitle": "Χρώμα",
+  "SwatchesLabel": "Γρήγορα χρώματα",
+  "TriggerAccessibilityHint": "Ανοίγει τον επιλογέα χρωμάτων"
+}

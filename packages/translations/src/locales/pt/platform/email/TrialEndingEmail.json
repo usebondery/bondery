@@ -1,0 +1,9 @@
+{
+  "body": "Depois disso, a sua subscrição será renovada automaticamente, a menos que a cancele.",
+  "cta": "Gerir subscrição",
+  "endDateFallback": "em breve",
+  "heading": "O seu período experimental Premium termina a {{endDate}}",
+  "preview": "A sua subscrição é renovada, a menos que a cancele",
+  "subject": "O seu período experimental do Bondery Premium está a terminar",
+  "whyReceiving": "Está a receber este email porque tem um período experimental do Bondery Premium."
+}

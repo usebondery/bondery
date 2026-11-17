@@ -1,0 +1,9 @@
+{
+  "ApiRejectedDescription": "De server wees het verzoek af omdat je extensie verouderd is. Werk bij.",
+  "ApiRejectedTitle": "Versie te oud",
+  "UpdateButton": "Bijwerken",
+  "UpdateRequiredDescription": "Je Bondery-extensie is verouderd en werkt mogelijk niet goed. Werk bij om door te gaan.",
+  "UpdateRequiredTitle": "Update vereist",
+  "WebappNotificationDescription": "Je Bondery Chrome-extensie moet worden bijgewerkt om goed te blijven werken.",
+  "WebappNotificationTitle": "Extensie-update beschikbaar"
+}

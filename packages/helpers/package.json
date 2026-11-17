@@ -268,6 +268,18 @@
       "node": "./dist/date/date-utils.js",
       "types": "./src/date/date-utils.ts"
     },
+    "./date/format-user": {
+      "default": "./dist/date/format-user.js",
+      "import": "./dist/date/format-user.js",
+      "node": "./dist/date/format-user.js",
+      "types": "./src/date/format-user.ts"
+    },
+    "./date/format-user.test": {
+      "default": "./dist/date/format-user.test.js",
+      "import": "./dist/date/format-user.test.js",
+      "node": "./dist/date/format-user.test.js",
+      "types": "./src/date/format-user.test.ts"
+    },
     "./dev/mcp-inspector-cimd": {
       "default": "./dist/dev/mcp-inspector-cimd.js",
       "import": "./dist/dev/mcp-inspector-cimd.js",
@@ -514,6 +526,18 @@
       "node": "./dist/locale/index.js",
       "types": "./src/locale/index.ts"
     },
+    "./locale/display-names": {
+      "default": "./dist/locale/display-names.js",
+      "import": "./dist/locale/display-names.js",
+      "node": "./dist/locale/display-names.js",
+      "types": "./src/locale/display-names.ts"
+    },
+    "./locale/display-names.test": {
+      "default": "./dist/locale/display-names.test.js",
+      "import": "./dist/locale/display-names.test.js",
+      "node": "./dist/locale/display-names.test.js",
+      "types": "./src/locale/display-names.test.ts"
+    },
     "./locale/languages": {
       "default": "./dist/locale/languages.js",
       "import": "./dist/locale/languages.js",
@@ -537,6 +561,12 @@
       "import": "./dist/locale/timezones.js",
       "node": "./dist/locale/timezones.js",
       "types": "./src/locale/timezones.ts"
+    },
+    "./locale/timezones.test": {
+      "default": "./dist/locale/timezones.test.js",
+      "import": "./dist/locale/timezones.test.js",
+      "node": "./dist/locale/timezones.test.js",
+      "types": "./src/locale/timezones.test.ts"
     },
     "./locale/world-languages": {
       "default": "./dist/locale/world-languages.js",
@@ -909,5 +939,5 @@
   },
   "type": "module",
   "types": "./src/index.ts",
-  "version": "1.11.2"
+  "version": "1.11.3-rc.1"
 }

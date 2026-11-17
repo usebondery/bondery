@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "No se ha podido crear la etiqueta. Inténtalo de nuevo.",
+  "CreateTag": "Crear etiqueta",
+  "DeleteFailed": "No se ha podido eliminar la etiqueta. Inténtalo de nuevo.",
+  "EditFailed": "No se ha podido guardar la etiqueta. Inténtalo de nuevo.",
+  "EditTagsSearchPlaceholder": "Buscar etiquetas...",
+  "LoadFailed": "No se han podido cargar las etiquetas",
+  "NoTagsYet": "Aún no hay etiquetas",
+  "NoTagsYetHint": "Las etiquetas te ayudan a organizar y encontrar contactos."
+}

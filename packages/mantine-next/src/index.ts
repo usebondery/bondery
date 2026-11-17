@@ -6,6 +6,7 @@ export {
   normalizeActionIconGraphicChild,
   renderActionIconGraphic,
 } from "#ActionIconButton/index.js";
+export { ClockTime, type ClockTimeProps } from "#ClockTime/index.js";
 export {
   BrandMark,
   CODE_BLOCK_PLATFORM_COOKIE,

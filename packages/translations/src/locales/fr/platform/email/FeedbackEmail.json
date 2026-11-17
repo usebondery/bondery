@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Ce que l’outil a renvoyé\u00a0:",
+  "agentExpectedHeading": "Ce que l’agent attendait\u00a0:",
+  "agentKindLabel": "Type de signalement\u00a0:",
+  "agentRequestIdLabel": "ID de requête\u00a0:",
+  "agentSourceHeading": "Signalé par un agent IA",
+  "agentToolLabel": "Outil\u00a0:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Retour général\u00a0:",
+  "heading": "Retour de {{userEmail}}",
+  "notProvided": "(Non fourni)",
+  "npsReasonHeading": "Pourquoi cette note\u00a0?",
+  "npsScoreLabel": "Score NPS\u00a0:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Nouveau retour de {{userEmail}} — NPS\u00a0: {{npsScore}}",
+  "replyCta": "Répondre à {{userEmail}}",
+  "subject": "Nouveau retour sur Bondery",
+  "submittedAt": "Envoyé le\u00a0: {{timestamp}}",
+  "userEmailLabel": "E-mail utilisateur\u00a0:",
+  "userIdLabel": "ID utilisateur\u00a0:"
+}

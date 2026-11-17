@@ -27,11 +27,7 @@ export function InlineDateDisplay(props: InlineDateDisplayProps) {
 
   if (props.isDisplayOnly) {
     const date = new Date(props.timestamp);
-    const display = formatter.dateTime(date, {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    const display = formatter.formatDate(date);
     return (
       <span style={{ display: "inline-block", verticalAlign: "middle" }}>
         <Badge
@@ -50,11 +46,7 @@ export function InlineDateDisplay(props: InlineDateDisplayProps) {
   const { node, updateAttributes } = props;
   const { timestamp } = node.attrs as { timestamp: string };
   const date = new Date(timestamp);
-  const display = formatter.dateTime(date, {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  const display = formatter.formatDate(date);
 
   return (
     <NodeViewWrapper

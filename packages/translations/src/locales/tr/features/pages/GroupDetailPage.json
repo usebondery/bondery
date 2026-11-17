@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Gruba kişi ekle",
+  "ColorLabel": "Renk",
+  "ContactCount": "Kişiler",
+  "DetailPageTitle": "Grup ayrıntıları",
+  "Empty": "Bu grupta henüz kişi yok.",
+  "HeaderDescription": "Seçili grubun üyelerine genel bakış.",
+  "NoContactsFound": "Bu grupta henüz kişi yok.",
+  "NoContactsMatchSearch": "Eşleşen kişi yok.",
+  "RemoveContact": {
+    "ErrorDescription": "Kişi gruptan kaldırılamadı. Yeniden dene.",
+    "LoadingDescription": "Grup üyeleri güncelleniyor…",
+    "LoadingTitle": "Kişi kaldırılıyor",
+    "SuccessDescription": "Kişi gruptan kaldırıldı"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Kişiler gruptan kaldırılamadı. Yeniden dene.",
+    "LoadingDescription": "Grup üyeleri güncelleniyor…",
+    "LoadingTitle": "Kişiler kaldırılıyor",
+    "SuccessDescription": "{count} kişi gruptan kaldırıldı"
+  },
+  "RemoveFromGroup": "Gruptan kaldır",
+  "Subtitle": "Bu gruba atanmış kişiler.",
+  "Table": {
+    "Avatar": "Profil fotoğrafı",
+    "LastInteraction": "Son etkileşim",
+    "Location": "Konum",
+    "Name": "Ad",
+    "Socials": "Sosyal profiller",
+    "Title": "Başlık"
+  },
+  "ThisContactFallback": "bu kişi",
+  "Title": "Grup: {label}"
+}

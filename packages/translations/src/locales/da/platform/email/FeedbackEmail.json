@@ -1,0 +1,21 @@
+{
+  "agentActualHeading": "Vad verktyget returnerade:",
+  "agentExpectedHeading": "Vad agenten förventade sig:",
+  "agentKindLabel": "Typ av rapport:",
+  "agentRequestIdLabel": "Begeran-ID:",
+  "agentSourceHeading": "Rapporterat av en AI-agent",
+  "agentToolLabel": "Verktyg:",
+  "description": "NPS {{npsScore}} / 10 · {{timestamp}}",
+  "generalFeedbackHeading": "Generel feedback:",
+  "heading": "Feedback från {{userEmail}}",
+  "notProvided": "(Ej angivet)",
+  "npsReasonHeading": "Varför valdes det her betyget?",
+  "npsScoreLabel": "NPS-værdi:",
+  "npsScoreValue": "{{npsScore}} / 10",
+  "preview": "Ny feedback från {{userEmail}} – NPS-værdi: {{npsScore}}",
+  "replyCta": "Svara till {{userEmail}}",
+  "subject": "Ny feedback om Bondery",
+  "submittedAt": "Sendt: {{timestamp}}",
+  "userEmailLabel": "Brugerens e-post:",
+  "userIdLabel": "Bruger-ID:"
+}

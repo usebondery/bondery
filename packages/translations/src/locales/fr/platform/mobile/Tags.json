@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Impossible de créer l’étiquette. Réessayez.",
+  "CreateTag": "Créer une étiquette",
+  "DeleteFailed": "Impossible de supprimer l’étiquette. Réessayez.",
+  "EditFailed": "Impossible d’enregistrer l’étiquette. Réessayez.",
+  "EditTagsSearchPlaceholder": "Rechercher des étiquettes…",
+  "LoadFailed": "Impossible de charger les étiquettes",
+  "NoTagsYet": "Aucune étiquette pour le moment",
+  "NoTagsYetHint": "Les étiquettes vous aident à organiser et retrouver vos contacts."
+}

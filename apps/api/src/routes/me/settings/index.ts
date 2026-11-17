@@ -35,6 +35,7 @@ const settingsPatchResponseSchema = z
     data: z
       .object({
         colorScheme: z.string().nullable().optional().describe("Color scheme preference"),
+        dateFormat: z.string().nullable().optional().describe("Calendar date order preference"),
         defaultPhoneCountry: z
           .string()
           .nullable()
@@ -179,6 +180,7 @@ export const meSettingsRoutes: AppRoutePlugin = async (fastify) => {
             aiMessagesUsed: resolvedSettings.aiMessagesUsed ?? 0,
             avatarUrl: resolvedAvatarUrl,
             colorScheme: resolvedSettings.colorScheme,
+            dateFormat: resolvedSettings.dateFormat ?? "locale",
             defaultPhoneCountry: resolvedSettings.defaultPhoneCountry ?? null,
             email: user.email,
             gettingStartedDismissedAt:

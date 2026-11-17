@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   compareTelephonePrefixByDialDigits,
   findTelephonePrefixOption,
+  localizeTelephonePrefixLabel,
   TELEPHONE_PREFIX_OPTIONS,
 } from "./prefix-options.js";
 
@@ -17,6 +18,14 @@ describe("findTelephonePrefixOption", () => {
     const antigua = findTelephonePrefixOption("+1-268");
     assert.equal(antigua?.value, "+1268");
     assert.equal(antigua?.displayPrefix, "+1 268");
+  });
+});
+
+describe("localizeTelephonePrefixLabel", () => {
+  it("uses the UI locale for the country name", () => {
+    const czechia = TELEPHONE_PREFIX_OPTIONS.find((option) => option.countryCode === "CZ");
+    assert.ok(czechia);
+    assert.equal(localizeTelephonePrefixLabel(czechia, "de-DE"), "Tschechien");
   });
 });
 

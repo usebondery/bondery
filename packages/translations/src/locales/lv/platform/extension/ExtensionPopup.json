@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Atvērt Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Pievienot savu kontu, lai saglabātu kontaktus no sociālajiem saziņas līdzekļiem.",
+    "SignIn": "Pierakstīties",
+    "Title": "Pieraksties Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Pievienot mijiedarbību ar šo personu"
+  },
+  "Settings": {
+    "ApiServer": "API serveris",
+    "SignOut": "Izrakstīties"
+  },
+  "UpdateRequired": {
+    "Description": "Tavs Bondery paplašinājums ir novecojis un var nedarboties pareizi. Atjaunini, lai turpinātu.",
+    "OpenExtensionsPage": "Atvērt paplašinājumu lapu",
+    "Title": "Nepieciešams atjauninājums"
+  },
+  "Welcome": {
+    "ConnectButton": "Pievienot savu Bondery kontu"
+  }
+}

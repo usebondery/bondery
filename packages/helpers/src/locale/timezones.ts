@@ -1,4 +1,9 @@
 import { getTimeZones } from "@vvo/tzdb";
+import {
+  displayContinentName,
+  displayRegionName,
+  displayTimeZoneCity,
+} from "#locale/display-names.js";
 
 export interface TimezoneData {
   city: string;
@@ -62,11 +67,19 @@ export function getDeviceTimezone(): string {
   }
 }
 
-export function formatTimezoneLabel(timezone: TimezoneData): string {
-  return `${timezone.city}, ${timezone.country}`;
+export function formatTimezoneLabel(timezone: TimezoneData, locale?: string): string {
+  const city = locale
+    ? (displayTimeZoneCity(timezone.value, locale) ?? timezone.city)
+    : timezone.city;
+  const country =
+    locale && timezone.countryCode
+      ? (displayRegionName(timezone.countryCode, locale) ?? timezone.country)
+      : timezone.country;
+  return `${city}, ${country}`;
 }
 
 export interface TimezoneSelectOption {
+  city: string;
   flag: string;
   label: string;
   offset: number;
@@ -83,35 +96,45 @@ export function countryCodeToFlagEmoji(countryCode: string): string {
   return String.fromCodePoint(...upper.split("").map((char) => 0x1f1e6 + char.charCodeAt(0) - 65));
 }
 
-function compareTimezoneSelectOptions(a: TimezoneSelectOption, b: TimezoneSelectOption): number {
+function compareTimezoneSelectOptions(
+  a: TimezoneSelectOption,
+  b: TimezoneSelectOption,
+  locale?: string,
+): number {
   if (a.offset !== b.offset) {
     return a.offset - b.offset;
   }
 
-  return a.label.localeCompare(b.label);
+  return a.label.localeCompare(b.label, locale);
 }
 
-function buildTimezoneSelectOptions(): TimezoneSelectOption[] {
+function buildTimezoneSelectOptions(locale?: string): TimezoneSelectOption[] {
   return TIMEZONES_DATA.map((timezone) => ({
+    city: timezone.city,
     flag: timezone.flag,
-    label: formatTimezoneLabel(timezone),
+    label: formatTimezoneLabel(timezone, locale),
     offset: timezone.offset,
     offsetLabel: formatOffset(timezone.offset),
     value: timezone.value,
-  })).sort(compareTimezoneSelectOptions);
+  })).sort((left, right) => compareTimezoneSelectOptions(left, right, locale));
 }
 
-let cachedTimezoneSelectOptions: TimezoneSelectOption[] | null = null;
+const cachedTimezoneSelectOptions = new Map<string, TimezoneSelectOption[]>();
 
 /**
  * Flat select options for timezone pickers (mobile + web).
  * Sorted by UTC offset, then city label.
  */
-export function getTimezoneSelectOptions(currentTimezone?: string): TimezoneSelectOption[] {
-  if (cachedTimezoneSelectOptions === null) {
-    cachedTimezoneSelectOptions = buildTimezoneSelectOptions();
+export function getTimezoneSelectOptions(
+  currentTimezone?: string,
+  locale?: string,
+): TimezoneSelectOption[] {
+  const cacheKey = locale ?? "";
+  let options = cachedTimezoneSelectOptions.get(cacheKey);
+  if (!options) {
+    options = buildTimezoneSelectOptions(locale);
+    cachedTimezoneSelectOptions.set(cacheKey, options);
   }
-  const options = cachedTimezoneSelectOptions;
 
   if (!currentTimezone) {
     return options;
@@ -124,6 +147,7 @@ export function getTimezoneSelectOptions(currentTimezone?: string): TimezoneSele
 
   return [
     {
+      city: canonicalCurrent,
       flag: "",
       label: canonicalCurrent,
       offset: 0,
@@ -160,6 +184,7 @@ export interface GroupedTimezoneItem {
   flag: string;
   label: string;
   offset: number;
+  searchHaystack: string;
   value: string;
 }
 
@@ -168,7 +193,7 @@ export interface GroupedTimezoneGroup {
   items: GroupedTimezoneItem[];
 }
 
-export function getGroupedTimezones(): GroupedTimezoneGroup[] {
+export function getGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
   const grouped: { [continent: string]: GroupedTimezoneItem[] } = {};
 
   TIMEZONES_DATA.forEach((tz) => {
@@ -177,8 +202,17 @@ export function getGroupedTimezones(): GroupedTimezoneGroup[] {
     }
     grouped[tz.continent].push({
       flag: tz.flag,
-      label: formatTimezoneLabel(tz),
+      label: formatTimezoneLabel(tz, locale),
       offset: tz.offset,
+      searchHaystack: [
+        formatTimezoneLabel(tz, locale),
+        tz.city,
+        tz.country,
+        tz.countryCode,
+        tz.value,
+      ]
+        .join(" ")
+        .toLowerCase(),
       value: tz.value,
     });
   });
@@ -189,7 +223,7 @@ export function getGroupedTimezones(): GroupedTimezoneGroup[] {
         return a.offset - b.offset;
       }
 
-      return a.label.localeCompare(b.label);
+      return a.label.localeCompare(b.label, locale);
     });
   });
 
@@ -197,7 +231,7 @@ export function getGroupedTimezones(): GroupedTimezoneGroup[] {
   return continentOrder
     .filter((continent) => grouped[continent])
     .map((continent) => ({
-      group: continent,
+      group: locale ? displayContinentName(continent, locale) : continent,
       items: grouped[continent],
     }));
 }

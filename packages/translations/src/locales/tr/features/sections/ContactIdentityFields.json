@@ -1,0 +1,18 @@
+{
+  "ContactNameFallback": "Kişi",
+  "FieldUpdated": "{label} güncellendi",
+  "FirstNamePlaceholder": "Ad",
+  "FirstNameSuccessLabel": "Ad",
+  "HeadlinePlaceholder": "Başlık",
+  "HeadlineSuccessLabel": "Başlık",
+  "LastNamePlaceholder": "Soyad",
+  "LastNameSuccessLabel": "Soyad",
+  "LocationPlaceholder": "Konum",
+  "LocationSuccessLabel": "Konum",
+  "LocationUpdated": "Konum güncellendi",
+  "MiddleNamePlaceholder": "İkinci ad",
+  "MiddleNameSuccessLabel": "İkinci ad",
+  "NameFieldUpdated": "{label} adı güncellendi",
+  "SavedTitle": "Kaydedildi",
+  "UpdateFieldFailed": "Güncellenemedi: {field}"
+}

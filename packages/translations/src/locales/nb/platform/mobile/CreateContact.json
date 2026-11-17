@@ -1,0 +1,13 @@
+{
+  "Create": "Legg til i Bondery",
+  "Creating": "Oppretter person …",
+  "ErrorDescription": "Det oppstod en feil da personen skulle opprettes.",
+  "ErrorTitle": "Kunne ikke opprette person",
+  "FullNameLabel": "Fullt navn",
+  "FullNamePlaceholder": "f.eks. Kari Nordmann",
+  "InvalidName": "Skriv inn et gyldig navn",
+  "NameRequired": "Skriv inn et navn",
+  "SuccessDescription": "Den nye personen er lagt til kontaktene dine.",
+  "SuccessTitle": "Person opprettet",
+  "Title": "Opprett person"
+}

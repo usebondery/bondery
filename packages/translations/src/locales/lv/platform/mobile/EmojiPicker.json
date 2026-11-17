@@ -1,0 +1,22 @@
+{
+  "Category": {
+    "Activities": "Darbības",
+    "Animals": "Dzīvnieki",
+    "Buildings": "Ēkas",
+    "Celebrations": "Svinības",
+    "Food": "Pārtika",
+    "Hearts": "Sirdis",
+    "Humans": "Personas",
+    "Miscellaneous": "Dažādi",
+    "Nature": "Daba",
+    "Objects": "Objekti",
+    "Sports": "Sports",
+    "Travel": "Ceļot",
+    "Work": "Darbs"
+  },
+  "EmptySearch": "Emocijas netika atrastas",
+  "RandomAccessibilityLabel": "Atlasīt nejauši izvēlētu emocijzīmi",
+  "SearchPlaceholder": "Meklēt emocijzīmes…",
+  "SheetTitle": "Emocijzīme",
+  "TriggerAccessibilityHint": "Tiek atvērts emocijzīmju atlasītājs"
+}

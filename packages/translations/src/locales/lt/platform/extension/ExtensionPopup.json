@@ -1,0 +1,25 @@
+{
+  "LoggedIn": {
+    "OpenBondery": "Atidaryti Bondery"
+  },
+  "LoggedOut": {
+    "Description": "Prijunk paskyrą, kad išsaugotum kontaktus iš socialinių tinklų.",
+    "SignIn": "Prisijungti",
+    "Title": "Prisijungti prie Bondery"
+  },
+  "PersonActions": {
+    "AddInteraction": "Pridėti sąveiką su šiuo žmogumi"
+  },
+  "Settings": {
+    "ApiServer": "API serveris",
+    "SignOut": "Atsijungti"
+  },
+  "UpdateRequired": {
+    "Description": "Tavo Bondery plėtinys pasenęs ir gali neveikti tinkamai. Atnaujink, kad galėtum tęsti.",
+    "OpenExtensionsPage": "Atidaryti plėtinių puslapį",
+    "Title": "Reikalingas atnaujinimas"
+  },
+  "Welcome": {
+    "ConnectButton": "Prijungti Bondery paskyrą"
+  }
+}

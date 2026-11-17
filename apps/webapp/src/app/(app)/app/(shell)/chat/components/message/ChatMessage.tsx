@@ -141,11 +141,8 @@ export function ChatMessage({
 
   // A stored message always has a time. Live turns carry one from send or finish.
   const sentDate = sentAt ?? new Date();
-  const timeLabel = formatter.dateTime(sentDate, { hour: "numeric", minute: "2-digit" });
-  const fullTimeLabel = formatter.dateTime(sentDate, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  const timeLabel = formatter.formatTime(sentDate);
+  const fullTimeLabel = formatter.formatDateTime(sentDate);
 
   const showStoppedNotice =
     !isUser && activity?.status === "incomplete" && !isStreaming && !pendingApproval;

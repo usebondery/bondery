@@ -1,0 +1,11 @@
+{
+  "ColorCopiedMessage": "Código da cor copiado para a área de transferência",
+  "CopyAccessibilityLabel": "Copiar código da cor",
+  "CopyFailedMessage": "Não foi possível copiar o código da cor. Tente novamente.",
+  "CustomColorLabel": "Cor personalizada",
+  "HexPlaceholder": "#RRGGBB",
+  "InvalidHex": "Introduza uma cor hexadecimal válida (ex.: #AE3EC9)",
+  "SheetTitle": "Cor",
+  "SwatchesLabel": "Cores rápidas",
+  "TriggerAccessibilityHint": "Abre o seletor de cores"
+}

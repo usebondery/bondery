@@ -1,0 +1,8 @@
+{
+  "documentation": "documentazione",
+  "help": "Serve aiuto? Consulta {{support}} o leggi la nostra {{documentation}}.",
+  "internalNote": "Operazione interna · non inviata al cliente",
+  "logoAlt": "Bondery",
+  "manageNotifications": "Gestire queste notifiche in Bondery",
+  "support": "assistenza"
+}

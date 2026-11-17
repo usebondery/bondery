@@ -1,0 +1,34 @@
+{
+  "AddPeopleToGroup": "Aggiungere persone ao gruppo",
+  "ColorLabel": "Cor",
+  "ContactCount": "Contatti",
+  "DetailPageTitle": "Detalhes do gruppo",
+  "Empty": "Nessun no há contatti associados a este gruppo.",
+  "HeaderDescription": "Visão geral dos membros do gruppo selecionado.",
+  "NoContactsFound": "Nessun no há contatti associados a este gruppo.",
+  "NoContactsMatchSearch": "Nenhum contatto encontrado.",
+  "RemoveContact": {
+    "ErrorDescription": "Impossibile remover o contatto do gruppo. Riprova.",
+    "LoadingDescription": "A atualizar membros do gruppo...",
+    "LoadingTitle": "A remover contatto",
+    "SuccessDescription": "Contatto removido do gruppo"
+  },
+  "RemoveContacts": {
+    "ErrorDescription": "Impossibile remover os contatti do gruppo. Riprova.",
+    "LoadingDescription": "A atualizar membros do gruppo...",
+    "LoadingTitle": "A remover contatti",
+    "SuccessDescription": "{count} contatto(s) removido(s) do gruppo"
+  },
+  "RemoveFromGroup": "Remover do gruppo",
+  "Subtitle": "Contatti atribuídos a este gruppo.",
+  "Table": {
+    "Avatar": "Avatar",
+    "LastInteraction": "Última interazione",
+    "Location": "Localização",
+    "Name": "Nome",
+    "Socials": "Retes sociais",
+    "Title": "Titolo"
+  },
+  "ThisContactFallback": "este contatto",
+  "Title": "Gruppo: {label}"
+}

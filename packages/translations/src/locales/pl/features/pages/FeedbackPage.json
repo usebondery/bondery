@@ -1,0 +1,16 @@
+{
+  "Description": "Pomóż nam ulepszyć Bondery — podziel się swoimi przemyśleniami. <3",
+  "ErrorMessage": "Nie udało się wysłać opinii. Spróbuj ponownie.",
+  "ErrorTitle": "Błąd",
+  "GeneralFeedbackLabel": "Masz opinię, wskazówkę lub widzisz błąd?",
+  "GeneralFeedbackPlaceholder": "Uwielbiam/nie lubię tej części aplikacji… Chcę zobaczyć… Mam problem z…",
+  "NpsLabel": "W skali od 0 do 10, jak bardzo prawdopodobne jest, że polecisz Bondery znajomemu lub współpracownikowi?",
+  "NpsReasonLabel": "Dlaczego taki wynik {score}?",
+  "NpsReasonPlaceholder": "Bo ta funkcja jest przydatna / ma błędy / jej brakuje…",
+  "SubmitButton": "Wysłać opinię do deweloperów",
+  "SubmittingMessage": "Poczekaj, wysyłamy Twoją opinię",
+  "SubmittingTitle": "Wysyłanie opinii…",
+  "SuccessMessage": "Otrzymaliśmy Twoją opinię",
+  "SuccessTitle": "Dziękujemy!",
+  "Title": "Opinia"
+}

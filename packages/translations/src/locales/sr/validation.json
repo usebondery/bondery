@@ -1,0 +1,35 @@
+{
+  "email": {
+    "invalid": "Unesi ispravnu adresu imejla",
+    "invalidTitle": "Neispravna adresa imejla"
+  },
+  "fields": {
+    "firstName": {
+      "maxLength": "Ime može imati najviše {max} znakova",
+      "required": "Ime je obavezno"
+    },
+    "generic": {
+      "maxLength": "Vrednost može imati najviše {max} znakova"
+    },
+    "headline": {
+      "maxLength": "Naslov može imati najviše {max} znakova"
+    },
+    "label": {
+      "maxLength": "Polje „{field}” može imati najviše {max} znakova",
+      "required": "Polje „{field}” je obavezno"
+    },
+    "lastName": {
+      "maxLength": "Prezime može imati najviše {max} znakova"
+    },
+    "location": {
+      "maxLength": "Lokacija može imati najviše {max} znakova"
+    },
+    "middleName": {
+      "maxLength": "Srednje ime može imati najviše {max} znakova"
+    }
+  },
+  "interaction": {
+    "titleRequired": "Naslov je obavezan"
+  },
+  "title": "Greška pri proveri"
+}

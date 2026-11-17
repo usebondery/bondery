@@ -1,5 +1,6 @@
 import {
   DEFAULT_LOCALE,
+  intlTagForLocale,
   SUPPORTED_LOCALES,
   type SupportedLocale,
 } from "@bondery/schemas/locale/supported-locale";
@@ -19,7 +20,7 @@ export interface TranslationManifest {
 
 export const manifest = manifestJson as TranslationManifest;
 
-export { DEFAULT_LOCALE, SUPPORTED_LOCALES, type SupportedLocale };
+export { DEFAULT_LOCALE, intlTagForLocale, SUPPORTED_LOCALES, type SupportedLocale };
 
 export const ALL_NAMESPACE_NAMES = Object.keys(manifest.namespaces);
 
@@ -33,8 +34,37 @@ export function namespacesForPlatform(platform: Platform): string[] {
     .map(([name]) => name);
 }
 
+/**
+ * Namespaces that any screen can read, regardless of its route group:
+ * shared verbs, validation messages, and product terms.
+ *
+ * They are added to every UI group instead of repeated in each manifest entry.
+ * A new screen that calls `useCommonTranslations` then cannot lose its copy.
+ */
+export const BASE_NAMESPACES = ["common", "validation", "glossary"] as const;
+
+const UI_GROUP_PREFIXES = ["web.", "mobile.", "extension."] as const;
+
+function isUiGroup(group: string): boolean {
+  return UI_GROUP_PREFIXES.some((prefix) => group.startsWith(prefix));
+}
+
+/**
+ * Resolve the namespaces a preload group needs.
+ *
+ * UI groups always carry `BASE_NAMESPACES`. Non-UI groups, such as email and
+ * website, return only what the manifest lists.
+ *
+ * @param group Manifest preload group name, such as `web.login`.
+ * @returns Deduplicated namespace names.
+ */
 export function preloadGroup(group: string): string[] {
-  return manifest.preload[group] ?? [];
+  const listed = manifest.preload[group] ?? [];
+  if (!isUiGroup(group)) {
+    return listed;
+  }
+
+  return [...new Set<string>([...BASE_NAMESPACES, ...listed])];
 }
 
 export function namespaceFilePath(namespace: string): string | undefined {

@@ -1,0 +1,10 @@
+{
+  "CreateFailed": "Nepavyko sukurti žymos. Bandyk dar kartą.",
+  "CreateTag": "Sukurti žymą",
+  "DeleteFailed": "Nepavyko ištrinti žymos. Bandyk dar kartą.",
+  "EditFailed": "Nepavyko išsaugoti žymos. Bandyk dar kartą.",
+  "EditTagsSearchPlaceholder": "Ieškoti žymų...",
+  "LoadFailed": "Nepavyko įkelti žymų",
+  "NoTagsYet": "Žymų dar nėra",
+  "NoTagsYetHint": "Žymos padeda tvarkyti ir rasti kontaktus."
+}

@@ -1,0 +1,22 @@
+{
+  "ActionsGroup": "Akcia",
+  "AddPerson": "Pridať osobu",
+  "AddPersonDescription": "Vytvorte nový kontakt ve vašej sieti",
+  "ContactUs": "Kontaktujte nás",
+  "ContactUsDescription": "Spojte sa s tímom Bondery",
+  "Documentation": "Dokumentácia",
+  "DocumentationDescription": "Prečtete si dokumentácii Bondery",
+  "ExportData": "Exportovat data",
+  "ExportDataDescription": "Uložiť kopii vašich dat z Bondery",
+  "FindPerson": "Nájsť osobu",
+  "FindPersonDescription": "Vyhľadajte vo svojej sieti podľa mena",
+  "GoToDescription": "Prejsť na {label}",
+  "HelpGroup": "Nápoveda",
+  "ImportData": "Importovat data",
+  "ImportDataDescription": "Naimportovat ZIP súbor Bondery JSON",
+  "LogInteraction": "Zaznamenat interakciu",
+  "LogInteractionDescription": "Zaznamenajte nové stretnutie, hovor alebo správu",
+  "NavigateGroup": "Navigace",
+  "NothingFound": "Žiadne akcia nenájdené",
+  "SearchPlaceholder": "Hľadať akciu alebo navigovať…"
+}

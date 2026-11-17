@@ -1,0 +1,32 @@
+{
+  "AddAction": "Legg til dato",
+  "AddHint": "For å legge til en ny dato, fyll inn all informasjon.",
+  "AddImportantDate": "Legg til viktig dato",
+  "BirthdayDateLabel": "Velg bursdag",
+  "DatePlaceholder": "Velg dato",
+  "DeleteAction": "Slett",
+  "DraftIncompleteError": "For å legge til en ny dato, fyll inn all informasjon.",
+  "Empty": "Ingen viktige datoer ennå.",
+  "ErrorTitle": "Feil",
+  "NotePlaceholder": "Valgfritt notat",
+  "NotifyDayBefore": "Varsle {count} dag før",
+  "NotifyDaysBefore": "Varsle {count} dager før",
+  "NotifyMe": "Varsle meg",
+  "NotifyNone": "Ikke varsle",
+  "SuccessTitle": "Vellykket",
+  "Title": "Viktige datoer",
+  "TypeDisabledBirthdateHint": "{firstName} har allerede fødselsdato",
+  "TypeDisabledHint": "{firstName} har allerede fødselsdato eller navnedag",
+  "TypeDisabledNamedateHint": "{firstName} har allerede navnedag",
+  "TypePlaceholder": "Velg type",
+  "Types": {
+    "anniversary": "Jubileum",
+    "birthday": "Bursdag",
+    "graduation": "Eksamen",
+    "nameday": "Navnedag",
+    "other": "Annet"
+  },
+  "UniqueTypeError": "Du kan bare legge til én {type}.",
+  "UpdateError": "Kunne ikke oppdatere viktige datoer",
+  "UpdateSuccess": "Viktige datoer oppdatert"
+}

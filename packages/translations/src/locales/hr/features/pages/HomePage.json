@@ -1,0 +1,57 @@
+{
+  "AddInteraction": "Zapisati interakciju",
+  "AddPerson": "Stvoriti osobu",
+  "ExtensionNudge": {
+    "Description": "Uvezi kontakte izravno s LinkedIn i Instagram profila i drži mrežu ažurnom bez napora.",
+    "InstallButton": "Instalirati proširenje",
+    "Title": "Ojačaj Bondery našim Chrome proširenjem"
+  },
+  "HeaderDescription": "Na početnoj vidi brzi pregled mreže, podsjetnika i nedavnih interakcija.",
+  "NoRecentlyAdded": "Još nema dodanih osoba.",
+  "NoRecentlyInteracted": "Još nema nedavnih interakcija.",
+  "NotificationInDays": "Za {count} dana",
+  "NotificationSent": "Već poslano",
+  "NotificationToday": "Danas",
+  "NotificationTomorrow": "Sutra",
+  "NotificationTooltipInDays": "Obavijest stiže za {count} dana",
+  "NotificationTooltipSentAt": "Obavijest je već poslana {sentAt}",
+  "NotificationTooltipToday": "Obavijest stiže danas",
+  "NotificationTooltipTomorrow": "Obavijest stiže sutra",
+  "NoUpcomingReminders": "Nema nadolazećih podsjetnika u sljedećih 30 dana.",
+  "ProgressRail": {
+    "AwaitingExport": "Tvoj {platform} izvoz je na putu. Izvozi obično stignu za 5–15 minuta.",
+    "ChoosePlatform": "Odaberi platformu za uvoz",
+    "Dismiss": "Odbaciti",
+    "HaveZipFile": "Imam datoteku",
+    "Instagram": "Instagram",
+    "LinkedIn": "LinkedIn",
+    "Progress": "{completed} od {total} dovršeno",
+    "SkipImport": "Preskočiti uvoz",
+    "Tasks": {
+      "AddContacts": "Dodaj prve kontakte",
+      "ImportContacts": "Uvezi kontakte",
+      "LogInteraction": "Zapiši prvu interakciju",
+      "SetReminder": "Postavi podsjetnik"
+    },
+    "Title": "Prvi koraci"
+  },
+  "RecentlyAddedTitle": "Nedavno dodano",
+  "RecentlyAddedTooltip": "5 najnovije dodanih osoba u mreži.",
+  "RecentlyInteractedTitle": "Nedavne interakcije",
+  "RecentlyInteractedTooltip": "5 osoba s kojima si nedavno imao interakciju.",
+  "Stats": {
+    "InteractionsTitle": "Interakcije ovog mjeseca",
+    "InteractionsTooltip": "Broj interakcija u mjesecu {month}.",
+    "NewContactsTitle": "Novi kontakti ove godine",
+    "NewContactsTooltip": "Koliko je osoba dodano u mrežu ove godine ({year}).",
+    "TotalContactsTitle": "Ukupno kontakata",
+    "TotalContactsTooltip": "Broj osoba u mreži na Bonderyju."
+  },
+  "TimelinePreviewTitle": "Interakcije",
+  "TimelinePreviewTooltip": "Tvojih 5 najnovijih interakcija. Klikni za sve interakcije.",
+  "Title": "Početna",
+  "UnknownPerson": "Nepoznata osoba",
+  "UpcomingRemindersMonthInfo": "Prikazuju se podsjetnici dospjeli u sljedećih 30 dana.",
+  "UpcomingRemindersTitle": "Nadolazeći podsjetnici",
+  "UpcomingRemindersTooltip": "Podsjetnici dospjeli u sljedećih 30 dana."
+}

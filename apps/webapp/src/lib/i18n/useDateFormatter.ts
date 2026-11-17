@@ -1,5 +1,18 @@
 "use client";
 
+import {
+  amPmLabelsForLocale,
+  type DateTimeFormatContext,
+  dateInputValueFormat,
+  formatClockTime,
+  formatUserDate,
+  formatUserDateField,
+  formatUserDateTime,
+  formatUserTime,
+  type UserDateField,
+  type UserDateStyle,
+} from "@bondery/helpers/date";
+import { buildIntlLocaleTag } from "@bondery/schemas/locale";
 import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 import {
   type DateFormatterLike,
@@ -7,25 +20,37 @@ import {
   formatRelativeTime,
 } from "@/lib/i18n/formatRelativeTime";
 
-function getIntlLocale(locale: string, timeFormat: "12h" | "24h"): string {
-  return timeFormat === "12h" ? `${locale}-u-hc-h12` : `${locale}-u-hc-h23`;
-}
-
 /**
- * Replaces next-intl useFormatter with Intl APIs driven by user locale preferences.
+ * Thin hook over `@bondery/helpers/date`. Every user-visible date and clock on
+ * web comes from here, so the string honors the user's date order, clock
+ * preference, and timezone.
+ *
+ * `number` and `relativeTime` stay here. They are not dates on a calendar.
  */
 export function useDateFormatter() {
-  const { locale, timezone, timeFormat } = useUserLocale();
-  const intlLocale = getIntlLocale(locale, timeFormat);
+  const { locale, timezone, timeFormat, dateFormat } = useUserLocale();
+  const ctx: DateTimeFormatContext = { dateFormat, locale, timeFormat, timeZone: timezone };
+  const intlLocale = buildIntlLocaleTag(locale, timeFormat);
 
   return {
-    dateTime: (date: Date, opts?: Intl.DateTimeFormatOptions & { timeZone?: string }) => {
-      const { timeZone, ...rest } = opts ?? {};
-      return new Intl.DateTimeFormat(intlLocale, {
-        timeZone: timeZone ?? timezone,
-        ...rest,
-      }).format(date);
-    },
+    /** Day-period labels for an input control that renders its own. */
+    amPmLabels: () => amPmLabelsForLocale(ctx),
+    ctx,
+    dateInputValueFormat: (options?: { withYear?: boolean }) => dateInputValueFormat(ctx, options),
+    /** Stored `HH:mm[:ss]` with no date. */
+    formatClockTime: (hhmmss: string, options?: { withSeconds?: boolean }) =>
+      formatClockTime(hhmmss, ctx, options),
+    /** A `Date` instant as a calendar date. */
+    formatDate: (date: Date, style: UserDateStyle = "numeric", options?: { timeZone?: string }) =>
+      formatUserDate(date, ctx, style, options),
+    /** One calendar field, for a split date rail or a heading. */
+    formatDateField: (date: Date, field: UserDateField, options?: { timeZone?: string }) =>
+      formatUserDateField(date, ctx, field, options),
+    /** A `Date` instant as a date and a wall clock in the user timezone. */
+    formatDateTime: (date: Date) => formatUserDateTime(date, ctx),
+    /** A `Date` instant as a wall clock in the user timezone. */
+    formatTime: (date: Date, options?: { withSeconds?: boolean }) =>
+      formatUserTime(date, ctx, options),
     number: (value: number, opts?: Intl.NumberFormatOptions) =>
       new Intl.NumberFormat(intlLocale, opts).format(value),
     relativeTime: (date: Date, base: Date) => {
