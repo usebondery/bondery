@@ -10,10 +10,7 @@ const IS_WINDOWS = process.platform === "win32";
 
 const DEFAULT_PATTERNS_BY_PORT = {
   26630: ["next dev --port 26630", "next-server \\(v"],
-  26631: [
-    "--import tsx src/index.ts",
-    "node --require .*/tsx/dist/preflight.cjs.*src/index.ts",
-  ],
+  26631: ["--import tsx src/index.ts", "node --require .*/tsx/dist/preflight.cjs.*src/index.ts"],
   26632: ["next dev --port 26632", "next-server \\(v"],
 };
 
