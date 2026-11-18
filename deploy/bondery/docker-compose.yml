@@ -24,13 +24,55 @@ include:
   - path: docker-compose.seaweedfs.yml
 
 services:
+  # One-shot job: creates the Redis password and TLS certificate in the redis-secrets
+  # volume on first start, keeps them afterwards. Existing installs upgrade with no action.
+  redis-secrets:
+    command:
+      - node
+      - apps/api/dist/cli/ensure-redis-secrets.js
+    environment:
+      BONDERY_INFRA_TRAEFIK_PREFIX: ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}
+    image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-production}
+    network_mode: none
+    pull_policy: always
+    restart: "no"
+    user: "0:0"
+    volumes:
+      - redis-secrets:/bondery-redis
+
+  # Redis accepts TLS only (no plaintext port) and requires the password from users.acl.
   redis:
-    command: redis-server --appendonly yes --save 60 1
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "60"
+      - "1"
+      - --port
+      - "0"
+      - --tls-port
+      - "6379"
+      - --tls-cert-file
+      - /bondery-redis/server/tls.crt
+      - --tls-key-file
+      - /bondery-redis/server/tls.key
+      - --tls-auth-clients
+      - "no"
+      - --aclfile
+      - /bondery-redis/server/users.acl
+    depends_on:
+      redis-secrets:
+        condition: service_completed_successfully
     healthcheck:
       interval: 5s
       retries: 5
       start_period: 5s
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        [
+          "CMD-SHELL",
+          "REDISCLI_AUTH=\"$$(cat /bondery-redis/client/password)\" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG",
+        ]
       timeout: 3s
     image: redis:8.10
     networks:
@@ -40,6 +82,7 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
+      - redis-secrets:/bondery-redis:ro
 
   api:
     depends_on:
@@ -55,7 +98,11 @@ services:
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
       BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
       BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
-      BONDERY_PRIVATE_REDIS_URL: ${BONDERY_PRIVATE_REDIS_URL:-redis://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379}
+      # Bundled Redis only: TLS + password from the redis-secrets volume. Compose always sets
+      # this URL; a BONDERY_PRIVATE_REDIS_URL in .env does not apply to this stack.
+      BONDERY_PRIVATE_REDIS_URL: rediss://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379
+      BONDERY_PRIVATE_REDIS_PASSWORD_FILE: /bondery-redis/client/password
+      BONDERY_PRIVATE_REDIS_TLS_CA_FILE: /bondery-redis/client/ca.crt
       DATABASE_URL: postgresql://postgres:${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}@${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-db:5432/bondery
       BONDERY_PRIVATE_S3_ENDPOINT: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8333
       BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
@@ -114,6 +161,8 @@ services:
         aliases:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api
     restart: unless-stopped
+    volumes:
+      - redis-secrets:/bondery-redis:ro
 
   webapp:
     depends_on:
@@ -169,3 +218,4 @@ networks:
 
 volumes:
   redis-data:
+  redis-secrets:

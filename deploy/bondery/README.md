@@ -42,7 +42,8 @@ curl -s http://localhost:26632/health/live
 |---------|-------|------|--------|
 | `webapp` | `ghcr.io/usebondery/webapp` | 26632 | Liveness `/health/live` |
 | `api` | `ghcr.io/usebondery/api` | 26631 | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS |
-| `redis` | `redis:8.10` | internal | AOF + volume `redis-data` |
+| `redis` | `redis:8.10` | internal | TLS only + password. AOF + volume `redis-data` |
+| `redis-secrets` | `ghcr.io/usebondery/api` | none | One-shot. Creates the Redis password and TLS certificate in volume `redis-secrets` when missing |
 | `db` | `postgis/postgis:17-3.5` | `127.0.0.1:5432` | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` |
 | `seaweedfs-*` | SeaweedFS | 8333 (Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`) |
 
@@ -106,10 +107,11 @@ A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bonder
 
 1. Do **not** start this compose Redis (or omit compose entirely).
 2. Run `ghcr.io/usebondery/api:<semver>` alone with your secrets.
-3. Set `BONDERY_PRIVATE_REDIS_URL` to your managed Redis (`rediss://…` when TLS is required).
+3. Set `BONDERY_PRIVATE_REDIS_URL` to your managed Redis. It must use TLS (`rediss://…`) and a password. For a private CA or a password file, set `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` / `BONDERY_PRIVATE_REDIS_PASSWORD_FILE`.
 
 ## Security
 
+- Redis requires TLS and a password. `redis-secrets` creates both on first start; rotation: [docs/deploy/secrets.mdx](../../docs/deploy/secrets.mdx#redis_password_and_certificate).
 - Never expose Redis or Postgres to the public internet. Compose publishes Postgres on `127.0.0.1` only; do not change that bind to `0.0.0.0`.
 - API secrets (`BONDERY_PRIVATE_*`) load only into the `api` service (`env_file`). Webapp receives an explicit allowlist.
 

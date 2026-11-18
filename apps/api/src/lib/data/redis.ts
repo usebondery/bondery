@@ -17,6 +17,10 @@ import {
   assertRuntimeDependencyConfigured,
   shouldSkipLiveRuntimeVerify,
 } from "../platform/runtime-env.js";
+import {
+  describeRedisSecurity,
+  resolveRedisConnectionOptions,
+} from "./redis-connection-options.js";
 
 export type RedisReadiness = {
   configured: boolean;
@@ -53,6 +57,7 @@ function trimRedisUrl(redisUrl?: string): string {
 
 function createRedisClient(url: string): Redis {
   return new Redis(url, {
+    ...resolveRedisConnectionOptions(url),
     connectTimeout: 500,
     enableReadyCheck: true,
     lazyConnect: true,
@@ -228,6 +233,25 @@ export function getRedisReadiness(): RedisReadiness {
 }
 
 /**
+ * Production Redis must use TLS and a password (see the bondery-security skill).
+ * The API still starts so that an upgrade never takes down an external Redis setup,
+ * but the operator sees what to fix on every boot.
+ */
+function warnOnInsecureProductionRedis(log: FastifyBaseLogger | undefined, redisUrl: string): void {
+  if (process.env.NODE_ENV !== "production") {
+    return;
+  }
+  const posture = describeRedisSecurity(redisUrl);
+  if (posture.tls && posture.authenticated) {
+    return;
+  }
+  log?.warn(
+    { redisAuthenticated: posture.authenticated, redisTls: posture.tls },
+    "Redis connection is not protected: production Redis must use TLS (rediss://) and a password. See https://docs.usebondery.com/deploy/configuration#redis",
+  );
+}
+
+/**
  * Eager Redis verify on startup. Required in development and production; skipped in test.
  */
 export async function initRedis(
@@ -243,6 +267,8 @@ export async function initRedis(
     log?.info("Redis not configured — skipping verify in test");
     return { clients: null, readiness: setUnconfiguredReadiness() };
   }
+
+  warnOnInsecureProductionRedis(log, trimmed);
 
   if (shouldSkipLiveRuntimeVerify()) {
     log?.info("Redis verify skipped in test environment");

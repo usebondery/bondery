@@ -39,8 +39,9 @@ BONDERY_INFRA_API_DOMAIN=api.usebondery.com
 BONDERY_INFRA_WEBAPP_DOMAIN=app.usebondery.com
 BONDERY_INFRA_WEBSITE_DOMAIN=usebondery.com
 BONDERY_INFRA_CHROME_EXTENSION_ID=lpcmokfekjjejnpobhbkgmjkodfhpmha
-BONDERY_PRIVATE_REDIS_URL=redis://redis:6379
 ```
+
+Do not set `BONDERY_PRIVATE_REDIS_URL`. Compose connects the API to the bundled Redis over TLS with a password that the `redis-secrets` service creates (see [Configuration → Redis](../deploy/configuration.mdx#redis)). A leftover value in Dokploy or Infisical has no effect.
 
 Plus Postgres password, Better Auth secrets, and OAuth vars from [`.env.example`](../../deploy/bondery/.env.example). The `api` service runs **`pre_start` init containers** before the main process on every deploy: `release-migrate` (schema + functions + OAuth + platform admins) then `ensure-storage-buckets` — no separate migrate service or manual first-boot step.
 

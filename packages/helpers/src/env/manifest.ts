@@ -1090,12 +1090,38 @@ export const ENV_MANIFEST: EnvVarDef[] = [
   },
   {
     canonical: "BONDERY_PRIVATE_REDIS_URL",
-    deployExample: { group: "Redis", include: true, value: "redis://redis:6379" },
-    description: "Redis connection URL",
+    // Compose sets the bundled TLS URL itself; an operator value in .env does not apply.
+    deployExample: { include: false },
+    description:
+      "Redis connection URL. Deployed Redis must use TLS (rediss://) and a password; local dev Redis on loopback is the only exception",
     exampleValue: "redis://127.0.0.1:26636",
     group: "Redis",
     requiredIn: ["development", "production"],
     secret: true,
+    targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PRIVATE_REDIS_PASSWORD_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional. File that holds the Redis password (Docker volume or secret). Compose sets it for the bundled Redis",
+    exampleValue: "",
+    group: "Redis",
+    omitFromRootExample: true,
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PRIVATE_REDIS_TLS_CA_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional. PEM certificate(s) the API trusts for Redis TLS (rediss:// only). Compose sets it for the bundled Redis",
+    exampleValue: "",
+    group: "Redis",
+    omitFromRootExample: true,
+    requiredIn: [],
+    secret: false,
     targets: [t("api")],
   },
   {

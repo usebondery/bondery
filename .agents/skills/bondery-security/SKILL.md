@@ -46,6 +46,7 @@ Do **not** activate for routine UI refactors, copy changes, or non-security API 
 9. **AI tool arguments are untrusted** — Zod-validate and scope to user-owned domain context; model output never grants authority.
 10. **No secrets or PII in logs or client bundles** — Redact tokens, cookies, passwords, and contact PII from structured logs.
 11. **CSP is built in exactly one place** — Every policy comes from `@bondery/helpers/security`. No app hand-writes a directive, and `script-src` never carries `'unsafe-inline'`. `pnpm run check:security-headers` enforces both.
+12. **Redis requires TLS and authentication** — Every deployed Redis (bundled, external, or any future instance) serves TLS only, clients verify its certificate, and it requires a strong password. Local loopback dev Redis is the only exception. Details: [Redis: TLS and authentication](references/secrets-deployment-and-supply-chain.md#redis-tls-and-authentication-required). `node deploy/bondery/scripts/check-compose.mjs` enforces it for Compose.
 14. **Stored HTML is sanitized at the API** — Contact notes are stored as HTML. Every write path (`applyContactPatch`, ZIP import, any new one) runs the value through `sanitizeNotesHtml()` (`apps/api/src/lib/notes/sanitize-notes-html.ts`), an allowlist that drops scripts, event handlers, and `javascript:`/`data:` links. Clients never sanitize on the API's behalf, and nothing renders a stored string with `innerHTML`. Any other free-text field that can carry markup gets a max length in `@bondery/schemas`. `pnpm run check:input-safety` and Biome plugin `biome/plugins/no-raw-html-sink.grit` enforce it. Details: [Contact notes](references/input-storage-and-output.md#contact-notes-stored-html).
 15. **Cap uploads while they stream** — A size check after `toBuffer()` is not a limit: the bytes are already in memory. Read uploads with `readUploadedFile()` (one file) or `request.parts({ limits: { fileSize: UPLOAD_LIMITS.<name> } })`, with caps named in `UPLOAD_LIMITS` (`apps/api/src/lib/platform/config.ts`). The global multipart ceiling is small, so a new route is safe by default. Biome plugin `biome/plugins/no-uncapped-multipart.grit` rejects a multipart read with no cap. Details: [Size limits](references/input-storage-and-output.md#size-limits-cap-the-stream-not-the-buffer).
 
@@ -105,6 +106,7 @@ pnpm run check:types -w chrome-extension
 - [ ] `openApiArea` set on every shelled route (CI enforces)
 - [ ] Input validated with Zod at route + domain layer
 - [ ] New secrets added to `packages/helpers/src/env/manifest.ts` with `secret: true`
+- [ ] Any Redis change keeps TLS (`rediss://`, verified certificate) and password auth
 - [ ] No secrets, tokens, or PII in logs or client bundles
 - [ ] Webhook handler verifies signature on raw body before JSON parse
 - [ ] Upload routes enforce MIME whitelist + magic-byte validation + a size cap on the stream (`readUploadedFile` / `limits.fileSize`, named in `UPLOAD_LIMITS`), not only a check after `toBuffer()`

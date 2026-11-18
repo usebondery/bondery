@@ -18,8 +18,8 @@ CI builds and pushes the API image to GHCR.
 - **Recommended:** [`deploy/bondery/docker-compose.yml`](../../deploy/bondery/docker-compose.yml) — webapp + API + bundled Redis.
 - **Advanced:** API image alone + `BONDERY_PRIVATE_REDIS_URL` pointing to Redis you already operate.
 
-- Bundled Redis default: `BONDERY_PRIVATE_REDIS_URL=redis://redis:6379` (compose service hostname).
-- External Redis: set `BONDERY_PRIVATE_REDIS_URL` to your Redis; do **not** start the compose Redis service.
+- Bundled Redis: Compose sets `BONDERY_PRIVATE_REDIS_URL=rediss://${BONDERY_INFRA_TRAEFIK_PREFIX}-redis:6379` plus the password and CA files from the `redis-secrets` volume. Do not set it in `.env`.
+- External Redis: set `BONDERY_PRIVATE_REDIS_URL` to your Redis; do **not** start the compose Redis service. It must require TLS (`rediss://`) and a password. See [Configuration → Redis](../deploy/configuration.mdx#redis).
 - Empty `BONDERY_PRIVATE_REDIS_URL` is **invalid in production**.
 
 Local laptop Redis: [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) (`pnpm run start:redis`, port 26636) — not the production `deploy/bondery` stack.
@@ -144,7 +144,7 @@ Use the **full image reference**. If you enter only `usebondery/api:production`,
 | **Container port** | `26631` |
 | **Domain** | your API hostname |
 
-Set `BONDERY_PRIVATE_REDIS_URL` to your Redis URL (`rediss://` when TLS is required). Do not leave it empty.
+Set `BONDERY_PRIVATE_REDIS_URL` to your Redis URL. Use `rediss://` and a password; the API logs a warning in production otherwise. Do not leave it empty. For a private CA or a password file, set `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` and `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` (see [Configuration → Redis](../deploy/configuration.mdx#redis)).
 
 ### Verify on the host
 

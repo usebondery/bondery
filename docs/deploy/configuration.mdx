@@ -15,7 +15,34 @@ Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/
 | `BONDERY_PRIVATE_POSTGRES_PASSWORD` | Postgres password (compose `db` service) |
 | `BONDERY_INFRA_POSTGRES_HOST_PORT` | Optional. Host loopback port for Compose Postgres (`127.0.0.1`). Default `5432`. A second stack on the same VPS must use another port (beta: `5433`). |
 | `BONDERY_PRIVATE_API_KEY_PEPPER` | API key hashing pepper |
-| `BONDERY_PRIVATE_REDIS_URL` | `redis://redis:6379` in the default stack. Stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*` — sessions and verification records, dual-written with Postgres). |
+| `BONDERY_PRIVATE_REDIS_URL` | Compose sets it for you. Do not put it in `.env`. See [Redis](#redis). |
+
+### Redis
+
+Redis stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*`: sessions and verification records, dual-written with Postgres). Because it holds session data, Redis always requires **TLS and a password**.
+
+**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `redis-secrets` service checks the `redis-secrets` volume. When the password or the TLS certificate is missing, it creates it. It keeps existing ones. Redis then accepts only TLS connections with that password, and the API connects with:
+
+| Variable | Value that Compose sets |
+|----------|-------------------------|
+| `BONDERY_PRIVATE_REDIS_URL` | `rediss://${BONDERY_INFRA_TRAEFIK_PREFIX}-redis:6379` |
+| `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` | `/bondery-redis/client/password` |
+| `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` | `/bondery-redis/client/ca.crt` (the pinned Redis certificate) |
+
+An older `.env` that still has `BONDERY_PRIVATE_REDIS_URL=redis://redis:6379` is safe to keep. Compose overrides it. Your Redis data volume stays as it is.
+
+**External Redis.** Run the API image alone (see [API container](../contributing/api-container.mdx)) and point it at a Redis that requires TLS and a password:
+
+```bash
+BONDERY_PRIVATE_REDIS_URL=rediss://:<password>@redis.example.com:6380
+# Or keep the password out of the URL:
+BONDERY_PRIVATE_REDIS_URL=rediss://redis.example.com:6380
+BONDERY_PRIVATE_REDIS_PASSWORD_FILE=/run/secrets/redis_password
+# Only for a private CA; publicly trusted certificates need nothing:
+BONDERY_PRIVATE_REDIS_TLS_CA_FILE=/run/secrets/redis_ca.pem
+```
+
+The API still starts with a `redis://` URL or without a password, but in production it logs a warning on every boot until you fix it.
 
 ### Database connection
 

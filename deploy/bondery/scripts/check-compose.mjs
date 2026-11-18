@@ -4,6 +4,7 @@
  * - webapp must never receive PRIVATE_* / BONDERY_PRIVATE_* secrets (except allowed PostHog)
  * - api and webapp must carry Traefik Host() rules and derive public URLs from domains
  * - redis must not carry Traefik labels or join dokploy-network
+ * - redis must require TLS and a password in every stack variant; api must connect with both
  * - db (Postgres) must not carry Traefik labels or join dokploy-network
  * - api must wait for db healthy (not legacy kong)
  * - shared dokploy-network lookups use BONDERY_INFRA_TRAEFIK_PREFIX aliases, not service names
@@ -230,11 +231,6 @@ if (api) {
   if (!/DATABASE_URL:.*\$\{BONDERY_INFRA_TRAEFIK_PREFIX/.test(api)) {
     errors.push("api must derive DATABASE_URL host from BONDERY_INFRA_TRAEFIK_PREFIX");
   }
-  if (!/redis:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/.test(api)) {
-    errors.push(
-      "api default BONDERY_PRIVATE_REDIS_URL must use BONDERY_INFRA_TRAEFIK_PREFIX-redis",
-    );
-  }
   if (!/db:\s*\n\s*condition:\s*service_healthy/.test(api)) {
     errors.push("api must depends_on db with condition: service_healthy");
   }
@@ -265,6 +261,74 @@ if (redis) {
   if (!/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis/.test(redis)) {
     errors.push("redis must publish a unique internal alias from BONDERY_INFRA_TRAEFIK_PREFIX");
   }
+}
+
+/**
+ * Every Redis in every product stack variant requires TLS and authentication
+ * (bondery-security: "Redis: TLS and authentication"). The variants are copies, so check each.
+ */
+function checkRedisTlsAndAuth(label, source) {
+  const fail = (message) => errors.push(`${label}: ${message}`);
+  const redisBlock = serviceBlock("redis", source);
+  const apiBlock = serviceBlock("api", source);
+  const secretsBlock = serviceBlock("redis-secrets", source);
+  if (!(redisBlock && apiBlock && secretsBlock)) {
+    return;
+  }
+
+  if (!/- --port\s*\n\s*- "0"/.test(redisBlock)) {
+    fail('redis must disable the plaintext port (--port "0")');
+  }
+  if (!/- --tls-port\s*\n\s*- "6379"/.test(redisBlock)) {
+    fail('redis must serve TLS on 6379 (--tls-port "6379")');
+  }
+  for (const flag of ["--tls-cert-file", "--tls-key-file", "--aclfile"]) {
+    if (!redisBlock.includes(`- ${flag}`)) {
+      fail(`redis must set ${flag} from the redis-secrets volume`);
+    }
+  }
+  if (/requirepass|--protected-mode\s*\n\s*- "?no/.test(redisBlock)) {
+    fail("redis must authenticate through the ACL file, not requirepass or protected-mode no");
+  }
+  if (!/redis-secrets:\s*\n\s*condition:\s*service_completed_successfully/.test(redisBlock)) {
+    fail("redis must depends_on redis-secrets with condition: service_completed_successfully");
+  }
+  if (!/redis-cli --tls --cacert/.test(redisBlock) || !redisBlock.includes("REDISCLI_AUTH")) {
+    fail("redis healthcheck must connect with TLS and the password");
+  }
+  if (!secretsBlock.includes("apps/api/dist/cli/ensure-redis-secrets.js")) {
+    fail("redis-secrets must run the ensure-redis-secrets CLI");
+  }
+  if (!/network_mode:\s*none/.test(secretsBlock)) {
+    fail("redis-secrets must run without a network (network_mode: none)");
+  }
+
+  if (
+    !/BONDERY_PRIVATE_REDIS_URL: rediss:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis:6379\s*$/m.test(
+      apiBlock,
+    )
+  ) {
+    fail(
+      "api BONDERY_PRIVATE_REDIS_URL must be rediss://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379 (TLS, not overridable from .env)",
+    );
+  }
+  if (!apiBlock.includes("BONDERY_PRIVATE_REDIS_PASSWORD_FILE: /bondery-redis/client/password")) {
+    fail("api must read the Redis password from BONDERY_PRIVATE_REDIS_PASSWORD_FILE");
+  }
+  if (!apiBlock.includes("BONDERY_PRIVATE_REDIS_TLS_CA_FILE: /bondery-redis/client/ca.crt")) {
+    fail("api must pin the Redis certificate with BONDERY_PRIVATE_REDIS_TLS_CA_FILE");
+  }
+  if (!apiBlock.includes("- redis-secrets:/bondery-redis:ro")) {
+    fail("api must mount the redis-secrets volume read-only");
+  }
+}
+
+for (const file of [
+  "docker-compose.yml",
+  "docker-compose.production.yml",
+  "docker-compose.self-hosted.yml",
+]) {
+  checkRedisTlsAndAuth(file, readFileSync(resolve(root, file), "utf8"));
 }
 
 if (db) {
