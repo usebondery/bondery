@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, before, describe, it } from "node:test";
@@ -21,11 +21,14 @@ function quietLog(): (message: string) => void {
   return () => undefined;
 }
 
-/** Completes a TLS handshake that trusts only `ca`, as the API does with ioredis. */
+/**
+ * Completes a TLS handshake that trusts only `ca`, as the API does with ioredis. Without a
+ * servername the client verifies the connect host, `127.0.0.1`, against the certificate.
+ */
 async function handshake(
   certificatePem: string,
   privateKeyPem: string,
-  servername: string,
+  servername?: string,
 ): Promise<void> {
   const server = createServer({ cert: certificatePem, key: privateKeyPem }, (socket) => {
     socket.end();
@@ -36,7 +39,12 @@ async function handshake(
   try {
     await new Promise<void>((resolve, reject) => {
       const socket = connect(
-        { ca: certificatePem, host: "127.0.0.1", port: address.port, servername },
+        {
+          ca: certificatePem,
+          host: "127.0.0.1",
+          port: address.port,
+          ...(servername ? { servername } : {}),
+        },
         () => {
           socket.end();
           resolve();
@@ -83,6 +91,11 @@ describe("redis secrets", () => {
       handshake(certificate.certificatePem, certificate.privateKeyPem, "other-redis"),
       /altnames|Hostname/i,
     );
+  });
+
+  it("also accepts the loopback address that local dev connects to", async () => {
+    const certificate = await generateRedisCertificate(redisCertificateHostnames("bondery"));
+    await handshake(certificate.certificatePem, certificate.privateKeyPem);
   });
 
   it("replaces a certificate that expires soon or misses a hostname", async () => {
@@ -140,5 +153,48 @@ describe("redis secrets", () => {
       root,
     });
     assert.equal(await readFile(paths.aclFile, "utf8"), buildRedisAclFile("operator-chosen"));
+  });
+
+  it("keeps the secrets private to their owner in a deployed stack", {
+    skip: process.platform === "win32",
+  }, async () => {
+    const privateRoot = await mkdtemp(join(tmpdir(), "bondery-redis-private-"));
+    try {
+      await ensureRedisSecrets({
+        chownToContainerUsers: false,
+        log: quietLog(),
+        prefix: "bondery",
+        root: privateRoot,
+      });
+      const paths = redisSecretPaths(privateRoot);
+      assert.equal((await stat(paths.serverKeyFile)).mode & 0o777, 0o600);
+      assert.equal((await stat(paths.passwordFile)).mode & 0o777, 0o600);
+      assert.equal((await stat(paths.serverDir)).mode & 0o777, 0o700);
+    } finally {
+      await rm(privateRoot, { force: true, recursive: true });
+    }
+  });
+
+  it("makes local dev secrets readable by the Redis container user", {
+    skip: process.platform === "win32",
+  }, async () => {
+    const devRoot = await mkdtemp(join(tmpdir(), "bondery-redis-dev-"));
+    try {
+      await ensureRedisSecrets({
+        chownToContainerUsers: false,
+        localDev: true,
+        log: quietLog(),
+        prefix: "bondery",
+        root: devRoot,
+      });
+      const paths = redisSecretPaths(devRoot);
+      assert.equal((await stat(paths.serverKeyFile)).mode & 0o777, 0o644);
+      assert.equal((await stat(paths.aclFile)).mode & 0o777, 0o644);
+      assert.equal((await stat(paths.passwordFile)).mode & 0o777, 0o644);
+      assert.equal((await stat(paths.serverDir)).mode & 0o777, 0o755);
+      assert.equal((await stat(paths.clientDir)).mode & 0o777, 0o755);
+    } finally {
+      await rm(devRoot, { force: true, recursive: true });
+    }
   });
 });

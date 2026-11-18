@@ -2,18 +2,53 @@
 #
 #   pnpm run start:redis
 #
-# Host port 26636 (DEV_PORTS.REDIS). Ephemeral — no persistence.
+# Same protection as the Compose stack (bondery-security: every Redis requires TLS and a
+# password): TLS only, password from an ACL file. `pnpm run start:redis` first creates the
+# password and certificate in .temp/redis-secrets (pnpm run redis:secrets), then starts Redis.
+# The API reads them through BONDERY_PRIVATE_REDIS_PASSWORD_FILE and
+# BONDERY_PRIVATE_REDIS_TLS_CA_FILE (root .env.local; `pnpm run setup:dev` sets them).
+#
+# Host port 26636 (DEV_PORTS.REDIS), loopback only. Ephemeral — no persistence.
+# Do not run `docker compose up` on this file directly: the secrets folder must exist first.
 
 services:
   redis:
     image: redis:8.10
     container_name: bondery-redis
     restart: unless-stopped
-    command: redis-server --save "" --appendonly no
+    command:
+      - redis-server
+      - --save
+      - ""
+      - --appendonly
+      - "no"
+      - --port
+      - "0"
+      - --tls-port
+      - "6379"
+      - --tls-cert-file
+      - /bondery-redis/server/tls.crt
+      - --tls-key-file
+      - /bondery-redis/server/tls.key
+      - --tls-auth-clients
+      - "no"
+      - --aclfile
+      - /bondery-redis/server/users.acl
     ports:
-      - "26636:6379"
+      - "127.0.0.1:26636:6379"
+    volumes:
+      - type: bind
+        source: ../../.temp/redis-secrets
+        target: /bondery-redis
+        read_only: true
+        bind:
+          create_host_path: false
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test:
+        [
+          "CMD-SHELL",
+          "REDISCLI_AUTH=\"$$(cat /bondery-redis/client/password)\" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG",
+        ]
       interval: 5s
       timeout: 3s
       retries: 3

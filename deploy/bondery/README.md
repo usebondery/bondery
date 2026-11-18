@@ -6,7 +6,7 @@ The marketing website is **not** in this stack — see [`deploy/ops`](../ops/) (
 
 Local development:
 
-- Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636)
+- Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636, TLS + password like the stack; secrets in `.temp/redis-secrets`)
 - Postgres: **`deploy/bondery/docker-compose.dev-db.yml`** or `packages/db` migrations — not this Compose file
 
 Docs: [docs/deploy/installation.mdx](../../docs/deploy/installation.mdx) · [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx) · [docs/contributing/api-container.mdx](../../docs/contributing/api-container.mdx)

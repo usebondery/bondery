@@ -92,6 +92,30 @@ function seedPostgresPassword(envPath: string) {
   log.info("  pnpm run env will derive DATABASE_URL for api/db");
 }
 
+/** Local Redis is TLS-only with a password (pnpm run start:redis). Old files still have redis://. */
+const LEGACY_LOCAL_REDIS_URL = "redis://127.0.0.1:26636";
+
+function seedRedisTls(envPath: string) {
+  const content = readFileSync(envPath, "utf-8");
+  const url = readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_URL");
+  if (url && url !== LEGACY_LOCAL_REDIS_URL) {
+    return; // a remote or custom Redis: leave it alone
+  }
+
+  const updates: Record<string, string> = {
+    BONDERY_PRIVATE_REDIS_URL: "rediss://127.0.0.1:26636",
+  };
+  if (!readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_PASSWORD_FILE")) {
+    updates.BONDERY_PRIVATE_REDIS_PASSWORD_FILE = "../../.temp/redis-secrets/client/password";
+  }
+  if (!readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_TLS_CA_FILE")) {
+    updates.BONDERY_PRIVATE_REDIS_TLS_CA_FILE = "../../.temp/redis-secrets/client/ca.crt";
+  }
+
+  upsertEnvAssignments(envPath, updates);
+  log.warn("Set up local Redis TLS + password in .env.local (pnpm run start:redis creates them)");
+}
+
 function main() {
   const rootEnv = join(repoRoot, ".env.local");
   const example = join(repoRoot, ".env.local.example");
@@ -113,6 +137,7 @@ function main() {
   }
   seedInventableAuthSecrets(rootEnv);
   seedPostgresPassword(rootEnv);
+  seedRedisTls(rootEnv);
 
   log.step(3, 3, "Sync app env files (development + production) → check");
   run("pnpm run env");

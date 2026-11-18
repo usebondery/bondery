@@ -78,7 +78,7 @@ Rules:
 5. **No public exposure.** Redis stays on the private `internal` network. No host `ports:` and no Traefik labels.
 6. **Upgrades must stay seamless.** A security change to Redis must not need operator action on existing installs. Generate missing secrets automatically (as the `redis-secrets` job does) and keep existing data.
 
-The only exception is local development Redis on loopback (`deploy/bondery/docker-compose.dev-redis.yml`, `127.0.0.1:26636`). It holds no production data.
+There is no exception for local development. `deploy/bondery/docker-compose.dev-redis.yml` follows the same rules, so the API's TLS and password path runs on every developer machine. `pnpm run start:redis` creates the secrets in `.temp/redis-secrets` with the same code as the Compose job (`ensure-redis-secrets.ts --local-dev`), and the dev port binds to `127.0.0.1` only.
 
 How the bundled stack does it:
 
@@ -90,7 +90,7 @@ How the bundled stack does it:
 | API reads the password and pinned CA from files | `apps/api/src/lib/data/redis-connection-options.ts` |
 | Compose always sets `rediss://${prefix}-redis:6379`. A stale `redis://` value in `.env` or Infisical does not apply | `deploy/bondery/docker-compose*.yml` |
 | Production API logs a warning at boot when Redis has no TLS or no password | `warnOnInsecureProductionRedis()` in `lib/data/redis.ts` |
-| CI fails when a stack variant drops TLS or auth | `checkRedisTlsAndAuth()` in `deploy/bondery/scripts/check-compose.mjs` |
+| CI fails when a stack variant or the dev Redis drops TLS or auth, or the dev port leaves loopback | `checkRedisTlsAndAuth()` and the dev block in `deploy/bondery/scripts/check-compose.mjs` |
 
 Rotation: see `docs/deploy/secrets.mdx` (delete the files in the `redis-secrets` volume, then recreate `redis-secrets`, `redis`, and `api`).
 

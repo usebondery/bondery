@@ -114,7 +114,7 @@ Start local Redis (required for Better Auth secondary storage, rate limits, and 
 pnpm run start:redis
 ```
 
-Set `BONDERY_PRIVATE_REDIS_URL=redis://127.0.0.1:26636` in root `.env.local` (default in examples), then `pnpm run env`.
+Set `BONDERY_PRIVATE_REDIS_URL=rediss://127.0.0.1:26636` and the two Redis file paths in root `.env.local` (defaults in examples; `pnpm run setup:dev` updates an older file), then `pnpm run env`. See [Local setup → Redis](./local-setup.mdx).
 
 <Callout type="info">
 Use `db:migrate:deploy` to apply existing migrations locally. Reserve `db:migrate:dev` for **authoring** new schema changes — it uses a Prisma shadow database that does not have PostGIS pre-installed and will fail on the initial migration.

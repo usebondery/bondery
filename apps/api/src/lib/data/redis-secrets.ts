@@ -170,6 +170,12 @@ async function writeAtomic(path: string, contents: string, mode: number): Promis
 export type EnsureRedisSecretsOptions = {
   /** Change ownership to the Redis and API container users. Needs root. */
   chownToContainerUsers: boolean;
+  /**
+   * Local development: write into a host folder that the Redis container reads through a bind
+   * mount. On Linux the files keep the host owner, so they must be readable by the Redis user.
+   * Never use this for a deployed stack.
+   */
+  localDev?: boolean;
   log: (message: string) => void;
   now?: Date;
   prefix: string;
@@ -186,18 +192,20 @@ export async function ensureRedisSecrets(
 ): Promise<EnsureRedisSecretsResult> {
   const paths = redisSecretPaths(options.root);
   const hostnames = redisCertificateHostnames(options.prefix);
+  const dirMode = options.localDev ? 0o755 : 0o700;
+  const secretMode = options.localDev ? 0o644 : 0o600;
 
-  await mkdir(paths.serverDir, { mode: 0o700, recursive: true });
-  await mkdir(paths.clientDir, { mode: 0o700, recursive: true });
+  await mkdir(paths.serverDir, { mode: dirMode, recursive: true });
+  await mkdir(paths.clientDir, { mode: dirMode, recursive: true });
 
   const existingPassword = (await readOptional(paths.passwordFile))?.trim();
   const password = existingPassword || generateRedisPassword();
   const passwordGenerated = !existingPassword;
   if (passwordGenerated) {
-    await writeAtomic(paths.passwordFile, `${password}\n`, 0o600);
+    await writeAtomic(paths.passwordFile, `${password}\n`, secretMode);
     options.log("Generated a new Redis password");
   }
-  await writeAtomic(paths.aclFile, buildRedisAclFile(password), 0o600);
+  await writeAtomic(paths.aclFile, buildRedisAclFile(password), secretMode);
 
   const existingCertificate = await readOptional(paths.serverCertFile);
   const existingKey = await readOptional(paths.serverKeyFile);
@@ -208,14 +216,16 @@ export async function ensureRedisSecrets(
   const certificateGenerated = replacementReason !== null;
   if (certificateGenerated) {
     const certificate = await generateRedisCertificate(hostnames, options.now);
-    await writeAtomic(paths.serverKeyFile, certificate.privateKeyPem, 0o600);
+    await writeAtomic(paths.serverKeyFile, certificate.privateKeyPem, secretMode);
     await writeAtomic(paths.serverCertFile, certificate.certificatePem, 0o644);
     options.log(
       `Generated a new Redis TLS certificate (${replacementReason}) for ${hostnames.join(", ")}`,
     );
     if (existingCertificate) {
       options.log(
-        "A running Redis keeps the old certificate. Load the new one: docker compose up -d --force-recreate redis api",
+        options.localDev
+          ? "A running Redis keeps the old certificate. Load the new one: pnpm run start:redis"
+          : "A running Redis keeps the old certificate. Load the new one: docker compose up -d --force-recreate redis api",
       );
     }
   }
@@ -235,8 +245,8 @@ export async function ensureRedisSecrets(
       await chown(path, API_CONTAINER_UID, API_CONTAINER_UID);
     }
   }
-  await chmod(paths.serverDir, 0o700);
-  await chmod(paths.clientDir, 0o700);
+  await chmod(paths.serverDir, dirMode);
+  await chmod(paths.clientDir, dirMode);
 
   return { certificateGenerated, passwordGenerated };
 }

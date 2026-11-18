@@ -183,21 +183,33 @@ Redis powers **rate limiting**, **Better Auth secondary storage** (`bondery:auth
 
 | Mode | `BONDERY_PRIVATE_REDIS_URL` | When to use |
 |------|---------------------|-------------|
-| **Local Docker (required)** | `redis://127.0.0.1:26636` | Normal local API work |
+| **Local Docker (required)** | `rediss://127.0.0.1:26636` | Normal local API work |
 
-From the repo root (Docker must be running):
+Local Redis is set up like the deployed one: TLS only, with a password. From the repo root (Docker must be running):
 
 ```bash
 pnpm run start:redis
 ```
 
-Stop with `pnpm run stop:redis`. Verify: `docker exec bondery-redis redis-cli ping` → `PONG`.
+`start:redis` first creates a random password and a TLS certificate in `.temp/redis-secrets` (git-ignored), then starts Redis on `127.0.0.1:26636`. It keeps existing secrets. Run it again after you delete that folder.
 
-Wire the API in `apps/api/.env.development.local`:
+Stop with `pnpm run stop:redis`. Verify:
+
+```bash
+docker exec bondery-redis sh -c 'REDISCLI_AUTH="$(cat /bondery-redis/client/password)" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost ping'
+```
+
+The answer is `PONG`.
+
+Wire the API in `apps/api/.env.development.local`. `pnpm run setup:dev` writes these values into root `.env.local`, and `pnpm run env` copies them. The two paths are relative to `apps/api`:
 
 ```text
-BONDERY_PRIVATE_REDIS_URL="redis://127.0.0.1:26636"
+BONDERY_PRIVATE_REDIS_URL="rediss://127.0.0.1:26636"
+BONDERY_PRIVATE_REDIS_PASSWORD_FILE="../../.temp/redis-secrets/client/password"
+BONDERY_PRIVATE_REDIS_TLS_CA_FILE="../../.temp/redis-secrets/client/ca.crt"
 ```
+
+An older `.env.local` still has `redis://127.0.0.1:26636`. Run `pnpm run setup:dev` once to update it, then `pnpm run env`.
 
 `BONDERY_PRIVATE_REDIS_URL` is **required** in development and production. See [Installation](../deploy/installation.mdx).
 

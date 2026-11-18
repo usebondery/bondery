@@ -331,6 +331,33 @@ for (const file of [
   checkRedisTlsAndAuth(file, readFileSync(resolve(root, file), "utf8"));
 }
 
+/** Local dev Redis has the same TLS and password rules, and only listens on loopback. */
+{
+  const label = "docker-compose.dev-redis.yml";
+  const devText = readFileSync(resolve(root, label), "utf8");
+  const fail = (message) => errors.push(`${label}: ${message}`);
+  if (!/- --port\s*\n\s*- "0"/.test(devText)) {
+    fail('redis must disable the plaintext port (--port "0")');
+  }
+  if (!/- --tls-port\s*\n\s*- "6379"/.test(devText)) {
+    fail('redis must serve TLS on 6379 (--tls-port "6379")');
+  }
+  for (const flag of ["--tls-cert-file", "--tls-key-file", "--aclfile"]) {
+    if (!devText.includes(`- ${flag}`)) {
+      fail(`redis must set ${flag}`);
+    }
+  }
+  if (!/redis-cli --tls --cacert/.test(devText) || !devText.includes("REDISCLI_AUTH")) {
+    fail("redis healthcheck must connect with TLS and the password");
+  }
+  if (!/- "127\.0\.0\.1:26636:6379"/.test(devText)) {
+    fail("redis must publish 26636 on 127.0.0.1 only");
+  }
+  if (/- "(?:0\.0\.0\.0:)?\d+:6379"/.test(devText)) {
+    fail("redis must not publish a port on all interfaces");
+  }
+}
+
 if (db) {
   if (/traefik\./.test(db)) {
     errors.push("db must not carry Traefik labels");

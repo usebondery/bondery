@@ -22,7 +22,7 @@ CI builds and pushes the API image to GHCR.
 - External Redis: set `BONDERY_PRIVATE_REDIS_URL` to your Redis; do **not** start the compose Redis service. It must require TLS (`rediss://`) and a password. See [Configuration → Redis](../deploy/configuration.mdx#redis).
 - Empty `BONDERY_PRIVATE_REDIS_URL` is **invalid in production**.
 
-Local laptop Redis: [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) (`pnpm run start:redis`, port 26636) — not the production `deploy/bondery` stack.
+Local laptop Redis: [`deploy/bondery/docker-compose.dev-redis.yml`](../../deploy/bondery/docker-compose.dev-redis.yml) (`pnpm run start:redis`, port 26636, TLS and password like the deployed Redis) — not the production `deploy/bondery` stack.
 
 ## Tagging model
 
