@@ -269,6 +269,10 @@
       }
     }
   ],
+  "plugins": [
+    "./biome/plugins/no-uncapped-multipart.grit",
+    "./biome/plugins/no-raw-html-sink.grit"
+  ],
   "vcs": {
     "clientKind": "git",
     "enabled": true,

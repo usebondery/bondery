@@ -1,3 +1,19 @@
+const HTML_ESCAPES: Record<string, string> = {
+  "'": "&#39;",
+  '"': "&quot;",
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+};
+
+/** Escape text so it can sit in element content or a double-quoted attribute. */
+function escapeHtml(text: string): string {
+  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
+}
+
+/** Link targets a note may hold. Anything else renders as plain text, never as an `href`. */
+const SAFE_LINK_URL = /^(?:https?:\/\/|mailto:|tel:)/i;
+
 /**
  * Converts a Markdown string to Tiptap-compatible HTML.
  *
@@ -5,6 +21,13 @@
  * highlight (==...==), links ([text](url)), person mentions
  * (`[@Name](bp://person/ID)` and `[[bp:person:ID]]`), blockquotes, un/ordered lists,
  * task lists (- [ ] / - [x]), horizontal rules, and plain paragraphs.
+ *
+ * Security: Markdown input is text, not HTML. Every character that could open a tag or leave an
+ * attribute (`& < > " '`) is escaped before any Markdown rule runs, so `<script>` and
+ * `<img onerror=…>` come out as visible text. Links keep only `http(s):`, `mailto:`, and `tel:`
+ * targets; `javascript:` and `data:` links render as plain text. The one raw-HTML exception is
+ * `<u>…</u>`, which `htmlToMarkdown` emits for underline. The API sanitizes again on write
+ * (`apps/api/src/lib/notes/sanitize-notes-html.ts`); this function must not rely on that.
  *
  * Cross-platform: works in React Native, Node.js, and browsers.
  *
@@ -37,8 +60,8 @@ export function markdownToHtml(markdown: string): string {
     }
   };
 
-  const inline = (text: string): string =>
-    text
+  const inline = (rawText: string): string =>
+    escapeHtml(rawText)
       // bold: **…** or __…__
       .replace(/\*\*(.+?)\*\*|__(.+?)__/g, (_, a, b) => `<strong>${a ?? b}</strong>`)
       // italic: *…* or _…_ (not touching bold markers)
@@ -67,11 +90,14 @@ export function markdownToHtml(markdown: string): string {
         /\[\[bp:date:([^\]]+)\]\]/g,
         (_, ts) => `<span data-type="inline-date" data-timestamp="${ts}"></span>`,
       )
-      // link: [text](url)
-      .replace(
-        /\[([^\]]+)\]\(([^)]+)\)/g,
-        (_, t, url) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${t}</a>`,
-      );
+      // link: [text](url). A target outside the allowlist keeps its text and loses the link.
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, t: string, url: string) =>
+        SAFE_LINK_URL.test(url.trim())
+          ? `<a href="${url.trim()}" target="_blank" rel="noopener noreferrer">${t}</a>`
+          : t,
+      )
+      // underline: the only raw tag htmlToMarkdown writes (it has no Markdown syntax)
+      .replace(/&lt;u&gt;(.+?)&lt;\/u&gt;/g, (_, a) => `<u>${a}</u>`);
 
   for (const line of lines) {
     const trimmed = line.trim();

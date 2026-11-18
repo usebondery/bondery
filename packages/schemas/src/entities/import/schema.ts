@@ -3,6 +3,7 @@ import {
   SOCIAL_IMPORT_COMMIT_BATCH_SIZE,
   VCARD_IMPORT_COMMIT_BATCH_SIZE,
 } from "#constants/import.js";
+import { CONTACT_FIELD_MAX_LENGTHS } from "#constants/index.js";
 import { channelTypeSchema } from "#primitives/channel/schema.js";
 import { nullableDateTimeSchema } from "../_shared/schema.js";
 import { contactAddressTypeSchema } from "../address/schema.js";
@@ -67,7 +68,13 @@ export const redirectRequestSchema = z.object({
   linkedinBio: z.string().optional().describe("LinkedIn about text"),
   location: z.string().optional().describe("Free-text location"),
   middleName: z.string().optional().describe("Middle name"),
-  notes: z.string().optional().describe("Free-text notes"),
+  notes: z
+    .string()
+    .max(CONTACT_FIELD_MAX_LENGTHS.notesHtml, {
+      error: `Notes must be at most ${CONTACT_FIELD_MAX_LENGTHS.notesHtml} characters`,
+    })
+    .optional()
+    .describe("Free-text notes"),
   profileImageUrl: z.string().optional().describe("Profile image URL to import as the avatar"),
   workHistory: z
     .array(scrapedWorkHistoryEntrySchema)

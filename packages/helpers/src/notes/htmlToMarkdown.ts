@@ -116,8 +116,24 @@ export function htmlToMarkdown(html: string): string {
   // Strip any remaining tags
   md = stripTags(md);
 
-  // Normalise excess blank lines
-  return md.replace(/\n{3,}/g, "\n\n").trim();
+  // Normalise excess blank lines, then turn entities back into the characters they stand for.
+  // Last, after every tag is gone: `markdownToHtml` escapes `& < > " '` on the way back in, so
+  // leaving `&lt;` here would come back as the literal text `&lt;`.
+  return decodeEntities(md.replace(/\n{3,}/g, "\n\n").trim());
+}
+
+const HTML_ENTITIES: Record<string, string> = {
+  "&#39;": "'",
+  "&amp;": "&",
+  "&gt;": ">",
+  "&lt;": "<",
+  "&nbsp;": " ",
+  "&quot;": '"',
+};
+
+/** One pass, so `&amp;lt;` becomes `&lt;` and not `<`. */
+function decodeEntities(text: string): string {
+  return text.replace(/&(?:#39|amp|gt|lt|nbsp|quot);/g, (entity) => HTML_ENTITIES[entity]);
 }
 
 function stripTags(html: string): string {

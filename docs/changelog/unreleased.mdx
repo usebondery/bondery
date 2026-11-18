@@ -23,6 +23,12 @@ last_updated: 2026-11-13
 - Settings: a **date format** preference (follow language, month first, day first, or year first) independent of UI language. Calendar display uses pinned Gregorian Intl tags; storage and pickers stay ISO.
 - Webapp and mobile: document direction follows the locale catalog (`dir`). Mantine `DirectionProvider` mirrors shell chrome. Map and graph canvases, phones, emails, and URLs stay `dir=ltr`. Contact names and note bodies use `dir=auto`. Mobile calls `I18nManager.forceRTL` only when resolved direction changes.
 
+### 🔒 Security
+
+- API: contact notes are now cleaned on the server before they are saved. Scripts, event handlers, and `javascript:` or `data:` links are removed, whichever client sent them (webapp, mobile, Chrome extension, API key, MCP, the assistant, or a Bondery ZIP import). Formatting, links, task lists, mentions, and dates are kept. Markdown input is now treated as text, so raw HTML typed in Markdown mode shows as text. Notes saved before this release are not rewritten. Notes are now limited to 20,000 characters on every write route, not only the notes route.
+- API: file uploads are now capped while they stream, not after they load. A profile or contact photo over 5 MB gets a `413` with `validation_error` and the upload stops at the limit. Before, the API read up to 100 MB into memory first. The default cap for any upload is 5 MB. The import routes keep larger caps: vCard, LinkedIn export, Instagram export and Bondery ZIP 100 MB.
+- CI: `pnpm run check:input-safety` fails when code writes contact notes without the sanitizer, or when the global upload ceiling grows. Two Biome rules, `biome/plugins/no-uncapped-multipart.grit` and `biome/plugins/no-raw-html-sink.grit`, fail the build on an upload read with no size cap and on a string written to the DOM as HTML.
+
 ### 🔄 Changed
 
 - Docs: the MCP server page leads with the Claude plugin install and keeps the custom-connector steps for self-hosted API origins.

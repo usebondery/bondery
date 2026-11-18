@@ -2,6 +2,8 @@
  * Shared configuration for the API server
  */
 
+import { AVATAR_UPLOAD as SCHEMA_AVATAR_UPLOAD } from "@bondery/schemas";
+
 export const AVATAR_UPLOAD = {
   allowedMimeTypes: [
     "image/jpeg",
@@ -13,8 +15,27 @@ export const AVATAR_UPLOAD = {
     "image/heic",
     "image/heif",
   ] as const,
-  maxFileSize: 5 * 1024 * 1024, // 5MB
-  maxFileSizeMB: 5,
+  // One source of truth with the webapp and the export-ZIP parser: `@bondery/schemas`.
+  maxFileSize: SCHEMA_AVATAR_UPLOAD.maxFileSizeBytes,
+  maxFileSizeMB: SCHEMA_AVATAR_UPLOAD.maxFileSizeMB,
+} as const;
+
+/**
+ * Per-route multipart file size caps, in bytes.
+ *
+ * `default` is the global ceiling registered in `build-app.ts`. It is small on purpose: a route
+ * that accepts a larger file must name its own cap here and pass it to the multipart call
+ * (`readUploadedFile` or `request.parts({ limits })`). The limit is enforced while the body
+ * streams, so an oversized upload is cut off instead of being buffered first.
+ * `scripts/check/check-input-safety.mjs` fails CI on a multipart call without a cap.
+ */
+export const UPLOAD_LIMITS = {
+  bonderyExport: 100 * 1024 * 1024,
+  default: 5 * 1024 * 1024,
+  image: AVATAR_UPLOAD.maxFileSize,
+  instagramExport: 100 * 1024 * 1024,
+  linkedinCsv: 100 * 1024 * 1024,
+  vcard: 100 * 1024 * 1024,
 } as const;
 
 /**

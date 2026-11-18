@@ -17,6 +17,7 @@ import { upsertContactSocials } from "../../lib/contacts/socials.js";
 import { setPersonLocationWithDb } from "../../lib/data/contact-rpc.js";
 import { cachedGeocodeLinkedInLocation } from "../../lib/integrations/mapy.js";
 import { loadDefaultPhoneCountryForUser } from "../../lib/me/default-phone-country.js";
+import { sanitizeNotesHtml } from "../../lib/notes/sanitize-notes-html.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { listContactChildIds } from "../../lib/sync/build-changes.js";
 import { type DomainContext, DomainError } from "../_shared/context.js";
@@ -61,7 +62,9 @@ export async function applyContactPatch(
     updates.location = body.location;
   }
   if (body.notes !== undefined) {
-    updates.notes = body.notes;
+    // The one write path for contact notes (REST, MCP, chat, extension, create). Never store
+    // client HTML as sent: see sanitize-notes-html.ts.
+    updates.notes = sanitizeNotesHtml(body.notes);
   }
   if (body.language !== undefined) {
     updates.language = body.language;

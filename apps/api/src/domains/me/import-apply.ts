@@ -3,6 +3,7 @@ import { remapImportId } from "@bondery/helpers/ids";
 import type { ImportResult } from "@bondery/schemas";
 import type { SyncChange } from "@bondery/schemas/sync";
 import type { ParsedBonderyExport } from "../../lib/import/parse-bondery-export-zip.js";
+import { sanitizeNotesHtml } from "../../lib/notes/sanitize-notes-html.js";
 import {
   buildGroupRowChange,
   buildPeopleTagChangeFromRow,
@@ -96,7 +97,8 @@ export async function applyParsedImport(
     longitude: person.longitude,
     middleName: person.middleName,
     myself: false,
-    notes: person.notes,
+    // ZIP content is client-controlled: sanitize like any other notes write.
+    notes: sanitizeNotesHtml(person.notes),
     notesUpdatedAt: asDateOrNull(person.notesUpdatedAt),
     timezone: person.timezone,
     updatedAt: asDate(person.updatedAt),

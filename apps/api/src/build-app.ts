@@ -29,6 +29,7 @@ import { envSchema } from "./env-schema.js";
 import { redactSensitiveAuthQuery } from "./lib/auth/redact-auth-query.js";
 import { registerExtensionVersionCheck } from "./lib/extension/version-check.js";
 import { registerAuthStrategies } from "./lib/platform/auth/strategies.js";
+import { UPLOAD_LIMITS } from "./lib/platform/config.js";
 import { mapErrorToResponse } from "./lib/platform/errors/map-to-response.js";
 import type { AppFastifyInstance } from "./lib/platform/fastify-types.js";
 import { registerIdempotency } from "./lib/platform/idempotency.js";
@@ -186,9 +187,11 @@ export async function buildApp(): Promise<AppFastifyInstance> {
 
   await fastify.register(formbody);
 
+  // Small default ceiling. A route that takes a larger file (ZIP and export imports) names its
+  // own cap in UPLOAD_LIMITS and passes it per call, so a new upload route is safe by default.
   await fastify.register(multipart, {
     limits: {
-      fileSize: 100 * 1024 * 1024,
+      fileSize: UPLOAD_LIMITS.default,
     },
   });
 

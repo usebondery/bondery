@@ -6,7 +6,7 @@ description: >
   Use when adding authentication, authorization, API routes, secrets, uploads, webhooks,
   payments, sensitive data, extension bridges, or reviewing security-sensitive changes.
 metadata:
-  version: "1.0.0"
+  version: "1.1.0"
   namespace: bondery
 ---
 
@@ -46,6 +46,8 @@ Do **not** activate for routine UI refactors, copy changes, or non-security API 
 9. **AI tool arguments are untrusted** — Zod-validate and scope to user-owned domain context; model output never grants authority.
 10. **No secrets or PII in logs or client bundles** — Redact tokens, cookies, passwords, and contact PII from structured logs.
 11. **CSP is built in exactly one place** — Every policy comes from `@bondery/helpers/security`. No app hand-writes a directive, and `script-src` never carries `'unsafe-inline'`. `pnpm run check:security-headers` enforces both.
+14. **Stored HTML is sanitized at the API** — Contact notes are stored as HTML. Every write path (`applyContactPatch`, ZIP import, any new one) runs the value through `sanitizeNotesHtml()` (`apps/api/src/lib/notes/sanitize-notes-html.ts`), an allowlist that drops scripts, event handlers, and `javascript:`/`data:` links. Clients never sanitize on the API's behalf, and nothing renders a stored string with `innerHTML`. Any other free-text field that can carry markup gets a max length in `@bondery/schemas`. `pnpm run check:input-safety` and Biome plugin `biome/plugins/no-raw-html-sink.grit` enforce it. Details: [Contact notes](references/input-storage-and-output.md#contact-notes-stored-html).
+15. **Cap uploads while they stream** — A size check after `toBuffer()` is not a limit: the bytes are already in memory. Read uploads with `readUploadedFile()` (one file) or `request.parts({ limits: { fileSize: UPLOAD_LIMITS.<name> } })`, with caps named in `UPLOAD_LIMITS` (`apps/api/src/lib/platform/config.ts`). The global multipart ceiling is small, so a new route is safe by default. Biome plugin `biome/plugins/no-uncapped-multipart.grit` rejects a multipart read with no cap. Details: [Size limits](references/input-storage-and-output.md#size-limits-cap-the-stream-not-the-buffer).
 
 ## Decision tree
 
@@ -73,6 +75,9 @@ pnpm run check:types -w api          # includes check-route-security
 
 # OAuth / auth integration (optional; Postgres + migrate required)
 pnpm run test:auth -w api
+
+# Notes sanitizer wiring + global upload ceiling (Biome plugins run inside `biome ci`)
+pnpm run check:input-safety
 
 # Env contract drift
 pnpm run env -- --check
@@ -102,7 +107,10 @@ pnpm run check:types -w chrome-extension
 - [ ] New secrets added to `packages/helpers/src/env/manifest.ts` with `secret: true`
 - [ ] No secrets, tokens, or PII in logs or client bundles
 - [ ] Webhook handler verifies signature on raw body before JSON parse
-- [ ] Upload routes enforce MIME whitelist + magic-byte validation (+ intended size limit)
+- [ ] Upload routes enforce MIME whitelist + magic-byte validation + a size cap on the stream (`readUploadedFile` / `limits.fileSize`, named in `UPLOAD_LIMITS`), not only a check after `toBuffer()`
+- [ ] Stored HTML or markdown is sanitized at the API on every write path and rendered as text or through a schema; no `innerHTML`, `dangerouslySetInnerHTML`, or `document.write` with stored or imported strings
+- [ ] Free-text fields that can hold markup have a max length in `@bondery/schemas`
+- [ ] `pnpm run check:input-safety` passes if an upload route, a notes write path, or `build-app.ts` changed
 - [ ] 5xx responses use catalog/generic messages — no stack traces to client
 - [ ] Policy headers come from `@bondery/helpers/security`; `proxy.ts` exports `config`
 - [ ] `pnpm run check:security-headers` passes if a proxy or policy changed

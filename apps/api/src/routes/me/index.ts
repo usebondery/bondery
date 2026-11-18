@@ -18,9 +18,11 @@ import { consumeStepUpHeader } from "../../lib/auth/step-up-redis.js";
 import { attachContactExtras } from "../../lib/contacts/enrichment.js";
 import { contactListSelect, mapContactListRecord } from "../../lib/data/prisma-mappers.js";
 import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
+import { UPLOAD_LIMITS } from "../../lib/platform/config.js";
 import { badRequest, internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { withOkResponse } from "../../lib/platform/openapi/responses.js";
+import { readUploadedFile } from "../../lib/platform/uploads.js";
 import { withDomainRoute } from "../../lib/platform/with-domain-route.js";
 import {
   deleteAccount,
@@ -139,13 +141,13 @@ export const meRoutes: AppRoutePlugin = async (fastify) => {
       } satisfies FastifyZodOpenApiSchema,
     },
     withDomainRoute(async (ctx, { request }) => {
-      const data = await request.file();
-      if (!data) {
+      // Streaming cap first; `uploadProfilePhoto` re-validates type, size, and magic bytes.
+      const file = await readUploadedFile(request, { maxBytes: UPLOAD_LIMITS.image });
+      if (!file) {
         throw badRequest("No file provided", "bad_request");
       }
 
-      const buffer = await data.toBuffer();
-      return uploadProfilePhoto(ctx, buffer, data.mimetype);
+      return uploadProfilePhoto(ctx, file.buffer, file.mimetype);
     }),
   );
 

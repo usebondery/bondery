@@ -1,0 +1,35 @@
+// Rejects reading a multipart upload without a size cap.
+//
+// `request.file()`, `request.files()` and `request.parts()` stream the request body into
+// memory. Without a `limits.fileSize` for the route, the only bound is the global ceiling, and
+// a size check after `toBuffer()` is too late because the bytes are already buffered. A photo
+// route that checked `buffer.length` afterwards accepted anything up to the old 100 MB ceiling.
+//
+// Use readUploadedFile() from apps/api/src/lib/platform/uploads.ts for a single file, or pass
+// `{ limits: { fileSize: UPLOAD_LIMITS.<name> } }` to request.parts(). Caps live in
+// UPLOAD_LIMITS (apps/api/src/lib/platform/config.ts).
+
+language js
+
+or {
+  `$request.file()`,
+  `$request.files()`,
+  `$request.parts()`,
+  `$request.saveRequestFiles()`,
+  `$request.file($options)`,
+  `$request.files($options)`,
+  `$request.parts($options)`,
+  `$request.saveRequestFiles($options)`
+} as $call where {
+  // Only the API serves uploads. The Fastify request is the receiver.
+  $filename <: r"(?:.*\W)?apps\Wapi\W.*",
+  // Test servers build throwaway routes, some of them deliberately uncapped.
+  $filename <: not r".*\.test\.ts",
+  or {
+    // No options at all.
+    $call <: not contains `$_($options)`,
+    // Options without a limits object.
+    $options <: not contains `limits`
+  },
+  register_diagnostic(span=$call, message="Read multipart uploads with a size cap. Use readUploadedFile() or pass { limits: { fileSize: UPLOAD_LIMITS.<name> } }. A size check after toBuffer() is too late.", severity="error")
+}

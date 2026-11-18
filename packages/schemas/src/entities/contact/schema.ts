@@ -251,7 +251,14 @@ export const contactWritableFieldsSchema = z.object({
   location: z.string().nullable().optional().describe("Free-text location"),
   longitude: z.number().nullable().optional().describe("Longitude in decimal degrees"),
   middleName: z.string().nullable().optional().describe("Middle name"),
-  notes: z.string().nullable().optional().describe("Free-text notes"),
+  notes: z
+    .string()
+    .max(CONTACT_FIELD_MAX_LENGTHS.notesHtml, {
+      error: `Notes must be at most ${CONTACT_FIELD_MAX_LENGTHS.notesHtml} characters`,
+    })
+    .nullable()
+    .optional()
+    .describe("Free-text notes"),
   phones: z
     .array(phoneEntryEntitySchema)
     .nullable()

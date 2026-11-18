@@ -628,6 +628,12 @@
       "node": "./dist/notes/notes-mentions.test.js",
       "types": "./src/notes/notes-mentions.test.ts"
     },
+    "./notes/notes-xss.test": {
+      "default": "./dist/notes/notes-xss.test.js",
+      "import": "./dist/notes/notes-xss.test.js",
+      "node": "./dist/notes/notes-xss.test.js",
+      "types": "./src/notes/notes-xss.test.ts"
+    },
     "./notes/personMentionFormat": {
       "default": "./dist/notes/personMentionFormat.js",
       "import": "./dist/notes/personMentionFormat.js",

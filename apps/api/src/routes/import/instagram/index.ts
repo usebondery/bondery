@@ -8,6 +8,7 @@ import { IMPORT_HANDLE_LOOKUP_CHUNK_SIZE } from "@bondery/schemas/constants";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
 import { domainDb } from "../../../domains/_shared/domain-db.js";
 import { commitInstagramImport } from "../../../domains/import/instagram.js";
+import { UPLOAD_LIMITS } from "../../../lib/platform/config.js";
 import { domainContextFromRequest } from "../../../lib/platform/domain-context.js";
 import { badRequest } from "../../../lib/platform/errors/http-errors.js";
 import type { AppRoutePlugin } from "../../../lib/platform/fastify-types.js";
@@ -57,7 +58,9 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
         const files: Array<{ fileName: string; content: Buffer }> = [];
         let strategy: InstagramImportStrategy = "following_and_followers";
 
-        for await (const part of request.parts()) {
+        for await (const part of request.parts({
+          limits: { fileSize: UPLOAD_LIMITS.instagramExport },
+        })) {
           if (part.type === "file") {
             const content = await part.toBuffer();
             if (!content || !part.filename) {

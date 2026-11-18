@@ -84,6 +84,22 @@ export function mapErrorToResponse(
 
   const statusCode = error.statusCode ?? 500;
 
+  // A multipart file over its cap that no route handler translated. Report it as the client
+  // error it is, not as `internal_server_error`.
+  if (error.code === "FST_REQ_FILE_TOO_LARGE") {
+    return {
+      body: wrap(
+        buildApiErrorBody({
+          code: "validation_error",
+          message: "File too large.",
+          requestId: request.id,
+          type: "invalid_request_error",
+        }),
+      ),
+      statusCode: 413,
+    };
+  }
+
   if (statusCode === 429) {
     const rawCode = error.code ?? "";
     const code = isApiErrorCode(rawCode) ? rawCode : "rate_limit_exceeded";

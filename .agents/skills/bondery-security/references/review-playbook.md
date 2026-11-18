@@ -32,8 +32,8 @@ Skip for: copy changes, styling, non-security refactors, routine API contract wo
 |-------|----------|---------|
 | **Critical** | Exploitable without auth; full tenant data breach; secret exposure | Missing `userId` filter on list endpoint |
 | **High** | Exploitable with low-privilege auth; partial data leak | IDOR on single resource by guessing UUID |
-| **Medium** | Requires specific conditions; defense-in-depth gap | Missing upload size check; no log redaction |
-| **Low** | Theoretical or heavily mitigated | Non-timing-safe service secret compare |
+| **Medium** | Requires specific conditions; defense-in-depth gap | Upload size cap applied after buffering; stored HTML not sanitized (self-XSS today, wider if rendered elsewhere); no log redaction |
+| **Low** | Theoretical or heavily mitigated | Non-timing-safe compare of a secret that no live route accepts |
 | **Info** | Improvement opportunity; known documented gap | Webapp CSP not configured |
 
 **Require a plausible attack path before assigning High or Critical.**
@@ -62,7 +62,10 @@ For security-sensitive features, require tests covering:
 | Missing webhook signature | 400/401 rejection |
 | Expired/reused WS ticket | Rejection |
 | API key on session-only route | 401/403 |
-| Oversized upload | 400 rejection (when size check exists) |
+| Oversized upload (one byte over the cap) | 413 `validation_error`, body cut off at the limit (`uploads.test.ts`) |
+| Disallowed upload MIME type | 400 `validation_error` before the body is read |
+| Stored-XSS payload in a stored HTML field (`<script>`, `<img onerror>`, `javascript:` link, injected attribute quote) | Stored value holds none of it (`sanitize-notes-html.test.ts`) |
+| Sanitizer applied twice | Same output (idempotent) |
 
 Existing test infrastructure:
 - `route-security-audit.test.ts` — every shelled route has `openApiArea`
@@ -101,7 +104,10 @@ Existing test infrastructure:
 - Auth hooks inside route module files (CI should catch, but verify)
 - Secrets in source code or client bundles
 - Webhook handlers that parse JSON before signature verification
-- `dangerouslySetInnerHTML` or unsanitized HTML storage without documented threat model
+- `dangerouslySetInnerHTML`, `innerHTML =`, or unsanitized HTML storage without documented threat model
+- A new write path for `people.notes` (or another stored-HTML field) that skips `sanitizeNotesHtml()`, and a Markdown or HTML converter that interpolates input into markup without escaping it
+- A multipart read with no per-call `limits.fileSize`, a size check that runs after `toBuffer()`, or a `fileSize` written as a literal instead of an `UPLOAD_LIMITS` entry
+- A free-text field that can carry markup with no max length in `@bondery/schemas`
 - A wrong `config` export name in `proxy.ts`. Next.js ignores `proxyConfig` without an error, so the matcher and every header are silently dropped.
 - A policy shipped without verification. Read the live header with `curl -sSI`. An unchanged local policy string proves nothing about what a browser receives.
 
