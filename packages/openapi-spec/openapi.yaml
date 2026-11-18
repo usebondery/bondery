@@ -2884,6 +2884,7 @@ paths:
                   description: Free-text notes
                   nullable: true
                   type: string
+                  maxLength: 20000
                 phones:
                   description: Phone numbers. Replaces the full set when present.
                   nullable: true
@@ -5574,6 +5575,7 @@ paths:
                   description: Free-text notes
                   nullable: true
                   type: string
+                  maxLength: 20000
                 phones:
                   description: Phone numbers. Replaces the full set when present.
                   nullable: true
@@ -26035,6 +26037,7 @@ paths:
                                 description: Free-text notes
                                 nullable: true
                                 type: string
+                                maxLength: 20000
                               phones:
                                 description: Phone numbers. Replaces the full set when present.
                                 nullable: true
@@ -26313,6 +26316,7 @@ paths:
                                 description: Free-text notes
                                 nullable: true
                                 type: string
+                                maxLength: 20000
                               phones:
                                 description: Phone numbers. Replaces the full set when present.
                                 nullable: true
@@ -27462,6 +27466,7 @@ paths:
                 notes:
                   description: Free-text notes
                   type: string
+                  maxLength: 20000
                 profileImageUrl:
                   description: Profile image URL to import as the avatar
                   type: string
