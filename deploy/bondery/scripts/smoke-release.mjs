@@ -317,6 +317,15 @@ function writeOverride(service, imageName, tag, skipPull) {
     override += `  seaweedfs-s3:\n    ports:\n      - "8333:8333"\n`;
   }
 
+  if (skipPull) {
+    // Local-only tags cannot be pulled. redis-secrets runs the api image, and so does api when
+    // the webapp is the service under test.
+    override += "  redis-secrets:\n    pull_policy: never\n";
+    if (service === "webapp") {
+      override += "  api:\n    pull_policy: never\n";
+    }
+  }
+
   writeFileSync(resolve(BONDERY_DIR, "docker-compose.override.yml"), override);
 }
 
