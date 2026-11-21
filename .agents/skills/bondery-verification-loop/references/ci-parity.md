@@ -7,13 +7,13 @@ There is **no** root `pnpm run verify` — mirror CI by running the steps below 
 
 ## Tiers
 
-| Tier | When | Typical commands |
-|------|------|------------------|
-| **0 — Pre-commit** | Automatic on commit | Lefthook: Biome write on staged files; OpenAPI regen if API/schema paths staged; env example regen if manifest / `scripts/env/**` staged |
-| **1 — Fast local** | After each coherent edit | Changed-file `biome check`, workspace `check:types`, targeted `test:*` |
-| **2 — PR parity** | Before opening PR | Full `verify.yml` command sequence (below) |
-| **3 — Staging** | Matches `main` image builds | `stage-images.yml` (path-filtered Docker builds for api, webapp, website) |
-| **4 — Smoke / release** | Tags, release branch | `release-*.yml` (smoke-gated), `deploy-website.yml`, `smoke-bondery-stack.yml` (manual). Operator sequencing: [`bondery-release`](../../bondery-release/SKILL.md). |
+| Tier                    | When                        | Typical commands                                                                                                                                                   |
+| ----------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **0 — Pre-commit**      | Automatic on commit         | Lefthook: Biome write on staged files; OpenAPI regen if API/schema paths staged; env example regen if manifest / `scripts/env/**` staged                           |
+| **1 — Fast local**      | After each coherent edit    | Changed-file `biome check`, workspace `check:types`, targeted `test:*`                                                                                             |
+| **2 — PR parity**       | Before opening PR           | Full `verify.yml` command sequence (below)                                                                                                                         |
+| **3 — Staging**         | Matches `main` image builds | `stage-images.yml` (path-filtered Docker builds for api, webapp, website)                                                                                          |
+| **4 — Smoke / release** | Tags, release branch        | `release-*.yml` (smoke-gated), `deploy-website.yml`, `smoke-bondery-stack.yml` (manual). Operator sequencing: [`bondery-release`](../../bondery-release/SKILL.md). |
 
 Tier 2 is the default "am I ready for PR?" target when risk is standard or high.
 
@@ -47,11 +47,11 @@ docker build -f apps/webapp/Dockerfile . --secret id=turbo_token,env=TURBO_TOKEN
 
 Path-filtered PR image jobs:
 
-| Job | Trigger paths | Proves |
-|-----|---------------|--------|
-| `api-docker-build` | `apps/api/**`, `packages/**`, Docker/workspace roots | Production API image builds; `@bondery/db` resolves in image |
-| `webapp-docker-build` | `apps/webapp/**`, `packages/**`, Docker/workspace roots | Production webapp image builds |
-| `website-build` | `apps/website/**`, … | Website prune+build on runner (not `docker build`) |
+| Job                   | Trigger paths                                           | Proves                                                       |
+| --------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| `api-docker-build`    | `apps/api/**`, `packages/**`, Docker/workspace roots    | Production API image builds; `@bondery/db` resolves in image |
+| `webapp-docker-build` | `apps/webapp/**`, `packages/**`, Docker/workspace roots | Production webapp image builds                               |
+| `website-build`       | `apps/website/**`, …                                    | Website prune+build on runner (not `docker build`)           |
 
 ## Staging workflow (not full verify)
 
@@ -62,27 +62,27 @@ Path-filtered PR image jobs:
 
 ## Optional local checks (not in CI)
 
-| Check | Command |
-|-------|---------|
-| Playwright E2E | `pnpm --filter webapp run test:e2e` |
-| Mobile sync lint | `pnpm --filter mobile run check-sync-patterns` |
-| Mobile unit sync | `pnpm --filter mobile run test:sync` |
-| Extension patterns | `pnpm --filter chrome-extension run check:extension-patterns` |
-| Helpers unit tests | `pnpm --filter @bondery/helpers test` |
-| Webapp SSR smoke | `pnpm --filter webapp run smoke-ssr` |
-| Full monorepo build | `pnpm run build` |
-| Expo doctor | `pnpm exec expo-doctor` in `apps/mobile` |
+| Check               | Command                                                       |
+| ------------------- | ------------------------------------------------------------- |
+| Playwright E2E      | `pnpm --filter webapp run test:e2e`                           |
+| Mobile sync lint    | `pnpm --filter mobile run check-sync-patterns`                |
+| Mobile unit sync    | `pnpm --filter mobile run test:sync`                          |
+| Extension patterns  | `pnpm --filter chrome-extension run check:extension-patterns` |
+| Helpers unit tests  | `pnpm --filter @bondery/helpers test`                         |
+| Webapp SSR smoke    | `pnpm --filter webapp run smoke-ssr`                          |
+| Full monorepo build | `pnpm run build`                                              |
+| Expo doctor         | `pnpm exec expo-doctor` in `apps/mobile`                      |
 
 Document these as `SKIPPED` in PR parity reports unless the diff touches those areas — then run them and report results.
 
 ## Known repository gaps (do not treat as passing silently)
 
-| Gap | Impact |
-|-----|--------|
-| Biome CI 2.5.0 vs local 2.5.3 | Rare formatter drift between local and Actions |
-| `verify` omits API auth integration | `test:auth` local-only until repaired |
-| `verify` omits `test:theme` / `test:sync` for webapp | Run locally when touching webapp UI/sync |
-| Website PR has no `docker build` | Only api/webapp get image builds on PR; website uses runner prune+build |
+| Gap                                                  | Impact                                                                  |
+| ---------------------------------------------------- | ----------------------------------------------------------------------- |
+| Biome CI 2.5.0 vs local 2.5.3                        | Rare formatter drift between local and Actions                          |
+| `verify` omits API auth integration                  | `test:auth` local-only until repaired                                   |
+| `verify` omits `test:theme` / `test:sync` for webapp | Run locally when touching webapp UI/sync                                |
+| Website PR has no `docker build`                     | Only api/webapp get image builds on PR; website uses runner prune+build |
 
 ## Checklist
 

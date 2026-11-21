@@ -29,7 +29,7 @@ import {
 } from "@/lib/i18n/generated/hooks";
 import { orientMergePair } from "@/lib/merge/orientMergePair";
 import { routePerson } from "@/lib/navigation/route/person";
-import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
+import { useMergeContactsMutation } from "@/lib/query/hooks/useContactMutations";
 import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
 
 interface MergeRecommendationCardProps {

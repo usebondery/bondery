@@ -4,33 +4,33 @@ Infrastructure and shared utilities for the API. **`lib/` root has no `.ts` file
 
 ## Subsystems
 
-| Folder | Responsibility |
-|--------|----------------|
-| `platform/` | Fastify glue, auth, errors, OpenAPI, route shells |
-| `data/` | Prisma helpers, Redis, pagination, search, SQL select fragments |
-| `contacts/` | Stateless CRM primitives shared by domains and services |
-| `integrations/` | Stateless third-party adapters with multiple consumers |
-| `extension/` | Chrome extension helpers and version check |
-| `import/` | Import helpers (data URIs, default groups, LinkedIn) |
-| `notifications/` | Email transporter |
-| `sync/` | Offline sync engine (do not restructure casually) |
-| `health/` | Health probes and routes |
+| Folder           | Responsibility                                                  |
+| ---------------- | --------------------------------------------------------------- |
+| `platform/`      | Fastify glue, auth, errors, OpenAPI, route shells               |
+| `data/`          | Prisma helpers, Redis, pagination, search, SQL select fragments |
+| `contacts/`      | Stateless CRM primitives shared by domains and services         |
+| `integrations/`  | Stateless third-party adapters with multiple consumers          |
+| `extension/`     | Chrome extension helpers and version check                      |
+| `import/`        | Import helpers (data URIs, default groups, LinkedIn)            |
+| `notifications/` | Email transporter                                               |
+| `sync/`          | Offline sync engine (do not restructure casually)               |
+| `health/`        | Health probes and routes                                        |
 
 Feature-specific adapters with a single owner live under `services/` instead (e.g. `services/admin/posthog.ts`, `services/billing/stripe.ts`).
 
 ## Where do I put new code?
 
-| Task | Location |
-|------|----------|
-| Auth strategy, error helper, OpenAPI wrapper | `platform/` |
-| Redis, pagination, shared `SELECT` fragments | `data/` |
-| Contact channel/address parsing, enrichment, avatar storage | `contacts/` |
-| Geocoding adapter used by import + routes | `integrations/` |
-| Extension version enforcement | `extension/` |
-| vCard decode, LinkedIn import helpers | `import/` |
-| Sync push/pull, conflict resolution | `sync/` |
-| Billing-only Stripe client | `services/billing/` |
-| Admin-only PostHog client | `services/admin/` |
+| Task                                                        | Location            |
+| ----------------------------------------------------------- | ------------------- |
+| Auth strategy, error helper, OpenAPI wrapper                | `platform/`         |
+| Redis, pagination, shared `SELECT` fragments                | `data/`             |
+| Contact channel/address parsing, enrichment, avatar storage | `contacts/`         |
+| Geocoding adapter used by import + routes                   | `integrations/`     |
+| Extension version enforcement                               | `extension/`        |
+| vCard decode, LinkedIn import helpers                       | `import/`           |
+| Sync push/pull, conflict resolution                         | `sync/`             |
+| Billing-only Stripe client                                  | `services/billing/` |
+| Admin-only PostHog client                                   | `services/admin/`   |
 
 ### `data/select-fragments.ts` vs `services/*/queries.ts`
 

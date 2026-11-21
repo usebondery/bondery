@@ -102,7 +102,8 @@ function main() {
         console.error(`  - ${line}`);
       }
       console.error("\nEdit files under .agents/, then run `pnpm run agents:sync`.");
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     console.log("check-agent-files: ok");
     return;

@@ -108,7 +108,14 @@ export function formatOrderedDate({
 }
 
 /** CSS font-family stack when a script needs more than Lexend. Otherwise null. */
-export function fontStackForLocale(locale: string | null | undefined): string | null {
+export type LocaleFontStack =
+  | '"Noto Sans Arabic", sans-serif'
+  | '"Noto Sans Hebrew", sans-serif'
+  | '"Noto Sans Thai", sans-serif'
+  | '"PingFang SC", "Hiragino Sans", "Noto Sans SC", sans-serif'
+  | '"Yu Gothic", "Hiragino Sans", Meiryo, sans-serif';
+
+export function fontStackForLocale(locale: string | null | undefined): LocaleFontStack | null {
   const code = (locale ?? "").toLowerCase();
   switch (code) {
     case "zh-hans":

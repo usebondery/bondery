@@ -97,11 +97,11 @@ export function stripNameTitles(rawName: string): string {
   let start = 0;
   let end = words.length - 1;
 
-  while (start <= end && NAME_TITLE_TOKENS.has(normalizeNameToken(words[start]))) {
+  while (start <= end && NAME_TITLE_TOKENS.has(normalizeNameToken(words[start] ?? ""))) {
     start += 1;
   }
 
-  while (end >= start && NAME_TITLE_TOKENS.has(normalizeNameToken(words[end]))) {
+  while (end >= start && NAME_TITLE_TOKENS.has(normalizeNameToken(words[end] ?? ""))) {
     end -= 1;
   }
 
@@ -126,18 +126,16 @@ export function extractNameParts(lastNameInput: string): {
 } {
   const words = lastNameInput.trim().split(/\s+/).filter(Boolean);
 
-  if (words.length === 0) {
+  const lastName = words.at(-1);
+  if (lastName === undefined) {
     return { lastName: "", middleName: null };
   }
 
   if (words.length === 1) {
-    return { lastName: words[0], middleName: null };
+    return { lastName, middleName: null };
   }
 
-  return {
-    lastName: words[words.length - 1],
-    middleName: words[words.length - 2],
-  };
+  return { lastName, middleName: words.at(-2) ?? null };
 }
 
 /**
@@ -193,21 +191,19 @@ export function parseFullName(fullName: string): {
   const cleaned = cleanPersonName(fullName);
   const tokens = cleaned.split(/\s+/).filter(Boolean);
 
-  if (tokens.length === 0) {
+  const firstName = tokens.at(0);
+  const lastName = tokens.at(-1);
+  if (firstName === undefined || lastName === undefined) {
     return { firstName: "", lastName: null, middleName: null };
   }
 
   if (tokens.length === 1) {
-    return { firstName: tokens[0], lastName: null, middleName: null };
+    return { firstName, lastName: null, middleName: null };
   }
 
   if (tokens.length === 2) {
-    return { firstName: tokens[0], lastName: tokens[1], middleName: null };
+    return { firstName, lastName, middleName: null };
   }
 
-  return {
-    firstName: tokens[0],
-    lastName: tokens[tokens.length - 1],
-    middleName: tokens.slice(1, -1).join(" "),
-  };
+  return { firstName, lastName, middleName: tokens.slice(1, -1).join(" ") };
 }

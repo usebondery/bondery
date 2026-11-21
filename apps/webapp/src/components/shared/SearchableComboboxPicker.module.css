@@ -1,16 +1,16 @@
 .optionsScroll {
   --combobox-padding: calc(0.25rem * var(--mantine-scale));
-  max-width: 100%;
-  min-width: 0;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .optionsScroll .mantine-ScrollArea-viewport,
 .optionsScroll .mantine-ScrollArea-content {
   box-sizing: border-box;
-  max-width: 100%;
-  min-width: 0;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .optionsScroll .mantine-ScrollArea-content {
@@ -20,10 +20,10 @@
 .optionsScroll .mantine-Combobox-option {
   box-sizing: border-box;
   display: block;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /*
@@ -62,11 +62,11 @@
 }
 
 .dropdown:has(.optionsScroll) .mantine-Combobox-search {
-  margin-inline-end: 0;
   padding-inline-end: 0;
+  margin-inline-end: 0;
 }
 
 .dropdown:has(.optionsScroll) .mantine-Combobox-options {
-  padding-inline-end: 0;
   width: 100%;
+  padding-inline-end: 0;
 }

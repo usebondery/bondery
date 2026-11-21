@@ -4,10 +4,10 @@ Bondery supports both **hosted cloud** (Bondery-operated) and **self-hosted** de
 
 ## Data controller roles
 
-| Deployment | Data controller (user CRM data) | Data processor |
-|------------|----------------------------------|----------------|
-| **Hosted cloud** | User (for their contacts) | Bondery / Sveetech (platform) — [legal-entity.md](./legal-entity.md) |
-| **Self-hosted** | **Operator** (the person/org running the instance) | N/A — operator runs the stack |
+| Deployment       | Data controller (user CRM data)                    | Data processor                                                       |
+| ---------------- | -------------------------------------------------- | -------------------------------------------------------------------- |
+| **Hosted cloud** | User (for their contacts)                          | Bondery / Sveetech (platform) — [legal-entity.md](./legal-entity.md) |
+| **Self-hosted**  | **Operator** (the person/org running the instance) | N/A — operator runs the stack                                        |
 
 Privacy Policy language ("we collect…", subprocessors table, retention windows) describes **Bondery's hosted cloud instance**, not an arbitrary self-hosted deployment.
 
@@ -34,18 +34,18 @@ Self-hosters are **not** bound by Bondery's published subprocessor table unless 
 
 ## Product implications for agents
 
-| Action | Hosted | Self-host |
-|--------|--------|-----------|
-| Link to `/privacy` from login | Correct | Operator should link to **their** policy |
-| Assume PostHog analytics | If key configured | Optional — operator choice |
-| Assume Stripe billing | Bondery cloud | Operator may omit |
-| Retention jobs in code | Should match hosted policy when Bondery runs them | Operator configures backups/logs |
+| Action                        | Hosted                                            | Self-host                                |
+| ----------------------------- | ------------------------------------------------- | ---------------------------------------- |
+| Link to `/privacy` from login | Correct                                           | Operator should link to **their** policy |
+| Assume PostHog analytics      | If key configured                                 | Optional — operator choice               |
+| Assume Stripe billing         | Bondery cloud                                     | Operator may omit                        |
+| Retention jobs in code        | Should match hosted policy when Bondery runs them | Operator configures backups/logs         |
 
 ## Documented gap
 
 [`docs/deploy/installation.mdx`](../../../../docs/deploy/installation.mdx) does not yet explicitly state that self-hosters are their own data controller and that the website Privacy Policy does not apply to their instance.
 
-**Flag for follow-up** — document in self-host guide, not in hosted Privacy.tsx.
+**Flag for follow-up** — document in self-host guide, not in hosted privacy.mdx.
 
 ## Marketing claims
 

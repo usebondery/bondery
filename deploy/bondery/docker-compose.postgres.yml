@@ -1,23 +1,35 @@
-# Plain Postgres (PostGIS) for Better Auth + Prisma.
-# Included by docker-compose.yml.
+# Postgres (PostGIS) for Better Auth + Prisma. TLS only: plaintext TCP connections are refused.
+# Included by docker-compose.yml. See docs/deploy/configuration.mdx#postgres-tls.
 
 services:
   db:
     image: postgis/postgis:17-3.5
     restart: unless-stopped
+    # The wrapper copies the TLS key from the stack-secrets job into a tmpfs owned by the
+    # postgres user, then starts Postgres with TLS on and deploy/bondery/postgres/pg_hba.conf.
+    entrypoint: [ "/bin/sh", "/etc/bondery/entrypoint.sh" ]
+    depends_on:
+      stack-secrets:
+        condition: service_completed_successfully
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}
       POSTGRES_DB: bondery
+    tmpfs:
+      - /run/bondery-postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
-    # Host loopback only (SSH tunnels). Not on the public NIC. Same VPS as beta:
+      - postgres-tls-server:/bondery-postgres/server:ro
+      - ./postgres/entrypoint.sh:/etc/bondery/entrypoint.sh:ro
+      - ./postgres/pg_hba.conf:/etc/bondery/pg_hba.conf:ro
+    # Host loopback only (SSH tunnels, TLS required). Not on the public NIC. Same VPS as beta:
     # set BONDERY_INFRA_POSTGRES_HOST_PORT=5433 on the beta stack or omit this
     # mapping there — two stacks cannot both bind 127.0.0.1:5432.
     ports:
       - "127.0.0.1:${BONDERY_INFRA_POSTGRES_HOST_PORT:-5432}:5432"
+    # Unix socket inside the container; unaffected by the TLS rule for TCP.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d bondery"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d bondery" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -27,4 +39,9 @@ services:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-db
 
 volumes:
-  postgres-data:
+  postgres-data: {}
+  # Written by the stack-secrets job (docker-compose.yml). ca: the job only. server: db only.
+  # client: the API only (the CA certificate it trusts).
+  postgres-tls-ca: {}
+  postgres-tls-server: {}
+  postgres-tls-client: {}

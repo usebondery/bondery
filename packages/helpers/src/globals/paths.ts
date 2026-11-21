@@ -185,7 +185,7 @@ export const BONDERY_STEP_UP_HEADER = "X-Bondery-Step-Up" as const;
 export const IDEMPOTENCY_KEY_HEADER = "Idempotency-Key" as const;
 
 export const HELP_DOCS_URL = "https://usebondery.com/docs";
-export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
+export const CHANGELOG_URL: string = `${HELP_DOCS_URL}/changelog`;
 
 /**
  * Repository identity. Every other GitHub URL below derives from this, so a
@@ -194,19 +194,19 @@ export const CHANGELOG_URL = `${HELP_DOCS_URL}/changelog`;
 export const GITHUB_REPO_SLUG = "usebondery/bondery" as const;
 
 /** Repository web URL, for humans and for `blob` / `tree` links. */
-export const GITHUB_REPO_WEB_URL = `https://github.com/${GITHUB_REPO_SLUG}`;
+export const GITHUB_REPO_WEB_URL: string = `https://github.com/${GITHUB_REPO_SLUG}`;
 
 /** GitHub REST base for this repository. */
-export const GITHUB_REPO_URL = `https://api.github.com/repos/${GITHUB_REPO_SLUG}`;
+export const GITHUB_REPO_URL: string = `https://api.github.com/repos/${GITHUB_REPO_SLUG}`;
 
 /** Default branch, the target of every `blob` and `tree` link. */
 export const GITHUB_DEFAULT_BRANCH = "main" as const;
 
 /** Base for `blob` links to files on the default branch. */
-export const GITHUB_BLOB_BASE = `${GITHUB_REPO_WEB_URL}/blob/${GITHUB_DEFAULT_BRANCH}`;
+export const GITHUB_BLOB_BASE: string = `${GITHUB_REPO_WEB_URL}/blob/${GITHUB_DEFAULT_BRANCH}`;
 
 /** Base for `blob` links to files in the `docs` directory. */
-export const DOCS_GITHUB_BLOB_BASE = `${GITHUB_BLOB_BASE}/docs`;
+export const DOCS_GITHUB_BLOB_BASE: string = `${GITHUB_BLOB_BASE}/docs`;
 
 export const PUBLIC_ROADMAP_PLANE_URL =
   "https://sites.plane.so/issues/8a364296fbbc4c858adeb1952a72a451";
@@ -218,7 +218,7 @@ export const SUPPORT_EMAIL = "team@usebondery.com";
 export const WEBAPP_NAME = "Bondery";
 
 /** Display name used in the web app manifest and browser install UI. */
-export const PWA_APP_NAME = `${WEBAPP_NAME} PWA`;
+export const PWA_APP_NAME: string = `${WEBAPP_NAME} PWA`;
 
 /** Divider character used in browser tab titles, e.g. "Person • Bondery" */
 export const METADATA_TITLE_DIVIDER = "•";

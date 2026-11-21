@@ -20,6 +20,14 @@ export const AVATAR_UPLOAD = {
   maxFileSizeMB: SCHEMA_AVATAR_UPLOAD.maxFileSizeMB,
 } as const;
 
+export const BYTES_PER_KIB = 1024;
+export const BYTES_PER_MIB = BYTES_PER_KIB * BYTES_PER_KIB;
+
+/** Global multipart ceiling. `scripts/check/check-input-safety.mjs` keeps it small. */
+const DEFAULT_UPLOAD_MIB = 5;
+/** Cap for the import routes that accept an export file or an archive. */
+const LARGE_IMPORT_MIB = 100;
+
 /**
  * Per-route multipart file size caps, in bytes.
  *
@@ -30,12 +38,12 @@ export const AVATAR_UPLOAD = {
  * `scripts/check/check-input-safety.mjs` fails CI on a multipart call without a cap.
  */
 export const UPLOAD_LIMITS = {
-  bonderyExport: 100 * 1024 * 1024,
-  default: 5 * 1024 * 1024,
+  bonderyExport: LARGE_IMPORT_MIB * BYTES_PER_MIB,
+  default: DEFAULT_UPLOAD_MIB * BYTES_PER_MIB,
   image: AVATAR_UPLOAD.maxFileSize,
-  instagramExport: 100 * 1024 * 1024,
-  linkedinCsv: 100 * 1024 * 1024,
-  vcard: 100 * 1024 * 1024,
+  instagramExport: LARGE_IMPORT_MIB * BYTES_PER_MIB,
+  linkedinCsv: LARGE_IMPORT_MIB * BYTES_PER_MIB,
+  vcard: LARGE_IMPORT_MIB * BYTES_PER_MIB,
 } as const;
 
 /**
@@ -82,6 +90,9 @@ const IMAGE_SIGNATURES: Array<{ bytes: number[]; offset?: number; mask?: number[
   { bytes: [0x66, 0x74, 0x79, 0x70], offset: 4 },
 ];
 
+/** Smallest buffer that holds every signature above: the WebP one ends at byte 12. */
+const IMAGE_SIGNATURE_PROBE_LENGTH = 12;
+
 /**
  * Validates that a buffer's leading bytes match a known image format signature.
  *
@@ -89,7 +100,7 @@ const IMAGE_SIGNATURES: Array<{ bytes: number[]; offset?: number; mask?: number[
  * @returns True if the buffer starts with a recognised image magic-byte sequence.
  */
 export function validateImageMagicBytes(buffer: Buffer | Uint8Array): boolean {
-  if (buffer.length < 12) {
+  if (buffer.length < IMAGE_SIGNATURE_PROBE_LENGTH) {
     return false;
   }
 

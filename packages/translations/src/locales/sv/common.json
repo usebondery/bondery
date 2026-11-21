@@ -230,11 +230,13 @@
     "deleting": "Tar bort…",
     "duplicating": "Duplicerar…",
     "errorTitle": "Fel",
+    "mobileRuntimeError": "Körtidsfel i mobilappen",
     "noResults": "Inga resultat",
     "removing": "Tar bort…",
     "savedTitle": "Sparat",
     "saving": "Sparar…",
     "sending": "Skickar…",
-    "successTitle": "Klart"
+    "successTitle": "Klart",
+    "unknownError": "Okänt fel"
   }
 }

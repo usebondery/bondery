@@ -241,7 +241,7 @@ jobs:
             Release publishing in progress for ${{ needs.validate.outputs.version }}.
 
   release_api:
-    needs: [validate, detect_changes, resolve_meta]
+    needs: [ validate, detect_changes, resolve_meta ]
     if: needs.detect_changes.outputs.api == 'true'
     uses: ./.github/workflows/shared-release-container.yml
     secrets: inherit
@@ -254,7 +254,7 @@ jobs:
       use_production_gate: ${{ needs.detect_changes.outputs.extension == 'true' }}
 
   release_webapp:
-    needs: [validate, detect_changes, resolve_meta]
+    needs: [ validate, detect_changes, resolve_meta ]
     if: needs.detect_changes.outputs.webapp == 'true'
     uses: ./.github/workflows/shared-release-container.yml
     secrets: inherit
@@ -267,7 +267,7 @@ jobs:
       use_production_gate: ${{ needs.detect_changes.outputs.extension == 'true' }}
 
   release_extension:
-    needs: [validate, detect_changes]
+    needs: [ validate, detect_changes ]
     if: needs.detect_changes.outputs.extension == 'true'
     uses: ./.github/workflows/shared-release-extension.yml
     secrets: inherit

@@ -37,7 +37,7 @@ import {
   useModalDismiss,
 } from "@/lib/modals";
 import { routePerson } from "@/lib/navigation/route/person";
-import { useCreateContactMutation } from "@/lib/query/hooks/useContacts";
+import { useCreateContactMutation } from "@/lib/query/hooks/useContactMutations";
 
 const addContactFormSchema = z
   .object({

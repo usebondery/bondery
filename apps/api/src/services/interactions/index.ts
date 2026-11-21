@@ -12,6 +12,7 @@ import {
   syncEmitMetaFromContext,
 } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
+import { blankToNull } from "../../lib/platform/blank-text.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { buildPeopleRowChange } from "../../lib/sync/build-changes.js";
 import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
@@ -117,20 +118,20 @@ export async function createInteraction(
   const db = domainDb(ctx);
   const { user } = ctx;
 
-  await assertOwnedPersonIds(ctx, input.participantIds ?? []);
+  await assertOwnedPersonIds(ctx, input.participantIds);
 
   const interaction = await db.interaction.create({
     data: {
       date: new Date(input.date),
-      description: input.description || null,
-      title: input.title || null,
+      description: blankToNull(input.description),
+      title: blankToNull(input.title),
       type: input.type,
       userId: user.id,
     },
     select: { id: true },
   });
 
-  if (input.participantIds && input.participantIds.length > 0) {
+  if (input.participantIds.length > 0) {
     await db.interactionParticipant.createMany({
       data: input.participantIds.map((personId) => ({
         interactionId: interaction.id,

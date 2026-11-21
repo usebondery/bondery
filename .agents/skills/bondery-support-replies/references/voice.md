@@ -30,18 +30,18 @@ Align with the warm-friend brand in [bondery-brand](../../bondery-brand/SKILL.md
 
 **AI-tell words** (use the plain substitute)
 
-| Avoid | Use |
-|-------|-----|
-| leverage | use |
-| robust | solid, reliable |
-| seamless | smooth, easy |
-| delve | look at |
-| utilise / utilize | use |
-| facilitate | help |
-| comprehensive | full, complete |
-| groundbreaking / cutting-edge | skip it |
-| furthermore / moreover | and, also |
-| that being said | but, still |
+| Avoid                         | Use             |
+| ----------------------------- | --------------- |
+| leverage                      | use             |
+| robust                        | solid, reliable |
+| seamless                      | smooth, easy    |
+| delve                         | look at         |
+| utilise / utilize             | use             |
+| facilitate                    | help            |
+| comprehensive                 | full, complete  |
+| groundbreaking / cutting-edge | skip it         |
+| furthermore / moreover        | and, also       |
+| that being said               | but, still      |
 
 If a sentence would not survive a spoken conversation with one user, rewrite it.
 

@@ -77,7 +77,7 @@ function toLocalDateInputValue(value: Date): string {
 }
 
 function parseLocalDateInputValue(value: string): Date {
-  const [year, month, day] = value.split("-").map(Number);
+  const [year = Number.NaN, month = Number.NaN, day = Number.NaN] = value.split("-").map(Number);
   return new Date(year, month - 1, day);
 }
 
@@ -191,7 +191,7 @@ function NewActivityForm({
     dismissModal();
   }
 
-  const resolvedInitialParticipantIds = (activity?.participants || initialParticipantIds || [])
+  const resolvedInitialParticipantIds = (activity?.participants ?? initialParticipantIds ?? [])
     .map((participant: ActivityParticipantRef) =>
       typeof participant === "string" ? participant : participant.id,
     )

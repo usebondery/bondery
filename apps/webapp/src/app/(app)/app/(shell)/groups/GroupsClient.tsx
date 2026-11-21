@@ -26,6 +26,7 @@ import {
   useGroupsListQuery,
 } from "@/lib/query/hooks/useGroups";
 import { isPageLoadFailure } from "@/lib/query/pageLoadFailure";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { openAddGroupModal } from "./components/AddGroupModal";
 import { openAddPeopleToGroupModal } from "./components/AddPeopleToGroupModal";
 import { openEditGroupModal } from "./components/EditGroupModal";
@@ -91,8 +92,8 @@ export function GroupsClient() {
   const handleEditGroup = (group: GroupWithCount) => {
     openEditGroupModal({
       groupId: group.id,
-      initialColor: group.color || "",
-      initialEmoji: group.emoji || "",
+      initialColor: group.color ?? "",
+      initialEmoji: group.emoji ?? "",
       initialLabel: group.label,
     });
   };
@@ -166,8 +167,8 @@ export function GroupsClient() {
     try {
       await duplicateGroupMutation.mutateAsync({
         input: {
-          color: group.color || "#1971C2",
-          emoji: group.emoji || "",
+          color: nonEmpty(group.color) ?? "#1971C2",
+          emoji: group.emoji ?? "",
           label: t("DuplicateGroup.DuplicatedName", { name: group.label }),
         },
         sourceGroupId: group.id,

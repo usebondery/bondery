@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionIcon, type ActionIconProps } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import {
   ACTION_ICON_GRAPHIC_SCALE,
   type ActionIconGraphic,
@@ -39,7 +39,7 @@ export function ActionIconLink({
   target,
   rel,
   ...actionIconProps
-}: ActionIconLinkProps) {
+}: ActionIconLinkProps): ReactElement {
   const renderedIcon = renderActionIconGraphic(icon, iconScale);
 
   if (!href) {

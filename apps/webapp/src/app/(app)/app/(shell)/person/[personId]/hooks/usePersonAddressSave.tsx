@@ -15,7 +15,7 @@ import { IconClock, IconMapPin } from "@tabler/icons-react";
 import type { Dispatch, SetStateAction } from "react";
 import { openStandardConfirmModal } from "@/components/modals/openStandardConfirmModal";
 import { fetchTimezoneForCoordinates } from "@/lib/api/geocode";
-import type { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
+import type { useUpdateContactMutation } from "@/lib/query/hooks/useContactMutations";
 import type { ContactAddressSavePayload } from "../utils/contactAddressUtils";
 
 type UpdateContactMutation = ReturnType<typeof useUpdateContactMutation>;
@@ -54,12 +54,7 @@ export function usePersonAddressSave({
     setSavingField("address");
 
     if (payload.locationOnly && payload.suggestedLocation) {
-      const addressEntries = Array.isArray(payload.addresses)
-        ? payload.addresses.filter(
-            (entry): entry is ContactAddressEntry =>
-              typeof entry === "object" && entry !== null && !Array.isArray(entry),
-          )
-        : [];
+      const addressEntries = payload.addresses;
       const preferredAddress =
         addressEntries.length > 0
           ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
@@ -157,12 +152,7 @@ export function usePersonAddressSave({
     try {
       await updateContactMutation.mutateAsync({ addresses: payload.addresses });
 
-      const addressEntries = Array.isArray(payload.addresses)
-        ? payload.addresses.filter(
-            (entry): entry is ContactAddressEntry =>
-              typeof entry === "object" && entry !== null && !Array.isArray(entry),
-          )
-        : [];
+      const addressEntries = payload.addresses;
 
       const preferredAddress =
         addressEntries.length > 0

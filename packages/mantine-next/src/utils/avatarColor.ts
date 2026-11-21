@@ -16,7 +16,7 @@ const AVATAR_COLOR_PALETTE: MantineColor[] = [
 ];
 
 function normalizeNamePart(value: string | null | undefined): string {
-  return (value || "").trim().toLowerCase();
+  return (value ?? "").trim().toLowerCase();
 }
 
 function getHash(input: string): number {
@@ -24,6 +24,7 @@ function getHash(input: string): number {
 
   for (let index = 0; index < input.length; index += 1) {
     hash = (hash << 5) - hash + input.charCodeAt(index);
+    // biome-ignore lint/nursery/useMathTrunc: 32-bit wrap keeps the avatar color hash stable
     hash |= 0;
   }
 

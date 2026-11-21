@@ -122,8 +122,8 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
       const result = await downloadBonderyExport({ signal: controller.signal });
       saveBonderyExportFile(result.blob, result.filename);
       closeModal();
-    } catch (caught) {
-      if (caught instanceof Error && caught.name === "AbortError") {
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
         if (abortReasonRef.current === "timeout") {
           setErrorKind("timeout");
           setPhase("error");
@@ -132,16 +132,16 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
         return;
       }
 
-      if (caught instanceof BonderyExportDownloadBlockedError) {
+      if (error instanceof BonderyExportDownloadBlockedError) {
         setErrorKind("blocked");
         setPhase("error");
         captureEvent("account_settings:export_fail", { error_code: "download_blocked" });
         return;
       }
 
-      const errorCode = caught instanceof ApiError ? caught.code : "export_failed_to_generate";
+      const errorCode = error instanceof ApiError ? error.code : "export_failed_to_generate";
       setErrorKind("api");
-      setErrorMessage(getUserFacingError(caught, tCommon));
+      setErrorMessage(getUserFacingError(error, tCommon));
       setPhase("error");
       captureEvent("account_settings:export_fail", { error_code: errorCode });
     } finally {

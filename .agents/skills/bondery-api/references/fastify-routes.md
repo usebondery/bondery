@@ -16,11 +16,11 @@ Use Fastify built-in `request.log` and `reply.log` instead of `console.log` for 
 
 Call `applyOpenApiRouteMeta(routeOptions, { area })` from `apps/api/src/lib/platform/openapi/meta.ts` on every **top-level** route plugin:
 
-| Area | Auth |
-|------|------|
-| `integration` | API key + bearer |
-| `session` | Bearer only |
-| `internal` | Hidden from public docs |
+| Area          | Auth                    |
+| ------------- | ----------------------- |
+| `integration` | API key + bearer        |
+| `session`     | Bearer only             |
+| `internal`    | Hidden from public docs |
 
 Every route `schema` must include `description` and `response`. Use `withOkResponse` / `withCreatedResponse` from `apps/api/src/lib/platform/openapi/responses.ts` for standard success + error shapes.
 

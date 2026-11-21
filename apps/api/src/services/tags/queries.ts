@@ -47,11 +47,13 @@ function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByW
   }
 }
 
+const DEFAULT_TAG_PREVIEW_LIMIT = 3;
+
 export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
   const { user } = ctx;
   const db = domainDb(ctx as DomainContext);
   const previewLimitRaw = query?.previewLimit;
-  const previewLimit = previewLimitRaw ? Number(previewLimitRaw) : 3;
+  const previewLimit = previewLimitRaw ? Number(previewLimitRaw) : DEFAULT_TAG_PREVIEW_LIMIT;
   const includePreview = previewLimit > 0;
   const avatarOptions = extractAvatarOptions(query ?? {});
 
@@ -136,11 +138,10 @@ export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
       ? (pIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return {
-      ...baseTag,
+    return Object.assign({}, baseTag, {
       contactCount: countMap.get(row.id) ?? 0,
       previewContacts,
-    };
+    });
   });
 
   return {
@@ -194,7 +195,7 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     hasAvatar: boolean;
     avatarUpdatedAt: Date | string | null;
   }> = [];
-  let totalCount = 0;
+  let totalCount: number;
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
@@ -270,18 +271,19 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     totalCount = count;
   }
 
-  const enrichedContacts = contacts.map((c) => ({
-    ...c,
-    avatar: resolveContactAvatarUrl(
-      user.id,
-      {
-        avatarUpdatedAt: c.avatarUpdatedAt,
-        hasAvatar: c.hasAvatar,
-        id: c.id,
-      },
-      avatarOptions,
-    ),
-  }));
+  const enrichedContacts = contacts.map((c) =>
+    Object.assign({}, c, {
+      avatar: resolveContactAvatarUrl(
+        user.id,
+        {
+          avatarUpdatedAt: c.avatarUpdatedAt,
+          hasAvatar: c.hasAvatar,
+          id: c.id,
+        },
+        avatarOptions,
+      ),
+    }),
+  );
 
   const pagination = buildPaginationMeta({
     itemCount: enrichedContacts.length,

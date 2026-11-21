@@ -8,12 +8,21 @@ export interface ErrorNotificationTemplateProps {
   title: string;
 }
 
+type ErrorNotificationPayload = {
+  color: "red";
+  icon: ReactNode;
+  loading: false;
+  message: string;
+  radius: string | number;
+  title: string;
+};
+
 export function errorNotificationTemplate({
   title,
   description,
   icon = createElement(IconX, { size: 18 }),
   radius = "xl",
-}: ErrorNotificationTemplateProps) {
+}: ErrorNotificationTemplateProps): ErrorNotificationPayload {
   return {
     color: "red",
     icon,

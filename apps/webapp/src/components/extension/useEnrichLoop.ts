@@ -71,7 +71,7 @@ export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
       setState({ currentPerson: null, failed: failedCount });
     };
 
-    while (true) {
+    for (;;) {
       if (isCancelled()) {
         break;
       }
@@ -121,7 +121,9 @@ export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
         break;
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 2_000));
+      await new Promise((resolve) => {
+        setTimeout(resolve, 2_000);
+      });
     }
 
     return { abortReason, completedCount, failedCount };

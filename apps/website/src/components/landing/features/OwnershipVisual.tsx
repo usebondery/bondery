@@ -8,8 +8,8 @@ const SHACKLE_LIFT = 26;
 
 /**
  * A single flat padlock in the brand primary colour. The shackle starts raised and settles closed
- * once when scrolled into view. It stands for the whole privacy section without repeating
- * any of its points.
+ * once when scrolled into view. It is the fallback for `LockVisual`: it shows while the 3D scene
+ * loads, and stays when WebGL is not available.
  */
 export function OwnershipVisual() {
   const ref = useRef<HTMLDivElement>(null);
@@ -19,7 +19,7 @@ export function OwnershipVisual() {
 
   return (
     <div aria-hidden="true" className="flex w-full justify-center" ref={ref}>
-      <div className="relative h-[290px] w-[240px]">
+      <div className="h-lock-flat w-lock relative">
         <svg
           className="absolute inset-0 size-full"
           fill="none"

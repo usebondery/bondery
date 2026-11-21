@@ -230,11 +230,13 @@
     "deleting": "Siliniyor...",
     "duplicating": "Çoğaltılıyor...",
     "errorTitle": "Hata",
+    "mobileRuntimeError": "Mobil uygulama çalışma zamanı hatası",
     "noResults": "Sonuç yok",
     "removing": "Kaldırılıyor...",
     "savedTitle": "Kaydedildi",
     "saving": "Kaydediliyor...",
     "sending": "Gönderiliyor...",
-    "successTitle": "Başarılı"
+    "successTitle": "Başarılı",
+    "unknownError": "Bilinmeyen hata"
   }
 }

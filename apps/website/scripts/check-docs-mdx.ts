@@ -78,7 +78,10 @@ function getHeadingsFromRaw(content: string): string[] {
 
   for (const line of content.split("\n")) {
     for (const match of line.matchAll(/\{#([^}]+)\}/g)) {
-      headings.add(match[1]);
+      const [, id] = match;
+      if (id !== undefined) {
+        headings.add(id);
+      }
     }
 
     const heading = line.match(/^#{1,6}\s+(.+?)\s*$/);
@@ -86,7 +89,7 @@ function getHeadingsFromRaw(content: string): string[] {
       continue;
     }
 
-    const text = heading[1].replace(/\s*\{#[^}]+\}\s*/g, "").trim();
+    const text = (heading[1] ?? "").replace(/\s*\{#[^}]+\}\s*/g, "").trim();
     if (text) {
       headings.add(slugger.slug(text));
     }

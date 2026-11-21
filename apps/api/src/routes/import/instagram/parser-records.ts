@@ -5,6 +5,7 @@ import type {
   InstagramPreparedContact,
 } from "@bondery/schemas";
 import type { UploadFile } from "../../../lib/data/select-fragments.js";
+import { firstNonBlank } from "../../../lib/platform/blank-text.js";
 import {
   isLikelyPersonUsername,
   normalizeHandle,
@@ -48,7 +49,7 @@ export function normalizePath(path: string): string {
 export function baseName(path: string): string {
   const normalized = normalizePath(path);
   const chunks = normalized.split("/").filter(Boolean);
-  return chunks[chunks.length - 1] || normalized;
+  return chunks.at(-1) || normalized;
 }
 
 function parseTimestampToDate(timestampValue: unknown): { iso: string | null; raw: number | null } {
@@ -113,7 +114,7 @@ function ensureFollowersArray(input: unknown, fileLabel: string): InstagramRelat
 function parseRelationshipItem(item: InstagramRelationshipItem): ParsedRecord | null {
   const title = typeof item.title === "string" ? item.title : "";
   const stringData = toStringListData(item.string_list_data);
-  const primary = stringData[0] || {};
+  const primary = stringData[0] ?? {};
 
   const value = typeof primary.value === "string" ? primary.value : "";
   const href = typeof primary.href === "string" ? primary.href : "";
@@ -122,7 +123,7 @@ function parseRelationshipItem(item: InstagramRelationshipItem): ParsedRecord | 
   const valueHandle = normalizeHandle(value);
   const hrefHandle = href ? normalizeUsernameFromHref(href) : null;
 
-  const username = titleHandle || valueHandle || hrefHandle || "";
+  const username = firstNonBlank(titleHandle, valueHandle, hrefHandle) ?? "";
   const normalizedUsername = normalizeHandle(username);
 
   if (!normalizedUsername) {
@@ -200,8 +201,8 @@ export function parseJsonFile<T>(file: UploadFile): T {
 
   try {
     return JSON.parse(rawContent) as T;
-  } catch {
-    throw new Error(`${baseName(file.fileName)} contains invalid JSON`);
+  } catch (error) {
+    throw new Error(`${baseName(file.fileName)} contains invalid JSON`, { cause: error });
   }
 }
 

@@ -6,6 +6,8 @@
  * @see references/naming-and-schema.md (bondery-analytics skill)
  */
 
+export {};
+
 // Client component (after mutation success):
 // import { captureEvent } from "@/lib/analytics/client";
 //

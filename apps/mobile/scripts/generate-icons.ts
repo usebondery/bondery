@@ -55,5 +55,5 @@ async function main(): Promise<void> {
 
 void main().catch((error: unknown) => {
   console.error("❌ Error writing login SVG module:", error);
-  process.exit(1);
+  process.exitCode = 1;
 });

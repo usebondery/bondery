@@ -1,10 +1,13 @@
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { ImageResponse } from "next/og";
 
 // NOTE: BonderyLogotypeBlack uses React.useId() which is not supported in the
 // next/og ImageResponse renderer (satori). The SVG is inlined here with a static gradient
 // ID as a workaround. Keep this in sync with packages/branding/src/react/BonderyLogotypeBlack.tsx.
 
-export const alt = "Bondery: Manage your personal and professional relationships";
+export const alt = landing.Meta.HomeImageAlt;
 export const size = {
   height: 630,
   width: 1200,

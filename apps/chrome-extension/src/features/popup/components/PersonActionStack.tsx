@@ -51,7 +51,7 @@ export function PersonActionStack({
           }
           loading={isLoading}
           onClick={onViewOrImport}
-          variant={"filled"}
+          variant="filled"
         >
           {doesPersonExist ? "View in Bondery" : "Import to Bondery"}
         </Button>

@@ -37,7 +37,7 @@ function PageHeaderActions({ children }: { children: ReactNode }) {
 }
 
 export function PageHeader({
-  icon: Icon,
+  icon: HeaderIcon,
   title,
   helpDoc,
   helpLabel,
@@ -84,7 +84,7 @@ export function PageHeader({
             variant="default"
           />
         )}
-        <Icon size={32} stroke={1.5} />
+        <HeaderIcon size={32} stroke={1.5} />
         <Title order={1}>{title}</Title>
         {helpLabel ? <HelpButton doc={helpDoc} label={helpLabel} /> : null}
       </Group>

@@ -4,16 +4,16 @@ Scouting findings as of July 2026. These are documented follow-ups, **not resolv
 
 ## Status table
 
-| Priority | Finding | Evidence | Status |
-|----------|---------|----------|--------|
-| P1 | Server defaults generate UUIDv4 while mobile generates UUIDv7 | `@bondery/helpers/ids`, `@bondery/db` client extension | Resolved — see [uuidv7-strategy.md](./uuidv7-strategy.md) |
-| P1 | Extension creation omits `WITH SCHEMA extensions` | `prisma/sql/functions.sql` (`uuid-ossp`, `postgis`) | Partial — `pg_trgm` / `unaccent` now live in `extensions`; remaining public-schema drift is PostGIS and uuid-ossp |
-| P1 | `People.lastInteractionActivity` delete behavior differs | Prisma relation has no `onDelete`; `0_init` SQL uses `SET NULL` | Schema/migration drift |
-| P1 | Some API RPC calls are not visibly represented in current `functions.sql` | `get_contact_extras`, sync/funnel helpers found in API/legacy migrations | Verify before fresh-install release |
-| P2 | Current Prisma indexes are sparser than legacy Supabase migrations | Missing some FK, partial, and spatial indexes | Needs query/EXPLAIN audit; do not copy blindly |
-| P2 | No explicit pool/statement timeout configuration | `DATABASE_URL`; Prisma singleton | Capacity/operability gap |
-| P3 | `packages/db/README.md` does not exist | Agent config previously referenced it | Documentation gap |
-| P3 | `uuid-ossp` appears unused | `functions.sql`; IDs app-generated | Candidate removal after dependency audit |
+| Priority | Finding                                                                   | Evidence                                                                 | Status                                                                                                            |
+| -------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| P1       | Server defaults generate UUIDv4 while mobile generates UUIDv7             | `@bondery/helpers/ids`, `@bondery/db` client extension                   | Resolved — see [uuidv7-strategy.md](./uuidv7-strategy.md)                                                         |
+| P1       | Extension creation omits `WITH SCHEMA extensions`                         | `prisma/sql/functions.sql` (`uuid-ossp`, `postgis`)                      | Partial — `pg_trgm` / `unaccent` now live in `extensions`; remaining public-schema drift is PostGIS and uuid-ossp |
+| P1       | `People.lastInteractionActivity` delete behavior differs                  | Prisma relation has no `onDelete`; `0_init` SQL uses `SET NULL`          | Schema/migration drift                                                                                            |
+| P1       | Some API RPC calls are not visibly represented in current `functions.sql` | `get_contact_extras`, sync/funnel helpers found in API/legacy migrations | Verify before fresh-install release                                                                               |
+| P2       | Current Prisma indexes are sparser than legacy Supabase migrations        | Missing some FK, partial, and spatial indexes                            | Needs query/EXPLAIN audit; do not copy blindly                                                                    |
+| P2       | No explicit pool/statement timeout configuration                          | `DATABASE_URL`; Prisma singleton                                         | Capacity/operability gap                                                                                          |
+| P3       | `packages/db/README.md` does not exist                                    | Agent config previously referenced it                                    | Documentation gap                                                                                                 |
+| P3       | `uuid-ossp` appears unused                                                | `functions.sql`; IDs app-generated                                       | Candidate removal after dependency audit                                                                          |
 
 ## Extension drift
 

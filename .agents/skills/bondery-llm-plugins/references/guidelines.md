@@ -29,13 +29,13 @@ Do not add a profile tool. Do not add a ChatGPT UI.
 
 The API already sets tool hints in `apps/api/src/routes/mcp/tools/mcp-tool-meta.ts`. Do not restate a hint that disagrees with this table. Every kind sets `openWorldHint` to false.
 
-| Kind | `readOnlyHint` | `destructiveHint` | `openWorldHint` | `idempotentHint` |
-|------|----------------|-------------------|-----------------|------------------|
-| `create` | false | true | false | false |
-| `delete` | false | true | false | false |
-| `get` | true | false | false | true |
-| `search` | true | false | false | true |
-| `update` | false | true | false | true |
+| Kind     | `readOnlyHint` | `destructiveHint` | `openWorldHint` | `idempotentHint` |
+| -------- | -------------- | ----------------- | --------------- | ---------------- |
+| `create` | false          | true              | false           | false            |
+| `delete` | false          | true              | false           | false            |
+| `get`    | true           | false             | false           | true             |
+| `search` | true           | false             | false           | true             |
+| `update` | false          | true              | false           | true             |
 
 `create` and `delete` set `idempotentHint` to false. `get`, `search`, and `update` set `idempotentHint` to true.
 

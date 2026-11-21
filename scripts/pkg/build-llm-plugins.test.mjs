@@ -8,6 +8,8 @@ import {
   loadPluginSource,
   readBrandPrimaryColor,
   renderClaudeTree,
+  renderMcpSkills,
+  renderMcpSkillsModule,
   renderOpenAiTree,
 } from "./build-llm-plugins.mjs";
 
@@ -18,9 +20,18 @@ const SKILLS = ["catch-up", "get-to-know", "onboarding", "reach-out", "remember"
 const { config, files } = loadPluginSource(root);
 const claude = renderClaudeTree(config, files, FIXTURE_VERSION);
 const openai = renderOpenAiTree(config, files, FIXTURE_VERSION);
+const mcpSkills = renderMcpSkills(config, files);
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
 
 function json(tree, rel) {
-  return JSON.parse(tree.get(rel).toString("utf8"));
+  return asUnknown(JSON.parse(tree.get(rel).toString("utf8")));
 }
 
 describe("llm plugin build", () => {
@@ -90,6 +101,26 @@ describe("llm plugin build", () => {
       }
       assert.equal(body.toString("utf8").includes("Claude"), false, rel);
     }
+  });
+
+  it("serves every plugin skill over MCP with the MCP connect line", () => {
+    assert.deepEqual(
+      [...mcpSkills.keys()],
+      SKILLS.map((name) => `${name}/SKILL.md`),
+    );
+    for (const [rel, body] of mcpSkills) {
+      assert.equal(body.includes("llm-plugin-connect"), false, rel);
+      assert.equal(body.includes("Claude"), false, rel);
+      assert.match(body, /the Bondery MCP server is not connected/, rel);
+    }
+    const pluginSkill = openai.get("skills/catch-up/SKILL.md").toString("utf8");
+    const before = pluginSkill.slice(0, pluginSkill.indexOf("- **Not connected:**"));
+    assert.ok(mcpSkills.get("catch-up/SKILL.md").startsWith(before));
+  });
+
+  it("matches the committed MCP skills module", () => {
+    const committed = readFileSync(join(root, "apps/api/src/routes/mcp/skills.generated.ts"));
+    assert.ok(renderMcpSkillsModule(mcpSkills).equals(committed));
   });
 
   it("matches the current Claude manifest, MCP file, and skill bytes", () => {

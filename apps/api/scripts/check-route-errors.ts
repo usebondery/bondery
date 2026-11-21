@@ -23,6 +23,9 @@ const authFiles = [
 ];
 const schemasRoot = join(__dirname, "..", "..", "..", "packages", "schemas", "src");
 
+/** A DomainError takes three arguments: message, status and code. */
+const DOMAIN_ERROR_REQUIRED_ARG_COUNT = 3;
+
 const violations: string[] = [];
 const catalogCodes = new Set<string>(API_ERROR_CODES);
 
@@ -111,7 +114,7 @@ function checkFile(
       if (match) {
         const args = match[1];
         const argCount = args.split(",").length;
-        if (argCount < 3) {
+        if (argCount < DOMAIN_ERROR_REQUIRED_ARG_COUNT) {
           violations.push(`${loc}: DomainError missing required code argument`);
         }
       }

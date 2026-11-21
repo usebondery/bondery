@@ -16,14 +16,14 @@ Verify version in `packages/emails/package.json` after upgrades.
 
 Apply on every template change:
 
-| Check | Rule |
-|-------|------|
-| Headings | One `h1`, nested in order (`h2` → `h3`); short notifications may omit headings |
-| Link text | Descriptive ("Manage subscription") — never "click here" |
-| Alt text | Meaningful for content images; `alt=""` for decorative only |
-| Contrast | Body text ≥ 4.5:1 against background; preview in dark mode |
-| Title | `<title>` describes email content (React Email `Head`) |
-| Language | `lang` matches content locale (English today: `en`) |
+| Check     | Rule                                                                           |
+| --------- | ------------------------------------------------------------------------------ |
+| Headings  | One `h1`, nested in order (`h2` → `h3`); short notifications may omit headings |
+| Link text | Descriptive ("Manage subscription") — never "click here"                       |
+| Alt text  | Meaningful for content images; `alt=""` for decorative only                    |
+| Contrast  | Body text ≥ 4.5:1 against background; preview in dark mode                     |
+| Title     | `<title>` describes email content (React Email `Head`)                         |
+| Language  | `lang` matches content locale (English today: `en`)                            |
 
 ## Plain-text part
 

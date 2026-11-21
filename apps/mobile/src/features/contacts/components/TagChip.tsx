@@ -6,6 +6,7 @@ import { Pressable } from "@/components/ui/Pressable";
 import { hexWithAlpha } from "../../../components/color-picker/colorUtils";
 import { Text } from "../../../components/ui/Text";
 import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
+import { nonEmpty } from "../../../lib/text";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 export type TagChipTag = Pick<Tag, "id" | "label" | "color">;
@@ -31,7 +32,7 @@ export function TagChip({
 }: TagChipProps) {
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
-  const tagColor = tag.color || colors.textMuted;
+  const tagColor = nonEmpty(tag.color) ?? colors.textMuted;
   const chipPaint = {
     backgroundColor: tag.color ? hexWithAlpha(tagColor, 0.1) : colors.surfaceMuted,
     borderColor: isSelected

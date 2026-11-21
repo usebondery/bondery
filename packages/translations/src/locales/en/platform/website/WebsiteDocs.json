@@ -1,0 +1,125 @@
+{
+  "Api": {
+    "AuthGuide": "Read the authentication guide",
+    "AuthTitle": {
+      "ApiKey": "Requires an API key.",
+      "ApiKeyOrSession": "Requires an API key or a session token.",
+      "Generic": "Requires authentication.",
+      "Session": "Requires a session token."
+    },
+    "Deprecated": "Deprecated",
+    "HideChildParameters": "Hide child parameters",
+    "JsonResponseLabel": "{code} JSON",
+    "MultipartNote": "Send the image as a multipart/form-data field named {field}.",
+    "OneOf": "one of",
+    "ParameterGroup": {
+      "Cookie": "Cookie parameters",
+      "Header": "Header parameters",
+      "Path": "Path parameters",
+      "Query": "Query parameters"
+    },
+    "Parameters": "Parameters",
+    "RequestBody": "Request body",
+    "Required": "Required",
+    "ResponseLabel": "{code} response",
+    "Responses": "Responses",
+    "SampleRequest": "Sample request",
+    "SendHeader": "Send {header}.",
+    "ShowChildParameters": "Show child parameters"
+  },
+  "ApiErrors": {
+    "BaseUrl": "Base URL for {field} fields: {url}"
+  },
+  "ApiGroups": {
+    "Account": "Account",
+    "Auth": "Auth",
+    "Billing": "Billing",
+    "BrowserExtension": "Browser extension",
+    "Chat": "Chat",
+    "Contacts": "Contacts",
+    "Geocoding": "Geocoding",
+    "Groups": "Groups",
+    "Health": "Health",
+    "Interactions": "Interactions",
+    "MobileApp": "Mobile app",
+    "Sync": "Sync",
+    "Tags": "Tags",
+    "Webhooks": "Webhooks"
+  },
+  "Changelog": {
+    "Changelog": "Changelog",
+    "EarlierVersions": "Earlier Bondery versions were not published as GitHub Releases. See {link} for tagged versions.",
+    "GitHubRelease": "GitHub release",
+    "GitHubReleases": "GitHub Releases"
+  },
+  "Copy": {
+    "CopyMarkdown": "Copy markdown",
+    "FailedLinkDescription": "Select the address and press Ctrl+C.",
+    "FailedMarkdownDescription": "Select the text and press Ctrl+C.",
+    "FailedTitle": "Copy failed",
+    "HeadingCopied": "Copied",
+    "HeadingCopyLink": "Copy link",
+    "HeadingCopyLinkAria": "Copy link to section",
+    "LinkCopiedDescription": "The markdown link is on your clipboard.",
+    "LinkCopiedTitle": "Markdown link copied",
+    "LinkLabel": "Copy markdown link",
+    "MarkdownCopiedDescription": "The page markdown is on your clipboard.",
+    "MarkdownCopiedTitle": "Markdown copied",
+    "MoreActions": "More page actions",
+    "OpenOnGitHub": "Open on GitHub",
+    "ViewAsMarkdown": "View as markdown"
+  },
+  "ErrorGroups": {
+    "Api": "Server errors",
+    "Authentication": "Authentication",
+    "Authorization": "Authorization",
+    "Conflicts": "Conflicts",
+    "InvalidRequests": "Invalid requests",
+    "NotFound": "Not found",
+    "RateLimits": "Rate limits",
+    "Retired": "Retired codes",
+    "ServiceUnavailable": "Service unavailable"
+  },
+  "LastUpdated": "Last updated {date}",
+  "Navigation": {
+    "CloseMenu": "Close documentation menu",
+    "DrawerTitle": "Documentation",
+    "Next": "Next",
+    "OnThisPage": "On this page",
+    "OpenMenu": "Open documentation menu",
+    "Previous": "Previous"
+  },
+  "NotFound": {
+    "Description": "The link may be old. Search the docs, or start from the introduction.",
+    "Introduction": "Introduction",
+    "Title": "This page is not here"
+  },
+  "Og": {
+    "ApiErrorTitle": "{code} — API error",
+    "DefaultTitle": "Bondery Docs",
+    "Subtype": "Docs"
+  },
+  "Repo": {
+    "Description": "Source code, issues, and pull requests.",
+    "Title": "Bondery on GitHub"
+  },
+  "Search": {
+    "Close": "Close",
+    "Label": "Search documentation",
+    "Navigate": "Navigate",
+    "NoResults": "No results for \"{query}\".",
+    "Open": "Open",
+    "Placeholder": "Search docs"
+  },
+  "Sidebar": {
+    "PagesAria": "Documentation pages",
+    "SearchLabel": "Search",
+    "SectionAria": "Documentation section"
+  },
+  "Tabs": {
+    "Develop": "Develop",
+    "Integrate": "Integrate",
+    "Product": "How to use Bondery",
+    "SelfHost": "Self-host"
+  }
+}

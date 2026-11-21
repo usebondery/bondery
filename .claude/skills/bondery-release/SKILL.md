@@ -39,28 +39,28 @@ metadata:
 
 ## Related skills and docs
 
-| Concern | Owner |
-|---------|--------|
-| Version scheme, `Unreleased` → dated section | [`bondery-changelog`](../bondery-changelog/SKILL.md) |
-| Public roadmap state updates (Ready for Release → Released) | [`bondery-roadmap`](../bondery-roadmap/SKILL.md) |
-| CI triggers, Docker channels, promote semantics | [`.github/workflows/README.md`](../../../.github/workflows/README.md) |
-| Execute file edits and commits | Cursor implementer agent |
-| Watch `release-*` / `deploy-website` CI | Cursor babysit skill |
-| Extension local dev / OAuth / listing graphics | [`bondery-chrome-extension`](../bondery-chrome-extension/SKILL.md); [`apps/chrome-extension/README.md`](../../../apps/chrome-extension/README.md); [OAuth workflow](../../workflows/CHROME-EXTENSION-OAUTH.md) |
-| Release blog post | [`.agents/workflows/blog/BLOG-POST.md`](../../workflows/blog/BLOG-POST.md) |
+| Concern                                                     | Owner                                                                                                                                                                                                          |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Version scheme, `Unreleased` → dated section                | [`bondery-changelog`](../bondery-changelog/SKILL.md)                                                                                                                                                           |
+| Public roadmap state updates (Ready for Release → Released) | [`bondery-roadmap`](../bondery-roadmap/SKILL.md)                                                                                                                                                               |
+| CI triggers, Docker channels, promote semantics             | [`.github/workflows/README.md`](../../../.github/workflows/README.md)                                                                                                                                          |
+| Execute file edits and commits                              | Cursor implementer agent                                                                                                                                                                                       |
+| Watch `release-*` / `deploy-website` CI                     | Cursor babysit skill                                                                                                                                                                                           |
+| Extension local dev / OAuth / listing graphics              | [`bondery-chrome-extension`](../bondery-chrome-extension/SKILL.md); [`apps/chrome-extension/README.md`](../../../apps/chrome-extension/README.md); [OAuth workflow](../../workflows/CHROME-EXTENSION-OAUTH.md) |
+| Release blog post                                           | [`.agents/workflows/blog/BLOG-POST.md`](../../workflows/blog/BLOG-POST.md)                                                                                                                                     |
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Pre-release bumps, openapi, build on `main` | [references/prerequisites.md](references/prerequisites.md) |
-| Order of RC → production tag → CWS → containers | [references/sequencing-and-gates.md](references/sequencing-and-gates.md) |
-| What GitHub runs on push/tag (operator view) | [references/ci-triggers.md](references/ci-triggers.md) |
-| Manifest pins, Dokploy product stack | [references/dokploy-pins.md](references/dokploy-pins.md) |
-| CWS wait/reject, staging zip sideload | [references/extension.md](references/extension.md) |
-| Hotfix or production rollback | [references/rollback-hotfix.md](references/rollback-hotfix.md) |
-| Blog, Discord, Reddit after deploy | [references/post-release.md](references/post-release.md) |
-| Calculate `X.Y.Z`, cut changelog | [bondery-changelog versioning](../bondery-changelog/references/versioning-and-release.md) |
+| Task                                            | Read                                                                                      |
+| ----------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Pre-release bumps, openapi, build on `main`     | [references/prerequisites.md](references/prerequisites.md)                                |
+| Order of RC → production tag → CWS → containers | [references/sequencing-and-gates.md](references/sequencing-and-gates.md)                  |
+| What GitHub runs on push/tag (operator view)    | [references/ci-triggers.md](references/ci-triggers.md)                                    |
+| Manifest pins, Dokploy product stack            | [references/dokploy-pins.md](references/dokploy-pins.md)                                  |
+| CWS wait/reject, staging zip sideload           | [references/extension.md](references/extension.md)                                        |
+| Hotfix or production rollback                   | [references/rollback-hotfix.md](references/rollback-hotfix.md)                            |
+| Blog, Discord, Reddit after deploy              | [references/post-release.md](references/post-release.md)                                  |
+| Calculate `X.Y.Z`, cut changelog                | [bondery-changelog versioning](../bondery-changelog/references/versioning-and-release.md) |
 
 Full index: [references/README.md](references/README.md).
 

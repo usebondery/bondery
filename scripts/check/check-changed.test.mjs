@@ -29,6 +29,18 @@ describe("planChecks", () => {
     assert.ok(names(["scripts/check/check-changed.mjs"]).includes("check-script-tests"));
   });
 
+  it("lints and tests when a Biome plugin changes", () => {
+    const plan = names(["biome/plugins/no-unsafe-secret-compare.grit"]);
+    assert.ok(plan.includes("biome"));
+    assert.ok(plan.includes("check-script-tests"));
+    assert.ok(plan.includes("diagnostic-messages"));
+  });
+
+  it("checks diagnostic wording when a check script changes", () => {
+    assert.ok(names(["scripts/check/check-docs-links.mjs"]).includes("diagnostic-messages"));
+    assert.ok(!names(["docs/api/index.mdx"]).includes("diagnostic-messages"));
+  });
+
   it("honours --only", () => {
     assert.deepEqual(names(["apps/api/src/main.ts"], ["biome"]), ["biome"]);
   });

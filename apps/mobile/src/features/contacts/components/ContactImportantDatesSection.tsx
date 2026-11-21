@@ -87,15 +87,19 @@ export function ContactImportantDatesSection({
   }
 
   function openEditSheet(index: number) {
-    setSheet({ entry: dates[index], index, mode: "edit", open: true });
+    const entry = dates[index];
+    if (!entry) {
+      return;
+    }
+    setSheet({ entry, index, mode: "edit", open: true });
   }
 
   function persistDates(nextDates: ImportantDate[]) {
     try {
       onSaveDates(nextDates);
-    } catch (err) {
-      showErrorToast(err, tContactImportantDates("ErrorTitle"));
-      throw err;
+    } catch (error) {
+      showErrorToast(error, tContactImportantDates("ErrorTitle"));
+      throw error;
     }
   }
 

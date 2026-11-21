@@ -105,7 +105,7 @@ export async function generateVCard(contact: Contact, extras?: VCardExportExtras
     }
   }
 
-  const revision = formatVCardTimestamp(contact.updatedAt ?? contact.createdAt);
+  const revision = formatVCardTimestamp(contact.updatedAt);
   if (revision) {
     card = {
       ...card,

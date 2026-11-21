@@ -32,7 +32,7 @@ export function GlobeVisual() {
   const shown = reduceMotion || inView;
 
   return (
-    <div aria-hidden="true" className="relative size-[260px] sm:size-[280px]" ref={ref}>
+    <div aria-hidden="true" className="size-globe sm:size-globe-sm relative" ref={ref}>
       <svg className="absolute inset-0 size-full" fill="none" viewBox="0 0 100 100">
         <circle
           cx={50}
@@ -56,7 +56,7 @@ export function GlobeVisual() {
         return (
           <motion.div
             animate={{ opacity: shown ? 1 : 0, scale: shown ? 1 : 0.6 }}
-            className="absolute -translate-x-1/2 -translate-y-1/2"
+            className="absolute -translate-1/2"
             initial={false}
             key={city}
             style={{ left: `${x}%`, top: `${y}%` }}

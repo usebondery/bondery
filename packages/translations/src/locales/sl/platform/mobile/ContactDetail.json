@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Dodaj opombe…",
   "DeleteContact": "Izbrisati stik",
   "DeleteContactConfirmTitle": "Izbrisati {name}?",
   "DeleteFailed": "Stika ni bilo mogoče izbrisati.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Urediti",
   "GroupsEditAccessibility": "Urediti skupine za {name}",
   "GroupsLoadError": "Skupin ni bilo mogoče naložiti",
+  "LastInteractionLabel": "Zadnja interakcija",
   "NoGroups": "Ni v nobeni skupini",
   "ShareContact": "Deliti vCard …",
   "ShareContactViaEmail": "Poslati po e-pošti …",

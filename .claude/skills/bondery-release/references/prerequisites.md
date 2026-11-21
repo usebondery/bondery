@@ -4,11 +4,11 @@ Complete version machinery on `main` **before** tagging. Named RCs do not need a
 
 ## Identity
 
-| Channel | Root `package.json` | Git tag | GHCR | GitHub Release |
-|---------|---------------------|---------|------|----------------|
-| Everyday `main` | last RC or last prod | none | `:sha-<short>` only | none |
-| Beta / RC | `X.Y.Z-rc.N` (N ≥ 1) | `vX.Y.Z-rc.N` | `:X.Y.Z-rc.N` + `:beta` | **prerelease**, **with** staging zip |
-| Production | `X.Y.Z` | `vX.Y.Z` | `:X.Y.Z` + `:production` + `:latest` | **not** prerelease, **no** zip |
+| Channel         | Root `package.json`  | Git tag       | GHCR                                 | GitHub Release                       |
+| --------------- | -------------------- | ------------- | ------------------------------------ | ------------------------------------ |
+| Everyday `main` | last RC or last prod | none          | `:sha-<short>` only                  | none                                 |
+| Beta / RC       | `X.Y.Z-rc.N` (N ≥ 1) | `vX.Y.Z-rc.N` | `:X.Y.Z-rc.N` + `:beta`              | **prerelease**, **with** staging zip |
+| Production      | `X.Y.Z`              | `vX.Y.Z`      | `:X.Y.Z` + `:production` + `:latest` | **not** prerelease, **no** zip       |
 
 Spelling is SemVer `1.9.1-rc.1` (not `1.9.1.rc-1`). Forbid `rc.0`. Chrome maps RC to `manifest.version` `1.9.1.N` plus `version_name` `1.9.1-rc.1`.
 

@@ -1,0 +1,24 @@
+{
+  "Categories": {
+    "All": "All",
+    "Bonds": "Bonds",
+    "Tech": "Tech",
+    "Updates": "Updates"
+  },
+  "CategoryTitle": "{category} Blog",
+  "Descriptions": {
+    "All": "Stay up to date with Bondery — product updates, relationship tips, and networking insights from the team behind the open-source PRM.",
+    "Bonds": "Tips and insights on building meaningful relationships, effective networking, and strong networks.",
+    "Tech": "Technical deep-dives on Bondery's architecture, infrastructure, and engineering decisions.",
+    "Updates": "Product updates, feature releases, and development news from Bondery."
+  },
+  "EmptyCategory": "No posts yet in this category.",
+  "ReadingTime": "{minutes} min read",
+  "Title": "Blog",
+  "Tooltips": {
+    "All": "Browse all blog posts",
+    "Bonds": "About networking and relationships",
+    "Tech": "Technical deep-dives",
+    "Updates": "Product updates and releases"
+  }
+}

@@ -24,7 +24,7 @@ import { z } from "zod";
 import { SelectableCard } from "@/components/shell/SelectableCard";
 import { useShareContactModalTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId, useModalDismiss } from "@/lib/modals";
-import { useShareContactMutation } from "@/lib/query/hooks/useContacts";
+import { useShareContactMutation } from "@/lib/query/hooks/useContactMutations";
 
 const REQUIRED_FIELDS: ShareableField[] = ["avatar", "headline"];
 const shareContactFormSchema = z.object({
@@ -289,7 +289,14 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
         />
 
         <Tooltip label={tShare("SendCopyTooltip")}>
-          <Checkbox checked disabled label={tShare("SendCopyCheckbox")} onChange={() => {}} />
+          <Checkbox
+            checked
+            disabled
+            label={tShare("SendCopyCheckbox")}
+            onChange={() => {
+              // no-op: send-copy is always on and the control is disabled
+            }}
+          />
         </Tooltip>
 
         <Text fw={500} size="sm">

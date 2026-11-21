@@ -80,6 +80,12 @@ export function useEmbeddedCheckout({
   const openGenerationRef = useRef(0);
   /** One Checkout open. A second click reuses this key until close, success, or a terminal error. */
   const idempotencyKeyRef = useRef<string | null>(null);
+  const clearIdempotencyKey = () => {
+    idempotencyKeyRef.current = null;
+  };
+  const storeCheckout = (checkout: StripeEmbeddedCheckout) => {
+    checkoutRef.current = checkout;
+  };
   const router = useRouter();
   const queryClient = useQueryClient();
   const t = useCheckoutTranslations();
@@ -156,7 +162,7 @@ export function useEmbeddedCheckout({
       if (generation !== openGenerationRef.current) {
         return;
       }
-      idempotencyKeyRef.current = null;
+      clearIdempotencyKey();
       if (error instanceof ApiError && error.status === 409 && error.code === "conflict") {
         notifications.show(
           warningNotificationTemplate({
@@ -190,7 +196,7 @@ export function useEmbeddedCheckout({
     }
 
     if (!stripe) {
-      idempotencyKeyRef.current = null;
+      clearIdempotencyKey();
       showCheckoutError();
       setIsLoading(false);
       return;
@@ -203,7 +209,7 @@ export function useEmbeddedCheckout({
     }
 
     if (!mountNode) {
-      idempotencyKeyRef.current = null;
+      clearIdempotencyKey();
       showCheckoutError();
       setIsLoading(false);
       setIsModalOpen(false);
@@ -219,7 +225,7 @@ export function useEmbeddedCheckout({
         return;
       }
 
-      checkoutRef.current = checkout;
+      storeCheckout(checkout);
       checkout.mount(mountNode);
       setIsLoading(false);
 

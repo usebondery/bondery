@@ -5,8 +5,8 @@
 */
 .grid {
   display: grid;
-  gap: var(--mantine-spacing-md);
   grid-template-areas: "meta" "notes";
+  gap: var(--mantine-spacing-md);
 }
 
 @media (min-width: 48em) {

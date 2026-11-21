@@ -52,6 +52,10 @@ export interface GroupMembershipUpdate {
   selectedGroupIds: string[];
 }
 
+function ignoreGroupCardAction() {
+  // no-op: selection uses the wrapper button, not GroupCard actions
+}
+
 function toContactSelectable(contact: Contact): ContactSelectable {
   return {
     avatar: contact.avatar,
@@ -148,15 +152,15 @@ function AddPeopleToGroupSelectionForm({
     }
   }, [isGroupsError, isContactsError, membershipQueries, t, tCommon]);
 
-  useEffect(() => {
-    if (hasInitialized) {
-      return;
-    }
-
-    if (isLoadingGroups || isLoadingContacts || isLoadingMemberships || !groupsData) {
-      return;
-    }
-
+  // Seed the local selection once, when every query has loaded. Doing it while rendering
+  // shows the loaded state in the same pass instead of one render later.
+  if (
+    !hasInitialized &&
+    !isLoadingGroups &&
+    !isLoadingContacts &&
+    !isLoadingMemberships &&
+    groupsData
+  ) {
     const memberships = membershipQueries.map(
       (query) => new Set((query.data || []).map((group) => group.id)),
     );
@@ -172,14 +176,7 @@ function AddPeopleToGroupSelectionForm({
     setInitialSelectedGroupIds(intersection);
     setSelectedGroupIds(new Set(intersection));
     setHasInitialized(true);
-  }, [
-    groupsData,
-    hasInitialized,
-    isLoadingContacts,
-    isLoadingGroups,
-    isLoadingMemberships,
-    membershipQueries,
-  ]);
+  }
 
   const filteredGroups = (() => {
     const trimmedSearch = search.trim().toLowerCase();
@@ -443,11 +440,11 @@ function AddPeopleToGroupSelectionForm({
                                 : undefined
                         }
                         interactive={false}
-                        onAddPeople={() => {}}
-                        onClick={() => {}}
-                        onDelete={() => {}}
-                        onDuplicate={() => {}}
-                        onEdit={() => {}}
+                        onAddPeople={ignoreGroupCardAction}
+                        onClick={ignoreGroupCardAction}
+                        onDelete={ignoreGroupCardAction}
+                        onDuplicate={ignoreGroupCardAction}
+                        onEdit={ignoreGroupCardAction}
                         selected={isCurrentlySelected}
                         showMenu={false}
                         variant={modalGroupCardVariant}

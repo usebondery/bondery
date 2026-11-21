@@ -8,6 +8,7 @@ import {
 import type { ContactAddressEntry } from "@bondery/schemas";
 import { Autocomplete, Group } from "@mantine/core";
 import { IconCompass } from "@tabler/icons-react";
+import { cn } from "cn";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { fetchGeocodeSuggestions } from "@/lib/api/geocode";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
@@ -27,6 +28,10 @@ interface LocationLookupInputProps {
   placeholder?: string;
   style?: React.CSSProperties;
   value: string;
+}
+
+function flagIconClass(code: string): string {
+  return `fi-${code}`;
 }
 
 function getSuggestionCountryFlag(entry: ContactAddressEntry): string {
@@ -67,7 +72,7 @@ export function LocationLookupInput({
   const optionTextByKey = useRef<Record<string, string>>({});
   const optionFlagByLabel = useRef<Record<string, string>>({});
   /** Tracks whether the user has actively changed the input value. */
-  const userHasTyped = useRef(false);
+  const userHasTyped = useRef<boolean>(false);
   const activeQueryRef = useRef<string | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -193,7 +198,7 @@ export function LocationLookupInput({
       renderOption={({ option }) => (
         <Group gap="xs" wrap="nowrap">
           <span
-            className={`fi fi-${optionFlagByKey.current[option.value] || "aq"}`}
+            className={cn("fi", flagIconClass(optionFlagByKey.current[option.value] || "aq"))}
             style={{ flexShrink: 0, width: 18 }}
           />
           <span>{optionTextByKey.current[option.value] ?? option.value}</span>
@@ -201,7 +206,7 @@ export function LocationLookupInput({
       )}
       rightSection={
         selectedFlag ? (
-          <span className={`fi fi-${selectedFlag}`} style={{ width: 18 }} />
+          <span className={cn("fi", flagIconClass(selectedFlag))} style={{ width: 18 }} />
         ) : undefined
       }
       rightSectionPointerEvents="none"

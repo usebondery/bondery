@@ -199,7 +199,9 @@ export function McpModal({ apiBaseUrl, modalId }: McpModalProps) {
                   data={permissionOptions}
                   disabled
                   miw={{ base: 0, sm: PERMISSION_SELECT_WIDTH }}
-                  onChange={() => {}}
+                  onChange={() => {
+                    // no-op: granted permission is read-only on this card
+                  }}
                   style={{ flexShrink: 0 }}
                   value={mcpAccessFromScopes(consent.scopes)}
                   w={{ base: "100%", sm: PERMISSION_SELECT_WIDTH }}

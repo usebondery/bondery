@@ -32,10 +32,11 @@ describe("resolveWebAuthnRp", () => {
 
   it("strips a trailing slash from origin", () => {
     const result = resolveWebAuthnRp({ webappUrl: "https://app.usebondery.com/" });
-    assert.equal(result.ok, true);
-    if (result.ok) {
-      assert.equal(result.origin, "https://app.usebondery.com");
-    }
+    assert.deepEqual(result, {
+      ok: true,
+      origin: "https://app.usebondery.com",
+      rpID: "usebondery.com",
+    });
   });
 
   it("refuses 127.0.0.1 because WebAuthn rpID cannot be an IP", () => {
@@ -89,13 +90,11 @@ describe("resolveWebAuthnRp", () => {
     process.env.BONDERY_PUBLIC_API_URL = "https://api.usebondery.com";
     try {
       const result = resolveWebAuthnRp({ webappUrl: "https://app.usebondery.com" });
-      assert.equal(result.ok, true);
-      if (result.ok) {
-        assert.equal(result.rpID, "usebondery.com");
-        assert.equal(result.origin, "https://app.usebondery.com");
-        assert.equal(result.rpID.includes("api"), false);
-        assert.equal(result.origin.includes("api.usebondery.com"), false);
-      }
+      assert.deepEqual(result, {
+        ok: true,
+        origin: "https://app.usebondery.com",
+        rpID: "usebondery.com",
+      });
     } finally {
       if (previous === undefined) {
         delete process.env.BONDERY_PUBLIC_API_URL;
@@ -107,10 +106,11 @@ describe("resolveWebAuthnRp", () => {
 
   it("does not treat the marketing website as origin when webapp URL is passed", () => {
     const result = resolveWebAuthnRp({ webappUrl: "https://app.usebondery.com" });
-    assert.equal(result.ok, true);
-    if (result.ok) {
-      assert.notEqual(result.origin, "https://usebondery.com");
-    }
+    assert.deepEqual(result, {
+      ok: true,
+      origin: "https://app.usebondery.com",
+      rpID: "usebondery.com",
+    });
   });
 
   it("never reads BONDERY_PUBLIC_API_URL when the webapp origin is localhost", () => {

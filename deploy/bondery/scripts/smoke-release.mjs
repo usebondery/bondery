@@ -10,12 +10,25 @@
  * Prerequisites: docker compose v2.38+, dokploy-network, GHCR login when pulling private images.
  */
 import { spawnSync } from "node:child_process";
-import { copyFileSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  assertApiHttpsOnly,
+  assertApiInternalTls,
+  assertPostgresTls,
+  assertStorageTls,
+  assertTraefikTransport,
+} from "./smoke-release-tls.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BONDERY_DIR = resolve(__dirname, "..");
+/** Stands in for Traefik's dynamic folder (see docker-compose.yml traefik-transport). */
+const TRAEFIK_DYNAMIC_DIR = resolve(BONDERY_DIR, ".smoke-traefik-dynamic");
+/** The API CA, exported from the api container, so the host can verify the API's HTTPS port. */
+const API_CA_FILE = resolve(BONDERY_DIR, ".smoke-api-ca.crt");
+/** The API serves HTTPS only (docs/adr/0031-internal-api-tls.mdx). */
+const API_HEALTH_BASE = "https://127.0.0.1:26642/health";
 
 const SMOKE_DOMAINS = {
   BONDERY_INFRA_API_DOMAIN: "api.example-smoke.test",
@@ -78,12 +91,14 @@ function parseArgs() {
     console.error(
       "Usage: smoke-release.mjs --service webapp|api --tag X.Y.Z [--image ghcr.io/usebondery/...] [--skip-pull]",
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (service !== "webapp" && service !== "api") {
     console.error(`Unknown service: ${service}`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   return {
@@ -103,7 +118,7 @@ function run(command, options = {}) {
     env: subprocessEnv(),
   });
   if (result.status !== 0) {
-    process.exit(result.status ?? 1);
+    process.exitCode = result.status ?? 1;
   }
 }
 
@@ -148,7 +163,7 @@ function assertSmokeEmailEnvInCi() {
     `Release smoke in CI requires Infisical staging email vars: ${missing.join(", ")}\n` +
       "Run ./.github/actions/shared/infisical-staging-secrets before smoke-release.mjs.",
   );
-  process.exit(1);
+  process.exitCode = 1;
 }
 
 function dumpComposeDiagnostics() {
@@ -186,17 +201,38 @@ function runCompose(command) {
   });
   if (result.status !== 0) {
     dumpComposeDiagnostics();
-    process.exit(result.status ?? 1);
+    process.exitCode = result.status ?? 1;
   }
 }
 
+/** `curl` arguments that trust the API CA, for https://127.0.0.1:26642 URLs. */
+function curlTrust(url) {
+  return url.startsWith(API_HEALTH_BASE) ? `--cacert "${API_CA_FILE}" ` : "";
+}
+
 function curlOk(url) {
-  const result = spawnSync(`curl -sf "${url}"`, { shell: true, stdio: "pipe" });
+  const result = spawnSync(`curl -sf ${curlTrust(url)}"${url}"`, { shell: true, stdio: "pipe" });
   return result.status === 0;
 }
 
+/**
+ * Copies the API CA out of the api container (it mounts the CA certificate for its own
+ * healthcheck). False until the container runs.
+ */
+function exportApiCa() {
+  const result = composeSync("exec -T api cat /bondery-api/client/ca.crt");
+  if (result.status !== 0 || !(result.stdout ?? "").includes("BEGIN CERTIFICATE")) {
+    return false;
+  }
+  writeFileSync(API_CA_FILE, result.stdout);
+  return true;
+}
+
 function logReadyHealthFailure(url) {
-  const result = spawnSync(`curl -s "${url}"`, { encoding: "utf8", shell: true });
+  const result = spawnSync(`curl -s ${curlTrust(url)}"${url}"`, {
+    encoding: "utf8",
+    shell: true,
+  });
   if (result.stdout?.trim()) {
     console.error(`Readiness probe body from ${url}:\n${result.stdout}`);
   }
@@ -211,14 +247,15 @@ function waitFor(predicate, { attempts = 40, intervalSec = 3, label = "service" 
     if (i === attempts) {
       console.error(`${label} did not become healthy after ${attempts} attempts`);
       if (label === "api") {
-        logReadyHealthFailure("http://127.0.0.1:26631/health/ready");
+        logReadyHealthFailure(`${API_HEALTH_BASE}/ready`);
       }
       if (label === "webapp") {
         logReadyHealthFailure("http://127.0.0.1:26632/health/ready");
       }
       run("docker compose --env-file .env.smoke ps");
       run("docker compose --env-file .env.smoke logs --tail=80");
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     spawnSync(`sleep ${intervalSec}`, { shell: true });
   }
@@ -276,8 +313,8 @@ function prepareEnvSmoke() {
 }
 
 /** Pin BONDERY_INFRA_VERSION for paired api/webapp compose images in smoke. */
-function applySmokeVersion(tag) {
-  smokeImageTag = tag;
+function applySmokeVersion(versionTag) {
+  smokeImageTag = versionTag;
   const envPath = resolve(BONDERY_DIR, ".env.smoke");
   const lines = readFileSync(envPath, "utf8").split("\n");
   const key = "BONDERY_INFRA_VERSION";
@@ -289,39 +326,40 @@ function applySmokeVersion(tag) {
     const lineKey = line.split("=")[0]?.trim();
     if (lineKey === key) {
       found = true;
-      return `${key}=${tag}`;
+      return `${key}=${versionTag}`;
     }
     return line;
   });
 
   if (!found) {
-    out.push(`${key}=${tag}`);
+    out.push(`${key}=${versionTag}`);
   }
 
   writeFileSync(envPath, `${out.join("\n")}\n`);
   copyFileSync(envPath, resolve(BONDERY_DIR, ".env"));
 }
 
-function writeOverride(service, imageName, tag, skipPull) {
-  const image = `${imageName}:${tag}`;
-  const pullPolicy = skipPull ? "    pull_policy: never\n" : "";
+function writeOverride(targetService, targetImageName, imageTag, useLocalImages) {
+  const image = `${targetImageName}:${imageTag}`;
+  const pullPolicy = useLocalImages ? "    pull_policy: never\n" : "";
   let override = "services:\n";
 
-  if (service === "webapp") {
+  if (targetService === "webapp") {
     override += `  webapp:\n    image: ${image}\n${pullPolicy}    ports:\n      - "26632:26632"\n`;
-    override += `  db:\n    ports:\n      - "54322:5432"\n`;
-    override += `  seaweedfs-s3:\n    ports:\n      - "8333:8333"\n`;
   } else {
-    override += `  api:\n    image: ${image}\n${pullPolicy}    ports:\n      - "26631:26631"\n`;
-    override += `  db:\n    ports:\n      - "54322:5432"\n`;
-    override += `  seaweedfs-s3:\n    ports:\n      - "8333:8333"\n`;
+    override += `  api:\n    image: ${image}\n${pullPolicy}    ports:\n      - "127.0.0.1:26642:26642"\n`;
   }
+  override += `  db:\n    ports:\n      - "127.0.0.1:54322:5432"\n`;
+  override += `  seaweedfs-s3:\n    ports:\n      - "8333:8333"\n`;
+  // No Dokploy here: the traefik-transport job writes into a scratch folder instead of Traefik's.
+  mkdirSync(TRAEFIK_DYNAMIC_DIR, { recursive: true });
+  override += `  traefik-transport:\n    volumes:\n      - type: bind\n        source: ${TRAEFIK_DYNAMIC_DIR}\n        target: /traefik-dynamic\n`;
 
-  if (skipPull) {
-    // Local-only tags cannot be pulled. redis-secrets runs the api image, and so does api when
+  if (useLocalImages) {
+    // Local-only tags cannot be pulled. stack-secrets runs the api image, and so does api when
     // the webapp is the service under test.
-    override += "  redis-secrets:\n    pull_policy: never\n";
-    if (service === "webapp") {
+    override += "  stack-secrets:\n    pull_policy: never\n";
+    if (targetService === "webapp") {
       override += "  api:\n    pull_policy: never\n";
     }
   }
@@ -337,7 +375,8 @@ function assertS3GatewaySpeaksS3() {
   const out = `${result.stdout ?? ""}${result.stderr ?? ""}`;
   if (result.status !== 0) {
     console.error("S3 ListBuckets probe failed");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const speaksS3 =
@@ -348,14 +387,15 @@ function assertS3GatewaySpeaksS3() {
       "S3 gateway did not speak S3 XML (expected 200 ListAllMyBucketsResult or 403 Error):\n",
       out,
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   console.log("S3 gateway ListBuckets returned protocol XML");
 }
 
-function smokeWebapp(skipPull) {
-  if (!skipPull) {
+function smokeWebapp(useLocalImages) {
+  if (!useLocalImages) {
     runCompose("pull api webapp");
   }
   runCompose("up -d webapp");
@@ -375,36 +415,67 @@ function smokeWebapp(skipPull) {
   );
   if (body.status !== 0) {
     console.error("runtime-config.json request failed");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   if (!body.stdout.includes("api.example-smoke.test")) {
     console.error("runtime-config.json missing public API host");
     console.error(body.stdout);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
-  if (body.stdout.includes("api:26631")) {
+  if (body.stdout.includes("api:26631") || body.stdout.includes(":26642")) {
     console.error("INTERNAL URL LEAKED into runtime-config.json");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
+
+  assertApiInternalTls({ compose: composeSync, fail: failSmoke });
 }
 
-function smokeApi(skipPull) {
-  if (!skipPull) {
+function smokeApi(useLocalImages) {
+  if (!useLocalImages) {
     runCompose("pull api");
   }
   runCompose("up -d api");
 
   waitFor(
-    () =>
-      curlOk("http://127.0.0.1:26631/health/live") && curlOk("http://127.0.0.1:26631/health/ready"),
+    () => exportApiCa() && curlOk(`${API_HEALTH_BASE}/live`) && curlOk(`${API_HEALTH_BASE}/ready`),
     { attempts: 45, intervalSec: 3, label: "api" },
   );
 
   assertS3GatewaySpeaksS3();
+  const tls = { compose: composeSync, fail: failSmoke };
+  assertApiHttpsOnly(tls);
+  assertTraefikTransport({ ...tls, dynamicDir: TRAEFIK_DYNAMIC_DIR });
+  assertPostgresTls(tls);
+  assertStorageTls(tls);
+}
+
+/** Runs `docker compose <args>` for the smoke stack and returns the result (utf8). */
+function composeSync(args, input) {
+  return spawnSync(`docker compose --env-file .env.smoke ${args}`, {
+    cwd: BONDERY_DIR,
+    encoding: "utf8",
+    env: subprocessEnv(),
+    input,
+    shell: true,
+  });
+}
+
+function failSmoke(message, output) {
+  console.error(message);
+  if (output) {
+    console.error(output);
+  }
+  dumpComposeDiagnostics();
+  process.exitCode = 1;
 }
 
 function tearDown() {
   run("docker compose --env-file .env.smoke down -v || true");
+  rmSync(TRAEFIK_DYNAMIC_DIR, { force: true, recursive: true });
+  rmSync(API_CA_FILE, { force: true });
 }
 
 const { service, tag, imageName, skipPull } = parseArgs();

@@ -13,8 +13,8 @@
 .docsPageDescription,
 .docsPageFoot,
 .docsPageHead {
-  max-width: var(--docs-measure);
   min-width: 0;
+  max-width: var(--docs-measure);
 }
 
 /* The prose box takes the whole column. Each direct child limits itself to
@@ -50,8 +50,8 @@
    style tag breaks the adjacent-sibling rhythm rules below. */
 .docsGrid {
   display: grid;
-  gap: var(--mantine-spacing-md);
   grid-template-columns: minmax(0, 1fr);
+  gap: var(--mantine-spacing-md);
 }
 
 @media (min-width: 48em) {
@@ -65,10 +65,10 @@
    the text baseline to the optical centre of the cap height. Declared before the
    rhythm block: the rhythm rules below carry higher specificity. */
 .docsHeadingAnchor {
-  color: var(--mantine-color-dimmed);
   margin-inline-start: var(--mantine-spacing-xs);
-  opacity: 0;
   vertical-align: 0.12em;
+  color: var(--mantine-color-dimmed);
+  opacity: 0;
 }
 
 .docsHeading:hover .docsHeadingAnchor,
@@ -106,7 +106,7 @@
    attribute selector. */
 
 .docsRhythm.docsRhythm
-:where(p, h1, h2, h3, h4, h5, h6, ul, ol, pre, hr, blockquote, table, img, details) {
+  :where(p, h1, h2, h3, h4, h5, h6, ul, ol, pre, hr, blockquote, table, img, details) {
   margin-block: 0;
 }
 
@@ -148,20 +148,20 @@
   --docs-step-marker: 44px;
 
   display: grid;
-  gap: var(--docs-step-gap);
   /* An explicit `minmax(0, 1fr)` column stops the implicit track from sizing to
      max-content. Without it the row keeps a code block's intrinsic width and the
      page scrolls sideways below ~660px. */
   grid-template-columns: minmax(0, 1fr);
-  list-style: none;
+  gap: var(--docs-step-gap);
   padding: 0;
+  list-style: none;
 }
 
 .docsSteps .docsStep {
+  position: relative;
   /* A grid item defaults to `min-width: auto`, so it refuses to shrink below its
      content and the `minmax(0, 1fr)` above has no effect without this. */
   min-width: 0;
-  position: relative;
 }
 
 /* The body takes the rest of the row, so a full-width code block fills the step.
@@ -172,15 +172,15 @@
 }
 
 .docsSteps .docsStep:not(:last-child)::after {
-  background: var(--mantine-color-default-border);
-  border-radius: 999px;
-  bottom: calc(-1 * var(--docs-step-gap));
-  content: "";
-  left: calc(var(--docs-step-marker) / 2);
   position: absolute;
   top: var(--docs-step-marker);
-  transform: translateX(-50%);
+  bottom: calc(-1 * var(--docs-step-gap));
+  left: calc(var(--docs-step-marker) / 2);
   width: 2px;
+  content: "";
+  background: var(--mantine-color-default-border);
+  border-radius: 999px;
+  transform: translateX(-50%);
 }
 
 /* Sidebar column keeps the header and footer side gap. `75em` is the Mantine `lg`
@@ -205,8 +205,8 @@
 @media (min-width: 62em) {
   .docsPageWithRail {
     display: grid;
-    gap: var(--mantine-spacing-lg);
     grid-template-columns: minmax(0, 1fr) 15rem;
+    gap: var(--mantine-spacing-lg);
   }
 
   .docsPageWithRail > * {

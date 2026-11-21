@@ -32,7 +32,7 @@ export function FloatingActionBar({
   return (
     <FloatingPillRail accessibilityLabel={accessibilityLabel} accessibilityRole="toolbar">
       {actions.map((action) => {
-        const isDisabled = action.disabled || action.loading;
+        const isDisabled = action.disabled === true || action.loading === true;
         const iconColor =
           action.tone === "danger"
             ? colors.dangerAccent

@@ -101,7 +101,7 @@ function previewForField(
       if (!source.notes) {
         return null;
       }
-      return source.notes.length > 80 ? `${source.notes.substring(0, 80)}…` : source.notes;
+      return source.notes.length > 80 ? `${source.notes.slice(0, 80)}…` : source.notes;
     case "importantDates":
       return source.importantDates && source.importantDates.length > 0
         ? `${source.importantDates.length} date(s)`

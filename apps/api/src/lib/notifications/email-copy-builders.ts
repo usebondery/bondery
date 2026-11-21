@@ -18,7 +18,8 @@ function readNestedLabels(
     return defaultShareLabels();
   }
 
-  const record = labels as Record<string, string>;
+  // Translation bundles come from JSON files, so any label can be missing.
+  const record = labels as Partial<Record<string, string>>;
   return {
     address: record.address ?? "Address",
     email: record.email ?? "Email",
@@ -64,7 +65,7 @@ function readDateTypes(bundle: Record<string, unknown>): ReminderDigestEmailCopy
     };
   }
 
-  const record = dateTypes as Record<string, string>;
+  const record = dateTypes as Partial<Record<string, string>>;
   return {
     anniversary: record.anniversary ?? "Anniversary",
     birthday: record.birthday ?? "Birthday",

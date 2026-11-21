@@ -27,6 +27,8 @@ import {
 } from "../importantDateUtils";
 import { RotatingWheelColumn } from "./RotatingWheelColumn";
 
+const MONTHS_PER_YEAR = 12;
+
 interface ImportantDateWheelPickerSheetProps {
   defaultWithoutYear?: boolean;
   initialIso: string | null;
@@ -81,7 +83,7 @@ export function ImportantDateWheelPickerSheet({
   const yearItems = years.map(String);
 
   const dayIndex = Math.min(Math.max(wheelValue.day - 1, 0), dayItems.length - 1);
-  const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), 11);
+  const monthIndex = Math.min(Math.max(wheelValue.month - 1, 0), MONTHS_PER_YEAR - 1);
   const yearIndex = Math.max(0, years.indexOf(wheelValue.year));
 
   function updateWheelValue(patch: Partial<ImportantDateWheelValue>) {
@@ -146,7 +148,9 @@ export function ImportantDateWheelPickerSheet({
             accessibilityLabel={tMobileContactIdentity("WithoutYearLabel")}
             checked={wheelValue.withoutYear}
             disabled
-            onCheckedChange={() => {}}
+            onCheckedChange={() => {
+              // Visual only. The parent Pressable toggles withoutYear.
+            }}
           />
         </View>
       </Pressable>
@@ -176,7 +180,7 @@ export function ImportantDateWheelPickerSheet({
               accessibilityLabel={tMobileContactIdentity("YearColumnLabel")}
               items={yearItems}
               onIndexChange={(index) => updateWheelValue({ year: years[index] ?? wheelValue.year })}
-              selectedIndex={yearIndex >= 0 ? yearIndex : 0}
+              selectedIndex={yearIndex}
             />
           </View>
         ) : null}

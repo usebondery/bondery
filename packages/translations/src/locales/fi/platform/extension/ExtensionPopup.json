@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Avaa Bondery"
+    "OpenBondery": "Avaa Bondery",
+    "UnsupportedSiteMessage": "Käy jonkun profiilissa Instagramissa tai LinkedInissä nähdäksesi laajennuksen lisätoimintoja ja ominaisuuksia."
   },
   "LoggedOut": {
     "Description": "Yhdistä tilisi tallentaaksesi yhteystietoja sosiaalisesta mediasta.",
@@ -20,6 +21,12 @@
     "Title": "Päivitys vaaditaan"
   },
   "Welcome": {
-    "ConnectButton": "Yhdistä Bondery-tili"
+    "ConnectButton": "Yhdistä Bondery-tili",
+    "Description": "Yhdistä Bondery-tilisi tallentaaksesi yhteystietoja suoraan sosiaalisen median profiileista.",
+    "SignInHint": "Sinua pyydetään kirjautumaan Bondery-tilillesi ja valtuuttamaan laajennus.",
+    "SuccessClose": "Voit nyt sulkea tämän välilehden.",
+    "SuccessDescription": "Bondery-tilisi on nyt yhdistetty. Käy missä tahansa Instagram- tai LinkedIn-profiilissa ja aloita yhteystietojen tallentaminen.",
+    "SuccessTitle": "Kaikki valmista!",
+    "Title": "Tervetuloa Bonderyyn"
   }
 }

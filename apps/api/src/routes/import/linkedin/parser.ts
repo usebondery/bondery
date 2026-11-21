@@ -47,7 +47,7 @@ function normalizeNullableString(value: string | null | undefined): string | nul
 }
 
 function parseLinkedInUsername(rawUrl: string): { username: string | null; normalizedUrl: string } {
-  const fallback = normalizeNullableString(rawUrl) || "";
+  const fallback = normalizeNullableString(rawUrl) ?? "";
 
   if (!fallback) {
     return { normalizedUrl: "", username: null };
@@ -58,16 +58,12 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
     const parsed = new URL(withProtocol);
     const segments = parsed.pathname.split("/").filter(Boolean);
 
-    let username: string | null = null;
     const inIndex = segments.findIndex((segment) => segment.toLowerCase() === "in");
+    const afterInSegment = segments[inIndex + 1];
+    const username: string | null =
+      inIndex >= 0 && afterInSegment ? afterInSegment : (segments.at(-1) ?? null);
 
-    if (inIndex >= 0 && segments[inIndex + 1]) {
-      username = segments[inIndex + 1];
-    } else if (segments.length > 0) {
-      username = segments[segments.length - 1];
-    }
-
-    const raw = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, "")) || null;
+    const raw = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, ""));
 
     if (!raw) {
       return { normalizedUrl: fallback, username: null };
@@ -91,6 +87,10 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
   }
 }
 
+/** LinkedIn writes "Connected On" as `month/day/year`. */
+const CONNECTED_ON_SLASH_SEGMENT_COUNT = 3;
+const MONTHS_PER_YEAR = 12;
+
 function parseConnectedOn(value: string): string | null {
   const normalized = normalizeNullableString(value);
   if (!normalized) {
@@ -103,7 +103,7 @@ function parseConnectedOn(value: string): string | null {
   }
 
   const slashParts = normalized.split("/");
-  if (slashParts.length === 3) {
+  if (slashParts.length === CONNECTED_ON_SLASH_SEGMENT_COUNT) {
     const [first, second, third] = slashParts;
     const month = Number(first);
     const day = Number(second);
@@ -114,7 +114,7 @@ function parseConnectedOn(value: string): string | null {
       Number.isInteger(day) &&
       Number.isInteger(year) &&
       month >= 1 &&
-      month <= 12 &&
+      month <= MONTHS_PER_YEAR &&
       day >= 1 &&
       day <= 31
     ) {
@@ -216,7 +216,7 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
   return parsedRows.map((row, index) => {
     const firstName = normalizeNameCase(
       stripNameTitles(
-        stripNameParentheticals(stripEmojis(normalizeNullableString(row["First Name"]) || "")),
+        stripNameParentheticals(stripEmojis(normalizeNullableString(row["First Name"]) ?? "")),
       ),
     );
     const rawLastName = stripNameTitles(
@@ -257,8 +257,8 @@ export function parseLinkedInCsvUpload(files: UploadFile[]): LinkedInPreparedCon
       isValid: issues.length === 0,
       lastName: cleanedLastName,
       linkedinUrl: normalizedUrl,
-      linkedinUsername: linkedinUsername || "",
-      middleName: cleanedMiddleName || null,
+      linkedinUsername: linkedinUsername ?? "",
+      middleName: cleanedMiddleName === "" ? null : cleanedMiddleName,
       position,
       tempId: `linkedin-row-${index + 1}`,
     };

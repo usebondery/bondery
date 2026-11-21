@@ -52,14 +52,14 @@ export type ContactSocialFieldKey =
   | "whatsapp"
   | "signal";
 
-export const CONTACT_SOCIAL_FIELD_KEYS = [
+export const CONTACT_SOCIAL_FIELD_KEYS: readonly [
   "linkedin",
   "instagram",
   "facebook",
   "whatsapp",
   "signal",
   "website",
-] as const satisfies readonly ContactSocialFieldKey[];
+] = ["linkedin", "instagram", "facebook", "whatsapp", "signal", "website"];
 
 /**
  * Extracts username from a social media URL.

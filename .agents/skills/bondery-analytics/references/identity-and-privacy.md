@@ -29,11 +29,11 @@ Do not send email or other PII as event properties. Person profile data in PostH
 
 ## Product analytics opt-out
 
-| Control | Behavior |
-|---------|----------|
-| Settings toggle (`productAnalyticsEnabled`) | Stored on `user_settings`; drives PostHog `opt_in` / `opt_out` |
-| Browser DNT (`navigator.doNotTrack`) | Honored in `instrumentation-client.ts` — opts out regardless of user preference |
-| Server capture | `captureProductEvent` checks `productAnalyticsEnabled` before sending |
+| Control                                     | Behavior                                                                        |
+| ------------------------------------------- | ------------------------------------------------------------------------------- |
+| Settings toggle (`productAnalyticsEnabled`) | Stored on `user_settings`; drives PostHog `opt_in` / `opt_out`                  |
+| Browser DNT (`navigator.doNotTrack`)        | Honored in `instrumentation-client.ts` — opts out regardless of user preference |
+| Server capture                              | `captureProductEvent` checks `productAnalyticsEnabled` before sending           |
 
 The settings UI is in **Settings → Data management → Product analytics**. Copy describes **pseudonymous** usage data, not full anonymization.
 
@@ -52,12 +52,12 @@ Plausible: `captureOnLocalhost` only in development on the website.
 
 ## Consent and legal
 
-| Claim / area | Status |
-|--------------|--------|
-| Analytics opt-out UI | **Implemented** — Settings → Data management |
-| Browser DNT | **Implemented** — `instrumentation-client.ts` |
-| Plausible cookieless marketing analytics | Implemented on website |
-| PostHog product analytics | Webapp + API when keys configured |
+| Claim / area                             | Status                                        |
+| ---------------------------------------- | --------------------------------------------- |
+| Analytics opt-out UI                     | **Implemented** — Settings → Data management  |
+| Browser DNT                              | **Implemented** — `instrumentation-client.ts` |
+| Plausible cookieless marketing analytics | Implemented on website                        |
+| PostHog product analytics                | Webapp + API when keys configured             |
 
 New events or properties → `bondery-legal` data-flow workflow and subprocessor registry.
 

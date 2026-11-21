@@ -3,7 +3,7 @@ import { afterEach, describe, it } from "node:test";
 
 import { loadTestEnv } from "./load-test-env.js";
 
-describe("GET /health/live", () => {
+describe("gET /health/live", () => {
   const originalVersion = process.env.BONDERY_INFRA_VERSION;
   const originalGitSha = process.env.BONDERY_INFRA_GIT_SHA;
 

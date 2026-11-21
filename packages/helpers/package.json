@@ -1,17 +1,17 @@
 {
   "dependencies": {
     "@bondery/schemas": "workspace:*",
-    "@vvo/tzdb": "^6.198.0",
-    "transliteration": "^2.6.1",
-    "uuid": "^14.0.2",
-    "zod": "^4.6.5"
+    "@vvo/tzdb": "^6.204.0",
+    "transliteration": "^2.7.0",
+    "uuid": "^14.0.3",
+    "zod": "^4.6.7"
   },
   "description": "Shared runtime utilities and form normalization pipelines for Bondery. Depends on @bondery/schemas.",
   "devDependencies": {
     "@bondery/typescript-config": "workspace:*",
     "@types/node": "^26.1.2",
     "dotenv": "^18.0.5",
-    "rimraf": "^6.1.3",
+    "rimraf": "^6.1.4",
     "tsx": "4.23.15",
     "typescript": "^7.0.2"
   },
@@ -351,6 +351,84 @@
       "import": "./dist/env/manifest.js",
       "node": "./dist/env/manifest.js",
       "types": "./src/env/manifest.ts"
+    },
+    "./env/manifest-dokploy": {
+      "default": "./dist/env/manifest-dokploy.js",
+      "import": "./dist/env/manifest-dokploy.js",
+      "node": "./dist/env/manifest-dokploy.js",
+      "types": "./src/env/manifest-dokploy.ts"
+    },
+    "./env/manifest-entries": {
+      "default": "./dist/env/manifest-entries.js",
+      "import": "./dist/env/manifest-entries.js",
+      "node": "./dist/env/manifest-entries.js",
+      "types": "./src/env/manifest-entries.ts"
+    },
+    "./env/manifest-entries-api-secrets": {
+      "default": "./dist/env/manifest-entries-api-secrets.js",
+      "import": "./dist/env/manifest-entries-api-secrets.js",
+      "node": "./dist/env/manifest-entries-api-secrets.js",
+      "types": "./src/env/manifest-entries-api-secrets.ts"
+    },
+    "./env/manifest-entries-auth": {
+      "default": "./dist/env/manifest-entries-auth.js",
+      "import": "./dist/env/manifest-entries-auth.js",
+      "node": "./dist/env/manifest-entries-auth.js",
+      "types": "./src/env/manifest-entries-auth.ts"
+    },
+    "./env/manifest-entries-public-database": {
+      "default": "./dist/env/manifest-entries-public-database.js",
+      "import": "./dist/env/manifest-entries-public-database.js",
+      "node": "./dist/env/manifest-entries-public-database.js",
+      "types": "./src/env/manifest-entries-public-database.ts"
+    },
+    "./env/manifest-entries-runtime": {
+      "default": "./dist/env/manifest-entries-runtime.js",
+      "import": "./dist/env/manifest-entries-runtime.js",
+      "node": "./dist/env/manifest-entries-runtime.js",
+      "types": "./src/env/manifest-entries-runtime.ts"
+    },
+    "./env/manifest-entries-storage": {
+      "default": "./dist/env/manifest-entries-storage.js",
+      "import": "./dist/env/manifest-entries-storage.js",
+      "node": "./dist/env/manifest-entries-storage.js",
+      "types": "./src/env/manifest-entries-storage.ts"
+    },
+    "./env/manifest-example-values": {
+      "default": "./dist/env/manifest-example-values.js",
+      "import": "./dist/env/manifest-example-values.js",
+      "node": "./dist/env/manifest-example-values.js",
+      "types": "./src/env/manifest-example-values.ts"
+    },
+    "./env/manifest-group-guides": {
+      "default": "./dist/env/manifest-group-guides.js",
+      "import": "./dist/env/manifest-group-guides.js",
+      "node": "./dist/env/manifest-group-guides.js",
+      "types": "./src/env/manifest-group-guides.ts"
+    },
+    "./env/manifest-ops-keys": {
+      "default": "./dist/env/manifest-ops-keys.js",
+      "import": "./dist/env/manifest-ops-keys.js",
+      "node": "./dist/env/manifest-ops-keys.js",
+      "types": "./src/env/manifest-ops-keys.ts"
+    },
+    "./env/manifest-queries": {
+      "default": "./dist/env/manifest-queries.js",
+      "import": "./dist/env/manifest-queries.js",
+      "node": "./dist/env/manifest-queries.js",
+      "types": "./src/env/manifest-queries.ts"
+    },
+    "./env/manifest-targets": {
+      "default": "./dist/env/manifest-targets.js",
+      "import": "./dist/env/manifest-targets.js",
+      "node": "./dist/env/manifest-targets.js",
+      "types": "./src/env/manifest-targets.ts"
+    },
+    "./env/manifest-types": {
+      "default": "./dist/env/manifest-types.js",
+      "import": "./dist/env/manifest-types.js",
+      "node": "./dist/env/manifest-types.js",
+      "types": "./src/env/manifest-types.ts"
     },
     "./env/oauth-client-ids": {
       "default": "./dist/env/oauth-client-ids.js",

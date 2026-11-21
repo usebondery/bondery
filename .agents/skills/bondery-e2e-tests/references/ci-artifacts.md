@@ -16,8 +16,8 @@ jobs:
       - run: pnpm run start:mailpit && pnpm run dev:webapp-api
       - run: pnpm run test:e2e -w webapp -- --project=unauth --project=oauth-callback --project=auth
         env:
-          BONDERY_PUBLIC_API_URL: http://127.0.0.1:26631
-          BONDERY_PUBLIC_WEBAPP_URL: http://127.0.0.1:26632
+          BONDERY_PUBLIC_API_URL: https://api.usebondery.test
+          BONDERY_PUBLIC_WEBAPP_URL: https://app.usebondery.test
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -46,23 +46,23 @@ reporter: process.env.CI
 
 Configured in `playwright.config.mjs`:
 
-| Artifact | Setting | When |
-|----------|---------|------|
-| Trace | `trace: "on-first-retry"` | Failed retry in CI |
+| Artifact   | Setting                         | When                   |
+| ---------- | ------------------------------- | ---------------------- |
+| Trace      | `trace: "on-first-retry"`       | Failed retry in CI     |
 | Screenshot | `screenshot: "only-on-failure"` | `github-login` project |
-| Video | `video: "retain-on-failure"` | `github-login` project |
+| Video      | `video: "retain-on-failure"`    | `github-login` project |
 
 Output under `apps/webapp/e2e/test-results/` (gitignored).
 
 ## Environment variables
 
-| Variable | Purpose |
-|----------|---------|
-| `CI` | Enables `forbidOnly`, retries |
-| `E2E_PAUSE_GITHUB` | `page.pause()` in GitHub login spec |
-| `E2E_PUBLIC_HOST` | Optional. Must match `BONDERY_PUBLIC_*` hosts when set |
-| `BONDERY_PUBLIC_API_URL` | Source of Playwright API health URL and cookie domain |
-| `BONDERY_PUBLIC_WEBAPP_URL` | Source of Playwright `baseURL` and webapp health URL |
+| Variable                    | Purpose                                                |
+| --------------------------- | ------------------------------------------------------ |
+| `CI`                        | Enables `forbidOnly`, retries                          |
+| `E2E_PAUSE_GITHUB`          | `page.pause()` in GitHub login spec                    |
+| `E2E_PUBLIC_HOST`           | Optional. Must match `BONDERY_PUBLIC_*` hosts when set |
+| `BONDERY_PUBLIC_API_URL`    | Source of Playwright API health URL and cookie domain  |
+| `BONDERY_PUBLIC_WEBAPP_URL` | Source of Playwright `baseURL` and webapp health URL   |
 
 ## Secrets
 

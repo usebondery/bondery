@@ -2,6 +2,12 @@ import type { PrismaClient } from "@bondery/db";
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import type { ContactWithId } from "../data/select-fragments.js";
 
+const MAX_ADDRESS_ENTRIES = 5;
+const CZECHIA_MIN_LATITUDE = 48.4;
+const CZECHIA_MAX_LATITUDE = 51.2;
+const CZECHIA_MIN_LONGITUDE = 12;
+const CZECHIA_MAX_LONGITUDE = 19;
+
 type ContactWithAddresses = {
   addresses: ContactAddressEntry[];
 };
@@ -60,7 +66,12 @@ function isValidCoordinatePair(latitude: number, longitude: number): boolean {
 }
 
 function isWithinCzechiaBounds(latitude: number, longitude: number): boolean {
-  return latitude >= 48.4 && latitude <= 51.2 && longitude >= 12.0 && longitude <= 19.0;
+  return (
+    latitude >= CZECHIA_MIN_LATITUDE &&
+    latitude <= CZECHIA_MAX_LATITUDE &&
+    longitude >= CZECHIA_MIN_LONGITUDE &&
+    longitude <= CZECHIA_MAX_LONGITUDE
+  );
 }
 
 function normalizeCoordinatePair(
@@ -79,7 +90,7 @@ function normalizeCoordinatePair(
     return { latitude: null, longitude: null };
   }
 
-  const normalizedCountryCode = String(countryCode || "").toUpperCase();
+  const normalizedCountryCode = (countryCode ?? "").toUpperCase();
   if (normalizedCountryCode === "CZ" && directValid && swappedValid) {
     const directInside = isWithinCzechiaBounds(latitude, longitude);
     const swappedInside = isWithinCzechiaBounds(longitude, latitude);
@@ -110,8 +121,8 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
     throw new Error("addresses must be an array");
   }
 
-  if (input.length > 5) {
-    throw new Error("addresses can contain at most 5 entries");
+  if (input.length > MAX_ADDRESS_ENTRIES) {
+    throw new Error(`addresses can contain at most ${MAX_ADDRESS_ENTRIES} entries`);
   }
 
   const parsed = input.map((item, index) => {
@@ -176,7 +187,7 @@ export async function attachContactAddresses<T extends ContactWithId>(
   userId: string,
   contacts: T[],
 ): Promise<Array<T & ContactWithAddresses>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 
@@ -249,7 +260,7 @@ export async function attachContactAddresses<T extends ContactWithId>(
 
   return contacts.map((contact) => ({
     ...contact,
-    addresses: byPerson.get(contact.id) || [],
+    addresses: byPerson.get(contact.id) ?? [],
   }));
 }
 

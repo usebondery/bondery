@@ -6,8 +6,7 @@ import { assertDevStackReady } from "./assert-dev-stack.mjs";
  * Playwright does not start or kill those processes.
  */
 export default async function globalSetup() {
-  if (ensureWslgDisplay()) {
-  }
+  ensureWslgDisplay();
 
   await assertDevStackReady();
 }

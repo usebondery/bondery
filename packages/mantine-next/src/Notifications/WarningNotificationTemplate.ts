@@ -8,15 +8,22 @@ export interface WarningNotificationTemplateProps {
   title: string;
 }
 
-/**
- * Builds a consistent warning notification payload.
- */
+type WarningNotificationPayload = {
+  color: "yellow";
+  icon: ReactNode;
+  loading: false;
+  message: string;
+  radius: string | number;
+  title: string;
+};
+
+/** Builds a consistent warning notification payload. */
 export function warningNotificationTemplate({
   title,
   description,
   radius = "xl",
   icon = createElement(IconAlertTriangle, { size: 18 }),
-}: WarningNotificationTemplateProps) {
+}: WarningNotificationTemplateProps): WarningNotificationPayload {
   return {
     color: "yellow",
     icon,

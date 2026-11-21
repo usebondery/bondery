@@ -78,7 +78,7 @@ describe("sanitizeAaguidCatalogDocument", () => {
   });
 });
 
-describe("AAGUID lookup", () => {
+describe("aaguid lookup", () => {
   const catalog: AaguidCatalog = {
     "ea9b8d66-4d01-1d21-3ce4-b6b48cb575d4": {
       icon_dark: `${AAGUID_SVG_DATA_URI_PREFIX}dark`,

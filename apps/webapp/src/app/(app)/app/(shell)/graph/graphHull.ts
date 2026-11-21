@@ -62,7 +62,9 @@ export function pushOutsideCircles(
 ): { x: number; y: number } {
   let px = x;
   let py = y;
-  for (let pass = 0; pass < circles.length; pass += 1) {
+  // At most one relaxation pass per circle.
+  const maxPasses = circles.length;
+  for (let pass = 0; pass < maxPasses; pass += 1) {
     let changed = false;
     for (const circle of circles) {
       const dx = px - circle.cx;

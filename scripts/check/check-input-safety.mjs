@@ -62,6 +62,46 @@ export function findUnsanitizedNotesWriters(files) {
 }
 
 /**
+ * Reads `const NAME = 5;` and `const NAME = A * B;` lines, so a size written with named units
+ * (`DEFAULT_UPLOAD_MIB * BYTES_PER_MIB`) can be evaluated.
+ *
+ * @param {string} text source of a module
+ * @returns {Map<string, string>} constant name to its product expression
+ */
+function readNumericConstants(text) {
+  const constants = new Map();
+  for (const match of text.matchAll(/^(?:export\s+)?const\s+(\w+)\s*=\s*([\w\s*]+?);/gm)) {
+    constants.set(match[1], match[2]);
+  }
+  return constants;
+}
+
+/**
+ * Evaluates `A * B * 3` where each factor is a number or a name from `constants`.
+ *
+ * @param {string} expression product of factors
+ * @param {Map<string, string>} constants name to product expression
+ * @param {Set<string>} seen names being resolved, to stop a cycle
+ * @returns {number} the product, or NaN when a name cannot be resolved
+ */
+function evaluateProduct(expression, constants, seen = new Set()) {
+  let product = 1;
+  for (const part of expression.split("*")) {
+    const term = part.trim();
+    if (/^\d+(\.\d+)?$/.test(term)) {
+      product *= Number(term);
+      continue;
+    }
+    const definition = constants.get(term);
+    if (definition === undefined || seen.has(term)) {
+      return Number.NaN;
+    }
+    product *= evaluateProduct(definition, constants, new Set([...seen, term]));
+  }
+  return product;
+}
+
+/**
  * The multipart registration in `build-app.ts` must use the small shared default.
  *
  * @param {string} buildAppText source of `apps/api/src/build-app.ts`
@@ -81,16 +121,13 @@ export function findMultipartCeilingViolations(buildAppText, configText) {
     );
   }
 
-  const defaultMatch = configText.match(/\bdefault\s*:\s*([\d\s*]+?)\s*,/);
+  const defaultMatch = configText.match(/\bdefault\s*:\s*([\w\s*]+?)\s*,/);
   if (!defaultMatch) {
     violations.push(
       "apps/api/src/lib/platform/config.ts: could not read `UPLOAD_LIMITS.default` as a number expression.",
     );
   } else {
-    const bytes = defaultMatch[1]
-      .split("*")
-      .map((part) => Number(part.trim()))
-      .reduce((product, factor) => product * factor, 1);
+    const bytes = evaluateProduct(defaultMatch[1], readNumericConstants(configText));
     if (!Number.isFinite(bytes) || bytes > MAX_DEFAULT_UPLOAD_BYTES) {
       violations.push(
         `apps/api/src/lib/platform/config.ts: UPLOAD_LIMITS.default is ${bytes} bytes. Keep the global ceiling at or below ${MAX_DEFAULT_UPLOAD_BYTES} bytes.`,

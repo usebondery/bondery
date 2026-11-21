@@ -4,7 +4,7 @@ Account theme is an **account preference**, not client UI state.
 
 ## Data flow
 
-```
+```text
 user_settings.color_scheme (Postgres)
   → GET /api/me/session (getAppSession)
   → UserSessionProvider.colorScheme

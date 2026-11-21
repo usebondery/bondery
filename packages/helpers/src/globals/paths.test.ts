@@ -11,7 +11,7 @@ import {
   WEBSITE_ROUTES,
 } from "./paths.js";
 
-describe("OAuth discovery paths", () => {
+describe("oauth discovery paths", () => {
   it("lists canonical RFC 8414, OIDC, and RFC 9728 documents plus aliases", () => {
     assert.equal(
       betterAuthAuthorizationServerMetadataPath(),

@@ -57,6 +57,7 @@ import {
   timelineFilterFromParsed,
 } from "@/lib/query/interactionsListParams";
 import { SELECTABLE_CONTACTS } from "@/lib/query/sharedListParams";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { openNewActivityModal } from "./components/NewActivityModal";
 
 type ActivityParticipantRef = string | InteractionParticipant;
@@ -137,7 +138,7 @@ export function InteractionsClient() {
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
   const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants || []).flatMap((participant: ActivityParticipantRef) => {
+    return (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
 
@@ -151,11 +152,11 @@ export function InteractionsClient() {
 
       return [
         {
-          avatar: participant.avatar || null,
+          avatar: nonEmpty(participant.avatar) ?? null,
           firstName: participant.firstName || t("UnknownPerson"),
           headline: participant.headline,
           id: participantId,
-          lastName: participant.lastName || null,
+          lastName: nonEmpty(participant.lastName) ?? null,
           location: participant.location,
           middleName: participant.middleName,
         },
@@ -207,7 +208,7 @@ export function InteractionsClient() {
   };
 
   const handleDuplicate = async (activity: Activity) => {
-    const participantIds = (activity.participants || [])
+    const participantIds = (activity.participants ?? [])
       .map((participant: ActivityParticipantRef) =>
         typeof participant === "string" ? participant : participant.id,
       )
@@ -223,9 +224,9 @@ export function InteractionsClient() {
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
-        description: activity.description || "",
+        description: activity.description ?? "",
         participantIds,
-        title: activity.title || "",
+        title: activity.title ?? "",
         type: activity.type,
       });
 

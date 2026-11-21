@@ -84,7 +84,9 @@ function OnboardingFlowContent() {
         centered
         closeOnClickOutside={false}
         closeOnEscape={false}
-        onClose={() => {}}
+        onClose={() => {
+          // no-op: onboarding cannot be dismissed
+        }}
         opened
         overlayProps={{ backgroundOpacity: 0.55, blur: 3 }}
         padding="xl"

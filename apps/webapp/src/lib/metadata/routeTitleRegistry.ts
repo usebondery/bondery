@@ -1,4 +1,4 @@
-﻿import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 
 export type DynamicRouteKind = "chat" | "group" | "myself" | "person";
 

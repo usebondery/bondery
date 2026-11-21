@@ -37,6 +37,10 @@ import { PersonInteractionsSection } from "../interactions/PersonInteractionsSec
 import { LinkedInTab } from "../linkedin/LinkedInTab";
 import { PersonTagsInput } from "./PersonTagsInput";
 
+function ignoreGroupCardMenuAction() {
+  // no-op: person group chips navigate on click and hide the action menu
+}
+
 interface PersonDetailTabsProps {
   activeTab: PersonTabValue;
   contact: Contact;
@@ -137,7 +141,7 @@ export function PersonDetailTabs({
                 disabled={savingLastInteraction}
                 label={tInteractions("LastInteractionInput")}
                 onChange={(val) => {
-                  handleSaveLastInteraction(
+                  void handleSaveLastInteraction(
                     datePickerValueToIsoDateTime(val as Date | string | null),
                   );
                 }}
@@ -239,11 +243,11 @@ export function PersonDetailTabs({
                   }}
                   interactive={true}
                   key={group.id}
-                  onAddPeople={() => {}}
+                  onAddPeople={ignoreGroupCardMenuAction}
                   onClick={(groupId) => router.push(routeGroup(groupId))}
-                  onDelete={() => {}}
-                  onDuplicate={() => {}}
-                  onEdit={() => {}}
+                  onDelete={ignoreGroupCardMenuAction}
+                  onDuplicate={ignoreGroupCardMenuAction}
+                  onEdit={ignoreGroupCardMenuAction}
                   shadow="none"
                   showMenu={false}
                   variant="small"

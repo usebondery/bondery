@@ -132,7 +132,7 @@ export function EditImportantDateSheet({
         notifyDaysBefore: entry.notifyDaysBefore
           ? (String(entry.notifyDaysBefore) as ImportantDateSheetInput["notifyDaysBefore"])
           : "none",
-        type: entry.type ?? "other",
+        type: entry.type,
       };
     },
     mode: "onChange",
@@ -177,8 +177,9 @@ export function EditImportantDateSheet({
     return true;
   }).map((value) => {
     const meta = IMPORTANT_DATE_TYPE_META[value];
+    const typeLabel = tContactImportantDates(`Types.${value}` as never);
     return {
-      label: `${meta.emoji} ${tContactImportantDates(`Types.${value}` as never)}`,
+      label: `${meta.emoji} ${typeLabel}`,
       value,
     };
   });

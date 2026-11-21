@@ -2,11 +2,11 @@
 
 `typedRoutes` is on. Prefer the `route*` / `href*` / `redirect*` map:
 
-| Prefix | Folder | Use |
-|--------|--------|-----|
-| `route*` | `route/` | Same-origin path → `Route` (client-safe) |
-| `href*` | `href/` | Absolute links (webapp CTAs); `hrefAssert` from mantine-next for data URLs |
-| `redirect*` | `redirect/` | Server redirect |
+| Prefix      | Folder      | Use                                                                        |
+| ----------- | ----------- | -------------------------------------------------------------------------- |
+| `route*`    | `route/`    | Same-origin path → `Route` (client-safe)                                   |
+| `href*`     | `href/`     | Absolute links (webapp CTAs); `hrefAssert` from mantine-next for data URLs |
+| `redirect*` | `redirect/` | Server redirect                                                            |
 
 **No barrel files.** Import the leaf module:
 

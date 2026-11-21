@@ -7,8 +7,8 @@ import {
   syncWsTicketResponseSchema,
 } from "@bondery/schemas/sync";
 import { mobileFetch } from "../api/transport";
-import { getAccessToken } from "../auth/client";
-import { AuthRequiredError, endLocalSession } from "../auth/session";
+import { endLocalSession, readLocalAccessToken } from "../auth/local-session";
+import { AuthRequiredError } from "../auth/session";
 import { API_URL } from "../config";
 import { syncRequestHeaders } from "./constants";
 import { ensureDeviceId } from "./outbox/pending-mutations";
@@ -25,7 +25,7 @@ type SyncWakeClient = {
 let activeClient: SyncWakeClient | null = null;
 
 async function fetchWsTicket(): Promise<string> {
-  const token = await getAccessToken();
+  const token = await readLocalAccessToken();
   if (!token) {
     throw new AuthRequiredError("missing_local_session");
   }
@@ -87,12 +87,12 @@ function handleServerMessage(
 }
 
 export async function startSyncWakeClient(): Promise<SyncWakeClient> {
+  const myDeviceId = await ensureDeviceId();
   activeClient?.stop();
   let stopped = false;
   let socket: WebSocket | null = null;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   let reconnectDelay = MIN_RECONNECT_MS;
-  const myDeviceId = await ensureDeviceId();
 
   const connect = async () => {
     if (stopped) {

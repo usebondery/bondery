@@ -39,6 +39,9 @@ import { mcpJsonResult, runMcpTool } from "./json.js";
 import { mcpToolMeta } from "./mcp-tool-meta.js";
 import { runMcpWriteTool } from "./mcp-write.js";
 
+/** The delete preview names at most this many tags, then elides the rest. */
+const MAX_LISTED_TAG_LABELS = 3;
+
 export function registerTagMcpTools(
   server: McpServer,
   ctx: DomainContext,
@@ -155,7 +158,9 @@ export function registerTagMcpTools(
         const labelById = new Map(tags.map((tag) => [tag.id, tag.label]));
         const labels = uniqueIds.map((id) => labelById.get(id) ?? id);
         const listed =
-          labels.length <= 3 ? labels.join(", ") : `${labels.slice(0, 3).join(", ")}, …`;
+          labels.length <= MAX_LISTED_TAG_LABELS
+            ? labels.join(", ")
+            : `${labels.slice(0, MAX_LISTED_TAG_LABELS).join(", ")}, …`;
         const countLabel = labels.length === 1 ? "tag" : `${labels.length} tags`;
         return confirmMcpDelete({
           args: { tagIds },
@@ -224,12 +229,13 @@ export function registerTagMcpTools(
           .map((person) => [person.firstName, person.lastName].filter(Boolean).join(" "))
           .filter(Boolean)
           .join(", ");
+        const memberLabel = names || `${uniquePersonIds.length} contact(s)`;
         return confirmMcpDelete({
           args: { personIds, tagId },
           extra,
           onConfirm: async () =>
             mcpJsonResult(await executeDeleteTagMembership(ctx, { personIds, tagId })),
-          preview: `Remove tag ${tag.label} from ${names || `${uniquePersonIds.length} contact(s)`}? This does not delete the people or the tag.`,
+          preview: `Remove tag ${tag.label} from ${memberLabel}? This does not delete the people or the tag.`,
           toolName: "delete_tag_membership",
           userId: ctx.user.id,
         });

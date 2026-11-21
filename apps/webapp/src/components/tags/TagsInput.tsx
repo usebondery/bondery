@@ -48,6 +48,11 @@ interface TagsInputProps {
  * Pill field for workspace tags.
  * Selected tags render as pills. The dropdown offers the remaining tags.
  */
+function appliedPillBorder(color: string | null | undefined): string {
+  const borderColor = color ? `${color}66` : "var(--mantine-color-gray-4)";
+  return `1px solid ${borderColor}`;
+}
+
 export function TagsInput({
   allowCreate = false,
   editTooltip,
@@ -87,7 +92,7 @@ export function TagsInput({
   const showCreateOption =
     allowCreate &&
     (search.trim().length === 0 ||
-      !tags.some((tag) => tag.label.toLowerCase() === search.trim().toLowerCase()));
+      tags.every((tag) => tag.label.toLowerCase() !== search.trim().toLowerCase()));
 
   const acceptTag = (tag: TagsInputTag) => {
     if (onSelect(tag) === false) {
@@ -154,7 +159,7 @@ export function TagsInput({
 
     if (event.key === "Backspace" && !search.trim() && selected.length > 0) {
       event.preventDefault();
-      const lastTag = selected[selected.length - 1];
+      const lastTag = selected.at(-1);
       if (lastTag) {
         onRemove(lastTag.id);
       }
@@ -279,7 +284,7 @@ export function TagsInput({
                           backgroundColor: exactAppliedMatch.color
                             ? `${exactAppliedMatch.color}1a`
                             : "var(--mantine-color-gray-0)",
-                          border: `1px solid ${exactAppliedMatch.color ? `${exactAppliedMatch.color}66` : "var(--mantine-color-gray-4)"}`,
+                          border: appliedPillBorder(exactAppliedMatch.color),
                           borderRadius: 999,
                           padding: "4px 10px",
                         }}

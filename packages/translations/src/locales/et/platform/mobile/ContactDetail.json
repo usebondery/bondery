@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Lisa märkmeid…",
   "DeleteContact": "Kustuta kontakt",
   "DeleteContactConfirmTitle": "Kustuta {name}?",
   "DeleteFailed": "Kontakti kustutamine ei õnnestunud.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Muuda",
   "GroupsEditAccessibility": "Muuda gruppide seoseid: {name}",
   "GroupsLoadError": "Gruppe ei õnnestunud laadida",
+  "LastInteractionLabel": "Viimane suhtlus",
   "NoGroups": "Pole üheski grupis",
   "ShareContact": "Jaga vCard…",
   "ShareContactViaEmail": "Saada e-postiga…",

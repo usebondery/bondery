@@ -187,12 +187,13 @@ export function registerGroupMcpTools(
           .map((person) => [person.firstName, person.lastName].filter(Boolean).join(" "))
           .filter(Boolean)
           .join(", ");
+        const memberLabel = names || `${uniquePersonIds.length} contact(s)`;
         return confirmMcpDelete({
           args: { groupId, personIds },
           extra,
           onConfirm: async () =>
             mcpJsonResult(await executeDeleteGroupMembership(ctx, { groupId, personIds })),
-          preview: `Remove ${names || `${uniquePersonIds.length} contact(s)`} from ${group.label}? This does not delete the people.`,
+          preview: `Remove ${memberLabel} from ${group.label}? This does not delete the people.`,
           toolName: "delete_group_membership",
           userId: ctx.user.id,
         });

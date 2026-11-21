@@ -1,6 +1,10 @@
 import { OgTitled } from "@bondery/branding/og";
 import { API_ERROR_CODES, isApiErrorCode } from "@bondery/schemas/errors";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { notFound } from "next/navigation";
+import { formatText } from "@/lib/i18n/message";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 
 export const revalidate = false;
@@ -15,7 +19,9 @@ export async function GET(_req: Request, context: RouteContext) {
     notFound();
   }
 
-  return createOgImageResponse(<OgTitled subtype="Docs" title={`${code} — API error`} />);
+  return createOgImageResponse(
+    <OgTitled subtype={docs.Og.Subtype} title={formatText(docs.Og.ApiErrorTitle, { code })} />,
+  );
 }
 
 export function generateStaticParams() {

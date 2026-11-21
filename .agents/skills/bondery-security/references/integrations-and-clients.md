@@ -7,6 +7,7 @@ Webhooks, WebSockets, AI tools, extension bridges, and mobile privacy boundaries
 ### Stripe subscriptions
 
 `apps/api/src/routes/webhooks/stripe.ts`:
+
 - **Signature verification** via `stripe.webhooks.constructEvent` on the raw request body
 - **Raw body preserved** — custom `application/json` buffer parser; signature over exact bytes
 - Rejects if `BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET` unset → `webhook_not_configured`
@@ -24,6 +25,7 @@ No internal HTTP email routes — reminder digests are dispatched via pg-boss on
 ## Sync WebSocket
 
 `apps/api/src/routes/sync/ws.ts`:
+
 - Short-lived WS ticket (60s TTL, single-use) obtained via authenticated REST (`lib/sync/wake/tickets.ts`)
 - **Origin check** against `trusted-origins.ts` allowlist on WS upgrade
 - Rate limit exempt for WS + ws-ticket endpoints
@@ -35,6 +37,7 @@ Mobile client: `apps/mobile/src/lib/sync/sync-wake-client.ts`.
 AI chat routes use `AI_TIER` rate limit (20 req/min).
 
 **Rules:**
+
 - Tool arguments from the model are **untrusted input** — Zod-validate before use
 - Tools must operate on user-scoped domain context (`getAuth` + `userId` filter)
 - Model output never grants authority or bypasses auth
@@ -55,6 +58,7 @@ Implementation (WXT entrypoints, interceptors, enrich tab): [bondery-chrome-exte
 ### Architecture rules (enforced by CI)
 
 `apps/chrome-extension/scripts/check-extension-patterns.ts`:
+
 - API calls **only from background** — not content scripts
 - UI in shadow DOM (`lib/ui/renderInShadowRoot.tsx`)
 
@@ -67,6 +71,7 @@ Implementation (WXT entrypoints, interceptors, enrich tab): [bondery-chrome-exte
 - Webapp enrich API checks `event.source === window` + `requestId` match
 
 **Review triggers:**
+
 - Instagram interceptor uses `postMessage(..., "*")` — spoofable profile metadata
 - Enrich bridge forwards `event.data.payload` without schema validation at bridge layer
 - Content-script host matches don't follow env for staging/custom domains

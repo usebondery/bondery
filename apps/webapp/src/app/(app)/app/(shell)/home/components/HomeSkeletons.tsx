@@ -1,4 +1,4 @@
-﻿import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
+import { Box, Group, Paper, SimpleGrid, Skeleton, Stack } from "@mantine/core";
 import { GettingStartedRailSkeleton } from "@/components/home/GettingStartedRailSkeleton";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 

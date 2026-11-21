@@ -101,16 +101,14 @@ export default function PopupApp() {
         });
 
         if (contextResponse.payload.supported) {
+          setShowUnsupportedSiteMessage(false);
           if (contextResponse.payload.existed && contextResponse.payload.preview) {
-            setShowUnsupportedSiteMessage(false);
             setPreview(contextResponse.payload.preview);
             setState("preview");
           } else if (contextResponse.payload.profile) {
-            setShowUnsupportedSiteMessage(false);
             setActiveProfile(contextResponse.payload.profile);
             setState("import");
           } else {
-            setShowUnsupportedSiteMessage(false);
             setState("logged-in");
           }
         } else {
@@ -118,8 +116,8 @@ export default function PopupApp() {
           setState("logged-in");
         }
       }
-    } catch (err) {
-      extLog.error("[popup] Init error:", err);
+    } catch (error_) {
+      extLog.error("[popup] Init error:", error_);
       setState("logged-out");
     }
   }, []);
@@ -142,8 +140,8 @@ export default function PopupApp() {
       } else {
         setError(result.payload.error ?? "Login failed");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Login failed");
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : "Login failed");
     } finally {
       setLoginLoading(false);
     }
@@ -162,8 +160,8 @@ export default function PopupApp() {
         setShowUnsupportedSiteMessage(false);
         setState("logged-out");
       }
-    } catch (err) {
-      extLog.error("[popup] Logout error:", err);
+    } catch (error_) {
+      extLog.error("[popup] Logout error:", error_);
     }
   }
 
@@ -238,8 +236,8 @@ export default function PopupApp() {
       } else {
         setError(result.payload.error ?? "Import failed");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Import failed");
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : "Import failed");
     } finally {
       setLoginLoading(false);
     }

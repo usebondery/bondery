@@ -12,9 +12,9 @@ export function resolveLocaleFromAcceptLanguageHeader(acceptLanguage: string): S
   const languages = acceptLanguage
     .split(",")
     .map((lang) => {
-      const [code, priority] = lang.trim().split(";q=");
+      const [code = "", priority] = lang.trim().split(";q=");
       return {
-        code: code.split("-")[0].toLowerCase(),
+        code: code.split("-").at(0)?.toLowerCase() ?? "",
         priority: priority ? Number.parseFloat(priority) : 1,
       };
     })

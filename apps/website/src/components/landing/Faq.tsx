@@ -1,4 +1,7 @@
 import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import {
   Accordion,
   AccordionControl,
@@ -26,7 +29,7 @@ export function Faq({ items }: FaqProps) {
       bg="var(--mantine-color-body)"
       fluid
       id="faq"
-      px={"0"}
+      px="0"
       py={{
         base: "calc(var(--mantine-spacing-lg) * 2)",
         lg: "calc(var(--mantine-spacing-lg) * 3)",
@@ -34,23 +37,25 @@ export function Faq({ items }: FaqProps) {
     >
       <Container size="md">
         <Stack gap="xs" mb="xl">
-          <Title className="text-5xl!" fw="bold" order={2} ta="center">
-            FAQs
+          <Title fw="bold" fz="3rem" order={2} ta="center">
+            {landing.Faq.Title}
           </Title>
         </Stack>
 
-        <Accordion className="w-full md:max-w-xl mx-auto" radius="md" variant="separated">
-          {items.map((item) => (
-            <AccordionItem key={item.question} value={item.question}>
-              <AccordionControl>{item.question}</AccordionControl>
-              <AccordionPanel>
-                {item.docsHref && item.docsLinkLabel
-                  ? renderAnswerWithDocsLink(item.answer, item.docsHref, item.docsLinkLabel)
-                  : item.answer}
-              </AccordionPanel>
-            </AccordionItem>
-          ))}
-        </Accordion>
+        <div className="mx-auto w-full md:max-w-xl">
+          <Accordion radius="md" variant="separated">
+            {items.map((item) => (
+              <AccordionItem key={item.question} value={item.question}>
+                <AccordionControl>{item.question}</AccordionControl>
+                <AccordionPanel>
+                  {item.docsHref && item.docsLinkLabel
+                    ? renderAnswerWithDocsLink(item.answer, item.docsHref, item.docsLinkLabel)
+                    : item.answer}
+                </AccordionPanel>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
       </Container>
     </Container>
   );

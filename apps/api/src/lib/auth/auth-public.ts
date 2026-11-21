@@ -8,9 +8,8 @@ import {
 } from "@bondery/helpers/auth/resolve-webauthn-origins";
 import { resolveWebAuthnRp } from "@bondery/helpers/auth/resolve-webauthn-rp";
 import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
-import { DEV_PORTS } from "@bondery/schemas/constants/dev-ports";
 import { buildAuthTranslations } from "./build-auth-translations.js";
-import { isLoopbackHostname, withLoopbackUrlAlias } from "./loopback-alias-urls.js";
+import { withLoopbackUrlAlias } from "./loopback-alias-urls.js";
 
 export const authTranslations = buildAuthTranslations();
 
@@ -64,38 +63,8 @@ export function resolveMcpResourceIdentifier(): string {
   return api ? `${api}${API_ROUTES.MCP}` : "";
 }
 
-/**
- * `mcp()` rejects HTTP except loopback. Phone-dev Tailscale API URLs are HTTP
- * MagicDNS hosts. Keep the plugin `resource` on loopback so the API can boot.
- * Canonical REST `BONDERY_PUBLIC_API_URL` is unchanged.
- */
-export function resolveMcpPluginResource(): string {
-  const resource = resolveMcpResourceIdentifier();
-  if (!resource) {
-    return resource;
-  }
-
-  try {
-    const url = new URL(resource);
-    if (url.protocol === "https:" || isLoopbackHostname(url.hostname)) {
-      return resource;
-    }
-
-    const port = url.port || String(DEV_PORTS.API);
-    const pathname = url.pathname.replace(/\/+$/, "");
-    return `http://127.0.0.1:${port}${pathname}`;
-  } catch {
-    return resource;
-  }
-}
-
 export function resolveMcpResourceIdentifiers(): string[] {
-  const identifiers = withLoopbackUrlAlias(resolveMcpResourceIdentifier());
-  const pluginResource = resolveMcpPluginResource();
-  if (pluginResource && !identifiers.includes(pluginResource)) {
-    identifiers.push(pluginResource);
-  }
-  return identifiers;
+  return withLoopbackUrlAlias(resolveMcpResourceIdentifier());
 }
 
 /** JWT `aud` check for MCP: string in production, both loopback aliases locally. */
@@ -171,8 +140,9 @@ export function resolveWebAuthnRpConfig(): { origin: string | string[]; rpID: st
     return { origin: webAuthnRp.origin, rpID: webAuthnRp.rpID };
   }
 
+  const [firstOrigin] = origins;
   return {
-    origin: origins.length === 1 ? origins[0] : origins,
+    origin: origins.length === 1 && firstOrigin !== undefined ? firstOrigin : origins,
     rpID: webAuthnRp.rpID,
   };
 }

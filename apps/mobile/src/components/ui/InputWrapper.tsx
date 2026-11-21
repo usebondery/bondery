@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { View } from "react-native";
+import { nonEmpty } from "../../lib/text";
 import { Text } from "./Text";
 
 export type InputWrapperProps = {
@@ -24,7 +25,7 @@ export function InputWrapper({
   label,
   statusMessage,
 }: InputWrapperProps) {
-  const belowMessage = errorMessage || statusMessage;
+  const belowMessage = nonEmpty(errorMessage) ?? statusMessage;
   if (!label && !description && !belowMessage) {
     return children;
   }

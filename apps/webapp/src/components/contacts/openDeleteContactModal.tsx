@@ -13,7 +13,7 @@ import { IconAlertCircle, IconTrash } from "@tabler/icons-react";
 import { captureEvent } from "@/lib/analytics/client";
 import { useCommonTranslations, usePeoplePageTranslations } from "@/lib/i18n/generated/hooks";
 import { createModalId } from "@/lib/modals";
-import { useDeleteContactsMutation } from "@/lib/query/hooks/useContacts";
+import { useDeleteContactsMutation } from "@/lib/query/hooks/useContactMutations";
 import { StandardConfirmModalBody } from "../modals/StandardConfirmModalBody";
 
 interface OpenDeleteContactModalParams {

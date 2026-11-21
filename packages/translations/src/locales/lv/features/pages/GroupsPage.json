@@ -98,7 +98,9 @@
     "UpdateFailed": "Neizdevās atjaunināt grupu"
   },
   "EmojiEmptySearch": "Emocijas netika atrastas",
+  "EmojiLabel": "Emocijzīme",
   "EmojiSearchPlaceholder": "Meklēt emocijzīmes…",
+  "EmojiSelectPlaceholder": "Atlasīt emocijzīmi",
   "Empty": "Vēl nav grupu. Izveidot to, lai sāktu kārtot savus kontaktus.",
   "FallbackTitle": "Grupa",
   "HeaderDescription": "Grupas var izmantot, lai sakārtotu personas pielāgotās grupās ātrākai filtrēšanai un darbībām.",

@@ -94,7 +94,9 @@
     "UpdateFailed": "Δεν ενημερώθηκε η ομάδα"
   },
   "EmojiEmptySearch": "Δεν βρέθηκαν emoji",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Αναζήτηση emoji…",
+  "EmojiSelectPlaceholder": "Επίλεξε emoji",
   "Empty": "Δεν υπάρχουν ακόμα ομάδες. Δημιούργησε μία για να αρχίσεις να οργανώνεις τις επαφές σου.",
   "FallbackTitle": "Ομάδα",
   "HeaderDescription": "Με τις ομάδες οργανώνεις τα άτομα σε δικές σου κατηγορίες, για πιο γρήγορο φιλτράρισμα και ενέργειες.",

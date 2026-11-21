@@ -230,11 +230,13 @@
     "deleting": "Sletter…",
     "duplicating": "Duplikerer…",
     "errorTitle": "Fel",
+    "mobileRuntimeError": "Kørselsfejl i mobilappen",
     "noResults": "Ingen resultater",
     "removing": "Sletter…",
     "savedTitle": "Gemt",
     "saving": "Gemr…",
     "sending": "Sender…",
-    "successTitle": "Lykkedes"
+    "successTitle": "Lykkedes",
+    "unknownError": "Ukendt fejl"
   }
 }

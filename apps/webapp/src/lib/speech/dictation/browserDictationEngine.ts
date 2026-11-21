@@ -33,7 +33,17 @@ function getRecognitionConstructor(): BrowserSpeechRecognitionConstructor | null
  * `no-speech` is not an error. A pause ends the session cleanly and the hook
  * restarts it, so the user keeps talking without a tap.
  */
-function toErrorCode(error: string): DictationErrorCode | "aborted" | "silence" {
+function toErrorCode(
+  error: string,
+):
+  | "aborted"
+  | "language-not-supported"
+  | "network"
+  | "no-microphone"
+  | "not-allowed"
+  | "service-failed"
+  | "service-not-allowed"
+  | "silence" {
   switch (error) {
     case "aborted":
       return "aborted";
@@ -284,8 +294,6 @@ let engine: DictationEngine | null = null;
  * `window.SpeechRecognition`.
  */
 export function getBrowserDictationEngine(): DictationEngine {
-  if (!engine) {
-    engine = createBrowserDictationEngine();
-  }
+  engine ??= createBrowserDictationEngine();
   return engine;
 }

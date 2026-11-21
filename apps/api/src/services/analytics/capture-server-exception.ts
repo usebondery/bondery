@@ -11,13 +11,16 @@ export type ServerExceptionContext = {
   statusCode: number;
 };
 
+/** Deepest `cause` chain walked before giving up. */
+const MAX_CAUSE_DEPTH = 5;
+
 /**
  * API errors wrap the real failure in `cause` (a Prisma or Stripe error). Report the
  * innermost one: its stack is what groups the issue and shows where it broke.
  */
 export function rootCause(error: unknown): unknown {
   let current = error;
-  for (let depth = 0; depth < 5; depth++) {
+  for (let depth = 0; depth < MAX_CAUSE_DEPTH; depth++) {
     const cause = (current as { cause?: unknown } | null)?.cause;
     if (!(cause instanceof Error)) {
       break;
@@ -46,13 +49,15 @@ export function captureServerException(
   }
 
   try {
-    client.captureException(rootCause(error), undefined, {
-      error_code: context.code,
-      http_method: context.method,
-      http_route: context.route,
-      http_status_code: context.statusCode,
-      request_id: context.requestId,
-      service: "bondery-api",
+    client.captureException(rootCause(error), {
+      properties: {
+        error_code: context.code,
+        http_method: context.method,
+        http_route: context.route,
+        http_status_code: context.statusCode,
+        request_id: context.requestId,
+        service: "bondery-api",
+      },
     });
   } catch {
     // Best effort.

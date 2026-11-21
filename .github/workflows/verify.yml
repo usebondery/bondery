@@ -1,7 +1,7 @@
 name: Verify
 
 on:
-  pull_request:
+  pull_request: {}
 
 concurrency:
   group: verify-${{ github.ref }}
@@ -67,6 +67,9 @@ jobs:
         run: node scripts/check/check-no-workarounds.mjs --commits "origin/${BASE_REF}..HEAD"
         env:
           BASE_REF: ${{ github.base_ref }}
+
+      - name: Require every diagnostic to say how to fix the problem
+        run: pnpm run check:diagnostic-messages
 
   env:
     runs-on: ubuntu-latest
@@ -164,7 +167,7 @@ jobs:
 
   # Ruleset context stays `contracts`. This job fails when any parallel check fails.
   contracts:
-    needs: [env, openapi, schema-contracts, translations]
+    needs: [ env, openapi, schema-contracts, translations ]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -240,6 +243,7 @@ jobs:
         run: |
           cp deploy/bondery/.env.example deploy/bondery/.env
           node deploy/bondery/scripts/check-compose.mjs
+          node --test deploy/bondery/scripts/*.test.mjs
 
       - name: Webapp runtime config tests
         run: pnpm run test:webapp:runtime-config
@@ -262,8 +266,11 @@ jobs:
       - name: Website discovery CORS tests
         run: pnpm --filter website run test:cors
 
+      - name: Website message formatter tests
+        run: pnpm --filter website run test:i18n
+
   website-docker-build:
-    needs: [lint, types, contracts]
+    needs: [ lint, types, contracts ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -314,7 +321,7 @@ jobs:
           cache_scope: website
 
   api-docker-build:
-    needs: [lint, types, contracts]
+    needs: [ lint, types, contracts ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -363,7 +370,7 @@ jobs:
           cache_scope: api
 
   webapp-docker-build:
-    needs: [lint, types, contracts]
+    needs: [ lint, types, contracts ]
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

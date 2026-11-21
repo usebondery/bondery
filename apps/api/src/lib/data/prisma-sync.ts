@@ -129,6 +129,13 @@ export type SyncChangeLogRow = {
   row_data: Record<string, unknown> | null;
 };
 
+/**
+ * One server sequence can hold several change-log rows (one per `change_index`).
+ * The query reads up to this many rows per requested sequence, so a page of `limit`
+ * sequences fits in a single read.
+ */
+const SYNC_CHANGE_LOG_ROWS_PER_SEQUENCE = 20;
+
 export async function fetchSyncChangeLogRows(
   client: PrismaClient,
   userId: string,
@@ -141,7 +148,7 @@ export async function fetchSyncChangeLogRows(
     WHERE user_id = ${userId}::uuid
       AND server_sequence > ${since}
     ORDER BY server_sequence ASC, change_index ASC
-    LIMIT ${limit * 20}
+    LIMIT ${limit * SYNC_CHANGE_LOG_ROWS_PER_SEQUENCE}
   `;
 
   const parsed = rows.map((row) => serializeRawRow(row) as SyncChangeLogRow);

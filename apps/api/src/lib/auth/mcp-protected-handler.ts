@@ -13,6 +13,7 @@ import { APIError } from "better-call";
 import type { JWTPayload } from "jose";
 import { URLS } from "../platform/config.js";
 import { assertActiveCimdMcpOAuthClient } from "./assert-mcp-oauth-client.js";
+import { BEARER_PREFIX } from "./bearer-token-format.js";
 import {
   MCP_READ_SCOPE,
   MCP_WRITE_SCOPE,
@@ -88,8 +89,8 @@ export function createBonderyMcpAuthHandler(
   return async (request) => {
     const authorization = request.headers.get("authorization");
     const token =
-      typeof authorization === "string" && authorization.startsWith("Bearer ")
-        ? authorization.slice(7).trim()
+      typeof authorization === "string" && authorization.startsWith(BEARER_PREFIX)
+        ? authorization.slice(BEARER_PREFIX.length).trim()
         : "";
 
     let accessTokenClaims: JWTPayload;

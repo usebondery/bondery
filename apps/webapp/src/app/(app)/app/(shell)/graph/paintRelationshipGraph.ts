@@ -2,6 +2,7 @@ import { formatContactName } from "@bondery/helpers/contact";
 import type { RelationshipGraphHub, RelationshipGraphNode } from "@bondery/schemas";
 import { select } from "d3";
 import type { CollapsedRelationshipEdge } from "./collapseRelationshipEdges";
+import { eachSelected } from "./eachSelected";
 
 type PaintNode = { id: string };
 type PaintEdge = { key: string; sourcePersonId: string; targetPersonId: string };
@@ -136,8 +137,8 @@ export function paintRelationshipGraph(
     hoveredKind = hoveredMarker.getAttribute("data-graph-kind");
   }
   if (!hoveredId) {
-    root.selectAll<SVGGElement, PaintNode>(".graph-node").each(function readHover(row) {
-      if (select(this).classed("is-hovered")) {
+    eachSelected(root.selectAll<SVGGElement, PaintNode>(".graph-node"), (element, row) => {
+      if (select(element).classed("is-hovered")) {
         hoveredId = row.id;
         hoveredKind = "person";
       }
@@ -175,16 +176,16 @@ export function paintRelationshipGraph(
     return SECONDARY_FOCUS_OPACITY;
   };
 
-  root.selectAll<SVGGElement, PaintNode>(".graph-node").each(function paintNode(row) {
+  eachSelected(root.selectAll<SVGGElement, PaintNode>(".graph-node"), (element, row) => {
     const matches = matchIds.has(row.id);
     const inFocus = focusIds.size === 0 || focusIds.has(row.id);
     const selected = row.id === input.selectedNodeId;
     const opacity = memberOpacity(row.id, matches);
-    select(this)
+    select(element)
       .style("opacity", String(opacity))
       .classed("is-labeled", selected || inFocus)
       .classed("is-selected", selected);
-    select(this)
+    select(element)
       .select("circle.avatar")
       .attr(
         "stroke",
@@ -193,53 +194,56 @@ export function paintRelationshipGraph(
       .attr("stroke-width", selected ? 2 : 1);
   });
 
-  root.selectAll<SVGLineElement, PaintEdge>(".graph-edge").each(function paintEdge(row) {
+  eachSelected(root.selectAll<SVGLineElement, PaintEdge>(".graph-edge"), (element, row) => {
     const bothMatch = matchIds.has(row.sourcePersonId) && matchIds.has(row.targetPersonId);
     const inFocus =
       focusIds.size === 0 || (focusIds.has(row.sourcePersonId) && focusIds.has(row.targetPersonId));
     const selected = row.key === input.selectedEdgeKey;
     const opacity = linkOpacity(row.sourcePersonId, row.targetPersonId, bothMatch);
-    select(this)
+    select(element)
       .style("opacity", String(selected ? 1 : opacity))
       .attr("stroke-width", selected || inFocus ? 2.5 : 1.25);
   });
 
-  root.selectAll<SVGLineElement, PaintSelfLink>(".graph-self-link").each(function paintSelf(row) {
-    const otherId = row.personId ?? "";
-    const opacity = linkOpacity(row.sourcePersonId, otherId, !query || matchIds.has(otherId));
-    select(this).style("opacity", String(opacity));
-  });
+  eachSelected(
+    root.selectAll<SVGLineElement, PaintSelfLink>(".graph-self-link"),
+    (element, row) => {
+      const otherId = row.personId ?? "";
+      const opacity = linkOpacity(row.sourcePersonId, otherId, !query || matchIds.has(otherId));
+      select(element).style("opacity", String(opacity));
+    },
+  );
 
-  root.selectAll<SVGGElement, PaintHub>(".graph-hub").each(function paintHub(row) {
+  eachSelected(root.selectAll<SVGGElement, PaintHub>(".graph-hub"), (element, row) => {
     const matches = !query || hubMatchIds.has(row.id);
     const selected = row.id === input.selectedHubId;
     const opacity = memberOpacity(row.id, matches);
-    select(this).style("opacity", String(opacity));
-    select(this)
+    select(element).style("opacity", String(opacity));
+    select(element)
       .select("circle")
       .attr("stroke-width", selected ? 3 : 1.5);
   });
 
-  root.selectAll<SVGLineElement, PaintSpoke>(".graph-spoke").each(function paintSpoke(row) {
+  eachSelected(root.selectAll<SVGLineElement, PaintSpoke>(".graph-spoke"), (element, row) => {
     const hubMatches = !query || hubMatchIds.has(row.hubId);
     const personMatches = !query || (row.personId ? matchIds.has(row.personId) : false);
     const selected = row.hubId === input.selectedHubId;
     const opacity = linkOpacity(row.hubId, row.personId ?? "", hubMatches || personMatches);
-    select(this)
+    select(element)
       .style("opacity", String(opacity))
       .attr("stroke-width", selected ? 2.25 : 1.25);
   });
 
   root.selectAll<SVGGElement, { id: string }>(".graph-hull").style("opacity", query ? 0.35 : 1);
 
-  input.markerRoot?.querySelectorAll<HTMLElement>("[data-graph-id]").forEach((element) => {
+  for (const element of input.markerRoot?.querySelectorAll<HTMLElement>("[data-graph-id]") ?? []) {
     const id = element.dataset.graphId;
     if (!id) {
-      return;
+      continue;
     }
     const kind = element.dataset.graphKind;
     const matches = kind === "hub" ? !query || hubMatchIds.has(id) : matchIds.has(id);
     const opacity = memberOpacity(id, matches);
     element.style.opacity = String(opacity);
-  });
+  }
 }

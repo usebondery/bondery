@@ -12,6 +12,9 @@
       "readmeConnect": "## Connect\n\n1. Install the plugin in Claude.\n2. Open **Connectors**.\n3. Choose **Connect** on the Bondery connector.\n4. Choose **Use Claude's published identity**.\n5. Sign in to your Bondery account.\n6. Approve **Read only** or **Full access**.\n\nInstall does not sign you in. **Register automatically** cannot sign in either, so use **Use Claude's published identity**. Then sign in again if Claude asks.\n\nOn a Team or Enterprise plan, an Owner adds the connector first. Each member then signs in with their own account.\n\nTo connect a self-hosted API instead, add `{apiBaseUrl}/mcp` as a custom connector in Claude.",
       "skillConnect": "- **Not connected:** if no Bondery tools are available, say the Bondery connector is not connected. Point the user to Connectors, then Connect, then **Use Claude's published identity**, then sign in."
     },
+    "mcp": {
+      "skillConnect": "- **Not connected:** if no Bondery tools are available, say the Bondery MCP server is not connected. Tell the user to add `https://api.usebondery.com/mcp` to their AI client and sign in."
+    },
     "openai": {
       "auth": {
         "client": {

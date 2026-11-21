@@ -75,7 +75,10 @@ for (const root of targets) {
         : sharedBanned;
       for (const pattern of patterns) {
         if (pattern.test(line)) {
-          check.add(`${rel}:${i + 1}: ${line.trim()}`);
+          check.add(
+            `${rel}:${i + 1}: shows a raw error message to the user: ${line.trim()}
+      Pass the error to getUserFacingError() and show its message instead, so the user reads a translated catalog string and not a server detail.`,
+          );
         }
       }
     }

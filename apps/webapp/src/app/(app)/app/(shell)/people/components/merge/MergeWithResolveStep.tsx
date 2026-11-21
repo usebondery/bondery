@@ -5,6 +5,7 @@ import type { Contact, MergeConflictChoice, MergeConflictField } from "@bondery/
 import { Center, Paper, SimpleGrid, Stack, Text } from "@mantine/core";
 import { IconArrowLeft, IconArrowMerge } from "@tabler/icons-react";
 import { SelectableCard } from "@/components/shell/SelectableCard";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import {
   formatConflictDisplayValue,
   normalizeDisplayText,
@@ -155,14 +156,14 @@ export function MergeWithResolveStep({
               <Stack gap="sm" key={conflict.field}>
                 <SimpleGrid cols={2} spacing="sm">
                   <SelectableCard
-                    description={leftDesc || undefined}
+                    description={nonEmpty(leftDesc)}
                     disabled={isBlocking}
                     label={label}
                     onClick={() => handleSelect("left")}
                     selected={selectedChoice === "left"}
                   />
                   <SelectableCard
-                    description={rightDesc || undefined}
+                    description={nonEmpty(rightDesc)}
                     disabled={isBlocking}
                     label={label}
                     onClick={() => handleSelect("right")}

@@ -3,6 +3,9 @@ import {
   CONTACT_FIELD_MAX_LENGTHS,
   CONTACT_LIMITS,
   IMPORTANT_DATE_TYPES,
+  NOTIFY_DAY_BEFORE,
+  NOTIFY_FEW_DAYS_BEFORE,
+  NOTIFY_WEEK_BEFORE,
 } from "#constants/index.js";
 import {
   entityAuditSchema,
@@ -29,9 +32,9 @@ export const importantDateTypeSchema = z.enum(
 ) satisfies z.ZodType<ImportantDateType>;
 
 export const importantDateNotifyDaysSchema: z.ZodType<ImportantDateNotifyDaysBefore> = z.union([
-  z.literal(1),
-  z.literal(3),
-  z.literal(7),
+  z.literal(NOTIFY_DAY_BEFORE),
+  z.literal(NOTIFY_FEW_DAYS_BEFORE),
+  z.literal(NOTIFY_WEEK_BEFORE),
   z.null(),
 ]);
 

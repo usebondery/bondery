@@ -16,7 +16,7 @@ interface SettingsReadOnlyFieldProps {
 }
 
 function StatusDot({ color }: { color: string }) {
-  return <View className="h-2 w-2 rounded-sm" style={{ backgroundColor: color }} />;
+  return <View className="size-2 rounded-sm" style={{ backgroundColor: color }} />;
 }
 
 export function SettingsReadOnlyField({
@@ -33,7 +33,7 @@ export function SettingsReadOnlyField({
 
   const rightSection =
     onReload != null ? (
-      <View className="w-[22px] items-center justify-center">
+      <View className="w-icon-slot items-center justify-center">
         {loading ? (
           <ActivityIndicator color={colors.textMuted} size="small" />
         ) : (

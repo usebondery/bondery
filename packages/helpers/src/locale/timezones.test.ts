@@ -15,28 +15,44 @@ function supportsTimeZoneDisplayNames(): boolean {
 }
 
 describe("formatTimezoneLabel", () => {
-  it("localizes the country for the UI locale", () => {
+  it("localizes the German country and city when DisplayNames supports timeZone", {
+    skip: !supportsTimeZoneDisplayNames(),
+  }, () => {
     const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
     assert.ok(prague);
     const label = formatTimezoneLabel(prague, "de-DE");
     assert.match(label, /Tschechien/);
-    if (supportsTimeZoneDisplayNames()) {
-      assert.match(label, /Prag/);
-    } else {
-      assert.match(label, /Prague/);
-    }
+    assert.match(label, /Prag/);
   });
 
-  it("localizes Prague to Praha on Czech when DisplayNames supports timeZone", () => {
+  it("localizes the German country and falls back to Prague without timeZone DisplayNames", {
+    skip: supportsTimeZoneDisplayNames(),
+  }, () => {
+    const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
+    assert.ok(prague);
+    const label = formatTimezoneLabel(prague, "de-DE");
+    assert.match(label, /Tschechien/);
+    assert.match(label, /Prague/);
+  });
+
+  it("localizes Prague to Praha on Czech when DisplayNames supports timeZone", {
+    skip: !supportsTimeZoneDisplayNames(),
+  }, () => {
     const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
     assert.ok(prague);
     const label = formatTimezoneLabel(prague, "cs-CZ");
     assert.match(label, /Česko|Česká/);
-    if (supportsTimeZoneDisplayNames()) {
-      assert.match(label, /Praha/);
-    } else {
-      assert.match(label, /Prague/);
-    }
+    assert.match(label, /Praha/);
+  });
+
+  it("falls back to Prague on Czech when DisplayNames does not support timeZone", {
+    skip: supportsTimeZoneDisplayNames(),
+  }, () => {
+    const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
+    assert.ok(prague);
+    const label = formatTimezoneLabel(prague, "cs-CZ");
+    assert.match(label, /Česko|Česká/);
+    assert.match(label, /Prague/);
   });
 });
 

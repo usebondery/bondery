@@ -64,10 +64,10 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
           }),
         );
       }
-    } catch (err) {
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getAuthUserFacingError(err, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: t("UnexpectedError"),
         }),
       );
@@ -89,8 +89,8 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
       }
 
       window.location.assign(postLoginCallbackUrl);
-    } catch (err) {
-      notifyPasskeyLoginError(err, t);
+    } catch (error) {
+      notifyPasskeyLoginError(error, t);
     } finally {
       setBusyAction(null);
     }
@@ -117,15 +117,11 @@ export function LoginClient({ lastUsedLoginMethod, oauthProviders }: LoginClient
         return false;
       }
 
-      if (magicLinkResultNavigates(data)) {
-        return false;
-      }
-
-      return true;
-    } catch (err) {
+      return !magicLinkResultNavigates(data);
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getAuthUserFacingError(err, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: t("UnexpectedError"),
         }),
       );

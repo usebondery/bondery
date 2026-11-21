@@ -43,6 +43,7 @@ Self-hosted CE → site matching `BONDERY_PUBLIC_PLAUSIBLE_DOMAIN` → realtime 
 
 ```markdown
 ## Analytics verification
+
 - [ ] Tool: Plausible / PostHog (correct surface)
 - [ ] Event: `category:object_action` in event-catalog.md
 - [ ] No PII in properties

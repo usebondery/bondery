@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
@@ -15,7 +16,6 @@ import {
   getActionButtonSizePx,
   getControlHeightPx,
 } from "./actionButtonTokens";
-import { joinClassNames } from "./joinClassNames";
 import { usePressSqueeze } from "./usePressSqueeze";
 
 export type ActionButtonShellPressableProps = {
@@ -71,7 +71,7 @@ export function ActionButtonShellPressable({
 
   return (
     <Animated.View
-      className={joinClassNames(layout === "stretch" ? "min-w-0 flex-1" : undefined, className)}
+      className={cn(layout === "stretch" && "min-w-0 flex-1", className)}
       style={squeezeStyle}
     >
       <Pressable

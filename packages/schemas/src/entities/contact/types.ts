@@ -23,7 +23,7 @@ export interface Contact {
   emails: EmailEntry[] | null;
   facebook: string | null;
   firstName: string;
-  gisPoint: unknown | null;
+  gisPoint: unknown;
   headline: string | null;
   id: string;
   importantDates?: ImportantDate[] | null;
@@ -42,7 +42,7 @@ export interface Contact {
   notes: string | null;
   notesUpdatedAt?: string | null;
   phones: PhoneEntry[] | null;
-  position?: unknown | null;
+  position?: unknown;
   signal: string | null;
   timezone: string | null;
   updatedAt: string;
@@ -84,7 +84,7 @@ export interface ContactListItem {
   emails: EmailEntry[] | null;
   facebook: string | null;
   firstName: string;
-  gisPoint: unknown | null;
+  gisPoint: unknown;
   headline: string | null;
   id: string;
   instagram: string | null;
@@ -131,7 +131,7 @@ export interface ContactWritableFields {
   emails?: EmailEntry[] | null;
   facebook?: string | null;
   firstName?: string;
-  gisPoint?: unknown | null;
+  gisPoint?: unknown;
   headline?: string | null;
   instagram?: string | null;
   keepFrequencyDays?: number | null;

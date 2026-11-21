@@ -1,4 +1,5 @@
 import { IconChevronDown, IconX } from "@tabler/icons-react-native";
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { type StyleProp, View, type ViewStyle } from "react-native";
@@ -6,7 +7,6 @@ import Animated from "react-native-reanimated";
 import { Pressable } from "@/components/ui/Pressable";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { ActionIcon } from "../ActionIcon";
-import { joinClassNames } from "../joinClassNames";
 import { Text } from "../Text";
 import { usePressSqueeze } from "../usePressSqueeze";
 import {
@@ -58,9 +58,9 @@ export function SelectTrigger({
   const showClearButton = showClear && onClear && clearAccessibilityLabel;
 
   return (
-    <Animated.View className={joinClassNames("w-full", className)} style={squeezeStyle}>
+    <Animated.View className={cn("w-full", className)} style={squeezeStyle}>
       <View
-        className="min-h-[44px] w-full flex-row items-center gap-1 rounded-[10px] border px-3"
+        className="min-h-touch rounded-control w-full flex-row items-center gap-1 border px-3"
         style={[
           {
             backgroundColor: isPressed && !disabled ? colors.surfacePressed : backgroundColor,
@@ -75,7 +75,7 @@ export function SelectTrigger({
           accessibilityLabel={accessibilityLabel}
           accessibilityRole="button"
           accessibilityState={{ disabled }}
-          className="min-h-[44px] min-w-0 flex-1 flex-row items-center gap-2"
+          className="min-h-touch min-w-0 flex-1 flex-row items-center gap-2"
           disabled={disabled}
           onPress={onPress}
           onPressIn={() => {

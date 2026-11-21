@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Section, Text } from "react-email";
 import { defaultFeedbackCopy } from "#fixtures/default-copy.js";
 import { clipEmailPreview, type EmailDocumentProps } from "#shared/chrome.js";
@@ -79,7 +80,7 @@ export default function FeedbackEmail({
   userEmail = "user@example.com",
   userId = "preview-user",
   websiteUrl,
-}: FeedbackEmailProps) {
+}: FeedbackEmailProps): ReactElement {
   const heading = copy.heading.replace("{{userEmail}}", userEmail);
   const scoreText = npsScore === undefined ? copy.notProvided : String(npsScore);
   const description = copy.description
@@ -92,6 +93,9 @@ export default function FeedbackEmail({
     npsScore === undefined
       ? copy.notProvided
       : copy.npsScoreValue.replace("{{npsScore}}", String(npsScore));
+  // An empty string counts as not provided, like a missing value.
+  const orNotProvided = (value: string | undefined) =>
+    value === undefined || value === "" ? copy.notProvided : value;
   const submittedAt = copy.submittedAt.replace("{{timestamp}}", timestamp);
 
   return (
@@ -125,7 +129,7 @@ export default function FeedbackEmail({
             <FieldBlock label={copy.agentActualHeading} value={agentReport.actual} />
             <FieldBlock
               label={copy.agentRequestIdLabel}
-              value={agentReport.requestId || copy.notProvided}
+              value={orNotProvided(agentReport.requestId)}
             />
           </>
         ) : null}
@@ -133,11 +137,11 @@ export default function FeedbackEmail({
         <Text style={{ ...descriptionStyle, fontWeight: 600, marginBottom: "8px" }}>
           {copy.npsReasonHeading}
         </Text>
-        <Text style={descriptionStyle}>{npsReason || copy.notProvided}</Text>
+        <Text style={descriptionStyle}>{orNotProvided(npsReason)}</Text>
         <Text style={{ ...descriptionStyle, fontWeight: 600, marginBottom: "8px" }}>
           {copy.generalFeedbackHeading}
         </Text>
-        <Text style={descriptionStyle}>{generalFeedback || copy.notProvided}</Text>
+        <Text style={descriptionStyle}>{orNotProvided(generalFeedback)}</Text>
         <Text style={{ color: EMAIL_MUTED, fontSize: "14px", lineHeight: "20px", margin: 0 }}>
           {submittedAt}
         </Text>

@@ -98,7 +98,9 @@
     "UpdateFailed": "Nepavyko atnaujinti grupės"
   },
   "EmojiEmptySearch": "Emoji nerasta",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Ieškoti emoji…",
+  "EmojiSelectPlaceholder": "Pasirink emoji",
   "Empty": "Grupų dar nėra. Sukurk pirmąją, kad tvarkytum kontaktus.",
   "FallbackTitle": "Grupa",
   "HeaderDescription": "Grupės padeda suskirstyti asmenis ir greičiau filtruoti bei atlikti veiksmus.",

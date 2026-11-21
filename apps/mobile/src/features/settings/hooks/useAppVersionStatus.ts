@@ -1,11 +1,13 @@
 import { API_ROUTES, isVersionBelow } from "@bondery/helpers";
 import * as Network from "expo-network";
 import { useFocusEffect } from "expo-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../../../lib/config";
 import { isDeviceOffline, STATUS_PROBE_TIMEOUT_MS } from "./probeNetwork";
 
 export type AppVersionStatus = "checking" | "latest" | "offline" | "outdated" | "unreachable";
+
+type VersionProbe = { latestVersion: string | null; status: AppVersionStatus };
 
 async function probeLatestAppVersion(): Promise<string | null> {
   if (!API_URL) {
@@ -38,28 +40,36 @@ export function useAppVersionStatus(currentVersion: string) {
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [status, setStatus] = useState<AppVersionStatus>("checking");
 
-  async function refresh() {
-    setStatus("checking");
+  const applyProbe = useCallback((result: VersionProbe) => {
+    setLatestVersion(result.latestVersion);
+    setStatus(result.status);
+  }, []);
 
+  /** Probes the server and returns the result. It sets no state. */
+  const probe = useCallback(async (): Promise<VersionProbe> => {
     if (await isDeviceOffline()) {
-      setLatestVersion(null);
-      setStatus("offline");
-      return;
+      return { latestVersion: null, status: "offline" };
     }
 
     const advertised = await probeLatestAppVersion();
     if (!advertised) {
-      setLatestVersion(null);
-      setStatus("unreachable");
-      return;
+      return { latestVersion: null, status: "unreachable" };
     }
 
-    setLatestVersion(advertised);
-    setStatus(isVersionBelow(currentVersion, advertised) ? "outdated" : "latest");
-  }
+    return {
+      latestVersion: advertised,
+      status: isVersionBelow(currentVersion, advertised) ? "outdated" : "latest",
+    };
+  }, [currentVersion]);
+
+  const refresh = useCallback(async () => {
+    setStatus("checking");
+    applyProbe(await probe());
+  }, [applyProbe, probe]);
 
   useEffect(() => {
-    void refresh();
+    // The state starts as "checking", so the first probe needs no reset.
+    void probe().then(applyProbe);
 
     const subscription = Network.addNetworkStateListener(() => {
       void refresh();
@@ -68,11 +78,13 @@ export function useAppVersionStatus(currentVersion: string) {
     return () => {
       subscription.remove();
     };
-  }, [refresh]);
+  }, [applyProbe, probe, refresh]);
 
-  useFocusEffect(() => {
-    void refresh();
-  });
+  useFocusEffect(
+    useCallback(() => {
+      void refresh();
+    }, [refresh]),
+  );
 
   return {
     isChecking: status === "checking",

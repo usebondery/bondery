@@ -35,7 +35,7 @@ const GEO_POSITION_OPTIONS: PositionOptions = {
   timeout: GEO_TIMEOUT_MS,
 };
 
-function detectInitialStatus(): MapGeolocationStatus {
+function detectInitialStatus(): "idle" | "insecure" | "unsupported" {
   if (typeof window === "undefined") {
     return "idle";
   }
@@ -48,7 +48,7 @@ function detectInitialStatus(): MapGeolocationStatus {
   return "idle";
 }
 
-function mapPositionError(error: GeolocationPositionError): MapGeolocationFailureStatus {
+function mapPositionError(error: GeolocationPositionError): "denied" | "timeout" | "unavailable" {
   if (error.code === error.PERMISSION_DENIED) {
     return "denied";
   }
@@ -83,10 +83,10 @@ function getCurrentMapPosition(geolocation: Geolocation): Promise<MapGeolocation
  * Does not show a permission prompt. Safari without `permissions.query` is not granted.
  */
 export async function readMapGeolocationIfGranted(): Promise<MapSelfLocation | null> {
-  const view = globalThis.window;
-  if (view === undefined) {
+  if (typeof globalThis.window === "undefined") {
     return null;
   }
+  const view = globalThis.window;
   if (!view.isSecureContext) {
     return null;
   }

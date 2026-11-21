@@ -39,6 +39,10 @@ const SKILLS_LINE = /\bskills?\b|\+\d+\s+skills/i;
 const MUTUAL_CONNECTIONS =
   /\bmutual connections?\b|vzájemn(á|é|ých)? spojení|společn(ých|é) spojení|\band \d+ other\b/i;
 const SOCIAL_PROOF_LINE = /followers|connections|sledujících|spojení|sledující/i;
+/** Shortest text taken as a profile headline; shorter lines are badges or separators. */
+const MIN_HEADLINE_LENGTH = 3;
+/** Shortest text taken as an About section body. */
+export const MIN_ABOUT_TEXT_LENGTH = 20;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -76,7 +80,7 @@ function orgId(
 
 function splitCompanyLine(line: string): { companyName: string; employmentType?: string } {
   const parts = line.split(" · ");
-  const last = parts.length > 0 ? parts[parts.length - 1] : undefined;
+  const last = parts.at(-1);
   if (parts.length >= 2 && last && EMPLOYMENT_TYPES.has(last)) {
     return { companyName: parts.slice(0, -1).join(" · "), employmentType: last };
   }
@@ -175,12 +179,12 @@ export function looksLikeLinkedInVanityHandle(value: string, handle?: string): b
 }
 
 function titleCaseHandleToken(token: string): string {
-  const chars = [...token];
-  const first = chars.shift();
+  const graphemes = Array.from(new Intl.Segmenter().segment(token), (segment) => segment.segment);
+  const first = graphemes[0];
   if (!first) {
     return token;
   }
-  return first.toLocaleUpperCase() + chars.join("").toLocaleLowerCase();
+  return first.toLocaleUpperCase() + graphemes.slice(1).join("").toLocaleLowerCase();
 }
 
 /**
@@ -207,7 +211,7 @@ export function displayNameFromLinkedInHandle(handle: string): {
   }
   const titled = tokens.map(titleCaseHandleToken);
   const firstName = titled[0];
-  const lastName = titled[titled.length - 1];
+  const lastName = titled.at(-1);
   if (!firstName) {
     return null;
   }
@@ -231,7 +235,7 @@ export function splitName(fullName: string): {
     return { firstName: parts[0] ?? "" };
   }
   const firstName = parts[0] ?? "";
-  const lastName = parts.length > 1 ? (parts[parts.length - 1] ?? "") : "";
+  const lastName = parts.length > 1 ? (parts.at(-1) ?? "") : "";
   return {
     firstName,
     lastName,
@@ -266,7 +270,7 @@ export function extractSduiIdentity(doc?: Document, handle?: string): SduiIdenti
       !/,/.test(t) &&
       !SOCIAL_PROOF_LINE.test(t) &&
       !MUTUAL_CONNECTIONS.test(t) &&
-      t.length > 3,
+      t.length > MIN_HEADLINE_LENGTH,
   );
 
   const profilePhotoUrl =
@@ -312,7 +316,7 @@ export function extractSduiBio(doc?: Document): string | undefined {
     const candidates = [...aboutCard.querySelectorAll("p, span")]
       .filter((el) => el.children.length === 0)
       .map((el) => text(el))
-      .filter((t) => t.length > 20 && !/^[\w\s]+•[\w\s]+•/.test(t))
+      .filter((t) => t.length > MIN_ABOUT_TEXT_LENGTH && !/^[\w\s]+•[\w\s]+•/.test(t))
       .sort((a, b) => b.length - a.length);
 
     return candidates[0] || undefined;
@@ -356,7 +360,7 @@ export function extractSduiWorkHistory(doc?: Document): WorkEntry[] {
 
   for (const item of items) {
     const texts = leafTexts(item);
-    if (!texts.length) {
+    if (texts.length === 0) {
       continue;
     }
 

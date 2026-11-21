@@ -26,6 +26,10 @@ function toTagsInputTag(tag: { color?: string | null; id: string; label: string 
   };
 }
 
+function ignoreTagEditorCallback() {
+  // no-op: person tags refresh from the contact-tags query, not modal callbacks
+}
+
 export function PersonTagsInput({ personId }: PersonTagsInputProps) {
   const t = useTagsInputTranslations();
   const tSettings = useTagsSettingsTranslations();
@@ -99,9 +103,9 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
           initialLabel: label,
           initialSelectedPersonIds: [personId],
           mode: "create",
-          onCreated: () => {},
-          onDeleted: () => {},
-          onUpdated: () => {},
+          onCreated: ignoreTagEditorCallback,
+          onDeleted: ignoreTagEditorCallback,
+          onUpdated: ignoreTagEditorCallback,
         });
       }}
       onEdit={(tag) => {
@@ -111,9 +115,9 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
         }
         openTagEditorModal({
           mode: "edit",
-          onCreated: () => {},
-          onDeleted: () => {},
-          onUpdated: () => {},
+          onCreated: ignoreTagEditorCallback,
+          onDeleted: ignoreTagEditorCallback,
+          onUpdated: ignoreTagEditorCallback,
           tag: source,
         });
       }}

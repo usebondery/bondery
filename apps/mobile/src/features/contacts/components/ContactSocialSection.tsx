@@ -84,13 +84,13 @@ export function ContactSocialSection({
         title: value ? "Saved" : "Removed",
         type: "success",
       });
-    } catch {
+    } catch (error) {
       notifications.show({
         message: `Failed to update ${platform}`,
         title: "Could not save",
         type: "error",
       });
-      throw new Error("Social update failed");
+      throw new Error("Social update failed", { cause: error });
     }
   }
 

@@ -19,7 +19,9 @@ export function KeyboardRoot({ children }: { children: ReactNode }) {
           setKeyboardModule(mod);
         }
       })
-      .catch(() => {});
+      .catch(() => {
+        // Keyboard-controller is optional. Children render without KeyboardProvider.
+      });
 
     return () => {
       cancelled = true;

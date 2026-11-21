@@ -94,7 +94,9 @@
     "UpdateFailed": "Grup güncellenemedi"
   },
   "EmojiEmptySearch": "Sonuç yok",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Emoji ara…",
+  "EmojiSelectPlaceholder": "Emoji seç",
   "Empty": "Henüz grup yok. Kişileri düzenlemek için bir tane oluştur.",
   "FallbackTitle": "Grup",
   "HeaderDescription": "Gruplar kişileri özel gruplara ayırır; daha hızlı filtreleme ve işlem yaparsın.",

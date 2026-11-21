@@ -9,6 +9,7 @@ import {
   mobileDateTimeFormatContext,
   useMobilePreferences,
 } from "../../lib/preferences/useMobilePreferences";
+import { nonEmpty } from "../../lib/text";
 import { AVATAR_COLOR_PALETTE_HEX } from "../../theme/colors";
 import { formatImportantDate, isYearlessDate, resolveDateLocale } from "./importantDateUtils";
 
@@ -29,8 +30,8 @@ export function getContactInitials(contact: PersonNameFields): string {
 }
 
 function getAvatarHash(first: string | null | undefined, last: string | null | undefined): number {
-  const a = (first || "").trim().toLowerCase();
-  const b = (last || "").trim().toLowerCase();
+  const a = (first ?? "").trim().toLowerCase();
+  const b = (last ?? "").trim().toLowerCase();
   const normalized = `${a} ${b}`.trim();
   if (!normalized) {
     return 0;
@@ -38,6 +39,7 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
   let hash = 0;
   for (let i = 0; i < normalized.length; i++) {
     hash = (hash << 5) - hash + normalized.charCodeAt(i);
+    // biome-ignore lint/nursery/useMathTrunc: 32-bit wrap keeps the avatar color hash stable
     hash |= 0;
   }
   return Math.abs(hash);
@@ -47,9 +49,14 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
  * Returns a deterministic hex color for a contact avatar, using the same
  * hash algorithm and palette as the webapp's getAvatarColorFromName.
  */
-export function getAvatarColorHex(contact: PersonNameFields): string {
+export function getAvatarColorHex(
+  contact: PersonNameFields,
+): (typeof AVATAR_COLOR_PALETTE_HEX)[number] {
   const hash = getAvatarHash(contact.firstName, contact.lastName);
-  return AVATAR_COLOR_PALETTE_HEX[hash % AVATAR_COLOR_PALETTE_HEX.length];
+  // The hash is a non-negative integer, so the index is always in range; the fallback only satisfies the checker.
+  return (
+    AVATAR_COLOR_PALETTE_HEX[hash % AVATAR_COLOR_PALETTE_HEX.length] ?? AVATAR_COLOR_PALETTE_HEX[0]
+  );
 }
 
 function parsePhones(phones: Contact["phones"]): PhoneEntry[] {
@@ -94,7 +101,7 @@ export function getPrimaryPhoneEntry(contact: Contact): PhoneEntry | null {
 
 export function getPrimaryEmail(contact: Contact): string | null {
   const email = getPrimaryEmailEntry(contact);
-  return email?.value || null;
+  return nonEmpty(email?.value) ?? null;
 }
 
 export function getPrimaryEmailEntry(contact: Contact): EmailEntry | null {
@@ -119,6 +126,8 @@ export function daysSince(dateStr: string): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / MS_PER_DAY);
 }
 
+const DAYS_PER_WEEK = 7;
+
 export function formatRelativeDate(dateStr: string): string {
   const diffDays = daysSince(dateStr);
   if (diffDays === 0) {
@@ -127,10 +136,10 @@ export function formatRelativeDate(dateStr: string): string {
   if (diffDays === 1) {
     return "Yesterday";
   }
-  if (diffDays < 7) {
+  if (diffDays < DAYS_PER_WEEK) {
     return `${diffDays} days ago`;
   }
-  const weeks = Math.floor(diffDays / 7);
+  const weeks = Math.floor(diffDays / DAYS_PER_WEEK);
   if (diffDays < 30) {
     return `${weeks} week${weeks > 1 ? "s" : ""} ago`;
   }
@@ -220,7 +229,7 @@ export function formatDisplayAddress(address: ContactAddressEntry): string {
     return formatted;
   }
 
-  return address.value?.trim() ?? "";
+  return address.value.trim();
 }
 
 export interface AddressCardLines {

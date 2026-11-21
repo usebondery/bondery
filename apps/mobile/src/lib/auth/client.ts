@@ -85,8 +85,3 @@ export const authClient = HAS_MOBILE_CONFIG
       ],
     })
   : null;
-
-export async function getAccessToken(): Promise<string | null> {
-  const { readLocalAccessToken } = await import("./session");
-  return readLocalAccessToken();
-}

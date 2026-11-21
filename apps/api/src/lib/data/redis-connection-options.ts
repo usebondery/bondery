@@ -37,9 +37,10 @@ function readTextFileUtf8(path: string): string {
 function parseRedisUrl(redisUrl: string): URL {
   try {
     return new URL(redisUrl);
-  } catch {
+  } catch (error) {
     throw new Error(
       "BONDERY_PRIVATE_REDIS_URL is not a valid URL (expected redis:// or rediss://)",
+      { cause: error },
     );
   }
 }
@@ -50,7 +51,9 @@ function readSecretFile(envName: string, path: string, readTextFile: ReadTextFil
     contents = readTextFile(path);
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
-    throw new Error(`${envName} points to a file the API cannot read (${path}): ${reason}`);
+    throw new Error(`${envName} points to a file the API cannot read (${path}): ${reason}`, {
+      cause: error,
+    });
   }
   const trimmed = contents.trim();
   if (!trimmed) {

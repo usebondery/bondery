@@ -8,13 +8,13 @@ Cross-skill implementation: [bondery-emails](../../bondery-emails/SKILL.md) → 
 
 Everything in `@bondery/emails` is **transactional, user-initiated, a reminder digest the user turned on, or internal ops**. We do **not** send newsletters, product-update blasts, or promotions.
 
-| Kind | Examples | Marketing? |
-|------|----------|------------|
-| Account / auth | Sign-in link, welcome, account deleted | No |
-| Billing | Trial ending | No |
-| In-app notification | Reminder digest (user enabled those dates) | No |
-| User-initiated to a third party | Share contact | No |
-| Internal | Feedback to the Bondery team | No |
+| Kind                            | Examples                                   | Marketing? |
+| ------------------------------- | ------------------------------------------ | ---------- |
+| Account / auth                  | Sign-in link, welcome, account deleted     | No         |
+| Billing                         | Trial ending                               | No         |
+| In-app notification             | Reminder digest (user enabled those dates) | No         |
+| User-initiated to a third party | Share contact                              | No         |
+| Internal                        | Feedback to the Bondery team               | No         |
 
 If a proposed email is a newsletter, launch announcement, upsell, or “here’s what’s new,” **stop** — that is marketing. Do not reuse transactional chrome. Escalate to a human owner before building.
 
@@ -22,10 +22,10 @@ If a proposed email is a newsletter, launch announcement, upsell, or “here’s
 
 Typical framing (confirm with counsel for new types; do not treat as a legal opinion):
 
-| Regime | Marketing (newsletters, promotions, product updates) | Transactional / relationship (account, auth, billing, requested service messages) |
-|--------|------------------------------------------------------|-------------------------------------------------------------------------------------|
-| US CAN-SPAM | Commercial email generally needs a working opt-out and related identification | Messages whose *primary purpose* is transactional or relationship are not treated as commercial email for those extra requirements |
-| EU ePrivacy + GDPR | Electronic mail for direct marketing generally needs a prior opt-in (member-state details vary; existing-customer “soft opt-in” is not universal) | Mail needed to perform a contract or a user-requested service is not direct marketing |
+| Regime             | Marketing (newsletters, promotions, product updates)                                                                                              | Transactional / relationship (account, auth, billing, requested service messages)                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| US CAN-SPAM        | Commercial email generally needs a working opt-out and related identification                                                                     | Messages whose _primary purpose_ is transactional or relationship are not treated as commercial email for those extra requirements |
+| EU ePrivacy + GDPR | Electronic mail for direct marketing generally needs a prior opt-in (member-state details vary; existing-customer “soft opt-in” is not universal) | Mail needed to perform a contract or a user-requested service is not direct marketing                                              |
 
 **Working product rules:**
 
@@ -43,10 +43,10 @@ That is a **product choice**, not a claim that every message is legally required
 
 Typical framing (again, not a certification):
 
-| Regime | When a postal address is commonly required |
-|--------|--------------------------------------------|
-| US CAN-SPAM | Commercial / marketing email — a valid physical postal address |
-| EU | No single “address in every email” rule equivalent to CAN-SPAM; sender identification and (for marketing) marketing rules still apply. Some member states have extra business-letterhead / Impressum norms |
+| Regime      | When a postal address is commonly required                                                                                                                                                                 |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| US CAN-SPAM | Commercial / marketing email — a valid physical postal address                                                                                                                                             |
+| EU          | No single “address in every email” rule equivalent to CAN-SPAM; sender identification and (for marketing) marketing rules still apply. Some member states have extra business-letterhead / Impressum norms |
 
 **Do not add** legal name/address to transactional templates “to be safe.” **Do not add** marketing mail that omits identification counsel would expect.
 

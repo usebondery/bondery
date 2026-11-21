@@ -292,22 +292,20 @@ async function loadVoyagerProfileMeta(username: string): Promise<VoyagerProfileM
     extLog.debug(`[linkedin][fetchDetails] profile bio: dash/graphql → ${bio.length}c`);
   }
 
-  if (!location || !identity || !bio) {
-    if (profileUrn) {
-      const [byUrn, dashByUrn] = await Promise.all([
-        voyagerFetch(profileGraphqlPathByUrn(profileUrn)),
-        bio ? Promise.resolve(null) : voyagerFetch(dashProfilePath(profileUrn)),
-      ]);
-      identity ??= identityFromResponse(byUrn, normalizedHandle, profileUrn);
-      identity ??= identityFromResponse(dashByUrn, normalizedHandle, profileUrn);
-      bio ??= bioFromResponse(byUrn, normalizedHandle, profileUrn);
-      bio ??= bioFromResponse(dashByUrn, normalizedHandle, profileUrn);
-      if (!location) {
-        location = extractLocationFromApiResponse(byUrn, profileUrn);
-        location ??= extractLocationFromApiResponse(dashByUrn, profileUrn);
-        if (location) {
-          extLog.debug(`[linkedin][fetchDetails] profile location: graphql/urn → ${location}`);
-        }
+  if ((!location || !identity || !bio) && profileUrn) {
+    const [byUrn, dashByUrn] = await Promise.all([
+      voyagerFetch(profileGraphqlPathByUrn(profileUrn)),
+      bio ? Promise.resolve(null) : voyagerFetch(dashProfilePath(profileUrn)),
+    ]);
+    identity ??= identityFromResponse(byUrn, normalizedHandle, profileUrn);
+    identity ??= identityFromResponse(dashByUrn, normalizedHandle, profileUrn);
+    bio ??= bioFromResponse(byUrn, normalizedHandle, profileUrn);
+    bio ??= bioFromResponse(dashByUrn, normalizedHandle, profileUrn);
+    if (!location) {
+      location = extractLocationFromApiResponse(byUrn, profileUrn);
+      location ??= extractLocationFromApiResponse(dashByUrn, profileUrn);
+      if (location) {
+        extLog.debug(`[linkedin][fetchDetails] profile location: graphql/urn → ${location}`);
       }
     }
   }

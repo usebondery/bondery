@@ -230,11 +230,13 @@
     "deleting": "Brisanje...",
     "duplicating": "Podvajanje...",
     "errorTitle": "Napaka",
+    "mobileRuntimeError": "Napaka med izvajanjem mobilne aplikacije",
     "noResults": "Ni rezultatov",
     "removing": "Odstranjevanje...",
     "savedTitle": "Shranjeno",
     "saving": "Shranjevanje...",
     "sending": "Pošiljanje...",
-    "successTitle": "Uspeh"
+    "successTitle": "Uspeh",
+    "unknownError": "Neznana napaka"
   }
 }

@@ -1,17 +1,33 @@
 # Bundled SeaweedFS object storage (S3-compatible gateway).
-# Included by docker-compose.yml. API uses BONDERY_PRIVATE_S3_ENDPOINT
-# http://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8333 (unique on dokploy-network).
-# Cluster peer names (master -ip=, volume -mserver=, filer -master=) stay
-# seaweedfs-master / seaweedfs-filer — those services are on per-stack `internal` only.
+# Included by docker-compose.yml. The API uses BONDERY_PRIVATE_S3_ENDPOINT
+# https://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8443 (unique on dokploy-network).
+# Cluster peer names (master -ip=, volume -ip= / -mserver=, filer -master=) stay
+# seaweedfs-master / -volume / -filer: those services are on the per-stack `internal` only.
+#
+# TLS everywhere (docs/deploy/configuration.mdx#object-storage-tls): the stack-secrets job issues
+# a cluster certificate from a private storage CA; seaweedfs/security.toml turns on mutual TLS
+# for gRPC and HTTPS between nodes; the gateway serves HTTPS on 8443 to the API and to Traefik
+# (public reads, verified with the storage CA). HTTP 8333 stays for the healthcheck and local
+# development.
 
 services:
   seaweedfs-master:
     command: "master -ip=seaweedfs-master -mdir=/data -defaultReplication=000"
+    depends_on:
+      stack-secrets:
+        condition: service_completed_successfully
+    entrypoint: [ "/bin/sh", "/etc/bondery/tls-entrypoint.sh", "/entrypoint.sh" ]
     healthcheck:
       interval: 10s
       retries: 5
       start_period: 10s
-      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:9333/cluster/status"]
+      test:
+        [
+          "CMD",
+          "/bin/sh",
+          "/etc/bondery/tls-health.sh",
+          "https://seaweedfs-master:9333/cluster/status",
+        ]
       timeout: 5s
     image: chrislusf/seaweedfs:4.40
     networks:
@@ -19,19 +35,30 @@ services:
         aliases:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-seaweedfs-master
     restart: unless-stopped
+    tmpfs:
+      - /run/bondery-storage
     volumes:
       - seaweedfs-master-data:/data
+      - storage-tls-cluster:/bondery-storage/cluster:ro
+      - ./seaweedfs/security.toml:/etc/seaweedfs/security.toml:ro
+      - ./seaweedfs/tls-entrypoint.sh:/etc/bondery/tls-entrypoint.sh:ro
+      - ./seaweedfs/tls-health.sh:/etc/bondery/tls-health.sh:ro
 
   seaweedfs-volume:
-    command: "volume -mserver=seaweedfs-master:9333 -dir=/data -max=100"
+    # -ip: the volume registers under its service name, which the cluster certificate covers.
+    command: "volume -ip=seaweedfs-volume -mserver=seaweedfs-master:9333 -dir=/data -max=100"
     depends_on:
       seaweedfs-master:
         condition: service_healthy
+      stack-secrets:
+        condition: service_completed_successfully
+    entrypoint: [ "/bin/sh", "/etc/bondery/tls-entrypoint.sh", "/entrypoint.sh" ]
     healthcheck:
       interval: 5s
       retries: 10
       start_period: 10s
-      test: ["CMD", "wget", "-q", "-O", "-", "http://seaweedfs-volume:8080/healthz"]
+      test:
+        [ "CMD", "/bin/sh", "/etc/bondery/tls-health.sh", "https://seaweedfs-volume:8080/healthz" ]
       timeout: 5s
     image: chrislusf/seaweedfs:4.40
     networks:
@@ -39,8 +66,14 @@ services:
         aliases:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-seaweedfs-volume
     restart: unless-stopped
+    tmpfs:
+      - /run/bondery-storage
     volumes:
       - seaweedfs-volume-data:/data
+      - storage-tls-cluster:/bondery-storage/cluster:ro
+      - ./seaweedfs/security.toml:/etc/seaweedfs/security.toml:ro
+      - ./seaweedfs/tls-entrypoint.sh:/etc/bondery/tls-entrypoint.sh:ro
+      - ./seaweedfs/tls-health.sh:/etc/bondery/tls-health.sh:ro
 
   seaweedfs-filer:
     command: "filer -master=seaweedfs-master:9333 -ip=seaweedfs-filer"
@@ -49,11 +82,14 @@ services:
         condition: service_healthy
       seaweedfs-volume:
         condition: service_healthy
+      stack-secrets:
+        condition: service_completed_successfully
+    entrypoint: [ "/bin/sh", "/etc/bondery/tls-entrypoint.sh", "/entrypoint.sh" ]
     healthcheck:
       interval: 10s
       retries: 5
       start_period: 10s
-      test: ["CMD", "wget", "-q", "-O", "-", "http://127.0.0.1:8888/"]
+      test: [ "CMD", "/bin/sh", "/etc/bondery/tls-health.sh", "https://seaweedfs-filer:8888/" ]
       timeout: 5s
     image: chrislusf/seaweedfs:4.40
     networks:
@@ -61,14 +97,26 @@ services:
         aliases:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-seaweedfs-filer
     restart: unless-stopped
+    tmpfs:
+      - /run/bondery-storage
     volumes:
       - seaweedfs-filer-data:/data
+      - storage-tls-cluster:/bondery-storage/cluster:ro
+      - ./seaweedfs/security.toml:/etc/seaweedfs/security.toml:ro
+      - ./seaweedfs/tls-entrypoint.sh:/etc/bondery/tls-entrypoint.sh:ro
+      - ./seaweedfs/tls-health.sh:/etc/bondery/tls-health.sh:ro
 
   seaweedfs-s3:
     depends_on:
       seaweedfs-filer:
         condition: service_healthy
-    entrypoint: ["/bin/sh", "/etc/seaweedfs/entrypoint.sh"]
+      stack-secrets:
+        condition: service_completed_successfully
+      # Traefik's storage transport (docker-compose.yml) must exist before Traefik routes here.
+      traefik-transport:
+        condition: service_completed_successfully
+    entrypoint:
+      [ "/bin/sh", "/etc/bondery/tls-entrypoint.sh", "/bin/sh", "/etc/seaweedfs/entrypoint.sh" ]
     environment:
       BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
       BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
@@ -76,16 +124,25 @@ services:
       interval: 10s
       retries: 5
       start_period: 15s
-      test: ["CMD", "/bin/sh", "/etc/seaweedfs/s3-ready.sh"]
+      test: [ "CMD", "/bin/sh", "/etc/seaweedfs/s3-ready.sh" ]
       timeout: 5s
     image: chrislusf/seaweedfs:4.40
+    # Public storage domain: reads only (GET, HEAD, and CORS preflight). Cookies and Authorization
+    # are dropped, because public reads never need them and the parent-domain session cookie would
+    # otherwise reach SeaweedFS. Traefik forwards over HTTPS (8443) and verifies the storage CA with
+    # the transport the traefik-transport job publishes.
     labels:
       - traefik.enable=true
-      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.rule=Host(`${BONDERY_INFRA_STORAGE_DOMAIN:-storage.localhost}`)"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.rule=Host(`${BONDERY_INFRA_STORAGE_DOMAIN:-storage.localhost}`) && (Method(`GET`) || Method(`HEAD`) || Method(`OPTIONS`))"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.entrypoints=websecure"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.tls.certResolver=letsencrypt"
+      - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.middlewares=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-public-read"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage"
-      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.loadbalancer.server.port=8333"
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-public-read.headers.customrequestheaders.Cookie="
+      - "traefik.http.middlewares.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage-public-read.headers.customrequestheaders.Authorization="
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.loadbalancer.server.port=8443"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.loadbalancer.server.scheme=https"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage.loadbalancer.serverstransport=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage@file"
     networks:
       dokploy-network:
         aliases:
@@ -94,7 +151,12 @@ services:
         aliases:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage
     restart: unless-stopped
+    tmpfs:
+      - /run/bondery-storage
     volumes:
+      - storage-tls-cluster:/bondery-storage/cluster:ro
+      - ./seaweedfs/security.toml:/etc/seaweedfs/security.toml:ro
+      - ./seaweedfs/tls-entrypoint.sh:/etc/bondery/tls-entrypoint.sh:ro
       - ./seaweedfs/entrypoint.sh:/etc/seaweedfs/entrypoint.sh:ro
       - ./seaweedfs/s3-ready.sh:/etc/seaweedfs/s3-ready.sh:ro
 
@@ -105,6 +167,11 @@ networks:
     external: true
 
 volumes:
-  seaweedfs-filer-data:
-  seaweedfs-master-data:
-  seaweedfs-volume-data:
+  seaweedfs-filer-data: {}
+  seaweedfs-master-data: {}
+  seaweedfs-volume-data: {}
+  # Written by the stack-secrets job (docker-compose.yml). ca: the job only. cluster: the
+  # SeaweedFS nodes only. client: the API only (the CA certificate it trusts).
+  storage-tls-ca: {}
+  storage-tls-cluster: {}
+  storage-tls-client: {}

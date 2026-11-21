@@ -31,28 +31,29 @@ flowchart LR
   Domains --> Storage
 ```
 
-| Boundary | What crosses it | Auth mechanism |
-|----------|-----------------|----------------|
-| Browser → webapp BFF | REST proxy, sync ticket | Encrypted `bondery_webapp_session` cookie |
-| Browser → API (social/OAuth UI) | Better Auth endpoints | Better Auth session cookie on API domain |
-| Client → API (data) | REST, sync pull | Session, OAuth JWT, or API key |
-| Webhook → API | Stripe events | Signature on raw body |
-| Internal → API | Reminder digest, jobs | `BONDERY_PRIVATE_SERVICE_SECRET` bearer |
-| Public → API | Avatar/logo files | None (by design) |
+| Boundary                        | What crosses it                                              | Auth mechanism                                                 |
+| ------------------------------- | ------------------------------------------------------------ | -------------------------------------------------------------- |
+| Browser → webapp BFF            | REST proxy, sync ticket                                      | Encrypted `bondery_webapp_session` cookie                      |
+| Browser → API (social/OAuth UI) | Better Auth endpoints                                        | Better Auth session cookie on API domain                       |
+| Client → API (data)             | REST, sync pull                                              | Session, OAuth JWT, or API key                                 |
+| Webhook → API                   | Stripe events                                                | Signature on raw body                                          |
+| Internal → API                  | No live routes (reminder digests run in-process via pg-boss) | `BONDERY_PRIVATE_SERVICE_SECRET` bearer, constant-time compare |
+| Public → API                    | Avatar/logo files                                            | None (by design)                                               |
 
 ## Route shells (canonical)
 
 Auth is wired **only** through shells in `apps/api/src/lib/platform/route-areas.ts`, mounted from `apps/api/src/routes/register-all.ts`.
 
-| Shell | Auth | API keys | `openApiArea` |
-|-------|------|----------|---------------|
-| `integrationRoutes` | Session or API key + route policy | Allowed | `integration` |
-| `sessionRoutes` | Session only | Denied | `session` |
-| `internalRoutes` | Service secret bearer | Denied | `internal` |
-| `openApiAreaRoutes` | Custom (webhook HMAC, WS ticket) | N/A | varies |
-| `composite` | Per-subtree | Varies | varies |
+| Shell               | Auth                              | API keys | `openApiArea` |
+| ------------------- | --------------------------------- | -------- | ------------- |
+| `integrationRoutes` | Session or API key + route policy | Allowed  | `integration` |
+| `sessionRoutes`     | Session only                      | Denied   | `session`     |
+| `internalRoutes`    | Service secret bearer             | Denied   | `internal`    |
+| `openApiAreaRoutes` | Custom (webhook HMAC, WS ticket)  | N/A      | varies        |
+| `composite`         | Per-subtree                       | Varies   | varies        |
 
 **Rules:**
+
 - Never add `verifySession` / `verifyAuth` hooks inside individual route modules — CI blocks this (`check-route-security.ts`).
 - Every shelled route must have `openApiArea` metadata — `route-security-audit.test.ts` enforces.
 - Routes without `openApiArea` deny API keys and log `api_key.missing_open_api_area`.
@@ -73,6 +74,7 @@ The API uses **application-layer authorization**, not Postgres RLS.
 ```
 
 **Every domain query** on tenant-owned data must:
+
 1. Get `user` from `getAuth(request)` (inside a protected handler)
 2. Scope with `where: { userId: user.id }` or join through an owned parent
 3. Return 404 (not 403) when a resource exists but belongs to another user
@@ -86,6 +88,7 @@ The API uses **application-layer authorization**, not Postgres RLS.
 `apps/supabase-db/supabase/migrations/` contains RLS policies and table grants for the **deprecated Supabase compose path** (`docker-compose.supabase.yml`).
 
 The **current stack** uses:
+
 - `packages/db/prisma/` migrations
 - `deploy/bondery/docker-compose.postgres.yml`
 - Better Auth + Prisma (no PostgREST, no GoTrue)
@@ -98,10 +101,10 @@ For Postgres query performance on the current stack, see `supabase-postgres-best
 
 `composite` shell has **no automatic auth**. Notable public subtrees:
 
-| Route | Auth | Model |
-|-------|------|-------|
-| `GET /files/:bucket/*` | None | Public avatars/logos by UUID path |
-| Sync WS | WS ticket (60s, single-use) + origin check | Authenticated after ticket exchange |
+| Route                  | Auth                                       | Model                               |
+| ---------------------- | ------------------------------------------ | ----------------------------------- |
+| `GET /files/:bucket/*` | None                                       | Public avatars/logos by UUID path   |
+| Sync WS                | WS ticket (60s, single-use) + origin check | Authenticated after ticket exchange |
 
 When adding routes under `composite`, explicitly document the auth model.
 

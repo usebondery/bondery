@@ -4,6 +4,9 @@ import { buildIntlLocaleTag } from "@bondery/schemas/locale";
 /** Epoch year used for recurring dates without a year (matches web + vCard convention). */
 export const YEARLESS_SENTINEL = 1904;
 
+/** Characters of the year at the start of an ISO `YYYY-MM-DD` date. */
+const ISO_YEAR_LENGTH = 4;
+
 export interface ImportantDateWheelValue {
   day: number;
   month: number;
@@ -12,7 +15,7 @@ export interface ImportantDateWheelValue {
 }
 
 export function isYearlessDate(iso: string): boolean {
-  const year = Number.parseInt(iso.slice(0, 4), 10);
+  const year = Number.parseInt(iso.slice(0, ISO_YEAR_LENGTH), 10);
   return year === YEARLESS_SENTINEL;
 }
 

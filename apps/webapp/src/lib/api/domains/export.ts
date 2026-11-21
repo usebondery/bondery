@@ -40,8 +40,8 @@ export async function downloadBonderyExport(
 }
 
 export class BonderyExportDownloadBlockedError extends Error {
-  constructor() {
-    super("download_blocked");
+  constructor(message = "download_blocked", options?: ErrorOptions) {
+    super(message, options);
     this.name = "BonderyExportDownloadBlockedError";
   }
 }
@@ -57,7 +57,7 @@ export function saveBonderyExportFile(blob: Blob, filename: string): void {
     anchor.click();
     document.body.removeChild(anchor);
     URL.revokeObjectURL(url);
-  } catch {
-    throw new BonderyExportDownloadBlockedError();
+  } catch (error) {
+    throw new BonderyExportDownloadBlockedError("download_blocked", { cause: error });
   }
 }

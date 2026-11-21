@@ -96,8 +96,11 @@ export async function applyContactPatch(
           updates.timezone = tz;
         }
       }
-    } catch (err) {
-      log?.warn({ err }, "[applyContactPatch] Geocode failed, continuing without coordinates");
+    } catch (error) {
+      log?.warn(
+        { err: error },
+        "[applyContactPatch] Geocode failed, continuing without coordinates",
+      );
     }
   }
 

@@ -45,131 +45,137 @@ loadEnvConfig(
 // Argument parsing
 // ---------------------------------------------------------------------------
 
-const args = process.argv.slice(2);
+async function main(): Promise<void> {
+  const args = process.argv.slice(2);
 
-// All tokens are plain words (no "--" prefix) so npm 11 does not intercept them.
-// The slug is the first token that isn't a known control word.
-const CONTROL_TOKENS = new Set(["simulate", "discord", "reddit", "skip-check"]);
-const slug = args.find((a) => !CONTROL_TOKENS.has(a));
-const dryRun = args.includes("simulate");
-const discordOnly = args.includes("discord");
-const redditOnly = args.includes("reddit");
-const force = args.includes("skip-check");
+  // All tokens are plain words (no "--" prefix) so npm 11 does not intercept them.
+  // The slug is the first token that isn't a known control word.
+  const CONTROL_TOKENS = new Set(["simulate", "discord", "reddit", "skip-check"]);
+  const slug = args.find((a) => !CONTROL_TOKENS.has(a));
+  const dryRun = args.includes("simulate");
+  const discordOnly = args.includes("discord");
+  const redditOnly = args.includes("reddit");
+  const force = args.includes("skip-check");
 
-if (!slug) {
-  console.error("Error: post slug is required as the first argument.");
-  console.error("Usage: pnpm run announce -- <slug> [simulate] [discord] [reddit] [skip-check]");
-  process.exit(1);
-}
-
-if (discordOnly && redditOnly) {
-  console.error("Error: discord and reddit tokens are mutually exclusive.");
-  process.exit(1);
-}
-
-// ---------------------------------------------------------------------------
-// Environment validation
-// ---------------------------------------------------------------------------
-
-// Always required
-const alwaysRequired = ["BONDERY_PUBLIC_WEBSITE_URL"];
-// Only required when posting to Discord (not when --reddit-only)
-const discordRequired = discordOnly || !redditOnly ? ["BONDERY_OPS_DISCORD_WEBHOOK_URL"] : [];
-// Only required when posting to Reddit (not when --discord-only)
-const redditRequired =
-  redditOnly || !discordOnly
-    ? [
-        "BONDERY_OPS_REDDIT_CLIENT_ID",
-        "BONDERY_OPS_REDDIT_CLIENT_SECRET",
-        "BONDERY_OPS_REDDIT_USERNAME",
-        "BONDERY_OPS_REDDIT_PASSWORD",
-      ]
-    : [];
-
-const missingEnv = [...alwaysRequired, ...discordRequired, ...redditRequired].filter(
-  (key) => !process.env[key],
-);
-if (missingEnv.length > 0) {
-  console.error("Error: Missing required environment variables:");
-  for (const key of missingEnv) {
-    console.error(`  - ${key}`);
+  if (!slug) {
+    console.error("Error: post slug is required as the first argument.");
+    console.error("Usage: pnpm run announce -- <slug> [simulate] [discord] [reddit] [skip-check]");
+    process.exitCode = 1;
+    return;
   }
-  process.exit(1);
-}
 
-const websiteUrl = process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(/\/$/, "");
-const discordWebhookUrl = process.env.BONDERY_OPS_DISCORD_WEBHOOK_URL ?? "";
-const redditConfig: RedditConfig = {
-  clientId: process.env.BONDERY_OPS_REDDIT_CLIENT_ID ?? "",
-  clientSecret: process.env.BONDERY_OPS_REDDIT_CLIENT_SECRET ?? "",
-  password: process.env.BONDERY_OPS_REDDIT_PASSWORD ?? "",
-  username: process.env.BONDERY_OPS_REDDIT_USERNAME ?? "",
-};
+  if (discordOnly && redditOnly) {
+    console.error("Error: discord and reddit tokens are mutually exclusive.");
+    process.exitCode = 1;
+    return;
+  }
 
-// ---------------------------------------------------------------------------
-// Find post
-// ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Environment validation
+  // ---------------------------------------------------------------------------
 
-const post = allPostMeta.find((p) => p.slug === slug);
+  // Always required
+  const alwaysRequired = ["BONDERY_PUBLIC_WEBSITE_URL"];
+  // Only required when posting to Discord (not when --reddit-only)
+  const discordRequired = discordOnly || !redditOnly ? ["BONDERY_OPS_DISCORD_WEBHOOK_URL"] : [];
+  // Only required when posting to Reddit (not when --discord-only)
+  const redditRequired =
+    redditOnly || !discordOnly
+      ? [
+          "BONDERY_OPS_REDDIT_CLIENT_ID",
+          "BONDERY_OPS_REDDIT_CLIENT_SECRET",
+          "BONDERY_OPS_REDDIT_USERNAME",
+          "BONDERY_OPS_REDDIT_PASSWORD",
+        ]
+      : [];
 
-if (!post) {
-  console.error(`Error: No post found with slug "${slug}".`);
-  console.error("Make sure the post is registered in content/blog/metadata.ts.");
-  process.exit(1);
-}
+  const missingEnv = [...alwaysRequired, ...discordRequired, ...redditRequired].filter(
+    (key) => !process.env[key],
+  );
+  if (missingEnv.length > 0) {
+    console.error("Error: Missing required environment variables:");
+    for (const key of missingEnv) {
+      console.error(`  - ${key}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
 
-// ---------------------------------------------------------------------------
-// Check announce eligibility
-// ---------------------------------------------------------------------------
+  const websiteUrl = process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(/\/$/, "");
+  const discordWebhookUrl = process.env.BONDERY_OPS_DISCORD_WEBHOOK_URL ?? "";
+  const redditConfig: RedditConfig = {
+    clientId: process.env.BONDERY_OPS_REDDIT_CLIENT_ID ?? "",
+    clientSecret: process.env.BONDERY_OPS_REDDIT_CLIENT_SECRET ?? "",
+    password: process.env.BONDERY_OPS_REDDIT_PASSWORD ?? "",
+    username: process.env.BONDERY_OPS_REDDIT_USERNAME ?? "",
+  };
 
-if (!post.announce?.enabled && !force) {
-  console.log(`Skipping: ${post.slug} — announce.enabled is false.`);
-  console.log("Set announce.enabled = true in the post's .meta.ts file, or pass skip-check token.");
-  process.exit(0);
-}
+  // ---------------------------------------------------------------------------
+  // Find post
+  // ---------------------------------------------------------------------------
 
-if (force && !post.announce?.enabled) {
-  console.warn("Warning: Announcing despite announce.enabled = false (skip-check token used).");
-}
+  const post = allPostMeta.find((p) => p.slug === slug);
 
-// ---------------------------------------------------------------------------
-// Resolve post URL
-// ---------------------------------------------------------------------------
+  if (!post) {
+    console.error(`Error: No post found with slug "${slug}".`);
+    console.error("Make sure the post is registered in content/blog/metadata.ts.");
+    process.exitCode = 1;
+    return;
+  }
 
-const postUrl = `${websiteUrl}/blog/${post.category}/${post.slug}`;
+  // ---------------------------------------------------------------------------
+  // Check announce eligibility
+  // ---------------------------------------------------------------------------
 
-let readingTime = 1;
-try {
-  const mdxPath = path.join(process.cwd(), "content", "blog", post.category, `${post.slug}.mdx`);
-  const mdxContent = fs.readFileSync(mdxPath, "utf-8");
-  readingTime = getReadingTime(mdxContent).minutes;
-} catch {
-  // Falls back to 1 min
-}
+  if (!post.announce?.enabled && !force) {
+    console.log(`Skipping: ${post.slug} — announce.enabled is false.`);
+    console.log(
+      "Set announce.enabled = true in the post's .meta.ts file, or pass skip-check token.",
+    );
+    return;
+  }
 
-console.log(`Announcing: "${post.title}"`);
-console.log(`  URL: ${postUrl}`);
-if (dryRun) {
-  console.log("  Mode: SIMULATE — no requests will be sent.");
-}
+  if (force && !post.announce?.enabled) {
+    console.warn("Warning: Announcing despite announce.enabled = false (skip-check token used).");
+  }
 
-// ---------------------------------------------------------------------------
-// Determine platforms to post to
-// ---------------------------------------------------------------------------
+  // ---------------------------------------------------------------------------
+  // Resolve post URL
+  // ---------------------------------------------------------------------------
 
-const announceDiscord = !redditOnly && post.announce?.discord !== false;
-const announceReddit = !discordOnly && post.announce?.reddit !== false;
+  const postUrl = `${websiteUrl}/blog/${post.category}/${post.slug}`;
 
-if (!announceDiscord && !announceReddit) {
-  console.log("No platforms selected. Nothing to do.");
-  process.exit(0);
-}
+  let readingTime = 1;
+  try {
+    const mdxPath = path.join(process.cwd(), "content", "blog", post.category, `${post.slug}.mdx`);
+    const mdxContent = fs.readFileSync(mdxPath, "utf-8");
+    readingTime = getReadingTime(mdxContent).minutes;
+  } catch {
+    // Falls back to 1 min
+  }
 
-// ---------------------------------------------------------------------------
-// Post in parallel
-// ---------------------------------------------------------------------------
+  console.log(`Announcing: "${post.title}"`);
+  console.log(`  URL: ${postUrl}`);
+  if (dryRun) {
+    console.log("  Mode: SIMULATE — no requests will be sent.");
+  }
 
-void (async () => {
+  // ---------------------------------------------------------------------------
+  // Determine platforms to post to
+  // ---------------------------------------------------------------------------
+
+  const announceDiscord = !redditOnly && post.announce?.discord !== false;
+  const announceReddit = !discordOnly && post.announce?.reddit !== false;
+
+  if (!announceDiscord && !announceReddit) {
+    console.log("No platforms selected. Nothing to do.");
+    return;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Post in parallel
+  // ---------------------------------------------------------------------------
+
   const tasks: Promise<void>[] = [];
 
   if (announceDiscord) {
@@ -210,8 +216,11 @@ void (async () => {
   }
 
   if (failed) {
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   console.log("Announcement complete.");
-})();
+}
+
+void main();

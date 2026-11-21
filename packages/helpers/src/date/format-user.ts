@@ -28,6 +28,14 @@ export type UserDateField = "monthShort" | "monthLong" | "yearNumeric" | "dayTwo
 type NumericDateOrder = "mdy" | "dmy" | "ymd";
 
 const CLOCK_PATTERN = /^(\d{1,2}):([0-5]\d)(?::([0-5]\d))?$/;
+const LAST_HOUR_OF_DAY = 23;
+
+/** Fixed sample dates. Only the clock or the field order is read from them, never the day itself. */
+const SAMPLE_YEAR = 2026;
+const MORNING_SAMPLE_HOUR = 5;
+const AFTERNOON_SAMPLE_HOUR = 17;
+/** A day above 12 cannot be a month, so its place in a formatted date shows the field order. */
+const UNAMBIGUOUS_SAMPLE_DAY = 13;
 
 /**
  * Shared `Intl.DateTimeFormat` instances. Building one costs far more than formatting with it,
@@ -232,7 +240,7 @@ function parseClockTime(hhmmss: string): { hour: number; minute: number; second:
   const hour = Number.parseInt(match[1] ?? "", 10);
   const minute = Number.parseInt(match[2] ?? "", 10);
   const second = Number.parseInt(match[3] ?? "0", 10);
-  if (hour > 23) {
+  if (hour > LAST_HOUR_OF_DAY) {
     return null;
   }
 
@@ -254,7 +262,7 @@ export function formatClockTime(
     return hhmmss;
   }
 
-  const date = new Date(Date.UTC(2026, 0, 1, parsed.hour, parsed.minute, parsed.second));
+  const date = new Date(Date.UTC(SAMPLE_YEAR, 0, 1, parsed.hour, parsed.minute, parsed.second));
   return formatTimeOfDate(date, { ...ctx, timeZone: "UTC" }, options);
 }
 
@@ -275,8 +283,8 @@ export function amPmLabelsForLocale(ctx: DateTimeFormatContext): { am: string; p
     hour12: true,
     timeZone: "UTC",
   };
-  const morning = new Date(Date.UTC(2026, 0, 1, 5, 0, 0));
-  const afternoon = new Date(Date.UTC(2026, 0, 1, 17, 0, 0));
+  const morning = new Date(Date.UTC(SAMPLE_YEAR, 0, 1, MORNING_SAMPLE_HOUR, 0, 0));
+  const afternoon = new Date(Date.UTC(SAMPLE_YEAR, 0, 1, AFTERNOON_SAMPLE_HOUR, 0, 0));
   const am =
     partValue(cachedDateTimeFormat(tag, timeOptions).formatToParts(morning), "dayPeriod") || "AM";
   const pm =
@@ -284,8 +292,8 @@ export function amPmLabelsForLocale(ctx: DateTimeFormatContext): { am: string; p
   return { am, pm };
 }
 
-function localeYearlessDayjsToken(ctx: DateTimeFormatContext): string {
-  const sample = new Date(2026, 10, 13);
+function localeYearlessDayjsToken(ctx: DateTimeFormatContext): "MMMM D" | "D MMMM" {
+  const sample = new Date(SAMPLE_YEAR, 10, UNAMBIGUOUS_SAMPLE_DAY);
   const parts = cachedDateTimeFormat(intlTag(ctx), {
     day: "numeric",
     month: "long",
@@ -304,7 +312,16 @@ function localeYearlessDayjsToken(ctx: DateTimeFormatContext): string {
 export function dateInputValueFormat(
   ctx: DateTimeFormatContext,
   options?: { withYear?: boolean },
-): string {
+):
+  | "D MMMM"
+  | "DD/MM"
+  | "DD/MM/YYYY"
+  | "LL"
+  | "MM-DD"
+  | "MM/DD"
+  | "MM/DD/YYYY"
+  | "MMMM D"
+  | "YYYY-MM-DD" {
   const withYear = options?.withYear ?? true;
 
   if (ctx.dateFormat === "mdy") {

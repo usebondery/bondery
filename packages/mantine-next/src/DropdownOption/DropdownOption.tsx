@@ -2,7 +2,7 @@
 
 import { Box, Group, Menu, Text } from "@mantine/core";
 import { IconCheck, IconExternalLink } from "@tabler/icons-react";
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, ReactElement, ReactNode } from "react";
 
 /**
  * One option inside a dropdown menu.
@@ -80,7 +80,7 @@ export function DropdownOption({
   onSelect,
   selected = false,
   tone = "default",
-}: DropdownOptionProps) {
+}: DropdownOptionProps): ReactElement {
   const isStacked = layout === "stacked";
   const toneColor = tone === "danger" ? "red" : undefined;
 

@@ -18,11 +18,11 @@ Upgrade dependencies in small steps. One ecosystem per PR. Every touched workspa
 
 **Choose a path:**
 
-| Path | When | Go to |
-|------|------|-------|
-| Bulk | Patch/minor within existing ranges | Step 1 |
-| Major | Range edit or breaking release | Step 2 |
-| Security | Advisory / `pnpm audit` | Step 2 (one fix per PR) |
+| Path     | When                               | Go to                   |
+| -------- | ---------------------------------- | ----------------------- |
+| Bulk     | Patch/minor within existing ranges | Step 1                  |
+| Major    | Range edit or breaking release     | Step 2                  |
+| Security | Advisory / `pnpm audit`            | Step 2 (one fix per PR) |
 
 **Workspaces:** `apps/api`, `apps/webapp`, `apps/mobile`, `apps/website`, `apps/chrome-extension`, `apps/supabase-db`, and `packages/*`. Package manager: pnpm workspaces + Turborepo.
 
@@ -78,13 +78,13 @@ Review `git diff` of `.agents/skills/` and `skills-lock.json`. If a skill disapp
 
 Commit skills separately from package bumps when possible:
 
-```
+```text
 chore: update agent skills
 ```
 
 Build every workspace you touched, then commit package bumps:
 
-```
+```text
 deps: bump patch and minor dependencies
 ```
 
@@ -102,19 +102,19 @@ Upgrade shared foundations first, then apps:
 
 ### Batch together
 
-| Ecosystem | Workspaces | Notes |
-|-----------|------------|-------|
-| **TypeScript** | Every workspace with `typescript` in `devDependencies` | Bump all to the same version. Run `check:types` everywhere, then build all touched workspaces. |
-| **React / react-dom** | All apps + `packages/emails` | Same exact version everywhere. Run `pnpm ls react -r` after install. |
-| **Zod** | `packages/schemas`, `apps/api`, `apps/webapp` | Run `pnpm --filter @bondery/schemas run check:contracts`. |
-| **Mantine** | `apps/webapp`, `apps/website`, `packages/mantine-next` | Same version on every `@mantine/*`. See [mantine-best-practices](../../skills/mantine-best-practices/SKILL.md). |
-| **Next.js** | `apps/webapp`, `apps/website` | `pnx @next/codemod@latest upgrade`. See [next-best-practices](../../skills/next-best-practices/SKILL.md). |
-| **Expo SDK** | `apps/mobile` | `pnpm exec expo install expo@<target>` then `pnpm exec expo install --fix`. See [upgrading-expo](../../skills/upgrading-expo/SKILL.md). |
-| **Tamagui** | `apps/mobile` | All `@tamagui/*` at the same version. |
-| **TanStack Query** | `apps/webapp` | Query + devtools together. |
-| **TipTap** | `apps/webapp` | All `@tiptap/*` aligned. |
-| **Supabase** | `apps/api`, `apps/webapp`, `apps/supabase-db` CLI | Regenerate types: `pnpm run generate-types`. |
-| **Fastify** | `apps/api` | `fastify` + `@fastify/*` together. |
+| Ecosystem             | Workspaces                                             | Notes                                                                                                                                   |
+| --------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **TypeScript**        | Every workspace with `typescript` in `devDependencies` | Bump all to the same version. Run `check:types` everywhere, then build all touched workspaces.                                          |
+| **React / react-dom** | All apps + `packages/emails`                           | Same exact version everywhere. Run `pnpm ls react -r` after install.                                                                    |
+| **Zod**               | `packages/schemas`, `apps/api`, `apps/webapp`          | Run `pnpm --filter @bondery/schemas run check:contracts`.                                                                               |
+| **Mantine**           | `apps/webapp`, `apps/website`, `packages/mantine-next` | Same version on every `@mantine/*`. See [mantine-best-practices](../../skills/mantine-best-practices/SKILL.md).                         |
+| **Next.js**           | `apps/webapp`, `apps/website`                          | `pnx @next/codemod@latest upgrade`. See [next-best-practices](../../skills/next-best-practices/SKILL.md).                               |
+| **Expo SDK**          | `apps/mobile`                                          | `pnpm exec expo install expo@<target>` then `pnpm exec expo install --fix`. See [upgrading-expo](../../skills/upgrading-expo/SKILL.md). |
+| **Tamagui**           | `apps/mobile`                                          | All `@tamagui/*` at the same version.                                                                                                   |
+| **TanStack Query**    | `apps/webapp`                                          | Query + devtools together.                                                                                                              |
+| **TipTap**            | `apps/webapp`                                          | All `@tiptap/*` aligned.                                                                                                                |
+| **Supabase**          | `apps/api`, `apps/webapp`, `apps/supabase-db` CLI      | Regenerate types: `pnpm run generate-types`.                                                                                            |
+| **Fastify**           | `apps/api`                                             | `fastify` + `@fastify/*` together.                                                                                                      |
 
 Per ecosystem: edit ranges → `pnpm install` → Steps 3–6 → merge before starting the next.
 
@@ -124,7 +124,7 @@ Per ecosystem: edit ranges → `pnpm install` → Steps 3–6 → merge before s
 
 Before editing code, fetch official release notes and migration guides for each major bump.
 
-```
+```text
 Web search: "<package> <from> to <to> migration"
 Web search: "<package> <to> breaking changes"
 ```
@@ -133,12 +133,12 @@ Grep the repo for APIs the guide says were removed. List config files that may n
 
 Repo checks:
 
-| Trigger | Command / file |
-|---------|----------------|
-| API schema change | `pnpm run generate:openapi` |
-| Supabase client bump | `pnpm run generate-types` (needs `pnpm --filter apps/supabase-db run start`) |
-| Env renames | `.env.*.example` per app |
-| Extension API break | `pnpm run sync-version` rewrites `MIN_EXTENSION_VERSION` (do not hand-edit) |
+| Trigger                                        | Command / file                                                                  |
+| ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| API schema change                              | `pnpm run generate:openapi`                                                     |
+| Supabase client bump                           | `pnpm run generate-types` (needs `pnpm --filter apps/supabase-db run start`)    |
+| Env renames                                    | `.env.*.example` per app                                                        |
+| Extension API break                            | `pnpm run sync-version` rewrites `MIN_EXTENSION_VERSION` (do not hand-edit)     |
 | `@better-auth/passkey` or any vendored catalog | Run every script in `scripts/updater/` (`pnpm run update:aaguid-catalog` today) |
 
 ---
@@ -154,7 +154,7 @@ Repo checks:
 
 One ecosystem per commit:
 
-```
+```text
 deps(webapp): upgrade Next.js 16.x → 17.x
 ```
 
@@ -187,14 +187,14 @@ pnpm exec expo-doctor                        # run inside apps/mobile
 pnpm run build                          # turbo build (all apps)
 ```
 
-| Workspace | Build command | Requires |
-|-----------|---------------|----------|
-| `apps/api` | `pnpm exec turbo build --filter=api` | `apps/api/.env.production.local` |
-| `apps/webapp` | `pnpm exec turbo build --filter=webapp` | `.env.production.local`, runs icon generation |
-| `apps/website` | `pnpm exec turbo build --filter=website` | `.env.production.local` |
-| `apps/chrome-extension` | `pnpm exec turbo build --filter=chrome-extension` | extension env files |
-| `apps/mobile` | `check:types` + `expo-doctor` | — |
-| `packages/*` | `pnpm exec turbo build --filter=./packages/*` or `pnpm --filter @bondery/<name> run build` | — |
+| Workspace               | Build command                                                                              | Requires                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| `apps/api`              | `pnpm exec turbo build --filter=api`                                                       | `apps/api/.env.production.local`              |
+| `apps/webapp`           | `pnpm exec turbo build --filter=webapp`                                                    | `.env.production.local`, runs icon generation |
+| `apps/website`          | `pnpm exec turbo build --filter=website`                                                   | `.env.production.local`                       |
+| `apps/chrome-extension` | `pnpm exec turbo build --filter=chrome-extension`                                          | extension env files                           |
+| `apps/mobile`           | `check:types` + `expo-doctor`                                                              | —                                             |
+| `packages/*`            | `pnpm exec turbo build --filter=./packages/*` or `pnpm --filter @bondery/<name> run build` | —                                             |
 
 **Webapp note:** `check:types` also runs `check:api-fetch -w webapp` — run it even when build passes.
 
@@ -212,28 +212,34 @@ End with a summary in the PR or handoff. Commit `pnpm-lock.yaml` with every `pac
 ## Package upgrade summary
 
 ### Updated packages
-| Package | From | To | Workspace(s) |
-|---------|------|----|--------------|
+
+| Package | From | To  | Workspace(s) |
+| ------- | ---- | --- | ------------ |
 
 ### Breaking changes
+
 | Package | Change | Fix applied |
-|---------|--------|-------------|
+| ------- | ------ | ----------- |
 
 ### Code changes
+
 - apps/webapp: …
 - Generated artifacts: openapi / supabase.types (yes/no)
 
 ### Build verification
+
 | Workspace | `pnpm run build` | Result |
-|-----------|------------------|--------|
+| --------- | ---------------- | ------ |
 
 ### Agent skills
+
 - `npx skills update`: updated / no-op / deferred (reason)
 - Breaking skill diffs (disappeared or rewritten): …
 
 ### Deferred
+
 | Package / skill | Reason |
-|-----------------|--------|
+| --------------- | ------ |
 ```
 
 Changelog: **📦 Dependencies** section, `deps:` commit prefix ([changelog instructions](../../../.github/instructions/changelog.instructions.md)).
@@ -253,28 +259,28 @@ Build passing does not mean UX is fine. From the **git diff**, list every change
 ```markdown
 ### Manual / UX testing
 
-| Area | Screen / flow | What to verify |
-|------|---------------|----------------|
-| Contacts | People list, person detail | Table sort, row selection, avatar initials |
-| Chat | Session sidebar, message input | Streaming, person chips, quota badge |
-| Modals | Add contact, delete contact | Open/close, focus trap, confirm destructive |
-| Mobile | Contact detail sheet | Sheet animation, form save, keyboard |
-| Extension | LinkedIn import popup | Content script injects, OAuth still works |
+| Area      | Screen / flow                  | What to verify                              |
+| --------- | ------------------------------ | ------------------------------------------- |
+| Contacts  | People list, person detail     | Table sort, row selection, avatar initials  |
+| Chat      | Session sidebar, message input | Streaming, person chips, quota badge        |
+| Modals    | Add contact, delete contact    | Open/close, focus trap, confirm destructive |
+| Mobile    | Contact detail sheet           | Sheet animation, form save, keyboard        |
+| Extension | LinkedIn import popup          | Content script injects, OAuth still works   |
 ```
 
 **Ecosystem → typical areas to test:**
 
-| If you upgraded… | Test these areas |
-|------------------|------------------|
-| Mantine / `@bondery/mantine-next` | Modals, forms, tables, date pickers, notifications, spotlight |
-| Next.js | Page navigation, loading states, server/client boundaries, metadata |
-| TanStack Query | List pages, optimistic updates, error toasts, refetch on focus |
-| TipTap | Rich text fields (notes, interactions) |
-| Expo / Tamagui / RN | Navigation, sheets, image picker, secure store, tab bar |
-| Supabase client | Auth session, realtime if used, storage uploads |
-| Fastify / Zod / schemas | API routes touched by migration; extension + mobile API calls |
-| React / TypeScript | Any screen using hooks, context, or refs — spot-check main flows |
-| Chrome extension | Content scripts, side panel, API version handshake |
+| If you upgraded…                  | Test these areas                                                    |
+| --------------------------------- | ------------------------------------------------------------------- |
+| Mantine / `@bondery/mantine-next` | Modals, forms, tables, date pickers, notifications, spotlight       |
+| Next.js                           | Page navigation, loading states, server/client boundaries, metadata |
+| TanStack Query                    | List pages, optimistic updates, error toasts, refetch on focus      |
+| TipTap                            | Rich text fields (notes, interactions)                              |
+| Expo / Tamagui / RN               | Navigation, sheets, image picker, secure store, tab bar             |
+| Supabase client                   | Auth session, realtime if used, storage uploads                     |
+| Fastify / Zod / schemas           | API routes touched by migration; extension + mobile API calls       |
+| React / TypeScript                | Any screen using hooks, context, or refs — spot-check main flows    |
+| Chrome extension                  | Content scripts, side panel, API version handshake                  |
 
 Mark each row **tested / not tested** in the PR. UI-facing upgrades should not merge with untested rows.
 

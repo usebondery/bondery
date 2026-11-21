@@ -10,7 +10,7 @@ They already wrote the problem. Do not copy it back. Answer.
 
 **Draft:**
 
-```
+```text
 Hi @login,
 
 Thanks for pointing this out and taking your time to open an issue.
@@ -28,7 +28,7 @@ Sveetya
 
 **Draft:**
 
-```
+```text
 Hi {Name},
 
 Thanks for reporting this, and sorry we lost your notes. That's on us.
@@ -50,7 +50,7 @@ Operator note: `Premium offer included. Credit after they write in.`
 
 **Draft:**
 
-```
+```text
 Hi @login,
 
 We're not going to add sales pipelines. Bondery is a personal relationship manager, not a sales tool, and that view would pull us the wrong way. If the underlying need is "who should I follow up with, and why", say more about that. That's closer to what we do build.
@@ -68,7 +68,7 @@ If this was a one-off miss they recovered from, skip Premium. If they missed som
 
 **Draft (pain is real, Premium yes):**
 
-```
+```text
 Hi {Name},
 
 I'm sorry. That's exactly the failure Bondery is supposed to prevent.
@@ -88,7 +88,7 @@ Sveetya
 
 **Do not ship:**
 
-```
+```text
 Hi {Name},
 
 Thank you so much for reaching out — I completely understand how frustrating this must be! We truly value your feedback.
@@ -101,7 +101,7 @@ The Bondery Team
 
 **Also do not ship (recap):**
 
-```
+```text
 Hi {Name},
 
 Safari keeps bouncing you back to login instead of opening the app.
@@ -111,7 +111,7 @@ That's a real bug on our side...
 
 **Rewrite:**
 
-```
+```text
 Hi {Name},
 
 Thanks for reporting this. That's a real bug on our side, not something you did.

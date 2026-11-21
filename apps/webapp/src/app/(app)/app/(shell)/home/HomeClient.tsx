@@ -17,6 +17,7 @@ import {
   useHomePageTranslations,
   useInteractionsPageTranslations,
 } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 type ActivityParticipantRef = string | InteractionParticipant;
 
@@ -104,7 +105,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
 
   const compactActivities = (() => {
     if (!timelineActivities) {
-      return undefined;
+      return;
     }
     return [...timelineActivities]
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -112,7 +113,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   })();
 
   const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants || []).flatMap((participant: ActivityParticipantRef) => {
+    return (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
 
@@ -126,11 +127,11 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
 
       return [
         {
-          avatar: participant.avatar || null,
+          avatar: nonEmpty(participant.avatar) ?? null,
           firstName: participant.firstName || t("UnknownPerson"),
           headline: participant.headline,
           id: participantId,
-          lastName: participant.lastName || null,
+          lastName: nonEmpty(participant.lastName) ?? null,
           location: participant.location,
           middleName: participant.middleName,
         },
@@ -181,7 +182,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
   };
 
   const handleDuplicate = async (activity: Activity) => {
-    const participantIds = (activity.participants || [])
+    const participantIds = (activity.participants ?? [])
       .map((participant: ActivityParticipantRef) =>
         typeof participant === "string" ? participant : participant.id,
       )
@@ -197,9 +198,9 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
-        description: activity.description || "",
+        description: activity.description ?? "",
         participantIds,
-        title: activity.title || "",
+        title: activity.title ?? "",
         type: activity.type,
       });
 

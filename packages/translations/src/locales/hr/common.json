@@ -230,11 +230,13 @@
     "deleting": "Brišem…",
     "duplicating": "Dupliciram…",
     "errorTitle": "Greška",
+    "mobileRuntimeError": "Pogreška pri izvođenju mobilne aplikacije",
     "noResults": "Nema rezultata",
     "removing": "Uklanjam…",
     "savedTitle": "Spremljeno",
     "saving": "Spremam…",
     "sending": "Šaljem…",
-    "successTitle": "Uspjeh"
+    "successTitle": "Uspjeh",
+    "unknownError": "Nepoznata pogreška"
   }
 }

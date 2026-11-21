@@ -55,7 +55,7 @@ export function resolveToCanonicalTimezone(iana: string): string {
   if (!iana) {
     return iana;
   }
-  const match = TIMEZONES_DATA.find((tz) => tz.group.some((alias) => alias === iana));
+  const match = TIMEZONES_DATA.find((tz) => tz.group.includes(iana));
   return match ? match.value : iana;
 }
 
@@ -87,7 +87,7 @@ export interface TimezoneSelectOption {
   value: string;
 }
 
-export function countryCodeToFlagEmoji(countryCode: string): string {
+export function countryCodeToFlagEmoji(countryCode: string | null | undefined): string {
   if (countryCode?.length !== 2) {
     return "🌐";
   }
@@ -213,12 +213,14 @@ export function getGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
 function buildGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
   const grouped: { [continent: string]: GroupedTimezoneItem[] } = {};
 
-  TIMEZONES_DATA.forEach((tz) => {
-    if (!grouped[tz.continent]) {
-      grouped[tz.continent] = [];
+  for (const tz of TIMEZONES_DATA) {
+    let continentItems = grouped[tz.continent];
+    if (!continentItems) {
+      continentItems = [];
+      grouped[tz.continent] = continentItems;
     }
     const label = formatTimezoneLabel(tz, locale);
-    grouped[tz.continent].push({
+    continentItems.push({
       flag: tz.flag,
       label,
       offset: tz.offset,
@@ -227,23 +229,24 @@ function buildGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
         .toLowerCase(),
       value: tz.value,
     });
-  });
+  }
 
-  Object.keys(grouped).forEach((continent) => {
-    grouped[continent].sort((a, b) => {
+  for (const items of Object.values(grouped)) {
+    items.sort((a, b) => {
       if (a.offset !== b.offset) {
         return a.offset - b.offset;
       }
 
       return a.label.localeCompare(b.label, locale);
     });
-  });
+  }
 
   const continentOrder = ["UTC", "Africa", "Americas", "Asia", "Europe", "Oceania"];
-  return continentOrder
-    .filter((continent) => grouped[continent])
-    .map((continent) => ({
-      group: locale ? displayContinentName(continent, locale) : continent,
-      items: grouped[continent],
-    }));
+  return continentOrder.flatMap((continent) => {
+    const items = grouped[continent];
+    if (!items) {
+      return [];
+    }
+    return [{ group: locale ? displayContinentName(continent, locale) : continent, items }];
+  });
 }

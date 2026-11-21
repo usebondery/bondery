@@ -1,7 +1,7 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { View, type ViewProps } from "react-native";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { joinClassNames } from "./joinClassNames";
 
 export type PaperProps = Omit<ViewProps, "children"> & {
   children?: ReactNode;
@@ -22,7 +22,7 @@ export function Paper({
 
   return (
     <View
-      className={joinClassNames("overflow-hidden", className)}
+      className={cn("overflow-hidden", className)}
       style={[
         {
           backgroundColor: colors.surface,

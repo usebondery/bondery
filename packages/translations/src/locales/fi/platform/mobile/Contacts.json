@@ -22,6 +22,8 @@
   "GroupFilterNewGroup": "Uusi ryhmä",
   "GroupFilterSheetTitle": "Näytä yhteystiedot",
   "Groups": "Ryhmät",
+  "MentionEmptyCaption": "Lisää henkilöitä, jotta voit mainita heidät muistiinpanoissa.",
+  "MentionEmptyTitle": "Ei vielä yhteystietoja",
   "MissingEmail": "Tällä yhteystiedolla ei ole sähköpostiosoitetta",
   "MissingPhone": "Tällä yhteystiedolla ei ole puhelinnumeroa",
   "MoreActions": "Lisää toimintoja",

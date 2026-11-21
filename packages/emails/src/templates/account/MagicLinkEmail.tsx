@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Text } from "react-email";
 import { defaultMagicLinkCopy } from "#fixtures/default-copy.js";
 import type { EmailDocumentProps } from "#shared/chrome.js";
@@ -27,7 +28,7 @@ export default function MagicLinkEmail({
   title,
   url = "https://app.usebondery.com/auth/start",
   websiteUrl,
-}: MagicLinkEmailProps) {
+}: MagicLinkEmailProps): ReactElement {
   return (
     <EmailWrapper
       chrome={chrome}

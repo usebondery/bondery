@@ -230,11 +230,13 @@
     "deleting": "Se șterge…",
     "duplicating": "Se duplică…",
     "errorTitle": "Eroare",
+    "mobileRuntimeError": "Eroare de rulare a aplicației mobile",
     "noResults": "Niciun rezultat",
     "removing": "Se elimină…",
     "savedTitle": "Salvat",
     "saving": "Se salvează…",
     "sending": "Se trimite…",
-    "successTitle": "Succes"
+    "successTitle": "Succes",
+    "unknownError": "Eroare necunoscută"
   }
 }

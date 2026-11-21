@@ -9,7 +9,7 @@ function normalizeTimeValue(value: string): string {
     return "08:00";
   }
 
-  const [hourPart, minutePart] = value.trim().split(":");
+  const [hourPart = "", minutePart = ""] = value.trim().split(":");
 
   return `${hourPart.padStart(2, "0")}:${minutePart.padStart(2, "0")}`;
 }
@@ -52,8 +52,9 @@ export function parseReminderPickerInput(value: string): string | null {
 
   const match24h = trimmed.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
   if (match24h) {
-    const hour = Number(match24h[1]);
-    const minute = Number(match24h[2]);
+    const [, hourText, minuteText] = match24h;
+    const hour = Number(hourText);
+    const minute = Number(minuteText);
 
     if (Number.isNaN(hour) || Number.isNaN(minute)) {
       return null;
@@ -68,9 +69,10 @@ export function parseReminderPickerInput(value: string): string | null {
     return null;
   }
 
-  const hourRaw = Number(match12h[1]);
-  const minute = Number(match12h[2]);
-  const suffix = match12h[3].toUpperCase();
+  const [, hourText, minuteText, suffixText = ""] = match12h;
+  const hourRaw = Number(hourText);
+  const minute = Number(minuteText);
+  const suffix = suffixText.toUpperCase();
 
   if (Number.isNaN(hourRaw) || Number.isNaN(minute) || hourRaw < 1 || hourRaw > 12) {
     return null;
@@ -90,7 +92,7 @@ function toApiTime(value: string): string | null {
     return null;
   }
 
-  const [hourPart, minutePart, secondPart] = value.trim().split(":");
+  const [hourPart = "", minutePart = "", secondPart] = value.trim().split(":");
   const normalizedHour = hourPart.padStart(2, "0");
   const normalizedMinute = minutePart.padStart(2, "0");
   const normalizedSecond = (secondPart || "00").padStart(2, "0");

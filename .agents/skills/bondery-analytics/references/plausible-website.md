@@ -4,11 +4,11 @@ Plausible Community Edition tracks **anonymous aggregate traffic** on the market
 
 ## Scope
 
-| In scope | Out of scope |
-|----------|--------------|
-| `apps/website` pageviews | `apps/webapp` product app |
+| In scope                        | Out of scope                           |
+| ------------------------------- | -------------------------------------- |
+| `apps/website` pageviews        | `apps/webapp` product app              |
 | Referrers, UTMs, outbound links | User identity, funnels, feature events |
-| Cookieless aggregate metrics | PostHog events |
+| Cookieless aggregate metrics    | PostHog events                         |
 
 Product analytics remain on PostHog. See `deploy/plausible/README.md`.
 
@@ -26,10 +26,10 @@ Product analytics remain on PostHog. See `deploy/plausible/README.md`.
 
 ## Ops
 
-| Item | Location |
-|------|----------|
-| Compose / deploy | `deploy/plausible/compose.yml` |
-| Env example | `deploy/plausible/.env.example` |
+| Item              | Location                                            |
+| ----------------- | --------------------------------------------------- |
+| Compose / deploy  | `deploy/plausible/compose.yml`                      |
+| Env example       | `deploy/plausible/.env.example`                     |
 | Ops domain wiring | `BONDERY_INFRA_PLAUSIBLE_DOMAIN` on ops Dokploy app |
 
 After deploy: register site domain in Plausible admin to match `BONDERY_PUBLIC_PLAUSIBLE_DOMAIN`.

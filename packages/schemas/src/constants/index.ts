@@ -33,12 +33,34 @@ export const IMPORTANT_DATE_TYPES = [
   "other",
 ] as const;
 
-export const IMPORTANT_DATE_NOTIFY_DAYS = [1, 3, 7] as const;
+/** Reminder lead times, in days before an important date. */
+export const NOTIFY_DAY_BEFORE = 1;
+export const NOTIFY_FEW_DAYS_BEFORE = 3;
+export const NOTIFY_WEEK_BEFORE = 7;
+
+export const IMPORTANT_DATE_NOTIFY_DAYS = [
+  NOTIFY_DAY_BEFORE,
+  NOTIFY_FEW_DAYS_BEFORE,
+  NOTIFY_WEEK_BEFORE,
+] as const;
+
+/** Maximum number of tag ids accepted by a contact filter and by `tag_ids` on the people list query. */
+export const MAX_TAG_FILTER_IDS = 20;
+
+/** Maximum number of tool activities stored on one chat message. */
+export const CHAT_MESSAGE_MAX_ACTIVITIES = 20;
+
+/** Shortest search text the geocoder accepts. */
+export const GEOCODE_SEARCH_MIN_LENGTH = 3;
+
+const BYTES_PER_KIB = 1024;
+const BYTES_PER_MIB = BYTES_PER_KIB * BYTES_PER_KIB;
+const AVATAR_MAX_MIB = 5;
 
 export const AVATAR_UPLOAD = {
   allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"] as const,
-  maxFileSizeBytes: 5 * 1024 * 1024,
-  maxFileSizeMB: 5,
+  maxFileSizeBytes: AVATAR_MAX_MIB * BYTES_PER_MIB,
+  maxFileSizeMB: AVATAR_MAX_MIB,
 } as const;
 
 export const API_KEY_LIMITS = {

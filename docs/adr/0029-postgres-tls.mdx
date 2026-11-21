@@ -1,0 +1,60 @@
+---
+title: "ADR 0029: Postgres TLS"
+hidden: true
+last_updated: 2026-11-18
+---
+
+# ADR 0029: Postgres TLS
+
+**Status:** Accepted
+**Date:** 2026-11-18
+
+## Context
+
+No connection to Postgres used TLS. The pool passed only a connection string, the bundled `postgis/postgis:17-3.5` ran with `ssl=off`, and no URL, CI job, or doc mentioned `sslmode`. SCRAM protected passwords, but contacts, notes, sessions, and OAuth tokens crossed the wire in plaintext.
+
+On the bundled stack that traffic stays inside one host's Compose bridge. It does not stay there for an external or managed Postgres, a split API and database host (the planned replicas, MAIN-376), tools on an SSH tunnel, or an "encryption in transit" review. Redis already moved to TLS plus a password through the `redis-secrets` job, so the stack had a pattern to follow.
+
+## Decision
+
+1. **Every connection uses TLS that verifies the server.** The default mode is `verify-full`: the CA and the hostname. `verify-ca`, `require`, and `disable` exist for external databases, chosen explicitly, and production warns on the last two. `prefer` and `allow` are refused, because they fall back to plaintext without telling anyone.
+2. **The server refuses plaintext.** `deploy/bondery/postgres/pg_hba.conf` accepts TCP only through `hostssl` with SCRAM and rejects `hostnossl`. The Unix socket stays `trust`, so the healthcheck and `compose exec` backups keep working. Postgres reads the file through `-c hba_file=`, so installs whose data volume still holds the initdb file are covered too.
+3. **A private CA, not a pinned certificate.** Three TLS client stacks connect: Node `pg`, Prisma's native schema engine, and libpq (psql, pg_dump). All of them handle a CA root the same way. The server certificate can be reissued without any client change, and tunnelled tools import one long-lived CA file. The CA is valid for 20 years and the server certificate for 10. `stack-secrets` reissues the server certificate 90 days before expiry, when a hostname is missing, or when the CA changed.
+4. **One secrets job for the bundled services.** The Redis job became `stack-secrets` (`ensure-stack-secrets.js`), with shared X.509 helpers in `apps/api/src/lib/infra-secrets/`. Redis behaviour did not change. Each Postgres volume has one consumer: `postgres-tls-ca` (the job), `postgres-tls-server` (db, read-only), `postgres-tls-client` (api, read-only).
+5. **The key reaches Postgres through a tmpfs.** Postgres refuses a key that other users can read, and a bind mount from a Windows or macOS host cannot carry Unix modes. `deploy/bondery/postgres/entrypoint.sh` copies the key into a tmpfs as `postgres:postgres 0600`, then starts Postgres. This works on every host and does not depend on the image's postgres UID.
+6. **One resolver decides TLS for every connection.** `packages/db/src/connection/database-tls.ts` reads `DATABASE_SSL_MODE`, `DATABASE_SSL_ROOT_CERT_FILE`, and `DATABASE_SSL_ROOT_CERT`. `pgConnectionConfig(url)` feeds every `pg` Pool, Client, and pg-boss. `prismaCliUrl(url)` feeds `prisma.config.ts`. `check:db-connections` fails on a connection built any other way.
+7. **Channel binding.** With TLS on, `pg` uses SCRAM-SHA-256-PLUS. The password exchange is bound to the TLS session, so a forged certificate cannot be used to relay the login.
+8. **Expiry is visible.** The API logs the negotiated TLS version, cipher, and days left on the presented certificate at boot. A daily pg-boss job warns 90 days before expiry and errors 14 days before. The public `/health/ready` shows none of this.
+
+## Findings that shaped the details
+
+All of these were measured against `postgis/postgis:17-3.5` with the real `entrypoint.sh` and `pg_hba.conf`.
+
+| Finding | Consequence |
+|---|---|
+| `pg` 8.23.1 applies URL parameters after explicit options. `sslmode=disable` in the URL turned a verify-full `ssl` object into a plaintext attempt | The resolver strips every TLS parameter from URLs before `pg` sees them. The server's `hostnossl reject` is the second line |
+| Prisma's schema engine silently ignores libpq's `sslmode=verify-full` and `sslrootcert`: it connected with a wrong CA and a wrong hostname | `prismaCliUrl` emits only Prisma's dialect: `sslmode=require&sslaccept=strict&sslcert=<absolute path>`. That rejected both the wrong CA and the wrong hostname. `check:db-connections` rejects libpq TLS parameters in `prisma.config.ts` |
+| Prisma has no mode that checks the CA but skips the hostname | `verify-ca` maps to `strict` for migrations, which is stricter and fails closed |
+| The schema engine on Windows (SChannel) cannot negotiate TLS 1.3 | `ssl_min_protocol_version=TLSv1.2`, with TLS 1.2 limited to `ECDHE+AESGCM:ECDHE+CHACHA20`. Node and libpq negotiate TLS 1.3 |
+| Prisma resolves a relative `sslcert` against `prisma/` | `prismaCliUrl` always passes an absolute path |
+| The `@bondery/db` package ships `dist`, `prisma`, and `prisma.config.ts`, not `src/` | `src/connection/database-tls.ts` (Node built-ins only) is added to the package `files`, so `prisma.config.ts` loads it in the API image |
+| A service in an included Compose file can depend on a service in the including file | `db` stays in `docker-compose.postgres.yml` and waits for `stack-secrets` |
+
+## Rollout
+
+One release: TLS on and plaintext refused together. The release smoke (`deploy/bondery/scripts/smoke-release.mjs`) runs the exact stack and checks three things: every client connection uses TLS 1.2 or newer, plaintext is refused, and an untrusted CA is refused. Deploy to `services-beta` first, check the boot line `Postgres connection security`, then promote. Rollback is the previous release: same data, plaintext configuration.
+
+## Relation to row-level security
+
+Row-level security (branch `sveetya/postgres-rls`) adds more connection sites: a service pool, an owner client, role provisioning, and pg-boss schema install. When it merges, each of them takes `pgConnectionConfig`, and all of them share one `DATABASE_SSL_*`, because it is one server. `check:db-connections` fails on any site that does not.
+
+## Consequences
+
+- Plaintext Postgres traffic is gone from the bundled stack. A configuration mistake fails loudly instead of downgrading.
+- Tools on an SSH tunnel need `sslmode=verify-full` and the CA (`deploy/bondery/scripts/postgres-ca.sh`). This is an upgrade note.
+- The database restarts once on the upgrade release.
+- External Postgres is a supported setup (`docker-compose.external-postgres.yml`), with its TLS mode and CA explicit.
+
+## Not in scope
+
+Client certificates (mTLS), Plausible's own Postgres, and moving Redis onto the stack CA are possible follow-ups.

@@ -13,10 +13,10 @@ export const TELEPHONE_PREFIX_OPTIONS: ReadonlyArray<TelephonePrefixOption> = Ar
   (() => {
     const map = new Map<string, TelephonePrefixOption>();
 
-    countryCodes.forEach((country) => {
+    for (const country of countryCodes) {
       const value = canonicalizeDialCode(country.dialCode);
       if (!value || map.has(value)) {
-        return;
+        continue;
       }
 
       map.set(value, {
@@ -24,10 +24,12 @@ export const TELEPHONE_PREFIX_OPTIONS: ReadonlyArray<TelephonePrefixOption> = Ar
         displayPrefix: formatDialCodeForDisplay(country.dialCode),
         flag: country.flag,
         label: country.name,
-        reactMaskExpression: country.reactMaskExpression || DEFAULT_PHONE_REACT_MASK_EXPRESSION,
+        reactMaskExpression: country.reactMaskExpression
+          ? country.reactMaskExpression
+          : DEFAULT_PHONE_REACT_MASK_EXPRESSION,
         value,
       });
-    });
+    }
 
     const sorted = Array.from(map.values()).sort((a, b) =>
       compareTelephonePrefixByDialDigits(a.value, b.value),
@@ -79,5 +81,7 @@ export function getTelephonePrefixSearchTexts(
 
 export function getTelephoneReactMaskExpression(prefix: string): string {
   const option = findTelephonePrefixOption(prefix);
-  return option?.reactMaskExpression || DEFAULT_PHONE_REACT_MASK_EXPRESSION;
+  return option?.reactMaskExpression
+    ? option.reactMaskExpression
+    : DEFAULT_PHONE_REACT_MASK_EXPRESSION;
 }

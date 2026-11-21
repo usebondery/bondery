@@ -73,6 +73,9 @@ export function toImportantDateFromPrisma(row: {
   });
 }
 
+/** Years are zero-padded to four digits in an ISO calendar date. */
+const ISO_YEAR_DIGITS = 4;
+
 export function toIsoDateKey(value: string): string | null {
   const dateOnly = value.slice(0, 10);
   const [year, month, day] = dateOnly.split("-").map(Number);
@@ -81,7 +84,7 @@ export function toIsoDateKey(value: string): string | null {
     return null;
   }
 
-  return `${year.toString().padStart(4, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
+  return `${year.toString().padStart(ISO_YEAR_DIGITS, "0")}-${month.toString().padStart(2, "0")}-${day.toString().padStart(2, "0")}`;
 }
 
 export function deriveReminderDateKey(entry: {

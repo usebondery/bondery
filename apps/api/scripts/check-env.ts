@@ -37,7 +37,8 @@ if (!sameSet(fromManifest, fromModule)) {
   console.error(
     `  only in module: ${fromModule.filter((k) => !fromManifest.includes(k)).join(", ") || "(none)"}`,
   );
-  process.exit(1);
+  process.exitCode = 1;
+  throw new Error("API required-env lists drifted");
 }
 
 const schemaDevRequired = [...getApiRequiredEnvVars("development")];
@@ -49,7 +50,8 @@ if (!sameSet(fromSchema, schemaDevRequired)) {
   console.error(
     `  only in manifest: ${schemaDevRequired.filter((k) => !fromSchema.includes(k)).join(", ") || "(none)"}`,
   );
-  process.exit(1);
+  process.exitCode = 1;
+  throw new Error("API required-env lists drifted");
 }
 
 const bootDevNames = getBootEnvVarNames("api", "development");
@@ -68,7 +70,8 @@ if (!sameSet(bootDevNames, bootDevExpected)) {
   console.error(
     `  only in expected: ${bootDevExpected.filter((k) => !bootDevNames.includes(k)).join(", ") || "(none)"}`,
   );
-  process.exit(1);
+  process.exitCode = 1;
+  throw new Error("API required-env lists drifted");
 }
 
 for (const name of bootDevNames) {
@@ -79,14 +82,16 @@ for (const name of bootDevNames) {
   );
   if (!entry) {
     console.error(`API boot-env: no manifest entry for ${name}`);
-    process.exit(1);
+    process.exitCode = 1;
+    throw new Error(`API boot-env: no manifest entry for ${name}`);
   }
   const value = resolveBootEnvValue(entry);
   if (!value.trim()) {
     console.error(
       `API boot-env: ${name} resolves to empty — add boot.value on manifest entry ${entry.canonical}`,
     );
-    process.exit(1);
+    process.exitCode = 1;
+    throw new Error(`API boot-env: ${name} resolves to empty`);
   }
 }
 

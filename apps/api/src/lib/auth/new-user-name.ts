@@ -24,7 +24,7 @@ export function splitDisplayName(name: string | null | undefined): {
     return { firstName: "", lastName: null };
   }
 
-  const [firstName, ...rest] = trimmed.split(/\s+/);
+  const [firstName = "", ...rest] = trimmed.split(/\s+/);
   const lastName = rest.join(" ").trim();
   return { firstName, lastName: lastName || null };
 }

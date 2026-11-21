@@ -1,5 +1,8 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Group, Select } from "@mantine/core";
 import { type Icon, IconBook, IconCode, IconServer, IconTool } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -48,7 +51,7 @@ export function DocsTabs({ pathname, tabs }: DocsTabsProps) {
   return (
     <Select
       allowDeselect={false}
-      aria-label="Documentation section"
+      aria-label={docs.Sidebar.SectionAria}
       data={tabs.map((tab) => ({ label: tab.title, value: tab.key }))}
       leftSection={active ? tabIcon(active.icon, 16) : null}
       leftSectionWidth={34}

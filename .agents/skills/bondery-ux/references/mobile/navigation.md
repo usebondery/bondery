@@ -22,12 +22,12 @@ The same class of bug appears anywhere a list or chip row fires `push` without a
 
 4. **Match intent to API.**
 
-   | User intent | Typical API | Notes |
-   |-------------|-------------|--------|
-   | Hub → settings leaf | `push` (through gate) | At most one leaf above tabs |
-   | Open contact / group by id | `navigate` | Prefer focus over duplicate stack entries |
-   | True child (contact → notes) | `push` (through gate) | Back returns to parent |
-   | Auth success | `replace` | No return to login |
+   | User intent                  | Typical API           | Notes                                     |
+   | ---------------------------- | --------------------- | ----------------------------------------- |
+   | Hub → settings leaf          | `push` (through gate) | At most one leaf above tabs               |
+   | Open contact / group by id   | `navigate`            | Prefer focus over duplicate stack entries |
+   | True child (contact → notes) | `push` (through gate) | Back returns to parent                    |
+   | Auth success                 | `replace`             | No return to login                        |
 
 5. **Disable affordances while blocked.** When navigation is in flight, set `NavLink` `disabled`, or set `pointerEvents="none"` on the hub scroll content until `transitionEnd`. Visual press feedback can stay; the second tap must not enqueue another route.
 

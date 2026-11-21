@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import type { ChatModelId } from "@bondery/schemas";
 import type { UIMessage } from "ai";
 import { DefaultChatTransport, lastAssistantMessageIsCompleteWithApprovalResponses } from "ai";
-import { type Dispatch, type SetStateAction, useCallback, useRef, useState } from "react";
+import { type Dispatch, type SetStateAction, useEffect, useRef, useState } from "react";
 import { resolveRequestIntent } from "./chatRequestIntent";
 import {
   chatQuotaResetAt,
@@ -38,7 +38,9 @@ export function useChatSession({
   const isRetryRef = useRef(false);
   const messagesRef = useRef<UIMessage[]>([]);
   // The chat setter is needed inside `onFinish`, which runs before `chat` exists.
-  const setMessagesRef = useRef<Dispatch<SetStateAction<UIMessage[]>>>(() => {});
+  const setMessagesRef = useRef<Dispatch<SetStateAction<UIMessage[]>>>(() => {
+    // no-op: replaced once useChat returns the live setter
+  });
   const [modelId, setModelId] = useState<ChatModelId>(initialModelId);
   const [turnOutcomes, setTurnOutcomes] = useState<Map<string, ChatTurnOutcome>>(new Map());
 
@@ -73,6 +75,7 @@ export function useChatSession({
     },
     // Approving or denying a paused tool resumes the same turn automatically.
     sendAutomaticallyWhen: lastAssistantMessageIsCompleteWithApprovalResponses,
+    // biome-ignore lint/nursery/useReactCompiler: `body` runs when a request is sent, never while rendering, so reading the refs here is safe
     transport: new DefaultChatTransport({
       api: "/api/chat",
       body: () => {
@@ -87,13 +90,16 @@ export function useChatSession({
     }),
   });
 
-  setMessagesRef.current = chat.setMessages;
-  messagesRef.current = chat.messages;
+  // Keep the refs current after each commit. React flushes this effect before it handles
+  // the next click or key press, so a send always sees the latest values.
+  useEffect(() => {
+    setMessagesRef.current = chat.setMessages;
+    messagesRef.current = chat.messages;
+    modelIdRef.current = modelId;
+  });
 
-  const selectModel = useCallback((nextModelId: ChatModelId) => {
-    modelIdRef.current = nextModelId;
-    setModelId(nextModelId);
-  }, []);
+  // The state setter keeps one identity for the life of the component.
+  const selectModel: (nextModelId: ChatModelId) => void = setModelId;
 
   /** Run a function with the retry intent set for the next request only. */
   const withRetryIntent = async (run: () => Promise<void>) => {

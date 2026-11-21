@@ -21,7 +21,7 @@ export function EnrichResumeNotificationContent() {
   }
 
   const handleResume = () => {
-    resume(pendingQueueStatus);
+    void resume(pendingQueueStatus);
   };
   const handleDiscard = async () => {
     await discard();

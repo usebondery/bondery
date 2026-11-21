@@ -24,7 +24,7 @@ export function TabRootScreenHeader({ titleRow, accessory }: TabRootScreenHeader
       }}
     >
       <View
-        className="w-full self-stretch justify-center overflow-hidden"
+        className="w-full justify-center self-stretch overflow-hidden"
         style={{ height: MOBILE_LAYOUT.screenChrome.titleRowHeight }}
       >
         {titleRow}

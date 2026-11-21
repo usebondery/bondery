@@ -10,9 +10,9 @@ When work ships in production:
 
 ## Patch vs minor
 
-| Ship type | MAIN state | Also update |
-|-----------|------------|-------------|
-| Patch/minor fix | Release queue → Released | Changelog entry |
+| Ship type         | MAIN state                           | Also update                   |
+| ----------------- | ------------------------------------ | ----------------------------- |
+| Patch/minor fix   | Release queue → Released             | Changelog entry               |
 | Public initiative | ROADMAP Ready for Release → Released | `bondery-roadmap` release-day |
 
 ## Release handoff checklist

@@ -230,11 +230,13 @@
     "deleting": "A eliminar...",
     "duplicating": "A duplicar...",
     "errorTitle": "Erro",
+    "mobileRuntimeError": "Erro de execução da aplicação móvel",
     "noResults": "Sem resultados",
     "removing": "A remover...",
     "savedTitle": "Guardado",
     "saving": "A guardar...",
     "sending": "A enviar...",
-    "successTitle": "Sucesso"
+    "successTitle": "Sucesso",
+    "unknownError": "Erro desconhecido"
   }
 }

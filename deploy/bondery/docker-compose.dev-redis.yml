@@ -47,7 +47,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "REDISCLI_AUTH=\"$$(cat /bondery-redis/client/password)\" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG",
+          'REDISCLI_AUTH="$$(cat /bondery-redis/client/password)" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG',
         ]
       interval: 5s
       timeout: 3s

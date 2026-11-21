@@ -4,7 +4,7 @@
 import { formatContactName } from "@bondery/helpers/contact";
 import type { ContactSelectable } from "@bondery/schemas";
 import { Combobox, getDefaultZIndex, Pill, PillsInput, useCombobox } from "@mantine/core";
-import { useEffect, useState } from "react";
+import { type ReactElement, useEffect, useState } from "react";
 import { PersonChip } from "#nextjs/PersonChip/index.js";
 import { PeoplePickerDropdownBody } from "#peoplePicker/PeoplePickerDropdownBody.js";
 import {
@@ -125,7 +125,7 @@ function ReadonlySelectedPeoplePills({
  *
  * `isReadonly` renders the same chip field without search, dropdown, or removal.
  */
-export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps) {
+export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps): ReactElement {
   if (props.isReadonly) {
     return (
       <ReadonlySelectedPeoplePills
@@ -287,7 +287,7 @@ function EditablePeopleMultiPickerInput({
                 onFocus={() => contactsCombobox.openDropdown()}
                 onKeyDown={(event) => {
                   if (event.key === "Backspace" && search.length === 0) {
-                    const lastSelectedId = selectedIds[selectedIds.length - 1];
+                    const lastSelectedId = selectedIds.at(-1);
 
                     if (lastSelectedId) {
                       onChange(selectedIds.slice(0, -1));

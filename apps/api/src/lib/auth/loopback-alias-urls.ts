@@ -1,3 +1,5 @@
+const IPV4_OCTET_COUNT = 4;
+
 export function isLoopbackHostname(hostname: string): boolean {
   if (hostname === "localhost" || hostname === "[::1]" || hostname === "::1") {
     return true;
@@ -5,7 +7,7 @@ export function isLoopbackHostname(hostname: string): boolean {
 
   const ipv4Octets = hostname.split(".");
   return (
-    ipv4Octets.length === 4 &&
+    ipv4Octets.length === IPV4_OCTET_COUNT &&
     ipv4Octets[0] === "127" &&
     ipv4Octets.every((octet) => /^\d+$/.test(octet) && Number(octet) <= 255)
   );

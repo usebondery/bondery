@@ -3,7 +3,7 @@
 import type { AddressPin, MapPin } from "@bondery/schemas";
 import type { MapUrlCamera } from "@/app/(app)/app/(shell)/map/utils/mapUrlCamera";
 import type { MapView } from "@/lib/contacts/map-types";
-import { useMapPinsQuery } from "@/lib/query/hooks/useContacts";
+import { useMapPinsQuery } from "@/lib/query/hooks/useMapPins";
 
 export function useMapViewportPins(view: MapView, camera: MapUrlCamera | null) {
   const contactEnabled = view === "locations";

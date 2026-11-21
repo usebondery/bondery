@@ -4,13 +4,13 @@ Project-specific rules for first-party skills in `.agents/skills/bondery-*`.
 
 ## Naming
 
-| Rule | Example |
-|------|---------|
-| Directory = `name` frontmatter field | `bondery-api/` → `name: bondery-api` |
-| Lowercase letters, numbers, hyphens only | `bondery-e2e-tests` ✅ `bondery_e2e` ❌ |
-| `bondery-` prefix for first-party skills | `bondery-ux`, `bondery-core` |
-| Upstream skills keep upstream name | `supabase-postgres-best-practices`, `prisma-next-*` |
-| `metadata.namespace: bondery` on first-party skills | Required |
+| Rule                                                | Example                                             |
+| --------------------------------------------------- | --------------------------------------------------- |
+| Directory = `name` frontmatter field                | `bondery-api/` → `name: bondery-api`                |
+| Lowercase letters, numbers, hyphens only            | `bondery-e2e-tests` ✅ `bondery_e2e` ❌             |
+| `bondery-` prefix for first-party skills            | `bondery-ux`, `bondery-core`                        |
+| Upstream skills keep upstream name                  | `supabase-postgres-best-practices`, `prisma-next-*` |
+| `metadata.namespace: bondery` on first-party skills | Required                                            |
 
 ## Hub + references pattern
 
@@ -36,29 +36,29 @@ See [api-errors.md](../../bondery-api/references/api-errors.md)
 
 Do not duplicate content across skills — link and keep a single source of truth:
 
-| Domain | Owner skill |
-|--------|-------------|
-| Cross-cutting code craft, TypeScript, Biome | `bondery-coding-standards` |
-| API contracts, Fastify, sync | `bondery-api` |
-| UI patterns, empty states, error display | `bondery-ux` |
-| Adding a UI locale, plurals, exonyms, locale profiles | `bondery-i18n` |
-| Monorepo boundaries, extension schema | `bondery-core` |
-| Prisma schema, migrations, Postgres usage (Bondery classic Prisma) | `bondery-database` |
-| Prisma Next (upstream CLI skills; routed from `bondery-database`) | `prisma-next-*` in `.agents/skills/` |
-| E2E / Playwright | `bondery-e2e-tests` |
-| Security, auth, tenant isolation | `bondery-security` |
-| Legal disclosure, subprocessors, policy claims | `bondery-legal` |
-| Product changelog, commit prefixes, release notes | `bondery-changelog` |
-| Public roadmap, Plane ROADMAP project | `bondery-roadmap` |
-| Internal MAIN board, cycles, sanity checks | `bondery-pm` |
-| Release operator runbook (deploy, tags, pins, gates) | `bondery-release` |
-| English registers (Orwell-Hemingway vs ASD-100) | `bondery-writing` |
-| Skill authoring | `bondery-skill-authoring` |
-| Verification loop, PR gates, change-scoped checks | `bondery-verification-loop` |
-| Transactional email, templates, SMTP/Plunk | `bondery-emails` |
-| 1:1 GitHub/email/review replies (founder voice) | `bondery-support-replies` |
-| Chrome extension runtime, WXT/MV3, CWS listing graphics | `bondery-chrome-extension` |
-| LLM plugin packages, Claude directory, OpenAI plugin ZIP | `bondery-llm-plugins` |
+| Domain                                                             | Owner skill                          |
+| ------------------------------------------------------------------ | ------------------------------------ |
+| Cross-cutting code craft, TypeScript, Biome                        | `bondery-coding-standards`           |
+| API contracts, Fastify, sync                                       | `bondery-api`                        |
+| UI patterns, empty states, error display                           | `bondery-ux`                         |
+| Adding a UI locale, plurals, exonyms, locale profiles              | `bondery-i18n`                       |
+| Monorepo boundaries, extension schema                              | `bondery-core`                       |
+| Prisma schema, migrations, Postgres usage (Bondery classic Prisma) | `bondery-database`                   |
+| Prisma Next (upstream CLI skills; routed from `bondery-database`)  | `prisma-next-*` in `.agents/skills/` |
+| E2E / Playwright                                                   | `bondery-e2e-tests`                  |
+| Security, auth, tenant isolation                                   | `bondery-security`                   |
+| Legal disclosure, subprocessors, policy claims                     | `bondery-legal`                      |
+| Product changelog, commit prefixes, release notes                  | `bondery-changelog`                  |
+| Public roadmap, Plane ROADMAP project                              | `bondery-roadmap`                    |
+| Internal MAIN board, cycles, sanity checks                         | `bondery-pm`                         |
+| Release operator runbook (deploy, tags, pins, gates)               | `bondery-release`                    |
+| English registers (Orwell-Hemingway vs ASD-100)                    | `bondery-writing`                    |
+| Skill authoring                                                    | `bondery-skill-authoring`            |
+| Verification loop, PR gates, change-scoped checks                  | `bondery-verification-loop`          |
+| Transactional email, templates, SMTP/Plunk                         | `bondery-emails`                     |
+| 1:1 GitHub/email/review replies (founder voice)                    | `bondery-support-replies`            |
+| Chrome extension runtime, WXT/MV3, CWS listing graphics            | `bondery-chrome-extension`           |
+| LLM plugin packages, Claude directory, OpenAI plugin ZIP           | `bondery-llm-plugins`                |
 
 ## Agent configuration
 
@@ -71,11 +71,11 @@ Not every skill belongs in both — only skills that apply broadly.
 
 ## Upstream vs first-party
 
-| | First-party (`bondery-*`) | Upstream CLI |
-|--|---------------------------|--------------|
-| Edit in repo | Yes | No — reinstall via `pnx skills add`, or refresh with `npx skills update` |
-| Lock file | No | Yes — `skills-lock.json` |
-| Checklist in SKILL.md | Required | Optional (upstream may not have one) |
+|                       | First-party (`bondery-*`) | Upstream CLI                                                             |
+| --------------------- | ------------------------- | ------------------------------------------------------------------------ |
+| Edit in repo          | Yes                       | No — reinstall via `pnx skills add`, or refresh with `npx skills update` |
+| Lock file             | No                        | Yes — `skills-lock.json`                                                 |
+| Checklist in SKILL.md | Required                  | Optional (upstream may not have one)                                     |
 
 Install upstream skills:
 

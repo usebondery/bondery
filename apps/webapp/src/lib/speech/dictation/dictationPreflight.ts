@@ -14,7 +14,7 @@ export function checkDictationPreflight(input: {
   online: boolean;
   secure: boolean;
   supported: boolean;
-}): DictationErrorCode | null {
+}): "insecure" | "offline" | "unsupported" | null {
   if (!input.supported) {
     return "unsupported";
   }
@@ -34,8 +34,8 @@ export function readDictationPreflightState(): {
   supported: boolean;
 } {
   return {
-    online: globalThis.navigator?.onLine !== false,
-    secure: globalThis.window?.isSecureContext !== false,
+    online: typeof globalThis.navigator === "undefined" || globalThis.navigator.onLine,
+    secure: typeof globalThis.window === "undefined" || globalThis.window.isSecureContext,
     supported: typeof globalThis.window !== "undefined",
   };
 }

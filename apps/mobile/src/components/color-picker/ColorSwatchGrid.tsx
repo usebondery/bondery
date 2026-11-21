@@ -1,6 +1,7 @@
 import { IconCheck } from "@tabler/icons-react-native";
 import { StyleSheet, View } from "react-native";
 import { Pressable } from "@/components/ui/Pressable";
+import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { normalizeHex } from "./colorUtils";
 import { COLOR_PICKER_LAYOUT, GROUP_COLOR_SWATCH_ROWS } from "./constants";
 
@@ -10,6 +11,7 @@ interface ColorSwatchGridProps {
 }
 
 export function ColorSwatchGrid({ value, onSelect }: ColorSwatchGridProps) {
+  const colors = useMobileThemeColors();
   const selectedHex = normalizeHex(value);
 
   return (
@@ -30,6 +32,9 @@ export function ColorSwatchGrid({ value, onSelect }: ColorSwatchGridProps) {
                   styles.swatch,
                   { backgroundColor: hex },
                   isSelected && styles.swatchSelected,
+                  isSelected
+                    ? { borderColor: colors.swatchSelectionRing, shadowColor: colors.shadow }
+                    : undefined,
                 ]}
               >
                 {isSelected ? <IconCheck color="#ffffff" size={12} strokeWidth={2.5} /> : null}
@@ -61,10 +66,8 @@ const styles = StyleSheet.create({
     width: COLOR_PICKER_LAYOUT.swatchSize,
   },
   swatchSelected: {
-    borderColor: "rgba(255,255,255,0.85)",
     borderWidth: 2,
     elevation: 4,
-    shadowColor: "#000",
     shadowOffset: { height: 0, width: 0 },
     shadowOpacity: 0.35,
     shadowRadius: 4,

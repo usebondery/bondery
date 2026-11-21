@@ -34,10 +34,10 @@ pnpm run env:sync
 
 ## Dokploy redeploy
 
-| Stack | Compose path | Dokploy app |
-|-------|--------------|-------------|
+| Stack                  | Compose path     | Dokploy app             |
+| ---------------------- | ---------------- | ----------------------- |
 | Product (api + webapp) | `deploy/bondery` | Services webhook target |
-| Marketing website | `deploy/ops` | Ops webhook target |
+| Marketing website      | `deploy/ops`     | Ops webhook target      |
 
 On Dokploy product Compose:
 

@@ -94,7 +94,9 @@
     "UpdateFailed": "Kunde inte uppdatera gruppen"
   },
   "EmojiEmptySearch": "Inga emojis hittades",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Sök emojis…",
+  "EmojiSelectPlaceholder": "Välj emoji",
   "Empty": "Inga grupper än. Skapa en för att organisera kontakter.",
   "FallbackTitle": "Grupp",
   "HeaderDescription": "Grupper hjälper dig dela in personer i egna grupper för snabbare filter och åtgärder.",

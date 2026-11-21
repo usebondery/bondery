@@ -6,37 +6,37 @@ HTTP status catalog and resource-keyed JSON: [api-usage.md](../../bondery-api/re
 
 ## Layer map (webapp ↔ extension)
 
-| Webapp | Extension |
-|--------|-----------|
+| Webapp                        | Extension                                                 |
+| ----------------------------- | --------------------------------------------------------- |
 | `lib/api/domains/contacts.ts` | `lib/api/domains/contacts.ts` (same function names, REST) |
-| `lib/api/domains/me.ts` | `lib/api/domains/me.ts` |
-| `lib/api/client.ts` (BFF) | `lib/api/transport.ts` (direct Fastify) |
-| `lib/query/hooks/*` | N/A — popup uses `useState` + `runtime.sendMessage` |
-| Server Components / loaders | N/A — no SSR |
+| `lib/api/domains/me.ts`       | `lib/api/domains/me.ts`                                   |
+| `lib/api/client.ts` (BFF)     | `lib/api/transport.ts` (direct Fastify)                   |
+| `lib/query/hooks/*`           | N/A — popup uses `useState` + `runtime.sendMessage`       |
+| Server Components / loaders   | N/A — no SSR                                              |
 
 Domain names match webapp where the operation exists (`findPersonBySocial`, `enrichPersonFromLinkedIn`, `fetchUserSettings`) but hit Fastify at `config.apiUrl`, not the Next.js BFF.
 
 ## Layout
 
-| Path | Role |
-|------|------|
-| `lib/api/transport.ts` | `authenticatedFetch`, `AuthRequiredError`, `ExtensionOutdatedError` |
-| `lib/api/domains/contacts.ts` | Lookup, preview, enrich, upsert |
-| `lib/api/domains/me.ts` | User settings |
-| `lib/auth/` | OAuth PKCE, token storage, refresh |
-| `lib/messaging/types.ts` | `ExtensionMessage` union |
-| `lib/ui/` | Mantine wrapper + `renderInShadowRoot` |
+| Path                          | Role                                                                |
+| ----------------------------- | ------------------------------------------------------------------- |
+| `lib/api/transport.ts`        | `authenticatedFetch`, `AuthRequiredError`, `ExtensionOutdatedError` |
+| `lib/api/domains/contacts.ts` | Lookup, preview, enrich, upsert                                     |
+| `lib/api/domains/me.ts`       | User settings                                                       |
+| `lib/auth/`                   | OAuth PKCE, token storage, refresh                                  |
+| `lib/messaging/types.ts`      | `ExtensionMessage` union                                            |
+| `lib/ui/`                     | Mantine wrapper + `renderInShadowRoot`                              |
 
 ## Import policy
 
-| Context | May import | Must not import |
-|---------|------------|-----------------|
-| Content scripts / interceptors | `lib/messaging`, `lib/ui`, `features/*/ui`, `features/*/intercept` | `lib/api/*`, `lib/auth/*` |
-| Service worker | `lib/*`, `features/background/*` | `features/popup/*`, React UI |
-| Popup / welcome | `lib/messaging`, `lib/ui`, `features/popup/*`, `features/welcome/*` | `lib/api/*` |
-| Platform scrape | `@bondery/helpers`, `@bondery/schemas`, host DOM / third-party fetch | Bondery `lib/api` |
+| Context                        | May import                                                           | Must not import              |
+| ------------------------------ | -------------------------------------------------------------------- | ---------------------------- |
+| Content scripts / interceptors | `lib/messaging`, `lib/ui`, `features/*/ui`, `features/*/intercept`   | `lib/api/*`, `lib/auth/*`    |
+| Service worker                 | `lib/*`, `features/background/*`                                     | `features/popup/*`, React UI |
+| Popup / welcome                | `lib/messaging`, `lib/ui`, `features/popup/*`, `features/welcome/*`  | `lib/api/*`                  |
+| Platform scrape                | `@bondery/helpers`, `@bondery/schemas`, host DOM / third-party fetch | Bondery `lib/api`            |
 
-`check-extension-patterns.ts` fails the workspace if popup/content import `lib/api`, or if `entrypoints/background/index.ts` exceeds 30 lines. That is the *enforcer*, not the reason: host pages can read content-script JS; only the background origin is extension-privileged.
+`check-extension-patterns.ts` fails the workspace if popup/content import `lib/api`, or if `entrypoints/background/index.ts` exceeds 30 lines. That is the _enforcer_, not the reason: host pages can read content-script JS; only the background origin is extension-privileged.
 
 ## Typed messaging
 
@@ -65,12 +65,12 @@ Server gate: `MIN_EXTENSION_VERSION` in `packages/helpers/src/globals/paths.ts` 
 
 ## Feature modules
 
-| Path | Role |
-|------|------|
-| `features/background/` | `init`, `message-router`, `oauth`, `badge`, `person-cache`, `enrich`, `version-check` |
-| `features/popup/`, `features/welcome/` | Extension UI |
-| `features/linkedin/`, `features/instagram/` | Platform UI + scrape/intercept |
-| `features/webapp-bridge/` | Webapp ↔ extension `postMessage` |
+| Path                                        | Role                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `features/background/`                      | `init`, `message-router`, `oauth`, `badge`, `person-cache`, `enrich`, `version-check` |
+| `features/popup/`, `features/welcome/`      | Extension UI                                                                          |
+| `features/linkedin/`, `features/instagram/` | Platform UI + scrape/intercept                                                        |
+| `features/webapp-bridge/`                   | Webapp ↔ extension `postMessage`                                                      |
 
 `entrypoints/` are thin WXT shells. Background shell: `defineBackground(() => { initBackground(); })`.
 

@@ -97,7 +97,7 @@ export async function upsertContactFromExtension(ctx: DomainContext, input: Exte
     );
   }
 
-  let existingContactId: string | null = null;
+  let existingContactId: string | null;
   try {
     existingContactId = await findPersonIdBySocial(
       db,

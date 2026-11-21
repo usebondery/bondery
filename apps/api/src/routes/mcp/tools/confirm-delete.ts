@@ -15,8 +15,12 @@ import { badRequest, serviceUnavailable } from "../../../lib/platform/errors/htt
 import { mcpJsonResult } from "./json.js";
 
 export const MCP_DELETE_CONFIRM_KEY = "confirm";
-export const MCP_DELETE_CONFIRM_TTL_MS = 5 * 60 * 1000;
+const MCP_DELETE_CONFIRM_TTL_MINUTES = 5;
+const MS_PER_MINUTE = 60_000;
+export const MCP_DELETE_CONFIRM_TTL_MS = MCP_DELETE_CONFIRM_TTL_MINUTES * MS_PER_MINUTE;
 const REQUEST_STATE_VERSION = "v1";
+/** Request state is `version.payload.signature`. */
+const REQUEST_STATE_SEGMENT_COUNT = 3;
 const INVALID_CONFIRMATION_MESSAGE = "Invalid or expired confirmation";
 
 function confirmActionSchema(description: string) {
@@ -122,7 +126,7 @@ export function verifyMcpDeleteRequestState(params: {
     return { ok: false };
   }
   const parts = params.requestState.split(".");
-  if (parts.length !== 3 || parts[0] !== REQUEST_STATE_VERSION) {
+  if (parts.length !== REQUEST_STATE_SEGMENT_COUNT || parts[0] !== REQUEST_STATE_VERSION) {
     return { ok: false };
   }
   const payloadB64 = parts[1];

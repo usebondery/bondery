@@ -4,7 +4,9 @@
 import { Group, Text } from "@mantine/core";
 import { DatePickerInput, type DatePickerInputProps } from "@mantine/dates";
 import { IconCalendar } from "@tabler/icons-react";
-import { useEffect, useRef } from "react";
+import { type ReactElement, useEffect, useRef } from "react";
+
+const DAYS_PER_WEEK = 7;
 
 export interface DatePickerPresetLabels {
   lastMonth: string;
@@ -94,13 +96,17 @@ export function DatePickerWithPresets({
   presetLabels,
   classNames,
   ...props
-}: DatePickerWithPresetsProps) {
+}: DatePickerWithPresetsProps): ReactElement {
   const today = startOfLocalDay(new Date());
 
   const presetItems = (() => {
     const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
     const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
-    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 7);
+    const lastWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - DAYS_PER_WEEK,
+    );
     const yesterday = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1);
     const tomorrow = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
     const minDay = toNormalizedDateString(props.minDate);
@@ -167,7 +173,7 @@ export function DatePickerWithPresets({
    */
   const markActivePreset = (current: string | null) => {
     setTimeout(() => {
-      document.querySelectorAll<HTMLButtonElement>(".presetsButton").forEach((button) => {
+      for (const button of document.querySelectorAll<HTMLButtonElement>(".presetsButton")) {
         const labelText = button.textContent?.trim() ?? "";
         const isActive = presetsRef.current.some(
           (preset) => labelText.includes(preset.textLabel) && preset.value === current,
@@ -177,7 +183,7 @@ export function DatePickerWithPresets({
         } else {
           button.removeAttribute("data-active");
         }
-      });
+      }
     }, 0);
   };
 

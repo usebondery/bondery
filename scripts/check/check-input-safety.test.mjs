@@ -65,6 +65,23 @@ describe("findMultipartCeilingViolations", () => {
     assert.deepEqual(findMultipartCeilingViolations(goodBuildApp, goodConfig), []);
   });
 
+  it("reads a default written with named units", () => {
+    const named =
+      "const MIB = 1048576;\nconst DEFAULT_MIB = 5;\nexport const UPLOAD_LIMITS = { default: DEFAULT_MIB * MIB, image: 1 } as const;";
+    assert.deepEqual(findMultipartCeilingViolations(goodBuildApp, named), []);
+  });
+
+  it("flags a named default above the ceiling", () => {
+    const named =
+      "const MIB = 1048576;\nconst BIG_MIB = 100;\nexport const UPLOAD_LIMITS = { default: BIG_MIB * MIB, image: 1 } as const;";
+    assert.equal(findMultipartCeilingViolations(goodBuildApp, named).length, 1);
+  });
+
+  it("flags a default it cannot resolve", () => {
+    const unknown = "export const UPLOAD_LIMITS = { default: MISSING * 1024, image: 1 } as const;";
+    assert.equal(findMultipartCeilingViolations(goodBuildApp, unknown).length, 1);
+  });
+
   it("flags a literal ceiling in the registration", () => {
     const literal =
       "await fastify.register(multipart, { limits: { fileSize: 100 * 1024 * 1024 } });";

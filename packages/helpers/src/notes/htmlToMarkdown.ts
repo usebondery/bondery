@@ -65,7 +65,7 @@ export function htmlToMarkdown(html: string): string {
     const items = body.match(/<li[^>]*data-checked="([^"]*)"[^>]*>(.*?)<\/li>/gs) ?? [];
     const rows = items.map((item: string) => {
       const checkedMatch = item.match(/data-checked="([^"]*)"/);
-      const checked = checkedMatch ? /^(true|1)$/i.test(checkedMatch[1]) : false;
+      const checked = checkedMatch ? /^(true|1)$/i.test(checkedMatch[1] ?? "") : false;
       const content = stripTags(item.replace(/<li[^>]*>|<\/li>/g, "")).trim();
       return `- [${checked ? "x" : " "}] ${content}`;
     });
@@ -133,7 +133,10 @@ const HTML_ENTITIES: Record<string, string> = {
 
 /** One pass, so `&amp;lt;` becomes `&lt;` and not `<`. */
 function decodeEntities(text: string): string {
-  return text.replace(/&(?:#39|amp|gt|lt|nbsp|quot);/g, (entity) => HTML_ENTITIES[entity]);
+  return text.replace(
+    /&(?:#39|amp|gt|lt|nbsp|quot);/g,
+    (entity) => HTML_ENTITIES[entity] ?? entity,
+  );
 }
 
 function stripTags(html: string): string {

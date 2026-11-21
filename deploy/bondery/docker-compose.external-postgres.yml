@@ -1,0 +1,31 @@
+# Use an external Postgres (RDS, Neon, Supabase, Crunchy, or your own server) instead of the
+# bundled one. See docs/deploy/configuration.mdx#postgres-tls.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.external-postgres.yml up -d
+#
+# Set in .env:
+#   DATABASE_URL=postgresql://<user>:<password>@<host>:5432/<database>
+#   DATABASE_SSL_MODE=verify-full            (default; see the docs for the other modes)
+#   DATABASE_SSL_ROOT_CERT_FILE=/run/secrets/postgres-ca.pem   (only for a private CA)
+#   DATABASE_SSL_ROOT_CERT=...               (or the same CA inline; newlines as \n)
+#
+# The bundled `db` service moves to a profile that never starts.
+
+services:
+  db:
+    profiles: [ "bundled-postgres" ]
+
+  api:
+    depends_on: !override
+      redis:
+        condition: service_healthy
+      seaweedfs-s3:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set for an external Postgres}
+      DATABASE_SSL_MODE: ${DATABASE_SSL_MODE:-verify-full}
+      DATABASE_SSL_ROOT_CERT_FILE: ${DATABASE_SSL_ROOT_CERT_FILE:-}
+      DATABASE_SSL_ROOT_CERT: ${DATABASE_SSL_ROOT_CERT:-}
+    # For a private CA file, mount it where DATABASE_SSL_ROOT_CERT_FILE points:
+    # volumes:
+    #   - ./postgres-ca.pem:/run/secrets/postgres-ca.pem:ro

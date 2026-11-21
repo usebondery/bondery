@@ -85,17 +85,23 @@ for (const filePath of walkMdxFiles(docsRoot).sort()) {
   const { frontmatter, value } = readLastUpdated(readFileSync(filePath, "utf8"));
 
   if (!frontmatter) {
-    check.add(`${path}: missing frontmatter`);
+    check.add(
+      `${path}: has no frontmatter block. Add a --- fenced block at the top of the file with title, description, icon and last_updated.`,
+    );
     continue;
   }
 
   if (value === null || value === "") {
-    check.add(`${path}: missing last_updated`);
+    check.add(
+      `${path}: frontmatter has no last_updated. Add \`last_updated: YYYY-MM-DD\` with the date you changed the content.`,
+    );
     continue;
   }
 
   if (!isCalendarDate(value)) {
-    check.add(`${path}: last_updated is not a YYYY-MM-DD calendar date: ${value}`);
+    check.add(
+      `${path}: last_updated is not a YYYY-MM-DD calendar date: ${value}. Correct it to a real date such as 2026-11-18.`,
+    );
     continue;
   }
 

@@ -86,9 +86,9 @@ export function ContactAddressesSection({
   function persistAddresses(nextAddresses: ContactAddressEntry[]) {
     try {
       onSaveAddresses(nextAddresses);
-    } catch (err) {
-      showErrorToast(err, tContactAddress("SaveErrorTitle"));
-      throw err;
+    } catch (error) {
+      showErrorToast(error, tContactAddress("SaveErrorTitle"));
+      throw error;
     }
   }
 
@@ -121,6 +121,9 @@ export function ContactAddressesSection({
       return;
     }
     const preferred = addresses[index];
+    if (!preferred) {
+      return;
+    }
     const rest = addresses.filter((_, i) => i !== index);
     persistAddresses([preferred, ...rest]);
   }
@@ -208,7 +211,7 @@ export function ContactAddressesSection({
               ),
               id: "set-preferred",
               label: tContactAddress("SetAsPreferred"),
-              onPress: () => void handleSetPreferred(index),
+              onPress: () => handleSetPreferred(index),
             },
             {
               icon: <IconCopy size={16} stroke={colors.iconPrimary} />,
@@ -230,7 +233,11 @@ export function ContactAddressesSection({
           return (
             <ContactChannelRow
               accessibilityHint="Tap to open in maps"
-              accessibilityLabel={`${accessibilityAddressLabel}${isPreferred ? `, ${tContactInfo("Preferred")}` : ""}`}
+              accessibilityLabel={
+                isPreferred
+                  ? `${accessibilityAddressLabel}, ${tContactInfo("Preferred")}`
+                  : accessibilityAddressLabel
+              }
               channelIcon={<IconMapPin size={16} stroke={colors.iconSecondary} />}
               isPreferred={isPreferred}
               key={address.addressFormatted ?? address.value}

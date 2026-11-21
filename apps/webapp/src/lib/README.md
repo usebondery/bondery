@@ -4,27 +4,27 @@ Client infrastructure for the Next.js webapp. **`lib/` root has no `.ts` files**
 
 ## Subsystems
 
-| Folder | Responsibility |
-|--------|----------------|
-| `platform/` | Env URLs, hotkeys, debounce constants, form option lists |
-| `api/` | HTTP transport, `resources/` (paths + parsers), `domains/` (reads + writes) — see [`api/README.md`](./api/README.md) |
-| `query/` | TanStack Query keys, hooks, prefetch, invalidation — see [`query/README.md`](./query/README.md) |
-| `contacts/` | Contact display helpers (avatars, names, search, activity types, social tooltips, shared table/map types) |
-| `auth/` | Session teardown, locale detection, unauthorized redirects |
-| `i18n/` | Translation loading, locale hooks, relative time formatting |
-| `extension/` | Extension detection, enrich batch store, notification store (no React UI) |
-| `modals/` | Modal dismiss/blocking primitives — see [`modals/README.md`](./modals/README.md) |
-| `sync/` | Sync wake WebSocket client |
-| `analytics/` | Client/server analytics capture |
-| `shared/` | Cross-cutting utilities without a feature owner |
-| `app/` | Server session probes (`getAppSession`) |
-| `home/` | Home feature config (`gettingStartedItems`) |
+| Folder       | Responsibility                                                                                                       |
+| ------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `platform/`  | Env URLs, hotkeys, debounce constants, form option lists                                                             |
+| `api/`       | HTTP transport, `resources/` (paths + parsers), `domains/` (reads + writes) — see [`api/README.md`](./api/README.md) |
+| `query/`     | TanStack Query keys, hooks, prefetch, invalidation — see [`query/README.md`](./query/README.md)                      |
+| `contacts/`  | Contact display helpers (avatars, names, search, activity types, social tooltips, shared table/map types)            |
+| `auth/`      | Session teardown, locale detection, unauthorized redirects                                                           |
+| `i18n/`      | Translation loading, locale hooks, relative time formatting                                                          |
+| `extension/` | Extension detection, enrich batch store, notification store (no React UI)                                            |
+| `modals/`    | Modal dismiss/blocking primitives — see [`modals/README.md`](./modals/README.md)                                     |
+| `sync/`      | Sync wake WebSocket client                                                                                           |
+| `analytics/` | Client/server analytics capture                                                                                      |
+| `shared/`    | Cross-cutting utilities without a feature owner                                                                      |
+| `app/`       | Server session probes (`getAppSession`)                                                                              |
+| `home/`      | Home feature config (`gettingStartedItems`)                                                                          |
 
 Chrome extension **UI** (notification managers, enrich hook) lives in [`src/components/extension/`](../components/extension/).
 
 ## Data flow
 
-```
+```text
 RSC loaders  →  lib/query/prefetch  →  lib/api/domains/server
 Client UI    →  lib/query/hooks      →  lib/api/domains
 Transport    →  lib/api/client | lib/api/server  (not in app components)
@@ -34,38 +34,36 @@ Transport    →  lib/api/client | lib/api/server  (not in app components)
 
 ## Where do I put new code?
 
-| Task | Location |
-|------|----------|
-| New API endpoint client | `api/resources/` + `api/domains/` (+ `domains/server/` for RSC) |
-| TanStack hook or prefetch | `query/hooks/` or `query/prefetch/` |
-| Contact table/avatar helper | `contacts/` (`table-types.ts`, `formatContactName` from `@bondery/helpers/contact`) |
-| Env constant or app-wide config | `platform/config.ts` |
-| BFF geocode client | `api/geocode.ts` |
-| Extension store or detection | `lib/extension/` |
-| Extension notification UI | `components/extension/` |
-| Reusable picker/button | `components/shared/` |
-| Page-specific UI | `app/(app)/app/<feature>/` — see **Feature route folders** below |
-| Cross-route chrome (shell, shared tables) | `components/<domain>/` (shell → `components/shell/`) |
+| Task                                      | Location                                                                            |
+| ----------------------------------------- | ----------------------------------------------------------------------------------- |
+| New API endpoint client                   | `api/resources/` + `api/domains/` (+ `domains/server/` for RSC)                     |
+| TanStack hook or prefetch                 | `query/hooks/` or `query/prefetch/`                                                 |
+| Contact table/avatar helper               | `contacts/` (`table-types.ts`, `formatContactName` from `@bondery/helpers/contact`) |
+| Env constant or app-wide config           | `platform/config.ts`                                                                |
+| BFF geocode client                        | `api/geocode.ts`                                                                    |
+| Extension store or detection              | `lib/extension/`                                                                    |
+| Extension notification UI                 | `components/extension/`                                                             |
+| Reusable picker/button                    | `components/shared/`                                                                |
+| Page-specific UI                          | `app/(app)/app/<feature>/` — see **Feature route folders** below                    |
+| Cross-route chrome (shell, shared tables) | `components/<domain>/` (shell → `components/shell/`)                                |
 
 ## `src/components/` layout
 
 Cross-route UI shared by multiple `/app/*` routes lives under `src/components/`:
 
-| Subfolder | Contents |
-|-----------|----------|
-| `shell/` | App shell, page chrome, `UserLocaleProvider` |
-| `contacts/`, `map/`, `tags/`, … | Domain widgets used on 2+ routes |
-| `shared/` | Generic pickers and buttons |
-| `extension/` | Chrome extension notification UI |
+| Subfolder                       | Contents                                     |
+| ------------------------------- | -------------------------------------------- |
+| `shell/`                        | App shell, page chrome, `UserLocaleProvider` |
+| `contacts/`, `map/`, `tags/`, … | Domain widgets used on 2+ routes             |
+| `shared/`                       | Generic pickers and buttons                  |
+| `extension/`                    | Chrome extension notification UI             |
 
 Feature-only UI stays in `app/(app)/app/<feature>/components/`.
 When a feature `components/` folder grows to **8 or more** files at the same depth, subdivide into focused subfolders (e.g. `chrome/`, `modals/`, `message/`, `cards/`, `import/`) instead of adding more flat files.
 
-
-
 Routes under `app/(app)/app/<feature>/` follow a tiered template. Not every tier needs every folder — create `hooks/`, `utils/`, and `editor/` when the first file appears.
 
-```
+```text
 <feature>/
 ├── page.tsx              # required — metadata + delegate (server)
 ├── loading.tsx           # recommended — skeleton on navigation
@@ -80,12 +78,12 @@ Routes under `app/(app)/app/<feature>/` follow a tiered template. Not every tier
 
 ### Tiers
 
-| Tier | Pattern | Examples |
-|------|---------|----------|
-| **A** | `page → Loader → Client → components/` | settings, home, groups, fix (`FixClient`), keep-in-touch, interactions, chat (`ChatClient`) |
-| **B** | `page` + `Suspense` → sub-loader in `components/` | people |
-| **C** | `page → Client` (no prefetch) | map (`MapClient`), onboarding, unavailable (`UnavailableClient`) |
-| **D** | Tier A + `hooks/`, `utils/`, subdivided `components/` | person (`PersonClient`), group (`GroupClient`), settings |
+| Tier  | Pattern                                               | Examples                                                                                    |
+| ----- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **A** | `page → Loader → Client → components/`                | settings, home, groups, fix (`FixClient`), keep-in-touch, interactions, chat (`ChatClient`) |
+| **B** | `page` + `Suspense` → sub-loader in `components/`     | people                                                                                      |
+| **C** | `page → Client` (no prefetch)                         | map (`MapClient`), onboarding, unavailable (`UnavailableClient`)                            |
+| **D** | Tier A + `hooks/`, `utils/`, subdivided `components/` | person (`PersonClient`), group (`GroupClient`), settings                                    |
 
 Onboarding wizard steps live in `components/Step*.tsx`, not a `steps/` folder.
 

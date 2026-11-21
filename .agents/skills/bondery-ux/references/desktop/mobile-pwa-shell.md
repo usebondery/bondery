@@ -57,7 +57,7 @@ The header exists because it is the only slot that stays reachable after scroll,
 
 ## Placement (component tree)
 
-```
+```text
 AppShellWrapper
   AppShell
     AppShellHeader          ← NEW, < sm only, sticky, safe-area top
@@ -76,14 +76,14 @@ Resize handle stays `visibleFrom="sm"`.
 
 ## Interaction
 
-| Event | Result |
-|-------|--------|
-| Tap menu | Toggle navbar overlay |
-| Tap overlay / Escape / route change | Close |
-| Tap nav item / user card / logo | Navigate and close |
-| Tap Search in overlay | Close overlay, open existing command palette |
-| After scroll on a long list | Header (menu) still on screen |
-| Person/group detail | Menu still in header; back still in `PageHeader` |
+| Event                               | Result                                           |
+| ----------------------------------- | ------------------------------------------------ |
+| Tap menu                            | Toggle navbar overlay                            |
+| Tap overlay / Escape / route change | Close                                            |
+| Tap nav item / user card / logo     | Navigate and close                               |
+| Tap Search in overlay               | Close overlay, open existing command palette     |
+| After scroll on a long list         | Header (menu) still on screen                    |
+| Person/group detail                 | Menu still in header; back still in `PageHeader` |
 
 Selected item: keep existing `NavLinkItem` `active` / `aria-current="page"`. Chat is active when `isChatRoute`.
 

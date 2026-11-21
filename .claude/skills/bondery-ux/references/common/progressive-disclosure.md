@@ -6,11 +6,11 @@ Show the minimum that unblocks the user. Add complexity when they choose to.
 
 ## Decision rules
 
-| Question | Answer | Pattern |
-|----------|--------|---------|
-| Can you derive it from existing data? | Yes | Do silently — no extra field |
-| Optional and rarely set at creation? | Yes | Edit flow, not create flow |
-| Required before proceed? | Yes | Ask at that moment, no earlier |
+| Question                              | Answer | Pattern                        |
+| ------------------------------------- | ------ | ------------------------------ |
+| Can you derive it from existing data? | Yes    | Do silently — no extra field   |
+| Optional and rarely set at creation?  | Yes    | Edit flow, not create flow     |
+| Required before proceed?              | Yes    | Ask at that moment, no earlier |
 
 ---
 

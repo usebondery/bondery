@@ -230,11 +230,13 @@
     "deleting": "Διαγραφή…",
     "duplicating": "Αντιγραφή…",
     "errorTitle": "Σφάλμα",
+    "mobileRuntimeError": "Σφάλμα εκτέλεσης της εφαρμογής για κινητά",
     "noResults": "Χωρίς αποτελέσματα",
     "removing": "Αφαίρεση…",
     "savedTitle": "Αποθηκεύτηκε",
     "saving": "Αποθήκευση…",
     "sending": "Αποστολή…",
-    "successTitle": "Επιτυχία"
+    "successTitle": "Επιτυχία",
+    "unknownError": "Άγνωστο σφάλμα"
   }
 }

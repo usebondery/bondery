@@ -1,6 +1,7 @@
 import { Button, Stack, Text } from "@mantine/core";
 import { IconExternalLink, IconSettings } from "@tabler/icons-react";
 import { useExtensionPopupTranslations } from "../../../lib/i18n/generated/hooks";
+import { firstNonEmpty } from "../../../lib/text";
 import { PopupBrandHeader } from "../components/PopupBrandHeader";
 import { UserCard } from "../components/UserCard";
 import type { UserInfo } from "../types";
@@ -31,15 +32,14 @@ export function LoggedInView({
         {user && (
           <UserCard
             avatarUrl={user.avatarUrl}
-            name={user.name || user.email || "User"}
+            name={firstNonEmpty(user.name, user.email) ?? "User"}
             subtitle={user.email || undefined}
           />
         )}
 
         {showUnsupportedSiteMessage && (
           <Text c="dimmed" size="sm">
-            Visit someone on Instagram or LinkedIn to see more actions and capabilities of the
-            extension.
+            {t("UnsupportedSiteMessage")}
           </Text>
         )}
 

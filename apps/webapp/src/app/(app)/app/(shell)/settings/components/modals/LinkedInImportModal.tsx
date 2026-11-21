@@ -26,6 +26,7 @@ import {
   useParseLinkedInImportMutation,
 } from "@/lib/query/hooks/useImports";
 import { useSettingsQuery, useUpdateImportFollowupMutation } from "@/lib/query/hooks/useSettings";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { useImportContactSelection } from "../../hooks/useImportContactSelection";
 import { useImporterNavigationProgress } from "../../hooks/useImporterNavigationProgress";
 import {
@@ -84,7 +85,7 @@ export function LinkedInImportModal({
   } | null>(null);
   const [parsedContacts, setParsedContacts] = useState<LinkedInPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const openRef = useRef<() => void>(null);
+  const openRef = useRef<(() => void) | null>(null);
 
   const previewContacts = parsedContacts
     .filter((contact) => contact.isValid)
@@ -168,10 +169,10 @@ export function LinkedInImportModal({
     setStep("processing");
 
     const formData = new FormData();
-    files.forEach((file) => {
+    for (const file of files) {
       const webkitFile = file as File & { webkitRelativePath?: string };
-      formData.append("files", file, webkitFile.webkitRelativePath || file.name);
-    });
+      formData.append("files", file, nonEmpty(webkitFile.webkitRelativePath) ?? file.name);
+    }
 
     try {
       const result = await parseImport.mutateAsync(formData);

@@ -94,7 +94,9 @@
     "UpdateFailed": "A csoport frissítése nem sikerült"
   },
   "EmojiEmptySearch": "Nincs találat",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Emoji keresése…",
+  "EmojiSelectPlaceholder": "Emoji kiválasztása",
   "Empty": "Még nincs csoport. Hozz létre egyet a kapcsolatok rendezéséhez.",
   "FallbackTitle": "Csoport",
   "HeaderDescription": "A csoportok segítenek egyedi csoportokba rendezni a személyeket gyorsabb szűréshez és műveletekhez.",

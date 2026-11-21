@@ -94,7 +94,9 @@
     "UpdateFailed": "Kan groep niet bijwerken"
   },
   "EmojiEmptySearch": "Geen emoji's gevonden",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Emoji's zoeken…",
+  "EmojiSelectPlaceholder": "Emoji selecteren",
   "Empty": "Nog geen groepen. Maak er een om je contacten te ordenen.",
   "FallbackTitle": "Groep",
   "HeaderDescription": "Met groepen orden je personen voor sneller filteren en acties.",

@@ -11,7 +11,8 @@ async function main() {
 
   if (files.length < MIN_PAGES) {
     console.error(`Expected at least ${MIN_PAGES} docs pages, found ${files.length}`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   let duplicates = 0;
@@ -33,7 +34,8 @@ async function main() {
   }
 
   if (duplicates > 0) {
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   console.log(`docs anchors ok (${files.length} pages)`);
@@ -41,5 +43,5 @@ async function main() {
 
 main().catch((error: unknown) => {
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 });

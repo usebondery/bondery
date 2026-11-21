@@ -1,7 +1,13 @@
 import { BonderyLogotypeBlack, BonderyLogotypeWhite } from "@bondery/branding/react";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Flex } from "@mantine/core";
 import type { Route } from "next";
 import Link from "next/link";
+
+/** The logotype (icon plus wordmark) is this many times wider than it is tall. */
+const LOGOTYPE_ASPECT_RATIO = 3;
 
 type LogoProps = {
   /** Size of the logotype in pixels */
@@ -23,16 +29,16 @@ export function Logo({ size, iconSize, href = "/" }: LogoProps) {
 
   return (
     <Link
-      aria-label="Bondery homepage"
+      aria-label={landing.Logo.HomepageAriaLabel}
       href={homeHref}
       style={{ color: "inherit", textDecoration: "none" }}
     >
       <Flex align="center" darkHidden gap="xs">
-        <BonderyLogotypeBlack height={logoSize} width={logoSize * 3} />
+        <BonderyLogotypeBlack height={logoSize} width={logoSize * LOGOTYPE_ASPECT_RATIO} />
       </Flex>
 
       <Flex align="center" gap="xs" lightHidden>
-        <BonderyLogotypeWhite height={logoSize} width={logoSize * 3} />
+        <BonderyLogotypeWhite height={logoSize} width={logoSize * LOGOTYPE_ASPECT_RATIO} />
       </Flex>
     </Link>
   );

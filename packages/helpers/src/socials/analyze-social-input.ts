@@ -28,7 +28,9 @@ export interface AnalyzeSocialFieldInputOptions {
 
 const HANDLE_FIELDS = new Set<ContactSocialFieldKey>(["linkedin", "instagram", "facebook"]);
 
-function detectPlatformFromUrl(input: string): ContactSocialFieldKey | null {
+function detectPlatformFromUrl(
+  input: string,
+): "facebook" | "instagram" | "linkedin" | "signal" | "whatsapp" | null {
   const trimmed = input.trim();
   if (!trimmed) {
     return null;
@@ -57,6 +59,9 @@ function detectPlatformFromUrl(input: string): ContactSocialFieldKey | null {
   return null;
 }
 
+/** Fewest digits a string needs before it can read as a phone number. */
+const MIN_PHONE_DIGITS = 7;
+
 function looksLikePhone(input: string): boolean {
   const trimmed = input.trim();
   if (!trimmed) {
@@ -64,7 +69,7 @@ function looksLikePhone(input: string): boolean {
   }
 
   const digits = trimmed.replace(/\D/g, "");
-  if (digits.length < 7) {
+  if (digits.length < MIN_PHONE_DIGITS) {
     return false;
   }
 

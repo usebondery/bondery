@@ -8,13 +8,13 @@ When adding or renaming MCP tools, follow this file. Product copy for users live
 
 `{verb}_{resource}` in snake_case.
 
-| Verb | Means | When to use |
-|------|--------|-------------|
-| `create` | Insert a record | Single-record create the user owns |
-| `get` | Read one record, or a **non-search** filtered collection | By id (`get_contact`) or by a scoped filter (`get_interactions` + optional `personId`, `get_groups` browse) |
-| `update` | Patch a record the user owns | Single-record mutations |
-| `delete` | Remove a record | Single record the user owns. People and interactions are deletable only after MCP protocol confirm (`input_required` elicitation). |
-| `search` | Free-text lookup | **Required** argument named `search` (not `query` / `q`); cap 25. Never dumps the full set. |
+| Verb     | Means                                                    | When to use                                                                                                                        |
+| -------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `create` | Insert a record                                          | Single-record create the user owns                                                                                                 |
+| `get`    | Read one record, or a **non-search** filtered collection | By id (`get_contact`) or by a scoped filter (`get_interactions` + optional `personId`, `get_groups` browse)                        |
+| `update` | Patch a record the user owns                             | Single-record mutations                                                                                                            |
+| `delete` | Remove a record                                          | Single record the user owns. People and interactions are deletable only after MCP protocol confirm (`input_required` elicitation). |
+| `search` | Free-text lookup                                         | **Required** argument named `search` (not `query` / `q`); cap 25. Never dumps the full set.                                        |
 
 **Rules:**
 
@@ -25,7 +25,7 @@ When adding or renaming MCP tools, follow this file. Product copy for users live
 - History writes are `create_*`. Never `log_*`.
 - Do not use `list`, `log`, `find`, `fetch`, `query`, `add`, `set`, or `upsert` as the verb.
 
-```
+```text
 # GOOD
 search_contacts
 get_contact
@@ -60,11 +60,11 @@ Contacts, interactions, groups, tags, relationships, and memberships **are** del
 
 Align with REST query names where they mean the same thing:
 
-| Meaning | MCP argument | REST |
-|---------|--------------|------|
-| Free-text search | `search` (required on `search_*`) | `search` (not `q`) |
-| Contact UUID | `personId` | path `:id` / `contactId` |
-| Offset paging | `limit`, `offset` | `limit`, `offset` |
+| Meaning          | MCP argument                      | REST                     |
+| ---------------- | --------------------------------- | ------------------------ |
+| Free-text search | `search` (required on `search_*`) | `search` (not `q`)       |
+| Contact UUID     | `personId`                        | path `:id` / `contactId` |
+| Offset paging    | `limit`, `offset`                 | `limit`, `offset`        |
 
 MCP collection reads and membership arrays are **capped** (25). `search_*` **requires** `search` so the model cannot dump the full set. REST `GET /contacts` can list without `search`.
 
@@ -113,29 +113,29 @@ MCP covers assistant-sized CRM work (contacts, dates, interactions, groups, tags
 
 In-app chat registers the same tool names as MCP (`create_interaction`, not `log_interaction`). Chat deletes call the domain directly after the model confirms in the thread; MCP still uses protocol confirm.
 
-| Capability | REST | MCP |
-|------------|------|-----|
-| List/search contacts | `GET /contacts` (optional `search`, sort, filters, up to 200) | `search_contacts` (`search` required, max 25) |
-| Get one contact | `GET /contacts/:id` | `get_contact` (same `{ contact }` JSON as REST; no extra groups/tags on the card) |
-| Create contact | `POST /contacts` (full create body) | `create_contact` (name plus optional phones, emails, socials, notes, profile) |
-| Update contact | `PATCH /contacts/:id` (full patch) | `update_contact` (identity, notes, language, timezone, geo, keep-in-touch, socials, phones/emails/addresses; omits photo/dates/tenant fields) |
-| Delete contact | `DELETE /contacts`, `DELETE /contacts/:id` | `delete_contact` (protocol confirm; refuses myself) |
-| Emails, phones, social, addresses | Nested contact routes + PATCH | Writable on `create_contact` / `update_contact` (`[]` clears). `get_contact_by_social` looks up Instagram, LinkedIn, or Facebook. |
-| Important dates | `GET`/`PUT /contacts/:id/important-dates`, upcoming | `get_important_dates`, `update_important_dates` (replace-all, including empty; no elicitation), `get_upcoming_reminders` |
-| Contact groups/tags | `GET /contacts/:id/groups`, `GET /contacts/:id/tags` | `get_contact_groups`, `get_contact_tags` |
-| LinkedIn work/education | `GET /contacts/:id/linkedin-data` | `get_contact_linkedin` (read of stored bio, work, and education; enrich upsert stays REST) |
-| Groups | `GET/POST/PATCH/DELETE /groups`, membership routes | `search_groups`, `get_groups`, `get_group`, `create_group`, `update_group`, `delete_group`, `get_group_contacts`, `create_group_membership`, `delete_group_membership` |
-| Tags | `GET/POST/PATCH/DELETE /tags`, membership routes | `search_tags`, `get_tags`, `get_tag`, `create_tag`, `update_tag`, `delete_tag`, `delete_tags` (at most 25), `get_tag_contacts`, `create_tag_membership`, `delete_tag_membership` |
-| Relationships | Nested contact relationship routes | `get_relationships`, `create_relationship`, `update_relationship`, `delete_relationship` |
-| Keep-in-touch | Contact fields + overdue count | `get_keep_in_touch_count`, `get_keep_in_touch_contacts`, `update_keep_in_touch` (also on `update_contact`) |
-| Share contact | `GET /contacts/:id/share-preview`, `POST /contacts/share` | `get_contact_share`, `create_contact_share` (protocol confirm; outbound email is irreversible) |
-| Merge, enrich, import, export, map, photo | Dedicated REST resources | — |
-| List interactions | `GET /interactions` (optional `contactId`) | `get_interactions` (optional `personId`, max 25; recent page if unfiltered) |
-| Get one interaction | `GET /interactions/:id` | `get_interaction` |
-| Update interaction | `PATCH /interactions/:id` (participants array) | `update_interaction` (`participantIds` replace, max 25) |
-| Delete interaction | `DELETE /interactions/:id` | `delete_interaction` (protocol confirm; `findFirst` `{id, userId}` first) |
-| Create interaction | `POST /interactions` (any participants) | `create_interaction` (`participantIds`, max 25) |
-| In-app chat, sync, billing, settings, API keys | REST | — |
+| Capability                                     | REST                                                          | MCP                                                                                                                                                                              |
+| ---------------------------------------------- | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| List/search contacts                           | `GET /contacts` (optional `search`, sort, filters, up to 200) | `search_contacts` (`search` required, max 25)                                                                                                                                    |
+| Get one contact                                | `GET /contacts/:id`                                           | `get_contact` (same `{ contact }` JSON as REST; no extra groups/tags on the card)                                                                                                |
+| Create contact                                 | `POST /contacts` (full create body)                           | `create_contact` (name plus optional phones, emails, socials, notes, profile)                                                                                                    |
+| Update contact                                 | `PATCH /contacts/:id` (full patch)                            | `update_contact` (identity, notes, language, timezone, geo, keep-in-touch, socials, phones/emails/addresses; omits photo/dates/tenant fields)                                    |
+| Delete contact                                 | `DELETE /contacts`, `DELETE /contacts/:id`                    | `delete_contact` (protocol confirm; refuses myself)                                                                                                                              |
+| Emails, phones, social, addresses              | Nested contact routes + PATCH                                 | Writable on `create_contact` / `update_contact` (`[]` clears). `get_contact_by_social` looks up Instagram, LinkedIn, or Facebook.                                                |
+| Important dates                                | `GET`/`PUT /contacts/:id/important-dates`, upcoming           | `get_important_dates`, `update_important_dates` (replace-all, including empty; no elicitation), `get_upcoming_reminders`                                                         |
+| Contact groups/tags                            | `GET /contacts/:id/groups`, `GET /contacts/:id/tags`          | `get_contact_groups`, `get_contact_tags`                                                                                                                                         |
+| LinkedIn work/education                        | `GET /contacts/:id/linkedin-data`                             | `get_contact_linkedin` (read of stored bio, work, and education; enrich upsert stays REST)                                                                                       |
+| Groups                                         | `GET/POST/PATCH/DELETE /groups`, membership routes            | `search_groups`, `get_groups`, `get_group`, `create_group`, `update_group`, `delete_group`, `get_group_contacts`, `create_group_membership`, `delete_group_membership`           |
+| Tags                                           | `GET/POST/PATCH/DELETE /tags`, membership routes              | `search_tags`, `get_tags`, `get_tag`, `create_tag`, `update_tag`, `delete_tag`, `delete_tags` (at most 25), `get_tag_contacts`, `create_tag_membership`, `delete_tag_membership` |
+| Relationships                                  | Nested contact relationship routes                            | `get_relationships`, `create_relationship`, `update_relationship`, `delete_relationship`                                                                                         |
+| Keep-in-touch                                  | Contact fields + overdue count                                | `get_keep_in_touch_count`, `get_keep_in_touch_contacts`, `update_keep_in_touch` (also on `update_contact`)                                                                       |
+| Share contact                                  | `GET /contacts/:id/share-preview`, `POST /contacts/share`     | `get_contact_share`, `create_contact_share` (protocol confirm; outbound email is irreversible)                                                                                   |
+| Merge, enrich, import, export, map, photo      | Dedicated REST resources                                      | —                                                                                                                                                                                |
+| List interactions                              | `GET /interactions` (optional `contactId`)                    | `get_interactions` (optional `personId`, max 25; recent page if unfiltered)                                                                                                      |
+| Get one interaction                            | `GET /interactions/:id`                                       | `get_interaction`                                                                                                                                                                |
+| Update interaction                             | `PATCH /interactions/:id` (participants array)                | `update_interaction` (`participantIds` replace, max 25)                                                                                                                          |
+| Delete interaction                             | `DELETE /interactions/:id`                                    | `delete_interaction` (protocol confirm; `findFirst` `{id, userId}` first)                                                                                                        |
+| Create interaction                             | `POST /interactions` (any participants)                       | `create_interaction` (`participantIds`, max 25)                                                                                                                                  |
+| In-app chat, sync, billing, settings, API keys | REST                                                          | —                                                                                                                                                                                |
 
 Auth: REST uses session cookies, bearer, or API keys. MCP uses OAuth 2.1 + PKCE with `mcp:read` / `mcp:write` only.
 

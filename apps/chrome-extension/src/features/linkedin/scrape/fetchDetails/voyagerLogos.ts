@@ -5,6 +5,9 @@
 import type { WorkEntry } from "../workExperience";
 import { voyagerFetch } from "./voyagerShared";
 
+/** How deep the logo search descends into nested Voyager image objects. */
+const MAX_LOGO_SEARCH_DEPTH = 5;
+
 /**
  * Extracts a displayable image URL from various Voyager logo/image structures.
  *
@@ -21,7 +24,7 @@ export function extractLogoUrlFromVoyagerImage(
   img: Record<string, unknown>,
   depth = 0,
 ): string | undefined {
-  if (depth > 5) {
+  if (depth > MAX_LOGO_SEARCH_DEPTH) {
     return undefined;
   }
 
@@ -29,7 +32,7 @@ export function extractLogoUrlFromVoyagerImage(
   const rootUrl = img.rootUrl as string | undefined;
   const artifacts = img.artifacts as { fileIdentifyingUrlPathSegment?: string }[] | undefined;
   if (rootUrl && artifacts?.length) {
-    const largest = artifacts[artifacts.length - 1];
+    const largest = artifacts.at(-1);
     if (largest?.fileIdentifyingUrlPathSegment) {
       return `${rootUrl}${largest.fileIdentifyingUrlPathSegment}`;
     }
@@ -218,27 +221,28 @@ export async function enrichWorkEntriesWithLogos(
   skipNetworkLogos = false,
 ): Promise<WorkEntry[]> {
   // Step 0: Apply DOM logos (free — already scraped synchronously by the caller)
-  if (domLogos && domLogos.size > 0) {
-    entries = entries.map((entry) => {
-      if (entry.companyLogoUrl) {
-        return entry;
-      }
-      const url = domLogos.get(entry.companyName.toLowerCase());
-      return url ? { ...entry, companyLogoUrl: url } : entry;
-    });
-  }
+  const withDomLogos =
+    domLogos && domLogos.size > 0
+      ? entries.map((entry) => {
+          if (entry.companyLogoUrl) {
+            return entry;
+          }
+          const url = domLogos.get(entry.companyName.toLowerCase());
+          return url ? Object.assign({}, entry, { companyLogoUrl: url }) : entry;
+        })
+      : entries;
   // Step 1: Mine logos from the included entities (free — already in memory)
   const includedLogos = includedEntities
     ? extractCompanyLogosFromIncluded(includedEntities)
     : new Map<string, string>();
 
   // Apply included logos (keyed by companyUrn)
-  entries = entries.map((entry) => {
+  const withIncludedLogos = withDomLogos.map((entry) => {
     if (entry.companyLogoUrl || !entry.companyUrn) {
       return entry;
     }
     const logoUrl = includedLogos.get(entry.companyUrn);
-    return logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry;
+    return logoUrl ? Object.assign({}, entry, { companyLogoUrl: logoUrl }) : entry;
   });
 
   // Step 2: Batch-fetch logos for entries still missing one.
@@ -246,7 +250,7 @@ export async function enrichWorkEntriesWithLogos(
   const tasks: FetchTask[] = [];
   const seenKeys = new Set<string>();
 
-  for (const entry of entries) {
+  for (const entry of withIncludedLogos) {
     if (entry.companyLogoUrl) {
       continue;
     }
@@ -260,7 +264,7 @@ export async function enrichWorkEntriesWithLogos(
   }
 
   if (skipNetworkLogos || tasks.length === 0) {
-    return entries;
+    return withIncludedLogos;
   }
 
   const keyToLogo = new Map<string, string>();
@@ -277,7 +281,7 @@ export async function enrichWorkEntriesWithLogos(
     }),
   );
 
-  return entries.map((entry) => {
+  return withIncludedLogos.map((entry) => {
     if (entry.companyLogoUrl) {
       return entry;
     }
@@ -287,6 +291,6 @@ export async function enrichWorkEntriesWithLogos(
       return entry;
     }
     const logoUrl = keyToLogo.get(key);
-    return logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry;
+    return logoUrl ? Object.assign({}, entry, { companyLogoUrl: logoUrl }) : entry;
   });
 }

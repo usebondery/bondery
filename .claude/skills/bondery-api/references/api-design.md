@@ -8,15 +8,15 @@ Canonical path constants: `API_ROUTES` in `packages/helpers/src/globals/paths.ts
 
 ### Rules
 
-| Pattern | Convention | Examples |
-|---------|------------|----------|
-| Resource roots | Plural nouns | `/contacts`, `/groups`, `/tags`, `/interactions` |
-| Current user | Singular `/me` | `/me/settings`, `/me/api-keys` |
-| Multi-word segments | kebab-case | `/map-pins`, `/merge-recommendations`, `/important-dates` |
-| Path params | `:id` (UUID) | `/contacts/:id`, `/groups/:id/contacts` |
-| Static before dynamic | Static siblings before `/:id` | `/contacts/select`, `/contacts/by-social` before `/contacts/:id` |
-| Nested sub-resources | `/{resource}/{id}/{sub}` | `/contacts/:id/relationships`, `/tags/:id/contacts` |
-| Actions | Verb-like static segments where CRUD does not fit | `/contacts/merge`, `/subscriptions/checkout` |
+| Pattern               | Convention                                        | Examples                                                         |
+| --------------------- | ------------------------------------------------- | ---------------------------------------------------------------- |
+| Resource roots        | Plural nouns                                      | `/contacts`, `/groups`, `/tags`, `/interactions`                 |
+| Current user          | Singular `/me`                                    | `/me/settings`, `/me/api-keys`                                   |
+| Multi-word segments   | kebab-case                                        | `/map-pins`, `/merge-recommendations`, `/important-dates`        |
+| Path params           | `:id` (UUID)                                      | `/contacts/:id`, `/groups/:id/contacts`                          |
+| Static before dynamic | Static siblings before `/:id`                     | `/contacts/select`, `/contacts/by-social` before `/contacts/:id` |
+| Nested sub-resources  | `/{resource}/{id}/{sub}`                          | `/contacts/:id/relationships`, `/tags/:id/contacts`              |
+| Actions               | Verb-like static segments where CRUD does not fit | `/contacts/merge`, `/subscriptions/checkout`                     |
 
 ### Fastify vs BFF paths
 
@@ -30,7 +30,7 @@ Path tiers and HTTP method order affect published GitBook docs. See [api-route-o
 
 ### Naming anti-patterns
 
-```
+```text
 # GOOD
 /contacts                    # plural resource
 /contacts/map-pins           # kebab-case
@@ -47,15 +47,15 @@ Path tiers and HTTP method order affect published GitBook docs. See [api-route-o
 
 Bondery success responses use **resource-keyed** top-level keys — not a generic `{ data }` envelope. Only errors use a wrapper.
 
-| Pattern | Shape | When |
-|---------|-------|------|
-| Single resource | `{ contact: {...} }` | GET/PATCH single resource, 201 create |
-| Paginated list | `{ contacts: [...], pagination: {...} }` | People-style lists |
-| Collection | `{ groups: [...], totalCount: N }` | Small bounded catalogs |
-| Collection (no count) | `{ relationships: [...] }` | Unbounded sub-resource lists |
-| Message | `{ message: "..." }` | Bulk deletes, confirmations |
-| Action result | `{ addedCount: N }` | Membership adds |
-| Error | `{ error: { code, type, message, doc_url, ... } }` | All 4xx/5xx |
+| Pattern               | Shape                                              | When                                  |
+| --------------------- | -------------------------------------------------- | ------------------------------------- |
+| Single resource       | `{ contact: {...} }`                               | GET/PATCH single resource, 201 create |
+| Paginated list        | `{ contacts: [...], pagination: {...} }`           | People-style lists                    |
+| Collection            | `{ groups: [...], totalCount: N }`                 | Small bounded catalogs                |
+| Collection (no count) | `{ relationships: [...] }`                         | Unbounded sub-resource lists          |
+| Message               | `{ message: "..." }`                               | Bulk deletes, confirmations           |
+| Action result         | `{ addedCount: N }`                                | Membership adds                       |
+| Error                 | `{ error: { code, type, message, doc_url, ... } }` | All 4xx/5xx                           |
 
 ### Why not `{ data }`?
 
@@ -102,12 +102,12 @@ Use for contacts, group members, interactions, tag members, chat sessions/messag
 
 **Query parameters** (full words — no abbreviations):
 
-| Param | Type | Default | Notes |
-|-------|------|---------|-------|
-| `limit` | integer | `50` | Clamped to `1`–`200`; echoed in `pagination.limit` |
-| `offset` | integer | `0` | Non-negative; echoed in `pagination.offset` |
-| `search` | string | — | Trimmed; whitespace-only treated as absent (`null` in meta) |
-| `sort` | string | route default | Effective sort echoed in `pagination.sort` |
+| Param    | Type    | Default       | Notes                                                       |
+| -------- | ------- | ------------- | ----------------------------------------------------------- |
+| `limit`  | integer | `50`          | Clamped to `1`–`200`; echoed in `pagination.limit`          |
+| `offset` | integer | `0`           | Non-negative; echoed in `pagination.offset`                 |
+| `search` | string  | —             | Trimmed; whitespace-only treated as absent (`null` in meta) |
+| `sort`   | string  | route default | Effective sort echoed in `pagination.sort`                  |
 
 **No cursor pagination.** Bondery does not use `cursor`, `page_token`, `after_id`, or keyset pagination. Use offset only.
 
@@ -146,22 +146,24 @@ End the `ORDER BY` with a unique column, usually `id`. The sort then has no ties
 
 ```ts
 // GOOD — total order, stable across page requests
-orderBy: [{ firstName: "asc" }, { id: "asc" }]
+orderBy: [{ firstName: "asc" }, { id: "asc" }];
 
 // BAD — ties have no defined order
-orderBy: { firstName: "asc" }
+orderBy: {
+  firstName: "asc";
+}
 ```
 
 The rule covers every paginated query, including Prisma `skip`/`take` and raw SQL `limit`/`offset`:
 
-| Query | Tiebreaker |
-|---|---|
-| `services/contacts/query-people-page.ts` | `{ id: "asc" }` on every sort |
-| `services/groups/queries.ts`, `services/tags/queries.ts` | `{ id: "asc" }` on every sort |
-| `services/interactions/queries.ts` | `{ id: "desc" }` after `date desc` |
-| `routes/chat/sessions.ts` | `{ id }` after `updatedAt desc` and `createdAt asc` |
-| `routes/contacts/merge/recommendations.ts` | `{ id: "desc" }` after `score`, `createdAt` |
-| `packages/db/prisma/sql/functions.sql` → `search_people_ids` | `p.id asc` after `rank desc, first_name asc` |
+| Query                                                        | Tiebreaker                                          |
+| ------------------------------------------------------------ | --------------------------------------------------- |
+| `services/contacts/query-people-page.ts`                     | `{ id: "asc" }` on every sort                       |
+| `services/groups/queries.ts`, `services/tags/queries.ts`     | `{ id: "asc" }` on every sort                       |
+| `services/interactions/queries.ts`                           | `{ id: "desc" }` after `date desc`                  |
+| `routes/chat/sessions.ts`                                    | `{ id }` after `updatedAt desc` and `createdAt asc` |
+| `routes/contacts/merge/recommendations.ts`                   | `{ id: "desc" }` after `score`, `createdAt`         |
+| `packages/db/prisma/sql/functions.sql` → `search_people_ids` | `p.id asc` after `rank desc, first_name asc`        |
 
 Cursor pagination has the same need. `fetchSyncChangeLogRows` orders by `server_sequence, change_index`, and a unique index covers that pair, so it is already safe.
 
@@ -196,9 +198,9 @@ The interactions page URL uses the same names. The values are `YYYY-MM-DD`. The 
 
 ### Sort
 
-Sort values from `contactSortOrderSchema` in `packages/schemas/src/entities/contact/schema.ts`:
+Sort values from `contactSortOrderSchema` in `packages/schemas/src/entities/contact/list-schema.ts`:
 
-```
+```text
 nameAsc | nameDesc | surnameAsc | surnameDesc
 interactionAsc | interactionDesc | createdAtAsc | createdAtDesc
 ```
@@ -212,12 +214,12 @@ interactionAsc | interactionDesc | createdAtAsc | createdAtDesc
 
 ### Endpoints without search/sort
 
-| Endpoint | Query schema | Notes |
-|----------|-------------|-------|
-| `GET /groups` | `previewListQuerySchema` | `previewLimit` only |
-| `GET /tags` | `previewListQuerySchema` | `previewLimit` only |
-| `GET /chat/sessions` | `paginationQuerySchema` | Server sorts `updatedAt desc` |
-| `GET /sync/pull` | `syncPullQuerySchema` | `since`, `limit`, `waitMs` |
+| Endpoint             | Query schema             | Notes                         |
+| -------------------- | ------------------------ | ----------------------------- |
+| `GET /groups`        | `previewListQuerySchema` | `previewLimit` only           |
+| `GET /tags`          | `previewListQuerySchema` | `previewLimit` only           |
+| `GET /chat/sessions` | `paginationQuerySchema`  | Server sorts `updatedAt desc` |
+| `GET /sync/pull`     | `syncPullQuerySchema`    | `since`, `limit`, `waitMs`    |
 
 ### Collection (small per-user catalogs)
 
@@ -248,14 +250,14 @@ See [versioning.md](./versioning.md) for non-breaking vs breaking classification
 
 ## Edge cases
 
-| Case | Expected |
-|------|----------|
-| `search` whitespace only | No search filter; `pagination.search: null` |
-| `offset` beyond `totalCount` | `items: []`, `hasMore: false`, `totalCount` unchanged |
-| `limit` > 200 or < 1 | Clamped; echoed in `pagination.limit` |
-| Last partial page | `hasMore: false` even if `items.length < limit` |
-| Sort omitted | Server default applied; echoed in `pagination.sort` |
-| Search + scoped filter | Count RPC respects same scope (group, tag, keep-in-touch) |
+| Case                         | Expected                                                  |
+| ---------------------------- | --------------------------------------------------------- |
+| `search` whitespace only     | No search filter; `pagination.search: null`               |
+| `offset` beyond `totalCount` | `items: []`, `hasMore: false`, `totalCount` unchanged     |
+| `limit` > 200 or < 1         | Clamped; echoed in `pagination.limit`                     |
+| Last partial page            | `hasMore: false` even if `items.length < limit`           |
+| Sort omitted                 | Server default applied; echoed in `pagination.sort`       |
+| Search + scoped filter       | Count RPC respects same scope (group, tag, keep-in-touch) |
 
 ## Implementation references
 

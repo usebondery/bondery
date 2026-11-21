@@ -22,8 +22,12 @@ function runLocalActionOrder(options: {
 describe("sheet local action order", () => {
   it("runs perform then onClose then onSuccess", () => {
     const order = runLocalActionOrder({
-      onClose: () => {},
-      onSuccess: () => {},
+      onClose: () => {
+        // The helper records order after this call.
+      },
+      onSuccess: () => {
+        // The helper records order after this call.
+      },
       perform: () => "ok",
     });
     assert.deepEqual(order, ["perform", "onClose", "onSuccess"]);

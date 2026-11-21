@@ -55,6 +55,7 @@ export function SocialPopoverButton({
     >
       <Popover.Target>
         {/* biome-ignore lint/a11y/noStaticElementInteractions: hover/focus wrapper for Mantine Popover.Target */}
+        {/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: same wrapper; the focusable child is the link inside it */}
         <span
           onBlurCapture={(event) => {
             const nextFocused = event.relatedTarget as Node | null;

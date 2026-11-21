@@ -4,21 +4,24 @@ import { SyncConnectionHub } from "./hub.js";
 import { type SyncWakeSocket, WS_OPEN } from "./types.js";
 
 function createMockSocket(): SyncWakeSocket & { sent: string[]; closed: boolean } {
-  const socket = {
+  let closed = false;
+  const sent: string[] = [];
+  return {
     close() {
-      this.closed = true;
+      closed = true;
     },
-    closed: false,
+    get closed() {
+      return closed;
+    },
     readyState: WS_OPEN,
     send(data: string) {
-      this.sent.push(data);
+      sent.push(data);
     },
-    sent: [] as string[],
+    sent,
   };
-  return socket;
 }
 
-describe("SyncConnectionHub", () => {
+describe("syncConnectionHub", () => {
   it("registers and broadcasts to user sockets", () => {
     const hub = new SyncConnectionHub();
     const socket = createMockSocket();

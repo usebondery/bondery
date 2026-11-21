@@ -45,7 +45,9 @@ function groupRowsIntoBatches(rows: SyncChangeLogRow[]): SyncBatch[] {
 }
 
 function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
@@ -91,14 +93,13 @@ export const syncPullRoutes: AppRoutePlugin = async (fastify): Promise<void> => 
       }
 
       const deadline = Date.now() + waitMs;
-      let rows: SyncChangeLogRow[] = [];
+      let rows: SyncChangeLogRow[] = await fetchSyncChangeLogRows(prisma, user.id, since, limit);
 
-      while (true) {
-        rows = await fetchSyncChangeLogRows(prisma, user.id, since, limit);
-        if (rows.length > 0 || waitMs === 0 || Date.now() >= deadline) {
-          break;
+      if (waitMs !== 0) {
+        while (rows.length === 0 && Date.now() < deadline) {
+          await sleep(POLL_INTERVAL_MS);
+          rows = await fetchSyncChangeLogRows(prisma, user.id, since, limit);
         }
-        await sleep(POLL_INTERVAL_MS);
       }
 
       const batches = groupRowsIntoBatches(rows);

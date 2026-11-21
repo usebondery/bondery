@@ -1,5 +1,8 @@
 "use client";
 
+import blog from "@bondery/translations/locales/en/platform/website/WebsiteBlog.json" with {
+  type: "json",
+};
 import { Tabs, Tooltip } from "@mantine/core";
 import Link from "next/link";
 import { BLOG_CATEGORIES, CATEGORY_ICONS } from "@/lib/blog/categories";
@@ -10,10 +13,17 @@ type CategorySwitcherProps = {
 };
 
 const CATEGORY_TOOLTIPS: Record<PostCategory, string> = {
-  all: "Browse all blog posts",
-  bonds: "About networking and relationships",
-  tech: "Technical deep-dives",
-  updates: "Product updates and releases",
+  all: blog.Tooltips.All,
+  bonds: blog.Tooltips.Bonds,
+  tech: blog.Tooltips.Tech,
+  updates: blog.Tooltips.Updates,
+};
+
+const CATEGORY_LABELS: Record<PostCategory, string> = {
+  all: blog.Categories.All,
+  bonds: blog.Categories.Bonds,
+  tech: blog.Categories.Tech,
+  updates: blog.Categories.Updates,
 };
 
 export function CategorySwitcher({ activeCategory }: CategorySwitcherProps) {
@@ -29,7 +39,7 @@ export function CategorySwitcher({ activeCategory }: CategorySwitcherProps) {
                 renderRoot={(props) => <Link href={`/blog/${cat}`} {...props} />}
                 value={cat}
               >
-                {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                {CATEGORY_LABELS[cat]}
               </Tabs.Tab>
             </Tooltip>
           );

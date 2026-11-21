@@ -12,11 +12,15 @@ interface ContactsSelectionActionBarProps {
   extraActions?: FloatingActionBarAction[];
 }
 
+const NO_EXTRA_ACTIONS: FloatingActionBarAction[] = [];
+
 /**
  * Selection action bar for contacts. Reads live disabled/loading state from the
  * selection store so tab chrome only mounts once per selection session.
  */
-export function ContactsSelectionActionBar({ extraActions = [] }: ContactsSelectionActionBarProps) {
+export function ContactsSelectionActionBar({
+  extraActions = NO_EXTRA_ACTIONS,
+}: ContactsSelectionActionBarProps) {
   const t = useCommonTranslations();
   const tMobileContacts = useMobileContactsTranslations();
   const colors = useMobileThemeColors();

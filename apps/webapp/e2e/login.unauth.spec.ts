@@ -11,11 +11,14 @@ test.describe("unauthenticated login", () => {
     expect(emailSubmitBox).not.toBeNull();
     expect(emailSubmitBox?.y ?? 0).toBeGreaterThan(githubBox?.y ?? 0);
     await expect(page.getByTestId("login-email")).toBeHidden();
+  });
+
+  test("opens the email field after continue with email", async ({ page }) => {
+    await page.goto("/login");
     const emailSubmit = page.getByTestId("login-email-submit");
-    if (await emailSubmit.isEnabled()) {
-      await emailSubmit.click();
-      await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
-    }
+    await expect(emailSubmit).toBeEnabled();
+    await emailSubmit.click();
+    await expect(page.getByRole("textbox", { name: "Email" })).toBeVisible();
   });
 
   test("renders GitHub login on a small viewport", async ({ page }) => {

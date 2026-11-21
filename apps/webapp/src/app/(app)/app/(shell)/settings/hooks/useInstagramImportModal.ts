@@ -90,7 +90,7 @@ export function useInstagramImportModal({
   const [strategy, setStrategy] = useState<InstagramImportStrategy>("following_and_followers");
   const [parsedContacts, setParsedContacts] = useState<InstagramPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const openRef = useRef<() => void>(null);
+  const openRef = useRef<(() => void) | null>(null);
 
   const previewContacts = parsedContacts
     .filter((contact) => contact.isValid)
@@ -157,7 +157,8 @@ export function useInstagramImportModal({
   };
 
   const handleZipDrop = (files: File[]) => {
-    if (files.length !== 1) {
+    const [file] = files;
+    if (files.length !== 1 || !file) {
       notifications.show(
         errorNotificationTemplate({
           description: t("ZipTooManyFiles"),
@@ -167,7 +168,7 @@ export function useInstagramImportModal({
       return;
     }
 
-    handleZipSelected(files[0]);
+    handleZipSelected(file);
   };
 
   const parseUpload = async () => {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { MCP_SERVER_INSTRUCTIONS } from "./instructions.js";
 
-describe("MCP_SERVER_INSTRUCTIONS", () => {
+describe("mCP_SERVER_INSTRUCTIONS", () => {
   it("names the search-then-get path and the write-access split", () => {
     assert.match(MCP_SERVER_INSTRUCTIONS, /search_contacts/);
     assert.match(MCP_SERVER_INSTRUCTIONS, /get_contact/);

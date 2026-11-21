@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Aggiungi note…",
   "DeleteContact": "Eliminare il contatto",
   "DeleteContactConfirmTitle": "Eliminare {name}?",
   "DeleteFailed": "Impossibile eliminare il contatto.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Modificare",
   "GroupsEditAccessibility": "Modificare i gruppi di {name}",
   "GroupsLoadError": "Impossibile caricare i gruppi",
+  "LastInteractionLabel": "Ultima interazione",
   "NoGroups": "In nessun gruppo",
   "ShareContact": "Condividere la vCard…",
   "ShareContactViaEmail": "Inviare per email…",

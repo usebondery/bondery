@@ -20,7 +20,7 @@ import {
   VisuallyHidden,
 } from "@mantine/core";
 import { IconChecks } from "@tabler/icons-react";
-import { useRef, useState } from "react";
+import { type ReactElement, useRef, useState } from "react";
 import { ColumnVisibilityMenu } from "#DataTable/ColumnVisibilityMenu.js";
 import { DataTableRow } from "#DataTable/DataTableRow.js";
 import { SearchInput } from "#DataTable/SearchInput.js";
@@ -72,7 +72,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   toolbarExtra,
   isSortActive = false,
   className,
-}: DataTableProps<TRow, TSortKey>) {
+}: DataTableProps<TRow, TSortKey>): ReactElement {
   const [openedMenuRowId, setOpenedMenuRowId] = useState<string | null>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
@@ -163,17 +163,18 @@ export function DataTable<TRow, TSortKey extends string = string>({
       const end = Math.max(lastSelectedIndexRef.current, rowIndex);
       for (let i = start; i <= end; i++) {
         const rangeRow = dataRef.current[i];
+        if (rangeRow === undefined) {
+          continue;
+        }
         const rangeRowId = getRowId(rangeRow);
         if (!nonSelectableIdsRef.current?.has(rangeRowId)) {
           newSelectedIds.add(rangeRowId);
         }
       }
+    } else if (newSelectedIds.has(rowId)) {
+      newSelectedIds.delete(rowId);
     } else {
-      if (newSelectedIds.has(rowId)) {
-        newSelectedIds.delete(rowId);
-      } else {
-        newSelectedIds.add(rowId);
-      }
+      newSelectedIds.add(rowId);
     }
 
     lastSelectedIndexRef.current = rowIndex;

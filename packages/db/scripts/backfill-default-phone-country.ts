@@ -16,11 +16,12 @@ async function main() {
   );
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+try {
+  await main();
+} catch (error) {
+  console.error(error);
+  // Set the exit code instead of exiting, so the finally block still disconnects.
+  process.exitCode = 1;
+} finally {
+  await prisma.$disconnect();
+}

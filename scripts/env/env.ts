@@ -36,6 +36,7 @@ import { infraPinCalver } from "../../packages/helpers/src/version/calver.ts";
 import { readGitTags } from "../pkg/calver.mjs";
 import { writeDeployExample } from "./env-deploy-example.js";
 import { compareAscii, formatEnvFile, quoteEnvValue, sortEnvRows } from "./env-file-format.js";
+import { mobilePublicUrl } from "./env-mobile.js";
 import { writeOpsExample } from "./env-ops-example.js";
 import { writePlausibleExample } from "./env-plausible-example.js";
 
@@ -87,13 +88,6 @@ function resolveSyncModes(flags): SyncMode[] {
   return ["development"];
 }
 
-/** Mobile examples keep loopback ports; device/emulator cannot use Portless DNS. */
-const MOBILE_EXAMPLE_PUBLIC_URLS = {
-  BONDERY_PUBLIC_API_URL: "http://localhost:26631",
-  BONDERY_PUBLIC_WEBAPP_URL: "http://localhost:26632",
-  BONDERY_PUBLIC_WEBSITE_URL: "http://localhost:26630",
-} as const;
-
 function collectTargetVars(targetId, rootEnv, useExamples) {
   const byKey = new Map();
 
@@ -104,28 +98,15 @@ function collectTargetVars(targetId, rootEnv, useExamples) {
       }
       const key = target.runtimeName ?? entry.canonical;
       let value: string | undefined;
-      if (useExamples) {
-        if (target.deriveFrom) {
-          const sourceEntry = ENV_MANIFEST.find((e) => e.canonical === target.deriveFrom);
-          const sourceVal = sourceEntry?.exampleValue ?? "";
-          value = applyTransform(target.transform, sourceVal);
-        } else if (targetId === "mobile" && entry.canonical in MOBILE_EXAMPLE_PUBLIC_URLS) {
-          value =
-            MOBILE_EXAMPLE_PUBLIC_URLS[entry.canonical as keyof typeof MOBILE_EXAMPLE_PUBLIC_URLS];
-        } else {
-          value = entry.exampleValue;
-        }
+      if (useExamples && target.deriveFrom) {
+        const sourceEntry = ENV_MANIFEST.find((e) => e.canonical === target.deriveFrom);
+        const sourceVal = sourceEntry?.exampleValue ?? "";
+        value = applyTransform(target.transform, sourceVal);
       } else {
-        value = resolveCanonicalValue(rootEnv, entry, target);
-        // Mobile device/emulator cannot resolve Portless *.usebondery.test.
-        // Keep loopback public URLs for the mobile target even when root uses Portless.
-        if (
-          targetId === "mobile" &&
-          entry.canonical in MOBILE_EXAMPLE_PUBLIC_URLS &&
-          value !== undefined
-        ) {
-          value =
-            MOBILE_EXAMPLE_PUBLIC_URLS[entry.canonical as keyof typeof MOBILE_EXAMPLE_PUBLIC_URLS];
+        value = useExamples ? entry.exampleValue : resolveCanonicalValue(rootEnv, entry, target);
+        // A phone or an emulator cannot use the Portless URLs (env-mobile.ts).
+        if (targetId === "mobile") {
+          value = mobilePublicUrl(entry.canonical, value, { rootEnv, useExamples });
         }
       }
       if (value === undefined) {
@@ -221,7 +202,7 @@ function writeExamples(dryRun) {
             e.targets.some((t) => (t.runtimeName ?? e.canonical) === r.key),
         );
         const value = entry ? resolveExampleValue(entry, "production") : r.value;
-        return { ...r, value };
+        return Object.assign({}, r, { value });
       });
       const prodPath = join(repoRoot, target.productionExampleFile);
       if (!dryRun) {
@@ -344,12 +325,13 @@ function syncApps(flags, mode: SyncMode) {
   if (!existsSync(ROOT_ENV)) {
     log.error("Missing .env.local — copy from .env.local.example:");
     log.info("  cp .env.local.example .env.local");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const rootEnv = parseEnvFile(ROOT_ENV);
   const targets = SYNC_TARGETS.filter((t) => !flags.only || flags.only.includes(t.id));
-  const summary = [];
+  const summary: Array<{ file: string; mode: SyncMode; target: string; vars: number }> = [];
 
   for (const target of targets) {
     const relPath = mode === "production" ? target.productionFile : target.devFile;
@@ -378,23 +360,25 @@ function validatePostgresRootEnv(rootEnv: Record<string, string>) {
     log.error(
       "Remove DATABASE_URL from root .env.local — pnpm run env derives it from BONDERY_PRIVATE_POSTGRES_PASSWORD",
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (!rootEnv.BONDERY_PRIVATE_POSTGRES_PASSWORD) {
     log.error("Missing BONDERY_PRIVATE_POSTGRES_PASSWORD in .env.local");
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
 function checkRoot(environment: SyncMode) {
   if (!existsSync(ROOT_ENV)) {
     log.error("Missing .env.local — run: pnpm run setup:dev");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const rootEnv = parseEnvFile(ROOT_ENV);
-  const missingRoot = [];
+  const missingRoot: string[] = [];
 
   for (const entry of ENV_MANIFEST) {
     if (!entry.requiredIn.includes(environment)) {
@@ -414,7 +398,8 @@ function checkRoot(environment: SyncMode) {
     for (const name of missingRoot) {
       log.error(`  ${name}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (environment === "development") {
@@ -457,7 +442,8 @@ function assertGeneratedFresh() {
     } catch {
       // Best-effort diff for CI logs.
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   log.success("Env examples, deploy/ops examples, and turbo.json env sections match the manifest");
@@ -476,7 +462,7 @@ function main() {
 
   const codegenOnly =
     (flags.writeExamples || flags.writeTurbo) &&
-    !argv.some((a) => a.startsWith("--only=")) &&
+    argv.every((a) => !a.startsWith("--only=")) &&
     argv.every(
       (a) =>
         a === "--write-examples" ||

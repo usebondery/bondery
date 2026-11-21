@@ -86,7 +86,9 @@ async function main() {
     for (const filePath of files) {
       const code = await readFile(filePath, "utf8");
       for (const { filePath: violationPath, specifier } of collectViolations(code, filePath)) {
-        check.add(`${violationPath}: ${specifier}`);
+        check.add(
+          `${violationPath}: relative import "${specifier}" has no file extension. Add the .js extension to the specifier so NodeNext resolves it at runtime.`,
+        );
       }
     }
   }
@@ -96,5 +98,5 @@ async function main() {
 
 main().catch((error) => {
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 });

@@ -230,11 +230,13 @@
     "deleting": "Kustutan…",
     "duplicating": "Dubleerin…",
     "errorTitle": "Viga",
+    "mobileRuntimeError": "Mobiilirakenduse käitusaja viga",
     "noResults": "Tulemusi pole",
     "removing": "Eemaldan…",
     "savedTitle": "Salvestatud",
     "saving": "Salvestan…",
     "sending": "Saadan…",
-    "successTitle": "Õnnestus"
+    "successTitle": "Õnnestus",
+    "unknownError": "Tundmatu viga"
   }
 }

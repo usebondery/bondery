@@ -30,12 +30,16 @@ include:
   - path: docker-compose.seaweedfs.yml
 
 services:
-  # One-shot job: creates the Redis password and TLS certificate in the redis-secrets
-  # volume on first start, keeps them afterwards. Existing installs upgrade with no action.
-  redis-secrets:
+  # One-shot job: creates the secrets of the bundled services on first start and keeps them
+  # afterwards: the Redis password and TLS certificate, the Postgres CA and TLS certificate, and
+  # the SeaweedFS CA and cluster certificate, and the CA and certificate of the API's internal
+  # HTTPS listener. Existing installs upgrade with no action. Each Postgres, storage, and API
+  # volume holds only what its consumer needs: ca (this job), server (db or api) or cluster
+  # (SeaweedFS nodes), client (the service that connects).
+  stack-secrets:
     command:
       - node
-      - apps/api/dist/cli/ensure-redis-secrets.js
+      - apps/api/dist/cli/ensure-stack-secrets.js
     environment:
       BONDERY_INFRA_TRAEFIK_PREFIX: ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}
     image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-production}
@@ -45,6 +49,47 @@ services:
     user: "0:0"
     volumes:
       - redis-secrets:/bondery-redis
+      - postgres-tls-ca:/bondery-postgres/ca
+      - postgres-tls-server:/bondery-postgres/server
+      - postgres-tls-client:/bondery-postgres/client
+      - storage-tls-ca:/bondery-storage/ca
+      - storage-tls-cluster:/bondery-storage/cluster
+      - storage-tls-client:/bondery-storage/client
+      - api-tls-ca:/bondery-api/ca
+      - api-tls-server:/bondery-api/server
+      - api-tls-client:/bondery-api/client
+
+  # One-shot job: lets Traefik reach the API and the storage gateway over verified HTTPS. It writes
+  # ${BONDERY_INFRA_TRAEFIK_PREFIX}-api-transport.yml and -storage-transport.yml (serversTransports
+  # with the private CAs) into the folder Traefik's file provider watches; the api and seaweedfs-s3
+  # labels reference them. The folder is Dokploy's unless BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR names
+  # another one. A pinned busybox image runs a script from git, with no network, no capabilities,
+  # and a read-only root filesystem. Hosts without Traefik: see docker-compose.override.yml.example.
+  traefik-transport:
+    cap_drop:
+      - ALL
+    command: [ "/bin/sh", "/bondery/publish-transports.sh" ]
+    depends_on:
+      stack-secrets:
+        condition: service_completed_successfully
+    environment:
+      BONDERY_INFRA_TRAEFIK_PREFIX: ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}
+    image: busybox:1.37
+    network_mode: none
+    read_only: true
+    restart: "no"
+    security_opt:
+      - no-new-privileges:true
+    user: "0:0"
+    volumes:
+      - api-tls-client:/bondery-api/client:ro
+      - storage-tls-client:/bondery-storage/client:ro
+      - ./traefik/publish-transports.sh:/bondery/publish-transports.sh:ro
+      - type: bind
+        source: ${BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-/etc/dokploy/traefik/dynamic}
+        target: /traefik-dynamic
+        bind:
+          create_host_path: false
 
   # Redis accepts TLS only (no plaintext port) and requires the password from users.acl.
   redis:
@@ -68,7 +113,7 @@ services:
       - --aclfile
       - /bondery-redis/server/users.acl
     depends_on:
-      redis-secrets:
+      stack-secrets:
         condition: service_completed_successfully
     healthcheck:
       interval: 5s
@@ -77,7 +122,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          "REDISCLI_AUTH=\"$$(cat /bondery-redis/client/password)\" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG",
+          'REDISCLI_AUTH="$$(cat /bondery-redis/client/password)" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG',
         ]
       timeout: 3s
     image: redis:8.10
@@ -98,19 +143,35 @@ services:
         condition: service_healthy
       seaweedfs-s3:
         condition: service_healthy
+      stack-secrets:
+        condition: service_completed_successfully
+      traefik-transport:
+        condition: service_completed_successfully
     env_file:
       - .env
     environment:
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
       BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
       BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
+      # The API serves HTTPS only, on 26642: Traefik, the webapp's server side, and the
+      # healthcheck. There is no plain HTTP port.
+      API_PORT: "26642"
+      BONDERY_PRIVATE_API_TLS_CERT_FILE: /bondery-api/server/tls.crt
+      BONDERY_PRIVATE_API_TLS_KEY_FILE: /bondery-api/server/tls.key
       # Bundled Redis only: TLS + password from the redis-secrets volume. Compose always sets
       # this URL; a BONDERY_PRIVATE_REDIS_URL in .env does not apply to this stack.
       BONDERY_PRIVATE_REDIS_URL: rediss://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379
       BONDERY_PRIVATE_REDIS_PASSWORD_FILE: /bondery-redis/client/password
       BONDERY_PRIVATE_REDIS_TLS_CA_FILE: /bondery-redis/client/ca.crt
+      # Bundled Postgres only: TLS verified against the stack CA from the stack-secrets job.
+      # Compose always sets these; DATABASE_SSL_* in .env does not apply to this stack.
+      DATABASE_SSL_MODE: verify-full
+      DATABASE_SSL_ROOT_CERT_FILE: /bondery-postgres/client/ca.crt
       DATABASE_URL: postgresql://postgres:${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}@${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-db:5432/bondery
-      BONDERY_PRIVATE_S3_ENDPOINT: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8333
+      # Bundled SeaweedFS only: HTTPS verified against the storage CA from the stack-secrets job.
+      # Compose always sets these; BONDERY_PRIVATE_S3_* in .env does not change them.
+      BONDERY_PRIVATE_S3_ENDPOINT: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443
+      BONDERY_PRIVATE_S3_TLS_CA_FILE: /bondery-storage/client/ca.crt
       BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
       BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
       BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
@@ -126,7 +187,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "fetch('http://127.0.0.1:26631/health/live').then((r)=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+          "require('node:https').get({ca:require('node:fs').readFileSync('/bondery-api/client/ca.crt'),host:'127.0.0.1',path:'/health/live',port:26642},(r)=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
         ]
       timeout: 5s
     image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-production}
@@ -146,7 +207,8 @@ services:
           - node
           - apps/api/dist/cli/ensure-storage-buckets.js
         environment:
-          BONDERY_PRIVATE_S3_ENDPOINT: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8333
+          BONDERY_PRIVATE_S3_ENDPOINT: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443
+          BONDERY_PRIVATE_S3_TLS_CA_FILE: /bondery-storage/client/ca.crt
           BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
           BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
           BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
@@ -158,7 +220,10 @@ services:
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.entrypoints=websecure"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.tls.certResolver=letsencrypt"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api"
-      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.port=26631"
+      # Traefik forwards over HTTPS and verifies the API CA (traefik-transport job above).
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.port=26642"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.scheme=https"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.serverstransport=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api@file"
     networks:
       dokploy-network:
         aliases:
@@ -169,13 +234,21 @@ services:
     restart: unless-stopped
     volumes:
       - redis-secrets:/bondery-redis:ro
+      - postgres-tls-client:/bondery-postgres/client:ro
+      - storage-tls-client:/bondery-storage/client:ro
+      - api-tls-server:/bondery-api/server:ro
+      # The API CA certificate only (no key), for the healthcheck's HTTPS request.
+      - api-tls-client:/bondery-api/client:ro
 
   webapp:
     depends_on:
       api:
         condition: service_healthy
     environment:
-      BONDERY_INFRA_INTERNAL_API_URL: http://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api:26631
+      # Server-side calls to the API use its internal HTTPS listener, verified against the API CA
+      # from the stack-secrets job. Compose always sets these; .env does not change them.
+      BONDERY_INFRA_INTERNAL_API_URL: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api:26642
+      BONDERY_INFRA_INTERNAL_API_CA_FILE: /bondery-api/client/ca.crt
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
       BONDERY_PUBLIC_CSP_REPORT_ENABLED: ${BONDERY_PUBLIC_CSP_REPORT_ENABLED:-true}
       BONDERY_PUBLIC_POSTHOG_HOST: ${BONDERY_PUBLIC_POSTHOG_HOST:-}
@@ -215,6 +288,8 @@ services:
         aliases:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-webapp
     restart: unless-stopped
+    volumes:
+      - api-tls-client:/bondery-api/client:ro
 
 networks:
   dokploy-network:
@@ -223,5 +298,10 @@ networks:
     driver: bridge
 
 volumes:
-  redis-data:
-  redis-secrets:
+  redis-data: {}
+  redis-secrets: {}
+  # Written by the stack-secrets job. ca: the job only. server: the API only (its key). client:
+  # the webapp only (the CA certificate it trusts).
+  api-tls-ca: {}
+  api-tls-server: {}
+  api-tls-client: {}

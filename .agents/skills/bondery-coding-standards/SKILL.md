@@ -35,17 +35,18 @@ The behavioral baseline in [`bondery-core/AGENTS.md`](../bondery-core/AGENTS.md)
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Readability, naming, functions, comments, code smells | [references/code-craft.md](references/code-craft.md) |
-| TypeScript, Biome rules, imports, non-mutating checks | [references/typescript-and-tooling.md](references/typescript-and-tooling.md) |
-| Package boundaries and shared-code placement | [`bondery-core`](../bondery-core/SKILL.md) |
-| API routes, transport, errors, pagination, sync | [`bondery-api`](../bondery-api/SKILL.md) |
-| Prisma, migrations, IDs, raw SQL | [`bondery-database`](../bondery-database/SKILL.md) |
-| Auth, authorization, tenant isolation, secrets | [`bondery-security`](../bondery-security/SKILL.md) |
-| UI, i18n, forms, empty/error/loading states | [`bondery-ux`](../bondery-ux/SKILL.md) |
-| React and Next.js implementation details | [`vercel-react-best-practices`](../vercel-react-best-practices/SKILL.md) and [`next-best-practices`](../next-best-practices/SKILL.md) |
-| Change-scoped checks before handoff | [`bondery-verification-loop`](../bondery-verification-loop/SKILL.md) |
+| Task                                                  | Read                                                                                                                                  |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Readability, naming, functions, comments, code smells | [references/code-craft.md](references/code-craft.md)                                                                                  |
+| TypeScript, Biome rules, imports, non-mutating checks | [references/typescript-and-tooling.md](references/typescript-and-tooling.md)                                                          |
+| Package boundaries and shared-code placement          | [`bondery-core`](../bondery-core/SKILL.md)                                                                                            |
+| API routes, transport, errors, pagination, sync       | [`bondery-api`](../bondery-api/SKILL.md)                                                                                              |
+| Prisma, migrations, IDs, raw SQL                      | [`bondery-database`](../bondery-database/SKILL.md)                                                                                    |
+| Auth, authorization, tenant isolation, secrets        | [`bondery-security`](../bondery-security/SKILL.md)                                                                                    |
+| UI, i18n, forms, empty/error/loading states           | [`bondery-ux`](../bondery-ux/SKILL.md)                                                                                                |
+| React and Next.js implementation details              | [`vercel-react-best-practices`](../vercel-react-best-practices/SKILL.md) and [`next-best-practices`](../next-best-practices/SKILL.md) |
+| Change-scoped checks before handoff                   | [`bondery-verification-loop`](../bondery-verification-loop/SKILL.md)                                                                  |
+| Turning a repeated defect into an enforced rule       | [`adding-a-check.md`](../bondery-verification-loop/references/adding-a-check.md)                                                      |
 
 Full local-reference index: [references/README.md](references/README.md).
 

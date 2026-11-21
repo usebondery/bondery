@@ -4,22 +4,22 @@ Canonical analytics environment variables.
 
 ## Public (browser-safe)
 
-| Variable | App | Purpose |
-|----------|-----|---------|
-| `BONDERY_PUBLIC_POSTHOG_KEY` | webapp | PostHog project API key (init) |
-| `BONDERY_PUBLIC_POSTHOG_HOST` | webapp | PostHog API host (default `https://eu.i.posthog.com`) |
-| `BONDERY_PUBLIC_PLAUSIBLE_DOMAIN` | website | Plausible site domain |
-| `BONDERY_PUBLIC_PLAUSIBLE_HOST` | website | Plausible CE base URL |
+| Variable                          | App     | Purpose                                               |
+| --------------------------------- | ------- | ----------------------------------------------------- |
+| `BONDERY_PUBLIC_POSTHOG_KEY`      | webapp  | PostHog project API key (init)                        |
+| `BONDERY_PUBLIC_POSTHOG_HOST`     | webapp  | PostHog API host (default `https://eu.i.posthog.com`) |
+| `BONDERY_PUBLIC_PLAUSIBLE_DOMAIN` | website | Plausible site domain                                 |
+| `BONDERY_PUBLIC_PLAUSIBLE_HOST`   | website | Plausible CE base URL                                 |
 
 Do not add private PostHog Query API keys. Operators use the PostHog product UI for DAU/WAU/MAU/NPS.
 
 ## Infra (Plausible CE deploy)
 
-| Variable | Purpose |
-|----------|---------|
-| `BONDERY_INFRA_PLAUSIBLE_DOMAIN` | Traefik / CE public URL |
-| `BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION` | e.g. `invite_only` |
-| `BONDERY_PRIVATE_PLAUSIBLE_*` | CE secrets (see `deploy/plausible/.env.example`) |
+| Variable                                       | Purpose                                          |
+| ---------------------------------------------- | ------------------------------------------------ |
+| `BONDERY_INFRA_PLAUSIBLE_DOMAIN`               | Traefik / CE public URL                          |
+| `BONDERY_INFRA_PLAUSIBLE_DISABLE_REGISTRATION` | e.g. `invite_only`                               |
+| `BONDERY_PRIVATE_PLAUSIBLE_*`                  | CE secrets (see `deploy/plausible/.env.example`) |
 
 ## Runtime config (webapp)
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { View } from "react-native";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { BottomSheetFlatList, Sheet, type SheetAction } from "../Sheet";
@@ -52,11 +52,15 @@ export function SelectSheet<TItem>({
   const query = controlledQuery ?? internalQuery;
   const setQuery = onQueryChange ?? setInternalQuery;
 
-  useEffect(() => {
+  // Closing the sheet clears the search. Resetting while rendering avoids a frame that
+  // still shows the old query.
+  const [wasOpened, setWasOpened] = useState(opened);
+  if (opened !== wasOpened) {
+    setWasOpened(opened);
     if (!opened) {
       setInternalQuery("");
     }
-  }, [opened]);
+  }
 
   const resolvedSnap = snapPoint ?? (searchable ? "selectSearch" : "selectSimple");
 

@@ -17,4 +17,4 @@
  * See packages/db/README.md for the full migration runbook (TODO).
  */
 console.error("migrate-storage-from-supabase: not implemented yet");
-process.exit(1);
+process.exitCode = 1;

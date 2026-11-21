@@ -1,4 +1,9 @@
-import about from "@bondery/translations/locales/en/features/pages/AboutPage.json";
+import about from "@bondery/translations/locales/en/features/pages/AboutPage.json" with {
+  type: "json",
+};
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Box, Container, Grid, GridCol, Image, Stack, Text, Title } from "@mantine/core";
 import { Team } from "@/components/landing/Team";
 
@@ -30,7 +35,7 @@ export function About() {
             </GridCol>
             <GridCol span={{ base: 12, md: 6 }}>
               <Stack gap="sm">
-                <Title order={2}>How Bondery started</Title>
+                <Title order={2}>{landing.About.StoryTitle}</Title>
                 <Text c="dimmed">{about.Story}</Text>
               </Stack>
             </GridCol>

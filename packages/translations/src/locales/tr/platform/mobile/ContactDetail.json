@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Not ekle…",
   "DeleteContact": "Kişiyi sil",
   "DeleteContactConfirmTitle": "{name} silinsin mi?",
   "DeleteFailed": "Kişi silinemedi.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Düzenle",
   "GroupsEditAccessibility": "Grupları düzenle: {name}",
   "GroupsLoadError": "Gruplar yüklenemedi",
+  "LastInteractionLabel": "Son etkileşim",
   "NoGroups": "Hiçbir grupta değil",
   "ShareContact": "vCard paylaş…",
   "ShareContactViaEmail": "E-posta ile gönder…",

@@ -93,7 +93,6 @@ export function installWebappBridge(): void {
           targetOrigin,
         );
       }
-      return;
     }
   });
 

@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Πρόσθεσε σημειώσεις…",
   "DeleteContact": "Διαγραφή επαφής",
   "DeleteContactConfirmTitle": "Διαγραφή {name};",
   "DeleteFailed": "Αποτυχία διαγραφής επαφής.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Επεξεργασία",
   "GroupsEditAccessibility": "Επεξεργασία ομάδων για {name}",
   "GroupsLoadError": "Αδύνατη φόρτωση ομάδων",
+  "LastInteractionLabel": "Τελευταία αλληλεπίδραση",
   "NoGroups": "Δεν ανήκει σε καμία ομάδα",
   "ShareContact": "Κοινοποίηση vCard…",
   "ShareContactViaEmail": "Αποστολή με email…",

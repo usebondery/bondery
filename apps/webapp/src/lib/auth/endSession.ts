@@ -18,6 +18,10 @@ export type EndSessionOptions = {
 
 let isEndingSession = false;
 
+function clearEndingSession(): void {
+  isEndingSession = false;
+}
+
 function resolveRedirectTo(reason: EndSessionReason, redirectTo?: string): string {
   if (redirectTo !== undefined) {
     return redirectTo;
@@ -107,6 +111,6 @@ export async function endSession({ reason, redirectTo }: EndSessionOptions): Pro
 
     window.location.replace(destination);
   } finally {
-    isEndingSession = false;
+    clearEndingSession();
   }
 }

@@ -54,7 +54,7 @@ export interface PeopleMapMyLocationControl {
   onClick: () => void;
 }
 
-interface PeopleMapProps {
+export interface PeopleMapProps {
   center?: [number, number];
   disableAutoFit?: boolean;
   disableChipNavigation?: boolean;

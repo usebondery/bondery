@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { BackHandler } from "react-native";
-import { useContactsSelection, useContactsSelectionMode } from "../contactsSelectionStore";
+import {
+  BULK_SELECTION_TRANSITION_THRESHOLD,
+  useContactsSelection,
+  useContactsSelectionMode,
+} from "../contactsSelectionStore";
 
 /** Handles Android back while contacts selection is active. */
 export function ContactsSelectionBackHandler() {
@@ -16,7 +20,8 @@ export function ContactsSelectionBackHandler() {
 
     const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
       exitSelectionMode({
-        useTransition: isAllTotalSelected && loadedContactCount >= 20,
+        useTransition:
+          isAllTotalSelected && loadedContactCount >= BULK_SELECTION_TRANSITION_THRESHOLD,
       });
       return true;
     });

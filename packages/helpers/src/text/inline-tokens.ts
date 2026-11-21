@@ -33,7 +33,7 @@ export type InlineToken =
 // ---------------------------------------------------------------------------
 
 /** Matches `[[bp:type:value]]` tokens. */
-export const BP_TOKEN_RE = /\[\[bp:(\w+):([^\]]+)\]\]/g;
+export const BP_TOKEN_RE: RegExp = /\[\[bp:(\w+):([^\]]+)\]\]/g;
 
 /** Matches standard markdown links `[label](url)`. */
 const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;

@@ -2,7 +2,7 @@
 
 import { TextInput } from "@mantine/core";
 import { IconSearch } from "@tabler/icons-react";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 
 /**
  * Isolated search input that owns its own local state.
@@ -19,7 +19,7 @@ export function SearchInput({
   placeholder?: string;
   onChange: (value: string) => void;
   loading?: boolean;
-}) {
+}): ReactElement {
   const [value, setValue] = useState(initialValue);
   return (
     <TextInput

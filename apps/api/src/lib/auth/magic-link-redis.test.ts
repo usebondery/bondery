@@ -18,7 +18,7 @@ describe("magic-link hashing", () => {
   it("hashes stored identifiers as SHA-256 base64url without padding", () => {
     const hashed = hashMagicLinkStoredIdentifier("plaintext-token");
     assert.doesNotMatch(hashed, /plaintext/);
-    assert.doesNotMatch(hashed, /=/);
+    assert.doesNotMatch(hashed, /[=]/);
   });
 
   it("matches Better Auth magic-link defaultKeyHasher", async () => {

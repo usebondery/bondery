@@ -45,8 +45,8 @@ export async function parseVCardUpload(
 
     try {
       parsed = parseVCards(content);
-    } catch {
-      throw new Error(`Failed to parse ${file.fileName}: invalid vCard format`);
+    } catch (error) {
+      throw new Error(`Failed to parse ${file.fileName}: invalid vCard format`, { cause: error });
     }
 
     for (const entry of parsed) {
@@ -103,8 +103,12 @@ export async function parseVCardUpload(
     const batch = jobs.slice(i, i + GEOCODE_BATCH_SIZE);
     await Promise.allSettled(
       batch.map(async ({ contactIndex, addressIndex }) => {
-        const addr = contacts[contactIndex].addresses[addressIndex];
-        contacts[contactIndex].addresses[addressIndex] = await enrichAddress(addr);
+        const contact = contacts[contactIndex];
+        const addr = contact?.addresses[addressIndex];
+        if (!contact || !addr) {
+          return;
+        }
+        contact.addresses[addressIndex] = await enrichAddress(addr);
       }),
     );
   }

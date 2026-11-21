@@ -44,7 +44,7 @@ export async function hydrateMergeRecommendations(
 
   const mappedContacts = personRows.map(mapContactDetailRecord);
 
-  let enrichedContacts: Array<{ id: string } & FullContactExtras> = [];
+  let enrichedContacts: Array<{ id: string } & FullContactExtras>;
   try {
     enrichedContacts = await attachContactExtras(db, user.id, mappedContacts, {
       addresses: true,

@@ -13,4 +13,4 @@ const result = spawnSync("npm", ["run", "setup:seaweedfs"], {
   stdio: "inherit",
 });
 
-process.exit(result.status ?? 1);
+process.exitCode = result.status ?? 1;

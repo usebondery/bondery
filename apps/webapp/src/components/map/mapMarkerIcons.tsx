@@ -1,7 +1,8 @@
 import { BRAND_PRIMARY_COLOR, BRAND_PRIMARY_SHADES } from "@bondery/branding";
 import { Avatar } from "@mantine/core";
-import { forwardRef, type HTMLAttributes } from "react";
+import type { HTMLAttributes, Ref } from "react";
 import { getAvatarColorFromName } from "@/lib/contacts/avatarColor";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 const PERSON_MARKER_SIZE = 34;
 const SELF_MARKER_SIZE = 34;
@@ -35,15 +36,21 @@ export function getClusterTier(count: number): ClusterTier {
   return { diameter: 32, shade: BRAND_PRIMARY_SHADES[4] };
 }
 
-export const PersonMapAvatarMarker = forwardRef<
-  HTMLDivElement,
-  {
-    avatarUrl?: string | null;
-    firstName: string;
-    lastName?: string | null;
-    name: string;
-  } & HTMLAttributes<HTMLDivElement>
->(function PersonMapAvatarMarker({ avatarUrl, firstName, lastName, name, style, ...rest }, ref) {
+export function PersonMapAvatarMarker({
+  avatarUrl,
+  firstName,
+  lastName,
+  name,
+  ref,
+  style,
+  ...rest
+}: {
+  avatarUrl?: string | null;
+  firstName: string;
+  lastName?: string | null;
+  name: string;
+  ref?: Ref<HTMLDivElement>;
+} & HTMLAttributes<HTMLDivElement>) {
   return (
     <div
       {...rest}
@@ -58,12 +65,12 @@ export const PersonMapAvatarMarker = forwardRef<
         name={name}
         radius="xl"
         size={PERSON_MARKER_SIZE}
-        src={avatarUrl || undefined}
+        src={nonEmpty(avatarUrl)}
         style={avatarRingStyle}
       />
     </div>
   );
-});
+}
 
 export function SelfMapAvatarMarker(input: {
   ariaLabel: string;
@@ -82,7 +89,7 @@ export function SelfMapAvatarMarker(input: {
         name={input.displayName}
         radius="xl"
         size={SELF_MARKER_SIZE}
-        src={input.avatarUrl || undefined}
+        src={nonEmpty(input.avatarUrl)}
         style={{ ...avatarRingStyle, pointerEvents: "none" }}
       />
     </div>

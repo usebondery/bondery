@@ -31,11 +31,11 @@ Monorepo shared packages follow a one-way dependency graph:
 - `@bondery/helpers` — behavior layer (parsing, formatting, geocoding, routes). May depend on schemas.
 - `@bondery/helpers/forms` — Zod pipelines that validate with schemas then normalize with helpers. Use on form submit/save.
 
-| Need | Import from |
-|------|-------------|
-| Type or validation schema | `@bondery/schemas` |
-| Utility / formatter | `@bondery/helpers` (subpath) |
-| Form submit (validate + normalize) | `@bondery/helpers/forms` |
+| Need                               | Import from                  |
+| ---------------------------------- | ---------------------------- |
+| Type or validation schema          | `@bondery/schemas`           |
+| Utility / formatter                | `@bondery/helpers` (subpath) |
+| Form submit (validate + normalize) | `@bondery/helpers/forms`     |
 
 See `packages/schemas/README.md` and `packages/helpers/README.md`.
 
@@ -43,7 +43,7 @@ See `packages/schemas/README.md` and `packages/helpers/README.md`.
 
 Shared packages follow the [Turborepo compiled-package model](https://turborepo.dev/docs/guides/tools/typescript#compiled-packages):
 
-- **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext.
+- **TypeScript:** extend `@bondery/typescript-config` (`base.json` or `react-library.json`); `module` / `moduleResolution` = NodeNext. Compiled packages enable `isolatedDeclarations` except `@bondery/schemas` (Zod composition).
 - **Exports:** `types` → `src/`, `default` → `dist/`; run `pnpm run sync-exports` after adding public subpaths.
 - **Internal imports:** `#*` hash paths with `.js` suffix (not `tsconfig` paths).
 - **Build:** `rimraf dist && tsc` (+ rewrite hash imports); **compile:** incremental `tsc` then rewrite `#` imports in `dist`; **dev:** `tsc --watch` plus rewrite after each emit (`scripts/pkg/tsc-watch-and-rewrite.mjs`). Next.js cannot resolve `#` specifiers in compiled files. pnpm `injectWorkspacePackages` copies packages into app `node_modules`; rewrite also copies `dist` into those copies. `syncInjectedDepsAfterScripts` covers `build` and `compile` only.

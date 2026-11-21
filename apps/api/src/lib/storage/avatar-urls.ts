@@ -14,7 +14,7 @@ export function buildContactAvatarUrl(
   personId: string,
   _options?: AvatarTransformOptions,
   avatarUpdatedAt?: Date | string | null,
-): string | null {
+): string {
   const path = `${userId}/${personId}.jpg`;
   const storage = getStorage();
   let baseUrl = storage.getPublicUrl(AVATARS_BUCKET, path);

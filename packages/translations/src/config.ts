@@ -1,4 +1,8 @@
-import { coerceSupportedLocale, DEFAULT_LOCALE } from "@bondery/schemas/locale/supported-locale";
+import {
+  coerceSupportedLocale,
+  DEFAULT_LOCALE,
+  type SupportedLocale,
+} from "@bondery/schemas/locale/supported-locale";
 import { ALL_NAMESPACE_NAMES } from "#manifest.js";
 
 export {
@@ -19,8 +23,21 @@ export {
 
 export { coerceSupportedLocale };
 
-export const i18nConfig = {
-  defaultNS: "common" as const,
+export type I18nConfig = {
+  readonly defaultNS: "common";
+  readonly fallbackLng: SupportedLocale;
+  readonly interpolation: {
+    readonly escapeValue: false;
+    readonly prefix: "{";
+    readonly suffix: "}";
+  };
+  readonly keySeparator: ".";
+  readonly ns: readonly string[];
+  readonly nsSeparator: ":";
+};
+
+export const i18nConfig: I18nConfig = {
+  defaultNS: "common",
   fallbackLng: DEFAULT_LOCALE,
   interpolation: {
     escapeValue: false,
@@ -30,4 +47,4 @@ export const i18nConfig = {
   keySeparator: ".",
   ns: ALL_NAMESPACE_NAMES,
   nsSeparator: ":",
-} as const;
+};

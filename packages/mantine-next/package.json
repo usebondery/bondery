@@ -6,6 +6,7 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "cn": "^0.5.2",
     "highlight.js": "^11.12.0"
   },
   "devDependencies": {
@@ -18,7 +19,7 @@
     "next": "16.4.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "rimraf": "^6.1.3",
+    "rimraf": "^6.1.4",
     "tsx": "4.23.15",
     "typescript": "^7.0.2"
   },
@@ -705,6 +706,12 @@
       "import": "./dist/utils/avatarColor.js",
       "node": "./dist/utils/avatarColor.js",
       "types": "./src/utils/avatarColor.ts"
+    },
+    "./utils/nonEmpty": {
+      "default": "./dist/utils/nonEmpty.js",
+      "import": "./dist/utils/nonEmpty.js",
+      "node": "./dist/utils/nonEmpty.js",
+      "types": "./src/utils/nonEmpty.ts"
     }
   },
   "imports": {
@@ -722,10 +729,10 @@
   "main": "./dist/index.js",
   "name": "@bondery/mantine-next",
   "peerDependencies": {
-    "@mantine/code-highlight": "^9.6.0",
+    "@mantine/code-highlight": "^9.8.1",
     "@mantine/core": "^9.6.0",
-    "@mantine/dates": "^9.6.0",
-    "@mantine/dropzone": "^9.6.0",
+    "@mantine/dates": "^9.8.1",
+    "@mantine/dropzone": "^9.8.1",
     "@mantine/hooks": "^9.6.0",
     "@tabler/icons-react": "^3.46.0",
     "next": "16.4.2",

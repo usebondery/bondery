@@ -108,10 +108,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
   }, [contact.addresses, contact.location, contact.latitude, contact.longitude, contact]);
 
   const getTypeData = (_currentType?: ContactAddressType) =>
-    typeOptions.map((option) => ({
-      ...option,
-      disabled: false,
-    }));
+    typeOptions.map((option) => Object.assign({}, option, { disabled: false }));
 
   const canAddMore = addresses.length < CONTACT_LIMITS.maxAddresses;
   const preferredAddressId = addresses[0]?.id;
@@ -142,7 +139,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
   })();
 
   const mapCenter = ((): [number, number] => {
-    if (!markers.length) {
+    if (markers.length === 0) {
       return [0, 0];
     }
 
@@ -160,7 +157,7 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     forceLocation = false,
   ) => {
     const normalized = addrList
-      .map((entry) => ({ ...entry, value: entry.value.trim() }))
+      .map((entry) => Object.assign({}, entry, { value: entry.value.trim() }))
       .filter((entry) => entry.value.length > 0)
       .map((entry) => enrichWithSuggestionIfAvailable(entry))
       .map(({ id, ...rest }) => rest);

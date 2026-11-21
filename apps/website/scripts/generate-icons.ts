@@ -48,14 +48,15 @@ async function main(): Promise<void> {
   });
   if (build.error) {
     console.error(build.error.message);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   if (build.status !== 0) {
-    process.exit(build.status ?? 1);
+    process.exitCode = build.status ?? 1;
   }
 }
 
 void main().catch((error: unknown) => {
   console.error(error);
-  process.exit(1);
+  process.exitCode = 1;
 });

@@ -62,8 +62,8 @@ function requirePublicUrl(name) {
   let url;
   try {
     url = new URL(value);
-  } catch {
-    throw new Error(`${name} is not a valid URL: ${value}`);
+  } catch (error) {
+    throw new Error(`${name} is not a valid URL: ${value}`, { cause: error });
   }
 
   if (!url.hostname) {

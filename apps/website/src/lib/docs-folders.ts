@@ -109,7 +109,7 @@ export function findDocsIcon(nodes: PageTree.Node[], url: string): ReactNode | u
       return node.index?.icon ?? node.icon;
     }
     const nested = findDocsIcon(node.children, url);
-    if (nested) {
+    if (nested !== undefined) {
       return nested;
     }
   }

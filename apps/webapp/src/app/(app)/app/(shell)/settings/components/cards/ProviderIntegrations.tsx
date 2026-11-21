@@ -24,6 +24,7 @@ import { detectBonderyChromeExtension } from "@/lib/extension/detectBonderyChrom
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { INTEGRATION_PROVIDERS } from "@/lib/platform/config";
 import { useMcpConsentsQuery } from "@/lib/query/hooks/useMcpConsents";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import {
   openUnlinkProviderConfirm,
   providerKeyFor,
@@ -179,11 +180,11 @@ export function ProviderIntegrations({
       <div>
         {hideTitle ? null : (
           <Text fw={500} mb={4} size="sm">
-            {title || t("ConnectedAccounts")}
+            {nonEmpty(title) ?? t("ConnectedAccounts")}
           </Text>
         )}
         <Text c="dimmed" mb={hideTitle ? 0 : undefined} size="xs">
-          {description || t("ConnectedAccountsDescription")}
+          {nonEmpty(description) ?? t("ConnectedAccountsDescription")}
         </Text>
       </div>
       <Group gap="md">

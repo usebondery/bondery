@@ -1,5 +1,8 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Badge, Divider, Group, Stack, Text, Title } from "@mantine/core";
 import { useOperation } from "fumadocs-openapi/operation";
 import { asParamSchema, DocsApiParameterItem } from "./DocsApiParameterItem";
@@ -21,10 +24,10 @@ export function DocsApiRequestBody() {
   return (
     <Stack gap="md">
       <Group gap="xs">
-        <Title order={3}>Request body</Title>
+        <Title order={3}>{docs.Api.RequestBody}</Title>
         {requestBody.required ? (
           <Badge color="red" size="sm" variant="light">
-            Required
+            {docs.Api.Required}
           </Badge>
         ) : null}
       </Group>

@@ -12,7 +12,7 @@ const MARKDOWN_SIGNALS: RegExp[] = [
   /^-\s?\[\s?[\sxX]?\s?\]\s?/m, // task list (lenient)
   /\[.+\]\(.+\)/, // link
   /`[^`]+`/, // inline code
-  /==.+==/, // highlight
+  /[=]=.+==/, // highlight
 ];
 
 export function looksLikeMarkdown(text: string): boolean {
@@ -35,7 +35,8 @@ export const MarkdownPasteExtension = Extension.create({
   name: "markdownPaste",
 
   onCreate() {
-    const { editor } = this;
+    // biome-ignore lint/nursery/noThisOutsideOfClass: TipTap binds `this` to the extension context in lifecycle hooks
+    const { editor, storage } = this;
 
     const handler = (e: Event) => {
       const event = e as ClipboardEvent;
@@ -59,15 +60,17 @@ export const MarkdownPasteExtension = Extension.create({
       }, 0);
     };
 
-    this.storage.pasteHandler = handler;
+    storage.pasteHandler = handler;
     editor.view.dom.addEventListener("paste", handler, true);
   },
 
   onDestroy() {
-    const handler = this.storage.pasteHandler;
+    // biome-ignore lint/nursery/noThisOutsideOfClass: TipTap binds `this` to the extension context in lifecycle hooks
+    const { editor, storage } = this;
+    const handler = storage.pasteHandler;
     if (handler) {
-      this.editor.view.dom.removeEventListener("paste", handler, true);
-      this.storage.pasteHandler = null;
+      editor.view.dom.removeEventListener("paste", handler, true);
+      storage.pasteHandler = null;
     }
   },
 });

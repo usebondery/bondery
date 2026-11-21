@@ -12,6 +12,7 @@ import { SearchableComboboxPickerOption } from "@/components/shared/SearchableCo
 import { SearchableComboboxPicker } from "@/components/shared/SearchableComboboxPicker";
 import { useUserLocale } from "@/components/shell/UserLocaleProvider";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 const PREVIEW_DATE = new Date(Date.UTC(2026, 10, 13, 12, 0, 0));
 const OPTIONS: DateFormatPreference[] = ["locale", "mdy", "dmy", "ymd"];
@@ -72,7 +73,7 @@ export function DateFormatPicker({
     return { main: t("DateFormatYmd"), supporting };
   };
 
-  const searchPlaceholder = placeholder || t("DateFormatSearch");
+  const searchPlaceholder = nonEmpty(placeholder) ?? t("DateFormatSearch");
   const selectedItem = itemFor(value);
 
   return (

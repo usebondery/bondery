@@ -11,7 +11,7 @@ import {
   RELATIONSHIP_FAMILIES,
   relationshipFamily,
 } from "./collapseRelationshipEdges";
-import { groupCircle, pushOutsideCircles } from "./graphHull";
+import { type GraphCircle, groupCircle, pushOutsideCircles } from "./graphHull";
 import { createGraphViewControls, type RelationshipGraphControls } from "./graphViewControls";
 import {
   COMPANY_HUB_COLOR,
@@ -36,7 +36,7 @@ function dragPointForPerson(
   groups: RelationshipGraphGroup[],
   nodeById: Map<string, GraphSimNode>,
 ): { x: number; y: number } {
-  const circles = [];
+  const circles: GraphCircle[] = [];
   for (const group of groups) {
     if (group.personIds.includes(personId)) {
       continue;
@@ -168,32 +168,31 @@ export function mountRelationshipGraph(input: {
     .attr("d", "M 0 0 L 10 5 L 0 10 z")
     .attr("fill", "context-stroke");
 
-  const personNodes: PersonSim[] = nodes.map((node) => {
-    const saved = positionsRef.current.get(node.id);
-    return {
-      ...node,
+  const personNodes: PersonSim[] = nodes.map((personInput) => {
+    const saved = positionsRef.current.get(personInput.id);
+    return Object.assign({}, personInput, {
       fx: saved?.pinned ? saved.x : null,
       fy: saved?.pinned ? saved.y : null,
-      nodeKind: "person",
-      x: saved?.x ?? (node.myself ? width / 2 : width / 2 + (Math.random() - 0.5) * 120),
-      y: saved?.y ?? (node.myself ? height / 2 : height / 2 + (Math.random() - 0.5) * 120),
-    };
+      nodeKind: "person" as const,
+      x: saved?.x ?? (personInput.myself ? width / 2 : width / 2 + (Math.random() - 0.5) * 120),
+      y: saved?.y ?? (personInput.myself ? height / 2 : height / 2 + (Math.random() - 0.5) * 120),
+    });
   });
-  const hubNodes: HubSimNode[] = hubs.map((hub) => {
-    const saved = positionsRef.current.get(hub.id);
+  const hubNodes: HubSimNode[] = hubs.map((hubInput) => {
+    const saved = positionsRef.current.get(hubInput.id);
     return {
       fx: saved?.pinned ? saved.x : null,
       fy: saved?.pinned ? saved.y : null,
-      hubKind: hub.kind,
-      id: hub.id,
-      label: hub.label,
+      hubKind: hubInput.kind,
+      id: hubInput.id,
+      label: hubInput.label,
       nodeKind: "hub",
       x: saved?.x ?? width / 2 + (Math.random() - 0.5) * 160,
       y: saved?.y ?? height / 2 + (Math.random() - 0.5) * 160,
     };
   });
   const simNodes: GraphSimNode[] = [...personNodes, ...hubNodes];
-  const nodeById = new Map(simNodes.map((node) => [node.id, node]));
+  const nodeById = new Map(simNodes.map((simNode) => [simNode.id, simNode]));
   const relationshipLinks: GraphSimLink[] = edges.flatMap((edge) => {
     if (!nodeById.has(edge.sourcePersonId) || !nodeById.has(edge.targetPersonId)) {
       return [];
@@ -213,22 +212,22 @@ export function mountRelationshipGraph(input: {
     ];
   });
   const spokeLinks: Array<GraphSimLink & { hubId: string; personId: string }> = hubs.flatMap(
-    (hub) => {
-      const color = hub.kind === "company" ? COMPANY_HUB_COLOR : SCHOOL_HUB_COLOR;
-      return hub.personIds.flatMap((personId) => {
-        if (!nodeById.has(hub.id) || !nodeById.has(personId)) {
+    (spokeHub) => {
+      const color = spokeHub.kind === "company" ? COMPANY_HUB_COLOR : SCHOOL_HUB_COLOR;
+      return spokeHub.personIds.flatMap((personId) => {
+        if (!nodeById.has(spokeHub.id) || !nodeById.has(personId)) {
           return [];
         }
         return [
           {
             color,
             directed: false,
-            hubId: hub.id,
-            key: `${hub.id}\0${personId}`,
+            hubId: spokeHub.id,
+            key: `${spokeHub.id}\0${personId}`,
             kind: "spoke" as const,
             personId,
-            source: hub.id,
-            sourcePersonId: hub.id,
+            source: spokeHub.id,
+            sourcePersonId: spokeHub.id,
             target: personId,
             targetPersonId: personId,
           },
@@ -236,7 +235,7 @@ export function mountRelationshipGraph(input: {
       });
     },
   );
-  const owner = personNodes.find((node) => node.myself) ?? null;
+  const owner = personNodes.find((personNode) => personNode.myself) ?? null;
   const selfLinks: GraphSimLink[] = owner
     ? personNodes.flatMap((person) => {
         if (person.id === owner.id) {

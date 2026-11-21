@@ -126,7 +126,7 @@ function checkFile(absPath: string): Violation[] {
 
 function main(): void {
   const files = walk(WEBAPP_SRC);
-  const violations = files.flatMap((file) => [...checkFile(file), ...checkApiRouteFile(file)]);
+  const violations = files.flatMap((file) => checkFile(file).concat(checkApiRouteFile(file)));
 
   for (const violation of violations) {
     check.add(`[${violation.rule}] ${violation.file}: ${violation.detail}`);

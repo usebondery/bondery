@@ -29,18 +29,18 @@ For visual assets (logo, colors, OG images), see `packages/branding` (`@bondery/
 
 ## Brand at a glance
 
-| Element | Statement |
-|---------|-----------|
-| **Purpose** | Help people build and maintain real relationships in a world that makes it easy to lose touch |
-| **Mission** | Be a proactive buddy for your network — a simple, private PRM that remembers what matters and gently suggests when to reach out |
-| **Category** | Open-source **PRM** (Personal Relationship Manager) |
-| **UVP** | The open-source address book for your network and your AI: every contact merged, searchable, in sync, and ready for Claude and other AI apps |
-| **Headline** | Everyone you know, in one place your AI can use |
-| **Name logic** | Bondery builds **bonds**, the edges between you and your network. Features title: "Everything you need to build stronger bonds". Tile: "Everyone you **met** in one place" (sources unified) |
-| **Primary user groups** | AI-native contact aggregators (agents, MCP) · Founders who care about weak ties · Finance and business networkers (coffee chats) |
-| **Voice tagline** | A buddy for the relationships that matter |
-| **Voice** | Warm friend — human, nudging, simple, no jargon or fluff |
-| **Proactivity** | Suggest action with context — not just dates, not guilt-tripping |
+| Element                 | Statement                                                                                                                                                                                    |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Purpose**             | Help people build and maintain real relationships in a world that makes it easy to lose touch                                                                                                |
+| **Mission**             | Be a proactive buddy for your network — a simple, private PRM that remembers what matters and gently suggests when to reach out                                                              |
+| **Category**            | Open-source **PRM** (Personal Relationship Manager)                                                                                                                                          |
+| **UVP**                 | The open-source address book for your network and your AI: every contact merged, searchable, in sync, and ready for Claude and other AI apps                                                 |
+| **Headline**            | Everyone you know, in one place your AI can use                                                                                                                                              |
+| **Name logic**          | Bondery builds **bonds**, the edges between you and your network. Features title: "Everything you need to build stronger bonds". Tile: "Everyone you **met** in one place" (sources unified) |
+| **Primary user groups** | AI-native contact aggregators (agents, MCP) · Founders who care about weak ties · Finance and business networkers (coffee chats)                                                             |
+| **Voice tagline**       | A buddy for the relationships that matter                                                                                                                                                    |
+| **Voice**               | Warm friend — human, nudging, simple, no jargon or fluff                                                                                                                                     |
+| **Proactivity**         | Suggest action with context — not just dates, not guilt-tripping                                                                                                                             |
 
 ## Non-negotiables
 
@@ -59,12 +59,12 @@ For visual assets (logo, colors, OG images), see `packages/branding` (`@bondery/
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Purpose, mission, **UVP**, **user groups**, PRM intro, claim guardrails | [references/positioning.md](references/positioning.md) |
-| Voice, tone, do/don't examples | [references/voice-and-tone.md](references/voice-and-tone.md) |
-| Headline, taglines, pillars, **sources and AI clients**, brand marks, sample-data cast, landing copy limits | [references/messaging.md](references/messaging.md) |
-| Values → product and comms behavior | [references/values.md](references/values.md) |
+| Task                                                                                                        | Read                                                         |
+| ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| Purpose, mission, **UVP**, **user groups**, PRM intro, claim guardrails                                     | [references/positioning.md](references/positioning.md)       |
+| Voice, tone, do/don't examples                                                                              | [references/voice-and-tone.md](references/voice-and-tone.md) |
+| Headline, taglines, pillars, **sources and AI clients**, brand marks, sample-data cast, landing copy limits | [references/messaging.md](references/messaging.md)           |
+| Values → product and comms behavior                                                                         | [references/values.md](references/values.md)                 |
 
 Full index: [references/README.md](references/README.md).
 
@@ -76,7 +76,7 @@ Related skills: [bondery-writing](../bondery-writing/SKILL.md) (Orwell-Hemingway
 - [ ] Category uses **PRM**; explained where the category is named (SEO, FAQ, about)
 - [ ] Headline and pillars match [messaging.md](references/messaging.md); copy stays within its length limits
 - [ ] Every claim is shipped or labelled "Soon"; the source and AI-client tables in messaging.md match the tile visuals
-- [ ] Section titles keep the reasoning (*bonds*, *met*); mock-ups use photos, not initials
+- [ ] Section titles keep the reasoning (_bonds_, _met_); mock-ups use photos, not initials
 - [ ] No sales-CRM language (pipeline, leads, conversion, quota)
 - [ ] Proactive suggestions are **helpful with context** — not guilt or spam
 - [ ] Privacy claims align with [bondery-legal](../bondery-legal/SKILL.md) — no overselling

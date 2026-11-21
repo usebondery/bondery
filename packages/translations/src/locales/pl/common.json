@@ -230,11 +230,13 @@
     "deleting": "Usuwanie…",
     "duplicating": "Duplikowanie…",
     "errorTitle": "Błąd",
+    "mobileRuntimeError": "Błąd działania aplikacji mobilnej",
     "noResults": "Brak wyników",
     "removing": "Usuwanie…",
     "savedTitle": "Zapisano",
     "saving": "Zapisywanie…",
     "sending": "Wysyłanie…",
-    "successTitle": "Sukces"
+    "successTitle": "Sukces",
+    "unknownError": "Nieznany błąd"
   }
 }

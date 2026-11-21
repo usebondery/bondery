@@ -64,7 +64,7 @@ export function normalizeHubName(raw: string): string | null {
   if (words[0] === "the") {
     words.shift();
   }
-  const last = words[words.length - 1];
+  const last = words.at(-1);
   if (last && LEGAL_SUFFIXES.has(last)) {
     words.pop();
   }
@@ -338,13 +338,15 @@ export function withHubLogos(userId: string, hubs: RelationshipGraphHub[]): Rela
     if (mark < 0) {
       return hub;
     }
-    const linkedinId = hub.id.slice(mark + HUB_LINKEDIN_MARK.length);
-    if (!linkedinId) {
+    const hubLinkedinId = hub.id.slice(mark + HUB_LINKEDIN_MARK.length);
+    if (!hubLinkedinId) {
       return hub;
     }
-    return { ...hub, logoUrl: buildLinkedinLogoUrl(userId, linkedinId) };
+    return { ...hub, logoUrl: buildLinkedinLogoUrl(userId, hubLinkedinId) };
   });
 }
+
+const MIN_GROUP_HUB_PERSON_COUNT = 3;
 
 /** Groups with at least three people on the canvas. Largest membership, then id. */
 export function selectGraphGroups(input: {
@@ -356,7 +358,7 @@ export function selectGraphGroups(input: {
     const personIds = [
       ...new Set(group.personIds.filter((personId) => input.canvasPersonIds.has(personId))),
     ].sort((left, right) => left.localeCompare(right));
-    if (personIds.length < 3) {
+    if (personIds.length < MIN_GROUP_HUB_PERSON_COUNT) {
       continue;
     }
     ranked.push({

@@ -232,12 +232,14 @@ export default interface Resources {
       "deleting": "Deleting...",
       "duplicating": "Duplicating...",
       "errorTitle": "Error",
+      "mobileRuntimeError": "Mobile app runtime error",
       "noResults": "No results",
       "removing": "Removing...",
       "savedTitle": "Saved",
       "saving": "Saving...",
       "sending": "Sending...",
-      "successTitle": "Success"
+      "successTitle": "Success",
+      "unknownError": "Unknown error"
     }
   },
   "features/modals/AddPeopleToGroupSelectionModal": {
@@ -770,7 +772,9 @@ export default interface Resources {
       "UpdateFailed": "Failed to update group"
     },
     "EmojiEmptySearch": "No emojis found",
+    "EmojiLabel": "Emoji",
     "EmojiSearchPlaceholder": "Search emojis…",
+    "EmojiSelectPlaceholder": "Select emoji",
     "Empty": "No groups yet. Create one to start organizing your contacts.",
     "FallbackTitle": "Group",
     "HeaderDescription": "Groups can be used to organize people into custom groups for faster filtering and actions.",
@@ -2539,7 +2543,8 @@ export default interface Resources {
   },
   "platform/extension/ExtensionPopup": {
     "LoggedIn": {
-      "OpenBondery": "Open Bondery"
+      "OpenBondery": "Open Bondery",
+      "UnsupportedSiteMessage": "Visit someone on Instagram or LinkedIn to see more actions and capabilities of the extension."
     },
     "LoggedOut": {
       "Description": "Connect your account to save contacts from social media.",
@@ -2559,7 +2564,13 @@ export default interface Resources {
       "Title": "Update Required"
     },
     "Welcome": {
-      "ConnectButton": "Connect your Bondery account"
+      "ConnectButton": "Connect your Bondery account",
+      "Description": "Connect your Bondery account to save contacts directly from social media profiles.",
+      "SignInHint": "You will be prompted to sign in to your Bondery account and authorize the extension.",
+      "SuccessClose": "You can close this tab now.",
+      "SuccessDescription": "Your Bondery account is now connected. Visit any Instagram or LinkedIn profile to start saving contacts.",
+      "SuccessTitle": "You're all set!",
+      "Title": "Welcome to Bondery"
     }
   },
   "platform/extension/ExtensionSocialButtons": {
@@ -2596,6 +2607,7 @@ export default interface Resources {
     "TriggerAccessibilityHint": "Opens color picker"
   },
   "platform/mobile/ContactDetail": {
+    "AddNotesPlaceholder": "Add notes…",
     "DeleteContact": "Delete contact",
     "DeleteContactConfirmTitle": "Delete {name}?",
     "DeleteFailed": "Failed to delete contact.",
@@ -2610,6 +2622,7 @@ export default interface Resources {
     "GroupsEdit": "Edit",
     "GroupsEditAccessibility": "Edit groups for {name}",
     "GroupsLoadError": "Could not load groups",
+    "LastInteractionLabel": "Last interaction",
     "NoGroups": "Not in any groups",
     "ShareContact": "Share vCard...",
     "ShareContactViaEmail": "Send via email...",
@@ -2684,6 +2697,8 @@ export default interface Resources {
     "GroupFilterNewGroup": "New group",
     "GroupFilterSheetTitle": "Show contacts in",
     "Groups": "Groups",
+    "MentionEmptyCaption": "Add people to mention them in notes.",
+    "MentionEmptyTitle": "No contacts yet",
     "MissingEmail": "This contact doesn't have an email",
     "MissingPhone": "This contact doesn't have a phone",
     "MoreActions": "More actions",
@@ -2957,6 +2972,468 @@ export default interface Resources {
     "NoPeopleFound": "No people found",
     "SearchPlaceholder": "Search people by name…",
     "SeeAllResults": "See all results in People"
+  },
+  "platform/website/WebsiteBlog": {
+    "Categories": {
+      "All": "All",
+      "Bonds": "Bonds",
+      "Tech": "Tech",
+      "Updates": "Updates"
+    },
+    "CategoryTitle": "{category} Blog",
+    "Descriptions": {
+      "All": "Stay up to date with Bondery — product updates, relationship tips, and networking insights from the team behind the open-source PRM.",
+      "Bonds": "Tips and insights on building meaningful relationships, effective networking, and strong networks.",
+      "Tech": "Technical deep-dives on Bondery's architecture, infrastructure, and engineering decisions.",
+      "Updates": "Product updates, feature releases, and development news from Bondery."
+    },
+    "EmptyCategory": "No posts yet in this category.",
+    "ReadingTime": "{minutes} min read",
+    "Title": "Blog",
+    "Tooltips": {
+      "All": "Browse all blog posts",
+      "Bonds": "About networking and relationships",
+      "Tech": "Technical deep-dives",
+      "Updates": "Product updates and releases"
+    }
+  },
+  "platform/website/WebsiteDocs": {
+    "Api": {
+      "AuthGuide": "Read the authentication guide",
+      "AuthTitle": {
+        "ApiKey": "Requires an API key.",
+        "ApiKeyOrSession": "Requires an API key or a session token.",
+        "Generic": "Requires authentication.",
+        "Session": "Requires a session token."
+      },
+      "Deprecated": "Deprecated",
+      "HideChildParameters": "Hide child parameters",
+      "JsonResponseLabel": "{code} JSON",
+      "MultipartNote": "Send the image as a multipart/form-data field named {field}.",
+      "OneOf": "one of",
+      "ParameterGroup": {
+        "Cookie": "Cookie parameters",
+        "Header": "Header parameters",
+        "Path": "Path parameters",
+        "Query": "Query parameters"
+      },
+      "Parameters": "Parameters",
+      "RequestBody": "Request body",
+      "Required": "Required",
+      "ResponseLabel": "{code} response",
+      "Responses": "Responses",
+      "SampleRequest": "Sample request",
+      "SendHeader": "Send {header}.",
+      "ShowChildParameters": "Show child parameters"
+    },
+    "ApiErrors": {
+      "BaseUrl": "Base URL for {field} fields: {url}"
+    },
+    "ApiGroups": {
+      "Account": "Account",
+      "Auth": "Auth",
+      "Billing": "Billing",
+      "BrowserExtension": "Browser extension",
+      "Chat": "Chat",
+      "Contacts": "Contacts",
+      "Geocoding": "Geocoding",
+      "Groups": "Groups",
+      "Health": "Health",
+      "Interactions": "Interactions",
+      "MobileApp": "Mobile app",
+      "Sync": "Sync",
+      "Tags": "Tags",
+      "Webhooks": "Webhooks"
+    },
+    "Changelog": {
+      "Changelog": "Changelog",
+      "EarlierVersions": "Earlier Bondery versions were not published as GitHub Releases. See {link} for tagged versions.",
+      "GitHubRelease": "GitHub release",
+      "GitHubReleases": "GitHub Releases"
+    },
+    "Copy": {
+      "CopyMarkdown": "Copy markdown",
+      "FailedLinkDescription": "Select the address and press Ctrl+C.",
+      "FailedMarkdownDescription": "Select the text and press Ctrl+C.",
+      "FailedTitle": "Copy failed",
+      "HeadingCopied": "Copied",
+      "HeadingCopyLink": "Copy link",
+      "HeadingCopyLinkAria": "Copy link to section",
+      "LinkCopiedDescription": "The markdown link is on your clipboard.",
+      "LinkCopiedTitle": "Markdown link copied",
+      "LinkLabel": "Copy markdown link",
+      "MarkdownCopiedDescription": "The page markdown is on your clipboard.",
+      "MarkdownCopiedTitle": "Markdown copied",
+      "MoreActions": "More page actions",
+      "OpenOnGitHub": "Open on GitHub",
+      "ViewAsMarkdown": "View as markdown"
+    },
+    "ErrorGroups": {
+      "Api": "Server errors",
+      "Authentication": "Authentication",
+      "Authorization": "Authorization",
+      "Conflicts": "Conflicts",
+      "InvalidRequests": "Invalid requests",
+      "NotFound": "Not found",
+      "RateLimits": "Rate limits",
+      "Retired": "Retired codes",
+      "ServiceUnavailable": "Service unavailable"
+    },
+    "LastUpdated": "Last updated {date}",
+    "Navigation": {
+      "CloseMenu": "Close documentation menu",
+      "DrawerTitle": "Documentation",
+      "Next": "Next",
+      "OnThisPage": "On this page",
+      "OpenMenu": "Open documentation menu",
+      "Previous": "Previous"
+    },
+    "NotFound": {
+      "Description": "The link may be old. Search the docs, or start from the introduction.",
+      "Introduction": "Introduction",
+      "Title": "This page is not here"
+    },
+    "Og": {
+      "ApiErrorTitle": "{code} — API error",
+      "DefaultTitle": "Bondery Docs",
+      "Subtype": "Docs"
+    },
+    "Repo": {
+      "Description": "Source code, issues, and pull requests.",
+      "Title": "Bondery on GitHub"
+    },
+    "Search": {
+      "Close": "Close",
+      "Label": "Search documentation",
+      "Navigate": "Navigate",
+      "NoResults": "No results for \"{query}\".",
+      "Open": "Open",
+      "Placeholder": "Search docs"
+    },
+    "Sidebar": {
+      "PagesAria": "Documentation pages",
+      "SearchLabel": "Search",
+      "SectionAria": "Documentation section"
+    },
+    "Tabs": {
+      "Develop": "Develop",
+      "Integrate": "Integrate",
+      "Product": "How to use Bondery",
+      "SelfHost": "Self-host"
+    }
+  },
+  "platform/website/WebsiteLanding": {
+    "About": {
+      "StoryTitle": "How Bondery started"
+    },
+    "AiClients": {
+      "WorksWith": "Works with"
+    },
+    "Bento": {
+      "Assistant": {
+        "Description": "Give Claude or any MCP client your contact book.",
+        "Title": "Your network, in your AI"
+      },
+      "KeepInTouch": {
+        "Description": "Birthdays and anniversaries reach your inbox ahead of time.",
+        "Title": "Email reminders for key dates"
+      },
+      "Network": {
+        "Description": "Search your network. See who is in a city before you go.",
+        "Title": "Find anyone"
+      },
+      "Sources": {
+        "Description": "Every source merges into one list, duplicates included.",
+        "Title": "All the people you met in one place"
+      },
+      "Sync": {
+        "Description": "Profiles refresh from the sources you saved them from.",
+        "Title": "Always up to date"
+      },
+      "Timeline": {
+        "Description": "Notes and history on every person.",
+        "Title": "Remember every conversation"
+      }
+    },
+    "Contact": {
+      "Discord": "Chat with us on Discord",
+      "Reddit": "Post on our Reddit",
+      "Subtitle": "Have questions or feedback? We're here to help or just chat!",
+      "Title": "Contact us"
+    },
+    "Cta": {
+      "Button": "Start building your network",
+      "Title": "Ready to organize your network?"
+    },
+    "Faq": {
+      "Items": {
+        "Free": {
+          "Answer": "Yes. Bondery is free with all the core features. A premium version exists for additional features, but the core personal PRM functionality will remain free forever.",
+          "Question": "Is Bondery free to use?"
+        },
+        "Private": {
+          "Answer": "Bondery is privacy-first and open source. Your relationship data is handled with a focus on user control and transparency. We will never sell your data or use it for advertising.",
+          "Question": "Is my data private in Bondery?"
+        },
+        "SelfHost": {
+          "Answer": "Yes. Bondery is open source and ships a Docker Compose stack for self-hosting. See the self-hosting guide in the docs.",
+          "DocsLinkLabel": "self-hosting guide in the docs",
+          "Question": "Can I self-host Bondery?"
+        },
+        "WhatIs": {
+          "Answer": "Bondery is an open-source personal CRM (=PRM) that helps you track relationships, remember key details, and stay connected with your network.",
+          "Question": "What is Bondery?"
+        }
+      },
+      "Title": "FAQs"
+    },
+    "Features": {
+      "Title": "Everything you need to build stronger bonds"
+    },
+    "Footer": {
+      "Groups": {
+        "Company": "Company",
+        "Connect": "Connect with us",
+        "Legal": "Legal",
+        "Product": "Product"
+      },
+      "Links": {
+        "Blog": "Blog",
+        "Contact": "Contact us",
+        "Docs": "Docs",
+        "Features": "Features",
+        "Pricing": "Pricing",
+        "Privacy": "Privacy Policy",
+        "Roadmap": "Roadmap",
+        "Security": "Security",
+        "Status": "Status",
+        "Terms": "Terms of Service"
+      }
+    },
+    "GetStarted": "Get started",
+    "Header": {
+      "Aria": {
+        "CloseMenu": "Close menu",
+        "CloseNavigationMenu": "Close navigation menu",
+        "MobileNavigation": "Mobile navigation",
+        "OpenNavigationMenu": "Open navigation menu",
+        "PrimaryNavigation": "Primary navigation"
+      },
+      "LoginOrSignUp": "Login or Sign up",
+      "Nav": {
+        "Blog": "Blog",
+        "Docs": "Docs",
+        "Features": "Features",
+        "Pricing": "Pricing"
+      },
+      "NavigationTitle": "Navigation"
+    },
+    "Hero": {
+      "ImageAlt": "Bondery home dashboard with interactions timeline, contact stats, and reminders",
+      "LearnMore": "Learn more",
+      "Subtitle": "Bondery merges your contacts, keeps them in sync, and reminds you to stay in touch.",
+      "Title": "Everyone you know, in one place your AI can use"
+    },
+    "Logo": {
+      "HomepageAriaLabel": "Bondery homepage"
+    },
+    "Meta": {
+      "ContactDescription": "Contact the Bondery team for support, feedback, and partnership inquiries.",
+      "ContactTitle": "Contact",
+      "HomeImageAlt": "Bondery: Manage your personal and professional relationships"
+    },
+    "Pricing": {
+      "Free": {
+        "Features": {
+          "Contacts": "Unlimited contacts",
+          "History": "Interaction history",
+          "Reminders": "Birthday and date reminders"
+        },
+        "Name": "Free",
+        "Price": "$0",
+        "Tagline": "All the core features."
+      },
+      "Premium": {
+        "Features": {
+          "AiAssistant": "AI Assistant",
+          "PrioritySupport": "Priority support",
+          "SmartSearch": "Smart search",
+          "WritingCopilot": "Writing copilot"
+        },
+        "Name": "Premium",
+        "Period": "/month",
+        "Price": "$10",
+        "Tagline": "For power users."
+      },
+      "Title": "Simple pricing"
+    },
+    "PrivacyBand": {
+      "Points": {
+        "EuHosted": "Hosted in the EU",
+        "OpenSource": "Open source (AGPL-3.0)",
+        "SelfHostOrExport": "Self-host or export anytime"
+      },
+      "SelfHostingGuide": "Self-hosting guide",
+      "Title": "Private by design. Yours to keep.",
+      "ViewOnGitHub": "View on GitHub"
+    },
+    "Team": {
+      "Members": {
+        "Sveetya": {
+          "Description": "Built the foundation.",
+          "Role": "Founder"
+        }
+      },
+      "Title": "Who will answer your questions?"
+    }
+  },
+  "platform/website/WebsiteLandingVisuals": {
+    "Assistant": {
+      "Logged": "Logged",
+      "Scenarios": {
+        "Alan": {
+          "Answer": "{birthday}. He loves running. Try a pair of trail shoes.",
+          "Question": "When is Alan's birthday? Any gift ideas?"
+        },
+        "Grace": {
+          "Answer": "Oct 12, over coffee in Boston. She recommended a book on leadership.",
+          "Question": "What did I last talk about with Grace?"
+        },
+        "Investors": {
+          "Answer": "Two investors.",
+          "Question": "What VC investors do I know?"
+        },
+        "Katherine": {
+          "Answer": "You met at a science talk in Houston.",
+          "Question": "Who is Katherine Johnson and where do I know her from?"
+        },
+        "LogCoffee": {
+          "Answer": "Logged to Ada's timeline.",
+          "LoggedNote": "Her upcoming launch",
+          "LoggedTitle": "Coffee with Ada",
+          "Question": "I met Ada for coffee and talked about her upcoming launch."
+        },
+        "Thailand": {
+          "Answer": "Two people.",
+          "Bangkok": "Bangkok",
+          "ChiangMai": "Chiang Mai",
+          "Question": "I'm visiting Thailand. Who do I know there?"
+        },
+        "UxDesign": {
+          "Answer": "Two people in your network.",
+          "Question": "Who could help me with UX design?"
+        }
+      }
+    },
+    "Briefing": {
+      "Answers": {
+        "Catchup": "Anna. You last talked six weeks ago.",
+        "Saved": "Saved to Anna's history."
+      },
+      "DemoNote": "Berlin · met at Web Summit",
+      "DueCatchUp": "Due a catch-up",
+      "InTouchToday": "In touch today",
+      "LastTalked": "Last talked",
+      "Questions": {
+        "Catchup": "Who should I catch up with?",
+        "SaveCoffee": "We had coffee today. Save it."
+      }
+    },
+    "Encryption": {
+      "Birthday": "March 3",
+      "Note": "Loves hiking and sci-fi books"
+    },
+    "People": {
+      "Ada": {
+        "Birthday": "December 10",
+        "Headline": "Mathematician"
+      },
+      "Alan": {
+        "Birthday": "June 23",
+        "Headline": "Computer scientist"
+      },
+      "Grace": {
+        "Headline": "Rear Admiral, US Navy"
+      },
+      "Hedy": {
+        "Headline": "Inventor and actor"
+      },
+      "John": {
+        "Headline": "Mathematician"
+      },
+      "Katherine": {
+        "Headline": "Mathematician, NASA"
+      },
+      "Limor": {
+        "Headline": "Founder, Adafruit"
+      },
+      "Margaret": {
+        "Headline": "Software engineer, Apollo"
+      },
+      "Marissa": {
+        "Headline": "Former CEO, Yahoo"
+      },
+      "Sheryl": {
+        "Headline": "Operator and author"
+      },
+      "Whitney": {
+        "Headline": "Founder, Bumble"
+      }
+    },
+    "Reminders": {
+      "Anniversary": "Work anniversary in 7 days",
+      "Birthday": "Birthday in 3 days",
+      "ComingUp": "{count} reminders coming up"
+    },
+    "Sources": {
+      "FromSource": "From {source}",
+      "Merged": "Merged",
+      "Soon": "Soon"
+    },
+    "Sync": {
+      "NewCity": "New city",
+      "NewPhoto": "New photo",
+      "NewTitle": "New title"
+    },
+    "Timeline": {
+      "Call": {
+        "Date": "Sep 28, 2026",
+        "Note": "Offered an intro to a co-founder",
+        "Title": "Call with Alan Turing"
+      },
+      "Coffee": {
+        "Date": "Oct 12, 2026",
+        "Note": "Talked about her upcoming launch",
+        "Title": "Coffee with Ada Lovelace"
+      },
+      "Party": {
+        "Date": "Aug 30, 2026",
+        "Note": "Met Grace and Margaret",
+        "Title": "Launch party"
+      }
+    }
+  },
+  "platform/website/WebsiteLegal": {
+    "Documents": {
+      "Privacy": {
+        "Description": "Learn how Bondery collects, uses, and protects your data.",
+        "Title": "Privacy Policy"
+      },
+      "Security": {
+        "Description": "How to report a security issue to Bondery.",
+        "Title": "Security"
+      },
+      "Terms": {
+        "Description": "The agreement that covers your use of Bondery: your account, your contacts, plans and billing, acceptable use, and how disputes are handled.",
+        "Title": "Terms of Service"
+      }
+    },
+    "LastUpdated": "Last Updated: {date}"
+  },
+  "platform/website/WebsiteNotFound": {
+    "BackToHome": "Back to Home",
+    "Description": "The page you are looking for does not exist.",
+    "Title": "Page Not Found"
   },
   "validation": {
     "email": {

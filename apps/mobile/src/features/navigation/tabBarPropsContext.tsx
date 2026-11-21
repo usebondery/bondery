@@ -35,7 +35,7 @@ export function TabBarPropsProvider({ children }: { children: ReactNode }) {
 
     if (!previous || focusChanged || routeCountChanged) {
       setTabBarProps(props);
-      setTabBarRevision((value) => value + 1);
+      setTabBarRevision((revision) => revision + 1);
     }
   }
 

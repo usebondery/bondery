@@ -18,10 +18,10 @@ Before a card moves from **Inbox** → **Icebox** or **Bet**, the description mu
 
 ## Triage outcomes
 
-| Result | Next state |
-|--------|------------|
-| Valid, not now | **Icebox** |
-| Ready to scope | **Bet** or **Bet for Next Cycle** |
+| Result                 | Next state                                            |
+| ---------------------- | ----------------------------------------------------- |
+| Valid, not now         | **Icebox**                                            |
+| Ready to scope         | **Bet** or **Bet for Next Cycle**                     |
 | Cannot answer honestly | Stay in **Inbox** or **Won't do** with reason comment |
 
 ## Inbox checklist

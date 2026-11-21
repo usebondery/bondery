@@ -13,8 +13,8 @@ export type BonderyImportPeekKind = "instagram" | "invalid" | "linkedin" | "vcar
 export class BonderyImportPeekError extends Error {
   readonly kind: BonderyImportPeekKind;
 
-  constructor(kind: BonderyImportPeekKind) {
-    super(kind);
+  constructor(kind: BonderyImportPeekKind, options?: ErrorOptions) {
+    super(kind, options);
     this.kind = kind;
     this.name = "BonderyImportPeekError";
   }
@@ -34,14 +34,14 @@ function normalizeZipPath(entryName: string): string {
 function zipBaseName(entryName: string): string {
   const normalized = normalizeZipPath(entryName);
   const parts = normalized.split("/").filter(Boolean);
-  return (parts[parts.length - 1] ?? normalized).toLowerCase();
+  return (parts.at(-1) ?? normalized).toLowerCase();
 }
 
 function isNestedFilePath(entryName: string): boolean {
   return normalizeZipPath(entryName).replace(/\/$/, "").includes("/");
 }
 
-function detectForeignDump(entryNames: string[]): BonderyImportPeekKind | null {
+function detectForeignDump(entryNames: string[]): "instagram" | "linkedin" | "vcard" | null {
   for (const name of entryNames) {
     const base = zipBaseName(name);
     if (base.endsWith(".vcf")) {
@@ -89,8 +89,8 @@ export function peekBonderyExportZip(bytes: Uint8Array): BonderyImportPeekCounts
   let unzipped: Record<string, Uint8Array>;
   try {
     unzipped = unzipSync(bytes);
-  } catch {
-    throw new BonderyImportPeekError("invalid");
+  } catch (error) {
+    throw new BonderyImportPeekError("invalid", { cause: error });
   }
 
   const entryNames = Object.keys(unzipped);
@@ -136,8 +136,8 @@ export function peekBonderyExportZip(bytes: Uint8Array): BonderyImportPeekCounts
   let parsedJson: unknown;
   try {
     parsedJson = JSON.parse(strFromU8(manifestBytes)) as unknown;
-  } catch {
-    throw new BonderyImportPeekError("invalid");
+  } catch (error) {
+    throw new BonderyImportPeekError("invalid", { cause: error });
   }
 
   const manifest = exportManifestSchema.safeParse(parsedJson);

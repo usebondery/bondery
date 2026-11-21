@@ -128,7 +128,6 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
             type: "invalid_request_error",
           },
         });
-      return;
     }
   });
 }

@@ -44,19 +44,19 @@ metadata:
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| States, labels, field rules, UUIDs | [references/states-and-labels.md](references/states-and-labels.md) |
-| Title format, description templates | [references/title-and-description.md](references/title-and-description.md) |
-| Inbox flow, sanity-check questions | [references/intake-and-sanity-check.md](references/intake-and-sanity-check.md) |
-| Weekly cycle setup and rollover | [references/cycles.md](references/cycles.md) |
-| MAIN vs ROADMAP boundaries | [references/vs-roadmap.md](references/vs-roadmap.md) |
-| Parent tasks and epic splitting | [references/parent-tasks.md](references/parent-tasks.md) |
-| Release queue → Released handoff | [references/release-handoff.md](references/release-handoff.md) |
-| MCP tool sequences for agents | [references/agent-workflows.md](references/agent-workflows.md) |
-| Bulk migration heuristics (audit) | [references/migration-heuristics.md](references/migration-heuristics.md) |
-| Public roadmap cards | [`bondery-roadmap`](../bondery-roadmap/SKILL.md) |
-| MCP tool usage | [`plane` skill](../plane/SKILL.md) |
+| Task                                | Read                                                                           |
+| ----------------------------------- | ------------------------------------------------------------------------------ |
+| States, labels, field rules, UUIDs  | [references/states-and-labels.md](references/states-and-labels.md)             |
+| Title format, description templates | [references/title-and-description.md](references/title-and-description.md)     |
+| Inbox flow, sanity-check questions  | [references/intake-and-sanity-check.md](references/intake-and-sanity-check.md) |
+| Weekly cycle setup and rollover     | [references/cycles.md](references/cycles.md)                                   |
+| MAIN vs ROADMAP boundaries          | [references/vs-roadmap.md](references/vs-roadmap.md)                           |
+| Parent tasks and epic splitting     | [references/parent-tasks.md](references/parent-tasks.md)                       |
+| Release queue → Released handoff    | [references/release-handoff.md](references/release-handoff.md)                 |
+| MCP tool sequences for agents       | [references/agent-workflows.md](references/agent-workflows.md)                 |
+| Bulk migration heuristics (audit)   | [references/migration-heuristics.md](references/migration-heuristics.md)       |
+| Public roadmap cards                | [`bondery-roadmap`](../bondery-roadmap/SKILL.md)                               |
+| MCP tool usage                      | [`plane` skill](../plane/SKILL.md)                                             |
 
 Full reference index: [references/README.md](references/README.md).
 

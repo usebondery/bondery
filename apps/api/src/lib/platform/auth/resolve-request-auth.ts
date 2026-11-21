@@ -5,6 +5,7 @@
 import { prisma } from "@bondery/db";
 import type { FastifyRequest } from "fastify";
 import type { JWTPayload } from "jose";
+import { BEARER_PREFIX, isJwtShapedToken } from "../../auth/bearer-token-format.js";
 import {
   auth,
   resolveApiResourceAudience,
@@ -18,17 +19,13 @@ export type ResolvedAuthUser = {
   id: string;
 };
 
-function isJwtShapedBearerToken(token: string): boolean {
-  return token.split(".").length === 3;
-}
-
 function extractBearerToken(request: FastifyRequest): string | undefined {
   const authHeader = request.headers.authorization;
-  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
+  if (typeof authHeader !== "string" || !authHeader.startsWith(BEARER_PREFIX)) {
     return undefined;
   }
 
-  return authHeader.slice(7).trim() || undefined;
+  return authHeader.slice(BEARER_PREFIX.length).trim() || undefined;
 }
 
 async function loadAuthUser(userId: string): Promise<ResolvedAuthUser | null> {
@@ -63,7 +60,7 @@ function isTrustedOAuthClient(payload: JWTPayload): boolean {
  * JWT-shaped tokens never fall back to opaque session lookup.
  */
 export async function resolveOAuthBearerUser(token: string): Promise<ResolvedAuthUser | null> {
-  if (!isJwtShapedBearerToken(token)) {
+  if (!isJwtShapedToken(token)) {
     return null;
   }
 
@@ -111,7 +108,7 @@ export async function resolveRequestAuthUser(
 ): Promise<ResolvedAuthUser | null> {
   const bearerToken = extractBearerToken(request);
 
-  if (bearerToken && isJwtShapedBearerToken(bearerToken)) {
+  if (bearerToken && isJwtShapedToken(bearerToken)) {
     return resolveOAuthBearerUser(bearerToken);
   }
 

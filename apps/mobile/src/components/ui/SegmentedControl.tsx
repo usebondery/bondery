@@ -1,3 +1,4 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import { View } from "react-native";
@@ -5,7 +6,6 @@ import Animated from "react-native-reanimated";
 import { Pressable } from "@/components/ui/Pressable";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 import { InputWrapper } from "./InputWrapper";
-import { joinClassNames } from "./joinClassNames";
 import { Text } from "./Text";
 import { usePressSqueeze } from "./usePressSqueeze";
 
@@ -44,7 +44,7 @@ function Segment<TValue extends string>({
       <Pressable
         accessibilityRole="button"
         accessibilityState={{ selected: isSelected }}
-        className="min-h-[44px] items-center justify-center gap-0.5 rounded-lg px-1 py-1.5"
+        className="min-h-touch items-center justify-center gap-0.5 rounded-lg px-1 py-1.5"
         data-pressed={isPressed ? "true" : undefined}
         data-selected={isSelected ? "true" : undefined}
         onPress={onPress}
@@ -57,7 +57,7 @@ function Segment<TValue extends string>({
           pressOut();
         }}
         style={{
-          backgroundColor: isSelected ? colors.selectionBackground : "transparent",
+          backgroundColor: isSelected ? colors.selectionBackground : colors.transparent,
         }}
       >
         {item.leftSection}
@@ -95,7 +95,7 @@ export function SegmentedControl<TValue extends string>({
       statusMessage={statusMessage}
     >
       <View
-        className={joinClassNames("flex-row gap-1 rounded-[10px] border p-1", className)}
+        className={cn("rounded-control flex-row gap-1 border p-1", className)}
         style={{ backgroundColor: colors.surface, borderColor: colors.borderStrong }}
       >
         {data.map((item) => (

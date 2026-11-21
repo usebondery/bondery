@@ -2,6 +2,9 @@
 
 import { AnthropicIcon } from "@bondery/branding/react";
 import { LogoIcon } from "@bondery/mantine-next";
+import visuals from "@bondery/translations/locales/en/platform/website/WebsiteLandingVisuals.json" with {
+  type: "json",
+};
 import { Avatar, Badge, Box, Card, Group, Stack, Text } from "@mantine/core";
 import { IconCheck, IconClock, IconMessageCircle } from "@tabler/icons-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
@@ -16,8 +19,10 @@ type Frame = {
   phase: Phase;
 };
 
+const INITIAL_FRAME: Frame = { at: 0, beat: 0, phase: "question" };
+
 const KEYFRAMES: readonly Frame[] = [
-  { at: 0, beat: 0, phase: "question" },
+  INITIAL_FRAME,
   { at: 1000, beat: 0, phase: "answered" },
   { at: 1550, beat: 0, phase: "card" },
   { at: 4400, beat: 1, phase: "question" },
@@ -31,15 +36,28 @@ const LOOP_MS = 9600;
 /** Reduced motion rests here: the read benefit, fully settled. */
 const RESTING_FRAME: Frame = { at: 1550, beat: 0, phase: "card" };
 
-const QUESTION = ["Who should I catch up with?", "We had coffee today. Save it."] as const;
-const ANSWER = ["Anna. You last talked six weeks ago.", "Saved to Anna's history."] as const;
+const QUESTION = [
+  visuals.Briefing.Questions.Catchup,
+  visuals.Briefing.Questions.SaveCoffee,
+] as const;
+const ANSWER = [visuals.Briefing.Answers.Catchup, visuals.Briefing.Answers.Saved] as const;
 
 const HAIRLINE = "light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4))";
 const BUBBLE_SURFACE = "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7))";
 
+/** The assistant is a product name, so it is not translated. */
+const ASSISTANT_NAME = "Claude";
+
+/** Sample contact for the demo card. The name is fixture data. The note is catalog copy. */
+const DEMO_CONTACT = {
+  initials: "AK",
+  name: "Anna Kowalski",
+  note: visuals.Briefing.DemoNote,
+} as const;
+
 export function AssistantBriefingAnimation() {
   const reduceMotion = useReducedMotion();
-  const [frame, setFrame] = useState<Frame>(KEYFRAMES[0]);
+  const [frame, setFrame] = useState<Frame>(INITIAL_FRAME);
 
   useEffect(() => {
     if (reduceMotion) {
@@ -127,7 +145,7 @@ function ConnectionStrip({ active, reduced }: { active: Frame; reduced: boolean 
       >
         <AnthropicIcon size={11} />
         <Text fw={600} style={{ fontSize: 10, lineHeight: 1.2 }}>
-          Claude
+          {ASSISTANT_NAME}
         </Text>
       </Group>
 
@@ -223,7 +241,7 @@ function AnswerBubble({ active, isTyping }: { active: Frame; isTyping: boolean }
         <Group gap={4} mb={2} wrap="nowrap">
           <AnthropicIcon size={10} />
           <Text c="dimmed" fw={500} style={{ fontSize: 10, lineHeight: 1.2 }}>
-            Claude
+            {ASSISTANT_NAME}
           </Text>
         </Group>
 
@@ -288,13 +306,13 @@ function ContactCard({ isSaved }: { isSaved: boolean }) {
     <Card padding={10} radius="md" shadow="sm" withBorder>
       <Group gap={10} wrap="nowrap">
         <Avatar color="branding-primary" radius="md" size={32} variant="light">
-          AK
+          {DEMO_CONTACT.initials}
         </Avatar>
 
         <Box style={{ flex: 1, minWidth: 0 }}>
           <Group gap="xs" justify="space-between" wrap="nowrap">
             <Text fw={600} style={{ fontSize: "clamp(11.5px, 3vw, 13px)" }} truncate>
-              Anna Kowalski
+              {DEMO_CONTACT.name}
             </Text>
 
             <Box style={{ flexShrink: 0, minWidth: 104, textAlign: "right" }}>
@@ -313,7 +331,7 @@ function ContactCard({ isSaved }: { isSaved: boolean }) {
                       size="xs"
                       variant="light"
                     >
-                      In touch today
+                      {visuals.Briefing.InTouchToday}
                     </Badge>
                   ) : (
                     <Badge
@@ -322,7 +340,7 @@ function ContactCard({ isSaved }: { isSaved: boolean }) {
                       size="xs"
                       variant="light"
                     >
-                      Due a catch-up
+                      {visuals.Briefing.DueCatchUp}
                     </Badge>
                   )}
                 </motion.div>
@@ -332,13 +350,13 @@ function ContactCard({ isSaved }: { isSaved: boolean }) {
 
           <Group gap="xs" justify="space-between" mt={2} wrap="nowrap">
             <Text c="dimmed" style={{ fontSize: 10.5, lineHeight: 1.3 }} truncate>
-              Berlin · met at Web Summit
+              {DEMO_CONTACT.note}
             </Text>
 
             <Group gap={4} style={{ flexShrink: 0 }} wrap="nowrap">
               <IconMessageCircle size={11} style={{ color: "var(--mantine-color-dimmed)" }} />
               <Text c="dimmed" style={{ fontSize: 10.5 }}>
-                Last talked
+                {visuals.Briefing.LastTalked}
               </Text>
               <Box style={{ minWidth: 62, textAlign: "right" }}>
                 <AnimatePresence initial={false} mode="wait">

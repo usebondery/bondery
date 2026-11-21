@@ -131,8 +131,8 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
 
       const modelMessages = await convertToModelMessages(
         stripToolPartsForModel(messages, { keepApproval: intent === "approval" }),
-      ).catch((err: unknown) => {
-        request.log.error(err, "Failed to convert chat messages");
+      ).catch((error: unknown) => {
+        request.log.error(error, "Failed to convert chat messages");
         throw badRequest("Invalid chat messages", "validation_error");
       });
 
@@ -202,19 +202,19 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
               if (title) {
                 await setChatSessionTitleIfEmpty(ctx, sessionId, title);
               }
-            } catch (err) {
-              request.log.error(err, "Title generation failed");
+            } catch (error) {
+              request.log.error(error, "Title generation failed");
             }
           }
         })
-        .catch((err: unknown) => {
+        .catch((error: unknown) => {
           // A stopped turn rejects the text promise. The partial row is already
           // written by the stream's own end callback.
           if (abortController.signal.aborted) {
             return;
           }
 
-          request.log.error(err, "Failed to persist assistant chat message");
+          request.log.error(error, "Failed to persist assistant chat message");
         });
 
       reply.hijack();
@@ -229,8 +229,8 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
             void persistOnce("incomplete");
           },
         });
-      } catch (err) {
-        request.log.error(err, "Chat stream failed");
+      } catch (error) {
+        request.log.error(error, "Chat stream failed");
       }
 
       void persistAssistant;

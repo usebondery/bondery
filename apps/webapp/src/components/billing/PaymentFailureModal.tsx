@@ -17,7 +17,9 @@ export function PaymentFailureModal() {
       centered
       closeOnClickOutside={false}
       closeOnEscape={false}
-      onClose={() => {}}
+      onClose={() => {
+        // no-op: payment block cannot be dismissed without the portal
+      }}
       opened={paymentBlocked}
       title={t("paymentBlockedTitle")}
       withCloseButton={false}

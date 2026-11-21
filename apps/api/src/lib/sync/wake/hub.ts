@@ -23,7 +23,11 @@ export class SyncConnectionHub {
   private readonly pingTimers = new Map<SyncWakeSocket, ReturnType<typeof setInterval>>();
   private readonly pongTimers = new Map<SyncWakeSocket, ReturnType<typeof setTimeout>>();
 
-  constructor(private readonly log?: FastifyBaseLogger) {}
+  private readonly log?: FastifyBaseLogger;
+
+  constructor(log?: FastifyBaseLogger) {
+    this.log = log;
+  }
 
   register(userId: string, socket: SyncWakeSocket): void {
     this.enforceConnectionLimit(userId);
@@ -85,7 +89,7 @@ export class SyncConnectionHub {
     }
 
     const payload = JSON.stringify(message);
-    for (const entry of [...set]) {
+    for (const entry of set) {
       if (entry.socket.readyState !== WS_OPEN) {
         this.unregister(entry.socket);
         continue;

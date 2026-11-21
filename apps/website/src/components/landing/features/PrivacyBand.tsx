@@ -1,8 +1,11 @@
 import { SOCIAL_LINKS } from "@bondery/helpers";
 import { ButtonLink, hrefAssert } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Card, List, ListItem, Text, ThemeIcon } from "@mantine/core";
 import { IconBook, IconBrandGithub, IconCheck } from "@tabler/icons-react";
-import { OwnershipVisual } from "./OwnershipVisual";
+import { LockVisual } from "./lock3d/LockVisual";
 import { Reveal } from "./Reveal";
 import { SectionHeader } from "./SectionHeader";
 
@@ -10,9 +13,9 @@ const SELF_HOSTING_DOCS_HREF = "/docs/deploy/requirements";
 
 /** Three points at most. More than that stops being scannable. */
 const PRIVACY_POINTS = [
-  "Open source (AGPL-3.0)",
-  "Hosted in the EU",
-  "Self-host or export anytime",
+  landing.PrivacyBand.Points.OpenSource,
+  landing.PrivacyBand.Points.EuHosted,
+  landing.PrivacyBand.Points.SelfHostOrExport,
 ] as const;
 
 /**
@@ -31,7 +34,7 @@ export function PrivacyBand() {
       >
         <div className="grid grid-cols-1 items-center gap-10 p-6 md:p-10 lg:grid-cols-2 lg:gap-14 lg:p-14">
           <div className="flex flex-col gap-8">
-            <SectionHeader align="left" title="Private by design. Yours to keep." />
+            <SectionHeader align="left" title={landing.PrivacyBand.Title} />
 
             <List
               center
@@ -58,7 +61,7 @@ export function PrivacyBand() {
                 target="_blank"
                 variant="default"
               >
-                View on GitHub
+                {landing.PrivacyBand.ViewOnGitHub}
               </ButtonLink>
               <ButtonLink
                 color="gray"
@@ -67,13 +70,13 @@ export function PrivacyBand() {
                 size="md"
                 variant="subtle"
               >
-                Self-hosting guide
+                {landing.PrivacyBand.SelfHostingGuide}
               </ButtonLink>
             </div>
           </div>
 
           <div className="flex justify-center">
-            <OwnershipVisual />
+            <LockVisual />
           </div>
         </div>
       </Card>

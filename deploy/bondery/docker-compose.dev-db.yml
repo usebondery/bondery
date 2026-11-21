@@ -2,25 +2,43 @@
 #
 #   pnpm run start:postgres
 #
-# Host port 54322. Stop any other Postgres on that port before starting.
+# Same protection as the Compose stack: TLS only, plaintext TCP refused (see
+# docs/deploy/configuration.mdx#postgres-tls). `pnpm run start:postgres` first creates the CA and
+# server certificate in .temp/postgres-secrets (pnpm run postgres:secrets), then starts Postgres.
+# Host tools trust .temp/postgres-secrets/client/ca.crt through DATABASE_SSL_ROOT_CERT_FILE
+# (`pnpm run setup:dev` sets it).
+#
+# Host port 54322, loopback only. Stop any other Postgres on that port before starting.
+# Do not run `docker compose up` on this file directly: the secrets folder must exist first.
 
 services:
   db:
     image: postgis/postgis:17-3.5
     restart: unless-stopped
+    entrypoint: [ "/bin/sh", "/etc/bondery/entrypoint.sh" ]
     ports:
-      - "54322:5432"
+      - "127.0.0.1:54322:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}
       POSTGRES_DB: bondery
+    tmpfs:
+      - /run/bondery-postgres
     volumes:
       - bondery-postgres-data:/var/lib/postgresql/data
+      - type: bind
+        source: ../../.temp/postgres-secrets/server
+        target: /bondery-postgres/server
+        read_only: true
+        bind:
+          create_host_path: false
+      - ./postgres/entrypoint.sh:/etc/bondery/entrypoint.sh:ro
+      - ./postgres/pg_hba.conf:/etc/bondery/pg_hba.conf:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d bondery"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres -d bondery" ]
       interval: 5s
       timeout: 5s
       retries: 10
 
 volumes:
-  bondery-postgres-data:
+  bondery-postgres-data: {}

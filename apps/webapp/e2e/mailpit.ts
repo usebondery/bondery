@@ -59,9 +59,8 @@ async function findMagicLinkVerifyUrl(
   to: string,
   receivedAfter?: Date,
 ): Promise<string | undefined> {
-  const search = await fetchJson<MailpitSearchResponse>(
-    `/api/v1/search?query=${encodeURIComponent(`to:${to}`)}`,
-  );
+  const recipientQuery = encodeURIComponent(`to:${to}`);
+  const search = await fetchJson<MailpitSearchResponse>(`/api/v1/search?query=${recipientQuery}`);
   const messages = [...(search.messages ?? [])].sort((left, right) => {
     const leftTime = left.Created ? Date.parse(left.Created) : 0;
     const rightTime = right.Created ? Date.parse(right.Created) : 0;

@@ -1,3 +1,6 @@
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Container } from "@mantine/core";
 import { FeatureBento } from "./features/FeatureBento";
 import { PrivacyBand } from "./features/PrivacyBand";
@@ -10,7 +13,7 @@ export function Features() {
   return (
     <section
       aria-labelledby="features-title"
-      className="scroll-mt-[var(--site-header-sticky-bottom)]"
+      className="scroll-mt-header-sticky-bottom"
       id="features"
       style={{
         backgroundColor: "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))",
@@ -18,10 +21,7 @@ export function Features() {
     >
       <Container py={{ base: 64, md: 112 }} size="xl">
         <div className="flex flex-col gap-12 md:gap-16">
-          <SectionHeader
-            title="Everything you need to build stronger bonds"
-            titleId="features-title"
-          />
+          <SectionHeader title={landing.Features.Title} titleId="features-title" />
           <FeatureBento />
           <PrivacyBand />
         </div>

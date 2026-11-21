@@ -19,6 +19,8 @@ const MAX_DIRECTIVE_LENGTH = 64;
 const MAX_DISPOSITION_LENGTH = 16;
 /** Longest path or file kept. Truncation is a data cap, not a validation rule. */
 const MAX_PATH_LENGTH = 512;
+/** A raw URL is capped at this many path lengths, so its query and host still fit before parsing. */
+const RAW_URL_LENGTH_FACTOR = 4;
 /** Longest host kept. 253 is the DNS maximum. */
 const MAX_HOST_LENGTH = 253;
 /** Bound on the work one request can cause. */
@@ -51,7 +53,7 @@ function capString(value: unknown, maxLength: number): string | undefined {
 
 /** Path only, with the query and fragment removed. */
 function toPath(value: unknown): string | undefined {
-  const raw = capString(value, MAX_PATH_LENGTH * 4);
+  const raw = capString(value, MAX_PATH_LENGTH * RAW_URL_LENGTH_FACTOR);
   if (!raw) {
     return undefined;
   }
@@ -70,7 +72,7 @@ function toPath(value: unknown): string | undefined {
  * `data`), which have no origin, so those pass through unchanged.
  */
 function toOriginAndPath(value: unknown): string | undefined {
-  const raw = capString(value, MAX_PATH_LENGTH * 4);
+  const raw = capString(value, MAX_PATH_LENGTH * RAW_URL_LENGTH_FACTOR);
   if (!raw) {
     return undefined;
   }
@@ -91,7 +93,7 @@ function toLineNumber(value: unknown): number | undefined {
 }
 
 function hostOf(value: unknown): string | undefined {
-  const raw = capString(value, MAX_PATH_LENGTH * 4);
+  const raw = capString(value, MAX_PATH_LENGTH * RAW_URL_LENGTH_FACTOR);
   if (!raw) {
     return undefined;
   }

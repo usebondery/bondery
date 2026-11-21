@@ -1,0 +1,126 @@
+{
+  "Assistant": {
+    "Logged": "Logged",
+    "Scenarios": {
+      "Alan": {
+        "Answer": "{birthday}. He loves running. Try a pair of trail shoes.",
+        "Question": "When is Alan's birthday? Any gift ideas?"
+      },
+      "Grace": {
+        "Answer": "Oct 12, over coffee in Boston. She recommended a book on leadership.",
+        "Question": "What did I last talk about with Grace?"
+      },
+      "Investors": {
+        "Answer": "Two investors.",
+        "Question": "What VC investors do I know?"
+      },
+      "Katherine": {
+        "Answer": "You met at a science talk in Houston.",
+        "Question": "Who is Katherine Johnson and where do I know her from?"
+      },
+      "LogCoffee": {
+        "Answer": "Logged to Ada's timeline.",
+        "LoggedNote": "Her upcoming launch",
+        "LoggedTitle": "Coffee with Ada",
+        "Question": "I met Ada for coffee and talked about her upcoming launch."
+      },
+      "Thailand": {
+        "Answer": "Two people.",
+        "Bangkok": "Bangkok",
+        "ChiangMai": "Chiang Mai",
+        "Question": "I'm visiting Thailand. Who do I know there?"
+      },
+      "UxDesign": {
+        "Answer": "Two people in your network.",
+        "Question": "Who could help me with UX design?"
+      }
+    }
+  },
+  "Briefing": {
+    "Answers": {
+      "Catchup": "Anna. You last talked six weeks ago.",
+      "Saved": "Saved to Anna's history."
+    },
+    "DemoNote": "Berlin · met at Web Summit",
+    "DueCatchUp": "Due a catch-up",
+    "InTouchToday": "In touch today",
+    "LastTalked": "Last talked",
+    "Questions": {
+      "Catchup": "Who should I catch up with?",
+      "SaveCoffee": "We had coffee today. Save it."
+    }
+  },
+  "Encryption": {
+    "Birthday": "March 3",
+    "Note": "Loves hiking and sci-fi books"
+  },
+  "People": {
+    "Ada": {
+      "Birthday": "December 10",
+      "Headline": "Mathematician"
+    },
+    "Alan": {
+      "Birthday": "June 23",
+      "Headline": "Computer scientist"
+    },
+    "Grace": {
+      "Headline": "Rear Admiral, US Navy"
+    },
+    "Hedy": {
+      "Headline": "Inventor and actor"
+    },
+    "John": {
+      "Headline": "Mathematician"
+    },
+    "Katherine": {
+      "Headline": "Mathematician, NASA"
+    },
+    "Limor": {
+      "Headline": "Founder, Adafruit"
+    },
+    "Margaret": {
+      "Headline": "Software engineer, Apollo"
+    },
+    "Marissa": {
+      "Headline": "Former CEO, Yahoo"
+    },
+    "Sheryl": {
+      "Headline": "Operator and author"
+    },
+    "Whitney": {
+      "Headline": "Founder, Bumble"
+    }
+  },
+  "Reminders": {
+    "Anniversary": "Work anniversary in 7 days",
+    "Birthday": "Birthday in 3 days",
+    "ComingUp": "{count} reminders coming up"
+  },
+  "Sources": {
+    "FromSource": "From {source}",
+    "Merged": "Merged",
+    "Soon": "Soon"
+  },
+  "Sync": {
+    "NewCity": "New city",
+    "NewPhoto": "New photo",
+    "NewTitle": "New title"
+  },
+  "Timeline": {
+    "Call": {
+      "Date": "Sep 28, 2026",
+      "Note": "Offered an intro to a co-founder",
+      "Title": "Call with Alan Turing"
+    },
+    "Coffee": {
+      "Date": "Oct 12, 2026",
+      "Note": "Talked about her upcoming launch",
+      "Title": "Coffee with Ada Lovelace"
+    },
+    "Party": {
+      "Date": "Aug 30, 2026",
+      "Note": "Met Grace and Margaret",
+      "Title": "Launch party"
+    }
+  }
+}

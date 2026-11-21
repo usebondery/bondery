@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Bondery’i aç"
+    "OpenBondery": "Bondery’i aç",
+    "UnsupportedSiteMessage": "Eklentinin daha fazla eylemini ve olanağını görmek için Instagram veya LinkedIn’de birinin profilini ziyaret et."
   },
   "LoggedOut": {
     "Description": "Sosyal sayfalardan kişi kaydetmek için hesabını bağla.",
@@ -20,6 +21,12 @@
     "Title": "Güncelleme gerekli"
   },
   "Welcome": {
-    "ConnectButton": "Bondery hesabını bağla"
+    "ConnectButton": "Bondery hesabını bağla",
+    "Description": "Sosyal medya profillerinden doğrudan kişi kaydetmek için Bondery hesabını bağla.",
+    "SignInHint": "Bondery hesabında oturum açman ve eklentiyi yetkilendirmen istenecek.",
+    "SuccessClose": "Artık bu sekmeyi kapatabilirsin.",
+    "SuccessDescription": "Bondery hesabın artık bağlı. Kişi kaydetmeye başlamak için herhangi bir Instagram veya LinkedIn profilini ziyaret et.",
+    "SuccessTitle": "Her şey hazır!",
+    "Title": "Bondery’ye hoş geldin"
   }
 }

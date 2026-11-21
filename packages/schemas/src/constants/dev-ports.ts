@@ -10,7 +10,8 @@ export const DEV_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-passwo
 export const DEV_PORTS = {
   /** Reserved: internal admin / one-off dev utilities */
   ADMIN: 26638,
-  API: 26631,
+  /** The API's only listener, HTTPS (Portless, the webapp's server side, `tailscale serve`) */
+  API: 26642,
   EMAIL_PREVIEW: 26639,
   EXTENSION: 26633,
   /** Local Mailpit SMTP (`deploy/bondery/docker-compose.dev-mail.yml`) */

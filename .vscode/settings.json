@@ -26,10 +26,6 @@
       "label": "website",
       "requireLocalPort": true
     },
-    "26631": {
-      "label": "api",
-      "requireLocalPort": true
-    },
     "26632": {
       "label": "webapp",
       "onAutoForward": "notify",
@@ -61,6 +57,11 @@
     },
     "26639": {
       "label": "email-preview",
+      "requireLocalPort": true
+    },
+    "26642": {
+      "label": "api",
+      "protocol": "https",
       "requireLocalPort": true
     },
     "54320": {

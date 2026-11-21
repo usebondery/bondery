@@ -59,12 +59,7 @@ function findProfileActionButton(): HTMLButtonElement | null {
 
   const artdecoButtons = Array.from(
     profileSection.querySelectorAll<HTMLButtonElement>("button.artdeco-button"),
-  ).filter((btn) => {
-    if (btn.closest("[class*='nt-edge']")) {
-      return false;
-    }
-    return true;
-  });
+  ).filter((btn) => !btn.closest("[class*='nt-edge']"));
 
   const firstArtdeco = artdecoButtons.find((btn) => !!btn.textContent?.trim());
   if (firstArtdeco) {
@@ -154,16 +149,27 @@ export async function injectBonderyButton(ctx: ContentScriptContext) {
   }
 
   isInjecting = true;
+  await mountLinkedInButton(ctx, anchor, username);
+}
+
+async function mountLinkedInButton(
+  ctx: ContentScriptContext,
+  anchor: Element,
+  username: string,
+): Promise<void> {
   try {
-    currentUi = await renderInShadowRoot(ctx, {
+    const ui = await renderInShadowRoot(ctx, {
       anchor,
       append: "after",
       name: "bondery-linkedin",
       position: "inline",
       render: () => <LinkedInButton username={username} />,
     });
+    currentUi = ui;
     currentInjectedUsername = username;
     extLog.debug("Bondery Extension: Button injected successfully on LinkedIn");
+  } catch (error) {
+    extLog.error("Bondery Extension: Button injection failed on LinkedIn", error);
   } finally {
     isInjecting = false;
   }
@@ -196,7 +202,7 @@ export function setupObserver(ctx: ContentScriptContext) {
       debounceTimer = null;
       const username = getLinkedInUsername();
       if (username && !document.querySelector("bondery-linkedin")) {
-        injectBonderyButton(ctx);
+        void injectBonderyButton(ctx);
       }
     }, 300);
   });

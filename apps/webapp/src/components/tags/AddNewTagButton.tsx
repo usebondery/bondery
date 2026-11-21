@@ -1,5 +1,6 @@
 import { Button } from "@mantine/core";
 import { IconPlus } from "@tabler/icons-react";
+import { cn } from "cn";
 
 interface AddNewTagButtonProps {
   className?: string;
@@ -17,7 +18,7 @@ export function AddNewTagButton({
 }: AddNewTagButtonProps) {
   return (
     <Button
-      className={`button-scale-effect${className ? ` ${className}` : ""}`}
+      className={cn("button-scale-effect", className)}
       leftSection={<IconPlus size={14} />}
       onClick={onClick}
       onMouseDown={(event) => {

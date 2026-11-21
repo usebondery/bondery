@@ -22,12 +22,12 @@ This is the same convention Stripe uses: `POST /customers` returns the full `Cus
 
 ## Status codes
 
-| Operation | Status | Body |
-|-----------|--------|------|
-| Create | `201 Created` | `{ <resource> }` — full object |
-| Update (PATCH / PUT) | `200 OK` | `{ <resource> }` — full updated object |
-| Side-effect only (no object) | `204 No Content` | empty |
-| Bulk op (counts matter more than object) | `200 OK` | `{ count, ... }` |
+| Operation                                | Status           | Body                                   |
+| ---------------------------------------- | ---------------- | -------------------------------------- |
+| Create                                   | `201 Created`    | `{ <resource> }` — full object         |
+| Update (PATCH / PUT)                     | `200 OK`         | `{ <resource> }` — full updated object |
+| Side-effect only (no object)             | `204 No Content` | empty                                  |
+| Bulk op (counts matter more than object) | `200 OK`         | `{ count, ... }`                       |
 
 ---
 
@@ -35,15 +35,15 @@ This is the same convention Stripe uses: `POST /customers` returns the full `Cus
 
 The rule applies to primary domain-object mutations. The following cases are appropriately different:
 
-| Endpoint category | Correct response | Reason |
-|---|---|---|
-| **Bulk / membership operations** (`POST /groups/:id/contacts`, `POST /tags/:id/contacts`) | `{ addedCount, skippedCount }` | No single object is created; counts are the meaningful output |
-| **Async triggers** (`POST /contacts/:id/enrich`) | `{ success: true }` | Work happens in the background; no object is ready at response time |
-| **Photo upload** (`POST /contacts/:id/photo`) | `{ avatarUrl }` | A derived URL is the meaningful output, not the full contact |
-| **Internal / side-effect ops** (enrich-queue, recommendations) | `{ success: true }` | No client-facing entity to return |
-| **Parse previews** (import parse endpoints) | parsed preview data | These are not DB mutations |
-| **Streaming responses** (chat) | SSE stream | Response is hijacked; object is meaningless |
-| **Delete** | `{ message }` or `204` | Object is gone; nothing to return |
+| Endpoint category                                                                         | Correct response               | Reason                                                              |
+| ----------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------------------------------------- |
+| **Bulk / membership operations** (`POST /groups/:id/contacts`, `POST /tags/:id/contacts`) | `{ addedCount, skippedCount }` | No single object is created; counts are the meaningful output       |
+| **Async triggers** (`POST /contacts/:id/enrich`)                                          | `{ success: true }`            | Work happens in the background; no object is ready at response time |
+| **Photo upload** (`POST /contacts/:id/photo`)                                             | `{ avatarUrl }`                | A derived URL is the meaningful output, not the full contact        |
+| **Internal / side-effect ops** (enrich-queue, recommendations)                            | `{ success: true }`            | No client-facing entity to return                                   |
+| **Parse previews** (import parse endpoints)                                               | parsed preview data            | These are not DB mutations                                          |
+| **Streaming responses** (chat)                                                            | SSE stream                     | Response is hijacked; object is meaningless                         |
+| **Delete**                                                                                | `{ message }` or `204`         | Object is gone; nothing to return                                   |
 
 ---
 

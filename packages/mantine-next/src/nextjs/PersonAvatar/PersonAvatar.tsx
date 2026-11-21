@@ -3,9 +3,11 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ContactPreview } from "@bondery/schemas";
 import { Avatar } from "@mantine/core";
+import type { ReactElement } from "react";
 import Link, { hrefAssert } from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { nonEmpty } from "#utils/nonEmpty.js";
 
 type PersonAvatarIdentity = ContactPreview & {
   middleName?: string | null;
@@ -24,9 +26,9 @@ export function PersonAvatar({
   size = "md",
   isClickable = false,
   href,
-}: PersonAvatarProps) {
+}: PersonAvatarProps): ReactElement {
   const fullName = [person.firstName, person.middleName, person.lastName].filter(Boolean).join(" ");
-  const resolvedHref = href || `${WEBAPP_ROUTES.PERSON}/${person.id}`;
+  const resolvedHref = nonEmpty(href) ?? `${WEBAPP_ROUTES.PERSON}/${person.id}`;
 
   const avatar = (
     <Avatar
@@ -34,7 +36,7 @@ export function PersonAvatar({
       name={fullName}
       radius="xl"
       size={size}
-      src={person.avatar || undefined}
+      src={nonEmpty(person.avatar)}
       style={{ cursor: isClickable ? "pointer" : "default" }}
     />
   );

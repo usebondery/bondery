@@ -169,7 +169,7 @@ async function syncInjectedDist(pkgName) {
   }
 }
 
-const targets = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT_PACKAGES;
+const targets = process.argv.slice(2).length > 0 ? process.argv.slice(2) : DEFAULT_PACKAGES;
 
 for (const pkg of targets) {
   await rewritePackage(pkg);

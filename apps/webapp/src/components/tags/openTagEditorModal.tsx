@@ -78,6 +78,8 @@ interface OpenTagEditorModalOptions {
   tag?: TagWithCount;
 }
 
+const NO_SELECTED_PERSON_IDS: string[] = [];
+
 interface TagEditorModalBodyProps extends OpenTagEditorModalOptions {
   modalId: string;
 }
@@ -87,7 +89,7 @@ function TagEditorModalBody({
   mode,
   tag,
   initialLabel,
-  initialSelectedPersonIds = [],
+  initialSelectedPersonIds = NO_SELECTED_PERSON_IDS,
   onCreated,
   onUpdated,
   onDeleted,
@@ -142,7 +144,10 @@ function TagEditorModalBody({
     mode === "create" ? initialSelectedPersonIds : [],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const submitLockRef = useRef(false);
+  const submitLockRef = useRef<boolean>(false);
+  const setSubmitLock = (locked: boolean) => {
+    submitLockRef.current = locked;
+  };
 
   useEffect(() => {
     if (mode !== "edit" || !tagMembers) {
@@ -197,7 +202,7 @@ function TagEditorModalBody({
       return;
     }
 
-    submitLockRef.current = true;
+    setSubmitLock(true);
     setIsSubmitting(true);
 
     const loadingId = notifications.show(
@@ -310,7 +315,7 @@ function TagEditorModalBody({
       );
     } finally {
       setIsSubmitting(false);
-      submitLockRef.current = false;
+      setSubmitLock(false);
     }
   };
 

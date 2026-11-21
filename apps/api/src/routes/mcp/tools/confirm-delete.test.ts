@@ -167,10 +167,11 @@ describe("confirmMcpDelete", () => {
     });
     assert.equal(isInputRequiredResult(result), true);
     assert.equal(confirmed, false);
-    if (isInputRequiredResult(result)) {
-      assert.ok(result.requestState);
-      assert.ok(result.inputRequests?.[MCP_DELETE_CONFIRM_KEY]);
+    if (!isInputRequiredResult(result)) {
+      throw new Error("expected input_required result with requestState");
     }
+    assert.ok(result.requestState);
+    assert.ok(result.inputRequests?.[MCP_DELETE_CONFIRM_KEY]);
   });
 
   it("cancels on decline and deletes only after accept plus a valid requestState", async () => {

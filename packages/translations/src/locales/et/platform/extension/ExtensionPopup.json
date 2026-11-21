@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Ava Bondery"
+    "OpenBondery": "Ava Bondery",
+    "UnsupportedSiteMessage": "Külasta kellegi profiili Instagramis või LinkedInis, et näha laienduse rohkem toiminguid ja võimalusi."
   },
   "LoggedOut": {
     "Description": "Ühenda oma konto, et salvestada kontakte sotsiaalmeediast.",
@@ -20,6 +21,12 @@
     "Title": "Uuendus on kohustuslik"
   },
   "Welcome": {
-    "ConnectButton": "Ühenda Bondery konto"
+    "ConnectButton": "Ühenda Bondery konto",
+    "Description": "Ühenda oma Bondery konto, et salvestada kontakte otse sotsiaalmeedia profiilidelt.",
+    "SignInHint": "Sul palutakse oma Bondery kontole sisse logida ja laiendusele luba anda.",
+    "SuccessClose": "Nüüd võid selle vahekaardi sulgeda.",
+    "SuccessDescription": "Sinu Bondery konto on nüüd ühendatud. Külasta mis tahes Instagrami või LinkedIni profiili ja alusta kontaktide salvestamist.",
+    "SuccessTitle": "Kõik valmis!",
+    "Title": "Tere tulemast Bonderysse"
   }
 }

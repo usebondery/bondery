@@ -6,10 +6,10 @@
 
 A failed request must not live only in the API container's stdout. Two pipelines send it to PostHog. Both are off without `BONDERY_PUBLIC_POSTHOG_KEY` (local dev, self-hosted) and in tests.
 
-| Pipeline | What is sent | Where |
-|----------|--------------|-------|
-| **Logs** | Every Pino record at **warn or above**, from Fastify's logger and the shared logger | `apps/api/src/lib/platform/telemetry/posthog-logs.ts` |
-| **Error tracking** | One `$exception` per **5xx** response, plus uncaught exceptions | `apps/api/src/services/analytics/capture-server-exception.ts`, called from `setErrorHandler` in `build-app.ts` |
+| Pipeline           | What is sent                                                                        | Where                                                                                                          |
+| ------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Logs**           | Every Pino record at **warn or above**, from Fastify's logger and the shared logger | `apps/api/src/lib/platform/telemetry/posthog-logs.ts`                                                          |
+| **Error tracking** | One `$exception` per **5xx** response, plus uncaught exceptions                     | `apps/api/src/services/analytics/capture-server-exception.ts`, called from `setErrorHandler` in `build-app.ts` |
 
 How logs work:
 
@@ -28,11 +28,11 @@ Rules when you touch API logging:
 
 ## Product analytics vs logs vs events
 
-| Signal | Tool | Examples |
-|--------|------|----------|
-| User actions | PostHog **events** | `contacts:contact_create`, `signup_flow:user_create` |
-| System behavior | PostHog **logs** (OTLP) | API request outcomes, retries, timeouts |
-| UX debugging | **Session replay** (gated) | Visual repro — privacy review required |
+| Signal          | Tool                       | Examples                                             |
+| --------------- | -------------------------- | ---------------------------------------------------- |
+| User actions    | PostHog **events**         | `contacts:contact_create`, `signup_flow:user_create` |
+| System behavior | PostHog **logs** (OTLP)    | API request outcomes, retries, timeouts              |
+| UX debugging    | **Session replay** (gated) | Visual repro — privacy review required               |
 
 Do not `capture()` infra failures that belong in logs:
 

@@ -28,23 +28,38 @@ function ctx(
 
 describe("formatUserDate", () => {
   for (const locale of LOCALES) {
+    for (const timeFormat of TIME_FORMATS) {
+      it(`numeric ${locale} mdy ${timeFormat}`, () => {
+        assert.equal(
+          formatUserDate(SAMPLE, ctx(locale, "mdy", timeFormat), "numeric"),
+          "11/13/2026",
+        );
+      });
+
+      it(`numeric ${locale} dmy ${timeFormat}`, () => {
+        assert.equal(
+          formatUserDate(SAMPLE, ctx(locale, "dmy", timeFormat), "numeric"),
+          "13/11/2026",
+        );
+      });
+
+      it(`numeric ${locale} ymd ${timeFormat}`, () => {
+        assert.equal(
+          formatUserDate(SAMPLE, ctx(locale, "ymd", timeFormat), "numeric"),
+          "2026-11-13",
+        );
+      });
+
+      it(`numeric ${locale} locale ${timeFormat}`, () => {
+        const formatted = formatUserDate(SAMPLE, ctx(locale, "locale", timeFormat), "numeric");
+        assert.match(formatted, /2026/);
+        assert.match(formatted, /11|13/);
+      });
+    }
+
     for (const dateFormat of DATE_FORMATS) {
       for (const timeFormat of TIME_FORMATS) {
         const formatCtx = ctx(locale, dateFormat, timeFormat);
-
-        it(`numeric ${locale} ${dateFormat} ${timeFormat}`, () => {
-          const formatted = formatUserDate(SAMPLE, formatCtx, "numeric");
-          if (dateFormat === "mdy") {
-            assert.equal(formatted, "11/13/2026");
-          } else if (dateFormat === "dmy") {
-            assert.equal(formatted, "13/11/2026");
-          } else if (dateFormat === "ymd") {
-            assert.equal(formatted, "2026-11-13");
-          } else {
-            assert.match(formatted, /2026/);
-            assert.match(formatted, /11|13/);
-          }
-        });
 
         it(`monthYear ${locale} ${dateFormat} ${timeFormat}`, () => {
           const formatted = formatUserDate(SAMPLE, formatCtx, "monthYear");
@@ -101,7 +116,7 @@ describe("formatUserDateField", () => {
 describe("formatUserTime and formatClockTime", () => {
   // Exact strings, so a locale that changes its day period shows up here.
   const expected: Record<
-    string,
+    (typeof LOCALES)[number],
     { clock12: string; clock12Seconds: string; storedClock12: string; time24: string }
   > = {
     cs: {

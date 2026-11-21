@@ -10,7 +10,12 @@ export function buildChatSessionMessagesPath(sessionId: string): string {
 }
 
 export interface ChatMessageRow {
-  content: { activities?: unknown; status?: unknown; text?: string; writeMayHaveLanded?: unknown };
+  content?: {
+    activities?: unknown;
+    status?: unknown;
+    text?: string;
+    writeMayHaveLanded?: unknown;
+  } | null;
   createdAt: string;
   id: string;
   role: "user" | "assistant";

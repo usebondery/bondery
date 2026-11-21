@@ -1,6 +1,9 @@
+import blog from "@bondery/translations/locales/en/platform/website/WebsiteBlog.json" with {
+  type: "json",
+};
 import { type Icon, IconCpu, IconHistory, IconTopologyStar } from "@tabler/icons-react";
-
 import type { PostCategory } from "@/lib/blog/types";
+import { formatText } from "@/lib/i18n/message";
 
 /** Full configuration for a blog category. */
 export type BlogCategoryConfig = {
@@ -32,7 +35,7 @@ export const updatesCategoryConfig: BlogCategoryConfig = {
   discordThreadName: "Updates",
   emoji: "⭐",
   icon: IconHistory,
-  label: "Updates",
+  label: blog.Categories.Updates,
   redditFlairId: "d66897b8-26fc-11f1-9219-7272b72b91c8",
   slug: "updates",
 };
@@ -42,7 +45,7 @@ export const techCategoryConfig: BlogCategoryConfig = {
   discordThreadName: "Tech",
   emoji: "🔧",
   icon: IconCpu,
-  label: "Tech",
+  label: blog.Categories.Tech,
   redditFlairId: "ae9b6d5e-8c29-11f1-88c8-92e274031672",
   slug: "tech",
 };
@@ -52,7 +55,7 @@ export const bondsCategoryConfig: BlogCategoryConfig = {
   discordThreadName: "Community & Bonds",
   emoji: "🟣",
   icon: IconTopologyStar,
-  label: "Bonds",
+  label: blog.Categories.Bonds,
   redditFlairId: "fac36e08-26fc-11f1-abe0-420e135784a5",
   slug: "bonds",
 };
@@ -71,15 +74,17 @@ export function getCategoryConfig(slug: string): BlogCategoryConfig | undefined 
 /** Display title for blog index / category pages (metadata + OG images). */
 export function getBlogCategoryTitle(category: string): string {
   if (category === "all") {
-    return "Blog";
+    return blog.Title;
   }
 
   const config = getCategoryConfig(category);
   if (config) {
-    return `${config.label} Blog`;
+    return formatText(blog.CategoryTitle, { category: config.label });
   }
 
-  return `${category.charAt(0).toUpperCase()}${category.slice(1)} Blog`;
+  return formatText(blog.CategoryTitle, {
+    category: `${category.charAt(0).toUpperCase()}${category.slice(1)}`,
+  });
 }
 
 /** All categories including the virtual "all" filter. */

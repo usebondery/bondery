@@ -295,11 +295,11 @@ for (const { name, schema } of [...RESPONSE_SCHEMA_EXAMPLES, ...REQUEST_SCHEMA_E
   }
 }
 
-export function getRegisteredSchemaExample(schema: z.ZodType): unknown | undefined {
+export function getRegisteredSchemaExample(schema: z.ZodType): unknown {
   return schemaExampleByIdentity.get(schema);
 }
 
-export function getNamedSchemaExample(name: string, schema: z.ZodType): unknown | undefined {
+export function getNamedSchemaExample(name: string, schema: z.ZodType): unknown {
   if (name in OPENAPI_SCHEMA_EXAMPLES) {
     return OPENAPI_SCHEMA_EXAMPLES[name];
   }

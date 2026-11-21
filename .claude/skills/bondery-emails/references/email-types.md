@@ -8,13 +8,13 @@ Classification affects legal requirements and deliverability expectations. Polic
 
 All current mail is transactional, user-initiated, a user-enabled reminder digest, or internal ops. **None of it is marketing.**
 
-| Type | Template folder | Examples | Manage notifications? | Legal name + HQ address? |
-|------|-----------------|----------|------------------------|--------------------------|
-| **Transactional / product** | `account/`, `billing/` | Sign-in link, welcome, account deleted, trial ending | No | No (`showLegalEntity` default) |
-| **User-initiated to a third party** | `notifications/` (share) | Share contact | No — recipient has no Bondery account | No |
-| **Configurable product mail** | `notifications/` | Reminder digest (user turned on those dates) | **Yes** — `manageNotificationsUrl` → Settings | No |
-| **Internal ops** | `internal/` | Feedback to ops inbox | No | No |
-| **Promotional / marketing** | none yet | Newsletters, launches, upsells | Preference center (not built) | **Yes** — `showLegalEntity` |
+| Type                                | Template folder          | Examples                                             | Manage notifications?                         | Legal name + HQ address?       |
+| ----------------------------------- | ------------------------ | ---------------------------------------------------- | --------------------------------------------- | ------------------------------ |
+| **Transactional / product**         | `account/`, `billing/`   | Sign-in link, welcome, account deleted, trial ending | No                                            | No (`showLegalEntity` default) |
+| **User-initiated to a third party** | `notifications/` (share) | Share contact                                        | No — recipient has no Bondery account         | No                             |
+| **Configurable product mail**       | `notifications/`         | Reminder digest (user turned on those dates)         | **Yes** — `manageNotificationsUrl` → Settings | No                             |
+| **Internal ops**                    | `internal/`              | Feedback to ops inbox                                | No                                            | No                             |
+| **Promotional / marketing**         | none yet                 | Newsletters, launches, upsells                       | Preference center (not built)                 | **Yes** — `showLegalEntity`    |
 
 ## Manage notifications vs marketing unsubscribe
 

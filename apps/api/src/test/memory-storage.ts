@@ -28,7 +28,7 @@ export function createMemoryStorage(options?: {
         return options.listKeys(bucket, prefix);
       }
       const normalized = prefix.replace(/^\/+|\/+$/g, "");
-      const listPrefix = `${bucket}/${normalized ? `${normalized}/` : ""}`;
+      const listPrefix = normalized ? `${bucket}/${normalized}/` : `${bucket}/`;
       const keys: string[] = [];
       for (const objectKey of objects.keys()) {
         if (!objectKey.startsWith(listPrefix)) {

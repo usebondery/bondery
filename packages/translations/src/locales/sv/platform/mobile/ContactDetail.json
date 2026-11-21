@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Lägg till anteckningar…",
   "DeleteContact": "Ta bort kontakt",
   "DeleteContactConfirmTitle": "Ta bort {name}?",
   "DeleteFailed": "Kunde inte ta bort kontakten.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Redigera",
   "GroupsEditAccessibility": "Redigera grupper för {name}",
   "GroupsLoadError": "Kunde inte ladda grupper",
+  "LastInteractionLabel": "Senaste interaktion",
   "NoGroups": "I ingen grupp",
   "ShareContact": "Dela vCard…",
   "ShareContactViaEmail": "Skicka via e-post…",

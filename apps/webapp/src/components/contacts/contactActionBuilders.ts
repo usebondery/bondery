@@ -1,4 +1,4 @@
-﻿import type { BulkSelectionAction, MenuAction } from "@/components/contacts/ContactsTableV2";
+import type { BulkSelectionAction, MenuAction } from "@/components/contacts/ContactsTableV2";
 
 interface BuildContactMenuActionsOptions {
   addToGroupsAction?: MenuAction;

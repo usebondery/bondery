@@ -22,7 +22,8 @@ import {
   type ProfileFieldConfig,
   useContactIdentityFieldConfigs,
 } from "@/lib/i18n/useContactIdentityFieldConfigs";
-import { useUpdateContactMutation } from "@/lib/query/hooks/useContacts";
+import { useUpdateContactMutation } from "@/lib/query/hooks/useContactMutations";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { ContactPhotoUploadButton } from "../chrome/ContactPhotoUploadButton";
 import { SocialsSection } from "../socials/SocialsSection";
 import { InlineEditableInput } from "./InlineEditableInput";
@@ -73,6 +74,10 @@ function usePersonNameFields(
 
   const persistedValuesRef = useRef<Record<NameField, string>>(initialValues);
 
+  const persistNameField = (field: NameField, value: string) => {
+    persistedValuesRef.current[field] = value;
+  };
+
   const updateField = (field: NameField, value: string) => {
     setValues((previous) => ({
       ...previous,
@@ -112,7 +117,7 @@ function usePersonNameFields(
     try {
       await updateContactMutation.mutateAsync({ [field]: value });
 
-      persistedValuesRef.current[field] = value;
+      persistNameField(field, value);
 
       notifications.show(
         successNotificationTemplate({
@@ -180,6 +185,10 @@ function usePersonProfileFields(
     location: initialLocation,
   });
   const placeCoordinatesRef = useRef<{ latitude: number; longitude: number } | null>(null);
+
+  const persistProfileField = (field: ProfileField, value: string) => {
+    persistedValuesRef.current[field] = value;
+  };
 
   useEffect(() => {
     setValues({
@@ -298,7 +307,7 @@ function usePersonProfileFields(
 
       await updateContactMutation.mutateAsync(payload);
 
-      persistedValuesRef.current[field] = value;
+      persistProfileField(field, value);
 
       notifications.show(
         successNotificationTemplate({
@@ -344,7 +353,7 @@ function usePersonProfileFields(
  *
  * Local name state keeps typing isolated from parent re-renders during save.
  */
-const NameFields = function NameFields({
+function NameFields({
   personId,
   initialFirstName,
   initialMiddleName,
@@ -368,11 +377,11 @@ const NameFields = function NameFields({
   const [hoveredField, setHoveredField] = useState<NameField | null>(null);
 
   return (
-    <Group dir="auto" gap={"xs"} grow wrap="nowrap">
+    <Group dir="auto" gap="xs" grow wrap="nowrap">
       {nameFieldConfigs.map((config) => (
         <InlineEditableInput
           aria-label={config.placeholder}
-          fw={"bold"}
+          fw="bold"
           isFocused={focusedField === config.field}
           isSaving={savingByField[config.field]}
           key={config.field}
@@ -392,7 +401,7 @@ const NameFields = function NameFields({
       ))}
     </Group>
   );
-};
+}
 
 export function ContactIdentitySection({
   contact,
@@ -418,8 +427,8 @@ export function ContactIdentitySection({
     handleBlur: handleProfileBlur,
   } = usePersonProfileFields(
     personId,
-    contact.headline || "",
-    contact.location || "",
+    contact.headline ?? "",
+    contact.location ?? "",
     profileFieldConfigs,
     profileFieldValidationSchemas,
     copy,
@@ -428,10 +437,10 @@ export function ContactIdentitySection({
   return (
     <Group align="center">
       <ContactPhotoUploadButton
-        avatarUrl={contact.avatar || null}
+        avatarUrl={nonEmpty(contact.avatar) ?? null}
         contactId={personId}
         contactName={
-          `${contact.firstName || ""} ${contact.lastName || ""}`.trim() || copy.contactNameFallback
+          `${contact.firstName} ${contact.lastName ?? ""}`.trim() || copy.contactNameFallback
         }
         firstName={contact.firstName}
         isMyselfContact={contact.myself === true}
@@ -443,8 +452,8 @@ export function ContactIdentitySection({
           <Stack gap="xs" style={{ flex: 1 }}>
             <NameFields
               initialFirstName={contact.firstName || ""}
-              initialLastName={contact.lastName || ""}
-              initialMiddleName={contact.middleName || ""}
+              initialLastName={contact.lastName ?? ""}
+              initialMiddleName={contact.middleName ?? ""}
               isMyselfContact={contact.myself === true}
               personId={personId}
             />

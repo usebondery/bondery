@@ -40,9 +40,9 @@ export function InlineEditableInput({
       onFocus={onFocus}
       rightSection={
         isSaving ? (
-          <Loader mr={"sm"} size="xs" />
+          <Loader mr="sm" size="xs" />
         ) : shouldShowCounter ? (
-          <Text c="dimmed" mr={"sm"} size="xs">
+          <Text c="dimmed" mr="sm" size="xs">
             {value.length}/{maxLength}
           </Text>
         ) : null

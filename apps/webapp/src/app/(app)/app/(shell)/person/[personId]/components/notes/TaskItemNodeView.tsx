@@ -27,7 +27,9 @@ export function TaskItemNodeView({ node, updateAttributes, editor }: NodeViewPro
       <Group align="flex-start" gap="xs" style={{ minHeight: "1.5rem" }} wrap="nowrap">
         <Checkbox
           checked={isChecked}
-          onChange={() => {}}
+          onChange={() => {
+            // no-op: checkbox state is applied on mouse down to keep editor focus
+          }}
           onMouseDown={(event) => {
             event.preventDefault();
             if (editor.isEditable) {

@@ -70,7 +70,7 @@ export function ActionButton({
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
   const [isPressed, setIsPressed] = useState(false);
-  const isDisabled = disabled || loading;
+  const isDisabled = disabled === true || loading === true;
   const dimension = getActionButtonSizePx(size);
   const spinnerColor = indicatorColor ?? colors.iconSecondary;
 

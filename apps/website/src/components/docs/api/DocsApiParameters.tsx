@@ -1,15 +1,18 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Box, Divider, Stack, Text, Title } from "@mantine/core";
 import { type OperationParameters, useOperation } from "fumadocs-openapi/operation";
 import type { ReactNode } from "react";
 import { asParamSchema, DocsApiParameterItem } from "./DocsApiParameterItem";
 
 const PARAMETER_GROUP_TITLE: Record<OperationParameters["in"], string> = {
-  cookie: "Cookie parameters",
-  header: "Header parameters",
-  path: "Path parameters",
-  query: "Query parameters",
+  cookie: docs.Api.ParameterGroup.Cookie,
+  header: docs.Api.ParameterGroup.Header,
+  path: docs.Api.ParameterGroup.Path,
+  query: docs.Api.ParameterGroup.Query,
 };
 
 type ParameterLike = {
@@ -38,7 +41,7 @@ export function DocsApiParameters() {
 
   return (
     <Stack gap="md">
-      <Title order={3}>Parameters</Title>
+      <Title order={3}>{docs.Api.Parameters}</Title>
       {groups.map((group, groupIndex) => (
         <Stack gap="sm" key={group.in}>
           {groupIndex > 0 ? <Divider /> : null}

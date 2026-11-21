@@ -7,7 +7,9 @@ import { STORE_SHOT_COPY } from "../../_lib/copy";
 import { STORE_SHOT_ACTIVITIES } from "../../_lib/fixtures";
 import { StoreShotFrame } from "../StoreShotFrame";
 
-const NOOP = () => {};
+function NOOP() {
+  // no-op: store-shot previews do not handle list actions
+}
 
 function resolveParticipants(activity: Activity): PersonPreview[] {
   return (activity.participants ?? [])

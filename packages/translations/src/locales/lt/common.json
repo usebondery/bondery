@@ -230,11 +230,13 @@
     "deleting": "Trinama…",
     "duplicating": "Dublikuojama…",
     "errorTitle": "Klaida",
+    "mobileRuntimeError": "Mobiliosios programėlės vykdymo klaida",
     "noResults": "Rezultatų nėra",
     "removing": "Šalinama…",
     "savedTitle": "Išsaugota",
     "saving": "Saugoma…",
     "sending": "Siunčiama…",
-    "successTitle": "Pavyko"
+    "successTitle": "Pavyko",
+    "unknownError": "Nežinoma klaida"
   }
 }

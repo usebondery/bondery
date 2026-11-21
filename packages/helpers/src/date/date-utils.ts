@@ -1,5 +1,7 @@
 import { type DateTimeFormatContext, formatUserDate } from "#date/format-user.js";
 
+const MONTHS_PER_YEAR = 12;
+
 /**
  * Date formatting utilities for work history and education display.
  *
@@ -114,13 +116,13 @@ export function formatDuration(
     return `${years} year${years > 1 ? "s" : ""}`;
   }
 
-  let months = (endYear - s.year) * 12 + (endMonth - s.month);
+  let months = (endYear - s.year) * MONTHS_PER_YEAR + (endMonth - s.month);
   if (months < 0) {
     months = 0;
   }
 
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
+  const years = Math.floor(months / MONTHS_PER_YEAR);
+  const remainingMonths = months % MONTHS_PER_YEAR;
 
   if (years === 0 && remainingMonths === 0) {
     return null;

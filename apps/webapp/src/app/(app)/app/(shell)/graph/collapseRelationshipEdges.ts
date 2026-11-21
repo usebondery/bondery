@@ -91,13 +91,11 @@ export function collapseRelationshipEdges(
     if (!group.relationshipTypes.includes(edge.relationshipType)) {
       group.relationshipTypes.push(edge.relationshipType);
     }
-    if (!group.directed) {
-      group.directed = directedEnds(
-        edge.relationshipType,
-        edge.sourcePersonId,
-        edge.targetPersonId,
-      );
-    }
+    group.directed ??= directedEnds(
+      edge.relationshipType,
+      edge.sourcePersonId,
+      edge.targetPersonId,
+    );
   }
 
   return [...groups.entries()].map(([key, group]) => ({

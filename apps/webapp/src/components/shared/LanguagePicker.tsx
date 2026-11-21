@@ -13,6 +13,7 @@ import { SearchableComboboxPickerOption } from "@/components/shared/SearchableCo
 import { SearchableComboboxPicker } from "@/components/shared/SearchableComboboxPicker";
 import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
 import { useLanguagesTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 type PickerLanguage = AppLanguageData | LanguageData;
 
@@ -90,7 +91,7 @@ export function LanguagePicker({
   };
 
   const selectedLanguage = languages.find((lang) => lang.value === language);
-  const searchPlaceholder = placeholder || t("LanguageSearch");
+  const searchPlaceholder = nonEmpty(placeholder) ?? t("LanguageSearch");
 
   return (
     <SearchableComboboxPicker
@@ -120,7 +121,7 @@ export function LanguagePicker({
           })
       }
       searchPlaceholder={searchPlaceholder}
-      targetFallback={language || searchPlaceholder}
+      targetFallback={nonEmpty(language) ?? searchPlaceholder}
       targetItem={
         selectedLanguage
           ? {

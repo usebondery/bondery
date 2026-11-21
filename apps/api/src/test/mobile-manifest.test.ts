@@ -24,7 +24,7 @@ function advertisedLatestVersion(): string {
   return latestProductionCalver(readRuntimeProductVersion(packageVersion), MIN_EXTENSION_VERSION);
 }
 
-describe("GET /mobile/manifest", () => {
+describe("gET /mobile/manifest", () => {
   it("returns latestVersion without auth", async () => {
     loadTestEnv();
     delete process.env.BONDERY_INFRA_VERSION;

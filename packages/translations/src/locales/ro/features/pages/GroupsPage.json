@@ -98,7 +98,9 @@
     "UpdateFailed": "Nu s-a putut actualiza grupul"
   },
   "EmojiEmptySearch": "Niciun emoji găsit",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Căutare emoji…",
+  "EmojiSelectPlaceholder": "Selectează emoji",
   "Empty": "Încă nu ai grupuri. Creează unul ca să-ți organizezi contactele.",
   "FallbackTitle": "Grup",
   "HeaderDescription": "Grupurile te ajută să clasifici persoanele ca să filtrezi și să acționezi mai repede.",

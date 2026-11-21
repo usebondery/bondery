@@ -1,4 +1,7 @@
 import { formatMetadataTitle } from "@bondery/helpers";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import type { Metadata } from "next";
 import { Contact, Team } from "@/components/landing";
 
@@ -6,17 +9,17 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/contact",
   },
-  description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
+  description: landing.Meta.ContactDescription,
   openGraph: {
-    description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
-    title: formatMetadataTitle("Contact"),
+    description: landing.Meta.ContactDescription,
+    title: formatMetadataTitle(landing.Meta.ContactTitle),
     type: "website",
     url: "/contact",
   },
-  title: "Contact",
+  title: landing.Meta.ContactTitle,
   twitter: {
-    description: "Contact the Bondery team for support, feedback, and partnership inquiries.",
-    title: formatMetadataTitle("Contact"),
+    description: landing.Meta.ContactDescription,
+    title: formatMetadataTitle(landing.Meta.ContactTitle),
   },
 };
 

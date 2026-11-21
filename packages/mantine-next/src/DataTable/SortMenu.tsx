@@ -2,7 +2,7 @@
 
 import { MenuDropdown, MenuTarget } from "@mantine/core";
 import { IconArrowsSort } from "@tabler/icons-react";
-import { useState } from "react";
+import { type ReactElement, useState } from "react";
 import type { SortMenuLabels, SortOption } from "#DataTable/types.js";
 import { DropdownOption, DropdownOptionMenu } from "#DropdownOption/index.js";
 import { ToolbarMenuButton } from "#ToolbarMenuButton/ToolbarMenuButton.js";
@@ -33,7 +33,7 @@ export function SortMenu<TSortKey extends string>({
   onSortChange,
   labels,
   width = 220,
-}: SortMenuProps<TSortKey>) {
+}: SortMenuProps<TSortKey>): ReactElement {
   const [opened, setOpened] = useState(false);
 
   return (

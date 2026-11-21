@@ -4,7 +4,7 @@ Ranked evolution for Bondery legal disclosure hygiene over 6–12 months. **Not 
 
 ## 1. Single source of truth for subprocessors (highest leverage)
 
-**Problem:** `Privacy.tsx` hardcoded array drifts from code (Supabase, Plunk stale today).
+**Problem:** The subprocessor table in `privacy.mdx` is written by hand and drifts from code (Supabase, Plunk stale today).
 
 **Target:** `packages/helpers/src/legal/subprocessors.ts` (or `packages/schemas`) — manifest shaped like `packages/helpers/src/env/manifest.ts`:
 
@@ -13,7 +13,7 @@ Ranked evolution for Bondery legal disclosure hygiene over 6–12 months. **Not 
 { name, useCase, dataCategories, region, privacyUrl, codeRefs: string[] }
 ```
 
-- `Privacy.tsx` renders table from manifest
+- `privacy.mdx` renders the table from the manifest through a `<SubprocessorsTable />` component added to `apps/website/src/components/legal/legal-mdx.tsx`
 - `bondery-legal/references/subprocessor-registry.md` becomes a thin pointer or generated doc
 - `pnpm run sync-legal` or extend `pnpm run env` pattern
 
@@ -29,7 +29,7 @@ Ranked evolution for Bondery legal disclosure hygiene over 6–12 months. **Not 
 
 ## 3. Terms of Service finalization (standing leadership item)
 
-**Severity:** Highest existing gap — live product with `Terms.tsx` stating it is not final contractual terms.
+**Severity:** Highest existing gap — live product with `terms.mdx` stating it is not final contractual terms.
 
 **Action:** Allocate counsel time; not an engineering skill deliverable.
 
@@ -81,19 +81,19 @@ Ranked evolution for Bondery legal disclosure hygiene over 6–12 months. **Not 
 
 ## Priority summary
 
-| Priority | Item | Type |
-|----------|------|------|
-| P0 | ToS finalization | Legal/counsel |
-| P1 | Subprocessor manifest + generated Privacy table | Engineering |
-| P1 | CI vendor drift check | Engineering |
-| P2 | Cookie consent banner | Product + legal review |
-| P2 | Self-host docs clarification | Docs |
-| P3 | Full account export | Product |
-| P3 | Retention jobs | Engineering |
-| P3 | DPA workflow | Ops + legal |
+| Priority | Item                                            | Type                   |
+| -------- | ----------------------------------------------- | ---------------------- |
+| P0       | ToS finalization                                | Legal/counsel          |
+| P1       | Subprocessor manifest + generated Privacy table | Engineering            |
+| P1       | CI vendor drift check                           | Engineering            |
+| P2       | Cookie consent banner                           | Product + legal review |
+| P2       | Self-host docs clarification                    | Docs                   |
+| P3       | Full account export                             | Product                |
+| P3       | Retention jobs                                  | Engineering            |
+| P3       | DPA workflow                                    | Ops + legal            |
 
 ## Roadmap checklist (for planners)
 
 - [ ] New work item references which roadmap item it advances
 - [ ] Claims inventory updated when P2/P3 items ship
-- [ ] Manifest (#1) preferred before large subprocessor table edits in Privacy.tsx
+- [ ] Manifest (#1) preferred before large subprocessor table edits in privacy.mdx

@@ -18,5 +18,5 @@ or {
   `document.write($_)`,
   `document.writeln($_)`
 } as $sink where {
-  register_diagnostic(span=$sink, message="Do not write a string into the DOM as HTML (innerHTML, outerHTML, insertAdjacentHTML, document.write). Render it as text, or sanitize it and add a biome-ignore with the reason.", severity="error")
+  register_diagnostic(span=$sink, message="Do not write a string into the DOM as HTML (innerHTML, outerHTML, insertAdjacentHTML, document.write). Render it as a React node or with textContent, or call sanitizeNotesHtml() first and add a biome-ignore with the reason.", severity="error")
 }

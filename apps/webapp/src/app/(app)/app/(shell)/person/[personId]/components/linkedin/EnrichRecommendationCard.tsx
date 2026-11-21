@@ -49,7 +49,7 @@ export function EnrichRecommendationCard({
 
   const handleResume = () => {
     if (pendingQueueStatus) {
-      resume(pendingQueueStatus);
+      void resume(pendingQueueStatus);
     }
   };
   const handleDiscard = async () => {

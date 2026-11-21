@@ -16,6 +16,7 @@ import {
 import type { ReactNode } from "react";
 import { SOCIAL_ACTION_ORDER, type SocialActionKey } from "@/lib/contacts/socialActionTooltips";
 import { useSocialActionTooltips } from "@/lib/i18n/useSocialActionTooltips";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { getPreferredEmail, getPreferredPhone } from "./utils/contacts-table-channel-helpers";
 
 interface SocialLink {
@@ -39,9 +40,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
       })(),
       href: (() => {
         const preferredEmail = getPreferredEmail(contact.emails);
-        if (preferredEmail) {
-          return `mailto:${preferredEmail.value}`;
-        }
+        return preferredEmail ? `mailto:${preferredEmail.value}` : undefined;
       })(),
       icon: <IconMail />,
       key: "email",
@@ -79,9 +78,9 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
       })(),
       href: (() => {
         const preferredPhone = getPreferredPhone(contact.phones);
-        if (preferredPhone) {
-          return `tel:${preferredPhone.prefix || ""}${preferredPhone.value}`;
-        }
+        return preferredPhone
+          ? `tel:${preferredPhone.prefix || ""}${preferredPhone.value}`
+          : undefined;
       })(),
       icon: <IconPhone />,
       key: "phone",
@@ -90,7 +89,7 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
     signal: {
       color: "indigo",
       disabled: !contact.signal,
-      href: contact.signal || undefined,
+      href: nonEmpty(contact.signal),
       icon: <IconBrandSignal />,
       key: "signal",
       label: getSocialActionLabel("signal"),
@@ -108,14 +107,14 @@ export function ContactSocialIcons({ contact }: { contact: Contact }) {
   const socials: SocialLink[] = SOCIAL_ACTION_ORDER.map((key) => socialByKey[key]);
 
   return (
-    <Group className="gap-1!" wrap="nowrap">
+    <Group gap={4} wrap="nowrap">
       {socials.map((social) => {
         if (!social || social.disabled) {
           return (
             <Space
-              h={"calc(1.75rem * var(--mantine-scale))"}
+              h="calc(1.75rem * var(--mantine-scale))"
               key={social.key}
-              w={"calc(1.75rem * var(--mantine-scale))"}
+              w="calc(1.75rem * var(--mantine-scale))"
             />
           );
         }

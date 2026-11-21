@@ -94,7 +94,9 @@
     "UpdateFailed": "Ryhmän päivitys epäonnistui"
   },
   "EmojiEmptySearch": "Emojeja ei löydy",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Hae emojeja…",
+  "EmojiSelectPlaceholder": "Valitse emoji",
   "Empty": "Ei vielä ryhmiä. Luo ryhmä järjestääksesi yhteystietoja.",
   "FallbackTitle": "Ryhmä",
   "HeaderDescription": "Ryhmät auttavat jakamaan ihmiset omiin ryhmiin nopeampaa suodatusta ja toimintoja varten.",

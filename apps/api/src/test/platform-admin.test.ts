@@ -18,7 +18,7 @@ loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
 
-async function createTestUser(role: string = "user"): Promise<{ id: string; email: string }> {
+async function createTestUser(role = "user"): Promise<{ id: string; email: string }> {
   const id = generateId();
   const email = `platform-admin-${id}@example.test`;
   await prisma.user.create({

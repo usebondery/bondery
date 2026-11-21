@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Öppna Bondery"
+    "OpenBondery": "Öppna Bondery",
+    "UnsupportedSiteMessage": "Besök någons profil på Instagram eller LinkedIn för att se fler åtgärder och funktioner i tillägget."
   },
   "LoggedOut": {
     "Description": "Koppla ditt konto för att spara kontakter från sociala medier.",
@@ -20,6 +21,12 @@
     "Title": "Uppdatering krävs"
   },
   "Welcome": {
-    "ConnectButton": "Koppla Bondery-konto"
+    "ConnectButton": "Koppla Bondery-konto",
+    "Description": "Anslut ditt Bondery-konto för att spara kontakter direkt från profiler på sociala medier.",
+    "SignInHint": "Du blir ombedd att logga in på ditt Bondery-konto och godkänna tillägget.",
+    "SuccessClose": "Du kan stänga den här fliken nu.",
+    "SuccessDescription": "Ditt Bondery-konto är nu anslutet. Besök valfri Instagram- eller LinkedIn-profil för att börja spara kontakter.",
+    "SuccessTitle": "Nu är allt klart!",
+    "Title": "Välkommen till Bondery"
   }
 }

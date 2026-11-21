@@ -85,7 +85,7 @@ export function usePersonContactFormState({
         setEmails([]);
       }
 
-      const whatsappParsed = parsePhoneNumber(contact.whatsapp || "");
+      const whatsappParsed = parsePhoneNumber(contact.whatsapp ?? "");
       if (whatsappParsed) {
         setWhatsappPrefix(whatsappParsed.dialCode);
         setEditedValues((prev) => ({
@@ -94,7 +94,7 @@ export function usePersonContactFormState({
         }));
       }
 
-      const signalParsed = parsePhoneNumber(contact.signal || "");
+      const signalParsed = parsePhoneNumber(contact.signal ?? "");
       if (signalParsed) {
         setSignalPrefix(signalParsed.dialCode);
         setEditedValues((prev) => ({
@@ -105,18 +105,18 @@ export function usePersonContactFormState({
 
       setEditedValues((prev) => ({
         ...prev,
-        facebook: contact.facebook || "",
+        facebook: contact.facebook ?? "",
         firstName: contact.firstName || "",
-        headline: contact.headline || "",
-        instagram: contact.instagram || "",
-        lastName: contact.lastName || "",
-        linkedin: contact.linkedin || "",
-        location: contact.location || "",
-        middleName: contact.middleName || "",
-        notes: contact.notes || "",
-        signal: contact.signal || "",
-        website: contact.website || "",
-        whatsapp: contact.whatsapp || "",
+        headline: contact.headline ?? "",
+        instagram: contact.instagram ?? "",
+        lastName: contact.lastName ?? "",
+        linkedin: contact.linkedin ?? "",
+        location: contact.location ?? "",
+        middleName: contact.middleName ?? "",
+        notes: contact.notes ?? "",
+        signal: contact.signal ?? "",
+        website: contact.website ?? "",
+        whatsapp: contact.whatsapp ?? "",
       }));
     }
   }, [

@@ -4,22 +4,22 @@ The config file is `llm-plugins/src/plugin.config.json`. The file has no version
 
 ## Shared fields
 
-| Key | Rule |
-|-----|------|
-| `name` | Package name. Use lowercase letters, numbers, and single hyphens. Stay at or under 64 characters. |
-| `displayName` | `Bondery`. OpenAI allows at most 30 characters. |
-| `description` | Shared long text. Stay at or under 4000 characters. |
-| `author` | Shared author object. Both manifests use `author.name`, `author.email` (`team@usebondery.com`), and `author.url`. |
-| `license` | `AGPL-3.0`. |
-| `keywords` | Shared list. |
-| `repository` | Shared repository URL. |
-| `links.homepage` | Shared URL. |
-| `links.documentation` | Shared URL. |
-| `links.support` | Shared URL. |
-| `links.privacy` | Shared URL. Do not paste policy text. |
-| `links.terms` | Shared URL. Do not paste policy text. |
-| `mcp.url` | `https://api.usebondery.com/mcp` |
-| `mcp.serverName` | `bondery` |
+| Key                   | Rule                                                                                                              |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `name`                | Package name. Use lowercase letters, numbers, and single hyphens. Stay at or under 64 characters.                 |
+| `displayName`         | `Bondery`. OpenAI allows at most 30 characters.                                                                   |
+| `description`         | Shared long text. Stay at or under 4000 characters.                                                               |
+| `author`              | Shared author object. Both manifests use `author.name`, `author.email` (`team@usebondery.com`), and `author.url`. |
+| `license`             | `AGPL-3.0`.                                                                                                       |
+| `keywords`            | Shared list.                                                                                                      |
+| `repository`          | Shared repository URL.                                                                                            |
+| `links.homepage`      | Shared URL.                                                                                                       |
+| `links.documentation` | Shared URL.                                                                                                       |
+| `links.support`       | Shared URL.                                                                                                       |
+| `links.privacy`       | Shared URL. Do not paste policy text.                                                                             |
+| `links.terms`         | Shared URL. Do not paste policy text.                                                                             |
+| `mcp.url`             | `https://api.usebondery.com/mcp`                                                                                  |
+| `mcp.serverName`      | `bondery`                                                                                                         |
 
 Policy wording stays in [bondery-legal](../../bondery-legal/SKILL.md).
 
@@ -27,7 +27,7 @@ Policy wording stays in [bondery-legal](../../bondery-legal/SKILL.md).
 
 Skills live in `llm-plugins/src/skills`.
 
-The builder replaces this block per host. `readme.md` uses the same block. Skill rules are in [guidelines.md](./guidelines.md).
+The builder replaces this block per host with `hosts.<host>.skillConnect`. The hosts are `claude`, `openai`, and `mcp`. `mcp` sets only `skillConnect`, for the skills the API serves over MCP. `readme.md` uses the same block. Skill rules are in [guidelines.md](./guidelines.md).
 
 ```html
 <!-- llm-plugin-connect -->
@@ -57,13 +57,13 @@ The builder writes `.claude-plugin/plugin.json` and `.mcp.json`.
 
 Set these listing keys on the Claude manifest:
 
-| Key | Source |
-|-----|--------|
-| `icon` | `./assets/icon.png` |
-| `documentationUrl` | `links.documentation` |
-| `supportUrl` | `links.support` |
-| `privacyPolicyUrl` | `links.privacy` |
-| `termsOfServiceUrl` | `links.terms` |
+| Key                 | Source                |
+| ------------------- | --------------------- |
+| `icon`              | `./assets/icon.png`   |
+| `documentationUrl`  | `links.documentation` |
+| `supportUrl`        | `links.support`       |
+| `privacyPolicyUrl`  | `links.privacy`       |
+| `termsOfServiceUrl` | `links.terms`         |
 
 Do not add a component key. Branch rules are in [claude.md](./claude.md).
 
@@ -77,18 +77,18 @@ The builder writes root `plugin.json` and root `mcp.json`.
 
 Put the listing under `extensions["com.openai"].interface`:
 
-| Key | Value |
-|-----|-------|
-| `displayName` | `Bondery` |
-| `shortDescription` | `People you mean to remember` (27 characters) |
-| `category` | `Productivity` |
-| `logo` | `./assets/icon.png` |
-| `logoDark` | `./assets/icon.png` |
-| `composerIcon` | `./assets/icon.png` |
-| `composerIconDark` | `./assets/icon.png` |
-| `brandColor` | `BRAND_PRIMARY_COLOR` from `packages/branding/src/colors.ts` |
-| `brandColorDark` | The same `BRAND_PRIMARY_COLOR` |
-| `onboardingSkill` | `./skills/onboarding/SKILL.md` |
+| Key                | Value                                                        |
+| ------------------ | ------------------------------------------------------------ |
+| `displayName`      | `Bondery`                                                    |
+| `shortDescription` | `People you mean to remember` (27 characters)                |
+| `category`         | `Productivity`                                               |
+| `logo`             | `./assets/icon.png`                                          |
+| `logoDark`         | `./assets/icon.png`                                          |
+| `composerIcon`     | `./assets/icon.png`                                          |
+| `composerIconDark` | `./assets/icon.png`                                          |
+| `brandColor`       | `BRAND_PRIMARY_COLOR` from `packages/branding/src/colors.ts` |
+| `brandColorDark`   | The same `BRAND_PRIMARY_COLOR`                               |
+| `onboardingSkill`  | `./skills/onboarding/SKILL.md`                               |
 
 `shortDescription` is not the shared `description`. The 30 character cap is in [openai-package.md](./openai-package.md).
 

@@ -35,12 +35,10 @@ async function main() {
   writeFileSync(outputPath, yamlContent, "utf-8");
 
   console.log(`OpenAPI spec written to ${outputPath}`);
-  // Exit before Better Auth OAuth resource seeding races against server.close()
-  // when DATABASE_URL points at a dummy host during spec generation.
-  process.exit(0);
+  await server.close();
 }
 
-main().catch((err) => {
-  console.error("Failed to generate OpenAPI spec:", err);
-  process.exit(1);
+main().catch((error) => {
+  console.error("Failed to generate OpenAPI spec:", error);
+  process.exitCode = 1;
 });

@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import type { ApiErrorType } from "@bondery/schemas/errors";
 
 const apiSrc = join(import.meta.dirname, "..", "src");
 const outPath = join(
@@ -208,7 +209,7 @@ function httpStatusFor(code: string, meta: CodeMeta): number {
   return meta.httpStatus;
 }
 
-function typeFor(status: number): string {
+function typeFor(status: number): ApiErrorType {
   if (status === 400) {
     return "invalid_request_error";
   }

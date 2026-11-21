@@ -230,11 +230,13 @@
     "deleting": "Видаляємо…",
     "duplicating": "Дублюємо…",
     "errorTitle": "Помилка",
+    "mobileRuntimeError": "Помилка виконання мобільного застосунку",
     "noResults": "Немає результатів",
     "removing": "Прибираємо…",
     "savedTitle": "Збережено",
     "saving": "Зберігаємо…",
     "sending": "Надсилаємо…",
-    "successTitle": "Готово"
+    "successTitle": "Готово",
+    "unknownError": "Невідома помилка"
   }
 }

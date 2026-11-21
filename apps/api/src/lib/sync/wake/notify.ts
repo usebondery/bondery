@@ -72,11 +72,12 @@ export async function initSyncWakeRuntime(
 }
 
 export async function shutdownSyncWakeRuntime(): Promise<void> {
-  if (!runtime) {
+  const current = runtime;
+  runtime = null;
+  if (!current) {
     return;
   }
-  await runtime.bus.stop();
-  runtime = null;
+  await current.bus.stop();
 }
 
 export function getSyncWakeRuntime(): SyncWakeRuntime | null {

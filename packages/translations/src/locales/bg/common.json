@@ -230,11 +230,13 @@
     "deleting": "Изтриване…",
     "duplicating": "Дублиране…",
     "errorTitle": "Грешка",
+    "mobileRuntimeError": "Грешка при работа на мобилното приложение",
     "noResults": "Няма резултати",
     "removing": "Премахване…",
     "savedTitle": "Запазено",
     "saving": "Запазване…",
     "sending": "Изпращане…",
-    "successTitle": "Готово"
+    "successTitle": "Готово",
+    "unknownError": "Неизвестна грешка"
   }
 }

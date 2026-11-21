@@ -20,6 +20,7 @@ import {
   requireEmailConfig,
   sendRenderedEmail,
 } from "../../lib/notifications/transporter.js";
+import { blankToUndefined } from "../../lib/platform/blank-text.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 import type { DomainContext } from "../_shared/context.js";
@@ -195,14 +196,15 @@ export async function shareContact(
     instagram: has("instagram") ? (enriched.instagram ?? undefined) : undefined,
     linkedin: has("linkedin") ? (enriched.linkedin ?? undefined) : undefined,
     location: has("location") ? (enriched.location ?? undefined) : undefined,
-    message: message || undefined,
+    message: blankToUndefined(message),
     notes: has("notes") ? (enriched.notes ?? undefined) : undefined,
     phones: phones?.map((phone) => ({
       prefix: phone.prefix || undefined,
       type: phone.type || undefined,
       value: phone.value,
     })),
-    recipientEmail: recipientEmails[0],
+    // The request schema requires at least one recipient, so the fallback is never used.
+    recipientEmail: recipientEmails.at(0) ?? "",
     senderAvatarUrl:
       resolveContactAvatarUrl(user.id, {
         avatarUpdatedAt: myselfContact?.avatarUpdatedAt,

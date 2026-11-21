@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { NOTIFY_DAY_BEFORE, NOTIFY_FEW_DAYS_BEFORE, NOTIFY_WEEK_BEFORE } from "#constants/index.js";
 import { nullableDateTimeSchema } from "../_shared/schema.js";
 import { contactPreviewSchema } from "../contact/schema.js";
 import { importantDateSchema, importantDateTypeSchema } from "../important-date/schema.js";
@@ -21,7 +22,11 @@ export const upcomingReminderSchema = z.object({
 export const reminderDigestItemSchema = z.object({
   date: z.string(),
   note: z.union([z.string(), z.null()]).optional(),
-  notifyDaysBefore: z.union([z.literal(1), z.literal(3), z.literal(7)]),
+  notifyDaysBefore: z.union([
+    z.literal(NOTIFY_DAY_BEFORE),
+    z.literal(NOTIFY_FEW_DAYS_BEFORE),
+    z.literal(NOTIFY_WEEK_BEFORE),
+  ]),
   notifyOn: z.string(),
   personAvatar: z.union([z.string(), z.null()]).optional(),
   personId: z.string(),

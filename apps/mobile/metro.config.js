@@ -13,16 +13,22 @@ const { withUniwindConfig } = require("uniwind/metro");
 // not fs.promises — so this patch fills that gap. require('fs') and
 // require('node:fs') return the same object, so this one patch covers both.
 const _origReadFile = fs.promises.readFile;
+const READ_FILE_MAX_ATTEMPTS = 10;
 fs.promises.readFile = async function emfileRetryReadFile(...args) {
-  for (let attempt = 0; attempt < 10; attempt++) {
+  for (let attempt = 0; attempt < READ_FILE_MAX_ATTEMPTS; attempt++) {
     try {
       return await _origReadFile.apply(fs.promises, args);
-    } catch (err) {
-      if ((err.code === "EMFILE" || err.code === "ENFILE") && attempt < 9) {
-        await new Promise((resolve) => setTimeout(resolve, 50 * (attempt + 1)));
+    } catch (error) {
+      if (
+        (error.code === "EMFILE" || error.code === "ENFILE") &&
+        attempt < READ_FILE_MAX_ATTEMPTS - 1
+      ) {
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50 * (attempt + 1));
+        });
         continue;
       }
-      throw err;
+      throw error;
     }
   }
 };

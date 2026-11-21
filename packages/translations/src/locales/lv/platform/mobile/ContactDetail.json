@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Pievienot piezīmes…",
   "DeleteContact": "Dzēst kontaktu",
   "DeleteContactConfirmTitle": "Vai dzēst {name}?",
   "DeleteFailed": "Neizdevās izdzēst kontaktu.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Rediģēt",
   "GroupsEditAccessibility": "Rediģēt grupas {name}",
   "GroupsLoadError": "Nevarēja ielādēt grupas",
+  "LastInteractionLabel": "Pēdējā mijiedarbība",
   "NoGroups": "Nevienā grupā",
   "ShareContact": "Kopīgot vCard...",
   "ShareContactViaEmail": "Sūtīt pa e-pastu...",

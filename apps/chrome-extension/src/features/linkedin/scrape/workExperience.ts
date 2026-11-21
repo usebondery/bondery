@@ -1,5 +1,5 @@
 /**
- * LinkedIn Work Experience types, date parsing, and SDUI DOM scraper re-export.
+ * LinkedIn Work Experience types and date parsing.
  */
 
 export interface WorkEntry {
@@ -149,8 +149,6 @@ export function parseDateRange(text: string): { startDate?: string; endDate?: st
     ...(endDate ? { endDate } : {}),
   };
 }
-
-export { extractSduiWorkHistory as extractWorkExperience } from "./sduiProfile";
 
 /** Drops Voyager-only fields (e.g. `companyUrn`) before POST to Fastify. */
 export function toApiWorkHistory(entries: WorkEntry[]): Omit<WorkEntry, "companyUrn">[] {

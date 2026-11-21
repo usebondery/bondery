@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Odpri Bondery"
+    "OpenBondery": "Odpri Bondery",
+    "UnsupportedSiteMessage": "Obišči nečigav profil na Instagramu ali LinkedInu, da vidiš več dejanj in zmožnosti razširitve."
   },
   "LoggedOut": {
     "Description": "Poveži svoj račun in shranjuj stike iz družabnih omrežij.",
@@ -20,6 +21,12 @@
     "Title": "Potrebna posodobitev"
   },
   "Welcome": {
-    "ConnectButton": "Poveži svoj račun Bondery"
+    "ConnectButton": "Poveži svoj račun Bondery",
+    "Description": "Poveži svoj račun Bondery, da shranjuješ stike neposredno iz profilov na družbenih omrežjih.",
+    "SignInHint": "Zahtevano bo, da se prijaviš v svoj račun Bondery in odobriš razširitev.",
+    "SuccessClose": "Zdaj lahko zapreš ta zavihek.",
+    "SuccessDescription": "Tvoj račun Bondery je zdaj povezan. Obišči poljuben profil na Instagramu ali LinkedInu in začni shranjevati stike.",
+    "SuccessTitle": "Vse je pripravljeno!",
+    "Title": "Dobrodošli v Bondery"
   }
 }

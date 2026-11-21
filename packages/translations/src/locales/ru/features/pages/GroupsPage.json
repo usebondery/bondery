@@ -102,7 +102,9 @@
     "UpdateFailed": "Не удалось обновить группу"
   },
   "EmojiEmptySearch": "Эмодзи не найдены",
+  "EmojiLabel": "Эмодзи",
   "EmojiSearchPlaceholder": "Искать эмодзи…",
+  "EmojiSelectPlaceholder": "Выбрать эмодзи",
   "Empty": "Групп пока нет. Создайте группу, чтобы организовать контакты.",
   "FallbackTitle": "Группа",
   "HeaderDescription": "Группы помогают делить людей на наборы для быстрой фильтрации и действий.",

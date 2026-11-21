@@ -33,7 +33,7 @@ export function useSheetForm<TSchema extends z.ZodTypeAny>({
   FormContext,
   FormOutput<TSchema>
 > {
-  const wasOpenRef = useRef(false);
+  const wasOpenRef = useRef<boolean>(false);
   const getDefaultValuesRef = useRef(getDefaultValues);
 
   useEffect(() => {

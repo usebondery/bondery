@@ -1,6 +1,9 @@
 "use client";
 
 import { PersonChip } from "@bondery/mantine-next";
+import visuals from "@bondery/translations/locales/en/platform/website/WebsiteLandingVisuals.json" with {
+  type: "json",
+};
 import { Box, Group, Paper, Stack, Text, Timeline } from "@mantine/core";
 import type { CSSProperties } from "react";
 import { Reveal } from "./Reveal";
@@ -36,31 +39,31 @@ type TimelineEntry = {
 
 const ENTRIES: readonly TimelineEntry[] = [
   {
-    date: "Oct 12, 2026",
-    note: "Talked about her upcoming launch",
+    date: visuals.Timeline.Coffee.Date,
+    note: visuals.Timeline.Coffee.Note,
     people: ["ada"],
-    title: "Coffee with Ada Lovelace",
+    title: visuals.Timeline.Coffee.Title,
     type: { color: "orange", emoji: "☕" }, // Coffee
   },
   {
-    date: "Sep 28, 2026",
-    note: "Offered an intro to a co-founder",
+    date: visuals.Timeline.Call.Date,
+    note: visuals.Timeline.Call.Note,
     people: ["alan"],
-    title: "Call with Alan Turing",
+    title: visuals.Timeline.Call.Title,
     type: { color: "blue", emoji: "📞" }, // Call
   },
   {
-    date: "Aug 30, 2026",
-    note: "Met Grace and Margaret",
+    date: visuals.Timeline.Party.Date,
+    note: visuals.Timeline.Party.Note,
     people: ["grace", "margaret"],
-    title: "Launch party",
+    title: visuals.Timeline.Party.Title,
     type: { color: "pink", emoji: "🎉" }, // Party/Social
   },
 ];
 
 function toPreview(id: SamplePersonId) {
   const { name, photo } = SAMPLE_PEOPLE[id];
-  const [firstName, ...rest] = name.split(" ");
+  const [firstName = "", ...rest] = name.split(" ");
 
   return { avatar: photo, firstName, id, lastName: rest.join(" ") };
 }

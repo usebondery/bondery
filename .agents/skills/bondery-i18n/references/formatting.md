@@ -4,17 +4,17 @@
 
 `supported-locales.json` `intl` is the tag for `Intl`, speech, and email dates.
 
-| Code | Tag | Note |
-|------|-----|------|
-| `en` | `en-US` | The flag is `gb`. Dates stay `en-US`. |
-| `pt` | `pt-PT` | Bare `pt` formats as Brazilian Portuguese. |
-| `es` | `es-ES` | Spain. Decimal comma. |
-| `uk` | `uk-UA` | The flag code is `ua`. |
-| `hu` | `hu-HU` | Dates are year-month-day. Do not hardcode day-month-year. |
-| `nb` | `nb-NO` | Bokmål. The code is `nb`. The flag is `no`. |
-| `sr` | `sr-Latn-RS` | Latin. Bare `sr` can format as Cyrillic. |
-| `nl` | `nl-NL` | Netherlands. Do not use `nl-BE`. |
-| `sv` | `sv-SE` | Sweden. Do not use `sv-FI`. |
+| Code | Tag          | Note                                                      |
+| ---- | ------------ | --------------------------------------------------------- |
+| `en` | `en-US`      | The flag is `gb`. Dates stay `en-US`.                     |
+| `pt` | `pt-PT`      | Bare `pt` formats as Brazilian Portuguese.                |
+| `es` | `es-ES`      | Spain. Decimal comma.                                     |
+| `uk` | `uk-UA`      | The flag code is `ua`.                                    |
+| `hu` | `hu-HU`      | Dates are year-month-day. Do not hardcode day-month-year. |
+| `nb` | `nb-NO`      | Bokmål. The code is `nb`. The flag is `no`.               |
+| `sr` | `sr-Latn-RS` | Latin. Bare `sr` can format as Cyrillic.                  |
+| `nl` | `nl-NL`      | Netherlands. Do not use `nl-BE`.                          |
+| `sv` | `sv-SE`      | Sweden. Do not use `sv-FI`.                               |
 
 `html lang` on the webapp stays the short code (`pt`). `Intl` calls use the region tag.
 

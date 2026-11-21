@@ -15,7 +15,7 @@ import { killDevPort } from "./kill-dev-port.mjs";
 
 const IS_WINDOWS = process.platform === "win32";
 
-const ports = [26630, 26631, 26632];
+const ports = [26630, 26632, 26642];
 
 /**
  * Command-line fragments for dev processes that hold no port.
@@ -122,4 +122,6 @@ if (!killWatchers()) {
   ok = false;
 }
 
-process.exit(ok ? 0 : 1);
+if (!ok) {
+  process.exitCode = 1;
+}

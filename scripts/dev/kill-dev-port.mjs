@@ -10,8 +10,8 @@ const IS_WINDOWS = process.platform === "win32";
 
 const DEFAULT_PATTERNS_BY_PORT = {
   26630: ["next dev --port 26630", "next-server \\(v"],
-  26631: ["--import tsx src/index.ts", "node --require .*/tsx/dist/preflight.cjs.*src/index.ts"],
   26632: ["next dev --port 26632", "next-server \\(v"],
+  26642: ["--import tsx src/index.ts", "node --require .*/tsx/dist/preflight.cjs.*src/index.ts"],
 };
 
 function run(command, { ignoreError = false } = {}) {
@@ -104,7 +104,11 @@ function killWindowsPort(port, log, quiet) {
  * @returns {boolean} true when the port is free afterward
  */
 export function killDevPort(port, { patterns = [], quiet = false } = {}) {
-  const log = quiet ? () => {} : console.log.bind(console);
+  const log = quiet
+    ? () => {
+        // Caller asked for no output.
+      }
+    : console.log.bind(console);
 
   if (IS_WINDOWS) {
     return killWindowsPort(port, log, quiet);
@@ -153,7 +157,8 @@ function main() {
   const ports = process.argv.slice(2).map(parsePortArg);
   if (ports.length === 0) {
     console.error("Usage: node scripts/dev/kill-dev-port.mjs <port> [port...]");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   let ok = true;
@@ -163,7 +168,7 @@ function main() {
     }
   }
 
-  process.exit(ok ? 0 : 1);
+  process.exitCode = ok ? 0 : 1;
 }
 
 if (process.argv[1]?.endsWith("kill-dev-port.mjs")) {

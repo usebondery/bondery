@@ -25,11 +25,11 @@ describe("assertOwnedPersonIds", () => {
   };
 
   it("allows an empty list", async () => {
-    await assertOwnedPersonIds(ctx, []);
+    await assert.doesNotReject(() => assertOwnedPersonIds(ctx, []));
   });
 
   it("allows ids that all belong to the caller", async () => {
-    await assertOwnedPersonIds(ctx, ["owned-1", "owned-2", "owned-1"]);
+    await assert.doesNotReject(() => assertOwnedPersonIds(ctx, ["owned-1", "owned-2", "owned-1"]));
   });
 
   it("404s when any id is foreign", async () => {

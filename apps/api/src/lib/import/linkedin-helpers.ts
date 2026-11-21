@@ -218,7 +218,7 @@ export async function uploadAllLinkedInLogos(
       if (
         entry.companyLinkedinId &&
         entry.companyLogoUrl &&
-        !tasks.some((t) => t.linkedInId === entry.companyLinkedinId)
+        tasks.every((t) => t.linkedInId !== entry.companyLinkedinId)
       ) {
         tasks.push({ imageUrl: entry.companyLogoUrl, linkedInId: entry.companyLinkedinId });
       }
@@ -230,7 +230,7 @@ export async function uploadAllLinkedInLogos(
       if (
         entry.schoolLinkedinId &&
         entry.schoolLogoUrl &&
-        !tasks.some((t) => t.linkedInId === entry.schoolLinkedinId)
+        tasks.every((t) => t.linkedInId !== entry.schoolLinkedinId)
       ) {
         tasks.push({ imageUrl: entry.schoolLogoUrl, linkedInId: entry.schoolLinkedinId });
       }

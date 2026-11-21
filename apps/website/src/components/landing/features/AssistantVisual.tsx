@@ -1,11 +1,21 @@
 "use client";
 
 import { LogoIcon } from "@bondery/mantine-next";
+import visuals from "@bondery/translations/locales/en/platform/website/WebsiteLandingVisuals.json" with {
+  type: "json",
+};
 import { Badge, Group, Indicator, Text, ThemeIcon } from "@mantine/core";
 import { IconCheck, IconCoffee } from "@tabler/icons-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useState } from "react";
-import { PersonAvatar, SAMPLE_PEOPLE, type SamplePersonId } from "./sample-people";
+import { formatText } from "@/lib/i18n/message";
+import {
+  PersonAvatar,
+  personBirthday,
+  personHeadline,
+  SAMPLE_PEOPLE,
+  type SamplePersonId,
+} from "./sample-people";
 import { Surface } from "./visuals";
 
 type Chip = { person: SamplePersonId; detail: string };
@@ -18,7 +28,7 @@ type Scenario = {
   logged?: LoggedInteraction;
 };
 
-const chip = (person: SamplePersonId, detail: string = SAMPLE_PEOPLE[person].headline): Chip => ({
+const chip = (person: SamplePersonId, detail: string = personHeadline(person)): Chip => ({
   detail,
   person,
 });
@@ -28,39 +38,48 @@ const chip = (person: SamplePersonId, detail: string = SAMPLE_PEOPLE[person].hea
  * and search by place or role. Everyone comes from the shared sample cast; headlines
  * are verbatim, while places and topics are invented and harmless.
  */
+const SCENARIO_COPY = visuals.Assistant.Scenarios;
+
 const SCENARIOS: readonly Scenario[] = [
   {
-    answer: "Two people in your network.",
+    answer: SCENARIO_COPY.UxDesign.Answer,
     chips: [chip("whitney"), chip("limor")],
-    question: "Who could help me with UX design?",
+    question: SCENARIO_COPY.UxDesign.Question,
   },
   {
-    answer: "Oct 12, over coffee in Boston. She recommended a book on leadership.",
-    question: "What did I last talk about with Grace?",
+    answer: SCENARIO_COPY.Grace.Answer,
+    question: SCENARIO_COPY.Grace.Question,
   },
   {
-    answer: "You met at a science talk in Houston.",
+    answer: SCENARIO_COPY.Katherine.Answer,
     chips: [chip("katherine")],
-    question: "Who is Katherine Johnson and where do I know her from?",
+    question: SCENARIO_COPY.Katherine.Question,
   },
   {
-    answer: `${SAMPLE_PEOPLE.alan.birthday}. He loves running. Try a pair of trail shoes.`,
-    question: "When is Alan's birthday? Any gift ideas?",
+    answer: formatText(SCENARIO_COPY.Alan.Answer, { birthday: personBirthday("alan") }),
+    question: SCENARIO_COPY.Alan.Question,
   },
   {
-    answer: "Logged to Ada's timeline.",
-    logged: { note: "Her upcoming launch", person: "ada", title: "Coffee with Ada" },
-    question: "I met Ada for coffee and talked about her upcoming launch.",
+    answer: SCENARIO_COPY.LogCoffee.Answer,
+    logged: {
+      note: SCENARIO_COPY.LogCoffee.LoggedNote,
+      person: "ada",
+      title: SCENARIO_COPY.LogCoffee.LoggedTitle,
+    },
+    question: SCENARIO_COPY.LogCoffee.Question,
   },
   {
-    answer: "Two people.",
-    chips: [chip("margaret", "Bangkok"), chip("hedy", "Chiang Mai")],
-    question: "I'm visiting Thailand. Who do I know there?",
+    answer: SCENARIO_COPY.Thailand.Answer,
+    chips: [
+      chip("margaret", SCENARIO_COPY.Thailand.Bangkok),
+      chip("hedy", SCENARIO_COPY.Thailand.ChiangMai),
+    ],
+    question: SCENARIO_COPY.Thailand.Question,
   },
   {
-    answer: "Two investors.",
+    answer: SCENARIO_COPY.Investors.Answer,
     chips: [chip("sheryl"), chip("marissa")],
-    question: "What VC investors do I know?",
+    question: SCENARIO_COPY.Investors.Question,
   },
 ];
 
@@ -85,11 +104,14 @@ export function AssistantVisual() {
   }, [reduceMotion]);
 
   const scenario = SCENARIOS[index];
+  if (!scenario) {
+    return null;
+  }
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-4">
       {/* Fixed height, so the tile does not jump between short and long answers. */}
-      <div className="min-h-[17rem] sm:min-h-[12rem]">
+      <div className="min-h-assistant sm:min-h-assistant-sm">
         <AnimatePresence mode="wait">
           <motion.div
             animate={{ opacity: 1 }}
@@ -101,7 +123,7 @@ export function AssistantVisual() {
           >
             <div className="flex justify-end">
               <div
-                className="max-w-[85%] rounded-2xl rounded-br-sm px-4 py-2.5"
+                className="max-w-chat rounded-2xl rounded-br-sm px-4 py-2.5"
                 style={{ backgroundColor: "var(--mantine-primary-color-filled)" }}
               >
                 <Text c="white" size="sm">
@@ -119,7 +141,11 @@ export function AssistantVisual() {
                 <ThemeIcon radius="xl" size={32} variant="light">
                   <LogoIcon size={16} />
                 </ThemeIcon>
-                <Surface className="min-w-0 flex-1 rounded-2xl! rounded-bl-sm!">
+                <Surface
+                  className="min-w-0 flex-1"
+                  radius={0}
+                  style={{ borderRadius: "1rem 1rem 0.25rem 1rem" }}
+                >
                   <Text size="sm">{scenario.answer}</Text>
                   {scenario.chips ? (
                     <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -141,64 +167,59 @@ export function AssistantVisual() {
 
 function PersonChip({ person, detail }: Chip) {
   return (
-    <Group
-      className="min-w-0 flex-1 rounded-lg border border-[var(--mantine-color-default-border)] px-2.5 py-2"
-      gap="xs"
-      wrap="nowrap"
-    >
-      <PersonAvatar person={person} size={30} />
-      <div className="min-w-0">
-        <Text fw={600} size="xs" truncate>
-          {SAMPLE_PEOPLE[person].name}
-        </Text>
-        <Text c="dimmed" size="xs" truncate>
-          {detail}
-        </Text>
-      </div>
-    </Group>
+    <div className="border-line min-w-0 flex-1 rounded-lg border px-2.5 py-2">
+      <Group gap="xs" wrap="nowrap">
+        <PersonAvatar person={person} size={30} />
+        <div className="min-w-0">
+          <Text fw={600} size="xs" truncate>
+            {SAMPLE_PEOPLE[person].name}
+          </Text>
+          <Text c="dimmed" size="xs" truncate>
+            {detail}
+          </Text>
+        </div>
+      </Group>
+    </div>
   );
 }
 
 function LoggedCard({ interaction }: { interaction: LoggedInteraction }) {
   return (
-    <Group
-      className="mt-3 rounded-lg border border-[var(--mantine-color-default-border)] px-2.5 py-2"
-      gap="xs"
-      justify="space-between"
-      wrap="nowrap"
-    >
-      <Group className="min-w-0" gap="xs" wrap="nowrap">
-        <Indicator
-          color="yellow"
-          inline
-          label={<IconCoffee size={9} stroke={2.5} />}
-          offset={3}
-          position="bottom-end"
-          size={14}
-          withBorder
+    <div className="border-line mt-3 rounded-lg border px-2.5 py-2">
+      <Group gap="xs" justify="space-between" wrap="nowrap">
+        <Group className="min-w-0" gap="xs" wrap="nowrap">
+          <Indicator
+            color="yellow"
+            inline
+            label={<IconCoffee size={9} stroke={2.5} />}
+            offset={3}
+            position="bottom-end"
+            size={14}
+            withBorder
+          >
+            <PersonAvatar person={interaction.person} size={30} />
+          </Indicator>
+          <div className="min-w-0">
+            <Text fw={600} size="xs" truncate>
+              {interaction.title}
+            </Text>
+            <Text c="dimmed" size="xs" truncate>
+              {interaction.note}
+            </Text>
+          </div>
+        </Group>
+        <Badge
+          className="shrink-0"
+          color="teal"
+          leftSection={<IconCheck size={12} />}
+          size="sm"
+          tt="none"
+          variant="light"
+          visibleFrom="sm"
         >
-          <PersonAvatar person={interaction.person} size={30} />
-        </Indicator>
-        <div className="min-w-0">
-          <Text fw={600} size="xs" truncate>
-            {interaction.title}
-          </Text>
-          <Text c="dimmed" size="xs" truncate>
-            {interaction.note}
-          </Text>
-        </div>
+          {visuals.Assistant.Logged}
+        </Badge>
       </Group>
-      <Badge
-        className="shrink-0"
-        color="teal"
-        leftSection={<IconCheck size={12} />}
-        size="sm"
-        tt="none"
-        variant="light"
-        visibleFrom="sm"
-      >
-        Logged
-      </Badge>
-    </Group>
+    </div>
   );
 }

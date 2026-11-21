@@ -42,22 +42,22 @@ metadata:
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| New list endpoint | [references/api-design.md](references/api-design.md) |
-| Client HTTP call | [references/api-usage.md](references/api-usage.md) |
-| Create/update response | [references/api-mutations.md](references/api-mutations.md) |
-| Error codes (server) | [references/api-errors.md](references/api-errors.md) |
-| Fastify route / OpenAPI | [references/fastify-routes.md](references/fastify-routes.md) |
-| HTTP status codes | [references/status-codes.md](references/status-codes.md) |
-| Doc sidebar order | [references/api-route-ordering.md](references/api-route-ordering.md) |
-| Mobile sync | [references/sync-architecture.md](references/sync-architecture.md) |
-| Health / liveness / readiness probes | [references/health-probes.md](references/health-probes.md) |
-| Rate limits | [references/rate-limits.md](references/rate-limits.md) |
-| Idempotency keys | [references/idempotency-keys.md](references/idempotency-keys.md) |
-| Versioning policy | [references/versioning.md](references/versioning.md) |
-| MCP tools / prompts | [references/mcp-tools.md](references/mcp-tools.md) |
-| Query param names (`search`, `next_action`, `redirect`, Expo `group_id`) | [references/url-query-params.md](references/url-query-params.md) |
+| Task                                                                     | Read                                                                 |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| New list endpoint                                                        | [references/api-design.md](references/api-design.md)                 |
+| Client HTTP call                                                         | [references/api-usage.md](references/api-usage.md)                   |
+| Create/update response                                                   | [references/api-mutations.md](references/api-mutations.md)           |
+| Error codes (server)                                                     | [references/api-errors.md](references/api-errors.md)                 |
+| Fastify route / OpenAPI                                                  | [references/fastify-routes.md](references/fastify-routes.md)         |
+| HTTP status codes                                                        | [references/status-codes.md](references/status-codes.md)             |
+| Doc sidebar order                                                        | [references/api-route-ordering.md](references/api-route-ordering.md) |
+| Mobile sync                                                              | [references/sync-architecture.md](references/sync-architecture.md)   |
+| Health / liveness / readiness probes                                     | [references/health-probes.md](references/health-probes.md)           |
+| Rate limits                                                              | [references/rate-limits.md](references/rate-limits.md)               |
+| Idempotency keys                                                         | [references/idempotency-keys.md](references/idempotency-keys.md)     |
+| Versioning policy                                                        | [references/versioning.md](references/versioning.md)                 |
+| MCP tools / prompts                                                      | [references/mcp-tools.md](references/mcp-tools.md)                   |
+| Query param names (`search`, `next_action`, `redirect`, Expo `group_id`) | [references/url-query-params.md](references/url-query-params.md)     |
 
 Full index: [references/README.md](references/README.md).
 

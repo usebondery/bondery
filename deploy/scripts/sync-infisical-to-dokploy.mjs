@@ -68,7 +68,8 @@ export function readDokployConfig(env, target) {
     for (const key of missing) {
       console.error(`  - ${key}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   return {
@@ -105,7 +106,8 @@ export function buildUploadPayload(env, target) {
     for (const key of missingRequired) {
       console.error(`  - ${key}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const uploadKeys = rows.map((row) => row.key);
@@ -114,7 +116,8 @@ export function buildUploadPayload(env, target) {
       console.error(
         `sync-infisical-to-dokploy: internal error — config key ${configKey} in upload payload`,
       );
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
   }
 
@@ -175,7 +178,8 @@ export async function fetchComposeEnv(config) {
   if (!response.ok) {
     const body = await response.text();
     console.error(`sync-infisical-to-dokploy: compose.one failed (${response.status}): ${body}`);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const data = await response.json();
@@ -205,7 +209,7 @@ export async function saveComposeEnv(config, envPayload) {
     console.error(
       `sync-infisical-to-dokploy: compose.saveEnvironment failed (${response.status}): ${body}`,
     );
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
@@ -249,30 +253,28 @@ export async function triggerDeployWebhook(webhookUrl, repository, pathSentinels
   if (!response.ok) {
     const body = await response.text();
     console.error(`sync-infisical-to-dokploy: deploy webhook failed (${response.status}): ${body}`);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
 function parseArgs(argv) {
-  const args = {
-    dryRun: false,
-    redeploy: false,
-    target: "",
-  };
+  let dryRun = false;
+  let redeploy = false;
+  let target = "";
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg === "--dry-run") {
-      args.dryRun = true;
+      dryRun = true;
     } else if (arg === "--redeploy") {
-      args.redeploy = true;
+      redeploy = true;
     } else if (arg === "--target") {
-      args.target = argv[i + 1] ?? "";
+      target = argv[i + 1] ?? "";
       i += 1;
     }
   }
 
-  return args;
+  return { dryRun, redeploy, target };
 }
 
 async function main() {
@@ -280,14 +282,16 @@ async function main() {
 
   if (args.target === "ops") {
     console.error("sync-infisical-to-dokploy: --target ops was renamed to --target website");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   if (!isDokploySyncTarget(args.target)) {
     console.error(
       "sync-infisical-to-dokploy: --target must be website, website-beta, plausible, services, or services-beta",
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const config = readDokployConfig(process.env, args.target);
@@ -313,7 +317,8 @@ async function main() {
       console.error(
         `sync-infisical-to-dokploy: --redeploy requires ${config.webhookKey} in Infisical`,
       );
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
 
     const repository =

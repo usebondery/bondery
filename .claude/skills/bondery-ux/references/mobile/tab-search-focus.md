@@ -18,10 +18,10 @@ Out of scope: stack routes without the tab bar (`group/[id]`, `settings/tags`, c
 
 ## Behavior
 
-| Gesture | Tab not selected | Tab already selected |
-|--------|------------------|----------------------|
-| Single tap | Switch to that tab | Focus registered in-page search; keyboard opens (Contacts only) |
-| Long press | Tab long-press event | Tab long-press event |
+| Gesture    | Tab not selected     | Tab already selected                                            |
+| ---------- | -------------------- | --------------------------------------------------------------- |
+| Single tap | Switch to that tab   | Focus registered in-page search; keyboard opens (Contacts only) |
+| Long press | Tab long-press event | Tab long-press event                                            |
 
 Tab bubbles use `ActionButton` with `onPress` / `onLongPress` (RNGH `Pressable`).
 

@@ -1,4 +1,6 @@
 #!/usr/bin/env node
 import { killDevPort } from "./kill-dev-port.mjs";
 
-process.exit(killDevPort(26632) ? 0 : 1);
+if (!killDevPort(26632)) {
+  process.exitCode = 1;
+}

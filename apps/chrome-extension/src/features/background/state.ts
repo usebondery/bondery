@@ -11,7 +11,7 @@ export type PendingEnrichState = {
 /** Mutable background service worker state shared across modules. */
 export const backgroundState = {
   indicatorUpdateTimer: null as ReturnType<typeof setTimeout> | null,
-  loginInProgress: false,
+  loginInProgress: false as boolean,
   pendingEnrich: null as PendingEnrichState | null,
   pendingPreview: null as PersonPreviewData | null,
 };

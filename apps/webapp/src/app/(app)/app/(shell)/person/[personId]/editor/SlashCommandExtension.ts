@@ -41,10 +41,12 @@ export const SlashCommandExtension = Extension.create({
   },
 
   addProseMirrorPlugins() {
+    // biome-ignore lint/nursery/noThisOutsideOfClass: TipTap binds `this` to the extension context in addProseMirrorPlugins
+    const { editor, options } = this;
     return [
       Suggestion({
-        editor: this.editor,
-        ...this.options.suggestion,
+        editor,
+        ...options.suggestion,
       }),
     ];
   },

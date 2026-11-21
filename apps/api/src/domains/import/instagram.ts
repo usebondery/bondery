@@ -154,13 +154,13 @@ export async function commitInstagramImport(
       select: { id: true },
     });
 
-    for (let index = 0; index < toInsert.length; index++) {
+    for (const [index, contact] of toInsert.entries()) {
       const inserted = insertedPeople[index];
       if (inserted) {
-        const handle = toInsert[index].instagramUsername.trim().toLowerCase();
+        const handle = contact.instagramUsername.trim().toLowerCase();
         handleToPersonId.set(handle, inserted.id);
 
-        const sources = (toInsert[index].sources ?? []) as InstagramImportSource[];
+        const sources = (contact.sources ?? []) as InstagramImportSource[];
         const groupKeys = toInstagramImportGroupKeys(sources);
         for (const groupKey of groupKeys) {
           const members = groupAssignments.get(groupKey) ?? new Set<string>();

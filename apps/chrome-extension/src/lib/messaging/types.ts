@@ -85,7 +85,7 @@ export interface AddPersonResult {
       }
     | {
         success: false;
-        error: string;
+        error?: string;
         requiresAuth?: boolean;
       };
   type: "ADD_PERSON_RESULT";

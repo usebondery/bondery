@@ -11,11 +11,11 @@ Opportunity framing, not apology. See [ux-writing.md](./ux-writing.md).
 
 ## Tiers
 
-| Tier | When | Pattern |
-|------|------|---------|
-| **Actionable** | Primary surfaces (People, Groups, Keep-in-touch, Chat, onboarding) | Icon or illustration + headline + **primary CTA** |
-| **Informational** | Modals, filters, secondary panels | Short dim text; CTA only if there is a clear action |
-| **Search no-match** | User typed a query | "No results for …" + suggest clearing search or different terms |
+| Tier                | When                                                               | Pattern                                                         |
+| ------------------- | ------------------------------------------------------------------ | --------------------------------------------------------------- |
+| **Actionable**      | Primary surfaces (People, Groups, Keep-in-touch, Chat, onboarding) | Icon or illustration + headline + **primary CTA**               |
+| **Informational**   | Modals, filters, secondary panels                                  | Short dim text; CTA only if there is a clear action             |
+| **Search no-match** | User typed a query                                                 | "No results for …" + suggest clearing search or different terms |
 
 **Rule:** If the user landed here expecting work (main nav destination), use **actionable**. If they narrowed a list themselves, **informational** is enough.
 
@@ -23,14 +23,14 @@ Opportunity framing, not apology. See [ux-writing.md](./ux-writing.md).
 
 ## Bondery examples
 
-| Surface | Good pattern |
-|---------|----------------|
-| **People — no contacts** | CTA to add person or import |
-| **People — no search matches** | Name the query; clear search affordance |
-| **Keep-in-touch — all caught up** | Positive framing + optional link to People |
-| **Chat — new session** | Suggested prompts to start |
-| **Groups — empty** | CTA to create group (avoid dim text only) |
-| **Import preview — no selectable rows** | Explain why (duplicates) + back/close |
+| Surface                                 | Good pattern                               |
+| --------------------------------------- | ------------------------------------------ |
+| **People — no contacts**                | CTA to add person or import                |
+| **People — no search matches**          | Name the query; clear search affordance    |
+| **Keep-in-touch — all caught up**       | Positive framing + optional link to People |
+| **Chat — new session**                  | Suggested prompts to start                 |
+| **Groups — empty**                      | CTA to create group (avoid dim text only)  |
+| **Import preview — no selectable rows** | Explain why (duplicates) + back/close      |
 
 ---
 

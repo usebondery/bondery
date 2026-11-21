@@ -30,15 +30,15 @@ metadata:
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Architecture & ADR | [references/architecture.md](references/architecture.md) |
-| Webhook events | [references/webhook-events.md](references/webhook-events.md) |
-| Stripe product model | [references/stripe-product-model.md](references/stripe-product-model.md) |
-| Access control | [references/access-control.md](references/access-control.md) |
-| Env vars / local Stripe CLI | [references/env-vars.md](references/env-vars.md) |
-| API routes | [references/api-routes.md](references/api-routes.md) |
-| Webapp checkout | [references/client-integration.md](references/client-integration.md) |
+| Task                                 | Read                                                                                                                                                 |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Architecture & ADR                   | [references/architecture.md](references/architecture.md)                                                                                             |
+| Webhook events                       | [references/webhook-events.md](references/webhook-events.md)                                                                                         |
+| Stripe product model                 | [references/stripe-product-model.md](references/stripe-product-model.md)                                                                             |
+| Access control                       | [references/access-control.md](references/access-control.md)                                                                                         |
+| Env vars / local Stripe CLI          | [references/env-vars.md](references/env-vars.md)                                                                                                     |
+| API routes                           | [references/api-routes.md](references/api-routes.md)                                                                                                 |
+| Webapp checkout                      | [references/client-integration.md](references/client-integration.md)                                                                                 |
 | Trial-ending email (billing trigger) | [references/trial-ending-email.md](references/trial-ending-email.md) — template/delivery → [bondery-emails](../bondery-emails/references/catalog.md) |
 
 ## Pre-ship checklist

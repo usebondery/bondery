@@ -27,7 +27,9 @@ describe("sessionColorSchemeManager", () => {
     assert.doesNotThrow(() => manager.set("dark"));
     assert.equal(manager.get("light"), "light");
     assert.doesNotThrow(() => {
-      manager.subscribe(() => {});
+      manager.subscribe(() => {
+        // no-op: this manager never notifies subscribers
+      });
       manager.unsubscribe();
       manager.clear();
     });

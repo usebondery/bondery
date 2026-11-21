@@ -39,16 +39,16 @@ metadata:
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| States, labels, field rules | [references/states-and-labels.md](references/states-and-labels.md) |
-| Card creation, copy templates | [references/card-lifecycle.md](references/card-lifecycle.md) |
-| Release-day state transitions | [references/release-day.md](references/release-day.md) |
+| Task                           | Read                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------ |
+| States, labels, field rules    | [references/states-and-labels.md](references/states-and-labels.md)       |
+| Card creation, copy templates  | [references/card-lifecycle.md](references/card-lifecycle.md)             |
+| Release-day state transitions  | [references/release-day.md](references/release-day.md)                   |
 | Public URL, footer, docs links | [references/public-url-and-links.md](references/public-url-and-links.md) |
-| What never goes on ROADMAP | [references/vs-internal-plane.md](references/vs-internal-plane.md) |
-| MCP tool usage | [`plane` skill](../plane/SKILL.md) |
-| Changelog cut | [`bondery-changelog`](../bondery-changelog/SKILL.md) |
-| Deploy / smoke gate | [`bondery-release`](../bondery-release/SKILL.md) |
+| What never goes on ROADMAP     | [references/vs-internal-plane.md](references/vs-internal-plane.md)       |
+| MCP tool usage                 | [`plane` skill](../plane/SKILL.md)                                       |
+| Changelog cut                  | [`bondery-changelog`](../bondery-changelog/SKILL.md)                     |
+| Deploy / smoke gate            | [`bondery-release`](../bondery-release/SKILL.md)                         |
 
 Full reference index: [references/README.md](references/README.md).
 

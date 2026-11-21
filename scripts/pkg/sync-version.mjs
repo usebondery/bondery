@@ -46,14 +46,16 @@ function readRootVersion() {
   const version = pkg.version?.trim();
   if (!version) {
     console.error("Invalid root package.json version: (missing)");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   try {
     parseCalver(version);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.error(message);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   return version;
 }
@@ -179,7 +181,8 @@ function main() {
       for (const path of changes) {
         console.error(`  - ${path}`);
       }
-      process.exit(1);
+      process.exitCode = 1;
+      return;
     }
     console.log(
       `All version targets match root ${version} (MIN ${minVersion}, native ${nativeVersion})`,

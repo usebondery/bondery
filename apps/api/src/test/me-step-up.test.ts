@@ -320,12 +320,11 @@ describe("me step-up", () => {
       url: "/me",
     });
     assert.ok(replay.statusCode === 403 || replay.statusCode === 401, replay.body);
-    if (replay.statusCode === 403) {
-      assert.equal(
-        (JSON.parse(replay.body) as { error?: { code?: string } }).error?.code,
-        "session_not_fresh",
-      );
-    }
+    const replayErrorCode =
+      replay.statusCode === 403
+        ? (JSON.parse(replay.body) as { error?: { code?: string } }).error?.code
+        : "session_not_fresh";
+    assert.equal(replayErrorCode, "session_not_fresh");
   });
 
   it("requires the step-up header on API key create and revoke", async () => {

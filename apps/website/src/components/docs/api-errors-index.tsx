@@ -1,7 +1,14 @@
 import { AnchorLink, hrefAssert } from "@bondery/mantine-next";
 import { API_ERROR_CODE_ENTRIES, API_ERROR_CODES, API_ERROR_TYPES } from "@bondery/schemas/errors";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Code, Stack, Text, Title } from "@mantine/core";
 import { WEBSITE_URL } from "@/lib/config";
+import { formatMessage } from "@/lib/i18n/message";
+
+/** Field name in the error body. It is not translated, because clients match it. */
+const DOC_URL_FIELD = "doc_url";
 
 export function ApiErrorsIndex() {
   const grouped = API_ERROR_TYPES.map((type) => ({
@@ -28,7 +35,10 @@ export function ApiErrorsIndex() {
         </Stack>
       ))}
       <Text c="dimmed" size="sm">
-        Base URL for <Code>doc_url</Code> fields: {WEBSITE_URL}
+        {formatMessage(docs.ApiErrors.BaseUrl, {
+          field: <Code>{DOC_URL_FIELD}</Code>,
+          url: WEBSITE_URL,
+        })}
       </Text>
     </Stack>
   );

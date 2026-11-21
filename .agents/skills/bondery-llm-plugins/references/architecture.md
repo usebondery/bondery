@@ -18,13 +18,21 @@ The root `package.json` supplies `version`. The config has no version key. The b
 
 ## Host-only output
 
-| Piece | Claude | OpenAI |
-|-------|--------|--------|
-| Folder | `llm-plugins/claude` | `llm-plugins/openai` |
-| Manifest | `.claude-plugin/plugin.json` | root `plugin.json` |
-| MCP file | `.mcp.json` | root `mcp.json` |
-| MCP type | `http` | `streamable-http` |
-| Publish | fast-forward of `claude-plugin` | human ZIP upload |
+| Piece    | Claude                          | OpenAI               |
+| -------- | ------------------------------- | -------------------- |
+| Folder   | `llm-plugins/claude`            | `llm-plugins/openai` |
+| Manifest | `.claude-plugin/plugin.json`    | root `plugin.json`   |
+| MCP file | `.mcp.json`                     | root `mcp.json`      |
+| MCP type | `http`                          | `streamable-http`    |
+| Publish  | fast-forward of `claude-plugin` | human ZIP upload     |
+
+## MCP skills
+
+The builder also writes `apps/api/src/routes/mcp/skills.generated.ts`. It holds each skill body, keyed by `<skill>/SKILL.md`, with the connect block replaced by `hosts.mcp.skillConnect`. The API bundles the module, so it reads no files at runtime.
+
+`apps/api/src/routes/mcp/skills.ts` loads the module into one SDK skills catalog (SEP-2640) per process, under the prefix `bondery`. Each per-request `McpServer` attaches that catalog. Clients read `skill://bondery/<skill>/SKILL.md`.
+
+Any MCP client can read these skills, so they follow the OpenAI rule: no word Claude. The catalog is strict, so an invalid skill fails `skills.test.ts` and API startup.
 
 Host field rules are in [claude.md](./claude.md) and [source-config.md](./source-config.md). OpenAI limits are in [openai-package.md](./openai-package.md).
 
@@ -32,7 +40,7 @@ Host field rules are in [claude.md](./claude.md) and [source-config.md](./source
 
 1. Edit `llm-plugins/src`.
 2. Run `pnpm run build:llm-plugins`.
-3. Commit `llm-plugins/claude` and `llm-plugins/openai` with the source.
+3. Commit `llm-plugins/claude`, `llm-plugins/openai`, and `apps/api/src/routes/mcp/skills.generated.ts` with the source.
 4. Run `pnpm run check:llm-plugins`. The check fails on drift.
 
 `pnpm run check:claude-plugin` runs the same check.

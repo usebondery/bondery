@@ -8,15 +8,22 @@ export interface InformationNotificationTemplateProps {
   title: string;
 }
 
-/**
- * Builds a consistent information notification payload.
- */
+type InformationNotificationPayload = {
+  color: "blue";
+  icon: ReactNode;
+  loading: false;
+  message: string;
+  radius: string | number;
+  title: string;
+};
+
+/** Builds a consistent information notification payload. */
 export function informationNotificationTemplate({
   title,
   description,
   radius = "xl",
   icon = createElement(IconInfoCircle, { size: 18 }),
-}: InformationNotificationTemplateProps) {
+}: InformationNotificationTemplateProps): InformationNotificationPayload {
   return {
     color: "blue",
     icon,

@@ -15,6 +15,14 @@ import { createCheck } from "./check-report.mjs";
 
 const check = createCheck("check-llm-plugins");
 
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const EXPECTED_MCP_URL = "https://api.usebondery.com/mcp";
 const EXPECTED_LICENSE = "AGPL-3.0";
@@ -79,14 +87,18 @@ function readJson(filePath, label) {
   try {
     source = readFileSync(filePath, "utf8");
   } catch {
-    check.add(`${label} is missing.`);
+    check.add(
+      `${label} is missing. Restore it, or run \`pnpm run build:llm-plugins\` to generate it.`,
+    );
     return null;
   }
   try {
-    return JSON.parse(source);
+    return asUnknown(JSON.parse(source));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    check.add(`${label} is not valid JSON: ${message}`);
+    check.add(
+      `${label} is not valid JSON: ${message}. Fix the syntax in ${label} so \`JSON.parse\` accepts it.`,
+    );
     return null;
   }
 }
@@ -146,17 +158,23 @@ function checkBundleFile(label, field, value, dir) {
   const abs = resolve(dir, value.slice(2));
   const prefix = `${resolve(dir)}${sep}`;
   if (!abs.startsWith(prefix)) {
-    check.add(`${label}: ${field} leaves the plugin folder.`);
+    check.add(
+      `${label}: ${field} leaves the plugin folder. Point ${field} at a file inside the plugin root.`,
+    );
     return;
   }
   let info;
   try {
     info = lstatSync(abs);
   } catch {
-    check.add(`${label}: ${field} ${value} does not exist in the bundle.`);
+    check.add(
+      `${label}: ${field} ${value} does not exist in the bundle. Add the file to the plugin, or correct the path in ${label}.`,
+    );
   }
   if (info && !info.isFile()) {
-    check.add(`${label}: ${field} ${value} is not a regular file.`);
+    check.add(
+      `${label}: ${field} ${value} is not a regular file. Replace the directory or symlink with a regular file.`,
+    );
   }
 }
 
@@ -170,7 +188,9 @@ function checkHttpsFields(label, record, fields) {
     try {
       parsed = new URL(String(value));
     } catch {
-      check.add(`${label}: ${field} is not a URL (got ${JSON.stringify(value)})`);
+      check.add(
+        `${label}: ${field} is not a URL (got ${JSON.stringify(value)}). Set ${field} to a full https:// URL.`,
+      );
       continue;
     }
     if (parsed.protocol !== "https:") {
@@ -238,16 +258,20 @@ function checkLicense(host) {
     return;
   }
   if (info.isSymbolicLink()) {
-    check.add(`${host.rel}/LICENSE is a symlink. Use a regular file.`);
+    check.add(
+      `${host.rel}/LICENSE is a symlink. Replace it with a regular file, because installers receive only this folder.`,
+    );
     return;
   }
   if (!info.isFile()) {
-    check.add(`${host.rel}/LICENSE is not a regular file.`);
+    check.add(`${host.rel}/LICENSE is not a regular file. Write the AGPL-3.0 text into that file.`);
     return;
   }
   const source = readFileSync(licensePath, "utf8");
   if (!source.startsWith("GNU AFFERO GENERAL PUBLIC LICENSE")) {
-    check.add(`${host.rel}/LICENSE does not hold the AGPL-3.0 text.`);
+    check.add(
+      `${host.rel}/LICENSE does not hold the AGPL-3.0 text. Copy the repository LICENSE into that file.`,
+    );
   }
 }
 
@@ -333,12 +357,18 @@ function checkSkillFrontmatter(name, skillFile) {
   const declaredName = readFrontmatterField(source, "name");
   const description = readFrontmatterField(source, "description");
   if (!declaredName) {
-    check.add(`${rel}: frontmatter is missing "name".`);
+    check.add(
+      `${rel}: frontmatter has no \`name\`. Add \`name: ${name}\` to the frontmatter so it matches the folder.`,
+    );
   } else if (declaredName !== name) {
-    check.add(`${rel}: name "${declaredName}" does not match folder "${name}".`);
+    check.add(
+      `${rel}: name "${declaredName}" does not match folder "${name}". Set \`name: ${name}\` in the frontmatter.`,
+    );
   }
   if (!description) {
-    check.add(`${rel}: frontmatter is missing "description".`);
+    check.add(
+      `${rel}: frontmatter has no \`description\`. Add a description that says when an agent should use this skill.`,
+    );
   }
 }
 
@@ -348,7 +378,9 @@ function walk(dir, pluginRoot, acc = []) {
     const info = lstatSync(full);
     if (info.isSymbolicLink()) {
       if (!isInsidePlugin(full, pluginRoot)) {
-        check.add(`${repoPath(full)} is a symlink that leaves the plugin folder.`);
+        check.add(
+          `${repoPath(full)} is a symlink that leaves the plugin folder. Replace it with the file it points to, inside the plugin.`,
+        );
       }
       acc.push(full);
       continue;
@@ -374,7 +406,7 @@ function checkTree(host) {
   try {
     skillEntries = readdirSync(skillsDir);
   } catch {
-    check.add(`${host.rel}/skills is missing.`);
+    check.add(`${host.rel}/skills is missing. Add it with one folder per skill, each a SKILL.md.`);
   }
   for (const entry of skillEntries) {
     if (lstatSync(join(skillsDir, entry)).isDirectory()) {
@@ -382,17 +414,17 @@ function checkTree(host) {
     }
   }
   if (skillEntries.length > 0 && skillDirs.size === 0) {
-    check.add(`${host.rel}/skills holds no skill folders.`);
+    check.add(`${host.rel}/skills holds no folders. Add one folder per skill, each a SKILL.md.`);
   }
   for (const name of skillDirs) {
     const skillFile = join(skillsDir, name, "SKILL.md");
     try {
       if (!lstatSync(skillFile).isFile()) {
-        check.add(`${host.rel}/skills/${name}/SKILL.md is not a regular file.`);
+        check.add(`${host.rel}/skills/${name}/SKILL.md is not a file. Replace it with a file.`);
         continue;
       }
     } catch {
-      check.add(`${host.rel}/skills/${name} has no SKILL.md.`);
+      check.add(`${host.rel}/skills/${name} has no SKILL.md. Add it to that folder.`);
       continue;
     }
     checkSkillFrontmatter(name, skillFile);
@@ -404,36 +436,40 @@ function checkTree(host) {
     const base = segments.at(-1) ?? "";
     for (const segment of segments) {
       if (FORBIDDEN_NAMES.has(segment)) {
-        check.add(`${rel} must not be inside the plugin bundle (${segment}).`);
+        check.add(`${rel} is inside the bundle (${segment}). Remove it from the plugin source.`);
       }
       if (FORBIDDEN_ENV_FILE.test(segment)) {
-        check.add(`${rel} is an env file and must not be inside the plugin bundle.`);
+        check.add(`${rel} is an env file in the bundle. Remove it from the plugin source.`);
       }
     }
     if (base.endsWith(".pem") || base.endsWith(".key")) {
-      check.add(`${rel} looks like a key file and must not be inside the plugin bundle.`);
+      check.add(`${rel} looks like a key file in the bundle. Remove it from the plugin source.`);
     }
     if (/\.[cm]?[jt]s$/.test(base)) {
-      check.add(`${rel} is a script. The plugin ships content only.`);
+      check.add(`${rel} is a script. The plugin ships content only, so remove it.`);
     }
     const source = readFileSync(file, "utf8");
     if (PRIVATE_KEY_BLOCK.test(source)) {
-      check.add(`${rel} contains a private-key block.`);
+      check.add(`${rel} contains a private-key block. Remove the key.`);
     }
     if (BEARER_TOKEN.test(source)) {
-      check.add(`${rel} contains a bearer token.`);
+      check.add(`${rel} contains a bearer token. Remove the token.`);
     }
     if (source.includes("../")) {
       for (const match of source.matchAll(/["'(]\.\.\/[^"')\s]*/g)) {
-        check.add(`${rel} references a path outside the folder: ${match[0].slice(1)}`);
+        check.add(
+          `${rel} references a path outside the folder: ${match[0].slice(1)}. Point it inside the plugin.`,
+        );
         break;
       }
     }
     if (isProse(base) && source.includes("llm-plugin-connect")) {
-      check.add(`${rel} still contains a connect marker.`);
+      check.add(
+        `${rel} still has a connect marker. Run \`pnpm run build:llm-plugins\` to regenerate it.`,
+      );
     }
     if (host.id === "openai" && isProse(base) && source.includes("Claude")) {
-      check.add(`${rel} contains "Claude".`);
+      check.add(`${rel} contains "Claude". Say "the assistant" instead, to avoid naming a rival.`);
     }
   }
 }
@@ -442,11 +478,13 @@ function runBuilderCheck() {
   const builder = join(ROOT, "scripts/pkg/build-llm-plugins.mjs");
   const result = spawnSync(process.execPath, [builder, "--check"], { cwd: ROOT, stdio: "inherit" });
   if (result.error) {
-    check.add(result.error.message);
+    check.add(
+      `Could not run \`scripts/pkg/build-llm-plugins.mjs --check\`: ${result.error.message}`,
+    );
     check.ok();
   }
   if (result.status !== 0) {
-    process.exit(result.status ?? 1);
+    process.exitCode = result.status ?? 1;
   }
 }
 
@@ -462,7 +500,9 @@ for (const host of HOSTS) {
     checkTree(host);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    check.add(`${host.rel} could not be read: ${message}`);
+    check.add(
+      `${host.rel} could not be read: ${message}. Fix the filesystem problem, then run \`pnpm run check:llm-plugins\` again.`,
+    );
   }
 }
 check.ok();

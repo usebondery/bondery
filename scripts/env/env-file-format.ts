@@ -48,14 +48,16 @@ export function sortEnvRows<T extends { group: string; key: string }>(rows: T[])
   });
 }
 
+export type EnvFileVar = {
+  commented?: boolean;
+  description?: string;
+  group: string;
+  key: string;
+  value: string;
+};
+
 export function formatEnvFile(
-  vars: Array<{
-    commented?: boolean;
-    description?: string;
-    group: string;
-    key: string;
-    value: string;
-  }>,
+  vars: EnvFileVar[],
   options?: {
     commented?: boolean;
     footer?: string;

@@ -4,7 +4,7 @@
 
 Bondery does **not** use `/api/v1` or `/v1` URL prefixes. Fastify routes mount at resource roots:
 
-```
+```text
 /contacts
 /groups
 /me/settings
@@ -45,9 +45,9 @@ See breaking-change rules in [api-design.md](./api-design.md).
 
 Some clients use **header-based** protocol versioning:
 
-| Client | Mechanism | On mismatch |
-|--------|-----------|-------------|
-| Mobile sync | `X-Bondery-Sync-Protocol`, SQLite schema headers | 426 Upgrade Required |
+| Client           | Mechanism                                                                                        | On mismatch          |
+| ---------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| Mobile sync      | `X-Bondery-Sync-Protocol`, SQLite schema headers                                                 | 426 Upgrade Required |
 | Chrome extension | `X-Bondery-Extension-Version` below `MIN_EXTENSION_VERSION` (previous production CalVer, 3-part) | 426 Upgrade Required |
 
 `GET /extension/manifest` returns `minVersion` (426 floor) and `latestVersion` (current production CalVer for a non-blocking update nudge). While the API package is an RC, `latestVersion` is the previous production tag — never the RC string.

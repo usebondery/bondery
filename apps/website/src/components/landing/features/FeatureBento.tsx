@@ -1,3 +1,6 @@
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import {
   IconAffiliate,
   IconBellRinging,
@@ -33,52 +36,52 @@ const SPAN_CLASS: Record<BentoTile["span"], string> = {
  */
 const TILES: BentoTile[] = [
   {
-    description: "Every source merges into one list, duplicates included.",
+    description: landing.Bento.Sources.Description,
     icon: IconUserPlus,
     id: "sources",
     span: "wide",
-    title: "All the people you met in one place",
+    title: landing.Bento.Sources.Title,
     visual: <SourcesVisual />,
   },
   {
-    description: "Notes and history on every person.",
+    description: landing.Bento.Timeline.Description,
     icon: IconTimelineEvent,
     id: "timeline",
     span: "narrow",
-    title: "Remember every conversation",
+    title: landing.Bento.Timeline.Title,
     visual: <TimelineVisual />,
   },
   {
-    description: "Birthdays and anniversaries reach your inbox ahead of time.",
+    description: landing.Bento.KeepInTouch.Description,
     icon: IconBellRinging,
     id: "keep-in-touch",
     span: "narrow",
-    title: "Email reminders for key dates",
+    title: landing.Bento.KeepInTouch.Title,
     visual: <ReminderEmailVisual />,
   },
   {
     aside: <AiClientLinks />,
-    description: "Give Claude or any MCP client your contact book.",
+    description: landing.Bento.Assistant.Description,
     icon: IconMessageChatbot,
     id: "assistant",
     span: "wide",
-    title: "Your network, in your AI",
+    title: landing.Bento.Assistant.Title,
     visual: <AssistantVisual />,
   },
   {
-    description: "Search your network. See who is in a city before you go.",
+    description: landing.Bento.Network.Description,
     icon: IconAffiliate,
     id: "network",
     span: "half",
-    title: "Find anyone",
+    title: landing.Bento.Network.Title,
     visual: <GlobeVisual />,
   },
   {
-    description: "Profiles refresh from the sources you saved them from.",
+    description: landing.Bento.Sync.Description,
     icon: IconRefresh,
     id: "sync",
     span: "half",
-    title: "Always up to date",
+    title: landing.Bento.Sync.Title,
     visual: <SyncVisual />,
   },
 ];

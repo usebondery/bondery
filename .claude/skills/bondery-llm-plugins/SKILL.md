@@ -1,9 +1,10 @@
 ---
 name: bondery-llm-plugins
 description: >
-  Builds the Claude plugin and the OpenAI plugin from llm-plugins/src.
-  Use when editing llm-plugins, plugin.config.json, the Claude plugin,
-  the OpenAI plugin, the ChatGPT plugin, or a directory ZIP.
+  Builds the Claude plugin, the OpenAI plugin, and the skills the MCP server
+  serves, from llm-plugins/src. Use when editing llm-plugins, plugin.config.json,
+  a plugin skill, the Claude plugin, the OpenAI plugin, the ChatGPT plugin,
+  MCP skills, skills.generated.ts, or a directory ZIP.
 metadata:
   version: "1.0.0"
   namespace: bondery
@@ -11,7 +12,7 @@ metadata:
 
 # Bondery LLM plugins
 
-`llm-plugins/src` is the only edited source. The builder writes two committed packages, `llm-plugins/claude` and `llm-plugins/openai`. Decision record: [ADR 0016](../../../docs/adr/0016-llm-plugin-source.mdx).
+`llm-plugins/src` is the only edited source. The builder writes two committed packages, `llm-plugins/claude` and `llm-plugins/openai`, and one committed module, `apps/api/src/routes/mcp/skills.generated.ts`. The API serves the skills in that module over MCP. Decision record: [ADR 0016](../../../docs/adr/0016-llm-plugin-source.mdx).
 
 ## When to use
 
@@ -28,7 +29,7 @@ metadata:
 
 ## Non-negotiables
 
-1. Edit `llm-plugins/src` only. Commit `llm-plugins/claude` and `llm-plugins/openai`. Do not edit the generated folders.
+1. Edit `llm-plugins/src` only. Commit `llm-plugins/claude`, `llm-plugins/openai`, and `apps/api/src/routes/mcp/skills.generated.ts`. Do not edit the generated output.
 2. After a source edit, run `pnpm run build:llm-plugins`. `pnpm run check:llm-plugins` fails on drift.
 3. The root `package.json` supplies the version. Do not add a version key to `llm-plugins/src/plugin.config.json`.
 4. Bondery MCP auth is CIMD only. `apps/api/src/lib/auth/create-bondery-auth.ts` sets `allowDynamicClientRegistration` to false. When CIMD fails, OpenAI may use DCR. When connect fails with client registration disabled, that setting is the cause. Token rules stay in [bondery-security](../bondery-security/SKILL.md).
@@ -51,27 +52,27 @@ Do not implement these items in the package change.
 
 Read the file in the Read column when the task matches.
 
-| Task | Read |
-|------|------|
-| Source tree, host output, builder, or drift check | [references/architecture.md](references/architecture.md) |
-| `plugin.config.json` or a manifest field | [references/source-config.md](references/source-config.md) |
-| Claude output or the `claude-plugin` branch | [references/claude.md](references/claude.md) |
-| OpenAI package limits or ZIP contents | [references/openai-package.md](references/openai-package.md) |
-| Human OpenAI portal submit | [references/openai-submission.md](references/openai-submission.md) |
-| Skill text, connect copy, or tool hints | [references/guidelines.md](references/guidelines.md) |
-| Index of every reference | [references/README.md](references/README.md) |
-| Privacy, Terms, or a policy claim | [bondery-legal](../bondery-legal/SKILL.md) |
-| OAuth, secrets, or tenant isolation | [bondery-security](../bondery-security/SKILL.md) |
-| Tags, deploy pins, or the release gate | [bondery-release](../bondery-release/SKILL.md) |
-| A user-visible changelog entry | [bondery-changelog](../bondery-changelog/SKILL.md) |
-| Local MCP Inspector | [docs/contributing/mcp.mdx](../../../docs/contributing/mcp.mdx) |
-| Why one source writes two packages | [ADR 0016](../../../docs/adr/0016-llm-plugin-source.mdx) |
+| Task                                              | Read                                                               |
+| ------------------------------------------------- | ------------------------------------------------------------------ |
+| Source tree, host output, builder, or drift check | [references/architecture.md](references/architecture.md)           |
+| `plugin.config.json` or a manifest field          | [references/source-config.md](references/source-config.md)         |
+| Claude output or the `claude-plugin` branch       | [references/claude.md](references/claude.md)                       |
+| OpenAI package limits or ZIP contents             | [references/openai-package.md](references/openai-package.md)       |
+| Human OpenAI portal submit                        | [references/openai-submission.md](references/openai-submission.md) |
+| Skill text, connect copy, or tool hints           | [references/guidelines.md](references/guidelines.md)               |
+| Index of every reference                          | [references/README.md](references/README.md)                       |
+| Privacy, Terms, or a policy claim                 | [bondery-legal](../bondery-legal/SKILL.md)                         |
+| OAuth, secrets, or tenant isolation               | [bondery-security](../bondery-security/SKILL.md)                   |
+| Tags, deploy pins, or the release gate            | [bondery-release](../bondery-release/SKILL.md)                     |
+| A user-visible changelog entry                    | [bondery-changelog](../bondery-changelog/SKILL.md)                 |
+| Local MCP Inspector                               | [docs/contributing/mcp.mdx](../../../docs/contributing/mcp.mdx)    |
+| Why one source writes two packages                | [ADR 0016](../../../docs/adr/0016-llm-plugin-source.mdx)           |
 
 ## Pre-ship checklist
 
 - [ ] Edits are in `llm-plugins/src` only
 - [ ] `pnpm run build:llm-plugins` has run
-- [ ] `llm-plugins/claude` and `llm-plugins/openai` are committed with the source
+- [ ] `llm-plugins/claude`, `llm-plugins/openai`, and `skills.generated.ts` are committed with the source
 - [ ] The builder is the only writer of the generated folders
 - [ ] `pnpm run check:llm-plugins` passes
 - [ ] `plugin.config.json` has no version key

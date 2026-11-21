@@ -44,11 +44,11 @@ function resolveMergedImportantDates(
   const importantDatesEqual =
     JSON.stringify(toComparable(leftDates)) === JSON.stringify(toComparable(rightDates));
 
-  if (!leftDates.length && rightDates.length) {
+  if (leftDates.length === 0 && rightDates.length > 0) {
     return rightDates;
   }
 
-  if (leftDates.length && rightDates.length && !importantDatesEqual) {
+  if (leftDates.length > 0 && rightDates.length > 0 && !importantDatesEqual) {
     const choice = resolveConflictChoice(conflictResolutions, "importantDates");
     return choice === "right" ? rightDates : leftDates;
   }

@@ -1,5 +1,5 @@
 import { Card } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import Link, { hrefAssert } from "#nextjs/NextLink.js";
 
 export interface PressableCardProps {
@@ -23,7 +23,7 @@ export function PressableCard({
   external = false,
   grow = false,
   href,
-}: PressableCardProps) {
+}: PressableCardProps): ReactElement {
   const className = grow
     ? "pressableCard pressableCardGrow button-scale-effect"
     : "pressableCard button-scale-effect";

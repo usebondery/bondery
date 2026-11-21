@@ -62,7 +62,7 @@ const EXCLUDED_PATHS = [
 ];
 
 export function isCheckedPath(path) {
-  return CHECKED_EXTENSIONS.test(path) && !EXCLUDED_PATHS.some((rule) => rule.test(path));
+  return CHECKED_EXTENSIONS.test(path) && EXCLUDED_PATHS.every((rule) => !rule.test(path));
 }
 
 /**
@@ -161,7 +161,8 @@ function main() {
       const [sha, body] = record.trim().split("\x00");
       if (sha && body) {
         for (const message of findViolations(messageLines(body))) {
-          check.add(`${sha.slice(0, 8)}: ${message}`);
+          // The violation text already ends with the remedy, so this prefix only names the commit.
+          check.add(`${sha.slice(0, 8)}: ${message}`); // diagnostic-message: remedy-in-value findViolations()
         }
       }
     }
@@ -173,7 +174,8 @@ function main() {
     const mergeBase = git(["merge-base", "HEAD", worktreeBase]).trim();
     const diff = git(["diff", "-U0", "--no-color", mergeBase]);
     for (const message of findViolations([...parseAddedLines(diff), ...untrackedAddedLines()])) {
-      check.add(message);
+      // The violation text already ends with the remedy, so nothing is added here.
+      check.add(message); // diagnostic-message: remedy-in-value findViolations()
     }
     check.ok(`working tree against ${worktreeBase}`);
     return;

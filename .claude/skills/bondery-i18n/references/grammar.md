@@ -6,17 +6,17 @@ i18next 26 selects the plural with `Intl.PluralRules`. The suffix must be the ca
 
 ## Categories
 
-| Locale | 0 | 1 | 2–4 | 5 | 12 | 22 |
-|--------|---|---|-----|---|----|----|
-| `en`, `es`, `pt`, `hu`, `nl`, `sv`, `fi`, `da`, `nb`, `it`, `bg`, `el`, `tr`, `et` | other | one | other | other | other | other |
-| `fr` | one | one | other | other | other | other |
-| `cs`, `sk` | other | one | few | other | other | other |
-| `pl`, `ru`, `uk` | many | one | few | many | many | few |
-| `ro` | few | one | few | few | few | other |
-| `hr`, `sr` | other | one | few | other | other | few |
-| `sl` | other | one | two for 2, few for 3–4 | other | other | other |
-| `lv` | zero | one | other | other | zero | other |
-| `lt` | other | one | few | few | other | few |
+| Locale                                                                             | 0     | 1   | 2–4                    | 5     | 12    | 22    |
+| ---------------------------------------------------------------------------------- | ----- | --- | ---------------------- | ----- | ----- | ----- |
+| `en`, `es`, `pt`, `hu`, `nl`, `sv`, `fi`, `da`, `nb`, `it`, `bg`, `el`, `tr`, `et` | other | one | other                  | other | other | other |
+| `fr`                                                                               | one   | one | other                  | other | other | other |
+| `cs`, `sk`                                                                         | other | one | few                    | other | other | other |
+| `pl`, `ru`, `uk`                                                                   | many  | one | few                    | many  | many  | few   |
+| `ro`                                                                               | few   | one | few                    | few   | few   | other |
+| `hr`, `sr`                                                                         | other | one | few                    | other | other | few   |
+| `sl`                                                                               | other | one | two for 2, few for 3–4 | other | other | other |
+| `lv`                                                                               | zero  | one | other                  | other | zero  | other |
+| `lt`                                                                               | other | one | few                    | few   | other | few   |
 
 French `_one` must be true for zero and for one. Do not write "un contact" if the same string appears for 0. Prefer a form that works for both, such as "{count} contact".
 

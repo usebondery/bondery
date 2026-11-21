@@ -34,7 +34,15 @@ export const IMPORTANT_DATE_TYPES = [
   "other",
 ] satisfies ImportantDateType[];
 
-export const IMPORTANT_DATE_NOTIFY_VALUES = [1, 3, 7] as const;
+const NOTIFY_ONE_DAY_BEFORE = 1;
+const NOTIFY_THREE_DAYS_BEFORE = 3;
+const NOTIFY_ONE_WEEK_BEFORE = 7;
+
+export const IMPORTANT_DATE_NOTIFY_VALUES = [
+  NOTIFY_ONE_DAY_BEFORE,
+  NOTIFY_THREE_DAYS_BEFORE,
+  NOTIFY_ONE_WEEK_BEFORE,
+] as const;
 
 export function isImportantDateType(value: string): value is ImportantDateType {
   return IMPORTANT_DATE_TYPES.includes(value as ImportantDateType);

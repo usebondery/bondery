@@ -1,0 +1,165 @@
+{
+  "About": {
+    "StoryTitle": "How Bondery started"
+  },
+  "AiClients": {
+    "WorksWith": "Works with"
+  },
+  "Bento": {
+    "Assistant": {
+      "Description": "Give Claude or any MCP client your contact book.",
+      "Title": "Your network, in your AI"
+    },
+    "KeepInTouch": {
+      "Description": "Birthdays and anniversaries reach your inbox ahead of time.",
+      "Title": "Email reminders for key dates"
+    },
+    "Network": {
+      "Description": "Search your network. See who is in a city before you go.",
+      "Title": "Find anyone"
+    },
+    "Sources": {
+      "Description": "Every source merges into one list, duplicates included.",
+      "Title": "All the people you met in one place"
+    },
+    "Sync": {
+      "Description": "Profiles refresh from the sources you saved them from.",
+      "Title": "Always up to date"
+    },
+    "Timeline": {
+      "Description": "Notes and history on every person.",
+      "Title": "Remember every conversation"
+    }
+  },
+  "Contact": {
+    "Discord": "Chat with us on Discord",
+    "Reddit": "Post on our Reddit",
+    "Subtitle": "Have questions or feedback? We're here to help or just chat!",
+    "Title": "Contact us"
+  },
+  "Cta": {
+    "Button": "Start building your network",
+    "Title": "Ready to organize your network?"
+  },
+  "Faq": {
+    "Items": {
+      "Free": {
+        "Answer": "Yes. Bondery is free with all the core features. A premium version exists for additional features, but the core personal PRM functionality will remain free forever.",
+        "Question": "Is Bondery free to use?"
+      },
+      "Private": {
+        "Answer": "Bondery is privacy-first and open source. Your relationship data is handled with a focus on user control and transparency. We will never sell your data or use it for advertising.",
+        "Question": "Is my data private in Bondery?"
+      },
+      "SelfHost": {
+        "Answer": "Yes. Bondery is open source and ships a Docker Compose stack for self-hosting. See the self-hosting guide in the docs.",
+        "DocsLinkLabel": "self-hosting guide in the docs",
+        "Question": "Can I self-host Bondery?"
+      },
+      "WhatIs": {
+        "Answer": "Bondery is an open-source personal CRM (=PRM) that helps you track relationships, remember key details, and stay connected with your network.",
+        "Question": "What is Bondery?"
+      }
+    },
+    "Title": "FAQs"
+  },
+  "Features": {
+    "Title": "Everything you need to build stronger bonds"
+  },
+  "Footer": {
+    "Groups": {
+      "Company": "Company",
+      "Connect": "Connect with us",
+      "Legal": "Legal",
+      "Product": "Product"
+    },
+    "Links": {
+      "Blog": "Blog",
+      "Contact": "Contact us",
+      "Docs": "Docs",
+      "Features": "Features",
+      "Pricing": "Pricing",
+      "Privacy": "Privacy Policy",
+      "Roadmap": "Roadmap",
+      "Security": "Security",
+      "Status": "Status",
+      "Terms": "Terms of Service"
+    }
+  },
+  "GetStarted": "Get started",
+  "Header": {
+    "Aria": {
+      "CloseMenu": "Close menu",
+      "CloseNavigationMenu": "Close navigation menu",
+      "MobileNavigation": "Mobile navigation",
+      "OpenNavigationMenu": "Open navigation menu",
+      "PrimaryNavigation": "Primary navigation"
+    },
+    "LoginOrSignUp": "Login or Sign up",
+    "Nav": {
+      "Blog": "Blog",
+      "Docs": "Docs",
+      "Features": "Features",
+      "Pricing": "Pricing"
+    },
+    "NavigationTitle": "Navigation"
+  },
+  "Hero": {
+    "ImageAlt": "Bondery home dashboard with interactions timeline, contact stats, and reminders",
+    "LearnMore": "Learn more",
+    "Subtitle": "Bondery merges your contacts, keeps them in sync, and reminds you to stay in touch.",
+    "Title": "Everyone you know, in one place your AI can use"
+  },
+  "Logo": {
+    "HomepageAriaLabel": "Bondery homepage"
+  },
+  "Meta": {
+    "ContactDescription": "Contact the Bondery team for support, feedback, and partnership inquiries.",
+    "ContactTitle": "Contact",
+    "HomeImageAlt": "Bondery: Manage your personal and professional relationships"
+  },
+  "Pricing": {
+    "Free": {
+      "Features": {
+        "Contacts": "Unlimited contacts",
+        "History": "Interaction history",
+        "Reminders": "Birthday and date reminders"
+      },
+      "Name": "Free",
+      "Price": "$0",
+      "Tagline": "All the core features."
+    },
+    "Premium": {
+      "Features": {
+        "AiAssistant": "AI Assistant",
+        "PrioritySupport": "Priority support",
+        "SmartSearch": "Smart search",
+        "WritingCopilot": "Writing copilot"
+      },
+      "Name": "Premium",
+      "Period": "/month",
+      "Price": "$10",
+      "Tagline": "For power users."
+    },
+    "Title": "Simple pricing"
+  },
+  "PrivacyBand": {
+    "Points": {
+      "EuHosted": "Hosted in the EU",
+      "OpenSource": "Open source (AGPL-3.0)",
+      "SelfHostOrExport": "Self-host or export anytime"
+    },
+    "SelfHostingGuide": "Self-hosting guide",
+    "Title": "Private by design. Yours to keep.",
+    "ViewOnGitHub": "View on GitHub"
+  },
+  "Team": {
+    "Members": {
+      "Sveetya": {
+        "Description": "Built the foundation.",
+        "Role": "Founder"
+      }
+    },
+    "Title": "Who will answer your questions?"
+  }
+}

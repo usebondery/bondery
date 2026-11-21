@@ -84,7 +84,7 @@ function isProcessAlive(pid) {
 
 function readLock() {
   try {
-    const parsed = JSON.parse(readFileSync(lockPath, "utf8"));
+    const parsed = asUnknown(JSON.parse(readFileSync(lockPath, "utf8")));
     return typeof parsed === "object" && parsed !== null ? parsed : null;
   } catch {
     return null;
@@ -118,7 +118,8 @@ function acquireLock(target) {
       const holder = readLock();
       if (holder && isProcessAlive(holder.pid)) {
         reportRunningSession(holder);
-        process.exit(1);
+        process.exitCode = 1;
+        return;
       }
       console.warn(`[dev] removing stale lock from pid ${holder?.pid ?? "unknown"}`);
       try {
@@ -130,7 +131,7 @@ function acquireLock(target) {
   }
 
   console.error("[dev] could not take .temp/dev.lock");
-  process.exit(1);
+  process.exitCode = 1;
 }
 
 /**
@@ -213,7 +214,8 @@ function parseTarget(argv) {
     console.error(
       `Usage: node scripts/dev/supervisor.mjs <${Object.keys(TARGETS).join("|")}|task,task...>`,
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   if (TARGETS[first]) {
     return { label: first, tasks: TARGETS[first] };
@@ -224,7 +226,8 @@ function parseTarget(argv) {
     .filter(Boolean);
   if (tasks.length === 0) {
     console.error("[dev] no turbo task given");
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   return { label: tasks.join(","), tasks };
 }

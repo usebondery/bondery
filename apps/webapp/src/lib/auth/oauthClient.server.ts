@@ -132,9 +132,7 @@ async function requestToken(body: URLSearchParams): Promise<TokenResponse | null
     }
 
     return (await response.json()) as TokenResponse;
-  } catch (_error) {
-    if (process.env.NODE_ENV === "development") {
-    }
+  } catch {
     return null;
   }
 }

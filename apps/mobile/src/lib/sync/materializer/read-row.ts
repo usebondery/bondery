@@ -22,7 +22,7 @@ export function readNumber(row: Record<string, unknown>, key: string): number | 
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-export function readBoolInt(row: Record<string, unknown>, key: string): number {
+export function readBoolInt(row: Record<string, unknown>, key: string): 1 | 0 {
   const value = row[key];
   if (value === true || value === 1 || value === "1" || value === "t") {
     return 1;

@@ -24,7 +24,7 @@ export function PhotoUploadButton({ avatarUrl, userName }: PhotoUploadButtonProp
     <UserAvatar
       avatarUrl={avatarUrl}
       onClick={handleOpenUploadModal}
-      radius={"xl"}
+      radius="xl"
       size="lg"
       style={{ cursor: "pointer" }}
       userName={userName}

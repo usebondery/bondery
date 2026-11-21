@@ -139,7 +139,7 @@ export function SettingsGroupsScreen() {
               errorTitle={tMobileSettings("GroupsLoadErrorTitle")}
               isLoading={isLoading}
               onRetry={() => {
-                void reloadGroups();
+                reloadGroups();
               }}
             >
               <ContactsGroupFilterField

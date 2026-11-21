@@ -8,13 +8,13 @@ Platform-specific mechanics: [mobile/lists-selection.md](../mobile/lists-selecti
 
 ## When to use which primitive
 
-| Primitive | Use when |
-|-----------|----------|
-| **`DataTable`** (web) | Sortable, searchable, selectable tabular data — People, import previews |
+| Primitive                | Use when                                                                         |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **`DataTable`** (web)    | Sortable, searchable, selectable tabular data — People, import previews          |
 | **Timeline cards** (web) | Interaction history on the Interactions page, a person tab, and the home preview |
-| **Card grid** (web) | Visual browse — Groups |
-| **`FlashList`** (mobile) | Sectioned contact lists, large local-first datasets |
-| **Simple stack** | Short fixed lists (< ~10 items), settings rows |
+| **Card grid** (web)      | Visual browse — Groups                                                           |
+| **`FlashList`** (mobile) | Sectioned contact lists, large local-first datasets                              |
+| **Simple stack**         | Short fixed lists (< ~10 items), settings rows                                   |
 
 ---
 
@@ -22,10 +22,10 @@ Platform-specific mechanics: [mobile/lists-selection.md](../mobile/lists-selecti
 
 **Rule:** If the list can grow beyond what a user can scan (~20+ items), add search.
 
-| Scope | Pattern |
-|-------|---------|
-| **Server-side** | Debounce with `DEBOUNCE_MS.search` (600ms); pass `search` to API |
-| **Client-side** | `DEBOUNCE_MS.localFilter` (200ms); filter in memory |
+| Scope               | Pattern                                                                                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Server-side**     | Debounce with `DEBOUNCE_MS.search` (600ms); pass `search` to API                                                                                        |
+| **Client-side**     | `DEBOUNCE_MS.localFilter` (200ms); filter in memory                                                                                                     |
 | **URL persistence** | Encode sort/filter/search in query params when state should survive refresh (pairs with [page-navigation-resume](../product/page-navigation-resume.md)) |
 
 Search fields are **not** submit forms — do not wire Done/Enter to mutate on mobile settings search.
@@ -36,14 +36,14 @@ Search fields are **not** submit forms — do not wire Done/Enter to mutate on m
 
 When rows are selectable:
 
-| Capability | Web (`DataTable`) | Mobile |
-|------------|-------------------|--------|
-| Enter selection | Checkbox column | Long-press row |
-| Range select | Shift+click | Drag across rows ([mobile/lists-selection.md](../mobile/lists-selection.md)) |
-| Select page | Header checkbox | Header control in selection mode |
-| Select all matching | `IconChecks` / select-all-total | `ContactsSelectionHeader` select-all-total |
-| Bulk actions | Bulk bar above table | `FloatingActionBar` |
-| Exit selection | Clear selection control | Done / back |
+| Capability          | Web (`DataTable`)               | Mobile                                                                       |
+| ------------------- | ------------------------------- | ---------------------------------------------------------------------------- |
+| Enter selection     | Checkbox column                 | Long-press row                                                               |
+| Range select        | Shift+click                     | Drag across rows ([mobile/lists-selection.md](../mobile/lists-selection.md)) |
+| Select page         | Header checkbox                 | Header control in selection mode                                             |
+| Select all matching | `IconChecks` / select-all-total | `ContactsSelectionHeader` select-all-total                                   |
+| Bulk actions        | Bulk bar above table            | `FloatingActionBar`                                                          |
+| Exit selection      | Clear selection control         | Done / back                                                                  |
 
 **Gmail rule:** drag-to-select and shift-range should feel continuous — no per-row tap marathon.
 

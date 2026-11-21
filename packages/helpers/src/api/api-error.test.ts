@@ -64,7 +64,7 @@ describe("buildApiErrorFromResponse", () => {
   });
 });
 
-describe("ApiError.getUserMessage", () => {
+describe("apiError.getUserMessage", () => {
   it("maps known catalog code to translation key", () => {
     const error = new ApiError({
       code: "contact_not_found",

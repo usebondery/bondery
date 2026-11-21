@@ -31,7 +31,7 @@ export function IntegrationCard({
   isLinkable = true,
   tooltip,
 }: IntegrationCardProps) {
-  const isChecked = isConnected && (isLinkable || Boolean(badgeLabel));
+  const isChecked = isConnected && (isLinkable === true || Boolean(badgeLabel));
   const showBadge = Boolean(badgeLabel) || isLinkable;
 
   return (
@@ -109,15 +109,7 @@ export function IntegrationCard({
               {iconNode ??
                 (Icon ? <Icon stroke={1.5} style={{ height: "70%", width: "70%" }} /> : null)}
             </ThemeIcon>
-            <Text
-              className="h-[2.5em]"
-              fw={600}
-              lh={1.25}
-              lineClamp={2}
-              size="sm"
-              ta="center"
-              w="100%"
-            >
+            <Text fw={600} h="2.5em" lh={1.25} lineClamp={2} size="sm" ta="center" w="100%">
               {displayName}
             </Text>
           </Stack>

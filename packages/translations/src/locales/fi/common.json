@@ -230,11 +230,13 @@
     "deleting": "Poistetaan...",
     "duplicating": "Kopioidaan...",
     "errorTitle": "Virhe",
+    "mobileRuntimeError": "Mobiilisovelluksen ajonaikainen virhe",
     "noResults": "Ei tuloksia",
     "removing": "Poistetaan...",
     "savedTitle": "Tallennettu",
     "saving": "Tallennetaan...",
     "sending": "Lähetetään...",
-    "successTitle": "Onnistui"
+    "successTitle": "Onnistui",
+    "unknownError": "Tuntematon virhe"
   }
 }

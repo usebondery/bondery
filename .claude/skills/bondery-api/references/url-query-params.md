@@ -6,37 +6,37 @@ Pattern for pending UI actions: **`next_action=intended_action`**. The param nam
 
 ## Fastify API
 
-| Param | Use |
-|-------|-----|
-| `search` | Free-text list filter. Never `q`. |
-| `limit`, `offset` | Offset pagination only. Never cursor / `page_token` / `after_id`. |
-| `start_date`, `end_date` | Inclusive list date bounds. Never `start`, `end`, `from`, or `to`. |
-| `tag_ids` | People-list tag filter. One comma-separated value: `tag_ids=id1,id2`. |
+| Param                    | Use                                                                   |
+| ------------------------ | --------------------------------------------------------------------- |
+| `search`                 | Free-text list filter. Never `q`.                                     |
+| `limit`, `offset`        | Offset pagination only. Never cursor / `page_token` / `after_id`.     |
+| `start_date`, `end_date` | Inclusive list date bounds. Never `start`, `end`, `from`, or `to`.    |
+| `tag_ids`                | People-list tag filter. One comma-separated value: `tag_ids=id1,id2`. |
 
 List search rules: [api-design.md](./api-design.md).
 
 ## Webapp product URLs
 
-| Param | Use |
-|-------|-----|
+| Param         | Use                                                                            |
+| ------------- | ------------------------------------------------------------------------------ |
 | `next_action` | Pending UI action after the page loads. Read once, then strip it from the URL. |
-| `redirect` | Login return path only. Never a product-page action. |
+| `redirect`    | Login return path only. Never a product-page action.                           |
 
 Constants: `NEXT_ACTION_PARAM`, `NEXT_ACTIONS`, `routePersonWithNextAction`, and `TAG_IDS_QUERY_PARAM` in `packages/helpers/src/globals/webapp-query.ts`. `TAG_IDS_QUERY_PARAM` is defined next to the people-list schema and re-exported here.
 
-| Value (`intended_action`) | Effect |
-|---------------------------|--------|
-| `add_interaction` | Open the add-interaction modal on a person page |
+| Value (`intended_action`) | Effect                                          |
+| ------------------------- | ----------------------------------------------- |
+| `add_interaction`         | Open the add-interaction modal on a person page |
 
 ### Producers and consumers
 
-| Producer | URL |
-|----------|-----|
+| Producer                                                              | URL                                                           |
+| --------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Chrome extension popup (already-in-Bondery confirm → Add interaction) | `routePersonWithNextAction(id, NEXT_ACTIONS.ADD_INTERACTION)` |
-| Any new deep link | Same helper. Add the value to `NEXT_ACTIONS` first. |
+| Any new deep link                                                     | Same helper. Add the value to `NEXT_ACTIONS` first.           |
 
-| Consumer | Behavior |
-|----------|----------|
+| Consumer                    | Behavior                                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
 | `PersonInteractionsSection` | If `next_action=add_interaction`, open the modal once, then `router.replace` without the param |
 
 Do not invent one-off flags (`addInteraction=1`). Do not mix camelCase values.
@@ -47,13 +47,13 @@ Login resume (`redirect`) is documented in [page-navigation-resume.md](../../bon
 
 Public query names follow the same rules: **snake_case**, no aliases. Constants live in `packages/helpers` (`mobile-query.ts`). Route builders for Expo Router live in `apps/mobile/src/lib/navigation/`.
 
-| Param | Use |
-|-------|-----|
+| Param      | Use                                                                 |
+| ---------- | ------------------------------------------------------------------- |
 | `group_id` | Contacts tab group filter (`MOBILE_GROUP_ID_PARAM`). Not `groupId`. |
-| `refresh` | Contacts list reload hint (existing). |
+| `refresh`  | Contacts list reload hint (existing).                               |
 
-| Route | Use |
-|-------|-----|
+| Route       | Use                                      |
+| ----------- | ---------------------------------------- |
 | `/contacts` | Contacts tab (`MOBILE_ROUTES.CONTACTS`). |
 
 Helpers:

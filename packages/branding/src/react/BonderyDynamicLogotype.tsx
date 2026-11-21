@@ -1,4 +1,5 @@
-import type { CSSProperties } from "react";
+import { cn } from "cn";
+import type { CSSProperties, ReactElement } from "react";
 import { BonderyIcon } from "#react/BonderyIcon.js";
 import { BonderyIconWhite } from "#react/BonderyIconWhite.js";
 import { BonderyLogotypeBlack } from "#react/BonderyLogotypeBlack.js";
@@ -46,7 +47,7 @@ export function BonderyDynamicLogotype({
   theme,
   height = 20,
   className,
-}: BonderyDynamicLogotypeProps) {
+}: BonderyDynamicLogotypeProps): ReactElement {
   const label = text?.trim();
   const isDefaultWordmark = label === BRAND_WORDMARK;
   const isIconOnly = !label;
@@ -77,10 +78,7 @@ export function BonderyDynamicLogotype({
   const Icon = theme === "dark" ? BonderyIconWhite : BonderyIcon;
 
   return (
-    <span
-      className={["inline-flex items-center", className].filter(Boolean).join(" ")}
-      style={{ color }}
-    >
+    <span className={cn("inline-flex items-center", className)} style={{ color }}>
       <Icon aria-hidden height={iconSize} width={iconSize} />
       <span
         className="leading-none"

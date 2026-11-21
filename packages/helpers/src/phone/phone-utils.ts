@@ -11,7 +11,7 @@ import {
  * @deprecated Prefer `normalizePhoneInput` or `normalizePhoneParts`.
  */
 export function parsePhoneNumber(
-  phoneNumber: string,
+  phoneNumber: string | null | undefined,
   defaultCountry?: string | null,
 ): {
   dialCode: string;

@@ -43,9 +43,9 @@ export function SettingsThemeScreen() {
       await updateSettings({
         colorScheme: nextThemePreference === "system" ? "auto" : nextThemePreference,
       });
-    } catch (err) {
+    } catch (error) {
       setThemePreference(previousThemePreference);
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 

@@ -6,20 +6,20 @@ Transport layer for HTTP. **Mutations and queries** go through `lib/api/domains/
 
 Import from `@/lib/api/client`. Always use same-origin paths from `API_ROUTES` (`/api/...`).
 
-| Function | Use when |
-|----------|----------|
-| `clientApiJson<T>` | POST/PATCH/DELETE or GET where errors should throw |
-| `clientApiJsonOrNull<T>` | Prefetch, search, chips — return `null` on failure |
-| `clientApiFetch` | FormData uploads, blob downloads, custom status handling — call `applyTransportResponsePolicy` when `!response.ok` |
+| Function                 | Use when                                                                                                           |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `clientApiJson<T>`       | POST/PATCH/DELETE or GET where errors should throw                                                                 |
+| `clientApiJsonOrNull<T>` | Prefetch, search, chips — return `null` on failure                                                                 |
+| `clientApiFetch`         | FormData uploads, blob downloads, custom status handling — call `applyTransportResponsePolicy` when `!response.ok` |
 
 **Never** import `API_URL` in `"use client"` files.
 
 ## Transport policy (401 + hop-down)
 
-| Runtime | Policy module | On 401 | On hop-down (502/503/504 / network) |
-|---------|---------------|--------|---------------------------------------|
-| Browser | `applyTransportErrorPolicy` | `endSession` → `/login?redirect=…` | Silent — query/page shows skeleton, stale, or inline error |
-| Server RSC | `applyServerTransportPolicy` | `handleServerUnauthorizedSession` → login | Rethrow into route `error.tsx` — **no URL change** |
+| Runtime    | Policy module                | On 401                                    | On hop-down (502/503/504 / network)                        |
+| ---------- | ---------------------------- | ----------------------------------------- | ---------------------------------------------------------- |
+| Browser    | `applyTransportErrorPolicy`  | `endSession` → `/login?redirect=…`        | Silent — query/page shows skeleton, stale, or inline error |
+| Server RSC | `applyServerTransportPolicy` | `handleServerUnauthorizedSession` → login | Rethrow into route `error.tsx` — **no URL change**         |
 
 Return intent is captured as `pathname + search` in the `redirect` query param (see `lib/auth/returnIntent.ts`). Middleware forwards `x-pathname` and `x-search` for server-side capture. User-initiated sign-out does not set `redirect`.
 
@@ -35,12 +35,12 @@ Raw `clientApiFetch` callers must call `applyTransportResponsePolicy(response)` 
 
 Import from `@/lib/api/server`. Used in RSC pages and loaders.
 
-| Function | `transportPolicy` | Use when |
-|----------|-------------------|----------|
-| `serverApiFetch` / `serverApiJson` | default `true` | RSC data loads |
-| `serverApiFetch` / `serverApiJson` | `false` | Routing probes (`probeMeSessionServer`) |
-| `serverApiJsonOrNull` | always off for outage | Optional RSC prefetch |
-| `bffProxyFetch` | N/A (imports from `@/lib/api/bffProxy`) | **`app/api/**` route handlers only** |
+| Function                           | `transportPolicy`                       | Use when                                |
+| ---------------------------------- | --------------------------------------- | --------------------------------------- |
+| `serverApiFetch` / `serverApiJson` | default `true`                          | RSC data loads                          |
+| `serverApiFetch` / `serverApiJson` | `false`                                 | Routing probes (`probeMeSessionServer`) |
+| `serverApiJsonOrNull`              | always off for outage                   | Optional RSC prefetch                   |
+| `bffProxyFetch`                    | N/A (imports from `@/lib/api/bffProxy`) | **`app/api/**` route handlers only**    |
 
 Auth: `serverApiFetch` attaches `Authorization: Bearer …` via `resolveServerSession()`. Route guards and BFF 401 gates use the same function — do not duplicate `getUser()` in server code.
 
@@ -48,11 +48,11 @@ Auth: `serverApiFetch` attaches `Authorization: Bearer …` via `resolveServerSe
 
 ## Domain-first data access
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| **Resources** | `lib/api/resources/*` | Path + parse only — no `@/lib/api/client` or `server` |
-| **Client domain** | `lib/api/domains/*` | Reads (via `clientApiJson`) + all writes |
-| **Server domain** | `lib/api/domains/server/*` | Reads with `next.tags` (`import "server-only"`) |
+| Layer             | Location                   | Responsibility                                        |
+| ----------------- | -------------------------- | ----------------------------------------------------- |
+| **Resources**     | `lib/api/resources/*`      | Path + parse only — no `@/lib/api/client` or `server` |
+| **Client domain** | `lib/api/domains/*`        | Reads (via `clientApiJson`) + all writes              |
+| **Server domain** | `lib/api/domains/server/*` | Reads with `next.tags` (`import "server-only"`)       |
 
 Query hooks call client domains; RSC loaders call server domains or `lib/query/prefetch/*`.
 

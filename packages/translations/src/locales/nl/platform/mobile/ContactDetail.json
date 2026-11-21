@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Notities toevoegen…",
   "DeleteContact": "Contact verwijderen",
   "DeleteContactConfirmTitle": "{name} verwijderen?",
   "DeleteFailed": "Kan contact niet verwijderen.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Bewerken",
   "GroupsEditAccessibility": "Groepen bewerken voor {name}",
   "GroupsLoadError": "Kan groepen niet laden",
+  "LastInteractionLabel": "Laatste interactie",
   "NoGroups": "In geen enkele groep",
   "ShareContact": "vCard delen...",
   "ShareContactViaEmail": "Via e-mail versturen...",

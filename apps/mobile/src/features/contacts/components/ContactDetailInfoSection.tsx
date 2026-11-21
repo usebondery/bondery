@@ -1,6 +1,7 @@
 import type { Contact } from "@bondery/schemas";
 import { IconClock } from "@tabler/icons-react-native";
 import { Text, View } from "react-native";
+import { useMobileContactDetailTranslations } from "@/lib/i18n/generated/hooks";
 import type { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { formatAbsoluteDate, formatRelativeDate } from "../contactUtils";
 import { ContactDetailSectionHeader } from "./ContactDetailSectionHeader";
@@ -12,6 +13,8 @@ interface ContactDetailInfoSectionProps {
 }
 
 export function ContactDetailInfoSection({ colors, contact }: ContactDetailInfoSectionProps) {
+  const t = useMobileContactDetailTranslations();
+
   if (!contact.lastInteraction) {
     return null;
   }
@@ -32,7 +35,7 @@ export function ContactDetailInfoSection({ colors, contact }: ContactDetailInfoS
           <IconClock size={16} stroke={colors.iconSecondary} />
           <View style={contactDetailStyles.infoTexts}>
             <Text style={[contactDetailStyles.sectionLabel, { color: colors.textMuted }]}>
-              Last interaction
+              {t("LastInteractionLabel")}
             </Text>
             <Text style={[contactDetailStyles.infoValue, { color: colors.textPrimary }]}>
               {formatRelativeDate(contact.lastInteraction)} ·{" "}

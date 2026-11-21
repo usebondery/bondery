@@ -49,8 +49,8 @@ export async function listInteractions(
     userId: user.id,
   });
 
-  let interactions: Awaited<ReturnType<typeof loadFormattedInteractions>> = [];
-  let totalCount = 0;
+  let interactions: Awaited<ReturnType<typeof loadFormattedInteractions>>;
+  let totalCount: number;
 
   try {
     const [rows, count] = await Promise.all([

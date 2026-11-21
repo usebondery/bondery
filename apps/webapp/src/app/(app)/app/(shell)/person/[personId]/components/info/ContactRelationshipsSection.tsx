@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
 import { usePersonRelationshipsTranslations } from "@/lib/i18n/generated/hooks";
 import { DEBOUNCE_MS, RELATIONSHIP_TYPE_OPTIONS } from "@/lib/platform/config";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 interface ContactRelationshipsSectionProps {
   contactsHasMore?: boolean;
@@ -66,7 +67,7 @@ export function ContactRelationshipsSection({
   const t = usePersonRelationshipsTranslations();
 
   const relationshipTypeOptions = RELATIONSHIP_TYPE_OPTIONS.map((typeOption) => ({
-    label: `${typeOption.emoji} ${t(`Types.${typeOption.value}`)}`,
+    label: [typeOption.emoji, t(`Types.${typeOption.value}`)].join(" "),
     value: typeOption.value,
   }));
 
@@ -227,10 +228,10 @@ function RelationshipCardRow({
   searchDebounceMs,
 }: RelationshipCardRowProps) {
   const [relationshipType, setRelationshipType] = useState<RelationshipType | null>(
-    initialRelationshipType || null,
+    nonEmpty(initialRelationshipType) ?? null,
   );
   const [relatedPersonId, setRelatedPersonId] = useState<string | null>(
-    initialRelatedPerson?.id || null,
+    nonEmpty(initialRelatedPerson?.id) ?? null,
   );
   const [isAutoCreating, setIsAutoCreating] = useState(false);
   const knownRelatedPeopleRef = useRef<Map<string, ContactPreview>>(new Map());
@@ -255,7 +256,8 @@ function RelationshipCardRow({
     if (!onSearch) {
       return { contacts: [], hasMore: false };
     }
-    const page = await onSearch(query, paging);
+    const search: PeoplePickerOnSearch<ContactPreview> = onSearch;
+    const page = await search(query, paging);
     for (const r of page.contacts) {
       knownRelatedPeopleRef.current.set(r.id, r);
     }
@@ -303,7 +305,7 @@ function RelationshipCardRow({
       relationshipType &&
       nextPersonId !== initialRelatedPerson?.id
     ) {
-      onUpdate(relationshipType, nextPersonId);
+      void onUpdate(relationshipType, nextPersonId);
     }
 
     void maybeCreate(relationshipType, nextPersonId);
@@ -376,7 +378,7 @@ function RelationshipCardRow({
             setRelationshipType(nextType);
 
             if (mode === "edit" && onUpdate && nextType && relatedPersonId) {
-              onUpdate(nextType, relatedPersonId);
+              void onUpdate(nextType, relatedPersonId);
             }
 
             void maybeCreate(nextType, relatedPersonId);

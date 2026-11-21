@@ -1,6 +1,7 @@
 "use client";
 
 import { type DateTimeFormatContext, formatClockTime, formatUserTime } from "@bondery/helpers/date";
+import type { ReactElement } from "react";
 
 export interface ClockTimeProps {
   /** User locale, clock preference, and display timezone. */
@@ -19,7 +20,7 @@ export interface ClockTimeProps {
  * `ClockTime` holds no time-of-day rule. 12h or 24h shape, AM/PM labels, and
  * label position all come from the helper.
  */
-export function ClockTime({ ctx, value, withSeconds }: ClockTimeProps) {
+export function ClockTime({ ctx, value, withSeconds }: ClockTimeProps): ReactElement {
   const text =
     value instanceof Date
       ? formatUserTime(value, ctx, { withSeconds })

@@ -4,17 +4,17 @@ Today only **webapp** has Playwright E2E. Plan new harnesses per client without 
 
 ## Current state
 
-| Client | E2E tool | Location | Status |
-|--------|----------|----------|--------|
-| webapp | Playwright | `apps/webapp/e2e/` | **Active** — login, OAuth, session |
-| api | Fastify inject / supertest | route tests in `apps/api` | Integration, not browser E2E |
-| mobile | Detox or Maestro (TBD) | `apps/mobile/e2e/` (future) | Not yet |
-| website | Playwright (TBD) | `apps/website/e2e/` (future) | Not yet |
-| chrome-extension | Playwright extension mode (TBD) | `apps/chrome-extension/e2e/` (future) | Not yet |
+| Client           | E2E tool                        | Location                              | Status                             |
+| ---------------- | ------------------------------- | ------------------------------------- | ---------------------------------- |
+| webapp           | Playwright                      | `apps/webapp/e2e/`                    | **Active** — login, OAuth, session |
+| api              | Fastify inject / supertest      | route tests in `apps/api`             | Integration, not browser E2E       |
+| mobile           | Detox or Maestro (TBD)          | `apps/mobile/e2e/` (future)           | Not yet                            |
+| website          | Playwright (TBD)                | `apps/website/e2e/` (future)          | Not yet                            |
+| chrome-extension | Playwright extension mode (TBD) | `apps/chrome-extension/e2e/` (future) | Not yet                            |
 
 ## Target layout (future)
 
-```
+```text
 apps/
 ├── webapp/e2e/           # Playwright — product app (exists)
 ├── website/e2e/          # Playwright — marketing site smoke tests

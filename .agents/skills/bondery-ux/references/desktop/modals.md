@@ -8,12 +8,12 @@ Webapp modals for keyboard + pointer users. Mobile equivalent: `ui/Sheet` — se
 
 Match the loader to the **job**. There is no shared modal body loader and no `isLoading` on `ModalScrollLayout` / `ModalFooter` (footer has `actionLoading` on the primary button only). `useModalBlocking` is dismiss chrome, not a spinner.
 
-| Job | What the user is waiting on | Body | Footer | `isBlocking` (hide X, no overlay/Esc) |
-|-----|------------------------------|------|--------|----------------------------------------|
-| **Prefetch that *is* the body** | Lists/options without which there is no UI | Title stays; `Center` + `Loader`; no footer | Hidden | **No.** Abort on unmount. |
-| **Inline region** | One widget (picker, preview, chips) | Rest of form stays; spinner in that region (`CountChip isLoading`, picker `Loader`) | Stays | **No.** |
-| **Submit** | Mutation, seconds | Form stays, fields disabled | `actionLoading` on the primary | **Yes.** |
-| **Long-running job** | Generate/parse/commit that must be cancellable | Replace body with `Loader` + copy | **Cancel only** | **Yes.** |
+| Job                             | What the user is waiting on                    | Body                                                                                | Footer                         | `isBlocking` (hide X, no overlay/Esc) |
+| ------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------- |
+| **Prefetch that _is_ the body** | Lists/options without which there is no UI     | Title stays; `Center` + `Loader`; no footer                                         | Hidden                         | **No.** Abort on unmount.             |
+| **Inline region**               | One widget (picker, preview, chips)            | Rest of form stays; spinner in that region (`CountChip isLoading`, picker `Loader`) | Stays                          | **No.**                               |
+| **Submit**                      | Mutation, seconds                              | Form stays, fields disabled                                                         | `actionLoading` on the primary | **Yes.**                              |
+| **Long-running job**            | Generate/parse/commit that must be cancellable | Replace body with `Loader` + copy                                                   | **Cancel only**                | **Yes.**                              |
 
 `isBlocking` means: **leaving now would lose an in-flight write, or a job that must be cancelled explicitly.** Prefetch and preview fetches abort. Import parse and ZIP generate do not.
 
@@ -45,12 +45,12 @@ See `apps/webapp/src/lib/modals/README.md`. CI: `pnpm run check:modal-patterns -
 
 One component owns the button row — do not nest in another `Group`.
 
-| Props | Role |
-|-------|------|
-| `dangerLabel` + `onDanger` | Left destructive (`IconTrash`) |
-| `backLabel` + `onBack` | Import wizards |
-| `cancelLabel` + `onCancel` | Dismiss |
-| `actionLabel` / `actionType="submit"` | Primary |
+| Props                                                                                                               | Role                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dangerLabel` + `onDanger`                                                                                          | Left destructive (`IconTrash`)                                                                                                                                                                                                                        |
+| `backLabel` + `onBack`                                                                                              | Import wizards                                                                                                                                                                                                                                        |
+| `cancelLabel` + `onCancel`                                                                                          | Dismiss                                                                                                                                                                                                                                               |
+| `actionLabel` / `actionType="submit"`                                                                               | Primary                                                                                                                                                                                                                                               |
 | `createMoreLabel` + `onCreateMoreChange` (+ `createMoreChecked`, `createMoreDisabled`, `createMoreAriaDescription`) | Switch for repetitive **create** only. Below `sm` it sits above Cancel + primary. From `sm` up it sits in the left cluster. App passes the translated label. Do not combine with `dangerLabel` / `backLabel`. See [create-more.md](./create-more.md). |
 
 ---

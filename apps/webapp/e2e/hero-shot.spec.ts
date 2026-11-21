@@ -56,8 +56,8 @@ const EXPECTED_WIDTH = 2880;
 const EXPECTED_HEIGHT = 1620;
 
 function note(message: string, detail?: unknown): void {
-  process.stdout.write(`${message}${detail === undefined ? "" : ` ${String(detail)}`}
-`);
+  const suffix = detail === undefined ? "" : ` ${String(detail)}`;
+  process.stdout.write(`${message}${suffix}\n`);
 }
 
 function readPngSize(filePath: string): { height: number; width: number } {
@@ -150,6 +150,7 @@ async function waitForDashboard(page: Page, contacts: number): Promise<void> {
   await expect(page.locator("html")).toHaveAttribute("data-mantine-color-scheme", "dark");
 
   // Stat cards show the contact count once the stats query resolves.
+  // biome-ignore lint/nursery/noPlaywrightNthMethods: several stat cards can show the same count
   await expect(page.getByText(String(contacts), { exact: true }).first()).toBeVisible({
     timeout: 60_000,
   });
@@ -201,9 +202,9 @@ async function cleanForCapture(page: Page): Promise<void> {
   // Let layout settle after the style change.
   await page.evaluate(
     () =>
-      new Promise<void>((resolve) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      ),
+      new Promise<void>((resolve) => {
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+      }),
   );
 }
 

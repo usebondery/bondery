@@ -1,7 +1,7 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { View } from "react-native";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { joinClassNames } from "./joinClassNames";
 import {
   THEME_ICON_SHAPE_CLASS,
   THEME_ICON_SIZE_CLASS,
@@ -35,7 +35,7 @@ export function ThemeIcon({
 
   return (
     <View
-      className={joinClassNames(
+      className={cn(
         "items-center justify-center",
         THEME_ICON_SIZE_CLASS[size],
         THEME_ICON_SHAPE_CLASS[shape],

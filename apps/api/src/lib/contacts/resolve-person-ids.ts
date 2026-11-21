@@ -96,7 +96,7 @@ export async function resolveContactPersonIds(
       }
 
       const excludeSet = new Set(body.excludePersonIds ?? []);
-      return (ranked || []).map((row) => row.id).filter((id) => !excludeSet.has(id));
+      return (ranked ?? []).map((row) => row.id).filter((id) => !excludeSet.has(id));
     }
 
     const rows = await db.people.findMany({

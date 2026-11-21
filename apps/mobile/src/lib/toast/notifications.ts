@@ -39,11 +39,11 @@ function resolveType(data: NotificationData): NotificationType {
 
 function resolveDuration(data: NotificationData): number {
   if (resolveType(data) === "loading") {
-    return Infinity;
+    return Number.POSITIVE_INFINITY;
   }
 
   if (data.autoClose === false) {
-    return Infinity;
+    return Number.POSITIVE_INFINITY;
   }
 
   if (typeof data.autoClose === "number") {
@@ -54,7 +54,7 @@ function resolveDuration(data: NotificationData): number {
 }
 
 function resolvePromiseContent<T>(
-  content: NotificationPromiseContent | ((value: T) => NotificationPromiseContent),
+  content: NotificationPromiseContent | ((result: T) => NotificationPromiseContent),
   value: T,
 ): NotificationPromiseContent {
   return typeof content === "function" ? content(value) : content;

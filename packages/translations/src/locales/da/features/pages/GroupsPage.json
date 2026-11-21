@@ -94,7 +94,9 @@
     "UpdateFailed": "Kunde ikke opdater gruppeen"
   },
   "EmojiEmptySearch": "Inga emojis blev fundet",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Sök emojis…",
+  "EmojiSelectPlaceholder": "Vælg emoji",
   "Empty": "Inga gruppeer end. Opret en for at organisera kontakter.",
   "FallbackTitle": "Gruppe",
   "HeaderDescription": "Gruppeer hjælper dig dela in personer i egna gruppeer for snabbare filter og handlinger.",

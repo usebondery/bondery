@@ -1,22 +1,9 @@
 import { clearTokens, getAccessToken } from "../auth";
+import { AuthRequiredError } from "./auth-required-error";
+import { ExtensionOutdatedError } from "./extension-outdated-error";
 
-export class AuthRequiredError extends Error {
-  readonly requiresAuth = true;
-
-  constructor(message: string) {
-    super(message);
-    this.name = "AuthRequiredError";
-  }
-}
-
-export class ExtensionOutdatedError extends Error {
-  readonly extensionOutdated = true;
-
-  constructor(message: string) {
-    super(message);
-    this.name = "ExtensionOutdatedError";
-  }
-}
+export { AuthRequiredError } from "./auth-required-error";
+export { ExtensionOutdatedError } from "./extension-outdated-error";
 
 export async function authenticatedFetch(
   url: string,

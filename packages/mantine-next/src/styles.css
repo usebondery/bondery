@@ -13,16 +13,16 @@
 }
 
 .pressableCard {
-  color: inherit;
   display: block;
+  color: inherit;
   text-decoration: none;
 }
 
 .pressableCardGrow {
   flex: 1 1 0;
-  height: 100%;
-  max-width: 100%;
   min-width: 0;
+  max-width: 100%;
+  height: 100%;
 }
 
 .pressableCard:hover .pressableCardSurface {
@@ -44,12 +44,12 @@
 
 .button-scale-effect:active:not(:disabled):not([data-disabled]):not([disabled]),
 .button-scale-effect-active:not(:disabled):not([data-disabled]):not([disabled]) {
+  filter: var(--active-filter);
+  transform: scale(var(--scale-shrink));
   transition:
     transform var(--transition-time) var(--transition-ease),
     filter var(--transition-time) var(--transition-ease),
     background-color var(--transition-time) var(--transition-ease);
-  transform: scale(var(--scale-shrink));
-  filter: var(--active-filter);
 }
 
 .button-scale-effect.button-scale-effect-active:not(:disabled):not([data-disabled]):not([disabled]),
@@ -59,8 +59,8 @@
 .button-scale-effect.button-scale-effect-active:focus:not(:disabled):not([data-disabled]):not(
   [disabled]
 ) {
-  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
+  transform: scale(var(--scale-shrink));
 }
 
 /* Removes scale/filter from elements that should not have the scale effect (e.g. nav cards).
@@ -69,8 +69,8 @@
 .no-scale:hover:not(:disabled):not([data-disabled]):not([disabled]),
 .no-scale:focus:not(:disabled):not([data-disabled]):not([disabled]),
 .no-scale:active:not(:disabled):not([data-disabled]):not([disabled]) {
-  transform: none;
   filter: none;
+  transform: none;
 }
 
 .emoji-picker-trigger:not(:disabled):not([data-disabled]) {
@@ -102,12 +102,12 @@
 .mantine-Checkbox-input[data-checked="true"]:active:not(:disabled):not([data-disabled]):not(
   [disabled]
 ) {
+  filter: var(--active-filter);
+  transform: scale(var(--scale-shrink));
   transition:
     transform var(--transition-time) var(--transition-ease),
     filter var(--transition-time) var(--transition-ease),
     background-color var(--transition-time) var(--transition-ease);
-  transform: scale(var(--scale-shrink));
-  filter: var(--active-filter);
 }
 
 /* ── Rounded tables ─────────────────────────────────────────────────────── */
@@ -116,8 +116,8 @@
    corner cells: their background (header, striped row) would otherwise cover it. */
 
 .mantine-Table-table {
-  border-collapse: separate;
   border-spacing: 0;
+  border-collapse: separate;
   border-radius: var(--mantine-radius-default);
 }
 
@@ -186,8 +186,8 @@ ol {
 
 .card-press-effect:active,
 button:active .card-press-effect {
-  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
+  transform: scale(var(--scale-shrink));
 }
 
 .selectable-card {
@@ -198,13 +198,13 @@ button:active .card-press-effect {
 
 .personSearchOptionRow,
 .personSearchOptionMeta {
-  max-width: 100%;
   min-width: 0;
+  max-width: 100%;
 }
 
 .personSearchOptionMeta {
-  color: var(--action-description-color, var(--mantine-color-dimmed));
   overflow: hidden;
+  color: var(--action-description-color, var(--mantine-color-dimmed));
 }
 
 .mantine-Combobox-option:hover {
@@ -223,9 +223,9 @@ button:active .card-press-effect {
 
 .peoplePickerOptions {
   --combobox-padding: calc(0.25rem * var(--mantine-scale));
-  max-width: 100%;
-  min-width: 0;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 /* Autosize viewport uses min-width: min-content, which either shrinks rows
@@ -233,9 +233,9 @@ button:active .card-press-effect {
 .peoplePickerOptions .mantine-ScrollArea-viewport,
 .peoplePickerOptions .mantine-ScrollArea-content {
   box-sizing: border-box;
-  max-width: 100%;
-  min-width: 0;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .peoplePickerOptions .mantine-ScrollArea-content {
@@ -246,10 +246,10 @@ button:active .card-press-effect {
 .peoplePickerOptions .mantine-Combobox-option {
   box-sizing: border-box;
   display: block;
-  max-width: 100%;
-  min-width: 0;
-  overflow: hidden;
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* Flush the scrollbar into the dropdown’s end padding, matching Mantine Select. */
@@ -258,8 +258,8 @@ button:active .card-press-effect {
 }
 
 .mantine-Combobox-dropdown:has(.peoplePickerOptions) .mantine-Combobox-options {
-  padding-inline-end: 0;
   width: 100%;
+  padding-inline-end: 0;
 }
 
 /* PersonSearchOptionRow highlight — Combobox, Spotlight, and custom hit targets */
@@ -268,10 +268,10 @@ button:active .card-press-effect {
   .mantine-Combobox-option:has(.personSearchOptionRow),
   .mantine-Spotlight-action:has(.personSearchOptionRow)
 ) {
-  border-radius: var(--mantine-radius-default);
-  max-width: 100%;
   min-width: 0;
+  max-width: 100%;
   overflow: hidden;
+  border-radius: var(--mantine-radius-default);
   transition: background-color var(--transition-time-quick) var(--transition-ease);
 }
 
@@ -329,8 +329,8 @@ button:active .card-press-effect {
 /* Applied via classNames={{ presetButton: "presetsButton" }} in the component */
 
 .presetsButton[data-active] {
-  background-color: var(--mantine-primary-color-filled);
   color: var(--mantine-color-white);
+  background-color: var(--mantine-primary-color-filled);
 }
 
 .presetsButton[data-active]:hover {
@@ -361,8 +361,8 @@ button:active .card-press-effect {
 }
 
 .presetsButton {
-  align-self: stretch;
   display: flex;
+  align-self: stretch;
   justify-content: flex-start;
   text-align: start;
 }
@@ -378,8 +378,8 @@ button:active .card-press-effect {
 .mantine-DatePickerInput-monthsListControl:hover:not([data-disabled]),
 .mantine-DatePicker-monthsListControl:hover:not([data-disabled]),
 .presetsButton:hover {
-  transform: scale(var(--scale-grow));
   background-color: var(--mantine-color-default-hover);
+  transform: scale(var(--scale-grow));
 }
 
 /* Selected day: keep primary colour on hover instead of defaulting to gray */
@@ -405,6 +405,6 @@ button:active .card-press-effect {
 .mantine-DatePickerInput-monthsListControl:active:not([data-disabled]),
 .mantine-DatePicker-monthsListControl:active:not([data-disabled]),
 .presetsButton:active {
-  transform: scale(var(--scale-shrink));
   filter: var(--active-filter);
+  transform: scale(var(--scale-shrink));
 }

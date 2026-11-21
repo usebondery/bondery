@@ -61,8 +61,8 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
   const editorRef = useRef<EnrichedMarkdownTextInputInstance>(null);
   const pendingMarkdown = useRef<string | null>(null);
   const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isSavingRef = useRef(false);
-  const isTransitioningToMentionRef = useRef(false);
+  const isSavingRef = useRef<boolean>(false);
+  const isTransitioningToMentionRef = useRef<boolean>(false);
 
   const {
     loading: mentionContactsLoading,

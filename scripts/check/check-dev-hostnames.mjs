@@ -102,7 +102,9 @@ function checkAllowedDevOrigins() {
     }
     const match = source.match(/allowedDevOrigins:\s*\[([\s\S]*?)\]/);
     if (!match) {
-      check.add(`${repoPath(filePath)} has no allowedDevOrigins; proxied dev hosts are rejected.`);
+      check.add(
+        `${repoPath(filePath)} has no allowedDevOrigins, so the proxy rejects every dev Host header. Add allowedDevOrigins with ${EXPECTED_HOSTS.join(", ")}.`,
+      );
       continue;
     }
     const entries = [...(match[1] ?? "").matchAll(/"([^"]+)"/g)].map((entry) => entry[1]);
@@ -112,7 +114,9 @@ function checkAllowedDevOrigins() {
         continue;
       }
       if (!allowsHost(entries, hostname)) {
-        check.add(`${repoPath(filePath)} does not allow ${hostname} in allowedDevOrigins.`);
+        check.add(
+          `${repoPath(filePath)} does not allow ${hostname} in allowedDevOrigins. Add it to the allowedDevOrigins array in that file.`,
+        );
       }
     }
   }
@@ -146,7 +150,9 @@ function checkRemotePortlessScript() {
     try {
       source = read(filePath);
     } catch {
-      check.add(`${relativePath} is missing.`);
+      check.add(
+        `${relativePath} is missing. Restore it from version control, or remove it from the list in check-dev-hostnames.mjs.`,
+      );
       continue;
     }
     if (relativePath.endsWith(".mjs")) {
@@ -157,7 +163,9 @@ function checkRemotePortlessScript() {
     }
     for (const hostname of EXPECTED_HOSTS) {
       if (!source.includes(hostname)) {
-        check.add(`${relativePath} does not name ${hostname}.`);
+        check.add(
+          `${relativePath} does not name ${hostname}. Add it to that script, or remove it from EXPECTED_HOSTS when the host is retired.`,
+        );
       }
     }
   }
@@ -192,7 +200,9 @@ function checkEnvExamples() {
         const hostname = new URL(match[0]).hostname;
         if (!EXPECTED_HOSTS.includes(hostname) && !seen.has(`${repoPath(fullPath)}:${hostname}`)) {
           seen.add(`${repoPath(fullPath)}:${hostname}`);
-          check.add(`${repoPath(fullPath)} names ${hostname}, which is not a registered dev host.`);
+          check.add(
+            `${repoPath(fullPath)} names ${hostname}, which is not a registered dev host. Use one of ${EXPECTED_HOSTS.join(", ")}, or add the host to DEV_URLS and EXPECTED_HOSTS.`,
+          );
         }
       }
     }

@@ -190,7 +190,7 @@ describe("peoplePickerPagedList", () => {
     );
   });
 
-  it("ArrowDown on the last option loads more instead of wrapping while hasMore", () => {
+  it("arrowDown on the last option loads more instead of wrapping while hasMore", () => {
     assert.equal(
       shouldLoadMoreOnArrowDown({ canLoadMore: true, optionCount: 10, selectedIndex: 9 }),
       true,
@@ -209,7 +209,7 @@ describe("peoplePickerPagedList", () => {
     );
   });
 
-  it("ArrowDown on the last option calls loadMore while hasMore", () => {
+  it("arrowDown on the last option calls loadMore while hasMore", () => {
     let loadMoreCalls = 0;
     handlePeoplePickerArrowDownLoadMore(
       { nativeEvent: { code: "ArrowDown" } },

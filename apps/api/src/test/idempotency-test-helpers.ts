@@ -166,6 +166,8 @@ export async function waitFor(ready: () => boolean): Promise<void> {
     if (Date.now() - start > 4000) {
       throw new Error("timed out waiting for the idempotency claim");
     }
-    await new Promise((resolve) => setTimeout(resolve, 15));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 15);
+    });
   }
 }

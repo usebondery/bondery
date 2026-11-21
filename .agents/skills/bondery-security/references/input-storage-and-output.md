@@ -15,15 +15,15 @@ Schemas live in `@bondery/schemas`. Error catalog codes only (snake_case).
 
 ## File uploads
 
-| Route | Auth | Size cap (`UPLOAD_LIMITS`) | Validation |
-|-------|------|----------------------------|------------|
-| `POST /contacts/:id/photo` | Session | `image` (5MB) | MIME whitelist before read, `buffer.length` re-check, magic bytes |
-| `POST /me/photo` | Session | `image` (5MB) | Same checks in `uploadProfilePhoto` |
-| `POST /import/vcard/parse` | Integration (API key OK) | `vcard` (100MB) | vCard parser |
-| `POST /import/linkedin/parse` | Integration | `linkedinCsv` (100MB) | CSV parser |
-| `POST /import/instagram/parse` | Integration | `instagramExport` (100MB) | Export parser |
-| `POST /me/import` | Session | `bonderyExport` (100MB) | ZIP magic, archive-root allowlist, entry/uncompressed caps, Zod export schemas |
-| Global multipart | — | `default` (5MB) | Ceiling for any route that sets no cap (`build-app.ts`) |
+| Route                          | Auth                     | Size cap (`UPLOAD_LIMITS`) | Validation                                                                     |
+| ------------------------------ | ------------------------ | -------------------------- | ------------------------------------------------------------------------------ |
+| `POST /contacts/:id/photo`     | Session                  | `image` (5MB)              | MIME whitelist before read, `buffer.length` re-check, magic bytes              |
+| `POST /me/photo`               | Session                  | `image` (5MB)              | Same checks in `uploadProfilePhoto`                                            |
+| `POST /import/vcard/parse`     | Integration (API key OK) | `vcard` (100MB)            | vCard parser                                                                   |
+| `POST /import/linkedin/parse`  | Integration              | `linkedinCsv` (100MB)      | CSV parser                                                                     |
+| `POST /import/instagram/parse` | Integration              | `instagramExport` (100MB)  | Export parser                                                                  |
+| `POST /me/import`              | Session                  | `bonderyExport` (100MB)    | ZIP magic, archive-root allowlist, entry/uncompressed caps, Zod export schemas |
+| Global multipart               | —                        | `default` (5MB)            | Ceiling for any route that sets no cap (`build-app.ts`)                        |
 
 ### Size limits: cap the stream, not the buffer
 
@@ -40,6 +40,7 @@ A size check after `toBuffer()` is not a limit. The bytes are already in memory,
 **Enforced by:** Biome plugin `biome/plugins/no-uncapped-multipart.grit` (a `file()`, `files()`, `parts()` or `saveRequestFiles()` call with no `limits`), and `pnpm run check:input-safety` (the global registration must use `UPLOAD_LIMITS.default`, at or below 10MB).
 
 **Image validation** (`lib/platform/config.ts`):
+
 - Allowed MIME: jpeg, png, gif, webp, avif, heic/heif
 - Size: `AVATAR_UPLOAD.maxFileSize` (5MB), streaming cap plus `validateImageUpload({ size: buffer.length })`
 - Magic-byte check after read
@@ -92,6 +93,7 @@ See [headers-csp-and-cors.md](./headers-csp-and-cors.md) for the per-surface hea
 ## Error handling (no data leakage)
 
 `apps/api/src/lib/platform/errors/map-to-response.ts`:
+
 - Validation → `validation_error` + optional `param`
 - `DomainError` → catalog code
 - **5xx messages sanitized** to `"Internal Server Error"` for client
@@ -99,6 +101,7 @@ See [headers-csp-and-cors.md](./headers-csp-and-cors.md) for the per-surface hea
 - Rate limit → `rate_limit_exceeded` + `retry_after`
 
 **Rules:**
+
 - Never return `error.stack` or internal details to clients
 - Use catalog codes via `internal()`, `unauthorized()`, etc. (`http-errors.ts`)
 - CI: `check-route-errors`, `check-no-flat-error-responses`, `check-api-errors-translations`
@@ -110,6 +113,7 @@ Client display: `bondery-ux` → `references/common/api-errors-display.md`.
 `apps/api/src/lib/platform/logger.ts` — bare Pino, `LOG_LEVEL` env.
 
 **Rules:**
+
 - No passwords, tokens, API keys, or session cookies in logs
 - No full contact PII in info-level logs
 - 5xx: log full `err` server-side only

@@ -37,6 +37,7 @@ import type {
 } from "../../lib/preferences/useMobilePreferences";
 import { useMobilePreferences } from "../../lib/preferences/useMobilePreferences";
 import { syncEffectState } from "../../lib/react/syncEffectState";
+import { nonEmpty } from "../../lib/text";
 import { useShowErrorToast } from "../../lib/toast/useShowErrorToast";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
@@ -44,7 +45,13 @@ import { SettingsAsyncState } from "./components/SettingsAsyncState";
 
 type ReminderHourValue = `${string}:00:00`;
 
-const DATE_FORMAT_PREVIEW = new Date(Date.UTC(2026, 10, 13, 12, 0, 0));
+/** A day above 12, so day-first and month-first formats render differently. */
+const PREVIEW_DAY_OF_MONTH = 13;
+/** Noon UTC keeps the previewed calendar day the same in nearly every time zone. */
+const PREVIEW_HOUR_UTC = 12;
+const DATE_FORMAT_PREVIEW = new Date(
+  Date.UTC(2026, 10, PREVIEW_DAY_OF_MONTH, PREVIEW_HOUR_UTC, 0, 0),
+);
 const DATE_FORMAT_OPTIONS: DateFormatPreference[] = ["locale", "mdy", "dmy", "ymd"];
 
 function normalizeReminderHour(value?: string): ReminderHourValue {
@@ -102,7 +109,7 @@ export function SettingsLanguageScreen() {
 
       const nextLanguage = coerceSupportedLocale(response.data.language);
       const nextTimezone = resolveToCanonicalTimezone(
-        response.data.timezone || getDeviceTimezone(),
+        nonEmpty(response.data.timezone) ?? getDeviceTimezone(),
       );
       const nextTimeFormat = coerceTimeFormatPreference(response.data.timeFormat);
       const nextDateFormat = coerceDateFormatPreference(response.data.dateFormat);
@@ -119,8 +126,8 @@ export function SettingsLanguageScreen() {
         timeFormat: nextTimeFormat,
         timezone: nextTimezone,
       });
-    } catch (err) {
-      setLoadError(resolveDisplayedError(err, t));
+    } catch (error) {
+      setLoadError(resolveDisplayedError(error, t));
     } finally {
       setIsLoading(false);
     }
@@ -130,12 +137,12 @@ export function SettingsLanguageScreen() {
     syncEffectState(() => {
       void loadSettings();
     });
-  }, []);
+  }, [loadSettings]);
 
   const localeOptions = APP_LANGUAGES_DATA.map((language) => ({
     label: formatAppLanguagePickerLabel((key) => tLanguages(key as never), language),
     leftSection: (
-      <Text className="text-[18px] leading-5" size={null}>
+      <Text className="text-lg leading-5" size={null}>
         {countryCodeToFlagEmoji(language.flag)}
       </Text>
     ),
@@ -158,7 +165,7 @@ export function SettingsLanguageScreen() {
         </Text>
       ),
       rightSection: (
-        <Text className="text-[18px] leading-5" size={null}>
+        <Text className="text-lg leading-5" size={null}>
           {countryCodeToFlagEmoji(timezoneOption.flag)}
         </Text>
       ),
@@ -210,9 +217,9 @@ export function SettingsLanguageScreen() {
 
     try {
       await updateSettings({ language: nextLocale });
-    } catch (err) {
+    } catch (error) {
       setLocale(previousLocale);
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 
@@ -227,10 +234,10 @@ export function SettingsLanguageScreen() {
 
     try {
       await updateSettings({ timezone: nextTimezone });
-    } catch (err) {
+    } catch (error) {
       setTimezone(previousTimezone);
       hydrateFromServer({ timezone: previousTimezone });
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 
@@ -245,10 +252,10 @@ export function SettingsLanguageScreen() {
 
     try {
       await updateSettings({ dateFormat: nextDateFormat });
-    } catch (err) {
+    } catch (error) {
       setDateFormat(previousDateFormat);
       hydrateFromServer({ dateFormat: previousDateFormat });
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 
@@ -263,10 +270,10 @@ export function SettingsLanguageScreen() {
 
     try {
       await updateSettings({ timeFormat: nextTimeFormat });
-    } catch (err) {
+    } catch (error) {
       setTimeFormat(previousTimeFormat);
       hydrateFromServer({ timeFormat: previousTimeFormat });
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 
@@ -282,9 +289,9 @@ export function SettingsLanguageScreen() {
 
     try {
       await updateSettings({ reminderSendHour: normalizedReminderSendHour });
-    } catch (err) {
+    } catch (error) {
       setReminderSendHour(previousReminderSendHour);
-      showErrorToast(err);
+      showErrorToast(error);
     }
   };
 

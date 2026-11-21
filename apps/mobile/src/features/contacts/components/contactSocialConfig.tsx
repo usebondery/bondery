@@ -62,11 +62,7 @@ export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] =
       },
     };
 
-    return {
-      color,
-      key,
-      ...configs[key],
-    };
+    return Object.assign({}, configs[key], { color, key });
   });
 
 export function getContactSocialPlatform(key: ContactSocialFieldKey): ContactSocialPlatformConfig {

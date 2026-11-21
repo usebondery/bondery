@@ -16,10 +16,9 @@ export function listTags(): TagWithCount[] {
       "SELECT COUNT(*) as count FROM people_tags WHERE tag_id = ?",
       row.id,
     );
-    return {
-      ...mapTagRow(row),
+    return Object.assign({}, mapTagRow(row), {
       contactCount: countRow?.count ?? 0,
-    };
+    });
   });
 }
 

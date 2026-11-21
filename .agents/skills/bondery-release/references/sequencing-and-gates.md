@@ -55,14 +55,14 @@ Do **not** use leftover `api-X.Y.Z` / `webapp-X.Y.Z` / `ext-X.Y.Z` tags.
 
 ## Human approval before production refs
 
-| Action | Who approves |
-|--------|----------------|
-| `git push origin main:release` | Human (agent proposes commands) |
-| `git push origin vX.Y.Z` / `vX.Y.Z-rc.N` | Human |
-| Approve `production-containers` | Human, after CWS live |
-| Dokploy pin change + redeploy | Human |
-| `force_rebuild: true` on release workflow dispatch | Human |
-| `source: tag-sha` on release workflow dispatch | Human (explicit no-RC hotfix) |
+| Action                                             | Who approves                    |
+| -------------------------------------------------- | ------------------------------- |
+| `git push origin main:release`                     | Human (agent proposes commands) |
+| `git push origin vX.Y.Z` / `vX.Y.Z-rc.N`           | Human                           |
+| Approve `production-containers`                    | Human, after CWS live           |
+| Dokploy pin change + redeploy                      | Human                           |
+| `force_rebuild: true` on release workflow dispatch | Human                           |
+| `source: tag-sha` on release workflow dispatch     | Human (explicit no-RC hotfix)   |
 
 ## Release smoke failure decision tree
 

@@ -231,10 +231,11 @@ export async function getContactGroups(
     countMap.set(item.groupId, current + 1);
   }
 
-  const groupsWithCounts: GroupWithCount[] = groups.map((group) => ({
-    ...toGroupDto(group),
-    contactCount: countMap.get(group.id) ?? 0,
-  }));
+  const groupsWithCounts: GroupWithCount[] = groups.map((group) =>
+    Object.assign({}, toGroupDto(group), {
+      contactCount: countMap.get(group.id) ?? 0,
+    }),
+  );
 
   return { groups: groupsWithCounts };
 }

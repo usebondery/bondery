@@ -4,7 +4,7 @@ MCP sequences for common MAIN board operations. Always verify `project_id = 5ab1
 
 ## Create card (agent)
 
-```
+```text
 create_work_item(
   project_id=MAIN,
   name="[Chore] ...",
@@ -18,7 +18,7 @@ Agents never create cards directly in Building.
 
 ## Sanity-check intake
 
-```
+```text
 retrieve_work_item(work_item_id)
 # Verify ## Sanity check section in description
 update_work_item(state=Icebox | Bet, description_html=...)
@@ -26,14 +26,14 @@ update_work_item(state=Icebox | Bet, description_html=...)
 
 ## Groom stale Icebox
 
-```
+```text
 list_work_items(pql='state = "<Icebox UUID>" AND created_at < "<60 days ago>"')
 # For each: comment + Won't do OR refresh with date bump
 ```
 
 ## Link ROADMAP
 
-```
+```text
 retrieve_work_item_by_identifier("ROADMAP-n")
 # Prefer MCP when list_work_item_relation_definitions works:
 # create_work_item_relation(..., relation_definition_id=..., relation_definition_label="relates to")
@@ -43,7 +43,7 @@ update_work_item(description_html with ## Roadmap section)
 
 ## Blocked
 
-```
+```text
 update_work_item(state=Blocked)
 create_work_item_comment("Blocked: [who/what] — need [what]. Since YYYY-MM-DD.")
 ```

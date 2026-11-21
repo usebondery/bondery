@@ -61,7 +61,7 @@ export function EditIdentitySheet({
     formState: { isDirty, isValid },
   } = useSheetForm({
     getDefaultValues: () => ({
-      firstName: contact.firstName ?? "",
+      firstName: contact.firstName,
       headline: contact.headline ?? "",
       lastName: contact.lastName ?? "",
       middleName: contact.middleName ?? "",
@@ -112,7 +112,7 @@ export function EditIdentitySheet({
   const headlineLeadingIcon = <IconBriefcase size={18} stroke={colors.iconSecondary} />;
 
   function performSave(values: Parameters<typeof updateContact>[1]) {
-    return updateContact(contact.id, values, contact.updatedAt ?? undefined);
+    return updateContact(contact.id, values, contact.updatedAt);
   }
 
   const { isSubmitting, submit } = useSheetLocalSubmit(handleSubmit, {

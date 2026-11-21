@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { Text } from "react-email";
 import { defaultAccountDeletedCopy } from "#fixtures/default-copy.js";
 import type { EmailDocumentProps } from "#shared/chrome.js";
@@ -24,7 +25,7 @@ export default function AccountDeletedEmail({
   lang,
   title,
   websiteUrl,
-}: AccountDeletedEmailProps) {
+}: AccountDeletedEmailProps): ReactElement {
   return (
     <EmailWrapper
       chrome={chrome}

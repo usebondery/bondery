@@ -1,11 +1,15 @@
-import { CONTACT_LIMITS, phoneEntryInputSchema } from "@bondery/schemas";
+import { CONTACT_LIMITS, type PhoneEntry, phoneEntryInputSchema } from "@bondery/schemas";
 import { z } from "zod";
 import { normalizePhoneParts } from "#phone/phone-normalize.js";
+
+type PhoneEntryInput = z.input<typeof phoneEntryInputSchema>;
 
 /**
  * Server/client phone row schema with normalization injected via default country.
  */
-export function createPhoneEntrySchema(defaultCountry: string | null) {
+export function createPhoneEntrySchema(
+  defaultCountry: string | null,
+): z.ZodType<PhoneEntry, PhoneEntryInput> {
   return phoneEntryInputSchema
     .superRefine((entry, context) => {
       const normalized = normalizePhoneParts(entry.prefix, entry.value, { defaultCountry });
@@ -17,7 +21,7 @@ export function createPhoneEntrySchema(defaultCountry: string | null) {
         });
       }
     })
-    .transform((entry) => {
+    .transform((entry): PhoneEntry => {
       const normalized = normalizePhoneParts(entry.prefix, entry.value, { defaultCountry });
       if ("error" in normalized) {
         return {
@@ -37,7 +41,9 @@ export function createPhoneEntrySchema(defaultCountry: string | null) {
     });
 }
 
-export function createReplacePhonesSchema(defaultCountry: string | null) {
+export function createReplacePhonesSchema(
+  defaultCountry: string | null,
+): z.ZodType<PhoneEntry[], PhoneEntryInput[]> {
   return z.array(createPhoneEntrySchema(defaultCountry)).max(CONTACT_LIMITS.maxPhones, {
     error: `Maximum of ${CONTACT_LIMITS.maxPhones} phone numbers allowed`,
   });

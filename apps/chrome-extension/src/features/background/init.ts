@@ -1,4 +1,4 @@
-﻿import { browser } from "wxt/browser";
+import { browser } from "wxt/browser";
 import { getTokens, isAuthenticated, refreshAccessToken } from "../../lib/auth";
 import { extLog } from "../../lib/log";
 import type { ExtensionMessage } from "../../lib/messaging/types";

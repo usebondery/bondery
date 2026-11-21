@@ -7,6 +7,7 @@ import {
   getContactAvatarStoragePath,
   uploadContactAvatarAndSetFlag,
 } from "../../lib/contacts/avatar-storage.js";
+import { firstNonBlank } from "../../lib/platform/blank-text.js";
 import { validateImageMagicBytes, validateImageUpload } from "../../lib/platform/config.js";
 import logger from "../../lib/platform/logger.js";
 import { AVATARS_BUCKET, getStorage } from "../../lib/storage/get-storage.js";
@@ -17,7 +18,7 @@ type UserMetadata = {
 };
 
 function getMetadataAvatarUrl(userMetadata: UserMetadata | undefined): string | null {
-  return userMetadata?.avatar_url || userMetadata?.picture || null;
+  return firstNonBlank(userMetadata?.avatar_url, userMetadata?.picture);
 }
 
 async function importMetadataAvatarToStorage(

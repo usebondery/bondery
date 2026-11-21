@@ -201,7 +201,7 @@ export function abbreviateLocationCountry(location: string | null | undefined): 
   }
 
   const parts = location.split(",").map((p) => p.trim());
-  const lastPart = parts[parts.length - 1];
+  const lastPart = parts.at(-1) ?? "";
 
   const countryCode = getCountryNameToCodeMap().get(lastPart) ?? (lastPart === "US" ? "US" : null);
   if (!countryCode) {
@@ -213,7 +213,7 @@ export function abbreviateLocationCountry(location: string | null | undefined): 
   // For US locations, also abbreviate the state segment (second-to-last part)
   if (countryCode === "US" && parts.length >= 2) {
     const stateIndex = parts.length - 2;
-    const stateAbbr = US_STATE_ABBREVIATIONS[parts[stateIndex]];
+    const stateAbbr = US_STATE_ABBREVIATIONS[parts[stateIndex] ?? ""];
     if (stateAbbr) {
       parts[stateIndex] = stateAbbr;
     }

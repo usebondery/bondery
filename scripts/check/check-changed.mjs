@@ -87,6 +87,13 @@ export const CHECKS = [
       ),
   },
   {
+    args: () => ["run", "check:diagnostic-messages"],
+    command: "pnpm",
+    name: "diagnostic-messages",
+    when: (files) =>
+      files.some((file) => file.startsWith("scripts/check/") || file.startsWith("biome/plugins/")),
+  },
+  {
     args: () => ["run", "check:docs"],
     command: "pnpm",
     name: "docs",
@@ -259,7 +266,7 @@ function lockHolderAlive() {
     process.kill(pid, 0);
     return true;
   } catch (error) {
-    return error?.code === "EPERM";
+    return error.code === "EPERM";
   }
 }
 
@@ -267,7 +274,7 @@ async function acquireRunLock() {
   mkdirSync(join(ROOT, ".temp"), { recursive: true });
   const started = Date.now();
   let announced = false;
-  while (true) {
+  for (;;) {
     try {
       const fd = openSync(LOCK_PATH, "wx");
       writeSync(fd, JSON.stringify({ pid: process.pid, startedAt: new Date().toISOString() }));
@@ -290,7 +297,9 @@ async function acquireRunLock() {
       console.log("check:changed: another run is in progress in this checkout, waiting for it");
       announced = true;
     }
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
   }
 }
 
@@ -365,13 +374,15 @@ async function main() {
     console.log(
       `\ncheck:changed: ${failed.length} failed. Fix the cause (not the symptom) and re-run \`pnpm run check:changed\`.`,
     );
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
   if (skipped.length > 0) {
     console.log(
       `\ncheck:changed: every check that ran passed, ${skipped.length} skipped. Not done until those run.`,
     );
-    process.exit(3);
+    process.exitCode = 3;
+    return;
   }
   console.log("\ncheck:changed: all checks passed");
 }

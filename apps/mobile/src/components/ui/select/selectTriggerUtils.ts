@@ -8,5 +8,5 @@ export function shouldShowSelectClear(
   showValueStyle: boolean,
   disabled: boolean,
 ): boolean {
-  return Boolean(clearable && showValueStyle && !disabled);
+  return clearable && showValueStyle && !disabled;
 }

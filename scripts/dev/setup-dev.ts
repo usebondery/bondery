@@ -116,6 +116,108 @@ function seedRedisTls(envPath: string) {
   log.warn("Set up local Redis TLS + password in .env.local (pnpm run start:redis creates them)");
 }
 
+/**
+ * Local Postgres is TLS-only (pnpm run start:postgres). Point the dev tools at its CA, unless the
+ * developer already chose a TLS mode (for example an external database).
+ */
+function seedPostgresTls(envPath: string) {
+  const content = readFileSync(envPath, "utf-8");
+  if (readEnvAssignment(content, "DATABASE_SSL_MODE")) {
+    return;
+  }
+  upsertEnvAssignments(envPath, {
+    DATABASE_SSL_MODE: "verify-full",
+    DATABASE_SSL_ROOT_CERT_FILE: "../../.temp/postgres-secrets/client/ca.crt",
+  });
+  log.warn(
+    "Set up local Postgres TLS in .env.local. Recreate the dev database once: pnpm run start:postgres",
+  );
+}
+
+/**
+ * Local SeaweedFS serves the API over HTTPS with a private CA (pnpm run start:seaweedfs). Older
+ * files still point at the plaintext gateway. A remote or custom endpoint is left alone.
+ */
+const LOCAL_S3_ENDPOINT = "https://127.0.0.1:8443";
+const LEGACY_LOCAL_S3_ENDPOINTS = new Set(["http://127.0.0.1:8333", "http://localhost:8333"]);
+
+function seedStorageTls(envPath: string) {
+  const content = readFileSync(envPath, "utf-8");
+  const endpoint = readEnvAssignment(content, "BONDERY_PRIVATE_S3_ENDPOINT");
+  if (endpoint && endpoint !== LOCAL_S3_ENDPOINT && !LEGACY_LOCAL_S3_ENDPOINTS.has(endpoint)) {
+    return;
+  }
+  const updates: Record<string, string> = {};
+  if (endpoint !== LOCAL_S3_ENDPOINT) {
+    updates.BONDERY_PRIVATE_S3_ENDPOINT = LOCAL_S3_ENDPOINT;
+  }
+  if (!readEnvAssignment(content, "BONDERY_PRIVATE_S3_TLS_CA_FILE")) {
+    updates.BONDERY_PRIVATE_S3_TLS_CA_FILE = "../../.temp/storage-secrets/client/ca.crt";
+  }
+  if (Object.keys(updates).length === 0) {
+    return;
+  }
+  upsertEnvAssignments(envPath, updates);
+  log.warn(
+    "Set up local object storage TLS in .env.local. Restart SeaweedFS once: pnpm run stop:seaweedfs && pnpm run start:seaweedfs",
+  );
+}
+
+/**
+ * The API serves HTTPS only (port 26642), like the deployed stack. The webapp's server side calls
+ * it directly; browsers go through Portless. Older files point at the plaintext port 26631, which
+ * no longer exists. A remote or custom internal URL is left alone.
+ */
+const LOCAL_INTERNAL_API_URL = "https://127.0.0.1:26642";
+const LEGACY_LOCAL_INTERNAL_API_URL = "http://127.0.0.1:26631";
+const LOCAL_PUBLIC_API_URL = "https://api.usebondery.test";
+/** The old plaintext API port, on loopback, a LAN IP, or a Tailscale IP or name (phone testing). */
+const LEGACY_PUBLIC_API_URL = /^http:\/\/[^/]+:26631\/?$/;
+
+/** Moves a plaintext public API URL to Portless. Phones now use `pnpm run dev:mobile-api`. */
+function migrateLegacyPublicApiUrl(envPath: string) {
+  const publicUrl = readEnvAssignment(readFileSync(envPath, "utf-8"), "BONDERY_PUBLIC_API_URL");
+  if (!(publicUrl && LEGACY_PUBLIC_API_URL.test(publicUrl))) {
+    return;
+  }
+  upsertEnvAssignments(envPath, { BONDERY_PUBLIC_API_URL: LOCAL_PUBLIC_API_URL });
+  log.warn(
+    `The API serves HTTPS only now. BONDERY_PUBLIC_API_URL moved from ${publicUrl} to ${LOCAL_PUBLIC_API_URL}. For a phone, run pnpm run dev:mobile-api`,
+  );
+}
+const API_TLS_FILES = {
+  BONDERY_INFRA_INTERNAL_API_CA_FILE: "../../.temp/api-secrets/client/ca.crt",
+  BONDERY_PRIVATE_API_TLS_CERT_FILE: "../../.temp/api-secrets/server/tls.crt",
+  BONDERY_PRIVATE_API_TLS_KEY_FILE: "../../.temp/api-secrets/server/tls.key",
+};
+
+function seedApiTls(envPath: string) {
+  const content = readFileSync(envPath, "utf-8");
+  const internalUrl = readEnvAssignment(content, "BONDERY_INFRA_INTERNAL_API_URL");
+  if (
+    internalUrl &&
+    internalUrl !== LOCAL_INTERNAL_API_URL &&
+    internalUrl !== LEGACY_LOCAL_INTERNAL_API_URL
+  ) {
+    return;
+  }
+  const updates: Record<string, string> = {};
+  if (internalUrl !== LOCAL_INTERNAL_API_URL) {
+    updates.BONDERY_INFRA_INTERNAL_API_URL = LOCAL_INTERNAL_API_URL;
+  }
+  for (const [key, value] of Object.entries(API_TLS_FILES)) {
+    if (!readEnvAssignment(content, key)) {
+      updates[key] = value;
+    }
+  }
+  if (Object.keys(updates).length > 0) {
+    upsertEnvAssignments(envPath, updates);
+    log.warn("Set up the API's HTTPS listener in .env.local. Restart pnpm run dev");
+  }
+  // The dev API and webapp read these files at boot, so create them now.
+  run("pnpm run api:secrets");
+}
+
 function main() {
   const rootEnv = join(repoRoot, ".env.local");
   const example = join(repoRoot, ".env.local.example");
@@ -138,6 +240,10 @@ function main() {
   seedInventableAuthSecrets(rootEnv);
   seedPostgresPassword(rootEnv);
   seedRedisTls(rootEnv);
+  seedPostgresTls(rootEnv);
+  seedStorageTls(rootEnv);
+  seedApiTls(rootEnv);
+  migrateLegacyPublicApiUrl(rootEnv);
 
   log.step(3, 3, "Sync app env files (development + production) → check");
   run("pnpm run env");

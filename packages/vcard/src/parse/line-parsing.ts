@@ -6,21 +6,20 @@ export function unfoldLines(input: string): string[] {
   const logicalLines: string[] = [];
 
   for (const line of physicalLines) {
+    const previous = logicalLines.at(-1);
+
     // RFC 6350 folding: continuation line starts with space or tab
-    if ((line.startsWith(" ") || line.startsWith("\t")) && logicalLines.length > 0) {
-      logicalLines[logicalLines.length - 1] += line.slice(1);
+    if (previous !== undefined && (line.startsWith(" ") || line.startsWith("\t"))) {
+      logicalLines.pop();
+      logicalLines.push(previous + line.slice(1));
       continue;
     }
 
     // vCard 2.1 quoted-printable soft line break: previous line ends with '='
-    if (
-      logicalLines.length > 0 &&
-      logicalLines[logicalLines.length - 1].endsWith("=") &&
-      isQuotedPrintableLine(logicalLines[logicalLines.length - 1])
-    ) {
+    if (previous !== undefined && previous.endsWith("=") && isQuotedPrintableLine(previous)) {
       // Remove trailing '=' and append current line
-      logicalLines[logicalLines.length - 1] =
-        logicalLines[logicalLines.length - 1].slice(0, -1) + line;
+      logicalLines.pop();
+      logicalLines.push(previous.slice(0, -1) + line);
       continue;
     }
 
@@ -42,6 +41,9 @@ function isQuotedPrintableLine(line: string): boolean {
   return left.includes("ENCODING=QUOTED-PRINTABLE");
 }
 
+/** A quoted-printable escape is `=` followed by two hex digits, as in `=C4`. */
+const QUOTED_PRINTABLE_ESCAPE_LENGTH = 3;
+
 /**
  * Decodes a quoted-printable encoded string to a UTF-8 string.
  * Handles multi-byte UTF-8 sequences (e.g. =C4=8D → č).
@@ -51,10 +53,10 @@ function decodeQuotedPrintable(value: string): string {
   let i = 0;
   while (i < value.length) {
     if (value[i] === "=" && i + 2 < value.length) {
-      const hex = value.slice(i + 1, i + 3);
+      const hex = value.slice(i + 1, i + QUOTED_PRINTABLE_ESCAPE_LENGTH);
       if (/^[0-9A-Fa-f]{2}$/.test(hex)) {
-        bytes.push(parseInt(hex, 16));
-        i += 3;
+        bytes.push(Number.parseInt(hex, 16));
+        i += QUOTED_PRINTABLE_ESCAPE_LENGTH;
         continue;
       }
     }
@@ -65,7 +67,7 @@ function decodeQuotedPrintable(value: string): string {
   return new TextDecoder("utf-8").decode(new Uint8Array(bytes));
 }
 
-function findContentDelimiter(line: string): number {
+function findContentDelimiter(line: string) {
   let quoted = false;
 
   for (let index = 0; index < line.length; index += 1) {
@@ -86,8 +88,7 @@ function splitSemicolonTokens(value: string): string[] {
   let current = "";
   let quoted = false;
 
-  for (let index = 0; index < value.length; index += 1) {
-    const char = value[index];
+  for (const char of value) {
     if (char === '"') {
       quoted = !quoted;
       current += char;
@@ -112,8 +113,7 @@ function splitCommaTokens(value: string): string[] {
   let current = "";
   let quoted = false;
 
-  for (let index = 0; index < value.length; index += 1) {
-    const char = value[index];
+  for (const char of value) {
     if (char === '"') {
       quoted = !quoted;
       continue;
@@ -164,7 +164,8 @@ export function parseContentLine(line: string): VCardProperty {
   const left = line.slice(0, delimiterIndex);
   const value = line.slice(delimiterIndex + 1);
   const tokens = splitSemicolonTokens(left);
-  const [nameToken, ...parameterTokens] = tokens;
+  // splitSemicolonTokens always returns at least one token, so the default never applies.
+  const [nameToken = "", ...parameterTokens] = tokens;
   const groupSeparatorIndex = nameToken.indexOf(".");
 
   const group = groupSeparatorIndex === -1 ? undefined : nameToken.slice(0, groupSeparatorIndex);

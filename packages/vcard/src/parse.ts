@@ -52,8 +52,9 @@ export function parseVCards(input: string, options: VCardParseOptions = {}): Par
  */
 export function parseVCard(input: string, options: VCardParseOptions = {}): ParsedVCard {
   const cards = parseVCards(input, options);
-  if (cards.length !== 1) {
+  const [card] = cards;
+  if (cards.length !== 1 || card === undefined) {
     throw new Error(`Expected exactly one VCARD entity but found ${cards.length}.`);
   }
-  return cards[0];
+  return card;
 }

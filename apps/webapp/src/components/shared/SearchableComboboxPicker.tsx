@@ -83,7 +83,7 @@ export function SearchableComboboxPicker({
     }
   };
 
-  const isTargetDisabled = disabled || loading;
+  const isTargetDisabled = disabled === true || loading === true;
 
   const targetBody = targetItem ? (
     <SearchableComboboxTargetItem {...targetItem} />

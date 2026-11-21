@@ -46,7 +46,9 @@ describe("redis shared clients", () => {
 
   it("shutdownRedis is idempotent without open connections", async () => {
     resetRedisClientsForTests();
-    await shutdownRedis();
-    await shutdownRedis();
+    await assert.doesNotReject(async () => {
+      await shutdownRedis();
+      await shutdownRedis();
+    });
   });
 });

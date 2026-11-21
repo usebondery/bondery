@@ -1,6 +1,7 @@
 "use client";
 
 import { Combobox, Group, Loader } from "@mantine/core";
+import type { ReactElement } from "react";
 import type { PeoplePickerOptionsProps } from "#peoplePicker/PeoplePickerOptions.js";
 import { PeoplePickerOptions } from "#peoplePicker/PeoplePickerOptions.js";
 import {
@@ -20,7 +21,7 @@ export function PeoplePickerDropdownBody<T extends PeoplePickerOptionPerson>({
   noResultsLabel,
   searchingLabel,
   ...options
-}: PeoplePickerDropdownBodyProps<T>) {
+}: PeoplePickerDropdownBodyProps<T>): ReactElement {
   return (
     <Combobox.Options w="100%">
       <PeoplePickerOptions

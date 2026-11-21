@@ -1,6 +1,6 @@
 import { Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconArrowRight } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { PressableCard } from "#PressableCard/PressableCard.js";
 
 export interface LinkCardProps {
@@ -15,7 +15,13 @@ export interface LinkCardProps {
  * Pressable card with an icon square, a title, and a description.
  * Use it for a docs link or any other destination that needs a short explanation.
  */
-export function LinkCard({ description, external = false, href, icon, title }: LinkCardProps) {
+export function LinkCard({
+  description,
+  external = false,
+  href,
+  icon,
+  title,
+}: LinkCardProps): ReactElement {
   return (
     <PressableCard external={external} href={href}>
       <Group align="center" gap="sm" wrap="nowrap">

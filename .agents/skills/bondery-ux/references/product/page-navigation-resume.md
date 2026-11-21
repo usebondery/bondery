@@ -22,11 +22,11 @@ Users lose context when:
 
 ## Three layers (do not mix)
 
-| Layer | What it owns | Hop-down / missing data |
-|-------|----------------|-------------------------|
-| **Identity** | Who you are (`getRequestSession`, app layout) | Anonymous → login. Hop-down **stays on the URL**. |
-| **Shell chrome** | Sidebar, session name/avatar/theme, locale | Session-backed. **No** global outage banner, **no** `/health/ready` polling, **no** app-wide offline pill. |
-| **Product data** | Page queries (settings, lists, detail) | Skeleton while pending with no cache, **stale** cache while refetching, `(shell)/error.tsx` + `QueryLoadError` Retry when the page-defining query fails with no data. Never fake defaults (`?? {}` / `?? []` as success) and never app-wide chrome. |
+| Layer            | What it owns                                  | Hop-down / missing data                                                                                                                                                                                                                             |
+| ---------------- | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Identity**     | Who you are (`getRequestSession`, app layout) | Anonymous → login. Hop-down **stays on the URL**.                                                                                                                                                                                                   |
+| **Shell chrome** | Sidebar, session name/avatar/theme, locale    | Session-backed. **No** global outage banner, **no** `/health/ready` polling, **no** app-wide offline pill.                                                                                                                                          |
+| **Product data** | Page queries (settings, lists, detail)        | Skeleton while pending with no cache, **stale** cache while refetching, `(shell)/error.tsx` + `QueryLoadError` Retry when the page-defining query fails with no data. Never fake defaults (`?? {}` / `?? []` as success) and never app-wide chrome. |
 
 ---
 
@@ -36,11 +36,11 @@ Users lose context when:
 
 ## Single mechanism: `redirect` query param
 
-| Trigger | Destination |
-|---------|-------------|
-| Session expired (401) | `/login?redirect=<encoded-path>` |
-| User sign-out / account delete | `/login` — **no** `redirect` |
-| Chained outage → login | Forward existing `redirect`, not `/app/unavailable` |
+| Trigger                        | Destination                                         |
+| ------------------------------ | --------------------------------------------------- |
+| Session expired (401)          | `/login?redirect=<encoded-path>`                    |
+| User sign-out / account delete | `/login` — **no** `redirect`                        |
+| Chained outage → login         | Forward existing `redirect`, not `/app/unavailable` |
 
 Hop failures (502/503/504, BFF synthetic 503, network errors) **do not** set `redirect` or change the URL. Product queries show skeleton, stale data, or `(shell)/error.tsx`.
 
@@ -55,9 +55,9 @@ Hop failures (502/503/504, BFF synthetic 503, network errors) **do not** set `re
 
 ## Two redirect layers (do not confuse)
 
-| Layer | When | Mechanism |
-|-------|------|-----------|
-| **Route auth** | No session visiting `/app/*` | `proxy.ts` → `supabase/proxy.ts` `updateSession` → `buildLoginUrl` |
+| Layer             | When                              | Mechanism                                                                          |
+| ----------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
+| **Route auth**    | No session visiting `/app/*`      | `proxy.ts` → `supabase/proxy.ts` `updateSession` → `buildLoginUrl`                 |
 | **API transport** | Valid session but API returns 401 | `applyTransportErrorPolicy` / `applyServerTransportPolicy` → login with `redirect` |
 
 API hop-down is **not** handled via URL change. Client transport classifies hop-down for query retries and otherwise stays silent. RSC transport rethrows into the route `error.tsx`.
@@ -98,35 +98,35 @@ Details: [onboarding.md](./onboarding.md).
 
 ## Implementation map
 
-| Area | Location |
-|------|----------|
-| URL builders / validation | `apps/webapp/src/lib/auth/returnIntent.ts` |
-| Constants | `apps/webapp/src/lib/auth/constants.ts` |
-| Middleware headers | `apps/webapp/src/proxy.ts` |
-| Unauthenticated route guard | `apps/webapp/src/supabase/proxy.ts` |
-| 401 client transport | `handleUnauthorizedSession`, `endSession({ reason: 'session_expired' })` |
-| 401 server transport | `handleServerUnauthorizedSession`, `applyServerTransportPolicy` |
-| Hop-down client | `applyTransportErrorPolicy` (silent); page queries / `(shell)/error.tsx` + `QueryErrorResetBoundary` |
-| Hop-down server | `applyServerTransportPolicy` (rethrow), `(shell)/error.tsx` |
-| Identity layout | `getRequestSession`, `app/(app)/app/layout.tsx` |
-| Stale bookmark page | `UnavailableClient.tsx` (`retryApiConnection` session probe only) |
-| OAuth | `apps/webapp/src/app/(app)/auth/callback/route.ts` |
-| API policy | `apps/webapp/src/lib/api/README.md` |
+| Area                        | Location                                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| URL builders / validation   | `apps/webapp/src/lib/auth/returnIntent.ts`                                                           |
+| Constants                   | `apps/webapp/src/lib/auth/constants.ts`                                                              |
+| Middleware headers          | `apps/webapp/src/proxy.ts`                                                                           |
+| Unauthenticated route guard | `apps/webapp/src/supabase/proxy.ts`                                                                  |
+| 401 client transport        | `handleUnauthorizedSession`, `endSession({ reason: 'session_expired' })`                             |
+| 401 server transport        | `handleServerUnauthorizedSession`, `applyServerTransportPolicy`                                      |
+| Hop-down client             | `applyTransportErrorPolicy` (silent); page queries / `(shell)/error.tsx` + `QueryErrorResetBoundary` |
+| Hop-down server             | `applyServerTransportPolicy` (rethrow), `(shell)/error.tsx`                                          |
+| Identity layout             | `getRequestSession`, `app/(app)/app/layout.tsx`                                                      |
+| Stale bookmark page         | `UnavailableClient.tsx` (`retryApiConnection` session probe only)                                    |
+| OAuth                       | `apps/webapp/src/app/(app)/auth/callback/route.ts`                                                   |
+| API policy                  | `apps/webapp/src/lib/api/README.md`                                                                  |
 
 ---
 
 ## Do / Don’t
 
-| Do | Don’t |
-|----|-------|
-| `redirect` only for login | `returnUrl` alias, or `next_action` for login return |
-| Validate every consume path | Trust raw URLs |
-| Stay on URL during hop blips | Hard-nav to `/app/unavailable` on 503 |
-| Skip onboarding once for deep links | Skip onboarding for `/app` home |
-| Attach `redirect` only for `session_expired` | On voluntary sign-out |
-| Show skeleton / stale / `(shell)/error.tsx` for product data | Global outage banner or fake `?? {}` success |
-| Let `refetchOnWindowFocus` refresh queries | Invalidate-all on tab visibility or `router.refresh()` as a heartbeat |
-| `refreshAppShell()` for onboarding / last-resort identity | `router.refresh()` after preference field saves |
+| Do                                                           | Don’t                                                                 |
+| ------------------------------------------------------------ | --------------------------------------------------------------------- |
+| `redirect` only for login                                    | `returnUrl` alias, or `next_action` for login return                  |
+| Validate every consume path                                  | Trust raw URLs                                                        |
+| Stay on URL during hop blips                                 | Hard-nav to `/app/unavailable` on 503                                 |
+| Skip onboarding once for deep links                          | Skip onboarding for `/app` home                                       |
+| Attach `redirect` only for `session_expired`                 | On voluntary sign-out                                                 |
+| Show skeleton / stale / `(shell)/error.tsx` for product data | Global outage banner or fake `?? {}` success                          |
+| Let `refetchOnWindowFocus` refresh queries                   | Invalidate-all on tab visibility or `router.refresh()` as a heartbeat |
+| `refreshAppShell()` for onboarding / last-resort identity    | `router.refresh()` after preference field saves                       |
 
 ---
 

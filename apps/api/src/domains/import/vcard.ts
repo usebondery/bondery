@@ -48,10 +48,11 @@ export async function commitVCardImport(
   const importedCount = insertedPeople.length;
   const personIds = insertedPeople.map((person) => person.id);
 
-  const contactPersonPairs = contacts.map((contact, index) => ({
-    contact,
-    personId: personIds[index],
-  }));
+  // `createManyAndReturn` returns one row per input row, in input order.
+  const contactPersonPairs = contacts.flatMap((contact, index) => {
+    const personId = personIds[index];
+    return personId === undefined ? [] : [{ contact, personId }];
+  });
 
   const phoneRows = contactPersonPairs.flatMap(({ contact, personId }) =>
     contact.phones.map((phone, sortOrder) => ({
@@ -175,9 +176,9 @@ export async function commitVCardImport(
             WHERE id = ${personId}::uuid AND user_id = ${user.id}::uuid
           `;
         }
-      } catch (err) {
+      } catch (error) {
         log?.error(
-          { err, personId },
+          { err: error, personId },
           "Failed to sync preferred address to person during vCard import",
         );
       }

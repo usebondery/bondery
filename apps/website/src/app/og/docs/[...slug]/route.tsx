@@ -1,4 +1,7 @@
 import { OgTitled } from "@bondery/branding/og";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { notFound } from "next/navigation";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 import { getPageImage, source } from "@/lib/source";
@@ -17,7 +20,7 @@ export async function GET(_req: Request, context: RouteContext) {
   }
 
   return createOgImageResponse(
-    <OgTitled subtype="Docs" title={page.data.title ?? "Bondery Docs"} />,
+    <OgTitled subtype={docs.Og.Subtype} title={page.data.title ?? docs.Og.DefaultTitle} />,
   );
 }
 

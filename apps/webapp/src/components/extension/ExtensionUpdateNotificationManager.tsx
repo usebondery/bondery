@@ -79,7 +79,7 @@ export function ExtensionUpdateNotificationManager() {
               window.location.origin,
             );
 
-            promise.then((handled) => {
+            void promise.then((handled) => {
               if (!handled) {
                 window.open(CHROME_EXTENSION_URL, "_blank", "noopener,noreferrer");
               }
@@ -92,7 +92,7 @@ export function ExtensionUpdateNotificationManager() {
               color: "red",
               id: EXTENSION_UPDATE_ID,
               message: (
-                <Stack gap={"xs"} mt={4}>
+                <Stack gap="xs" mt={4}>
                   <Text c="dimmed" size="xs">
                     {t("WebappNotificationDescription")}
                   </Text>
@@ -118,7 +118,7 @@ export function ExtensionUpdateNotificationManager() {
       }
     }
 
-    check();
+    void check();
 
     return () => {
       cancelled = true;

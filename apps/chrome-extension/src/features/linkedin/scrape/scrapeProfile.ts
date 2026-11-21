@@ -126,7 +126,7 @@ function keptCount(voyagerCount: number, domCount: number): "voyager" | "dom" | 
   return "none";
 }
 
-function setFlag(value: string | undefined): string {
+function setFlag(value: string | undefined): "set" | "" {
   return value ? "set" : "";
 }
 
@@ -145,7 +145,7 @@ function coverageRows(input: {
 }): VoyagerCoverageRow[] {
   const dom = input.domIdentity;
   const voyager = input.voyagerIdentity;
-  const nameKept = (field: "firstName" | "lastName"): string => {
+  const nameKept = (field: "firstName" | "lastName"): "dom" | "voyager" | "handle" | "none" => {
     const side = keptPreferDom(dom?.[field], voyager?.[field]);
     if (side !== "none") {
       return side;
@@ -235,7 +235,7 @@ export async function scrapeLinkedInProfile(
     }
   }
   const inflight = inflightScrapes.get(handle);
-  if (inflight) {
+  if (inflight !== undefined) {
     return inflight;
   }
 
@@ -325,11 +325,13 @@ export async function scrapeLinkedInProfile(
         workHistory,
       };
 
+      const locationLog = voyagerMeta.location ? `"${voyagerMeta.location}"` : "none";
+      const bioLog = linkedinBio ? `${linkedinBio.length}c` : "none";
       extLog.debug(
         `[linkedin][scrape] ${handle}: ${workHistory.length} work (${fetchedWork.length > 0 ? "voyager" : "dom"}),` +
           ` ${educationHistory.length} edu (${fetchedEdu.length > 0 ? "voyager" : "dom"}),` +
-          ` location=${voyagerMeta.location ? `"${voyagerMeta.location}"` : "none"}` +
-          ` bio=${linkedinBio ? `${linkedinBio.length}c` : "none"}`,
+          ` location=${locationLog}` +
+          ` bio=${bioLog}`,
       );
 
       if (workHistory.length === 0 && educationHistory.length === 0) {

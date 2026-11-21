@@ -1,4 +1,4 @@
-import type { CSSProperties, ImgHTMLAttributes } from "react";
+import type { CSSProperties, ImgHTMLAttributes, ReactElement } from "react";
 
 /**
  * Official Anthropic / Claude logomark.
@@ -19,7 +19,12 @@ export type AnthropicIconProps = Omit<
   size?: number | string;
 };
 
-export function AnthropicIcon({ color, size = 24, style, ...props }: AnthropicIconProps) {
+export function AnthropicIcon({
+  color,
+  size = 24,
+  style,
+  ...props
+}: AnthropicIconProps): ReactElement {
   if (color && color !== ANTHROPIC_MARK_COLOR) {
     return (
       <span

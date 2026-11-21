@@ -39,30 +39,30 @@ Use `supabase-postgres-best-practices` for generic Postgres performance theory. 
 
 ## Package map
 
-| Concern | Path |
-|---------|------|
-| Prisma schema (entry) | `packages/db/prisma/schema.prisma` (generator + datasource) |
-| Prisma models | `packages/db/prisma/models/*.prisma` |
-| Prisma config | `packages/db/prisma.config.ts` (`schema: "prisma"`) |
-| Prisma migrations | `packages/db/prisma/migrations/` |
-| Extensions, indexes, functions | `packages/db/prisma/sql/functions.sql` |
-| Shared Prisma client | `packages/db/src/client.ts` |
-| SQL apply script | `packages/db/scripts/apply-sql-functions.ts` |
-| Release migration gate | `packages/db/scripts/release-migrate.ts` |
-| Mobile UUIDv7 generator | `apps/mobile/src/lib/sync/ids.ts` |
-| API raw SQL wrappers | `apps/api/src/lib/data/`, `apps/api/src/services/` |
+| Concern                        | Path                                                        |
+| ------------------------------ | ----------------------------------------------------------- |
+| Prisma schema (entry)          | `packages/db/prisma/schema.prisma` (generator + datasource) |
+| Prisma models                  | `packages/db/prisma/models/*.prisma`                        |
+| Prisma config                  | `packages/db/prisma.config.ts` (`schema: "prisma"`)         |
+| Prisma migrations              | `packages/db/prisma/migrations/`                            |
+| Extensions, indexes, functions | `packages/db/prisma/sql/functions.sql`                      |
+| Shared Prisma client           | `packages/db/src/client.ts`                                 |
+| SQL apply script               | `packages/db/scripts/apply-sql-functions.ts`                |
+| Release migration gate         | `packages/db/scripts/release-migrate.ts`                    |
+| Mobile UUIDv7 generator        | `apps/mobile/src/lib/sync/ids.ts`                           |
+| API raw SQL wrappers           | `apps/api/src/lib/data/`, `apps/api/src/services/`          |
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Prisma model, relation, type, index, naming, multi-file layout | [references/schema-conventions.md](references/schema-conventions.md) |
-| New IDs or UUIDv7 rollout | [references/uuidv7-strategy.md](references/uuidv7-strategy.md) |
-| Raw SQL, pg_trgm, PostGIS, functions | [references/raw-sql-and-postgis.md](references/raw-sql-and-postgis.md) |
-| Migration or connection behavior | [references/migrations-and-connections.md](references/migrations-and-connections.md) |
-| Selects, `omit`, batching, transactions, N+1 | [references/query-patterns.md](references/query-patterns.md) |
-| Known schema drift and follow-ups | [references/schema-drift-and-gaps.md](references/schema-drift-and-gaps.md) |
-| Prisma Next skills, PN vs classic Prisma, upstream routing | [references/prisma-skills.md](references/prisma-skills.md) |
+| Task                                                           | Read                                                                                                                                     |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Prisma model, relation, type, index, naming, multi-file layout | [references/schema-conventions.md](references/schema-conventions.md)                                                                     |
+| New IDs or UUIDv7 rollout                                      | [references/uuidv7-strategy.md](references/uuidv7-strategy.md)                                                                           |
+| Raw SQL, pg_trgm, PostGIS, functions                           | [references/raw-sql-and-postgis.md](references/raw-sql-and-postgis.md)                                                                   |
+| Migration or connection behavior                               | [references/migrations-and-connections.md](references/migrations-and-connections.md)                                                     |
+| Selects, `omit`, batching, transactions, N+1                   | [references/query-patterns.md](references/query-patterns.md)                                                                             |
+| Known schema drift and follow-ups                              | [references/schema-drift-and-gaps.md](references/schema-drift-and-gaps.md)                                                               |
+| Prisma Next skills, PN vs classic Prisma, upstream routing     | [references/prisma-skills.md](references/prisma-skills.md)                                                                               |
 | Prisma Next contract / migrations / queries (PN projects only) | `prisma-next-contract`, `prisma-next-migrations`, `prisma-next-queries` — via [references/prisma-skills.md](references/prisma-skills.md) |
 
 Full index: [references/README.md](references/README.md).

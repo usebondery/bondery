@@ -6,7 +6,7 @@ Grounded in `packages/db/prisma/` and its generated migrations.
 
 Bondery uses Prisma's multi-file schema (GA since v6.7). Prisma merges all `.prisma` files under the configured directory at generate/migrate time — no imports between files.
 
-```
+```text
 packages/db/prisma/
 ├── schema.prisma          # generator + datasource only
 ├── models/
@@ -36,15 +36,15 @@ packages/db/prisma/
 
 Prisma layer uses idiomatic TypeScript names; Postgres keeps legacy snake_case via mapping.
 
-| Layer | Convention | Example |
-|-------|------------|---------|
-| Model | PascalCase, singular | `People`, `UserSettings` |
-| Field | camelCase | `firstName`, `createdAt` |
-| Relation field | camelCase, descriptive | `lastInteractionActivity` |
-| Enum | PascalCase type; lowercase values | `ColorScheme { light dark auto }` |
-| DB table | snake_case via `@@map` | `@@map("people")` |
-| DB column | snake_case via `@map` | `@map("first_name")` |
-| DB enum | snake_case via `@@map` on enum | `@@map("color_scheme")` |
+| Layer          | Convention                        | Example                           |
+| -------------- | --------------------------------- | --------------------------------- |
+| Model          | PascalCase, singular              | `People`, `UserSettings`          |
+| Field          | camelCase                         | `firstName`, `createdAt`          |
+| Relation field | camelCase, descriptive            | `lastInteractionActivity`         |
+| Enum           | PascalCase type; lowercase values | `ColorScheme { light dark auto }` |
+| DB table       | snake_case via `@@map`            | `@@map("people")`                 |
+| DB column      | snake_case via `@map`             | `@map("first_name")`              |
+| DB enum        | snake_case via `@@map` on enum    | `@@map("color_scheme")`           |
 
 Example:
 
@@ -91,10 +91,10 @@ Use `SetNull` only when the child remains meaningful without its former parent, 
 
 For every new relation, decide explicitly:
 
-| Behavior | Use when |
-|----------|----------|
-| `Cascade` | Child is owned by and meaningless without parent |
-| `SetNull` | Child remains valid independently |
+| Behavior   | Use when                                           |
+| ---------- | -------------------------------------------------- |
+| `Cascade`  | Child is owned by and meaningless without parent   |
+| `SetNull`  | Child remains valid independently                  |
 | `Restrict` | Deleting parent would violate a business invariant |
 
 Do not rely on Prisma defaults for important ownership edges; state `onDelete` explicitly.

@@ -37,5 +37,5 @@ export function extractLinkedinId(urlOrId: string | null | undefined): string | 
   const match = urlOrId.match(
     /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i,
   );
-  return match ? match[1].toLowerCase() : urlOrId;
+  return match ? (match[1] ?? "").toLowerCase() : urlOrId;
 }

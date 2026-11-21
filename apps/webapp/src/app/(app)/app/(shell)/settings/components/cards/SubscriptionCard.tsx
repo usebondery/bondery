@@ -33,7 +33,7 @@ function SubscriptionCardContent({
     }
     const upperCurrency = currency.toUpperCase();
 
-    let fractionDigits = 2;
+    let fractionDigits: number;
     try {
       fractionDigits =
         new Intl.NumberFormat(undefined, {

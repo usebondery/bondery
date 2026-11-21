@@ -2,7 +2,12 @@ import Svg, { Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { loginScreenStyles as styles } from "./loginScreenStyles";
 
 const LOGOTYPE_HEIGHT = 36;
-const LOGOTYPE_WIDTH = Math.round((LOGOTYPE_HEIGHT * 866) / 256);
+/** Size of the SVG's own coordinate space (its `viewBox`). */
+const LOGOTYPE_VIEWBOX_WIDTH = 866;
+const LOGOTYPE_VIEWBOX_HEIGHT = 256;
+const LOGOTYPE_WIDTH = Math.round(
+  (LOGOTYPE_HEIGHT * LOGOTYPE_VIEWBOX_WIDTH) / LOGOTYPE_VIEWBOX_HEIGHT,
+);
 const NODE_STROKE = {
   fill: "white",
   stroke: "white",
@@ -28,7 +33,7 @@ export function BonderyLoginLogotype({ accessibilityLabel }: { accessibilityLabe
       accessibilityRole="image"
       height={LOGOTYPE_HEIGHT}
       style={styles.logotype}
-      viewBox="0 0 866 256"
+      viewBox={`0 0 ${LOGOTYPE_VIEWBOX_WIDTH} ${LOGOTYPE_VIEWBOX_HEIGHT}`}
       width={LOGOTYPE_WIDTH}
     >
       <Defs>

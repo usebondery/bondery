@@ -240,7 +240,9 @@ async function runResumedAction(options: {
     case "create_api_key": {
       openApiKeyModal({
         apiBaseUrl: getWebappRuntimeConfigSync().apiBaseUrl,
-        onCreated: () => {},
+        onCreated: () => {
+          // no-op: the API keys list query invalidates after create
+        },
       });
       return;
     }

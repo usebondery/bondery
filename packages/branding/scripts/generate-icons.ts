@@ -47,7 +47,8 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
 
   if (!existsSync(svgPath)) {
     console.error("❌ SVG icon not found at:", svgPath);
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   try {
@@ -67,7 +68,8 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
         const size = icon.size;
         if (!size) {
           console.error(`❌ Size is required for ${icon.format} format`);
-          process.exit(1);
+          process.exitCode = 1;
+          return;
         }
         nextBytes = await rasterizeIcon(svgPath, size, icon.name);
       }
@@ -85,6 +87,6 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
     );
   } catch (error) {
     console.error("❌ Error generating icons:", error);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }

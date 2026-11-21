@@ -3,7 +3,9 @@
 import type { ContactPreview } from "@bondery/schemas";
 import { Avatar, Group, Paper, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCompass } from "@tabler/icons-react";
+import type { ReactElement } from "react";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { nonEmpty } from "#utils/nonEmpty.js";
 
 type PersonCardIdentity = ContactPreview & {
   middleName?: string | null;
@@ -20,7 +22,7 @@ export interface PersonCardProps {
  * Renders a compact person card for hover previews.
  * Shows avatar on the left with name and optional headline on the right.
  */
-export function PersonCard({ person, size = "md" }: PersonCardProps) {
+export function PersonCard({ person, size = "md" }: PersonCardProps): ReactElement {
   const fullName = [person.firstName, person.middleName, person.lastName].filter(Boolean).join(" ");
 
   return (
@@ -38,7 +40,7 @@ export function PersonCard({ person, size = "md" }: PersonCardProps) {
           name={fullName}
           radius="xl"
           size={size}
-          src={person.avatar || undefined}
+          src={nonEmpty(person.avatar)}
         />
         <Stack gap={2} style={{ minWidth: 0 }}>
           <Text c="dark.8" fw={700} size="sm" truncate>

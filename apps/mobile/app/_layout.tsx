@@ -15,11 +15,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppNavigationBar, AppStatusBar } from "../src/components/chrome";
 import { RootErrorBoundary } from "../src/components/RootErrorBoundary";
 import { AuthProvider } from "../src/lib/auth/AuthProvider";
-import {
-  readLocalAccessToken,
-  resolveBootAuthGate,
-  subscribeLocalSessionEnded,
-} from "../src/lib/auth/session";
+import { readLocalAccessToken } from "../src/lib/auth/local-session";
+import { resolveBootAuthGate, subscribeLocalSessionEnded } from "../src/lib/auth/session";
 import { useAuth } from "../src/lib/auth/useAuth";
 import { KeyboardRoot } from "../src/lib/boot/KeyboardRoot";
 import { hideNativeSplash, keepNativeSplashVisible } from "../src/lib/boot/nativeSplash";

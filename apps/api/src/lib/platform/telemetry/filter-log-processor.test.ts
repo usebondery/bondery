@@ -55,7 +55,7 @@ describe("redactSensitive", () => {
   });
 });
 
-describe("FilteringLogRecordProcessor", () => {
+describe("filteringLogRecordProcessor", () => {
   it("drops records below warn and passes warn and error", () => {
     const { exporter, logger } = createLogger();
 

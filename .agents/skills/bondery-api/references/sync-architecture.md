@@ -6,15 +6,15 @@ Bondery mobile uses **Supabase Postgres** as source of truth (server authoritati
 
 Screens **never** choose between “online API” and “offline cache” for tier-1 domain data:
 
-| Layer | Responsibility |
-|-------|----------------|
-| **Resources** (`lib/resources/`) | List params, row mappers, SQL fragments — no React, no I/O |
-| **Repositories** (`lib/sync/repositories/`) | Execute SQLite reads (imports `lib/resources`) |
-| **Domains** (`lib/domains/`) | Public CRUD API; writes via `submitSyncMutation` |
-| **Sync hooks** (`lib/sync/hooks/`) | Named UI hooks backed by TanStack Query SQLite views |
-| **MutationService** | `submitSyncMutation` in `apps/mobile/src/lib/sync/mutation-service.ts` | Optimistic SQLite + enqueue outbox + schedule drain |
-| **PullManager** (`pull-manager.ts`) | `GET /api/sync/bootstrap` + long-poll `GET /api/sync/pull` → materializers |
-| **SyncDrainer** (`outbox/sync-worker`) | Push pending mutations; reconcile with server |
+| Layer                                       | Responsibility                                                             |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| **Resources** (`lib/resources/`)            | List params, row mappers, SQL fragments — no React, no I/O                 |
+| **Repositories** (`lib/sync/repositories/`) | Execute SQLite reads (imports `lib/resources`)                             |
+| **Domains** (`lib/domains/`)                | Public CRUD API; writes via `submitSyncMutation`                           |
+| **Sync hooks** (`lib/sync/hooks/`)          | Named UI hooks backed by TanStack Query SQLite views                       |
+| **MutationService**                         | `submitSyncMutation` in `apps/mobile/src/lib/sync/mutation-service.ts`     | Optimistic SQLite + enqueue outbox + schedule drain |
+| **PullManager** (`pull-manager.ts`)         | `GET /api/sync/bootstrap` + long-poll `GET /api/sync/pull` → materializers |
+| **SyncDrainer** (`outbox/sync-worker`)      | Push pending mutations; reconcile with server                              |
 
 Tier-2 (settings) and tier-3 (photos, geocode, share, account delete) stay in `lib/api/online-only.ts`.
 
@@ -37,11 +37,11 @@ All tier-1 mutations go through `submitSyncMutation`:
 
 On push response:
 
-| Status | Action |
-|--------|--------|
-| `applied` / `duplicate` | Apply server payload; delete outbox row |
-| `conflict` | Apply server snapshot from `result.server`; mark conflict |
-| `rejected` | Mark rejected; `pullOnce()` to reconcile; toast |
+| Status                  | Action                                                    |
+| ----------------------- | --------------------------------------------------------- |
+| `applied` / `duplicate` | Apply server payload; delete outbox row                   |
+| `conflict`              | Apply server snapshot from `result.server`; mark conflict |
+| `rejected`              | Mark rejected; `pullOnce()` to reconcile; toast           |
 
 Domain writes (REST + push) emit one **batch** per logical change into `sync_change_log` via `emitSyncBatch()`.
 
@@ -62,17 +62,17 @@ Domain writes (REST + push) emit one **batch** per logical change into `sync_cha
 
 ## Ordering
 
-| Field | Owner | Purpose |
-|-------|-------|---------|
-| `clientSequence` | Mobile | Monotonic per device (`sync_meta`) |
-| `serverSequence` | API | Monotonic per user (`sync_user_sequence` / changelog) |
+| Field            | Owner  | Purpose                                               |
+| ---------------- | ------ | ----------------------------------------------------- |
+| `clientSequence` | Mobile | Monotonic per device (`sync_meta`)                    |
+| `serverSequence` | API    | Monotonic per user (`sync_user_sequence` / changelog) |
 
 ## Protocol versioning
 
-| Header | Purpose |
-|--------|---------|
+| Header                       | Purpose              |
+| ---------------------------- | -------------------- |
 | `X-Bondery-Sync-Protocol: 2` | Push + pull contract |
-| `X-Bondery-SQLite-Schema: 3` | Local DDL version |
+| `X-Bondery-SQLite-Schema: 3` | Local DDL version    |
 
 Mismatch → **426** — force resync / app update.
 
@@ -95,23 +95,23 @@ Mismatch → **426** — force resync / app update.
 
 Cross-device freshness uses a **thin wake channel** — not a second sync protocol.
 
-| Layer | Responsibility |
-|-------|----------------|
-| **`emitSyncBatch`** | Writes `sync_change_log` then async `notifySyncWake` |
-| **`SyncWakeBus`** | In-memory (dev) or Redis pub/sub (prod) fanout across API instances |
-| **`GET /api/sync/ws-ticket`** | Short-lived ticket (60s, single-use) — no JWT in WS URL |
-| **`GET /api/sync/ws`** | WebSocket doorbell: `sync.hello`, `sync.batch`, `ping`/`pong` |
-| **Mobile** | `sync-wake-client.ts` → `schedulePull` on wake; long-poll when WS down |
-| **Web** | BFF ticket + same-origin WS (`/api/sync/ws` proxy) → TanStack Query invalidation by `affectedTables` |
+| Layer                         | Responsibility                                                                                       |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **`emitSyncBatch`**           | Writes `sync_change_log` then async `notifySyncWake`                                                 |
+| **`SyncWakeBus`**             | In-memory (dev) or Redis pub/sub (prod) fanout across API instances                                  |
+| **`GET /api/sync/ws-ticket`** | Short-lived ticket (60s, single-use) — no JWT in WS URL                                              |
+| **`GET /api/sync/ws`**        | WebSocket doorbell: `sync.hello`, `sync.batch`, `ping`/`pong`                                        |
+| **Mobile**                    | `sync-wake-client.ts` → `schedulePull` on wake; long-poll when WS down                               |
+| **Web**                       | BFF ticket + same-origin WS (`/api/sync/ws` proxy) → TanStack Query invalidation by `affectedTables` |
 
 **Source of truth unchanged:** `sync_change_log` + pull (mobile) / REST refetch (web).
 
 **Mobile pull modes:**
 
-| Mode | When | Behavior |
-|------|------|----------|
-| `long_poll` | WS disconnected | `GET /api/sync/pull?waitMs=25000` loop |
-| `websocket_wake` | WS connected | Event-driven `schedulePull` + 300s safety pull |
+| Mode             | When            | Behavior                                       |
+| ---------------- | --------------- | ---------------------------------------------- |
+| `long_poll`      | WS disconnected | `GET /api/sync/pull?waitMs=25000` loop         |
+| `websocket_wake` | WS connected    | Event-driven `schedulePull` + 300s safety pull |
 
 **Rollback:** set `SYNC_WAKE_ENABLED=false` on API to disable publish without client changes.
 

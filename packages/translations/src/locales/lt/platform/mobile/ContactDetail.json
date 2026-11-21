@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Pridėk pastabų…",
   "DeleteContact": "Ištrinti kontaktą",
   "DeleteContactConfirmTitle": "Ištrinti {name}?",
   "DeleteFailed": "Nepavyko ištrinti kontakto.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Redaguoti",
   "GroupsEditAccessibility": "Redaguoti {name} grupes",
   "GroupsLoadError": "Nepavyko įkelti grupių",
+  "LastInteractionLabel": "Paskutinė sąveika",
   "NoGroups": "Nėra jokioje grupėje",
   "ShareContact": "Dalintis vCard...",
   "ShareContactViaEmail": "Siųsti el. paštu...",

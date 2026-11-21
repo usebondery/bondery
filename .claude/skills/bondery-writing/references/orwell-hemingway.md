@@ -6,7 +6,7 @@ Do not apply this register to agent replies, plans, comments, or tech specs. Tho
 
 ## Orwell's six rules
 
-From *Politics and the English Language*. Apply them in this order:
+From _Politics and the English Language_. Apply them in this order:
 
 1. Never use a metaphor, simile, or other figure of speech which you are used to seeing in print.
 2. Never use a long word where a short one will do.
@@ -30,10 +30,10 @@ Warmth is not extra adjectives. Warmth is a concrete human detail.
 
 This register must not turn landing copy into a war dispatch. Keep Bondery's warm-friend voice from `bondery-brand`. Cut fluff. Keep the person.
 
-| Cold (too much Hemingway) | Warm and still tight |
-|---------------------------|----------------------|
+| Cold (too much Hemingway)        | Warm and still tight                                    |
+| -------------------------------- | ------------------------------------------------------- |
 | Store contacts. Open them later. | Keep the people who matter, and know when to reach out. |
-| Reduce relationship decay. | It is easy to lose touch. Bondery helps you not to. |
+| Reduce relationship decay.       | It is easy to lose touch. Bondery helps you not to.     |
 
 ## Before / after
 

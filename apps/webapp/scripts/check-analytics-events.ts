@@ -36,7 +36,10 @@ function extractEventNames(content: string, callee: string): string[] {
   const names: string[] = [];
   let match = pattern.exec(content);
   while (match) {
-    names.push(match[1]);
+    const [, name] = match;
+    if (name !== undefined) {
+      names.push(name);
+    }
     match = pattern.exec(content);
   }
   return names;
@@ -72,10 +75,8 @@ function checkFile(absPath: string): Violation[] {
 
 const violations = walk(WEBAPP_SRC).flatMap(checkFile);
 
-if (violations.length > 0) {
-  for (const violation of violations) {
-    check.add(`${violation.file}: ${violation.detail}`);
-  }
+for (const violation of violations) {
+  check.add(`${violation.file}: ${violation.detail}`);
 }
 
 check.ok(`${walk(WEBAPP_SRC).length} files checked`);

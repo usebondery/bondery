@@ -130,7 +130,7 @@ export function SettingsTagsScreen() {
               errorTitle={tMobileSettings("TagsLoadErrorTitle")}
               isLoading={isLoading}
               onRetry={() => {
-                void reloadTags();
+                reloadTags();
               }}
             >
               <ContactsTagsHeader

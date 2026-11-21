@@ -5,7 +5,7 @@ import { i18nConfig, SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/tr
 import { DatesProvider } from "@mantine/dates";
 import type { Resource } from "i18next";
 import { I18nProvider } from "next-i18next/client";
-import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import "@/lib/i18n/loadDayjsLocales";
 
 export interface UserLocaleSettings {
@@ -68,46 +68,65 @@ export function LocaleProvider({
   const [timeFormat, setTimeFormat] = useState<"24h" | "12h">(initialTimeFormat);
   const [dateFormat, setDateFormat] = useState<DateFormatPreference>(initialDateFormat);
 
-  useEffect(() => {
+  // New server props replace the local copy. Adjusting during render avoids the extra
+  // render pass that an effect would add.
+  const [serverLocale, setServerLocale] = useState({
+    dateFormat: initialDateFormat,
+    locale: initialLocale,
+    timeFormat: initialTimeFormat,
+    timezone: initialTimezone,
+  });
+  if (
+    serverLocale.dateFormat !== initialDateFormat ||
+    serverLocale.locale !== initialLocale ||
+    serverLocale.timeFormat !== initialTimeFormat ||
+    serverLocale.timezone !== initialTimezone
+  ) {
+    setServerLocale({
+      dateFormat: initialDateFormat,
+      locale: initialLocale,
+      timeFormat: initialTimeFormat,
+      timezone: initialTimezone,
+    });
     setLocale(initialLocale);
     setTimezone(initialTimezone);
     setTimeFormat(initialTimeFormat);
     setDateFormat(initialDateFormat);
-  }, [initialLocale, initialTimezone, initialTimeFormat, initialDateFormat]);
+  }
 
-  const applyUserLocale = (
-    patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
-  ) => {
-    const localeChanged = patch.locale !== undefined && patch.locale !== locale;
-    if (patch.locale) {
-      setLocale(patch.locale);
-    }
-    if (patch.timezone) {
-      setTimezone(patch.timezone);
-    }
-    if (patch.timeFormat) {
-      setTimeFormat(patch.timeFormat);
-    }
-    if (patch.dateFormat) {
-      setDateFormat(patch.dateFormat);
-    }
-    // The client bundle holds only the current locale. The strings of another
-    // locale arrive from the server, so a language change reloads the page.
-    // Callers persist the settings mutation before they call this function.
-    if (localeChanged) {
-      window.location.reload();
-    }
-  };
-
-  const applyRef = useRef(applyUserLocale);
-  applyRef.current = applyUserLocale;
+  const applyUserLocale = useCallback(
+    (
+      patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
+    ) => {
+      const localeChanged = patch.locale !== undefined && patch.locale !== locale;
+      if (patch.locale) {
+        setLocale(patch.locale);
+      }
+      if (patch.timezone) {
+        setTimezone(patch.timezone);
+      }
+      if (patch.timeFormat) {
+        setTimeFormat(patch.timeFormat);
+      }
+      if (patch.dateFormat) {
+        setDateFormat(patch.dateFormat);
+      }
+      // The client bundle holds only the current locale. The strings of another
+      // locale arrive from the server, so a language change reloads the page.
+      // Callers persist the settings mutation before they call this function.
+      if (localeChanged) {
+        window.location.reload();
+      }
+    },
+    [locale],
+  );
 
   useEffect(() => {
-    applyUserLocaleRef = (patch) => applyRef.current(patch);
+    applyUserLocaleRef = applyUserLocale;
     return () => {
       applyUserLocaleRef = null;
     };
-  }, []);
+  }, [applyUserLocale]);
 
   return (
     <UserLocaleContext.Provider

@@ -16,10 +16,10 @@ Skip this pattern for edit, delete, confirm, import/export, share, merge, settin
 
 A Mantine `Switch` in `ModalFooter`, label **Create more**.
 
-| Switch | After a successful create |
-|--------|---------------------------|
-| **Off** (default) | Existing close, navigate, `onCreated`, and toast behavior. Do not change that path to "add or remove" toasts. |
-| **On** | Do **not** close. Do **not** navigate. Do **not** call picker `onCreated`. Show a **success notification** (required). Reset the form for the next create. Focus the first field. |
+| Switch            | After a successful create                                                                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Off** (default) | Existing close, navigate, `onCreated`, and toast behavior. Do not change that path to "add or remove" toasts.                                                                     |
+| **On**            | Do **not** close. Do **not** navigate. Do **not** call picker `onCreated`. Show a **success notification** (required). Reset the form for the next create. Focus the first field. |
 
 Default is **off**. Do not persist the switch. Every time the modal opens, it starts off. Do not use `sessionStorage` or `localStorage`.
 
@@ -27,12 +27,12 @@ Default is **off**. Do not persist the switch. Every time the modal opens, it st
 
 ## Decision tree (new modal)
 
-| Question | If yes |
-|----------|--------|
-| Is this edit, confirm, import, or a nested picker (`repeatable: false`)? | No switch. |
-| Will the user reasonably create several in one sitting? | Add Create more. |
-| Does success currently navigate to the new entity? | Off path: keep that. On path: skip navigate, toast instead. |
-| Does success currently skip a toast because the next screen is the confirmation? | Off path: still skip. On path: **must toast**. |
+| Question                                                                         | If yes                                                      |
+| -------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| Is this edit, confirm, import, or a nested picker (`repeatable: false`)?         | No switch.                                                  |
+| Will the user reasonably create several in one sitting?                          | Add Create more.                                            |
+| Does success currently navigate to the new entity?                               | Off path: keep that. On path: skip navigate, toast instead. |
+| Does success currently skip a toast because the next screen is the confirmation? | Off path: still skip. On path: **must toast**.              |
 
 ---
 
@@ -93,12 +93,12 @@ Cancel / X / Esc: close and discard, even if the form is dirty and the switch is
 
 ## Reset rule
 
-| Field kind | After Create more success |
-|------------|---------------------------|
-| One-shot prefill (name from opener, search label) | Clear |
-| Unique body (name, LinkedIn, group label, interaction title + note) | Clear |
-| Context from opener that applies to every item (person page → same participant ids; tag created from a person → that person still selected) | Keep |
-| Fresh system defaults (new random emoji/color, date stays "today" unless the user changed it for a batch) | Re-apply as specified per modal |
+| Field kind                                                                                                                                  | After Create more success       |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| One-shot prefill (name from opener, search label)                                                                                           | Clear                           |
+| Unique body (name, LinkedIn, group label, interaction title + note)                                                                         | Clear                           |
+| Context from opener that applies to every item (person page → same participant ids; tag created from a person → that person still selected) | Keep                            |
+| Fresh system defaults (new random emoji/color, date stays "today" unless the user changed it for a batch)                                   | Re-apply as specified per modal |
 
 ---
 
@@ -114,10 +114,10 @@ A parent form that reads `form.values` in render must use Mantine `mode: "contro
 
 ## i18n
 
-| Key | EN |
-|-----|----|
-| `common.actions.createMore` | Create more |
-| `common.a11y.createMore` | After creating, stay in this dialog to add another |
+| Key                         | EN                                                 |
+| --------------------------- | -------------------------------------------------- |
+| `common.actions.createMore` | Create more                                        |
+| `common.a11y.createMore`    | After creating, stay in this dialog to add another |
 
 Add the same keys in `cs` and `de`. Pass both into `ModalFooter`. Do not hardcode the label in `mantine-next`.
 

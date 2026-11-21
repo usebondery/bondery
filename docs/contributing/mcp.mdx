@@ -66,7 +66,7 @@ CI should pass `--stored-auth-only` instead, so a missing token fails immediatel
 | Tenant isolation (foreign `personId` / `interactionId`) | `get_contact` / `get_interaction` with another user’s id → not found, not a leak |
 | Deletes and share send require host confirmation | The host must advertise `elicitation.form` in `_meta` client capabilities. First `tools/call` on `delete_*` or `create_contact_share` then returns `resultType: input_required`. Inspector 2026 / Claude retry with `inputResponses` + `requestState`. Clients that omit that capability or never retry elicitation cannot delete or send a share. |
 
-Automated coverage for the same gates lives in `pnpm run test:auth -w api` (`apps/api/src/test/mcp-integration.test.ts`). The Inspector is for interactive debugging, not a substitute for those tests.
+Automated coverage for the same gates lives in `pnpm run test:auth -w api` (`apps/api/src/test/mcp-integration.test.ts`, `mcp-tool-isolation-integration.test.ts`, `mcp-org-tools-integration.test.ts`, `mcp-delete-integration.test.ts`). The Inspector is for interactive debugging, not a substitute for those tests.
 
 ## Official MCP Registry
 

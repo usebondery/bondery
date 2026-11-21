@@ -29,8 +29,9 @@ export function normalizePhonesForSave(phones: PhoneEntry[]): PhoneEntry[] {
       value: phone.value.trim(),
     }));
 
-  if (phonesToSave.length > 0 && !phonesToSave.some((phone) => phone.preferred)) {
-    phonesToSave[0] = { ...phonesToSave[0], preferred: true };
+  const [firstPhone] = phonesToSave;
+  if (firstPhone && phonesToSave.every((phone) => !phone.preferred)) {
+    phonesToSave[0] = { ...firstPhone, preferred: true };
   }
 
   return phonesToSave;
@@ -45,8 +46,9 @@ export function normalizeEmailsForSave(emails: EmailEntry[]): EmailEntry[] {
       value: email.value.trim(),
     }));
 
-  if (emailsToSave.length > 0 && !emailsToSave.some((email) => email.preferred)) {
-    emailsToSave[0] = { ...emailsToSave[0], preferred: true };
+  const [firstEmail] = emailsToSave;
+  if (firstEmail && emailsToSave.every((email) => !email.preferred)) {
+    emailsToSave[0] = { ...firstEmail, preferred: true };
   }
 
   return emailsToSave;

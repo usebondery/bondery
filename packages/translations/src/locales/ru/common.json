@@ -230,11 +230,13 @@
     "deleting": "Удаление…",
     "duplicating": "Дублирование…",
     "errorTitle": "Ошибка",
+    "mobileRuntimeError": "Ошибка выполнения мобильного приложения",
     "noResults": "Ничего не найдено",
     "removing": "Удаление…",
     "savedTitle": "Сохранено",
     "saving": "Сохранение…",
     "sending": "Отправка…",
-    "successTitle": "Готово"
+    "successTitle": "Готово",
+    "unknownError": "Неизвестная ошибка"
   }
 }

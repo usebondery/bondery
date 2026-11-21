@@ -12,10 +12,9 @@ export function listGroups(): GroupWithCount[] {
       "SELECT COUNT(*) as count FROM people_groups WHERE group_id = ?",
       row.id,
     );
-    return {
-      ...mapGroupRow(row),
+    return Object.assign({}, mapGroupRow(row), {
       contactCount: countRow?.count ?? 0,
-    };
+    });
   });
 }
 

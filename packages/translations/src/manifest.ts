@@ -9,6 +9,12 @@ import manifestJson from "../manifest.json" with { type: "json" };
 export type Platform = "web" | "mobile" | "website" | "extension";
 
 export interface NamespaceEntry {
+  /**
+   * The namespace exists only in the source locale because its copy is not translated yet, such as
+   * the marketing website. Locale tooling then expects no file in other locales, and the loader
+   * serves the source locale. Remove the flag to start localizing the namespace.
+   */
+  englishOnly?: boolean;
   path: string;
   platforms: Platform[];
 }
@@ -22,7 +28,7 @@ export const manifest = manifestJson as TranslationManifest;
 
 export { DEFAULT_LOCALE, intlTagForLocale, SUPPORTED_LOCALES, type SupportedLocale };
 
-export const ALL_NAMESPACE_NAMES = Object.keys(manifest.namespaces);
+export const ALL_NAMESPACE_NAMES: string[] = Object.keys(manifest.namespaces);
 
 export function getNamespaceManifest(): TranslationManifest {
   return manifest;

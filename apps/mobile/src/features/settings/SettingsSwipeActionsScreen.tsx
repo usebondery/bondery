@@ -58,7 +58,9 @@ function createPreviewContact(name: ReturnType<typeof getRandomExampleName>): Co
   };
 }
 
-const noop = () => {};
+const noop = () => {
+  // Preview row. Swipe callbacks must not navigate or mutate.
+};
 
 export function SettingsSwipeActionsScreen() {
   const tMobileSettings = useMobileSettingsTranslations();

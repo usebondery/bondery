@@ -230,10 +230,10 @@ export function ConfirmClient({
           }),
         );
       }
-    } catch (err) {
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getAuthUserFacingError(err, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: t("UnexpectedError"),
         }),
       );
@@ -251,8 +251,8 @@ export function ConfirmClient({
         return;
       }
       await goToSettingsIfFresh();
-    } catch (err) {
-      notifyPasskeyLoginError(err, t);
+    } catch (error) {
+      notifyPasskeyLoginError(error, t);
     } finally {
       setBusyAction(null);
     }
@@ -278,10 +278,10 @@ export function ConfirmClient({
       }
 
       return true;
-    } catch (err) {
+    } catch (error) {
       notifications.show(
         errorNotificationTemplate({
-          description: getAuthUserFacingError(err, tCommon),
+          description: getAuthUserFacingError(error, tCommon),
           title: t("UnexpectedError"),
         }),
       );

@@ -71,7 +71,7 @@ function freeMcpInspectorPorts() {
     console.error(
       `Could not free MCP Inspector ports (${MCP_INSPECTOR_WEB_PORTS.join(", ")}). Stop the other process manually.`,
     );
-    process.exit(1);
+    process.exitCode = 1;
   }
 }
 
@@ -101,5 +101,5 @@ child.on("exit", (code, signal) => {
     process.kill(process.pid, signal);
     return;
   }
-  process.exit(code ?? 0);
+  process.exitCode = code ?? 0;
 });

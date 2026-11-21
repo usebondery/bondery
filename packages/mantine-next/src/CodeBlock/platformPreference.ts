@@ -68,7 +68,9 @@ export function setCodeBlockPlatform(platform: CodeBlockPlatform): void {
   cached = platform;
 
   if (typeof document !== "undefined") {
-    void writeCookie(platform).catch(() => {});
+    void writeCookie(platform).catch(() => {
+      // Cookie write is best-effort. The in-memory cache already holds the choice.
+    });
   }
 
   notify();

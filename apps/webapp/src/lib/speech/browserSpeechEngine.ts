@@ -200,8 +200,6 @@ let engine: SpeechEngine | null = null;
  * the only place that touches `window.speechSynthesis`.
  */
 export function getBrowserSpeechEngine(): SpeechEngine {
-  if (!engine) {
-    engine = createBrowserSpeechEngine();
-  }
+  engine ??= createBrowserSpeechEngine();
   return engine;
 }

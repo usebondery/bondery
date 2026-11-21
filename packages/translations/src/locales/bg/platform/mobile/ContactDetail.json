@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Добави бележки…",
   "DeleteContact": "Изтриване контакт",
   "DeleteContactConfirmTitle": "Изтриване {name}?",
   "DeleteFailed": "Неуспешно изтриване контакт.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Изменить",
   "GroupsEditAccessibility": "Редактировать групи для {name}",
   "GroupsLoadError": "Неуспешно загрузить групи",
+  "LastInteractionLabel": "Последно взаимодействие",
   "NoGroups": "Не состоит ни в одной группе",
   "ShareContact": "Поделиться vCard…",
   "ShareContactViaEmail": "Отправить по эл. почте…",

@@ -27,7 +27,7 @@ export type SecurityHeaderInput = {
  * The API sends it from an `onSend` hook because Helmet has no option for this
  * header. Keeping the string here means the three cannot drift apart.
  */
-export const PERMISSIONS_POLICY = [
+export const PERMISSIONS_POLICY: string = [
   "camera=()",
   "geolocation=(self)",
   "microphone=(self)",

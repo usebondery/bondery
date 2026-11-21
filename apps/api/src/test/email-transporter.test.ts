@@ -72,7 +72,7 @@ function restoreEmailEnv(snapshot: EmailEnvSnapshot): void {
   const restore = (key: keyof EmailEnvSnapshot, envKey: string) => {
     const value = snapshot[key];
     if (value === undefined) {
-      delete process.env[envKey];
+      Reflect.deleteProperty(process.env, envKey);
     } else {
       process.env[envKey] = value;
     }

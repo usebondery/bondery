@@ -49,28 +49,28 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Translations / i18n | [references/common/i18n.md](references/common/i18n.md) |
-| Empty / loading states | [references/common/empty-states.md](references/common/empty-states.md), [loading-states.md](references/common/loading-states.md) |
-| Lists and selection | [references/common/lists-and-selection.md](references/common/lists-and-selection.md) |
-| UX writing voice | [references/common/ux-writing.md](references/common/ux-writing.md) |
-| API error display | [references/common/api-errors-display.md](references/common/api-errors-display.md) |
-| Agent / MCP tool errors, docs link, bug reports | [references/common/agent-interfaces.md](references/common/agent-interfaces.md) |
-| Avatars | [references/common/avatars.md](references/common/avatars.md) |
-| Web modals / command palette | [references/desktop/modals.md](references/desktop/modals.md), [global-find.md](references/desktop/global-find.md) |
-| Webapp phone / PWA shell nav | [references/desktop/mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md) |
-| Create more / stay-open after create | [references/desktop/create-more.md](references/desktop/create-more.md) |
-| Keyboard shortcut chips | [references/desktop/keyboard-shortcuts.md](references/desktop/keyboard-shortcuts.md) |
-| Tooltips (Mantine, web) | [references/desktop/tooltips.md](references/desktop/tooltips.md) |
-| Start and end date inputs | [references/desktop/date-inputs.md](references/desktop/date-inputs.md) |
-| Filter menus | [references/desktop/filter-menus.md](references/desktop/filter-menus.md) |
-| Drag cursor (`grab` / `grabbing`) | [references/desktop/pointer.md](references/desktop/pointer.md) |
-| Mobile forms / sheets | [references/mobile/forms.md](references/mobile/forms.md) |
-| Mobile stack / rapid taps | [references/mobile/navigation.md](references/mobile/navigation.md) |
-| Mobile tab tap → search focus | [references/mobile/tab-search-focus.md](references/mobile/tab-search-focus.md) |
-| Onboarding / import | [references/product/onboarding.md](references/product/onboarding.md), [import-flow.md](references/product/import-flow.md) |
-| Outage / session recovery | [references/product/page-navigation-resume.md](references/product/page-navigation-resume.md) |
+| Task                                            | Read                                                                                                                             |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Translations / i18n                             | [references/common/i18n.md](references/common/i18n.md)                                                                           |
+| Empty / loading states                          | [references/common/empty-states.md](references/common/empty-states.md), [loading-states.md](references/common/loading-states.md) |
+| Lists and selection                             | [references/common/lists-and-selection.md](references/common/lists-and-selection.md)                                             |
+| UX writing voice                                | [references/common/ux-writing.md](references/common/ux-writing.md)                                                               |
+| API error display                               | [references/common/api-errors-display.md](references/common/api-errors-display.md)                                               |
+| Agent / MCP tool errors, docs link, bug reports | [references/common/agent-interfaces.md](references/common/agent-interfaces.md)                                                   |
+| Avatars                                         | [references/common/avatars.md](references/common/avatars.md)                                                                     |
+| Web modals / command palette                    | [references/desktop/modals.md](references/desktop/modals.md), [global-find.md](references/desktop/global-find.md)                |
+| Webapp phone / PWA shell nav                    | [references/desktop/mobile-pwa-shell.md](references/desktop/mobile-pwa-shell.md)                                                 |
+| Create more / stay-open after create            | [references/desktop/create-more.md](references/desktop/create-more.md)                                                           |
+| Keyboard shortcut chips                         | [references/desktop/keyboard-shortcuts.md](references/desktop/keyboard-shortcuts.md)                                             |
+| Tooltips (Mantine, web)                         | [references/desktop/tooltips.md](references/desktop/tooltips.md)                                                                 |
+| Start and end date inputs                       | [references/desktop/date-inputs.md](references/desktop/date-inputs.md)                                                           |
+| Filter menus                                    | [references/desktop/filter-menus.md](references/desktop/filter-menus.md)                                                         |
+| Drag cursor (`grab` / `grabbing`)               | [references/desktop/pointer.md](references/desktop/pointer.md)                                                                   |
+| Mobile forms / sheets                           | [references/mobile/forms.md](references/mobile/forms.md)                                                                         |
+| Mobile stack / rapid taps                       | [references/mobile/navigation.md](references/mobile/navigation.md)                                                               |
+| Mobile tab tap → search focus                   | [references/mobile/tab-search-focus.md](references/mobile/tab-search-focus.md)                                                   |
+| Onboarding / import                             | [references/product/onboarding.md](references/product/onboarding.md), [import-flow.md](references/product/import-flow.md)        |
+| Outage / session recovery                       | [references/product/page-navigation-resume.md](references/product/page-navigation-resume.md)                                     |
 
 ## UX checklist (before merge)
 

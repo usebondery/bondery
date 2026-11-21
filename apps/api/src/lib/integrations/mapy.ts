@@ -45,15 +45,17 @@ function parseLinkedInLocation(location: string): { query: string; locality?: st
     .map((s) => s.trim())
     .filter(Boolean);
 
-  if (parts.length === 0) {
+  const [query, ...rest] = parts;
+  if (query === undefined) {
     return { query: trimmed };
   }
 
-  if (parts.length === 1) {
-    return { query: parts[0] };
+  const locality = rest.at(-1);
+  if (locality === undefined) {
+    return { query };
   }
 
-  return { locality: parts[parts.length - 1], query: parts[0] };
+  return { locality, query };
 }
 
 /**
@@ -123,7 +125,7 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
 
     for (const entry of regional) {
       if (entry.type === "regional.municipality" || entry.type === "regional.municipality_part") {
-        if (!city) {
+        if (city === null || city === "") {
           city = entry.name;
         }
       } else if (entry.type === "regional.region") {
@@ -147,8 +149,8 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
       state,
       stateCode,
     };
-  } catch (err) {
-    logger.error({ err, location: trimmed }, "[mapy] Geocode error");
+  } catch (error) {
+    logger.error({ err: error, location: trimmed }, "[mapy] Geocode error");
     return null;
   }
 }
@@ -182,8 +184,8 @@ export async function getTimezoneForCoordinates(lat: number, lon: number): Promi
     const timezoneName = payload?.timezone?.timezoneName;
 
     return typeof timezoneName === "string" && timezoneName.length > 0 ? timezoneName : null;
-  } catch (err) {
-    logger.error({ err }, "[mapy] Timezone lookup error");
+  } catch (error) {
+    logger.error({ err: error }, "[mapy] Timezone lookup error");
     return null;
   }
 }
@@ -260,7 +262,7 @@ export async function validateStreetAddress(
 
     for (const entry of regional) {
       if (entry.type === "regional.municipality" || entry.type === "regional.municipality_part") {
-        if (!city) {
+        if (city === null || city === "") {
           city = entry.name;
         }
       } else if (entry.type === "regional.region") {
@@ -295,8 +297,8 @@ export async function validateStreetAddress(
       state,
       stateCode,
     };
-  } catch (err) {
-    logger.error({ address: trimmed, err }, "[mapy] Address validation error");
+  } catch (error) {
+    logger.error({ address: trimmed, err: error }, "[mapy] Address validation error");
     return null;
   }
 }
@@ -357,8 +359,8 @@ export async function cachedGeocodeLinkedInLocation(
         timezone: cached.timezone ?? null,
       };
     }
-  } catch (err) {
-    logger.error({ err }, "[mapy] Cache read failed, falling through to live geocode");
+  } catch (error) {
+    logger.error({ err: error }, "[mapy] Cache read failed, falling through to live geocode");
   }
 
   const mapsKeyConfigured = !!getMapsKey();
@@ -419,8 +421,8 @@ export async function cachedGeocodeLinkedInLocation(
         where: { placeKey },
       });
     }
-  } catch (err) {
-    logger.error({ err }, "[mapy] Cache upsert failed");
+  } catch (error) {
+    logger.error({ err: error }, "[mapy] Cache upsert failed");
   }
 
   if (!geo) {

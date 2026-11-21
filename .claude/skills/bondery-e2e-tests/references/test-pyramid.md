@@ -39,13 +39,13 @@ Bondery follows a classic test pyramid. E2E is the smallest, slowest layer — r
 
 ## Decision guide
 
-| Question | If yes → |
-|----------|----------|
-| Can this be tested with a pure function input/output? | Unit test |
-| Does it need DB or HTTP but not a browser? | Integration test |
+| Question                                                        | If yes →                                                                    |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Can this be tested with a pure function input/output?           | Unit test                                                                   |
+| Does it need DB or HTTP but not a browser?                      | Integration test                                                            |
 | Does it need cookies, OAuth redirect, or multi-page navigation? | E2E test (in-app paths use email `storageState`; GitHub only for IdP login) |
-| Is it a regression in API response shape? | Integration + OpenAPI CI checks (`check:openapi`) |
-| Is it a UI loading state or empty state? | Component test or manual QA — not E2E unless critical path |
+| Is it a regression in API response shape?                       | Integration + OpenAPI CI checks (`check:openapi`)                           |
+| Is it a UI loading state or empty state?                        | Component test or manual QA — not E2E unless critical path                  |
 
 ## Anti-patterns
 

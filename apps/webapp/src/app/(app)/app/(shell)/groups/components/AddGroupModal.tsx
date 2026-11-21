@@ -60,7 +60,10 @@ const COLOR_SWATCHES = [
 
 // Get a random color from swatches
 function getRandomColor(): string {
-  return COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)];
+  return (
+    COLOR_SWATCHES[Math.floor(Math.random() * COLOR_SWATCHES.length)] ??
+    DEFAULT_THEME.colors.blue[6]
+  );
 }
 
 interface OpenAddGroupModalOptions {
@@ -95,6 +98,8 @@ export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
   });
 }
 
+const NO_SELECTED_IDS: string[] = [];
+
 interface AddGroupFormProps {
   initialLabel?: string;
   initialSelectedIds?: string[];
@@ -105,7 +110,7 @@ interface AddGroupFormProps {
 
 function AddGroupForm({
   modalId,
-  initialSelectedIds = [],
+  initialSelectedIds = NO_SELECTED_IDS,
   initialLabel = "",
   onCreated,
   repeatable = true,
@@ -230,7 +235,9 @@ function AddGroupForm({
               disabled={isBlocking}
               emptyLabel={t("EmojiEmptySearch")}
               error={form.errors.emoji as string | undefined}
+              label={t("EmojiLabel")}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
+              placeholder={t("EmojiSelectPlaceholder")}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
               searchPlaceholder={t("EmojiSearchPlaceholder")}
               value={form.values.emoji}

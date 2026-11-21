@@ -10,23 +10,23 @@ Hosted-cloud vs self-host controller split: [self-host-vs-cloud.md](./self-host-
 
 ## Recorded
 
-| Field | Value |
-|-------|--------|
-| Legal name | Sveetech s.r.o. |
-| Legal form | s.r.o. (Czech limited-liability company) |
-| Brand name | Bondery |
-| Registered address | Fryčajova 82/8, 614 00 Brno, Czechia |
-| Country | Czechia (CZ) |
-| EUID | CZVROR.29902321 |
-| VAT ID (DIČ) | CZ29902321 |
-| DUNS | 351804152 (Czechia) — **internal; not in Privacy or `LEGAL_ENTITY`** |
+| Field              | Value                                                                |
+| ------------------ | -------------------------------------------------------------------- |
+| Legal name         | Sveetech s.r.o.                                                      |
+| Legal form         | s.r.o. (Czech limited-liability company)                             |
+| Brand name         | Bondery                                                              |
+| Registered address | Fryčajova 82/8, 614 00 Brno, Czechia                                 |
+| Country            | Czechia (CZ)                                                         |
+| EUID               | CZVROR.29902321                                                      |
+| VAT ID (DIČ)       | CZ29902321                                                           |
+| DUNS               | 351804152 (Czechia) — **internal; not in Privacy or `LEGAL_ENTITY`** |
 
 ## Published contact (already on the website)
 
-| Field | Value | Where |
-|-------|--------|--------|
-| Support / rights email | `team@usebondery.com` | Privacy §12, Terms draft, `@bondery/helpers` `SUPPORT_EMAIL` |
-| Lead supervisory authority | Úřad pro ochranu osobních údajů (ÚOOÚ), Pplk. Sochora 27, 170 00 Praha 7 | Privacy §12 |
+| Field                      | Value                                                                    | Where                                                        |
+| -------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------ |
+| Support / rights email     | `team@usebondery.com`                                                    | Privacy §12, Terms draft, `@bondery/helpers` `SUPPORT_EMAIL` |
+| Lead supervisory authority | Úřad pro ochranu osobních údajů (ÚOOÚ), Pplk. Sochora 27, 170 00 Praha 7 | Privacy §12                                                  |
 
 `foundingDate: "2026"` is in `LEGAL_ENTITY` for schema.org only. It is **not** confirmed here as the commercial-register incorporation date.
 
@@ -34,18 +34,18 @@ Hosted-cloud vs self-host controller split: [self-host-vs-cloud.md](./self-host-
 
 Paste into this file when known. Do not guess.
 
-| Field | Notes |
-|-------|--------|
-| IČO (company ID) | Czech 8-digit number. VAT `CZ29902321` usually means IČO `29902321`, but this file does not treat that as confirmed. |
-| Commercial register | Court (likely Krajský soud v Brně) + file number (oddíl / vložka) |
-| Date of incorporation | Commercial-register *den vzniku*, not product launch year |
-| Statutory representative | Jednatel / managing director (legal name, not brand nickname) |
-| Registered capital | Základní kapitál |
-| Phone | If there is a company phone used on invoices or forms |
-| Legal-only email | If different from `team@usebondery.com` |
-| IBAN / bank | Invoicing only; do not put in public Privacy copy |
-| LEI | If registered |
-| DPO | Likely none; record explicitly if appointed |
+| Field                    | Notes                                                                                                                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| IČO (company ID)         | Czech 8-digit number. VAT `CZ29902321` usually means IČO `29902321`, but this file does not treat that as confirmed. |
+| Commercial register      | Court (likely Krajský soud v Brně) + file number (oddíl / vložka)                                                    |
+| Date of incorporation    | Commercial-register _den vzniku_, not product launch year                                                            |
+| Statutory representative | Jednatel / managing director (legal name, not brand nickname)                                                        |
+| Registered capital       | Základní kapitál                                                                                                     |
+| Phone                    | If there is a company phone used on invoices or forms                                                                |
+| Legal-only email         | If different from `team@usebondery.com`                                                                              |
+| IBAN / bank              | Invoicing only; do not put in public Privacy copy                                                                    |
+| LEI                      | If registered                                                                                                        |
+| DPO                      | Likely none; record explicitly if appointed                                                                          |
 
 ## Agent rules
 

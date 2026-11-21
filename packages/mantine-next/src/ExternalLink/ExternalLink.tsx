@@ -2,7 +2,7 @@
 
 import { Anchor, type AnchorProps, VisuallyHidden } from "@mantine/core";
 import { IconExternalLink, IconWorld } from "@tabler/icons-react";
-import { type ReactNode, useState } from "react";
+import { type ReactElement, type ReactNode, useState } from "react";
 import { faviconUrlForHost, linkHostname } from "./faviconUrl.js";
 
 /** Default screen-reader hint for a link that opens in a new tab. */
@@ -74,7 +74,7 @@ export function ExternalLink({
   showFavicon = true,
   underline = "hover",
   ...anchorProps
-}: ExternalLinkProps) {
+}: ExternalLinkProps): ReactElement {
   const host = linkHostname(href);
 
   if (!host) {

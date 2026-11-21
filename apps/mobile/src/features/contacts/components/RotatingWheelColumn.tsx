@@ -15,6 +15,7 @@ import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 const PICKER_HEIGHT = WHEEL_PICKER_ITEM_HEIGHT * WHEEL_PICKER_VISIBLE_ROWS;
 const PADDING_ITEMS = Math.floor(WHEEL_PICKER_VISIBLE_ROWS / 2);
+const WHEEL_PADDING: readonly string[] = Array.from({ length: PADDING_ITEMS }, () => "");
 
 interface RotatingWheelColumnProps {
   accessibilityLabel: string;
@@ -35,10 +36,7 @@ export function RotatingWheelColumn({
   const listRef = useRef<FlatList<string>>(null);
   const isUserScrollingRef = useRef(false);
 
-  const paddedData =
-    items.length === 0
-      ? []
-      : [...Array(PADDING_ITEMS).fill(""), ...items, ...Array(PADDING_ITEMS).fill("")];
+  const paddedData = items.length === 0 ? [] : [...WHEEL_PADDING, ...items, ...WHEEL_PADDING];
 
   function scrollToIndex(index: number, animated = false) {
     listRef.current?.scrollToOffset({

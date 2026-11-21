@@ -90,7 +90,9 @@ export function setCodeBlockSnippet(key: string, id: string): void {
   cached = choices;
 
   if (typeof document !== "undefined") {
-    void writeCookie(choices).catch(() => {});
+    void writeCookie(choices).catch(() => {
+      // Cookie write is best-effort. The in-memory cache already holds the choice.
+    });
   }
 
   notify();

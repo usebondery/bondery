@@ -1,5 +1,8 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Stack, Text } from "@mantine/core";
 import { useScrollSpy } from "@mantine/hooks";
 import { useLayoutEffect, useRef, useState } from "react";
@@ -86,13 +89,13 @@ export function PageToc({ items, selector = "h2[id], h3[id], h4[id]", variant }:
 
   return (
     <Stack
-      aria-label="On this page"
+      aria-label={docs.Navigation.OnThisPage}
       component="nav"
       gap="xs"
       style={variant === "rail" ? RAIL_STYLE : undefined}
     >
       <Text fw={600} size="xs">
-        On this page
+        {docs.Navigation.OnThisPage}
       </Text>
       <div className={classes.list} ref={listRef}>
         {indicator !== null ? (

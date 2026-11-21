@@ -110,14 +110,14 @@ describe("webapp proxy", () => {
       BONDERY_PUBLIC_STORAGE_URL: "http://127.0.0.1:8333",
       NODE_ENV: "development",
     });
-    const policy = parsePolicy(headers["Content-Security-Policy"] ?? "");
+    const policy = parsePolicy(new Headers(headers).get("Content-Security-Policy") ?? "");
 
     assert.equal(policy.get("img-src")?.includes("http://127.0.0.1:8333"), true);
   });
 
   it("omits the storage origin when the variable is unset", () => {
     const { headers } = buildWebappProxyHeaders({ NODE_ENV: "development" });
-    const policy = parsePolicy(headers["Content-Security-Policy"] ?? "");
+    const policy = parsePolicy(new Headers(headers).get("Content-Security-Policy") ?? "");
 
     assert.equal(policy.get("img-src")?.includes("undefined"), false);
     assert.equal(policy.get("img-src")?.includes(""), false);

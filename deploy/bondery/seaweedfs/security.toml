@@ -1,0 +1,65 @@
+# TLS for the bundled SeaweedFS cluster. See docs/deploy/configuration.mdx#object-storage-tls.
+#
+# Every node (master, volume, filer, s3) reads this file from /etc/seaweedfs/security.toml.
+# The stack-secrets job issues one cluster certificate from a private storage CA, and
+# tls-entrypoint.sh copies it into a tmpfs that the seaweed user owns. The certificate is valid
+# for server and client authentication, so every connection between nodes is mutual TLS.
+
+# gRPC between nodes (heartbeats, volume assignment, filer metadata): mutual TLS. A peer must
+# present a certificate from the storage CA with the cluster common name.
+[grpc]
+ca = "/run/bondery-storage/tls/ca.crt"
+
+[grpc.master]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+allowed_commonNames = "Bondery bundled SeaweedFS"
+
+[grpc.volume]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+allowed_commonNames = "Bondery bundled SeaweedFS"
+
+[grpc.filer]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+allowed_commonNames = "Bondery bundled SeaweedFS"
+
+[grpc.s3]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+allowed_commonNames = "Bondery bundled SeaweedFS"
+
+[grpc.client]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+
+# HTTP between nodes (file chunks, the master and filer HTTP APIs): HTTPS only, the server
+# certificate is verified (host name included), and servers require a client certificate.
+[https.client]
+enabled = true
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+ca = "/run/bondery-storage/tls/ca.crt"
+insecure_skip_verify = false
+
+[https.master]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+ca = "/run/bondery-storage/tls/ca.crt"
+
+[https.volume]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+ca = "/run/bondery-storage/tls/ca.crt"
+
+[https.filer]
+cert = "/run/bondery-storage/tls/tls.crt"
+key = "/run/bondery-storage/tls/tls.key"
+ca = "/run/bondery-storage/tls/ca.crt"
+
+# Set both bounds: with only min_version, SeaweedFS 4.40 rejects the gRPC TLS settings and starts
+# gRPC in plaintext, logging only a warning. The release smoke checks that plaintext is refused.
+[tls]
+min_version = "TLS 1.3"
+max_version = "TLS 1.3"

@@ -78,7 +78,7 @@ export function InstagramImportInstructionsStep({
               variant="filled"
             >
               <Text component="span" fw={700} lh={1} size="xs">
-                1
+                {1}
               </Text>
             </ThemeIcon>
             <Text size="sm">

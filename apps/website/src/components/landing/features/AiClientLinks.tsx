@@ -1,5 +1,8 @@
 "use client";
 
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Tooltip } from "@mantine/core";
 import { BrandTileLink, type BrandTileLinkProps } from "./BrandTileLink";
 
@@ -55,7 +58,7 @@ const CLIENT_LINKS: readonly ClientLink[] = [
  */
 export function AiClientLinks() {
   return (
-    <nav aria-label="Works with" className="w-full">
+    <nav aria-label={landing.AiClients.WorksWith} className="w-full">
       <ul
         className="m-0 flex list-none flex-row flex-wrap justify-center gap-3 p-0"
         style={{ listStyle: "none" }}

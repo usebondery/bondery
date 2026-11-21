@@ -8,6 +8,11 @@ export interface SuggestionToContactAddressOptions {
   type?: ContactAddressType;
 }
 
+/** Treats an empty string like a missing value, so a blank API field never wins a fallback chain. */
+function nonEmpty(value: string | null | undefined): string | null {
+  return value === undefined || value === null || value === "" ? null : value;
+}
+
 function pickByType(
   entries: MapSuggestionRegionalEntry[],
   wantedType: string,
@@ -20,11 +25,7 @@ function pickLastByType(
   entries: MapSuggestionRegionalEntry[],
   wantedType: string,
 ): MapSuggestionRegionalEntry | null {
-  const matches = entries.filter((entry) => entry.type === wantedType);
-  if (matches.length === 0) {
-    return null;
-  }
-  return matches[matches.length - 1] || null;
+  return entries.filter((entry) => entry.type === wantedType).at(-1) ?? null;
 }
 
 function deriveGranularity(type: string): ContactAddressEntry["addressGranularity"] {
@@ -51,8 +52,18 @@ function isValidCoordinatePair(latitude: number, longitude: number): boolean {
   );
 }
 
+const CZECHIA_MIN_LATITUDE = 48.4;
+const CZECHIA_MAX_LATITUDE = 51.2;
+const CZECHIA_MIN_LONGITUDE = 12;
+const CZECHIA_MAX_LONGITUDE = 19;
+
 function isWithinCzechiaBounds(latitude: number, longitude: number): boolean {
-  return latitude >= 48.4 && latitude <= 51.2 && longitude >= 12.0 && longitude <= 19.0;
+  return (
+    latitude >= CZECHIA_MIN_LATITUDE &&
+    latitude <= CZECHIA_MAX_LATITUDE &&
+    longitude >= CZECHIA_MIN_LONGITUDE &&
+    longitude <= CZECHIA_MAX_LONGITUDE
+  );
 }
 
 function normalizeCoordinatePair(
@@ -71,7 +82,7 @@ function normalizeCoordinatePair(
     return { latitude: null, longitude: null };
   }
 
-  const normalizedCountryCode = String(countryCode || "").toUpperCase();
+  const normalizedCountryCode = (nonEmpty(countryCode) ?? "").toUpperCase();
   if (normalizedCountryCode === "CZ" && directValid && swappedValid) {
     const directInside = isWithinCzechiaBounds(latitude, longitude);
     const swappedInside = isWithinCzechiaBounds(longitude, latitude);
@@ -119,11 +130,11 @@ export function mapSuggestionToContactAddress(
   );
 
   const addressLine1 = item.type === "regional.address" ? item.name : null;
-  const addressCity = municipality?.name || municipalityPart?.name || null;
-  const addressPostalCode = item.zip || null;
-  const addressState = region?.name || null;
-  const addressCountryCode = countryEntry?.isoCode || null;
-  const addressCountry = countryEntry?.name || null;
+  const addressCity = nonEmpty(municipality?.name) ?? nonEmpty(municipalityPart?.name);
+  const addressPostalCode = nonEmpty(item.zip);
+  const addressState = nonEmpty(region?.name);
+  const addressCountryCode = nonEmpty(countryEntry?.isoCode);
+  const addressCountry = nonEmpty(countryEntry?.name);
   const formattedValue = formatAddressLabel({
     addressLine1,
     city: addressCity,

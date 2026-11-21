@@ -2,11 +2,11 @@
 
 ## URLs
 
-| Purpose | URL | Constant |
-|---------|-----|----------|
-| User-facing link | `https://usebondery.com/roadmap` | `ROADMAP_URL` |
+| Purpose              | URL                                                              | Constant                   |
+| -------------------- | ---------------------------------------------------------------- | -------------------------- |
+| User-facing link     | `https://usebondery.com/roadmap`                                 | `ROADMAP_URL`              |
 | Plane publish target | `https://sites.plane.so/issues/8a364296fbbc4c858adeb1952a72a451` | `PUBLIC_ROADMAP_PLANE_URL` |
-| Changelog | `https://usebondery.com/docs/changelog` | `CHANGELOG_URL` |
+| Changelog            | `https://usebondery.com/docs/changelog`                          | `CHANGELOG_URL`            |
 
 **Rule:** README, docs, footer, and community posts use `ROADMAP_URL`. Only the website redirect route imports `PUBLIC_ROADMAP_PLANE_URL`.
 
@@ -20,12 +20,12 @@ Mirror [`apps/website/src/app/status/route.ts`](../../../../apps/website/src/app
 
 ## Surfaces that link to the roadmap
 
-| Surface | Location |
-|---------|----------|
-| GitHub README | Centered nav row |
-| Website footer | Product group — `/roadmap`, `target="_blank"` |
-| Docs | `docs/roadmap.mdx` in Help & updates nav |
-| Changelog | Intro cross-link in `docs/changelog/index.mdx` |
+| Surface        | Location                                       |
+| -------------- | ---------------------------------------------- |
+| GitHub README  | Centered nav row                               |
+| Website footer | Product group — `/roadmap`, `target="_blank"`  |
+| Docs           | `docs/roadmap.mdx` in Help & updates nav       |
+| Changelog      | Intro cross-link in `docs/changelog/index.mdx` |
 
 ## Public URL checklist
 

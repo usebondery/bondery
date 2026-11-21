@@ -12,6 +12,7 @@ import {
   type SupportedLocale,
 } from "@bondery/schemas/locale";
 import { loadNamespace } from "@bondery/translations/loader";
+import { orIfBlank } from "../platform/blank-text.js";
 
 export type EmailCopyValues = Record<string, string | number | boolean | null | undefined>;
 
@@ -36,7 +37,7 @@ function contextFromSettingsRow(row: {
     dateFormat: coerceDateFormatPreference(row.dateFormat),
     locale: coerceSupportedLocale(row.language) ?? DEFAULT_LOCALE,
     timeFormat: coerceTimeFormatPreference(row.timeFormat),
-    timeZone: row.timezone || "UTC",
+    timeZone: orIfBlank(row.timezone, "UTC"),
   };
 }
 
@@ -120,7 +121,7 @@ export function getPreloadedCopy(
   cache: Record<SupportedLocale, Record<string, unknown>>,
   lng: SupportedLocale,
 ): Record<string, unknown> {
-  return cache[lng] ?? cache[DEFAULT_LOCALE];
+  return cache[lng] ?? cache[DEFAULT_LOCALE] ?? {};
 }
 
 export async function resolveEmailLocalesForUsers(

@@ -23,7 +23,7 @@ export function UnavailableClient() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [sessionReachable, setSessionReachable] = useState<boolean | null>(null);
   const [secondsUntilPoll, setSecondsUntilPoll] = useState(POLL_INTERVAL_MS / 1000);
-  const isNavigatingRef = useRef(false);
+  const isNavigatingRef = useRef<boolean>(false);
 
   const navigateBack = async () => {
     if (isNavigatingRef.current) {

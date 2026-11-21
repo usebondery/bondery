@@ -27,7 +27,7 @@ import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n
 import { bothHaveDefinedAvatars, hasMergeAvatarChoice } from "@/lib/merge/hasMergeAvatarChoice";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { routePerson } from "@/lib/navigation/route/person";
-import { useMergeContactsMutation } from "@/lib/query/hooks/useContacts";
+import { useMergeContactsMutation } from "@/lib/query/hooks/useContactMutations";
 import {
   getAutoLastInteractionChoice,
   listMergeFieldConflicts,
@@ -142,7 +142,7 @@ function MergeWithModal({
 
   const [step, setStep] = useState<Step>(shouldSkipPickStep ? "resolve" : "pick");
   const [leftPersonId, setLeftPersonId] = useState(initialLeftPersonId);
-  const [rightPersonId, setRightPersonId] = useState(initialRightPersonId || "");
+  const [rightPersonId, setRightPersonId] = useState(initialRightPersonId ?? "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const autoMergeRef = useRef(false);
   const knownContactsRef = useRef<Map<string, Contact>>(new Map());
@@ -174,16 +174,17 @@ function MergeWithModal({
     if (!onSearch) {
       return { contacts: [], hasMore: false };
     }
-    const page = await onSearch(query, paging);
-    const contacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
-    for (const contact of contacts) {
+    const search: PeoplePickerOnSearch<ContactSelectable> = onSearch;
+    const page = await search(query, paging);
+    const pageContacts = page.contacts.filter((c) => !c.myself && c.id !== leftPersonId);
+    for (const contact of pageContacts) {
       const preview = toPersonPreview(contact);
       if (preview) {
         knownPeopleRef.current.set(contact.id, preview);
       }
     }
     return {
-      contacts,
+      contacts: pageContacts,
       hasMore: page.hasMore,
     };
   };

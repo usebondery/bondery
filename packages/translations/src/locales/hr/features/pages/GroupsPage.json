@@ -98,7 +98,9 @@
     "UpdateFailed": "Ažuriranje grupe nije uspjelo"
   },
   "EmojiEmptySearch": "Nema pronađenih emojija",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Traži emojije…",
+  "EmojiSelectPlaceholder": "Odaberi emoji",
   "Empty": "Još nema grupa. Stvori jednu da organiziraš kontakte.",
   "FallbackTitle": "Grupa",
   "HeaderDescription": "Grupe služe za organizaciju ljudi radi bržeg filtriranja i radnji.",

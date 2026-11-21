@@ -72,7 +72,9 @@ function getDaysUntilNotification(reminder: UpcomingReminder): number {
  * - 3-7 days: violet (brand)
  * - 8+ days: gray
  */
-function getNotificationBadgeColor(daysUntilNotification: number): string {
+function getNotificationBadgeColor(
+  daysUntilNotification: number,
+): "gray" | "orange" | "red" | "violet" {
   if (daysUntilNotification <= 0) {
     return "red";
   }
@@ -119,8 +121,10 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
   const notificationColor = isNotificationSent
     ? "gray"
     : getNotificationBadgeColor(notificationInDays);
-  const personName =
-    `${reminder.person.firstName}${reminder.person.lastName ? ` ${reminder.person.lastName}` : ""}`.trim();
+  const personName = [reminder.person.firstName, reminder.person.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
   const sentAtLabel = reminder.notificationSentAt
     ? formatter.formatDateTime(new Date(reminder.notificationSentAt))
     : null;
@@ -158,7 +162,7 @@ export function UpcomingReminderCard({ reminder, onClick }: UpcomingReminderCard
       withBorder
     >
       {/* Main row: date | divider | avatar | date info | notification */}
-      <Group align="stretch" gap={"0"} wrap="nowrap">
+      <Group align="stretch" gap="0" wrap="nowrap">
         {/* Date rail */}
         <Stack align="center" gap={0} justify="center" miw={60} px="md" py="xs">
           <Text c="var(--mantine-primary-color-filled)" fw={700} lh={1.3} size="xs">

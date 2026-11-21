@@ -4,6 +4,7 @@ import { createSocialUrl, normalizeWebsiteUrl } from "@bondery/helpers";
 import { parsePhoneNumber } from "@bondery/helpers/phone";
 import { Stack } from "@mantine/core";
 import type { ReactNode } from "react";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import type { SocialFieldKey, useSocialFieldEditor } from "../../hooks/useSocialFieldEditor";
 import { SocialFieldRerouteNudge } from "./SocialFieldRerouteNudge";
 import { SocialHandleInput } from "./SocialHandleInput";
@@ -37,7 +38,7 @@ function getWebsiteUrl(website: string | null): string | undefined {
     return website;
   }
 
-  return normalizeWebsiteUrl(website) || undefined;
+  return nonEmpty(normalizeWebsiteUrl(website));
 }
 
 function getExternalHref(field: SocialFieldKey, persistedValue: string): string | undefined {

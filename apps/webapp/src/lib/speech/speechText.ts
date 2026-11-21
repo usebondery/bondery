@@ -112,7 +112,7 @@ export function toSpeechText(parts: readonly SpeechTextPart[], resolve: TokenSpe
  * has words. A link counts through its label. An action token does not count,
  * because the share card is a button.
  */
-const PROBE_TOKEN: TokenSpeaker = (token) => {
+function PROBE_TOKEN(token: InlineToken) {
   switch (token.type) {
     case "text":
       return token.value;
@@ -127,7 +127,7 @@ const PROBE_TOKEN: TokenSpeaker = (token) => {
     case "tag":
       return PLACEHOLDER_SPEECH;
   }
-};
+}
 
 const PLACEHOLDER_SPEECH = "x";
 

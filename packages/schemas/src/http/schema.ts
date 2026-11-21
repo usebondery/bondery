@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { GEOCODE_SEARCH_MIN_LENGTH, MAX_TAG_FILTER_IDS } from "#constants/index.js";
 import { contactIdSchema, EXAMPLE_CONTACT_ID } from "#contact-id/index.js";
 import { contactAddressReadSchema } from "#entities/address/schema.js";
 import { avatarQualitySchema, avatarSizeSchema } from "#entities/api/index.js";
@@ -121,16 +122,13 @@ export const avatarTransformQuerySchema = z.object({
 /** Public query name for the people-list tag filter. */
 export const TAG_IDS_QUERY_PARAM = "tag_ids" as const;
 
-/** Maximum number of tag ids accepted by `tag_ids` on the people list query. */
-const MAX_TAG_FILTER_IDS = 20;
-
 /**
  * One comma-separated value: `?tag_ids=a,b`.
  * A repeated `tag_ids` key is also accepted. Trims each entry and drops empties.
  */
 const tagIdsQuerySchema = z.preprocess((value) => {
   if (value === undefined || value === null) {
-    return undefined;
+    return;
   }
   const rawEntries = Array.isArray(value) ? value : [value];
   const parts = rawEntries.flatMap((entry) =>
@@ -187,7 +185,12 @@ export const geocodeSuggestQuerySchema = z.object({
     .optional()
     .default("address")
     .describe("Search mode: `address` for postal addresses, `place` for points of interest"),
-  search: z.string().trim().min(3).max(200).describe("Text to look up, at least 3 characters"),
+  search: z
+    .string()
+    .trim()
+    .min(GEOCODE_SEARCH_MIN_LENGTH)
+    .max(200)
+    .describe(`Text to look up, at least ${GEOCODE_SEARCH_MIN_LENGTH} characters`),
 }) satisfies z.ZodType<GeocodeSuggestQuery>;
 
 /** GET /api/geocode/timezone query string. */

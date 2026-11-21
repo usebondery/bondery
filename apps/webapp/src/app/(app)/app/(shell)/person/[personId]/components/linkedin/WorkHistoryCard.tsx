@@ -60,7 +60,7 @@ export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
             {duration ? ` (${duration})` : ""}
           </Text>
         )}
-        {(entry.employmentType || entry.location) && (
+        {(Boolean(entry.employmentType) || Boolean(entry.location)) && (
           <Text c="dimmed" size="xs">
             {[entry.employmentType, entry.location].filter(Boolean).join(" · ")}
           </Text>

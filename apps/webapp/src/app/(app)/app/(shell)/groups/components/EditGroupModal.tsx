@@ -135,7 +135,9 @@ function EditGroupForm({
               disabled={isBlocking}
               emptyLabel={t("EmojiEmptySearch")}
               error={form.errors.emoji as string | undefined}
+              label={t("EmojiLabel")}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
+              placeholder={t("EmojiSelectPlaceholder")}
               searchDebounceMs={DEBOUNCE_MS.localFilter}
               searchPlaceholder={t("EmojiSearchPlaceholder")}
               value={form.values.emoji}

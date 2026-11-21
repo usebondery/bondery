@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Atidaryti Bondery"
+    "OpenBondery": "Atidaryti Bondery",
+    "UnsupportedSiteMessage": "Aplankyk kieno nors Instagram arba LinkedIn profilį, kad pamatytum daugiau plėtinio veiksmų ir galimybių."
   },
   "LoggedOut": {
     "Description": "Prijunk paskyrą, kad išsaugotum kontaktus iš socialinių tinklų.",
@@ -20,6 +21,12 @@
     "Title": "Reikalingas atnaujinimas"
   },
   "Welcome": {
-    "ConnectButton": "Prijungti Bondery paskyrą"
+    "ConnectButton": "Prijungti Bondery paskyrą",
+    "Description": "Prijunk savo Bondery paskyrą, kad išsaugotum kontaktus tiesiai iš socialinių tinklų profilių.",
+    "SignInHint": "Bus paprašyta prisijungti prie Bondery paskyros ir suteikti plėtiniui leidimą.",
+    "SuccessClose": "Dabar gali uždaryti šį skirtuką.",
+    "SuccessDescription": "Tavo Bondery paskyra dabar prijungta. Aplankyk bet kurį Instagram arba LinkedIn profilį ir pradėk saugoti kontaktus.",
+    "SuccessTitle": "Viskas paruošta!",
+    "Title": "Sveiki atvykę į Bondery"
   }
 }

@@ -1,5 +1,6 @@
 import type { RelationshipGraphGroup } from "@bondery/schemas";
 import { type Selection, type SimulationLinkDatum, type SimulationNodeDatum, select } from "d3";
+import { eachSelected } from "./eachSelected";
 import { groupCaption, groupCircle, groupColor } from "./graphHull";
 
 export const COMPANY_HUB_COLOR = "var(--mantine-color-indigo-6)";
@@ -53,9 +54,9 @@ export function mountGraphOverlays(input: {
     .join("g")
     .attr("class", "graph-hull");
 
-  hull.each(function drawHull(row) {
+  eachSelected(hull, (element, row) => {
     const color = groupColor(row);
-    const group = select(this);
+    const group = select(element);
     group
       .append("circle")
       .attr("fill", color)
@@ -101,7 +102,7 @@ export function mountGraphOverlays(input: {
         .attr("y1", (row) => linkCoord(row.source, "y"))
         .attr("x2", (row) => linkCoord(row.target, "x"))
         .attr("y2", (row) => linkCoord(row.target, "y"));
-      hull.each(function placeHull(row) {
+      eachSelected(hull, (element, row) => {
         const points: [number, number][] = [];
         for (const personId of row.personIds) {
           const node = nodeById.get(personId);
@@ -111,7 +112,7 @@ export function mountGraphOverlays(input: {
           points.push([node.x, node.y]);
         }
         const circle = groupCircle(points, pad);
-        const group = select(this);
+        const group = select(element);
         if (!circle) {
           group.select("circle").attr("r", 0);
           return;

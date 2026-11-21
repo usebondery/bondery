@@ -1,6 +1,7 @@
 import type { GroupWithCount } from "@bondery/schemas";
 import type { SelectDataItem } from "../../components/ui/select/index";
 import { Text } from "../../components/ui/Text";
+import { nonEmpty } from "../text";
 
 export function mapGroupToSelectItem(
   group: GroupWithCount,
@@ -8,7 +9,7 @@ export function mapGroupToSelectItem(
 ): SelectDataItem<string> {
   const leftSection = group.emoji
     ? {
-        backgroundColor: group.color || fallbackBadgeColor,
+        backgroundColor: nonEmpty(group.color) ?? fallbackBadgeColor,
         emoji: group.emoji,
         type: "emojiBadge" as const,
       }

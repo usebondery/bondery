@@ -39,24 +39,17 @@ export function ContactCard({ contact, detailed }: ContactCardProps) {
 
   return (
     <Link
+      className="block rounded-md bg-(--mantine-color-default) hover:bg-(--mantine-color-default-hover)"
       href={link}
       style={{
         color: "inherit",
-        display: "block",
+        cursor: "pointer",
+        marginBottom: "var(--mantine-spacing-xs)",
         textDecoration: "none",
+        transition: "background-color 150ms ease",
       }}
     >
-      <Paper
-        className="hover:bg-(--mantine-color-default-hover)"
-        mb="xs"
-        p="sm"
-        radius="md"
-        style={{
-          cursor: "pointer",
-          transition: "background-color 150ms ease",
-        }}
-        withBorder
-      >
+      <Paper bg="transparent" p="sm" radius="md" withBorder>
         <Group align="flex-start" gap="sm" wrap="nowrap">
           <PersonAvatar
             person={{

@@ -84,7 +84,8 @@ function main() {
 
   if (duplicates.length > 0) {
     console.error("Duplicate docId values:", [...new Set(duplicates)].join(", "));
-    process.exit(1);
+    process.exitCode = 1;
+    return;
   }
 
   const sortedIds = [...entries.keys()].sort();

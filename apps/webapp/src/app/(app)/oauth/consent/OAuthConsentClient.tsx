@@ -114,8 +114,11 @@ export function OAuthConsentClient({
     scope: string;
   } | null>(null);
   const [permission, setPermission] = useState<McpAccessLevel>("read");
-  const handledRef = useRef(false);
-  const redirectingRef = useRef(false);
+  const handledRef = useRef<boolean>(false);
+  const redirectingRef = useRef<boolean>(false);
+  const markRedirecting = () => {
+    redirectingRef.current = true;
+  };
 
   const oauthQuery = buildSignedOAuthQuery(searchParams.toString()) ?? "";
   const requestedScopes = authDetails ? splitScopes(authDetails.scope) : [];
@@ -126,7 +129,9 @@ export function OAuthConsentClient({
     readDescription: t("PermissionReadDescription"),
     readLabel: t("PermissionReadLabel"),
   }).map((option) =>
-    option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
+    option.value === "full" && !canOfferWrite
+      ? Object.assign({}, option, { disabled: true })
+      : option,
   );
 
   const fetchDetails = async () => {
@@ -145,7 +150,7 @@ export function OAuthConsentClient({
     try {
       const session = await authClient.getSession();
       if (!session.data?.user) {
-        redirectingRef.current = true;
+        markRedirecting();
         window.location.replace(buildOAuthLoginHref(window.location.search));
         return;
       }
@@ -180,7 +185,7 @@ export function OAuthConsentClient({
         return;
       }
 
-      let fetchedName: string | null = null;
+      let fetchedName: string | null;
       try {
         fetchedName = await fetchOAuthPublicClientName(apiBaseUrl, request.clientId, oauthQuery);
       } catch {
@@ -198,8 +203,8 @@ export function OAuthConsentClient({
         redirect_uri: request.redirectUri,
         scope: request.scope,
       });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("UnexpectedError"));
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : t("UnexpectedError"));
     } finally {
       if (!redirectingRef.current) {
         setLoading(false);
@@ -244,13 +249,13 @@ export function OAuthConsentClient({
       const data = await response.json();
       const redirectUrl = getRedirectUri(data);
       if (redirectUrl) {
-        redirectingRef.current = true;
+        markRedirecting();
         window.location.href = redirectUrl;
       }
-    } catch (err) {
+    } catch (error_) {
       notifications.show(
         errorNotificationTemplate({
-          description: err instanceof Error ? err.message : t("UnexpectedError"),
+          description: error_ instanceof Error ? error_.message : t("UnexpectedError"),
           title: t("ErrorTitle"),
         }),
       );

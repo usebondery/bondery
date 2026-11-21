@@ -4,7 +4,7 @@ import type { SQLiteDatabase } from "expo-sqlite";
 import { resetPendingAvatarJobsForTests } from "../avatar-file-queue.ts";
 import { applyPeopleShapeOp, PEOPLE_UPSERT_SQL } from "./people.ts";
 
-describe("PEOPLE_UPSERT_SQL", () => {
+describe("people upsert sql", () => {
   it("writes avatar_updated_at from the server and preserves avatar_local_updated_at", () => {
     assert.equal(
       PEOPLE_UPSERT_SQL.includes("avatar_updated_at = excluded.avatar_updated_at"),

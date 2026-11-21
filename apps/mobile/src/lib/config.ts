@@ -6,6 +6,7 @@ import {
   resolveAndroidLoopbackHost,
   rewriteLoopbackHostname,
 } from "./config-loopback";
+import { nonEmpty } from "./text";
 
 type MobileExtra = {
   apiUrl?: string;
@@ -35,12 +36,12 @@ function normalizeApiBaseUrl(value: string): string {
 }
 
 const extra = getExtra();
-const rawApiUrl = normalizeMobileUrlForDevice(extra.apiUrl || "");
-const rawStorageUrl = normalizeMobileUrlForDevice(extra.storageUrl || "");
+const rawApiUrl = normalizeMobileUrlForDevice(extra.apiUrl ?? "");
+const rawStorageUrl = normalizeMobileUrlForDevice(extra.storageUrl ?? "");
 
 export const API_URL = rawApiUrl ? normalizeApiBaseUrl(rawApiUrl) : "";
 export const STORAGE_URL = rawStorageUrl.replace(/\/+$/, "");
-export const WEBSITE_URL = extra.websiteUrl || "https://usebondery.com";
+export const WEBSITE_URL = nonEmpty(extra.websiteUrl) ?? "https://usebondery.com";
 export const HAS_MOBILE_CONFIG = Boolean(API_URL && STORAGE_URL);
 export const SYNC_DEBUG = extra.syncDebug === "1" || extra.syncDebug === "true";
 
@@ -110,10 +111,14 @@ export const LIMITS = {
   maxImportantDates: CONTACT_LIMITS.maxImportantDates,
 } as const;
 
+const BYTES_PER_KIB = 1024;
+const BYTES_PER_MIB = BYTES_PER_KIB * BYTES_PER_KIB;
+const AVATAR_MAX_MIB = 5;
+
 export const AVATAR_UPLOAD = {
   allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"] as const,
-  maxFileSize: 5 * 1024 * 1024,
-  maxFileSizeMB: 5,
+  maxFileSize: AVATAR_MAX_MIB * BYTES_PER_MIB,
+  maxFileSizeMB: AVATAR_MAX_MIB,
 } as const;
 
 /** Wheel picker row height (matches minimum touch target). */

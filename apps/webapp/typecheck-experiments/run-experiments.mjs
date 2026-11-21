@@ -48,11 +48,20 @@ function parseDiagnostics(output) {
   return metrics;
 }
 
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
 function parseTraceHotFile(tracePath, targetFile) {
   const raw = readFileSync(tracePath, "utf8").trim();
-  const events = raw.startsWith("[")
-    ? JSON.parse(raw)
-    : raw.split("\n").map((line) => JSON.parse(line));
+  const parsed = raw.startsWith("[")
+    ? asUnknown(JSON.parse(raw))
+    : raw.split("\n").map((line) => asUnknown(JSON.parse(line)));
+  const events = Array.isArray(parsed) ? parsed : [];
 
   let totalMicros = 0;
   for (const event of events) {

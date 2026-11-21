@@ -39,25 +39,25 @@ Every shipped release page needs a `description` in frontmatter. The string fill
 
 The page title is only a version number (`1.11.0`), so the description must stand alone.
 
-| Rule | Reason |
-|------|--------|
-| 140 to 160 characters | `check:docs:descriptions` fails outside this band |
-| Start with `Bondery X.Y.Z` | The title is a bare number, and search results need the product name |
-| Name the two or three changes a reader would search for | A snippet earns its place with a specific change |
-| Say "build-only patch" when no user change exists | Silence reads as an oversight |
+| Rule                                                    | Reason                                                               |
+| ------------------------------------------------------- | -------------------------------------------------------------------- |
+| 140 to 160 characters                                   | `check:docs:descriptions` fails outside this band                    |
+| Start with `Bondery X.Y.Z`                              | The title is a bare number, and search results need the product name |
+| Name the two or three changes a reader would search for | A snippet earns its place with a specific change                     |
+| Say "build-only patch" when no user change exists       | Silence reads as an oversight                                        |
 
 Do not use these shapes. The check rejects each one.
 
-| Shape | Why it fails |
-|-------|--------------|
-| `25 new features, 16 fixes, 24 changes` | Counts categories instead of naming changes. The result fits any release. |
-| `Release notes from 2 November 2026` | Repeats the date already in the page heading |
-| `Everything that changed in this version` | Names nothing, so a reader cannot pick this result over another |
+| Shape                                       | Why it fails                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `25 new features, 16 fixes, 24 changes`     | Counts categories instead of naming changes. The result fits any release.                 |
+| `Release notes from 2 November 2026`        | Repeats the date already in the page heading                                              |
+| `Everything that changed in this version`   | Names nothing, so a reader cannot pick this result over another                           |
 | A sentence copied from the previous release | `check:docs:descriptions` fails when the version in the text does not match the file name |
 
 Good and bad, from real releases:
 
-```
+```text
 1.11.0  Bondery 1.11.0 adds passkey and email login on mobile, a MapLibre people map,
         chat read-aloud and dictation, and a tag filter on the People page.
 
@@ -71,18 +71,18 @@ The description is written when the release is cut, in the same pass as the date
 
 ## Categories and commit prefixes
 
-| Section | Use for | Commit prefix |
-|---------|---------|---------------|
-| `### ✨ Added` | New product or platform capabilities | `feat:` |
-| `### 🐛 Fixed` | Defect corrections | `fix:` |
-| `### 🔄 Changed` | Meaningful changes to existing behavior or architecture | `refactor:` |
-| `### 🔒 Security` | Vulnerability fixes and security hardening | `security:` |
-| `### 📝 Documentation` | Notable documentation changes | `docs:` |
-| `### 🎨 Style` | Contributor-relevant formatting or styling-only changes | `style:` |
-| `### ⚡ Performance` | Measurable or user-visible performance improvements | `perf:` |
-| `### 🧪 Tests` | Contributor-relevant test infrastructure or coverage changes | `test:` |
-| `### 🤖 CI` | CI, release automation, or build-pipeline changes | `ci:` |
-| `### 📦 Dependencies` | Dependency and minimum-version updates | `deps:` |
+| Section                | Use for                                                      | Commit prefix |
+| ---------------------- | ------------------------------------------------------------ | ------------- |
+| `### ✨ Added`         | New product or platform capabilities                         | `feat:`       |
+| `### 🐛 Fixed`         | Defect corrections                                           | `fix:`        |
+| `### 🔄 Changed`       | Meaningful changes to existing behavior or architecture      | `refactor:`   |
+| `### 🔒 Security`      | Vulnerability fixes and security hardening                   | `security:`   |
+| `### 📝 Documentation` | Notable documentation changes                                | `docs:`       |
+| `### 🎨 Style`         | Contributor-relevant formatting or styling-only changes      | `style:`      |
+| `### ⚡ Performance`   | Measurable or user-visible performance improvements          | `perf:`       |
+| `### 🧪 Tests`         | Contributor-relevant test infrastructure or coverage changes | `test:`       |
+| `### 🤖 CI`            | CI, release automation, or build-pipeline changes            | `ci:`         |
+| `### 📦 Dependencies`  | Dependency and minimum-version updates                       | `deps:`       |
 
 Commit scopes are allowed, for example `deps(webapp):` or `fix(mobile):`. The changelog bullet should describe the released outcome rather than copy the commit subject mechanically.
 

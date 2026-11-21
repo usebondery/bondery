@@ -1,7 +1,7 @@
 "use client";
 
 import { Group, Loader, ScrollArea } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { PEOPLE_PICKER_DROPDOWN_MAX_HEIGHT } from "#peoplePicker/constants.js";
 import { PeoplePickerLoadMore } from "#peoplePicker/PeoplePickerLoadMore.js";
 import {
@@ -41,7 +41,7 @@ export function PeoplePickerOptions<T extends PeoplePickerOptionPerson>({
   scrollResetKey,
   searchingLabel,
   searchingState,
-}: PeoplePickerOptionsProps<T>) {
+}: PeoplePickerOptionsProps<T>): ReactElement {
   const searching =
     searchingState ??
     (searchingLabel ? (

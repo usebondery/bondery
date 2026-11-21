@@ -27,25 +27,30 @@ docker compose up -d
 
 Requires Docker Compose **v2.38+** (`pre_start` on `api`). First boot applies migrations, OAuth provisioning, and SeaweedFS buckets automatically via `api` init containers — no manual steps.
 
-Without Traefik (host ports):
+Without Traefik (Caddy or nginx on the same host). The override turns off `traefik-transport` and binds the stack ports to `127.0.0.1` only:
 
 ```bash
 cp docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
-curl -s http://localhost:26631/health/live
-curl -s http://localhost:26632/health/live
+sh scripts/api-ca.sh > api-ca.crt          # CA of the API's HTTPS listener (26642)
+sh scripts/storage-ca.sh > storage-ca.crt  # CA of the storage gateway (8443)
+curl -s --cacert api-ca.crt https://127.0.0.1:26642/health/live
+curl -s http://127.0.0.1:26632/health/live
 ```
+
+Point your proxy at those ports with [`proxy/Caddyfile`](proxy/Caddyfile) or [`proxy/nginx.conf`](proxy/nginx.conf). Another Traefik (Coolify): keep the job and set `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR` instead. Details: [Reverse proxy](../../docs/deploy/reverse-proxy.mdx).
 
 ### Services
 
-| Service | Image | Port | Notes |
-|---------|-------|------|--------|
-| `webapp` | `ghcr.io/usebondery/webapp` | 26632 | Liveness `/health/live` |
-| `api` | `ghcr.io/usebondery/api` | 26631 | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS |
-| `redis` | `redis:8.10` | internal | TLS only + password. AOF + volume `redis-data` |
-| `redis-secrets` | `ghcr.io/usebondery/api` | none | One-shot. Creates the Redis password and TLS certificate in volume `redis-secrets` when missing |
-| `db` | `postgis/postgis:17-3.5` | `127.0.0.1:5432` | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` |
-| `seaweedfs-*` | SeaweedFS | 8333 (Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`) |
+| Service             | Image                       | Port                      | Notes                                                                                                                                                                                                                       |
+| ------------------- | --------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `webapp`            | `ghcr.io/usebondery/webapp` | 26632                     | Liveness `/health/live`                                                                                                                                                                                                     |
+| `api`               | `ghcr.io/usebondery/api`    | 26642 HTTPS               | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS                                                                                                                                                                |
+| `redis`             | `redis:8.10`                | internal                  | TLS only + password. AOF + volume `redis-data`                                                                                                                                                                              |
+| `stack-secrets`     | `ghcr.io/usebondery/api`    | none                      | One-shot. Creates the Redis password and certificate, and the Postgres, storage, and API CAs and certificates, when missing                                                                                                 |
+| `traefik-transport` | `busybox:1.37`              | none                      | One-shot. Writes `${prefix}-api-transport.yml` and `-storage-transport.yml` (the CAs) into Traefik's folder (Dokploy's, or `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR`), so Traefik reaches the API and storage over verified HTTPS |
+| `db`                | `postgis/postgis:17-3.5`    | `127.0.0.1:5432`          | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433`                                                                                                            |
+| `seaweedfs-*`       | SeaweedFS                   | 8443 HTTPS (API, Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`). Mutual TLS between nodes (`seaweedfs/security.toml`)                                                                                                |
 
 Compose entrypoint: **`docker-compose.yml`** includes **`docker-compose.postgres.yml`** and **`docker-compose.seaweedfs.yml`**. Dokploy points at this path only.
 
@@ -54,8 +59,8 @@ Compose entrypoint: **`docker-compose.yml`** includes **`docker-compose.postgres
 - `webapp`, `api`, and `seaweedfs-s3` join external `dokploy-network` (Traefik). Postgres, Redis, and the SeaweedFS cluster (master / volume / filer) stay on private `internal`.
 - Every service publishes `${BONDERY_INFRA_TRAEFIK_PREFIX}-{api|webapp|storage|db|redis|…}`. Look those names up — never the Compose service names `api`, `webapp`, or `seaweedfs-s3` (they collide when production and beta share `dokploy-network`).
 - Set hostnames (`BONDERY_INFRA_*_DOMAIN`); Compose derives `https://…` URLs.
-- Webapp SSR uses `BONDERY_INFRA_INTERNAL_API_URL=http://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631`.
-- API storage uses `BONDERY_PRIVATE_S3_ENDPOINT=http://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8333`.
+- Webapp SSR uses `BONDERY_INFRA_INTERNAL_API_URL=https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26642`, the API's HTTPS listener (its only one), and trusts the API CA (`BONDERY_INFRA_INTERNAL_API_CA_FILE`). Traefik keeps using the HTTP port `26631`.
+- API storage uses `BONDERY_PRIVATE_S3_ENDPOINT=https://${BONDERY_INFRA_TRAEFIK_PREFIX}-storage:8443` and trusts the storage CA (`BONDERY_PRIVATE_S3_TLS_CA_FILE`).
 
 ### Upgrades / rollback
 

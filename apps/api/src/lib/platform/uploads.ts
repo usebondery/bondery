@@ -1,5 +1,6 @@
 import type { FastifyRequest } from "fastify";
 import { DomainError } from "../../domains/_shared/context.js";
+import { BYTES_PER_MIB } from "./config.js";
 import { badRequest } from "./errors/http-errors.js";
 
 export interface UploadedFile {
@@ -24,7 +25,7 @@ function isFileTooLarge(error: unknown): boolean {
 }
 
 function formatMegabytes(bytes: number): string {
-  return `${Math.round((bytes / (1024 * 1024)) * 10) / 10}MB`;
+  return `${Math.round((bytes / BYTES_PER_MIB) * 10) / 10}MB`;
 }
 
 /**

@@ -24,12 +24,12 @@ Bondery is not primarily a database, analytics dashboard, or sales workflow. It 
 
 ## Name logic: why Bondery says "bonds"
 
-**Bondery** is built on *bond*. A relationship is an **edge** between you and a person in your network. Bondery's job is to create, record, and strengthen those edges.
+**Bondery** is built on _bond_. A relationship is an **edge** between you and a person in your network. Bondery's job is to create, record, and strengthen those edges.
 
-- **Say the brand verb.** Copy about the product's purpose uses *bond*: "Everything you need to build stronger bonds".
+- **Say the brand verb.** Copy about the product's purpose uses _bond_: "Everything you need to build stronger bonds".
 - **The relationship graph is the product's shape**, not a feature: people are nodes, bonds are edges. That is why the graph, relationships, and keep-in-touch cadence exist.
-- **"Met" versus "know".** *Know* is the present (hero: "Everyone you know, in one place your AI can use"). *Met* is the history: contacts arrive from every source across your life (LinkedIn, Instagram, WhatsApp soon, files), and Bondery **unifies** them. The tile says "Everyone you **met** in one place" because consolidation is about where people came from.
-- **Sources belong inside that tile.** LinkedIn, Instagram, WhatsApp, and files are not a separate "integrations" strip. They are the *sources*, shown flowing into one list, so the page explains consolidation instead of listing logos.
+- **"Met" versus "know".** _Know_ is the present (hero: "Everyone you know, in one place your AI can use"). _Met_ is the history: contacts arrive from every source across your life (LinkedIn, Instagram, WhatsApp soon, files), and Bondery **unifies** them. The tile says "Everyone you **met** in one place" because consolidation is about where people came from.
+- **Sources belong inside that tile.** LinkedIn, Instagram, WhatsApp, and files are not a separate "integrations" strip. They are the _sources_, shown flowing into one list, so the page explains consolidation instead of listing logos.
 
 ---
 
@@ -43,13 +43,13 @@ The wedge: other contact tools store people. Bondery stores people **and makes t
 
 ### Five things Bondery does
 
-| # | Claim | Proof today | Status |
-|---|-------|-------------|--------|
-| 1 | **Centralizes and consolidates** contacts, and merges duplicates | Chrome extension, imports (LinkedIn, Instagram, vCard, Bondery ZIP), merge recommendations | Shipped |
-| 2 | **Searches intelligently** | Contact search; plain-language Smart search is Premium | Shipped |
-| 3 | **Feeds your network to your AI** as context | MCP server, Claude connector, REST API | Shipped |
-| 4 | **Stays up to date** through syncs | Imports and one-click LinkedIn re-sync from the extension | Shipped (user-triggered) |
-| 5 | **Proactive** — nudges you to keep in touch | Keep-in-touch cadence, email reminders for important dates | Shipped |
+| #   | Claim                                                            | Proof today                                                                                | Status                   |
+| --- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------ |
+| 1   | **Centralizes and consolidates** contacts, and merges duplicates | Chrome extension, imports (LinkedIn, Instagram, vCard, Bondery ZIP), merge recommendations | Shipped                  |
+| 2   | **Searches intelligently**                                       | Contact search; plain-language Smart search is Premium                                     | Shipped                  |
+| 3   | **Feeds your network to your AI** as context                     | MCP server, Claude connector, REST API                                                     | Shipped                  |
+| 4   | **Stays up to date** through syncs                               | Imports and one-click LinkedIn re-sync from the extension                                  | Shipped (user-triggered) |
+| 5   | **Proactive** — nudges you to keep in touch                      | Keep-in-touch cadence, email reminders for important dates                                 | Shipped                  |
 
 **Claim guardrails:**
 
@@ -62,12 +62,12 @@ The wedge: other contact tools store people. Bondery stores people **and makes t
 
 ## Category: PRM
 
-| Rule | Detail |
-|------|--------|
-| **Standard term** | PRM (Personal Relationship Manager) |
-| **First touch** | Spell out once: "PRM — a personal relationship manager" (or equivalent) |
-| **After first touch** | "PRM" alone is fine |
-| **Avoid as primary** | "Personal CRM" on hero — acceptable as comparison ("not a sales CRM") |
+| Rule                  | Detail                                                                  |
+| --------------------- | ----------------------------------------------------------------------- |
+| **Standard term**     | PRM (Personal Relationship Manager)                                     |
+| **First touch**       | Spell out once: "PRM — a personal relationship manager" (or equivalent) |
+| **After first touch** | "PRM" alone is fine                                                     |
+| **Avoid as primary**  | "Personal CRM" on hero — acceptable as comparison ("not a sales CRM")   |
 
 ### Why PRM
 
@@ -79,11 +79,11 @@ The wedge: other contact tools store people. Bondery stores people **and makes t
 
 ## Competitive frame
 
-| vs | Message |
-|----|---------|
-| **Spreadsheet** | Structured, proactive, remembers for you — better than rows and columns |
-| **Sales CRM** | Simpler, personal, no pipeline theater — "not a sales tool" |
-| **Doing nothing** | Gentle nudges so relationships don't quietly fade |
+| vs                | Message                                                                 |
+| ----------------- | ----------------------------------------------------------------------- |
+| **Spreadsheet**   | Structured, proactive, remembers for you — better than rows and columns |
+| **Sales CRM**     | Simpler, personal, no pipeline theater — "not a sales tool"             |
+| **Doing nothing** | Gentle nudges so relationships don't quietly fade                       |
 
 Keep comparisons **plain** — no dunking on competitors by name in primary marketing.
 
@@ -124,19 +124,19 @@ Three primary groups, one secondary. Lead copy with the **job**, not the feature
 - **Job to be done:** Remember details and dates; reach out before too much time passes
 - **Fear:** Apps that feel like work or surveillance
 
-**Writing test:** Would this sentence make sense to a founder at a meetup *and* someone tracking family birthdays? If not, simplify. The page is allowed to speak to the three primary groups first.
+**Writing test:** Would this sentence make sense to a founder at a meetup _and_ someone tracking family birthdays? If not, simplify. The page is allowed to speak to the three primary groups first.
 
 ---
 
 ## What we are / are not
 
-| We are | We are not |
-|--------|------------|
-| Open-source PRM | Sales CRM, ATS, or marketing automation |
-| Privacy-first | Ad-supported or data-broker model |
-| Proactive buddy | Stalkerware, social score, or "engagement optimization" |
-| Simple by design | Feature-bloated "platform" |
-| Sustainable company | Growth-at-all-costs startup |
+| We are              | We are not                                              |
+| ------------------- | ------------------------------------------------------- |
+| Open-source PRM     | Sales CRM, ATS, or marketing automation                 |
+| Privacy-first       | Ad-supported or data-broker model                       |
+| Proactive buddy     | Stalkerware, social score, or "engagement optimization" |
+| Simple by design    | Feature-bloated "platform"                              |
+| Sustainable company | Growth-at-all-costs startup                             |
 
 ---
 

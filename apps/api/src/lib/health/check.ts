@@ -63,6 +63,24 @@ async function runProbes(config: HealthCheckConfig): Promise<HealthServices> {
   };
 }
 
+async function loadAndStoreHealthReport(
+  config: HealthCheckConfig,
+  now: number,
+): Promise<HealthReport> {
+  const services = await runProbes(config);
+  const nextExpiresAt = now + CACHE_TTL_MS;
+  const report: HealthReport = {
+    cached: false,
+    cacheExpiresAt: new Date(nextExpiresAt).toISOString(),
+    services,
+    status: deriveOverallStatus(services),
+    timestamp: new Date().toISOString(),
+  };
+  cacheExpiresAt = nextExpiresAt;
+  cachedReport = report;
+  return report;
+}
+
 export async function getHealthReport(config: HealthCheckConfig): Promise<HealthReport> {
   const now = Date.now();
 
@@ -73,20 +91,7 @@ export async function getHealthReport(config: HealthCheckConfig): Promise<Health
     };
   }
 
-  const services = await runProbes(config);
-  const timestamp = new Date().toISOString();
-  cacheExpiresAt = now + CACHE_TTL_MS;
-
-  const report: HealthReport = {
-    cached: false,
-    cacheExpiresAt: new Date(cacheExpiresAt).toISOString(),
-    services,
-    status: deriveOverallStatus(services),
-    timestamp,
-  };
-
-  cachedReport = report;
-  return report;
+  return loadAndStoreHealthReport(config, now);
 }
 
 /** Clears the in-memory cache — exposed for tests. */

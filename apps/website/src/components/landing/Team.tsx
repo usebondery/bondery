@@ -1,4 +1,7 @@
 import { ActionIconLink, hrefAssert } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Avatar, Card, Container, Flex, Group, Stack, Text, Title } from "@mantine/core";
 import { IconBrandLinkedin, IconBrandX } from "@tabler/icons-react";
 import { TEAM_MEMBERS, type TeamMember } from "@/data/team";
@@ -14,7 +17,7 @@ function TeamCard({ member }: { member: TeamMember }) {
         <Avatar alt={member.name} size={160} src={member.image} />
         <Stack align="left" gap="sm">
           <Stack gap={0}>
-            <Text c={"var(--mantine-default-text-color)"} fw={"bold"} size="xl">
+            <Text c="var(--mantine-default-text-color)" fw="bold" size="xl">
               {member.name}
             </Text>
             <Text c="dimmed" fw={500} size="md">
@@ -57,11 +60,11 @@ function TeamCard({ member }: { member: TeamMember }) {
 
 export function Team({ title }: TeamProps) {
   return (
-    <Container id="team" mb={"xl"} py="xl" size="lg">
-      <Title className="text-3xl! mb-12!" order={2} ta="center">
-        {title ?? "Who will answer your questions?"}
+    <Container id="team" mb="xl" py="xl" size="lg">
+      <Title fw={700} fz="1.875rem" mb="3rem" order={2} ta="center">
+        {title ?? landing.Team.Title}
       </Title>
-      <Flex gap={"xl"} justify={"center"} wrap={"wrap"}>
+      <Flex gap="xl" justify="center" wrap="wrap">
         {TEAM_MEMBERS.map((member) => (
           <TeamCard key={member.name} member={member} />
         ))}

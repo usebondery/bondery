@@ -1,7 +1,8 @@
 import { startTransition } from "react";
 import { create } from "zustand";
 
-const _BULK_SELECTION_TRANSITION_THRESHOLD = 20;
+/** Selections of at least this many loaded contacts clear inside a React transition. */
+export const BULK_SELECTION_TRANSITION_THRESHOLD = 20;
 
 export type DragSelectionIntent = "select" | "deselect";
 

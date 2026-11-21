@@ -13,6 +13,7 @@ import type {
 import { useMobilePreferences } from "../../src/lib/preferences/useMobilePreferences";
 import { SqliteQueryProvider } from "../../src/lib/sync/SqliteQueryProvider";
 import { SyncProvider } from "../../src/lib/sync/SyncProvider";
+import { nonEmpty } from "../../src/lib/text";
 
 export const unstable_settings = {
   anchor: "(tabs)",
@@ -39,7 +40,7 @@ function PreferencesHydration() {
           rightSwipeAction: response.data.rightSwipeAction as SwipeAction,
           tagSortOrder: response.data.tagSortOrder as TagSortOrder,
           timeFormat: coerceTimeFormatPreference(response.data.timeFormat),
-          timezone: response.data.timezone || undefined,
+          timezone: nonEmpty(response.data.timezone),
         });
       } catch {
         // Ignore hydration errors; local persisted preferences remain in use.

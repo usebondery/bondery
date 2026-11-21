@@ -230,11 +230,13 @@
     "deleting": "Notiek dzēšana...",
     "duplicating": "Notiek dublēšana...",
     "errorTitle": "Kļūda",
+    "mobileRuntimeError": "Mobilās lietotnes izpildes kļūda",
     "noResults": "Nav rezultātu",
     "removing": "Notiek noņemšana...",
     "savedTitle": "Saglabāts",
     "saving": "Notiek saglabāšana...",
     "sending": "Notiek sūtīšana...",
-    "successTitle": "Panākumi"
+    "successTitle": "Panākumi",
+    "unknownError": "Nezināma kļūda"
   }
 }

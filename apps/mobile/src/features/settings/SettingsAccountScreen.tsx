@@ -10,7 +10,7 @@ import { Text } from "../../components/ui/Text";
 import { deleteMyAccount, fetchSettings } from "../../lib/api/client";
 import { resolveDisplayedError } from "../../lib/api/resolveDisplayedError";
 import { authClient } from "../../lib/auth/client";
-import { endLocalSession } from "../../lib/auth/session";
+import { endLocalSession } from "../../lib/auth/local-session";
 import {
   useCommonTranslations,
   useMobileAuthTranslations,
@@ -52,11 +52,11 @@ export function SettingsAccountScreen() {
 
     try {
       const settingsResponse = await fetchSettings();
-      setEmail(settingsResponse.data?.email ?? null);
-      setFallbackName(settingsResponse.data?.name ?? null);
-      setFallbackAvatarUrl(settingsResponse.data?.avatarUrl ?? null);
-    } catch (err) {
-      setLoadError(resolveDisplayedError(err, t));
+      setEmail(settingsResponse.data.email ?? null);
+      setFallbackName(settingsResponse.data.name ?? null);
+      setFallbackAvatarUrl(settingsResponse.data.avatarUrl ?? null);
+    } catch (error) {
+      setLoadError(resolveDisplayedError(error, t));
     } finally {
       setIsLoading(false);
     }

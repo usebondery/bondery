@@ -8,7 +8,7 @@ const HTML_ESCAPES: Record<string, string> = {
 
 /** Escape text so it can sit in element content or a double-quoted attribute. */
 function escapeHtml(text: string): string {
-  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char]);
+  return text.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char);
 }
 
 /** Link targets a note may hold. Anything else renders as plain text, never as an `href`. */
@@ -72,7 +72,7 @@ export function markdownToHtml(markdown: string): string {
       // strikethrough: ~~…~~
       .replace(/~~(.+?)~~/g, (_, a) => `<s>${a}</s>`)
       // highlight: ==…==
-      .replace(/==(.+?)==/g, (_, a) => `<mark>${a}</mark>`)
+      .replace(/[=]=(.+?)==/g, (_, a) => `<mark>${a}</mark>`)
       // inline code: `…`
       .replace(/`([^`]+)`/g, (_, a) => `<code>${a}</code>`)
       // Person mention links must run before generic markdown links.
@@ -115,8 +115,8 @@ export function markdownToHtml(markdown: string): string {
     if (headingMatch) {
       closeList();
       closeBlockquote();
-      const level = headingMatch[1].length;
-      html += `<h${level}>${inline(headingMatch[2])}</h${level}>`;
+      const level = (headingMatch[1] ?? "").length;
+      html += `<h${level}>${inline(headingMatch[2] ?? "")}</h${level}>`;
       continue;
     }
 
@@ -130,7 +130,7 @@ export function markdownToHtml(markdown: string): string {
         html += "<blockquote>";
         inBlockquote = true;
       }
-      html += `<p>${inline(bqMatch[1])}</p>`;
+      html += `<p>${inline(bqMatch[1] ?? "")}</p>`;
       continue;
     }
     closeBlockquote();
@@ -145,8 +145,8 @@ export function markdownToHtml(markdown: string): string {
         html += `<ul data-type="taskList">`;
         listType = "taskList";
       }
-      const checked = /[xX]/.test(taskMatch[1]);
-      const taskContent = taskMatch[2].trim();
+      const checked = /[xX]/.test(taskMatch[1] ?? "");
+      const taskContent = (taskMatch[2] ?? "").trim();
       html +=
         `<li data-type="taskItem" data-checked="${checked}">` +
         `<label><input type="checkbox"${checked ? " checked" : ""}></label>` +
@@ -164,7 +164,7 @@ export function markdownToHtml(markdown: string): string {
         html += "<ul>";
         listType = "ul";
       }
-      html += `<li><p>${inline(ulMatch[1])}</p></li>`;
+      html += `<li><p>${inline(ulMatch[1] ?? "")}</p></li>`;
       continue;
     }
 
@@ -178,7 +178,7 @@ export function markdownToHtml(markdown: string): string {
         html += "<ol>";
         listType = "ol";
       }
-      html += `<li><p>${inline(olMatch[1])}</p></li>`;
+      html += `<li><p>${inline(olMatch[1] ?? "")}</p></li>`;
       continue;
     }
 

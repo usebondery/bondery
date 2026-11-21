@@ -3,12 +3,26 @@ import {
   COMMON_PERSON_NAME_TOKEN_SET as COMMON_NAME_TOKENS,
 } from "@bondery/helpers/name";
 
+/** Shortest username the compact-name splitter tries to split. */
+const MIN_COMPACT_USERNAME_LENGTH = 4;
+/** When only one half is a known name, the known half must be at least this long. */
+const MIN_KNOWN_NAME_PART_LENGTH = 3;
+/** Shortest brand token matched as a substring of a username (shorter ones match too often). */
+const MIN_EMBEDDED_BRAND_TOKEN_LENGTH = 7;
+
+/** Split-score weights: longer total, then name evidence, then balanced halves. */
+const SPLIT_SCORE_LENGTH_WEIGHT = 10;
+const SPLIT_SCORE_REPEATED_BONUS = 5;
+const SPLIT_SCORE_BOTH_KNOWN_BONUS = 200;
+const SPLIT_SCORE_ONE_KNOWN_BONUS = 80;
+const SPLIT_SCORE_RIGHT_KNOWN_BONUS = 20;
+
 function toTitleCase(token: string): string {
   return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
 }
 
 function splitCompactUsernameToken(token: string): [string, string] | null {
-  if (token.length < 4) {
+  if (token.length < MIN_COMPACT_USERNAME_LENGTH) {
     return null;
   }
 
@@ -34,7 +48,10 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
     const unknownPart = leftKnown ? right : left;
     const knownPart = leftKnown ? left : right;
 
-    if (leftKnown !== rightKnown && (unknownPart.length < 1 || knownPart.length < 3)) {
+    if (
+      leftKnown !== rightKnown &&
+      (unknownPart.length === 0 || knownPart.length < MIN_KNOWN_NAME_PART_LENGTH)
+    ) {
       continue;
     }
 
@@ -50,22 +67,23 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
     const bothKnown = leftKnown && rightKnown;
     const oneKnown = leftKnown !== rightKnown;
     const score =
-      (left.length + right.length) * 10 +
-      (isRepeated ? 5 : 0) +
-      (bothKnown ? 200 : 0) +
-      (oneKnown ? 80 : 0) +
-      (rightKnown ? 20 : 0) -
+      (left.length + right.length) * SPLIT_SCORE_LENGTH_WEIGHT +
+      (isRepeated ? SPLIT_SCORE_REPEATED_BONUS : 0) +
+      (bothKnown ? SPLIT_SCORE_BOTH_KNOWN_BONUS : 0) +
+      (oneKnown ? SPLIT_SCORE_ONE_KNOWN_BONUS : 0) +
+      (rightKnown ? SPLIT_SCORE_RIGHT_KNOWN_BONUS : 0) -
       Math.abs(left.length - right.length);
 
     candidates.push({ left, right, score });
   }
 
-  if (candidates.length === 0) {
+  candidates.sort((a, b) => b.score - a.score);
+  const best = candidates[0];
+  if (!best) {
     return null;
   }
 
-  candidates.sort((a, b) => b.score - a.score);
-  return [toTitleCase(candidates[0].left), toTitleCase(candidates[0].right)];
+  return [toTitleCase(best.left), toTitleCase(best.right)];
 }
 
 function hasLikelyPersonSignal(normalizedUsername: string): boolean {
@@ -96,7 +114,10 @@ function hasLikelyBrandSignal(normalizedUsername: string): boolean {
       return true;
     }
 
-    if (brandToken.length >= 7 && normalizedUsername.includes(brandToken)) {
+    if (
+      brandToken.length >= MIN_EMBEDDED_BRAND_TOKEN_LENGTH &&
+      normalizedUsername.includes(brandToken)
+    ) {
       return true;
     }
   }
@@ -119,10 +140,8 @@ export function normalizeUsernameFromHref(href: string): string | null {
     }
 
     const uSegmentIndex = segments.findIndex((segment) => segment.toLowerCase() === "_u");
-    const username =
-      uSegmentIndex >= 0 && segments[uSegmentIndex + 1]
-        ? segments[uSegmentIndex + 1]
-        : segments[segments.length - 1];
+    const afterUSegment = segments[uSegmentIndex + 1];
+    const username = uSegmentIndex >= 0 && afterUSegment ? afterUSegment : (segments.at(-1) ?? "");
 
     const normalized = normalizeHandle(username);
     return normalized || null;

@@ -13,22 +13,24 @@
  */
 
 import { createHash, randomBytes } from "node:crypto";
-import { chmod, chown, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { chmod, chown, mkdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import * as x509 from "@peculiar/x509";
+import { readOptional, writeAtomic } from "../infra-secrets/files.js";
+import { API_CONTAINER_UID, LOOPBACK_IP } from "../infra-secrets/ownership.js";
+import {
+  certificateCoverageReason,
+  createSelfSignedServerCertificate,
+} from "../infra-secrets/x509.js";
+
+export { API_CONTAINER_UID };
 
 /** `redis` user in the official `redis` image. */
 export const REDIS_CONTAINER_UID = 999;
-/** `nodejs` user in `apps/api/Dockerfile`. */
-export const API_CONTAINER_UID = 1001;
 
 const CERT_VALIDITY_DAYS = 3650;
 const CERT_RENEW_BEFORE_DAYS = 30;
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const ECDSA_KEY: EcKeyGenParams = { name: "ECDSA", namedCurve: "P-256" };
-const ECDSA_SIGNING: EcdsaParams = { hash: "SHA-256", name: "ECDSA" };
+const REDIS_PASSWORD_BYTES = 32;
 
 export type RedisSecretPaths = {
   aclFile: string;
@@ -71,13 +73,7 @@ export function buildRedisAclFile(password: string): string {
 }
 
 export function generateRedisPassword(): string {
-  return randomBytes(32).toString("base64url");
-}
-
-function toPem(label: string, der: ArrayBuffer): string {
-  const base64 = Buffer.from(der).toString("base64");
-  const lines = base64.match(/.{1,64}/g) ?? [];
-  return `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
+  return randomBytes(REDIS_PASSWORD_BYTES).toString("base64url");
 }
 
 export type RedisCertificate = {
@@ -86,40 +82,16 @@ export type RedisCertificate = {
 };
 
 /** Self-signed ECDSA P-256 certificate. The API pins it as its only trusted CA for Redis. */
-export async function generateRedisCertificate(
+export function generateRedisCertificate(
   hostnames: string[],
   now: Date = new Date(),
 ): Promise<RedisCertificate> {
-  x509.cryptoProvider.set(globalThis.crypto);
-  const keys = await globalThis.crypto.subtle.generateKey(ECDSA_KEY, true, ["sign", "verify"]);
-  const certificate = await x509.X509CertificateGenerator.createSelfSigned({
-    extensions: [
-      new x509.BasicConstraintsExtension(true, undefined, true),
-      new x509.KeyUsagesExtension(
-        x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyCertSign,
-        true,
-      ),
-      new x509.ExtendedKeyUsageExtension([x509.ExtendedKeyUsage.serverAuth]),
-      new x509.SubjectAlternativeNameExtension([
-        ...hostnames.map((value) => ({ type: "dns" as const, value })),
-        { type: "ip" as const, value: "127.0.0.1" },
-      ]),
-      await x509.SubjectKeyIdentifierExtension.create(keys.publicKey),
-    ],
-    keys,
-    name: "CN=Bondery bundled Redis",
-    notAfter: new Date(now.getTime() + CERT_VALIDITY_DAYS * DAY_MS),
-    notBefore: new Date(now.getTime() - DAY_MS),
-    serialNumber: randomBytes(16)
-      .toString("hex")
-      .replace(/^[89a-f]/, "1"),
-    signingAlgorithm: ECDSA_SIGNING,
+  return createSelfSignedServerCertificate({
+    commonName: "Bondery bundled Redis",
+    names: { dns: hostnames, ip: [LOOPBACK_IP] },
+    now,
+    validityDays: CERT_VALIDITY_DAYS,
   });
-  const privateKey = await globalThis.crypto.subtle.exportKey("pkcs8", keys.privateKey);
-  return {
-    certificatePem: certificate.toString("pem"),
-    privateKeyPem: toPem("PRIVATE KEY", privateKey),
-  };
 }
 
 /** Why an existing certificate must be replaced, or null when it is still good. */
@@ -128,43 +100,11 @@ export function certificateReplacementReason(
   hostnames: string[],
   now: Date = new Date(),
 ): string | null {
-  let certificate: x509.X509Certificate;
-  try {
-    certificate = new x509.X509Certificate(certificatePem);
-  } catch {
-    return "certificate cannot be parsed";
-  }
-  if (certificate.notAfter.getTime() - now.getTime() < CERT_RENEW_BEFORE_DAYS * DAY_MS) {
-    return "certificate expires soon";
-  }
-  const san = certificate.getExtension(x509.SubjectAlternativeNameExtension);
-  const covered = new Set(
-    (san?.names.items ?? []).filter((name) => name.type === "dns").map((name) => name.value),
-  );
-  const missing = hostnames.filter((hostname) => !covered.has(hostname));
-  if (missing.length > 0) {
-    return `certificate does not cover ${missing.join(", ")}`;
-  }
-  return null;
-}
-
-async function readOptional(path: string): Promise<string | null> {
-  try {
-    return await readFile(path, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
-      return null;
-    }
-    throw error;
-  }
-}
-
-/** Write via a temporary file and rename, so a crash never leaves a half-written secret. */
-async function writeAtomic(path: string, contents: string, mode: number): Promise<void> {
-  const temporaryPath = `${path}.tmp`;
-  await writeFile(temporaryPath, contents, { mode });
-  await chmod(temporaryPath, mode);
-  await rename(temporaryPath, path);
+  return certificateCoverageReason(certificatePem, {
+    names: { dns: hostnames, ip: [] },
+    now,
+    renewBeforeDays: CERT_RENEW_BEFORE_DAYS,
+  });
 }
 
 export type EnsureRedisSecretsOptions = {

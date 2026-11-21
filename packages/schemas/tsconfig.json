@@ -1,5 +1,8 @@
 {
   "compilerOptions": {
+    // Zod schemas are composed with .extend/.pick/.shape. Annotating them as
+    // z.ZodType<T> for isolatedDeclarations would collapse those APIs.
+    "isolatedDeclarations": false,
     "outDir": "./dist",
     "rootDir": "./src"
   },

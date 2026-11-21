@@ -3,7 +3,7 @@ const SIGNED_QUERY_PARAMETER_NAME_PARAM = "ba_param";
 
 function getSignedOAuthQueryParameterNames(params: URLSearchParams): Set<string> | undefined {
   const signedParameterNames = params.getAll(SIGNED_QUERY_PARAMETER_NAME_PARAM);
-  if (!signedParameterNames.length) {
+  if (signedParameterNames.length === 0) {
     return undefined;
   }
 

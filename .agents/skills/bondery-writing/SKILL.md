@@ -34,17 +34,17 @@ This skill owns **how English is built**. Domain skills still own **what Bondery
 
 ## Decision tree
 
-| Artifact | Register | Also read |
-|----------|----------|-----------|
-| Blog, landing, marketing, social, hero/taglines | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-brand`](../bondery-brand/SKILL.md) |
-| Product UI strings | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-ux`](../bondery-ux/SKILL.md) → `ux-writing.md` + i18n |
-| Changelog / user release notes | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-changelog`](../bondery-changelog/SKILL.md) |
-| Transactional email body | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-emails`](../bondery-emails/SKILL.md) |
+| Artifact                                                                     | Register                                           | Also read                                                                                     |
+| ---------------------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Blog, landing, marketing, social, hero/taglines                              | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-brand`](../bondery-brand/SKILL.md)                                                  |
+| Product UI strings                                                           | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-ux`](../bondery-ux/SKILL.md) → `ux-writing.md` + i18n                               |
+| Changelog / user release notes                                               | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-changelog`](../bondery-changelog/SKILL.md)                                          |
+| Transactional email body                                                     | [Orwell-Hemingway](references/orwell-hemingway.md) | [`bondery-emails`](../bondery-emails/SKILL.md)                                                |
 | User product docs (`docs/getting-started`, `apps/`, `bondery/`, `concepts/`) | [Orwell-Hemingway](references/orwell-hemingway.md) | [`docs/contributing/how-to-write-docs.mdx`](../../../docs/contributing/how-to-write-docs.mdx) |
-| Agent chat, plans, summaries, PR text | [ASD-100](references/asd-100.md) | — |
-| Comments, JSDoc, internal READMEs, ADRs | [ASD-100](references/asd-100.md) | [`bondery-coding-standards`](../bondery-coding-standards/SKILL.md) for *when* to comment |
-| Tech docs (`docs/api/`, `deploy/`, `contributing/`) | [ASD-100](references/asd-100.md) | how-to-write-docs.mdx (structure only) |
-| Legal / privacy claims | neither | [`bondery-legal`](../bondery-legal/SKILL.md) |
+| Agent chat, plans, summaries, PR text                                        | [ASD-100](references/asd-100.md)                   | —                                                                                             |
+| Comments, JSDoc, internal READMEs, ADRs                                      | [ASD-100](references/asd-100.md)                   | [`bondery-coding-standards`](../bondery-coding-standards/SKILL.md) for _when_ to comment      |
+| Tech docs (`docs/api/`, `deploy/`, `contributing/`)                          | [ASD-100](references/asd-100.md)                   | how-to-write-docs.mdx (structure only)                                                        |
+| Legal / privacy claims                                                       | neither                                            | [`bondery-legal`](../bondery-legal/SKILL.md)                                                  |
 
 Full index: [references/README.md](references/README.md).
 

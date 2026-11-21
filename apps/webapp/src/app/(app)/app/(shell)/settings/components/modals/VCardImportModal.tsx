@@ -133,7 +133,7 @@ export function VCardImportModal({
   } | null>(null);
   const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const openRef = useRef<() => void>(null);
+  const openRef = useRef<(() => void) | null>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   const previewContacts = parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact);
@@ -236,9 +236,9 @@ export function VCardImportModal({
     setStep("processing");
 
     const formData = new FormData();
-    files.forEach((file) => {
+    for (const file of files) {
       formData.append("files", file, file.name);
-    });
+    }
 
     try {
       const result = await parseImport.mutateAsync(formData);
@@ -361,8 +361,8 @@ export function VCardImportModal({
               { number: 2, step: t("InstructionStep2") },
               { number: 3, step: t("InstructionStep3") },
               { number: 4, step: t("InstructionStep4") },
-            ].map(({ step, number }) => (
-              <Group align="center" gap="sm" key={step} wrap="nowrap">
+            ].map(({ step: instruction, number }) => (
+              <Group align="center" gap="sm" key={instruction} wrap="nowrap">
                 <ThemeIcon
                   color="green"
                   radius="xl"
@@ -374,7 +374,7 @@ export function VCardImportModal({
                     {number}
                   </Text>
                 </ThemeIcon>
-                <Text size="sm">{step}</Text>
+                <Text size="sm">{instruction}</Text>
               </Group>
             ))}
           </Stack>

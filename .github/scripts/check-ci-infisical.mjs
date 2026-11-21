@@ -24,33 +24,40 @@ const profiles = {
   "website-webhook": ["BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK"],
 };
 
-const profile = process.argv[2];
-const keys = profiles[profile];
+function main() {
+  const profile = process.argv[2];
+  const keys = profiles[profile];
 
-if (!keys) {
-  console.error(
-    `Unknown profile "${profile}". Expected one of: ${Object.keys(profiles).join(", ")}`,
-  );
-  process.exit(1);
-}
-
-const missing = keys.filter((key) => !process.env[key]?.trim());
-
-if (missing.length > 0) {
-  console.error(`Missing required CI env for profile "${profile}":`);
-  for (const key of missing) {
-    console.error(`  - ${key}`);
+  if (!keys) {
+    console.error(
+      `Unknown profile "${profile}". Expected one of: ${Object.keys(profiles).join(", ")}`,
+    );
+    process.exitCode = 1;
+    return;
   }
-  process.exit(1);
+
+  const missing = keys.filter((key) => !process.env[key]?.trim());
+
+  if (missing.length > 0) {
+    console.error(`Missing required CI env for profile "${profile}":`);
+    for (const key of missing) {
+      console.error(`  - ${key}`);
+    }
+    process.exitCode = 1;
+    return;
+  }
+
+  const extensionClientId = process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID?.trim();
+  const webappClientId = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID?.trim();
+  if (extensionClientId && webappClientId && extensionClientId === webappClientId) {
+    console.error(
+      "BONDERY_PUBLIC_OAUTH_CLIENT_ID must not equal BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID",
+    );
+    process.exitCode = 1;
+    return;
+  }
+
+  console.log(`CI Infisical check OK (${profile}): ${keys.length} keys present`);
 }
 
-const extensionClientId = process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID?.trim();
-const webappClientId = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID?.trim();
-if (extensionClientId && webappClientId && extensionClientId === webappClientId) {
-  console.error(
-    "BONDERY_PUBLIC_OAUTH_CLIENT_ID must not equal BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID",
-  );
-  process.exit(1);
-}
-
-console.log(`CI Infisical check OK (${profile}): ${keys.length} keys present`);
+main();

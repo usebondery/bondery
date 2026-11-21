@@ -108,10 +108,10 @@ export function pickLinuxDevNode(nodes) {
  *   Self?: { DNSName?: string, HostName?: string, OS?: string, Online?: boolean },
  *   Peer?: Record<string, { DNSName?: string, HostName?: string, OS?: string, Online?: boolean }>,
  * }} status
- * @param {string} [sshUserOverride]
+ * @param {string} [sshUser]
  * @returns {string} `user@magic-dns-name`
  */
-export function resolveRemoteSshTarget(status, sshUserOverride) {
+export function resolveRemoteSshTarget(status, sshUser) {
   const self = status.Self;
   if (!self) {
     throw new Error("Tailscale status has no Self node. Is Tailscale running?");
@@ -133,7 +133,7 @@ export function resolveRemoteSshTarget(status, sshUserOverride) {
     throw new Error("Tailscale node has no MagicDNS name. Enable MagicDNS on the tailnet.");
   }
 
-  const user = (sshUserOverride ?? "").trim() || inferSshUser(node.HostName, host);
+  const user = (sshUser ?? "").trim() || inferSshUser(node.HostName, host);
   if (!user) {
     throw new Error("Could not infer the SSH user. Set BONDERY_DEV_SSH_USER.");
   }
@@ -146,7 +146,7 @@ function readTailscaleStatus() {
   if (!raw) {
     throw new Error("Could not read `tailscale status --json`. Is Tailscale on PATH?");
   }
-  return JSON.parse(raw);
+  return asUnknown(JSON.parse(raw));
 }
 
 function sshUserOverride() {
@@ -213,10 +213,10 @@ if (isMain()) {
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error(message);
-      process.exit(1);
+      process.exitCode = 1;
     }
   } else {
     console.error(`Unknown command: ${command}. Use share, hosts, or target.`);
-    process.exit(1);
+    process.exitCode = 1;
   }
 }

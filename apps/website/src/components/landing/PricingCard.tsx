@@ -27,58 +27,63 @@ export function PricingCard({
   featured = false,
 }: PricingCardProps) {
   return (
-    <Card
-      className="flex h-full flex-col transition-shadow duration-300 hover:shadow-lg"
-      p="xl"
-      radius="lg"
-      style={{
-        backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-7))",
-        ...(featured ? { border: "1px solid var(--mantine-primary-color-filled)" } : {}),
-      }}
-      withBorder
-    >
-      <Text c="dimmed" fw={500} size="sm">
-        {name}
-      </Text>
-
-      <Group align="baseline" gap={6} mt="xs" wrap="nowrap">
-        <Text
-          c="light-dark(var(--mantine-color-black), var(--mantine-color-white))"
-          className="text-5xl! leading-none! tracking-tight"
-          fw={700}
-          style={{ fontVariantNumeric: "tabular-nums" }}
-        >
-          {price}
-        </Text>
-        {period ? (
-          <Text c="dimmed" size="sm">
-            {period}
-          </Text>
-        ) : null}
-      </Group>
-
-      <Text c="dimmed" mt="sm" size="sm">
-        {tagline}
-      </Text>
-
-      <Divider my="xl" />
-
-      <List
-        center
-        className="flex-1"
-        icon={
-          <ThemeIcon radius="xl" size={20} variant="light">
-            <IconCheck size={12} stroke={2.5} />
-          </ThemeIcon>
-        }
-        spacing="sm"
+    <div className="h-full rounded-2xl transition-shadow duration-300 hover:shadow-lg">
+      <Card
+        className="flex h-full flex-col"
+        h="100%"
+        p="xl"
+        radius="lg"
+        style={{
+          backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-7))",
+          ...(featured ? { border: "1px solid var(--mantine-primary-color-filled)" } : {}),
+        }}
+        withBorder
       >
-        {features.map((feature) => (
-          <ListItem key={feature}>{feature}</ListItem>
-        ))}
-      </List>
+        <Text c="dimmed" fw={500} size="sm">
+          {name}
+        </Text>
 
-      <div className="mt-8">{action}</div>
-    </Card>
+        <Group align="baseline" gap={6} mt="xs" wrap="nowrap">
+          <Text
+            c="light-dark(var(--mantine-color-black), var(--mantine-color-white))"
+            fw={700}
+            fz="3rem"
+            lh={1}
+            lts="-0.025em"
+            style={{ fontVariantNumeric: "tabular-nums" }}
+          >
+            {price}
+          </Text>
+          {period ? (
+            <Text c="dimmed" size="sm">
+              {period}
+            </Text>
+          ) : null}
+        </Group>
+
+        <Text c="dimmed" mt="sm" size="sm">
+          {tagline}
+        </Text>
+
+        <Divider my="xl" />
+
+        <List
+          center
+          className="flex-1"
+          icon={
+            <ThemeIcon radius="xl" size={20} variant="light">
+              <IconCheck size={12} stroke={2.5} />
+            </ThemeIcon>
+          }
+          spacing="sm"
+        >
+          {features.map((feature) => (
+            <ListItem key={feature}>{feature}</ListItem>
+          ))}
+        </List>
+
+        <div className="mt-8">{action}</div>
+      </Card>
+    </div>
   );
 }

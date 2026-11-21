@@ -2,6 +2,7 @@ import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ColorSchemePreference } from "@bondery/schemas";
 import type { SupportedLocale } from "@bondery/translations";
 import { coerceSupportedLocale } from "@bondery/translations";
+import { firstNonEmpty, nonEmpty } from "@/lib/shared/nonEmpty";
 
 export const SETTINGS_API_PATH = API_ROUTES.ME_SETTINGS;
 
@@ -43,9 +44,10 @@ export function parseUserSettingsData(settings: Record<string, unknown>): UserSe
     locale,
     onboardingCompletedAt: (settings.onboardingCompletedAt as string | null | undefined) ?? null,
     timeFormat: settings.timeFormat === "12h" ? "12h" : "24h",
-    timezone: (settings.timezone as string | undefined) || "UTC",
-    userEmail: (settings.email as string | undefined) || "",
+    timezone: nonEmpty(settings.timezone as string | undefined) ?? "UTC",
+    userEmail: (settings.email as string | undefined) ?? "",
     userName:
-      (settings.name as string | undefined) || (settings.email as string | undefined) || "User",
+      firstNonEmpty(settings.name as string | undefined, settings.email as string | undefined) ??
+      "User",
   };
 }

@@ -17,6 +17,10 @@ function resetGate(): void {
   recordNavigationKey("", 0);
 }
 
+function unusedRouterMethod(): void {
+  // This case does not call this router method.
+}
+
 describe("serializeHref", () => {
   it("uses string hrefs as-is", () => {
     assert.equal(serializeHref("/settings/tags"), "/settings/tags");
@@ -42,10 +46,7 @@ describe("evaluateNavigationRequest", () => {
     setNavigationTransitioning(true);
 
     const decision = evaluateNavigationRequest("/settings/tags", "push", true, Date.now());
-    assert.equal(decision.allow, false);
-    if (!decision.allow) {
-      assert.equal(decision.reason, "inFlight");
-    }
+    assert.deepEqual(decision, { allow: false, reason: "inFlight" });
   });
 
   it("allows replace while transitioning", () => {
@@ -67,10 +68,7 @@ describe("evaluateNavigationRequest", () => {
       true,
       now + NAVIGATION_DEDUPE_MS - 1,
     );
-    assert.equal(decision.allow, false);
-    if (!decision.allow) {
-      assert.equal(decision.reason, "duplicate");
-    }
+    assert.deepEqual(decision, { allow: false, reason: "duplicate" });
   });
 });
 
@@ -79,7 +77,7 @@ describe("runAppNavigation", () => {
     resetGate();
     const calls: string[] = [];
     const router = {
-      back: () => {},
+      back: unusedRouterMethod,
       canGoBack: () => false,
       navigate: () => {
         calls.push("navigate");
@@ -106,9 +104,9 @@ describe("runAppNavigation", () => {
     setNavigationTransitioning(true);
     const calls: string[] = [];
     const router = {
-      back: () => {},
+      back: unusedRouterMethod,
       canGoBack: () => false,
-      navigate: () => {},
+      navigate: unusedRouterMethod,
       push: () => {
         calls.push("push");
       },
@@ -127,11 +125,11 @@ describe("getNavigationGateSnapshot", () => {
   it("records last key after runAppNavigation", () => {
     resetGate();
     const router = {
-      back: () => {},
+      back: unusedRouterMethod,
       canGoBack: () => false,
-      navigate: () => {},
-      push: () => {},
-      replace: () => {},
+      navigate: unusedRouterMethod,
+      push: unusedRouterMethod,
+      replace: unusedRouterMethod,
     };
 
     runAppNavigation(router, { href: "/settings/account" });

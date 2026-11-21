@@ -13,6 +13,7 @@ import {
   select,
 } from "d3";
 import type { RefObject } from "react";
+import { eachSelected } from "./eachSelected";
 import type { HubSimNode } from "./mountGraphOverlays";
 
 export type PersonSim = SimulationNodeDatum & RelationshipGraphNode & { nodeKind: "person" };
@@ -125,10 +126,10 @@ export function startGraphSimulation(input: {
       .attr("y1", (row) => linkCoord(row.source, "y"))
       .attr("x2", (row) => linkCoord(row.target, "x"))
       .attr("y2", (row) => linkCoord(row.target, "y"));
-    node.each(function placeNode(row) {
+    eachSelected(node, (element, row) => {
       const x = row.x ?? 0;
       const y = row.y ?? 0;
-      const group = select(this);
+      const group = select(element);
       group.select("circle.ring").attr("cx", x).attr("cy", y);
       group.select("circle.avatar").attr("cx", x).attr("cy", y);
       svg.select(`#graph-clip-${row.id} circle`).attr("cx", x).attr("cy", y);

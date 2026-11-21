@@ -5,7 +5,7 @@
  * Usage:
  *   BONDERY_API_KEY=bondery_key_… node packages/tests/sample-data/bondery/seed-sample-export.mjs
  *
- * Defaults to the local API (http://127.0.0.1:26631).
+ * Defaults to the local API (https://127.0.0.1:26642, trusting the dev API CA).
  */
 
 import { randomUUID } from "node:crypto";
@@ -13,14 +13,25 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const API_URL = (process.env.BONDERY_API_URL ?? "http://127.0.0.1:26631").replace(/\/+$/, "");
+import { resolveDevApiUrl } from "./dev-api.mjs";
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
+const API_URL = resolveDevApiUrl();
 const API_KEY = process.env.BONDERY_API_KEY;
 const BONDERY_VERSION = "1.9.1";
 const CONCURRENCY = 1;
 
 if (!API_KEY) {
   console.error("BONDERY_API_KEY is required");
-  process.exit(1);
+  process.exitCode = 1;
+  throw new Error("BONDERY_API_KEY is required");
 }
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
@@ -768,7 +779,9 @@ const INTERACTION_TEMPLATES = [
 ];
 
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 }
 
 async function api(method, pathname, body) {
@@ -791,10 +804,11 @@ async function api(method, pathname, body) {
     }
 
     const text = await response.text();
+    /** @type {unknown} */
     let json = null;
     if (text) {
       try {
-        json = JSON.parse(text);
+        json = /** @type {unknown} */ (JSON.parse(text));
       } catch {
         json = { raw: text };
       }
@@ -811,7 +825,7 @@ async function api(method, pathname, body) {
       throw error;
     }
 
-    return json;
+    return asUnknown(json);
   }
 
   throw new Error(`${method} ${pathname} failed after rate-limit retries`);
@@ -819,7 +833,7 @@ async function api(method, pathname, body) {
 
 async function apiIgnoreSyncEmit(method, pathname, body) {
   try {
-    return await api(method, pathname, body);
+    return asUnknown(await api(method, pathname, body));
   } catch (error) {
     if (error.status !== 500) {
       throw error;
@@ -1023,16 +1037,12 @@ async function resetPreviousSampleContacts() {
 }
 
 async function main() {
-  const uniqueSeeds = UNIQUE_CONTACTS.map((seed, index) => ({
-    ...seed,
-    index,
-    skipLinkedin: false,
-  }));
-  const duplicateSeeds = DUPLICATE_CONTACTS.map((seed, index) => ({
-    ...seed,
-    index: uniqueSeeds.length + index,
-    skipLinkedin: true,
-  }));
+  const uniqueSeeds = UNIQUE_CONTACTS.map((seed, index) =>
+    Object.assign({}, seed, { index, skipLinkedin: false }),
+  );
+  const duplicateSeeds = DUPLICATE_CONTACTS.map((seed, index) =>
+    Object.assign({}, seed, { index: uniqueSeeds.length + index, skipLinkedin: true }),
+  );
   const allSeeds = [...uniqueSeeds, ...duplicateSeeds];
   if (allSeeds.length !== 70) {
     throw new Error(`Expected 70 contact seeds, got ${allSeeds.length}`);
@@ -1165,15 +1175,15 @@ async function main() {
     })),
     updatedAt: tag.updatedAt,
   }));
-  const interactionRecords = interactions.map(({ created, participantIds }) => ({
-    createdAt: created.createdAt,
-    date: created.date,
-    description: created.description ?? null,
-    id: created.id,
+  const interactionRecords = interactions.map(({ created: interactionRecord, participantIds }) => ({
+    createdAt: interactionRecord.createdAt,
+    date: interactionRecord.date,
+    description: interactionRecord.description ?? null,
+    id: interactionRecord.id,
     participantIds,
-    title: created.title ?? null,
-    type: created.type,
-    updatedAt: created.updatedAt,
+    title: interactionRecord.title ?? null,
+    type: interactionRecord.type,
+    updatedAt: interactionRecord.updatedAt,
   }));
 
   const files = {

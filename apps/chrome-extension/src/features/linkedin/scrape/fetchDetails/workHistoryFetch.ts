@@ -3,6 +3,7 @@
  */
 
 import { extLog } from "../../../../lib/log";
+import { nonEmpty } from "../../../../lib/text";
 import type { WorkEntry } from "../workExperience";
 import { enrichWorkEntriesWithLogos, extractLogoUrlFromVoyagerImage } from "./voyagerLogos";
 import {
@@ -79,7 +80,7 @@ function mapPositionEntity(
     endDate,
     startDate,
     ...(employmentType ? { employmentType } : {}),
-    description: description || undefined,
+    description: nonEmpty(description),
     location: locationName ?? undefined,
   };
 }
@@ -296,14 +297,16 @@ function extractNestedPositions(
 }
 
 /** Endpoints to try for work history (in priority order). */
-const WORK_ENDPOINTS = (urn: string) => [
-  // Individual positions endpoint (has title, companyName, etc.)
-  // count=100 overrides LinkedIn's default page size of ~5 so we get all entries in one shot
-  `/voyager/api/identity/dash/profilePositions?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
-  // Position groups endpoint (groups by company, may lack titles)
-  `/voyager/api/identity/dash/profilePositionGroups?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
-  `/voyager/api/identity/dash/profilePositionGroups?q=viewee&profileUrn=${encodeURIComponent(urn)}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfilePositionGroup-3&count=100`,
-];
+function WORK_ENDPOINTS(urn: string): string[] {
+  return [
+    // Individual positions endpoint (has title, companyName, etc.)
+    // count=100 overrides LinkedIn's default page size of ~5 so we get all entries in one shot
+    `/voyager/api/identity/dash/profilePositions?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
+    // Position groups endpoint (groups by company, may lack titles)
+    `/voyager/api/identity/dash/profilePositionGroups?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
+    `/voyager/api/identity/dash/profilePositionGroups?q=viewee&profileUrn=${encodeURIComponent(urn)}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfilePositionGroup-3&count=100`,
+  ];
+}
 
 /**
  * Fetches the full work history for a LinkedIn profile.

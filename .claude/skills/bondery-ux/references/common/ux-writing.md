@@ -6,12 +6,12 @@ All user-visible copy goes through `packages/translations` — see [i18n.md](./i
 
 ## Voice
 
-| Rule | Example |
-|------|---------|
+| Rule              | Example                                                    |
+| ----------------- | ---------------------------------------------------------- |
 | **Sentence case** | "Add person" not "Add Person" (except proper nouns, brand) |
-| **Short** | One idea per sentence; trim filler |
-| **Second person** | "Your contacts" not "The user's contacts" |
-| **Active** | "Delete group" not "Group will be deleted" |
+| **Short**         | One idea per sentence; trim filler                         |
+| **Second person** | "Your contacts" not "The user's contacts"                  |
+| **Active**        | "Delete group" not "Group will be deleted"                 |
 
 ---
 
@@ -19,11 +19,11 @@ All user-visible copy goes through `packages/translations` — see [i18n.md](./i
 
 Structure: **what happened** + **what to do**.
 
-| Bad | Good |
-|-----|------|
-| "Error 503" | "Bondery is temporarily unavailable. We'll keep checking." |
-| Server `message` verbatim | `getUserFacingError(error, t)` / catalog copy |
-| "Something went wrong" alone | Name the action that failed + retry or next step |
+| Bad                          | Good                                                       |
+| ---------------------------- | ---------------------------------------------------------- |
+| "Error 503"                  | "Bondery is temporarily unavailable. We'll keep checking." |
+| Server `message` verbatim    | `getUserFacingError(error, t)` / catalog copy              |
+| "Something went wrong" alone | Name the action that failed + retry or next step           |
 
 API errors use nested envelope + `common.errors.api.{code}` — never surface raw server `message` in UI.
 
@@ -33,9 +33,9 @@ API errors use nested envelope + `common.errors.api.{code}` — never surface ra
 
 **Opportunity framing, not apology.**
 
-| Bad | Good |
-|-----|------|
-| "Sorry, no contacts found" | "No contacts yet" + Add person CTA |
+| Bad                         | Good                                      |
+| --------------------------- | ----------------------------------------- |
+| "Sorry, no contacts found"  | "No contacts yet" + Add person CTA        |
 | "We couldn't find anything" | "No results for '{query}'" + clear search |
 
 See [empty-states.md](./empty-states.md).
@@ -46,12 +46,12 @@ See [empty-states.md](./empty-states.md).
 
 Align with [destructive-actions.md](./destructive-actions.md):
 
-| Element | Rule |
-|---------|------|
-| **Title** | Name the thing: "Delete {name}?" — not "Are you sure?" |
-| **Body** | One sentence on permanence: "This contact and all their data will be permanently removed." |
-| **Confirm button** | Verb of action: "Delete" — not "OK" or "Yes" |
-| **Cancel** | "Cancel" from `common.actions` |
+| Element            | Rule                                                                                       |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| **Title**          | Name the thing: "Delete {name}?" — not "Are you sure?"                                     |
+| **Body**           | One sentence on permanence: "This contact and all their data will be permanently removed." |
+| **Confirm button** | Verb of action: "Delete" — not "OK" or "Yes"                                               |
+| **Cancel**         | "Cancel" from `common.actions`                                                             |
 
 ---
 

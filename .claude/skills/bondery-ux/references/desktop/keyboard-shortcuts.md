@@ -11,7 +11,7 @@ import { Kbd, parseShortcutKeys } from "@bondery/mantine-next";
 ## API
 
 ```tsx
-<Kbd keys={["mod", "k"]} size="xs" />
+<Kbd keys={["mod", "k"]} size="xs" />;
 ```
 
 Pass shortcut **tokens**, not pre-formatted strings. Use `"mod"` for the primary modifier (Ctrl on Windows/Linux, ⌘ on macOS/iOS).
@@ -19,7 +19,7 @@ Pass shortcut **tokens**, not pre-formatted strings. Use `"mod"` for the primary
 ## With HOTKEYS
 
 ```tsx
-<Kbd keys={parseShortcutKeys(HOTKEYS.COMMAND_PALETTE)} size="xs" />
+<Kbd keys={parseShortcutKeys(HOTKEYS.COMMAND_PALETTE)} size="xs" />;
 ```
 
 Keeps display in sync with `useHotkeys` / Spotlight bindings in `@/lib/platform/config`.

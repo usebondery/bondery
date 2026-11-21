@@ -1,7 +1,7 @@
 import { Group, Text } from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { IconFileZip, IconUpload, IconX } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export interface DropzoneContentProps {
   acceptIcon?: ReactNode;
@@ -12,14 +12,18 @@ export interface DropzoneContentProps {
   title: string;
 }
 
+const DEFAULT_ACCEPT_ICON = <IconUpload size={52} stroke={1.5} />;
+const DEFAULT_REJECT_ICON = <IconX size={52} stroke={1.5} />;
+const DEFAULT_IDLE_ICON = <IconFileZip size={52} stroke={1.5} />;
+
 export function DropzoneContent({
-  acceptIcon = <IconUpload size={52} stroke={1.5} />,
-  rejectIcon = <IconX size={52} stroke={1.5} />,
-  idleIcon = <IconFileZip size={52} stroke={1.5} />,
+  acceptIcon = DEFAULT_ACCEPT_ICON,
+  rejectIcon = DEFAULT_REJECT_ICON,
+  idleIcon = DEFAULT_IDLE_ICON,
   title,
   description,
   minHeight = 220,
-}: DropzoneContentProps) {
+}: DropzoneContentProps): ReactElement {
   return (
     <Group gap="xl" justify="center" mih={minHeight} style={{ pointerEvents: "none" }}>
       <Dropzone.Accept>{acceptIcon}</Dropzone.Accept>

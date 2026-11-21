@@ -215,26 +215,28 @@ export function SettingsScreen() {
 
           <InputWrapper label={tMobileSettings("FollowUs")}>
             <Paper withBorder>
-              <Group className="px-4 py-3.5" grow>
-                {SOCIAL_BUTTONS.map((social) => {
-                  const Icon = social.icon;
+              <View className="px-4 py-3.5">
+                <Group grow>
+                  {SOCIAL_BUTTONS.map((social) => {
+                    const Icon = social.icon;
 
-                  return (
-                    <ActionButton
-                      accessibilityLabel={tMobileSettings(social.labelKey)}
-                      color={social.color}
-                      key={social.id}
-                      onPress={() => {
-                        void openExternalUrl(social.url);
-                      }}
-                      size="md"
-                      variant="outline"
-                    >
-                      <Icon size={20} stroke={social.color} />
-                    </ActionButton>
-                  );
-                })}
-              </Group>
+                    return (
+                      <ActionButton
+                        accessibilityLabel={tMobileSettings(social.labelKey)}
+                        color={social.color}
+                        key={social.id}
+                        onPress={() => {
+                          void openExternalUrl(social.url);
+                        }}
+                        size="md"
+                        variant="outline"
+                      >
+                        <Icon size={20} stroke={social.color} />
+                      </ActionButton>
+                    );
+                  })}
+                </Group>
+              </View>
             </Paper>
           </InputWrapper>
 

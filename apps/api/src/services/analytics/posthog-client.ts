@@ -28,7 +28,7 @@ export function scrubExceptionEvent(event: EventMessage | null): EventMessage | 
       $exception_list: exceptions.map((exception: unknown) => {
         const value = (exception as { value?: unknown } | null)?.value;
         return typeof value === "string"
-          ? { ...(exception as object), value: scrubEmails(value) }
+          ? Object.assign({}, exception as object, { value: scrubEmails(value) })
           : exception;
       }),
     },
@@ -51,7 +51,7 @@ export function getPosthogClient(): PostHog | null {
   client =
     key && !isTestEnvironment()
       ? new PostHog(key, {
-          before_send: scrubExceptionEvent,
+          beforeSend: scrubExceptionEvent,
           enableExceptionAutocapture: true,
           flushAt: 1,
           flushInterval: 0,

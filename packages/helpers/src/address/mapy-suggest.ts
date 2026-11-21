@@ -37,8 +37,18 @@ function isValidCoordinate(lat: number, lon: number): boolean {
   );
 }
 
+const CZECHIA_MIN_LATITUDE = 48.4;
+const CZECHIA_MAX_LATITUDE = 51.2;
+const CZECHIA_MIN_LONGITUDE = 12;
+const CZECHIA_MAX_LONGITUDE = 19;
+
 function isWithinCzechiaBounds(lat: number, lon: number): boolean {
-  return lat >= 48.4 && lat <= 51.2 && lon >= 12.0 && lon <= 19.0;
+  return (
+    lat >= CZECHIA_MIN_LATITUDE &&
+    lat <= CZECHIA_MAX_LATITUDE &&
+    lon >= CZECHIA_MIN_LONGITUDE &&
+    lon <= CZECHIA_MAX_LONGITUDE
+  );
 }
 
 function normalizeCoordinates(
@@ -85,7 +95,7 @@ function normalizeCoordinates(
  * produces a display label using the shared formatting helpers.
  */
 function buildLabelFromRawItem(raw: unknown): string {
-  const item = raw as Record<string, unknown>;
+  const item = raw as Record<string, unknown> | null | undefined;
   const name = String(item?.name || "").trim();
   if (!name) {
     return "";
@@ -136,13 +146,13 @@ function buildLabelFromRawItem(raw: unknown): string {
  * Parses a single raw Mapy.com suggest item into a {@link MapSuggestionItem}.
  */
 export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
-  const item = raw as Record<string, unknown>;
+  const item = raw as Record<string, unknown> | null | undefined;
   const position = item?.position;
   let lat: number | null = null;
   let lon: number | null = null;
   const regionalStructure = Array.isArray(item?.regionalStructure) ? item.regionalStructure : [];
   const countryIso = String(
-    (regionalStructure as Array<Record<string, unknown>>).find(
+    (regionalStructure as Array<Record<string, unknown> | null | undefined>).find(
       (entry) => entry?.type === "regional.country",
     )?.isoCode || "",
   ).toUpperCase();
@@ -177,11 +187,13 @@ export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
       lon: Number.isFinite(lon) ? lon : null,
     },
     regionalStructure: Array.isArray(item?.regionalStructure)
-      ? (item.regionalStructure as Array<Record<string, unknown>>).map((entry) => ({
-          isoCode: entry?.isoCode ? String(entry.isoCode) : undefined,
-          name: entry?.name ? String(entry.name) : undefined,
-          type: entry?.type ? String(entry.type) : undefined,
-        }))
+      ? (item.regionalStructure as Array<Record<string, unknown> | null | undefined>).map(
+          (entry) => ({
+            isoCode: entry?.isoCode ? String(entry.isoCode) : undefined,
+            name: entry?.name ? String(entry.name) : undefined,
+            type: entry?.type ? String(entry.type) : undefined,
+          }),
+        )
       : [],
     type: String(item?.type || "regional.address"),
     zip: item?.zip ? String(item.zip) : null,

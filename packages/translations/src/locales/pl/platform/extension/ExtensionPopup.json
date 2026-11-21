@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Otwórz Bondery"
+    "OpenBondery": "Otwórz Bondery",
+    "UnsupportedSiteMessage": "Odwiedź czyjś profil na Instagramie lub LinkedIn, aby zobaczyć więcej akcji i możliwości rozszerzenia."
   },
   "LoggedOut": {
     "Description": "Połącz konto, aby zapisywać kontakty z mediów społecznościowych.",
@@ -20,6 +21,12 @@
     "Title": "Wymagana aktualizacja"
   },
   "Welcome": {
-    "ConnectButton": "Połącz konto Bondery"
+    "ConnectButton": "Połącz konto Bondery",
+    "Description": "Połącz swoje konto Bondery, aby zapisywać kontakty bezpośrednio z profili w mediach społecznościowych.",
+    "SignInHint": "Pojawi się prośba o zalogowanie się na konto Bondery i autoryzowanie rozszerzenia.",
+    "SuccessClose": "Możesz teraz zamknąć tę kartę.",
+    "SuccessDescription": "Twoje konto Bondery zostało połączone. Odwiedź dowolny profil na Instagramie lub LinkedIn, aby zacząć zapisywać kontakty.",
+    "SuccessTitle": "Wszystko gotowe!",
+    "Title": "Witaj w Bondery"
   }
 }

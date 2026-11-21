@@ -1,7 +1,7 @@
 "use client";
 
 import { Avatar, Badge, type BadgeProps, type MantineColor } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
 import {
   type PersonChipSize,
@@ -46,8 +46,9 @@ export function PersonChip({
   interactive,
   label,
   rightSection,
-}: PersonChipProps) {
-  const fullName = (label ?? `${firstName}${lastName ? ` ${lastName}` : ""}`).trim();
+}: PersonChipProps): ReactElement {
+  const lastNameSuffix = lastName ? ` ${lastName}` : "";
+  const fullName = (label ?? `${firstName}${lastNameSuffix}`).trim();
   const sizes = personChipSizes(size);
   const personAvatarColor = color === "gray" ? "gray" : getAvatarColorFromName(firstName, lastName);
   const isInteractive = interactive ?? Boolean(onClick);

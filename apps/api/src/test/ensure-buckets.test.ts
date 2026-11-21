@@ -94,7 +94,9 @@ describe("ensureStorageBuckets", () => {
       create: (bucket) => {
         created.push(bucket);
       },
-      head: async () => {},
+      head: async () => {
+        // HeadBucket succeeds: the bucket already exists.
+      },
       putPolicy: (bucket) => {
         policies.push(bucket);
       },
@@ -123,7 +125,9 @@ describe("ensureStorageBuckets", () => {
         }
         throw notFoundError();
       },
-      putPolicy: async () => {},
+      putPolicy: async () => {
+        // Policy attach is not asserted in this retry case.
+      },
     });
 
     await ensureStorageBuckets({
@@ -148,7 +152,9 @@ describe("ensureStorageBuckets", () => {
         headCalls += 1;
         throw accessDeniedError();
       },
-      putPolicy: async () => {},
+      putPolicy: async () => {
+        // AccessDenied must fail before PutBucketPolicy runs.
+      },
     });
 
     await assert.rejects(
@@ -175,10 +181,12 @@ describe("ensureStorageBuckets", () => {
       head: () => {
         throw notFoundError();
       },
-      putPolicy: async () => {},
+      putPolicy: async () => {
+        // Owned-by-you is treated as success without asserting policy.
+      },
     });
 
-    await ensureStorageBuckets({ buckets: ["avatars"], client });
+    await assert.doesNotReject(() => ensureStorageBuckets({ buckets: ["avatars"], client }));
   });
 
   it("rejects after exhausted UnknownError HeadBucket attempts without creating", async () => {
@@ -191,7 +199,9 @@ describe("ensureStorageBuckets", () => {
       head: () => {
         throw unknownError();
       },
-      putPolicy: async () => {},
+      putPolicy: async () => {
+        // Exhausted HeadBucket retries must not reach PutBucketPolicy.
+      },
     });
 
     await assert.rejects(

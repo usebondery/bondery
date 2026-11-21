@@ -77,7 +77,7 @@ function isIgnoredUserAgentBrand(brand: string): boolean {
   return brand === "Chromium" || CHROMIUM_GREASE_BRAND.test(brand);
 }
 
-function inferBrowser(userAgent: string, brands?: NavigatorBrands): string | null {
+function inferBrowser(userAgent: string, brands?: NavigatorBrands) {
   const highEntropy = brands?.find((entry) => !isIgnoredUserAgentBrand(entry.brand));
   if (highEntropy?.brand) {
     return shortenBrowserBrand(highEntropy.brand);

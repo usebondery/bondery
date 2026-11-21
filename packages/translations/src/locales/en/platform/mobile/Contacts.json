@@ -22,6 +22,8 @@
   "GroupFilterNewGroup": "New group",
   "GroupFilterSheetTitle": "Show contacts in",
   "Groups": "Groups",
+  "MentionEmptyCaption": "Add people to mention them in notes.",
+  "MentionEmptyTitle": "No contacts yet",
   "MissingEmail": "This contact doesn't have an email",
   "MissingPhone": "This contact doesn't have a phone",
   "MoreActions": "More actions",

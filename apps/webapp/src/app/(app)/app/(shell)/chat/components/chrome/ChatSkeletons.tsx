@@ -1,4 +1,4 @@
-﻿import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Box, Group, Paper, Skeleton, Stack } from "@mantine/core";
 import { PageHeaderSkeleton } from "@/components/shell/PageHeaderSkeleton";
 
 /**

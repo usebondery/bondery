@@ -1,6 +1,6 @@
 import type { MantineSpacing } from "@mantine/core";
 import { Box, ScrollArea, Stack } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 const DEFAULT_SCROLL_MAX_HEIGHT = "min(70dvh, calc(100dvh - 14rem))";
 
@@ -18,7 +18,7 @@ export function ModalScrollLayout({
   header,
   maxHeight = DEFAULT_SCROLL_MAX_HEIGHT,
   gap = "md",
-}: ModalScrollLayoutProps) {
+}: ModalScrollLayoutProps): ReactElement {
   const scrollMaxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
 
   if (header) {

@@ -6,31 +6,64 @@ export type PersonChipSize = "sm" | "md";
  */
 const CHIP_HEIGHT_PX: Record<PersonChipSize, number> = { md: 32, sm: 26 };
 
-export function personChipSizes(size: PersonChipSize) {
+export type PersonChipSizes = {
+  avatarEdgeSize: number;
+  avatarSize: number;
+  badgeHeight: number;
+  badgeSize: "lg" | "xl";
+  chevronSize: number;
+  clearSize: number;
+  endPadding: number;
+};
+
+export function personChipSizes(size: PersonChipSize): PersonChipSizes {
   return {
     avatarEdgeSize: CHIP_HEIGHT_PX[size],
     avatarSize: size === "sm" ? 16 : 20,
     // Drives the badge height directly, so the `lg`/`xl` badge heights no longer
     // have to equal the avatar height by coincidence.
     badgeHeight: CHIP_HEIGHT_PX[size],
-    badgeSize: (size === "sm" ? "lg" : "xl") as "lg" | "xl",
+    badgeSize: size === "sm" ? "lg" : "xl",
     chevronSize: size === "sm" ? 12 : 14,
     clearSize: size === "sm" ? 12 : 14,
     endPadding: size === "sm" ? 8 : 10,
   };
 }
 
+type PersonChipBadgeVars = () => {
+  root: { "--badge-height": string };
+};
+
 /**
  * Badge `vars` resolver for this chip. Badge takes a resolver function, and
  * Mantine merges `varsResolver` output before it, so a `--badge-height` set
  * through `styles` alone is overwritten by the badge `size` value.
  */
-export function personChipBadgeVars(size: PersonChipSize) {
+export function personChipBadgeVars(size: PersonChipSize): PersonChipBadgeVars {
   const sizes = personChipSizes(size);
   return () => ({
     root: { "--badge-height": `calc(${sizes.badgeHeight}px * var(--mantine-scale))` },
   });
 }
+
+type PersonChipBadgeStyles = {
+  label: {
+    color: string | undefined;
+    fontWeight: 400;
+    overflow: "visible";
+    textTransform: "none";
+  };
+  root: {
+    cursor: "pointer" | "default";
+    opacity: number;
+    paddingInlineEnd: number | undefined;
+    paddingInlineStart: number | undefined;
+    verticalAlign: "middle";
+  };
+  section: {
+    maxHeight: "none";
+  };
+};
 
 export function personChipBadgeStyles(args: {
   avatarEdge: boolean;
@@ -39,15 +72,15 @@ export function personChipBadgeStyles(args: {
   hasPerson: boolean;
   interactive: boolean;
   size: PersonChipSize;
-}) {
+}): PersonChipBadgeStyles {
   const sizes = personChipSizes(args.size);
 
   return {
     label: {
       color: args.hasPerson ? undefined : "var(--mantine-color-dimmed)",
       fontWeight: 400,
-      overflow: "visible" as const,
-      textTransform: "none" as const,
+      overflow: "visible",
+      textTransform: "none",
     },
     root: {
       cursor: args.interactive && !args.disabled ? "pointer" : "default",
@@ -64,5 +97,5 @@ export function personChipBadgeStyles(args: {
       // full-bleed avatar in both sizes. Let the avatar fill the chip.
       maxHeight: "none",
     },
-  } as const;
+  };
 }

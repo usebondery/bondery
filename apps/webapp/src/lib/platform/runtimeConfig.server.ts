@@ -63,9 +63,8 @@ function assertProductionRuntimeConfig(config: WebappRuntimeConfig): void {
   }
 
   if (errors.length > 0) {
-    throw new Error(
-      `Invalid webapp runtime config:\n${errors.map((message) => `- ${message}`).join("\n")}`,
-    );
+    const details = errors.map((message) => `- ${message}`).join("\n");
+    throw new Error(`Invalid webapp runtime config:\n${details}`);
   }
 }
 

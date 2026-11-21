@@ -1,5 +1,5 @@
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
-import type { ReactNode } from "react";
+import type { JSX, ReactNode } from "react";
 import { Column, Img, Link, Row, Section, Text } from "react-email";
 import { defaultShareContactCopy } from "#fixtures/default-copy.js";
 import { clipEmailPreview, type EmailDocumentProps } from "#shared/chrome.js";
@@ -135,7 +135,8 @@ function AvatarDisplay({ avatarUrl, name }: { avatarUrl?: string; name: string }
 }
 
 function toTelHref(prefix: string | undefined, value: string): string {
-  return `tel:${`${prefix ?? ""}${value}`.replace(/[^\d+]/g, "")}`;
+  const dialable = `${prefix ?? ""}${value}`.replace(/[^\d+]/g, "");
+  return `tel:${dialable}`;
 }
 
 function previewFromMessage(message: string | undefined, fallback: string): string {
@@ -147,6 +148,14 @@ function previewFromMessage(message: string | undefined, fallback: string): stri
   return clipEmailPreview(trimmed);
 }
 
+const PREVIEW_EMAILS: ShareContactEmailEntry[] = [{ type: "work", value: "jane@example.com" }];
+const PREVIEW_IMPORTANT_DATES: ShareContactEmailDate[] = [
+  { date: "March 15", label: "Birthday", type: "birthday" },
+];
+const PREVIEW_PHONES: ShareContactEmailPhone[] = [
+  { prefix: "+1", type: "mobile", value: "555 010 2030" },
+];
+
 export default function ShareContactEmail({
   addresses,
   chrome,
@@ -154,17 +163,17 @@ export default function ShareContactEmail({
   contactName = "Jane Doe",
   copy = defaultShareContactCopy,
   dir,
-  emails = [{ type: "work", value: "jane@example.com" }],
+  emails = PREVIEW_EMAILS,
   facebook,
   headline,
-  importantDates = [{ date: "March 15", label: "Birthday", type: "birthday" }],
+  importantDates = PREVIEW_IMPORTANT_DATES,
   instagram,
   lang,
   linkedin = "jane-doe",
   location = "Prague, Czechia",
   message,
   notes = "Met at a conference last year.",
-  phones = [{ prefix: "+1", type: "mobile", value: "555 010 2030" }],
+  phones = PREVIEW_PHONES,
   recipientEmail: _recipientEmail = "friend@example.com",
   senderAvatarUrl: _senderAvatarUrl,
   senderEmail = "alex@example.com",
@@ -174,7 +183,7 @@ export default function ShareContactEmail({
   website = "https://example.com",
   websiteUrl,
   whatsapp,
-}: ShareContactEmailProps) {
+}: ShareContactEmailProps): JSX.Element {
   const customMessage = message?.trim();
   const resolvedHeadline = headline?.trim();
   const preview = previewFromMessage(customMessage, copy.previewFallback);

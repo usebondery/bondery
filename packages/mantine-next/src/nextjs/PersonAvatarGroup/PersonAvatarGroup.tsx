@@ -2,6 +2,7 @@
 
 import type { ContactPreview } from "@bondery/schemas";
 import { Avatar, AvatarGroup, Stack, Tooltip } from "@mantine/core";
+import type { ReactElement } from "react";
 import { PersonAvatar } from "#nextjs/PersonAvatar/index.js";
 
 type PersonAvatarGroupIdentity = ContactPreview & {
@@ -33,7 +34,7 @@ export function PersonAvatarGroup({
   moreTooltipTemplate = "And {count} more",
   wrap = false,
   wrapRowSize = 2,
-}: PersonAvatarGroupProps) {
+}: PersonAvatarGroupProps): ReactElement {
   const effectiveTotalCount = totalCount ?? people.length;
   const visibleCount = Math.min(maxDisplayCount, people.length, effectiveTotalCount);
   const visiblePeople = people.slice(0, visibleCount);

@@ -42,14 +42,14 @@ export function InteractionsList({
   const groupedActivities = (() => {
     const groups: Record<string, Activity[]> = {};
 
-    activities.forEach((activity) => {
+    for (const activity of activities) {
       const date = new Date(activity.date);
       const key = formatter.formatDate(date, "monthYearLong");
       if (!groups[key]) {
         groups[key] = [];
       }
       groups[key].push(activity);
-    });
+    }
 
     return groups;
   })();

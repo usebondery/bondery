@@ -1,4 +1,4 @@
-﻿import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { CodeHighlightProvider } from "@bondery/mantine-next";
 import { ModalsProvider } from "@mantine/modals";
 import { headers } from "next/headers";

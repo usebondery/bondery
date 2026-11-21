@@ -4,7 +4,6 @@ import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import { View } from "react-native";
 import { GestureDetector, type GestureType } from "react-native-gesture-handler";
 import { useMobileContactsTranslations } from "@/lib/i18n/generated/hooks";
-import { Stack } from "../../../components/ui/Stack";
 import { Text } from "../../../components/ui/Text";
 import type { SwipeAction } from "../../../lib/preferences/useMobilePreferences";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
@@ -88,14 +87,12 @@ export function ContactsScreenList({
   }
 
   const listEmpty = (
-    <Stack
-      align="center"
-      className="px-5"
-      justify="center"
+    <View
+      className="items-center justify-center px-5"
       style={{ paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset }}
     >
       <Text c="secondary">{emptyMessage}</Text>
-    </Stack>
+    </View>
   );
 
   const listExtraData = {

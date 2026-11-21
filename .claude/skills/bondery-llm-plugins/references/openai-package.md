@@ -4,12 +4,12 @@ These limits apply to the portable package in `llm-plugins/openai`. Field placem
 
 ## Text limits
 
-| Field | Limit |
-|-------|-------|
-| `displayName` | At most 30 characters. The value is `Bondery`. |
+| Field              | Limit                                                                              |
+| ------------------ | ---------------------------------------------------------------------------------- |
+| `displayName`      | At most 30 characters. The value is `Bondery`.                                     |
 | `shortDescription` | At most 30 characters. The value is `People you mean to remember` (27 characters). |
-| `longDescription` | At most 4000 characters. |
-| `name` | At most 64 characters. Use lowercase letters, numbers, and single hyphens. |
+| `longDescription`  | At most 4000 characters.                                                           |
+| `name`             | At most 64 characters. Use lowercase letters, numbers, and single hyphens.         |
 
 Do not repeat a hyphen in `name`. Do not put the long text in `shortDescription`.
 

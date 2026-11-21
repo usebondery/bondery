@@ -21,12 +21,12 @@ packages/emails/
     index.ts                 # Barrel re-exports for apps/api
 ```
 
-| Folder | Meaning | Current templates |
-|--------|---------|-------------------|
-| `account/` | User account create, delete, authentication | `MagicLinkEmail`, `WelcomeEmail`, `AccountDeletedEmail` |
-| `billing/` | Subscriptions and billing | `TrialEndingEmail` |
-| `internal/` | Visible to the Bondery team, not the end user as the audience | `FeedbackEmail` |
-| `notifications/` | User-initiated (or scheduled product) mail from the apps | `ShareContactEmail`, `ReminderDigestEmail` |
+| Folder           | Meaning                                                       | Current templates                                       |
+| ---------------- | ------------------------------------------------------------- | ------------------------------------------------------- |
+| `account/`       | User account create, delete, authentication                   | `MagicLinkEmail`, `WelcomeEmail`, `AccountDeletedEmail` |
+| `billing/`       | Subscriptions and billing                                     | `TrialEndingEmail`                                      |
+| `internal/`      | Visible to the Bondery team, not the end user as the audience | `FeedbackEmail`                                         |
+| `notifications/` | User-initiated (or scheduled product) mail from the apps      | `ShareContactEmail`, `ReminderDigestEmail`              |
 
 Senders in `apps/api` import from the barrel:
 
@@ -42,17 +42,17 @@ Hash imports inside the package (`#templates/account/MagicLinkEmail.js`) must ma
 
 Every template must wrap content in `packages/emails/src/shared/EmailWrapper.tsx`. Body copy goes through `EmailBody` (`heading` → `description` → contents → optional CTA → notes).
 
-| Prop | Purpose |
-|------|---------|
-| `preview` | **Required.** Inbox snippet (React Email [`<Preview>`](https://react.email/docs/components/preview)) — complements subject, does not duplicate it. Keep **≤90 characters**; `EmailWrapper` clips with `clipEmailPreview`. |
-| `title` | Document `<title>` — usually the send subject |
-| `lang` / `dir` | Content locale (`en`, `cs`, `de`) and direction |
-| `chrome` | Localized header/footer strings (`EmailChrome` namespace) |
-| `websiteUrl` | Marketing origin for logo, support, and docs links |
-| `showHelp` | Default `true`. Set `false` for internal ops mail (feedback) — help links are replaced by the internal note. |
-| `manageNotificationsUrl` | Settings URL for **configurable** product mail only (reminder digest). Omit everywhere else. |
-| `showLegalEntity` | Default `false`. Set `true` **only** for promotional/marketing mail (legal name + registered address from `LEGAL_ENTITY`). |
-| `children` | Email body |
+| Prop                     | Purpose                                                                                                                                                                                                                   |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `preview`                | **Required.** Inbox snippet (React Email [`<Preview>`](https://react.email/docs/components/preview)) — complements subject, does not duplicate it. Keep **≤90 characters**; `EmailWrapper` clips with `clipEmailPreview`. |
+| `title`                  | Document `<title>` — usually the send subject                                                                                                                                                                             |
+| `lang` / `dir`           | Content locale (`en`, `cs`, `de`) and direction                                                                                                                                                                           |
+| `chrome`                 | Localized header/footer strings (`EmailChrome` namespace)                                                                                                                                                                 |
+| `websiteUrl`             | Marketing origin for logo, support, and docs links                                                                                                                                                                        |
+| `showHelp`               | Default `true`. Set `false` for internal ops mail (feedback) — help links are replaced by the internal note.                                                                                                              |
+| `manageNotificationsUrl` | Settings URL for **configurable** product mail only (reminder digest). Omit everywhere else.                                                                                                                              |
+| `showLegalEntity`        | Default `false`. Set `true` **only** for promotional/marketing mail (legal name + registered address from `LEGAL_ENTITY`).                                                                                                |
+| `children`               | Email body                                                                                                                                                                                                                |
 
 `EmailWrapper` provides:
 
@@ -68,13 +68,13 @@ Do **not** add a second logo, left-align the header, or paste legal identity int
 
 ## EmailBody / EmailCta
 
-| Slot | Style | Use for |
-|------|-------|---------|
-| `heading` | 24px bold | One H1; must not clone the CTA label |
-| `description` | 16px body | Context paragraph |
-| `children` | 16px body unless the block needs its own layout | Lists, fields, extra paragraphs (including a closing thank-you) |
-| `cta` | Full-width centered brand button ≥44px | One primary action. `EmailCta` does **not** render the raw URL under the button. Never left-align a pill button. |
-| `notes` | 14px muted | Why-receiving, expiry, “reply to reach …” |
+| Slot          | Style                                           | Use for                                                                                                          |
+| ------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `heading`     | 24px bold                                       | One H1; must not clone the CTA label                                                                             |
+| `description` | 16px body                                       | Context paragraph                                                                                                |
+| `children`    | 16px body unless the block needs its own layout | Lists, fields, extra paragraphs (including a closing thank-you)                                                  |
+| `cta`         | Full-width centered brand button ≥44px          | One primary action. `EmailCta` does **not** render the raw URL under the button. Never left-align a pill button. |
+| `notes`       | 14px muted                                      | Why-receiving, expiry, “reply to reach …”                                                                        |
 
 API senders pass chrome via `emailDocumentProps(lng, subject)` in `apps/api/src/lib/notifications/email-chrome.ts`.
 

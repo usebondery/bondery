@@ -6,6 +6,17 @@ export interface StatusNotificationTemplateProps {
   title: string;
 }
 
+type StatusNotificationPayload = {
+  autoClose: false;
+  color: "blue";
+  id: string;
+  loading: false;
+  message: ReactNode;
+  radius: "md";
+  title: string;
+  withCloseButton: false;
+};
+
 /**
  * Builds a notification payload for persistent status/progress indicators.
  *
@@ -23,7 +34,7 @@ export function statusNotificationTemplate({
   id,
   title,
   message,
-}: StatusNotificationTemplateProps) {
+}: StatusNotificationTemplateProps): StatusNotificationPayload {
   return {
     autoClose: false as const,
     color: "blue",

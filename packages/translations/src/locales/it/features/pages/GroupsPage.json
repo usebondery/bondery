@@ -94,7 +94,9 @@
     "UpdateFailed": "Impossibile aggiornare il gruppo"
   },
   "EmojiEmptySearch": "Nessun emoji trovato",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Cercare emoji…",
+  "EmojiSelectPlaceholder": "Seleziona emoji",
   "Empty": "Nessun gruppo. Creane uno per organizzare i tuoi contatti.",
   "FallbackTitle": "Gruppo",
   "HeaderDescription": "I gruppi organizzano le persone in insiemi personalizzati per filtri e azioni più rapidi.",

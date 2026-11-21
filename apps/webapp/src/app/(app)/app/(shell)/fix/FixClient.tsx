@@ -39,7 +39,7 @@ export function FixClient() {
   const [showDeclined, setShowDeclined] = useState(false);
   const [restoringIds, setRestoringIds] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
-  const didBootstrapRefresh = useRef(false);
+  const didBootstrapRefresh = useRef<boolean>(false);
 
   const { data: recommendations, isFetching: isListFetching } =
     useMergeRecommendationsQuery(showDeclined);

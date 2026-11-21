@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Jegyzetek hozzáadása…",
   "DeleteContact": "Kapcsolat törlése",
   "DeleteContactConfirmTitle": "Törlöd: {name}?",
   "DeleteFailed": "A kapcsolat törlése nem sikerült.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Szerkesztés",
   "GroupsEditAccessibility": "Csoportok szerkesztése: {name}",
   "GroupsLoadError": "A csoportok betöltése nem sikerült",
+  "LastInteractionLabel": "Utolsó interakció",
   "NoGroups": "Nincs egyetlen csoportban sem",
   "ShareContact": "vCard megosztása…",
   "ShareContactViaEmail": "Küldés e-mailben…",

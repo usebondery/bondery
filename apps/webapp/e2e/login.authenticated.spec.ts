@@ -55,9 +55,9 @@ test.describe("authenticated session", () => {
     // restart mid-run surfaces as unrelated "Failed to fetch" errors.
     test.setTimeout(180_000);
     const pageErrors: string[] = [];
-    page.on("pageerror", (error) =>
-      pageErrors.push(`${page.url()}: ${error.message.slice(0, 200)}`),
-    );
+    page.on("pageerror", (error) => {
+      pageErrors.push(`${page.url()}: ${error.message.slice(0, 200)}`);
+    });
 
     const paths = [
       "/app/home",
@@ -71,6 +71,7 @@ test.describe("authenticated session", () => {
     ];
     for (const path of paths) {
       await page.goto(path);
+      // biome-ignore lint/suspicious/noPlaywrightNetworkidle: lets late hydration errors surface on each page before the check below
       await page.waitForLoadState("networkidle");
     }
 
@@ -91,6 +92,7 @@ test.describe("authenticated session", () => {
     });
     await page.goto("/app/settings");
     await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+    // biome-ignore lint/suspicious/noPlaywrightWaitForTimeout: the sleep is the long-task measurement window, not a wait for a condition
     await page.waitForTimeout(5_000);
 
     const longTaskMs = await page.evaluate(

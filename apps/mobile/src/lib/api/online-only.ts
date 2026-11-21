@@ -41,7 +41,10 @@ function parseContentDispositionFilename(header: string | null): string | null {
     return null;
   }
 
-  const raw = (match[1] ?? match[2] ?? match[3]).trim();
+  const raw = (match[1] ?? match[2] ?? match[3])?.trim();
+  if (raw === undefined) {
+    return null;
+  }
   try {
     return decodeURIComponent(raw);
   } catch {
@@ -66,7 +69,7 @@ export function buildContactVCardFilename(
   contact: Pick<Contact, "firstName" | "lastName">,
 ): string {
   const firstName = contact.firstName || "contact";
-  const lastName = contact.lastName || "";
+  const lastName = contact.lastName ?? "";
   return lastName ? `${firstName}_${lastName}.vcf` : `${firstName}.vcf`;
 }
 

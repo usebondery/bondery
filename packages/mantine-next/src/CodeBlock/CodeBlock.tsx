@@ -4,7 +4,7 @@ import { BRAND_MARKS, type BrandMarkName, THEMED_BRAND_MARKS } from "@bondery/br
 import { CodeHighlight } from "@mantine/code-highlight";
 import { Box, Group, SegmentedControl, Text } from "@mantine/core";
 import { type UseOSReturnValue, useOs } from "@mantine/hooks";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactElement, type ReactNode, useState } from "react";
 import { setCodeBlockPlatform } from "#CodeBlock/platformPreference.js";
 import { setCodeBlockSnippet } from "#CodeBlock/snippetPreference.js";
 import { useCodeBlockPlatform } from "#CodeBlock/useCodeBlockPlatform.js";
@@ -125,7 +125,7 @@ function PlatformMark({ platform }: { platform: CodeBlockPlatform }) {
  * Mantine shows the one that matches the color scheme, so a dark logo never sits
  * on a dark surface. Callers pass it as a snippet `icon`.
  */
-export function BrandMark({ name }: { name: BrandMarkName }) {
+export function BrandMark({ name }: { name: BrandMarkName }): ReactElement {
   if (name in THEMED_BRAND_MARKS) {
     const themed = THEMED_BRAND_MARKS[name as keyof typeof THEMED_BRAND_MARKS];
 
@@ -248,7 +248,7 @@ function CodeBlockShell({
  * Supports a single snippet, switchable snippets (`snippets`), or one command per desktop OS
  * (`platforms`). The platform form owns its labels, marks, order, and the shared tab choice.
  */
-export function CodeBlock(props: CodeBlockProps) {
+export function CodeBlock(props: CodeBlockProps): ReactElement {
   const copyLabel = props.copyLabel ?? "Copy";
   const copiedLabel = props.copiedLabel ?? "Copied!";
 
@@ -360,28 +360,15 @@ function MultiCodeBlock({
   copiedLabel,
   className,
 }: CodeBlockMultiProps & { copyLabel: string; copiedLabel: string }) {
-  const [activeId, setActiveId] = useState(defaultSnippetId ?? snippets[0]?.id ?? "");
-  const userPickedTab = useRef(false);
+  // The tab this reader clicked in this block. It outranks every other source.
+  const [pickedId, setPickedId] = useState<string | null>(null);
   const storedId = useCodeBlockSnippet(preferenceKey ?? "");
 
   // A stored choice outranks the default, so a reader who picked Python keeps it.
-  useEffect(() => {
-    if (userPickedTab.current || !preferenceKey || !storedId) {
-      return;
-    }
-    if (snippets.some((snippet) => snippet.id === storedId)) {
-      setActiveId(storedId);
-    }
-  }, [preferenceKey, snippets, storedId]);
-
-  useEffect(() => {
-    if (userPickedTab.current || !defaultSnippetId) {
-      return;
-    }
-    if (snippets.some((snippet) => snippet.id === defaultSnippetId)) {
-      setActiveId(defaultSnippetId);
-    }
-  }, [defaultSnippetId, snippets]);
+  const hasSnippet = (id: string | undefined) => snippets.some((snippet) => snippet.id === id);
+  const storedSnippetId = preferenceKey && storedId && hasSnippet(storedId) ? storedId : null;
+  const defaultId = defaultSnippetId && hasSnippet(defaultSnippetId) ? defaultSnippetId : null;
+  const activeId = pickedId ?? storedSnippetId ?? defaultId ?? snippets[0]?.id ?? "";
 
   const activeSnippet = snippets.find((snippet) => snippet.id === activeId) ?? snippets[0];
 
@@ -409,8 +396,7 @@ function MultiCodeBlock({
             value: snippet.id,
           }))}
           onChange={(value) => {
-            userPickedTab.current = true;
-            setActiveId(value);
+            setPickedId(value);
             if (preferenceKey) {
               setCodeBlockSnippet(preferenceKey, value);
             }

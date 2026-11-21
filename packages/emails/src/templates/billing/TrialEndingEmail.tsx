@@ -1,4 +1,5 @@
 import { WEBAPP_ROUTES } from "@bondery/helpers";
+import type { ReactElement } from "react";
 import { defaultTrialEndingCopy } from "#fixtures/default-copy.js";
 import { DEFAULT_APP_URL, type EmailDocumentProps } from "#shared/chrome.js";
 import { EmailBody } from "#shared/EmailBody.js";
@@ -27,7 +28,7 @@ export default function TrialEndingEmail({
   settingsUrl = `${DEFAULT_APP_URL}${WEBAPP_ROUTES.SETTINGS}`,
   title,
   websiteUrl,
-}: TrialEndingEmailProps) {
+}: TrialEndingEmailProps): ReactElement {
   const heading = copy.heading.replace("{{endDate}}", formattedEndDate);
   const body = copy.body.replace("{{endDate}}", formattedEndDate);
 

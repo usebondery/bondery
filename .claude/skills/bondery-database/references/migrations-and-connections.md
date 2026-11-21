@@ -6,15 +6,15 @@ Bondery uses **classic Prisma migrate** (`prisma migrate dev` / `deploy`), not P
 
 Package scripts live in `packages/db/package.json`; run them from the repo root via root aliases (`pnpm run db:*`, `pnpm run release-migrate`).
 
-| Command | Purpose |
-|---------|---------|
-| `pnpm run db:generate` | Generate Prisma client |
-| `pnpm run db:validate` | Validate merged multi-file schema |
-| `pnpm run db:migrate:dev` | Create/apply development migration |
-| `pnpm run db:migrate:deploy` | Apply committed Prisma migrations |
-| `pnpm run db:functions` | Apply idempotent SQL functions/indexes |
-| `pnpm run release-migrate` | Production/CI migration gate |
-| `pnpm run db:studio` | Inspect local data |
+| Command                      | Purpose                                |
+| ---------------------------- | -------------------------------------- |
+| `pnpm run db:generate`       | Generate Prisma client                 |
+| `pnpm run db:validate`       | Validate merged multi-file schema      |
+| `pnpm run db:migrate:dev`    | Create/apply development migration     |
+| `pnpm run db:migrate:deploy` | Apply committed Prisma migrations      |
+| `pnpm run db:functions`      | Apply idempotent SQL functions/indexes |
+| `pnpm run release-migrate`   | Production/CI migration gate           |
+| `pnpm run db:studio`         | Inspect local data                     |
 
 Release order is mandatory:
 
@@ -51,9 +51,28 @@ Tests that require isolated clients must disconnect them explicitly and justify 
 
 ## Connection configuration
 
+### TLS (required)
+
+Every connection to Postgres uses TLS that verifies the server (ADR 0029, `bondery-security` non-negotiable "Postgres requires verified TLS"). One resolver in `packages/db/src/connection/database-tls.ts` turns `DATABASE_SSL_MODE` (`verify-full` by default), `DATABASE_SSL_ROOT_CERT_FILE`, and `DATABASE_SSL_ROOT_CERT` into connection options:
+
+```typescript
+import { pgConnectionConfig } from "@bondery/db";
+
+const pool = new Pool({ ...pgConnectionConfig(url), max: 10 }); // pg Pool or Client
+const boss = new PgBoss({ ...pgConnectionConfig(url) }); // pg-boss
+// prisma.config.ts: datasource.url = prismaCliUrl(url)
+```
+
+- Never put `ssl`, `sslmode`, or `rejectUnauthorized` on a connection by hand. `pg` applies URL parameters after explicit options, so the resolver strips TLS parameters from URLs.
+- The Prisma CLI runs Prisma's native schema engine, which silently ignores libpq's `sslmode=verify-full`/`sslrootcert`. Only `prismaCliUrl` (Prisma's `sslaccept=strict` dialect, absolute `sslcert`) verifies it.
+- `check:db-connections` (API `check:types`) fails on a connection that skips the resolver.
+- Local dev Postgres is TLS-only too (`pnpm run start:postgres`, CA in `.temp/postgres-secrets`).
+
+### Pooling and limits
+
 Current state:
 
-- Plain `DATABASE_URL`
+- One `DATABASE_URL`, TLS settings from `DATABASE_SSL_*`
 - No PgBouncer configuration
 - No explicit `connection_limit`, `pool_timeout`, or `statement_timeout`
 - `pg-boss` shares the same database URL
@@ -86,6 +105,7 @@ Account for:
 - [ ] `functions.sql` changes remain idempotent
 - [ ] Release ordering preserved
 - [ ] Shared Prisma singleton used
+- [ ] Any new Postgres connection spreads `pgConnectionConfig(url)` (Prisma CLI: `prismaCliUrl(url)`)
 - [ ] Connection budget includes API, workers, replicas, and reserve
 - [ ] Transaction contains no external network operation
 - [ ] Backfill/destructive rollout is restartable and reversible where feasible

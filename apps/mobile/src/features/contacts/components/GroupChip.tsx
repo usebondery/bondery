@@ -4,6 +4,7 @@ import Animated from "react-native-reanimated";
 import { Pressable } from "@/components/ui/Pressable";
 import { Text } from "../../../components/ui/Text";
 import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
+import { nonEmpty } from "../../../lib/text";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 export type GroupChipGroup = Pick<Group, "id" | "label" | "emoji" | "color"> & {
@@ -30,7 +31,7 @@ export function GroupChip({
   const label = accessibilityLabel ?? group.label;
   const chipPaint = {
     backgroundColor: colors.surfaceMuted,
-    borderColor: group.color || colors.borderStrong,
+    borderColor: nonEmpty(group.color) ?? colors.borderStrong,
   };
   const content = (
     <>
@@ -39,10 +40,10 @@ export function GroupChip({
         {group.label}
       </Text>
       <View
-        className="rounded-[10px] px-1.5 py-px"
+        className="rounded-control px-1.5 py-px"
         style={{ backgroundColor: colors.borderStrong }}
       >
-        <Text c="secondary" className="text-[11px] font-bold" size={null}>
+        <Text c="secondary" className="text-2xs font-bold" size={null}>
           {group.contactCount}
         </Text>
       </View>

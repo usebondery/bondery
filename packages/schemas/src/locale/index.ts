@@ -5,6 +5,7 @@ export {
   directionFromDirField,
   fontStackForLocale,
   formatOrderedDate,
+  type LocaleFontStack,
   parseAmbiguousNumericDate,
   type TextDirection,
 } from "#locale/intl-format.js";

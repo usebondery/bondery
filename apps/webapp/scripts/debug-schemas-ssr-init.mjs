@@ -27,7 +27,9 @@ function log(hypothesisId, location, message, data = {}) {
     body: JSON.stringify(entry),
     headers: { "Content-Type": "application/json", "X-Debug-Session-Id": SESSION },
     method: "POST",
-  }).catch(() => {});
+  }).catch(() => {
+    // Debug ingest is best-effort.
+  });
 }
 
 const probes = [

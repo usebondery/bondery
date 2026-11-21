@@ -16,16 +16,19 @@ import { betterAuthPath } from "@bondery/helpers/globals/paths";
 import type { ApiKeyPermission } from "@bondery/schemas";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { productPermissionFromBa } from "../../auth/api-key-permissions.js";
+import { BEARER_PREFIX, isJwtShapedToken } from "../../auth/bearer-token-format.js";
 import { auth } from "../../auth/index.js";
 import { unauthorized } from "../errors/http-errors.js";
 import type { AppFastifyInstance } from "../fastify-types.js";
 import { assertApiKeyAccess } from "./api-key-access.js";
 import { isApiKeyBearerToken } from "./api-keys.js";
 import { resolveOAuthBearerUser, resolveRequestAuthUser } from "./resolve-request-auth.js";
+import { createVerifyServiceSecret } from "./service-secret.js";
 
 // ── Type augmentation ────────────────────────────────────────────────────────
 
 declare module "fastify" {
+  // biome-ignore lint/suspicious/noShadow: module augmentation must reuse fastify's own interface name to merge with it
   interface FastifyRequest {
     /** Set when the request was authenticated via a long-lived API key */
     authApiKey: {
@@ -51,15 +54,11 @@ declare module "fastify" {
 
 function extractBearerToken(request: FastifyRequest): string | undefined {
   const authHeader = request.headers.authorization;
-  if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
+  if (typeof authHeader !== "string" || !authHeader.startsWith(BEARER_PREFIX)) {
     return undefined;
   }
 
-  return authHeader.slice(7).trim() || undefined;
-}
-
-function isJwtShapedBearerToken(token: string): boolean {
-  return token.split(".").length === 3;
+  return authHeader.slice(BEARER_PREFIX.length).trim() || undefined;
 }
 
 async function applyResolvedAuth(
@@ -86,7 +85,7 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
     async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
       const bearerToken = extractBearerToken(request);
       const user =
-        bearerToken && isJwtShapedBearerToken(bearerToken)
+        bearerToken && isJwtShapedToken(bearerToken)
           ? await resolveOAuthBearerUser(bearerToken)
           : await resolveRequestAuthUser(request);
 
@@ -152,44 +151,9 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
     },
   );
 
-  const verifiedServiceTokens = new Set<string>();
-
   fastify.decorate(
     "verifyServiceSecret",
-    async (request: FastifyRequest, _reply: FastifyReply): Promise<void> => {
-      const authHeader = request.headers.authorization;
-      if (typeof authHeader !== "string" || !authHeader.startsWith("Bearer ")) {
-        request.log.warn(
-          { reason: "missing or malformed Authorization header", url: request.url },
-          "verifyServiceSecret: rejected",
-        );
-        throw unauthorized("Unauthorized", "service_auth_required");
-      }
-
-      const token = authHeader.slice(7);
-      if (isApiKeyBearerToken(token)) {
-        request.log.warn(
-          { reason: "API key sent to service-secret route", url: request.url },
-          "verifyServiceSecret: rejected",
-        );
-        throw unauthorized("Unauthorized", "service_auth_invalid");
-      }
-
-      if (verifiedServiceTokens.has(token)) {
-        return;
-      }
-
-      const expected = fastify.config.BONDERY_PRIVATE_SERVICE_SECRET;
-      if (!expected || token !== expected) {
-        request.log.warn(
-          { reason: "service secret mismatch", url: request.url },
-          "verifyServiceSecret: rejected",
-        );
-        throw unauthorized("Unauthorized", "service_auth_invalid");
-      }
-
-      verifiedServiceTokens.add(token);
-    },
+    createVerifyServiceSecret(() => fastify.config.BONDERY_PRIVATE_SERVICE_SECRET),
   );
 }
 

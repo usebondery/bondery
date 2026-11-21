@@ -64,10 +64,12 @@ interface AppShellWrapperProps {
 }
 
 function persistSidebarWidths(width: number, lastExpandedWidth: number) {
-  void setClientCookie(SIDEBAR_WIDTH_COOKIE_NAME, String(width)).catch(() => {});
-  void setClientCookie(SIDEBAR_LAST_EXPANDED_COOKIE_NAME, String(lastExpandedWidth)).catch(
-    () => {},
-  );
+  void setClientCookie(SIDEBAR_WIDTH_COOKIE_NAME, String(width)).catch(() => {
+    // no-op: cookie writes can fail in restrictive browsers
+  });
+  void setClientCookie(SIDEBAR_LAST_EXPANDED_COOKIE_NAME, String(lastExpandedWidth)).catch(() => {
+    // no-op: cookie writes can fail in restrictive browsers
+  });
 }
 
 function AppShellMobileHeader({
@@ -147,8 +149,8 @@ export function AppShellWrapper({
     }) ?? false;
   const [mobileNavOpened, { close: closeMobileNav, toggle: toggleMobileNav }] =
     useDisclosure(false);
-  const pendingSpotlightRef = useRef(false);
-  const wasMobileNavOpenedRef = useRef(false);
+  const pendingSpotlightRef = useRef<boolean>(false);
+  const wasMobileNavOpenedRef = useRef<boolean>(false);
   const closeMobileNavRef = useRef(closeMobileNav);
   closeMobileNavRef.current = closeMobileNav;
   const [width, setWidth] = useState(initialWidth);

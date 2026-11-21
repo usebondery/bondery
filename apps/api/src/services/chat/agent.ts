@@ -74,7 +74,7 @@ export function runChatAgent(
   ctx: DomainContext,
   options: RunChatAgentOptions = {},
 ): ChatAgentResult {
-  const today = new Date().toISOString().split("T")[0];
+  const today = new Date().toISOString().slice(0, 10);
   const tracker = options.tracker ?? createChatActivityTracker();
 
   return streamText({

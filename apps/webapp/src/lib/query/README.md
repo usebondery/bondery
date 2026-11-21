@@ -4,13 +4,13 @@ Client cache on top of [`lib/api`](../api/README.md). Components use **hooks** a
 
 ## Domain-first reads
 
-| Layer | Location | Responsibility |
-|-------|----------|----------------|
-| **Resources** | `lib/api/resources/*` | Path builders + response parsers (no transport, no React) |
-| **Client domain** | `lib/api/domains/*` | `clientApiJson` reads and all writes |
-| **Server domain** | `lib/api/domains/server/*` | `serverApiJson` reads + `next.tags` (import `server-only`) |
-| **Prefetch** | `lib/query/prefetch/*` | Thin RSC helpers: `prefetchQuery` for sibling widgets; `fetchQuery` / `fetchInfiniteQuery` for the page-defining read |
-| **Hooks** | `lib/query/hooks/*` | `useQuery` / `useMutation`, query keys, cache invalidation |
+| Layer             | Location                   | Responsibility                                                                                                        |
+| ----------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Resources**     | `lib/api/resources/*`      | Path builders + response parsers (no transport, no React)                                                             |
+| **Client domain** | `lib/api/domains/*`        | `clientApiJson` reads and all writes                                                                                  |
+| **Server domain** | `lib/api/domains/server/*` | `serverApiJson` reads + `next.tags` (import `server-only`)                                                            |
+| **Prefetch**      | `lib/query/prefetch/*`     | Thin RSC helpers: `prefetchQuery` for sibling widgets; `fetchQuery` / `fetchInfiniteQuery` for the page-defining read |
+| **Hooks**         | `lib/query/hooks/*`        | `useQuery` / `useMutation`, query keys, cache invalidation                                                            |
 
 **Reads:** hooks call `lib/api/domains/*`; loaders call `lib/api/domains/server/*` or `lib/query/prefetch/*`.
 
@@ -27,12 +27,12 @@ After every successful mutation, call `invalidateQueries` on affected keys. Do *
 
 **Exception:** read mutation response IDs for navigation only (e.g. `router.push` after create).
 
-| Operation | Invalidation |
-|-----------|--------------|
-| Contact PATCH/DELETE | `contactKeys.detail(id)` + `contactKeys.lists()` or `contactKeys.all` |
-| Import / merge / bulk delete | `invalidateAfterImport()` or `contactKeys.all` |
-| Enrich batch | `invalidateAfterEnrichBatch()` when batch **completes**, not on trigger POST |
-| Photo upload | `contactKeys.detail(id)` |
+| Operation                    | Invalidation                                                                 |
+| ---------------------------- | ---------------------------------------------------------------------------- |
+| Contact PATCH/DELETE         | `contactKeys.detail(id)` + `contactKeys.lists()` or `contactKeys.all`        |
+| Import / merge / bulk delete | `invalidateAfterImport()` or `contactKeys.all`                               |
+| Enrich batch                 | `invalidateAfterEnrichBatch()` when batch **completes**, not on trigger POST |
+| Photo upload                 | `contactKeys.detail(id)`                                                     |
 
 ## Inline field edits
 

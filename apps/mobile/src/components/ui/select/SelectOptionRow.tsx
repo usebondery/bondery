@@ -37,10 +37,10 @@ export function SelectOptionRow<TValue extends string>({
       <Pressable
         accessibilityRole={accessibilityRole}
         accessibilityState={accessibilityState}
-        className="min-h-[44px] flex-row items-center gap-2 px-4 py-2.5"
+        className="min-h-touch flex-row items-center gap-2 px-4 py-2.5"
         data-pressed={isPressed ? "true" : undefined}
         data-selected={isSelected ? "true" : undefined}
-        disabled={disabled || option.disabled}
+        disabled={disabled === true || option.disabled}
         onPress={onPress}
         onPressIn={() => {
           setIsPressed(true);
@@ -57,7 +57,7 @@ export function SelectOptionRow<TValue extends string>({
           opacity: disabled || option.disabled ? 0.5 : 1,
         })}
       >
-        {leadingVisual ? (
+        {leadingVisual !== null ? (
           <View className="min-w-5 items-center justify-center">{leadingVisual}</View>
         ) : null}
         <Text className="flex-1" fw={500} numberOfLines={2}>

@@ -108,7 +108,7 @@ function readDescription(content) {
 function stripQuotes(value) {
   if (value.length >= 2) {
     const first = value[0];
-    const last = value[value.length - 1];
+    const last = value.at(-1);
     if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
       return value.slice(1, -1);
     }
@@ -153,27 +153,37 @@ for (const filePath of walkMdxFiles(docsRoot).sort()) {
   const description = readDescription(readFileSync(filePath, "utf8"));
 
   if (description === null) {
-    check.add(`${path}: missing frontmatter`);
+    check.add(
+      `${path}: has no frontmatter block. Add a --- fenced block with a description of ${MIN_LENGTH}-${MAX_LENGTH} characters.`,
+    );
     continue;
   }
 
   if (description.block) {
-    check.add(`${path}: must be a single-line description`);
+    check.add(
+      `${path}: description must be a single line. Put the whole value on the \`description:\` line.`,
+    );
     continue;
   }
 
   if (description.value === null) {
-    check.add(`${path}: missing description`);
+    check.add(
+      `${path}: frontmatter has no description. Add \`description:\` with ${MIN_LENGTH}-${MAX_LENGTH} characters that name what the page covers.`,
+    );
     continue;
   }
 
   const text = stripQuotes(description.value);
   if (text.length > MAX_LENGTH) {
-    check.add(`${path}: description is ${text.length} chars (max ${MAX_LENGTH}): ${text}`);
+    check.add(
+      `${path}: description is ${text.length} chars (max ${MAX_LENGTH}): ${text}. Shorten it to ${MIN_LENGTH}-${MAX_LENGTH} characters.`,
+    );
   } else if (text.length < WARN_MIN_LENGTH) {
-    check.add(`${path}: description is ${text.length} chars (min ${WARN_MIN_LENGTH}): ${text}`);
+    check.add(
+      `${path}: description is ${text.length} chars (min ${WARN_MIN_LENGTH}): ${text}. Extend it to ${MIN_LENGTH}-${MAX_LENGTH} characters.`,
+    );
   } else if (text.length < MIN_LENGTH) {
-    const message = `${path}: description is ${text.length} chars (target ${MIN_LENGTH}-${MAX_LENGTH}): ${text}`;
+    const message = `${path}: description is ${text.length} chars (target ${MIN_LENGTH}-${MAX_LENGTH}): ${text}. Add a distinguishing detail.`;
     if (strict) {
       check.add(message);
     } else {

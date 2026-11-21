@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Dodaj notatki…",
   "DeleteContact": "Usuń kontakt",
   "DeleteContactConfirmTitle": "Usuń {name}?",
   "DeleteFailed": "Kontakt sa nie udało się usunąć.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Edytuj",
   "GroupsEditAccessibility": "Edytuj grupy pre {name}",
   "GroupsLoadError": "Grupy sa nie udało się wczytać",
+  "LastInteractionLabel": "Ostatnia interakcja",
   "NoGroups": "Nie je v brakch skupinách",
   "ShareContact": "Udostępnij vCard...",
   "ShareContactViaEmail": "Poslat e-mailom...",

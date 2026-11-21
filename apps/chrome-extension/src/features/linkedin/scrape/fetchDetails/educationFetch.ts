@@ -3,6 +3,7 @@
  */
 
 import { extLog } from "../../../../lib/log";
+import { nonEmpty } from "../../../../lib/text";
 import type { EducationEntry } from "../education";
 import { extractLogoUrlFromVoyagerImage, fetchCompanyLogo } from "./voyagerLogos";
 import {
@@ -92,7 +93,7 @@ async function mapEducationEntityAsync(
     | undefined;
   let schoolName = (edu.schoolName ??
     (multiLocaleSchoolName ? Object.values(multiLocaleSchoolName)[0] : null) ??
-    (edu.school as Record<string, unknown>)?.name ??
+    (edu.school as Record<string, unknown> | undefined)?.name ??
     edu.subtitle ??
     "") as string;
 
@@ -149,7 +150,10 @@ async function mapEducationEntityAsync(
   // LinkedIn API responses often include logo data in these sub-objects (same Voyager image structure
   // as company logos). This avoids extra network requests when the logo is already in the payload.
   let schoolLogoUrl: string | undefined;
-  for (const obj of [miniSchool, school, edu].filter(Boolean) as Record<string, unknown>[]) {
+  for (const obj of [miniSchool, school, edu]) {
+    if (!obj) {
+      continue;
+    }
     for (const key of ["logo", "companyLogo", "logoV2", "logoResolutionResult"]) {
       const logoData = obj[key] as Record<string, unknown> | undefined;
       if (logoData) {
@@ -170,7 +174,7 @@ async function mapEducationEntityAsync(
     schoolName,
     ...(schoolLogoUrl ? { schoolLogoUrl } : {}),
     degree,
-    description: description || undefined,
+    description: nonEmpty(description),
     endDate,
     startDate,
   };
@@ -189,20 +193,21 @@ async function enrichEducationWithLogos(
   skipNetworkLogos = false,
   domLogos?: Map<string, string>,
 ): Promise<EducationEntry[]> {
-  if (domLogos && domLogos.size > 0) {
-    entries = entries.map((entry) => {
-      if (entry.schoolLogoUrl) {
-        return entry;
-      }
-      const url = domLogos.get(entry.schoolName.toLowerCase());
-      return url ? { ...entry, schoolLogoUrl: url } : entry;
-    });
-  }
+  const withDomLogos =
+    domLogos && domLogos.size > 0
+      ? entries.map((entry) => {
+          if (entry.schoolLogoUrl) {
+            return entry;
+          }
+          const url = domLogos.get(entry.schoolName.toLowerCase());
+          return url ? Object.assign({}, entry, { schoolLogoUrl: url }) : entry;
+        })
+      : entries;
 
   // Collect distinct IDs that still need logos (deduplicated)
   const seenIds = new Set<string>();
   const tasks: string[] = [];
-  for (const entry of entries) {
+  for (const entry of withDomLogos) {
     if (entry.schoolLogoUrl || !entry.schoolLinkedinId) {
       continue;
     }
@@ -214,7 +219,7 @@ async function enrichEducationWithLogos(
   }
 
   if (skipNetworkLogos || tasks.length === 0) {
-    return entries;
+    return withDomLogos;
   }
 
   extLog.debug(`[linkedin][fetchDetails] Fetching logos for ${tasks.length} school(s):`, tasks);
@@ -233,20 +238,22 @@ async function enrichEducationWithLogos(
     }),
   );
 
-  return entries.map((entry) => {
+  return withDomLogos.map((entry) => {
     if (entry.schoolLogoUrl || !entry.schoolLinkedinId) {
       return entry;
     }
     const url = idToLogo.get(entry.schoolLinkedinId);
-    return url ? { ...entry, schoolLogoUrl: url } : entry;
+    return url ? Object.assign({}, entry, { schoolLogoUrl: url }) : entry;
   });
 }
 
 /** Endpoints to try for education history (in priority order). */
-const EDU_ENDPOINTS = (urn: string) => [
-  `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
-  `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfileEducation-3&count=100`,
-];
+function EDU_ENDPOINTS(urn: string): string[] {
+  return [
+    `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&count=100`,
+    `/voyager/api/identity/dash/profileEducations?q=viewee&profileUrn=${encodeURIComponent(urn)}&decorationId=com.linkedin.voyager.dash.deco.identity.profile.FullProfileEducation-3&count=100`,
+  ];
+}
 
 /**
  * Fetches the full education history for a LinkedIn profile.

@@ -4,6 +4,8 @@ import type { CSSProperties } from "react";
 export const EMAIL_PAGE_BG = "#ffffff";
 export const EMAIL_TEXT = "#111827";
 export const EMAIL_MUTED = "#4b5563";
+/** Inbox-safe content width. Matches the React Email `Container` default. */
+export const EMAIL_CONTAINER_MAX_WIDTH = 600;
 
 export const headingStyle: CSSProperties = {
   color: EMAIL_TEXT,

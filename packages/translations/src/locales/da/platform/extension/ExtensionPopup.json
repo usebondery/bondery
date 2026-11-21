@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Åbn Bondery"
+    "OpenBondery": "Åbn Bondery",
+    "UnsupportedSiteMessage": "Besøg en profil på Instagram eller LinkedIn for at se flere handlinger og muligheder i udvidelsen."
   },
   "LoggedOut": {
     "Description": "Koppla ditt konto for at gem kontakter från sociala medier.",
@@ -20,6 +21,12 @@
     "Title": "Uppdatering kræves"
   },
   "Welcome": {
-    "ConnectButton": "Koppla Bondery-konto"
+    "ConnectButton": "Koppla Bondery-konto",
+    "Description": "Forbind din Bondery-konto for at gemme kontakter direkte fra profiler på sociale medier.",
+    "SignInHint": "Du bliver bedt om at logge ind på din Bondery-konto og give udvidelsen tilladelse.",
+    "SuccessClose": "Du kan lukke denne fane nu.",
+    "SuccessDescription": "Din Bondery-konto er nu forbundet. Besøg en hvilken som helst Instagram- eller LinkedIn-profil for at begynde at gemme kontakter.",
+    "SuccessTitle": "Så er du klar!",
+    "Title": "Velkommen til Bondery"
   }
 }

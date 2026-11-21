@@ -1,6 +1,6 @@
 import { Group, SegmentedControl, Stack, Text } from "@mantine/core";
 import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export type ThemePreference = "light" | "dark" | "auto";
 
@@ -30,7 +30,12 @@ const defaultLabels: ThemePickerLabels = {
  *
  * This is a controlled component: parent owns value and side effects.
  */
-export function ThemePicker({ value, onChange, labels, className }: ThemePickerProps) {
+export function ThemePicker({
+  value,
+  onChange,
+  labels,
+  className,
+}: ThemePickerProps): ReactElement {
   const resolvedLabels = {
     ...defaultLabels,
     ...labels,

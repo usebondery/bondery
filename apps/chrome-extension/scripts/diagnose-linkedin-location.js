@@ -4,7 +4,13 @@
  * Compares DOM topcard lines vs Voyager geo (embedded + GraphQL).
  * Share the printed JSON when reporting location scrape issues.
  */
-(async () => {
+void (async () => {
+  /**
+   * @param {unknown} value
+   * @returns {unknown}
+   */
+  const asUnknown = (value) => value;
+
   const handle = decodeURIComponent(location.pathname.match(/\/in\/([^/]+)/)?.[1] ?? "");
   const topcard = document.querySelector('[componentkey*="Topcard"]');
   const componentkey = topcard?.getAttribute("componentkey") ?? null;
@@ -27,7 +33,7 @@
       }
       const m = raw.match(/^<!--(.+)-->$/s);
       try {
-        return JSON.parse(m ? m[1] : raw);
+        return asUnknown(JSON.parse(m ? m[1] : raw));
       } catch {
         return null;
       }

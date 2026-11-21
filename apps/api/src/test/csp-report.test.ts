@@ -38,7 +38,7 @@ const LEGACY_REPORT = {
   },
 };
 
-describe("POST /security/csp-report", () => {
+describe("pOST /security/csp-report", () => {
   it("accepts the legacy content type without credentials and returns 204", async () => {
     const app = await createRouteApp();
 

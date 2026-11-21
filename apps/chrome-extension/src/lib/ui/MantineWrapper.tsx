@@ -87,7 +87,7 @@ export function MantineWrapper({
       }
     }
 
-    loadPreference();
+    void loadPreference();
 
     return () => {
       mounted = false;

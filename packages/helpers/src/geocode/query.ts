@@ -27,7 +27,7 @@ export function geocodeSuggestionDisplayKey(entry: {
   latitude: number | null;
   longitude: number | null;
 }): string {
-  const label = entry.addressFormatted || entry.value;
+  const label = entry.addressFormatted ? entry.addressFormatted : entry.value;
   return `${label}|${entry.latitude ?? ""}|${entry.longitude ?? ""}`;
 }
 
@@ -35,5 +35,5 @@ export function geocodeSuggestionDisplayLabel(entry: {
   value: string;
   addressFormatted?: string | null;
 }): string {
-  return entry.addressFormatted || entry.value;
+  return entry.addressFormatted ? entry.addressFormatted : entry.value;
 }

@@ -28,8 +28,6 @@ type LocalSessionEndedListener = (reason: EndLocalSessionReason) => void;
 
 const localSessionEndedListeners = new Set<LocalSessionEndedListener>();
 
-let isSigningOutLocally = false;
-
 function decodeCookiePart(value: string): string {
   try {
     return decodeURIComponent(value);
@@ -157,50 +155,8 @@ export function subscribeLocalSessionEnded(listener: LocalSessionEndedListener):
   };
 }
 
-function notifyLocalSessionEnded(reason: EndLocalSessionReason): void {
+export function notifyLocalSessionEnded(reason: EndLocalSessionReason): void {
   for (const listener of localSessionEndedListeners) {
     listener(reason);
-  }
-}
-
-/**
- * Local credential only. Does not call `getSession()`.
- */
-export async function readLocalAccessToken(): Promise<string | null> {
-  const { authClient } = await import("./client");
-  if (!authClient) {
-    return null;
-  }
-
-  const cookieHeader = await authClient.getCookie();
-  return parseSessionTokenFromCookieHeader(cookieHeader);
-}
-
-/**
- * Tear down the local Better Auth session. Stack.Protected handles redirect.
- */
-export async function endLocalSession({
-  reason,
-}: {
-  reason: EndLocalSessionReason;
-}): Promise<void> {
-  if (isSigningOutLocally) {
-    return;
-  }
-
-  const { authClient } = await import("./client");
-  if (!authClient) {
-    return;
-  }
-
-  isSigningOutLocally = true;
-  try {
-    notifyLocalSessionEnded(reason);
-    const result = await authClient.signOut();
-    if (reason === "user_initiated" && result.error) {
-      throw result.error;
-    }
-  } finally {
-    isSigningOutLocally = false;
   }
 }

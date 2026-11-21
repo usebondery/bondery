@@ -21,7 +21,10 @@ export const DEFAULT_GROUP_COLOR = "#ae3ec9";
 
 /** Picks a random preset swatch (same pool as the webapp group/tag color picker). */
 export function getRandomGroupColor(): string {
-  return GROUP_COLOR_SWATCHES[Math.floor(Math.random() * GROUP_COLOR_SWATCHES.length)];
+  return (
+    GROUP_COLOR_SWATCHES[Math.floor(Math.random() * GROUP_COLOR_SWATCHES.length)] ??
+    DEFAULT_GROUP_COLOR
+  );
 }
 
 export const COLOR_PICKER_LAYOUT = {

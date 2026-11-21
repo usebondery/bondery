@@ -230,11 +230,13 @@
     "deleting": "Verwijderen…",
     "duplicating": "Dupliceren…",
     "errorTitle": "Fout",
+    "mobileRuntimeError": "Runtimefout in de mobiele app",
     "noResults": "Geen resultaten",
     "removing": "Verwijderen…",
     "savedTitle": "Opgeslagen",
     "saving": "Opslaan…",
     "sending": "Verzenden…",
-    "successTitle": "Gelukt"
+    "successTitle": "Gelukt",
+    "unknownError": "Onbekende fout"
   }
 }

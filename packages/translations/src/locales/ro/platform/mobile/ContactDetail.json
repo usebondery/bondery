@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Adaugă notițe…",
   "DeleteContact": "Șterge contact",
   "DeleteContactConfirmTitle": "Ștergi {name}?",
   "DeleteFailed": "Nu s-a putut șterge contactul.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Modifica",
   "GroupsEditAccessibility": "Editează grupurile pentru {name}",
   "GroupsLoadError": "Nu s-au putut încărca grupurile",
+  "LastInteractionLabel": "Ultima interacțiune",
   "NoGroups": "Nu e în niciun grup",
   "ShareContact": "Partajează vCard…",
   "ShareContactViaEmail": "Trimite prin e-mail…",

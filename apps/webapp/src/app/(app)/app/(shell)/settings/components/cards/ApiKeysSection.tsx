@@ -50,6 +50,9 @@ function ApiKeyRow({
   const [label, setLabel] = useState(apiKey.label);
   const [isSaving, setIsSaving] = useState(false);
   const persistedLabelRef = useRef(apiKey.label);
+  const persistLabel = (next: string) => {
+    persistedLabelRef.current = next;
+  };
   const updateMutation = useUpdateApiKeyLabelMutation();
 
   useEffect(() => {
@@ -67,7 +70,7 @@ function ApiKeyRow({
     setIsSaving(true);
     try {
       await updateMutation.mutateAsync({ id: apiKey.id, patch: { label: trimmed } });
-      persistedLabelRef.current = trimmed;
+      persistLabel(trimmed);
       setLabel(trimmed);
       onLabelUpdated(trimmed);
     } catch {
@@ -108,7 +111,9 @@ function ApiKeyRow({
         data={permissionOptions}
         disabled
         miw={PERMISSION_SELECT_WIDTH}
-        onChange={() => {}}
+        onChange={() => {
+          // no-op: permission is read-only after an API key is created
+        }}
         style={{ flexShrink: 0 }}
         value={apiKey.permission}
         w={PERMISSION_SELECT_WIDTH}
@@ -145,7 +150,9 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
       neverUsed: t("NeverUsed"),
     });
 
-  const handleCreated = (_created: ApiKeyCreated) => {};
+  const handleCreated = (_created: ApiKeyCreated) => {
+    // no-op: the API keys list query invalidates after create
+  };
 
   const openCreateModal = async () => {
     if (atLimit) {
@@ -222,7 +229,9 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
                   key={key.id}
                   lastUsedLabel={lastUsedLabel(key.lastUsedAt)}
                   onDelete={() => void handleDelete(key)}
-                  onLabelUpdated={() => {}}
+                  onLabelUpdated={() => {
+                    // no-op: the row already holds the saved label
+                  }}
                   permissionOptions={permissionOptions}
                 />
               ))}

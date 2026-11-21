@@ -102,7 +102,9 @@
     "UpdateFailed": "Nie udało się zaktualizować grupy"
   },
   "EmojiEmptySearch": "Nie znaleziono emoji",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Szukać emoji…",
+  "EmojiSelectPlaceholder": "Wybierz emoji",
   "Empty": "Brak grup. Utwórz pierwszą, aby uporządkować kontakty.",
   "FallbackTitle": "Grupa",
   "HeaderDescription": "Grupy pomagają grupować osoby do szybszego filtrowania i akcji.",

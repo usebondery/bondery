@@ -45,13 +45,16 @@ describe("displayTimeZoneCity", () => {
     assert.notEqual(city, "Europe/Prague");
   });
 
-  it("localizes Prague on Czech when DisplayNames supports timeZone", () => {
-    const city = displayTimeZoneCity("Europe/Prague", "cs-CZ");
-    if (supportsTimeZoneDisplayNames()) {
-      assert.equal(city, "Praha");
-    } else {
-      assert.equal(city, "Prague");
-    }
+  it("localizes Prague to Praha on Czech when DisplayNames supports timeZone", {
+    skip: !supportsTimeZoneDisplayNames(),
+  }, () => {
+    assert.equal(displayTimeZoneCity("Europe/Prague", "cs-CZ"), "Praha");
+  });
+
+  it("falls back to Prague on Czech when DisplayNames does not support timeZone", {
+    skip: supportsTimeZoneDisplayNames(),
+  }, () => {
+    assert.equal(displayTimeZoneCity("Europe/Prague", "cs-CZ"), "Prague");
   });
 
   it("returns UTC for the UTC zone", () => {

@@ -28,15 +28,15 @@ MCP tool failures and in-app chat tool failures use the same nested envelope. MC
 
 `apps/api/src/lib/platform/errors/http-errors.ts`:
 
-| Helper | Status |
-|--------|--------|
-| `badRequest()` | 400 |
-| `unauthorized()` | 401 |
-| `forbidden()` | 403 |
-| `notFound()` | 404 |
-| `conflict()` | 409 |
-| `internal()` | 500 |
-| `serviceUnavailable()` | 503 |
+| Helper                 | Status |
+| ---------------------- | ------ |
+| `badRequest()`         | 400    |
+| `unauthorized()`       | 401    |
+| `forbidden()`          | 403    |
+| `notFound()`           | 404    |
+| `conflict()`           | 409    |
+| `internal()`           | 500    |
+| `serviceUnavailable()` | 503    |
 
 Throw via helpers or `new DomainError(...)` with catalog codes. Never put internal details in `message` for 5xx — log server-side only.
 

@@ -16,12 +16,15 @@ export function loadNamespace(lng: SupportedLocale, namespace: string): Record<s
   if (!localeResources) {
     return {};
   }
-  const byLocale = localeResources as Record<SupportedLocale, Record<string, unknown>>;
-  return byLocale[lng] ?? byLocale[DEFAULT_LOCALE];
+  const byLocale = localeResources as Partial<Record<SupportedLocale, Record<string, unknown>>>;
+  return byLocale[lng] ?? byLocale[DEFAULT_LOCALE] ?? {};
 }
 
 /** For next-i18next / react-i18next resourceLoader. */
-export function resourceLoader(language: string, namespace: string) {
+export function resourceLoader(
+  language: string,
+  namespace: string,
+): Promise<Record<string, unknown>> {
   const lng = coerceSupportedLocale(language);
   if (!manifest.namespaces[namespace]) {
     return Promise.resolve({});

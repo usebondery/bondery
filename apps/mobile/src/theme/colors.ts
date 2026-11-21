@@ -34,12 +34,15 @@ export interface MobileThemeColors {
   surfaceElevated: string;
   surfaceMuted: string;
   surfacePressed: string;
+  /** Ring around a selected color-picker swatch. */
+  swatchSelectionRing: string;
   /** Mantine Title `--mantine-color-default-color` (black / white). */
   textDefault: string;
   textMuted: string;
   textOnPrimary: string;
   textPrimary: string;
   textSecondary: string;
+  transparent: string;
   warningSurface: string;
 }
 
@@ -48,10 +51,13 @@ export const BRAND_PRIMARY = BRAND_PRIMARY_COLOR;
 /** Pure white — text and icons on primary-filled controls. */
 export const PRIMARY_BUTTON_TEXT = BRAND_PRIMARY_TEXT;
 
+/** Hex digits in the `#rgb` shorthand. */
+const SHORTHAND_HEX_DIGIT_COUNT = 3;
+
 function hexToRgba(hex: string, alpha: number): string {
   const digits = hex.startsWith("#") ? hex.slice(1) : hex;
   const normalized =
-    digits.length === 3
+    digits.length === SHORTHAND_HEX_DIGIT_COUNT
       ? `${digits[0]}${digits[0]}${digits[1]}${digits[1]}${digits[2]}${digits[2]}`
       : digits;
   const value = Number.parseInt(normalized, 16);
@@ -89,11 +95,13 @@ export const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
     surfaceElevated: dark.surface,
     surfaceMuted: dark.hover,
     surfacePressed: dark.hover,
+    swatchSelectionRing: "rgba(255,255,255,0.85)",
     textDefault: "#ffffff",
     textMuted: dark.dimmed,
     textOnPrimary: PRIMARY_BUTTON_TEXT,
     textPrimary: dark.text,
     textSecondary: "#b8b8b8", // Mantine dark.1 — between text and dimmed
+    transparent: "transparent",
     warningSurface: "#78350f",
   },
   light: {
@@ -120,11 +128,13 @@ export const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
     surfaceElevated: light.surface,
     surfaceMuted: light.mutedCanvas,
     surfacePressed: light.hover,
+    swatchSelectionRing: "rgba(255,255,255,0.85)",
     textDefault: "#000000",
     textMuted: light.dimmed,
     textOnPrimary: PRIMARY_BUTTON_TEXT,
     textPrimary: light.text,
     textSecondary: "#495057", // Mantine gray.7 — between text and dimmed
+    transparent: "transparent",
     warningSurface: "#fef3c7",
   },
 };

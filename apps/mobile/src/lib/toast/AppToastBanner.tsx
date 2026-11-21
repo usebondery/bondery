@@ -74,7 +74,7 @@ export function AppToastBanner({
   return (
     <View
       accessibilityLiveRegion="polite"
-      className="mx-4 flex-row items-center gap-2.5 rounded-[14px] border px-3.5 py-3"
+      className="rounded-card mx-4 flex-row items-center gap-2.5 border px-3.5 py-3"
       style={{
         backgroundColor: colors.surface,
         borderColor: toastTheme.borderColor,
@@ -85,7 +85,7 @@ export function AppToastBanner({
         shadowRadius: 10,
       }}
     >
-      <View className="h-[30px] w-[30px] items-center justify-center">
+      <View className="size-toast-icon items-center justify-center">
         <ToastTypeIcon iconColor={toastTheme.iconColor} type={type} />
       </View>
       <View className="min-w-0 flex-1 gap-0.5">
@@ -93,7 +93,7 @@ export function AppToastBanner({
           {title}
         </Text>
         {message ? (
-          <Text c="secondary" className="leading-[18px]" size="sm">
+          <Text c="secondary" className="leading-compact" size="sm">
             {message}
           </Text>
         ) : null}

@@ -2,14 +2,16 @@ import type {
   VCardAddress,
   VCardDateValue,
   VCardMedia,
+  VCardParameter,
   VCardPhone,
   VCardProperty,
   VCardRelated,
   VCardTextValue,
   VCardTimezone,
 } from "#model.js";
+import { TEL_URI_PREFIX } from "#uri-schemes.js";
 
-export function getParameter(property: VCardProperty, name: string) {
+export function getParameter(property: VCardProperty, name: string): VCardParameter | undefined {
   return property.parameters.find((parameter) => parameter.name === name);
 }
 
@@ -97,8 +99,11 @@ export function parseCommonText(property: VCardProperty): VCardTextValue {
 export function parseTel(property: VCardProperty): VCardPhone {
   const valueType = getParameter(property, "VALUE")?.values[0]?.toLowerCase();
   const rawValue = decodeTextValue(property.value);
-  const uri = valueType === "uri" || rawValue.startsWith("tel:") ? rawValue : `tel:${rawValue}`;
-  const value = uri.startsWith("tel:") ? uri.slice(4) : rawValue;
+  const uri =
+    valueType === "uri" || rawValue.startsWith(TEL_URI_PREFIX)
+      ? rawValue
+      : `${TEL_URI_PREFIX}${rawValue}`;
+  const value = uri.startsWith(TEL_URI_PREFIX) ? uri.slice(TEL_URI_PREFIX.length) : rawValue;
 
   return {
     altId: getParameter(property, "ALTID")?.values[0],

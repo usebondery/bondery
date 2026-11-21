@@ -230,11 +230,13 @@
     "deleting": "Deleting...",
     "duplicating": "Duplicating...",
     "errorTitle": "Error",
+    "mobileRuntimeError": "Mobile app runtime error",
     "noResults": "No results",
     "removing": "Removing...",
     "savedTitle": "Saved",
     "saving": "Saving...",
     "sending": "Sending...",
-    "successTitle": "Success"
+    "successTitle": "Success",
+    "unknownError": "Unknown error"
   }
 }

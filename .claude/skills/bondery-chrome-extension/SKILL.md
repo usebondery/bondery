@@ -41,7 +41,7 @@ Agents get these wrong:
 3. **No WXT auto-imports** — `imports: false` in `wxt.config.ts`. Write explicit imports.
 4. **Never force `NODE_ENV` in Vite `define`.** Forcing production while the React plugin still emits `jsxDEV` kills the popup.
 5. **Env is baked at WXT build time.** Production CI must not bake localhost `BONDERY_PUBLIC_API_URL` / `BONDERY_PUBLIC_WEBAPP_URL`.
-6. **`webapp.content` matches:** production CWS (`BONDERY_EXTENSION_FLAVOR=production`) is `https://app.usebondery.com/*` + `http://localhost/*` + `http://127.0.0.1/*`. Staging/RC may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin (beta). `host_permissions` *are* computed from env origins.
+6. **`webapp.content` matches:** production CWS (`BONDERY_EXTENSION_FLAVOR=production`) is `https://app.usebondery.com/*` + `http://localhost/*` + `http://127.0.0.1/*`. Staging/RC may add the baked `BONDERY_PUBLIC_WEBAPP_URL` origin (beta). `host_permissions` _are_ computed from env origins.
 7. **`cssInjectionMode: "ui"` + shadow root.** Mantine root is `:host`, not `:root`.
 8. **`webExt.disabled: true`.** `pnpm exec wxt` will not launch Chrome. Load `dist/chrome-mv3-dev` unpacked yourself.
 9. **Never import `apps/chrome-extension` into the webapp, or webapp components into the extension** ([ADR 0007](../../../docs/adr/0007-cws-listing-compositions.mdx)).
@@ -51,32 +51,32 @@ Directory name is `bondery-chrome-extension`, not `bondery-extension` (collides 
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Layers, import policy, add an API call, message router | [references/architecture.md](references/architecture.md) |
-| Unpacked load, ports, Windows polling, OAuth, 426 sim | [references/local-dev.md](references/local-dev.md) |
-| LinkedIn, Instagram, webapp bridge, enrich, shadow DOM | [references/host-integrations.md](references/host-integrations.md) |
-| Env bake, manifest, `host_permissions`, `web_accessible_resources` | [references/env-and-manifest.md](references/env-and-manifest.md) |
-| CWS 1280×800 PNGs / store-shots generator | [references/store-listing.md](references/store-listing.md) |
-| HTTP 401 / 426 / `X-Bondery-Extension-Version` | [api-usage.md](../bondery-api/references/api-usage.md), [versioning.md](../bondery-api/references/versioning.md) |
-| Tokens, PKCE, bridge spoofing | [auth-and-sessions.md](../bondery-security/references/auth-and-sessions.md), [integrations-and-clients.md](../bondery-security/references/integrations-and-clients.md) |
-| CWS publish wait / permission-review sequencing | [extension.md](../bondery-release/references/extension.md) |
-| User-visible strings | [bondery-ux](../bondery-ux/SKILL.md) |
-| Future Playwright + extension fixture | [per-client.md](../bondery-e2e-tests/references/per-client.md) |
+| Task                                                               | Read                                                                                                                                                                   |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Layers, import policy, add an API call, message router             | [references/architecture.md](references/architecture.md)                                                                                                               |
+| Unpacked load, ports, Windows polling, OAuth, 426 sim              | [references/local-dev.md](references/local-dev.md)                                                                                                                     |
+| LinkedIn, Instagram, webapp bridge, enrich, shadow DOM             | [references/host-integrations.md](references/host-integrations.md)                                                                                                     |
+| Env bake, manifest, `host_permissions`, `web_accessible_resources` | [references/env-and-manifest.md](references/env-and-manifest.md)                                                                                                       |
+| CWS 1280×800 PNGs / store-shots generator                          | [references/store-listing.md](references/store-listing.md)                                                                                                             |
+| HTTP 401 / 426 / `X-Bondery-Extension-Version`                     | [api-usage.md](../bondery-api/references/api-usage.md), [versioning.md](../bondery-api/references/versioning.md)                                                       |
+| Tokens, PKCE, bridge spoofing                                      | [auth-and-sessions.md](../bondery-security/references/auth-and-sessions.md), [integrations-and-clients.md](../bondery-security/references/integrations-and-clients.md) |
+| CWS publish wait / permission-review sequencing                    | [extension.md](../bondery-release/references/extension.md)                                                                                                             |
+| User-visible strings                                               | [bondery-ux](../bondery-ux/SKILL.md)                                                                                                                                   |
+| Future Playwright + extension fixture                              | [per-client.md](../bondery-e2e-tests/references/per-client.md)                                                                                                         |
 
 Full index: [references/README.md](references/README.md).
 
 ## Cross-skill owners
 
-| Domain | Owner |
-|--------|-------|
-| Fastify routes, resource-keyed JSON, 426 catalog | [bondery-api](../bondery-api/SKILL.md) |
-| Auth tokens, MAIN-world privilege, postMessage threat model | [bondery-security](../bondery-security/SKILL.md) |
-| `vX.Y.Z` CWS, RC staging zip | [bondery-release](../bondery-release/SKILL.md) |
-| i18n / UX writing | [bondery-ux](../bondery-ux/SKILL.md) |
-| Webapp login E2E (`127.0.0.1`) | [bondery-e2e-tests](../bondery-e2e-tests/SKILL.md) |
-| Unpacked OAuth redirect URI | [CHROME-EXTENSION-OAUTH.md](../../workflows/CHROME-EXTENSION-OAUTH.md) |
-| Listing composition *decision* | [ADR 0007](../../../docs/adr/0007-cws-listing-compositions.mdx) |
+| Domain                                                      | Owner                                                                  |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Fastify routes, resource-keyed JSON, 426 catalog            | [bondery-api](../bondery-api/SKILL.md)                                 |
+| Auth tokens, MAIN-world privilege, postMessage threat model | [bondery-security](../bondery-security/SKILL.md)                       |
+| `vX.Y.Z` CWS, RC staging zip                                | [bondery-release](../bondery-release/SKILL.md)                         |
+| i18n / UX writing                                           | [bondery-ux](../bondery-ux/SKILL.md)                                   |
+| Webapp login E2E (`127.0.0.1`)                              | [bondery-e2e-tests](../bondery-e2e-tests/SKILL.md)                     |
+| Unpacked OAuth redirect URI                                 | [CHROME-EXTENSION-OAUTH.md](../../workflows/CHROME-EXTENSION-OAUTH.md) |
+| Listing composition _decision_                              | [ADR 0007](../../../docs/adr/0007-cws-listing-compositions.mdx)        |
 
 ## Pre-ship checklist
 

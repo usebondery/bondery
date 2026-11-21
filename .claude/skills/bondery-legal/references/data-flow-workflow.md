@@ -4,29 +4,29 @@ Step-by-step loop for reconciling code changes with legal disclosures.
 
 ## Loop
 
-```
+```text
 Change → Classify → Check registry → Check claims → Classify fix → Update registry → Checklist
 ```
 
 ### 1. Classify the change
 
-| Type | Examples | Skill applies? |
-|------|----------|----------------|
-| New vendor / SDK | Add Sentry, new email ESP | Yes |
-| New data category | New profile field synced to mobile | Yes |
-| New tracking event | PostHog `captureEvent` with new properties | Yes |
-| New AI / LLM path | Background summarization calling Anthropic | Yes |
-| Retention / deletion | Backup job, log TTL, account delete cascade | Yes |
-| Consent / cookies | Cookie banner, analytics toggle | Yes |
-| Policy copy edit | `Privacy.tsx` wording | Yes |
-| Routine refactor | Rename internal function | No |
+| Type                 | Examples                                    | Skill applies? |
+| -------------------- | ------------------------------------------- | -------------- |
+| New vendor / SDK     | Add Sentry, new email ESP                   | Yes            |
+| New data category    | New profile field synced to mobile          | Yes            |
+| New tracking event   | PostHog `captureEvent` with new properties  | Yes            |
+| New AI / LLM path    | Background summarization calling Anthropic  | Yes            |
+| Retention / deletion | Backup job, log TTL, account delete cascade | Yes            |
+| Consent / cookies    | Cookie banner, analytics toggle             | Yes            |
+| Policy copy edit     | `privacy.mdx` wording                       | Yes            |
+| Routine refactor     | Rename internal function                    | No             |
 
 ### 2. Check subprocessor registry
 
 Open [subprocessor-registry.md](./subprocessor-registry.md).
 
 - Vendor already listed with `in-sync` → proceed
-- Vendor listed `drifted` → note; may need Privacy.tsx reality-sync
+- Vendor listed `drifted` → note; may need privacy.mdx reality-sync
 - **Vendor not listed** → **blocking flag**; add row with `undisclosed` before merge
 
 ### 3. Check policy claims inventory
@@ -36,18 +36,19 @@ Open [policy-claims-inventory.md](./policy-claims-inventory.md).
 Ask: Does this change **satisfy**, **contradict**, or **orphan** a published claim?
 
 Examples:
+
 - Adding analytics toggle → satisfies "disable in account settings" (`unimplemented` → `implemented`)
 - Adding PostHog event with email property → contradicts "no PII in analytics" engineering norm
 - Shipping without cookie banner → leaves cookie §6 claims orphaned
 
 ### 4. Classify the fix
 
-| Fix type | Agent may | Requires |
-|----------|-----------|----------|
-| **Reality-sync** | Propose Privacy.tsx factual update (vendor name, feature now exists) | PR label; human review |
-| **Product gap** | File issue / Plane task to build missing feature | Engineering |
-| **Substantive legal** | Draft suggestion only | Human/counsel sign-off |
-| **Escalate** | Flag ambiguity | Human owner |
+| Fix type              | Agent may                                                            | Requires               |
+| --------------------- | -------------------------------------------------------------------- | ---------------------- |
+| **Reality-sync**      | Propose privacy.mdx factual update (vendor name, feature now exists) | PR label; human review |
+| **Product gap**       | File issue / Plane task to build missing feature                     | Engineering            |
+| **Substantive legal** | Draft suggestion only                                                | Human/counsel sign-off |
+| **Escalate**          | Flag ambiguity                                                       | Human owner            |
 
 See [escalation-boundaries.md](./escalation-boundaries.md).
 
@@ -68,7 +69,7 @@ Same PR as the code change — add or update the vendor row and `policy-sync` st
 1. **Classify:** New vendor sending errors (may include PII in stack traces).
 2. **Registry:** No Sentry row → add with `undisclosed`, data categories: stack traces, URLs, user IDs if configured.
 3. **Claims:** Privacy §15 subprocessors — new row needed. Check PII in logs (`bondery-security` redaction gap).
-4. **Fix:** Reality-sync for Privacy.tsx table + escalate if DPA/SCC review needed.
+4. **Fix:** Reality-sync for privacy.mdx table + escalate if DPA/SCC review needed.
 5. **Registry:** Update `policy-sync` after Privacy PR merged.
 6. **Security:** Configure scrubbing before merge (`bondery-security`).
 

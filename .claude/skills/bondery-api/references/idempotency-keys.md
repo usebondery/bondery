@@ -88,8 +88,8 @@ The route adds no idempotency code.
 An exemption sets `config.idempotency` to `false`.
 List each exemption and its reason in this table.
 
-| Route | Reason |
-|-------|--------|
+| Route        | Reason                                                                        |
+| ------------ | ----------------------------------------------------------------------------- |
 | `POST /chat` | SSE stream. An `Idempotency-Key` returns `400` `idempotency_key_unsupported`. |
 
 The error envelope is in [api-errors.md](./api-errors.md).

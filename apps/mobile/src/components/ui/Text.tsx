@@ -1,6 +1,6 @@
+import { cn } from "cn";
 import { Text as RNText, type TextProps as RNTextProps } from "react-native";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
-import { joinClassNames } from "./joinClassNames";
 
 export type TextSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type TextWeight = 400 | 500 | 600 | 700;
@@ -70,10 +70,10 @@ export function Text({ c = "primary", className, fw, size = "md", style, ta, ...
   return (
     <RNText
       {...rest}
-      className={joinClassNames(
+      className={cn(
         sizeClass,
-        fw === undefined ? undefined : WEIGHT_CLASS[fw],
-        ta === undefined ? undefined : ALIGN_CLASS[ta],
+        fw !== undefined && WEIGHT_CLASS[fw],
+        ta !== undefined && ALIGN_CLASS[ta],
         className,
       )}
       style={[{ color: colorForToken(c, colors) }, style]}

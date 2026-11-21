@@ -1,3 +1,7 @@
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
+
 /** A member of the Bondery team. */
 export type TeamMember = {
   /** Display name — also used as `author` in PostMeta. */
@@ -19,11 +23,11 @@ export type TeamMember = {
  * the `author` field in PostMeta, instead of hardcoding a string.
  */
 export const sveetya: TeamMember = {
-  description: "Built the foundation.",
+  description: landing.Team.Members.Sveetya.Description,
   image: "/images/team/sveetya.png",
   linkedin: "https://linkedin.com/in/mareksvitek",
   name: "Sveetya",
-  role: "Founder",
+  role: landing.Team.Members.Sveetya.Role,
   x: "https://x.com/sveetya",
 };
 

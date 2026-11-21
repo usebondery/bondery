@@ -10,6 +10,7 @@ import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { type AuthInfo, createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import { createInsufficientScopeError } from "better-auth/oauth2";
 import type { JWTPayload } from "jose";
+import { BEARER_PREFIX } from "../../lib/auth/bearer-token-format.js";
 import { sendFetchResponse, toFetchRequest } from "../../lib/auth/fetch-bridge.js";
 import { MCP_WRITE_SCOPE } from "../../lib/auth/index.js";
 import { createBonderyMcpAuthHandler } from "../../lib/auth/mcp-protected-handler.js";
@@ -17,6 +18,7 @@ import { domainContextFromUser } from "../../lib/platform/domain-context.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { MCP_TIER } from "../../lib/platform/rate-limit.js";
 import { MCP_SERVER_INSTRUCTIONS } from "./instructions.js";
+import { loadMcpSkills } from "./skills.js";
 import { rewriteMcpFetchResponse } from "./tool-error-response.js";
 import { registerContactMcpTools } from "./tools/contacts.js";
 import { registerFeedbackMcpTools } from "./tools/feedback.js";
@@ -63,6 +65,7 @@ const mcpHttpHandler = createMcpHandler(
     registerShareMcpTools(server, ctx, claims);
     registerTagMcpTools(server, ctx, claims);
     registerMcpPrompts(server);
+    (await loadMcpSkills()).attach(server);
     return server;
   },
   // MCP 2026-07-28 only (`@modelcontextprotocol/server` v2). Do not serve
@@ -72,7 +75,9 @@ const mcpHttpHandler = createMcpHandler(
 
 function authInfoFromClaims(request: Request, claims: JWTPayload, email: string): AuthInfo {
   const authorization = request.headers.get("authorization") ?? "";
-  const token = authorization.startsWith("Bearer ") ? authorization.slice(7).trim() : "";
+  const token = authorization.startsWith(BEARER_PREFIX)
+    ? authorization.slice(BEARER_PREFIX.length).trim()
+    : "";
   const scopes = typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
   const clientId =
     (typeof claims.client_id === "string" && claims.client_id) ||
@@ -182,6 +187,9 @@ function fetchResponseForMcpProbe(method: string, response: Response): Response 
 }
 
 export const mcpRoutes: AppRoutePlugin = async (fastify) => {
+  // Fail at startup, not on the first MCP request, when a skill is invalid.
+  await loadMcpSkills();
+
   fastify.post(
     "/",
     {

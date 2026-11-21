@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { PullSessionGuard } from "./pull-session-guard.ts";
 
-describe("PullSessionGuard", () => {
+describe("pull session guard", () => {
   it("rejects a response when the authenticated token changed", () => {
     const guard = new PullSessionGuard();
     const generation = guard.activate();
@@ -66,6 +66,7 @@ describe("PullSessionGuard", () => {
     const guard = new PullSessionGuard();
     const generation = guard.activate();
     const finishes: Array<() => void> = [];
+    const operations: Array<Promise<void> | null> = [];
     let cacheReplaced = false;
     let databaseWiped = false;
 
@@ -73,12 +74,16 @@ describe("PullSessionGuard", () => {
       const operation = new Promise<void>((resolve) => {
         finishes.push(resolve);
       });
-      guard.runIfCurrent(generation, async () => {
-        await operation;
-        if (guard.isCurrent(generation)) {
-          assert.fail("prior-session operation remained current during teardown");
-        }
-      });
+      operations.push(
+        guard.runIfCurrent(generation, async () => {
+          await operation;
+          assert.equal(
+            guard.isCurrent(generation),
+            false,
+            "prior-session operation remained current during teardown",
+          );
+        }),
+      );
     }
 
     const teardown = guard.deactivateAndWait().then(() => {
@@ -98,6 +103,7 @@ describe("PullSessionGuard", () => {
 
     finishes[2]?.();
     await teardown;
+    await Promise.all(operations);
     assert.equal(databaseWiped, true);
     assert.equal(cacheReplaced, true);
   });

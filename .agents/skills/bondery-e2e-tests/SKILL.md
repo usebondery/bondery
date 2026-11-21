@@ -26,7 +26,7 @@ metadata:
 
 - **Test pyramid:** unit and integration tests carry most coverage; E2E covers critical user paths only
 - **Webapp E2E lives in** `apps/webapp/e2e/` with config at `e2e/playwright.config.mjs`
-- **E2E URLs follow `BONDERY_PUBLIC_API_URL` / `BONDERY_PUBLIC_WEBAPP_URL`** after loading API env. Prefer `127.0.0.1` in those files. `E2E_PUBLIC_HOST` is optional and must match those hosts or config load fails. Ports `26631` (API) and `26632` (webapp)
+- **E2E URLs follow `BONDERY_PUBLIC_API_URL` / `BONDERY_PUBLIC_WEBAPP_URL`** after loading API env. Use the Portless hosts (`https://api.usebondery.test`, `https://app.usebondery.test`); the API serves HTTPS only. `E2E_PUBLIC_HOST` is optional and must match those hosts or config load fails
 - The store-shots Playwright generator produces Chrome Web Store marketing PNGs, not client E2E — see `bondery-chrome-extension` [store-listing.md](../bondery-chrome-extension/references/store-listing.md)
 - **Prefer `data-testid` locators** (`page.getByTestId(...)`) over brittle CSS selectors
 - **No `waitForTimeout`** — wait for URL, response, or locator state
@@ -39,17 +39,17 @@ metadata:
 
 ## Test pyramid (Bondery)
 
-| Layer | Where | What to test |
-|-------|-------|--------------|
-| Unit | `*.test.ts` next to source, package tests | Pure functions, Zod schemas, formatters |
-| Integration | API route tests, DB tests, BFF handlers | Request/response contracts, auth middleware |
-| E2E | `apps/webapp/e2e/*.spec.ts` (today) | Login, session, OAuth callback, critical in-app flows |
+| Layer       | Where                                     | What to test                                          |
+| ----------- | ----------------------------------------- | ----------------------------------------------------- |
+| Unit        | `*.test.ts` next to source, package tests | Pure functions, Zod schemas, formatters               |
+| Integration | API route tests, DB tests, BFF handlers   | Request/response contracts, auth middleware           |
+| E2E         | `apps/webapp/e2e/*.spec.ts` (today)       | Login, session, OAuth callback, critical in-app flows |
 
 See [references/test-pyramid.md](references/test-pyramid.md) for placement rules and anti-patterns.
 
 ## Current layout
 
-```
+```text
 apps/webapp/e2e/
 ├── playwright.config.mjs    # projects, ports (does not start servers)
 ├── global-setup.mjs         # requires Mailpit + running API + webapp
@@ -81,13 +81,13 @@ Full workflow: [references/playwright-webapp.md](references/playwright-webapp.md
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Where tests belong (pyramid) | [references/test-pyramid.md](references/test-pyramid.md) |
+| Task                               | Read                                                               |
+| ---------------------------------- | ------------------------------------------------------------------ |
+| Where tests belong (pyramid)       | [references/test-pyramid.md](references/test-pyramid.md)           |
 | Webapp Playwright setup & projects | [references/playwright-webapp.md](references/playwright-webapp.md) |
-| Per-client future layout | [references/per-client.md](references/per-client.md) |
-| Flaky tests, quarantine, retries | [references/flaky-tests.md](references/flaky-tests.md) |
-| CI, artifacts, reporters | [references/ci-artifacts.md](references/ci-artifacts.md) |
+| Per-client future layout           | [references/per-client.md](references/per-client.md)               |
+| Flaky tests, quarantine, retries   | [references/flaky-tests.md](references/flaky-tests.md)             |
+| CI, artifacts, reporters           | [references/ci-artifacts.md](references/ci-artifacts.md)           |
 
 Full index: [references/README.md](references/README.md).
 

@@ -1,4 +1,7 @@
 import { PressableCard } from "@bondery/mantine-next";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { Box, Divider, SimpleGrid, Stack, Text } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 
@@ -33,7 +36,7 @@ export function DocsFooterNav({ next, previous }: DocsFooterNavProps) {
               <Box component="span" style={{ alignItems: "center", display: "flex", gap: 6 }}>
                 <IconChevronLeft size={16} />
                 <Text component="span" size="sm">
-                  Previous
+                  {docs.Navigation.Previous}
                 </Text>
               </Box>
               <Text fw={600}>{previous.title}</Text>
@@ -55,7 +58,7 @@ export function DocsFooterNav({ next, previous }: DocsFooterNavProps) {
                 }}
               >
                 <Text component="span" size="sm">
-                  Next
+                  {docs.Navigation.Next}
                 </Text>
                 <IconChevronRight size={16} />
               </Box>

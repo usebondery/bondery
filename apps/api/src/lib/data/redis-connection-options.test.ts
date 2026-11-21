@@ -37,7 +37,7 @@ describe("resolveRedisConnectionOptions", () => {
       readFake,
     );
     assert.equal(options.password, "s3cret");
-    assert.deepEqual(options.tls, { ca: FILES["/secrets/ca.crt"]?.trim() });
+    assert.deepEqual(options.tls, { ca: readFake("/secrets/ca.crt").trim() });
   });
 
   it("rejects a CA file on a URL without TLS", () => {

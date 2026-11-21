@@ -1,6 +1,6 @@
 import * as BackgroundTask from "expo-background-task";
 import * as TaskManager from "expo-task-manager";
-import { readLocalAccessToken } from "../../auth/session";
+import { readLocalAccessToken } from "../../auth/local-session";
 import { pushSync } from "../outbox/sync-worker";
 import { shouldRunBackgroundSync } from "../pull-auth";
 import { schedulePull } from "../pull-manager";

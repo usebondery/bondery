@@ -47,7 +47,7 @@ export async function attachContactSocials<T extends ContactWithId>(
   userId: string,
   contacts: T[],
 ): Promise<Array<T & SocialsShape>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 
@@ -79,7 +79,7 @@ export async function attachContactSocials<T extends ContactWithId>(
 
   return contacts.map((contact) => ({
     ...contact,
-    ...(map.get(contact.id) || emptySocialShape()),
+    ...(map.get(contact.id) ?? emptySocialShape()),
   }));
 }
 

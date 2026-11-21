@@ -75,35 +75,36 @@ type GraphReads = {
   work: number;
 };
 
-export function personMatches(person: PersonSeed, where: PersonWhere | undefined): boolean {
+export function personMatches(seededPerson: PersonSeed, where: PersonWhere | undefined): boolean {
   if (!where) {
     return true;
   }
-  if (where.userId && person.userId !== where.userId) {
+  if (where.userId && seededPerson.userId !== where.userId) {
     return false;
   }
-  if (where.myself !== undefined && person.myself !== where.myself) {
+  if (where.myself !== undefined && seededPerson.myself !== where.myself) {
     return false;
   }
-  if (typeof where.id === "string" && person.id !== where.id) {
+  if (typeof where.id === "string" && seededPerson.id !== where.id) {
     return false;
   }
-  if (where.id && typeof where.id === "object" && !where.id.in.includes(person.id)) {
+  if (where.id && typeof where.id === "object" && !where.id.in.includes(seededPerson.id)) {
     return false;
   }
   return true;
 }
 
-function isUnlinked(person: PersonSeed, edges: EdgeSeed[]): boolean {
-  return !edges.some(
-    (edge) =>
-      edge.userId === person.userId &&
-      (edge.sourcePersonId === person.id || edge.targetPersonId === person.id),
+function isUnlinked(seededPerson: PersonSeed, edges: EdgeSeed[]): boolean {
+  return edges.every(
+    (seededEdge) =>
+      seededEdge.userId !== seededPerson.userId ||
+      (seededEdge.sourcePersonId !== seededPerson.id &&
+        seededEdge.targetPersonId !== seededPerson.id),
   );
 }
 
-export function edgeMatches(edge: EdgeSeed, where: EdgeWhere | undefined): boolean {
-  if (!where?.userId || edge.userId !== where.userId) {
+export function edgeMatches(seededEdge: EdgeSeed, where: EdgeWhere | undefined): boolean {
+  if (!where?.userId || seededEdge.userId !== where.userId) {
     return false;
   }
   if (!where.OR) {
@@ -111,8 +112,9 @@ export function edgeMatches(edge: EdgeSeed, where: EdgeWhere | undefined): boole
   }
   return where.OR.some(
     (clause) =>
-      (clause.sourcePersonId !== undefined && edge.sourcePersonId === clause.sourcePersonId) ||
-      (clause.targetPersonId !== undefined && edge.targetPersonId === clause.targetPersonId),
+      (clause.sourcePersonId !== undefined &&
+        seededEdge.sourcePersonId === clause.sourcePersonId) ||
+      (clause.targetPersonId !== undefined && seededEdge.targetPersonId === clause.targetPersonId),
   );
 }
 
@@ -139,12 +141,12 @@ export function createFakeClient(seed: {
   const people = {
     count: async ({ where }: { where?: PersonWhere }) =>
       seed.people.filter(
-        (person) =>
-          personMatches(person, where) &&
-          (!where?.relationshipsFrom || isUnlinked(person, seed.edges)),
+        (seededPerson) =>
+          personMatches(seededPerson, where) &&
+          (!where?.relationshipsFrom || isUnlinked(seededPerson, seed.edges)),
       ).length,
     findFirst: async ({ where }: { where: PersonWhere }) =>
-      seed.people.find((person) => personMatches(person, where)) ?? null,
+      seed.people.find((seededPerson) => personMatches(seededPerson, where)) ?? null,
     findMany: async ({
       take,
       where,
@@ -154,12 +156,12 @@ export function createFakeClient(seed: {
       take?: number;
       where?: PersonWhere;
     }) => {
-      const rows = seed.people.filter((person) => {
-        if (!personMatches(person, where)) {
+      const rows = seed.people.filter((seededPerson) => {
+        if (!personMatches(seededPerson, where)) {
           return false;
         }
         if (where?.relationshipsFrom || where?.relationshipsTo) {
-          return isUnlinked(person, seed.edges);
+          return isUnlinked(seededPerson, seed.edges);
         }
         return true;
       });
@@ -189,7 +191,7 @@ export function createFakeClient(seed: {
       where?: EdgeWhere;
     }) => {
       const rows = seed.edges
-        .filter((edge) => edgeMatches(edge, where))
+        .filter((seededEdge) => edgeMatches(seededEdge, where))
         .sort((left, right) => {
           const byTime = left.createdAt.getTime() - right.createdAt.getTime();
           if (byTime !== 0) {

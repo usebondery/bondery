@@ -1,7 +1,11 @@
 import { SOCIAL_LINKS } from "@bondery/helpers";
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import Link from "next/link";
 import { getChangelogFeedPages, releaseHeadingLabel } from "@/lib/changelog";
 import { changelogGithubReleaseUrl, changelogVersionHeadingId } from "@/lib/changelog-github";
+import { formatMessage } from "@/lib/i18n/message";
 
 export function ChangelogIndex() {
   const { releases } = getChangelogFeedPages();
@@ -20,12 +24,12 @@ export function ChangelogIndex() {
             <h2 id={changelogVersionHeadingId(version)}>{releaseHeadingLabel(entry)}</h2>
             <ul>
               <li>
-                <Link href={`/docs/changelog/${version}`}>Changelog</Link>
+                <Link href={`/docs/changelog/${version}`}>{docs.Changelog.Changelog}</Link>
               </li>
               {githubUrl ? (
                 <li>
                   <a href={githubUrl} rel="noreferrer" target="_blank">
-                    GitHub release
+                    {docs.Changelog.GitHubRelease}
                   </a>
                 </li>
               ) : null}
@@ -34,11 +38,13 @@ export function ChangelogIndex() {
         );
       })}
       <p>
-        Earlier Bondery versions were not published as GitHub Releases. See{" "}
-        <a href={`${SOCIAL_LINKS.github}/releases`} rel="noreferrer" target="_blank">
-          GitHub Releases
-        </a>{" "}
-        for tagged versions.
+        {formatMessage(docs.Changelog.EarlierVersions, {
+          link: (
+            <a href={`${SOCIAL_LINKS.github}/releases`} rel="noreferrer" target="_blank">
+              {docs.Changelog.GitHubReleases}
+            </a>
+          ),
+        })}
       </p>
     </>
   );

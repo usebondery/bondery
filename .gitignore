@@ -54,6 +54,11 @@ yarn-error.log*
 .env.production
 .env.local
 
+# deploy/bondery release smoke (scripts/smoke-release.mjs): env, override, and scratch files
+deploy/bondery/.env.smoke
+deploy/bondery/docker-compose.override.yml
+deploy/bondery/.smoke-*
+
 # vercel
 .vercel
 **/.vercel/output

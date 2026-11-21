@@ -31,6 +31,7 @@ import { useSheetLocalAction } from "../../../lib/forms/useSheetLocalAction";
 import { useSheetLocalSubmit } from "../../../lib/forms/useSheetLocalSubmit";
 import type { NativeTextInputRef } from "../../../lib/native-host-refs";
 import { syncEffectState } from "../../../lib/react/syncEffectState";
+import { firstNonEmpty, nonEmpty } from "../../../lib/text";
 import { MOBILE_LAYOUT, MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 import { CountryFlag } from "./CountryFlag";
@@ -73,13 +74,14 @@ function buildAddressEntry(
   }
 
   const displayValue =
-    geocodedSuggestion.addressFormatted || geocodedSuggestion.value || addressText.trim();
+    firstNonEmpty(geocodedSuggestion.addressFormatted, geocodedSuggestion.value) ??
+    addressText.trim();
 
   return {
     ...geocodedSuggestion,
     label: trimmedNickname,
     timezone,
-    type: type,
+    type,
     value: displayValue,
   };
 }
@@ -216,7 +218,7 @@ export function EditAddressSheet({
 
   function handleSelectSuggestion(suggestion: ContactAddressEntry) {
     invalidateSuggestionsFetch();
-    setValue("value", suggestion.addressFormatted || suggestion.value, {
+    setValue("value", nonEmpty(suggestion.addressFormatted) ?? suggestion.value, {
       shouldDirty: true,
       shouldValidate: true,
     });
@@ -245,7 +247,7 @@ export function EditAddressSheet({
       >
         <CountryFlag countryCode={item.addressCountryCode} />
         <Text numberOfLines={2} style={[styles.suggestionText, { color: colors.textPrimary }]}>
-          {item.addressFormatted || item.value}
+          {nonEmpty(item.addressFormatted) ?? item.value}
         </Text>
       </Pressable>
     );

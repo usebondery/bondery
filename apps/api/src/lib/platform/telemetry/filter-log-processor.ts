@@ -7,10 +7,13 @@ import { isSensitiveKey, REDACTED, redactSensitive, scrubEmails } from "./redact
  * redacts the rest, so only warnings and errors are shipped, without contact details.
  */
 export class FilteringLogRecordProcessor implements LogRecordProcessor {
-  constructor(
-    private readonly next: LogRecordProcessor,
-    private readonly minimumSeverity: SeverityNumber = SeverityNumber.WARN,
-  ) {}
+  private readonly next: LogRecordProcessor;
+  private readonly minimumSeverity: SeverityNumber;
+
+  constructor(next: LogRecordProcessor, minimumSeverity: SeverityNumber = SeverityNumber.WARN) {
+    this.next = next;
+    this.minimumSeverity = minimumSeverity;
+  }
 
   onEmit(logRecord: ReadWriteLogRecord, context?: Context): void {
     if ((logRecord.severityNumber ?? SeverityNumber.UNSPECIFIED) < this.minimumSeverity) {

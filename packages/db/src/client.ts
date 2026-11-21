@@ -1,6 +1,7 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 import { Pool } from "pg";
 
+import { pgConnectionConfig } from "./connection/database-tls.js";
 import { PrismaClient as BasePrismaClient } from "./generated/prisma/client.js";
 import { injectCreateIds } from "./inject-create-ids.js";
 
@@ -16,8 +17,9 @@ function resolveDatabaseUrl(): string {
   return databaseUrl;
 }
 
+/** Pool for the Prisma adapter. TLS comes from `DATABASE_SSL_*` (connection/database-tls.ts). */
 export function createPrismaPool(url: string): Pool {
-  return new Pool({ connectionString: url });
+  return new Pool({ ...pgConnectionConfig(url) });
 }
 
 function createPrismaClientFromPool(pool: Pool): BasePrismaClient {

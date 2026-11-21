@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Dodaj beleške…",
   "DeleteContact": "Obriši kontakt",
   "DeleteContactConfirmTitle": "Obrisati {name}?",
   "DeleteFailed": "Kontakt nije obrisan.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Uredi",
   "GroupsEditAccessibility": "Uredi grupe za {name}",
   "GroupsLoadError": "Grupe nisu učitane",
+  "LastInteractionLabel": "Poslednja interakcija",
   "NoGroups": "Nije u nijednoj grupi",
   "ShareContact": "Podeli vCard...",
   "ShareContactViaEmail": "Pošalji imejlom...",

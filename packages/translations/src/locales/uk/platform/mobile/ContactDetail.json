@@ -1,4 +1,5 @@
 {
+  "AddNotesPlaceholder": "Додати нотатки…",
   "DeleteContact": "Видалити контакт",
   "DeleteContactConfirmTitle": "Видалити {name}?",
   "DeleteFailed": "Не вдалося видалити контакт.",
@@ -13,6 +14,7 @@
   "GroupsEdit": "Змінити",
   "GroupsEditAccessibility": "Редагувати групи для {name}",
   "GroupsLoadError": "Не вдалося завантажити групи",
+  "LastInteractionLabel": "Остання взаємодія",
   "NoGroups": "Не состоит н і в одной групі",
   "ShareContact": "Поділитися vCard…",
   "ShareContactViaEmail": "Надіслить по ел. поште…",

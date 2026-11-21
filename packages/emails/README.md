@@ -27,12 +27,12 @@ Do not rebuild header, footer, or CTA. Do not print the destination URL under th
 
 ## Folders
 
-| Folder | For | Templates |
-|--------|-----|-----------|
-| `src/templates/account/` | Sign-in, welcome, account lifecycle | `MagicLinkEmail`, `WelcomeEmail`, `AccountDeletedEmail` |
-| `src/templates/billing/` | Subscriptions | `TrialEndingEmail` |
-| `src/templates/internal/` | Mail the Bondery team reads | `FeedbackEmail` |
-| `src/templates/notifications/` | Client-triggered product mail and reminder digest | `ShareContactEmail`, `ReminderDigestEmail` |
+| Folder                         | For                                               | Templates                                               |
+| ------------------------------ | ------------------------------------------------- | ------------------------------------------------------- |
+| `src/templates/account/`       | Sign-in, welcome, account lifecycle               | `MagicLinkEmail`, `WelcomeEmail`, `AccountDeletedEmail` |
+| `src/templates/billing/`       | Subscriptions                                     | `TrialEndingEmail`                                      |
+| `src/templates/internal/`      | Mail the Bondery team reads                       | `FeedbackEmail`                                         |
+| `src/templates/notifications/` | Client-triggered product mail and reminder digest | `ShareContactEmail`, `ReminderDigestEmail`              |
 
 API senders import from the package barrel:
 

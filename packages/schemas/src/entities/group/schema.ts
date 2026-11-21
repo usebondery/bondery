@@ -14,11 +14,8 @@ import {
   messageResponseSchema,
   personIdsSelectionSchema,
 } from "../_shared/schema.js";
-import {
-  contactListItemSchema,
-  contactPreviewSchema,
-  contactsFilterSchema,
-} from "../contact/schema.js";
+import { contactsFilterSchema } from "../contact/list-schema.js";
+import { contactListItemSchema, contactPreviewSchema } from "../contact/schema.js";
 import type {
   AddContactsToGroupRequest,
   AddContactsToGroupResponse,

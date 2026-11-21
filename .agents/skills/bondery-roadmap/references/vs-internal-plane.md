@@ -24,11 +24,11 @@ For bugs, chores, weekly cycles, sanity checks, and internal kanban hygiene, use
 
 ## Distinction from other docs
 
-| Surface | Owns |
-|---------|------|
-| **ROADMAP** (this skill) | Future intent and confidence |
-| **MAIN** (`bondery-pm`) | Internal execution, cycles, task breakdown |
-| **Changelog** | Shipped facts and versions |
+| Surface                             | Owns                                          |
+| ----------------------------------- | --------------------------------------------- |
+| **ROADMAP** (this skill)            | Future intent and confidence                  |
+| **MAIN** (`bondery-pm`)             | Internal execution, cycles, task breakdown    |
+| **Changelog**                       | Shipped facts and versions                    |
 | **bondery-legal long-term-roadmap** | Compliance evolution, manifest, policy claims |
 
 Cross-link legal initiatives on ROADMAP only when user-visible; legal skill owns disclosure accuracy.

@@ -110,8 +110,7 @@ function pushMediaValues(lines: string[], name: string, values: VCardMedia[]): v
       // Use ENCODING=b format for broad client compatibility (Google Contacts, etc.)
       const dataUriMatch = item.uri.match(/^data:([^;]+);base64,(.+)$/s);
       if (dataUriMatch) {
-        const mimeType = dataUriMatch[1];
-        const base64Data = dataUriMatch[2];
+        const [, mimeType = "", base64Data = ""] = dataUriMatch;
         const typeSubtype = (mimeType.split("/")[1] ?? "jpeg").toUpperCase();
         const parameters: VCardParameter[] = [
           { name: "ENCODING", values: ["b"] },

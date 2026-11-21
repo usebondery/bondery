@@ -20,6 +20,15 @@ import { updateActionContextIndicator } from "./badge";
 import { clearPersonCaches } from "./person-cache";
 import { backgroundState } from "./state";
 
+/** Random bytes in the OAuth `state` value (hex-encoded to twice this many characters). */
+const OAUTH_STATE_BYTES = 16;
+/** Radix for hex-encoding bytes. */
+const HEX_RADIX = 16;
+/** Characters of the PKCE challenge kept in debug logs. */
+const CODE_CHALLENGE_LOG_PREFIX_LENGTH = 12;
+/** Characters of the OAuth `state` kept in debug logs. */
+const STATE_LOG_PREFIX_LENGTH = 8;
+
 export async function handleAuthStatus(sendResponse: (response: unknown) => void): Promise<void> {
   const authenticated = await isAuthenticated();
   let user: { id: string; email: string } | undefined;
@@ -55,7 +64,10 @@ export async function handleLogin(sendResponse: (response: unknown) => void): Pr
   }
 
   backgroundState.loginInProgress = true;
+  await runLoginFlow(sendResponse);
+}
 
+async function runLoginFlow(sendResponse: (response: unknown) => void): Promise<void> {
   try {
     const result = await initiateOAuthFlow();
     extLog.debug("[background][oauth] login-result", result);
@@ -76,9 +88,9 @@ export async function initiateOAuthFlow(): Promise<{ success: boolean; error?: s
     const codeVerifier = generateCodeVerifier();
     const codeChallenge = await generateCodeChallenge(codeVerifier);
 
-    const stateArray = new Uint8Array(16);
+    const stateArray = new Uint8Array(OAUTH_STATE_BYTES);
     crypto.getRandomValues(stateArray);
-    const state = Array.from(stateArray, (b) => b.toString(16).padStart(2, "0")).join("");
+    const state = Array.from(stateArray, (b) => b.toString(HEX_RADIX).padStart(2, "0")).join("");
 
     const redirectUri = browser.identity.getRedirectURL();
 
@@ -95,9 +107,9 @@ export async function initiateOAuthFlow(): Promise<{ success: boolean; error?: s
     extLog.debug("[background][oauth] authorize-request", {
       authorizeUrl: authUrl.toString(),
       clientId: config.oauthClientId,
-      codeChallengePrefix: codeChallenge.slice(0, 12),
+      codeChallengePrefix: codeChallenge.slice(0, CODE_CHALLENGE_LOG_PREFIX_LENGTH),
       redirectUri,
-      statePrefix: state.slice(0, 8),
+      statePrefix: state.slice(0, STATE_LOG_PREFIX_LENGTH),
     });
 
     const responseUrl = await browser.identity.launchWebAuthFlow({
@@ -126,11 +138,11 @@ export async function initiateOAuthFlow(): Promise<{ success: boolean; error?: s
       callbackPath: url.pathname,
       error,
       errorDescription,
-      expectedStatePrefix: state.slice(0, 8),
+      expectedStatePrefix: state.slice(0, STATE_LOG_PREFIX_LENGTH),
       hasCode: Boolean(code),
       hasError: Boolean(error),
       hasState: Boolean(returnedState),
-      returnedStatePrefix: returnedState?.slice(0, 8) ?? null,
+      returnedStatePrefix: returnedState?.slice(0, STATE_LOG_PREFIX_LENGTH) ?? null,
     });
 
     if (error) {
@@ -144,8 +156,8 @@ export async function initiateOAuthFlow(): Promise<{ success: boolean; error?: s
 
     if (returnedState !== state) {
       extLog.debug("[background][oauth] state-mismatch", {
-        expectedStatePrefix: state.slice(0, 8),
-        returnedStatePrefix: returnedState?.slice(0, 8) ?? null,
+        expectedStatePrefix: state.slice(0, STATE_LOG_PREFIX_LENGTH),
+        returnedStatePrefix: returnedState?.slice(0, STATE_LOG_PREFIX_LENGTH) ?? null,
       });
       return { error: "State mismatch — possible CSRF attack", success: false };
     }

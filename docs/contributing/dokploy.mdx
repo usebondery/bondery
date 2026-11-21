@@ -16,7 +16,7 @@ Bondery production runs on Dokploy, and this page is the canonical topology. It 
 | Host | Service | Stack |
 |------|---------|--------|
 | `app.usebondery.com` | `webapp` :26632 | [`deploy/bondery`](../../deploy/bondery/) Compose |
-| `api.usebondery.com` | `api` :26631 | same Compose file |
+| `api.usebondery.com` | `api` :26642 (HTTPS only) | same Compose file |
 | (internal) | `redis`, `db` | same Compose — **never** attach a public domain |
 | `usebondery.com` | `website` :26630 | [`deploy/ops`](../../deploy/ops/) Compose (Bondery prod only) |
 
@@ -41,7 +41,7 @@ BONDERY_INFRA_WEBSITE_DOMAIN=usebondery.com
 BONDERY_INFRA_CHROME_EXTENSION_ID=lpcmokfekjjejnpobhbkgmjkodfhpmha
 ```
 
-Do not set `BONDERY_PRIVATE_REDIS_URL`. Compose connects the API to the bundled Redis over TLS with a password that the `redis-secrets` service creates (see [Configuration → Redis](../deploy/configuration.mdx#redis)). A leftover value in Dokploy or Infisical has no effect.
+Do not set `BONDERY_PRIVATE_REDIS_URL`. Compose connects the API to the bundled Redis over TLS with a password that the `stack-secrets` service creates (see [Configuration → Redis](../deploy/configuration.mdx#redis)). A leftover value in Dokploy or Infisical has no effect.
 
 Plus Postgres password, Better Auth secrets, and OAuth vars from [`.env.example`](../../deploy/bondery/.env.example). The `api` service runs **`pre_start` init containers** before the main process on every deploy: `release-migrate` (schema + functions + OAuth + platform admins) then `ensure-storage-buckets` — no separate migrate service or manual first-boot step.
 
@@ -51,7 +51,7 @@ Plus Postgres password, Better Auth secrets, and OAuth vars from [`.env.example`
 - Set hostnames only (`BONDERY_INFRA_*_DOMAIN`). Compose derives `https://…` URLs and Traefik `Host()` rules.
 - `BONDERY_PRIVATE_BETTER_AUTH_SECRETS` must use format `version:secret` (e.g. `1:<≥32-char secret>`) in `.env`.
 - Webapp never receives raw `BONDERY_PRIVATE_*` secrets except its own session/OAuth client secrets — compose allowlists public vars for the webapp service.
-- Compose publishes unique Docker DNS aliases from `BONDERY_INFRA_TRAEFIK_PREFIX` (`bondery` vs `bondery-beta`) so production and beta can share `dokploy-network`. Lookups: webapp SSR → `${prefix}-api:26631`; API S3 → `${prefix}-storage:8333`. Do not use the Compose service names `api` or `seaweedfs-s3` on that network.
+- Compose publishes unique Docker DNS aliases from `BONDERY_INFRA_TRAEFIK_PREFIX` (`bondery` vs `bondery-beta`) so production and beta can share `dokploy-network`. Lookups: webapp SSR → `https://${prefix}-api:26642` (the API's internal HTTPS listener, verified with the API CA); API S3 → `https://${prefix}-storage:8443` (TLS with the storage CA). Do not use the Compose service names `api` or `seaweedfs-s3` on that network.
 
 ### Health checks
 
@@ -186,7 +186,7 @@ If the API container crashes with missing `NEXT_PUBLIC_*` or legacy deploy paths
 1. Point the existing Compose app at `deploy/bondery/docker-compose.yml` (in-place preferred).
 2. Set domains and secrets from `.env.example` (image tags optional — unset falls back to `:production`).
 3. Deploy; wait until `redis` and `db` healthy and `api` `/status` OK.
-4. Confirm Traefik routes: `api.usebondery.com` → `api:26631`, `app.usebondery.com` → `webapp:26632`. Do **not** route Redis or Postgres publicly.
+4. Confirm Traefik routes: `api.usebondery.com` → `https://${prefix}-api:26642` (HTTPS, verified with the API CA through `${prefix}-api-transport.yml`, which the `traefik-transport` job writes to **Traefik File System**), `storage.usebondery.com` → `https://${prefix}-storage:8443` (reads only, verified with the storage CA through `${prefix}-storage-transport.yml`), `app.usebondery.com` → `webapp:26632`. Do **not** route Redis or Postgres publicly.
 5. Stop the old standalone webapp app if it conflicts on the domain.
 6. Smoke: `curl` `/health/live`, `/health/ready`, `/api/health/ready`; login; one authenticated mutation; sync/WebSocket if used.
 

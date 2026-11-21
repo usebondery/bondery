@@ -94,13 +94,12 @@ export function usePWAInstall(): UsePWAInstallResult {
       return false;
     }
 
+    deferredPrompt.current = null;
     try {
       await promptEvent.prompt();
-      deferredPrompt.current = null;
       await promptEvent.userChoice;
       return true;
     } catch {
-      deferredPrompt.current = null;
       return false;
     }
   };

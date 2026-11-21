@@ -33,8 +33,17 @@ function withBuildMetadata<T extends Record<string, unknown>>(body: T): T & Buil
   };
 }
 
+export type ProbeLivenessStatus = BuildMetadata & {
+  status: "ok";
+  timestamp: string;
+};
+
+export type ProbeReadinessStatus =
+  | ProbeLivenessStatus
+  | (BuildMetadata & { error: string; status: "unhealthy"; timestamp: string });
+
 /** Shared liveness payload for api, webapp, and website container probes. */
-export function buildLivenessStatus() {
+export function buildLivenessStatus(): ProbeLivenessStatus {
   return withBuildMetadata({
     status: "ok" as const,
     timestamp: new Date().toISOString(),
@@ -42,7 +51,7 @@ export function buildLivenessStatus() {
 }
 
 /** Shared readiness payload for webapp and website container probes. */
-export function buildReadinessStatus(ok: boolean, error?: string) {
+export function buildReadinessStatus(ok: boolean, error?: string): ProbeReadinessStatus {
   const timestamp = new Date().toISOString();
   if (ok) {
     return withBuildMetadata({

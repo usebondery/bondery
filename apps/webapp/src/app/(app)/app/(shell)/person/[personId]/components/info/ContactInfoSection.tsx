@@ -7,6 +7,7 @@ import { notifications } from "@mantine/notifications";
 import type { ContactInfoLabels } from "@/lib/contacts/contact-info-labels";
 import { useContactInfoLabels } from "@/lib/i18n/useContactInfoLabels";
 import { EMAIL_TYPE_OPTIONS, PHONE_TYPE_OPTIONS } from "@/lib/platform/config";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { ContactEmailsSection } from "./ContactEmailsSection";
 import { ContactPhonesSection } from "./ContactPhonesSection";
 
@@ -56,7 +57,7 @@ export function ContactInfoSection({
   const showSchemaNotification = (message?: string) => {
     notifications.show(
       errorNotificationTemplate({
-        description: message || text.invalidEmailMessage,
+        description: nonEmpty(message) ?? text.invalidEmailMessage,
         title: text.invalidEmailTitle,
       }),
     );

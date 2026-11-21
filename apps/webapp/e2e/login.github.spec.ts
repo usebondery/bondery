@@ -7,6 +7,7 @@ test("login with GitHub", async ({ page }) => {
   await page.getByTestId("login-github").click();
 
   if (process.env.E2E_PAUSE_GITHUB === "1") {
+    // biome-ignore lint/suspicious/noPlaywrightPagePause: opt-in through E2E_PAUSE_GITHUB=1 for the interactive GitHub login
     await page.pause();
   } else {
     await page.waitForURL(/\/app\//, { timeout: 300_000 });

@@ -31,6 +31,6 @@ export function readGitTags(repoRoot) {
       .filter(Boolean);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`Failed to list git tags: ${message}. Run: git fetch --tags`);
+    throw new Error(`Failed to list git tags: ${message}. Run: git fetch --tags`, { cause: error });
   }
 }

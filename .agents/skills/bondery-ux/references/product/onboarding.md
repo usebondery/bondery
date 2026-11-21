@@ -6,11 +6,11 @@ Bondery-specific first-run flows on web. Generic empty-state patterns: [../commo
 
 ## Surfaces
 
-| Surface | Location | Purpose |
-|---------|----------|---------|
-| **Setup wizard** | `/app/onboarding` (`OnboardingClient.tsx`) | One-time modal flow until `onboardingCompletedAt` is set |
-| **Getting Started rail** | Home (`HomeClient` → `GettingStartedProgressRail`) | Post-onboarding checklist until user dismisses |
-| **Mobile** | — | No onboarding wizard yet |
+| Surface                  | Location                                           | Purpose                                                  |
+| ------------------------ | -------------------------------------------------- | -------------------------------------------------------- |
+| **Setup wizard**         | `/app/onboarding` (`OnboardingClient.tsx`)         | One-time modal flow until `onboardingCompletedAt` is set |
+| **Getting Started rail** | Home (`HomeClient` → `GettingStartedProgressRail`) | Post-onboarding checklist until user dismisses           |
+| **Mobile**               | —                                                  | No onboarding wizard yet                                 |
 
 ---
 
@@ -24,12 +24,12 @@ Bondery-specific first-run flows on web. Generic empty-state patterns: [../commo
 
 **Progress:** `@mantine/nprogress` `NavigationProgress` — steps 0→3 map to 10% / 30% / 60% / 90%.
 
-| Step | Component | Content |
-|------|-----------|---------|
-| 0 | `StepLoading` | Brief loading → auto-advance |
-| 1 | `StepWelcome` | Greeting with first name when available |
-| 2 | `StepIntent` | Personal / professional / both — stored in `OnboardingContext` |
-| 3 | `StepImport` | LinkedIn or Instagram import cards, or skip |
+| Step | Component     | Content                                                        |
+| ---- | ------------- | -------------------------------------------------------------- |
+| 0    | `StepLoading` | Brief loading → auto-advance                                   |
+| 1    | `StepWelcome` | Greeting with first name when available                        |
+| 2    | `StepIntent`  | Personal / professional / both — stored in `OnboardingContext` |
+| 3    | `StepImport`  | LinkedIn or Instagram import cards, or skip                    |
 
 **Finish:** `useFinishOnboardingMutation` sets `onboardingCompletedAt` (+ optional import follow-up fields) → `router.push(WEBAPP_ROUTES.HOME)`.
 
@@ -51,11 +51,11 @@ Bondery-specific first-run flows on web. Generic empty-state patterns: [../commo
 
 **Tasks** (`GettingStartedTaskId`):
 
-| Task | Complete when | Action |
-|------|---------------|--------|
-| `importContacts` | `importCompletedAt` set | Navigate to Settings → Data management (`#data-management`) |
-| `addContacts` | `totalContacts > 0` | `openAddContactModal()` |
-| `logInteraction` | user has any interaction | `openNewActivityModal()` |
+| Task             | Complete when            | Action                                                      |
+| ---------------- | ------------------------ | ----------------------------------------------------------- |
+| `importContacts` | `importCompletedAt` set  | Navigate to Settings → Data management (`#data-management`) |
+| `addContacts`    | `totalContacts > 0`      | `openAddContactModal()`                                     |
+| `logInteraction` | user has any interaction | `openNewActivityModal()`                                    |
 
 **Import awaiting hint:** When `importFollowupStatus === "awaiting_export"`, import row expands with platform-specific copy (LinkedIn / Instagram).
 

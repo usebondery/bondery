@@ -10,6 +10,10 @@ import { useTagsListQuery } from "@/lib/query/hooks/useTags";
 import { SETTINGS_TAGS_PREVIEW } from "@/lib/query/settingsPageQueryParams";
 import { SettingsSection } from "./SettingsSection";
 
+function ignoreTagEditorCallback() {
+  // no-op: settings tags refresh from the tags list query, not modal callbacks
+}
+
 export function TagsSection() {
   const t = useTagsSettingsTranslations();
   const { data: tags = [] } = useTagsListQuery(SETTINGS_TAGS_PREVIEW);
@@ -26,9 +30,9 @@ export function TagsSection() {
               onClick={() => {
                 openTagEditorModal({
                   mode: "edit",
-                  onCreated: () => {},
-                  onDeleted: () => {},
-                  onUpdated: () => {},
+                  onCreated: ignoreTagEditorCallback,
+                  onDeleted: ignoreTagEditorCallback,
+                  onUpdated: ignoreTagEditorCallback,
                   tag,
                 });
               }}
@@ -42,9 +46,9 @@ export function TagsSection() {
             onClick={() => {
               openTagEditorModal({
                 mode: "create",
-                onCreated: () => {},
-                onDeleted: () => {},
-                onUpdated: () => {},
+                onCreated: ignoreTagEditorCallback,
+                onDeleted: ignoreTagEditorCallback,
+                onUpdated: ignoreTagEditorCallback,
               });
             }}
           />

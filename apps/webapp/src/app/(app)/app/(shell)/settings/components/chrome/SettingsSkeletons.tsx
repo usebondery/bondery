@@ -1,4 +1,4 @@
-﻿import { Group, Paper, Skeleton, Stack } from "@mantine/core";
+import { Group, Paper, Skeleton, Stack } from "@mantine/core";
 
 /**
  * Skeleton for a settings section card (Paper withBorder).

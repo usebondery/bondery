@@ -195,7 +195,7 @@ export function parseEntity(lines: string[], options: VCardParseOptions): Parsed
     raw.warnings.push(`Unrecognized vCard version ${version}. Parsed best-effort.`);
   }
 
-  if (!properties.some((property) => property.name === "FN")) {
+  if (properties.every((property) => property.name !== "FN")) {
     raw.warnings.push("VCARD is missing FN.");
   }
 

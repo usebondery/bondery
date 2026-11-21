@@ -55,7 +55,7 @@ export function EnrichRecommendationCard({
 
   const handleResume = () => {
     if (effectiveQueueStatus) {
-      resume(effectiveQueueStatus);
+      void resume(effectiveQueueStatus);
     }
   };
   const handleDiscard = async () => {

@@ -44,7 +44,7 @@ export function extractProfilePhotoUrl(): string | null {
   return null;
 }
 
-const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
+function LinkedInButton({ username }: LinkedInButtonProps) {
   const t = useExtensionSocialButtonsTranslations("LinkedIn");
   const [isLoading, setIsLoading] = useState(false);
   const [isPreloading, setIsPreloading] = useState(!profileCache.has(username));
@@ -56,7 +56,11 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       return;
     }
     setIsPreloading(true);
-    scrapeLinkedInProfile(username).finally(() => setIsPreloading(false));
+    scrapeLinkedInProfile(username)
+      .catch((error) => {
+        extLog.error("[linkedin] Profile preload failed", error);
+      })
+      .finally(() => setIsPreloading(false));
   }, [username]);
 
   const handleClick = async (e: React.MouseEvent) => {
@@ -127,6 +131,6 @@ const LinkedInButton: React.FC<LinkedInButtonProps> = ({ username }) => {
       )}
     </>
   );
-};
+}
 
 export default LinkedInButton;

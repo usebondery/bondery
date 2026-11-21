@@ -100,7 +100,7 @@ export default function LoginScreen() {
     }
 
     showAuthError(tLoginPage("AuthenticationError"), tMobileAuth("MissingConfig"));
-  }, [authClient, tLoginPage, tMobileAuth]);
+  }, [tLoginPage, tMobileAuth, showAuthError]);
 
   useEffect(() => {
     let cancelled = false;
@@ -127,7 +127,7 @@ export default function LoginScreen() {
       tLoginPage("AuthenticationError"),
       getAuthUserFacingError({ code: queryError }, tCommon),
     );
-  }, [params.error, tCommon, tLoginPage]);
+  }, [params.error, tCommon, tLoginPage, showAuthError]);
 
   useEffect(() => {
     if (resendSeconds <= 0) {
@@ -376,7 +376,7 @@ export default function LoginScreen() {
                 />
               )}
 
-              <Text c="muted" className="leading-[18px]" size="xs" style={styles.terms}>
+              <Text c="muted" className="leading-compact" size="xs" style={styles.terms}>
                 {tLoginPage("TermsAgreement")}{" "}
                 <Anchor href={`${WEBSITE_URL}${WEBSITE_ROUTES.TERMS}`} size="xs">
                   {tLoginPage("TermsOfService")}

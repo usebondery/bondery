@@ -30,6 +30,8 @@ metadata:
 - Placeholders stay `{token}` in product JSON. Do not convert them to `{{token}}`.
 - Keep `Bondery`, `PRM`, GitHub, LinkedIn, Instagram, WhatsApp, Signal, and Stripe.
 - Do not translate the marketing site, docs, or legal pages.
+- Website UI strings live in `packages/translations/src/locales/en/platform/website/`. Their manifest entries carry `"englishOnly": true`, so no other locale has a file for them. Do not add a translation of an `englishOnly` namespace: `check:i18n:structure` fails. Remove the flag in the same change that translates the namespace.
+- Legal documents are MDX files under `apps/website/content/legal/`, not catalog keys. `bondery-legal` owns them.
 - Do not edit `packages/helpers/src/locale/world-languages.ts` for a UI locale. That list is the contact's spoken language.
 - Do not edit the root `i18next.config.ts`. The package config reads the catalog.
 - `Languages.json` in every shipped locale needs an exonym for the new code. `check:i18n:structure` fails without it.
@@ -39,13 +41,13 @@ metadata:
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Register a locale and touch the shared files | [references/add-language.md](references/add-language.md) |
+| Task                                                    | Read                                                                   |
+| ------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Register a locale and touch the shared files            | [references/add-language.md](references/add-language.md)               |
 | Voice, placeholders, glossary, what to leave in English | [references/translation-quality.md](references/translation-quality.md) |
-| Plurals, gender, case, Hungarian suffixes | [references/grammar.md](references/grammar.md) |
-| Dates, numbers, quotes, dayjs, speech, sort | [references/formatting.md](references/formatting.md) |
-| Any shipped locale's voice, plurals, and glossary | [references/locale-profiles.md](references/locale-profiles.md) |
+| Plurals, gender, case, Hungarian suffixes               | [references/grammar.md](references/grammar.md)                         |
+| Dates, numbers, quotes, dayjs, speech, sort             | [references/formatting.md](references/formatting.md)                   |
+| Any shipped locale's voice, plurals, and glossary       | [references/locale-profiles.md](references/locale-profiles.md)         |
 
 Full index: [references/README.md](references/README.md).
 

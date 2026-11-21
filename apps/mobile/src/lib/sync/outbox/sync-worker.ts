@@ -2,8 +2,8 @@ import { isApiError } from "@bondery/helpers/api";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SyncMutation, SyncPushResponse, SyncTableKey } from "@bondery/schemas/sync";
 import { mobileFetch } from "../../api/transport";
-import { getAccessToken } from "../../auth/client";
-import { endLocalSession, logLocalSessionMissing } from "../../auth/session";
+import { endLocalSession, readLocalAccessToken } from "../../auth/local-session";
+import { logLocalSessionMissing } from "../../auth/session";
 import { API_URL } from "../../config";
 import { syncRequestHeaders } from "../constants";
 import { getSyncMutationTables } from "../mutation-tables";
@@ -24,6 +24,15 @@ import { errorFromSyncPushHttp, errorFromSyncPushRejected } from "./sync-display
 
 let drainScheduledGeneration: PullSessionGeneration | null = null;
 let draining = false;
+
+function tryBeginDrain(): boolean {
+  if (draining) {
+    return false;
+  }
+
+  draining = true;
+  return true;
+}
 
 type SyncErrorListener = (error: unknown) => void;
 const errorListeners = new Set<SyncErrorListener>();
@@ -49,7 +58,7 @@ function logDisplayedSyncError(error: unknown, extra: Record<string, unknown>): 
 }
 
 async function getBearerToken(): Promise<string | null> {
-  return getAccessToken();
+  return readLocalAccessToken();
 }
 
 async function isCurrentDrainSession(
@@ -64,10 +73,9 @@ async function isCurrentDrainSession(
 }
 
 async function runDrainPendingMutations(generation: PullSessionGeneration): Promise<void> {
-  if (draining) {
+  if (!tryBeginDrain()) {
     return;
   }
-  draining = true;
 
   try {
     const token = await getBearerToken();

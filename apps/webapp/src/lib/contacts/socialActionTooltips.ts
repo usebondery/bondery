@@ -18,7 +18,7 @@ export const SOCIAL_ACTION_ORDER: SocialActionKey[] = [
 ];
 
 function normalizeFirstName(firstName: string | null | undefined): string {
-  const trimmed = String(firstName || "").trim();
+  const trimmed = (firstName ?? "").trim();
   return trimmed.length > 0 ? trimmed : "contact";
 }
 

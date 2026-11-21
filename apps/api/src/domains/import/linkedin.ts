@@ -171,10 +171,10 @@ export async function commitLinkedInImport(
       select: { id: true },
     });
 
-    for (let index = 0; index < toInsert.length; index++) {
+    for (const [index, contact] of toInsert.entries()) {
       const inserted = insertedPeople[index];
       if (inserted) {
-        handleToPersonId.set(toInsert[index].linkedinUsername.trim(), inserted.id);
+        handleToPersonId.set(contact.linkedinUsername.trim(), inserted.id);
       }
     }
 

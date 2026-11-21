@@ -33,7 +33,7 @@ describe("injectCreateIds", () => {
     };
 
     assert.equal(isUuidV7(result.id), true);
-    assert.equal(isUuidV7(result.phones.create[0]?.id), true);
+    assert.equal(isUuidV7(result.phones.create[0]?.id ?? ""), true);
   });
 
   it("does not inject id for composite-key rows", () => {

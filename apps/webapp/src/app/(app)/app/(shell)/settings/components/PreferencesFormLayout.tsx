@@ -24,10 +24,18 @@ export function PreferencesFieldRow({ children }: { children: ReactNode }) {
 }
 
 export function PreferencesField({ children }: { children: ReactNode }) {
-  return <Box className="min-w-0 w-full">{children}</Box>;
+  return (
+    <Box miw={0} w="100%">
+      {children}
+    </Box>
+  );
 }
 
 /** Theme segmented control: full width on mobile, compact cap on `sm+`. */
 export function PreferencesThemeField({ children }: { children: ReactNode }) {
-  return <Box className="min-w-0 w-full sm:max-w-96">{children}</Box>;
+  return (
+    <Box maw={{ sm: "24rem" }} miw={0} w="100%">
+      {children}
+    </Box>
+  );
 }

@@ -230,11 +230,13 @@
     "deleting": "Eliminazione…",
     "duplicating": "Duplicazione…",
     "errorTitle": "Errore",
+    "mobileRuntimeError": "Errore di esecuzione dell'app mobile",
     "noResults": "Nessun risultato",
     "removing": "Rimozione…",
     "savedTitle": "Salvato",
     "saving": "Salvataggio…",
     "sending": "Invio…",
-    "successTitle": "Operazione riuscita"
+    "successTitle": "Operazione riuscita",
+    "unknownError": "Errore sconosciuto"
   }
 }

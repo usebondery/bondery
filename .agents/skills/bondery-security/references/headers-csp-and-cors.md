@@ -12,12 +12,12 @@ Sources used in this file:
 
 Which principle came from which source:
 
-| Principle | Source |
-|---|---|
-| A nonce with `'strict-dynamic'` protects script loading. | OWASP CSP Cheat Sheet |
-| `frame-ancestors` supersedes `X-Frame-Options`. | MDN CSP guide |
-| A report-only policy collects violations before enforcement. | MDN CSP guide |
-| Trusted Types turns DOM XSS sinks into TypeErrors. | MDN Trusted Types |
+| Principle                                                    | Source                |
+| ------------------------------------------------------------ | --------------------- |
+| A nonce with `'strict-dynamic'` protects script loading.     | OWASP CSP Cheat Sheet |
+| `frame-ancestors` supersedes `X-Frame-Options`.              | MDN CSP guide         |
+| A report-only policy collects violations before enforcement. | MDN CSP guide         |
+| Trusted Types turns DOM XSS sinks into TypeErrors.           | MDN Trusted Types     |
 
 ## The rule
 
@@ -33,11 +33,11 @@ runtime, so `node:crypto` and `Buffer` are not available there.
 
 ## Header matrix
 
-| Surface | `Content-Security-Policy` | Report-Only | `X-Content-Type-Options` | `Referrer-Policy` | `Permissions-Policy` | COOP | HSTS |
-|---|---|---|---|---|---|---|---|
-| Website (`apps/website/src/proxy.ts`) | Enforced, nonce + `strict-dynamic` | Yes, adds Trusted Types | `nosniff` | `strict-origin-when-cross-origin` | From the builder | `same-origin` | `next.config.ts` |
-| Webapp (`apps/webapp/src/proxy.ts`) | Enforced, nonce + `strict-dynamic` | Yes, adds Trusted Types | `nosniff` | `strict-origin-when-cross-origin` | From the builder | `same-origin` | `next.config.ts` |
-| API (`apps/api/src/build-app.ts`) | Disabled on purpose | — | Helmet default | Helmet default | `onSend` hook, shared constant | Disabled | Production only |
+| Surface                               | `Content-Security-Policy`          | Report-Only             | `X-Content-Type-Options` | `Referrer-Policy`                 | `Permissions-Policy`           | COOP          | HSTS             |
+| ------------------------------------- | ---------------------------------- | ----------------------- | ------------------------ | --------------------------------- | ------------------------------ | ------------- | ---------------- |
+| Website (`apps/website/src/proxy.ts`) | Enforced, nonce + `strict-dynamic` | Yes, adds Trusted Types | `nosniff`                | `strict-origin-when-cross-origin` | From the builder               | `same-origin` | `next.config.ts` |
+| Webapp (`apps/webapp/src/proxy.ts`)   | Enforced, nonce + `strict-dynamic` | Yes, adds Trusted Types | `nosniff`                | `strict-origin-when-cross-origin` | From the builder               | `same-origin` | `next.config.ts` |
+| API (`apps/api/src/build-app.ts`)     | Disabled on purpose                | —                       | Helmet default           | Helmet default                    | `onSend` hook, shared constant | Disabled      | Production only  |
 
 The API serves JSON, so a policy adds no protection there. That is a known-safe
 pattern, not a gap. Helmet has no option for `Permissions-Policy`, so the API
@@ -50,10 +50,10 @@ builder uses. All three surfaces therefore deny the same features.
 (MDN CSP guide). Two sources for one decision drift apart, so the split follows
 the proxy matcher:
 
-| Path | Framing source |
-|---|---|
-| Matched by `proxy.ts` | `frame-ancestors 'none'` in the policy. No `X-Frame-Options`. |
-| Excluded by the matcher (`/api`, `_next/static`, `_next/image`, `favicon.ico`, static images) | `X-Frame-Options: DENY` from `next.config.ts` `headers()` |
+| Path                                                                                          | Framing source                                                |
+| --------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Matched by `proxy.ts`                                                                         | `frame-ancestors 'none'` in the policy. No `X-Frame-Options`. |
+| Excluded by the matcher (`/api`, `_next/static`, `_next/image`, `favicon.ico`, static images) | `X-Frame-Options: DENY` from `next.config.ts` `headers()`     |
 
 The excluded paths never reach the proxy, so they would otherwise have no
 framing protection at all. `next.config.ts` declares XFO only for those four or
@@ -69,7 +69,7 @@ the policies into a header record.
 ```ts
 buildCsp({
   nonce,
-  variant: "enforced",       // or "report-only"
+  variant: "enforced", // or "report-only"
   connectSrc: ["https://api.example.com"],
   imgSrc: ["https://tiles.example.com"],
   scriptSrc: ["https://plausible.example.com"],
@@ -142,10 +142,10 @@ nothing registers a Trusted Types policy.
 **Do not register a `default` (or any) Trusted Types policy.** Measured on the
 webapp `/login` route:
 
-| Setup | Result |
-|---|---|
-| Directive present, `bondery#default` + `default` registered | Runtime error dialog: `Cannot read properties of null (reading 'cloneNode')` |
-| Directive present, no policy registered | Clean render. `new Function`, `script.text`, `script.src`, `innerHTML` all succeed |
+| Setup                                                       | Result                                                                             |
+| ----------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Directive present, `bondery#default` + `default` registered | Runtime error dialog: `Cannot read properties of null (reading 'cloneNode')`       |
+| Directive present, no policy registered                     | Clean render. `new Function`, `script.text`, `script.src`, `innerHTML` all succeed |
 
 The failure is in `next/dist/client/head-manager.js`. Its `isEqualNode` clones a
 tag and reads `cloneTag.nonce`. A registered policy affects how that clone
@@ -157,12 +157,12 @@ flag. Both were removed after this measurement.
 
 ### Sink audit
 
-| Sink | Where | Under the directive |
-|---|---|---|
-| `innerHTML` | React hydration, TipTap | Succeeds |
-| `script.src` | Next.js chunk loader, Stripe, PostHog | Succeeds |
-| `script.text` | React Compiler | Succeeds |
-| `cloneNode` nonce read | Next head manager | Succeeds when no policy is registered |
+| Sink                   | Where                                 | Under the directive                   |
+| ---------------------- | ------------------------------------- | ------------------------------------- |
+| `innerHTML`            | React hydration, TipTap               | Succeeds                              |
+| `script.src`           | Next.js chunk loader, Stripe, PostHog | Succeeds                              |
+| `script.text`          | React Compiler                        | Succeeds                              |
+| `cloneNode` nonce read | Next head manager                     | Succeeds when no policy is registered |
 
 ### How to verify after a change
 
@@ -173,7 +173,7 @@ a new sink needs attention.
 
 ## Reporting pipeline
 
-```
+```text
 browser violation
   → Content-Security-Policy-Report-Only (or enforced)
   → POST /security/csp-report  (API)

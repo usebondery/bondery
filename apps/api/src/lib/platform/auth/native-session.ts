@@ -23,15 +23,9 @@ function cookieOnlyHeaders(request: FastifyRequest): Headers {
   return headers;
 }
 
-async function verifyNativeFreshSession(
-  request: FastifyRequest,
-  _reply: FastifyReply,
-): Promise<void> {
-  if (!hasBetterAuthSessionCookie(request)) {
-    throw unauthorized("Unauthorized - Please log in", "auth_required");
-  }
+type NativeAuthSession = Awaited<ReturnType<typeof auth.api.getSession>>;
 
-  const session = await auth.api.getSession({ headers: cookieOnlyHeaders(request) });
+function applyVerifiedNativeSession(request: FastifyRequest, session: NativeAuthSession): void {
   const user = session?.user;
   if (!session?.session || !user?.id || !user.email) {
     throw unauthorized("Unauthorized - Please log in", "auth_required");
@@ -43,6 +37,18 @@ async function verifyNativeFreshSession(
 
   request.authUser = { email: user.email, id: user.id };
   request.authApiKey = null;
+}
+
+async function verifyNativeFreshSession(
+  request: FastifyRequest,
+  _reply: FastifyReply,
+): Promise<void> {
+  if (!hasBetterAuthSessionCookie(request)) {
+    throw unauthorized("Unauthorized - Please log in", "auth_required");
+  }
+
+  const session = await auth.api.getSession({ headers: cookieOnlyHeaders(request) });
+  applyVerifiedNativeSession(request, session);
 }
 
 /** Register cookie-fresh Better Auth session auth on a route module. */

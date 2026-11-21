@@ -144,11 +144,10 @@ export async function listGroups(ctx: GroupListContext, query?: PreviewListQuery
       ? (previewIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return {
-      ...baseGroup,
+    return Object.assign({}, baseGroup, {
       contactCount: countMap.get(row.id) ?? 0,
       previewContacts,
-    };
+    });
   });
 
   return {
@@ -199,7 +198,7 @@ export async function listGroupMembers(
   };
 
   let contacts = [] as ReturnType<typeof mapContactListRecord>[];
-  let totalCount = 0;
+  let totalCount: number;
 
   if (search) {
     const [searchResult, countResult] = await Promise.all([
@@ -252,7 +251,7 @@ export async function listGroupMembers(
     totalCount = count;
   }
 
-  let enrichedContacts = contacts;
+  let enrichedContacts: typeof contacts;
   try {
     enrichedContacts = await attachContactExtras(db, user.id, contacts, {
       addresses: true,
@@ -260,19 +259,20 @@ export async function listGroupMembers(
     });
   } catch (error) {
     log?.error({ err: error }, "Failed to attach contact channels/social media for group contacts");
-    enrichedContacts = contacts.map((contact) => ({
-      ...contact,
-      addresses: [],
-      avatar: null,
-      emails: [],
-      facebook: null,
-      instagram: null,
-      linkedin: null,
-      phones: [],
-      signal: null,
-      website: null,
-      whatsapp: null,
-    }));
+    enrichedContacts = contacts.map((contact) =>
+      Object.assign({}, contact, {
+        addresses: [],
+        avatar: null,
+        emails: [],
+        facebook: null,
+        instagram: null,
+        linkedin: null,
+        phones: [],
+        signal: null,
+        website: null,
+        whatsapp: null,
+      }),
+    );
   }
 
   const pagination = buildPaginationMeta({

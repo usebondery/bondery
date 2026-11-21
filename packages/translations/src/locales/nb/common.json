@@ -230,11 +230,13 @@
     "deleting": "Sletter …",
     "duplicating": "Dupliserer …",
     "errorTitle": "Feil",
+    "mobileRuntimeError": "Kjøretidsfeil i mobilappen",
     "noResults": "Ingen resultater",
     "removing": "Fjerner …",
     "savedTitle": "Lagret",
     "saving": "Lagrer …",
     "sending": "Sender …",
-    "successTitle": "Fullført"
+    "successTitle": "Fullført",
+    "unknownError": "Ukjent feil"
   }
 }

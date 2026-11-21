@@ -1,5 +1,8 @@
 "use client";
 
+import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
+  type: "json",
+};
 import { ActionIcon, Tooltip } from "@mantine/core";
 import { IconCheck, IconLink } from "@tabler/icons-react";
 import { useEffect, useRef, useState } from "react";
@@ -38,9 +41,12 @@ export function DocsHeadingLink({ id }: DocsHeadingLinkProps) {
   }
 
   return (
-    <Tooltip label={copied ? "Copied" : "Copy link"} opened={copied ? true : undefined}>
+    <Tooltip
+      label={copied ? docs.Copy.HeadingCopied : docs.Copy.HeadingCopyLink}
+      opened={copied ? true : undefined}
+    >
       <ActionIcon
-        aria-label={copied ? "Copied" : "Copy link to section"}
+        aria-label={copied ? docs.Copy.HeadingCopied : docs.Copy.HeadingCopyLinkAria}
         c="dimmed"
         className="docsHeadingAnchor"
         color="gray"

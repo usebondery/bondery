@@ -4,7 +4,7 @@ Full spec: https://agentskills.io/specification
 
 ## Directory structure
 
-```
+```text
 skill-name/
 ├── SKILL.md          # Required
 ├── references/       # Optional — on-demand docs
@@ -14,14 +14,14 @@ skill-name/
 
 ## Frontmatter fields
 
-| Field | Required | Notes |
-|-------|----------|-------|
-| `name` | Yes | Matches directory; `a-z`, `0-9`, `-` only; max 64 chars |
-| `description` | Yes | WHAT + WHEN + keywords; max 1024 chars |
-| `license` | No | Short license name |
-| `compatibility` | No | Environment requirements |
-| `metadata` | No | Arbitrary key-value (use `namespace: bondery` for Bondery skills) |
-| `allowed-tools` | No | Experimental pre-approved tools |
+| Field           | Required | Notes                                                             |
+| --------------- | -------- | ----------------------------------------------------------------- |
+| `name`          | Yes      | Matches directory; `a-z`, `0-9`, `-` only; max 64 chars           |
+| `description`   | Yes      | WHAT + WHEN + keywords; max 1024 chars                            |
+| `license`       | No       | Short license name                                                |
+| `compatibility` | No       | Environment requirements                                          |
+| `metadata`      | No       | Arbitrary key-value (use `namespace: bondery` for Bondery skills) |
+| `allowed-tools` | No       | Experimental pre-approved tools                                   |
 
 ## Progressive disclosure
 

@@ -11,6 +11,8 @@ import type { AppFastifyInstance } from "./fastify-types.js";
 const DEFAULT_MAX_REQUESTS = 300;
 const DEFAULT_WINDOW = "60 seconds";
 const DEFAULT_WINDOW_SECONDS = 60;
+/** Hex characters of the bearer-token hash kept in the MCP rate-limit key. */
+const BEARER_FINGERPRINT_LENGTH = 16;
 
 export const AI_TIER = {
   max: 20,
@@ -66,7 +68,7 @@ export const MCP_TIER = {
     const authorization = request.headers.authorization;
     const identity =
       typeof authorization === "string" && authorization.length > 0
-        ? `bearer:${createHash("sha256").update(authorization).digest("hex").slice(0, 16)}`
+        ? `bearer:${createHash("sha256").update(authorization).digest("hex").slice(0, BEARER_FINGERPRINT_LENGTH)}`
         : `ip:${request.ip}`;
     return `mcp:${identity}:${mcpMethod}:${mcpName}`;
   },

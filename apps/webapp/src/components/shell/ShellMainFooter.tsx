@@ -4,9 +4,9 @@ import { createContext, type ReactNode, useContext, useState } from "react";
 import { createPortal } from "react-dom";
 
 const ShellMainFooterNodeContext = createContext<HTMLDivElement | null>(null);
-const ShellMainFooterSetNodeContext = createContext<(node: HTMLDivElement | null) => void>(
-  () => {},
-);
+const ShellMainFooterSetNodeContext = createContext<(node: HTMLDivElement | null) => void>(() => {
+  // no-op: default setter until ShellMainFooterProvider mounts
+});
 
 export function ShellMainFooterProvider({ children }: { children: ReactNode }) {
   const [node, setNode] = useState<HTMLDivElement | null>(null);

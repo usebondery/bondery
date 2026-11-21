@@ -22,6 +22,8 @@
   "GroupFilterNewGroup": "Új csoport",
   "GroupFilterSheetTitle": "Kapcsolatok megjelenítése itt",
   "Groups": "Csoportok",
+  "MentionEmptyCaption": "Adj hozzá személyeket, hogy megemlíthesd őket a jegyzetekben.",
+  "MentionEmptyTitle": "Még nincsenek kapcsolatok",
   "MissingEmail": "Ennek a kapcsolatnak nincs e-mail címe",
   "MissingPhone": "Ennek a kapcsolatnak nincs telefonszáma",
   "MoreActions": "További műveletek",

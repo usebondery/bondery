@@ -17,7 +17,8 @@ export function createCheck(name) {
     for (const violation of violations) {
       console.error(`  - ${violation}`);
     }
-    process.exit(1);
+    process.exitCode = 1;
+    throw new Error(`${label}: failed`);
   }
 
   return {

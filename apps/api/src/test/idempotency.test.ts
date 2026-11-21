@@ -1,5 +1,4 @@
-import { AssertionError } from "node:assert";
-import assert from "node:assert/strict";
+import assert, { AssertionError } from "node:assert/strict";
 import { after, before, beforeEach, describe, it } from "node:test";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import Fastify from "fastify";
@@ -93,7 +92,9 @@ describe("idempotency hook", { concurrency: false }, () => {
   });
 
   it("returns 409 while another claim is open", async () => {
-    let release = () => {};
+    let release = (): void => {
+      throw new Error("hold resolve was not assigned");
+    };
     const hold = new Promise<void>((resolve) => {
       release = resolve;
     });
@@ -196,7 +197,7 @@ describe("idempotency hook", { concurrency: false }, () => {
 });
 
 describe("idempotency route allowlist", { concurrency: false }, () => {
-  it("POST /chat opts out and is the only exempt route on that plugin", async () => {
+  it("pOST /chat opts out and is the only exempt route on that plugin", async () => {
     const { chatRoutes } = await import("../routes/chat/index.js");
     const seen: { idempotency?: boolean; method: string; url: string }[] = [];
     const app = Fastify({ logger: false }).withTypeProvider<FastifyZodOpenApiTypeProvider>();
@@ -276,15 +277,19 @@ describe("idempotency concurrent claims", { concurrency: false }, () => {
   });
 
   it("lets one claim win and returns 409 for the other", async () => {
-    try {
-      await runConcurrentClaims();
-    } catch (error) {
-      if (error instanceof AssertionError) {
-        throw error;
+    await assert.doesNotReject(async () => {
+      try {
+        await runConcurrentClaims();
+      } catch (error) {
+        if (error instanceof AssertionError) {
+          throw error;
+        }
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1500);
+        });
+        await runConcurrentClaims();
       }
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      await runConcurrentClaims();
-    }
+    });
   });
 });
 
@@ -295,7 +300,9 @@ async function runConcurrentClaims(): Promise<void> {
   }
 
   const key = `conc-${Date.now()}`;
-  let release = () => {};
+  let release = (): void => {
+    throw new Error("hold resolve was not assigned");
+  };
   const hold = new Promise<void>((resolve) => {
     release = resolve;
   });
@@ -342,8 +349,8 @@ async function runConcurrentClaims(): Promise<void> {
         DELETE FROM idempotency_keys
         WHERE user_id = ${user.id}::uuid AND key = ${key}
       `;
-    } catch (error) {
-      void error;
+    } catch {
+      // Best-effort cleanup: a failed delete must not fail the test.
     }
   }
 }

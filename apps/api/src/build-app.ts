@@ -28,6 +28,7 @@ import type { OpenAPIV3 } from "openapi-types";
 import { envSchema } from "./env-schema.js";
 import { redactSensitiveAuthQuery } from "./lib/auth/redact-auth-query.js";
 import { registerExtensionVersionCheck } from "./lib/extension/version-check.js";
+import type { ApiTlsOptions } from "./lib/platform/api-tls.js";
 import { registerAuthStrategies } from "./lib/platform/auth/strategies.js";
 import { UPLOAD_LIMITS } from "./lib/platform/config.js";
 import { mapErrorToResponse } from "./lib/platform/errors/map-to-response.js";
@@ -82,10 +83,19 @@ function getLoggerConfig(env: string) {
   return { level: "info", serializers: authLogSerializers() };
 }
 
-export async function buildApp(): Promise<AppFastifyInstance> {
+export type BuildAppOptions = {
+  /**
+   * TLS for the server Fastify creates. The running API always passes it (buildServer); tests
+   * and tools that only call `inject()` or read routes leave it out.
+   */
+  https?: ApiTlsOptions;
+};
+
+export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastifyInstance> {
   registerOpenApiComponentSchemas();
   const environment = process.env.NODE_ENV || "development";
   const fastify = Fastify({
+    https: options.https ?? null,
     logger: getLoggerConfig(environment),
     routerOptions: {
       ignoreTrailingSlash: true,

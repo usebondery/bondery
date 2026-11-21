@@ -32,7 +32,7 @@ import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore"
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { routeWithQuery } from "@/lib/navigation/route/query";
-import { usePatchContactMutation } from "@/lib/query/hooks/useContacts";
+import { usePatchContactMutation } from "@/lib/query/hooks/useContactMutations";
 import { useKeepInTouchQuery } from "@/lib/query/hooks/useKeepInTouch";
 import { KeepInTouchSelect } from "./components/KeepInTouchSelect";
 import { computeNextDueDate } from "./utils/keepInTouchConfig";
@@ -46,7 +46,7 @@ function computeDaysUntilDue(contact: Contact): number {
   const lastInteraction = contact.lastInteraction ? new Date(contact.lastInteraction) : null;
 
   if (!lastInteraction) {
-    return -Infinity;
+    return Number.NEGATIVE_INFINITY;
   }
 
   const nextDue = new Date(lastInteraction);
@@ -70,10 +70,10 @@ const WINDOW_OPTIONS = [
 function computeEndDate(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().slice(0, 10);
 }
 
-function endDateToWindowValue(endDate: string): string {
+function endDateToWindowValue(endDate: string): "7" | "30" | "90" {
   const now = new Date();
   const end = new Date(`${endDate}T23:59:59`);
   const diffDays = Math.round((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -99,7 +99,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
 
   const handleWindowChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set("endDate", computeEndDate(parseInt(value, 10)));
+    params.set("endDate", computeEndDate(Number.parseInt(value, 10)));
     router.replace(routeWithQuery(pathname, params));
   };
 
@@ -108,7 +108,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
   const contacts = (() => {
     const all = keepInTouchData?.contacts;
     if (!all) {
-      return undefined;
+      return;
     }
     return all
       .filter((c) => {
@@ -121,7 +121,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
         }
         return nextDue <= new Date(`${endDate}T23:59:59`);
       })
-      .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
+      .map((c) => Object.assign({}, c, { daysUntilDue: computeDaysUntilDue(c) }))
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
   })();
 
@@ -174,7 +174,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
       return;
     }
     markLoading(contactId, true);
-    const keepFrequencyDays = value && value !== "none" ? parseInt(value, 10) : null;
+    const keepFrequencyDays = value && value !== "none" ? Number.parseInt(value, 10) : null;
 
     try {
       await patchContact.mutateAsync({ id: contactId, patch: { keepFrequencyDays } });

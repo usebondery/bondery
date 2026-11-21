@@ -65,7 +65,7 @@ export function stripToolPartsForModel(
 
 /** True when the last assistant message carries a tool part awaiting a decision. */
 export function hasPendingToolApproval(messages: UIMessage[]): boolean {
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.at(-1);
   if (lastMessage?.role !== "assistant") {
     return false;
   }

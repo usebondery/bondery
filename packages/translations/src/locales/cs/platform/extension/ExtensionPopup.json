@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Otevřít Bondery"
+    "OpenBondery": "Otevřít Bondery",
+    "UnsupportedSiteMessage": "Navštivte profil někoho na Instagramu nebo LinkedInu a uvidíte další akce a možnosti rozšíření."
   },
   "LoggedOut": {
     "Description": "Připojte účet a ukládejte kontakty ze sociálních sítí.",
@@ -20,6 +21,12 @@
     "Title": "Je vyžadována aktualizace"
   },
   "Welcome": {
-    "ConnectButton": "Připojit účet Bondery"
+    "ConnectButton": "Připojit účet Bondery",
+    "Description": "Připojte svůj účet Bondery a ukládejte kontakty přímo z profilů na sociálních sítích.",
+    "SignInHint": "Zobrazí se výzva k přihlášení k účtu Bondery a k autorizaci rozšíření.",
+    "SuccessClose": "Tuto kartu teď můžete zavřít.",
+    "SuccessDescription": "Váš účet Bondery je nyní připojený. Navštivte libovolný profil na Instagramu nebo LinkedInu a začněte ukládat kontakty.",
+    "SuccessTitle": "Vše je připraveno!",
+    "Title": "Vítejte v Bondery"
   }
 }

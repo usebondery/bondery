@@ -90,7 +90,7 @@ export async function attachContactChannels<T extends ContactWithId>(
   userId: string,
   contacts: T[],
 ): Promise<Array<T & PersonChannelRows>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 
@@ -141,7 +141,7 @@ export async function attachContactChannels<T extends ContactWithId>(
   }
 
   return contacts.map((contact) => {
-    const channels = map.get(contact.id) || { emails: [], phones: [] };
+    const channels = map.get(contact.id) ?? { emails: [], phones: [] };
     return {
       ...contact,
       emails: channels.emails,

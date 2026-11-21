@@ -122,7 +122,8 @@ function responseLines(responses: OperationLike["responses"]): string[] {
       lines.push(`- \`${status}\``);
       continue;
     }
-    lines.push(`- \`${status}\`${response.description ? `: ${response.description}` : ""}`);
+    const description = response.description ? `: ${response.description}` : "";
+    lines.push(`- \`${status}\`${description}`);
   }
   lines.push("");
 

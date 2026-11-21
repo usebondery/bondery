@@ -17,11 +17,14 @@ import {
 export type { ChatMessageRow };
 
 export async function createChatSession(): Promise<string> {
-  const { session } = await clientApiJson<{ session: ChatSession }>(API_ROUTES.CHAT_SESSIONS, {
-    body: JSON.stringify({}),
-    headers: { "Content-Type": "application/json" },
-    method: "POST",
-  });
+  const { session } = await clientApiJson<{ session?: ChatSession | null }>(
+    API_ROUTES.CHAT_SESSIONS,
+    {
+      body: JSON.stringify({}),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    },
+  );
 
   if (!session?.id) {
     throw new Error("Chat session was created but response did not include id");

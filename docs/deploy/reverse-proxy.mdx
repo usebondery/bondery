@@ -1,0 +1,67 @@
+---
+title: Reverse proxy
+description: Put Bondery behind Dokploy's Traefik, another Traefik, Caddy, or nginx. Every hop to the stack uses TLS checked against a private CA, and no stack port is open.
+icon: ArrowsExchange
+last_updated: 2026-11-19
+---
+
+Visitors always reach Bondery over HTTPS at your proxy. Behind the proxy, the stack serves the API and the storage gateway on HTTPS ports with private certificate authorities, which the one-shot `stack-secrets` service creates. The proxy checks those certificates, so the hop from the proxy to the stack is encrypted and authenticated too.
+
+| Upstream | Port | TLS | Name to verify |
+|----------|------|-----|----------------|
+| API (WebSocket sync included) | `26642` | HTTPS, API CA | `${BONDERY_INFRA_TRAEFIK_PREFIX}-api` |
+| Storage gateway (public reads) | `8443` | HTTPS, storage CA | `${BONDERY_INFRA_TRAEFIK_PREFIX}-storage` |
+| Webapp | `26632` | HTTP, on the same host only | none |
+
+The default `BONDERY_INFRA_TRAEFIK_PREFIX` is `bondery`, so the names are `bondery-api` and `bondery-storage`.
+
+## Dokploy's Traefik
+
+You do not configure anything. On each `docker compose up`, the `traefik-transport` service writes `${BONDERY_INFRA_TRAEFIK_PREFIX}-api-transport.yml` and `-storage-transport.yml` into `/etc/dokploy/traefik/dynamic`. Each holds a Traefik `serversTransport` with the CA inline, and the Compose labels point Traefik at it. You see both files under **Traefik File System** in Dokploy. See [Internal API TLS](./configuration.mdx#internal-api-tls).
+
+## Another Traefik (Coolify, your own)
+
+Set `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR` in `.env` to the host folder that your Traefik's file provider watches, for example `/data/coolify/proxy/dynamic` on Coolify. The `traefik-transport` service then writes the two files there.
+
+- The folder must exist; the service fails rather than create it.
+- Traefik must watch the folder itself. It reads subfolders, but only notices new files in the top folder.
+- The Compose labels use Dokploy's entry point `websecure` and certificate resolver `letsencrypt`. If your Traefik names them differently, change those labels in `docker-compose.override.yml`.
+
+## Caddy or nginx on the same host
+
+Run the stack without Traefik and let your proxy reach it on `127.0.0.1`:
+
+1. Copy the override example. It turns off `traefik-transport` and binds every stack port to `127.0.0.1`:
+
+   ```bash
+   cp docker-compose.override.yml.example docker-compose.override.yml
+   docker compose up -d
+   ```
+
+2. Export the two CAs for your proxy. Do it again only if you replace a CA:
+
+   ```bash
+   sh scripts/api-ca.sh > /etc/caddy/bondery-api-ca.crt
+   sh scripts/storage-ca.sh > /etc/caddy/bondery-storage-ca.crt
+   ```
+
+3. Use the ready-made configuration and set your domains:
+   - Caddy: [`deploy/bondery/proxy/Caddyfile`](../../deploy/bondery/proxy/Caddyfile). It reads the domains from the same variables as `.env`, and gets the public certificates itself.
+   - nginx: [`deploy/bondery/proxy/nginx.conf`](../../deploy/bondery/proxy/nginx.conf). Replace the `example.com` names, and get certificates with certbot.
+
+Both configurations:
+
+- verify the API and the storage gateway against their CAs, by the names in the table above, and require TLS 1.3;
+- pass WebSocket upgrades to the API (sync);
+- serve the storage domain for reads only (`GET`, `HEAD`, `OPTIONS`) and drop the `Cookie` and `Authorization` headers there, because public images never need them;
+- allow uploads up to 100 MB on the API, the largest import Bondery accepts.
+
+## Rules for any other proxy
+
+If you use something else (HAProxy, a Cloudflare Tunnel, a load balancer), keep the same rules:
+
+- Connect to `26642` and `8443` over HTTPS, trust only the exported CA, and verify the name from the table. Never turn verification off.
+- Pass WebSocket upgrades to the API.
+- Set `X-Forwarded-For` to the address of the visitor only. Never pass on an `X-Forwarded-For` that the visitor sent: the API rate-limits sign-in by that address. Traefik and Caddy do this by default; in nginx, use `$remote_addr`, not `$proxy_add_x_forwarded_for`.
+- Limit the storage domain to reads, and do not forward cookies or credentials to it.
+- Keep the stack ports on `127.0.0.1`, or on a private network that only the proxy can reach.

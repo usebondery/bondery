@@ -9,6 +9,8 @@ export function isValidUuid(value: string | null | undefined): value is string {
   return typeof value === "string" && uuidValidate(value);
 }
 
+const UUID_V7_VERSION = 7;
+
 export function isUuidV7(value: string): boolean {
-  return isValidUuid(value) && uuidVersion(value) === 7;
+  return isValidUuid(value) && uuidVersion(value) === UUID_V7_VERSION;
 }

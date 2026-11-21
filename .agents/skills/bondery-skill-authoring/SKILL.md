@@ -32,14 +32,14 @@ metadata:
 
 ## Skill types
 
-| Type | Location | Naming | Lock file |
-|------|----------|--------|-----------|
-| Bondery first-party | `.agents/skills/bondery-{domain}/` | `bondery-api`, `bondery-ux`, etc. | No |
-| Upstream CLI | `.agents/skills/{upstream-name}/` | Keep upstream name (e.g. `supabase-postgres-best-practices`) | Yes — `skills-lock.json` |
+| Type                | Location                           | Naming                                                       | Lock file                |
+| ------------------- | ---------------------------------- | ------------------------------------------------------------ | ------------------------ |
+| Bondery first-party | `.agents/skills/bondery-{domain}/` | `bondery-api`, `bondery-ux`, etc.                            | No                       |
+| Upstream CLI        | `.agents/skills/{upstream-name}/`  | Keep upstream name (e.g. `supabase-postgres-best-practices`) | Yes — `skills-lock.json` |
 
 ## Structure template
 
-```
+```text
 .agents/skills/bondery-example/
 ├── SKILL.md              # Hub: when to use, non-negotiables, decision tree, checklist
 ├── references/           # Progressive disclosure (one hop from SKILL.md)
@@ -66,12 +66,12 @@ Canonical example: `bondery-api` — decision tree + merge checklist at end of S
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| agentskills.io field rules | [references/specification.md](references/specification.md) |
-| Context budget, gotchas, defaults | [references/best-practices.md](references/best-practices.md) |
-| Test and iterate on a skill | [references/evaluating-skills.md](references/evaluating-skills.md) |
-| Bundle scripts in a skill | [references/scripts.md](references/scripts.md) |
+| Task                                 | Read                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| agentskills.io field rules           | [references/specification.md](references/specification.md)             |
+| Context budget, gotchas, defaults    | [references/best-practices.md](references/best-practices.md)           |
+| Test and iterate on a skill          | [references/evaluating-skills.md](references/evaluating-skills.md)     |
+| Bundle scripts in a skill            | [references/scripts.md](references/scripts.md)                         |
 | Bondery naming and checklist pattern | [references/bondery-conventions.md](references/bondery-conventions.md) |
 
 Full index: [references/README.md](references/README.md).

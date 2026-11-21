@@ -230,11 +230,13 @@
     "deleting": "Törlés...",
     "duplicating": "Másolás...",
     "errorTitle": "Hiba",
+    "mobileRuntimeError": "A mobilalkalmazás futásidejű hibája",
     "noResults": "Nincs találat",
     "removing": "Eltávolítás...",
     "savedTitle": "Mentve",
     "saving": "Mentés...",
     "sending": "Küldés...",
-    "successTitle": "Siker"
+    "successTitle": "Siker",
+    "unknownError": "Ismeretlen hiba"
   }
 }

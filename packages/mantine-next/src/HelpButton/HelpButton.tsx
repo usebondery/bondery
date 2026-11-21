@@ -3,7 +3,7 @@
 import { type DocId, docHref } from "@bondery/helpers";
 import { Tooltip, type TooltipProps } from "@mantine/core";
 import { IconHelpCircle } from "@tabler/icons-react";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import { ActionIconButton } from "#ActionIconButton/ActionIconButton.js";
 import { ActionIconLink, type ActionIconLinkProps } from "#nextjs/ActionIconLink/ActionIconLink.js";
 import { hrefAssert } from "#nextjs/NextLink.js";
@@ -44,7 +44,7 @@ export function HelpButton({
   radius = "xl",
   size = "sm",
   ...actionIconProps
-}: HelpButtonProps) {
+}: HelpButtonProps): ReactElement {
   const resolvedAriaLabel = ariaLabel ?? label;
   const resolvedIcon = icon ?? <IconHelpCircle />;
   const resolvedHref = doc ? docHref(doc) : href;

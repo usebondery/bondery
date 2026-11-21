@@ -115,7 +115,7 @@ type UserIdentityRow = {
 };
 
 function _normalizeReminderSendHour(value: string): string {
-  const [hourPart, minutePart, secondPart] = value.trim().split(":");
+  const [hourPart = "", minutePart = "", secondPart] = value.trim().split(":");
   const normalizedHour = hourPart.padStart(2, "0");
   const normalizedMinute = minutePart.padStart(2, "0");
   const normalizedSecond = (secondPart || "00").padStart(2, "0");

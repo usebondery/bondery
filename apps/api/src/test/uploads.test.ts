@@ -87,7 +87,7 @@ describe("multipart upload caps", { concurrency: false }, () => {
   it("returns null when the request has no file part", async () => {
     const form = new FormData();
     form.append("note", "no file here");
-    const response = await fetch(`${address}/small`, { body: form, method: "POST" });
+    const response = await fetch(`${app.listeningOrigin}/small`, { body: form, method: "POST" });
     assert.equal(response.status, 200);
     assert.deepEqual(await response.json(), { bytes: null });
   });

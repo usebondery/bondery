@@ -3,9 +3,10 @@ import {
   GetObjectCommand,
   ListObjectsV2Command,
   PutObjectCommand,
-  S3Client,
+  type S3Client,
 } from "@aws-sdk/client-s3";
 import type { StorageAdapter, StoragePutOptions } from "./adapter.js";
+import { createS3Client, type S3ConnectionConfig } from "./s3-client.js";
 
 function isStorageObjectMissingError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
@@ -34,28 +35,17 @@ async function streamToBuffer(body: unknown): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
-export type S3StorageConfig = {
-  accessKeyId: string;
-  endpoint: string;
-  forcePathStyle?: boolean;
+export type S3StorageConfig = S3ConnectionConfig & {
   publicBaseUrl: string;
-  region: string;
-  secretAccessKey: string;
 };
 
 export class S3Storage implements StorageAdapter {
   private readonly client: S3Client;
+  private readonly config: S3StorageConfig;
 
-  constructor(private readonly config: S3StorageConfig) {
-    this.client = new S3Client({
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
-      endpoint: config.endpoint,
-      forcePathStyle: config.forcePathStyle ?? true,
-      region: config.region,
-    });
+  constructor(config: S3StorageConfig) {
+    this.config = config;
+    this.client = createS3Client(config);
   }
 
   async put(bucket: string, key: string, data: Buffer, opts?: StoragePutOptions): Promise<void> {

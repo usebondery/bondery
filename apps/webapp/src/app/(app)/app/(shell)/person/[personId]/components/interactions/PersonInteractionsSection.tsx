@@ -42,7 +42,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   const tCommon = useCommonTranslations();
   const deleteInteractionMutation = useDeleteInteractionMutation(personId);
   const createInteractionMutation = useCreateInteractionMutation(personId);
-  const addInteractionTriggeredRef = useRef(false);
+  const addInteractionTriggeredRef = useRef<boolean>(false);
   const {
     data: interactionsData,
     fetchNextPage,
@@ -108,7 +108,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   };
 
   const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants || []).flatMap((participant) => {
+    return (activity.participants ?? []).flatMap((participant) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
       if (knownContact) {
@@ -167,7 +167,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
   };
 
   const handleDuplicate = async (activity: Activity) => {
-    const participantIds = (activity.participants || [])
+    const participantIds = (activity.participants ?? [])
       .map((participant) => (typeof participant === "string" ? participant : participant.id))
       .filter((id): id is string => Boolean(id));
 
@@ -181,9 +181,9 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     try {
       await createInteractionMutation.mutateAsync({
         date: activity.date,
-        description: activity.description || "",
+        description: activity.description ?? "",
         participantIds,
-        title: activity.title || "",
+        title: activity.title ?? "",
         type: activity.type,
       });
 

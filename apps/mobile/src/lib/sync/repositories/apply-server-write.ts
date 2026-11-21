@@ -6,6 +6,7 @@ import { PEOPLE_UPSERT_SQL } from "../materializer/people";
 
 export function upsertContactFromServer(contact: Contact): void {
   const db = getSyncDatabase();
+  // biome-ignore lint/suspicious/noUnnecessaryConditions: server rows arrive as unvalidated JSON, so a missing updatedAt must still get a timestamp
   const ts = contact.updatedAt ?? new Date().toISOString();
 
   db.runSync(

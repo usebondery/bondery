@@ -84,8 +84,8 @@ export async function stripeWebhookRoutes(fastify: FastifyInstance): Promise<voi
       let event: Stripe.Event;
       try {
         event = stripe.webhooks.constructEvent(rawBody, signature, secret);
-      } catch (err) {
-        request.log.warn({ err }, "stripe-webhook: invalid signature");
+      } catch (error) {
+        request.log.warn({ err: error }, "stripe-webhook: invalid signature");
         throw badRequest("Invalid webhook signature", "bad_request");
       }
 
@@ -135,11 +135,11 @@ export async function stripeWebhookRoutes(fastify: FastifyInstance): Promise<voi
         }
 
         await recordStripeWebhookEvent(event.id, event.type);
-      } catch (err) {
+      } catch (error) {
         // Handlers acknowledge events that can never be processed, so what reaches here is
         // unknown or transient. Answer 500 so Stripe retries, and keep the cause: the
         // error handler logs it and reports it.
-        throw internal("failed_to_process_webhook", err);
+        throw internal("failed_to_process_webhook", error);
       }
 
       return reply.status(200).send({ received: true });

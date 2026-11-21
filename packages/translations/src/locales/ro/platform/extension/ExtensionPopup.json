@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Deschide Bondery"
+    "OpenBondery": "Deschide Bondery",
+    "UnsupportedSiteMessage": "Vizitează profilul cuiva pe Instagram sau LinkedIn pentru a vedea mai multe acțiuni și funcții ale extensiei."
   },
   "LoggedOut": {
     "Description": "Conectează contul ca să salvezi contacte din rețelele sociale.",
@@ -20,6 +21,12 @@
     "Title": "Actualizare necesară"
   },
   "Welcome": {
-    "ConnectButton": "Conectează contul Bondery"
+    "ConnectButton": "Conectează contul Bondery",
+    "Description": "Conectează-ți contul Bondery pentru a salva contacte direct din profilurile de pe rețelele sociale.",
+    "SignInHint": "Ți se va cere să te conectezi la contul tău Bondery și să autorizezi extensia.",
+    "SuccessClose": "Acum poți închide această filă.",
+    "SuccessDescription": "Contul tău Bondery este acum conectat. Vizitează orice profil de Instagram sau LinkedIn pentru a începe să salvezi contacte.",
+    "SuccessTitle": "Totul este gata!",
+    "Title": "Bun venit la Bondery"
   }
 }

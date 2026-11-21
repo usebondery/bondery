@@ -4,6 +4,56 @@
   &:where([data-mantine-color-scheme="dark"], [data-mantine-color-scheme="dark"] *)
 );
 
+/*
+ * Named landing utilities. Values map to Mantine CSS variables so light/dark
+ * follow the theme. Put look-and-feel on native hosts, not Mantine components.
+ */
+@theme {
+  --color-canvas: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8));
+  --color-canvas-strong: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-9));
+  --color-date: var(--mantine-color-pink-filled);
+  --color-date-soft: var(--mantine-color-pink-light);
+  --color-demo-text: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-1));
+  --color-heading: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+  --color-line: var(--mantine-color-default-border);
+  --color-note: var(--mantine-color-violet-filled);
+  --color-note-soft: var(--mantine-color-violet-light);
+  --color-phone: var(--mantine-color-blue-filled);
+  --color-phone-soft: var(--mantine-color-blue-light);
+  --color-subtle-line: light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-4));
+  --color-surface: var(--mantine-color-default);
+  --color-surface-demo: light-dark(var(--mantine-color-white), var(--mantine-color-dark-8));
+
+  --height-lock-flat: 290px;
+  --height-lock-shadow: 7%;
+  --height-sources: 252px;
+
+  --inset-lock-scene: 12%;
+  --inset-lock-shadow: 88%;
+
+  --max-width-chat: 85%;
+  --max-width-pricing: 880px;
+  --max-width-sources-phone: 300px;
+
+  --min-height-assistant: 17rem;
+  --min-height-assistant-sm: 12rem;
+
+  --scale-lock-fallback: 0.8;
+
+  --shadow-hero: 0 20px 50px -12px rgb(0 0 0 / 0.45);
+  --shadow-hero-lg: 0 32px 64px -16px rgb(0 0 0 / 0.55);
+
+  --size-globe: 260px;
+  --size-globe-sm: 280px;
+  --size-lock: 240px;
+  --size-lock-md: 300px;
+
+  --spacing-header-sticky-bottom: var(--site-header-sticky-bottom);
+
+  --width-lock-shadow: 55%;
+  --width-sources-rail: 164px;
+}
+
 :root {
   /* Site header height. Measured from the rendered header: the mobile header drops the
      desktop nav row, so it is shorter. */

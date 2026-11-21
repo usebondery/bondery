@@ -6,11 +6,11 @@ This is the **behavior layer**: parsing, formatting, geocoding helpers, route co
 
 ## When to import from where
 
-| Need | Import from |
-|------|-------------|
-| Entity type or API validation schema | `@bondery/schemas` |
-| Format, parse, or transform utility | `@bondery/helpers` or a subpath |
-| Form submit (validate + normalize in one step) | `@bondery/helpers/forms` |
+| Need                                           | Import from                     |
+| ---------------------------------------------- | ------------------------------- |
+| Entity type or API validation schema           | `@bondery/schemas`              |
+| Format, parse, or transform utility            | `@bondery/helpers` or a subpath |
+| Form submit (validate + normalize in one step) | `@bondery/helpers/forms`        |
 
 ## Form pipelines (`@bondery/helpers/forms`)
 

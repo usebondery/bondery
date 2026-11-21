@@ -94,7 +94,9 @@
     "UpdateFailed": "Grupi uuendamine ei õnnestunud"
   },
   "EmojiEmptySearch": "Emoji-sid ei leitud",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Otsi emojisid…",
+  "EmojiSelectPlaceholder": "Vali emoji",
   "Empty": "Gruppe pole veel. Loo üks, et hakata kontakte korraldama.",
   "FallbackTitle": "Grupp",
   "HeaderDescription": "Gruppe saad kasutada inimeste korraldamiseks kiiremaks filtreerimiseks ja toiminguteks.",

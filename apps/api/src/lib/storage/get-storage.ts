@@ -15,7 +15,6 @@ function createStorageAdapter(): StorageAdapter {
   return new S3Storage({
     accessKeyId: requireEnv("BONDERY_PRIVATE_S3_ACCESS_KEY_ID"),
     endpoint: requireEnv("BONDERY_PRIVATE_S3_ENDPOINT"),
-    forcePathStyle: true,
     publicBaseUrl: requireEnv("BONDERY_PUBLIC_STORAGE_URL"),
     region: requireEnv("BONDERY_PRIVATE_S3_REGION"),
     secretAccessKey: requireEnv("BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY"),

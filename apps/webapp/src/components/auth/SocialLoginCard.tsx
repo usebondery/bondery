@@ -17,7 +17,7 @@ import { schemaResolver, useForm } from "@mantine/form";
 import { notifications } from "@mantine/notifications";
 import { IconMail, IconMailForward } from "@tabler/icons-react";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { isOAuthAuthorizationServerError } from "@/lib/auth/authorization-server-error";
 import type { WebappAuthClient } from "@/lib/auth/client";
 import { isLastUsedMagicLink } from "@/lib/auth/last-login-method";
@@ -33,6 +33,9 @@ export type { LoginBusyAction };
 
 const SESSION_POLL_MS = 4_000;
 const RESEND_SECONDS = 30;
+
+/** Browser capabilities never change while the page is open, so there is nothing to subscribe to. */
+const subscribeToNothing = () => () => undefined;
 
 export type LoginSurface = "oauth" | "webapp";
 
@@ -91,7 +94,13 @@ export function SocialLoginCard({
   const searchParams = useSearchParams();
   const queryError = searchParams.get("error");
   const authorizationWindowInvalid = isOAuthAuthorizationServerError(queryError);
-  const [passkeySupported, setPasskeySupported] = useState(true);
+  // The server cannot probe the browser, so it renders the passkey option. The client
+  // then reads the real capability without an extra effect and state update.
+  const passkeySupported = useSyncExternalStore(
+    subscribeToNothing,
+    isWebAuthnSupported,
+    () => true,
+  );
   const [emailPanelOpen, setEmailPanelOpen] = useState(false);
   const [awaitingVerify, setAwaitingVerify] = useState(false);
   const [resendSeconds, setResendSeconds] = useState(0);
@@ -113,10 +122,6 @@ export function SocialLoginCard({
   const showProviders = !emailPanelOpen;
   const showOAuth = allowedOAuthProviders === undefined || allowedOAuthProviders.length > 0;
   const magicLinkIsLastUsed = isLastUsedMagicLink(lastUsedLoginMethod);
-
-  useEffect(() => {
-    setPasskeySupported(isWebAuthnSupported());
-  }, []);
 
   useEffect(() => {
     if (!queryError || shownQueryErrorRef.current === queryError) {

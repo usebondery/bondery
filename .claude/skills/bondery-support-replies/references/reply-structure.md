@@ -2,7 +2,7 @@
 
 Every draft uses this skeleton. Compress on short public reviews; do not drop name, answer, feedback invite, or sign-off.
 
-```
+```text
 Hi {Name},
 
 {straight answer / what we will do}
@@ -26,7 +26,7 @@ Default sign-off is **Sveetya**. Use another name only when the operator says so
 ## Body
 
 1. **Do not recap.** They already described the problem. Copying it back ("when you add an interaction, the filter didn't…") helps no one. Understand it privately, then answer.
-2. **Answer.** What is true, what we will do, what we will not do. Look up product/code if needed (see below). Specificity in the *fix* proves you read them.
+2. **Answer.** What is true, what we will do, what we will not do. Look up product/code if needed (see below). Specificity in the _fix_ proves you read them.
 3. **Next step.** A fix, a workaround you verified, a timeline you actually know, or "I'll dig in and reply when I know more".
 4. **Premium** only when [premium-offer.md](./premium-offer.md) says so.
 5. **Feedback invite.** Every reply. Negative is welcome. Example: "Any other feedback, especially the frustrating kind, is welcome. It helps us make Bondery more delightful and useful for you."
@@ -42,12 +42,12 @@ Do not apologize five times. One honest "sorry this happened" is enough when we 
 
 ## Channel notes
 
-| Channel | Shape |
-|---------|--------|
-| **GitHub** | Markdown ok. Link issues/PRs. Public-safe: no other users' PII, no secrets, no Plane IDs. |
-| **Email** | Same skeleton. Use a real `mailto:team@usebondery.com` link when the channel supports links. |
-| **Short public reviews** | Compress. Keep name + core answer + sign-off if the platform allows. |
-| **Social DMs** | Same as email, shorter. Still name + sign-off. |
+| Channel                  | Shape                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| **GitHub**               | Markdown ok. Link issues/PRs. Public-safe: no other users' PII, no secrets, no Plane IDs.    |
+| **Email**                | Same skeleton. Use a real `mailto:team@usebondery.com` link when the channel supports links. |
+| **Short public reviews** | Compress. Keep name + core answer + sign-off if the platform allows.                         |
+| **Social DMs**           | Same as email, shorter. Still name + sign-off.                                               |
 
 Support address: `team@usebondery.com` (`SUPPORT_EMAIL` in `packages/helpers`). Do not invent another inbox.
 

@@ -1,5 +1,5 @@
 import { Avatar, Group, Stack, Text } from "@mantine/core";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 export interface UserCardProps {
   avatarUrl?: string | null;
@@ -11,7 +11,7 @@ export interface UserCardProps {
 /**
  * Compact user identity card with avatar and primary/secondary text.
  */
-export function UserCard({ name, subtitle, avatarUrl, rightSection }: UserCardProps) {
+export function UserCard({ name, subtitle, avatarUrl, rightSection }: UserCardProps): ReactElement {
   return (
     <Group align="center" justify="space-between" wrap="nowrap">
       <Group align="center" gap="md" wrap="nowrap">

@@ -6,13 +6,14 @@ import { forbidden } from "../platform/errors/http-errors.js";
 
 export const STEP_UP_TTL_SECONDS = 10 * 60;
 const STEP_UP_REDIS_PREFIX = "bondery:step-up:" as const;
+const STEP_UP_TOKEN_BYTES = 32;
 
 function stepUpKey(userId: string): string {
   return `${STEP_UP_REDIS_PREFIX}${userId}`;
 }
 
 export async function mintStepUpToken(userId: string): Promise<string> {
-  const token = randomBytes(32).toString("base64url");
+  const token = randomBytes(STEP_UP_TOKEN_BYTES).toString("base64url");
   const redis = requireRedisCommands();
   await redis.set(stepUpKey(userId), token, "EX", STEP_UP_TTL_SECONDS);
   return token;

@@ -8,7 +8,7 @@ Cycles are the weekly commitment container (Mon–Sun). State = execution progre
 
 ## Set up new cycle
 
-Triggered when user says *"set up a new cycle"* or at the start of each week:
+Triggered when user says _"set up a new cycle"_ or at the start of each week:
 
 1. `list_cycles` on MAIN → find current cycle (`status: current`); `complete_cycle` if one exists.
 2. Compute Mon 00:00 – Sun 23:59 (project timezone UTC, or user TZ if specified).
@@ -20,7 +20,7 @@ Triggered when user says *"set up a new cycle"* or at the start of each week:
 
 ### MCP sequence (example)
 
-```
+```text
 list_cycles(project_id=MAIN)
 complete_cycle(...)           # if current exists
 create_cycle(name="Week of 2026-08-04", start_date=..., end_date=..., owned_by=...)
@@ -32,12 +32,12 @@ transfer_cycle_work_items(...) # rollover Building/Blocked from prior cycle
 
 ## Rollover rules
 
-| Prior state | Action |
-|-------------|--------|
-| Building | Carry to new cycle, keep Building |
-| Blocked | Carry to new cycle, keep Blocked |
-| Bet (unfinished) | Founder decides: roll or demote to Icebox |
-| Release queue / Released | Do not add to new cycle |
+| Prior state              | Action                                    |
+| ------------------------ | ----------------------------------------- |
+| Building                 | Carry to new cycle, keep Building         |
+| Blocked                  | Carry to new cycle, keep Blocked          |
+| Bet (unfinished)         | Founder decides: roll or demote to Icebox |
+| Release queue / Released | Do not add to new cycle                   |
 
 ## Cycle checklist
 

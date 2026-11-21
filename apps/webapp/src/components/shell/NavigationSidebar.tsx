@@ -5,6 +5,7 @@ import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { AnchorLink, Kbd, parseShortcutKeys } from "@bondery/mantine-next";
 import { Avatar, Box, Group, SegmentedControl, Stack, Text, Tooltip } from "@mantine/core";
 import { useHover } from "@mantine/hooks";
+import { spotlight } from "@mantine/spotlight";
 import {
   type Icon,
   IconArrowMerge,
@@ -34,7 +35,6 @@ import {
 } from "@/lib/navigation/appNavLinks";
 import { routeAssert } from "@/lib/navigation/route/assert";
 import { HOTKEYS } from "@/lib/platform/config";
-import { spotlight } from "./CommandPalette";
 import {
   NAV_LINK_ITEM_BORDER_RADIUS,
   NavLinkItem,
@@ -127,11 +127,15 @@ export function NavigationSidebarContent({
     rememberBrowsePath(pathname);
   }, [pathname]);
 
-  useEffect(() => {
+  // The pending flag ends when navigation reaches the chat route. Adjusting it while
+  // rendering avoids an extra render pass after an effect.
+  const [previousPathname, setPreviousPathname] = useState(pathname);
+  if (pathname !== previousPathname) {
+    setPreviousPathname(pathname);
     if (isChatRoute(pathname)) {
       setChatModePending(false);
     }
-  }, [pathname]);
+  }
 
   function handleModeChange(value: string) {
     if (value === SIDEBAR_MODE_CHAT) {

@@ -292,7 +292,9 @@ export function ContactAddressEntryCard({
                       <Menu.Item
                         leftSection={
                           detectingTimezoneId === entry.id ? (
-                            <IconLoader2 className="animate-spin" size={14} />
+                            <span className="animate-spin">
+                              <IconLoader2 size={14} />
+                            </span>
                           ) : (
                             <IconClock size={14} />
                           )

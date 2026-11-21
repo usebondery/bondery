@@ -1,7 +1,6 @@
+<h1 align="center">Bondery</h1>
 
 ![github.png](/packages/branding/src/platforms/github_social_preview.png)
-
-<h1 align="center">Bondery</h1>
 
 <p align="center">
   The open-source personal CRM for building better bonds

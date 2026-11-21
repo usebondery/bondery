@@ -74,6 +74,8 @@ export async function getLLMText(page: Page) {
     sourceBaseUrl: DOCS_GITHUB_BLOB_BASE,
   });
 
+  const openApiSection = openApi ? `\n\n${openApi}` : "";
+
   return `# ${page.data.title}
 
 URL: ${pageUrl}
@@ -81,7 +83,7 @@ Source: ${sourceUrl}
 
 ${page.data.description ?? ""}
 
-${markdown}${openApi ? `\n\n${openApi}` : ""}`;
+${markdown}${openApiSection}`;
 }
 
 export function getDocsGithubUrl(page: Page): string {

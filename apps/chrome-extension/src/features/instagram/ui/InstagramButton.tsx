@@ -26,10 +26,10 @@ interface InstagramProfileSnapshot {
   profileImageUrl?: string;
 }
 
-const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot }) => {
+function InstagramButton({ username, getSnapshot }: InstagramButtonProps) {
   const t = useExtensionSocialButtonsTranslations("Instagram");
   const [isLoading, setIsLoading] = useState(false);
-  const requestInFlightRef = useRef(false);
+  const requestInFlightRef = useRef<boolean>(false);
 
   const extractProfileName = (): {
     firstName: string;
@@ -81,18 +81,7 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
 
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  const handleClick = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (requestInFlightRef.current) {
-      return;
-    }
-
-    requestInFlightRef.current = true;
-    setIsLoading(true);
-    setStatusMessage(null);
-
+  async function submitAddPerson(): Promise<void> {
     try {
       const snapshot = getSnapshot?.();
       const profileName = snapshot
@@ -129,12 +118,11 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
 
       if (result.payload.success) {
         return;
+      }
+      if (result.payload.requiresAuth) {
+        setStatusMessage(t("SignInRequired"));
       } else {
-        if (result.payload.requiresAuth) {
-          setStatusMessage(t("SignInRequired"));
-        } else {
-          setStatusMessage(result.payload.error ?? t("SomethingWrong"));
-        }
+        setStatusMessage(result.payload.error ?? t("SomethingWrong"));
       }
     } catch (error) {
       extLog.error("Error opening in Bondery:", error);
@@ -143,6 +131,20 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
       setIsLoading(false);
       requestInFlightRef.current = false;
     }
+  }
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (requestInFlightRef.current) {
+      return;
+    }
+
+    requestInFlightRef.current = true;
+    setIsLoading(true);
+    setStatusMessage(null);
+    void submitAddPerson();
   };
 
   return (
@@ -162,6 +164,6 @@ const InstagramButton: React.FC<InstagramButtonProps> = ({ username, getSnapshot
       )}
     </>
   );
-};
+}
 
 export default InstagramButton;

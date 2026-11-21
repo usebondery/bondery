@@ -32,9 +32,9 @@ Too narrow forces multiple skills per task. Too broad makes activation imprecise
 
 ## Calibrate control
 
-| Fragility | Style |
-|-----------|-------|
-| Flexible (code review lens) | Principles + why |
+| Fragility                            | Style                    |
+| ------------------------------------ | ------------------------ |
+| Flexible (code review lens)          | Principles + why         |
 | Fragile (migration order, auth flow) | Exact steps and commands |
 
 **Defaults, not menus:** pick one approach; mention alternatives briefly.

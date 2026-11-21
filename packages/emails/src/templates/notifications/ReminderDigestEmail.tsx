@@ -1,5 +1,6 @@
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
 import { IMPORTANT_DATE_TYPE_META, WEBAPP_ROUTES } from "@bondery/helpers";
+import type { JSX } from "react";
 import { Column, Img, Link, Row, Section, Text } from "react-email";
 import { defaultReminderDigestCopy, previewReminderDigestItems } from "#fixtures/default-copy.js";
 import { clipEmailPreview, DEFAULT_APP_URL, type EmailDocumentProps } from "#shared/chrome.js";
@@ -66,7 +67,7 @@ export default function ReminderDigestEmail({
   targetDate: _targetDate = "2026-01-01",
   title,
   websiteUrl,
-}: ReminderDigestEmailProps) {
+}: ReminderDigestEmailProps): JSX.Element {
   const count = reminders.length;
   const first = reminders[0];
   const heading =

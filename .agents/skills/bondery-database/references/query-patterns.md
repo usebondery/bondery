@@ -121,7 +121,7 @@ Bondery public API contract is **offset pagination only** (`limit`, `offset`) an
 Prisma implementation:
 
 ```typescript
-findMany({ skip: offset, take: limit, orderBy, where })
+findMany({ skip: offset, take: limit, orderBy, where });
 ```
 
 Do not introduce cursor parameters into API endpoints. For internal high-volume maintenance jobs, keyset iteration may be used without changing the public contract; document it as an internal implementation detail.

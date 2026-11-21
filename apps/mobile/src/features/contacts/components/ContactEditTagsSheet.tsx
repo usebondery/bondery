@@ -32,7 +32,7 @@ function filterTags(tags: TagWithCount[], query: string): TagWithCount[] {
     return tags;
   }
 
-  return tags.filter((tag) => (tag.label ?? "").toLowerCase().includes(normalizedQuery));
+  return tags.filter((tag) => tag.label.toLowerCase().includes(normalizedQuery));
 }
 
 function setsEqual(left: Set<string>, right: Set<string>): boolean {

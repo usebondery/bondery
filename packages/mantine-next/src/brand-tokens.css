@@ -1,12 +1,12 @@
 :root {
-  --bondery-primary-filled: #a34bcb;
+  --bondery-primary-filled: rgb(163, 75, 203);
   --bondery-selection-background: var(--bondery-primary-filled);
-  --bondery-selection-foreground: #ffffff;
+  --bondery-selection-foreground: rgb(255, 255, 255);
   /* Mantine apps resolve selection via this variable when MantineProvider is mounted. */
   --mantine-primary-color-filled: var(--bondery-primary-filled);
 }
 
 ::selection {
-  background-color: var(--bondery-selection-background);
   color: var(--bondery-selection-foreground);
+  background-color: var(--bondery-selection-background);
 }

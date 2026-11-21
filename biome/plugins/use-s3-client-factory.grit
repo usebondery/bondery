@@ -1,0 +1,15 @@
+// Rejects `new S3Client(...)` in the API outside apps/api/src/lib/storage/s3-client.ts.
+//
+// createS3Client() is the one place that applies the object storage TLS settings: it trusts
+// the CA in BONDERY_PRIVATE_S3_TLS_CA_FILE (the private CA of the bundled SeaweedFS) and refuses
+// that file with a plaintext endpoint. A client built by hand trusts only the system CAs, so it
+// fails against the bundled stack, and the easy "fix" of turning verification off talks to
+// anyone. Type-only imports of S3Client stay allowed.
+
+language js
+
+`new S3Client($...)` as $call where {
+  $filename <: r"(?:.*\W)?apps\Wapi\W.*",
+  $filename <: not r"(?:.*\W)?apps\Wapi\Wsrc\Wlib\Wstorage\Ws3-client\.ts",
+  register_diagnostic(span=$call, message="Create S3 clients with createS3Client() from apps/api/src/lib/storage/s3-client.ts. It applies the object storage TLS settings (BONDERY_PRIVATE_S3_TLS_CA_FILE).", severity="error")
+}

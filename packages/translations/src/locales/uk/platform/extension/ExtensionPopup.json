@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Відкрити Bondery"
+    "OpenBondery": "Відкрити Bondery",
+    "UnsupportedSiteMessage": "Відкрийте чийсь профіль в Instagram або LinkedIn, щоб побачити більше дій і можливостей розширення."
   },
   "LoggedOut": {
     "Description": "Підключіть обліковий запис, щоб зберігати контакти із соцмереж.",
@@ -20,6 +21,12 @@
     "Title": "Требуется оновлення"
   },
   "Welcome": {
-    "ConnectButton": "Підключити обліковий запис Bondery"
+    "ConnectButton": "Підключити обліковий запис Bondery",
+    "Description": "Підключіть обліковий запис Bondery, щоб зберігати контакти просто з профілів у соцмережах.",
+    "SignInHint": "Вам запропонують увійти до облікового запису Bondery й надати розширенню дозвіл.",
+    "SuccessClose": "Тепер цю вкладку можна закрити.",
+    "SuccessDescription": "Ваш обліковий запис Bondery підключено. Відкрийте будь-який профіль в Instagram або LinkedIn, щоб почати зберігати контакти.",
+    "SuccessTitle": "Усе готово!",
+    "Title": "Вітаємо в Bondery"
   }
 }

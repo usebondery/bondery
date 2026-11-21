@@ -25,7 +25,9 @@ for (const locale of locales) {
   for (const code of API_ERROR_CODES) {
     const value = apiErrors[code];
     if (typeof value !== "string" || value.trim().length === 0) {
-      check.add(`${locale}: missing common.errors.api.${code}`);
+      check.add(
+        `${locale}: common.json has no common.errors.api.${code}. Add the code to packages/translations/src/locales/${locale}/common.json under errors.api.`,
+      );
     }
   }
 }

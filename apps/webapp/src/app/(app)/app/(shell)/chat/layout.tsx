@@ -34,9 +34,13 @@ export default async function ChatLayout({ children }: { children: React.ReactNo
     );
 
     if (subscriptionStatus?.plan !== "premium") {
-      serverApiFetch(API_ROUTES.SUBSCRIPTIONS_SYNC, { method: "POST" }).catch(() => {});
+      serverApiFetch(API_ROUTES.SUBSCRIPTIONS_SYNC, { method: "POST" }).catch(() => {
+        // no-op: chat still renders if subscription sync fails
+      });
     }
-  } catch {}
+  } catch {
+    // no-op: chat still renders if prefetch fails
+  }
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

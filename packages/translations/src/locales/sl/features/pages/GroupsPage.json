@@ -102,7 +102,9 @@
     "UpdateFailed": "Skupine ni bilo mogoče posodobiti"
   },
   "EmojiEmptySearch": "Emoji ni mogoče najti",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Išči emoji …",
+  "EmojiSelectPlaceholder": "Izberi emoji",
   "Empty": "Še nimaš skupin. Ustvari eno in začni organizirati stike.",
   "FallbackTitle": "Skupina",
   "HeaderDescription": "Skupine organizirajo osebe za hitrejše filtriranje in dejanja.",

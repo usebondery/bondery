@@ -8,7 +8,11 @@
  * Every error body carries this field. Codes without a specific hint fall
  * back to the docs link, so the field is never empty.
  */
-import { type ApiErrorCode, getErrorDefinition } from "./api-error-codes.generated.js";
+import {
+  type ApiErrorCode,
+  getErrorDefinition,
+  isApiErrorCode,
+} from "./api-error-codes.generated.js";
 
 /**
  * HOW sentence per code. Prefer a named tool and a named argument, because
@@ -97,6 +101,5 @@ export function buildAgentMessage(code: string, message: string): string {
 }
 
 function isServerErrorCode(code: string): boolean {
-  const definition = getErrorDefinition(code as ApiErrorCode);
-  return definition !== undefined && definition.httpStatus >= 500;
+  return isApiErrorCode(code) && getErrorDefinition(code).httpStatus >= 500;
 }

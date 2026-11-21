@@ -27,7 +27,7 @@ function restoreSmtpEnv(snapshot: SmtpEnvSnapshot): void {
   for (const key of SMTP_ENV_KEYS) {
     const value = snapshot[key];
     if (value === undefined) {
-      delete process.env[key];
+      Reflect.deleteProperty(process.env, key);
     } else {
       process.env[key] = value;
     }
@@ -45,7 +45,7 @@ function setConfiguredSmtpEnv(): void {
 
 function clearSmtpEnv(): void {
   for (const key of SMTP_ENV_KEYS) {
-    delete process.env[key];
+    Reflect.deleteProperty(process.env, key);
   }
 }
 

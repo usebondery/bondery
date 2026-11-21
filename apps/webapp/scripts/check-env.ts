@@ -17,7 +17,8 @@ const fromManifest = getRequiredVarsForTarget("webapp", environment);
 for (const key of WEBAPP_RUNTIME_REQUIRED_ENV) {
   if (!fromManifest.includes(key)) {
     console.error(`WEBAPP_RUNTIME_REQUIRED_ENV key missing from manifest: ${key}`);
-    process.exit(1);
+    process.exitCode = 1;
+    throw new Error(`WEBAPP_RUNTIME_REQUIRED_ENV key missing from manifest: ${key}`);
   }
 }
 

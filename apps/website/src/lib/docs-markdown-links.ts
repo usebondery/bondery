@@ -90,8 +90,8 @@ function docsPath(
 /** Resolve one href against the source file that holds it. */
 export function rewriteDocsHref(href: string, options: RewriteOptions): string {
   const { filePath, hasPage, isPublicPage, siteOrigin, sourceBaseUrl } = options;
-  const resolvePath = (relativePath: string, suffix: string) =>
-    docsPath(relativePath, suffix, hasPage, isPublicPage, sourceBaseUrl);
+  const resolvePath = (relativePath: string, linkSuffix: string) =>
+    docsPath(relativePath, linkSuffix, hasPage, isPublicPage, sourceBaseUrl);
 
   if (href.length === 0 || SKIP_PREFIXES.some((prefix) => href.startsWith(prefix))) {
     return href;

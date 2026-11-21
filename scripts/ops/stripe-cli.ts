@@ -194,7 +194,7 @@ export function spawnStripeListen(): void {
 
   child.on("error", (error) => {
     process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    process.exit(1);
+    process.exitCode = 1;
   });
 
   child.on("exit", (code, signal) => {
@@ -202,6 +202,6 @@ export function spawnStripeListen(): void {
       process.kill(process.pid, signal);
       return;
     }
-    process.exit(code ?? 0);
+    process.exitCode = code ?? 0;
   });
 }

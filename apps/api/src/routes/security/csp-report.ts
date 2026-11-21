@@ -1,6 +1,7 @@
 import { API_ROUTES } from "@bondery/helpers";
 import { noContentResponse, standardErrorResponses } from "@bondery/schemas/http/responses";
 import type { FastifyZodOpenApiSchema } from "fastify-zod-openapi";
+import { BYTES_PER_KIB } from "../../lib/platform/config.js";
 import type { AppRoutePlugin } from "../../lib/platform/fastify-types.js";
 import { CSP_REPORT_TIER } from "../../lib/platform/rate-limit.js";
 import { compactCspReport } from "../../lib/platform/security/csp-report.js";
@@ -11,7 +12,8 @@ import { captureCspReport } from "../../services/analytics/csp-report.js";
  * 20 violations with long URLs still fits. 16 KiB is far below the 64 KiB
  * Fastify default, so an oversized body is rejected before it is parsed.
  */
-const CSP_REPORT_BODY_LIMIT = 16 * 1024;
+const CSP_REPORT_BODY_LIMIT_KIB = 16;
+const CSP_REPORT_BODY_LIMIT = CSP_REPORT_BODY_LIMIT_KIB * BYTES_PER_KIB;
 
 const CSP_REPORT_CONTENT_TYPES = ["application/csp-report", "application/reports+json"] as const;
 

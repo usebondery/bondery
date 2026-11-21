@@ -2,11 +2,10 @@ import { buildApiErrorFromResponse } from "@bondery/helpers/api";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SyncBootstrapResponse, SyncPullResponse, SyncTableKey } from "@bondery/schemas/sync";
 import { mobileFetch } from "../api/transport";
-import { getAccessToken } from "../auth/client";
+import { endLocalSession, readLocalAccessToken } from "../auth/local-session";
 import {
   AuthRequiredError,
   classifyTransportFailure,
-  endLocalSession,
   logLocalSessionMissing,
 } from "../auth/session";
 import { API_URL } from "../config";
@@ -136,7 +135,7 @@ export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean
     return Promise.resolve(false);
   }
 
-  if (pullInFlight) {
+  if (pullInFlight !== null) {
     pullPending = true;
     return pullInFlight;
   }
@@ -153,7 +152,7 @@ export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean
 }
 
 async function getSyncAccessToken(): Promise<string | null> {
-  return getAccessToken();
+  return readLocalAccessToken();
 }
 
 async function delay(ms: number, signal: AbortSignal): Promise<void> {
@@ -343,13 +342,18 @@ export function pullOnce(
   );
 }
 
+/** True while abort is clear, the session is current, and `pullMode` is `"long_poll"`. */
+function isLongPollLoopActive(signal: AbortSignal, generation: PullSessionGeneration): boolean {
+  return !signal.aborted && syncSessionGuard.isCurrent(generation) && pullMode === "long_poll";
+}
+
 async function pullLoop(
   controller: AbortController,
   generation: PullSessionGeneration,
 ): Promise<void> {
   const signal = controller.signal;
 
-  while (!signal.aborted && syncSessionGuard.isCurrent(generation) && pullMode === "long_poll") {
+  while (isLongPollLoopActive(signal, generation)) {
     try {
       await pullOnce(signal, "long_poll", generation);
     } catch (error) {
@@ -478,7 +482,7 @@ async function stopPullRuntime(): Promise<void> {
 
   await Promise.allSettled([
     trackedOperations,
-    ...(inFlight ? [inFlight] : []),
+    ...(inFlight !== null ? [inFlight] : []),
     ...(loop ? [loop] : []),
   ]);
 

@@ -22,15 +22,15 @@ OAuth client secrets provisioned at deploy only: `apps/api/scripts/provision-oau
 
 Registered in `apps/api/src/lib/platform/auth/strategies.ts`:
 
-| Strategy | Use |
-|----------|-----|
-| `verifySession` | Session or OAuth resource JWT |
-| `verifyAuth` | Session, OAuth JWT, or API key |
+| Strategy              | Use                                     |
+| --------------------- | --------------------------------------- |
+| `verifySession`       | Session or OAuth resource JWT           |
+| `verifyAuth`          | Session, OAuth JWT, or API key          |
 | `verifyServiceSecret` | `BONDERY_PRIVATE_SERVICE_SECRET` bearer |
 
 ### JWT vs opaque bearer (no fallback)
 
-```
+```text
 Bearer token shape?
 ├── JWT (3 dot-separated segments) → resolveOAuthBearerUser only
 │   └── failure → unauthorized (never calls getSession)
@@ -38,17 +38,19 @@ Bearer token shape?
 ```
 
 OAuth JWT verification checks:
+
 - JWKS signature (`jose`)
 - `iss` = `BONDERY_PUBLIC_API_URL`
 - `aud` = API resource identifier
 - `api:access` scope present
 - `client_id` in trusted set (`BONDERY_PUBLIC_OAUTH_CLIENT_ID`, `BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID`)
 
-Integration tests: `apps/api/src/test/auth-integration.test.ts`.
+Integration tests: `apps/api/src/test/auth-integration.test.ts` and `apps/api/src/test/auth-mcp-protocol-integration.test.ts`.
 
 ## API keys
 
 `@better-auth/api-key` plugin (`apps/api/src/lib/auth/index.ts`):
+
 - Prefix: `bondery_key_` (`defaultPrefix`)
 - Verification: `auth.api.verifyApiKey` in `verifyAuth` (`strategies.ts`)
 - Permissions stored as BA JSON (`api: ["read"]` or `api: ["full"]`); product UI/API only exposes `read` and `full`
@@ -59,18 +61,20 @@ API keys shown once at creation in UI — never stored in client localStorage.
 
 ## Webapp dual-session model
 
-| Cookie | Domain | Purpose |
-|--------|--------|---------|
-| Better Auth session | API (`BONDERY_PUBLIC_API_URL`) | Social sign-in, OAuth AS native session |
-| `bondery_webapp_session` | Webapp | Encrypted BFF credential for RSC/BFF |
-| `bondery_oauth_flow` | Webapp | PKCE verifier + state (10 min TTL) |
+| Cookie                   | Domain                         | Purpose                                 |
+| ------------------------ | ------------------------------ | --------------------------------------- |
+| Better Auth session      | API (`BONDERY_PUBLIC_API_URL`) | Social sign-in, OAuth AS native session |
+| `bondery_webapp_session` | Webapp                         | Encrypted BFF credential for RSC/BFF    |
+| `bondery_oauth_flow`     | Webapp                         | PKCE verifier + state (10 min TTL)      |
 
 **BFF session** (`apps/webapp/src/lib/auth/oauthClient.server.ts`):
+
 - JWE (`dir` + `A256GCM`), key = SHA-256(`BONDERY_PRIVATE_WEBAPP_SESSION_SECRET`)
 - `httpOnly`, `sameSite: lax`, `secure` when HTTPS
 - OAuth code+PKCE against API AS; includes `resource` on authorize, exchange, refresh
 
 **BFF proxy** (`apps/webapp/src/app/api/[[...path]]/route.ts`):
+
 - Requires decrypted webapp session
 - Forwards Bearer OAuth JWT to API — browser never holds API access token in JS for REST
 
@@ -81,6 +85,7 @@ API keys shown once at creation in UI — never stored in client localStorage.
 ## Mobile
 
 `apps/mobile/src/lib/auth/client.ts`:
+
 - `@better-auth/expo` — opaque bearer session token
 - Native: `expo-secure-store` (`WHEN_UNLOCKED_THIS_DEVICE_ONLY`)
 - Web (Expo): falls back to `localStorage` for PKCE verifier survival — flag when reviewing mobile-web flows
@@ -90,6 +95,7 @@ Deep link scheme: `bondery://` (trusted origin on API).
 ## Chrome extension
 
 `apps/chrome-extension/src/lib/auth/index.ts`:
+
 - OAuth tokens in `browser.storage.local` (persists across restarts)
 - PKCE + **state CSRF check** on callback (`features/background/oauth.ts`)
 - API calls: Bearer + `X-Bondery-Extension-Version` (`lib/api/transport.ts`)
@@ -100,15 +106,18 @@ Deep link scheme: `bondery://` (trusted origin on API).
 ## Extension version gate
 
 `apps/api/src/lib/extension/version-check.ts`:
+
 - Unauthenticated requests without Cookie, Bearer, or extension version → 401
 - Extension below `MIN_EXTENSION_VERSION` (generated 3-part previous production CalVer) → 426 `extension_outdated`. `GET /extension/manifest` also exposes `latestVersion` for a non-blocking nudge.
 - Skips `/auth/*`, `/webhooks/*`, `/health/*`, `/extension/manifest`
 
 ## Service secret (internal)
 
-`verifyServiceSecret` compares `BONDERY_PRIVATE_SERVICE_SECRET` with plain `===` (not timing-safe).
+`verifyServiceSecret` (`apps/api/src/lib/platform/auth/service-secret.ts`) accepts only `Authorization: Bearer <BONDERY_PRIVATE_SERVICE_SECRET>`. It compares the token with `constantTimeEqual()` (SHA-256 of both values, then `timingSafeEqual`), so the response time does not leak the secret or its length. An unset secret rejects every request. API keys are rejected.
 
-**Review trigger:** consider `timingSafeEqual` for defense-in-depth.
+No live route uses the `internalRoutes` shell today. Reminder digests run in-process through pg-boss.
+
+**Enforcement:** the Biome plugin `biome/plugins/no-unsafe-secret-compare.grit` rejects `==`/`===` on secret-named values (and on `const` aliases of them) in server code.
 
 ## Auth checklist
 

@@ -1,7 +1,8 @@
 import * as Network from "expo-network";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
-import { readLocalAccessToken, subscribeLocalSessionEnded } from "../auth/session";
+import { readLocalAccessToken } from "../auth/local-session";
+import { subscribeLocalSessionEnded } from "../auth/session";
 import { useAuth } from "../auth/useAuth";
 import {
   registerSyncBackgroundTask,
@@ -99,6 +100,16 @@ export function SyncProvider({ children }: SyncProviderProps) {
       void stopPullSync();
     };
 
+    function takeSyncSessionAction(token: string | null) {
+      return decideSyncSessionLifecycle({
+        hasLocalToken: token !== null,
+        isAuthenticated,
+        isSessionHydrating: false,
+        nextUserId: userId,
+        previousUserId: previousUserIdRef.current,
+      });
+    }
+
     void (async () => {
       if (isSessionHydrating) {
         return;
@@ -109,13 +120,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
         return;
       }
 
-      const action = decideSyncSessionLifecycle({
-        hasLocalToken: token !== null,
-        isAuthenticated,
-        isSessionHydrating: false,
-        nextUserId: userId,
-        previousUserId: previousUserIdRef.current,
-      });
+      const action = takeSyncSessionAction(token);
 
       if (action === "idle") {
         return;

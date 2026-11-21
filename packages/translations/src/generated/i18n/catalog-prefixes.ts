@@ -148,6 +148,18 @@ export type UnavailablePagePrefix = never;
 
 export type ValidationPrefix = "email" | "fields" | "fields.firstName" | "fields.generic" | "fields.headline" | "fields.label" | "fields.lastName" | "fields.location" | "fields.middleName" | "interaction";
 
+export type WebsiteBlogPrefix = "Categories" | "Descriptions" | "Tooltips";
+
+export type WebsiteDocsPrefix = "Api" | "Api.AuthTitle" | "Api.ParameterGroup" | "ApiErrors" | "ApiGroups" | "Changelog" | "Copy" | "ErrorGroups" | "Navigation" | "NotFound" | "Og" | "Repo" | "Search" | "Sidebar" | "Tabs";
+
+export type WebsiteLandingPrefix = "About" | "AiClients" | "Bento" | "Bento.Assistant" | "Bento.KeepInTouch" | "Bento.Network" | "Bento.Sources" | "Bento.Sync" | "Bento.Timeline" | "Contact" | "Cta" | "Faq" | "Faq.Items" | "Faq.Items.Free" | "Faq.Items.Private" | "Faq.Items.SelfHost" | "Faq.Items.WhatIs" | "Features" | "Footer" | "Footer.Groups" | "Footer.Links" | "Header" | "Header.Aria" | "Header.Nav" | "Hero" | "Logo" | "Meta" | "Pricing" | "Pricing.Free" | "Pricing.Free.Features" | "Pricing.Premium" | "Pricing.Premium.Features" | "PrivacyBand" | "PrivacyBand.Points" | "Team" | "Team.Members" | "Team.Members.Sveetya";
+
+export type WebsiteLandingVisualsPrefix = "Assistant" | "Assistant.Scenarios" | "Assistant.Scenarios.Alan" | "Assistant.Scenarios.Grace" | "Assistant.Scenarios.Investors" | "Assistant.Scenarios.Katherine" | "Assistant.Scenarios.LogCoffee" | "Assistant.Scenarios.Thailand" | "Assistant.Scenarios.UxDesign" | "Briefing" | "Briefing.Answers" | "Briefing.Questions" | "Encryption" | "People" | "People.Ada" | "People.Alan" | "People.Grace" | "People.Hedy" | "People.John" | "People.Katherine" | "People.Limor" | "People.Margaret" | "People.Marissa" | "People.Sheryl" | "People.Whitney" | "Reminders" | "Sources" | "Sync" | "Timeline" | "Timeline.Call" | "Timeline.Coffee" | "Timeline.Party";
+
+export type WebsiteLegalPrefix = "Documents" | "Documents.Privacy" | "Documents.Security" | "Documents.Terms";
+
+export type WebsiteNotFoundPrefix = never;
+
 export type WelcomeEmailPrefix = never;
 
 export interface NamespacePrefixes {
@@ -225,5 +237,11 @@ export interface NamespacePrefixes {
   "TrialEndingEmail": TrialEndingEmailPrefix;
   "UnavailablePage": UnavailablePagePrefix;
   "validation": ValidationPrefix;
+  "WebsiteBlog": WebsiteBlogPrefix;
+  "WebsiteDocs": WebsiteDocsPrefix;
+  "WebsiteLanding": WebsiteLandingPrefix;
+  "WebsiteLandingVisuals": WebsiteLandingVisualsPrefix;
+  "WebsiteLegal": WebsiteLegalPrefix;
+  "WebsiteNotFound": WebsiteNotFoundPrefix;
   "WelcomeEmail": WelcomeEmailPrefix;
 }

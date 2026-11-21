@@ -17,6 +17,7 @@ import {
 } from "../../features/instagram/intercept/networkInterceptor";
 import InstagramButton from "../../features/instagram/ui/InstagramButton";
 import { extLog } from "../../lib/log";
+import { firstNonEmpty, nonEmpty } from "../../lib/text";
 import { renderInShadowRoot } from "../../lib/ui";
 
 export default defineContentScript({
@@ -52,14 +53,14 @@ export default defineContentScript({
     }
 
     // Initial injection attempt
-    injectBonderyButton(ctx);
+    void injectBonderyButton(ctx);
 
     // Setup observer for SPA navigation
     const _observer = setupObserver(ctx);
 
     // Retry injection after delay
     ctx.setTimeout(() => {
-      injectBonderyButton(ctx);
+      void injectBonderyButton(ctx);
     }, 2000);
 
     // Listen for URL changes (SPA navigation)
@@ -68,7 +69,7 @@ export default defineContentScript({
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
         ctx.setTimeout(() => {
-          injectBonderyButton(ctx);
+          void injectBonderyButton(ctx);
         }, 1000);
       }
     }, 500);
@@ -132,14 +133,14 @@ function installInstagramNetworkResponseListener() {
     }
 
     lastInterceptedProfileMeta = {
-      addressStreet: payload.addressStreet || "",
-      category: payload.category || "",
-      cityName: payload.cityName || "",
-      description: payload.description || "",
-      displayName: payload.displayName || payload.username,
-      photoUrl: payload.photoUrl || "",
+      addressStreet: payload.addressStreet ?? "",
+      category: payload.category ?? "",
+      cityName: payload.cityName ?? "",
+      description: payload.description ?? "",
+      displayName: firstNonEmpty(payload.displayName) ?? payload.username,
+      photoUrl: payload.photoUrl ?? "",
       username: payload.username,
-      zip: payload.zip || "",
+      zip: payload.zip ?? "",
     };
 
     extLog.debug(
@@ -163,7 +164,8 @@ function getInstagramSnapshot() {
   const nameElement = document.querySelector(
     ".x1lliihq.x1plvlek.xryxfnj.x1n2onr6.xyejjpt.x15dsfln.x193iq5w.xeuugli.x1fj9vlw.x13faqbe.x1vvkbs.x1s928wv.xhkezso.x1gmr53x.x1cpjm7i.x1fgarty.x1943h6x.x1i0vuye.xvs91rp.xo1l8bm.x5n08af.x10wh9bi.xpm28yp.x8viiok.x1o7cslx",
   );
-  const displayName = interceptedMeta?.displayName || nameElement?.textContent?.trim() || username;
+  const displayName =
+    firstNonEmpty(interceptedMeta?.displayName, nameElement?.textContent?.trim()) ?? username;
   const parsedName = parseInstagramUsername({
     displayName,
     username,
@@ -177,13 +179,13 @@ function getInstagramSnapshot() {
     displayName,
     firstName: parsedName.firstName,
     handle: username,
-    headline: interceptedMeta?.category || undefined,
-    lastName: parsedName.lastName || undefined,
+    headline: nonEmpty(interceptedMeta?.category),
+    lastName: nonEmpty(parsedName.lastName),
     location: getAddressPlace(interceptedMeta),
-    middleName: parsedName.middleName || undefined,
-    notes: interceptedMeta?.description || undefined,
+    middleName: nonEmpty(parsedName.middleName),
+    notes: nonEmpty(interceptedMeta?.description),
     platform: "instagram" as const,
-    profileImageUrl: interceptedMeta?.photoUrl || img?.src || undefined,
+    profileImageUrl: firstNonEmpty(interceptedMeta?.photoUrl, img?.src),
   };
 }
 
@@ -235,15 +237,26 @@ async function injectBonderyButton(ctx: ContentScriptContext) {
   }
 
   isInjecting = true;
+  await mountInstagramButton(ctx, targetSection, username);
+}
+
+async function mountInstagramButton(
+  ctx: ContentScriptContext,
+  targetSection: Element,
+  username: string,
+): Promise<void> {
   try {
-    currentUi = await renderInShadowRoot(ctx, {
+    const ui = await renderInShadowRoot(ctx, {
       anchor: targetSection,
       append: "last",
       name: "bondery-instagram",
       position: "inline",
       render: () => <InstagramButton getSnapshot={getInstagramSnapshot} username={username} />,
     });
+    currentUi = ui;
     extLog.debug("Bondery Extension: Button injected successfully");
+  } catch (error) {
+    extLog.error("Bondery Extension: Button injection failed", error);
   } finally {
     isInjecting = false;
   }
@@ -257,7 +270,7 @@ function setupObserver(ctx: ContentScriptContext) {
     }
     const username = getInstagramUsername();
     if (username && !document.querySelector("bondery-instagram")) {
-      injectBonderyButton(ctx);
+      void injectBonderyButton(ctx);
     }
   });
 

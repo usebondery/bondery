@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { OG_BACKGROUND, OG_FONT_FAMILY, OG_GRADIENT_TO } from "#og/constants.js";
 import { Logotype } from "#og/Logotype.js";
 import { truncateOgTitle } from "#og/truncate.js";
@@ -12,7 +13,7 @@ type OgTitledProps = {
  * Titled OG card — optional subtype, page title, and logotype footer.
  * Used for blog posts, docs, and static marketing pages.
  */
-export function OgTitled({ title, subtype }: OgTitledProps) {
+export function OgTitled({ title, subtype }: OgTitledProps): ReactElement {
   const displayTitle = truncateOgTitle(title);
 
   return (

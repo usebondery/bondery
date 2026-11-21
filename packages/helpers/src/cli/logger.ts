@@ -16,7 +16,7 @@ const LEVEL_BG = {
 
 type Level = keyof typeof LEVEL_BG;
 
-function useColor(): boolean {
+function isColorEnabled(): boolean {
   if (process.env.NO_COLOR !== undefined) {
     return false;
   }
@@ -26,8 +26,11 @@ function useColor(): boolean {
   return Boolean(process.stdout.isTTY);
 }
 
+/** Width of the widest level label ("SUCCESS"), so the columns after it line up. */
+const LEVEL_LABEL_WIDTH = 7;
+
 function padLevel(level: Level): string {
-  return level.toUpperCase().padEnd(7);
+  return level.toUpperCase().padEnd(LEVEL_LABEL_WIDTH);
 }
 
 function formatLine(level: Level, message: string, colored: boolean): string {
@@ -49,7 +52,7 @@ export type CliLogger = {
 };
 
 export function createCliLogger(_scope?: string): CliLogger {
-  const colored = useColor();
+  const colored = isColorEnabled();
 
   const write = (level: Level, message: string, stream: NodeJS.WriteStream = process.stdout) => {
     stream.write(`${formatLine(level, message, colored)}\n`);

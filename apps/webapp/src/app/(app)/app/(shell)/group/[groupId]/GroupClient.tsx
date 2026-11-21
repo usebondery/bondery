@@ -245,7 +245,9 @@ export function GroupClient({ groupId }: GroupClientProps) {
           group={groupCardData}
           interactive={false}
           onAddPeople={handleAddContacts}
-          onClick={() => {}}
+          onClick={() => {
+            // no-op: this card is already on the group detail page
+          }}
           onDelete={handleDeleteGroup}
           onDuplicate={handleDuplicateGroup}
           onEdit={handleEditGroup}

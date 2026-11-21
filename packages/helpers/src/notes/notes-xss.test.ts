@@ -11,9 +11,10 @@ import { markdownToHtml } from "./markdownToHtml.js";
 function eventHandlerAttributes(html: string): string[] {
   const names: string[] = [];
   for (const tag of html.matchAll(/<[a-z][^\s>/]*((?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*\/?>/gi)) {
-    for (const attribute of tag[1].matchAll(/\s+([^\s=>/]+)(?:="[^"]*")?/g)) {
-      if (/^on/i.test(attribute[1])) {
-        names.push(attribute[1]);
+    for (const attribute of (tag[1] ?? "").matchAll(/\s+([^\s=>/]+)(?:="[^"]*")?/g)) {
+      const name = attribute[1] ?? "";
+      if (/^on/i.test(name)) {
+        names.push(name);
       }
     }
   }

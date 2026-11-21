@@ -6,18 +6,18 @@ Docs: [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx)
 
 ## What this is
 
-| Service | Image | Port | Notes |
-|---------|-------|------|--------|
+| Service   | Image                                                                       | Port  | Notes                                                                                 |
+| --------- | --------------------------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------- |
 | `website` | `ghcr.io/usebondery/website:${BONDERY_INFRA_WEBSITE_IMAGE_TAG:-production}` | 26630 | Floating `:production` by default; liveness `/health/live`, readiness `/health/ready` |
 
 Traefik router names and the Docker DNS alias are `${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-website`. Default prefix is `bondery`; beta uses `bondery-beta`. Production and beta share `dokploy-network`. Leave Dokploy **Isolated Deployments** off.
 
 Two Compose apps, same file:
 
-| Stack | Hostname | Image pin (Dokploy UI) | Dokploy branch |
-|-------|----------|------------------------|----------------|
-| Production | `usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=production` (Infisical production → `website` sync; omit for compose default `:production`) | `release` |
-| Beta | `beta.usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=beta` (Infisical staging → `website-beta` sync) | `main` |
+| Stack      | Hostname              | Image pin (Dokploy UI)                                                                                                       | Dokploy branch |
+| ---------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| Production | `usebondery.com`      | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=production` (Infisical production → `website` sync; omit for compose default `:production`) | `release`      |
+| Beta       | `beta.usebondery.com` | `BONDERY_INFRA_WEBSITE_IMAGE_TAG=beta` (Infisical staging → `website-beta` sync)                                             | `main`         |
 
 **Hard gate:** Redeploy production with this prefixed compose **before** creating the second app. Same Traefik router names on one Traefik overwrite production HTTPS routes.
 
@@ -35,11 +35,11 @@ There are **no** `website-X.Y.Z` release tags. Pin `BONDERY_INFRA_WEBSITE_IMAGE_
 
 ## Quick start (Dokploy)
 
-| Setting | Value |
-|---------|-------|
-| Provider | **Docker Compose** |
-| Compose path | `deploy/ops/docker-compose.yml` |
-| Domain | `BONDERY_INFRA_WEBSITE_DOMAIN` (Traefik labels in compose) |
+| Setting      | Value                                                      |
+| ------------ | ---------------------------------------------------------- |
+| Provider     | **Docker Compose**                                         |
+| Compose path | `deploy/ops/docker-compose.yml`                            |
+| Domain       | `BONDERY_INFRA_WEBSITE_DOMAIN` (Traefik labels in compose) |
 
 ```bash
 cd deploy/ops

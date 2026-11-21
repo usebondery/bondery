@@ -296,6 +296,36 @@
       "path": "validation.json",
       "platforms": ["web", "mobile", "extension"]
     },
+    "WebsiteBlog": {
+      "englishOnly": true,
+      "path": "platform/website/WebsiteBlog.json",
+      "platforms": ["website"]
+    },
+    "WebsiteDocs": {
+      "englishOnly": true,
+      "path": "platform/website/WebsiteDocs.json",
+      "platforms": ["website"]
+    },
+    "WebsiteLanding": {
+      "englishOnly": true,
+      "path": "platform/website/WebsiteLanding.json",
+      "platforms": ["website"]
+    },
+    "WebsiteLandingVisuals": {
+      "englishOnly": true,
+      "path": "platform/website/WebsiteLandingVisuals.json",
+      "platforms": ["website"]
+    },
+    "WebsiteLegal": {
+      "englishOnly": true,
+      "path": "platform/website/WebsiteLegal.json",
+      "platforms": ["website"]
+    },
+    "WebsiteNotFound": {
+      "englishOnly": true,
+      "path": "platform/website/WebsiteNotFound.json",
+      "platforms": ["website"]
+    },
     "WelcomeEmail": {
       "path": "platform/email/WelcomeEmail.json",
       "platforms": ["email"]

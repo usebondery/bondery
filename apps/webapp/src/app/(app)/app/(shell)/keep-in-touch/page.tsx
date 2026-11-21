@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 function defaultEndDate(): string {
   const d = new Date();
   d.setDate(d.getDate() + 30);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().slice(0, 10);
 }
 
 export default async function KeepInTouchPage({

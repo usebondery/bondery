@@ -15,8 +15,8 @@ const OnboardingCtx = createContext<OnboardingContextValue | null>(null);
 export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [intent, setIntentState] = useState<OnboardingIntent>(null);
 
-  const setIntent = (value: OnboardingIntent) => {
-    setIntentState(value);
+  const setIntent = (nextIntent: OnboardingIntent) => {
+    setIntentState(nextIntent);
   };
 
   const value = { intent, setIntent };

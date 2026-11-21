@@ -61,7 +61,7 @@ function restoreEnv(snapshot: EnvSnapshot): void {
   const restore = (key: keyof EnvSnapshot, envKey: string) => {
     const value = snapshot[key];
     if (value === undefined) {
-      delete process.env[envKey];
+      Reflect.deleteProperty(process.env, envKey);
     } else {
       process.env[envKey] = value;
     }
@@ -178,7 +178,9 @@ describe("object storage runtime readiness", () => {
 
   it("initObjectStorage succeeds when HeadBucket succeeds without a /status server", async () => {
     process.env.NODE_ENV = "development";
-    const client = createMockHeadBucketClient(async () => {});
+    const client = createMockHeadBucketClient(async () => {
+      // HeadBucket succeeds: the bucket is already present.
+    });
 
     const readiness = await initObjectStorage(undefined, { ...storageConfig, client });
 
@@ -188,7 +190,9 @@ describe("object storage runtime readiness", () => {
 
   it("verifyObjectStorage succeeds when HeadBucket succeeds without a /status server", async () => {
     process.env.NODE_ENV = "development";
-    const client = createMockHeadBucketClient(async () => {});
+    const client = createMockHeadBucketClient(async () => {
+      // HeadBucket succeeds: the bucket is already present.
+    });
 
     const readiness = await verifyObjectStorage({ ...storageConfig, client });
 

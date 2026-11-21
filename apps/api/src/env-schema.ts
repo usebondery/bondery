@@ -4,12 +4,14 @@ import { getApiRequiredEnvVars } from "./lib/platform/required-env.js";
 
 export const envSchema = {
   properties: {
+    // Empty: loopback in development, all interfaces otherwise (resolveListenAddress).
     API_HOST: {
-      default: "0.0.0.0",
+      default: "",
       type: "string",
     },
+    // The API's only listener, HTTPS (lib/platform/api-tls.ts).
     API_PORT: {
-      default: 26631,
+      default: 26642,
       type: "number",
     },
     BONDERY_PRIVATE_ANTHROPIC_API_KEY: {

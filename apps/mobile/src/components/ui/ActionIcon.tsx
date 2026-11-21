@@ -1,9 +1,9 @@
+import { cn } from "cn";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import Animated from "react-native-reanimated";
 import { Pressable } from "@/components/ui/Pressable";
 import { MOBILE_HIT_SLOP } from "../../theme/tokens";
-import { joinClassNames } from "./joinClassNames";
 import { usePressSqueeze } from "./usePressSqueeze";
 
 type ActionIconSize = "md" | "sm";
@@ -42,7 +42,7 @@ export function ActionIcon({
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
         accessibilityState={{ disabled }}
-        className={joinClassNames("items-center justify-center", SIZE_CLASS[size], className)}
+        className={cn("items-center justify-center", SIZE_CLASS[size], className)}
         data-disabled={disabled ? "true" : undefined}
         data-pressed={isPressed ? "true" : undefined}
         disabled={disabled}

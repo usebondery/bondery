@@ -158,7 +158,7 @@ export function ChatThreadView({
                   />
                 );
               })}
-              {isLoading && turns[turns.length - 1]?.message.role === "user" ? (
+              {isLoading && turns.at(-1)?.message.role === "user" ? (
                 <Box pl="md">
                   <Loader color="dimmed" size="sm" type="dots" />
                 </Box>

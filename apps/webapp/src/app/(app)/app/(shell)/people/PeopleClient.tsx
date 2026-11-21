@@ -75,7 +75,7 @@ function applyColumnVisibility(
   const savedMap = new Map(saved.map((e) => [e.key, e.visible]));
   return defaults.map((col) => {
     const visible = savedMap.get(col.key);
-    return visible === undefined ? col : { ...col, visible };
+    return visible === undefined ? col : Object.assign({}, col, { visible });
   });
 }
 
@@ -149,18 +149,14 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   // HTML already has the correct columns — no mount-time localStorage read,
   // no layout shift.
   const [columns, setColumns] = useState<ColumnConfig[]>(() =>
-    applyColumnVisibility(savedColumnVisibility, columnLabels).map((col) => ({
-      ...col,
-      icon: columnIcons[col.key],
-    })),
+    applyColumnVisibility(savedColumnVisibility, columnLabels).map((col) =>
+      Object.assign({}, col, { icon: columnIcons[col.key] }),
+    ),
   );
 
   useEffect(() => {
     setColumns((prev) =>
-      prev.map((col) => ({
-        ...col,
-        label: columnLabels[col.key] ?? col.label,
-      })),
+      prev.map((col) => Object.assign({}, col, { label: columnLabels[col.key] ?? col.label })),
     );
   }, [columnLabels]);
 
@@ -422,7 +418,7 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
             label: tEnrich("MenuLabel"),
             onClick: (contactId) => {
               const contact = contacts.find((c) => c.id === contactId);
-              startForPerson(contactId, contact?.linkedin);
+              void startForPerson(contactId, contact?.linkedin);
             },
           },
         ]}

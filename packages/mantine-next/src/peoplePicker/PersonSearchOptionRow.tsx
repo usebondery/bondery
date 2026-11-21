@@ -3,7 +3,9 @@
 import { formatContactName } from "@bondery/helpers/contact";
 import { Avatar, Group, Stack, Text } from "@mantine/core";
 import { IconBriefcase, IconCompass } from "@tabler/icons-react";
+import type { ReactElement } from "react";
 import { getAvatarColorFromName } from "#utils/avatarColor.js";
+import { nonEmpty } from "#utils/nonEmpty.js";
 
 /** Put this on Combobox.Option, Spotlight.Action, or a custom hit target wrapping the row. */
 export const PERSON_SEARCH_OPTION_HIT_CLASS = "personSearchOptionHit";
@@ -20,7 +22,11 @@ export type PersonSearchOptionIdentity = {
 export type PeoplePickerOptionPerson = PersonSearchOptionIdentity & { id: string };
 
 /** Shared person row for Find person, people pickers, and notes @-mention options. */
-export function PersonSearchOptionRow({ person }: { person: PersonSearchOptionIdentity }) {
+export function PersonSearchOptionRow({
+  person,
+}: {
+  person: PersonSearchOptionIdentity;
+}): ReactElement {
   const name = formatContactName(person);
 
   return (
@@ -30,7 +36,7 @@ export function PersonSearchOptionRow({ person }: { person: PersonSearchOptionId
         name={name}
         radius="xl"
         size={32}
-        src={person.avatar || undefined}
+        src={nonEmpty(person.avatar)}
       />
       <Stack gap={2} miw={0} style={{ flex: 1 }}>
         <Text fw={600} size="sm" truncate>

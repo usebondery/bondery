@@ -23,7 +23,7 @@
     },
     "bondery": {
       "type": "http",
-      "url": "http://localhost:26631/mcp"
+      "url": "https://api.usebondery.test/mcp"
     },
     "dashboard-icons": {
       "url": "https://dashboardicons.com/api/mcp"

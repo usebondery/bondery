@@ -274,7 +274,7 @@ export function migrateItem(item) {
     .filter((id) => id && VALID_ASSIGNEES.has(id));
 
   return {
-    assignees: assigneeIds.length ? assigneeIds : [DEFAULT_OWNER],
+    assignees: assigneeIds.length > 0 ? assigneeIds : [DEFAULT_OWNER],
     description_html: buildDescription(item),
     labels: [source, surface],
     name: outcomeTitle(item, typePrefix),

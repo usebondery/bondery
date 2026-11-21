@@ -350,12 +350,14 @@ export type CommonCatalog = {
     deleting: string;
     duplicating: string;
     errorTitle: string;
+    mobileRuntimeError: string;
     noResults: string;
     removing: string;
     savedTitle: string;
     saving: string;
     sending: string;
     successTitle: string;
+    unknownError: string;
   };
 };
 
@@ -679,6 +681,7 @@ export type EnrichRecommendationCardCatalog = {
 export type ExtensionPopupCatalog = {
   LoggedIn: {
     OpenBondery: string;
+    UnsupportedSiteMessage: string;
   };
   LoggedOut: {
     Description: string;
@@ -699,6 +702,12 @@ export type ExtensionPopupCatalog = {
   };
   Welcome: {
     ConnectButton: string;
+    Description: string;
+    SignInHint: string;
+    SuccessClose: string;
+    SuccessDescription: string;
+    SuccessTitle: string;
+    Title: string;
   };
 };
 
@@ -988,7 +997,9 @@ export type GroupsPageCatalog = {
     UpdateFailed: string;
   };
   EmojiEmptySearch: string;
+  EmojiLabel: string;
   EmojiSearchPlaceholder: string;
+  EmojiSelectPlaceholder: string;
   Empty: string;
   FallbackTitle: string;
   HeaderDescription: string;
@@ -1593,6 +1604,7 @@ export type MobileColorPickerCatalog = {
 };
 
 export type MobileContactDetailCatalog = {
+  AddNotesPlaceholder: string;
   DeleteContact: string;
   DeleteContactConfirmTitle: string;
   DeleteFailed: string;
@@ -1607,6 +1619,7 @@ export type MobileContactDetailCatalog = {
   GroupsEdit: string;
   GroupsEditAccessibility: string;
   GroupsLoadError: string;
+  LastInteractionLabel: string;
   NoGroups: string;
   ShareContact: string;
   ShareContactViaEmail: string;
@@ -1683,6 +1696,8 @@ export type MobileContactsCatalog = {
   GroupFilterNewGroup: string;
   GroupFilterSheetTitle: string;
   Groups: string;
+  MentionEmptyCaption: string;
+  MentionEmptyTitle: string;
   MissingEmail: string;
   MissingPhone: string;
   MoreActions: string;
@@ -3059,6 +3074,474 @@ export type ValidationCatalog = {
   title: string;
 };
 
+export type WebsiteBlogCatalog = {
+  Categories: {
+    All: string;
+    Bonds: string;
+    Tech: string;
+    Updates: string;
+  };
+  CategoryTitle: string;
+  Descriptions: {
+    All: string;
+    Bonds: string;
+    Tech: string;
+    Updates: string;
+  };
+  EmptyCategory: string;
+  ReadingTime: string;
+  Title: string;
+  Tooltips: {
+    All: string;
+    Bonds: string;
+    Tech: string;
+    Updates: string;
+  };
+};
+
+export type WebsiteDocsCatalog = {
+  Api: {
+    AuthGuide: string;
+    AuthTitle: {
+      ApiKey: string;
+      ApiKeyOrSession: string;
+      Generic: string;
+      Session: string;
+    };
+    Deprecated: string;
+    HideChildParameters: string;
+    JsonResponseLabel: string;
+    MultipartNote: string;
+    OneOf: string;
+    ParameterGroup: {
+      Cookie: string;
+      Header: string;
+      Path: string;
+      Query: string;
+    };
+    Parameters: string;
+    RequestBody: string;
+    Required: string;
+    ResponseLabel: string;
+    Responses: string;
+    SampleRequest: string;
+    SendHeader: string;
+    ShowChildParameters: string;
+  };
+  ApiErrors: {
+    BaseUrl: string;
+  };
+  ApiGroups: {
+    Account: string;
+    Auth: string;
+    Billing: string;
+    BrowserExtension: string;
+    Chat: string;
+    Contacts: string;
+    Geocoding: string;
+    Groups: string;
+    Health: string;
+    Interactions: string;
+    MobileApp: string;
+    Sync: string;
+    Tags: string;
+    Webhooks: string;
+  };
+  Changelog: {
+    Changelog: string;
+    EarlierVersions: string;
+    GitHubRelease: string;
+    GitHubReleases: string;
+  };
+  Copy: {
+    CopyMarkdown: string;
+    FailedLinkDescription: string;
+    FailedMarkdownDescription: string;
+    FailedTitle: string;
+    HeadingCopied: string;
+    HeadingCopyLink: string;
+    HeadingCopyLinkAria: string;
+    LinkCopiedDescription: string;
+    LinkCopiedTitle: string;
+    LinkLabel: string;
+    MarkdownCopiedDescription: string;
+    MarkdownCopiedTitle: string;
+    MoreActions: string;
+    OpenOnGitHub: string;
+    ViewAsMarkdown: string;
+  };
+  ErrorGroups: {
+    Api: string;
+    Authentication: string;
+    Authorization: string;
+    Conflicts: string;
+    InvalidRequests: string;
+    NotFound: string;
+    RateLimits: string;
+    Retired: string;
+    ServiceUnavailable: string;
+  };
+  LastUpdated: string;
+  Navigation: {
+    CloseMenu: string;
+    DrawerTitle: string;
+    Next: string;
+    OnThisPage: string;
+    OpenMenu: string;
+    Previous: string;
+  };
+  NotFound: {
+    Description: string;
+    Introduction: string;
+    Title: string;
+  };
+  Og: {
+    ApiErrorTitle: string;
+    DefaultTitle: string;
+    Subtype: string;
+  };
+  Repo: {
+    Description: string;
+    Title: string;
+  };
+  Search: {
+    Close: string;
+    Label: string;
+    Navigate: string;
+    NoResults: string;
+    Open: string;
+    Placeholder: string;
+  };
+  Sidebar: {
+    PagesAria: string;
+    SearchLabel: string;
+    SectionAria: string;
+  };
+  Tabs: {
+    Develop: string;
+    Integrate: string;
+    Product: string;
+    SelfHost: string;
+  };
+};
+
+export type WebsiteLandingCatalog = {
+  About: {
+    StoryTitle: string;
+  };
+  AiClients: {
+    WorksWith: string;
+  };
+  Bento: {
+    Assistant: {
+      Description: string;
+      Title: string;
+    };
+    KeepInTouch: {
+      Description: string;
+      Title: string;
+    };
+    Network: {
+      Description: string;
+      Title: string;
+    };
+    Sources: {
+      Description: string;
+      Title: string;
+    };
+    Sync: {
+      Description: string;
+      Title: string;
+    };
+    Timeline: {
+      Description: string;
+      Title: string;
+    };
+  };
+  Contact: {
+    Discord: string;
+    Reddit: string;
+    Subtitle: string;
+    Title: string;
+  };
+  Cta: {
+    Button: string;
+    Title: string;
+  };
+  Faq: {
+    Items: {
+      Free: {
+        Answer: string;
+        Question: string;
+      };
+      Private: {
+        Answer: string;
+        Question: string;
+      };
+      SelfHost: {
+        Answer: string;
+        DocsLinkLabel: string;
+        Question: string;
+      };
+      WhatIs: {
+        Answer: string;
+        Question: string;
+      };
+    };
+    Title: string;
+  };
+  Features: {
+    Title: string;
+  };
+  Footer: {
+    Groups: {
+      Company: string;
+      Connect: string;
+      Legal: string;
+      Product: string;
+    };
+    Links: {
+      Blog: string;
+      Contact: string;
+      Docs: string;
+      Features: string;
+      Pricing: string;
+      Privacy: string;
+      Roadmap: string;
+      Security: string;
+      Status: string;
+      Terms: string;
+    };
+  };
+  GetStarted: string;
+  Header: {
+    Aria: {
+      CloseMenu: string;
+      CloseNavigationMenu: string;
+      MobileNavigation: string;
+      OpenNavigationMenu: string;
+      PrimaryNavigation: string;
+    };
+    LoginOrSignUp: string;
+    Nav: {
+      Blog: string;
+      Docs: string;
+      Features: string;
+      Pricing: string;
+    };
+    NavigationTitle: string;
+  };
+  Hero: {
+    ImageAlt: string;
+    LearnMore: string;
+    Subtitle: string;
+    Title: string;
+  };
+  Logo: {
+    HomepageAriaLabel: string;
+  };
+  Meta: {
+    ContactDescription: string;
+    ContactTitle: string;
+    HomeImageAlt: string;
+  };
+  Pricing: {
+    Free: {
+      Features: {
+        Contacts: string;
+        History: string;
+        Reminders: string;
+      };
+      Name: string;
+      Price: string;
+      Tagline: string;
+    };
+    Premium: {
+      Features: {
+        AiAssistant: string;
+        PrioritySupport: string;
+        SmartSearch: string;
+        WritingCopilot: string;
+      };
+      Name: string;
+      Period: string;
+      Price: string;
+      Tagline: string;
+    };
+    Title: string;
+  };
+  PrivacyBand: {
+    Points: {
+      EuHosted: string;
+      OpenSource: string;
+      SelfHostOrExport: string;
+    };
+    SelfHostingGuide: string;
+    Title: string;
+    ViewOnGitHub: string;
+  };
+  Team: {
+    Members: {
+      Sveetya: {
+        Description: string;
+        Role: string;
+      };
+    };
+    Title: string;
+  };
+};
+
+export type WebsiteLandingVisualsCatalog = {
+  Assistant: {
+    Logged: string;
+    Scenarios: {
+      Alan: {
+        Answer: string;
+        Question: string;
+      };
+      Grace: {
+        Answer: string;
+        Question: string;
+      };
+      Investors: {
+        Answer: string;
+        Question: string;
+      };
+      Katherine: {
+        Answer: string;
+        Question: string;
+      };
+      LogCoffee: {
+        Answer: string;
+        LoggedNote: string;
+        LoggedTitle: string;
+        Question: string;
+      };
+      Thailand: {
+        Answer: string;
+        Bangkok: string;
+        ChiangMai: string;
+        Question: string;
+      };
+      UxDesign: {
+        Answer: string;
+        Question: string;
+      };
+    };
+  };
+  Briefing: {
+    Answers: {
+      Catchup: string;
+      Saved: string;
+    };
+    DemoNote: string;
+    DueCatchUp: string;
+    InTouchToday: string;
+    LastTalked: string;
+    Questions: {
+      Catchup: string;
+      SaveCoffee: string;
+    };
+  };
+  Encryption: {
+    Birthday: string;
+    Note: string;
+  };
+  People: {
+    Ada: {
+      Birthday: string;
+      Headline: string;
+    };
+    Alan: {
+      Birthday: string;
+      Headline: string;
+    };
+    Grace: {
+      Headline: string;
+    };
+    Hedy: {
+      Headline: string;
+    };
+    John: {
+      Headline: string;
+    };
+    Katherine: {
+      Headline: string;
+    };
+    Limor: {
+      Headline: string;
+    };
+    Margaret: {
+      Headline: string;
+    };
+    Marissa: {
+      Headline: string;
+    };
+    Sheryl: {
+      Headline: string;
+    };
+    Whitney: {
+      Headline: string;
+    };
+  };
+  Reminders: {
+    Anniversary: string;
+    Birthday: string;
+    ComingUp: string;
+  };
+  Sources: {
+    FromSource: string;
+    Merged: string;
+    Soon: string;
+  };
+  Sync: {
+    NewCity: string;
+    NewPhoto: string;
+    NewTitle: string;
+  };
+  Timeline: {
+    Call: {
+      Date: string;
+      Note: string;
+      Title: string;
+    };
+    Coffee: {
+      Date: string;
+      Note: string;
+      Title: string;
+    };
+    Party: {
+      Date: string;
+      Note: string;
+      Title: string;
+    };
+  };
+};
+
+export type WebsiteLegalCatalog = {
+  Documents: {
+    Privacy: {
+      Description: string;
+      Title: string;
+    };
+    Security: {
+      Description: string;
+      Title: string;
+    };
+    Terms: {
+      Description: string;
+      Title: string;
+    };
+  };
+  LastUpdated: string;
+};
+
+export type WebsiteNotFoundCatalog = {
+  BackToHome: string;
+  Description: string;
+  Title: string;
+};
+
 export type WelcomeEmailCatalog = {
   body: string;
   getStarted: string;
@@ -3140,6 +3623,12 @@ export interface Catalog {
   "TagsSettings": TagsSettingsCatalog;
   "TrialEndingEmail": TrialEndingEmailCatalog;
   "UnavailablePage": UnavailablePageCatalog;
+  "WebsiteBlog": WebsiteBlogCatalog;
+  "WebsiteDocs": WebsiteDocsCatalog;
+  "WebsiteLanding": WebsiteLandingCatalog;
+  "WebsiteLandingVisuals": WebsiteLandingVisualsCatalog;
+  "WebsiteLegal": WebsiteLegalCatalog;
+  "WebsiteNotFound": WebsiteNotFoundCatalog;
   "WelcomeEmail": WelcomeEmailCatalog;
   "common": CommonCatalog;
   "glossary": GlossaryCatalog;

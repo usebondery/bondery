@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { resolveMcpPluginResource, resolveMcpResourceIdentifiers } from "./auth-public.js";
+import { resolveMcpResourceIdentifiers } from "./auth-public.js";
 import { isLoopbackHostname, withLoopbackUrlAlias } from "./loopback-alias-urls.js";
 
 describe("withLoopbackUrlAlias", () => {
@@ -40,7 +40,7 @@ describe("isLoopbackHostname", () => {
   });
 });
 
-describe("resolveMcpPluginResource", () => {
+describe("resolveMcpResourceIdentifiers", () => {
   function withApiUrl(url: string, run: () => void) {
     const previous = process.env.BONDERY_PUBLIC_API_URL;
     process.env.BONDERY_PUBLIC_API_URL = url;
@@ -57,27 +57,23 @@ describe("resolveMcpPluginResource", () => {
 
   it("keeps HTTPS MCP resources", () => {
     withApiUrl("https://api.usebondery.com", () => {
-      assert.equal(resolveMcpPluginResource(), "https://api.usebondery.com/mcp");
+      assert.deepEqual(resolveMcpResourceIdentifiers(), ["https://api.usebondery.com/mcp"]);
     });
   });
 
-  it("keeps loopback HTTP MCP resources", () => {
-    withApiUrl("http://localhost:26631", () => {
-      assert.equal(resolveMcpPluginResource(), "http://localhost:26631/mcp");
-    });
-  });
-
-  it("maps Tailscale HTTP API URLs to loopback for mcp()", () => {
-    withApiUrl("http://dev-host.tailnet.ts.net:26631", () => {
-      assert.equal(resolveMcpPluginResource(), "http://127.0.0.1:26631/mcp");
-    });
-  });
-
-  it("includes the plugin resource in MCP identifiers", () => {
-    withApiUrl("http://dev-host.tailnet.ts.net:26631", () => {
+  it("keeps the HTTPS Tailscale URL of a phone-dev API as it is", () => {
+    withApiUrl("https://dev-host.tailnet.ts.net:26642", () => {
       assert.deepEqual(resolveMcpResourceIdentifiers(), [
-        "http://dev-host.tailnet.ts.net:26631/mcp",
-        "http://127.0.0.1:26631/mcp",
+        "https://dev-host.tailnet.ts.net:26642/mcp",
+      ]);
+    });
+  });
+
+  it("pairs a loopback MCP resource with its alias", () => {
+    withApiUrl("https://localhost:26642", () => {
+      assert.deepEqual(resolveMcpResourceIdentifiers(), [
+        "https://localhost:26642/mcp",
+        "https://127.0.0.1:26642/mcp",
       ]);
     });
   });

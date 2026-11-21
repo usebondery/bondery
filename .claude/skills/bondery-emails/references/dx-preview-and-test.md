@@ -35,11 +35,11 @@ Check: subject, **preview snippet (≤90 chars)**, single-column layout, button/
 
 API coverage lives next to senders (for example `apps/api/src/test/magic-link-email.test.ts`, `email-i18n.test.ts`, `email-transporter.test.ts`). When adding an email, extend those rather than inventing a second test stack.
 
-| Level | What to test |
-|-------|----------------|
-| Unit smoke | `renderEmailParts(YourEmail(props))` does not throw; HTML has `<Preview>`; `text` has body/CTA URL; optional HTML snapshot |
-| Integration | Mock `sendRenderedEmail`; assert called with expected `to`/`subject`/`from` **and** `text` |
-| E2E | Do **not** assert real inbox delivery unless you have a test mailbox |
+| Level       | What to test                                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Unit smoke  | `renderEmailParts(YourEmail(props))` does not throw; HTML has `<Preview>`; `text` has body/CTA URL; optional HTML snapshot |
+| Integration | Mock `sendRenderedEmail`; assert called with expected `to`/`subject`/`from` **and** `text`                                 |
+| E2E         | Do **not** assert real inbox delivery unless you have a test mailbox                                                       |
 
 API tests stub email env in `apps/api/src/test/load-test-env.ts` with dummy `BONDERY_PRIVATE_EMAIL_*`.
 
@@ -51,9 +51,9 @@ Production uses Plunk SMTP. Local development **must** use Mailpit — never a l
 pnpm run start:mailpit
 ```
 
-| Surface | Address |
-|---------|---------|
-| SMTP | `127.0.0.1:26640` (`DEV_PORTS.MAILPIT_SMTP`) |
+| Surface       | Address                                           |
+| ------------- | ------------------------------------------------- |
+| SMTP          | `127.0.0.1:26640` (`DEV_PORTS.MAILPIT_SMTP`)      |
 | UI + HTTP API | `http://127.0.0.1:26641` (`DEV_PORTS.MAILPIT_UI`) |
 
 Set `BONDERY_PRIVATE_EMAIL_HOST=127.0.0.1` and `BONDERY_PRIVATE_EMAIL_PORT=26640`. The development API refuses to boot if the host is not loopback.
@@ -66,9 +66,9 @@ Never send intentional hard bounces to fake addresses on a real ESP (damages sen
 
 When changing email code:
 
-| Changed paths | Checks |
-|---------------|--------|
-| `packages/emails/**` | `pnpm --filter @bondery/emails run compile` and `pnpm --filter @bondery/emails run test` |
+| Changed paths                            | Checks                                                                                       |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `packages/emails/**`                     | `pnpm --filter @bondery/emails run compile` and `pnpm --filter @bondery/emails run test`     |
 | `apps/api/src/services/notifications/**` | API typecheck/lint per [bondery-verification-loop](../../bondery-verification-loop/SKILL.md) |
 
 ## Related docs

@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Atvērt Bondery"
+    "OpenBondery": "Atvērt Bondery",
+    "UnsupportedSiteMessage": "Apmeklē kāda profilu Instagram vai LinkedIn, lai redzētu vairāk paplašinājuma darbību un iespēju."
   },
   "LoggedOut": {
     "Description": "Pievienot savu kontu, lai saglabātu kontaktus no sociālajiem saziņas līdzekļiem.",
@@ -20,6 +21,12 @@
     "Title": "Nepieciešams atjauninājums"
   },
   "Welcome": {
-    "ConnectButton": "Pievienot savu Bondery kontu"
+    "ConnectButton": "Pievienot savu Bondery kontu",
+    "Description": "Pievieno savu Bondery kontu, lai saglabātu kontaktus tieši no sociālo tīklu profiliem.",
+    "SignInHint": "Tev tiks lūgts pieteikties savā Bondery kontā un autorizēt paplašinājumu.",
+    "SuccessClose": "Tagad vari aizvērt šo cilni.",
+    "SuccessDescription": "Tavs Bondery konts tagad ir pievienots. Apmeklē jebkuru Instagram vai LinkedIn profilu un sāc saglabāt kontaktus.",
+    "SuccessTitle": "Viss gatavs!",
+    "Title": "Laipni lūdzam Bondery"
   }
 }

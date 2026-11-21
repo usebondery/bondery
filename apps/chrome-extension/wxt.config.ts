@@ -152,6 +152,8 @@ export default defineConfig({
       // Local unpacked ID = Chrome Web Store ID so OAuth redirect_uri matches
       // BONDERY_INFRA_CHROME_EXTENSION_ID. Staging/RC zips keep the key; CWS omits it.
       ...(includeManifestKey ? { key: CWS_EXTENSION_PUBLIC_KEY } : {}),
+      // First Chrome with `Array.prototype.at` (92), `Object.hasOwn` and `Error` `cause` (93).
+      minimum_chrome_version: "93",
       name: "Bondery Extension",
 
       permissions: ["storage", "identity", "alarms"],

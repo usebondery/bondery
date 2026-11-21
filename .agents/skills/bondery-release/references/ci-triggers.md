@@ -6,14 +6,14 @@ This file interprets CI for release captains. If anything conflicts, trust the w
 
 ## Pipeline layers
 
-| Phase | Trigger | Workflow | Operator outcome |
-|-------|---------|----------|------------------|
-| PR checks | `pull_request` | `verify.yml` | `contract` (+ `check:versions`) + path-filtered `website-build` |
-| Stage artifacts | push `main` | `stage-images.yml` | `:sha-<short>` always; `:beta` + `:X.Y.Z-rc.N` only on named RC cuts |
-| Website CD | push `release` | `deploy-website.yml` | Promote `:sha` → `:production` or build fallback; smoke; Dokploy ops webhook |
-| **RC** | tag `vX.Y.Z-rc.N` | `rc-release.yml` | Prerelease + staging zip; **verify** `:sha` / `:X.Y.Z-rc.N` / `:beta` digests match; **no CWS**; does not retag `:beta` |
-| **Production** | tag `vX.Y.Z` | `release.yml` | Draft then publish GitHub release (no zip); promote last named `:X.Y.Z-rc.N` → `:X.Y.Z`; smoke; **always CWS**; `:production` + `:latest` after gate |
-| **Claude plugin** | tag `vX.Y.Z` | `publish-claude-plugin.yml` | Fast-forward `claude-plugin` to the tag commit when `llm-plugins/claude` changed (version field ignored); green skip otherwise |
+| Phase             | Trigger           | Workflow                    | Operator outcome                                                                                                                                     |
+| ----------------- | ----------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PR checks         | `pull_request`    | `verify.yml`                | `contract` (+ `check:versions`) + path-filtered `website-build`                                                                                      |
+| Stage artifacts   | push `main`       | `stage-images.yml`          | `:sha-<short>` always; `:beta` + `:X.Y.Z-rc.N` only on named RC cuts                                                                                 |
+| Website CD        | push `release`    | `deploy-website.yml`        | Promote `:sha` → `:production` or build fallback; smoke; Dokploy ops webhook                                                                         |
+| **RC**            | tag `vX.Y.Z-rc.N` | `rc-release.yml`            | Prerelease + staging zip; **verify** `:sha` / `:X.Y.Z-rc.N` / `:beta` digests match; **no CWS**; does not retag `:beta`                              |
+| **Production**    | tag `vX.Y.Z`      | `release.yml`               | Draft then publish GitHub release (no zip); promote last named `:X.Y.Z-rc.N` → `:X.Y.Z`; smoke; **always CWS**; `:production` + `:latest` after gate |
+| **Claude plugin** | tag `vX.Y.Z`      | `publish-claude-plugin.yml` | Fast-forward `claude-plugin` to the tag commit when `llm-plugins/claude` changed (version field ignored); green skip otherwise                       |
 
 `release.yml` still matches `v*.*.*` (includes RC tags) but **skips** refs containing `-rc.`. Do not loosen `shared-release-validate.yml` `^v[0-9]+\.[0-9]+\.[0-9]+$`. `publish-claude-plugin.yml` skips RC refs the same way, so only production tags may move `claude-plugin`.
 
@@ -50,12 +50,12 @@ Release tags **do not rebuild by default**.
 
 Fetched from **Infisical production** (OIDC) in CI.
 
-| Infisical key | Workflow |
-|---------------|----------|
-| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK` | `deploy-website.yml` |
-| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK` | `release.yml` |
+| Infisical key                                         | Workflow                            |
+| ----------------------------------------------------- | ----------------------------------- |
+| `BONDERY_OPS_DOKPLOY_WEBSITE_DEPLOY_WEBHOOK`          | `deploy-website.yml`                |
+| `BONDERY_OPS_DOKPLOY_SERVICES_DEPLOY_WEBHOOK`         | `release.yml`                       |
 | `BONDERY_OPS_DOKPLOY_STAGING_SERVICES_DEPLOY_WEBHOOK` | `stage-images.yml` on named RC cuts |
-| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK` | `stage-images.yml` on named RC cuts |
+| `BONDERY_OPS_DOKPLOY_STAGING_WEBSITE_DEPLOY_WEBHOOK`  | `stage-images.yml` on named RC cuts |
 
 Payload uses `refs/heads/release` for production and `refs/heads/main` for staging.
 

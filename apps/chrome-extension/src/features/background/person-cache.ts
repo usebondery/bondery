@@ -13,6 +13,7 @@ import type {
   ScrapedProfileData,
 } from "../../lib/messaging/types";
 import { openWebappPersonTab } from "../../lib/navigation";
+import { firstNonEmpty } from "../../lib/text";
 import { backgroundState } from "./state";
 
 const personExistenceCache = new Map<string, { result: SocialLookupResult; expiresAt: number }>();
@@ -133,7 +134,7 @@ export async function resolvePersonLookup(
   }
 
   const inFlight = personExistenceLookupInFlight.get(cacheKey);
-  if (inFlight) {
+  if (inFlight !== undefined) {
     return inFlight;
   }
 
@@ -161,7 +162,7 @@ export async function resolvePersonExists(profile: ScrapedProfileData): Promise<
   if (!lookup) {
     return null;
   }
-  return Boolean(lookup.exists);
+  return lookup.exists;
 }
 
 export async function handleAddPerson(
@@ -206,6 +207,8 @@ export async function handleAddPerson(
 
     const contact = result.contact;
     const contactId = contact.id;
+    // biome-ignore lint/suspicious/noUnnecessaryConditions: response.json() is not validated at runtime, so a missing firstName must still fall back to the scraped name
+    const firstName = contact.firstName ?? payload.firstName ?? payload.handle;
 
     extLog.debug("[background] addOrFindPerson result", {
       contactId,
@@ -215,7 +218,7 @@ export async function handleAddPerson(
     if (result.existed) {
       const previewContact = {
         avatar: contact.avatar ?? payload.profileImageUrl ?? null,
-        firstName: contact.firstName ?? payload.firstName ?? payload.handle,
+        firstName,
         id: contactId,
         lastName: contact.lastName ?? payload.lastName ?? null,
       };
@@ -228,7 +231,7 @@ export async function handleAddPerson(
       const preview: PersonPreviewData = {
         avatar: contact.avatar ?? payload.profileImageUrl ?? null,
         contactId,
-        firstName: contact.firstName ?? payload.firstName ?? payload.handle,
+        firstName,
         handle: payload.handle,
         lastName: contact.lastName ?? payload.lastName ?? null,
         platform: payload.platform,
@@ -251,7 +254,7 @@ export async function handleAddPerson(
       setPersonCacheEntry(cacheKey, {
         contact: {
           avatar: contact.avatar ?? payload.profileImageUrl ?? null,
-          firstName: contact.firstName ?? payload.firstName ?? payload.handle,
+          firstName,
           id: contactId,
           lastName: contact.lastName ?? payload.lastName ?? null,
         },
@@ -320,7 +323,7 @@ export async function handleActiveProfileContext(
       const preview: PersonPreviewData = {
         avatar: lookup.contact.avatar ?? profile.profileImageUrl ?? null,
         contactId: lookup.contact.id,
-        firstName: lookup.contact.firstName || profile.firstName || profile.handle,
+        firstName: firstNonEmpty(lookup.contact.firstName, profile.firstName) ?? profile.handle,
         handle: profile.handle,
         lastName: lookup.contact.lastName ?? profile.lastName ?? null,
         platform: profile.platform,

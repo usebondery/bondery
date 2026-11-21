@@ -18,7 +18,7 @@ function resolvePnpmStorePath(): string | undefined {
   try {
     const nextReal = fs.realpathSync(path.join(appDir, "node_modules", "next"));
     const match = /[/\\]store[/\\]v\d+/i.exec(nextReal);
-    if (!match || match.index === undefined) {
+    if (!match) {
       return undefined;
     }
     return nextReal.slice(0, match.index + match[0].length);

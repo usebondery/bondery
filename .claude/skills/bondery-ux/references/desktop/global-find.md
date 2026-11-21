@@ -6,12 +6,12 @@ Keyboard-driven discovery for laptop and PC. Principles: [search-and-discovery.m
 
 ## Components
 
-| Surface | Shortcut | Role |
-|---------|----------|------|
-| **Command palette** | `mod+k` (`HOTKEYS.COMMAND_PALETTE`) | Nav, create actions, jump to Find person |
-| **Find person spotlight** | `f` (`HOTKEYS.FIND_PERSON`) | Server search contacts; any trimmed non-empty query |
-| **Add person** | `c` | Opens add contact modal |
-| **Log interaction** | `n` | Opens log interaction modal |
+| Surface                   | Shortcut                            | Role                                                |
+| ------------------------- | ----------------------------------- | --------------------------------------------------- |
+| **Command palette**       | `mod+k` (`HOTKEYS.COMMAND_PALETTE`) | Nav, create actions, jump to Find person            |
+| **Find person spotlight** | `f` (`HOTKEYS.FIND_PERSON`)         | Server search contacts; any trimmed non-empty query |
+| **Add person**            | `c`                                 | Opens add contact modal                             |
+| **Log interaction**       | `n`                                 | Opens log interaction modal                         |
 
 **Config:** `HOTKEYS` in `@/lib/platform/config`. **Display:** `Kbd` + `parseShortcutKeys` from `@bondery/mantine-next` — see [keyboard-shortcuts.md](../desktop/keyboard-shortcuts.md).
 

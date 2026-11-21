@@ -32,17 +32,28 @@ type TocEntry = {
 };
 
 function textFromNode(node: ReactNode): string {
-  if (typeof node === "string" || typeof node === "number") {
-    return String(node);
+  const parts: string[] = [];
+  const pending: ReactNode[] = [node];
+
+  while (pending.length > 0) {
+    const current = pending.pop();
+    if (typeof current === "string" || typeof current === "number") {
+      parts.push(String(current));
+      continue;
+    }
+    if (Array.isArray(current)) {
+      for (const child of current.slice().reverse()) {
+        pending.push(child);
+      }
+      continue;
+    }
+    if (current && typeof current === "object" && "props" in current) {
+      const props = current.props as { children?: ReactNode };
+      pending.push(props.children);
+    }
   }
-  if (Array.isArray(node)) {
-    return node.map(textFromNode).join("");
-  }
-  if (node && typeof node === "object" && "props" in node) {
-    const props = node.props as { children?: ReactNode };
-    return textFromNode(props.children);
-  }
-  return "";
+
+  return parts.join("");
 }
 
 function toDocsToc(toc: TocEntry[]): DocsTocItem[] {
@@ -73,6 +84,7 @@ function footerLink(item: { name: ReactNode; url: string } | undefined) {
 }
 
 function createPageLink(pageUrl: string) {
+  // biome-ignore lint/correctness/noComponentHookFactories: server component made once per request; it holds no state, so a new identity cannot remount anything
   return function PageLink({ children, href }: { children?: ReactNode; href?: string }) {
     if (typeof href !== "string") {
       return children;
@@ -133,6 +145,8 @@ export default async function DocPage(props: PageProps) {
       <MDX
         components={getMDXComponents({
           a: createPageLink(page.url),
+          // biome-ignore lint/correctness/noComponentHookFactories: async server component made once per request; it holds no state, so a new identity cannot remount anything
+          // biome-ignore lint/correctness/noNestedComponentDefinitions: it closes over this request's page, and MDX takes components as a map, so page cannot arrive as a prop
           OpenAPIPage: async (openApiProps) => (
             <OpenAPIPage
               {...openApiProps}

@@ -50,7 +50,7 @@ Use `isSubmitting` for:
   name="label"
   returnKeyType="done"
   onSubmitEditing={() => void onSubmit()}
-/>
+/>;
 ```
 
 ## Non-text control pattern (SettingsSelect, wheel, pickers)

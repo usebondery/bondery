@@ -33,7 +33,7 @@ export function EmojiPickerSheet({
   const tMobileEmojiPicker = useMobileEmojiPickerTranslations();
   const _t = useCommonTranslations();
   const [query, setQuery] = useState("");
-  const gridRef = useRef<EmojiPickerGridRef>(null);
+  const gridRef = useRef<EmojiPickerGridRef | null>(null);
   const pendingScrollEmojiRef = useRef<string | null>(null);
   const { sections, debouncedQuery } = useEmojiPickerFilter(query);
 

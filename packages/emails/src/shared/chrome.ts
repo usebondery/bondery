@@ -1,6 +1,6 @@
 export const EMAIL_PREVIEW_MAX_CHARS = 90;
 
-export function clipEmailPreview(value: string, max = EMAIL_PREVIEW_MAX_CHARS): string {
+export function clipEmailPreview(value: string, max: number = EMAIL_PREVIEW_MAX_CHARS): string {
   const trimmed = value.replace(/\s+/g, " ").trim();
   if (trimmed.length <= max) {
     return trimmed;

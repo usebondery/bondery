@@ -80,7 +80,7 @@ function timeZoneDisplayNames(locale: string): Intl.DisplayNames | undefined {
     return timeZoneNamesByLocale.get(locale) ?? undefined;
   }
 
-  let names: Intl.DisplayNames | null = null;
+  let names: Intl.DisplayNames | null;
   try {
     names = new Intl.DisplayNames([locale], {
       type: "timeZone" as Intl.DisplayNamesOptions["type"],

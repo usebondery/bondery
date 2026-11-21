@@ -6,10 +6,8 @@ import type { CreateDocumentOptions } from "zod-openapi";
  */
 export const openApiDocumentOpts: CreateDocumentOptions = {
   override: ({ jsonSchema }) => {
-    if (jsonSchema.pattern) {
-      if (jsonSchema.format === "uuid" || jsonSchema.format === "date-time") {
-        delete jsonSchema.pattern;
-      }
+    if (jsonSchema.pattern && (jsonSchema.format === "uuid" || jsonSchema.format === "date-time")) {
+      delete jsonSchema.pattern;
     }
   },
 };

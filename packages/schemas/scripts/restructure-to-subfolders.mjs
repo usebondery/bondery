@@ -85,7 +85,8 @@ function moveModule(baseDir, name) {
     renameSync(src, join(targetDir, dest));
   }
 
-  console.log(`  ${baseDir === "." ? "" : `${baseDir}/`}${name}/`);
+  const dirPrefix = baseDir === "." ? "" : `${baseDir}/`;
+  console.log(`  ${dirPrefix}${name}/`);
 }
 
 for (const { dir, modules } of GROUPS) {
@@ -116,7 +117,9 @@ function walkTsFiles(dir, acc = []) {
   return acc;
 }
 
-function applyImportRewrites(content) {
+function applyImportRewrites(source) {
+  let content = source;
+
   for (const { dir, modules } of GROUPS) {
     for (const name of modules) {
       const hashPrefix = dir === "." ? `#${name}` : `#${dir}/${name}`;

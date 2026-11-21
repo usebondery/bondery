@@ -137,7 +137,8 @@ export function responseForStorage(payload: unknown): { body: unknown; omitted: 
   }
 
   try {
-    const text = JSON.stringify(payload);
+    // `JSON.stringify` returns `undefined` for `undefined`, functions and symbols, but is typed as `string`.
+    const text: string | undefined = JSON.stringify(payload);
     if (text === undefined || Buffer.byteLength(text) > IDEMPOTENCY_MAX_RESPONSE_BYTES) {
       return { body: null, omitted: true };
     }

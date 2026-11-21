@@ -18,6 +18,7 @@ import { SearchableComboboxPicker } from "@/components/shared/SearchableCombobox
 import { useCurrentLocale } from "@/components/shell/UserLocaleProvider";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter } from "@/lib/i18n/useDateFormatter";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
 interface TimezonePickerProps {
   description?: ReactNode;
@@ -64,17 +65,18 @@ export function TimezonePicker({
   const currentTimezoneTime =
     selectedTimezone && now ? clockFor(selectedTimezone.value) : "--:--:--";
 
-  const searchPlaceholder = placeholder || t("TimezoneSearch");
+  const searchPlaceholder = nonEmpty(placeholder) ?? t("TimezoneSearch");
 
   const groupedOptions = (query: string) => {
     const normalized = query.trim().toLowerCase();
     return getGroupedTimezones(intlTag)
-      .map((group) => ({
-        ...group,
-        items: group.items.filter((item) =>
-          normalized ? item.searchHaystack.includes(normalized) : true,
-        ),
-      }))
+      .map((group) =>
+        Object.assign({}, group, {
+          items: group.items.filter((item) =>
+            normalized ? item.searchHaystack.includes(normalized) : true,
+          ),
+        }),
+      )
       .filter((group) => group.items.length > 0);
   };
 
@@ -107,7 +109,7 @@ export function TimezonePicker({
         ))
       }
       searchPlaceholder={searchPlaceholder}
-      targetFallback={timezone || searchPlaceholder}
+      targetFallback={nonEmpty(timezone) ?? searchPlaceholder}
       targetItem={
         selectedTimezone
           ? {

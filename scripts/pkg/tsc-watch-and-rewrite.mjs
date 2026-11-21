@@ -10,81 +10,87 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveTypescriptTsc } from "./resolve-typescript-tsc.mjs";
 
-const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-const pkg = process.argv[2];
+function main() {
+  const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
+  const pkg = process.argv[2];
 
-if (!pkg) {
-  console.error("usage: tsc-watch-and-rewrite.mjs <package-dir>");
-  process.exit(1);
-}
-
-const pkgDir = join(root, "packages", pkg);
-const tsc = resolveTypescriptTsc([pkgDir, root]);
-if (!tsc) {
-  console.error("tsc-watch-and-rewrite: could not resolve TypeScript compiler");
-  process.exit(1);
-}
-const rewriteScript = join(root, "scripts/pkg/rewrite-package-hash-imports-in-dist.mjs");
-
-let rewriteTimer;
-let rewriteInFlight = false;
-let rewriteQueued = false;
-
-function scheduleRewrite() {
-  clearTimeout(rewriteTimer);
-  rewriteTimer = setTimeout(() => {
-    void runRewrite();
-  }, 250);
-}
-
-function runRewrite() {
-  if (rewriteInFlight) {
-    rewriteQueued = true;
+  if (!pkg) {
+    console.error("usage: tsc-watch-and-rewrite.mjs <package-dir>");
+    process.exitCode = 1;
     return;
   }
-  rewriteInFlight = true;
-  const child = spawn(process.execPath, [rewriteScript, pkg], {
-    cwd: root,
-    stdio: "inherit",
-  });
-  child.on("exit", (code) => {
-    rewriteInFlight = false;
-    if (code !== 0) {
-      console.error(`tsc-watch-and-rewrite: rewrite exited ${code}`);
+
+  const pkgDir = join(root, "packages", pkg);
+  const tsc = resolveTypescriptTsc([pkgDir, root]);
+  if (!tsc) {
+    console.error("tsc-watch-and-rewrite: could not resolve TypeScript compiler");
+    process.exitCode = 1;
+    return;
+  }
+  const rewriteScript = join(root, "scripts/pkg/rewrite-package-hash-imports-in-dist.mjs");
+
+  let rewriteTimer;
+  let rewriteInFlight = false;
+  let rewriteQueued = false;
+
+  function scheduleRewrite() {
+    clearTimeout(rewriteTimer);
+    rewriteTimer = setTimeout(() => {
+      runRewrite();
+    }, 250);
+  }
+
+  function runRewrite() {
+    if (rewriteInFlight) {
+      rewriteQueued = true;
+      return;
     }
-    if (rewriteQueued) {
-      rewriteQueued = false;
+    rewriteInFlight = true;
+    const child = spawn(process.execPath, [rewriteScript, pkg], {
+      cwd: root,
+      stdio: "inherit",
+    });
+    child.on("exit", (code) => {
+      rewriteInFlight = false;
+      if (code !== 0) {
+        console.error(`tsc-watch-and-rewrite: rewrite exited ${code}`);
+      }
+      if (rewriteQueued) {
+        rewriteQueued = false;
+        scheduleRewrite();
+      }
+    });
+    child.on("error", (error) => {
+      rewriteInFlight = false;
+      console.error(error);
+    });
+  }
+
+  const compiler = spawn(process.execPath, [tsc, "--watch", "--preserveWatchOutput"], {
+    cwd: pkgDir,
+    stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  function onChunk(chunk, stream) {
+    stream.write(chunk);
+    if (chunk.toString().includes("Watching for file changes")) {
       scheduleRewrite();
     }
-  });
-  child.on("error", (error) => {
-    rewriteInFlight = false;
-    console.error(error);
-  });
-}
-
-const compiler = spawn(process.execPath, [tsc, "--watch", "--preserveWatchOutput"], {
-  cwd: pkgDir,
-  stdio: ["inherit", "pipe", "pipe"],
-});
-
-function onChunk(chunk, stream) {
-  stream.write(chunk);
-  if (chunk.toString().includes("Watching for file changes")) {
-    scheduleRewrite();
   }
+
+  compiler.stdout.on("data", (chunk) => onChunk(chunk, process.stdout));
+  compiler.stderr.on("data", (chunk) => onChunk(chunk, process.stderr));
+
+  compiler.on("exit", (code) => {
+    process.exitCode = code ?? 1;
+  });
+
+  process.on("SIGINT", () => {
+    compiler.kill("SIGINT");
+  });
+  process.on("SIGTERM", () => {
+    compiler.kill("SIGTERM");
+  });
 }
 
-compiler.stdout.on("data", (chunk) => onChunk(chunk, process.stdout));
-compiler.stderr.on("data", (chunk) => onChunk(chunk, process.stderr));
-
-compiler.on("exit", (code) => {
-  process.exit(code ?? 1);
-});
-
-process.on("SIGINT", () => {
-  compiler.kill("SIGINT");
-});
-process.on("SIGTERM", () => {
-  compiler.kill("SIGTERM");
-});
+main();

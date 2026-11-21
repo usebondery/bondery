@@ -83,7 +83,7 @@ function isAllowedInside(inside) {
   if (parts.some((part) => ALLOWED_DIR_NAMES.has(part))) {
     return true;
   }
-  const base = parts[parts.length - 1] ?? "";
+  const base = parts.at(-1) ?? "";
   return base === "*.tsbuildinfo" || base.endsWith(".tsbuildinfo");
 }
 
@@ -129,7 +129,8 @@ function checkRootGitignore() {
       continue;
     }
     if (!isAllowedRepoPattern(body)) {
-      check.add(`.gitignore:${index + 1}: ${body} ignores a path inside a package. ${HINT}`);
+      // HINT holds the remedy.
+      check.add(`.gitignore:${index + 1}: ${body} ignores a path inside a package. ${HINT}`); // diagnostic-message: remedy-in-value HINT
     }
   }
 }
@@ -187,7 +188,8 @@ function checkIgnoredPathsOnDisk() {
       continue;
     }
     if (!isAllowedOnDisk(parts.slice(2).join("/"))) {
-      check.add(`${repoPath} is gitignored inside a package. ${HINT}`);
+      // HINT holds the remedy.
+      check.add(`${repoPath} is gitignored inside a package. ${HINT}`); // diagnostic-message: remedy-in-value HINT
     }
   }
 }

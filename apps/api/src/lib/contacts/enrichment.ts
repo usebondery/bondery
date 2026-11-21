@@ -126,7 +126,7 @@ export async function attachContactExtras<T extends ContactWithId>(
   contacts: T[],
   options?: { addresses?: boolean; avatarOptions?: AvatarTransformOptions },
 ): Promise<Array<T & ChannelsAndSocialExtras>> {
-  if (!contacts.length) {
+  if (contacts.length === 0) {
     return [];
   }
 

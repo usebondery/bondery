@@ -132,6 +132,8 @@ Full Dokploy runbook: [dokploy.md](./dokploy.mdx).
 
 Use when Redis is already managed outside this stack.
 
+The API serves **HTTPS only**, on container port `26642`, with the certificate and key in `BONDERY_PRIVATE_API_TLS_CERT_FILE` and `BONDERY_PRIVATE_API_TLS_KEY_FILE`. It does not start without them. The proxy in front must connect over HTTPS and trust the CA that signed that certificate (see [Reverse proxy](../deploy/reverse-proxy.mdx)). A platform that forwards only plain HTTP to the container port cannot run it; use the Compose stack there.
+
 ### Dokploy Docker Image fields
 
 Use the **full image reference**. If you enter only `usebondery/api:production`, Docker pulls from **Docker Hub**, not GHCR.
@@ -141,7 +143,7 @@ Use the **full image reference**. If you enter only `usebondery/api:production`,
 | **Docker image** | `ghcr.io/usebondery/api:1.7.0` |
 | **Registry URL** | leave empty, or `ghcr.io` if required |
 | **Username / Password** | empty for public packages |
-| **Container port** | `26631` |
+| **Container port** | `26642` (HTTPS) |
 | **Domain** | your API hostname |
 
 Set `BONDERY_PRIVATE_REDIS_URL` to your Redis URL. Use `rediss://` and a password; the API logs a warning in production otherwise. Do not leave it empty. For a private CA or a password file, set `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` and `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` (see [Configuration → Redis](../deploy/configuration.mdx#redis)).
@@ -170,7 +172,10 @@ docker compose up -d
 
 # Or build the API image locally (external Redis style)
 docker build -f apps/api/Dockerfile -t api:local .
-docker run --rm -p 26631:26631 --env-file apps/api/.env.production.local api:local`}
+docker run --rm -p 127.0.0.1:26642:26642 -v "$PWD/.temp/api-secrets/server:/bondery-api/server:ro" \\
+  -e BONDERY_PRIVATE_API_TLS_CERT_FILE=/bondery-api/server/tls.crt \\
+  -e BONDERY_PRIVATE_API_TLS_KEY_FILE=/bondery-api/server/tls.key \\
+  --env-file apps/api/.env.production.local api:local`}
   windows={`cd deploy/bondery
 Copy-Item .env.example .env
 # add secrets, then:
@@ -180,7 +185,9 @@ docker compose up -d
 
 # Or build the API image locally (external Redis style)
 docker build -f apps/api/Dockerfile -t api:local .
-docker run --rm -p 26631:26631 --env-file apps/api/.env.production.local api:local`}
+docker run --rm -p 127.0.0.1:26642:26642 -v "$PWD/.temp/api-secrets/server:/bondery-api/server:ro" -e BONDERY_PRIVATE_API_TLS_CERT_FILE=/bondery-api/server/tls.crt -e BONDERY_PRIVATE_API_TLS_KEY_FILE=/bondery-api/server/tls.key --env-file apps/api/.env.production.local api:local`}
 />
+
+`pnpm run api:secrets` creates that certificate in `.temp/api-secrets`. Check the API with its CA: `curl --cacert .temp/api-secrets/client/ca.crt https://127.0.0.1:26642/health/live`.
 
 Boot validates required env via `assertRequiredEnvAtStartup` (same list as `pnpm run check:env -w api`) before Fastify listens.

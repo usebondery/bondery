@@ -230,11 +230,13 @@
     "deleting": "Mazanie...",
     "duplicating": "Duplikovanie...",
     "errorTitle": "Chyba",
+    "mobileRuntimeError": "Chyba behu mobilnej aplikácie",
     "noResults": "Žiadne výsledky",
     "removing": "Odoberanie...",
     "savedTitle": "Uložené",
     "saving": "Ukladanie...",
     "sending": "Odosielanie...",
-    "successTitle": "Úspech"
+    "successTitle": "Úspech",
+    "unknownError": "Neznáma chyba"
   }
 }

@@ -120,7 +120,9 @@ export function ChatClient() {
   const sessionIdRef = useRef<string | undefined>(routeSessionId);
   const createdSessionIdRef = useRef<string | undefined>(undefined);
 
-  const notifyChatErrorRef = useRef<(error: unknown) => void>(() => {});
+  const notifyChatErrorRef = useRef<(error: unknown) => void>(() => {
+    // no-op: replaced with the live notifier on the next line
+  });
   notifyChatErrorRef.current = (error: unknown) => {
     notifications.show(
       errorNotificationTemplate({
@@ -147,7 +149,7 @@ export function ChatClient() {
   const { modelId, selectModel, turnOutcomes, withRetryIntent } = chat;
 
   const isLoading = status === "submitted" || status === "streaming";
-  const lastMessage = messages[messages.length - 1];
+  const lastMessage = messages.at(-1);
   const pendingApproval =
     lastMessage?.role === "assistant" ? findPendingApproval(lastMessage.parts) : undefined;
   const composerLocked = isLoading || pendingApproval !== undefined;
@@ -327,6 +329,13 @@ export function ChatClient() {
     }
   }
 
+  const storeCreatedSession = (sessionId: string) => {
+    createdSessionIdRef.current = sessionId;
+    sessionIdRef.current = sessionId;
+    setHighlightedSessionId(sessionId);
+    writeChatModelPreference(sessionId, modelId);
+  };
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const text = inputValue.trim();
@@ -340,10 +349,7 @@ export function ChatClient() {
     if (!sessionIdRef.current) {
       try {
         const sessionId = await createChatSessionMutation.mutateAsync();
-        createdSessionIdRef.current = sessionId;
-        sessionIdRef.current = sessionId;
-        setHighlightedSessionId(sessionId);
-        writeChatModelPreference(sessionId, modelId);
+        storeCreatedSession(sessionId);
       } catch (error) {
         notifyChatErrorRef.current(error);
         return;
@@ -383,13 +389,12 @@ export function ChatClient() {
     }
   }, [adjustedSubscriptionStatus]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: chatResetKey and routeSessionId only retrigger the focus; the effect body does not read them
   useEffect(() => {
     if (quotaExceeded) {
       return;
     }
     // Retrigger-only: focus when the session route or sidebar "new chat" reset changes.
-    void chatResetKey;
-    void routeSessionId;
     inputRef.current?.focus();
   }, [chatResetKey, quotaExceeded, routeSessionId]);
 
@@ -436,7 +441,7 @@ export function ChatClient() {
   // Retry is offered only for the last turn, and only when nothing was written.
   // A finished reply keeps its text, so a retry needs the stored status; a
   // stopped or failed one keeps its live parts.
-  const lastTurn = turns[turns.length - 1];
+  const lastTurn = turns.at(-1);
   const retryAllowed =
     lastTurn?.message.role === "assistant" &&
     lastTurn.activity?.status !== "complete" &&

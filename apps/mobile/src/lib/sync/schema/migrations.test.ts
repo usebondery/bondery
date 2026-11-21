@@ -167,6 +167,6 @@ describe("wipeSyncDatabase", () => {
       leftover: "1",
     });
 
-    wipeSyncDatabase(db);
+    assert.doesNotThrow(() => wipeSyncDatabase(db));
   });
 });

@@ -134,6 +134,7 @@ export async function runAvatarFileQueue(input: {
 
   const rows = loadPeopleAvatarRows(input.db, upsertIds);
   const downloads: Array<() => Promise<void>> = [];
+  const downloadedIds = new Set<string>();
 
   for (const row of rows) {
     const hasAvatar = row.has_avatar === 1;
@@ -164,7 +165,7 @@ export async function runAvatarFileQueue(input: {
       try {
         await input.fs.download(row.id, remoteUrl);
         markAvatarLocalClock(input.db, row.id, row.avatar_updated_at);
-        changed = true;
+        downloadedIds.add(row.id);
       } catch {
         // Retry on the next pull when the file is still missing or stale.
       }
@@ -172,5 +173,5 @@ export async function runAvatarFileQueue(input: {
   }
 
   await runPool(downloads, AVATAR_DOWNLOAD_CONCURRENCY);
-  return changed;
+  return changed || downloadedIds.size > 0;
 }

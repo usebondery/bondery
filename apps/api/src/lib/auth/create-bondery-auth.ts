@@ -35,7 +35,7 @@ import {
   resolveApiResourceIdentifiers,
   resolveAuthErrorPageUrl,
   resolveBetterAuthIssuerUrl,
-  resolveMcpPluginResource,
+  resolveMcpResourceIdentifier,
   resolveMcpResourceIdentifiers,
   resolveTrustedOAuthClientIds,
   resolveUseSecureCookies,
@@ -259,7 +259,7 @@ export function createBonderyAuth() {
         // Canonical MCP resource. mcp() also appends this identifier to
         // `resources` if missing. REST identifiers stay in `resources` with
         // REST-only allowedScopes; first-party provisioner links only REST.
-        resource: resolveMcpPluginResource(),
+        resource: resolveMcpResourceIdentifier(),
         resources: [
           ...resolveApiResourceIdentifiers().map((identifier) => ({
             allowedScopes: [...OAUTH_PROVIDER_SCOPES],

@@ -58,8 +58,16 @@ export type PrefixedKeys<
 /** Valid keyPrefix values for a namespace (object branch paths in the JSON tree). */
 export type BranchPrefixFor<NS extends NamespaceKey> = NamespacePrefixes[NS];
 
-/** Bivariant translate fn for utilities that accept dynamic or cross-section keys. */
-export type LooseTranslateFn = (key: string, options?: Record<string, unknown>) => string;
+/**
+ * Bivariant translate fn for utilities that accept dynamic or cross-section keys.
+ *
+ * Declared as a method on purpose. i18next 27 types `t()` as an overload list whose parameters
+ * are tuple unions, and a plain function type no longer overlaps it, so `t as LooseTranslateFn`
+ * fails with TS2352. A method signature compares bivariantly and keeps the cast working.
+ */
+export type LooseTranslateFn = {
+  bivarianceHack(key: string, options?: Record<string, unknown>): string;
+}["bivarianceHack"];
 
 /** Namespace-scoped translate function with optional prefix narrowing. */
 export type TranslateFn<

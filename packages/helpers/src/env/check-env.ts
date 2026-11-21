@@ -67,10 +67,10 @@ export function parseEnvFile(filePath: string): Record<string, string> {
 
 /**
  * Checks if all required environment variables are defined.
- * Exits with error code 1 if any required variables are missing.
+ * Throws when any required variable is missing.
  *
  * @param config - Configuration object for env validation
- * @throws Exits process with code 1 if validation fails
+ * @throws {Error} When required variables are missing. The message lists those names.
  *
  * @example
  * ```typescript
@@ -107,18 +107,18 @@ export function checkEnvVariables(config: EnvCheckConfig): void {
   // Check for missing variables
   const missing: string[] = [];
 
-  requiredVars.forEach((varName) => {
+  for (const varName of requiredVars) {
     if (!allEnv[varName] || allEnv[varName] === "") {
       missing.push(varName);
     }
-  });
+  }
 
   // Report results
   if (missing.length > 0) {
     console.error(`${colors.red}❌ Missing required environment variables:${colors.reset}\n`);
-    missing.forEach((varName) => {
+    for (const varName of missing) {
       console.error(`   ${colors.red}✗${colors.reset} ${varName}`);
-    });
+    }
 
     if (fileExists) {
       console.error(
@@ -129,7 +129,7 @@ export function checkEnvVariables(config: EnvCheckConfig): void {
         `\n${colors.yellow}Please set these variables in your deployment environment (e.g. Dokploy, GitHub Actions)${colors.reset}`,
       );
     }
-    process.exit(1);
+    throw new Error(`Missing required environment variables: ${missing.join(", ")}`);
   }
 
   console.log(

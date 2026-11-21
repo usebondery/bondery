@@ -1,6 +1,7 @@
 {
   "LoggedIn": {
-    "OpenBondery": "Otvoriti Bondery"
+    "OpenBondery": "Otvoriti Bondery",
+    "UnsupportedSiteMessage": "Posjeti nečiji profil na Instagramu ili LinkedInu da vidiš više radnji i mogućnosti proširenja."
   },
   "LoggedOut": {
     "Description": "Poveži račun da spremaš kontakte s društvenih mreža.",
@@ -20,6 +21,12 @@
     "Title": "Potrebno ažuriranje"
   },
   "Welcome": {
-    "ConnectButton": "Povezati Bondery račun"
+    "ConnectButton": "Povezati Bondery račun",
+    "Description": "Poveži svoj Bondery račun da spremaš kontakte izravno s profila na društvenim mrežama.",
+    "SignInHint": "Zatražit će se da se prijaviš u svoj Bondery račun i autoriziraš proširenje.",
+    "SuccessClose": "Sada možeš zatvoriti ovu karticu.",
+    "SuccessDescription": "Tvoj Bondery račun sada je povezan. Posjeti bilo koji profil na Instagramu ili LinkedInu i počni spremati kontakte.",
+    "SuccessTitle": "Sve je spremno!",
+    "Title": "Dobrodošli u Bondery"
   }
 }

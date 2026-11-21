@@ -1998,39 +1998,46 @@ import r1994 from "../locales/sr/validation.json" with { type: "json" };
 import r1995 from "../locales/sv/validation.json" with { type: "json" };
 import r1996 from "../locales/tr/validation.json" with { type: "json" };
 import r1997 from "../locales/uk/validation.json" with { type: "json" };
-import r1998 from "../locales/en/platform/email/WelcomeEmail.json" with { type: "json" };
-import r1999 from "../locales/bg/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2000 from "../locales/cs/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2001 from "../locales/da/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2002 from "../locales/de/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2003 from "../locales/el/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2004 from "../locales/es/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2005 from "../locales/et/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2006 from "../locales/fi/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2007 from "../locales/fr/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2008 from "../locales/hr/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2009 from "../locales/hu/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2010 from "../locales/it/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2011 from "../locales/lt/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2012 from "../locales/lv/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2013 from "../locales/nb/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2014 from "../locales/nl/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2015 from "../locales/pl/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2016 from "../locales/pt/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2017 from "../locales/ro/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2018 from "../locales/ru/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2019 from "../locales/sk/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2020 from "../locales/sl/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2021 from "../locales/sr/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2022 from "../locales/sv/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2023 from "../locales/tr/platform/email/WelcomeEmail.json" with { type: "json" };
-import r2024 from "../locales/uk/platform/email/WelcomeEmail.json" with { type: "json" };
+import r1998 from "../locales/en/platform/website/WebsiteBlog.json" with { type: "json" };
+import r1999 from "../locales/en/platform/website/WebsiteDocs.json" with { type: "json" };
+import r2000 from "../locales/en/platform/website/WebsiteLanding.json" with { type: "json" };
+import r2001 from "../locales/en/platform/website/WebsiteLandingVisuals.json" with { type: "json" };
+import r2002 from "../locales/en/platform/website/WebsiteLegal.json" with { type: "json" };
+import r2003 from "../locales/en/platform/website/WebsiteNotFound.json" with { type: "json" };
+import r2004 from "../locales/en/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2005 from "../locales/bg/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2006 from "../locales/cs/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2007 from "../locales/da/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2008 from "../locales/de/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2009 from "../locales/el/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2010 from "../locales/es/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2011 from "../locales/et/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2012 from "../locales/fi/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2013 from "../locales/fr/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2014 from "../locales/hr/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2015 from "../locales/hu/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2016 from "../locales/it/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2017 from "../locales/lt/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2018 from "../locales/lv/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2019 from "../locales/nb/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2020 from "../locales/nl/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2021 from "../locales/pl/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2022 from "../locales/pt/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2023 from "../locales/ro/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2024 from "../locales/ru/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2025 from "../locales/sk/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2026 from "../locales/sl/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2027 from "../locales/sr/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2028 from "../locales/sv/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2029 from "../locales/tr/platform/email/WelcomeEmail.json" with { type: "json" };
+import r2030 from "../locales/uk/platform/email/WelcomeEmail.json" with { type: "json" };
 
 import type { SupportedLocale } from "@bondery/schemas/locale/supported-locale";
 
+/** An englishOnly namespace lists the source locale alone. The loader falls back to it. */
 export const resourcesByNamespace: Record<
   string,
-  Record<SupportedLocale, Record<string, unknown>>
+  Partial<Record<SupportedLocale, Record<string, unknown>>>
 > = {
   "AboutPage": {
     en: r0,
@@ -4178,34 +4185,52 @@ export const resourcesByNamespace: Record<
     tr: r1996,
     uk: r1997,
   },
-  "WelcomeEmail": {
+  "WebsiteBlog": {
     en: r1998,
-    bg: r1999,
-    cs: r2000,
-    da: r2001,
-    de: r2002,
-    el: r2003,
-    es: r2004,
-    et: r2005,
-    fi: r2006,
-    fr: r2007,
-    hr: r2008,
-    hu: r2009,
-    it: r2010,
-    lt: r2011,
-    lv: r2012,
-    nb: r2013,
-    nl: r2014,
-    pl: r2015,
-    pt: r2016,
-    ro: r2017,
-    ru: r2018,
-    sk: r2019,
-    sl: r2020,
-    sr: r2021,
-    sv: r2022,
-    tr: r2023,
-    uk: r2024,
+  },
+  "WebsiteDocs": {
+    en: r1999,
+  },
+  "WebsiteLanding": {
+    en: r2000,
+  },
+  "WebsiteLandingVisuals": {
+    en: r2001,
+  },
+  "WebsiteLegal": {
+    en: r2002,
+  },
+  "WebsiteNotFound": {
+    en: r2003,
+  },
+  "WelcomeEmail": {
+    en: r2004,
+    bg: r2005,
+    cs: r2006,
+    da: r2007,
+    de: r2008,
+    el: r2009,
+    es: r2010,
+    et: r2011,
+    fi: r2012,
+    fr: r2013,
+    hr: r2014,
+    hu: r2015,
+    it: r2016,
+    lt: r2017,
+    lv: r2018,
+    nb: r2019,
+    nl: r2020,
+    pl: r2021,
+    pt: r2022,
+    ro: r2023,
+    ru: r2024,
+    sk: r2025,
+    sl: r2026,
+    sr: r2027,
+    sv: r2028,
+    tr: r2029,
+    uk: r2030,
   },
 };
 

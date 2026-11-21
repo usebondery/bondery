@@ -67,7 +67,7 @@ jobs:
         BONDERY_INFRA_VERSION=${{ inputs.version }}
 
   image_ready:
-    needs: [promote, build-push]
+    needs: [ promote, build-push ]
     if: ${{ always() && (needs.promote.result == 'success' || needs.build-push.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
@@ -95,7 +95,7 @@ jobs:
       - run: echo "Extension gate approved — promote to :production"
 
   promote-production:
-    needs: [smoke, extension_production_gate]
+    needs: [ smoke, extension_production_gate ]
     if: >-
       always() &&
       needs.smoke.result == 'success' &&

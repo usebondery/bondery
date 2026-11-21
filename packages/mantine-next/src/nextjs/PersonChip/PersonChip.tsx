@@ -10,7 +10,7 @@ import {
   useCombobox,
 } from "@mantine/core";
 import { IconChevronDown, IconX } from "@tabler/icons-react";
-import { type ReactNode, useEffect, useRef } from "react";
+import { type ReactElement, type ReactNode, useEffect, useRef } from "react";
 import Link, { hrefAssert } from "#nextjs/NextLink.js";
 import { PersonAvatarTooltip } from "#nextjs/PersonAvatar/PersonAvatarTooltip.js";
 import { PEOPLE_PICKER_DROPDOWN_WIDTH } from "#peoplePicker/constants.js";
@@ -20,6 +20,7 @@ import {
   type PeoplePickerOnSearch,
 } from "#peoplePicker/peoplePickerPagedList.js";
 import { usePeoplePickerPagedList } from "#peoplePicker/usePeoplePickerPagedList.js";
+import { nonEmpty } from "#utils/nonEmpty.js";
 import { PersonChip as PersonChipView } from "../../PersonChip/PersonChip.js";
 import { personChipSizes } from "../../PersonChip/personChipLayout.js";
 
@@ -86,6 +87,8 @@ export type PersonChipProps = PersonChipBaseProps &
       }
   );
 
+const NO_PEOPLE: PersonChipIdentity[] = [];
+
 export function PersonChip({
   person,
   size = "md",
@@ -96,7 +99,7 @@ export function PersonChip({
   showChevronWhenEmpty = true,
   disabled = false,
   placeholder = "Select person",
-  people = [],
+  people = NO_PEOPLE,
   contactsHasMore = false,
   searchPlaceholder = "Search...",
   noResultsLabel = "No people found",
@@ -115,7 +118,7 @@ export function PersonChip({
   rightSection,
   onSearch,
   searchDebounceMs,
-}: PersonChipProps) {
+}: PersonChipProps): ReactElement {
   const { chevronSize, clearSize } = personChipSizes(size);
 
   const getDisplayName = (candidate: PersonChipIdentity | null) => {
@@ -189,10 +192,10 @@ export function PersonChip({
   }, [visibleItems]);
 
   const fullName = getDisplayName(person);
-  const resolvedHref = href || (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
+  const resolvedHref =
+    nonEmpty(href) ?? (person ? `${WEBAPP_ROUTES.PERSON}/${person.id}` : undefined);
 
-  const shouldShowChevron =
-    isSelectable && !disabled && ((person && !onClear) || (!person && showChevronWhenEmpty));
+  const shouldShowChevron = isSelectable && !disabled && (person ? !onClear : showChevronWhenEmpty);
 
   const endSection =
     rightSection !== undefined ? (
@@ -227,11 +230,11 @@ export function PersonChip({
       avatar={person?.avatar}
       avatarEdge={avatarEdge}
       badgeVariant={badgeVariant}
-      color={person ? color || "branding-primary" : "gray"}
+      color={person ? (nonEmpty(color) ?? "branding-primary") : "gray"}
       disabled={disabled}
       firstName={person?.firstName ?? ""}
       hasPerson={Boolean(person)}
-      interactive={isSelectable || isClickable}
+      interactive={isSelectable ? true : isClickable}
       label={fullName}
       lastName={person?.lastName}
       rightSection={endSection}

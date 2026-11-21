@@ -142,7 +142,7 @@ export async function postRedditAnnouncement(
     );
   }
 
-  const result = (await response.json()) as { json?: { errors?: unknown[] } };
+  const result = (await response.json()) as { json?: { errors?: unknown[] } } | null;
   const errors = result?.json?.errors;
   if (errors && Array.isArray(errors) && errors.length > 0) {
     throw new Error(`Reddit returned submission errors: ${JSON.stringify(errors)}`);

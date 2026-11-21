@@ -24,8 +24,9 @@ export function SectionHeader({
   return (
     <Stack
       align={centered ? "center" : "flex-start"}
-      className={centered ? "mx-auto max-w-2xl" : "max-w-xl"}
       gap="md"
+      maw={centered ? "42rem" : "36rem"}
+      mx={centered ? "auto" : undefined}
     >
       {eyebrow ? (
         <Badge radius="xl" size="lg" tt="none" variant="light">
@@ -33,8 +34,11 @@ export function SectionHeader({
         </Badge>
       ) : null}
       <Title
-        className="text-3xl! leading-tight! font-bold tracking-tight md:text-5xl!"
+        fw={700}
+        fz={{ base: "1.875rem", md: "3rem" }}
         id={titleId}
+        lh={1.25}
+        lts="-0.025em"
         order={2}
         style={{ textWrap: "balance" }}
         ta={centered ? "center" : "left"}

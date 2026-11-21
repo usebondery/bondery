@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { defaultWelcomeCopy } from "#fixtures/default-copy.js";
 import { DEFAULT_APP_URL, type EmailDocumentProps } from "#shared/chrome.js";
 import { EmailBody } from "#shared/EmailBody.js";
@@ -24,7 +25,7 @@ export default function WelcomeEmail({
   lang,
   title,
   websiteUrl,
-}: WelcomeEmailProps) {
+}: WelcomeEmailProps): ReactElement {
   return (
     <EmailWrapper
       chrome={chrome}

@@ -24,7 +24,7 @@ function advertisedLatestVersion(): string {
   return latestProductionCalver(readRuntimeProductVersion(packageVersion), MIN_EXTENSION_VERSION);
 }
 
-describe("GET /extension/manifest", () => {
+describe("gET /extension/manifest", () => {
   it("advertises a production BONDERY_INFRA_VERSION pin over an RC package.json", () => {
     process.env.BONDERY_INFRA_VERSION = "1.9.2";
     assert.equal(advertisedLatestVersion(), "1.9.2");

@@ -17,7 +17,7 @@ describe("rewriteToolErrorText", () => {
     assert.ok(rewritten);
     assert.equal(rewritten.error.code, "validation_error");
     assert.match(rewritten.error.message, /search_contacts/);
-    assert.match(String(rewritten.error.doc_url), /\/docs\/api\/errors\/validation_error$/);
+    assert.match(rewritten.error.doc_url, /\/docs\/api\/errors\/validation_error$/);
     assert.equal(rewritten.error.request_id, REQUEST_ID);
     assert.equal((rewritten.error.details as { toolName: string }).toolName, "search_contacts");
     assert.match(rewritten.error.agent_message, /correct those arguments/);

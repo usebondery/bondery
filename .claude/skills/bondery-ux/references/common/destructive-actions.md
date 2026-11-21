@@ -6,12 +6,12 @@ Friction should match **consequences**, not developer convenience. Copy rules: [
 
 ## Decision table
 
-| Situation | Pattern |
-|-----------|---------|
-| **Hard delete, no undo** (contact, account, group) | Two-step: overflow menu → confirm dialog |
-| **Soft remove or easily reversed** (social link, clear field) | Direct action; undo toast if feasible |
-| **Batch delete** | Always confirm — high consequence |
-| **Action inside a sheet** | Confirm in same sheet; no extra screen |
+| Situation                                                     | Pattern                                  |
+| ------------------------------------------------------------- | ---------------------------------------- |
+| **Hard delete, no undo** (contact, account, group)            | Two-step: overflow menu → confirm dialog |
+| **Soft remove or easily reversed** (social link, clear field) | Direct action; undo toast if feasible    |
+| **Batch delete**                                              | Always confirm — high consequence        |
+| **Action inside a sheet**                                     | Confirm in same sheet; no extra screen   |
 
 ---
 

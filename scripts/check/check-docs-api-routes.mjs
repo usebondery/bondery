@@ -208,7 +208,9 @@ function loadSpecRoutes() {
 const { paths: specPaths, routes: specRoutes } = loadSpecRoutes();
 
 if (specRoutes.size === 0) {
-  check.add(`Parsed no routes from ${repoPath(specPath)}. Is the spec valid?`);
+  check.add(
+    `Parsed no routes from ${repoPath(specPath)}. Regenerate the spec with \`pnpm run generate:openapi\` and check that it lists paths.`,
+  );
   check.ok("0 pages checked");
 } else {
   const known = new Set([...specRoutes, ...ROUTES_OUTSIDE_SPEC]);
@@ -220,7 +222,7 @@ if (specRoutes.size === 0) {
     const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
     pages += 1;
 
-    lines.forEach((line, index) => {
+    for (const [index, line] of lines.entries()) {
       const at = `${path}:${index + 1}`;
 
       for (const match of line.matchAll(MENTION)) {
@@ -264,7 +266,7 @@ if (specRoutes.size === 0) {
 
         check.add(
           `${at}: ${method} ${route.path} is not in the OpenAPI spec` +
-            suggestionSuffix(method, route.specPath, known),
+            suggestionSuffix(method, route.specPath, known), // diagnostic-message: remedy-in-value suggestionSuffix()
         );
       }
 
@@ -314,9 +316,11 @@ if (specRoutes.size === 0) {
           continue;
         }
 
-        check.add(`${at}: ${url} does not match any path in the OpenAPI spec`);
+        check.add(
+          `${at}: ${url} does not match any path in the OpenAPI spec. Fix the path in the page, or add the route in apps/api and run \`pnpm run generate:openapi\`.`,
+        );
       }
-    });
+    }
   }
 
   check.ok(`${mentions} route reference(s) across ${pages} pages match the OpenAPI spec`);
@@ -339,8 +343,8 @@ function isApiHost(url) {
  * The closest known route for the same method, so a typo or a stale prefix is
  * obvious from the failure. Returns `""` when nothing is close.
  */
-function suggestionSuffix(method, specPath, known) {
-  const wanted = segments(specPath);
+function suggestionSuffix(method, requestedPath, known) {
+  const wanted = segments(requestedPath);
   let best = null;
   let bestScore = 0;
 
@@ -368,7 +372,9 @@ function suggestionSuffix(method, specPath, known) {
     }
   }
 
-  return best === null ? "" : `. Did you mean ${best}?`;
+  return best === null
+    ? ". Fix the path in the page to match a route in packages/openapi-spec/openapi.yaml."
+    : `. Did you mean ${best}?`;
 }
 
 /** `true` when two segments are equal or differ by one typo (length 1). */

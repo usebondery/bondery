@@ -33,7 +33,9 @@ async function handshake(
   const server = createServer({ cert: certificatePem, key: privateKeyPem }, (socket) => {
     socket.end();
   });
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  await new Promise<void>((resolve) => {
+    server.listen(0, "127.0.0.1", resolve);
+  });
   const address = server.address();
   assert.ok(address && typeof address === "object");
   try {
@@ -53,7 +55,9 @@ async function handshake(
       socket.on("error", reject);
     });
   } finally {
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
   }
 }
 
@@ -95,7 +99,9 @@ describe("redis secrets", () => {
 
   it("also accepts the loopback address that local dev connects to", async () => {
     const certificate = await generateRedisCertificate(redisCertificateHostnames("bondery"));
-    await handshake(certificate.certificatePem, certificate.privateKeyPem);
+    await assert.doesNotReject(() =>
+      handshake(certificate.certificatePem, certificate.privateKeyPem),
+    );
   });
 
   it("replaces a certificate that expires soon or misses a hostname", async () => {

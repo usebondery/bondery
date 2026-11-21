@@ -61,16 +61,16 @@
   "CreateNewGroup": "Créer un groupe",
   "DeleteGroup": {
     "ErrorDescription": "Impossible de supprimer le groupe. Réessayez.",
-    "LoadingDescription": "Suppression du groupe «\u00a0{label}\u00a0»",
-    "Message": "Voulez-vous vraiment supprimer «\u00a0{label}\u00a0»\u00a0? Cette action est irréversible. Les contacts du groupe ne seront pas supprimés.",
+    "LoadingDescription": "Suppression du groupe « {label} »",
+    "Message": "Voulez-vous vraiment supprimer « {label} » ? Cette action est irréversible. Les contacts du groupe ne seront pas supprimés.",
     "SuccessDescription": "Groupe supprimé",
-    "Title": "Supprimer le groupe\u00a0?"
+    "Title": "Supprimer le groupe ?"
   },
   "Duplicate": "Dupliquer",
   "DuplicateGroup": {
     "DuplicatedName": "{name} (copie)",
     "ErrorDescription": "Impossible de dupliquer le groupe. Réessayez.",
-    "LoadingDescription": "Duplication du groupe «\u00a0{label}\u00a0»",
+    "LoadingDescription": "Duplication du groupe « {label} »",
     "SuccessDescription": "Groupe dupliqué"
   },
   "Edit": "Modifier",
@@ -94,7 +94,9 @@
     "UpdateFailed": "Impossible de mettre à jour le groupe"
   },
   "EmojiEmptySearch": "Aucun emoji trouvé",
+  "EmojiLabel": "Emoji",
   "EmojiSearchPlaceholder": "Rechercher des emojis…",
+  "EmojiSelectPlaceholder": "Sélectionner un emoji",
   "Empty": "Aucun groupe pour le moment. Créez-en un pour organiser vos contacts.",
   "FallbackTitle": "Groupe",
   "HeaderDescription": "Les groupes permettent de classer les personnes pour filtrer et agir plus vite.",

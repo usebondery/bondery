@@ -1,7 +1,7 @@
 import { BRAND_PRIMARY_COLOR } from "@bondery/branding";
 import { BonderyLogotypeBlack } from "@bondery/branding/react";
 import { formatLegalAddressLine, LEGAL_ENTITY, WEBSITE_ROUTES } from "@bondery/helpers";
-import type { ReactNode } from "react";
+import type { ReactElement, ReactNode } from "react";
 import {
   Body,
   Container,
@@ -22,7 +22,12 @@ import {
   type EmailChromeCopy,
   type EmailDocumentProps,
 } from "#shared/chrome.js";
-import { chromeLinkStyle, EMAIL_PAGE_BG, footerTextStyle } from "#shared/email-styles.js";
+import {
+  chromeLinkStyle,
+  EMAIL_CONTAINER_MAX_WIDTH,
+  EMAIL_PAGE_BG,
+  footerTextStyle,
+} from "#shared/email-styles.js";
 import { interpolateNamedLinks } from "#shared/interpolate-named-links.js";
 
 function joinUrl(origin: string, path: string): string {
@@ -43,7 +48,7 @@ export function EmailWrapper({
 }: EmailDocumentProps & {
   children: ReactNode;
   preview: string;
-}) {
+}): ReactElement {
   const origin = websiteUrl.replace(/\/+$/, "");
   const supportHref = joinUrl(origin, WEBSITE_ROUTES.CONTACT);
   const docsHref = joinUrl(origin, WEBSITE_ROUTES.DOCS);
@@ -56,7 +61,7 @@ export function EmailWrapper({
       <Head>
         <title>{documentTitle}</title>
         <Font
-          fallbackFontFamily={"sans-serif"}
+          fallbackFontFamily="sans-serif"
           fontFamily="Lexend"
           fontStyle="normal"
           fontWeight={400}
@@ -81,12 +86,13 @@ export function EmailWrapper({
       >
         <Body style={{ backgroundColor: EMAIL_PAGE_BG, margin: 0, padding: 0 }}>
           <Container
-            className="mx-auto max-w-[600px] px-9"
+            className="mx-auto px-9"
             style={{
               backgroundColor: EMAIL_PAGE_BG,
+              maxWidth: EMAIL_CONTAINER_MAX_WIDTH,
             }}
           >
-            <Section className="mb-9 mt-9 text-center">
+            <Section className="my-9 text-center">
               <Link
                 href={origin}
                 style={{ display: "inline-block", textDecoration: "none" }}

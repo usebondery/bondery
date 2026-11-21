@@ -31,7 +31,17 @@ export function isLiveStatus(status: DictationStatus): boolean {
 }
 
 /** Maps an engine error onto the sticky status that explains it. */
-export function statusForError(code: DictationErrorCode): DictationStatus {
+export function statusForError(
+  code: DictationErrorCode,
+):
+  | "busy"
+  | "denied"
+  | "failed"
+  | "idle"
+  | "no-service"
+  | "offline"
+  | "service-off"
+  | "unavailable" {
   switch (code) {
     case "not-allowed":
       return "denied";

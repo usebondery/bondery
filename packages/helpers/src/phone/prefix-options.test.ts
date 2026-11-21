@@ -29,7 +29,7 @@ describe("localizeTelephonePrefixLabel", () => {
   });
 });
 
-describe("TELEPHONE_PREFIX_OPTIONS order", () => {
+describe("telephone prefix options order", () => {
   it("sorts by dial digits lexicographically", () => {
     assert.ok(compareTelephonePrefixByDialDigits("+420", "+43") < 0);
 

@@ -1,5 +1,8 @@
 import { SOCIAL_LINKS, WEBSITE_ROUTES } from "@bondery/helpers";
 import { AnchorLink, type AppHref, hrefAssert } from "@bondery/mantine-next";
+import landing from "@bondery/translations/locales/en/platform/website/WebsiteLanding.json" with {
+  type: "json",
+};
 import { Box, Divider, Flex, Paper, Title } from "@mantine/core";
 import {
   IconBrandDiscordFilled,
@@ -29,33 +32,44 @@ function hasHref(link: LinkItem): link is LinkItem & { href: AppHref } {
   return typeof link.href === "string" && link.href.length > 0;
 }
 
-const LinkGroup = ({ title, links }: LinkGroupItem) => (
-  <Box>
-    <Title fw="bold" mb="xs" order={3}>
-      {title}
-    </Title>
-    {links.filter(hasHref).map((link) => (
-      <AnchorLink
-        c="dimmed"
-        display="block"
-        fz="sm"
-        href={link.href}
-        key={link.key}
-        py={4}
-        target={link.target}
-      >
-        {link.title}
-      </AnchorLink>
-    ))}
-  </Box>
-);
+function LinkGroup({ title, links }: LinkGroupItem) {
+  return (
+    <Box>
+      <Title fw="bold" mb="xs" order={3}>
+        {title}
+      </Title>
+      {links.filter(hasHref).map((link) => (
+        <AnchorLink
+          c="dimmed"
+          display="block"
+          fz="sm"
+          href={link.href}
+          key={link.key}
+          py={4}
+          target={link.target}
+        >
+          {link.title}
+        </AnchorLink>
+      ))}
+    </Box>
+  );
+}
+
+/** Network names are brand names. They are not translated. */
+const NETWORK_NAMES = {
+  discord: "Discord",
+  github: "GitHub",
+  linkedin: "LinkedIn",
+  reddit: "Reddit",
+  x: "X",
+} as const;
 
 export function Footer() {
   return (
-    <Box component="footer" my={"xl"}>
+    <Box component="footer" my="xl">
       <Paper
         {...siteFrameProps}
-        p={"xl"}
+        p="xl"
         radius="md"
         shadow="md"
         style={{
@@ -67,37 +81,58 @@ export function Footer() {
           <Box style={{ minWidth: "200px" }}>
             <LinkGroup
               links={[
-                { href: "/#features", key: "features", title: "Features" },
-                { href: "/#pricing", key: "pricing", title: "Pricing" },
-                { href: routeAssert(WEBSITE_ROUTES.DOCS), key: "docs", title: "Docs" },
+                { href: "/#features", key: "features", title: landing.Footer.Links.Features },
+                { href: "/#pricing", key: "pricing", title: landing.Footer.Links.Pricing },
+                {
+                  href: routeAssert(WEBSITE_ROUTES.DOCS),
+                  key: "docs",
+                  title: landing.Footer.Links.Docs,
+                },
                 {
                   href: hrefAssert("/roadmap"),
                   key: "roadmap",
                   target: "_blank",
-                  title: "Roadmap",
+                  title: landing.Footer.Links.Roadmap,
                 },
               ]}
-              title="Product"
+              title={landing.Footer.Groups.Product}
             />
           </Box>
           <Box style={{ minWidth: "200px" }}>
             <LinkGroup
               links={[
-                { href: WEBSITE_ROUTES.BLOG, key: "blog", title: "Blog" },
-                { href: WEBSITE_ROUTES.CONTACT, key: "contact", title: "Contact us" },
-                { href: hrefAssert("/status"), key: "status", target: "_blank", title: "Status" },
+                { href: WEBSITE_ROUTES.BLOG, key: "blog", title: landing.Footer.Links.Blog },
+                {
+                  href: WEBSITE_ROUTES.CONTACT,
+                  key: "contact",
+                  title: landing.Footer.Links.Contact,
+                },
+                {
+                  href: hrefAssert("/status"),
+                  key: "status",
+                  target: "_blank",
+                  title: landing.Footer.Links.Status,
+                },
               ]}
-              title="Company"
+              title={landing.Footer.Groups.Company}
             />
           </Box>
           <Box style={{ minWidth: "200px" }}>
             <LinkGroup
               links={[
-                { href: WEBSITE_ROUTES.PRIVACY, key: "privacy", title: "Privacy Policy" },
-                { href: WEBSITE_ROUTES.TERMS, key: "terms", title: "Terms of Service" },
-                { href: WEBSITE_ROUTES.SECURITY, key: "security", title: "Security" },
+                {
+                  href: WEBSITE_ROUTES.PRIVACY,
+                  key: "privacy",
+                  title: landing.Footer.Links.Privacy,
+                },
+                { href: WEBSITE_ROUTES.TERMS, key: "terms", title: landing.Footer.Links.Terms },
+                {
+                  href: WEBSITE_ROUTES.SECURITY,
+                  key: "security",
+                  title: landing.Footer.Links.Security,
+                },
               ]}
-              title="Legal"
+              title={landing.Footer.Groups.Legal}
             />
           </Box>
           <Box style={{ minWidth: "200px" }}>
@@ -109,7 +144,7 @@ export function Footer() {
                   target: "_blank",
                   title: (
                     <Flex align="center" gap={4}>
-                      <IconBrandDiscordFilled size={16} /> Discord
+                      <IconBrandDiscordFilled size={16} /> {NETWORK_NAMES.discord}
                     </Flex>
                   ),
                 },
@@ -120,7 +155,7 @@ export function Footer() {
                   target: "_blank",
                   title: (
                     <Flex align="center" gap={4}>
-                      <IconBrandReddit size={16} /> Reddit
+                      <IconBrandReddit size={16} /> {NETWORK_NAMES.reddit}
                     </Flex>
                   ),
                 },
@@ -130,7 +165,7 @@ export function Footer() {
                   target: "_blank",
                   title: (
                     <Flex align="center" gap={4}>
-                      <IconBrandX size={16} /> X
+                      <IconBrandX size={16} /> {NETWORK_NAMES.x}
                     </Flex>
                   ),
                 },
@@ -140,7 +175,7 @@ export function Footer() {
                   target: "_blank",
                   title: (
                     <Flex align="center" gap={4}>
-                      <IconBrandLinkedinFilled size={16} /> LinkedIn
+                      <IconBrandLinkedinFilled size={16} /> {NETWORK_NAMES.linkedin}
                     </Flex>
                   ),
                 },
@@ -150,12 +185,12 @@ export function Footer() {
                   target: "_blank",
                   title: (
                     <Flex align="center" gap={4}>
-                      <IconBrandGithubFilled size={16} /> GitHub
+                      <IconBrandGithubFilled size={16} /> {NETWORK_NAMES.github}
                     </Flex>
                   ),
                 },
               ]}
-              title="Connect with us"
+              title={landing.Footer.Groups.Connect}
             />
           </Box>
         </Flex>

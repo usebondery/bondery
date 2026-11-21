@@ -78,8 +78,8 @@ export async function syncSubscriptionFromStripe(
       query: `metadata['bondery_user_id']:'${user.id}'`,
     });
     stripeCustomer = search.data[0] ?? null;
-  } catch (err) {
-    log?.warn({ err, userId: user.id }, "subscription-sync: Stripe customer search failed");
+  } catch (error) {
+    log?.warn({ err: error, userId: user.id }, "subscription-sync: Stripe customer search failed");
   }
 
   if (!stripeCustomer && email) {

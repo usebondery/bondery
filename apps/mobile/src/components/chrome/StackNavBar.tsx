@@ -39,7 +39,7 @@ export function StackNavBar({
   const titleContent =
     titleRow ??
     (title ? (
-      <Text className="text-center text-[17px] font-bold" numberOfLines={1} size={null}>
+      <Text className="text-nav font-bold" numberOfLines={1} size={null} ta="center">
         {title}
       </Text>
     ) : null);

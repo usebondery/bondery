@@ -8,6 +8,15 @@ export interface SuccessNotificationTemplateProps {
   title: string;
 }
 
+type SuccessNotificationPayload = {
+  color: "green";
+  icon: ReactNode;
+  loading: false;
+  message: string;
+  radius: string | number;
+  title: string;
+};
+
 /**
  * Builds a consistent success notification payload.
  *
@@ -21,7 +30,7 @@ export function successNotificationTemplate({
   description,
   radius = "xl",
   icon = createElement(IconCheck, { size: 18 }),
-}: SuccessNotificationTemplateProps) {
+}: SuccessNotificationTemplateProps): SuccessNotificationPayload {
   return {
     color: "green",
     icon,

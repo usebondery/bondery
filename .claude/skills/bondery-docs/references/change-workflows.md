@@ -32,33 +32,33 @@ it and then fails when an app references an unknown `docId`.
 
 Never hand-edit any of these. Regenerate them from the source instead.
 
-| Generated artifact | Command | Source |
-|--------------------|---------|--------|
-| `packages/openapi-spec/openapi.yaml` | `pnpm run generate:openapi` | Zod schemas on Fastify routes |
-| `docs/api/api-reference/_generated/**` | `pnpm run generate:api-docs` | `packages/openapi-spec/openapi.yaml` |
-| `packages/helpers/src/docs/doc-links.generated.ts` | `pnpm run generate:doc-links` | `docId` frontmatter |
-| `llms.txt`, `llms-full.txt`, `/docs/<slug>.md` | Build step in the website app | Page tree and page bodies |
+| Generated artifact                                 | Command                       | Source                               |
+| -------------------------------------------------- | ----------------------------- | ------------------------------------ |
+| `packages/openapi-spec/openapi.yaml`               | `pnpm run generate:openapi`   | Zod schemas on Fastify routes        |
+| `docs/api/api-reference/_generated/**`             | `pnpm run generate:api-docs`  | `packages/openapi-spec/openapi.yaml` |
+| `packages/helpers/src/docs/doc-links.generated.ts` | `pnpm run generate:doc-links` | `docId` frontmatter                  |
+| `llms.txt`, `llms-full.txt`, `/docs/<slug>.md`     | Build step in the website app | Page tree and page bodies            |
 
 The pre-commit hook regenerates the OpenAPI spec when routes or `@bondery/schemas` change.
 
 ## What each check covers
 
-| Command | Scope | Fails when |
-|---------|-------|------------|
-| `check:docs:links` | `docId` registry and app usage | A generated file is missing an entry, an anchor is missing, app code uses an unknown `docId`, or app code hardcodes a docs URL |
-| `check:docs:mdx` | Links and anchors across the whole tree | An internal link points at a page or heading that does not exist |
-| `check:docs:descriptions` | Frontmatter of every in-scope page | A `description` is missing, not a single line, shorter than 120, or longer than 160 |
-| `check:api-errors:catalog` | `docs/api/errors/*.mdx` against `API_ERROR_CODES` | An error code has no page |
+| Command                    | Scope                                             | Fails when                                                                                                                     |
+| -------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `check:docs:links`         | `docId` registry and app usage                    | A generated file is missing an entry, an anchor is missing, app code uses an unknown `docId`, or app code hardcodes a docs URL |
+| `check:docs:mdx`           | Links and anchors across the whole tree           | An internal link points at a page or heading that does not exist                                                               |
+| `check:docs:descriptions`  | Frontmatter of every in-scope page                | A `description` is missing, not a single line, shorter than 120, or longer than 160                                            |
+| `check:api-errors:catalog` | `docs/api/errors/*.mdx` against `API_ERROR_CODES` | An error code has no page                                                                                                      |
 
 `pnpm run check:docs` runs the first three in order.
 
 ## Changelog and ADR placement
 
-| Artifact | Where | Rules |
-|----------|-------|-------|
-| In-flight release note | `docs/changelog/unreleased.mdx` | `hidden: true`, not in `meta.json`, 404 in production |
-| Shipped release | `docs/changelog/X.Y.Z.mdx` | `title: "X.Y.Z"`, listed newest first in `docs/changelog/meta.json` |
-| Architecture decision | `docs/adr/NNNN-slug.mdx` | `hidden: true`, absent from `meta.json`, never linked from a published page |
+| Artifact               | Where                           | Rules                                                                       |
+| ---------------------- | ------------------------------- | --------------------------------------------------------------------------- |
+| In-flight release note | `docs/changelog/unreleased.mdx` | `hidden: true`, not in `meta.json`, 404 in production                       |
+| Shipped release        | `docs/changelog/X.Y.Z.mdx`      | `title: "X.Y.Z"`, listed newest first in `docs/changelog/meta.json`         |
+| Architecture decision  | `docs/adr/NNNN-slug.mdx`        | `hidden: true`, absent from `meta.json`, never linked from a published page |
 
 When a decision matters to operators or integrators, restate the relevant facts in the guide they
 read. Do not link them to the ADR. Read `bondery-changelog` for the release note format.

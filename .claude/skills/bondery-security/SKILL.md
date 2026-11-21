@@ -47,20 +47,24 @@ Do **not** activate for routine UI refactors, copy changes, or non-security API 
 10. **No secrets or PII in logs or client bundles** — Redact tokens, cookies, passwords, and contact PII from structured logs.
 11. **CSP is built in exactly one place** — Every policy comes from `@bondery/helpers/security`. No app hand-writes a directive, and `script-src` never carries `'unsafe-inline'`. `pnpm run check:security-headers` enforces both.
 12. **Redis requires TLS and authentication** — Every Redis (bundled, external, local development, or any future instance) serves TLS only, clients verify its certificate, and it requires a strong password. There is no exception for local development. Details: [Redis: TLS and authentication](references/secrets-deployment-and-supply-chain.md#redis-tls-and-authentication-required). `node deploy/bondery/scripts/check-compose.mjs` enforces it for Compose.
+13. **Compare secrets in constant time** — Compare a caller-supplied secret, signature, or token with `constantTimeEqual()` (`apps/api/src/lib/platform/security/constant-time-equal.ts`), never `===`. The Biome plugin `biome/plugins/no-unsafe-secret-compare.grit` rejects `==`/`===` on secret-named values in server code.
 14. **Stored HTML is sanitized at the API** — Contact notes are stored as HTML. Every write path (`applyContactPatch`, ZIP import, any new one) runs the value through `sanitizeNotesHtml()` (`apps/api/src/lib/notes/sanitize-notes-html.ts`), an allowlist that drops scripts, event handlers, and `javascript:`/`data:` links. Clients never sanitize on the API's behalf, and nothing renders a stored string with `innerHTML`. Any other free-text field that can carry markup gets a max length in `@bondery/schemas`. `pnpm run check:input-safety` and Biome plugin `biome/plugins/no-raw-html-sink.grit` enforce it. Details: [Contact notes](references/input-storage-and-output.md#contact-notes-stored-html).
 15. **Cap uploads while they stream** — A size check after `toBuffer()` is not a limit: the bytes are already in memory. Read uploads with `readUploadedFile()` (one file) or `request.parts({ limits: { fileSize: UPLOAD_LIMITS.<name> } })`, with caps named in `UPLOAD_LIMITS` (`apps/api/src/lib/platform/config.ts`). The global multipart ceiling is small, so a new route is safe by default. Biome plugin `biome/plugins/no-uncapped-multipart.grit` rejects a multipart read with no cap. Details: [Size limits](references/input-storage-and-output.md#size-limits-cap-the-stream-not-the-buffer).
+16. **Postgres requires verified TLS** — Every connection to Postgres (API pool, pg-boss, Prisma CLI, scripts, tunnelled tools) uses TLS that verifies the server (`verify-full` by default), and the bundled Postgres refuses plaintext TCP. Build every `pg` Pool, Client, and pg-boss with `...pgConnectionConfig(url)` and the Prisma CLI URL with `prismaCliUrl(url)` from `@bondery/db`; never pass `ssl` options or `sslmode` by hand, and never `rejectUnauthorized: false`. Details: [Postgres: TLS](references/secrets-deployment-and-supply-chain.md#postgres-tls-required). `check:db-connections` and `check-compose.mjs` enforce it.
+17. **Object storage requires TLS** — The API reaches S3 over HTTPS that verifies the server, and the bundled SeaweedFS nodes accept each other only over mutual TLS (`deploy/bondery/seaweedfs/security.toml`). Create every S3 client with `createS3Client()` (`apps/api/src/lib/storage/s3-client.ts`); never `new S3Client(` elsewhere and never turn certificate checks off. Details: [Object storage: TLS](references/secrets-deployment-and-supply-chain.md#object-storage-tls-required). Biome plugin `biome/plugins/use-s3-client-factory.grit`, `check-compose.mjs`, and the release smoke enforce it.
+18. **The API serves HTTPS only** — Traefik, the webapp's server side, and the healthcheck call its only listener (port 26642, TLS 1.3); development uses it too (Portless, `tailscale serve`). The webapp trusts the API CA through `trustInternalApiCa()` at startup; Traefik through the `serversTransport` that the `traefik-transport` job publishes to Traefik's file provider (Dokploy's folder, or `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR`). The public storage route also reaches SeaweedFS over verified HTTPS, for reads only and without `Cookie` or `Authorization`. There is no plain HTTP port. Never add one, never call the API over plain HTTP, and never disable certificate checks. Details: [Internal API: TLS](references/secrets-deployment-and-supply-chain.md#internal-api-tls-required). `check-compose.mjs` and the release smoke enforce it.
 
 ## Decision tree
 
-| Task | Read |
-|------|------|
-| Trust boundaries, route shells, tenant isolation | [references/security-architecture.md](references/security-architecture.md) |
-| Better Auth, sessions, API keys, OAuth, client tokens | [references/auth-and-sessions.md](references/auth-and-sessions.md) |
-| Input validation, uploads, XSS, errors, public files | [references/input-storage-and-output.md](references/input-storage-and-output.md) |
-| Security headers, CSP, Trusted Types, CORS, reporting | [references/headers-csp-and-cors.md](references/headers-csp-and-cors.md) |
-| Webhooks, WS, AI tools, extension/mobile bridges | [references/integrations-and-clients.md](references/integrations-and-clients.md) |
-| Secrets, env, deploy, Redis, supply chain | [references/secrets-deployment-and-supply-chain.md](references/secrets-deployment-and-supply-chain.md) |
-| Security review process, severity, false positives | [references/review-playbook.md](references/review-playbook.md) |
+| Task                                                  | Read                                                                                                   |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Trust boundaries, route shells, tenant isolation      | [references/security-architecture.md](references/security-architecture.md)                             |
+| Better Auth, sessions, API keys, OAuth, client tokens | [references/auth-and-sessions.md](references/auth-and-sessions.md)                                     |
+| Input validation, uploads, XSS, errors, public files  | [references/input-storage-and-output.md](references/input-storage-and-output.md)                       |
+| Security headers, CSP, Trusted Types, CORS, reporting | [references/headers-csp-and-cors.md](references/headers-csp-and-cors.md)                               |
+| Webhooks, WS, AI tools, extension/mobile bridges      | [references/integrations-and-clients.md](references/integrations-and-clients.md)                       |
+| Secrets, env, deploy, Redis, supply chain             | [references/secrets-deployment-and-supply-chain.md](references/secrets-deployment-and-supply-chain.md) |
+| Security review process, severity, false positives    | [references/review-playbook.md](references/review-playbook.md)                                         |
 
 Full index: [references/README.md](references/README.md).
 
@@ -107,8 +111,12 @@ pnpm run check:types -w chrome-extension
 - [ ] Input validated with Zod at route + domain layer
 - [ ] New secrets added to `packages/helpers/src/env/manifest.ts` with `secret: true`
 - [ ] Any Redis change keeps TLS (`rediss://`, verified certificate) and password auth
+- [ ] Any new Postgres connection spreads `pgConnectionConfig(url)` (Prisma CLI: `prismaCliUrl(url)`); no hand-written `ssl` options or `sslmode`
+- [ ] Any new S3 client uses `createS3Client()`; any SeaweedFS change keeps `security.toml` mutual TLS (both `[tls]` version bounds) and the HTTPS endpoint
+- [ ] Any new server-side call to the API goes through `resolveServerApiBaseUrl()` (the API's HTTPS listener), never a hard-coded `http://` URL
 - [ ] No secrets, tokens, or PII in logs or client bundles
 - [ ] Webhook handler verifies signature on raw body before JSON parse
+- [ ] Secrets, signatures, and tokens are compared with `constantTimeEqual()`, not `===`
 - [ ] Upload routes enforce MIME whitelist + magic-byte validation + a size cap on the stream (`readUploadedFile` / `limits.fileSize`, named in `UPLOAD_LIMITS`), not only a check after `toBuffer()`
 - [ ] Stored HTML or markdown is sanitized at the API on every write path and rendered as text or through a schema; no `innerHTML`, `dangerouslySetInnerHTML`, or `document.write` with stored or imported strings
 - [ ] Free-text fields that can hold markup have a max length in `@bondery/schemas`

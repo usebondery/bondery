@@ -1,5 +1,8 @@
 "use client";
 
+import visuals from "@bondery/translations/locales/en/platform/website/WebsiteLandingVisuals.json" with {
+  type: "json",
+};
 import { Badge, Image, Indicator, Paper, Text, ThemeIcon } from "@mantine/core";
 import {
   type Icon,
@@ -10,9 +13,10 @@ import {
   IconMail,
   IconPhone,
 } from "@tabler/icons-react";
+import { cn } from "cn";
 import { useReducedMotion } from "motion/react";
 import { BRAND_ICONS } from "./brand-icons";
-import { PersonAvatar, SAMPLE_PEOPLE, type SamplePersonId } from "./sample-people";
+import { PersonAvatar, personHeadline, SAMPLE_PEOPLE, type SamplePersonId } from "./sample-people";
 
 type SourceId = "linkedin" | "instagram" | "whatsapp" | "vcard" | "api";
 
@@ -117,7 +121,7 @@ function SourceTile({ source, stacked }: { source: Source; stacked: boolean }) {
       </Text>
       {source.soon && !stacked ? (
         <Badge className="shrink-0" color="gray" radius="xl" size="xs" tt="none" variant="default">
-          Soon
+          {visuals.Sources.Soon}
         </Badge>
       ) : null}
     </div>
@@ -197,7 +201,7 @@ function PhoneFlow({ reduceMotion }: { reduceMotion: boolean | null }) {
   return (
     <svg
       aria-hidden="true"
-      className="block h-auto w-full max-w-[300px] sm:hidden"
+      className="max-w-sources-phone block h-auto w-full sm:hidden"
       viewBox={`0 0 ${PHONE_WIDTH} ${PHONE_HEIGHT}`}
     >
       {SOURCES.map((source, index) => {
@@ -219,10 +223,11 @@ function PhoneFlow({ reduceMotion }: { reduceMotion: boolean | null }) {
 }
 
 function ContactRow({ row, hiddenOnPhone }: { row: Row; hiddenOnPhone: boolean }) {
-  const { headline, name } = SAMPLE_PEOPLE[row.person];
+  const { name } = SAMPLE_PEOPLE[row.person];
+  const headline = personHeadline(row.person);
 
   return (
-    <div className={`${hiddenOnPhone ? "hidden sm:flex" : "flex"} items-center gap-3`}>
+    <div className={cn(hiddenOnPhone ? "hidden sm:flex" : "flex", "items-center gap-3")}>
       <PersonAvatar person={row.person} size={34} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -231,7 +236,7 @@ function ContactRow({ row, hiddenOnPhone }: { row: Row; hiddenOnPhone: boolean }
           </Text>
           {row.merged ? (
             <Badge radius="xl" size="xs" tt="none" variant="light">
-              Merged
+              {visuals.Sources.Merged}
             </Badge>
           ) : null}
         </div>
@@ -266,13 +271,13 @@ export function SourcesVisual() {
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="flex w-full max-w-3xl flex-col items-center sm:h-[252px] sm:flex-row sm:items-stretch">
-      <div className="hidden w-[164px] shrink-0 flex-col justify-between sm:flex">
+    <div className="sm:h-sources flex w-full max-w-3xl flex-col items-center sm:flex-row sm:items-stretch">
+      <div className="w-sources-rail hidden shrink-0 flex-col justify-between sm:flex">
         {SOURCES.map((source) => (
           <SourceTile key={source.id} source={source} stacked={false} />
         ))}
       </div>
-      <div className="grid w-full max-w-[300px] grid-cols-5 sm:hidden">
+      <div className="max-w-sources-phone grid w-full grid-cols-5 sm:hidden">
         {SOURCES.map((source) => (
           <SourceTile key={source.id} source={source} stacked />
         ))}

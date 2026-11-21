@@ -14,6 +14,7 @@ import {
   requireEmailConfig,
   sendRenderedEmail,
 } from "../../lib/notifications/transporter.js";
+import { blankToUndefined } from "../../lib/platform/blank-text.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 
 export type SendFeedbackEmailInput = {
@@ -53,8 +54,8 @@ export async function sendFeedbackEmail(
         ...emailDocumentProps(lng, subject),
         agentReport: input.agentReport,
         copy,
-        generalFeedback: input.generalFeedback || undefined,
-        npsReason: input.npsReason || undefined,
+        generalFeedback: blankToUndefined(input.generalFeedback),
+        npsReason: blankToUndefined(input.npsReason),
         npsScore: input.npsScore,
         timestamp,
         userEmail: input.userEmail,
@@ -74,7 +75,7 @@ export async function sendFeedbackEmail(
       },
       log,
     );
-  } catch (cause) {
-    throw internal("failed_to_render_or_send_feedback_email_", cause);
+  } catch (error) {
+    throw internal("failed_to_render_or_send_feedback_email_", error);
   }
 }

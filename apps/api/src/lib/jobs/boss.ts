@@ -1,3 +1,4 @@
+import { pgConnectionConfig } from "@bondery/db";
 import { PgBoss } from "pg-boss";
 
 let boss: PgBoss | null = null;
@@ -22,7 +23,8 @@ export async function startBoss(connectionString: string): Promise<PgBoss> {
 
   if (!boss) {
     bossConnectionString = trimmed;
-    boss = new PgBoss(trimmed);
+    // TLS comes from DATABASE_SSL_* like every other database connection.
+    boss = new PgBoss({ ...pgConnectionConfig(trimmed) });
   }
 
   await boss.start();
@@ -30,11 +32,13 @@ export async function startBoss(connectionString: string): Promise<PgBoss> {
 }
 
 export async function stopBoss(): Promise<void> {
-  if (boss) {
-    await boss.stop();
-    boss = null;
-    bossConnectionString = null;
+  const current = boss;
+  boss = null;
+  bossConnectionString = null;
+  if (!current) {
+    return;
   }
+  await current.stop();
 }
 
 /** @internal Test-only reset. */

@@ -2,7 +2,15 @@
  * Voyager identity (name, headline, photo) from GraphQL / embedded entities.
  */
 
-import { looksLikeLinkedInVanityHandle, type SduiIdentity, splitName } from "../sduiProfile";
+import {
+  looksLikeLinkedInVanityHandle,
+  MIN_ABOUT_TEXT_LENGTH,
+  type SduiIdentity,
+  splitName,
+} from "../sduiProfile";
+
+/** How deep `findExpandableText` descends into nested Voyager objects. */
+const MAX_EXPANDABLE_TEXT_DEPTH = 8;
 
 function nfcText(value: unknown): string | undefined {
   if (typeof value !== "string" || value.length === 0) {
@@ -259,7 +267,7 @@ function entityLooksLikeAbout(entity: Record<string, unknown>): boolean {
 }
 
 function findExpandableText(value: unknown, depth = 0): string | undefined {
-  if (value == null || depth > 8) {
+  if (value == null || depth > MAX_EXPANDABLE_TEXT_DEPTH) {
     return undefined;
   }
   if (typeof value !== "object") {
@@ -281,7 +289,7 @@ function findExpandableText(value: unknown, depth = 0): string | undefined {
     const box = expandable as Record<string, unknown>;
     const text =
       localizedString(box.description) ?? localizedString(box.text) ?? localizedString(box.caption);
-    if (text && text.length > 20) {
+    if (text && text.length > MIN_ABOUT_TEXT_LENGTH) {
       return text;
     }
   }

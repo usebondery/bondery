@@ -270,8 +270,7 @@ describe("sync-infisical-to-dokploy", () => {
     "BONDERY_INFRA_PLAUSIBLE_DOMAIN",
   ]) {
     it(`website sync fails when required key ${missingKey} is missing`, () => {
-      const env = { ...websiteEnv };
-      delete env[missingKey];
+      const { [missingKey]: _missing, ...env } = websiteEnv;
 
       let exited = false;
       const originalExit = process.exit;

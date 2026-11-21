@@ -17,7 +17,7 @@ import { createModalId } from "@/lib/modals";
 import {
   useDeleteContactsFilteredMutation,
   useDeleteContactsMutation,
-} from "@/lib/query/hooks/useContacts";
+} from "@/lib/query/hooks/useContactMutations";
 import { StandardConfirmModalBody } from "../modals/StandardConfirmModalBody";
 
 export interface OpenDeleteContactsModalParams {

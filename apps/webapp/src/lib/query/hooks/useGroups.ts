@@ -71,19 +71,14 @@ export function useGroupMembersInfiniteQuery(
 
   return useInfiniteQuery<GroupMembersResult>({
     enabled: !!groupId,
-
-    getNextPageParam: nextPaginatedOffset,
-
-    initialPageParam: 0,
-
     queryFn: async ({ pageParam }) =>
       getGroupMembers(groupId, {
         ...filter,
-
         limit: GROUP_MEMBERS_PAGE_SIZE,
-
         offset: pageParam as number,
       }),
+    initialPageParam: 0,
+    getNextPageParam: nextPaginatedOffset,
     queryKey: groupKeys.membersInfinite(groupId, infiniteParams),
   });
 }
