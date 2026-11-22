@@ -75,17 +75,20 @@
       "quoteStyle": "double",
       "semicolons": "always",
       "trailingCommas": "all"
-    }
+    },
+    "globals": ["__DEV__"]
   },
   "linter": {
     "domains": {
       "next": "all",
       "playwright": "all",
       "project": "all",
+      "react": "all",
       "tailwind": "all",
       "tanstackQuery": "all",
       "test": "all",
-      "turborepo": "all"
+      "turborepo": "all",
+      "types": "all"
     },
     "enabled": true,
     "rules": {
@@ -111,6 +114,7 @@
         "noUselessStringConcat": "error",
         "noUselessUndefined": "error",
         "noUselessUndefinedInitialization": "error",
+        "noVoid": "error",
         "useArrayFind": "error",
         "useArraySome": "error",
         "useMaxParams": "info",
@@ -132,12 +136,15 @@
         "noReactPropAssignments": "error",
         "noRenderReturnValue": "error",
         "noUndeclaredDependencies": "error",
+        "noUndeclaredVariables": "error",
         "noUnresolvedImports": "off",
         "noUnusedInstantiation": "error",
         "useGraphqlNamedOperations": "error",
         "useImportExtensions": "off",
         "useInlineScriptId": "error",
-        "useLoneAnonymousOperation": "error"
+        "useLoneAnonymousOperation": "error",
+        "useSingleJsDocAsterisk": "error",
+        "useUniqueElementIds": "error"
       },
       "nursery": {
         "noAccidentalBitwiseOperators": "error",
@@ -226,12 +233,15 @@
         "noUnsafeIframeSandbox": "error",
         "noUnsafePlusOperands": "error",
         "noUnsafeReturn": "error",
+        "noUnsafeTypeAssertion": "off",
         "noUnsafeUnaryMinus": "error",
         "noUselessAssignment": "error",
         "noUselessAwait": "error",
+        "noUselessCall": "error",
         "noUselessFallbackInSpread": "error",
         "noUselessLengthCheck": "error",
         "noUselessRecursion": "error",
+        "noUselessSplice": "error",
         "noUselessSpread": "error",
         "noUselessTypeAssertion": "error",
         "noUselessTypeConversion": "error",
@@ -246,6 +256,7 @@
         "useCatchErrorName": "error",
         "useConsistentHeadingLevel": "error",
         "useConsistentUnicodeBom": "error",
+        "useDisposables": "off",
         "useExhaustiveSwitchCases": "error",
         "useExpectToContain": "error",
         "useExpectToHaveBeenCalled": "error",
@@ -256,15 +267,20 @@
         "useLowercaseTestTitle": "error",
         "useMathAbs": "error",
         "useMathTrunc": "error",
+        "useNamedFunction": "error",
         "useNextScriptForGoogleAnalytics": "error",
         "useNullishCoalescing": "error",
         "useObjectFromEntries": "error",
         "usePromiseRejectErrors": "error",
+        "useReactCompiler": "error",
         "useReactFunctionComponentDefinition": "error",
+        "useReactNamingConvention": "off",
+        "useRegexpExec": "off",
         "useSetSize": "error",
         "useSimplifiedBooleanReturn": "error",
         "useSingleTopLevelHeading": "error",
         "useSpyOn": "error",
+        "useStrictBooleanExpressions": "off",
         "useStringStartsEndsWith": "error",
         "useTailwindShorthandClasses": "error",
         "useTailwindSortedClasses": "error",
@@ -279,10 +295,12 @@
         "noAwaitInLoops": "info",
         "noBarrelFile": "info",
         "noImgElement": "error",
+        "noJsxPropsBind": "off",
         "noReExportAll": "info",
         "noSyncScripts": "error",
         "noUnwantedPolyfillio": "error",
-        "useGoogleFontPreconnect": "error"
+        "useGoogleFontPreconnect": "error",
+        "useTopLevelRegex": "error"
       },
       "preset": "recommended",
       "security": {
@@ -350,8 +368,10 @@
         "useBlockStatements": "error",
         "useCollapsedElseIf": "error",
         "useCollapsedIf": "error",
+        "useComponentExportOnlyModules": "off",
         "useConsistentBuiltinInstantiation": "error",
         "useConsistentCurlyBraces": "error",
+        "useConsistentEnumValueType": "error",
         "useConsistentGraphqlDescriptions": "error",
         "useConsistentObjectDefinitions": {
           "level": "error",
@@ -368,14 +388,19 @@
         },
         "useDefaultParameterLast": "error",
         "useDeprecatedReason": "error",
+        "useDestructuring": "error",
         "useErrorCause": "warn",
         "useExplicitLengthCheck": "error",
+        "useExportsLast": "error",
         "useForOf": "error",
         "useGraphqlNamingConvention": "error",
+        "useImportsFirst": "error",
         "useInputName": "error",
         "useLoneExecutableDefinition": "error",
         "useNodeAssertStrict": "error",
         "useNumberNamespace": "error",
+        "useNumericSeparators": "error",
+        "useObjectSpread": "error",
         "useReactFunctionComponents": "error",
         "useSelfClosingElements": "error",
         "useShorthandAssign": "error",
@@ -386,23 +411,30 @@
         "useThrowOnlyError": "error"
       },
       "suspicious": {
+        "noAlert": "error",
+        "noBitwiseOperators": "error",
         "noConditionalExpect": "error",
         "noConsole": "error",
         "noConstantBinaryExpressions": "error",
         "noDeprecatedImports": "warn",
         "noDocumentImportInPage": "error",
+        "noDuplicatedSpreadProps": "error",
         "noDuplicateFields": "error",
         "noDuplicateGraphqlOperationName": "error",
         "noDuplicateTestHooks": "error",
         "noEmptyBlockStatements": "error",
         "noEmptySource": "error",
+        "noEqualsToNull": "error",
         "noEvolvingTypes": "error",
         "noExportsInTest": "error",
         "noFocusedTests": "error",
+        "noForIn": "error",
         "noGlobalIsNan": "error",
         "noHeadImportInDocument": "error",
         "noIdenticalTestTitle": "error",
         "noImportCycles": "error",
+        "noJsxLeakedDollar": "error",
+        "noLeakedRender": "error",
         "noLoopFunc": "error",
         "noNestedPromises": "error",
         "noParametersOnlyUsedInRecursion": "error",
@@ -435,13 +467,25 @@
             ]
           }
         },
+        "noUnknownAttribute": "error",
         "noUnnecessaryConditions": "error",
-        "noUntrustedLicenses": "off",
+        "noUntrustedLicenses": "error",
         "noUnusedExpressions": "error",
+        "noVar": "error",
+        "useArraySortCompare": "error",
         "useAwait": "info",
+        "useBaseline": {
+          "level": "error",
+          "options": {
+            "allowSelectors": ["selection"],
+            "available": "newly"
+          }
+        },
         "useDeprecatedDate": "error",
         "useErrorMessage": "error",
-        "useExpect": "error"
+        "useExpect": "error",
+        "useNumberToFixedDigitsArgument": "error",
+        "useStrictMode": "error"
       }
     }
   },
@@ -639,6 +683,37 @@
           },
           "nursery": {
             "useReactCompiler": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/api/src/lib/data/redis-secrets.test.ts",
+        "apps/api/src/lib/infra-secrets/**",
+        "apps/chrome-extension/cws-public-key.ts",
+        "apps/mobile/src/features/contacts/contactUtils.ts",
+        "apps/mobile/src/theme/colors.ts",
+        "apps/webapp/src/app/(app)/app/(shell)/graph/graphHull.ts",
+        "apps/webapp/src/lib/contacts/avatarColor.ts",
+        "packages/mantine-next/src/utils/avatarColor.ts",
+        "packages/translations/scripts/sync-locale-mirror.mjs",
+        "packages/vcard/src/attachments.ts"
+      ],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noBitwiseOperators": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["apps/website/src/components/landing/features/lock3d/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAttribute": "off"
           }
         }
       }

@@ -3,6 +3,11 @@ import {
   COMMON_PERSON_NAME_TOKEN_SET as COMMON_NAME_TOKENS,
 } from "@bondery/helpers/name";
 
+const LEADING_AT_PATTERN = /^@+/;
+const REPEATED_CHAR_PATTERN = /^(.)\1+$/u;
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//i;
+const DOT_UNDERSCORE_SEPARATOR_PATTERN = /[._]+/;
+
 /** Shortest username the compact-name splitter tries to split. */
 const MIN_COMPACT_USERNAME_LENGTH = 4;
 /** When only one half is a known name, the known half must be at least this long. */
@@ -59,7 +64,7 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
       continue;
     }
 
-    if (/^(.)\1+$/u.test(unknownPart)) {
+    if (REPEATED_CHAR_PATTERN.test(unknownPart)) {
       continue;
     }
 
@@ -87,7 +92,7 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
 }
 
 function hasLikelyPersonSignal(normalizedUsername: string): boolean {
-  const parts = normalizedUsername.split(/[._]+/).filter(Boolean);
+  const parts = normalizedUsername.split(DOT_UNDERSCORE_SEPARATOR_PATTERN).filter(Boolean);
 
   for (const part of parts) {
     if (COMMON_NAME_TOKENS.has(part)) {
@@ -103,7 +108,7 @@ function hasLikelyPersonSignal(normalizedUsername: string): boolean {
 }
 
 function hasLikelyBrandSignal(normalizedUsername: string): boolean {
-  const parts = normalizedUsername.split(/[._]+/).filter(Boolean);
+  const parts = normalizedUsername.split(DOT_UNDERSCORE_SEPARATOR_PATTERN).filter(Boolean);
 
   for (const brandToken of COMMON_BRANDS_NAME_TOKENS) {
     if (
@@ -126,12 +131,12 @@ function hasLikelyBrandSignal(normalizedUsername: string): boolean {
 }
 
 export function normalizeHandle(rawHandle: string): string {
-  return rawHandle.trim().replace(/^@+/, "").toLowerCase();
+  return rawHandle.trim().replace(LEADING_AT_PATTERN, "").toLowerCase();
 }
 
 export function normalizeUsernameFromHref(href: string): string | null {
   try {
-    const withProtocol = /^https?:\/\//i.test(href) ? href : `https://${href}`;
+    const withProtocol = HTTP_PROTOCOL_PATTERN.test(href) ? href : `https://${href}`;
     const parsed = new URL(withProtocol);
     const segments = parsed.pathname.split("/").filter(Boolean);
 

@@ -1,5 +1,5 @@
 /** Radix of hex digits. */
-export const HEX_RADIX = 16;
+const HEX_RADIX = 16;
 /** Hex digits in a `rrggbb` color. */
 const HEX_COLOR_DIGIT_COUNT = 6;
 /** Hex digits that encode one color channel. */
@@ -11,7 +11,7 @@ function readHexChannel(digits: string, channelIndex: number): number {
 }
 
 /** Reads the red, green and blue channels (0-255) from `rrggbb` hex digits without the `#`. */
-export function parseHexChannels(digits: string): { blue: number; green: number; red: number } {
+function parseHexChannels(digits: string): { blue: number; green: number; red: number } {
   return {
     blue: readHexChannel(digits, 2),
     green: readHexChannel(digits, 1),
@@ -22,7 +22,7 @@ export function parseHexChannels(digits: string): { blue: number; green: number;
 /**
  * Applies an alpha channel to a `#rrggbb` hex color.
  */
-export function colorWithAlpha(hexColor: string, alpha: number): string {
+function colorWithAlpha(hexColor: string, alpha: number): string {
   const normalized = hexColor.replace("#", "");
 
   if (normalized.length !== HEX_COLOR_DIGIT_COUNT) {
@@ -33,3 +33,5 @@ export function colorWithAlpha(hexColor: string, alpha: number): string {
 
   return `rgba(${red}, ${green}, ${blue}, ${alpha})`;
 }
+
+export { colorWithAlpha, HEX_RADIX, parseHexChannels };

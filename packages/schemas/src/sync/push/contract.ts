@@ -21,17 +21,23 @@ import type {
   WriteResult,
 } from "./types.js";
 
-type _SyncPushRequest = Assert<IsEqual<SyncPushRequest, z.infer<typeof syncPushRequestSchema>>>;
-type _WriteResult = Assert<IsEqual<WriteResult, z.infer<typeof writeResultSchema>>>;
-type _SyncPushResult = Assert<IsEqual<SyncPushResult, z.infer<typeof syncPushResultSchema>>>;
-type _SyncPushResponse = Assert<IsEqual<SyncPushResponse, z.infer<typeof syncPushResponseSchema>>>;
-type _SyncContactWriteData = Assert<
+export type _SyncPushRequest = Assert<
+  IsEqual<SyncPushRequest, z.infer<typeof syncPushRequestSchema>>
+>;
+export type _WriteResult = Assert<IsEqual<WriteResult, z.infer<typeof writeResultSchema>>>;
+export type _SyncPushResult = Assert<IsEqual<SyncPushResult, z.infer<typeof syncPushResultSchema>>>;
+export type _SyncPushResponse = Assert<
+  IsEqual<SyncPushResponse, z.infer<typeof syncPushResponseSchema>>
+>;
+export type _SyncContactWriteData = Assert<
   IsEqual<SyncContactWriteData, z.infer<typeof syncContactWriteDataSchema>>
 >;
-type _SyncGroupWriteData = Assert<
+export type _SyncGroupWriteData = Assert<
   IsEqual<SyncGroupWriteData, z.infer<typeof syncGroupWriteDataSchema>>
 >;
-type _SyncTagWriteData = Assert<IsEqual<SyncTagWriteData, z.infer<typeof syncTagWriteDataSchema>>>;
-type _SyncMembershipWriteData = Assert<
+export type _SyncTagWriteData = Assert<
+  IsEqual<SyncTagWriteData, z.infer<typeof syncTagWriteDataSchema>>
+>;
+export type _SyncMembershipWriteData = Assert<
   IsEqual<SyncMembershipWriteData, z.infer<typeof syncMembershipWriteDataSchema>>
 >;

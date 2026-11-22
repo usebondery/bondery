@@ -2,6 +2,7 @@
 "use client";
 
 import { getUserFacingError, isApiError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { ChatModelId } from "@bondery/schemas";
@@ -57,7 +58,7 @@ function chatSessionIdFromPathname(pathname: string): string | undefined {
     return undefined;
   }
 
-  const sessionId = pathname.slice(prefix.length).split("/")[0];
+  const [sessionId] = pathname.slice(prefix.length).split("/");
   return sessionId || undefined;
 }
 
@@ -469,8 +470,8 @@ export function ChatClient() {
       helpLabel={t("description")}
       heroPrompt={t("heroPrompt")}
       isLoading={isLoading}
-      onApproval={(approved) => void handleApproval(approved)}
-      onRetry={() => void handleRetry()}
+      onApproval={(approved) => detachPromise(handleApproval(approved))}
+      onRetry={() => detachPromise(handleRetry())}
       onSuggestedPrompt={handleSuggestedPrompt}
       pendingApproval={pendingApproval !== undefined}
       quotaExceeded={quotaExceeded}

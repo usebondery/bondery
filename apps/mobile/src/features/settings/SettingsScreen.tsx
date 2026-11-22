@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { HELP_DOCS_URL, SOCIAL_LINKS } from "@bondery/helpers/globals/paths";
 import {
   IconBook,
@@ -30,7 +31,6 @@ import { Paper } from "../../components/ui/Paper";
 import { Stack } from "../../components/ui/Stack";
 import { ThemeIcon } from "../../components/ui/ThemeIcon";
 import {
-  useCommonTranslations,
   useMobileSettingsTranslations,
   useTagsSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
@@ -81,18 +81,19 @@ const SOCIAL_BUTTONS = [
 export function SettingsScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
   const tTagsSettings = useTagsSettingsTranslations();
-  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("tabRoot");
 
   const openDocs = () => {
-    void openExternalUrl(HELP_DOCS_URL, () => {
-      notifications.show({
-        message: tMobileSettings("OpenDocsErrorDescription"),
-        title: tMobileSettings("OpenDocsErrorHeadline"),
-        type: "error",
-      });
-    });
+    detachPromise(
+      openExternalUrl(HELP_DOCS_URL, () => {
+        notifications.show({
+          message: tMobileSettings("OpenDocsErrorDescription"),
+          title: tMobileSettings("OpenDocsErrorHeadline"),
+          type: "error",
+        });
+      }),
+    );
   };
 
   const guidesLabel = tMobileSettings("Guides");
@@ -226,7 +227,7 @@ export function SettingsScreen() {
                         color={social.color}
                         key={social.id}
                         onPress={() => {
-                          void openExternalUrl(social.url);
+                          detachPromise(openExternalUrl(social.url));
                         }}
                         size="md"
                         variant="outline"

@@ -7,8 +7,6 @@
  * connection, and the user cannot act on it. These checks catch the two causes
  * the page can see, before the recognizer starts.
  */
-import type { DictationErrorCode } from "@/lib/speech/dictation/dictationEngine";
-
 /** Returns a failure code, or `null` when the session may start. */
 export function checkDictationPreflight(input: {
   online: boolean;

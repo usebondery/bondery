@@ -14,6 +14,17 @@ import { Group, Loader, Paper, Text, UnstyledButton } from "@mantine/core";
 import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useNotesEditorTranslations } from "@/lib/i18n/generated/hooks";
 
+interface MentionListProps {
+  command: (item: MentionSuggestionItem) => void;
+  contactsHasMore?: boolean;
+  currentPerson?: PeoplePickerOptionPerson | null;
+  onSearch: PeoplePickerOnSearch<PeoplePickerOptionPerson>;
+  query: string;
+  ref?: Ref<MentionListHandle>;
+  searchDebounceMs: number;
+  seed: PeoplePickerOptionPerson[];
+}
+
 export interface MentionSuggestionItem {
   avatar?: string | null;
   firstName: string;
@@ -35,17 +46,6 @@ export function contactToMentionItem(contact: PeoplePickerOptionPerson): Mention
     lastName: contact.lastName,
     location: contact.location,
   };
-}
-
-interface MentionListProps {
-  command: (item: MentionSuggestionItem) => void;
-  contactsHasMore?: boolean;
-  currentPerson?: PeoplePickerOptionPerson | null;
-  onSearch: PeoplePickerOnSearch<PeoplePickerOptionPerson>;
-  query: string;
-  ref?: Ref<MentionListHandle>;
-  searchDebounceMs: number;
-  seed: PeoplePickerOptionPerson[];
 }
 
 export interface MentionListHandle {

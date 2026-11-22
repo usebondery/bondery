@@ -7,6 +7,7 @@ import { Text } from "../../../components/ui/Text";
 import { MOBILE_LAYOUT } from "../../../theme/tokens";
 import { formatContactName } from "../../contacts/contactUtils";
 
+const WHITESPACE_RE = /\s+/;
 interface SettingsAccountProfileCardProps {
   contact: Contact | null;
   email: string | null;
@@ -15,7 +16,7 @@ interface SettingsAccountProfileCardProps {
 }
 
 function buildFallbackContact(name: string): Contact {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
+  const parts = name.trim().split(WHITESPACE_RE).filter(Boolean);
   const firstName = parts[0] ?? "";
   const lastName = parts.length > 1 ? parts.slice(1).join(" ") : null;
 

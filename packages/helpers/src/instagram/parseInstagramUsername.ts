@@ -1,14 +1,14 @@
 import { COMMON_PERSON_NAME_TOKEN_SET } from "#name/common-person-name-tokens.js";
 
-export interface ParsedInstagramName {
+const PATTERN_285B272D5D29_RE = /(['-])/;
+const PATTERN_5E282E295C31_RE = /^(.)\1+$/u;
+const PATTERN_5B5C732E2F5F_RE = /[\s./_+|\\-]+/;
+const PATTERN_5B2E5F2D5D2B_RE = /[._-]+/;
+
+interface ParsedInstagramName {
   firstName: string;
   lastName: string | null;
   middleName: string | null;
-}
-
-export interface ParseInstagramUsernameInput {
-  displayName?: string | null;
-  username: string;
 }
 
 const SMALL_CAPS_MAP: Record<string, string> = {
@@ -48,7 +48,7 @@ function toTitleCase(token: string): string {
 
 function toNameCase(token: string): string {
   return token
-    .split(/(['-])/)
+    .split(PATTERN_285B272D5D29_RE)
     .map((part) => {
       if (part === "'" || part === "-") {
         return part;
@@ -142,7 +142,7 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
       continue;
     }
 
-    if (/^(.)\1+$/u.test(left) || /^(.)\1+$/u.test(right)) {
+    if (PATTERN_5E282E295C31_RE.test(left) || PATTERN_5E282E295C31_RE.test(right)) {
       continue;
     }
 
@@ -179,7 +179,7 @@ function parseFromDisplayName(displayName?: string | null): ParsedInstagramName 
   }
 
   const tokens = normalized
-    .split(/[\s./_+|\\-]+/)
+    .split(PATTERN_5B5C732E2F5F_RE)
     .filter(Boolean)
     .map((token) => toNameCase(token));
   const firstName = tokens.at(0);
@@ -208,7 +208,7 @@ function parseFromUsername(username: string): ParsedInstagramName {
   const noNumbers = stripped.replace(/\d+/g, "");
 
   const tokens = noNumbers
-    .split(/[._-]+/)
+    .split(PATTERN_5B2E5F2D5D2B_RE)
     .map((token) => token.trim())
     .filter(Boolean)
     .map((token) => toTitleCase(token));
@@ -246,6 +246,13 @@ function parseFromUsername(username: string): ParsedInstagramName {
     lastName,
     middleName: tokens.length > 2 ? tokens.slice(1, -1).join(" ") : null,
   };
+}
+
+export type { ParsedInstagramName };
+
+export interface ParseInstagramUsernameInput {
+  displayName?: string | null;
+  username: string;
 }
 
 /**

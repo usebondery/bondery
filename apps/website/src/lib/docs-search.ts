@@ -2,7 +2,7 @@ import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.
   type: "json",
 };
 
-export type DocsSearchResult = {
+type DocsSearchResult = {
   breadcrumbs?: string[];
   content: string;
   id: string;
@@ -10,7 +10,7 @@ export type DocsSearchResult = {
   url: string;
 };
 
-export type DocsSearchTab = "develop" | "integrate" | "product" | "selfhost";
+type DocsSearchTab = "develop" | "integrate" | "product" | "selfhost";
 
 const TAB_TITLES: Record<DocsSearchTab, string> = {
   develop: docs.Tabs.Develop,
@@ -19,14 +19,14 @@ const TAB_TITLES: Record<DocsSearchTab, string> = {
   selfhost: docs.Tabs.SelfHost,
 };
 
-export type DocsSearchAction = {
+type DocsSearchAction = {
   description?: string;
   id: string;
   label: string;
   url: string;
 };
 
-export type DocsSearchGroup = {
+type DocsSearchGroup = {
   actions: DocsSearchAction[];
   group: string;
 };
@@ -34,7 +34,7 @@ export type DocsSearchGroup = {
 const TAB_ORDER: readonly DocsSearchTab[] = ["product", "selfhost", "integrate", "develop"];
 
 /** Removes the `<mark>` wrappers the docs search API puts around hits. */
-export function stripTags(value: string): string {
+function stripTags(value: string): string {
   return value.replace(/<\/?mark>/g, "");
 }
 
@@ -50,7 +50,7 @@ function docsPathname(url: string): string {
   }
 }
 
-export function tabForDocsUrl(url: string): DocsSearchTab {
+function tabForDocsUrl(url: string): DocsSearchTab {
   const path = docsPathname(url);
 
   if (path.startsWith("/docs/deploy")) {
@@ -88,7 +88,7 @@ function actionForResult(result: DocsSearchResult): DocsSearchAction {
   };
 }
 
-export function toSearchGroups(results: DocsSearchResult[]): DocsSearchGroup[] {
+function toSearchGroups(results: DocsSearchResult[]): DocsSearchGroup[] {
   const grouped = new Map<DocsSearchTab, DocsSearchAction[]>();
 
   for (const result of results) {
@@ -112,3 +112,6 @@ export function toSearchGroups(results: DocsSearchResult[]): DocsSearchGroup[] {
     return [{ actions, group: TAB_TITLES[tab] }];
   });
 }
+
+export type { DocsSearchAction, DocsSearchGroup, DocsSearchResult, DocsSearchTab };
+export { stripTags, tabForDocsUrl, toSearchGroups };

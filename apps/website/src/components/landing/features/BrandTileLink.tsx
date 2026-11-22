@@ -11,11 +11,9 @@ import type { CSSProperties, ReactElement } from "react";
  *   file serves any tile colour (white on Claude orange, black on ChatGPT white).
  * - `image`: a full-colour mark drawn as-is.
  */
-export type BrandGlyph =
-  | { kind: "mask"; src: string; color: string }
-  | { kind: "image"; src: string };
+type BrandGlyph = { kind: "mask"; src: string; color: string } | { kind: "image"; src: string };
 
-export type BrandTileLinkProps = {
+type BrandTileLinkProps = {
   label: string;
   href: string;
   /** Tile fill, taken from the brand. */
@@ -57,7 +55,7 @@ function renderGlyph(glyph: BrandGlyph): ReactElement {
  * its real logo, and a soft shadow. It stays put on hover. Built on `ActionIconLink`, so it keeps
  * the typed `href`, the aria label and keyboard focus. Pair it with a `Tooltip` for the name.
  */
-export function BrandTileLink({
+function BrandTileLink({
   label,
   href,
   background,
@@ -80,3 +78,6 @@ export function BrandTileLink({
     />
   );
 }
+
+export type { BrandGlyph, BrandTileLinkProps };
+export { BrandTileLink };

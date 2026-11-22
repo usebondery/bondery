@@ -14,13 +14,7 @@ import { domainDb } from "../../domains/_shared/domain-db.js";
 import { rpcCheckAndIncrementAiMessages } from "../../lib/data/rpc.js";
 import { hasPremiumAccess } from "../billing/entitlements.js";
 
-/** Number of free AI messages available to unsubscribed users (lifetime). */
-export const FREE_MESSAGE_LIMIT = 5;
-
-/** Monthly AI message cap for premium subscribers. */
-export const PREMIUM_MESSAGE_LIMIT = 300;
-
-export interface QuotaCheckResult {
+interface QuotaCheckResult {
   allowed: boolean;
   limit: number;
   messagesUsed: number;
@@ -52,6 +46,14 @@ async function resolvePremiumAccess(
       : null,
   );
 }
+
+export type { QuotaCheckResult };
+
+/** Number of free AI messages available to unsubscribed users (lifetime). */
+export const FREE_MESSAGE_LIMIT = 5;
+
+/** Monthly AI message cap for premium subscribers. */
+export const PREMIUM_MESSAGE_LIMIT = 300;
 
 /**
  * Atomically checks quota and increments the message counter.

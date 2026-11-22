@@ -10,6 +10,12 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeFormattedJson } from "./write-formatted-json.mjs";
 
+const TSX_RE_2 = /\.tsx?$/;
+const SRC_RE = /^\.\/src\//;
+const TSX_RE = /\.tsx$/;
+const TS_RE = /\.ts$/;
+const PACKAGE_JSON_RE = /package\.json$/;
+
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 
 const HASH_IMPORTS = {
@@ -62,19 +68,19 @@ async function collectModuleSubpaths(srcDir) {
         await walk(full, rel);
         continue;
       }
-      if (!/\.tsx?$/.test(entry.name)) {
+      if (!TSX_RE_2.test(entry.name)) {
         continue;
       }
       if (entry.name === "index.ts" || entry.name === "index.tsx") {
         continue;
       }
-      const subpath = `./${rel.replace(/\\/g, "/").replace(/\.tsx?$/, "")}`;
+      const subpath = `./${rel.replace(/\\/g, "/").replace(TSX_RE_2, "")}`;
       modules.add(subpath);
     }
   }
 
   await walk(srcRoot);
-  return [...modules].sort();
+  return [...modules].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 async function collectBarrelSubpaths(srcDir) {
@@ -98,14 +104,11 @@ async function collectBarrelSubpaths(srcDir) {
   }
 
   await walk(srcRoot);
-  return [...barrels].sort();
+  return [...barrels].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
 function tsToDist(srcPath) {
-  return srcPath
-    .replace(/^\.\/src\//, "./dist/")
-    .replace(/\.tsx$/, ".js")
-    .replace(/\.ts$/, ".js");
+  return srcPath.replace(SRC_RE, "./dist/").replace(TSX_RE, ".js").replace(TS_RE, ".js");
 }
 
 async function buildExports(pkgRel, config) {
@@ -116,7 +119,7 @@ async function buildExports(pkgRel, config) {
     "./*": COMPILED_ENTRY("./src/*.ts", "./dist/*.js"),
   };
 
-  const srcDirRel = pkgRel.replace(/package\.json$/, config.srcDir);
+  const srcDirRel = pkgRel.replace(PACKAGE_JSON_RE, config.srcDir);
   const barrels = await collectBarrelSubpaths(srcDirRel);
   for (const subpath of barrels) {
     const _indexTs = `${subpath}/index.ts`;

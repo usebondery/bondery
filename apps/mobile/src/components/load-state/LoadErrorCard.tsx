@@ -11,7 +11,7 @@ interface LoadErrorCardProps {
   title: string;
 }
 
-export function LoadErrorCard({ title, description, onRetry, style }: LoadErrorCardProps) {
+function LoadErrorCard({ title, description, onRetry, style }: LoadErrorCardProps) {
   const colors = useMobileThemeColors();
 
   return (
@@ -66,12 +66,14 @@ const styles = StyleSheet.create({
   },
 });
 
-export const loadErrorTabRootInset = {
+const loadErrorTabRootInset = {
   paddingHorizontal: 20,
   paddingTop: MOBILE_LAYOUT.floatingTabBar.screenHeaderInset,
 } as const;
 
-export const loadErrorStackInset = {
+const loadErrorStackInset = {
   paddingHorizontal: 16,
   paddingTop: 8,
 } as const;
+
+export { LoadErrorCard, loadErrorStackInset, loadErrorTabRootInset };

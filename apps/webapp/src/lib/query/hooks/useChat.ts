@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import type { ChatSession } from "@bondery/schemas";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
@@ -147,14 +148,14 @@ export function useChatSessionsRefreshOnStreamEnd(
 
     wasInFlightRef.current = false;
     onStreamCompleteRef.current?.();
-    void invalidateChatSessions(queryClient);
+    detachPromise(invalidateChatSessions(queryClient));
 
     if (titleRefreshTimerRef.current) {
       clearTimeout(titleRefreshTimerRef.current);
     }
     titleRefreshTimerRef.current = setTimeout(() => {
       titleRefreshTimerRef.current = undefined;
-      void invalidateChatSessions(queryClient);
+      detachPromise(invalidateChatSessions(queryClient));
     }, TITLE_REFRESH_DELAY_MS);
   }, [status, queryClient, getSessionId]);
 }

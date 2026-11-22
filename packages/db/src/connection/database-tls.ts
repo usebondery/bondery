@@ -23,31 +23,12 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import type { ConnectionOptions } from "node:tls";
 
-export const DATABASE_SSL_MODE_ENV = "DATABASE_SSL_MODE";
-export const DATABASE_SSL_ROOT_CERT_FILE_ENV = "DATABASE_SSL_ROOT_CERT_FILE";
-export const DATABASE_SSL_ROOT_CERT_ENV = "DATABASE_SSL_ROOT_CERT";
+const DATABASE_SSL_MODE_ENV = "DATABASE_SSL_MODE";
+const DATABASE_SSL_ROOT_CERT_FILE_ENV = "DATABASE_SSL_ROOT_CERT_FILE";
+const DATABASE_SSL_ROOT_CERT_ENV = "DATABASE_SSL_ROOT_CERT";
 
-export const DATABASE_SSL_MODES = ["verify-full", "verify-ca", "require", "disable"] as const;
-export type DatabaseSslMode = (typeof DATABASE_SSL_MODES)[number];
-
-export type DatabaseTlsEnv = Partial<
-  Record<
-    | typeof DATABASE_SSL_MODE_ENV
-    | typeof DATABASE_SSL_ROOT_CERT_FILE_ENV
-    | typeof DATABASE_SSL_ROOT_CERT_ENV,
-    string
-  >
->;
-
-export type DatabaseCaSource =
-  | { kind: "file"; path: string }
-  | { kind: "inline"; pem: string }
-  | { kind: "system" };
-
-export type DatabaseTlsSettings = {
-  ca: DatabaseCaSource;
-  mode: DatabaseSslMode;
-};
+const DATABASE_SSL_MODES = ["verify-full", "verify-ca", "require", "disable"] as const;
+type DatabaseSslMode = (typeof DATABASE_SSL_MODES)[number];
 
 /** TLS-related URL parameters understood by libpq, `pg`, or Prisma. All are removed from URLs. */
 const URL_TLS_PARAMS = [
@@ -128,6 +109,72 @@ function sameCa(left: DatabaseCaSource, right: DatabaseCaSource): boolean {
   return left.kind === "system";
 }
 
+type ReadTextFile = (path: string) => string;
+
+function readCaPem(ca: DatabaseCaSource, readTextFile: ReadTextFile): string | undefined {
+  if (ca.kind === "system") {
+    return undefined;
+  }
+  let pem: string;
+  if (ca.kind === "inline") {
+    ({ pem } = ca);
+  } else {
+    try {
+      pem = readTextFile(ca.path).trim();
+    } catch (error) {
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `${DATABASE_SSL_ROOT_CERT_FILE_ENV} points to a file that cannot be read (${ca.path}): ${reason}`,
+        { cause: error },
+      );
+    }
+  }
+  const source =
+    ca.kind === "inline" ? DATABASE_SSL_ROOT_CERT_ENV : DATABASE_SSL_ROOT_CERT_FILE_ENV;
+  if (!pem.includes("-----BEGIN CERTIFICATE-----")) {
+    throw new Error(`${source} does not contain a PEM certificate`);
+  }
+  let certificate: X509Certificate;
+  try {
+    certificate = new X509Certificate(pem);
+  } catch (error) {
+    throw new Error(`${source} does not contain a valid PEM certificate`, { cause: error });
+  }
+  if (certificate.raw.byteLength === 0) {
+    throw new Error(`${source} does not contain a valid PEM certificate`);
+  }
+  return pem;
+}
+
+/** Hex characters of the CA hash kept in the temp file name. */
+const CA_FILE_DIGEST_LENGTH = 16;
+
+/** Write an inline CA to a private temp file once, for tools that only accept a path. */
+function inlineCaFile(pem: string): string {
+  const digest = createHash("sha256").update(pem).digest("hex").slice(0, CA_FILE_DIGEST_LENGTH);
+  const path = join(tmpdir(), `bondery-postgres-ca-${digest}.crt`);
+  if (!existsSync(path)) {
+    writeFileSync(path, `${pem}\n`, { mode: 0o600 });
+  }
+  return path;
+}
+
+type DatabaseTlsEnv = Partial<
+  Record<
+    | typeof DATABASE_SSL_MODE_ENV
+    | typeof DATABASE_SSL_ROOT_CERT_FILE_ENV
+    | typeof DATABASE_SSL_ROOT_CERT_ENV,
+    string
+  >
+>;
+
+type DatabaseCaSource =
+  | { kind: "file"; path: string }
+  | { kind: "inline"; pem: string }
+  | { kind: "system" };
+
+export type { DatabaseCaSource, DatabaseTlsEnv };
+
 /**
  * Resolve the TLS settings for a database URL. Reads no files, so it never fails because a CA
  * file is not there yet; `pgConnectionConfig` reads it when a connection is configured.
@@ -182,43 +229,6 @@ export function stripTlsParams(databaseUrl: string): string {
   return url.toString();
 }
 
-type ReadTextFile = (path: string) => string;
-
-function readCaPem(ca: DatabaseCaSource, readTextFile: ReadTextFile): string | undefined {
-  if (ca.kind === "system") {
-    return undefined;
-  }
-  let pem: string;
-  if (ca.kind === "inline") {
-    pem = ca.pem;
-  } else {
-    try {
-      pem = readTextFile(ca.path).trim();
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      throw new Error(
-        `${DATABASE_SSL_ROOT_CERT_FILE_ENV} points to a file that cannot be read (${ca.path}): ${reason}`,
-        { cause: error },
-      );
-    }
-  }
-  const source =
-    ca.kind === "inline" ? DATABASE_SSL_ROOT_CERT_ENV : DATABASE_SSL_ROOT_CERT_FILE_ENV;
-  if (!pem.includes("-----BEGIN CERTIFICATE-----")) {
-    throw new Error(`${source} does not contain a PEM certificate`);
-  }
-  let certificate: X509Certificate;
-  try {
-    certificate = new X509Certificate(pem);
-  } catch (error) {
-    throw new Error(`${source} does not contain a valid PEM certificate`, { cause: error });
-  }
-  if (certificate.raw.byteLength === 0) {
-    throw new Error(`${source} does not contain a valid PEM certificate`);
-  }
-  return pem;
-}
-
 export type PgConnectionConfig = {
   connectionString: string;
   /** SCRAM-SHA-256-PLUS: binds the password exchange to the TLS session. */
@@ -250,19 +260,6 @@ export function pgConnectionConfig(
     ...(settings.mode === "verify-ca" ? { checkServerIdentity: () => undefined } : {}),
   };
   return { connectionString, enableChannelBinding: true, ssl };
-}
-
-/** Hex characters of the CA hash kept in the temp file name. */
-const CA_FILE_DIGEST_LENGTH = 16;
-
-/** Write an inline CA to a private temp file once, for tools that only accept a path. */
-function inlineCaFile(pem: string): string {
-  const digest = createHash("sha256").update(pem).digest("hex").slice(0, CA_FILE_DIGEST_LENGTH);
-  const path = join(tmpdir(), `bondery-postgres-ca-${digest}.crt`);
-  if (!existsSync(path)) {
-    writeFileSync(path, `${pem}\n`, { mode: 0o600 });
-  }
-  return path;
 }
 
 /**
@@ -318,3 +315,16 @@ export function describeDatabaseTls(
     mode: settings.mode,
   };
 }
+
+export type { DatabaseSslMode };
+export {
+  DATABASE_SSL_MODE_ENV,
+  DATABASE_SSL_MODES,
+  DATABASE_SSL_ROOT_CERT_ENV,
+  DATABASE_SSL_ROOT_CERT_FILE_ENV,
+};
+
+export type DatabaseTlsSettings = {
+  ca: DatabaseCaSource;
+  mode: DatabaseSslMode;
+};

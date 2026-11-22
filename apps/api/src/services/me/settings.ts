@@ -7,7 +7,7 @@ import { domainDb } from "../../domains/_shared/domain-db.js";
 import { internal } from "../../lib/platform/errors/http-errors.js";
 import { invalidateProductAnalyticsCache } from "../analytics/posthog-capture.js";
 
-export type UserSettingsLanguage = SupportedLocale;
+type UserSettingsLanguage = SupportedLocale;
 
 const DEFAULT_REMINDER_SEND_HOUR = "08:00:00";
 const NEW_SIGNUP_WINDOW_MS = 30_000;
@@ -19,6 +19,8 @@ function normalizeReminderSendHour(value: string): string {
   const normalizedSecond = (secondPart || "00").padStart(2, "0");
   return `${normalizedHour}:${normalizedMinute}:${normalizedSecond}`;
 }
+
+export type { UserSettingsLanguage };
 
 export function formatSettingsPatchData(result: {
   timezone?: string | null;

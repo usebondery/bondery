@@ -7,13 +7,13 @@ import { notFound } from "next/navigation";
 import { formatText } from "@/lib/i18n/message";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 
-export const revalidate = false;
+const revalidate = false;
 
 type RouteContext = {
   params: Promise<{ code: string }>;
 };
 
-export async function GET(_req: Request, context: RouteContext) {
+async function GET(_req: Request, context: RouteContext) {
   const { code } = await context.params;
   if (!isApiErrorCode(code)) {
     notFound();
@@ -24,6 +24,8 @@ export async function GET(_req: Request, context: RouteContext) {
   );
 }
 
-export function generateStaticParams() {
+function generateStaticParams() {
   return API_ERROR_CODES.map((code) => ({ code }));
 }
+
+export { GET, generateStaticParams, revalidate };

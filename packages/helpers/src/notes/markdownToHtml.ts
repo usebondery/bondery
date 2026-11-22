@@ -1,3 +1,12 @@
+const PATTERN_5E40_RE = /^@/;
+const PATTERN_5E282D2D2D2B_RE = /^(---+|\*\*\*+|___+)$/;
+const PATTERN_5E28237B312C_RE = /^(#{1,3})\s*(.+)$/;
+const PATTERN_5E3E5C733F28_RE = /^>\s?(.*)$/;
+const XX_RE_2 = /^[-*]\s*\[([\s\t]*[xX]?[\s\t]*)\]\s*(.*)$/;
+const XX_RE = /[xX]/;
+const PATTERN_5E5B2D2A2B5D_RE = /^[-*+]\s*(.+)$/;
+const PATTERN_5E5C642B5C2E_RE = /^\d+\. (.+)$/;
+
 const HTML_ESCAPES: Record<string, string> = {
   "'": "&#39;",
   '"': "&quot;",
@@ -77,7 +86,7 @@ export function markdownToHtml(markdown: string): string {
       .replace(/`([^`]+)`/g, (_, a) => `<code>${a}</code>`)
       // Person mention links must run before generic markdown links.
       .replace(/\[(@[^\]]*)\]\(bp:\/\/person\/([^)]+)\)/g, (_, rawLabel: string, id: string) => {
-        const label = rawLabel.replace(/^@/, "").trim();
+        const label = rawLabel.replace(PATTERN_5E40_RE, "").trim();
         const text = label.length > 0 ? `@${label}` : "@";
         return `<span data-type="mention" data-id="${id}" data-label="${label}">${text}</span>`;
       })
@@ -103,7 +112,7 @@ export function markdownToHtml(markdown: string): string {
     const trimmed = line.trim();
 
     // ── Horizontal rule ──────────────────────────────────────────────────────
-    if (/^(---+|\*\*\*+|___+)$/.test(trimmed)) {
+    if (PATTERN_5E282D2D2D2B_RE.test(trimmed)) {
       closeList();
       closeBlockquote();
       html += "<hr>";
@@ -111,7 +120,7 @@ export function markdownToHtml(markdown: string): string {
     }
 
     // ── Heading ──────────────────────────────────────────────────────────────
-    const headingMatch = line.match(/^(#{1,3})\s*(.+)$/);
+    const headingMatch = line.match(PATTERN_5E28237B312C_RE);
     if (headingMatch) {
       closeList();
       closeBlockquote();
@@ -121,7 +130,7 @@ export function markdownToHtml(markdown: string): string {
     }
 
     // ── Blockquote ───────────────────────────────────────────────────────────
-    const bqMatch = line.match(/^>\s?(.*)$/);
+    const bqMatch = line.match(PATTERN_5E3E5C733F28_RE);
     if (bqMatch) {
       if (listType) {
         closeList();
@@ -136,7 +145,7 @@ export function markdownToHtml(markdown: string): string {
     closeBlockquote();
 
     // ── Task list ─────────────────────────────────────────────────────────────
-    const taskMatch = line.match(/^[-*]\s*\[([\s\t]*[xX]?[\s\t]*)\]\s*(.*)$/);
+    const taskMatch = line.match(XX_RE_2);
     if (taskMatch) {
       if (listType !== "taskList") {
         if (listType) {
@@ -145,7 +154,7 @@ export function markdownToHtml(markdown: string): string {
         html += `<ul data-type="taskList">`;
         listType = "taskList";
       }
-      const checked = /[xX]/.test(taskMatch[1] ?? "");
+      const checked = XX_RE.test(taskMatch[1] ?? "");
       const taskContent = (taskMatch[2] ?? "").trim();
       html +=
         `<li data-type="taskItem" data-checked="${checked}">` +
@@ -155,7 +164,7 @@ export function markdownToHtml(markdown: string): string {
     }
 
     // ── Unordered list ───────────────────────────────────────────────────────
-    const ulMatch = line.match(/^[-*+]\s*(.+)$/);
+    const ulMatch = line.match(PATTERN_5E5B2D2A2B5D_RE);
     if (ulMatch) {
       if (listType !== "ul") {
         if (listType) {
@@ -169,7 +178,7 @@ export function markdownToHtml(markdown: string): string {
     }
 
     // ── Ordered list ─────────────────────────────────────────────────────────
-    const olMatch = line.match(/^\d+\. (.+)$/);
+    const olMatch = line.match(PATTERN_5E5C642B5C2E_RE);
     if (olMatch) {
       if (listType !== "ol") {
         if (listType) {

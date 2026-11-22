@@ -12,13 +12,13 @@ import {
   extractLivePageJsonBlocks,
   extractProfileUrn,
   nfcText,
+  type VoyagerEntity,
   voyagerFetch,
 } from "./voyagerShared";
 
-function buildGeoEntityMap(
-  entities: Record<string, unknown>[],
-): Map<string, Record<string, unknown>> {
-  const map = new Map<string, Record<string, unknown>>();
+const PRIVACY_PROFILE_OR_MINI_RE = /PrivacySettings|ProfileCard|MiniProfile/i;
+function buildGeoEntityMap(entities: VoyagerEntity[]): Map<string, VoyagerEntity> {
+  const map = new Map<string, VoyagerEntity>();
   for (const e of entities) {
     const urn = e.entityUrn as string | undefined;
     const type = e.$type as string | undefined;
@@ -30,8 +30,8 @@ function buildGeoEntityMap(
 }
 
 function resolveGeoDisplayName(
-  geoEntity: Record<string, unknown>,
-  geoByUrn: Map<string, Record<string, unknown>>,
+  geoEntity: VoyagerEntity,
+  geoByUrn: Map<string, VoyagerEntity>,
 ): string | undefined {
   const localized = (geoEntity.defaultLocalizedName ??
     geoEntity.defaultLocalizedNameWithoutCountryName ??
@@ -63,7 +63,7 @@ function resolveGeoDisplayName(
 }
 
 function extractProfileLocationFromEntities(
-  entities: Record<string, unknown>[],
+  entities: VoyagerEntity[],
   username: string,
   profileUrn: string | null,
 ): string | undefined {
@@ -74,7 +74,7 @@ function extractProfileLocationFromEntities(
     if (!type?.includes("identity.profile.Profile")) {
       continue;
     }
-    if (/PrivacySettings|ProfileCard|MiniProfile/i.test(type)) {
+    if (PRIVACY_PROFILE_OR_MINI_RE.test(type)) {
       continue;
     }
 
@@ -95,11 +95,11 @@ function extractProfileLocationFromEntities(
 }
 
 function resolveGeoFromProfileEntity(
-  profile: Record<string, unknown>,
-  entityByUrn: Map<string, Record<string, unknown>>,
+  profile: VoyagerEntity,
+  entityByUrn: Map<string, VoyagerEntity>,
 ): string | undefined {
   const geoByUrn = buildGeoEntityMap([...entityByUrn.values()]);
-  const geoLocation = profile.geoLocation as Record<string, unknown> | undefined;
+  const { geoLocation } = profile;
   if (!geoLocation) {
     return undefined;
   }
@@ -124,7 +124,7 @@ function resolveGeoFromProfileEntity(
 }
 
 function extractLocationFromApiResponse(
-  response: Record<string, unknown> | null,
+  response: VoyagerEntity | null,
   profileUrn: string | null,
 ): string | undefined {
   if (!response) {
@@ -139,7 +139,7 @@ function extractLocationFromApiResponse(
     if (!type?.includes("identity.profile.Profile")) {
       continue;
     }
-    if (/PrivacySettings|ProfileCard|MiniProfile/i.test(type)) {
+    if (PRIVACY_PROFILE_OR_MINI_RE.test(type)) {
       continue;
     }
     if (profileUrn && e.entityUrn !== profileUrn) {
@@ -158,7 +158,7 @@ function extractLocationFromApiResponse(
     if (!type?.includes("identity.profile.Profile")) {
       continue;
     }
-    if (/PrivacySettings|ProfileCard|MiniProfile/i.test(type)) {
+    if (PRIVACY_PROFILE_OR_MINI_RE.test(type)) {
       continue;
     }
 
@@ -198,9 +198,7 @@ function dashProfilePath(
   );
 }
 
-function collectProfileEntities(
-  response: Record<string, unknown> | null,
-): Record<string, unknown>[] {
+function collectProfileEntities(response: VoyagerEntity | null): VoyagerEntity[] {
   if (!response) {
     return [];
   }
@@ -208,21 +206,21 @@ function collectProfileEntities(
 }
 
 function bioFromResponse(
-  response: Record<string, unknown> | null,
+  response: VoyagerEntity | null,
   username: string,
   profileUrn: string | null,
 ): string | undefined {
   return extractVoyagerBio(collectProfileEntities(response), username, profileUrn);
 }
 
-export interface VoyagerProfileMeta {
+interface VoyagerProfileMeta {
   bio: string | undefined;
   identity: SduiIdentity | null;
   location: string | undefined;
 }
 
 function identityFromResponse(
-  response: Record<string, unknown> | null,
+  response: VoyagerEntity | null,
   username: string,
   profileUrn: string | null,
 ): SduiIdentity | null {
@@ -238,7 +236,7 @@ function identityFromResponse(
  * Location priority: GraphQL by vanity → GraphQL by URN → embedded entities.
  * Identity uses the same responses (and MiniProfile / Profile entities).
  */
-export async function fetchVoyagerProfileMeta(username: string): Promise<VoyagerProfileMeta> {
+async function fetchVoyagerProfileMeta(username: string): Promise<VoyagerProfileMeta> {
   try {
     return await loadVoyagerProfileMeta(username);
   } catch (error) {
@@ -331,7 +329,10 @@ async function loadVoyagerProfileMeta(username: string): Promise<VoyagerProfileM
 }
 
 /** Resolves profile location from Voyager — never from topcard DOM text. */
-export async function fetchProfileLocation(username: string): Promise<string | undefined> {
+async function fetchProfileLocation(username: string): Promise<string | undefined> {
   const { location } = await fetchVoyagerProfileMeta(username);
   return location;
 }
+
+export type { VoyagerProfileMeta };
+export { fetchProfileLocation, fetchVoyagerProfileMeta };

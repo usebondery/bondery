@@ -3,6 +3,8 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { resolve } from "node:path";
 
+const PATTERN_5B5C5C2F5D_RE = /[\\/]/;
+
 function main() {
   const configName = process.argv[2];
   if (!configName) {
@@ -54,7 +56,7 @@ function main() {
 
   const ngrokBinary = resolveNgrokBinary();
   const child = spawn(ngrokBinary, ["start", "--config", configPath, "--all"], {
-    shell: process.platform === "win32" && !/[\\/]/.test(ngrokBinary),
+    shell: process.platform === "win32" && !PATTERN_5B5C5C2F5D_RE.test(ngrokBinary),
     stdio: "inherit",
   });
 

@@ -7,6 +7,8 @@ import { isValidUuid } from "@bondery/helpers/ids";
 import { AVATARS_BUCKET, deleteStorageObjects, getStorage } from "../storage/get-storage.js";
 import { AVATAR_IMAGE_MAX_EDGE, normalizeImageToJpeg } from "../storage/normalize-image.js";
 
+const LEADING_SLASHES_PATTERN = /^\/+/;
+
 export function getContactAvatarStoragePath(userId: string, contactId: string): string {
   return `${userId}/${contactId}.jpg`;
 }
@@ -14,7 +16,7 @@ export function getContactAvatarStoragePath(userId: string, contactId: string): 
 /** Returns the contact id when `key` is `{userId}/{uuid}.jpg` in the avatars bucket. */
 export function contactIdFromAvatarStorageKey(userId: string, key: string): string | null {
   const expectedPrefix = `${userId}/`;
-  const normalized = key.replace(/^\/+/, "");
+  const normalized = key.replace(LEADING_SLASHES_PATTERN, "");
   if (!normalized.startsWith(expectedPrefix) || !normalized.endsWith(".jpg")) {
     return null;
   }

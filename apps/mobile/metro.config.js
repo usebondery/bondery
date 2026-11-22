@@ -1,3 +1,4 @@
+const JS_TS_FILE_EXT_RE = /\.(js|ts|tsx)$/;
 const fs = require("node:fs");
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("node:path");
@@ -57,7 +58,7 @@ const workspacePackageFolders = fs
     if (!fs.existsSync(pkgJsonPath)) {
       return null;
     }
-    const name = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8")).name;
+    const { name } = JSON.parse(fs.readFileSync(pkgJsonPath, "utf8"));
     return { folderPath, name };
   })
   .filter((entry) => entry !== null && mobileDeps.has(entry.name))
@@ -135,7 +136,7 @@ function normalizePath(filePath) {
 }
 
 function resolveWorkspaceSourceFile(pkgRoot, subpath) {
-  const clean = subpath.replace(/\.(js|ts|tsx)$/, "");
+  const clean = subpath.replace(JS_TS_FILE_EXT_RE, "");
   const candidates = [
     path.join(pkgRoot, "src", `${clean}.ts`),
     path.join(pkgRoot, "src", `${clean}.tsx`),
@@ -177,7 +178,7 @@ function resolveWorkspaceRelativeJs(originModulePath, moduleName) {
     return null;
   }
   const originDir = path.dirname(originModulePath);
-  const withoutExt = moduleName.replace(/\.(js|ts|tsx)$/, "");
+  const withoutExt = moduleName.replace(JS_TS_FILE_EXT_RE, "");
   const candidates = [
     path.join(originDir, `${withoutExt}.ts`),
     path.join(originDir, `${withoutExt}.tsx`),
@@ -213,7 +214,7 @@ function resolveWorkspaceHashImport(originModulePath, moduleName) {
 }
 
 config.resolver.resolveRequest = (context, moduleName, platform) => {
-  const base = moduleName.split("/")[0];
+  const [base] = moduleName.split("/");
 
   // Only override if the import is coming from *outside* the local node_modules,
   // e.g. from root workspace packages or shared packages. This avoids infinite

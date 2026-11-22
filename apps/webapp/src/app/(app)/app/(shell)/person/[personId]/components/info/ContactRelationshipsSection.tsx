@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { ActionIconButton, type PeoplePickerOnSearch, PersonChip } from "@bondery/mantine-next";
 import type {
   ContactPreview,
@@ -52,110 +53,6 @@ function getPerspectiveType(
   }
 
   return relationshipType;
-}
-
-export function ContactRelationshipsSection({
-  contactsHasMore = false,
-  currentPerson,
-  selectablePeople,
-  relationships,
-  isSubmitting,
-  onAddRelationship,
-  onUpdateRelationship,
-  onDeleteRelationship,
-}: ContactRelationshipsSectionProps) {
-  const t = usePersonRelationshipsTranslations();
-
-  const relationshipTypeOptions = RELATIONSHIP_TYPE_OPTIONS.map((typeOption) => ({
-    label: [typeOption.emoji, t(`Types.${typeOption.value}`)].join(" "),
-    value: typeOption.value,
-  }));
-
-  const handleSearch: PeoplePickerOnSearch<ContactPreview> = async (query, paging) => {
-    const page = await searchContactsPage(query, paging);
-    return {
-      contacts: page.contacts.filter((c) => c.id !== currentPerson.id),
-      hasMore: page.hasMore,
-    };
-  };
-
-  return (
-    <Stack gap="sm">
-      <Text fw={600} size="sm">
-        {t("Title")}
-      </Text>
-
-      {relationships.length > 0 ? (
-        <Stack gap="xs">
-          {relationships.map((relationship) => {
-            const isSourcePerspective = relationship.sourcePersonId === currentPerson.id;
-            const relatedPerson = isSourcePerspective
-              ? relationship.targetPerson
-              : relationship.sourcePerson;
-            const perspectiveType = getPerspectiveType(
-              relationship.relationshipType,
-              isSourcePerspective,
-            );
-
-            return (
-              <RelationshipCardRow
-                contactsHasMore={contactsHasMore}
-                currentPerson={currentPerson}
-                initialRelatedPerson={relatedPerson}
-                initialRelationshipType={perspectiveType}
-                isLabel={t("IsLabel")}
-                isSubmitting={isSubmitting}
-                key={relationship.id}
-                loadingMoreLabel={t("LoadingMoreLabel")}
-                loadMoreErrorLabel={t("LoadMoreError")}
-                loadMoreRetryLabel={t("LoadMoreRetry")}
-                mode="edit"
-                noPeopleFound={t("NoPeopleFound")}
-                ofLabel={t("OfLabel")}
-                onDelete={() => onDeleteRelationship(relationship.id)}
-                onSearch={handleSearch}
-                onUpdate={(nextType, nextPersonId) =>
-                  onUpdateRelationship(relationship.id, nextType, nextPersonId)
-                }
-                relatedPersonPlaceholder={t("RelatedPersonPlaceholder")}
-                relationshipTypeOptions={relationshipTypeOptions}
-                relationshipTypePlaceholder={t("RelationshipTypePlaceholder")}
-                removeActionLabel={t("RemoveAction")}
-                searchDebounceMs={DEBOUNCE_MS.search}
-                searchingLabel={t("SearchingLabel")}
-                searchPlaceholder={t("SearchPlaceholder")}
-                selectablePeople={selectablePeople}
-                showRightAction
-              />
-            );
-          })}
-        </Stack>
-      ) : null}
-
-      <RelationshipCardRow
-        addActionLabel={t("AddHint")}
-        contactsHasMore={contactsHasMore}
-        currentPerson={currentPerson}
-        isLabel={t("IsLabel")}
-        isSubmitting={isSubmitting}
-        loadingMoreLabel={t("LoadingMoreLabel")}
-        loadMoreErrorLabel={t("LoadMoreError")}
-        loadMoreRetryLabel={t("LoadMoreRetry")}
-        mode="create"
-        noPeopleFound={t("NoPeopleFound")}
-        ofLabel={t("OfLabel")}
-        onCreate={onAddRelationship}
-        onSearch={handleSearch}
-        relatedPersonPlaceholder={t("RelatedPersonPlaceholder")}
-        relationshipTypeOptions={relationshipTypeOptions}
-        relationshipTypePlaceholder={t("RelationshipTypePlaceholder")}
-        searchDebounceMs={DEBOUNCE_MS.search}
-        searchingLabel={t("SearchingLabel")}
-        searchPlaceholder={t("SearchPlaceholder")}
-        selectablePeople={selectablePeople}
-      />
-    </Stack>
-  );
 }
 
 type RelationshipOption = { value: string; label: string };
@@ -305,14 +202,17 @@ function RelationshipCardRow({
       relationshipType &&
       nextPersonId !== initialRelatedPerson?.id
     ) {
-      void onUpdate(relationshipType, nextPersonId);
+      detachPromise(onUpdate(relationshipType, nextPersonId));
     }
 
-    void maybeCreate(relationshipType, nextPersonId);
+    detachPromise(maybeCreate(relationshipType, nextPersonId));
   };
 
   const relatedPersonChip =
-    onSearch != null && searchDebounceMs != null ? (
+    onSearch !== null &&
+    onSearch !== undefined &&
+    searchDebounceMs !== null &&
+    searchDebounceMs !== undefined ? (
       <PersonChip
         contactsHasMore={contactsHasMore}
         disabled={isSubmitting || isAutoCreating}
@@ -378,10 +278,10 @@ function RelationshipCardRow({
             setRelationshipType(nextType);
 
             if (mode === "edit" && onUpdate && nextType && relatedPersonId) {
-              void onUpdate(nextType, relatedPersonId);
+              detachPromise(onUpdate(nextType, relatedPersonId));
             }
 
-            void maybeCreate(nextType, relatedPersonId);
+            detachPromise(maybeCreate(nextType, relatedPersonId));
           }}
           placeholder={relationshipTypePlaceholder}
           searchable
@@ -407,5 +307,109 @@ function RelationshipCardRow({
         ) : null}
       </Group>
     </Card>
+  );
+}
+
+export function ContactRelationshipsSection({
+  contactsHasMore = false,
+  currentPerson,
+  selectablePeople,
+  relationships,
+  isSubmitting,
+  onAddRelationship,
+  onUpdateRelationship,
+  onDeleteRelationship,
+}: ContactRelationshipsSectionProps) {
+  const t = usePersonRelationshipsTranslations();
+
+  const relationshipTypeOptions = RELATIONSHIP_TYPE_OPTIONS.map((typeOption) => ({
+    label: [typeOption.emoji, t(`Types.${typeOption.value}`)].join(" "),
+    value: typeOption.value,
+  }));
+
+  const handleSearch: PeoplePickerOnSearch<ContactPreview> = async (query, paging) => {
+    const page = await searchContactsPage(query, paging);
+    return {
+      contacts: page.contacts.filter((c) => c.id !== currentPerson.id),
+      hasMore: page.hasMore,
+    };
+  };
+
+  return (
+    <Stack gap="sm">
+      <Text fw={600} size="sm">
+        {t("Title")}
+      </Text>
+
+      {relationships.length > 0 ? (
+        <Stack gap="xs">
+          {relationships.map((relationship) => {
+            const isSourcePerspective = relationship.sourcePersonId === currentPerson.id;
+            const relatedPerson = isSourcePerspective
+              ? relationship.targetPerson
+              : relationship.sourcePerson;
+            const perspectiveType = getPerspectiveType(
+              relationship.relationshipType,
+              isSourcePerspective,
+            );
+
+            return (
+              <RelationshipCardRow
+                contactsHasMore={contactsHasMore}
+                currentPerson={currentPerson}
+                initialRelatedPerson={relatedPerson}
+                initialRelationshipType={perspectiveType}
+                isLabel={t("IsLabel")}
+                isSubmitting={isSubmitting}
+                key={relationship.id}
+                loadingMoreLabel={t("LoadingMoreLabel")}
+                loadMoreErrorLabel={t("LoadMoreError")}
+                loadMoreRetryLabel={t("LoadMoreRetry")}
+                mode="edit"
+                noPeopleFound={t("NoPeopleFound")}
+                ofLabel={t("OfLabel")}
+                onDelete={() => onDeleteRelationship(relationship.id)}
+                onSearch={handleSearch}
+                onUpdate={(nextType, nextPersonId) =>
+                  onUpdateRelationship(relationship.id, nextType, nextPersonId)
+                }
+                relatedPersonPlaceholder={t("RelatedPersonPlaceholder")}
+                relationshipTypeOptions={relationshipTypeOptions}
+                relationshipTypePlaceholder={t("RelationshipTypePlaceholder")}
+                removeActionLabel={t("RemoveAction")}
+                searchDebounceMs={DEBOUNCE_MS.search}
+                searchingLabel={t("SearchingLabel")}
+                searchPlaceholder={t("SearchPlaceholder")}
+                selectablePeople={selectablePeople}
+                showRightAction
+              />
+            );
+          })}
+        </Stack>
+      ) : null}
+
+      <RelationshipCardRow
+        addActionLabel={t("AddHint")}
+        contactsHasMore={contactsHasMore}
+        currentPerson={currentPerson}
+        isLabel={t("IsLabel")}
+        isSubmitting={isSubmitting}
+        loadingMoreLabel={t("LoadingMoreLabel")}
+        loadMoreErrorLabel={t("LoadMoreError")}
+        loadMoreRetryLabel={t("LoadMoreRetry")}
+        mode="create"
+        noPeopleFound={t("NoPeopleFound")}
+        ofLabel={t("OfLabel")}
+        onCreate={onAddRelationship}
+        onSearch={handleSearch}
+        relatedPersonPlaceholder={t("RelatedPersonPlaceholder")}
+        relationshipTypeOptions={relationshipTypeOptions}
+        relationshipTypePlaceholder={t("RelationshipTypePlaceholder")}
+        searchDebounceMs={DEBOUNCE_MS.search}
+        searchingLabel={t("SearchingLabel")}
+        searchPlaceholder={t("SearchPlaceholder")}
+        selectablePeople={selectablePeople}
+      />
+    </Stack>
   );
 }

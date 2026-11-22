@@ -9,19 +9,24 @@ import {
   listContactNotesFields,
 } from "../../resources/contacts-list-sql.ts";
 
+const SQL_LIMIT_RE = /LIMIT/i;
+const SQL_OFFSET_RE = /OFFSET/i;
+const SQL_LIMIT_OFFSET_PLACEHOLDERS_RE = /LIMIT \? OFFSET \?/;
+const SQL_NOTES_RE = /\bnotes\b/;
+const SQL_NOTES_UPDATED_AT_RE = /\bnotes_updated_at\b/;
 describe("buildContactsListSelectSql", () => {
   it("omits LIMIT when limit is absent", () => {
     const { sql, params } = buildContactsListSelectSql({ query: "ada" });
 
-    assert.equal(/LIMIT/i.test(sql), false);
-    assert.equal(/OFFSET/i.test(sql), false);
+    assert.equal(SQL_LIMIT_RE.test(sql), false);
+    assert.equal(SQL_OFFSET_RE.test(sql), false);
     assert.deepEqual(params, ["%ada%", "%ada%", "%ada%"]);
   });
 
   it("includes LIMIT when limit is set", () => {
     const { sql, params } = buildContactsListSelectSql({ limit: 8, query: "ada" });
 
-    assert.equal(/LIMIT \? OFFSET \?/.test(sql), true);
+    assert.equal(SQL_LIMIT_OFFSET_PLACEHOLDERS_RE.test(sql), true);
     assert.deepEqual(params, ["%ada%", "%ada%", "%ada%", 8, 0]);
   });
 
@@ -29,8 +34,8 @@ describe("buildContactsListSelectSql", () => {
     const { sql } = buildContactsListSelectSql({});
 
     assert.equal(sql.includes("p.*"), false);
-    assert.equal(/\bnotes\b/.test(sql), false);
-    assert.equal(/\bnotes_updated_at\b/.test(sql), false);
+    assert.equal(SQL_NOTES_RE.test(sql), false);
+    assert.equal(SQL_NOTES_UPDATED_AT_RE.test(sql), false);
     assert.equal(sql.includes("p.avatar_updated_at"), true);
     assert.equal(sql.startsWith("SELECT DISTINCT p.id, p.user_id"), true);
   });
@@ -43,7 +48,7 @@ describe("buildContactIdsSelectSql", () => {
 
     assert.equal(selectClause, "SELECT DISTINCT p.id");
     assert.equal(selectClause.includes("p.*"), false);
-    assert.equal(/LIMIT \? OFFSET \?/.test(sql), true);
+    assert.equal(SQL_LIMIT_OFFSET_PLACEHOLDERS_RE.test(sql), true);
   });
 });
 

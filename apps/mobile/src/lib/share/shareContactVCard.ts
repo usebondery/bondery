@@ -5,7 +5,7 @@ import { fetchContactVCard } from "../api/client";
 
 const VCARD_MIME_TYPE = "text/vcard" as const;
 
-export class ShareUnavailableError extends Error {
+class ShareUnavailableError extends Error {
   constructor() {
     super("Sharing is not available on this device");
     this.name = "ShareUnavailableError";
@@ -18,7 +18,7 @@ type ShareContactVCardInput = {
   dialogTitle: string;
 };
 
-export async function shareContactVCard(input: ShareContactVCardInput): Promise<void> {
+async function shareContactVCard(input: ShareContactVCardInput): Promise<void> {
   const isSharingAvailable = await Sharing.isAvailableAsync();
   if (!isSharingAvailable) {
     throw new ShareUnavailableError();
@@ -36,3 +36,5 @@ export async function shareContactVCard(input: ShareContactVCardInput): Promise<
   };
   await Sharing.shareAsync(file.uri, shareOptions);
 }
+
+export { ShareUnavailableError, shareContactVCard };

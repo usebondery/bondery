@@ -22,7 +22,7 @@ interface MaskedPhoneInputProps {
   value: string;
 }
 
-export function MaskedPhoneInput({
+function MaskedPhoneInput({
   prefix,
   value,
   onChangeValue,
@@ -93,3 +93,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
 });
+
+export { MaskedPhoneInput };

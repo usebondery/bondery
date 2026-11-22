@@ -7,6 +7,8 @@ import { unauthorized } from "../lib/platform/errors/http-errors.js";
 import { mapErrorToResponse } from "../lib/platform/errors/map-to-response.js";
 import { SyncConflictError } from "../lib/sync/conflict.js";
 
+const DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN = /\/docs\/api\/errors\/contact_not_found$/;
+
 function mockRequest(id = "test-req-id"): FastifyRequest {
   return {
     authUser: { email: "u@example.com", id: "user-1" },
@@ -29,7 +31,7 @@ describe("mapErrorToResponse", () => {
     assert.equal(body.error.message, "Contact not found");
     assert.equal(body.error.type, "not_found_error");
     assert.equal(body.error.request_id, "test-req-id");
-    assert.match(body.error.doc_url, /\/docs\/api\/errors\/contact_not_found$/);
+    assert.match(body.error.doc_url, DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN);
   });
 
   it("sanitizes DomainError 500 — generic message, code, request_id, no leak", () => {

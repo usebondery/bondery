@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   useCallback,
   useEffect,
@@ -35,6 +36,15 @@ import {
   type DictationSession,
   sessionInterimPreview,
 } from "@/lib/speech/dictation/dictationSession";
+
+/** A `stop()` that never reports `onend` must not keep the control spinning. */
+const FINALIZE_GUARD_MS = 1500;
+
+/** Browser capabilities never change while the page is open, so there is nothing to subscribe to. */
+const subscribeToNothing = () => () => undefined;
+
+/** The server has no recognizer and has not run the browser check. */
+const getServerAvailability = (): null => null;
 
 export type { DictationAvailability, DictationStatus };
 
@@ -76,15 +86,6 @@ export interface UseDictationResult {
   status: DictationStatus;
   toggle: () => void;
 }
-
-/** A `stop()` that never reports `onend` must not keep the control spinning. */
-const FINALIZE_GUARD_MS = 1500;
-
-/** Browser capabilities never change while the page is open, so there is nothing to subscribe to. */
-const subscribeToNothing = () => () => undefined;
-
-/** The server has no recognizer and has not run the browser check. */
-const getServerAvailability = (): null => null;
 
 /**
  * Dictation session for the chat composer.
@@ -243,7 +244,7 @@ export function useDictation({
 
   const openCapture = useCallback(
     (processLocally: boolean) => {
-      const current = valueRef.current;
+      const { current } = valueRef;
       const selection = readSelection();
       const start = selection?.start ?? current.length;
       const end = selection?.end ?? current.length;
@@ -299,17 +300,19 @@ export function useDictation({
     setInterimText("");
     setStatus("requesting");
 
-    void resolveDictationRoute(lang).then((route) => {
-      if (startTokenRef.current !== token) {
-        return;
-      }
-      if (route === "none") {
-        routeRef.current = "none";
-        setStatus("no-service");
-        return;
-      }
-      openCapture(route === "local");
-    });
+    detachPromise(
+      resolveDictationRoute(lang).then((route) => {
+        if (startTokenRef.current !== token) {
+          return;
+        }
+        if (route === "none") {
+          routeRef.current = "none";
+          setStatus("no-service");
+          return;
+        }
+        openCapture(route === "local");
+      }),
+    );
   }, [engine, lang, openCapture, setStatus]);
 
   /** Writes the composed value. Returns false when the session lost the field. */
@@ -444,16 +447,18 @@ export function useDictation({
       return;
     }
     let cancelled = false;
-    void readDictationRouteChoice(lang).then((choice) => {
-      if (cancelled) {
-        return;
-      }
-      routeRef.current = choice;
-      if (choice === "none" && statusRef.current === "idle") {
-        setStatus("no-service");
-      }
-      setRouteReady(true);
-    });
+    detachPromise(
+      readDictationRouteChoice(lang).then((choice) => {
+        if (cancelled) {
+          return;
+        }
+        routeRef.current = choice;
+        if (choice === "none" && statusRef.current === "idle") {
+          setStatus("no-service");
+        }
+        setRouteReady(true);
+      }),
+    );
     return () => {
       cancelled = true;
     };
@@ -466,14 +471,16 @@ export function useDictation({
       return;
     }
     let cancelled = false;
-    void readDictationPermission().then((permission) => {
-      if (cancelled || permission !== "denied") {
-        return;
-      }
-      if (statusRef.current === "idle") {
-        setStatus("denied");
-      }
-    });
+    detachPromise(
+      readDictationPermission().then((permission) => {
+        if (cancelled || permission !== "denied") {
+          return;
+        }
+        if (statusRef.current === "idle") {
+          setStatus("denied");
+        }
+      }),
+    );
     return () => {
       cancelled = true;
     };
@@ -492,8 +499,6 @@ export function useDictation({
   // A terminal status (denied, unavailable) describes the browser, not the
   // session, so it survives a reset and the user keeps its explanation.
   useEffect(() => {
-    void lang;
-    void resetKey;
     if (isLiveStatus(statusRef.current)) {
       endSession();
     }

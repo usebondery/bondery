@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import type {
   Contact,
   ContactPreview,
@@ -141,8 +142,10 @@ export function PersonDetailTabs({
                 disabled={savingLastInteraction}
                 label={tInteractions("LastInteractionInput")}
                 onChange={(val) => {
-                  void handleSaveLastInteraction(
-                    datePickerValueToIsoDateTime(val as Date | string | null),
+                  detachPromise(
+                    handleSaveLastInteraction(
+                      datePickerValueToIsoDateTime(val as Date | string | null),
+                    ),
                   );
                 }}
                 value={contact.lastInteraction ?? null}

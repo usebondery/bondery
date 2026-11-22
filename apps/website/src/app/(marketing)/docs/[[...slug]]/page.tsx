@@ -21,6 +21,7 @@ import { getDocsGithubUrl, getDocsPageUrl, getPageMarkdownUrl } from "@/lib/get-
 import { openapi } from "@/lib/openapi";
 import { getFilteredPageTree, getPageImage, source } from "@/lib/source";
 
+const HASH_PREFIX_RE = /^#/;
 type PageProps = {
   params: Promise<{ slug?: string[] }>;
 };
@@ -61,7 +62,7 @@ function toDocsToc(toc: TocEntry[]): DocsTocItem[] {
 
   for (const item of toc) {
     const title = textFromNode(item.title).trim();
-    const id = item.url.replace(/^#/, "");
+    const id = item.url.replace(HASH_PREFIX_RE, "");
     if (!title || !id) {
       continue;
     }

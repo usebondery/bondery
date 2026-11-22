@@ -1,4 +1,4 @@
-import type { ImportFollowupPlatform, ImportFollowupStatus } from "@bondery/schemas";
+import type { ImportFollowupPlatform, ImportFollowupStatus, UserSettings } from "@bondery/schemas";
 
 export type GettingStartedTaskId = "importContacts" | "addContacts" | "logInteraction";
 
@@ -28,18 +28,15 @@ export interface GettingStartedState {
   totalCount: number;
 }
 
-export function parseGettingStartedSettings(
-  data?: Record<string, unknown>,
-): GettingStartedSettings {
+export function parseGettingStartedSettings(data?: UserSettings): GettingStartedSettings {
   const status = data?.importFollowupStatus;
 
   const platform = data?.importFollowupPlatform;
 
   return {
-    gettingStartedDismissedAt:
-      (data?.gettingStartedDismissedAt as string | null | undefined) ?? null,
+    gettingStartedDismissedAt: data?.gettingStartedDismissedAt ?? null,
 
-    importCompletedAt: (data?.importCompletedAt as string | null | undefined) ?? null,
+    importCompletedAt: data?.importCompletedAt ?? null,
 
     importFollowupPlatform: platform === "linkedin" || platform === "instagram" ? platform : null,
     importFollowupStatus: status === "awaiting_export" || status === "dismissed" ? status : null,
@@ -55,7 +52,8 @@ export function buildGettingStartedState(input: {
 }): GettingStartedState {
   const { settings, totalContacts, hasInteraction } = input;
 
-  const importComplete = settings.importCompletedAt != null;
+  const importComplete =
+    settings.importCompletedAt !== null && settings.importCompletedAt !== undefined;
 
   const importAwaiting = !importComplete && settings.importFollowupStatus === "awaiting_export";
 
@@ -90,7 +88,9 @@ export function buildGettingStartedState(input: {
   return {
     completedCount,
 
-    showRail: settings.gettingStartedDismissedAt == null,
+    showRail:
+      settings.gettingStartedDismissedAt === null ||
+      settings.gettingStartedDismissedAt === undefined,
     tasks,
 
     totalCount: tasks.length,

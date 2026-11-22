@@ -1,4 +1,16 @@
 /** Better Auth mount path on the API host (`api.example.com/auth/*`). */
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
+const OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH =
+  "/.well-known/oauth-authorization-server" as const;
+const OPENID_CONFIGURATION_WELL_KNOWN_PATH = "/.well-known/openid-configuration" as const;
+
+function betterAuthResourcePath(resourcePath: string): string {
+  return resourcePath.startsWith("/")
+    ? resourcePath.replace(PATTERN_5C2F2B24_RE, "")
+    : `/${resourcePath}`;
+}
+
 export const BETTER_AUTH_BASE_PATH = "/auth" as const;
 
 /** Path under {@link BETTER_AUTH_BASE_PATH}, e.g. `/auth/oauth2/token`. */
@@ -6,10 +18,6 @@ export function betterAuthPath(segment: string): string {
   const suffix = segment.startsWith("/") ? segment : `/${segment}`;
   return `${BETTER_AUTH_BASE_PATH}${suffix}`;
 }
-
-const OAUTH_AUTHORIZATION_SERVER_WELL_KNOWN_PATH =
-  "/.well-known/oauth-authorization-server" as const;
-const OPENID_CONFIGURATION_WELL_KNOWN_PATH = "/.well-known/openid-configuration" as const;
 
 /** RFC 8414 authorization-server metadata document for the configured base path. */
 export function betterAuthAuthorizationServerMetadataPath(): string {
@@ -44,10 +52,6 @@ export function betterAuthOpenIdConfigurationPaths(): string[] {
 /** RFC 9728 protected-resource metadata (root document). */
 export const BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH =
   "/.well-known/oauth-protected-resource" as const;
-
-function betterAuthResourcePath(resourcePath: string): string {
-  return resourcePath.startsWith("/") ? resourcePath.replace(/\/+$/, "") : `/${resourcePath}`;
-}
 
 /**
  * RFC 9728 paths: Better Auth `mcp()` root + path-inserted documents, plus the

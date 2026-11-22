@@ -13,6 +13,20 @@ import {
   stripTlsParams,
 } from "./database-tls.js";
 
+const DATABASE_SSL_MODE_IS_VERIFY_FULL_RE =
+  /DATABASE_SSL_MODE is verify-full but the database URL has sslmode=disable/;
+const FALLS_BACK_TO_AN_UNENCRYPTED_CONNECTION_RE = /falls back to an unencrypted connection/;
+const MUST_BE_ONE_OF_RE = /must be one of/;
+const NOT_BOTH_RE = /not both/;
+const DOES_NOT_CHECK_IT_RE = /does not check it/;
+const CLIENT_CERTIFICATES_RE = /Client certificates/;
+const KEEP_ONE_RE = /Keep one/;
+const DATABASE_SSL_ROOT_CERT_FILE_POINTS_RE =
+  /DATABASE_SSL_ROOT_CERT_FILE points to a file that cannot be read \(.*missing\.crt\)/;
+const DOES_NOT_CONTAIN_PEM_CERTIFICATE_RE = /does not contain a PEM certificate/;
+const NO_ENCRYPTION_RE = /no encryption/;
+const CERTIFICATE_RE = /certificate/i;
+
 const URL_BASE = "postgresql://bondery_app:pw@bondery-db:5432/bondery";
 
 /**
@@ -59,7 +73,7 @@ describe("resolveDatabaseTls", () => {
   it("rejects a URL sslmode that contradicts DATABASE_SSL_MODE", () => {
     assert.throws(
       () => resolveDatabaseTls(`${URL_BASE}?sslmode=disable`, { DATABASE_SSL_MODE: "verify-full" }),
-      /DATABASE_SSL_MODE is verify-full but the database URL has sslmode=disable/,
+      DATABASE_SSL_MODE_IS_VERIFY_FULL_RE,
     );
   });
 
@@ -67,7 +81,7 @@ describe("resolveDatabaseTls", () => {
     for (const mode of ["prefer", "allow"]) {
       assert.throws(
         () => resolveDatabaseTls(URL_BASE, { DATABASE_SSL_MODE: mode }),
-        /falls back to an unencrypted connection/,
+        FALLS_BACK_TO_AN_UNENCRYPTED_CONNECTION_RE,
       );
     }
   });
@@ -75,7 +89,7 @@ describe("resolveDatabaseTls", () => {
   it("refuses an unknown mode", () => {
     assert.throws(
       () => resolveDatabaseTls(URL_BASE, { DATABASE_SSL_MODE: "on" }),
-      /must be one of/,
+      MUST_BE_ONE_OF_RE,
     );
   });
 
@@ -86,7 +100,7 @@ describe("resolveDatabaseTls", () => {
           DATABASE_SSL_ROOT_CERT: PEM,
           DATABASE_SSL_ROOT_CERT_FILE: "ca.crt",
         }),
-      /not both/,
+      NOT_BOTH_RE,
     );
   });
 
@@ -98,7 +112,7 @@ describe("resolveDatabaseTls", () => {
             DATABASE_SSL_MODE: mode,
             DATABASE_SSL_ROOT_CERT_FILE: "ca.crt",
           }),
-        /does not check it/,
+        DOES_NOT_CHECK_IT_RE,
       );
     }
   });
@@ -106,7 +120,7 @@ describe("resolveDatabaseTls", () => {
   it("refuses client certificate parameters instead of ignoring them", () => {
     assert.throws(
       () => resolveDatabaseTls(`${URL_BASE}?sslcert=client.crt`, {}),
-      /Client certificates/,
+      CLIENT_CERTIFICATES_RE,
     );
   });
 
@@ -116,7 +130,7 @@ describe("resolveDatabaseTls", () => {
         resolveDatabaseTls(`${URL_BASE}?sslrootcert=other.crt`, {
           DATABASE_SSL_ROOT_CERT_FILE: "ca.crt",
         }),
-      /Keep one/,
+      KEEP_ONE_RE,
     );
   });
 
@@ -192,7 +206,7 @@ describe("pgConnectionConfig", () => {
         pgConnectionConfig(URL_BASE, { DATABASE_SSL_ROOT_CERT_FILE: "missing.crt" }, () => {
           throw new Error("ENOENT");
         }),
-      /DATABASE_SSL_ROOT_CERT_FILE points to a file that cannot be read \(.*missing\.crt\)/,
+      DATABASE_SSL_ROOT_CERT_FILE_POINTS_RE,
     );
   });
 
@@ -204,7 +218,7 @@ describe("pgConnectionConfig", () => {
           { DATABASE_SSL_ROOT_CERT_FILE: "ca.crt" },
           fixedReader("hello"),
         ),
-      /does not contain a PEM certificate/,
+      DOES_NOT_CONTAIN_PEM_CERTIFICATE_RE,
     );
   });
 });
@@ -269,17 +283,22 @@ describe("describeDatabaseTls", () => {
  * BONDERY_DEV_TLS_TEST_CA_FILE to run them.
  */
 describe("against a TLS Postgres", () => {
-  const url = process.env.BONDERY_DEV_TLS_TEST_DATABASE_URL;
-  const caFile = process.env.BONDERY_DEV_TLS_TEST_CA_FILE;
+  const url = process.env["BONDERY_DEV_TLS_TEST_DATABASE_URL"];
+  const caFile = process.env["BONDERY_DEV_TLS_TEST_CA_FILE"];
 
-  async function query(config: pg.ClientConfig): Promise<Record<string, unknown>> {
+  interface PgStatSslRow {
+    ssl?: boolean;
+    version?: string;
+  }
+
+  async function query(config: pg.ClientConfig): Promise<PgStatSslRow> {
     const client = new pg.Client(config);
     await client.connect();
     try {
-      const { rows } = await client.query(
+      const { rows } = await client.query<PgStatSslRow>(
         "select ssl, version from pg_stat_ssl where pid = pg_backend_pid()",
       );
-      return rows[0];
+      return rows[0] ?? {};
     } finally {
       await client.end();
     }
@@ -293,7 +312,7 @@ describe("against a TLS Postgres", () => {
 
   it("is refused without TLS", { skip: !url || !caFile }, async () => {
     const config = pgConnectionConfig(url as string, { DATABASE_SSL_MODE: "disable" });
-    await assert.rejects(query(config), /no encryption/);
+    await assert.rejects(query(config), NO_ENCRYPTION_RE);
   });
 
   it("refuses a server whose certificate the CA did not sign", {
@@ -301,6 +320,6 @@ describe("against a TLS Postgres", () => {
   }, async () => {
     const config = pgConnectionConfig(url as string, {}, () => "");
     // System CAs do not include the bundled private CA.
-    await assert.rejects(query(config), /certificate/i);
+    await assert.rejects(query(config), CERTIFICATE_RE);
   });
 });

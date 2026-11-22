@@ -13,9 +13,12 @@
 import { execSync } from "node:child_process";
 import { killDevPort } from "./kill-dev-port.mjs";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const PATTERN_5E5C642B24_RE = /^\d+$/;
+
 const IS_WINDOWS = process.platform === "win32";
 
-const ports = [26630, 26632, 26642];
+const ports = [26_630, 26_632, 26_642];
 
 /**
  * Command-line fragments for dev processes that hold no port.
@@ -63,16 +66,16 @@ function findPids(fragment) {
     }
 
     return out
-      .split(/\r?\n/)
+      .split(PATTERN_5C723F5C6E_RE)
       .map((line) => line.trim())
-      .filter((line) => /^\d+$/.test(line));
+      .filter((line) => PATTERN_5E5C642B24_RE.test(line));
   }
 
   const out = run(`pgrep -f '${fragment.replace(/'/g, "'\\''")}'`);
   return out
     .split("\n")
     .map((line) => line.trim())
-    .filter((line) => /^\d+$/.test(line));
+    .filter((line) => PATTERN_5E5C642B24_RE.test(line));
 }
 
 function killPid(pid) {

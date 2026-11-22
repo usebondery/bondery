@@ -73,7 +73,7 @@ type PersonChipBaseProps = {
   size?: "sm" | "md";
 };
 
-export type PersonChipProps = PersonChipBaseProps &
+type PersonChipProps = PersonChipBaseProps &
   (
     | {
         /** Async server-side search with offset paging. Empty field still lists prefetched `people`. */
@@ -89,7 +89,7 @@ export type PersonChipProps = PersonChipBaseProps &
 
 const NO_PEOPLE: PersonChipIdentity[] = [];
 
-export function PersonChip({
+function PersonChip({
   person,
   size = "md",
   color,
@@ -328,3 +328,6 @@ export function PersonChip({
     </Combobox>
   );
 }
+
+export type { PersonChipProps };
+export { PersonChip };

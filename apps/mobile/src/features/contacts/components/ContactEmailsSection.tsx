@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { EmailEntry } from "@bondery/schemas";
 import {
   IconCopy,
@@ -183,7 +184,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                   id: "copy",
                   label: tContactInfo("CopyAction"),
                   onPress: () => {
-                    void copyEmailToClipboard(email, copyMessages);
+                    detachPromise(copyEmailToClipboard(email, copyMessages));
                   },
                 },
                 {
@@ -208,7 +209,7 @@ export function ContactEmailsSection({ emails, onSaveEmails }: ContactEmailsSect
                 },
               ]}
               onLongPress={() => {
-                void copyEmailToClipboard(email, copyMessages);
+                detachPromise(copyEmailToClipboard(email, copyMessages));
               }}
               onPress={() => openEmailMailto(email, errorTitle)}
               primaryLabel={email.value}

@@ -10,6 +10,8 @@ import { firstNonEmpty } from "@/lib/shared/nonEmpty";
 import { ClusterMapBubble, PersonMapAvatarMarker } from "./mapMarkerIcons";
 import type { PeopleMapMarker } from "./PeopleMap";
 
+const PATTERN = /\s+/;
+
 const CLUSTER_RADIUS_PX = 50;
 
 type ClusterPointProperties = {
@@ -28,8 +30,7 @@ function readPointCoordinates(
   if (!Array.isArray(coordinates) || coordinates.length < 2) {
     return null;
   }
-  const longitude = coordinates[0];
-  const latitude = coordinates[1];
+  const [longitude, latitude] = coordinates;
   if (!isFiniteCoordinate(longitude) || !isFiniteCoordinate(latitude)) {
     return null;
   }
@@ -187,7 +188,7 @@ export function ClusteredPersonMarkers({
           return null;
         }
 
-        const nameParts = marker.name.trim().split(/\s+/).filter(Boolean);
+        const nameParts = marker.name.trim().split(PATTERN).filter(Boolean);
         const firstName = firstNonEmpty(marker.firstName, nameParts[0]) ?? marker.name;
         const lastName =
           marker.lastName ?? (nameParts.length > 1 ? nameParts.slice(1).join(" ") : null);

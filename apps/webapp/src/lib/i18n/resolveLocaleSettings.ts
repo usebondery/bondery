@@ -9,19 +9,19 @@ import { getRequestSession } from "@/lib/auth/getRequestSession";
 import { fetchBetterAuthSession } from "@/lib/auth/server";
 import { getLocaleFromHeaders } from "./getLocaleFromHeaders";
 
-export interface LocaleSettings {
-  dateFormat: DateFormatPreference;
-  locale: SupportedLocale;
-  timeFormat: "24h" | "12h";
-  timezone: string;
-}
-
 const FALLBACK: LocaleSettings = {
   dateFormat: "locale",
   locale: DEFAULT_LOCALE,
   timeFormat: "24h",
   timezone: "UTC",
 };
+
+export interface LocaleSettings {
+  dateFormat: DateFormatPreference;
+  locale: SupportedLocale;
+  timeFormat: "24h" | "12h";
+  timezone: string;
+}
 
 /**
  * Resolves locale settings for the current request.

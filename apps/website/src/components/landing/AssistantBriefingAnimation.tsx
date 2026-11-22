@@ -55,7 +55,7 @@ const DEMO_CONTACT = {
   note: visuals.Briefing.DemoNote,
 } as const;
 
-export function AssistantBriefingAnimation() {
+function AssistantBriefingAnimation() {
   const reduceMotion = useReducedMotion();
   const [frame, setFrame] = useState<Frame>(INITIAL_FRAME);
 
@@ -380,3 +380,5 @@ function ContactCard({ isSaved }: { isSaved: boolean }) {
     </Card>
   );
 }
+
+export { AssistantBriefingAnimation };

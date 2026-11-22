@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
  */
 export function GET() {
   const document = buildAppleAppSiteAssociation({
-    teamId: process.env.BONDERY_PUBLIC_IOS_APP_TEAM_ID,
+    teamId: process.env["BONDERY_PUBLIC_IOS_APP_TEAM_ID"],
   });
 
   if (!document) {

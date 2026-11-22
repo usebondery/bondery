@@ -1,3 +1,5 @@
+const WWW_RE = /^www\./;
+
 /** Returns the hostname of an `http(s)` or protocol-relative URL, or `null` for any other input. */
 export function linkHostname(href: string): string | null {
   const trimmed = href.trim();
@@ -20,6 +22,6 @@ export function linkHostname(href: string): string | null {
 
 /** DuckDuckGo favicon URL for a host. The page CSP must allow `icons.duckduckgo.com`. */
 export function faviconUrlForHost(host: string): string {
-  const normalized = host.toLowerCase().replace(/^www\./, "");
+  const normalized = host.toLowerCase().replace(WWW_RE, "");
   return `https://icons.duckduckgo.com/ip3/${normalized}.ico`;
 }

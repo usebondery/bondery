@@ -121,7 +121,7 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
         }
         return nextDue <= new Date(`${endDate}T23:59:59`);
       })
-      .map((c) => Object.assign({}, c, { daysUntilDue: computeDaysUntilDue(c) }))
+      .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
       .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
   })();
 

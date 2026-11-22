@@ -2,17 +2,10 @@ import { cn } from "cn";
 import { Text as RNText, type TextProps as RNTextProps } from "react-native";
 import { useMobileThemeColors } from "../../theme/useMobileThemeColors";
 
-export type TextSize = "xs" | "sm" | "md" | "lg" | "xl";
-export type TextWeight = 400 | 500 | 600 | 700;
-export type TextColor =
-  | "brand"
-  | "danger"
-  | "default"
-  | "muted"
-  | "onPrimary"
-  | "primary"
-  | "secondary";
-export type TextAlign = "left" | "center" | "right";
+type TextSize = "xs" | "sm" | "md" | "lg" | "xl";
+type TextWeight = 400 | 500 | 600 | 700;
+type TextColor = "brand" | "danger" | "default" | "muted" | "onPrimary" | "primary" | "secondary";
+type TextAlign = "left" | "center" | "right";
 
 const SIZE_CLASS: Record<TextSize, string> = {
   lg: "text-[15px]",
@@ -35,7 +28,7 @@ const ALIGN_CLASS: Record<TextAlign, string> = {
   right: "text-right",
 };
 
-export type TextProps = RNTextProps & {
+type TextProps = RNTextProps & {
   c?: TextColor;
   className?: string;
   fw?: TextWeight;
@@ -63,7 +56,7 @@ function colorForToken(c: TextColor, colors: ReturnType<typeof useMobileThemeCol
   }
 }
 
-export function Text({ c = "primary", className, fw, size = "md", style, ta, ...rest }: TextProps) {
+function Text({ c = "primary", className, fw, size = "md", style, ta, ...rest }: TextProps) {
   const colors = useMobileThemeColors();
   const sizeClass = size === null ? undefined : SIZE_CLASS[size];
 
@@ -80,3 +73,6 @@ export function Text({ c = "primary", className, fw, size = "md", style, ta, ...
     />
   );
 }
+
+export type { TextAlign, TextColor, TextProps, TextSize, TextWeight };
+export { Text };

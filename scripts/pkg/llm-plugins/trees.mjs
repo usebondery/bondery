@@ -49,7 +49,20 @@ function listFiles(dir) {
     }
   };
   walk(dir);
-  return out.sort();
+  return out.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+}
+
+function removeEmptyDirs(dir) {
+  for (const entry of readdirSync(dir)) {
+    const abs = join(dir, entry);
+    if (!lstatSync(abs).isDirectory()) {
+      continue;
+    }
+    removeEmptyDirs(abs);
+    if (readdirSync(abs).length === 0) {
+      rmdirSync(abs);
+    }
+  }
 }
 
 export function diffTree(dir, files) {
@@ -70,19 +83,6 @@ export function diffTree(dir, files) {
     }
   }
   return diffs;
-}
-
-function removeEmptyDirs(dir) {
-  for (const entry of readdirSync(dir)) {
-    const abs = join(dir, entry);
-    if (!lstatSync(abs).isDirectory()) {
-      continue;
-    }
-    removeEmptyDirs(abs);
-    if (readdirSync(abs).length === 0) {
-      rmdirSync(abs);
-    }
-  }
 }
 
 export function writeTree(dir, files) {

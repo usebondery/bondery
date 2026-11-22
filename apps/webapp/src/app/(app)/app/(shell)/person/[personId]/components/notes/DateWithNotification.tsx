@@ -89,7 +89,7 @@ export default function DateWithNotification({
           value={dateValue}
           valueFormat={formatter.dateInputValueFormat({ withYear: true })}
         />
-        {showNameInput && (
+        {showNameInput ? (
           <TextInput
             maxLength={INPUT_MAX_LENGTHS.dateName}
             onBlur={() => onBlur?.(nameFieldName)}
@@ -108,7 +108,7 @@ export default function DateWithNotification({
             style={{ flex: 1 }}
             value={nameValue}
           />
-        )}
+        ) : null}
         <Checkbox
           checked={notifyValue}
           disabled={!dateValue}

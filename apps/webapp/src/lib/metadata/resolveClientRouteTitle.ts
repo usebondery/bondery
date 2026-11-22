@@ -5,12 +5,6 @@ import { formatEntityTitleString } from "@/lib/metadata/pageTitles";
 import { matchDynamicRoute } from "@/lib/metadata/routeTitleRegistry";
 import { chatKeys, contactKeys, groupKeys, settingsKeys } from "@/lib/query/keys";
 
-export type ResolveClientRouteTitleOptions = {
-  queryClient: QueryClient;
-  optimisticTitle?: string;
-  entityTitleOverride?: string | null;
-};
-
 const ME_PERSON_AVATAR_PRESETS = ["large", "small"] as const;
 
 function resolveEntityTitleFromCache(
@@ -54,6 +48,12 @@ function resolveEntityTitleFromCache(
 
   return null;
 }
+
+export type ResolveClientRouteTitleOptions = {
+  queryClient: QueryClient;
+  optimisticTitle?: string;
+  entityTitleOverride?: string | null;
+};
 
 /**
  * Resolves the browser tab title for entity routes on client-side navigation.

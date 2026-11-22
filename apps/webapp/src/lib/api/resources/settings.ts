@@ -1,12 +1,12 @@
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
-import type { ColorSchemePreference } from "@bondery/schemas";
+import type { ColorSchemePreference, UserSettingsResponse } from "@bondery/schemas";
 import type { SupportedLocale } from "@bondery/translations";
 import { coerceSupportedLocale } from "@bondery/translations";
 import { firstNonEmpty, nonEmpty } from "@/lib/shared/nonEmpty";
 
 export const SETTINGS_API_PATH = API_ROUTES.ME_SETTINGS;
 
-export type SettingsQueryResult = { data?: Record<string, unknown> };
+export type SettingsQueryResult = { data?: UserSettingsResponse["data"] };
 
 export interface UserSettingsData {
   aiMessagesUsed: number;
@@ -22,12 +22,13 @@ export interface UserSettingsData {
 
 /** Normalize raw API `data` object for TanStack Query cache (`settingsKeys.me`). */
 export function parseSettingsQueryResult(raw: SettingsQueryResult): SettingsQueryResult {
-  const data = raw.data ?? {};
-  return { data };
+  return { data: raw.data };
 }
 
 /** Normalize settings for layout routing (onboarding, shell, locale). */
-export function parseUserSettingsData(settings: Record<string, unknown>): UserSettingsData {
+export function parseUserSettingsData(
+  settings: Partial<UserSettingsResponse["data"]>,
+): UserSettingsData {
   const colorScheme: ColorSchemePreference =
     settings.colorScheme === "light" ||
     settings.colorScheme === "dark" ||
@@ -35,19 +36,17 @@ export function parseUserSettingsData(settings: Record<string, unknown>): UserSe
       ? settings.colorScheme
       : "auto";
 
-  const locale = coerceSupportedLocale(settings.language as string | undefined);
+  const locale = coerceSupportedLocale(settings.language);
 
   return {
-    aiMessagesUsed: (settings.aiMessagesUsed as number | undefined) ?? 0,
-    avatarUrl: (settings.avatarUrl as string | null | undefined) ?? null,
+    aiMessagesUsed: settings.aiMessagesUsed ?? 0,
+    avatarUrl: settings.avatarUrl ?? null,
     colorScheme,
     locale,
-    onboardingCompletedAt: (settings.onboardingCompletedAt as string | null | undefined) ?? null,
+    onboardingCompletedAt: settings.onboardingCompletedAt ?? null,
     timeFormat: settings.timeFormat === "12h" ? "12h" : "24h",
-    timezone: nonEmpty(settings.timezone as string | undefined) ?? "UTC",
-    userEmail: (settings.email as string | undefined) ?? "",
-    userName:
-      firstNonEmpty(settings.name as string | undefined, settings.email as string | undefined) ??
-      "User",
+    timezone: nonEmpty(settings.timezone) ?? "UTC",
+    userEmail: settings.email ?? "",
+    userName: firstNonEmpty(settings.name, settings.email) ?? "User",
   };
 }

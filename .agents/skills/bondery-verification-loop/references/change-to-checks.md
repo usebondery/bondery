@@ -24,6 +24,7 @@ pnpm exec biome ci .
 | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | Any TS/JS across monorepo                                                  | `pnpm run check:types` (or scoped `-w` only if change is isolated)                                            |
 | Package import patterns                                                    | `pnpm run check:package-imports`                                                                              |
+| `tsconfig*.json`, `packages/typescript-config/`                            | `pnpm run check:tsconfig-extends`                                                                             |
 | `packages/helpers/src/env/**`, `scripts/env/**`, `.env.example`, turbo env | `pnpm run env -- --check`                                                                                     |
 | `scripts/updater/**`                                                       | `pnpm run update:aaguid-catalog` (run every file in that folder)                                              |
 | `docs/**` (non-website)                                                    | `pnpm run check-docs`                                                                                         |

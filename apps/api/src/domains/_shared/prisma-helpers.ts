@@ -1,6 +1,11 @@
 import { Prisma } from "@bondery/db";
 import type { Group, Tag } from "@bondery/schemas";
 
+function isPlainObject(value: object): value is Record<string, unknown> {
+  const proto = Object.getPrototypeOf(value);
+  return proto === Object.prototype || proto === null;
+}
+
 export function isUniqueViolation(error: unknown): boolean {
   return error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002";
 }
@@ -62,11 +67,6 @@ export function toTagDto(row: {
     updatedAt: row.updatedAt.toISOString(),
     userId: row.userId,
   };
-}
-
-function isPlainObject(value: object): value is Record<string, unknown> {
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
 }
 
 /** Drop Prisma Unsupported / Buffer values that cannot be stored in JSONB. */

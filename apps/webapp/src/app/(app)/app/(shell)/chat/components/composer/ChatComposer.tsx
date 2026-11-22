@@ -13,6 +13,17 @@ import { useDictation } from "@/lib/speech/dictation/useDictation";
 import { ChatDictateButton } from "./ChatDictateButton";
 import { ChatModelPicker } from "./ChatModelPicker";
 
+/** `mod+shift+m` as the field sees it. `mod` is Ctrl on Windows and Linux. */
+function isDictateHotkey(event: KeyboardEvent<HTMLTextAreaElement>): boolean {
+  const parts = HOTKEYS.DICTATE.split("+");
+  const key = parts.at(-1)?.toLowerCase();
+  if (!key || event.key.toLowerCase() !== key) {
+    return false;
+  }
+  const mod = event.ctrlKey || event.metaKey;
+  return mod && event.shiftKey && !event.altKey;
+}
+
 export interface ChatComposerProps {
   /** A reply or a pending confirm blocks a new send. */
   canStop: boolean;
@@ -27,17 +38,6 @@ export interface ChatComposerProps {
   onSubmit: (event: FormEvent) => void;
   setValue: (value: string) => void;
   value: string;
-}
-
-/** `mod+shift+m` as the field sees it. `mod` is Ctrl on Windows and Linux. */
-function isDictateHotkey(event: KeyboardEvent<HTMLTextAreaElement>): boolean {
-  const parts = HOTKEYS.DICTATE.split("+");
-  const key = parts.at(-1)?.toLowerCase();
-  if (!key || event.key.toLowerCase() !== key) {
-    return false;
-  }
-  const mod = event.ctrlKey || event.metaKey;
-  return mod && event.shiftKey && !event.altKey;
 }
 
 /**

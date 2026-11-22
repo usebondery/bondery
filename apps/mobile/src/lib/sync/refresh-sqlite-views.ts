@@ -7,7 +7,7 @@ import type { SyncTableKey } from "@bondery/schemas/sync";
 import { notifyManager, type Query, type QueryClient, type QueryKey } from "@tanstack/react-query";
 import { getSqliteQueryClient } from "./sqlite-query-client";
 
-export type SqliteQueryMeta = {
+type SqliteQueryMeta = {
   sqliteRead: () => unknown;
 };
 
@@ -42,7 +42,7 @@ function toError(error: unknown): Error {
   return error instanceof Error ? error : new Error(String(error));
 }
 
-export function refreshSqliteViews(
+function refreshSqliteViews(
   tables: readonly SyncTableKey[],
   queryClient: QueryClient = getSqliteQueryClient(),
 ): void {
@@ -78,3 +78,6 @@ export function refreshSqliteViews(
     }
   });
 }
+
+export type { SqliteQueryMeta };
+export { refreshSqliteViews };

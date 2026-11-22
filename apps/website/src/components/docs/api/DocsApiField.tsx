@@ -10,7 +10,7 @@ import { type ReactNode, useId, useState } from "react";
 /** Enums with more allowed values than this are not listed inline. */
 const MAX_INLINE_ALLOWED_VALUES = 8;
 
-export function formatFieldValue(value: unknown): string {
+function formatFieldValue(value: unknown): string {
   if (typeof value === "string") {
     return value;
   }
@@ -37,7 +37,7 @@ type DocsApiFieldProps = {
  * One row in a parameter or response list: name, type, default, allowed values,
  * description, and an optional disclosure for child fields.
  */
-export function DocsApiField({
+function DocsApiField({
   children,
   defaultValue,
   deprecated = false,
@@ -130,3 +130,5 @@ export function DocsApiField({
     </Box>
   );
 }
+
+export { DocsApiField, formatFieldValue };

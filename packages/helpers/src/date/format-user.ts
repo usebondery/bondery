@@ -1,10 +1,7 @@
 import type { DateFormatPreference, TimeFormatPreference } from "@bondery/schemas";
 import { buildIntlLocaleTag, formatOrderedDate } from "@bondery/schemas/locale";
 
-export type { DateFormatPreference, TimeFormatPreference };
-export { formatOrderedDate };
-
-export type DateTimeFormatContext = {
+type DateTimeFormatContext = {
   /** UI locale code (`cs`, `de`). Helpers build the Intl tag internally. */
   locale: string;
   dateFormat: DateFormatPreference;
@@ -13,7 +10,7 @@ export type DateTimeFormatContext = {
   timeZone?: string;
 };
 
-export type UserDateStyle =
+type UserDateStyle =
   | "numeric"
   | "short"
   | "medium"
@@ -23,7 +20,7 @@ export type UserDateStyle =
   | "monthYearLong";
 
 /** One calendar field, for a split date rail. Use `formatUserDate` for a full date. */
-export type UserDateField = "monthShort" | "monthLong" | "yearNumeric" | "dayTwoDigit";
+type UserDateField = "monthShort" | "monthLong" | "yearNumeric" | "dayTwoDigit";
 
 type NumericDateOrder = "mdy" | "dmy" | "ymd";
 
@@ -46,7 +43,7 @@ const UNAMBIGUOUS_SAMPLE_DAY = 13;
 const DATE_TIME_FORMAT_CACHE_LIMIT = 2000;
 const dateTimeFormats = new Map<string, Intl.DateTimeFormat>();
 
-export function cachedDateTimeFormat(
+function cachedDateTimeFormat(
   locale: string,
   options: Intl.DateTimeFormatOptions,
 ): Intl.DateTimeFormat {
@@ -139,7 +136,7 @@ function formatNamedOverride(
  * `options.timeZone` overrides `ctx.timeZone` for one call. Use it for a
  * calendar date held as UTC midnight, which must not shift to the day before.
  */
-export function formatUserDate(
+function formatUserDate(
   date: Date,
   ctx: DateTimeFormatContext,
   style: UserDateStyle = "numeric",
@@ -182,26 +179,6 @@ const DATE_FIELD_OPTIONS: Record<UserDateField, Intl.DateTimeFormatOptions> = {
   yearNumeric: { year: "numeric" },
 };
 
-/**
- * Formats one calendar field. Use it for a split date rail or a group heading.
- * Use `formatUserDate` when the user needs a full date.
- */
-export function formatUserDateField(
-  date: Date,
-  ctx: DateTimeFormatContext,
-  field: UserDateField,
-  options?: { timeZone?: string },
-): string {
-  const resolved: DateTimeFormatContext = options?.timeZone
-    ? { ...ctx, timeZone: options.timeZone }
-    : ctx;
-
-  return cachedDateTimeFormat(intlTag(resolved), {
-    ...DATE_FIELD_OPTIONS[field],
-    ...zoneOptions(resolved),
-  }).format(date);
-}
-
 function formatTimeOfDate(
   date: Date,
   ctx: DateTimeFormatContext,
@@ -223,7 +200,7 @@ function formatTimeOfDate(
  * The shape (12h or 24h, day-period labels and their position) comes from
  * `Intl` in `ctx.locale`, so the label stays correct in every locale.
  */
-export function formatUserTime(
+function formatUserTime(
   date: Date,
   ctx: DateTimeFormatContext,
   options?: { withSeconds?: boolean },
@@ -245,6 +222,20 @@ function parseClockTime(hhmmss: string): { hour: number; minute: number; second:
   }
 
   return { hour, minute, second };
+}
+
+function localeYearlessDayjsToken(ctx: DateTimeFormatContext): "MMMM D" | "D MMMM" {
+  const sample = new Date(SAMPLE_YEAR, 10, UNAMBIGUOUS_SAMPLE_DAY);
+  const parts = cachedDateTimeFormat(intlTag(ctx), {
+    day: "numeric",
+    month: "long",
+  }).formatToParts(sample);
+  const monthIndex = parts.findIndex((part) => part.type === "month");
+  const dayIndex = parts.findIndex((part) => part.type === "day");
+  if (monthIndex >= 0 && dayIndex >= 0 && monthIndex < dayIndex) {
+    return "MMMM D";
+  }
+  return "D MMMM";
 }
 
 /**
@@ -292,20 +283,6 @@ export function amPmLabelsForLocale(ctx: DateTimeFormatContext): { am: string; p
   return { am, pm };
 }
 
-function localeYearlessDayjsToken(ctx: DateTimeFormatContext): "MMMM D" | "D MMMM" {
-  const sample = new Date(SAMPLE_YEAR, 10, UNAMBIGUOUS_SAMPLE_DAY);
-  const parts = cachedDateTimeFormat(intlTag(ctx), {
-    day: "numeric",
-    month: "long",
-  }).formatToParts(sample);
-  const monthIndex = parts.findIndex((part) => part.type === "month");
-  const dayIndex = parts.findIndex((part) => part.type === "day");
-  if (monthIndex >= 0 && dayIndex >= 0 && monthIndex < dayIndex) {
-    return "MMMM D";
-  }
-  return "D MMMM";
-}
-
 /**
  * Mantine `DateInput` / `DatePickerInput` `valueFormat` token string.
  */
@@ -336,3 +313,29 @@ export function dateInputValueFormat(
 
   return withYear ? "LL" : localeYearlessDayjsToken(ctx);
 }
+
+export type { DateTimeFormatContext, UserDateField, UserDateStyle };
+export { formatUserDate, formatUserTime };
+
+/**
+ * Formats one calendar field. Use it for a split date rail or a group heading.
+ * Use `formatUserDate` when the user needs a full date.
+ */
+export function formatUserDateField(
+  date: Date,
+  ctx: DateTimeFormatContext,
+  field: UserDateField,
+  options?: { timeZone?: string },
+): string {
+  const resolved: DateTimeFormatContext = options?.timeZone
+    ? { ...ctx, timeZone: options.timeZone }
+    : ctx;
+
+  return cachedDateTimeFormat(intlTag(resolved), {
+    ...DATE_FIELD_OPTIONS[field],
+    ...zoneOptions(resolved),
+  }).format(date);
+}
+
+export type { DateFormatPreference, TimeFormatPreference };
+export { cachedDateTimeFormat, formatOrderedDate };

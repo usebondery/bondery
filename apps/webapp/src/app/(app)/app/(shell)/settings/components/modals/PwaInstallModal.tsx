@@ -1,6 +1,7 @@
 "use client";
 
 import { PWA_APP_NAME } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { informationNotificationTemplate, ModalFooter } from "@bondery/mantine-next";
 import { Group, Paper, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
@@ -81,7 +82,7 @@ export function PwaInstallModal({ modalId, isChromiumDesktop, install }: PwaInst
         actionRightSection={<IconDeviceDesktop size={16} />}
         cancelLabel={t("Close")}
         onAction={() => {
-          void handleInstall();
+          detachPromise(handleInstall());
         }}
         onCancel={closeModal}
       />

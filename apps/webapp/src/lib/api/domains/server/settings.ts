@@ -10,14 +10,14 @@ import {
 } from "@/lib/api/resources/settings";
 import { type ServerApiFetchOptions, serverApiFetch, serverApiJson } from "@/lib/api/server";
 
+const DEFAULT_SERVER_OPTIONS: ServerApiFetchOptions = {
+  next: { tags: ["settings"] },
+};
+
 export type GetSettingsServerOptions = Pick<
   ServerApiFetchOptions,
   "cache" | "next" | "transportPolicy"
 >;
-
-const DEFAULT_SERVER_OPTIONS: ServerApiFetchOptions = {
-  next: { tags: ["settings"] },
-};
 
 export type SettingsBootstrapResult =
   | { status: "ok"; settings: UserSettingsData; queryData: SettingsQueryResult }

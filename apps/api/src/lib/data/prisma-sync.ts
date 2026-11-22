@@ -5,7 +5,7 @@ import { SYNC_TABLE_KEYS } from "@bondery/schemas/sync";
 
 const SYNC_TABLE_SET = new Set<string>(SYNC_TABLE_KEYS);
 
-export type DbRow = Record<string, unknown>;
+type DbRow = Record<string, unknown>;
 
 function serializeRawRow(row: Record<string, unknown>): DbRow {
   const out: DbRow = {};
@@ -22,6 +22,24 @@ function serializeRawRow(row: Record<string, unknown>): DbRow {
   }
   return out;
 }
+
+type SyncChangeLogRow = {
+  server_sequence: number;
+  change_index: number;
+  table_name: string;
+  operation: "insert" | "update" | "delete";
+  entity_id: string;
+  row_data: Record<string, unknown> | null;
+};
+
+/**
+ * One server sequence can hold several change-log rows (one per `change_index`).
+ * The query reads up to this many rows per requested sequence, so a page of `limit`
+ * sequences fits in a single read.
+ */
+const SYNC_CHANGE_LOG_ROWS_PER_SEQUENCE = 20;
+
+export type { DbRow, SyncChangeLogRow };
 
 export async function fetchSyncTableRows(
   client: PrismaClient,
@@ -119,22 +137,6 @@ export async function fetchSyncGroupRow(
   const row = rows[0];
   return row ? serializeRawRow(row) : null;
 }
-
-export type SyncChangeLogRow = {
-  server_sequence: number;
-  change_index: number;
-  table_name: string;
-  operation: "insert" | "update" | "delete";
-  entity_id: string;
-  row_data: Record<string, unknown> | null;
-};
-
-/**
- * One server sequence can hold several change-log rows (one per `change_index`).
- * The query reads up to this many rows per requested sequence, so a page of `limit`
- * sequences fits in a single read.
- */
-const SYNC_CHANGE_LOG_ROWS_PER_SEQUENCE = 20;
 
 export async function fetchSyncChangeLogRows(
   client: PrismaClient,

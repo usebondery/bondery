@@ -12,7 +12,7 @@ import {
 
 export function applyPushResultToLocal(result: SyncPushResult): void {
   if (result.status === "conflict") {
-    const server = result.server;
+    const { server } = result;
     if (server && typeof server === "object" && "contact" in server) {
       const parsed = syncContactWriteDataSchema.safeParse(server);
       if (parsed.success) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   errorNotificationTemplate,
@@ -41,8 +42,6 @@ import { ImportZipUploadStep } from "../import/ImportZipUploadStep";
 import { LinkedInImportInstructionsStep } from "../import/LinkedInImportInstructionsStep";
 import { LinkedInImportPreviewStep } from "../import/LinkedInImportPreviewStep";
 
-export type { LinkedInImportStep };
-
 const LINKEDIN_MAX_UPLOAD_BYTES = 30 * 1024 * 1024;
 const LINKEDIN_UPLOAD_ACCEPT = {
   [MIME_TYPES.csv]: [".csv"],
@@ -55,6 +54,8 @@ const LINKEDIN_UPLOAD_ACCEPT = {
   "multipart/x-zip": [".zip"],
   "text/plain": [".csv"],
 };
+
+export type { LinkedInImportStep };
 
 export function LinkedInImportModal({
   modalId,
@@ -217,7 +218,9 @@ export function LinkedInImportModal({
 
     setIsImporting(true);
     setImportProgress({ current: 0, total: selectedContacts.length });
-    const isFirstImport = settingsResult?.data?.importCompletedAt == null;
+    const isFirstImport =
+      settingsResult?.data?.importCompletedAt === null ||
+      settingsResult?.data?.importCompletedAt === undefined;
 
     let totalImported = 0;
     let totalUpdated = 0;
@@ -318,7 +321,7 @@ export function LinkedInImportModal({
         ]}
         onAction={() => {
           if (isOnboardingFlow) {
-            void handleRequestedExport();
+            detachPromise(handleRequestedExport());
           } else {
             setStep("upload");
           }
@@ -342,7 +345,7 @@ export function LinkedInImportModal({
         onBack={() => setStep("instructions")}
         onCancel={closeModal}
         onDrop={(files) => {
-          void parseUpload(files);
+          detachPromise(parseUpload(files));
         }}
         onReject={() => {
           notifications.show(
@@ -402,7 +405,7 @@ export function LinkedInImportModal({
       onBack={() => setStep("upload")}
       onCancel={closeModal}
       onImport={() => {
-        void handleImport();
+        detachPromise(handleImport());
       }}
       onSelectAll={handleToggleAll}
       onSelectOne={handleToggleOne}

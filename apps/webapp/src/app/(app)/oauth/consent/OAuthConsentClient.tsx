@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
 import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
 import { Alert, Button, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
@@ -24,12 +25,26 @@ import { buildSignedOAuthQuery } from "@/lib/auth/signedOAuthQuery";
 import { useOAuthConsentTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
 
+const TRAILING_SLASHES = /\/+$/;
+
+type OAuthConsentRedirectPayload = {
+  redirect_to?: string;
+  redirect_uri?: string;
+  url?: string;
+};
+
+type OAuthConsentSubmitBody = {
+  accept: boolean;
+  oauth_query: string;
+  scope?: string;
+};
+
 function getRedirectUri(data: unknown): string | null {
   if (!data || typeof data !== "object") {
     return null;
   }
 
-  const candidate = data as { redirect_uri?: string; redirect_to?: string; url?: string };
+  const candidate = data as OAuthConsentRedirectPayload;
   return candidate.redirect_uri ?? candidate.redirect_to ?? candidate.url ?? null;
 }
 
@@ -101,7 +116,7 @@ export function OAuthConsentClient({
   const runtimeConfig = useWebappRuntimeConfig();
   const { websiteUrl } = runtimeConfig;
   const authClient = createWebappAuthClient(runtimeConfig);
-  const apiBaseUrl = runtimeConfig.apiBaseUrl.replace(/\/+$/, "");
+  const apiBaseUrl = runtimeConfig.apiBaseUrl.replace(TRAILING_SLASHES, "");
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -129,9 +144,7 @@ export function OAuthConsentClient({
     readDescription: t("PermissionReadDescription"),
     readLabel: t("PermissionReadLabel"),
   }).map((option) =>
-    option.value === "full" && !canOfferWrite
-      ? Object.assign({}, option, { disabled: true })
-      : option,
+    option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
   );
 
   const fetchDetails = async () => {
@@ -214,7 +227,7 @@ export function OAuthConsentClient({
 
   useEffect(() => {
     // biome-ignore lint/nursery/useReactCompiler: one-time consent bootstrap on mount
-    void fetchDetails();
+    detachPromise(fetchDetails());
     // biome-ignore lint/correctness/useExhaustiveDependencies: run once on mount for OAuth consent bootstrap
   }, [fetchDetails]);
 
@@ -226,7 +239,7 @@ export function OAuthConsentClient({
     setSubmitting(true);
     try {
       const requested = splitScopes(authDetails.scope);
-      const body: Record<string, unknown> = {
+      const body: OAuthConsentSubmitBody = {
         accept,
         oauth_query: oauthQuery,
       };
@@ -291,8 +304,7 @@ export function OAuthConsentClient({
   }
 
   const scopes = requestedScopes;
-  const displayName = authDetails.client.name;
-  const hostname = authDetails.client.hostname;
+  const { hostname, name: displayName } = authDetails.client;
 
   return (
     <LoginBrandShell leftContent="userKey" websiteUrl={websiteUrl}>

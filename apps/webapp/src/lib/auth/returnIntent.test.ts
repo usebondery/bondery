@@ -17,7 +17,7 @@ describe("isSafeReturnPath", () => {
   });
 
   it("rejects oversized return paths so a signed oauth_query cannot hide in redirect", () => {
-    const stuffed = `/app/people?${"x".repeat(2_100)}`;
+    const stuffed = `/app/people?${"x".repeat(2100)}`;
     assert.equal(isSafeReturnPath(stuffed), false);
     assert.equal(parseReturnIntent(new URLSearchParams({ redirect: stuffed })), null);
   });

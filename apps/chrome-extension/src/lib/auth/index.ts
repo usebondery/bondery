@@ -6,15 +6,20 @@ import { browser } from "wxt/browser";
 import { config, getOAuthResource, getOAuthTokenUrl } from "../../config";
 import { extLog } from "../log";
 
-export interface StoredTokens {
+interface StoredTokens {
   accessToken: string;
   expiresAt: number;
   refreshToken: string;
 }
 
-export interface TokenUser {
+interface TokenUser {
   email: string;
   id: string;
+}
+
+interface JwtClaims {
+  email?: string;
+  sub?: string;
 }
 
 /** Random bytes behind a PKCE code verifier. */
@@ -22,13 +27,13 @@ const CODE_VERIFIER_BYTES = 32;
 /** A JWT is `header.payload.signature`. */
 const JWT_PART_COUNT = 3;
 
-export function generateCodeVerifier(): string {
+function generateCodeVerifier(): string {
   const array = new Uint8Array(CODE_VERIFIER_BYTES);
   crypto.getRandomValues(array);
   return base64URLEncode(array);
 }
 
-export async function generateCodeChallenge(verifier: string): Promise<string> {
+async function generateCodeChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const hash = await crypto.subtle.digest("SHA-256", data);
@@ -45,20 +50,20 @@ function base64URLEncode(buffer: Uint8Array): string {
 
 const STORAGE_KEY = "bondery_auth_tokens";
 
-export async function setTokens(tokens: StoredTokens): Promise<void> {
+async function setTokens(tokens: StoredTokens): Promise<void> {
   await browser.storage.local.set({ [STORAGE_KEY]: tokens });
 }
 
-export async function getTokens(): Promise<StoredTokens | null> {
+async function getTokens(): Promise<StoredTokens | null> {
   const result = await browser.storage.local.get(STORAGE_KEY);
   return (result[STORAGE_KEY] as StoredTokens | undefined) ?? null;
 }
 
-export async function clearTokens(): Promise<void> {
+async function clearTokens(): Promise<void> {
   await browser.storage.local.remove(STORAGE_KEY);
 }
 
-export async function isAuthenticated(): Promise<boolean> {
+async function isAuthenticated(): Promise<boolean> {
   const tokens = await getTokens();
   if (!tokens) {
     return false;
@@ -77,7 +82,7 @@ function buildTokenRequestBody(params: Record<string, string>): URLSearchParams 
   return body;
 }
 
-export async function refreshAccessToken(): Promise<StoredTokens | null> {
+async function refreshAccessToken(): Promise<StoredTokens | null> {
   if (refreshInFlight !== null) {
     return refreshInFlight;
   }
@@ -131,7 +136,7 @@ async function performTokenRefresh(): Promise<StoredTokens | null> {
   }
 }
 
-export async function getAccessToken(): Promise<string | null> {
+async function getAccessToken(): Promise<string | null> {
   const tokens = await getTokens();
   if (!tokens) {
     return null;
@@ -148,17 +153,17 @@ export async function getAccessToken(): Promise<string | null> {
   return refreshed?.accessToken ?? null;
 }
 
-function isJwtPayload(value: unknown): value is Record<string, unknown> {
+function isJwtPayload(value: unknown): value is JwtClaims {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function decodeJwtPayload(token: string): Record<string, unknown> | null {
+function decodeJwtPayload(token: string): JwtClaims | null {
   try {
     const parts = token.split(".");
     if (parts.length !== JWT_PART_COUNT) {
       return null;
     }
-    const payloadPart = parts[1];
+    const [, payloadPart] = parts;
     if (!payloadPart) {
       return null;
     }
@@ -174,18 +179,18 @@ export function decodeJwtPayload(token: string): Record<string, unknown> | null 
   }
 }
 
-export function getUserFromToken(token: string): TokenUser | null {
+function getUserFromToken(token: string): TokenUser | null {
   const payload = decodeJwtPayload(token);
   if (!payload) {
     return null;
   }
   return {
-    email: (payload.email as string | undefined) ?? "",
-    id: (payload.sub as string | undefined) ?? "",
+    email: payload.email ?? "",
+    id: payload.sub ?? "",
   };
 }
 
-export async function exchangeCodeForTokens(
+async function exchangeCodeForTokens(
   code: string,
   codeVerifier: string,
   redirectUri: string,
@@ -225,3 +230,18 @@ export async function exchangeCodeForTokens(
     return null;
   }
 }
+
+export type { StoredTokens, TokenUser };
+export {
+  clearTokens,
+  decodeJwtPayload,
+  exchangeCodeForTokens,
+  generateCodeChallenge,
+  generateCodeVerifier,
+  getAccessToken,
+  getTokens,
+  getUserFromToken,
+  isAuthenticated,
+  refreshAccessToken,
+  setTokens,
+};

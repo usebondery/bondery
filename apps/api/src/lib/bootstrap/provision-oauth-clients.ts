@@ -17,12 +17,13 @@ import {
 import { chromeExtensionRedirectUris } from "./chrome-extension-redirect-uris.js";
 import { disableDcrOAuthClients } from "./disable-dcr-oauth-clients.js";
 
-export function hashOAuthClientSecret(secret: string): string {
-  return createHash("sha256").update(Buffer.from(secret, "utf8")).digest("base64url");
-}
+const TRAILING_SLASHES_PATTERN = /\/+$/;
 
 function resolveWebappOrigin(): string {
-  const origin = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
+  const origin = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(
+    TRAILING_SLASHES_PATTERN,
+    "",
+  );
   if (!origin) {
     throw new Error("BONDERY_PUBLIC_WEBAPP_URL is not set");
   }
@@ -68,6 +69,10 @@ function resolveWebappRedirectUris(): string[] {
 
 function resourceIdList(resourceId: string | readonly string[]): string[] {
   return typeof resourceId === "string" ? [resourceId] : [...resourceId];
+}
+
+export function hashOAuthClientSecret(secret: string): string {
+  return createHash("sha256").update(Buffer.from(secret, "utf8")).digest("base64url");
 }
 
 export async function provisionWebappClient(resourceId: string | readonly string[]): Promise<void> {

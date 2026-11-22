@@ -63,7 +63,7 @@ function OverlayIconButton({
   );
 }
 
-export function AvatarPhotoOverlayControls({
+function AvatarPhotoOverlayControls({
   showRemove,
   disabled = false,
   onChangePhoto,
@@ -114,7 +114,7 @@ const overlayButtonStyles = StyleSheet.create({
 
 const OVERLAY_OFFSET = -4;
 
-export const avatarPhotoOverlayStyles = StyleSheet.create({
+const avatarPhotoOverlayStyles = StyleSheet.create({
   avatarFrame: {
     alignItems: "center",
     height: 96,
@@ -135,3 +135,5 @@ export const avatarPhotoOverlayStyles = StyleSheet.create({
     zIndex: 2,
   },
 });
+
+export { AvatarPhotoOverlayControls, avatarPhotoOverlayStyles };

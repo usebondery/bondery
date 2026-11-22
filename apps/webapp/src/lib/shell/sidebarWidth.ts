@@ -1,3 +1,7 @@
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
 export const SIDEBAR_COLLAPSED_WIDTH = 80;
 export const SIDEBAR_DEFAULT_EXPANDED_WIDTH = 280;
 export const SIDEBAR_MIN_EXPANDED_WIDTH = 240;
@@ -15,10 +19,6 @@ export type SnapSidebarWidthResult = {
   lastExpandedWidth: number;
   width: number;
 };
-
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(max, Math.max(min, value));
-}
 
 export function isSidebarCollapsed(width: number): boolean {
   return width <= SIDEBAR_COLLAPSED_WIDTH;

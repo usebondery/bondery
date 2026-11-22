@@ -40,7 +40,7 @@ export function useMapPinsQuery(
 ): UseQueryResult<MapContactPinsResult | MapAddressPinsResult> {
   const cameraKey = camera ? serializeMapCamera(camera) : undefined;
   return useQuery<MapContactPinsResult | MapAddressPinsResult>({
-    enabled: enabled && camera != null,
+    enabled: enabled && camera !== null,
     gcTime: MAP_PINS_GC_TIME_MS,
     placeholderData: (previousData) => previousData,
     queryFn: async () => {

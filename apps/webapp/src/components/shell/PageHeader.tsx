@@ -9,6 +9,10 @@ import type { ReactNode } from "react";
 import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
 import classes from "./PageHeader.module.css";
 
+const styles = {
+  actions: classes["actions"] ?? "",
+};
+
 interface PageHeaderProps {
   action?: ReactNode;
   backHref?: AppHref;
@@ -25,7 +29,7 @@ function PageHeaderActions({ children }: { children: ReactNode }) {
   return (
     <Flex
       align={{ base: "stretch", sm: "center" }}
-      className={classes.actions}
+      className={styles.actions}
       direction={{ base: "column", sm: "row" }}
       gap="sm"
       justify="flex-end"

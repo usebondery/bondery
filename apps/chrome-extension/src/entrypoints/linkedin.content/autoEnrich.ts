@@ -62,7 +62,7 @@ async function waitForEnrichScrapeReady(timeoutMs = 15_000): Promise<void> {
  * Runs enrich when this LinkedIn tab was opened by the background.
  * Callable from startup (poll) or when background sends RUN_PENDING_ENRICH.
  */
-export async function runPendingEnrich(triggerRequestId?: string): Promise<void> {
+async function runPendingEnrich(triggerRequestId?: string): Promise<void> {
   if (triggerRequestId && enrichInFlightRequestId === triggerRequestId) {
     extLog.debug("[linkedin][enrich] already in flight", triggerRequestId);
     return;
@@ -90,7 +90,7 @@ async function runPendingEnrichBody(triggerRequestId?: string): Promise<void> {
     return;
   }
 
-  const requestId = context.requestId;
+  const { requestId } = context;
   enrichInFlightRequestId = requestId;
   await executeEnrich(context).finally(() => {
     if (enrichInFlightRequestId === requestId) {
@@ -133,9 +133,9 @@ async function executeEnrich(context: EnrichContextPayload): Promise<void> {
     let profile = await scrapeLinkedInProfile(username);
     if (profile.workHistory.length === 0 && profile.educationHistory.length === 0) {
       await new Promise((resolve) => {
-        setTimeout(resolve, 2_000);
+        setTimeout(resolve, 2000);
       });
-      await ensureProfileSectionsLoaded(undefined, 8_000);
+      await ensureProfileSectionsLoaded(undefined, 8000);
       profile = await scrapeLinkedInProfile(username);
     }
     const {
@@ -192,3 +192,5 @@ async function executeEnrich(context: EnrichContextPayload): Promise<void> {
     }
   }
 }
+
+export { runPendingEnrich };

@@ -4,19 +4,6 @@ import { parseAvatarUpdatedAtFromUrl } from "./avatar-clock";
 import { type AvatarFs, type AvatarSqlite, runAvatarFileQueue } from "./avatar-file-queue";
 import { getSyncDatabase } from "./db";
 
-export type {
-  AvatarFileAction,
-  AvatarFileRow,
-  AvatarFs,
-} from "./avatar-file-queue";
-export {
-  clearPendingAvatarJobs,
-  decideAvatarFileAction,
-  notePeopleAvatarDelete,
-  notePeopleAvatarUpsert,
-  resetPendingAvatarJobsForTests,
-} from "./avatar-file-queue";
-
 const AVATARS_DIR_NAME = "avatars";
 
 function avatarsDirectory(): Directory {
@@ -78,23 +65,23 @@ function getAvatarDb(): AvatarSqlite {
   return getSyncDatabase() as unknown as AvatarSqlite;
 }
 
-export function getLocalAvatarFileUri(personId: string): string | null {
+function getLocalAvatarFileUri(personId: string): string | null {
   return avatarFs.fileUri(personId);
 }
 
-export async function copyPickerFileToAvatar(personId: string, sourceUri: string): Promise<void> {
+async function copyPickerFileToAvatar(personId: string, sourceUri: string): Promise<void> {
   await avatarFs.copyFromUri(personId, sourceUri);
 }
 
-export function deleteLocalAvatarFile(personId: string): void {
+function deleteLocalAvatarFile(personId: string): void {
   avatarFs.deleteFile(personId);
 }
 
-export function deleteAvatarsDirectory(): void {
+function deleteAvatarsDirectory(): void {
   avatarFs.deleteDir();
 }
 
-export function markLocalAvatarAfterUpload(personId: string, avatarUrl: string | null): void {
+function markLocalAvatarAfterUpload(personId: string, avatarUrl: string | null): void {
   const clock = parseAvatarUpdatedAtFromUrl(avatarUrl);
   getAvatarDb().runSync(
     `UPDATE people
@@ -106,7 +93,7 @@ export function markLocalAvatarAfterUpload(personId: string, avatarUrl: string |
   );
 }
 
-export function markLocalAvatarRemoved(personId: string): void {
+function markLocalAvatarRemoved(personId: string): void {
   getAvatarDb().runSync(
     `UPDATE people
      SET has_avatar = 0, avatar_updated_at = NULL, avatar_local_updated_at = NULL
@@ -116,10 +103,32 @@ export function markLocalAvatarRemoved(personId: string): void {
   avatarFs.deleteFile(personId);
 }
 
-export async function flushAvatarFileJobs(): Promise<boolean> {
+async function flushAvatarFileJobs(): Promise<boolean> {
   return runAvatarFileQueue({
     db: getAvatarDb(),
     fs: avatarFs,
     resolveRemoteUrl: resolveLocalContactAvatarUrl,
   });
 }
+
+export type {
+  AvatarFileAction,
+  AvatarFileRow,
+  AvatarFs,
+} from "./avatar-file-queue";
+export {
+  clearPendingAvatarJobs,
+  decideAvatarFileAction,
+  notePeopleAvatarDelete,
+  notePeopleAvatarUpsert,
+  resetPendingAvatarJobsForTests,
+} from "./avatar-file-queue";
+export {
+  copyPickerFileToAvatar,
+  deleteAvatarsDirectory,
+  deleteLocalAvatarFile,
+  flushAvatarFileJobs,
+  getLocalAvatarFileUri,
+  markLocalAvatarAfterUpload,
+  markLocalAvatarRemoved,
+};

@@ -8,6 +8,7 @@ import { defineConfig } from "wxt";
 import { CWS_EXTENSION_PUBLIC_KEY } from "./cws-public-key";
 import { loopbackHostPermissionPatterns } from "./src/lib/auth/oauth-urls";
 
+const LOOPBACK_HOST_RE = /localhost|127\.0\.0\.1/i;
 const require = createRequire(import.meta.url);
 const { version } = require("./package.json") as { version: string };
 const parsedVersion = parseCalver(version);
@@ -22,11 +23,11 @@ const reactAlias = {
   react: path.join(extensionRoot, "node_modules/react"),
   "react-dom": path.join(extensionRoot, "node_modules/react-dom"),
 };
-const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
+const isCi = process.env["GITHUB_ACTIONS"] === "true" || process.env["CI"] === "true";
 const extensionFlavor =
-  process.env.BONDERY_EXTENSION_FLAVOR === "production"
+  process.env["BONDERY_EXTENSION_FLAVOR"] === "production"
     ? "production"
-    : process.env.BONDERY_EXTENSION_FLAVOR === "staging"
+    : process.env["BONDERY_EXTENSION_FLAVOR"] === "staging"
       ? "staging"
       : "local";
 const includeManifestKey = extensionFlavor !== "production";
@@ -67,8 +68,8 @@ export default defineConfig({
       const missing = requiredEnvVars.filter((key) => !process.env[key]?.trim());
 
       assertDistinctFirstPartyOAuthClientIds(
-        process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
-        process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+        process.env["BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
+        process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"],
       );
 
       if (missing.length > 0) {
@@ -82,10 +83,10 @@ export default defineConfig({
 
       if (wxt.config.mode === "production" && isCi) {
         const bakedUrls = [
-          process.env.BONDERY_PUBLIC_API_URL,
-          process.env.BONDERY_PUBLIC_WEBAPP_URL,
+          process.env["BONDERY_PUBLIC_API_URL"],
+          process.env["BONDERY_PUBLIC_WEBAPP_URL"],
         ];
-        if (bakedUrls.some((url) => url && /localhost|127\.0\.0\.1/i.test(url))) {
+        if (bakedUrls.some((url) => url && LOOPBACK_HOST_RE.test(url))) {
           throw new Error(
             "[wxt] Production CI build cannot bake localhost BONDERY_PUBLIC_API_URL or BONDERY_PUBLIC_WEBAPP_URL",
           );
@@ -101,8 +102,8 @@ export default defineConfig({
   manifest: ({ mode }) => {
     const isDev = mode === "development";
 
-    const webappUrl = process.env.BONDERY_PUBLIC_WEBAPP_URL || DEV_URLS.webapp;
-    const apiUrl = process.env.BONDERY_PUBLIC_API_URL || DEV_URLS.api;
+    const webappUrl = process.env["BONDERY_PUBLIC_WEBAPP_URL"] || DEV_URLS.webapp;
+    const apiUrl = process.env["BONDERY_PUBLIC_API_URL"] || DEV_URLS.api;
     const webappOrigin = getOrigin(webappUrl);
     const apiOrigin = getOrigin(apiUrl);
 
@@ -188,7 +189,7 @@ export default defineConfig({
     css: {
       postcss: {},
     },
-    // Note: do NOT override process.env.NODE_ENV in development mode builds.
+    // Note: do NOT override process.env["NODE_ENV"] in development mode builds.
     // Forcing "production" here causes a mismatch: Vite's React plugin still
     // emits jsxDEV() calls (dev JSX transform), but React's production bundle
     // doesn't export jsxDEV — resulting in a runtime crash in the popup.

@@ -7,71 +7,12 @@ import { EmailBody } from "#shared/EmailBody.js";
 import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
 
-export interface ShareContactEmailPhone {
+const PATTERN_5C732B_RE = /\s+/;
+
+interface ShareContactEmailPhone {
   prefix?: string;
   type?: string;
   value: string;
-}
-
-export interface ShareContactEmailEntry {
-  type?: string;
-  value: string;
-}
-
-export interface ShareContactEmailAddress {
-  formatted?: string;
-}
-
-export interface ShareContactEmailDate {
-  date: string;
-  label: string;
-  type: string;
-}
-
-export interface ShareContactEmailCopy {
-  description: string;
-  footerNotes: string;
-  importantDateLine: string;
-  labels: {
-    phone: string;
-    email: string;
-    location: string;
-    address: string;
-    linkedin: string;
-    instagram: string;
-    facebook: string;
-    website: string;
-    whatsapp: string;
-    signal: string;
-    notes: string;
-    importantDates: string;
-  };
-  previewFallback: string;
-  replyCta: string;
-}
-
-export interface ShareContactEmailProps extends EmailDocumentProps {
-  addresses?: ShareContactEmailAddress[];
-  contactAvatarUrl?: string;
-  contactName: string;
-  copy?: ShareContactEmailCopy;
-  emails?: ShareContactEmailEntry[];
-  facebook?: string;
-  headline?: string;
-  importantDates?: ShareContactEmailDate[];
-  instagram?: string;
-  linkedin?: string;
-  location?: string;
-  message?: string;
-  notes?: string;
-  phones?: ShareContactEmailPhone[];
-  recipientEmail: string;
-  senderAvatarUrl?: string;
-  senderEmail: string;
-  senderName: string;
-  signal?: string;
-  website?: string;
-  whatsapp?: string;
 }
 
 function InfoRow({ label, children }: { label: string; children: ReactNode }) {
@@ -96,7 +37,7 @@ function InfoRow({ label, children }: { label: string; children: ReactNode }) {
 function getInitials(name: string | undefined): string {
   return (name ?? "")
     .trim()
-    .split(/\s+/)
+    .split(PATTERN_5C732B_RE)
     .filter(Boolean)
     .slice(0, 2)
     .map((part) => part.charAt(0).toUpperCase())
@@ -407,4 +348,67 @@ export default function ShareContactEmail({
       </EmailBody>
     </EmailWrapper>
   );
+}
+
+export type { ShareContactEmailPhone };
+
+export interface ShareContactEmailEntry {
+  type?: string;
+  value: string;
+}
+
+export interface ShareContactEmailAddress {
+  formatted?: string;
+}
+
+export interface ShareContactEmailDate {
+  date: string;
+  label: string;
+  type: string;
+}
+
+export interface ShareContactEmailCopy {
+  description: string;
+  footerNotes: string;
+  importantDateLine: string;
+  labels: {
+    phone: string;
+    email: string;
+    location: string;
+    address: string;
+    linkedin: string;
+    instagram: string;
+    facebook: string;
+    website: string;
+    whatsapp: string;
+    signal: string;
+    notes: string;
+    importantDates: string;
+  };
+  previewFallback: string;
+  replyCta: string;
+}
+
+export interface ShareContactEmailProps extends EmailDocumentProps {
+  addresses?: ShareContactEmailAddress[];
+  contactAvatarUrl?: string;
+  contactName: string;
+  copy?: ShareContactEmailCopy;
+  emails?: ShareContactEmailEntry[];
+  facebook?: string;
+  headline?: string;
+  importantDates?: ShareContactEmailDate[];
+  instagram?: string;
+  linkedin?: string;
+  location?: string;
+  message?: string;
+  notes?: string;
+  phones?: ShareContactEmailPhone[];
+  recipientEmail: string;
+  senderAvatarUrl?: string;
+  senderEmail: string;
+  senderName: string;
+  signal?: string;
+  website?: string;
+  whatsapp?: string;
 }

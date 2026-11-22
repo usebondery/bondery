@@ -14,7 +14,7 @@ interface EmojiPickerCellProps {
   onPress: (emoji: string) => void;
 }
 
-export function EmojiPickerCell({ item, cellSize, isSelected, onPress }: EmojiPickerCellProps) {
+function EmojiPickerCell({ item, cellSize, isSelected, onPress }: EmojiPickerCellProps) {
   const colors = useMobileThemeColors();
 
   return (
@@ -56,3 +56,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export { EmojiPickerCell };

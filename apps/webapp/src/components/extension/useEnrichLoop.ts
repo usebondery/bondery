@@ -122,7 +122,7 @@ export function useEnrichLoop({ errorTitle }: UseEnrichLoopParams) {
       }
 
       await new Promise((resolve) => {
-        setTimeout(resolve, 2_000);
+        setTimeout(resolve, 2000);
       });
     }
 

@@ -5,7 +5,7 @@ import {
   displayTimeZoneCity,
 } from "#locale/display-names.js";
 
-export interface TimezoneData {
+interface TimezoneData {
   city: string;
   continent: string;
   country: string;
@@ -28,7 +28,7 @@ function normalizeContinent(continentName: string): string {
   return continentName;
 }
 
-export const TIMEZONES_DATA: TimezoneData[] = [
+const TIMEZONES_DATA: TimezoneData[] = [
   {
     city: "UTC",
     continent: "UTC",
@@ -51,23 +51,7 @@ export const TIMEZONES_DATA: TimezoneData[] = [
   })),
 ];
 
-export function resolveToCanonicalTimezone(iana: string): string {
-  if (!iana) {
-    return iana;
-  }
-  const match = TIMEZONES_DATA.find((tz) => tz.group.includes(iana));
-  return match ? match.value : iana;
-}
-
-export function getDeviceTimezone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
-  } catch {
-    return "UTC";
-  }
-}
-
-export function formatTimezoneLabel(timezone: TimezoneData, locale?: string): string {
+function formatTimezoneLabel(timezone: TimezoneData, locale?: string): string {
   const city = locale
     ? (displayTimeZoneCity(timezone.value, locale) ?? timezone.city)
     : timezone.city;
@@ -78,22 +62,13 @@ export function formatTimezoneLabel(timezone: TimezoneData, locale?: string): st
   return `${city}, ${country}`;
 }
 
-export interface TimezoneSelectOption {
+interface TimezoneSelectOption {
   city: string;
   flag: string;
   label: string;
   offset: number;
   offsetLabel: string;
   value: string;
-}
-
-export function countryCodeToFlagEmoji(countryCode: string | null | undefined): string {
-  if (countryCode?.length !== 2) {
-    return "🌐";
-  }
-
-  const upper = countryCode.toUpperCase();
-  return String.fromCodePoint(...upper.split("").map((char) => 0x1f1e6 + char.charCodeAt(0) - 65));
 }
 
 function compareTimezoneSelectOptions(
@@ -121,44 +96,7 @@ function buildTimezoneSelectOptions(locale?: string): TimezoneSelectOption[] {
 
 const cachedTimezoneSelectOptions = new Map<string, TimezoneSelectOption[]>();
 
-/**
- * Flat select options for timezone pickers (mobile + web).
- * Sorted by UTC offset, then city label.
- */
-export function getTimezoneSelectOptions(
-  currentTimezone?: string,
-  locale?: string,
-): TimezoneSelectOption[] {
-  const cacheKey = locale ?? "";
-  let options = cachedTimezoneSelectOptions.get(cacheKey);
-  if (!options) {
-    options = buildTimezoneSelectOptions(locale);
-    cachedTimezoneSelectOptions.set(cacheKey, options);
-  }
-
-  if (!currentTimezone) {
-    return options;
-  }
-
-  const canonicalCurrent = resolveToCanonicalTimezone(currentTimezone);
-  if (options.some((option) => option.value === canonicalCurrent)) {
-    return options;
-  }
-
-  return [
-    {
-      city: canonicalCurrent,
-      flag: "",
-      label: canonicalCurrent,
-      offset: 0,
-      offsetLabel: formatOffset(0),
-      value: canonicalCurrent,
-    },
-    ...options,
-  ];
-}
-
-export function formatOffset(minutes: number): string {
+function formatOffset(minutes: number): string {
   const sign = minutes >= 0 ? "+" : "-";
   const absMinutes = Math.abs(minutes);
   const hours = Math.floor(absMinutes / 60);
@@ -169,18 +107,7 @@ export function formatOffset(minutes: number): string {
   return `UTC${sign}${hours}:${mins.toString().padStart(2, "0")}`;
 }
 
-export function getCurrentTimeInTimezone(offsetMinutes: number): string {
-  const now = new Date();
-  const utc = now.getTime() + now.getTimezoneOffset() * 60000;
-  const targetTime = new Date(utc + offsetMinutes * 60000);
-  return targetTime.toLocaleTimeString("en-US", {
-    hour: "2-digit",
-    hour12: false,
-    minute: "2-digit",
-  });
-}
-
-export interface GroupedTimezoneItem {
+interface GroupedTimezoneItem {
   flag: string;
   label: string;
   offset: number;
@@ -188,27 +115,12 @@ export interface GroupedTimezoneItem {
   value: string;
 }
 
-export interface GroupedTimezoneGroup {
+interface GroupedTimezoneGroup {
   group: string;
   items: GroupedTimezoneItem[];
 }
 
 const cachedGroupedTimezones = new Map<string, GroupedTimezoneGroup[]>();
-
-/**
- * Timezones grouped by continent, labels localized for `locale`. Built once per locale and
- * shared: callers must not mutate the result.
- */
-export function getGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
-  const cacheKey = locale ?? "";
-  const cached = cachedGroupedTimezones.get(cacheKey);
-  if (cached) {
-    return cached;
-  }
-  const result = buildGroupedTimezones(locale);
-  cachedGroupedTimezones.set(cacheKey, result);
-  return result;
-}
 
 function buildGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
   const grouped: { [continent: string]: GroupedTimezoneItem[] } = {};
@@ -249,4 +161,97 @@ function buildGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
     }
     return [{ group: locale ? displayContinentName(continent, locale) : continent, items }];
   });
+}
+
+export type { GroupedTimezoneGroup, GroupedTimezoneItem, TimezoneData, TimezoneSelectOption };
+export { formatOffset, formatTimezoneLabel, TIMEZONES_DATA };
+
+export function resolveToCanonicalTimezone(iana: string): string {
+  if (!iana) {
+    return iana;
+  }
+  const match = TIMEZONES_DATA.find((tz) => tz.group.includes(iana));
+  return match ? match.value : iana;
+}
+
+export function getDeviceTimezone(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  } catch {
+    return "UTC";
+  }
+}
+
+export function countryCodeToFlagEmoji(countryCode: string | null | undefined): string {
+  if (countryCode?.length !== 2) {
+    return "🌐";
+  }
+
+  const upper = countryCode.toUpperCase();
+  return String.fromCodePoint(
+    ...upper.split("").map((char) => 0x1_f1_e6 + char.charCodeAt(0) - 65),
+  );
+}
+
+/**
+ * Flat select options for timezone pickers (mobile + web).
+ * Sorted by UTC offset, then city label.
+ */
+export function getTimezoneSelectOptions(
+  currentTimezone?: string,
+  locale?: string,
+): TimezoneSelectOption[] {
+  const cacheKey = locale ?? "";
+  let options = cachedTimezoneSelectOptions.get(cacheKey);
+  if (!options) {
+    options = buildTimezoneSelectOptions(locale);
+    cachedTimezoneSelectOptions.set(cacheKey, options);
+  }
+
+  if (!currentTimezone) {
+    return options;
+  }
+
+  const canonicalCurrent = resolveToCanonicalTimezone(currentTimezone);
+  if (options.some((option) => option.value === canonicalCurrent)) {
+    return options;
+  }
+
+  return [
+    {
+      city: canonicalCurrent,
+      flag: "",
+      label: canonicalCurrent,
+      offset: 0,
+      offsetLabel: formatOffset(0),
+      value: canonicalCurrent,
+    },
+    ...options,
+  ];
+}
+
+export function getCurrentTimeInTimezone(offsetMinutes: number): string {
+  const now = new Date();
+  const utc = now.getTime() + now.getTimezoneOffset() * 60_000;
+  const targetTime = new Date(utc + offsetMinutes * 60_000);
+  return targetTime.toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    hour12: false,
+    minute: "2-digit",
+  });
+}
+
+/**
+ * Timezones grouped by continent, labels localized for `locale`. Built once per locale and
+ * shared: callers must not mutate the result.
+ */
+export function getGroupedTimezones(locale?: string): GroupedTimezoneGroup[] {
+  const cacheKey = locale ?? "";
+  const cached = cachedGroupedTimezones.get(cacheKey);
+  if (cached) {
+    return cached;
+  }
+  const result = buildGroupedTimezones(locale);
+  cachedGroupedTimezones.set(cacheKey, result);
+  return result;
 }

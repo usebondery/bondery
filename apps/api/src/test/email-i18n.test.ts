@@ -9,6 +9,12 @@ import {
   readCopyString,
 } from "../lib/notifications/email-i18n.js";
 
+const SUPPORT_PATTERN = /\{\{support\}\}/;
+const DOCUMENTATION_PATTERN = /\{\{documentation\}\}/;
+const YEAR_2026_PATTERN = /2026/;
+const YEAR_2026_PREFIX_PATTERN = /^2026/;
+const ISO_DATE_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
 describe("email-i18n", () => {
   it("loads TrialEndingEmail copy for Czech", () => {
     const bundle = loadEmailNamespace("cs", "TrialEndingEmail");
@@ -31,8 +37,8 @@ describe("email-i18n", () => {
     const bundle = loadEmailNamespace("en", "EmailChrome");
     const help = readCopyString(bundle, "help");
 
-    assert.match(help, /\{\{support\}\}/);
-    assert.match(help, /\{\{documentation\}\}/);
+    assert.match(help, SUPPORT_PATTERN);
+    assert.match(help, DOCUMENTATION_PATTERN);
   });
 
   it("formats dates per locale", () => {
@@ -46,9 +52,9 @@ describe("email-i18n", () => {
     const de = { ...en, locale: "de" as const };
     const hu = { ...en, locale: "hu" as const };
 
-    assert.match(formatEmailDate(date, en), /2026/);
-    assert.match(formatEmailDateFromIso("2026-07-30", de), /2026/);
-    assert.match(formatEmailDate(date, hu), /^2026/);
+    assert.match(formatEmailDate(date, en), YEAR_2026_PATTERN);
+    assert.match(formatEmailDateFromIso("2026-07-30", de), YEAR_2026_PATTERN);
+    assert.match(formatEmailDate(date, hu), YEAR_2026_PREFIX_PATTERN);
   });
 
   it("does not use a raw ISO date when the language is not numeric ymd", () => {
@@ -59,7 +65,7 @@ describe("email-i18n", () => {
       timeZone: "UTC",
     };
     const formatted = formatEmailDateFromIso("2026-07-29", ctx, "long");
-    assert.doesNotMatch(formatted, /^\d{4}-\d{2}-\d{2}$/);
-    assert.match(formatted, /2026/);
+    assert.doesNotMatch(formatted, ISO_DATE_PATTERN);
+    assert.match(formatted, YEAR_2026_PATTERN);
   });
 });

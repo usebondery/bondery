@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { IconCopy } from "@tabler/icons-react-native";
 import { startTransition, useEffect, useState } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -26,7 +27,7 @@ interface ColorPickerSheetProps {
   value: string;
 }
 
-export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorPickerSheetProps) {
+function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorPickerSheetProps) {
   const tContactInfo = useContactInfoTranslations();
   const tMobileColorPicker = useMobileColorPickerTranslations();
   const tMobileGroups = useMobileGroupsTranslations();
@@ -157,7 +158,7 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
               autoCapitalize="characters"
               autoCorrect={false}
               enterKeyHint="done"
-              error={hexError != null}
+              error={hexError !== null && hexError !== undefined}
               leftSection={colorPreview}
               onBlur={commitHexInput}
               onChangeText={(text) => {
@@ -177,7 +178,7 @@ export function ColorPickerSheet({ open, value, onOpenChange, onSelect }: ColorP
           <ActionButtonShellPressable
             accessibilityLabel={tMobileColorPicker("CopyAccessibilityLabel")}
             matchInputChrome
-            onPress={() => void handleCopyHex()}
+            onPress={() => detachPromise(handleCopyHex())}
             size="md"
             variant="outline"
           >
@@ -247,3 +248,5 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
+
+export { ColorPickerSheet };

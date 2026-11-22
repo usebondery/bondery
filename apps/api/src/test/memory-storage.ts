@@ -1,7 +1,9 @@
 import type { StorageAdapter, StoragePutOptions } from "../lib/storage/adapter.js";
 
+const LEADING_SLASHES_PATTERN = /^\/+/;
+
 function storageKey(bucket: string, key: string): string {
-  return `${bucket}/${key.replace(/^\/+/, "")}`;
+  return `${bucket}/${key.replace(LEADING_SLASHES_PATTERN, "")}`;
 }
 
 export function createMemoryStorage(options?: {
@@ -21,7 +23,7 @@ export function createMemoryStorage(options?: {
       return objects.get(storageKey(bucket, key)) ?? null;
     },
     getPublicUrl(bucket, key) {
-      return `https://storage.test/${bucket}/${key.replace(/^\/+/, "")}`;
+      return `https://storage.test/${bucket}/${key.replace(LEADING_SLASHES_PATTERN, "")}`;
     },
     async listKeys(bucket, prefix) {
       if (options?.listKeys) {

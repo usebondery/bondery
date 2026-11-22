@@ -19,6 +19,8 @@ import {
   stripeCliFailure,
 } from "./stripe-cli.js";
 
+const STRIPE_LOGIN_RE = /stripe login/i;
+
 const WEBHOOK_SECRET_KEY = "BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET";
 
 const log = createCliLogger("setup:stripe");
@@ -49,7 +51,7 @@ function main() {
   log.step(2, 4, "Read CLI webhook signing secret");
   const printed = printStripeListenSecret();
   if (!printed.ok) {
-    if (/stripe login/i.test(printed.error)) {
+    if (STRIPE_LOGIN_RE.test(printed.error)) {
       log.error("Stripe CLI is not logged in");
       log.info("Run: stripe login");
       process.exitCode = 1;

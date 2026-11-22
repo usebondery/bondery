@@ -56,7 +56,7 @@ function DocsSidebarNodes({
         return null;
       }
       return (
-        <Text className={classes.groupLabel} component="p" key={key}>
+        <Text className={classes["groupLabel"]} component="p" key={key}>
           {node.name}
         </Text>
       );
@@ -139,14 +139,14 @@ export function DocsSidebar({
         <DocsTabs pathname={pathname} tabs={tabs} />
       </Stack>
       <ScrollArea
-        className={classes.scroll}
+        className={classes["scroll"]}
         flex="1 1 auto"
         mih={0}
         offsetScrollbars={false}
         type="hover"
         viewportProps={{ style: { height: "100%" } }}
       >
-        <Box aria-label={docs.Sidebar.PagesAria} className={classes.nav} component="nav">
+        <Box aria-label={docs.Sidebar.PagesAria} className={classes["nav"]} component="nav">
           <DocsSidebarNodes activeRef={activeRef} nodes={tree.children} pathname={pathname} />
         </Box>
       </ScrollArea>

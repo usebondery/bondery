@@ -1,4 +1,6 @@
-export type PasskeyCeremonyKind =
+const TIMEOUT_MESSAGE_RE = /\btimed?\s*out\b/i;
+const NOT_ALLOWED_MESSAGE_RE = /not allowed/i;
+type PasskeyCeremonyKind =
   | "cancel"
   | "fail"
   | "not_found"
@@ -24,7 +26,7 @@ const TIMEOUT_CODES = new Set(["TimeoutError"]);
  * Classifies WebAuthn / Better Auth passkey client errors for inline copy vs
  * silent OS-sheet cancel.
  */
-export function nativePasskeyLoginMessage(
+function nativePasskeyLoginMessage(
   kind: PasskeyCeremonyKind,
   copy: {
     noPasskeyFound: string;
@@ -48,7 +50,7 @@ export function nativePasskeyLoginMessage(
   return copy.passkeySignInFailed;
 }
 
-export function classifyPasskeyCeremonyError(error: unknown): PasskeyCeremonyKind {
+function classifyPasskeyCeremonyError(error: unknown): PasskeyCeremonyKind {
   const code = getErrorCode(error);
   const message = getErrorMessage(error);
 
@@ -80,7 +82,7 @@ function isTimeout(code: string | null, message: string): boolean {
     return true;
   }
 
-  return /\btimed?\s*out\b/i.test(message) && !/not allowed/i.test(message);
+  return TIMEOUT_MESSAGE_RE.test(message) && !NOT_ALLOWED_MESSAGE_RE.test(message);
 }
 
 function getErrorCode(error: unknown): string | null {
@@ -110,3 +112,6 @@ function getErrorMessage(error: unknown): string {
 
   return "";
 }
+
+export type { PasskeyCeremonyKind };
+export { classifyPasskeyCeremonyError, nativePasskeyLoginMessage };

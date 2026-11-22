@@ -22,15 +22,15 @@ import {
 } from "../utils/socialFieldEditorTypes";
 import { useSocialFieldEditorInteractions } from "./useSocialFieldEditorInteractions";
 
-export type { RerouteSuggestion, SocialFieldKey } from "../utils/socialFieldEditorTypes";
-export { isSavableSocialField } from "../utils/socialFieldEditorTypes";
-
 interface UseSocialFieldEditorOptions {
   contact: Contact;
   fieldLabels: Record<SocialFieldKey, string>;
   personId: string;
   validationErrorTitle: string;
 }
+
+export type { RerouteSuggestion, SocialFieldKey } from "../utils/socialFieldEditorTypes";
+export { isSavableSocialField } from "../utils/socialFieldEditorTypes";
 
 export function useSocialFieldEditor({
   contact,

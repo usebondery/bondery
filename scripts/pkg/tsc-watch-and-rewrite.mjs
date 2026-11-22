@@ -12,7 +12,7 @@ import { resolveTypescriptTsc } from "./resolve-typescript-tsc.mjs";
 
 function main() {
   const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
-  const pkg = process.argv[2];
+  const [, , pkg] = process.argv;
 
   if (!pkg) {
     console.error("usage: tsc-watch-and-rewrite.mjs <package-dir>");

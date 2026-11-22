@@ -11,12 +11,12 @@ import type {
   GeocodeTimezoneResponse,
 } from "../geocode/types.js";
 
-type _GeocodeSuggestAddress = Assert<
+export type _GeocodeSuggestAddress = Assert<
   IsEqual<GeocodeSuggestAddress, z.infer<typeof contactAddressReadSchema>>
 >;
-type _GeocodeSuggestResponse = Assert<
+export type _GeocodeSuggestResponse = Assert<
   IsEqual<GeocodeSuggestResponse, z.infer<typeof geocodeSuggestResponseSchema>>
 >;
-type _GeocodeTimezoneResponse = Assert<
+export type _GeocodeTimezoneResponse = Assert<
   IsEqual<GeocodeTimezoneResponse, z.infer<typeof geocodeTimezoneResponseSchema>>
 >;

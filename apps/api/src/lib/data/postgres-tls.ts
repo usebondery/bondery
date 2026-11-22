@@ -19,10 +19,8 @@ import {
 } from "../platform/certificate-expiry.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-export const POSTGRES_CERT_WARN_DAYS = CERTIFICATE_WARN_DAYS;
-export const POSTGRES_CERT_ERROR_DAYS = CERTIFICATE_ERROR_DAYS;
 
-export type DatabaseTlsInspection = {
+type DatabaseTlsInspection = {
   /** Days until the presented server certificate expires; null without TLS or a readable certificate. */
   certificateDaysLeft: number | null;
   cipher: string | null;
@@ -43,6 +41,10 @@ function peerCertificateDaysLeft(client: PoolClient, now: Date): number | null {
   const expiresAt = Date.parse(validTo);
   return Number.isNaN(expiresAt) ? null : Math.floor((expiresAt - now.getTime()) / DAY_MS);
 }
+
+export type { DatabaseTlsInspection };
+export const POSTGRES_CERT_WARN_DAYS = CERTIFICATE_WARN_DAYS;
+export const POSTGRES_CERT_ERROR_DAYS = CERTIFICATE_ERROR_DAYS;
 
 export async function inspectDatabaseTls(
   pool: Pool,

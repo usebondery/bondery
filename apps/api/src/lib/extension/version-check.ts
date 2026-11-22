@@ -21,8 +21,10 @@ import { URLS } from "../platform/config.js";
 import { unauthorized } from "../platform/errors/http-errors.js";
 import type { AppFastifyInstance } from "../platform/fastify-types.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 function websiteBaseUrl(): string {
-  return (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  return (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
 }
 
 function isPublicInfraPath(url: string): boolean {

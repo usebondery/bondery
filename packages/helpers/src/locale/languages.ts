@@ -5,18 +5,10 @@ import {
 } from "@bondery/schemas/locale/supported-locale";
 
 /** App UI locale picker row — exonyms come from the `Languages` translation namespace. */
-export interface AppLanguageData {
+interface AppLanguageData {
   flag: string;
   nativeName: string;
   value: SupportedLocale;
-}
-
-/** World / contact language rows include a fixed English label for search and display. */
-export interface LanguageData {
-  flag: string;
-  label: string;
-  nativeName: string;
-  value: string;
 }
 
 function toAppLanguageData(entry: AppLocaleMetadata): AppLanguageData {
@@ -25,6 +17,16 @@ function toAppLanguageData(entry: AppLocaleMetadata): AppLanguageData {
     nativeName: entry.nativeName,
     value: entry.code as SupportedLocale,
   };
+}
+
+export type { AppLanguageData };
+
+/** World / contact language rows include a fixed English label for search and display. */
+export interface LanguageData {
+  flag: string;
+  label: string;
+  nativeName: string;
+  value: string;
 }
 
 /** App-supported languages for user settings (web + mobile). Derived from supported-locales.json. */

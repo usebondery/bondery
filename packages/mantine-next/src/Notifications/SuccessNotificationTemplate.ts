@@ -1,13 +1,6 @@
 import { IconCheck } from "@tabler/icons-react";
 import { createElement, type ReactNode } from "react";
 
-export interface SuccessNotificationTemplateProps {
-  description: string;
-  icon?: ReactNode;
-  radius?: string | number;
-  title: string;
-}
-
 type SuccessNotificationPayload = {
   color: "green";
   icon: ReactNode;
@@ -16,6 +9,13 @@ type SuccessNotificationPayload = {
   radius: string | number;
   title: string;
 };
+
+export interface SuccessNotificationTemplateProps {
+  description: string;
+  icon?: ReactNode;
+  radius?: string | number;
+  title: string;
+}
 
 /**
  * Builds a consistent success notification payload.

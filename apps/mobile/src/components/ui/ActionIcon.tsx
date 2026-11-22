@@ -8,7 +8,7 @@ import { usePressSqueeze } from "./usePressSqueeze";
 
 type ActionIconSize = "md" | "sm";
 
-export type ActionIconProps = {
+type ActionIconProps = {
   accessibilityHint?: string;
   accessibilityLabel: string;
   children: ReactNode;
@@ -23,7 +23,7 @@ const SIZE_CLASS: Record<ActionIconSize, string> = {
   sm: "h-8 w-8",
 };
 
-export function ActionIcon({
+function ActionIcon({
   accessibilityHint,
   accessibilityLabel,
   children,
@@ -65,3 +65,6 @@ export function ActionIcon({
     </Animated.View>
   );
 }
+
+export type { ActionIconProps };
+export { ActionIcon };

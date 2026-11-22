@@ -25,7 +25,7 @@ function stripGeneratedSegment(_file: unknown, next: () => string[]): string[] |
   return slugs.filter((slug) => slug !== GENERATED_SEGMENT);
 }
 
-export const source = loader(
+const source = loader(
   {
     docs: docs.toFumadocsSource(),
   },
@@ -37,7 +37,7 @@ export const source = loader(
   },
 );
 
-export type Page = (typeof source)["$inferPage"];
+type Page = (typeof source)["$inferPage"];
 
 function getHiddenPageUrls(): Set<string> {
   return new Set(
@@ -78,7 +78,7 @@ function filterHiddenNodes(nodes: PageTree.Node[], hiddenUrls: Set<string>): Pag
   return kept;
 }
 
-export function getFilteredPageTree(): PageTree.Root {
+function getFilteredPageTree(): PageTree.Root {
   const hiddenUrls = getHiddenPageUrls();
   const tree = source.getPageTree();
 
@@ -93,7 +93,7 @@ export function getFilteredPageTree(): PageTree.Root {
   };
 }
 
-export function getPageImage(page: Page) {
+function getPageImage(page: Page) {
   const segments = [...page.slugs, "image.webp"];
 
   return {
@@ -101,3 +101,6 @@ export function getPageImage(page: Page) {
     url: `/og/docs/${segments.join("/")}`,
   };
 }
+
+export type { Page };
+export { getFilteredPageTree, getPageImage, source };

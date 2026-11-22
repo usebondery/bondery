@@ -40,7 +40,7 @@ function usesCompositePrimaryKey(record: Record<string, unknown>): boolean {
 }
 
 function shouldInjectId(record: Record<string, unknown>): boolean {
-  if (record.id !== undefined && record.id !== null) {
+  if (record["id"] !== undefined && record["id"] !== null) {
     return false;
   }
   if (usesCompositePrimaryKey(record)) {
@@ -72,7 +72,7 @@ function processRelationWrite(value: unknown, key: "create" | "createMany"): unk
     const createMany = value as Record<string, unknown>;
     return {
       ...createMany,
-      data: injectCreateIds(createMany.data),
+      data: injectCreateIds(createMany["data"]),
     };
   }
 
@@ -113,7 +113,7 @@ export function injectCreateIds<T>(data: T): T {
   }
 
   if (shouldInjectId(result)) {
-    result.id = generateId();
+    result["id"] = generateId();
   }
 
   return result as T;

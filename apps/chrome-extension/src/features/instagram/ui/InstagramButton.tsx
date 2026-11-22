@@ -1,5 +1,6 @@
 import { BonderyIconWhite } from "@bondery/branding";
 import { parseInstagramUsername } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { Button, Text } from "@mantine/core";
 import type React from "react";
 import { useRef, useState } from "react";
@@ -144,7 +145,7 @@ function InstagramButton({ username, getSnapshot }: InstagramButtonProps) {
     requestInFlightRef.current = true;
     setIsLoading(true);
     setStatusMessage(null);
-    void submitAddPerson();
+    detachPromise(submitAddPerson());
   };
 
   return (
@@ -157,11 +158,11 @@ function InstagramButton({ username, getSnapshot }: InstagramButtonProps) {
       >
         {t("OpenInBondery")}
       </Button>
-      {statusMessage && (
+      {statusMessage ? (
         <Text c="dimmed" mt={4} size="xs" ta="center">
           {statusMessage}
         </Text>
-      )}
+      ) : null}
     </>
   );
 }

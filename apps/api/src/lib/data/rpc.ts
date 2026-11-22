@@ -3,6 +3,25 @@ import { prisma } from "@bondery/db";
 
 type RpcClient = PrismaClient;
 
+type MapPin = {
+  id: string;
+  latitude: number;
+  longitude: number;
+};
+
+function toIsoTimestamp(value: Date | string | null | undefined): string | null {
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value.toISOString();
+  }
+  if (typeof value === "string" && value.length > 0) {
+    const parsed = new Date(value);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
+  return null;
+}
+
+export type { MapPin };
+
 export async function rpcGetContactExtras(
   db: RpcClient,
   userId: string,
@@ -28,12 +47,6 @@ export async function rpcSetPersonLocation(
     SELECT set_person_location(${userId}::uuid, ${personId}::uuid, ${latitude}::double precision, ${longitude}::double precision)
   `;
 }
-
-export type MapPin = {
-  id: string;
-  latitude: number;
-  longitude: number;
-};
 
 export async function rpcGetMapPinsInBbox(
   db: RpcClient,
@@ -116,17 +129,6 @@ export async function rpcReplaceEducationHistory(
   await db.$executeRaw`
     SELECT replace_education_history(${userId}::uuid, ${peopleLinkedinId}::uuid, ${JSON.stringify(rows)}::jsonb)
   `;
-}
-
-function toIsoTimestamp(value: Date | string | null | undefined): string | null {
-  if (value instanceof Date) {
-    return Number.isNaN(value.getTime()) ? null : value.toISOString();
-  }
-  if (typeof value === "string" && value.length > 0) {
-    const parsed = new Date(value);
-    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
-  }
-  return null;
 }
 
 export async function rpcCheckAndIncrementAiMessages(

@@ -1,4 +1,4 @@
-export interface ExampleName {
+interface ExampleName {
   firstName: string;
   lastName: string;
   middleName: string;
@@ -25,6 +25,8 @@ const EXAMPLE_NAMES: ExampleName[] = [
     middleName: "August von",
   },
 ];
+
+export type { ExampleName };
 
 export function getRandomExampleName(): ExampleName {
   return EXAMPLE_NAMES[Math.floor(Math.random() * EXAMPLE_NAMES.length)] ?? FALLBACK_EXAMPLE_NAME;

@@ -34,6 +34,9 @@ jobs:
       - name: Check package imports
         run: pnpm run check:package-imports
 
+      - name: Check every tsconfig extends a TypeScript preset
+        run: pnpm run check:tsconfig-extends
+
       - name: Check injected packages stay free of generated files
         run: pnpm run check:injected-packages
 

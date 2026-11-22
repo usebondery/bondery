@@ -7,14 +7,14 @@ import type { ReactNode } from "react";
 import { useCommonTranslations, useLoginPageTranslations } from "@/lib/i18n/generated/hooks";
 import { Logo } from "./Logo";
 
-export type LoginBrandShellLeftContent = "marketing" | "shield" | "userKey";
-
 type LoginBrandShellProps = {
   children: ReactNode;
   leftContent?: LoginBrandShellLeftContent;
   loading?: boolean;
   websiteUrl: string;
 };
+
+export type LoginBrandShellLeftContent = "marketing" | "shield" | "userKey";
 
 export function LoginBrandShell({
   children,

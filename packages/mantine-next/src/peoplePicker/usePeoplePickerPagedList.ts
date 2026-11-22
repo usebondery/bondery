@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
 import { PEOPLE_PICKER_PAGE_SIZE } from "#peoplePicker/constants.js";
@@ -21,7 +22,6 @@ import {
   type PeoplePickerItem,
   type PeoplePickerOnSearch,
   type PeoplePickerPagedState,
-  type PeoplePickerSearchPage,
 } from "#peoplePicker/peoplePickerPagedList.js";
 
 type UsePeoplePickerPagedListOptions<T extends PeoplePickerItem> = {
@@ -115,7 +115,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
   };
 
   const triggerTypedSearch = useDebouncedCallback((_query: string, generation: number) => {
-    void fetchPage(0, "typed", generation);
+    detachPromise(fetchPage(0, "typed", generation));
   }, searchDebounceMs);
 
   const setQuery = (query: string) => {
@@ -142,7 +142,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
     if (fetchLockRef.current) {
       return;
     }
-    const current = stateRef.current;
+    const { current } = stateRef;
     const hasOnSearch = Boolean(onSearchRef.current);
     const pool = getFilteredPool(seedRef.current, current, {
       filter,
@@ -170,7 +170,7 @@ export function usePeoplePickerPagedList<T extends PeoplePickerItem>({
     const generation = generationRef.current;
     fetchLockRef.current = true;
     setState((prev) => applyLoadMoreStart(prev));
-    void fetchPage(offset, typed ? "typed" : "browse", generation);
+    detachPromise(fetchPage(offset, typed ? "typed" : "browse", generation));
   };
 
   const retryLoadMore = () => {

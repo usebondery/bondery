@@ -29,7 +29,7 @@ const CODE_CHALLENGE_LOG_PREFIX_LENGTH = 12;
 /** Characters of the OAuth `state` kept in debug logs. */
 const STATE_LOG_PREFIX_LENGTH = 8;
 
-export async function handleAuthStatus(sendResponse: (response: unknown) => void): Promise<void> {
+async function handleAuthStatus(sendResponse: (response: unknown) => void): Promise<void> {
   const authenticated = await isAuthenticated();
   let user: { id: string; email: string } | undefined;
 
@@ -49,7 +49,7 @@ export async function handleAuthStatus(sendResponse: (response: unknown) => void
   });
 }
 
-export async function handleLogin(sendResponse: (response: unknown) => void): Promise<void> {
+async function handleLogin(sendResponse: (response: unknown) => void): Promise<void> {
   extLog.debug("[background][oauth] login-request", {
     apiUrl: config.apiUrl,
     loginInProgress: backgroundState.loginInProgress,
@@ -81,7 +81,7 @@ async function runLoginFlow(sendResponse: (response: unknown) => void): Promise<
   }
 }
 
-export async function initiateOAuthFlow(): Promise<{ success: boolean; error?: string }> {
+async function initiateOAuthFlow(): Promise<{ success: boolean; error?: string }> {
   try {
     extLog.debug("[background][oauth] flow-start");
 
@@ -210,10 +210,12 @@ export async function initiateOAuthFlow(): Promise<{ success: boolean; error?: s
   }
 }
 
-export async function handleLogout(sendResponse: (response: unknown) => void): Promise<void> {
+async function handleLogout(sendResponse: (response: unknown) => void): Promise<void> {
   await clearTokens();
   backgroundState.pendingPreview = null;
   clearPersonCaches();
   await updateActionContextIndicator();
   sendResponse({ payload: { success: true }, type: "LOGOUT_RESULT" });
 }
+
+export { handleAuthStatus, handleLogin, handleLogout, initiateOAuthFlow };

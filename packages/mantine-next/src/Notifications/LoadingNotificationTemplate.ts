@@ -1,13 +1,6 @@
 import { IconLoader2 } from "@tabler/icons-react";
 import { createElement, type ReactNode } from "react";
 
-export interface LoadingNotificationTemplateProps {
-  description: string;
-  icon?: ReactNode;
-  radius?: string | number;
-  title: string;
-}
-
 type LoadingNotificationPayload = {
   color: "blue";
   icon: ReactNode;
@@ -16,6 +9,13 @@ type LoadingNotificationPayload = {
   radius: string | number;
   title: string;
 };
+
+export interface LoadingNotificationTemplateProps {
+  description: string;
+  icon?: ReactNode;
+  radius?: string | number;
+  title: string;
+}
 
 /** Builds a consistent loading notification payload. */
 export function loadingNotificationTemplate({

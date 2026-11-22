@@ -23,6 +23,15 @@ import {
   resolveListenAddress,
 } from "./api-tls.js";
 
+const HTTPS_ONLY_API_SECRETS_PATTERN = /HTTPS only.*api:secrets/;
+const HTTPS_ONLY_PATTERN = /HTTPS only/;
+const BONDERY_PRIVATE_API_TLS_CERT_FILE_POINTS_TO_A_FILE_THE_API_C_PATTERN =
+  /BONDERY_PRIVATE_API_TLS_CERT_FILE points to a file the API cannot read.*api:secrets/;
+const NO_PEM_DATA_PATTERN = /no PEM data/;
+const HELLO_OVER_WSS_PATTERN = /hello over wss/;
+const CERTIFICATE_PATTERN = /certificate/i;
+const VERSION_PROTOCOL_ALERT_PATTERN = /version|protocol|alert/i;
+
 type Reply = { body: string; headers: Record<string, unknown>; status: number };
 
 function get(
@@ -47,9 +56,15 @@ function get(
 
 describe("aPI TLS config", () => {
   it("requires both the certificate and the key: there is no plain HTTP fallback", () => {
-    assert.throws(() => resolveApiTlsConfig({}), /HTTPS only.*api:secrets/);
-    assert.throws(() => resolveApiTlsConfig({ [API_TLS_CERT_FILE_ENV]: "/tls.crt" }), /HTTPS only/);
-    assert.throws(() => resolveApiTlsConfig({ [API_TLS_KEY_FILE_ENV]: "/tls.key" }), /HTTPS only/);
+    assert.throws(() => resolveApiTlsConfig({}), HTTPS_ONLY_API_SECRETS_PATTERN);
+    assert.throws(
+      () => resolveApiTlsConfig({ [API_TLS_CERT_FILE_ENV]: "/tls.crt" }),
+      HTTPS_ONLY_PATTERN,
+    );
+    assert.throws(
+      () => resolveApiTlsConfig({ [API_TLS_KEY_FILE_ENV]: "/tls.key" }),
+      HTTPS_ONLY_PATTERN,
+    );
     assert.deepEqual(
       resolveApiTlsConfig({
         [API_TLS_CERT_FILE_ENV]: "/tls.crt",
@@ -66,31 +81,31 @@ describe("aPI TLS config", () => {
           certFile: join(tmpdir(), "bondery-missing", "tls.crt"),
           keyFile: join(tmpdir(), "bondery-missing", "tls.key"),
         }),
-      /BONDERY_PRIVATE_API_TLS_CERT_FILE points to a file the API cannot read.*api:secrets/,
+      BONDERY_PRIVATE_API_TLS_CERT_FILE_POINTS_TO_A_FILE_THE_API_C_PATTERN,
     );
   });
 
   it("refuses a file without PEM data", () => {
     assert.throws(
       () => loadApiTlsOptions({ certFile: "/tls.crt", keyFile: "/tls.key" }, () => "not a pem"),
-      /no PEM data/,
+      NO_PEM_DATA_PATTERN,
     );
   });
 });
 
 describe("aPI listen address", () => {
   it("binds loopback in development and all interfaces elsewhere", () => {
-    const config = { API_HOST: "", API_PORT: 26642 };
+    const config = { API_HOST: "", API_PORT: 26_642 };
     assert.deepEqual(resolveListenAddress(config, "development"), {
       host: "127.0.0.1",
-      port: 26642,
+      port: 26_642,
     });
-    assert.deepEqual(resolveListenAddress(config, "production"), { host: "0.0.0.0", port: 26642 });
+    assert.deepEqual(resolveListenAddress(config, "production"), { host: "0.0.0.0", port: 26_642 });
   });
 
   it("keeps an explicit API_HOST", () => {
     assert.equal(
-      resolveListenAddress({ API_HOST: "0.0.0.0", API_PORT: 26642 }, "development").host,
+      resolveListenAddress({ API_HOST: "0.0.0.0", API_PORT: 26_642 }, "development").host,
       "0.0.0.0",
     );
   });
@@ -182,7 +197,7 @@ describe("aPI HTTPS server", () => {
       req.end();
     });
     assert.equal(upgrade.status, 101);
-    assert.match(upgrade.firstFrame, /hello over wss/);
+    assert.match(upgrade.firstFrame, HELLO_OVER_WSS_PATTERN);
   });
 
   it("refuses plaintext HTTP", async () => {
@@ -192,7 +207,7 @@ describe("aPI HTTPS server", () => {
   it("refuses a client that does not trust the API CA", async () => {
     await assert.rejects(
       get(httpsRequest, { agent: false, path: "/whoami", port }),
-      /certificate/i,
+      CERTIFICATE_PATTERN,
     );
   });
 
@@ -205,7 +220,7 @@ describe("aPI HTTPS server", () => {
         });
         socket.on("error", reject);
       }),
-      /version|protocol|alert/i,
+      VERSION_PROTOCOL_ALERT_PATTERN,
     );
   });
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { isOAuthProviderEnabled } from "@bondery/helpers/auth/oauth-providers";
 import {
   errorNotificationTemplate,
@@ -91,13 +92,15 @@ export function ProviderIntegrations({
   useEffect(() => {
     let isMounted = true;
 
-    void detectBonderyChromeExtension().then((result) => {
-      if (!isMounted) {
-        return;
-      }
+    detachPromise(
+      detectBonderyChromeExtension().then((result) => {
+        if (!isMounted) {
+          return;
+        }
 
-      setIsExtensionInstalled(result.state === "installed");
-    });
+        setIsExtensionInstalled(result.state === "installed");
+      }),
+    );
 
     return () => {
       isMounted = false;
@@ -223,9 +226,9 @@ export function ProviderIntegrations({
                       return;
                     }
                     if (isConnected) {
-                      void handleUnlinkClick(provider);
+                      detachPromise(handleUnlinkClick(provider));
                     } else {
-                      void linkProvider(provider);
+                      detachPromise(linkProvider(provider));
                     }
                   }}
                   provider={provider}

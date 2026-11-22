@@ -7,7 +7,7 @@ import {
 } from "../platform/runtime-env.js";
 import { isDatabaseConfigured } from "./database-url.js";
 
-export type PostgresReadiness = {
+type PostgresReadiness = {
   configured: boolean;
   error?: string;
   latencyMs?: number;
@@ -69,6 +69,8 @@ async function runPostgresVerify(): Promise<PostgresReadiness> {
     return postgresReadiness;
   }
 }
+
+export type { PostgresReadiness };
 
 export function getPostgresReadiness(): PostgresReadiness {
   return postgresReadiness ?? UNCONFIGURED_READINESS;

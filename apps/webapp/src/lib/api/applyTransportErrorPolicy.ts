@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { handleUnauthorizedSession } from "@/lib/auth/handleUnauthorizedSession";
 import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth/unauthorized";
 
@@ -9,7 +10,7 @@ import { isUnauthorizedApiError, isUnauthorizedResponseStatus } from "@/lib/auth
  */
 export function applyTransportErrorPolicy(error: unknown): void {
   if (isUnauthorizedApiError(error)) {
-    void handleUnauthorizedSession();
+    detachPromise(handleUnauthorizedSession());
   }
 }
 
@@ -19,6 +20,6 @@ export function applyTransportErrorPolicy(error: unknown): void {
  */
 export function applyTransportResponsePolicy(response: Response): void {
   if (isUnauthorizedResponseStatus(response.status)) {
-    void handleUnauthorizedSession();
+    detachPromise(handleUnauthorizedSession());
   }
 }

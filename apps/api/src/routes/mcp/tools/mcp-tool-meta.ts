@@ -1,6 +1,6 @@
 import type { ToolAnnotations } from "@modelcontextprotocol/server";
 
-export type McpToolKind = "create" | "delete" | "get" | "search" | "update";
+type McpToolKind = "create" | "delete" | "get" | "search" | "update";
 
 type McpToolHints = Pick<
   ToolAnnotations,
@@ -39,6 +39,8 @@ const HINTS: Record<McpToolKind, Required<McpToolHints>> = {
     readOnlyHint: false,
   },
 };
+
+export type { McpToolKind };
 
 /** Title plus all four ToolAnnotations hints for `registerTool`. */
 export function mcpToolMeta(

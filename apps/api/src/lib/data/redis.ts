@@ -22,7 +22,7 @@ import {
   resolveRedisConnectionOptions,
 } from "./redis-connection-options.js";
 
-export type RedisReadiness = {
+type RedisReadiness = {
   configured: boolean;
   error?: string;
   latencyMs?: number;
@@ -30,12 +30,12 @@ export type RedisReadiness = {
   verifiedAt: string;
 };
 
-export type RedisClients = {
+type RedisClients = {
   commands: Redis;
   subscriber: Redis;
 };
 
-export type InitRedisResult = {
+type InitRedisResult = {
   readiness: RedisReadiness;
   clients: RedisClients | null;
 };
@@ -77,52 +77,6 @@ function ensureUrl(redisUrl?: string): string | undefined {
   }
   configuredUrl = trimmed;
   return trimmed;
-}
-
-/** Process-scoped command connection. Undefined when URL empty. */
-export function getRedisCommands(redisUrl?: string): Redis | undefined {
-  const url = ensureUrl(redisUrl);
-  if (!url) {
-    return undefined;
-  }
-  if (!commandsClient) {
-    commandsClient = createRedisClient(url);
-  }
-  return commandsClient;
-}
-
-/** Command connection — throws when Redis URL is unset (required in all environments). */
-export function requireRedisCommands(redisUrl?: string): Redis {
-  const client = getRedisCommands(redisUrl);
-  if (!client) {
-    throw new Error(
-      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
-    );
-  }
-  return client;
-}
-
-/** Process-scoped subscriber connection. Undefined when URL empty. */
-export function getRedisSubscriber(redisUrl?: string): Redis | undefined {
-  const url = ensureUrl(redisUrl);
-  if (!url) {
-    return undefined;
-  }
-  if (!subscriberClient) {
-    subscriberClient = createRedisClient(url);
-  }
-  return subscriberClient;
-}
-
-/** Subscriber connection — throws when Redis URL is unset (required in all environments). */
-export function requireRedisSubscriber(redisUrl?: string): Redis {
-  const client = getRedisSubscriber(redisUrl);
-  if (!client) {
-    throw new Error(
-      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
-    );
-  }
-  return client;
 }
 
 function setUnconfiguredReadiness(): RedisReadiness {
@@ -228,10 +182,6 @@ async function runRedisVerify(
   }
 }
 
-export function getRedisReadiness(): RedisReadiness {
-  return redisReadiness ?? UNCONFIGURED_READINESS;
-}
-
 /**
  * Production Redis must use TLS and a password (see the bondery-security skill).
  * The API still starts so that an upgrade never takes down an external Redis setup,
@@ -249,6 +199,73 @@ function warnOnInsecureProductionRedis(log: FastifyBaseLogger | undefined, redis
     { redisAuthenticated: posture.authenticated, redisTls: posture.tls },
     "Redis connection is not protected: production Redis must use TLS (rediss://) and a password. See https://docs.usebondery.com/deploy/configuration#redis",
   );
+}
+
+async function quitClient(client: Redis | null): Promise<void> {
+  if (!client) {
+    return;
+  }
+  const status = client.status;
+  if (status === "end" || status === "close") {
+    return;
+  }
+  try {
+    await client.quit();
+  } catch {
+    // Already closed — idempotent shutdown
+  }
+}
+
+export type { InitRedisResult, RedisClients, RedisReadiness };
+
+/** Process-scoped command connection. Undefined when URL empty. */
+export function getRedisCommands(redisUrl?: string): Redis | undefined {
+  const url = ensureUrl(redisUrl);
+  if (!url) {
+    return undefined;
+  }
+  if (!commandsClient) {
+    commandsClient = createRedisClient(url);
+  }
+  return commandsClient;
+}
+
+/** Command connection — throws when Redis URL is unset (required in all environments). */
+export function requireRedisCommands(redisUrl?: string): Redis {
+  const client = getRedisCommands(redisUrl);
+  if (!client) {
+    throw new Error(
+      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
+    );
+  }
+  return client;
+}
+
+/** Process-scoped subscriber connection. Undefined when URL empty. */
+export function getRedisSubscriber(redisUrl?: string): Redis | undefined {
+  const url = ensureUrl(redisUrl);
+  if (!url) {
+    return undefined;
+  }
+  if (!subscriberClient) {
+    subscriberClient = createRedisClient(url);
+  }
+  return subscriberClient;
+}
+
+/** Subscriber connection — throws when Redis URL is unset (required in all environments). */
+export function requireRedisSubscriber(redisUrl?: string): Redis {
+  const client = getRedisSubscriber(redisUrl);
+  if (!client) {
+    throw new Error(
+      "BONDERY_PRIVATE_REDIS_URL must be set. Start local Redis with: pnpm run start:redis",
+    );
+  }
+  return client;
+}
+
+export function getRedisReadiness(): RedisReadiness {
+  return redisReadiness ?? UNCONFIGURED_READINESS;
 }
 
 /**
@@ -325,21 +342,6 @@ export async function verifyRedis(redisUrl: string): Promise<RedisReadiness> {
   }
 
   return runRedisVerify(trimmed, { subscriberCheck: "status" });
-}
-
-async function quitClient(client: Redis | null): Promise<void> {
-  if (!client) {
-    return;
-  }
-  const status = client.status;
-  if (status === "end" || status === "close") {
-    return;
-  }
-  try {
-    await client.quit();
-  } catch {
-    // Already closed — idempotent shutdown
-  }
 }
 
 /** Unsubscribe paths must run first (via shutdownSyncWakeRuntime). Idempotent. */

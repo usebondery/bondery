@@ -18,7 +18,7 @@ import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const depsDir = process.argv[2];
+const [, , depsDir] = process.argv;
 if (!depsDir) {
   throw new Error(
     "Pass the folder where d3-geo, topojson-client, and world-atlas are installed as the first argument.",

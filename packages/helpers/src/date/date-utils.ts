@@ -1,5 +1,7 @@
 import { type DateTimeFormatContext, formatUserDate } from "#date/format-user.js";
 
+const PATTERN_5E285C647B34_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+
 const MONTHS_PER_YEAR = 12;
 
 /**
@@ -36,6 +38,24 @@ function formatWorkHistoryDate(d: string, ctx: DateTimeFormatContext): string {
   }
   const date = new Date(year, month - 1, 1);
   return formatUserDate(date, { ...ctx, timeZone: undefined }, "monthYear");
+}
+
+/** Parse a `YYYY-MM-DD` calendar date as UTC midnight, so no timezone shifts the day. */
+function parseCalendarDate(value: string): Date | undefined {
+  const match = PATTERN_5E285C647B34_RE.exec(value);
+  if (!match) {
+    return undefined;
+  }
+
+  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00.000Z`);
+
+  // `new Date` rolls impossible days forward (2026-02-30 becomes 2026-03-02),
+  // so compare the round trip to reject a date that does not exist.
+  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    return undefined;
+  }
+
+  return date;
 }
 
 /**
@@ -137,24 +157,6 @@ export function formatDuration(
   }
 
   return parts.join(", ");
-}
-
-/** Parse a `YYYY-MM-DD` calendar date as UTC midnight, so no timezone shifts the day. */
-function parseCalendarDate(value: string): Date | undefined {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
-  if (!match) {
-    return undefined;
-  }
-
-  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T00:00:00.000Z`);
-
-  // `new Date` rolls impossible days forward (2026-02-30 becomes 2026-03-02),
-  // so compare the round trip to reject a date that does not exist.
-  if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
-    return undefined;
-  }
-
-  return date;
 }
 
 /**

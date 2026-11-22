@@ -1,12 +1,13 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { createElement } from "react";
 import { toast } from "sonner-native";
 import { v7 as uuidv7 } from "uuid";
 import { UI_TIMING_MS } from "../config";
 import { AppToastBanner } from "./AppToastBanner";
 
-export type NotificationType = "success" | "error" | "neutral" | "loading";
+type NotificationType = "success" | "error" | "neutral" | "loading";
 
-export interface NotificationData {
+interface NotificationData {
   autoClose?: number | false;
   id?: string;
   loading?: boolean;
@@ -15,11 +16,11 @@ export interface NotificationData {
   type?: NotificationType;
 }
 
-export type NotificationUpdateData = NotificationData & { id: string };
+type NotificationUpdateData = NotificationData & { id: string };
 
 type NotificationPromiseContent = Omit<NotificationData, "id">;
 
-export interface NotificationPromiseHandlers<T> {
+interface NotificationPromiseHandlers<T> {
   error: NotificationPromiseContent | ((error: unknown) => NotificationPromiseContent);
   id?: string;
   loading: NotificationPromiseContent;
@@ -132,10 +133,10 @@ function promise<T>(work: Promise<T>, handlers: NotificationPromiseHandlers<T>):
     type: handlers.loading.type ?? "loading",
   });
 
-  void work.then(
-    (value) => {
+  detachPromise(
+    work.then((value) => {
       showSettled(id, resolvePromiseContent(handlers.success, value));
-    },
+    }),
     (error: unknown) => {
       showSettled(id, resolvePromiseContent(handlers.error, error));
     },
@@ -144,10 +145,18 @@ function promise<T>(work: Promise<T>, handlers: NotificationPromiseHandlers<T>):
   return work;
 }
 
-export const notifications = {
+const notifications = {
   clean,
   hide,
   promise,
   show,
   update,
 };
+
+export type {
+  NotificationData,
+  NotificationPromiseHandlers,
+  NotificationType,
+  NotificationUpdateData,
+};
+export { notifications };

@@ -17,10 +17,11 @@ import { IconBrandGithub, IconTopologyStar, IconX } from "@tabler/icons-react";
 import { Logo } from "@/components/Logo";
 import { siteFrameProps } from "@/components/site-shell";
 import { routeAssert } from "@/lib/navigation/route/assert";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 const navLinks: { href: AppHref; label: string }[] = [
-  { href: "/#features", label: landing.Header.Nav.Features },
-  { href: "/#pricing", label: landing.Header.Nav.Pricing },
+  { href: `/#${LANDING_SECTION_IDS.features}`, label: landing.Header.Nav.Features },
+  { href: `/#${LANDING_SECTION_IDS.pricing}`, label: landing.Header.Nav.Pricing },
   { href: WEBSITE_ROUTES.BLOG, label: landing.Header.Nav.Blog },
   { href: routeAssert(WEBSITE_ROUTES.DOCS), label: landing.Header.Nav.Docs },
 ];

@@ -23,7 +23,7 @@ export interface MeSessionData {
 }
 
 export function parseMeSession(raw: UserSessionResponse): MeSessionData {
-  const data = raw.data;
+  const { data } = raw;
   return {
     avatarUrl: data.avatarUrl ?? null,
     colorScheme:

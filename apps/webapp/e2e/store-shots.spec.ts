@@ -18,8 +18,12 @@ type Shot = (typeof SHOTS)[number];
 
 function readPngHeader(filePath: string): { colorType: number; height: number; width: number } {
   const header = readFileSync(filePath).subarray(0, 26);
+  const [, , , , , , , , , , , , , , , , , , , , , , , , , colorType] = header;
+  if (header.byteLength < 26 || colorType === undefined) {
+    throw new Error(`PNG header is too short: ${filePath}`);
+  }
   return {
-    colorType: header[25],
+    colorType,
     height: header.readUInt32BE(20),
     width: header.readUInt32BE(16),
   };

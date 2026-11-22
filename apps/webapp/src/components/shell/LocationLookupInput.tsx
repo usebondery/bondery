@@ -1,6 +1,7 @@
 "use client";
 
 import { GEOCODE_SUGGEST_MIN_QUERY_LENGTH } from "@bondery/helpers/address";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   geocodeSuggestionDisplayKey,
   geocodeSuggestionDisplayLabel,
@@ -12,6 +13,8 @@ import { cn } from "cn";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { fetchGeocodeSuggestions } from "@/lib/api/geocode";
 import { DEBOUNCE_MS } from "@/lib/platform/config";
+
+const A_Z_2 = /^[a-z]{2}$/;
 
 interface LocationLookupInputProps {
   ariaLabel?: string;
@@ -46,7 +49,7 @@ function getSuggestionCountryFlag(entry: ContactAddressEntry): string {
  */
 function extractCountryCodeFromLabel(label: string): string | null {
   const lastSegment = label.split(",").pop()?.trim().toLowerCase();
-  return lastSegment && /^[a-z]{2}$/.test(lastSegment) ? lastSegment : null;
+  return lastSegment && A_Z_2.test(lastSegment) ? lastSegment : null;
 }
 
 export function LocationLookupInput({
@@ -106,61 +109,63 @@ export function LocationLookupInput({
       abortControllerRef.current = controller;
       activeQueryRef.current = text;
 
-      void (async () => {
-        setLoading(true);
-        try {
-          const items = await fetchGeocodeSuggestions(text, mode, controller.signal);
-          if (activeQueryRef.current !== text) {
-            return;
-          }
-
-          const dictionary: Record<string, ContactAddressEntry> = {};
-          const flags: Record<string, string> = {};
-          const flagsByLabel: Record<string, string> = {};
-          const textsByKey: Record<string, string> = {};
-          const labels: Array<{ label: string; value: string }> = [];
-          const seen = new Set<string>();
-
-          for (const item of items) {
-            const displayLabel = geocodeSuggestionDisplayLabel(item);
-            const key = geocodeSuggestionDisplayKey(item);
-            if (seen.has(key)) {
-              continue;
+      detachPromise(
+        (async () => {
+          setLoading(true);
+          try {
+            const items = await fetchGeocodeSuggestions(text, mode, controller.signal);
+            if (activeQueryRef.current !== text) {
+              return;
             }
-            seen.add(key);
-            const flag = getSuggestionCountryFlag(item);
-            dictionary[key] = item;
-            flags[key] = flag;
-            flagsByLabel[displayLabel] ??= flag;
-            textsByKey[key] = displayLabel;
-            labels.push({ label: displayLabel, value: key });
-          }
 
-          suggestionsByKey.current = dictionary;
-          optionFlagByKey.current = flags;
-          optionFlagByLabel.current = flagsByLabel;
-          optionTextByKey.current = textsByKey;
-          setOptions(labels);
-        } catch (error) {
-          if (error instanceof Error && error.name === "AbortError") {
-            return;
+            const dictionary: Record<string, ContactAddressEntry> = {};
+            const flags: Record<string, string> = {};
+            const flagsByLabel: Record<string, string> = {};
+            const textsByKey: Record<string, string> = {};
+            const labels: Array<{ label: string; value: string }> = [];
+            const seen = new Set<string>();
+
+            for (const item of items) {
+              const displayLabel = geocodeSuggestionDisplayLabel(item);
+              const key = geocodeSuggestionDisplayKey(item);
+              if (seen.has(key)) {
+                continue;
+              }
+              seen.add(key);
+              const flag = getSuggestionCountryFlag(item);
+              dictionary[key] = item;
+              flags[key] = flag;
+              flagsByLabel[displayLabel] ??= flag;
+              textsByKey[key] = displayLabel;
+              labels.push({ label: displayLabel, value: key });
+            }
+
+            suggestionsByKey.current = dictionary;
+            optionFlagByKey.current = flags;
+            optionFlagByLabel.current = flagsByLabel;
+            optionTextByKey.current = textsByKey;
+            setOptions(labels);
+          } catch (error) {
+            if (error instanceof Error && error.name === "AbortError") {
+              return;
+            }
+            if (activeQueryRef.current === text) {
+              setOptions([]);
+              suggestionsByKey.current = {};
+              optionFlagByKey.current = {};
+              optionFlagByLabel.current = {};
+              optionTextByKey.current = {};
+            }
+          } finally {
+            if (activeQueryRef.current === text) {
+              setLoading(false);
+            }
+            if (abortControllerRef.current === controller) {
+              abortControllerRef.current = null;
+            }
           }
-          if (activeQueryRef.current === text) {
-            setOptions([]);
-            suggestionsByKey.current = {};
-            optionFlagByKey.current = {};
-            optionFlagByLabel.current = {};
-            optionTextByKey.current = {};
-          }
-        } finally {
-          if (activeQueryRef.current === text) {
-            setLoading(false);
-          }
-          if (abortControllerRef.current === controller) {
-            abortControllerRef.current = null;
-          }
-        }
-      })();
+        })(),
+      );
     }, DEBOUNCE_MS.locationSuggest);
 
     return () => {

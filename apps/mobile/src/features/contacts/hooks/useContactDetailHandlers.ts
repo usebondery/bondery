@@ -1,4 +1,5 @@
 import type { ContactSocialFieldKey } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import type {
   Contact,
   ContactAddressEntry,
@@ -52,29 +53,31 @@ export function useContactDetailHandlers({
   const name = formatContactName(contact);
 
   function shareContact() {
-    void (async () => {
-      setIsSharing(true);
+    detachPromise(
+      (async () => {
+        setIsSharing(true);
 
-      try {
-        await shareContactVCard({
-          contact,
-          contactId: contact.id,
-          dialogTitle: name,
-        });
-      } catch (error) {
-        if (error instanceof ShareUnavailableError) {
-          notifications.show({
-            title: tMobileContactDetail("ShareUnavailable"),
-            type: "error",
+        try {
+          await shareContactVCard({
+            contact,
+            contactId: contact.id,
+            dialogTitle: name,
           });
-          return;
-        }
+        } catch (error) {
+          if (error instanceof ShareUnavailableError) {
+            notifications.show({
+              title: tMobileContactDetail("ShareUnavailable"),
+              type: "error",
+            });
+            return;
+          }
 
-        showErrorToast(error, tMobileContactDetail("ShareFailed"));
-      } finally {
-        setIsSharing(false);
-      }
-    })();
+          showErrorToast(error, tMobileContactDetail("ShareFailed"));
+        } finally {
+          setIsSharing(false);
+        }
+      })(),
+    );
   }
 
   function handleCloseDeleteConfirm() {

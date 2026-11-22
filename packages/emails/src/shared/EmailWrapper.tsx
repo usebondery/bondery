@@ -30,8 +30,50 @@ import {
 } from "#shared/email-styles.js";
 import { interpolateNamedLinks } from "#shared/interpolate-named-links.js";
 
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
 function joinUrl(origin: string, path: string): string {
-  return `${origin.replace(/\/+$/, "")}${path}`;
+  return `${origin.replace(PATTERN_5C2F2B24_RE, "")}${path}`;
+}
+
+function EmailFooter({
+  chrome,
+  docsHref,
+  manageNotificationsUrl,
+  showHelp,
+  supportHref,
+}: {
+  chrome: EmailChromeCopy;
+  docsHref: string;
+  manageNotificationsUrl?: string;
+  showHelp: boolean;
+  supportHref: string;
+}) {
+  return (
+    <Section style={{ borderTop: "1px solid #e5e7eb", marginTop: "32px", paddingTop: "16px" }}>
+      {showHelp ? (
+        <Text style={footerTextStyle}>
+          {interpolateNamedLinks(
+            chrome.help,
+            {
+              documentation: { href: docsHref, label: chrome.documentation },
+              support: { href: supportHref, label: chrome.support },
+            },
+            chromeLinkStyle,
+          )}
+        </Text>
+      ) : (
+        <Text style={footerTextStyle}>{chrome.internalNote}</Text>
+      )}
+      {manageNotificationsUrl ? (
+        <Text style={footerTextStyle}>
+          <Link href={manageNotificationsUrl} style={chromeLinkStyle}>
+            {chrome.manageNotifications}
+          </Link>
+        </Text>
+      ) : null}
+    </Section>
+  );
 }
 
 export function EmailWrapper({
@@ -49,7 +91,7 @@ export function EmailWrapper({
   children: ReactNode;
   preview: string;
 }): ReactElement {
-  const origin = websiteUrl.replace(/\/+$/, "");
+  const origin = websiteUrl.replace(PATTERN_5C2F2B24_RE, "");
   const supportHref = joinUrl(origin, WEBSITE_ROUTES.CONTACT);
   const docsHref = joinUrl(origin, WEBSITE_ROUTES.DOCS);
   const clippedPreview = clipEmailPreview(preview);
@@ -124,45 +166,5 @@ export function EmailWrapper({
         </Body>
       </Tailwind>
     </Html>
-  );
-}
-
-function EmailFooter({
-  chrome,
-  docsHref,
-  manageNotificationsUrl,
-  showHelp,
-  supportHref,
-}: {
-  chrome: EmailChromeCopy;
-  docsHref: string;
-  manageNotificationsUrl?: string;
-  showHelp: boolean;
-  supportHref: string;
-}) {
-  return (
-    <Section style={{ borderTop: "1px solid #e5e7eb", marginTop: "32px", paddingTop: "16px" }}>
-      {showHelp ? (
-        <Text style={footerTextStyle}>
-          {interpolateNamedLinks(
-            chrome.help,
-            {
-              documentation: { href: docsHref, label: chrome.documentation },
-              support: { href: supportHref, label: chrome.support },
-            },
-            chromeLinkStyle,
-          )}
-        </Text>
-      ) : (
-        <Text style={footerTextStyle}>{chrome.internalNote}</Text>
-      )}
-      {manageNotificationsUrl ? (
-        <Text style={footerTextStyle}>
-          <Link href={manageNotificationsUrl} style={chromeLinkStyle}>
-            {chrome.manageNotifications}
-          </Link>
-        </Text>
-      ) : null}
-    </Section>
   );
 }

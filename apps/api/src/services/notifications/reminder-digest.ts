@@ -25,7 +25,7 @@ import {
   sendRenderedEmail,
 } from "../../lib/notifications/transporter.js";
 
-export type ReminderDigestResult = {
+type ReminderDigestResult = {
   success: boolean;
   targetDate: string;
   sentUsers: number;
@@ -33,7 +33,7 @@ export type ReminderDigestResult = {
   failures: Array<{ userId: string; email: string; error: string }>;
 };
 
-export type SendOneUserDigestContext = {
+type SendOneUserDigestContext = {
   defaultTargetDate: string;
   formatByUserId: Map<string, EmailFormatContext>;
   namespaceCache: ReturnType<typeof preloadEmailNamespaces>;
@@ -106,6 +106,8 @@ async function recordDispatchLog(
     throw error;
   }
 }
+
+export type { ReminderDigestResult, SendOneUserDigestContext };
 
 export async function sendOneUserDigest(
   user: ReminderDigestUser,

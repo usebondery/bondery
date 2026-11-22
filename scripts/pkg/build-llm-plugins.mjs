@@ -22,16 +22,6 @@ import { diffTree, writeTree, writeZip } from "./llm-plugins/trees.mjs";
 
 const MCP_SKILLS_MODULE = "apps/api/src/routes/mcp/skills.generated.ts";
 
-export { readBrandPrimaryColor } from "./llm-plugins/json-format.mjs";
-export { loadPluginSource } from "./llm-plugins/plugin-source.mjs";
-export {
-  applyConnectBlock,
-  renderClaudeTree,
-  renderMcpSkills,
-  renderMcpSkillsModule,
-  renderOpenAiTree,
-} from "./llm-plugins/render.mjs";
-
 function parseArgs(args) {
   const options = { check: false, zip: false };
   for (const arg of args) {
@@ -102,3 +92,13 @@ function main() {
 if (resolve(process.argv[1] ?? "") === fileURLToPath(import.meta.url)) {
   main();
 }
+
+export { readBrandPrimaryColor } from "./llm-plugins/json-format.mjs";
+export { loadPluginSource } from "./llm-plugins/plugin-source.mjs";
+export {
+  applyConnectBlock,
+  renderClaudeTree,
+  renderMcpSkills,
+  renderMcpSkillsModule,
+  renderOpenAiTree,
+} from "./llm-plugins/render.mjs";

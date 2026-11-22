@@ -30,12 +30,6 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
-/** Each source folder and the folders that must mirror it exactly. */
-export const MIRRORS = [
-  { source: ".agents/agents", targets: [".claude/agents", ".cursor/agents"] },
-  { source: ".agents/skills", targets: [".claude/skills"] },
-];
-
 function listFiles(dir) {
   if (!existsSync(dir)) {
     return [];
@@ -55,11 +49,17 @@ function listFiles(dir) {
 function relativeFiles(dir) {
   return listFiles(dir)
     .map((file) => relative(dir, file).split(sep).join("/"))
-    .sort();
+    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
 }
 
+/** Each source folder and the folders that must mirror it exactly. */
+const MIRRORS = [
+  { source: ".agents/agents", targets: [".claude/agents", ".cursor/agents"] },
+  { source: ".agents/skills", targets: [".claude/skills"] },
+];
+
 /** Paths that differ between a source folder and one mirror, relative to the repo root. */
-export function findDrift(sourceDir, targetDir) {
+function findDrift(sourceDir, targetDir) {
   const source = relativeFiles(sourceDir);
   const target = relativeFiles(targetDir);
   const drift = [];
@@ -124,3 +124,5 @@ function main() {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }
+
+export { findDrift, MIRRORS };

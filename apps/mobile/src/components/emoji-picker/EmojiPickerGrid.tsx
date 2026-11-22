@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { FlashList, type FlashListRef } from "@shopify/flash-list";
 import { type Ref, useImperativeHandle, useRef } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
@@ -10,7 +11,7 @@ import { EmojiPickerCell } from "./EmojiPickerCell";
 import { buildEmojiFlatRows, type EmojiFlatRow, findEmojiFlatIndex } from "./emojiFlatList";
 import type { EmojiPickerSection } from "./useEmojiPickerFilter";
 
-export type EmojiPickerGridRef = {
+type EmojiPickerGridRef = {
   scrollToEmoji: (emoji: string) => void;
 };
 
@@ -23,7 +24,7 @@ interface EmojiPickerGridProps {
   value: string;
 }
 
-export function EmojiPickerGrid({
+function EmojiPickerGrid({
   sections,
   value,
   emptySearchLabel,
@@ -51,24 +52,26 @@ export function EmojiPickerGrid({
     scrollRetryCountRef.current = 0;
 
     const attemptScroll = () => {
-      void listRef.current
-        ?.scrollToIndex({
-          animated: true,
-          index,
-          viewOffset: 8,
-          viewPosition: 0.25,
-        })
-        .catch(() => {
-          if (
-            pendingScrollIndexRef.current !== index ||
-            scrollRetryCountRef.current >= LIST_SCROLL.maxRetries
-          ) {
-            return;
-          }
+      const scrollResult = listRef.current?.scrollToIndex({
+        animated: true,
+        index,
+        viewOffset: 8,
+        viewPosition: 0.25,
+      });
+      if (!scrollResult) {
+        return;
+      }
+      detachPromise(scrollResult, () => {
+        if (
+          pendingScrollIndexRef.current !== index ||
+          scrollRetryCountRef.current >= LIST_SCROLL.maxRetries
+        ) {
+          return;
+        }
 
-          scrollRetryCountRef.current += 1;
-          setTimeout(attemptScroll, UI_TIMING_MS.scrollRetryDelay);
-        });
+        scrollRetryCountRef.current += 1;
+        setTimeout(attemptScroll, UI_TIMING_MS.scrollRetryDelay);
+      });
     };
 
     requestAnimationFrame(attemptScroll);
@@ -160,3 +163,6 @@ const styles = StyleSheet.create({
     width: "100%",
   },
 });
+
+export type { EmojiPickerGridRef };
+export { EmojiPickerGrid };

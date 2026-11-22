@@ -12,6 +12,7 @@ import {
 import type { ComponentType } from "react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useWebappRuntimeConfig } from "@/lib/platform/runtimeConfig.client";
+import { SETTINGS_SUPPORT_SECTION_ID } from "../../settingsSectionIds";
 import { openFeedbackModal } from "../modals/openFeedbackModal";
 import { SettingsSection } from "./SettingsSection";
 
@@ -85,7 +86,11 @@ export function SupportCard() {
     openFeedbackModal();
   };
   return (
-    <SettingsSection icon={<IconLifebuoy size={20} stroke={1.5} />} id="support" title={t("Title")}>
+    <SettingsSection
+      icon={<IconLifebuoy size={20} stroke={1.5} />}
+      id={SETTINGS_SUPPORT_SECTION_ID}
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <Group align="stretch" gap="md" grow>
           <SupportItemCard

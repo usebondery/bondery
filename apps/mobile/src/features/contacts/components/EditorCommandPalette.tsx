@@ -6,7 +6,7 @@ import type { SlashCommandDefinition } from "../slashCommands";
 import { MentionContactListContent } from "./MentionContactListContent";
 import { SlashCommandListContent } from "./SlashCommandListContent";
 
-export type EditorPaletteMode = "closed" | "slash" | "mention";
+type EditorPaletteMode = "closed" | "slash" | "mention";
 
 interface EditorCommandPaletteProps {
   mentionContacts: Contact[];
@@ -18,7 +18,7 @@ interface EditorCommandPaletteProps {
   slashQuery: string;
 }
 
-export function EditorCommandPalette({
+function EditorCommandPalette({
   mode,
   slashQuery,
   mentionContacts,
@@ -81,3 +81,6 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
 });
+
+export type { EditorPaletteMode };
+export { EditorCommandPalette };

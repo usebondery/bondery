@@ -19,20 +19,22 @@ import type {
   UpdateInteractionInput,
 } from "./types.js";
 
-type _InteractionType = Assert<IsEqual<InteractionType, z.infer<typeof interactionTypeSchema>>>;
-type _InteractionParticipant = Assert<
+export type _InteractionType = Assert<
+  IsEqual<InteractionType, z.infer<typeof interactionTypeSchema>>
+>;
+export type _InteractionParticipant = Assert<
   IsEqual<InteractionParticipant, z.infer<typeof interactionParticipantSchema>>
 >;
-type _Interaction = Assert<IsEqual<Interaction, z.infer<typeof interactionSchema>>>;
-type _CreateInteractionInput = Assert<
+export type _Interaction = Assert<IsEqual<Interaction, z.infer<typeof interactionSchema>>>;
+export type _CreateInteractionInput = Assert<
   IsEqual<CreateInteractionInput, z.infer<typeof createInteractionInputSchema>>
 >;
-type _UpdateInteractionInput = Assert<
+export type _UpdateInteractionInput = Assert<
   IsEqual<UpdateInteractionInput, z.infer<typeof updateInteractionInputSchema>>
 >;
-type _InteractionFormInput = Assert<
+export type _InteractionFormInput = Assert<
   IsEqual<InteractionFormInput, z.infer<typeof interactionFormSchema>>
 >;
-type _InteractionsListResponse = Assert<
+export type _InteractionsListResponse = Assert<
   IsEqual<InteractionsListResponse, z.infer<typeof interactionsListResponseSchema>>
 >;

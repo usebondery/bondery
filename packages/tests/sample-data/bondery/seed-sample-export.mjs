@@ -895,13 +895,13 @@ function buildChannelPatch(seed) {
     patch.phones = [
       { preferred: true, prefix: seed.phone.prefix, type: "work", value: seed.phone.value },
     ];
-  } else if (seed.index != null && seed.index % 3 === 0) {
+  } else if (seed.index !== null && seed.index !== undefined && seed.index % 3 === 0) {
     patch.phones = [
       {
         preferred: true,
         prefix: "+1",
         type: "home",
-        value: String(5550100000 + seed.index),
+        value: String(5_550_100_000 + seed.index),
       },
     ];
   }
@@ -925,8 +925,7 @@ function channelType(type) {
 }
 
 function toExportPerson(contact, seed) {
-  const createdAt = contact.createdAt;
-  const updatedAt = contact.updatedAt;
+  const { createdAt, updatedAt } = contact;
   const emails = (contact.emails ?? []).map((email, sortOrder) => ({
     createdAt,
     id: randomUUID(),
@@ -1037,12 +1036,16 @@ async function resetPreviousSampleContacts() {
 }
 
 async function main() {
-  const uniqueSeeds = UNIQUE_CONTACTS.map((seed, index) =>
-    Object.assign({}, seed, { index, skipLinkedin: false }),
-  );
-  const duplicateSeeds = DUPLICATE_CONTACTS.map((seed, index) =>
-    Object.assign({}, seed, { index: uniqueSeeds.length + index, skipLinkedin: true }),
-  );
+  const uniqueSeeds = UNIQUE_CONTACTS.map((seed, index) => ({
+    ...seed,
+    index,
+    skipLinkedin: false,
+  }));
+  const duplicateSeeds = DUPLICATE_CONTACTS.map((seed, index) => ({
+    ...seed,
+    index: uniqueSeeds.length + index,
+    skipLinkedin: true,
+  }));
   const allSeeds = [...uniqueSeeds, ...duplicateSeeds];
   if (allSeeds.length !== 70) {
     throw new Error(`Expected 70 contact seeds, got ${allSeeds.length}`);
@@ -1057,7 +1060,7 @@ async function main() {
       lastName: seed.lastName,
       ...(seed.middleName ? { middleName: seed.middleName } : {}),
     });
-    const id = createdBody.contact.id;
+    const { id } = createdBody.contact;
     await sleep(60);
     await apiIgnoreSyncEmit("PATCH", `/contacts/${id}`, buildScalarPatch(seed));
     await sleep(60);

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import * as Network from "expo-network";
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
@@ -36,7 +37,7 @@ const SyncContext = createContext<SyncContextValue>({
   pendingCount: 0,
 });
 
-export function useSync(): SyncContextValue {
+function useSync(): SyncContextValue {
   return useContext(SyncContext);
 }
 
@@ -44,7 +45,7 @@ type SyncProviderProps = {
   children: ReactNode;
 };
 
-export function SyncProvider({ children }: SyncProviderProps) {
+function SyncProvider({ children }: SyncProviderProps) {
   const { isAuthenticated, isSessionHydrating, session } = useAuth();
   const userId = session?.user?.id ?? null;
   const previousUserIdRef = useRef<string | null>(null);
@@ -69,12 +70,14 @@ export function SyncProvider({ children }: SyncProviderProps) {
 
   useEffect(() => {
     return subscribeLocalSessionEnded(() => {
-      void (async () => {
-        await unregisterSyncBackgroundTask();
-        stopSyncWakeClient();
-        await resetLocalSyncState();
-        clearReadyState();
-      })();
+      detachPromise(
+        (async () => {
+          await unregisterSyncBackgroundTask();
+          stopSyncWakeClient();
+          await resetLocalSyncState();
+          clearReadyState();
+        })(),
+      );
     });
   }, []);
 
@@ -97,7 +100,7 @@ export function SyncProvider({ children }: SyncProviderProps) {
       stopSyncWakeClient();
       // Effect cleanup cannot await. stopPullSync invalidates the session before its first await,
       // and the next startPullSync call awaits the same teardown.
-      void stopPullSync();
+      detachPromise(stopPullSync());
     };
 
     function takeSyncSessionAction(token: string | null) {
@@ -110,97 +113,101 @@ export function SyncProvider({ children }: SyncProviderProps) {
       });
     }
 
-    void (async () => {
-      if (isSessionHydrating) {
-        return;
-      }
+    detachPromise(
+      (async () => {
+        if (isSessionHydrating) {
+          return;
+        }
 
-      const token = await readLocalAccessToken();
-      if (!active) {
-        return;
-      }
-
-      const action = takeSyncSessionAction(token);
-
-      if (action === "idle") {
-        return;
-      }
-
-      if (action === "wipe_logout") {
-        await unregisterSyncBackgroundTask();
+        const token = await readLocalAccessToken();
         if (!active) {
           return;
         }
-        stopSyncWakeClient();
-        await resetLocalSyncState();
-        clearReadyState();
-        return;
-      }
 
-      if (action === "wipe_user_switch") {
-        clearReadyState();
-        await resetLocalSyncState();
-        if (!active) {
+        const action = takeSyncSessionAction(token);
+
+        if (action === "idle") {
           return;
         }
-      }
 
-      if (!userId) {
-        return;
-      }
-
-      previousUserIdRef.current = userId;
-
-      getSyncDatabase();
-      await registerSyncBackgroundTask();
-      if (!active) {
-        return;
-      }
-      await startPullSync();
-      if (!active) {
-        return;
-      }
-      wakeClient = await startSyncWakeClient();
-      scheduleSyncDrain();
-
-      if (!active) {
-        wakeClient?.stop();
-        wakeClient = null;
-        return;
-      }
-
-      setIsReady(true);
-      refreshCounts();
-
-      unsubscribeUpdates = subscribeSyncUpdates(() => {
-        refreshCounts();
-        if (getHasInitialSyncSnapshot()) {
-          setIsInitialSync(false);
+        if (action === "wipe_logout") {
+          await unregisterSyncBackgroundTask();
+          if (!active) {
+            return;
+          }
+          stopSyncWakeClient();
+          await resetLocalSyncState();
+          clearReadyState();
+          return;
         }
-      });
 
-      networkSub = Network.addNetworkStateListener((state) => {
-        if (state.isConnected) {
-          scheduleSyncDrain();
-        }
-      });
-
-      appStateSub = AppState.addEventListener("change", (nextState) => {
-        if (nextState === "active") {
-          void schedulePull({ reason: "foreground" });
-          scheduleSyncDrain();
-          if (!wakeClient) {
-            void startSyncWakeClient().then((client) => {
-              if (!active) {
-                client.stop();
-                return;
-              }
-              wakeClient = client;
-            });
+        if (action === "wipe_user_switch") {
+          clearReadyState();
+          await resetLocalSyncState();
+          if (!active) {
+            return;
           }
         }
-      });
-    })();
+
+        if (!userId) {
+          return;
+        }
+
+        previousUserIdRef.current = userId;
+
+        getSyncDatabase();
+        await registerSyncBackgroundTask();
+        if (!active) {
+          return;
+        }
+        await startPullSync();
+        if (!active) {
+          return;
+        }
+        wakeClient = await startSyncWakeClient();
+        scheduleSyncDrain();
+
+        if (!active) {
+          wakeClient?.stop();
+          wakeClient = null;
+          return;
+        }
+
+        setIsReady(true);
+        refreshCounts();
+
+        unsubscribeUpdates = subscribeSyncUpdates(() => {
+          refreshCounts();
+          if (getHasInitialSyncSnapshot()) {
+            setIsInitialSync(false);
+          }
+        });
+
+        networkSub = Network.addNetworkStateListener((state) => {
+          if (state.isConnected) {
+            scheduleSyncDrain();
+          }
+        });
+
+        appStateSub = AppState.addEventListener("change", (nextState) => {
+          if (nextState === "active") {
+            detachPromise(schedulePull({ reason: "foreground" }));
+            scheduleSyncDrain();
+            if (!wakeClient) {
+              detachPromise(
+                startSyncWakeClient().then((client) => {
+                  if (!active) {
+                    client.stop();
+                    return;
+                  }
+                  wakeClient = client;
+                }),
+              );
+            }
+          }
+        });
+      })(),
+    );
 
     return () => {
       active = false;
@@ -233,3 +240,5 @@ function countContactsLocal(): number {
     return 0;
   }
 }
+
+export { SyncProvider, useSync };

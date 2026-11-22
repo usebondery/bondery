@@ -7,6 +7,8 @@ import {
 } from "@bondery/schemas/errors";
 import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.server";
 
+const PATTERN = /\/$/;
+
 type BuildNestedErrorResponseParams = {
   code: ApiErrorCode;
   message: string;
@@ -16,7 +18,7 @@ type BuildNestedErrorResponseParams = {
 };
 
 function websiteBaseUrl(): string {
-  return buildWebappRuntimeConfigFromEnv().websiteUrl.replace(/\/$/, "");
+  return buildWebappRuntimeConfigFromEnv().websiteUrl.replace(PATTERN, "");
 }
 
 export function buildNestedErrorResponse(params: BuildNestedErrorResponseParams): Response {

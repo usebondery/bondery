@@ -21,7 +21,7 @@ import {
   applyTagsShapeOp,
 } from "./tables";
 
-export type SyncShapeKey = SyncTableKey;
+type SyncShapeKey = SyncTableKey;
 
 const MATERIALIZERS: Record<SyncShapeKey, (db: SQLiteDatabase, message: ShapeRowMessage) => void> =
   {
@@ -37,9 +37,9 @@ const MATERIALIZERS: Record<SyncShapeKey, (db: SQLiteDatabase, message: ShapeRow
     tags: applyTagsShapeOp,
   };
 
-export const ALL_SYNC_TABLE_KEYS = [...SYNC_TABLE_KEYS];
+const ALL_SYNC_TABLE_KEYS = [...SYNC_TABLE_KEYS];
 
-export type MaterializerResult = {
+type MaterializerResult = {
   hadChanges: boolean;
   tables: SyncTableKey[];
 };
@@ -61,7 +61,7 @@ function applyChange(db: SQLiteDatabase, change: SyncChange): SyncTableKey | nul
   return table;
 }
 
-export function applySyncBatch(batch: SyncBatch): MaterializerResult {
+function applySyncBatch(batch: SyncBatch): MaterializerResult {
   const db = getSyncDatabase();
   const tables = new Set<SyncTableKey>();
 
@@ -77,7 +77,7 @@ export function applySyncBatch(batch: SyncBatch): MaterializerResult {
   return { hadChanges: tables.size > 0, tables: Array.from(tables) };
 }
 
-export function applySyncBatches(batches: SyncBatch[]): MaterializerResult {
+function applySyncBatches(batches: SyncBatch[]): MaterializerResult {
   let hadChanges = false;
   for (const batch of batches) {
     const result = applySyncBatch(batch);
@@ -88,7 +88,7 @@ export function applySyncBatches(batches: SyncBatch[]): MaterializerResult {
   return { hadChanges, tables: collectAppliedSyncTables(batches) };
 }
 
-export function applyBootstrapTables(
+function applyBootstrapTables(
   tables: Partial<Record<SyncTableKey, Record<string, unknown>[]>>,
 ): MaterializerResult {
   const db = getSyncDatabase();
@@ -110,3 +110,5 @@ export function applyBootstrapTables(
 
 export { collectAppliedSyncTables } from "./applied-tables";
 export { applyPeopleShapeOp } from "./people";
+export type { MaterializerResult, SyncShapeKey };
+export { ALL_SYNC_TABLE_KEYS, applyBootstrapTables, applySyncBatch, applySyncBatches };

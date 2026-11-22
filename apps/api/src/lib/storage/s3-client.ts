@@ -15,12 +15,9 @@ import { Agent } from "node:https";
 
 import { S3Client } from "@aws-sdk/client-s3";
 
-export const S3_ENDPOINT_ENV = "BONDERY_PRIVATE_S3_ENDPOINT";
-export const S3_TLS_CA_FILE_ENV = "BONDERY_PRIVATE_S3_TLS_CA_FILE";
+type S3ConnectionEnv = Partial<Record<typeof S3_TLS_CA_FILE_ENV, string>>;
 
-export type S3ConnectionEnv = Partial<Record<typeof S3_TLS_CA_FILE_ENV, string>>;
-
-export type S3ConnectionConfig = {
+type S3ConnectionConfig = {
   accessKeyId: string;
   endpoint: string;
   region: string;
@@ -28,12 +25,12 @@ export type S3ConnectionConfig = {
 };
 
 /** Socket limits in milliseconds. The SDK sets none by default. */
-export type S3RequestLimits = {
+type S3RequestLimits = {
   connectionTimeout?: number;
   requestTimeout?: number;
 };
 
-export type S3SecurityPosture = {
+type S3SecurityPosture = {
   /** The client trusts only the certificates in `BONDERY_PRIVATE_S3_TLS_CA_FILE`. */
   privateCa: boolean;
   tls: boolean;
@@ -43,21 +40,6 @@ type ReadTextFile = (path: string) => string;
 
 function readTextFileUtf8(path: string): string {
   return readFileSync(path, "utf8");
-}
-
-export function parseS3Endpoint(endpoint: string): URL {
-  let url: URL;
-  try {
-    url = new URL(endpoint);
-  } catch (error) {
-    throw new Error(`${S3_ENDPOINT_ENV} is not a valid URL (expected https:// or http://)`, {
-      cause: error,
-    });
-  }
-  if (url.protocol !== "https:" && url.protocol !== "http:") {
-    throw new Error(`${S3_ENDPOINT_ENV} must start with https:// or http://`);
-  }
-  return url;
 }
 
 function readCaFile(path: string, readTextFile: ReadTextFile): string {
@@ -75,6 +57,35 @@ function readCaFile(path: string, readTextFile: ReadTextFile): string {
     throw new Error(`${S3_TLS_CA_FILE_ENV} points to a file with no PEM certificate (${path})`);
   }
   return contents;
+}
+
+/**
+ * An Agent instance, not agent options. Given options, the SDK builds a fresh agent without them
+ * for every request that sends `Expect: 100-continue` (uploads of a few MB), so those requests
+ * would drop the CA and fail verification. Keep-alive and the socket cap match the SDK defaults.
+ */
+function trustingAgent(ca: string): Agent {
+  return new Agent({ ca, keepAlive: true, maxSockets: 50 });
+}
+
+export type { S3ConnectionConfig, S3ConnectionEnv, S3RequestLimits, S3SecurityPosture };
+
+export const S3_ENDPOINT_ENV = "BONDERY_PRIVATE_S3_ENDPOINT";
+export const S3_TLS_CA_FILE_ENV = "BONDERY_PRIVATE_S3_TLS_CA_FILE";
+
+export function parseS3Endpoint(endpoint: string): URL {
+  let url: URL;
+  try {
+    url = new URL(endpoint);
+  } catch (error) {
+    throw new Error(`${S3_ENDPOINT_ENV} is not a valid URL (expected https:// or http://)`, {
+      cause: error,
+    });
+  }
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error(`${S3_ENDPOINT_ENV} must start with https:// or http://`);
+  }
+  return url;
 }
 
 /** Reports whether the endpoint uses TLS and a private CA. Never reads files. */
@@ -127,13 +138,4 @@ export function createS3Client(
     region: config.region,
     requestHandler: { ...limits, ...(ca ? { httpsAgent: trustingAgent(ca) } : {}) },
   });
-}
-
-/**
- * An Agent instance, not agent options. Given options, the SDK builds a fresh agent without them
- * for every request that sends `Expect: 100-continue` (uploads of a few MB), so those requests
- * would drop the CA and fail verification. Keep-alive and the socket cap match the SDK defaults.
- */
-function trustingAgent(ca: string): Agent {
-  return new Agent({ ca, keepAlive: true, maxSockets: 50 });
 }

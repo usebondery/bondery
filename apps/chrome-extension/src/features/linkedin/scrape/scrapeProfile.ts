@@ -24,7 +24,8 @@ import {
 } from "./sduiProfile";
 import type { WorkEntry } from "./workExperience";
 
-export interface CachedProfile {
+const JSESSIONID_COOKIE_PRESENT_RE = /(?:^|;\s*)JSESSIONID=/;
+interface CachedProfile {
   educationHistory: EducationEntry[];
   firstName?: string;
   headline?: string;
@@ -36,11 +37,11 @@ export interface CachedProfile {
   workHistory: WorkEntry[];
 }
 
-export const profileCache = new Map<string, CachedProfile>();
+const profileCache = new Map<string, CachedProfile>();
 const inflightScrapes = new Map<string, Promise<CachedProfile>>();
 
 /** Only cache profiles that include history so a later scrape can recover empty Voyager. */
-export function shouldCacheProfile(profile: CachedProfile): boolean {
+function shouldCacheProfile(profile: CachedProfile): boolean {
   return profile.workHistory.length > 0 || profile.educationHistory.length > 0;
 }
 
@@ -224,7 +225,7 @@ function applySchoolDomLogos(entries: EducationEntry[], sdui: EducationEntry[]):
   });
 }
 
-export async function scrapeLinkedInProfile(
+async function scrapeLinkedInProfile(
   handle: string,
   options?: { skipNetworkLogos?: boolean },
 ): Promise<CachedProfile> {
@@ -304,7 +305,7 @@ export async function scrapeLinkedInProfile(
       if (!linkedinBio) {
         await pollUntil(
           () => Boolean(extractSduiBio()),
-          5_000,
+          5000,
           () => {
             window.scrollTo(0, 480);
           },
@@ -338,7 +339,7 @@ export async function scrapeLinkedInProfile(
         extLog.warn("[linkedin][scrape] empty work and education", {
           handle,
           hasIdentity: Boolean(identity),
-          hasJsessionId: /(?:^|;\s*)JSESSIONID=/.test(document.cookie),
+          hasJsessionId: JSESSIONID_COOKIE_PRESENT_RE.test(document.cookie),
           hasTopcard: Boolean(getTopcard()),
           voyagerEduEmpty: fetchedEdu.length === 0,
           voyagerWorkEmpty: fetchedWork.length === 0,
@@ -376,3 +377,6 @@ export async function scrapeLinkedInProfile(
     inflightScrapes.delete(handle);
   }
 }
+
+export type { CachedProfile };
+export { profileCache, scrapeLinkedInProfile, shouldCacheProfile };

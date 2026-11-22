@@ -4,6 +4,9 @@ import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parse as parseYaml } from "yaml";
 
+const PATTERN_5E2D2D2D5C72_RE = /^---\r?\n([\s\S]*?)\r?\n---/;
+const MDX_RE = /\.mdx$/;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "../..");
 const DOCS_DIR = join(REPO_ROOT, "docs");
@@ -22,7 +25,7 @@ function walkMarkdownFiles(dir, acc = []) {
 }
 
 function parseFrontmatter(content) {
-  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  const match = content.match(PATTERN_5E2D2D2D5C72_RE);
   if (!match) {
     return null;
   }
@@ -38,7 +41,7 @@ function defaultDocPath(filePath) {
   if (rel === "index.mdx") {
     return "";
   }
-  const withoutExt = rel.replace(/\.mdx$/, "");
+  const withoutExt = rel.replace(MDX_RE, "");
   if (withoutExt.endsWith("/index")) {
     return withoutExt.slice(0, -"/index".length);
   }

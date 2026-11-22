@@ -22,11 +22,13 @@ import {
 } from "./index.js";
 import { verifyBonderyAccessJwt } from "./verify-access-jwt.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 export const MCP_CHALLENGE_SCOPES = [MCP_READ_SCOPE, MCP_WRITE_SCOPE] as const;
 
 /** Product docs page an agent reads when MCP auth or scope fails. */
 export function mcpDocsUrl(): string {
-  const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
+  const website = (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
   return `${website}/docs/apps/mcp`;
 }
 
@@ -55,7 +57,7 @@ export function mcpUnauthorizedChallenge(
   return new Response(
     JSON.stringify({
       error: {
-        code: -32000,
+        code: -32_000,
         data: {
           agent_message: agentMessage,
           doc_url: mcpDocsUrl(),

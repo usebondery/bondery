@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
   type: "json",
 };
@@ -28,16 +29,18 @@ export function DocsHeadingLink({ id }: DocsHeadingLinkProps) {
 
   function handleClick() {
     const url = `${location.origin}${location.pathname}#${id}`;
-    void navigator.clipboard.writeText(url).then(() => {
-      setCopied(true);
-      if (resetTimer.current !== null) {
-        window.clearTimeout(resetTimer.current);
-      }
-      resetTimer.current = window.setTimeout(() => {
-        setCopied(false);
-        resetTimer.current = null;
-      }, COPIED_MS);
-    });
+    detachPromise(
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        if (resetTimer.current !== null) {
+          window.clearTimeout(resetTimer.current);
+        }
+        resetTimer.current = window.setTimeout(() => {
+          setCopied(false);
+          resetTimer.current = null;
+        }, COPIED_MS);
+      }),
+    );
   }
 
   return (

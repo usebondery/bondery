@@ -1,5 +1,7 @@
 import type { CSSProperties, ImgHTMLAttributes, ReactElement } from "react";
 
+const ANTHROPIC_MARK_SRC = new URL("../assets/brands/anthropic.svg", import.meta.url).href;
+
 /**
  * Official Anthropic / Claude logomark.
  *
@@ -7,8 +9,6 @@ import type { CSSProperties, ImgHTMLAttributes, ReactElement } from "react";
  * only sizes it, and optionally recolors it with a CSS mask.
  */
 export const ANTHROPIC_MARK_COLOR = "#D97757";
-
-const ANTHROPIC_MARK_SRC = new URL("../assets/brands/anthropic.svg", import.meta.url).href;
 
 export type AnthropicIconProps = Omit<
   ImgHTMLAttributes<HTMLImageElement>,

@@ -17,10 +17,10 @@ const LEVEL_BG = {
 type Level = keyof typeof LEVEL_BG;
 
 function isColorEnabled(): boolean {
-  if (process.env.NO_COLOR !== undefined) {
+  if (process.env["NO_COLOR"] !== undefined) {
     return false;
   }
-  if (process.env.FORCE_COLOR === "0") {
+  if (process.env["FORCE_COLOR"] === "0") {
     return false;
   }
   return Boolean(process.stdout.isTTY);
@@ -76,7 +76,7 @@ export function createCliLogger(_scope?: string): CliLogger {
       if (rows.length === 0) {
         return;
       }
-      const first = rows[0];
+      const [first] = rows;
       if (!first) {
         return;
       }

@@ -60,6 +60,20 @@ function withIcons(links: AppNavLinkDef[]): NavigationLinkDef[] {
   return links.map((link) => ({ ...link, icon: navIcons[link.labelKey] }));
 }
 
+const SIDEBAR_MODE_BROWSE = "browse";
+const SIDEBAR_MODE_CHAT = "chat";
+
+interface NavigationSidebarContentProps {
+  avatarUrl: string | null;
+  collapsed: boolean;
+  hasActiveMergeRecommendations: boolean;
+  hasOverdueKeepInTouch: boolean;
+  isMobileOverlay?: boolean;
+  onExpandSidebar: () => void;
+  onSearchActivate?: () => void;
+  userName: string;
+}
+
 export const primaryLinkDefs = withIcons(primaryAppNavLinks);
 export const secondaryLinkDefs = withIcons(secondaryAppNavLinks);
 export const chatLinkDef: NavigationLinkDef = {
@@ -87,20 +101,6 @@ export function useAppNavigationLinks(): {
     primaryLinks: resolve(primaryLinkDefs),
     secondaryLinks: resolve(secondaryLinkDefs),
   };
-}
-
-const SIDEBAR_MODE_BROWSE = "browse";
-const SIDEBAR_MODE_CHAT = "chat";
-
-interface NavigationSidebarContentProps {
-  avatarUrl: string | null;
-  collapsed: boolean;
-  hasActiveMergeRecommendations: boolean;
-  hasOverdueKeepInTouch: boolean;
-  isMobileOverlay?: boolean;
-  onExpandSidebar: () => void;
-  onSearchActivate?: () => void;
-  userName: string;
 }
 
 export function NavigationSidebarContent({

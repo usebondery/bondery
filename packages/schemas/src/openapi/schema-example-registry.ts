@@ -147,12 +147,12 @@ import { syncPushRequestSchema, syncPushResponseSchema } from "#sync/push/index.
 import { syncWsTicketResponseSchema } from "#sync/ws/schema.js";
 import { OPENAPI_SCHEMA_EXAMPLES } from "./example-fixtures.js";
 
-export type OpenApiSchemaExampleEntry = {
+type OpenApiSchemaExampleEntry = {
   name: string;
   schema: z.ZodType;
 };
 
-export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
+const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "messageResponseSchema", schema: messageResponseSchema },
   { name: "apiSuccessResponseSchema", schema: apiSuccessResponseSchema },
   { name: "apiErrorResponseSchema", schema: apiErrorResponseSchema },
@@ -244,7 +244,7 @@ export const RESPONSE_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "geocodeTimezoneResponseWireSchema", schema: geocodeTimezoneResponseWireSchema },
 ];
 
-export const REQUEST_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
+const REQUEST_SCHEMA_EXAMPLES: OpenApiSchemaExampleEntry[] = [
   { name: "createContactApiInputSchema", schema: createContactApiInputSchema },
   { name: "createContactBodySchema", schema: createContactBodySchema },
   { name: "updateContactInputSchema", schema: updateContactInputSchema },
@@ -294,6 +294,9 @@ for (const { name, schema } of [...RESPONSE_SCHEMA_EXAMPLES, ...REQUEST_SCHEMA_E
     schemaExampleByIdentity.set(schema, example);
   }
 }
+
+export type { OpenApiSchemaExampleEntry };
+export { REQUEST_SCHEMA_EXAMPLES, RESPONSE_SCHEMA_EXAMPLES };
 
 export function getRegisteredSchemaExample(schema: z.ZodType): unknown {
   return schemaExampleByIdentity.get(schema);

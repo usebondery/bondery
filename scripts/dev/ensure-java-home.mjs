@@ -8,6 +8,10 @@ import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+const JAVA_VERSION_RE = /JAVA_VERSION="(\d+)/;
+const PATTERN_5B5C73225D_RE = /[\s"]/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+
 function main() {
   const isWindows = process.platform === "win32";
   const javaBin = isWindows ? "java.exe" : "java";
@@ -18,7 +22,7 @@ function main() {
     if (!existsSync(releasePath)) {
       return null;
     }
-    const match = readFileSync(releasePath, "utf8").match(/JAVA_VERSION="(\d+)/);
+    const match = readFileSync(releasePath, "utf8").match(JAVA_VERSION_RE);
     return match ? Number(match[1]) : null;
   }
 
@@ -53,7 +57,7 @@ function main() {
   }
 
   function quoteArg(value) {
-    if (!/[\s"]/.test(value)) {
+    if (!PATTERN_5B5C73225D_RE.test(value)) {
       return value;
     }
     return `"${value.replaceAll('"', '\\"')}"`;
@@ -64,7 +68,7 @@ function main() {
       encoding: "utf8",
     });
     const text = `${probe.stderr ?? ""}${probe.stdout ?? ""}`;
-    return text.split(/\r?\n/).find(Boolean) ?? `JDK ${javaMajorVersion(home)}`;
+    return text.split(PATTERN_5C723F5C6E_RE).find(Boolean) ?? `JDK ${javaMajorVersion(home)}`;
   }
 
   const previousHome = process.env.JAVA_HOME ?? "";

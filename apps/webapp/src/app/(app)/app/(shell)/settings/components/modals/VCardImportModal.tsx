@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   DropzoneContent,
@@ -280,7 +281,9 @@ export function VCardImportModal({
 
     setIsImporting(true);
     setImportProgress({ current: 0, total: selectedContacts.length });
-    const isFirstImport = settingsResult?.data?.importCompletedAt == null;
+    const isFirstImport =
+      settingsResult?.data?.importCompletedAt === null ||
+      settingsResult?.data?.importCompletedAt === undefined;
 
     let totalImported = 0;
     let totalSkipped = 0;
@@ -408,7 +411,7 @@ export function VCardImportModal({
           maxFiles={1}
           maxSize={30 * 1024 * 1024}
           onDrop={(files) => {
-            void parseUpload(files);
+            detachPromise(parseUpload(files));
           }}
           onReject={() => {
             notifications.show(
@@ -485,7 +488,7 @@ export function VCardImportModal({
           cancelLabel={t("Cancel")}
           mt={0}
           onAction={() => {
-            void handleImport();
+            detachPromise(handleImport());
           }}
           onBack={() => setStep("upload")}
           onCancel={closeModal}

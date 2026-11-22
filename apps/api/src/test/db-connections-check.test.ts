@@ -3,6 +3,10 @@ import { describe, it } from "node:test";
 
 import { DATABASE_TLS_MODULE, findDbConnectionViolations } from "../../scripts/db-connections.ts";
 
+const PGCONNECTIONCONFIG_PATTERN = /pgConnectionConfig/;
+const PRISMACLIURL_PATTERN = /prismaCliUrl/;
+const IGNORES_PATTERN = /ignores/;
+
 const PG_IMPORT = 'import { Pool, Client } from "pg";\n';
 
 describe("check-db-connections rules", () => {
@@ -15,7 +19,7 @@ describe("check-db-connections rules", () => {
     const source = `${PG_IMPORT}const pool = new Pool({ connectionString: url });`;
     const [violation] = findDbConnectionViolations(source, "packages/db/src/x.ts");
     assert.equal(violation?.line, 2);
-    assert.match(violation?.message ?? "", /pgConnectionConfig/);
+    assert.match(violation?.message ?? "", PGCONNECTIONCONFIG_PATTERN);
   });
 
   it("rejects pg-boss without pgConnectionConfig", () => {
@@ -44,7 +48,7 @@ describe("check-db-connections rules", () => {
       "export default defineConfig({ datasource: { url: process.env.DATABASE_URL } });";
     assert.match(
       findDbConnectionViolations(source, "packages/db/prisma.config.ts")[0]?.message ?? "",
-      /prismaCliUrl/,
+      PRISMACLIURL_PATTERN,
     );
   });
 
@@ -53,7 +57,7 @@ describe("check-db-connections rules", () => {
       "const url = `${base}?sslmode=verify-full&sslrootcert=/ca.crt`;\nexport default defineConfig({ datasource: { url: prismaCliUrl(url) } });";
     assert.match(
       findDbConnectionViolations(source, "packages/db/prisma.config.ts")[0]?.message ?? "",
-      /ignores/,
+      IGNORES_PATTERN,
     );
   });
 });

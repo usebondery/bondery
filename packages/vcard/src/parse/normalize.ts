@@ -182,7 +182,7 @@ export function parseEntity(lines: string[], options: VCardParseOptions): Parsed
     warnings: [],
   };
 
-  const version = raw.version;
+  const { version } = raw;
   if (!version) {
     throw new Error("VCARD is missing VERSION.");
   }

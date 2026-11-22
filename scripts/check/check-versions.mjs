@@ -15,6 +15,11 @@ import {
   toCoreCalver,
 } from "../pkg/calver.mjs";
 
+const VERSION_RE = /version:\s*"([^"]+)"/;
+const VERSIONNAME_RE = /versionName\s+"([^"]+)"/;
+const BONDERY_INFRA_VERSION_RE_2 = /^BONDERY_INFRA_VERSION=(\d+\.\d+\.\d+)/m;
+const BONDERY_INFRA_VERSION_RE = /^# BONDERY_INFRA_VERSION=(\d+\.\d+\.\d+)/m;
+
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -35,13 +40,13 @@ function main() {
 
   function readMobileAppConfigVersion() {
     const content = readFileSync(join(root, "apps/mobile/app.config.ts"), "utf8");
-    const match = content.match(/version:\s*"([^"]+)"/);
+    const match = content.match(VERSION_RE);
     return match?.[1] ?? "";
   }
 
   function readAndroidVersionName() {
     const content = readFileSync(join(root, "apps/mobile/android/app/build.gradle"), "utf8");
-    const match = content.match(/versionName\s+"([^"]+)"/);
+    const match = content.match(VERSIONNAME_RE);
     return match?.[1] ?? "";
   }
 
@@ -56,11 +61,11 @@ function main() {
       return "";
     }
     const content = readFileSync(examplePath, "utf8");
-    const uncommented = content.match(/^BONDERY_INFRA_VERSION=(\d+\.\d+\.\d+)/m);
+    const uncommented = content.match(BONDERY_INFRA_VERSION_RE_2);
     if (uncommented) {
       return uncommented[1];
     }
-    const commented = content.match(/^# BONDERY_INFRA_VERSION=(\d+\.\d+\.\d+)/m);
+    const commented = content.match(BONDERY_INFRA_VERSION_RE);
     return commented?.[1] ?? "";
   }
 

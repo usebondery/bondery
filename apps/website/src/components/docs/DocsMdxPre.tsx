@@ -1,6 +1,7 @@
 import { isValidElement, type ReactNode } from "react";
 import { DocsCodeBlock } from "@/components/docs/DocsCodeBlock";
 
+const LANGUAGE_CLASS_RE = /language-([\w-]+)/;
 function nodeText(node: ReactNode): string {
   const parts: string[] = [];
   const pending: ReactNode[] = [node];
@@ -31,7 +32,7 @@ function codeLanguage(node: ReactNode): string {
   let current = node;
 
   while (isValidElement<{ children?: ReactNode; className?: string }>(current)) {
-    const match = /language-([\w-]+)/.exec(current.props.className ?? "");
+    const match = LANGUAGE_CLASS_RE.exec(current.props.className ?? "");
     if (match?.[1]) {
       return match[1];
     }

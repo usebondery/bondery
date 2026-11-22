@@ -1,5 +1,7 @@
 /** Snapshot of Better Auth `commonAuthenticatorNames`; written by `pnpm run update:aaguid-catalog`. */
-import betterAuthAuthenticatorNames from "./aaguid-catalog/better-auth-authenticator-names.json";
+import betterAuthAuthenticatorNames from "./aaguid-catalog/better-auth-authenticator-names.json" with {
+  type: "json",
+};
 import { resolveDefaultPasskeyName } from "./passkey-name";
 
 /** Community AAGUID catalog SVG data URIs must use this exact prefix. */
@@ -16,8 +18,21 @@ export type AaguidCatalogEntry = {
 
 export type AaguidCatalog = Record<string, AaguidCatalogEntry>;
 
+/** Untrusted catalog row or created-passkey JSON. */
+export type AaguidCatalogJsonFields = {
+  aaguid?: unknown;
+  icon_dark?: unknown;
+  icon_light?: unknown;
+  id?: unknown;
+  name?: unknown;
+};
+
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function isAaguidCatalogJsonFields(value: unknown): value is AaguidCatalogJsonFields {
+  return isPlainObject(value);
 }
 
 /**
@@ -45,7 +60,7 @@ export function sanitizeAaguidCatalogDocument(doc: unknown): AaguidCatalog {
 
   const catalog: AaguidCatalog = {};
   for (const [rawKey, rawEntry] of Object.entries(doc)) {
-    if (!isPlainObject(rawEntry) || typeof rawEntry.name !== "string") {
+    if (!isAaguidCatalogJsonFields(rawEntry) || typeof rawEntry.name !== "string") {
       continue;
     }
     const name = rawEntry.name.trim();
@@ -154,10 +169,10 @@ export function lookupAaguidIconUri(
 }
 
 export function parseCreatedPasskey(data: unknown): { aaguid: string | null; id: string } | null {
-  if (!isPlainObject(data)) {
+  if (!isAaguidCatalogJsonFields(data)) {
     return null;
   }
-  const id = data.id;
+  const { id } = data;
   if (typeof id !== "string" || id.length === 0) {
     return null;
   }

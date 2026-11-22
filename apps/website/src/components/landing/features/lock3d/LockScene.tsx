@@ -7,7 +7,7 @@ import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment
 import { LockModel, type StagePointer } from "./LockModel";
 import { ENV_INTENSITY } from "./lock-geometry";
 
-export interface LockSceneProps {
+interface LockSceneProps {
   /** `true` while the stage is on screen. Rendering pauses otherwise. */
   active: boolean;
   /** `true` once the lock should close. */
@@ -50,14 +50,7 @@ function RoomLighting() {
 }
 
 /** The R3F canvas for the padlock. Default export so `next/dynamic` can load it lazily. */
-export default function LockScene({
-  closed,
-  active,
-  reducedMotion,
-  pointer,
-  onReady,
-  onFailure,
-}: LockSceneProps) {
+function LockScene({ closed, active, reducedMotion, pointer, onReady, onFailure }: LockSceneProps) {
   let frameloop: "always" | "demand" = "demand";
   if (active && !reducedMotion) {
     frameloop = "always";
@@ -84,3 +77,6 @@ export default function LockScene({
     </Canvas>
   );
 }
+
+export type { LockSceneProps };
+export default LockScene;

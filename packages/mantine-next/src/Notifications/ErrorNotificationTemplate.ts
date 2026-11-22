@@ -1,13 +1,6 @@
 import { IconX } from "@tabler/icons-react";
 import { createElement, type ReactNode } from "react";
 
-export interface ErrorNotificationTemplateProps {
-  description: string;
-  icon?: ReactNode;
-  radius?: string | number;
-  title: string;
-}
-
 type ErrorNotificationPayload = {
   color: "red";
   icon: ReactNode;
@@ -16,6 +9,13 @@ type ErrorNotificationPayload = {
   radius: string | number;
   title: string;
 };
+
+export interface ErrorNotificationTemplateProps {
+  description: string;
+  icon?: ReactNode;
+  radius?: string | number;
+  title: string;
+}
 
 export function errorNotificationTemplate({
   title,

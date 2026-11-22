@@ -3,14 +3,14 @@
 import { SortMenu as SharedSortMenu } from "@bondery/mantine-next";
 import { useGroupsPageTranslations } from "@/lib/i18n/generated/hooks";
 
-export type SortOption = "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
-
 const DEFAULT_GROUPS_SORT: SortOption = "count-desc";
 
 interface SortMenuProps {
   setSortBy: (option: SortOption) => void;
   sortBy: SortOption;
 }
+
+export type SortOption = "count-desc" | "count-asc" | "alpha-asc" | "alpha-desc";
 
 /**
  * Groups page sort menu. Renders the shared `SortMenu` from `@bondery/mantine-next`

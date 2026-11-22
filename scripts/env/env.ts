@@ -202,7 +202,7 @@ function writeExamples(dryRun) {
             e.targets.some((t) => (t.runtimeName ?? e.canonical) === r.key),
         );
         const value = entry ? resolveExampleValue(entry, "production") : r.value;
-        return Object.assign({}, r, { value });
+        return { ...r, value };
       });
       const prodPath = join(repoRoot, target.productionExampleFile);
       if (!dryRun) {
@@ -235,7 +235,9 @@ function writeTurbo(dryRun) {
   const turbo = JSON.parse(readFileSync(turboPath, "utf-8"));
 
   const globalPassThroughEnv = [...TURBO_SYSTEM_PASSTHROUGH, ...getAllRuntimeNames()];
-  turbo.globalPassThroughEnv = [...new Set(globalPassThroughEnv)].toSorted();
+  turbo.globalPassThroughEnv = [...new Set(globalPassThroughEnv)].toSorted((a, b) =>
+    a < b ? -1 : a > b ? 1 : 0,
+  );
 
   const packageEnv = {
     api: getRuntimeNamesForTarget("api"),
@@ -286,7 +288,7 @@ function writeTurbo(dryRun) {
         ...inherit,
         ...existing,
         dependsOn: existing.dependsOn ?? inherit.dependsOn,
-        env: [...new Set(env)].toSorted(),
+        env: [...new Set(env)].toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0)),
       };
     }
   }

@@ -4,7 +4,7 @@ const REDDIT_TOKEN_URL = "https://www.reddit.com/api/v1/access_token";
 const REDDIT_SUBMIT_URL = "https://oauth.reddit.com/api/submit";
 const DEFAULT_SUBREDDIT = "bondery";
 
-export interface RedditConfig {
+interface RedditConfig {
   clientId: string;
   clientSecret: string;
   password: string;
@@ -63,7 +63,7 @@ async function getAccessToken(config: RedditConfig, userAgent: string): Promise<
  * @param flairId - Link flair template UUID to attach to the submission.
  * @param dryRun - When true, logs what would be submitted without calling the API.
  */
-export async function postRedditAnnouncement(
+async function postRedditAnnouncement(
   post: PostMeta,
   postUrl: string,
   config: RedditConfig,
@@ -150,3 +150,6 @@ export async function postRedditAnnouncement(
 
   console.log(`[Reddit] ✅ Submitted to r/${subreddit} successfully.`);
 }
+
+export type { RedditConfig };
+export { postRedditAnnouncement };

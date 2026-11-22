@@ -16,6 +16,8 @@ import {
   retryAfterHeader,
 } from "@bondery/schemas/http/responses";
 
+const THREE_DIGIT_STATUS_PATTERN = /^\d{3}$/;
+
 const RATE_LIMIT_REF = "#/components/headers/RateLimit";
 const RATE_LIMIT_POLICY_REF = "#/components/headers/RateLimitPolicy";
 const RETRY_AFTER_REF = "#/components/headers/RetryAfter";
@@ -47,7 +49,7 @@ type OpenApiSpec = {
 };
 
 function statusCode(status: string): number | undefined {
-  if (!/^\d{3}$/.test(status)) {
+  if (!THREE_DIGIT_STATUS_PATTERN.test(status)) {
     return undefined;
   }
   return Number(status);

@@ -5,6 +5,8 @@ import {
   WEBAPP_RUNTIME_ENV,
 } from "@/lib/platform/runtimeConfig.env";
 
+const LOCALHOST_OR_LOOPBACK = /localhost|127\.0\.0\.1/i;
+
 /**
  * Read env at runtime. Never use literal `process.env.NEXT_PUBLIC_*` — Next.js inlines those at build time.
  */
@@ -18,6 +20,31 @@ function requireValue(name: string, value: string | undefined): string {
     throw new Error(`Missing required environment variable: ${name}`);
   }
   return value;
+}
+
+function assertProductionRuntimeConfig(config: WebappRuntimeConfig): void {
+  const errors: string[] = [];
+
+  if (config.apiBaseUrl === WEBAPP_RUNTIME_BUILD_PLACEHOLDERS.apiUrl) {
+    errors.push(`${WEBAPP_RUNTIME_ENV.apiUrl} is still the Docker build placeholder`);
+  }
+
+  if (config.webappUrl === WEBAPP_RUNTIME_BUILD_PLACEHOLDERS.webappUrl) {
+    errors.push(`${WEBAPP_RUNTIME_ENV.webappUrl} is still the Docker build placeholder`);
+  }
+
+  if (config.websiteUrl === WEBAPP_RUNTIME_BUILD_PLACEHOLDERS.websiteUrl) {
+    errors.push(`${WEBAPP_RUNTIME_ENV.websiteUrl} is still the Docker build placeholder`);
+  }
+
+  if (LOCALHOST_OR_LOOPBACK.test(config.webappUrl)) {
+    errors.push(`${WEBAPP_RUNTIME_ENV.webappUrl} must not point at localhost in production`);
+  }
+
+  if (errors.length > 0) {
+    const details = errors.map((message) => `- ${message}`).join("\n");
+    throw new Error(`Invalid webapp runtime config:\n${details}`);
+  }
 }
 
 export function buildWebappRuntimeConfigFromEnv(): WebappRuntimeConfig {
@@ -43,36 +70,11 @@ export function buildWebappRuntimeConfigFromEnv(): WebappRuntimeConfig {
   return webappRuntimeConfigSchema.parse(config);
 }
 
-function assertProductionRuntimeConfig(config: WebappRuntimeConfig): void {
-  const errors: string[] = [];
-
-  if (config.apiBaseUrl === WEBAPP_RUNTIME_BUILD_PLACEHOLDERS.apiUrl) {
-    errors.push(`${WEBAPP_RUNTIME_ENV.apiUrl} is still the Docker build placeholder`);
-  }
-
-  if (config.webappUrl === WEBAPP_RUNTIME_BUILD_PLACEHOLDERS.webappUrl) {
-    errors.push(`${WEBAPP_RUNTIME_ENV.webappUrl} is still the Docker build placeholder`);
-  }
-
-  if (config.websiteUrl === WEBAPP_RUNTIME_BUILD_PLACEHOLDERS.websiteUrl) {
-    errors.push(`${WEBAPP_RUNTIME_ENV.websiteUrl} is still the Docker build placeholder`);
-  }
-
-  if (/localhost|127\.0\.0\.1/i.test(config.webappUrl)) {
-    errors.push(`${WEBAPP_RUNTIME_ENV.webappUrl} must not point at localhost in production`);
-  }
-
-  if (errors.length > 0) {
-    const details = errors.map((message) => `- ${message}`).join("\n");
-    throw new Error(`Invalid webapp runtime config:\n${details}`);
-  }
-}
-
 /** Fail fast on boot when production container env is missing or still uses build placeholders. */
 export function validateWebappRuntimeConfigAtStartup(): WebappRuntimeConfig {
   const config = buildWebappRuntimeConfigFromEnv();
 
-  if (process.env.NODE_ENV === "production") {
+  if (process.env["NODE_ENV"] === "production") {
     assertProductionRuntimeConfig(config);
   }
 

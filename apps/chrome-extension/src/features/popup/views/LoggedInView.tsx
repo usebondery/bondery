@@ -29,19 +29,19 @@ export function LoggedInView({
       />
 
       <Stack gap="md" style={{ flex: 1 }}>
-        {user && (
+        {user ? (
           <UserCard
             avatarUrl={user.avatarUrl}
             name={firstNonEmpty(user.name, user.email) ?? "User"}
             subtitle={user.email || undefined}
           />
-        )}
+        ) : null}
 
-        {showUnsupportedSiteMessage && (
+        {showUnsupportedSiteMessage ? (
           <Text c="dimmed" size="sm">
             {t("UnsupportedSiteMessage")}
           </Text>
-        )}
+        ) : null}
 
         <Button
           fullWidth

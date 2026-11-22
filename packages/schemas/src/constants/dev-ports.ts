@@ -9,26 +9,26 @@ export const DEV_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-passwo
 /** Bondery first-party HTTP dev servers (2663x block). */
 export const DEV_PORTS = {
   /** Reserved: internal admin / one-off dev utilities */
-  ADMIN: 26638,
+  ADMIN: 26_638,
   /** The API's only listener, HTTPS (Portless, the webapp's server side, `tailscale serve`) */
-  API: 26642,
-  EMAIL_PREVIEW: 26639,
-  EXTENSION: 26633,
+  API: 26_642,
+  EMAIL_PREVIEW: 26_639,
+  EXTENSION: 26_633,
   /** Local Mailpit SMTP (`deploy/bondery/docker-compose.dev-mail.yml`) */
-  MAILPIT_SMTP: 26640,
+  MAILPIT_SMTP: 26_640,
   /** Local Mailpit UI and HTTP API */
-  MAILPIT_UI: 26641,
-  MOBILE: 26634,
+  MAILPIT_UI: 26_641,
+  MOBILE: 26_634,
   /** Local dev Postgres (`deploy/bondery/docker-compose.dev-db.yml`) */
-  POSTGRES: 54322,
+  POSTGRES: 54_322,
   /** Local API Redis (`deploy/bondery/docker-compose.dev-redis.yml`) */
-  REDIS: 26636,
+  REDIS: 26_636,
   /** Reserved: Storybook / component docs */
-  STORYBOOK: 26635,
+  STORYBOOK: 26_635,
   /** Reserved: Swagger UI dev server */
-  SWAGGER_UI: 26637,
-  WEBAPP: 26632,
-  WEBSITE: 26630,
+  SWAGGER_UI: 26_637,
+  WEBAPP: 26_632,
+  WEBSITE: 26_630,
 } as const;
 
 /**

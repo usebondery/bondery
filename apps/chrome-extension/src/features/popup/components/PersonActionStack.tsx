@@ -56,7 +56,7 @@ export function PersonActionStack({
           {doesPersonExist ? "View in Bondery" : "Import to Bondery"}
         </Button>
 
-        {doesPersonExist && onAddInteraction && (
+        {doesPersonExist && onAddInteraction ? (
           <Button
             fullWidth
             leftSection={<IconCalendarPlus size={16} />}
@@ -65,14 +65,14 @@ export function PersonActionStack({
           >
             {t("AddInteraction")}
           </Button>
-        )}
+        ) : null}
       </Stack>
 
-      {error && (
+      {error ? (
         <Text c="red" size="xs" ta="center">
           {error}
         </Text>
-      )}
+      ) : null}
     </Stack>
   );
 }

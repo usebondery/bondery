@@ -1,6 +1,7 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
@@ -146,7 +147,7 @@ export function OAuthLoginClient({ lastUsedLoginMethod, oauthProviders }: OAuthL
       lastUsedLoginMethod={lastUsedLoginMethod}
       oauthProviders={oauthProviders}
       onEmailSubmit={handleEmailSubmit}
-      onPasskeyClick={() => void handlePasskeyLogin()}
+      onPasskeyClick={() => detachPromise(handlePasskeyLogin())}
       onProviderClick={handleOAuthLogin}
       surface="oauth"
       websiteUrl={websiteUrl}

@@ -12,6 +12,15 @@ import {
   dictationCaretIndex,
 } from "@/lib/speech/dictation/dictationText";
 
+/** Appends a settled piece to the committed text with one space. */
+function appendCommitted(committed: string, piece: string): string {
+  const trimmed = piece.trim();
+  if (trimmed === "") {
+    return committed;
+  }
+  return committed === "" ? trimmed : `${committed} ${trimmed}`;
+}
+
 /** An open dictation session. */
 export interface DictationSession {
   /** Where the caret goes after each write. */
@@ -24,15 +33,6 @@ export interface DictationSession {
   prefix: string;
   /** Field text after the insertion point. */
   suffix: string;
-}
-
-/** Appends a settled piece to the committed text with one space. */
-function appendCommitted(committed: string, piece: string): string {
-  const trimmed = piece.trim();
-  if (trimmed === "") {
-    return committed;
-  }
-  return committed === "" ? trimmed : `${committed} ${trimmed}`;
 }
 
 /**

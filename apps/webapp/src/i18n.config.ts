@@ -16,7 +16,7 @@ async function bundledResourceLoader(
   return resourceLoader(language, namespace);
 }
 
-const isDevelopment = process.env.NODE_ENV === "development";
+const isDevelopment = process.env["NODE_ENV"] === "development";
 
 const config: I18nConfig = {
   defaultNS: i18nConfig.defaultNS,

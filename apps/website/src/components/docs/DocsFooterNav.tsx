@@ -5,7 +5,7 @@ import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.
 import { Box, Divider, SimpleGrid, Stack, Text } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 
-export interface DocsFooterLink {
+interface DocsFooterLink {
   title: string;
   url: string;
 }
@@ -21,7 +21,7 @@ interface DocsFooterNavProps {
  *
  * The divider belongs here, so it is hidden together with the navigation.
  */
-export function DocsFooterNav({ next, previous }: DocsFooterNavProps) {
+function DocsFooterNav({ next, previous }: DocsFooterNavProps) {
   if (!previous && !next) {
     return null;
   }
@@ -72,3 +72,6 @@ export function DocsFooterNav({ next, previous }: DocsFooterNavProps) {
     </>
   );
 }
+
+export type { DocsFooterLink };
+export { DocsFooterNav };

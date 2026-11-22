@@ -7,6 +7,7 @@ import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
 import { Reveal } from "./features/Reveal";
 import { SectionHeader } from "./features/SectionHeader";
 import { PricingCard } from "./PricingCard";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 const FREE_FEATURES = [
   landing.Pricing.Free.Features.Contacts,
@@ -26,7 +27,7 @@ export function Pricing() {
     <Container
       bg="var(--mantine-color-body)"
       fluid
-      id="pricing"
+      id={LANDING_SECTION_IDS.pricing}
       px="md"
       py={{
         base: "calc(var(--mantine-spacing-lg) * 2)",

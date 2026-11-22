@@ -12,6 +12,7 @@ import {
 } from "./navigationGateState.ts";
 import { serializeHref } from "./serializeHref.ts";
 
+const CONTACTS_PATH_RE = /\/contacts/;
 function resetGate(): void {
   setNavigationTransitioning(false);
   recordNavigationKey("", 0);
@@ -36,7 +37,7 @@ describe("serializeHref", () => {
       pathname: "/contacts",
     });
     assert.equal(a, b);
-    assert.match(a, /\/contacts/);
+    assert.match(a, CONTACTS_PATH_RE);
   });
 });
 

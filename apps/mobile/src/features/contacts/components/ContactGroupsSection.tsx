@@ -53,7 +53,7 @@ function GroupsLoadingSkeleton() {
   );
 }
 
-export function ContactGroupsSection({
+function ContactGroupsSection({
   contactId,
   contactName,
   groups,
@@ -160,3 +160,5 @@ const styles = StyleSheet.create({
     height: 36,
   },
 });
+
+export { ContactGroupsSection };

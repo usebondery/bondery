@@ -6,6 +6,7 @@ import { Container, Flex, Stack, Text, Title } from "@mantine/core";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { useMDXComponents as getBlogMdxComponents } from "@/components/blog-mdx";
+import { LANDING_SECTION_IDS } from "@/components/landing/sectionIds";
 import { PageTopSpacer } from "@/components/page-top-spacer";
 import { getTeamMember } from "@/data/team";
 import { formatMessage } from "@/lib/i18n/message";
@@ -124,7 +125,13 @@ export default async function BlogPostPage({ params }: Props) {
                 {formatMessage(blog.ReadingTime, { minutes: readingTime })}
               </Text>
             </Flex>
-            {authorChip && <PersonChip href="/contact#team" isClickable person={authorChip} />}
+            {authorChip ? (
+              <PersonChip
+                href={`/contact#${LANDING_SECTION_IDS.team}`}
+                isClickable
+                person={authorChip}
+              />
+            ) : null}
           </Stack>
 
           <article>

@@ -19,7 +19,7 @@ const SURFACE_STYLE: CSSProperties = {
   backgroundColor: "light-dark(var(--mantine-color-white), var(--mantine-color-dark-6))",
 };
 
-export function Surface({ children, style, ...paperProps }: PaperProps & { children: ReactNode }) {
+function Surface({ children, style, ...paperProps }: PaperProps & { children: ReactNode }) {
   return (
     <Paper
       p="md"
@@ -48,7 +48,7 @@ const REMINDERS = [
 ] as const;
 
 /** An incoming Bondery reminder email, with a second message peeking behind it. */
-export function ReminderEmailVisual() {
+function ReminderEmailVisual() {
   return (
     <div className="relative w-full max-w-sm pt-3">
       <div
@@ -118,7 +118,7 @@ const SYNCED = [
 ] as const;
 
 /** Profiles that refresh from the sources they were saved from. */
-export function SyncVisual() {
+function SyncVisual() {
   return (
     <Surface className="w-full max-w-sm" p={0}>
       {SYNCED.map((row, index) => (
@@ -149,3 +149,5 @@ export function SyncVisual() {
     </Surface>
   );
 }
+
+export { ReminderEmailVisual, Surface, SyncVisual };

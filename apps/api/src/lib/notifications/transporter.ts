@@ -14,7 +14,7 @@ import {
   shouldSkipLiveRuntimeVerify,
 } from "../platform/runtime-env.js";
 
-export type EmailConfig = {
+type EmailConfig = {
   host: string;
   port: number;
   user: string;
@@ -23,7 +23,7 @@ export type EmailConfig = {
   replyToAddress: string;
 };
 
-export type RenderedEmailOptions = {
+type RenderedEmailOptions = {
   from: string;
   to: string;
   subject: string;
@@ -34,7 +34,7 @@ export type RenderedEmailOptions = {
   replyTo?: string;
 };
 
-export type EmailReadiness = {
+type EmailReadiness = {
   configured: boolean;
   error?: string;
   latencyMs?: number;
@@ -44,7 +44,7 @@ export type EmailReadiness = {
 
 const EMAIL_POOL_MAX_CONNECTIONS = 3;
 const EMAIL_POOL_MAX_MESSAGES = 100;
-const EMAIL_VERIFY_TIMEOUT_MS = 5_000;
+const EMAIL_VERIFY_TIMEOUT_MS = 5000;
 /** Reuse boot-time SMTP verify for readiness probes (matches /health/ready cache TTL). */
 const EMAIL_READINESS_REUSE_MS = 60_000;
 
@@ -57,45 +57,6 @@ const UNCONFIGURED_READINESS: EmailReadiness = {
 let configuredEmailConfig: EmailConfig | null = null;
 let transporter: Transporter | null = null;
 let emailReadiness: EmailReadiness | null = null;
-
-export function classifySmtpError(error: unknown): string {
-  if (error instanceof Error) {
-    const message = error.message.toLowerCase();
-    const code = "code" in error ? String(error.code).toLowerCase() : "";
-
-    if (error.name === "AbortError" || code === "etimedout" || message.includes("timeout")) {
-      return "timeout";
-    }
-    if (
-      code === "eauth" ||
-      message.includes("invalid login") ||
-      message.includes("authentication") ||
-      message.includes("auth")
-    ) {
-      return "auth_failed";
-    }
-    if (
-      message.includes("certificate") ||
-      message.includes("tls") ||
-      message.includes("ssl") ||
-      code === "ecert"
-    ) {
-      return "tls_error";
-    }
-    if (
-      code === "econnrefused" ||
-      code === "enotfound" ||
-      code === "ehostunreach" ||
-      message.includes("connect")
-    ) {
-      return "unreachable";
-    }
-
-    return error.message;
-  }
-
-  return "unknown";
-}
 
 async function verifyTransporterWithTimeout(
   current: Transporter,
@@ -189,6 +150,80 @@ function assertDevelopmentSmtpIsLoopback(config: EmailConfig): void {
   );
 }
 
+function ensureEmailConfig(): EmailConfig {
+  assertEmailConfigured();
+  const config = emailConfigFromProcessEnv();
+  if (!config) {
+    throw new Error("BONDERY_PRIVATE_EMAIL_* must be set before sending email");
+  }
+
+  if (configuredEmailConfig && JSON.stringify(configuredEmailConfig) !== JSON.stringify(config)) {
+    throw new Error(
+      "BONDERY_PRIVATE_EMAIL_* changed after transporter was created; restart the process",
+    );
+  }
+
+  configuredEmailConfig = config;
+  return config;
+}
+
+function isEmailReadinessFresh(readiness: EmailReadiness): boolean {
+  if (!readiness.ok) {
+    return false;
+  }
+
+  const ageMs = Date.now() - Date.parse(readiness.verifiedAt);
+  return ageMs >= 0 && ageMs < EMAIL_READINESS_REUSE_MS;
+}
+
+type SendRenderedEmailFn = (
+  options: RenderedEmailOptions,
+  log?: FastifyBaseLogger,
+) => Promise<void>;
+
+let sendRenderedEmailTestOverride: SendRenderedEmailFn | null = null;
+
+export type { EmailConfig, EmailReadiness, RenderedEmailOptions };
+
+export function classifySmtpError(error: unknown): string {
+  if (error instanceof Error) {
+    const message = error.message.toLowerCase();
+    const code = "code" in error ? String(error.code).toLowerCase() : "";
+
+    if (error.name === "AbortError" || code === "etimedout" || message.includes("timeout")) {
+      return "timeout";
+    }
+    if (
+      code === "eauth" ||
+      message.includes("invalid login") ||
+      message.includes("authentication") ||
+      message.includes("auth")
+    ) {
+      return "auth_failed";
+    }
+    if (
+      message.includes("certificate") ||
+      message.includes("tls") ||
+      message.includes("ssl") ||
+      code === "ecert"
+    ) {
+      return "tls_error";
+    }
+    if (
+      code === "econnrefused" ||
+      code === "enotfound" ||
+      code === "ehostunreach" ||
+      message.includes("connect")
+    ) {
+      return "unreachable";
+    }
+
+    return error.message;
+  }
+
+  return "unknown";
+}
+
 export function emailTransportOptions(config: EmailConfig) {
   const secure = config.port === 465;
   const useInsecureLoopback = isLoopbackSmtpHost(config.host) && !isProductionEnvironment();
@@ -278,23 +313,6 @@ export function emailConfigFromProcessEnv(): EmailConfig | null {
   return emailConfigFromNodeEnv(process.env);
 }
 
-function ensureEmailConfig(): EmailConfig {
-  assertEmailConfigured();
-  const config = emailConfigFromProcessEnv();
-  if (!config) {
-    throw new Error("BONDERY_PRIVATE_EMAIL_* must be set before sending email");
-  }
-
-  if (configuredEmailConfig && JSON.stringify(configuredEmailConfig) !== JSON.stringify(config)) {
-    throw new Error(
-      "BONDERY_PRIVATE_EMAIL_* changed after transporter was created; restart the process",
-    );
-  }
-
-  configuredEmailConfig = config;
-  return config;
-}
-
 export function isEmailConfigured(): boolean {
   return emailConfigFromProcessEnv() !== null;
 }
@@ -373,15 +391,6 @@ export async function initEmailTransport(log?: FastifyBaseLogger): Promise<Email
   return readiness;
 }
 
-function isEmailReadinessFresh(readiness: EmailReadiness): boolean {
-  if (!readiness.ok) {
-    return false;
-  }
-
-  const ageMs = Date.now() - Date.parse(readiness.verifiedAt);
-  return ageMs >= 0 && ageMs < EMAIL_READINESS_REUSE_MS;
-}
-
 /** Re-verify the shared pool (used by /health/ready when cache is cold). */
 export async function verifyEmailTransport(): Promise<EmailReadiness> {
   if (!isEmailConfigured()) {
@@ -407,13 +416,6 @@ export async function verifyEmailTransport(): Promise<EmailReadiness> {
 
   return runEmailVerify();
 }
-
-type SendRenderedEmailFn = (
-  options: RenderedEmailOptions,
-  log?: FastifyBaseLogger,
-) => Promise<void>;
-
-let sendRenderedEmailTestOverride: SendRenderedEmailFn | null = null;
 
 export async function sendRenderedEmail(
   options: RenderedEmailOptions,

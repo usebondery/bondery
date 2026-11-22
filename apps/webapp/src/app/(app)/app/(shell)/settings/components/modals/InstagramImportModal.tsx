@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import { List, ListItem, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
@@ -122,7 +123,7 @@ export function InstagramImportModal({
         ]}
         onAction={() => {
           if (isOnboardingFlow) {
-            void handleRequestedExport();
+            detachPromise(handleRequestedExport());
           } else {
             setStep("upload");
           }
@@ -191,7 +192,7 @@ export function InstagramImportModal({
         onBack={() => setStep("upload")}
         onCancel={closeModal}
         onParse={() => {
-          void parseUpload();
+          detachPromise(parseUpload());
         }}
         onStrategyChange={setStrategy}
         parseUploadedLabel={t("ParseUploaded")}
@@ -251,7 +252,7 @@ export function InstagramImportModal({
       onBack={() => setStep("strategy")}
       onCancel={closeModal}
       onImport={() => {
-        void handleImport();
+        detachPromise(handleImport());
       }}
       onSelectAll={handleToggleAll}
       onSelectOne={handleToggleOne}

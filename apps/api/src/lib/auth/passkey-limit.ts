@@ -12,6 +12,8 @@ import { PASSKEY_LIMITS } from "@bondery/schemas";
 import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/api";
 import { isJwtShapedToken } from "./bearer-token-format.js";
 
+const BEARER_S_S_PATTERN = /^Bearer\s+(\S+)/i;
+
 const PASSKEY_REGISTER_PATHS = new Set([
   "/passkey/generate-register-options",
   "/passkey/verify-registration",
@@ -22,7 +24,7 @@ const GENERATE_REGISTER_OPTIONS_PATH = "/passkey/generate-register-options";
 function readOpaqueBearerToken(ctx: { headers?: Headers; request?: Request }): string | undefined {
   const authorization =
     ctx.headers?.get("authorization") ?? ctx.request?.headers.get("authorization") ?? "";
-  const match = /^Bearer\s+(\S+)/i.exec(authorization);
+  const match = BEARER_S_S_PATTERN.exec(authorization);
   const token = match?.[1];
   if (!token || isJwtShapedToken(token)) {
     return undefined;

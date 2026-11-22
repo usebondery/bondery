@@ -4,14 +4,6 @@ import { resolve } from "node:path";
 /**
  * Configuration for environment variable validation
  */
-export interface EnvCheckConfig {
-  /** Absolute path to the app directory */
-  appPath: string;
-  /** Environment type: 'production' or 'development' */
-  environment: "production" | "development";
-  /** List of required environment variable names */
-  requiredVars: string[];
-}
 
 /**
  * ANSI color codes for terminal output
@@ -23,6 +15,14 @@ const colors = {
   reset: "\x1b[0m",
   yellow: "\x1b[33m",
 };
+export interface EnvCheckConfig {
+  /** Absolute path to the app directory */
+  appPath: string;
+  /** Environment type: 'production' or 'development' */
+  environment: "production" | "development";
+  /** List of required environment variable names */
+  requiredVars: string[];
+}
 
 /**
  * Parses an .env file and returns key-value pairs.

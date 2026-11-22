@@ -48,30 +48,30 @@ export function WorkHistoryCard({ entry }: WorkHistoryCardProps) {
       </Avatar>
 
       <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
-        {entry.title && (
+        {entry.title ? (
           <Text fw={600} lineClamp={1} size="sm">
             {entry.title}
           </Text>
-        )}
+        ) : null}
         {companyNameElement}
-        {dateRange && (
+        {dateRange ? (
           <Text c="dimmed" size="xs">
             {dateRange}
             {duration ? ` (${duration})` : ""}
           </Text>
-        )}
-        {(Boolean(entry.employmentType) || Boolean(entry.location)) && (
+        ) : null}
+        {entry.employmentType || entry.location ? (
           <Text c="dimmed" size="xs">
             {[entry.employmentType, entry.location].filter(Boolean).join(" · ")}
           </Text>
-        )}
-        {entry.description && (
+        ) : null}
+        {entry.description ? (
           <Spoiler hideLabel={t("ShowLess")} maxHeight={60} mt={4} showLabel={t("ShowMore")}>
             <Text c="dimmed" size="xs" style={{ whiteSpace: "pre-wrap" }}>
               {entry.description}
             </Text>
           </Spoiler>
-        )}
+        ) : null}
       </Stack>
     </Group>
   );

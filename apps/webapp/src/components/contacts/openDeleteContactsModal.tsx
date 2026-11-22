@@ -20,15 +20,6 @@ import {
 } from "@/lib/query/hooks/useContactMutations";
 import { StandardConfirmModalBody } from "../modals/StandardConfirmModalBody";
 
-export interface OpenDeleteContactsModalParams {
-  /** Explicit IDs when not using filter mode. */
-  contactIds: string[];
-  /** When set, the API receives a filter-based payload instead of explicit IDs. */
-  filterPayload?: { filter: ContactsFilter; excludeIds?: string[] };
-  /** Called after the delete succeeds. `deletedCount` is provided when the API returns it. */
-  onDeleted?: (deletedCount?: number) => Promise<void> | void;
-}
-
 interface DeleteContactsModalTitleProps {
   contactCount: number;
   isFilterMode: boolean;
@@ -122,33 +113,6 @@ function DeleteContactsModalBody({
   );
 }
 
-export function openDeleteContactsModal({
-  contactIds,
-  filterPayload,
-  onDeleted,
-}: OpenDeleteContactsModalParams) {
-  const isFilterMode = !!filterPayload;
-  if (!isFilterMode && contactIds.length === 0) {
-    return;
-  }
-
-  const modalId = createModalId("delete-contacts");
-
-  modals.open({
-    children: (
-      <DeleteContactsModalBodyWrapper
-        contactIds={contactIds}
-        filterPayload={filterPayload}
-        isFilterMode={isFilterMode}
-        modalId={modalId}
-        onDeleted={onDeleted}
-      />
-    ),
-    modalId,
-    title: <DeleteContactsModalTitleWrapper contactIds={contactIds} isFilterMode={isFilterMode} />,
-  });
-}
-
 function DeleteContactsModalTitleWrapper({
   contactIds,
   isFilterMode,
@@ -182,4 +146,40 @@ function DeleteContactsModalBodyWrapper({
       onDeleted={onDeleted}
     />
   );
+}
+
+export interface OpenDeleteContactsModalParams {
+  /** Explicit IDs when not using filter mode. */
+  contactIds: string[];
+  /** When set, the API receives a filter-based payload instead of explicit IDs. */
+  filterPayload?: { filter: ContactsFilter; excludeIds?: string[] };
+  /** Called after the delete succeeds. `deletedCount` is provided when the API returns it. */
+  onDeleted?: (deletedCount?: number) => Promise<void> | void;
+}
+
+export function openDeleteContactsModal({
+  contactIds,
+  filterPayload,
+  onDeleted,
+}: OpenDeleteContactsModalParams) {
+  const isFilterMode = !!filterPayload;
+  if (!isFilterMode && contactIds.length === 0) {
+    return;
+  }
+
+  const modalId = createModalId("delete-contacts");
+
+  modals.open({
+    children: (
+      <DeleteContactsModalBodyWrapper
+        contactIds={contactIds}
+        filterPayload={filterPayload}
+        isFilterMode={isFilterMode}
+        modalId={modalId}
+        onDeleted={onDeleted}
+      />
+    ),
+    modalId,
+    title: <DeleteContactsModalTitleWrapper contactIds={contactIds} isFilterMode={isFilterMode} />,
+  });
 }

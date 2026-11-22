@@ -9,9 +9,32 @@ import { pollUntil } from "../pollUntil";
 import type { EducationEntry } from "./education";
 import { parseDateRange, type WorkEntry } from "./workExperience";
 
+const HEX_ID_SEGMENT_RE = /^[a-f0-9]{8,12}$/i;
+const TRAILING_LOGO_RE = /\s+logo\s*$/i;
+const YEAR_TOKEN_RE = /\b(19[7-9]\d|20[0-3]\d)\b/;
+const DASH_SEPARATOR_RE = /[–—·-]/;
+const YEAR_ONLY_LINE_RE = /^\s*(19|20)\d{2}\s*$/;
+const LINKEDIN_SCHOOL_URL_RE = /linkedin\.com\/school\/([^/?#]+)/i;
+const LINKEDIN_ORG_URL_RE = /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i;
+const ANY_WHITESPACE_CHAR_RE = /\s/;
+const SDUI_PROFILE_REF_RE =
+  /ref(ACo[A-Za-z0-9_-]+?)(?:Topcard|About|Experience|Education|Featured|Services|$)/;
+const FSD_PROFILE_URN_RE = /urn:li:fsd_profile:(ACo[A-Za-z0-9_-]+)/;
+const ACO_ID_RE = /(ACo[A-Za-z0-9_-]{20,})/;
+const DIGIT_CHAR_RE = /\d/;
+const TRAILING_HEX_SUFFIX_RE = /-[a-f0-9]{8,12}$/i;
+const WHITESPACE_RE = /\s+/;
+const COMMA_CHAR_RE = /,/;
+const PROFILE_PHOTO_URL_RE = /profile|displayphoto|shrink/i;
+const BULLET_META_LINE_RE = /^[\w\s]+•[\w\s]+•/;
+const SHOW_ALL_EDUCATIONS_RE = /show all \d+ educations/i;
+const MONTH_YEAR_RANGE_RE =
+  /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{4}\s*[–—-]\s*(?:Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{0,4}/i;
+const LEADING_COMMA_RE = /^,\s*/;
+const FOUR_DIGIT_YEAR_RE = /\d{4}/;
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-export interface SduiIdentity {
+interface SduiIdentity {
   firstName: string;
   fullName: string;
   headline?: string;
@@ -42,7 +65,7 @@ const SOCIAL_PROOF_LINE = /followers|connections|sledujících|spojení|sledují
 /** Shortest text taken as a profile headline; shorter lines are badges or separators. */
 const MIN_HEADLINE_LENGTH = 3;
 /** Shortest text taken as an About section body. */
-export const MIN_ABOUT_TEXT_LENGTH = 20;
+const MIN_ABOUT_TEXT_LENGTH = 20;
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -55,13 +78,11 @@ function text(el: Element | null | undefined): string {
 }
 
 function stripLogo(s: string): string {
-  return s.replace(/\s+logo\s*$/i, "").trim();
+  return s.replace(TRAILING_LOGO_RE, "").trim();
 }
 
 function isDateText(t: string): boolean {
-  return (
-    /\b(19[7-9]\d|20[0-3]\d)\b/.test(t) && (/[–—·-]/.test(t) || /^\s*(19|20)\d{2}\s*$/.test(t))
-  );
+  return YEAR_TOKEN_RE.test(t) && (DASH_SEPARATOR_RE.test(t) || YEAR_ONLY_LINE_RE.test(t));
 }
 
 function orgId(
@@ -71,10 +92,7 @@ function orgId(
   if (!href) {
     return undefined;
   }
-  const re =
-    kind === "school"
-      ? /linkedin\.com\/school\/([^/?#]+)/i
-      : /linkedin\.com\/(?:company|school|organization|showcase)\/([^/?#]+)/i;
+  const re = kind === "school" ? LINKEDIN_SCHOOL_URL_RE : LINKEDIN_ORG_URL_RE;
   return href.match(re)?.[1]?.toLowerCase();
 }
 
@@ -98,11 +116,11 @@ function leafTexts(root: Element): string[] {
 
 // ─── Detection ───────────────────────────────────────────────────────────────
 
-export function isSduiProfile(doc?: Document): boolean {
+function isSduiProfile(doc?: Document): boolean {
   return !!getDoc(doc).querySelector('[componentkey*="Topcard"]');
 }
 
-export function getTopcard(doc?: Document): Element | null {
+function getTopcard(doc?: Document): Element | null {
   const cards = [...getDoc(doc).querySelectorAll('[componentkey*="Topcard"]')];
   if (cards.length === 0) {
     return null;
@@ -113,7 +131,7 @@ export function getTopcard(doc?: Document): Element | null {
       text(card.querySelector("h1")) ||
       text(card.querySelector("h2")) ||
       text(card.querySelector('[data-anonymize="person-name"]'));
-    return Boolean(name && /\s/.test(name));
+    return Boolean(name && ANY_WHITESPACE_CHAR_RE.test(name));
   });
 
   return withPersonName ?? cards[0] ?? null;
@@ -124,24 +142,22 @@ export function getTopcard(doc?: Document): Element | null {
  * e.g. "…refACoAAABbCU8BZ1u7ldnivR0qeqOY0lnnhiyUDswTopcard"
  *   → urn:li:fsd_profile:ACoAAABbCU8BZ1u7ldnivR0qeqOY0lnnhiyUDsw
  */
-export function parseFsdProfileUrnFromComponentKey(key: string | null | undefined): string | null {
+function parseFsdProfileUrnFromComponentKey(key: string | null | undefined): string | null {
   if (!key) {
     return null;
   }
 
-  const withSuffix = key.match(
-    /ref(ACo[A-Za-z0-9_-]+?)(?:Topcard|About|Experience|Education|Featured|Services|$)/,
-  );
+  const withSuffix = key.match(SDUI_PROFILE_REF_RE);
   if (withSuffix?.[1]) {
     return `urn:li:fsd_profile:${withSuffix[1]}`;
   }
 
-  const embeddedUrn = key.match(/urn:li:fsd_profile:(ACo[A-Za-z0-9_-]+)/);
+  const embeddedUrn = key.match(FSD_PROFILE_URN_RE);
   if (embeddedUrn?.[1]) {
     return `urn:li:fsd_profile:${embeddedUrn[1]}`;
   }
 
-  const bareAco = key.match(/(ACo[A-Za-z0-9_-]{20,})/);
+  const bareAco = key.match(ACO_ID_RE);
   if (bareAco?.[1]) {
     return `urn:li:fsd_profile:${bareAco[1]}`;
   }
@@ -152,7 +168,7 @@ export function parseFsdProfileUrnFromComponentKey(key: string | null | undefine
 /**
  * Parses the fsd_profile URN from the topcard componentkey.
  */
-export function extractProfileUrnFromComponentKey(doc?: Document): string | null {
+function extractProfileUrnFromComponentKey(doc?: Document): string | null {
   const topcard = getTopcard(doc);
   return parseFsdProfileUrnFromComponentKey(topcard?.getAttribute("componentkey"));
 }
@@ -163,7 +179,7 @@ export function extractProfileUrnFromComponentKey(doc?: Document): string | null
  * True when `value` is a LinkedIn vanity slug (the URL handle), not a display name.
  * LinkedIn auto-handles look like `jakub-žemlička-50779a201`.
  */
-export function looksLikeLinkedInVanityHandle(value: string, handle?: string): boolean {
+function looksLikeLinkedInVanityHandle(value: string, handle?: string): boolean {
   const normalized = value.normalize("NFC").trim();
   if (!normalized) {
     return true;
@@ -171,16 +187,16 @@ export function looksLikeLinkedInVanityHandle(value: string, handle?: string): b
   if (handle && normalized.toLowerCase() === handle.normalize("NFC").trim().toLowerCase()) {
     return true;
   }
-  if (/\s/.test(normalized)) {
+  if (ANY_WHITESPACE_CHAR_RE.test(normalized)) {
     return false;
   }
   const lastSegment = normalized.split("-").pop() ?? "";
-  return /^[a-f0-9]{8,12}$/i.test(lastSegment) && /\d/.test(lastSegment);
+  return HEX_ID_SEGMENT_RE.test(lastSegment) && DIGIT_CHAR_RE.test(lastSegment);
 }
 
 function titleCaseHandleToken(token: string): string {
   const graphemes = Array.from(new Intl.Segmenter().segment(token), (segment) => segment.segment);
-  const first = graphemes[0];
+  const [first] = graphemes;
   if (!first) {
     return token;
   }
@@ -191,7 +207,7 @@ function titleCaseHandleToken(token: string): string {
  * Last-resort name from a LinkedIn vanity handle when DOM/Voyager identity is missing.
  * `jakub-žemlička-50779a201` → Jakub / Žemlička.
  */
-export function displayNameFromLinkedInHandle(handle: string): {
+function displayNameFromLinkedInHandle(handle: string): {
   firstName: string;
   lastName?: string;
   middleName?: string;
@@ -204,13 +220,15 @@ export function displayNameFromLinkedInHandle(handle: string): {
   }
   const stripped = decoded
     .normalize("NFC")
-    .replace(/-[a-f0-9]{8,12}$/i, (suffix) => (/\d/.test(suffix.slice(1)) ? "" : suffix));
+    .replace(TRAILING_HEX_SUFFIX_RE, (suffix) =>
+      DIGIT_CHAR_RE.test(suffix.slice(1)) ? "" : suffix,
+    );
   const tokens = stripped.split("-").filter(Boolean);
   if (tokens.length < 2) {
     return null;
   }
   const titled = tokens.map(titleCaseHandleToken);
-  const firstName = titled[0];
+  const [firstName] = titled;
   const lastName = titled.at(-1);
   if (!firstName) {
     return null;
@@ -222,12 +240,12 @@ export function displayNameFromLinkedInHandle(handle: string): {
   };
 }
 
-export function splitName(fullName: string): {
+function splitName(fullName: string): {
   firstName: string;
   middleName?: string;
   lastName?: string;
 } {
-  const parts = fullName.split(/\s+/).filter(Boolean);
+  const parts = fullName.split(WHITESPACE_RE).filter(Boolean);
   if (parts.length === 0) {
     return { firstName: "" };
   }
@@ -243,7 +261,7 @@ export function splitName(fullName: string): {
   };
 }
 
-export function extractSduiIdentity(doc?: Document, handle?: string): SduiIdentity | null {
+function extractSduiIdentity(doc?: Document, handle?: string): SduiIdentity | null {
   const topcard = getTopcard(doc);
   if (!topcard) {
     return null;
@@ -267,7 +285,7 @@ export function extractSduiIdentity(doc?: Document, handle?: string): SduiIdenti
   const headline = paragraphs.find(
     (t) =>
       t !== fullName &&
-      !/,/.test(t) &&
+      !COMMA_CHAR_RE.test(t) &&
       !SOCIAL_PROOF_LINE.test(t) &&
       !MUTUAL_CONNECTIONS.test(t) &&
       t.length > MIN_HEADLINE_LENGTH,
@@ -277,7 +295,7 @@ export function extractSduiIdentity(doc?: Document, handle?: string): SduiIdenti
     topcard.querySelector<HTMLImageElement>('img[src*="profile-displayphoto"]')?.src ??
     [...topcard.querySelectorAll<HTMLImageElement>("img")]
       .map((i) => i.src)
-      .find((s) => /profile|displayphoto|shrink/i.test(s));
+      .find((s) => PROFILE_PHOTO_URL_RE.test(s));
 
   const { firstName, middleName, lastName } = splitName(fullName);
   if (!firstName || looksLikeLinkedInVanityHandle(firstName, handle)) {
@@ -296,7 +314,7 @@ export function extractSduiIdentity(doc?: Document, handle?: string): SduiIdenti
 
 // ─── Bio ─────────────────────────────────────────────────────────────────────
 
-export function extractSduiBio(doc?: Document): string | undefined {
+function extractSduiBio(doc?: Document): string | undefined {
   try {
     const d = getDoc(doc);
     const aboutCard =
@@ -316,7 +334,7 @@ export function extractSduiBio(doc?: Document): string | undefined {
     const candidates = [...aboutCard.querySelectorAll("p, span")]
       .filter((el) => el.children.length === 0)
       .map((el) => text(el))
-      .filter((t) => t.length > MIN_ABOUT_TEXT_LENGTH && !/^[\w\s]+•[\w\s]+•/.test(t))
+      .filter((t) => t.length > MIN_ABOUT_TEXT_LENGTH && !BULLET_META_LINE_RE.test(t))
       .sort((a, b) => b.length - a.length);
 
     return candidates[0] || undefined;
@@ -347,7 +365,7 @@ function getEducationSection(doc?: Document): Element | null {
   );
 }
 
-export function extractSduiWorkHistory(doc?: Document): WorkEntry[] {
+function extractSduiWorkHistory(doc?: Document): WorkEntry[] {
   const expSection = getExperienceSection(doc);
   if (!expSection) {
     return [];
@@ -404,7 +422,7 @@ export function extractSduiWorkHistory(doc?: Document): WorkEntry[] {
 
 // ─── Education ───────────────────────────────────────────────────────────────
 
-export function extractSduiEducation(doc?: Document): EducationEntry[] {
+function extractSduiEducation(doc?: Document): EducationEntry[] {
   const eduSection = getEducationSection(doc);
   if (!eduSection) {
     return [];
@@ -415,7 +433,7 @@ export function extractSduiEducation(doc?: Document): EducationEntry[] {
 
   for (const anchor of eduSection.querySelectorAll<HTMLAnchorElement>('a[href*="/school/"]')) {
     const line = text(anchor);
-    if (!line || /show all \d+ educations/i.test(line)) {
+    if (!line || SHOW_ALL_EDUCATIONS_RE.test(line)) {
       continue;
     }
 
@@ -435,20 +453,19 @@ export function extractSduiEducation(doc?: Document): EducationEntry[] {
       logoEl?.getAttribute("alt") ?? logoEl?.getAttribute("aria-label") ?? "",
     );
 
-    const dateMatch = line.match(
-      /((?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{4}\s*[–—-]\s*(?:Present|(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+)?\d{0,4}/i,
-    );
+    const dateMatch = line.match(MONTH_YEAR_RANGE_RE);
     const dateText = dateMatch?.[0] ?? "";
     const beforeDates = dateText ? line.slice(0, line.indexOf(dateText)).trim() : line;
     const degree =
       schoolFromLogo && beforeDates.startsWith(schoolFromLogo)
-        ? beforeDates.slice(schoolFromLogo.length).trim().replace(/^,\s*/, "") || undefined
+        ? beforeDates.slice(schoolFromLogo.length).trim().replace(LEADING_COMMA_RE, "") || undefined
         : undefined;
 
     const logoImg = logoEl instanceof HTMLImageElement ? logoEl : null;
 
     entries.push({
-      schoolName: schoolFromLogo || (beforeDates.split(/\d{4}/)[0]?.trim() ?? "") || line,
+      schoolName:
+        schoolFromLogo || (beforeDates.split(FOUR_DIGIT_YEAR_RE)[0]?.trim() ?? "") || line,
       ...(schoolLinkedinId ? { schoolLinkedinId } : {}),
       ...(logoImg?.src ? { schoolLogoUrl: logoImg.src } : {}),
       ...(degree ? { degree } : {}),
@@ -466,10 +483,7 @@ export function extractSduiEducation(doc?: Document): EducationEntry[] {
  * LinkedIn lazy-loads Experience/Education on scroll.
  * Do not use requestAnimationFrame: inactive enrich tabs pause rAF forever.
  */
-export async function ensureProfileSectionsLoaded(
-  doc?: Document,
-  timeoutMs = 8000,
-): Promise<boolean> {
+async function ensureProfileSectionsLoaded(doc?: Document, timeoutMs = 8000): Promise<boolean> {
   const d = getDoc(doc);
   const selector =
     '[componentkey*="ExperienceTopLevelSection"], section:has(#experience), #experience';
@@ -482,3 +496,20 @@ export async function ensureProfileSectionsLoaded(
     },
   );
 }
+
+export type { SduiIdentity };
+export {
+  displayNameFromLinkedInHandle,
+  ensureProfileSectionsLoaded,
+  extractProfileUrnFromComponentKey,
+  extractSduiBio,
+  extractSduiEducation,
+  extractSduiIdentity,
+  extractSduiWorkHistory,
+  getTopcard,
+  isSduiProfile,
+  looksLikeLinkedInVanityHandle,
+  MIN_ABOUT_TEXT_LENGTH,
+  parseFsdProfileUrnFromComponentKey,
+  splitName,
+};

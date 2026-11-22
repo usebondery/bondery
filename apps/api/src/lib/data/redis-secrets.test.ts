@@ -15,6 +15,10 @@ import {
   redisSecretPaths,
 } from "./redis-secrets.js";
 
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/i;
+const BONDERY_BETA_REDIS_PATTERN = /bondery-beta-redis/;
+const EXPIRES_SOON_PATTERN = /expires soon/;
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 function quietLog(): (message: string) => void {
@@ -93,7 +97,7 @@ describe("redis secrets", () => {
     await handshake(certificate.certificatePem, certificate.privateKeyPem, "redis");
     await assert.rejects(
       handshake(certificate.certificatePem, certificate.privateKeyPem, "other-redis"),
-      /altnames|Hostname/i,
+      ALTNAMES_HOSTNAME_PATTERN,
     );
   });
 
@@ -113,12 +117,12 @@ describe("redis secrets", () => {
         certificate.certificatePem,
         redisCertificateHostnames("bondery-beta"),
       ) ?? "",
-      /bondery-beta-redis/,
+      BONDERY_BETA_REDIS_PATTERN,
     );
     const nearExpiry = new Date(Date.now() + 3640 * DAY_MS);
     assert.match(
       certificateReplacementReason(certificate.certificatePem, hostnames, nearExpiry) ?? "",
-      /expires soon/,
+      EXPIRES_SOON_PATTERN,
     );
   });
 

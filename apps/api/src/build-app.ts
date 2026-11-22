@@ -40,6 +40,8 @@ import { swaggerOpenApiConfig } from "./openapi/swagger-config.js";
 import { registerAllRoutes } from "./routes/register-all.js";
 import { captureServerException } from "./services/analytics/capture-server-exception.js";
 
+const LEADING_SLASH_PATTERN = /^\//;
+
 const require = createRequire(import.meta.url);
 
 function authLogSerializers() {
@@ -112,7 +114,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastif
   fastify.setSchemaErrorFormatter((errors, dataVar) => {
     const first = errors[0];
     const field = first?.instancePath
-      ? first.instancePath.replace(/^\//, "").replace(/\//g, ".")
+      ? first.instancePath.replace(LEADING_SLASH_PATTERN, "").replace(/\//g, ".")
       : dataVar;
     const message = first?.message ?? "Invalid value";
     return new Error(`${field} ${message}`);
@@ -154,7 +156,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastif
     crossOriginOpenerPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
     strictTransportSecurity:
-      environment === "production" ? { includeSubDomains: true, maxAge: 31536000 } : false,
+      environment === "production" ? { includeSubDomains: true, maxAge: 31_536_000 } : false,
   });
 
   /**

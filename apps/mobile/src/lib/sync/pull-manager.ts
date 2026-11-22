@@ -1,4 +1,5 @@
 import { buildApiErrorFromResponse } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SyncBootstrapResponse, SyncPullResponse, SyncTableKey } from "@bondery/schemas/sync";
 import { mobileFetch } from "../api/transport";
@@ -30,7 +31,7 @@ import { refreshSqliteViews } from "./refresh-sqlite-views";
 import { logSyncPullError, logSyncPullResponse } from "./sync-logger";
 
 type SyncSubscriber = (tables: readonly SyncTableKey[]) => void;
-export type SyncPullReason =
+type SyncPullReason =
   | "wake"
   | "reconnect"
   | "safety"
@@ -55,19 +56,19 @@ let pullPending = false;
 let wakeDebounceTimer: ReturnType<typeof setTimeout> | null = null;
 let lifecycleRequest = 0;
 
-export function subscribeSyncUpdates(listener: SyncSubscriber): () => void {
+function subscribeSyncUpdates(listener: SyncSubscriber): () => void {
   subscribers.add(listener);
   return () => subscribers.delete(listener);
 }
 
-export function notifySyncSubscribers(tables: readonly SyncTableKey[]): void {
+function notifySyncSubscribers(tables: readonly SyncTableKey[]): void {
   refreshSqliteViews(tables);
   for (const listener of subscribers) {
     listener(tables);
   }
 }
 
-export function getHasInitialSyncSnapshot(): boolean {
+function getHasInitialSyncSnapshot(): boolean {
   try {
     return getBootstrapCompleted();
   } catch {
@@ -75,7 +76,7 @@ export function getHasInitialSyncSnapshot(): boolean {
   }
 }
 
-export function resetInitialSyncSnapshot(): void {
+function resetInitialSyncSnapshot(): void {
   try {
     setBootstrapCompleted(false);
   } catch {
@@ -83,7 +84,7 @@ export function resetInitialSyncSnapshot(): void {
   }
 }
 
-export function setSyncPullMode(mode: SyncPullMode): void {
+function setSyncPullMode(mode: SyncPullMode): void {
   if (pullMode === mode) {
     return;
   }
@@ -99,7 +100,7 @@ export function setSyncPullMode(mode: SyncPullMode): void {
   }
 }
 
-export function onSyncWakeEvent(input: {
+function onSyncWakeEvent(input: {
   serverSequence: number;
   sourceDeviceId?: string;
   myDeviceId?: string;
@@ -121,15 +122,15 @@ export function onSyncWakeEvent(input: {
 
   wakeDebounceTimer = setTimeout(() => {
     wakeDebounceTimer = null;
-    void schedulePull({ reason: "wake" });
+    detachPromise(schedulePull({ reason: "wake" }));
   }, 50);
 }
 
-export function onSyncWakeReconnect(): void {
-  void schedulePull({ reason: "reconnect" });
+function onSyncWakeReconnect(): void {
+  detachPromise(schedulePull({ reason: "reconnect" }));
 }
 
-export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean> {
+function schedulePull(input: { reason: SyncPullReason }): Promise<boolean> {
   const generation = syncSessionGuard.capture();
   if (generation === null) {
     return Promise.resolve(false);
@@ -144,7 +145,7 @@ export function schedulePull(input: { reason: SyncPullReason }): Promise<boolean
     pullInFlight = null;
     if (pullPending && syncSessionGuard.isCurrent(generation)) {
       pullPending = false;
-      void schedulePull({ reason: input.reason });
+      detachPromise(schedulePull({ reason: input.reason }));
     }
   });
 
@@ -263,7 +264,7 @@ async function runBootstrapSync(
   return true;
 }
 
-export function bootstrapSync(
+function bootstrapSync(
   signal?: AbortSignal,
   generation: PullSessionGeneration | null = syncSessionGuard.capture(),
 ): Promise<boolean> {
@@ -330,7 +331,7 @@ async function runPullOnce(
   return true;
 }
 
-export function pullOnce(
+function pullOnce(
   signal?: AbortSignal,
   reason: SyncPullReason = "manual",
   generation: PullSessionGeneration | null = syncSessionGuard.capture(),
@@ -351,7 +352,7 @@ async function pullLoop(
   controller: AbortController,
   generation: PullSessionGeneration,
 ): Promise<void> {
-  const signal = controller.signal;
+  const { signal } = controller;
 
   while (isLongPollLoopActive(signal, generation)) {
     try {
@@ -375,7 +376,7 @@ async function pullLoop(
       }
 
       logSyncPullError(error);
-      await delay(5_000, signal);
+      await delay(5000, signal);
     }
   }
 }
@@ -401,7 +402,7 @@ function startPullLoop(
 function startSafetyTimer(): void {
   stopSafetyTimer();
   safetyTimer = setInterval(() => {
-    void schedulePull({ reason: "safety" });
+    detachPromise(schedulePull({ reason: "safety" }));
   }, SAFETY_PULL_INTERVAL_MS);
 }
 
@@ -412,7 +413,7 @@ function stopSafetyTimer(): void {
   }
 }
 
-export async function startPullSync(): Promise<void> {
+async function startPullSync(): Promise<void> {
   const request = ++lifecycleRequest;
   await stopPullRuntime();
   if (request !== lifecycleRequest) {
@@ -420,7 +421,7 @@ export async function startPullSync(): Promise<void> {
   }
 
   pullAbort = new AbortController();
-  const signal = pullAbort.signal;
+  const { signal } = pullAbort;
   const generation = syncSessionGuard.activate();
   getSyncDatabase();
 
@@ -462,7 +463,7 @@ export async function startPullSync(): Promise<void> {
   }
 }
 
-export async function stopPullSync(): Promise<void> {
+async function stopPullSync(): Promise<void> {
   lifecycleRequest += 1;
   await stopPullRuntime();
 }
@@ -491,10 +492,30 @@ async function stopPullRuntime(): Promise<void> {
   }
 }
 
-export function resumePullSync(): void {
-  void startPullSync();
+function resumePullSync(): void {
+  detachPromise(startPullSync());
 }
 
-export const startAllShapeSync = startPullSync;
-export const stopAllShapeSync = stopPullSync;
-export const resumeAllShapeSync = resumePullSync;
+const startAllShapeSync = startPullSync;
+const stopAllShapeSync = stopPullSync;
+const resumeAllShapeSync = resumePullSync;
+
+export type { SyncPullReason };
+export {
+  bootstrapSync,
+  getHasInitialSyncSnapshot,
+  notifySyncSubscribers,
+  onSyncWakeEvent,
+  onSyncWakeReconnect,
+  pullOnce,
+  resetInitialSyncSnapshot,
+  resumeAllShapeSync,
+  resumePullSync,
+  schedulePull,
+  setSyncPullMode,
+  startAllShapeSync,
+  startPullSync,
+  stopAllShapeSync,
+  stopPullSync,
+  subscribeSyncUpdates,
+};

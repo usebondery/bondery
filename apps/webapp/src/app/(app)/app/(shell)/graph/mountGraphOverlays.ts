@@ -3,6 +3,17 @@ import { type Selection, type SimulationLinkDatum, type SimulationNodeDatum, sel
 import { eachSelected } from "./eachSelected";
 import { groupCaption, groupCircle, groupColor } from "./graphHull";
 
+type PointNode = SimulationNodeDatum & { id: string };
+
+type Viewport = Selection<SVGGElement, unknown, null, undefined>;
+
+function linkCoord(endpoint: SpokeSimLink["source"], axis: "x" | "y"): number {
+  if (typeof endpoint === "object" && endpoint) {
+    return endpoint[axis] ?? 0;
+  }
+  return 0;
+}
+
 export const COMPANY_HUB_COLOR = "var(--mantine-color-indigo-6)";
 export const SCHOOL_HUB_COLOR = "var(--mantine-color-grape-6)";
 
@@ -13,23 +24,12 @@ export type HubSimNode = SimulationNodeDatum & {
   nodeKind: "hub";
 };
 
-type PointNode = SimulationNodeDatum & { id: string };
-
 export type SpokeSimLink = SimulationLinkDatum<PointNode> & {
   color: string;
   hubId: string;
   key: string;
   personId: string;
 };
-
-type Viewport = Selection<SVGGElement, unknown, null, undefined>;
-
-function linkCoord(endpoint: SpokeSimLink["source"], axis: "x" | "y"): number {
-  if (typeof endpoint === "object" && endpoint) {
-    return endpoint[axis] ?? 0;
-  }
-  return 0;
-}
 
 /**
  * Group circles and spokes sit behind relationship lines.

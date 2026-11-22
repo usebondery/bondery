@@ -31,7 +31,7 @@ const SAMPLE_EXPORT_FILES = [
   ...BONDERY_EXPORT_FILE_ENTRIES.map((entry) => entry.name),
 ];
 
-export type ProvisionReviewerParams = {
+type ProvisionReviewerParams = {
   email: string;
   label: string;
   days?: number;
@@ -39,7 +39,7 @@ export type ProvisionReviewerParams = {
   createdBy?: string;
 };
 
-export type ProvisionReviewerResult = {
+type ProvisionReviewerResult = {
   expiresAt: Date;
   label: string;
   reviewerAccessId: string;
@@ -72,6 +72,8 @@ async function buildSampleExportZip(): Promise<Buffer> {
   }
   return zip.toBuffer();
 }
+
+export type { ProvisionReviewerParams, ProvisionReviewerResult };
 
 export async function provisionReviewerAccount(
   params: ProvisionReviewerParams,

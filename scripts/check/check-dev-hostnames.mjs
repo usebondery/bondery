@@ -21,6 +21,9 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const ALLOWEDDEVORIGINS_RE = /allowedDevOrigins:\s*\[([\s\S]*?)\]/;
+const ENV_EXAMPLE_RE = /\.env.*\.example$/;
+
 const check = createCheck("check-dev-hostnames");
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
@@ -100,7 +103,7 @@ function checkAllowedDevOrigins() {
       check.add(`apps/${app}/next.config.ts is missing.`);
       continue;
     }
-    const match = source.match(/allowedDevOrigins:\s*\[([\s\S]*?)\]/);
+    const match = source.match(ALLOWEDDEVORIGINS_RE);
     if (!match) {
       check.add(
         `${repoPath(filePath)} has no allowedDevOrigins, so the proxy rejects every dev Host header. Add allowedDevOrigins with ${EXPECTED_HOSTS.join(", ")}.`,
@@ -192,7 +195,7 @@ function checkEnvExamples() {
         walk(fullPath);
         continue;
       }
-      if (!/\.env.*\.example$/.test(entry)) {
+      if (!ENV_EXAMPLE_RE.test(entry)) {
         continue;
       }
       const source = read(fullPath);

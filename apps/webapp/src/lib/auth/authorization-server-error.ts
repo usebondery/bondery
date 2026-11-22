@@ -16,17 +16,21 @@ const OAUTH_AUTHORIZATION_SERVER_ERROR_CODES = new Set([
   "unsupported_response_type",
 ]);
 
+export type NextSearchParamValue = string | string[] | undefined;
+
+export type NextSearchParams = {
+  error?: NextSearchParamValue;
+} & Record<string, NextSearchParamValue>;
+
 export function isOAuthAuthorizationServerError(code: string | null | undefined): boolean {
   return Boolean(code && OAUTH_AUTHORIZATION_SERVER_ERROR_CODES.has(code));
 }
 
-export function firstNextSearchParam(value: string | string[] | undefined): string | undefined {
+export function firstNextSearchParam(value: NextSearchParamValue): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
 
-export function searchStringFromNextParams(
-  params: Record<string, string | string[] | undefined>,
-): string {
+export function searchStringFromNextParams(params: NextSearchParams): string {
   const search = new URLSearchParams();
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined) {
@@ -44,9 +48,7 @@ export function searchStringFromNextParams(
   return encoded ? `?${encoded}` : "";
 }
 
-export function resolveAuthorizationServerErrorHref(
-  params: Record<string, string | string[] | undefined>,
-): string | null {
+export function resolveAuthorizationServerErrorHref(params: NextSearchParams): string | null {
   if (!isOAuthAuthorizationServerError(firstNextSearchParam(params.error))) {
     return null;
   }

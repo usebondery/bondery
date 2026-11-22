@@ -38,7 +38,7 @@ function menuPosition(anchor: LayoutRectangle & { windowWidth: number }) {
   return { left, top, width: menuWidth };
 }
 
-export function OverflowMenu({
+function OverflowMenu({
   items,
   accessibilityLabel,
   disabled = false,
@@ -202,3 +202,5 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
   },
 });
+
+export { OverflowMenu };

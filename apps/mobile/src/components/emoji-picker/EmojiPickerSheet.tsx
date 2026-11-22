@@ -1,10 +1,7 @@
 import { getRandomEmoji } from "@bondery/helpers/emoji";
 import { useEffect, useRef, useState } from "react";
 import { StyleSheet, Text } from "react-native";
-import {
-  useCommonTranslations,
-  useMobileEmojiPickerTranslations,
-} from "@/lib/i18n/generated/hooks";
+import { useMobileEmojiPickerTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../theme/tokens";
 import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
 import { Sheet } from "../ui/Sheet";
@@ -21,7 +18,7 @@ interface EmojiPickerSheetProps {
   value: string;
 }
 
-export function EmojiPickerSheet({
+function EmojiPickerSheet({
   open,
   value,
   searchPlaceholder,
@@ -31,7 +28,6 @@ export function EmojiPickerSheet({
   onSelect,
 }: EmojiPickerSheetProps) {
   const tMobileEmojiPicker = useMobileEmojiPickerTranslations();
-  const _t = useCommonTranslations();
   const [query, setQuery] = useState("");
   const gridRef = useRef<EmojiPickerGridRef | null>(null);
   const pendingScrollEmojiRef = useRef<string | null>(null);
@@ -130,3 +126,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export { EmojiPickerSheet };

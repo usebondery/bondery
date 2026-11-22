@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
     "jsx": "react-jsx",
-    "noEmit": true,
-    "tsBuildInfoFile": "./.cache/tsconfig.tsbuildinfo"
+    "noEmit": true
   },
   "extends": "../tsconfig.json"
 }

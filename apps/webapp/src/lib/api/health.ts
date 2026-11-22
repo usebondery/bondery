@@ -1,5 +1,7 @@
 import { clientApiFetch } from "@/lib/api/client";
 
+const HEALTH_REPORT_STATUSES = new Set<HealthReportStatus>(["ok", "degraded", "unhealthy"]);
+
 export type HealthReportStatus = "ok" | "degraded" | "unhealthy";
 
 export type ServiceProbeResult = {
@@ -36,8 +38,6 @@ export type HealthCheckResult =
   | { reachable: false; status: number | null };
 
 export type UserHealthStatus = "checking" | "offline" | "degraded" | "online";
-
-const HEALTH_REPORT_STATUSES = new Set<HealthReportStatus>(["ok", "degraded", "unhealthy"]);
 
 /** Returns a parsed readiness summary for the client, or null when the body is not a /health/ready payload. */
 export function parseHealthReport(body: unknown): ClientHealthReport | null {

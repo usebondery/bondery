@@ -7,11 +7,11 @@ import {
 import { serializeHref } from "./serializeHref";
 import type { AppNavigateMode, AppNavigateOptions, NavigationDropReason } from "./types";
 
-export const NAVIGATION_DEDUPE_MS = 300;
+const NAVIGATION_DEDUPE_MS = 300;
 
-export type NavigationDecision = { allow: true } | { allow: false; reason: NavigationDropReason };
+type NavigationDecision = { allow: true } | { allow: false; reason: NavigationDropReason };
 
-export function evaluateNavigationRequest(
+function evaluateNavigationRequest(
   key: string,
   mode: AppNavigateMode,
   respectTransitionLock: boolean,
@@ -66,7 +66,7 @@ function invokeRouter(
 /**
  * Runs a navigation request through the gate and invokes the Expo router when allowed.
  */
-export function runAppNavigation(
+function runAppNavigation(
   router: AppRouter,
   options: AppNavigateOptions,
   now = Date.now(),
@@ -90,3 +90,6 @@ export function runAppNavigation(
   invokeRouter(router, options.href, mode);
   return "executed";
 }
+
+export type { NavigationDecision };
+export { evaluateNavigationRequest, NAVIGATION_DEDUPE_MS, runAppNavigation };

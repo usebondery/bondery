@@ -86,8 +86,8 @@ describe("resolveWebAuthnRp", () => {
   });
 
   it("does not use BONDERY_PUBLIC_API_URL even when it is set", () => {
-    const previous = process.env.BONDERY_PUBLIC_API_URL;
-    process.env.BONDERY_PUBLIC_API_URL = "https://api.usebondery.com";
+    const previous = process.env["BONDERY_PUBLIC_API_URL"];
+    process.env["BONDERY_PUBLIC_API_URL"] = "https://api.usebondery.com";
     try {
       const result = resolveWebAuthnRp({ webappUrl: "https://app.usebondery.com" });
       assert.deepEqual(result, {
@@ -97,9 +97,9 @@ describe("resolveWebAuthnRp", () => {
       });
     } finally {
       if (previous === undefined) {
-        delete process.env.BONDERY_PUBLIC_API_URL;
+        delete process.env["BONDERY_PUBLIC_API_URL"];
       } else {
-        process.env.BONDERY_PUBLIC_API_URL = previous;
+        process.env["BONDERY_PUBLIC_API_URL"] = previous;
       }
     }
   });
@@ -114,8 +114,8 @@ describe("resolveWebAuthnRp", () => {
   });
 
   it("never reads BONDERY_PUBLIC_API_URL when the webapp origin is localhost", () => {
-    const previous = process.env.BONDERY_PUBLIC_API_URL;
-    process.env.BONDERY_PUBLIC_API_URL = "https://api.usebondery.com";
+    const previous = process.env["BONDERY_PUBLIC_API_URL"];
+    process.env["BONDERY_PUBLIC_API_URL"] = "https://api.usebondery.com";
     try {
       const result = resolveWebAuthnRp({ webappUrl: "http://localhost:26632" });
       assert.deepEqual(result, {
@@ -125,9 +125,9 @@ describe("resolveWebAuthnRp", () => {
       });
     } finally {
       if (previous === undefined) {
-        delete process.env.BONDERY_PUBLIC_API_URL;
+        delete process.env["BONDERY_PUBLIC_API_URL"];
       } else {
-        process.env.BONDERY_PUBLIC_API_URL = previous;
+        process.env["BONDERY_PUBLIC_API_URL"] = previous;
       }
     }
   });

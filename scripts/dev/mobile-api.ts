@@ -27,6 +27,8 @@ import { DEV_PORTS } from "@bondery/schemas/constants/dev-ports";
 
 import { upsertEnvAssignments } from "../env/env-upsert.js";
 
+const PATTERN_5C2E24_RE = /\.$/;
+
 const log = createCliLogger("dev:mobile-api");
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const rootEnv = join(repoRoot, ".env.local");
@@ -65,7 +67,7 @@ function tailnetHostname(): string {
       `Tailscale is not connected (${status.BackendState ?? "unknown"}). Run: tailscale up`,
     );
   }
-  const hostname = status.Self?.DNSName?.replace(/\.$/, "");
+  const hostname = status.Self?.DNSName?.replace(PATTERN_5C2E24_RE, "");
   if (!hostname) {
     throw new Error("This machine has no MagicDNS name. Turn on MagicDNS for the tailnet.");
   }

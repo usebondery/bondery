@@ -1,9 +1,9 @@
 import { parseAndroidSha256CertFingerprints } from "./resolve-webauthn-origins.js";
 
+const APPLE_TEAM_ID_PATTERN = /^[A-Z0-9]{10}$/;
+
 /** Android application id and iOS bundle identifier for the Expo app. */
 export const MOBILE_APP_PACKAGE_ID = "com.usebondery.mobile";
-
-const APPLE_TEAM_ID_PATTERN = /^[A-Z0-9]{10}$/;
 
 export type AppleAppSiteAssociation = {
   applinks: {

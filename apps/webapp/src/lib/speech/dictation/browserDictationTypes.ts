@@ -1,3 +1,9 @@
+declare global {
+  interface Window {
+    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
+    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
+  }
+}
 /**
  * Local DOM declarations for the browser speech recognizer.
  *
@@ -52,11 +58,4 @@ export interface BrowserSpeechRecognition {
 
 export interface BrowserSpeechRecognitionConstructor {
   new (): BrowserSpeechRecognition;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition?: BrowserSpeechRecognitionConstructor;
-    webkitSpeechRecognition?: BrowserSpeechRecognitionConstructor;
-  }
 }

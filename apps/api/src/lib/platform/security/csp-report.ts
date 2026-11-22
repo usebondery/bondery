@@ -25,8 +25,9 @@ const RAW_URL_LENGTH_FACTOR = 4;
 const MAX_HOST_LENGTH = 253;
 /** Bound on the work one request can cause. */
 const MAX_VIOLATIONS = 20;
+const QUERY_OR_FRAGMENT_PATTERN = /[?#]/;
 
-export type CompactedCspViolation = {
+type CompactedCspViolation = {
   blockedOriginPath?: string;
   disposition?: string;
   documentPath?: string;
@@ -35,7 +36,7 @@ export type CompactedCspViolation = {
   sourceFile?: string;
 };
 
-export type CompactedCspReport = {
+type CompactedCspReport = {
   siteHost: string;
   violations: CompactedCspViolation[];
 };
@@ -61,7 +62,7 @@ function toPath(value: unknown): string | undefined {
     return new URL(raw).pathname.slice(0, MAX_PATH_LENGTH);
   } catch {
     // Not an absolute URL. Drop any query or fragment it carries.
-    return raw.split(/[?#]/)[0]?.slice(0, MAX_PATH_LENGTH);
+    return raw.split(QUERY_OR_FRAGMENT_PATTERN)[0]?.slice(0, MAX_PATH_LENGTH);
   }
 }
 
@@ -80,7 +81,7 @@ function toOriginAndPath(value: unknown): string | undefined {
     const url = new URL(raw);
     return `${url.origin}${url.pathname}`.slice(0, MAX_PATH_LENGTH);
   } catch {
-    return raw.split(/[?#]/)[0]?.slice(0, MAX_PATH_LENGTH);
+    return raw.split(QUERY_OR_FRAGMENT_PATTERN)[0]?.slice(0, MAX_PATH_LENGTH);
   }
 }
 
@@ -136,6 +137,8 @@ function prune(violation: CompactedCspViolation): CompactedCspViolation {
     Object.entries(violation).filter(([, value]) => value !== undefined),
   ) as CompactedCspViolation;
 }
+
+export type { CompactedCspReport, CompactedCspViolation };
 
 /**
  * Reads a report body in either supported shape.

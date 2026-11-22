@@ -3,8 +3,6 @@ import { verifyRedis } from "../data/redis.js";
 import { verifyObjectStorage } from "../storage/init-storage.js";
 import type { ServiceProbeResult } from "./types.js";
 
-export { probeSmtp } from "./probe-smtp.js";
-
 type ReadinessLike = {
   configured: boolean;
   error?: string;
@@ -28,6 +26,8 @@ function readinessToProbeResult(readiness: ReadinessLike): ServiceProbeResult {
     ok: readiness.ok,
   };
 }
+
+export { probeSmtp } from "./probe-smtp.js";
 
 /** Prisma ping against the app's primary Postgres database. */
 export async function probePostgres(): Promise<ServiceProbeResult> {

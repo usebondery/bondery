@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { afterEach, describe, it } from "node:test";
 
+import { detachPromise } from "@bondery/helpers/async";
+
 import { probeSmtp } from "../lib/health/probe-smtp.js";
 import {
   classifySmtpError,
@@ -13,6 +15,10 @@ import {
   shutdownEmailTransporter,
   verifyEmailTransport,
 } from "../lib/notifications/transporter.js";
+
+const BONDERY_PRIVATE_EMAIL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_EMAIL_\* must be set/;
+const SMTP_VERIFY_FAILED_PATTERN = /SMTP verify failed/;
+const PNPM_RUN_START_MAILPIT_PATTERN = /pnpm run start:mailpit/;
 
 const baseConfig = {
   fromAddress: "robot@usebondery.com",
@@ -109,13 +115,13 @@ describe("emailTransportOptions", () => {
     const options = emailTransportOptions({
       ...baseConfig,
       host: "127.0.0.1",
-      port: 26640,
+      port: 26_640,
     });
 
     assert.equal(options.secure, false);
     assert.equal(options.requireTLS, false);
     assert.equal(options.ignoreTLS, true);
-    assert.equal(options.port, 26640);
+    assert.equal(options.port, 26_640);
   });
 
   it("keeps STARTTLS for loopback host in production", () => {
@@ -149,7 +155,7 @@ describe("email transporter singleton", () => {
   const snapshot = snapshotEmailEnv();
 
   afterEach(() => {
-    void shutdownEmailTransporter();
+    detachPromise(shutdownEmailTransporter());
     resetEmailReadinessForTests();
     restoreEmailEnv(snapshot);
   });
@@ -169,7 +175,7 @@ describe("email transport readiness", () => {
   const snapshot = snapshotEmailEnv();
 
   afterEach(() => {
-    void shutdownEmailTransporter();
+    detachPromise(shutdownEmailTransporter());
     resetEmailReadinessForTests();
     restoreEmailEnv(snapshot);
   });
@@ -191,7 +197,7 @@ describe("email transport readiness", () => {
     clearEmailEnv();
     resetEmailTransporterForTests();
 
-    await assert.rejects(() => initEmailTransport(), /BONDERY_PRIVATE_EMAIL_\* must be set/);
+    await assert.rejects(() => initEmailTransport(), BONDERY_PRIVATE_EMAIL_MUST_BE_SET_PATTERN);
   });
 
   it("initEmailTransport skips live verify in test environment", async () => {
@@ -264,7 +270,7 @@ describe("email transport readiness", () => {
       throw new Error("connection refused");
     };
 
-    await assert.rejects(() => initEmailTransport(), /SMTP verify failed/);
+    await assert.rejects(() => initEmailTransport(), SMTP_VERIFY_FAILED_PATTERN);
   });
 
   it("initEmailTransport throws in development when SMTP host is not loopback", async () => {
@@ -272,7 +278,7 @@ describe("email transport readiness", () => {
     setConfiguredEmailEnv();
     resetEmailTransporterForTests();
 
-    await assert.rejects(() => initEmailTransport(), /pnpm run start:mailpit/);
+    await assert.rejects(() => initEmailTransport(), PNPM_RUN_START_MAILPIT_PATTERN);
   });
 
   it("initEmailTransport does not require loopback in production", async () => {
@@ -294,7 +300,7 @@ describe("probeSmtp", () => {
   const snapshot = snapshotEmailEnv();
 
   afterEach(() => {
-    void shutdownEmailTransporter();
+    detachPromise(shutdownEmailTransporter());
     resetEmailReadinessForTests();
     restoreEmailEnv(snapshot);
   });

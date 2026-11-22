@@ -82,7 +82,7 @@ export function NavLinkItem({
       >
         <Icon size={20} stroke={1.5} />
       </Indicator>
-      {!collapsed && (
+      {!collapsed ? (
         <>
           <Text
             c={active ? "white" : dimLabel ? "dimmed" : undefined}
@@ -92,13 +92,13 @@ export function NavLinkItem({
           >
             {label}
           </Text>
-          {rightSection && (
+          {rightSection ? (
             <div style={{ alignItems: "center", display: "flex", flexShrink: 0, lineHeight: 1 }}>
               {rightSection}
             </div>
-          )}
+          ) : null}
         </>
-      )}
+      ) : null}
     </>
   );
 

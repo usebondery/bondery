@@ -22,6 +22,9 @@ import type { FastifyBaseLogger } from "fastify";
 import { BYTES_PER_MIB, validateImageMagicBytes } from "../platform/config.js";
 import { badRequest } from "../platform/errors/http-errors.js";
 
+const A_ZA_Z_PATTERN = /^[a-zA-Z]:/;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 const MAX_NON_PHOTO_ZIP_ENTRIES = 32;
 const MAX_PHOTO_ZIP_FILES = 10_000;
 const MAX_UNCOMPRESSED_MIB = 200;
@@ -35,21 +38,21 @@ const REQUIRED_ROOT_FILES = new Set<string>([
   ...BONDERY_EXPORT_FILE_ENTRIES.map((entry) => entry.name),
 ]);
 
-export type ParsedGroupMembership = {
+type ParsedGroupMembership = {
   createdAt: string;
   groupId: string;
   id: string;
   personId: string;
 };
 
-export type ParsedTagMembership = {
+type ParsedTagMembership = {
   createdAt: string;
   id: string;
   personId: string;
   tagId: string;
 };
 
-export type ParsedBonderyExport = {
+type ParsedBonderyExport = {
   bonderyVersion: string;
   groupMemberships: ParsedGroupMembership[];
   groups: ExportGroupRecord[];
@@ -82,11 +85,11 @@ function isUnsafeZipPath(entryName: string): boolean {
   if (normalized.includes("..") || normalized.startsWith("/")) {
     return true;
   }
-  return /^[a-zA-Z]:/.test(entryName);
+  return A_ZA_Z_PATTERN.test(entryName);
 }
 
 function isNestedFilePath(entryName: string): boolean {
-  return normalizeZipPath(entryName).replace(/\/$/, "").includes("/");
+  return normalizeZipPath(entryName).replace(TRAILING_SLASH_PATTERN, "").includes("/");
 }
 
 /** A ZIP local-file or archive header starts with a four-byte signature: `PK` plus two bytes. */
@@ -145,6 +148,8 @@ function photoSourcePersonId(entryName: string): string | null {
   }
   return sourcePersonId;
 }
+
+export type { ParsedBonderyExport, ParsedGroupMembership, ParsedTagMembership };
 
 /**
  * Validates a Bondery export ZIP in memory and returns the typed CRM graph.

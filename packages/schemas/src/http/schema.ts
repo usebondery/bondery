@@ -70,6 +70,33 @@ const EXAMPLE_GEOCODE_TIMEZONE_RESPONSE = {
   timezone: "Europe/London",
 } as const;
 
+/**
+ * One comma-separated value: `?tag_ids=a,b`.
+ * A repeated `tag_ids` key is also accepted. Trims each entry and drops empties.
+ */
+const tagIdsQuerySchema = z.preprocess((value) => {
+  if (value === undefined || value === null) {
+    return;
+  }
+  const rawEntries = Array.isArray(value) ? value : [value];
+  const parts = rawEntries.flatMap((entry) =>
+    typeof entry === "string" ? entry.split(",") : [entry],
+  );
+  const cleaned = parts
+    .filter((part): part is string => typeof part === "string")
+    .map((part) => part.trim())
+    .filter((part) => part.length > 0);
+  return cleaned.length > 0 ? cleaned : undefined;
+}, z.array(z.string().uuid()).max(MAX_TAG_FILTER_IDS).optional());
+
+/** RFC 3339 datetime with timezone offset. Avoid Zod `iso.datetime` (Turbopack SSR TDZ). */
+const ISO_DATETIME_OFFSET_PATTERN =
+  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
+
+const interactionInstantSchema = z.string().regex(ISO_DATETIME_OFFSET_PATTERN, {
+  error: "Expected ISO 8601 datetime with timezone offset",
+});
+
 /** UUID path parameter (e.g. `:id`). */
 export const uuidParamSchema = z.object({
   id: contactIdSchema.describe("Contact identifier"),
@@ -121,25 +148,6 @@ export const avatarTransformQuerySchema = z.object({
 
 /** Public query name for the people-list tag filter. */
 export const TAG_IDS_QUERY_PARAM = "tag_ids" as const;
-
-/**
- * One comma-separated value: `?tag_ids=a,b`.
- * A repeated `tag_ids` key is also accepted. Trims each entry and drops empties.
- */
-const tagIdsQuerySchema = z.preprocess((value) => {
-  if (value === undefined || value === null) {
-    return;
-  }
-  const rawEntries = Array.isArray(value) ? value : [value];
-  const parts = rawEntries.flatMap((entry) =>
-    typeof entry === "string" ? entry.split(",") : [entry],
-  );
-  const cleaned = parts
-    .filter((part): part is string => typeof part === "string")
-    .map((part) => part.trim())
-    .filter((part) => part.length > 0);
-  return cleaned.length > 0 ? cleaned : undefined;
-}, z.array(z.string().uuid()).max(MAX_TAG_FILTER_IDS).optional());
 
 /** People list query — pagination, search, sort, keep-in-touch filter, and avatar transforms. */
 export const peopleListQuerySchema = z.object({
@@ -209,14 +217,6 @@ export const previewListQuerySchema = z.object({
     .describe("Rendered avatar size. Use `small` for dense lists and `large` for detail views."),
   previewLimit: z.string().optional().describe("Number of preview members to include on each row"),
 }) satisfies z.ZodType<PreviewListQuery>;
-
-/** RFC 3339 datetime with timezone offset. Avoid Zod `iso.datetime` (Turbopack SSR TDZ). */
-const ISO_DATETIME_OFFSET_PATTERN =
-  /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?(?:Z|[+-]\d{2}:\d{2})$/;
-
-const interactionInstantSchema = z.string().regex(ISO_DATETIME_OFFSET_PATTERN, {
-  error: "Expected ISO 8601 datetime with timezone offset",
-});
 
 /** Interactions list query — pagination, text search, inclusive date range, and avatar transforms. */
 export const interactionsListQuerySchema = z

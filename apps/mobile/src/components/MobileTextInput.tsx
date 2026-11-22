@@ -50,35 +50,38 @@ function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
     return { fillsWrapper: false, innerContainerStyle: undefined, wrapperStyle: undefined };
   }
 
-  const wrapperStyle: Record<string, unknown> = {};
-  const innerContainerStyle: Record<string, unknown> = {};
+  const wrapperEntries: Array<[string, unknown]> = [];
+  const innerEntries: Array<[string, unknown]> = [];
 
   for (const [key, value] of Object.entries(flat)) {
-    if (value == null) {
+    if (value === null || value === undefined) {
       continue;
     }
 
     if (WRAPPER_LAYOUT_KEYS.has(key as keyof ViewStyle)) {
-      wrapperStyle[key] = value;
+      wrapperEntries.push([key, value]);
     } else {
-      innerContainerStyle[key] = value;
+      innerEntries.push([key, value]);
     }
   }
 
+  const wrapperStyle = Object.fromEntries(wrapperEntries) as ViewStyle;
+  const innerContainerStyle = Object.fromEntries(innerEntries) as ViewStyle;
+
   const fillsWrapper =
-    wrapperStyle.flex != null ||
-    wrapperStyle.flexGrow != null ||
+    (wrapperStyle.flex !== null && wrapperStyle.flex !== undefined) ||
+    (wrapperStyle.flexGrow !== null && wrapperStyle.flexGrow !== undefined) ||
     wrapperStyle.width === "100%" ||
     wrapperStyle.alignSelf === "stretch";
 
   return {
     fillsWrapper,
-    innerContainerStyle: innerContainerStyle as ViewStyle,
-    wrapperStyle: wrapperStyle as ViewStyle,
+    innerContainerStyle,
+    wrapperStyle,
   };
 }
 
-export type MobileTextInputProps = TextInputProps & {
+type MobileTextInputProps = TextInputProps & {
   error?: boolean;
   errorMessage?: string;
   description?: string;
@@ -93,7 +96,7 @@ export type MobileTextInputProps = TextInputProps & {
   ref?: Ref<NativeTextInputRef>;
 };
 
-export function MobileTextInput({
+function MobileTextInput({
   error = false,
   errorMessage,
   description,
@@ -283,3 +286,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
 });
+
+export type { MobileTextInputProps };
+export { MobileTextInput };

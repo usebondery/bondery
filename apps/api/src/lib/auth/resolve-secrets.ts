@@ -1,9 +1,11 @@
-export type BetterAuthSecretVersion = {
+type BetterAuthSecretVersion = {
   version: number;
   value: string;
 };
 
 const MIN_SECRET_LENGTH = 32;
+
+export type { BetterAuthSecretVersion };
 
 export function parseBetterAuthSecretsString(raw: string): BetterAuthSecretVersion[] {
   const trimmed = raw.trim();

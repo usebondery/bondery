@@ -3,7 +3,7 @@ import { createElement, Fragment, type ReactNode } from "react";
 const TOKEN = /\{(\w+)\}/g;
 
 /** Values for `{token}` placeholders. A value may be a node, so a message can wrap a link. */
-export type MessageValues = Record<string, ReactNode>;
+type MessageValues = Record<string, ReactNode>;
 
 type MessagePart = string | { token: string };
 
@@ -11,7 +11,7 @@ type MessagePart = string | { token: string };
  * Splits a catalog message into literal text and placeholder names, in reading order.
  * Placeholders use the same `{token}` form as the rest of `@bondery/translations`.
  */
-export function splitMessage(template: string): MessagePart[] {
+function splitMessage(template: string): MessagePart[] {
   const parts: MessagePart[] = [];
   let cursor = 0;
 
@@ -55,13 +55,13 @@ function stringifyI18nPrimitive(value: unknown): string | undefined {
 }
 
 /** Values for a message that must come back as a plain string, such as page metadata. */
-export type TextValues = Record<string, string | number>;
+type TextValues = Record<string, string | number>;
 
 /**
  * Fills the placeholders of a catalog message and returns a string. A missing value leaves
  * `{token}` visible. Use `formatMessage` when a value is a node.
  */
-export function formatText(template: string, values: TextValues = {}): string {
+function formatText(template: string, values: TextValues = {}): string {
   const texts: string[] = [];
   for (const part of splitMessage(template)) {
     if (typeof part === "string") {
@@ -83,7 +83,7 @@ export function formatText(template: string, values: TextValues = {}): string {
  * @param template Message from a `@bondery/translations` namespace.
  * @param values Replacement for each placeholder.
  */
-export function formatMessage(template: string, values: MessageValues = {}): ReactNode {
+function formatMessage(template: string, values: MessageValues = {}): ReactNode {
   const parts = splitMessage(template);
   const hasNode = parts.some((part) => typeof part !== "string" && isNode(values[part.token]));
 
@@ -120,3 +120,6 @@ export function formatMessage(template: string, values: MessageValues = {}): Rea
 
   return createElement(Fragment, null, ...children);
 }
+
+export type { MessageValues, TextValues };
+export { formatMessage, formatText, splitMessage };

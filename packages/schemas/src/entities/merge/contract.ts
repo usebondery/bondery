@@ -27,43 +27,43 @@ import type {
   RefreshMergeRecommendationsResponse,
 } from "./types.js";
 
-type _MergeConflictChoice = Assert<
+export type _MergeConflictChoice = Assert<
   IsEqual<MergeConflictChoice, z.infer<typeof mergeConflictChoiceSchema>>
 >;
-type _MergeConflictField = Assert<
+export type _MergeConflictField = Assert<
   IsEqual<MergeConflictField, z.infer<typeof mergeConflictFieldSchema>>
 >;
-type _MergeRecommendationReason = Assert<
+export type _MergeRecommendationReason = Assert<
   IsEqual<MergeRecommendationReason, z.infer<typeof mergeRecommendationReasonSchema>>
 >;
-type _MergeRecommendation = Assert<
+export type _MergeRecommendation = Assert<
   IsEqual<MergeRecommendation, z.infer<typeof mergeRecommendationSchema>>
 >;
-type _MergeContactsRequest = Assert<
+export type _MergeContactsRequest = Assert<
   IsEqual<MergeContactsRequest, z.infer<typeof mergeContactsRequestSchema>>
 >;
-type _MergeContactsResponse = Assert<
+export type _MergeContactsResponse = Assert<
   IsEqual<MergeContactsResponse, z.infer<typeof mergeContactsResponseSchema>>
 >;
-type _MergeRecommendationsResponse = Assert<
+export type _MergeRecommendationsResponse = Assert<
   IsEqual<MergeRecommendationsResponse, z.infer<typeof mergeRecommendationsResponseSchema>>
 >;
-type _MergeAvatarIdentityResponse = Assert<
+export type _MergeAvatarIdentityResponse = Assert<
   IsEqual<MergeAvatarIdentityResponse, z.infer<typeof mergeAvatarIdentityResponseSchema>>
 >;
-type _DeclineMergeRecommendationResponse = Assert<
+export type _DeclineMergeRecommendationResponse = Assert<
   IsEqual<
     DeclineMergeRecommendationResponse,
     z.infer<typeof declineMergeRecommendationResponseSchema>
   >
 >;
-type _MergeRecommendationsCountResponse = Assert<
+export type _MergeRecommendationsCountResponse = Assert<
   IsEqual<
     MergeRecommendationsCountResponse,
     z.infer<typeof mergeRecommendationsCountResponseSchema>
   >
 >;
-type _RefreshMergeRecommendationsResponse = Assert<
+export type _RefreshMergeRecommendationsResponse = Assert<
   IsEqual<
     RefreshMergeRecommendationsResponse,
     z.infer<typeof refreshMergeRecommendationsResponseSchema>

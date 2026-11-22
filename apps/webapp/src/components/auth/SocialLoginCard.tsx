@@ -1,6 +1,7 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { isEmailSignInEnabled } from "@bondery/helpers/auth/oauth-providers";
 import { WEBSITE_ROUTES } from "@bondery/helpers/globals/paths";
 import {
@@ -29,15 +30,15 @@ import { LoginBrandShell, type LoginBrandShellLeftContent } from "./LoginBrandSh
 import { type LoginBusyAction, LoginProviderButtons } from "./LoginProviderButtons";
 import classes from "./SocialLoginCard.module.css";
 
-export type { LoginBusyAction };
+const styles = {
+  filledButton: classes["filledButton"] ?? "",
+};
 
-const SESSION_POLL_MS = 4_000;
+const SESSION_POLL_MS = 4000;
 const RESEND_SECONDS = 30;
 
 /** Browser capabilities never change while the page is open, so there is nothing to subscribe to. */
 const subscribeToNothing = () => () => undefined;
-
-export type LoginSurface = "oauth" | "webapp";
 
 type SocialLoginCardProps = {
   allowedOAuthProviders?: OAuthProviderId[];
@@ -64,6 +65,10 @@ type SocialLoginCardProps = {
   title?: string;
   websiteUrl: string;
 };
+
+export type { LoginBusyAction };
+
+export type LoginSurface = "oauth" | "webapp";
 
 export function SocialLoginCard({
   allowedOAuthProviders,
@@ -150,7 +155,7 @@ export function SocialLoginCard({
 
     const timeout = window.setTimeout(() => {
       setResendSeconds((current) => Math.max(0, current - 1));
-    }, 1_000);
+    }, 1000);
 
     return () => {
       window.clearTimeout(timeout);
@@ -163,11 +168,13 @@ export function SocialLoginCard({
     }
 
     const poll = window.setInterval(() => {
-      void authClient.getSession().then(({ data }) => {
-        if (data?.session) {
-          window.location.assign(continueUrl);
-        }
-      });
+      detachPromise(
+        authClient.getSession().then(({ data }) => {
+          if (data?.session) {
+            window.location.assign(continueUrl);
+          }
+        }),
+      );
     }, SESSION_POLL_MS);
 
     return () => {
@@ -226,7 +233,7 @@ export function SocialLoginCard({
   };
   const continueWithEmailButton = (
     <CornerLabeledButton
-      className={classes.filledButton}
+      className={styles.filledButton}
       color="branding-primary"
       cornerLabel={magicLinkIsLastUsed ? t("LastUsed") : undefined}
       cornerLabelTestId="login-last-used-badge"
@@ -259,7 +266,7 @@ export function SocialLoginCard({
 
   const lockedEmailButton = (
     <CornerLabeledButton
-      className={classes.filledButton}
+      className={styles.filledButton}
       color="branding-primary"
       cornerLabel={magicLinkIsLastUsed ? t("LastUsed") : undefined}
       cornerLabelTestId="login-last-used-badge"
@@ -274,7 +281,7 @@ export function SocialLoginCard({
         if (!emailSignInEnabled) {
           return;
         }
-        void submitLockedEmail();
+        detachPromise(submitLockedEmail());
       }}
       size="lg"
       type="button"
@@ -337,7 +344,7 @@ export function SocialLoginCard({
         {emailPanelOpen && offerTypedEmail ? (
           <form
             onSubmit={form.onSubmit(() => {
-              void submitTypedEmail();
+              detachPromise(submitTypedEmail());
             })}
           >
             <Stack gap="sm">
@@ -353,7 +360,7 @@ export function SocialLoginCard({
                 type="email"
               />
               <CornerLabeledButton
-                className={classes.filledButton}
+                className={styles.filledButton}
                 color="branding-primary"
                 data-testid={awaitingVerify ? "login-email-resend" : "login-email-send"}
                 disabled={

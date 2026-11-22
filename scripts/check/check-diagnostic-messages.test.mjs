@@ -12,6 +12,8 @@ import {
   literalText,
 } from "./check-diagnostic-messages.mjs";
 
+const MJS_GRIT_RE = /\.(?:mjs|grit)$/;
+
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 describe("literalText", () => {
@@ -134,7 +136,7 @@ describe("every diagnostic in the repo", () => {
   const dirs = ["scripts/check", "biome/plugins"];
   const files = dirs.flatMap((dir) =>
     readdirSync(join(repoRoot, dir))
-      .filter((entry) => /\.(?:mjs|grit)$/.test(entry))
+      .filter((entry) => MJS_GRIT_RE.test(entry))
       .filter((entry) => !entry.includes("check-diagnostic-messages"))
       .map((entry) => join(dir, entry)),
   );

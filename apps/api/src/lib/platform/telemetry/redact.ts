@@ -1,9 +1,3 @@
-/**
- * Redaction for anything sent to PostHog as operational data (logs, exceptions).
- * It may carry a pseudonymous user id, never contact details or secrets.
- */
-
-export const REDACTED = "[redacted]";
 const REDACTED_EMAIL = "[redacted-email]";
 
 /** Keys whose values never leave the server, matched case-insensitively at any depth. */
@@ -20,6 +14,12 @@ const SENSITIVE_KEYS = new Set([
 const EMAIL_PATTERN = /[a-z0-9._%+-]+@[a-z0-9-]+(?:\.[a-z0-9-]+)+/gi;
 
 const MAX_DEPTH = 6;
+/**
+ * Redaction for anything sent to PostHog as operational data (logs, exceptions).
+ * It may carry a pseudonymous user id, never contact details or secrets.
+ */
+
+export const REDACTED = "[redacted]";
 
 export function isSensitiveKey(key: string): boolean {
   return SENSITIVE_KEYS.has(key.toLowerCase());

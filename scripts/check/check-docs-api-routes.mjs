@@ -28,6 +28,10 @@ import { parse } from "yaml";
 
 import { createCheck } from "./check-report.mjs";
 
+const BFF_WEBAPP_RE = /\b(BFF|webapp)\b/i;
+const PATTERN_5B2E2C3B3A29_RE = /[.,;:)]$/;
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
 const check = createCheck("check-docs-api-routes");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -107,13 +111,13 @@ const URL_PATTERN = /https?:\/\/[A-Za-z0-9.-]+(\/[A-Za-z0-9{}\-_/.:]*)?/g;
  * stays correct in prose that says so.
  */
 function isBffContext(line) {
-  return /\b(BFF|webapp)\b/i.test(line);
+  return BFF_WEBAPP_RE.test(line);
 }
 
 /** Strips punctuation a sentence adds around a path, never a path character. */
 function trimPath(raw) {
   let path = raw;
-  while (path.length > 1 && /[.,;:)]$/.test(path)) {
+  while (path.length > 1 && PATTERN_5B2E2C3B3A29_RE.test(path)) {
     path = path.slice(0, -1);
   }
   return path;
@@ -124,7 +128,7 @@ function trimPath(raw) {
  * A bare trailing slash is a sentence artifact, so it is dropped too.
  */
 function normalizePath(path) {
-  const normalized = path.replace(/:([A-Za-z0-9_]+)/g, "{$1}").replace(/\/+$/, "");
+  const normalized = path.replace(/:([A-Za-z0-9_]+)/g, "{$1}").replace(PATTERN_5C2F2B24_RE, "");
   return normalized.length === 0 ? "/" : normalized;
 }
 
@@ -226,7 +230,7 @@ if (specRoutes.size === 0) {
       const at = `${path}:${index + 1}`;
 
       for (const match of line.matchAll(MENTION)) {
-        const method = match[1];
+        const [, method] = match;
         const route = toSpecPath(normalizePath(trimPath(match[2])));
 
         if (route === null) {
@@ -271,7 +275,7 @@ if (specRoutes.size === 0) {
       }
 
       for (const match of line.matchAll(URL_PATTERN)) {
-        const url = match[0];
+        const [url] = match;
 
         // Bare API paths apply only on an API origin. A link to a vendor site, a
         // repository file, or the website is not a route and is not checked.
@@ -290,7 +294,7 @@ if (specRoutes.size === 0) {
 
         // `/api/` on the API origin is the bug this check exists for.
         if (route.bff) {
-          const origin = new URL(url).origin;
+          const { origin } = new URL(url);
           check.add(
             `${at}: ${url} adds ${BFF_PREFIX}/ on the API origin.` +
               ` Use the bare path instead: ${origin}${route.specPath}`,

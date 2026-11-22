@@ -3,7 +3,7 @@ import landing from "@bondery/translations/locales/en/platform/website/WebsiteLa
 };
 import type { FAQPage, WithContext } from "schema-dts";
 
-export const FAQ_ITEMS = [
+const FAQ_ITEMS = [
   {
     answer: landing.Faq.Items.WhatIs.Answer,
     question: landing.Faq.Items.WhatIs.Question,
@@ -26,7 +26,7 @@ export const FAQ_ITEMS = [
 
 type FaqItem = (typeof FAQ_ITEMS)[number];
 
-export function buildFaqSchema(items: readonly FaqItem[]): WithContext<FAQPage> {
+function buildFaqSchema(items: readonly FaqItem[]): WithContext<FAQPage> {
   return {
     "@context": "https://schema.org",
     "@type": "FAQPage",
@@ -40,3 +40,5 @@ export function buildFaqSchema(items: readonly FaqItem[]): WithContext<FAQPage> 
     })),
   };
 }
+
+export { buildFaqSchema, FAQ_ITEMS };

@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useEffect, useRef } from "react";
 import { applyPostHogConsentState, captureEvent, posthog } from "@/lib/analytics/client";
 import { createWebappAuthClient } from "@/lib/auth/client";
@@ -24,29 +25,31 @@ export function ProductAnalyticsShellSync() {
   useEffect(() => {
     let cancelled = false;
 
-    void (async () => {
-      const authClient = createWebappAuthClient();
-      const session = await authClient.getSession();
-      const userId = session.data?.user?.id;
+    detachPromise(
+      (async () => {
+        const authClient = createWebappAuthClient();
+        const session = await authClient.getSession();
+        const userId = session.data?.user?.id;
 
-      if (!userId || cancelled || !posthog.__loaded) {
-        return;
-      }
+        if (!userId || cancelled || !posthog.__loaded) {
+          return;
+        }
 
-      if (identifiedUserIdRef.current !== userId) {
-        posthog.identify(userId);
-        identifiedUserIdRef.current = userId;
-      }
+        if (identifiedUserIdRef.current !== userId) {
+          posthog.identify(userId);
+          identifiedUserIdRef.current = userId;
+        }
 
-      if (typeof window !== "undefined" && !sessionStorage.getItem(SESSION_CREATE_KEY)) {
-        const loginMethod = resolveAnalyticsLoginMethod(authClient.getLastUsedLoginMethod());
-        captureEvent(
-          "auth:session_create",
-          loginMethod ? { login_method: loginMethod } : undefined,
-        );
-        sessionStorage.setItem(SESSION_CREATE_KEY, "1");
-      }
-    })();
+        if (typeof window !== "undefined" && !sessionStorage.getItem(SESSION_CREATE_KEY)) {
+          const loginMethod = resolveAnalyticsLoginMethod(authClient.getLastUsedLoginMethod());
+          captureEvent(
+            "auth:session_create",
+            loginMethod ? { login_method: loginMethod } : undefined,
+          );
+          sessionStorage.setItem(SESSION_CREATE_KEY, "1");
+        }
+      })(),
+    );
 
     return () => {
       cancelled = true;

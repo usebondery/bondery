@@ -1,35 +1,6 @@
 import type { VCardParameter, VCardProperty } from "#model.js";
 
-export function unfoldLines(input: string): string[] {
-  const normalized = input.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-  const physicalLines = normalized.split("\n");
-  const logicalLines: string[] = [];
-
-  for (const line of physicalLines) {
-    const previous = logicalLines.at(-1);
-
-    // RFC 6350 folding: continuation line starts with space or tab
-    if (previous !== undefined && (line.startsWith(" ") || line.startsWith("\t"))) {
-      logicalLines.pop();
-      logicalLines.push(previous + line.slice(1));
-      continue;
-    }
-
-    // vCard 2.1 quoted-printable soft line break: previous line ends with '='
-    if (previous !== undefined && previous.endsWith("=") && isQuotedPrintableLine(previous)) {
-      // Remove trailing '=' and append current line
-      logicalLines.pop();
-      logicalLines.push(previous.slice(0, -1) + line);
-      continue;
-    }
-
-    if (line.length > 0) {
-      logicalLines.push(line);
-    }
-  }
-
-  return logicalLines;
-}
+const FA_RE = /^[0-9A-Fa-f]{2}$/;
 
 /** Checks whether a content line has ENCODING=QUOTED-PRINTABLE in the property parameters. */
 function isQuotedPrintableLine(line: string): boolean {
@@ -54,7 +25,7 @@ function decodeQuotedPrintable(value: string): string {
   while (i < value.length) {
     if (value[i] === "=" && i + 2 < value.length) {
       const hex = value.slice(i + 1, i + QUOTED_PRINTABLE_ESCAPE_LENGTH);
-      if (/^[0-9A-Fa-f]{2}$/.test(hex)) {
+      if (FA_RE.test(hex)) {
         bytes.push(Number.parseInt(hex, 16));
         i += QUOTED_PRINTABLE_ESCAPE_LENGTH;
         continue;
@@ -153,6 +124,37 @@ function parseParameters(tokens: string[]): VCardParameter[] {
   }
 
   return parameters;
+}
+
+export function unfoldLines(input: string): string[] {
+  const normalized = input.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+  const physicalLines = normalized.split("\n");
+  const logicalLines: string[] = [];
+
+  for (const line of physicalLines) {
+    const previous = logicalLines.at(-1);
+
+    // RFC 6350 folding: continuation line starts with space or tab
+    if (previous !== undefined && (line.startsWith(" ") || line.startsWith("\t"))) {
+      logicalLines.pop();
+      logicalLines.push(previous + line.slice(1));
+      continue;
+    }
+
+    // vCard 2.1 quoted-printable soft line break: previous line ends with '='
+    if (previous !== undefined && previous.endsWith("=") && isQuotedPrintableLine(previous)) {
+      // Remove trailing '=' and append current line
+      logicalLines.pop();
+      logicalLines.push(previous.slice(0, -1) + line);
+      continue;
+    }
+
+    if (line.length > 0) {
+      logicalLines.push(line);
+    }
+  }
+
+  return logicalLines;
 }
 
 export function parseContentLine(line: string): VCardProperty {

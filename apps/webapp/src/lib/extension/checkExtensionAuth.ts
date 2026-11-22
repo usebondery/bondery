@@ -1,7 +1,5 @@
 import { detectBonderyChromeExtension } from "./detectBonderyChromeExtension";
 
-export type ExtensionAuthState = "authenticated" | "not_authenticated" | "not_installed";
-
 const AUTH_STATUS_REQUEST_TYPE = "BONDERY_AUTH_STATUS_REQUEST";
 const AUTH_STATUS_RESPONSE_TYPE = "BONDERY_AUTH_STATUS_RESPONSE";
 
@@ -48,6 +46,8 @@ function requestExtensionAuth(
     );
   });
 }
+
+export type ExtensionAuthState = "authenticated" | "not_authenticated" | "not_installed";
 
 /**
  * Checks whether the Bondery Chrome Extension is installed and whether

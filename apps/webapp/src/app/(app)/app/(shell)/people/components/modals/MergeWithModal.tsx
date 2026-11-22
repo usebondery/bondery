@@ -2,6 +2,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -56,52 +57,12 @@ const mergeRequestsInFlight = new Set<string>();
 const mergeRequestsCompleted = new Set<string>();
 
 function mergeRequestKey(leftPersonId: string, rightPersonId: string): string {
-  return [leftPersonId, rightPersonId].toSorted().join(":");
+  return [leftPersonId, rightPersonId].toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0)).join(":");
 }
 
 function MergeWithModalTitle() {
   const t = useMergeWithModalTranslations();
   return <ModalTitle icon={<IconArrowMerge size={22} />} text={t("ModalTitle")} />;
-}
-
-export function openMergeWithModal({
-  contacts,
-  contactsHasMore = false,
-  leftPersonId,
-  rightPersonId,
-  disableLeftPicker = true,
-  disableRightPicker = false,
-  redirectToMergedPerson = true,
-  onSearch,
-  onSuccess,
-  people,
-  initialConflictChoices,
-}: OpenMergeWithModalParams) {
-  const modalId = createModalId("merge-with");
-
-  modals.open({
-    children: (
-      <MergeWithModal
-        contacts={contacts}
-        contactsHasMore={contactsHasMore}
-        disableLeftPicker={disableLeftPicker}
-        disableRightPicker={disableRightPicker}
-        initialConflictChoices={initialConflictChoices}
-        initialLeftPersonId={leftPersonId}
-        initialRightPersonId={rightPersonId}
-        modalId={modalId}
-        onSearch={onSearch}
-        onSuccess={onSuccess}
-        people={people}
-        redirectToMergedPerson={redirectToMergedPerson}
-      />
-    ),
-    className: "min-h-80",
-    modalId,
-    size: "lg",
-    title: <MergeWithModalTitle />,
-    trapFocus: true,
-  });
 }
 
 interface MergeWithModalProps {
@@ -235,20 +196,23 @@ function MergeWithModal({
     let cancelled = false;
     setAvatarsHaveDistinctContents(false);
     const abort = new AbortController();
-    void getMergeAvatarIdentity(leftPersonId, rightPersonId, { signal: abort.signal })
-      .then((result) => {
-        if (!cancelled) {
-          setAvatarsHaveDistinctContents(!result.identical);
-        }
-      })
-      .catch((error: unknown) => {
+    detachPromise(
+      getMergeAvatarIdentity(leftPersonId, rightPersonId, { signal: abort.signal }).then(
+        (result) => {
+          if (!cancelled) {
+            setAvatarsHaveDistinctContents(!result.identical);
+          }
+        },
+      ),
+      (error: unknown) => {
         if (cancelled || (error instanceof Error && error.name === "AbortError")) {
           return;
         }
         if (!cancelled) {
           setAvatarsHaveDistinctContents(true);
         }
-      });
+      },
+    );
 
     return () => {
       cancelled = true;
@@ -289,7 +253,7 @@ function MergeWithModal({
     }
 
     if (conflicts.length === 0) {
-      void handleMerge();
+      detachPromise(handleMerge());
       return;
     }
 
@@ -372,7 +336,7 @@ function MergeWithModal({
       !autoMergeRef.current
     ) {
       autoMergeRef.current = true;
-      void handleMerge();
+      detachPromise(handleMerge());
     }
   }, [
     shouldSkipPickStep,
@@ -443,7 +407,7 @@ function MergeWithModal({
           onCancel={closeModal}
           onChangeChoice={setConflictChoices}
           onMerge={() => {
-            void handleMerge();
+            detachPromise(handleMerge());
           }}
           rightContact={rightContact}
           showAvatarPicker={showAvatarPicker}
@@ -463,4 +427,44 @@ function MergeWithModal({
       ) : null}
     </Stack>
   );
+}
+
+export function openMergeWithModal({
+  contacts,
+  contactsHasMore = false,
+  leftPersonId,
+  rightPersonId,
+  disableLeftPicker = true,
+  disableRightPicker = false,
+  redirectToMergedPerson = true,
+  onSearch,
+  onSuccess,
+  people,
+  initialConflictChoices,
+}: OpenMergeWithModalParams) {
+  const modalId = createModalId("merge-with");
+
+  modals.open({
+    children: (
+      <MergeWithModal
+        contacts={contacts}
+        contactsHasMore={contactsHasMore}
+        disableLeftPicker={disableLeftPicker}
+        disableRightPicker={disableRightPicker}
+        initialConflictChoices={initialConflictChoices}
+        initialLeftPersonId={leftPersonId}
+        initialRightPersonId={rightPersonId}
+        modalId={modalId}
+        onSearch={onSearch}
+        onSuccess={onSuccess}
+        people={people}
+        redirectToMergedPerson={redirectToMergedPerson}
+      />
+    ),
+    className: "min-h-80",
+    modalId,
+    size: "lg",
+    title: <MergeWithModalTitle />,
+    trapFocus: true,
+  });
 }

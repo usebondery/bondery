@@ -9,7 +9,8 @@ function callSplashFn(fn: unknown): void {
   try {
     const result = (fn as () => unknown)();
     if (
-      result != null &&
+      result !== null &&
+      result !== undefined &&
       typeof result === "object" &&
       "catch" in result &&
       typeof result.catch === "function"

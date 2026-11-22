@@ -25,7 +25,7 @@ interface RotatingWheelColumnProps {
   selectedIndex: number;
 }
 
-export function RotatingWheelColumn({
+function RotatingWheelColumn({
   items,
   selectedIndex,
   onIndexChange,
@@ -201,3 +201,5 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
 });
+
+export { RotatingWheelColumn };

@@ -3,7 +3,7 @@
 "use client";
 
 import { createNamespaceHook } from "../createNamespaceHook";
-import type { CommonPrefix, ContactActionMenuPrefix, ContactAddressPrefix, ContactIdentityFieldsPrefix, ContactImportantDatesPrefix, ContactInfoPrefix, ContactPhotoUploadPrefix, ContactPreferenceSectionPrefix, ContactsTablePrefix, EnrichFromLinkedInPrefix, EnrichRecommendationCardPrefix, ExtensionVersionCheckPrefix, GlossaryPrefix, InteractionTypesPrefix, LanguagesPrefix, LinkedInDataPrefix, LoginPagePrefix, MapCommonPrefix, MobileAuthPrefix, MobileColorPickerPrefix, MobileContactDetailPrefix, MobileContactIdentityPrefix, MobileContactsPrefix, MobileCreateContactPrefix, MobileEmojiPickerPrefix, MobileGroupsPrefix, MobileNavigationPrefix, MobileSettingsPrefix, MobileShareContactEmailPrefix, MobileTagsPrefix, NotesEditorPrefix, NotesSlashCommandsPrefix, PersonRelationshipsPrefix, PersonTabsPrefix, SettingsPagePrefix, SocialsPrefix, TagsInputPrefix, TagsSettingsPrefix, ValidationPrefix } from "@bondery/translations/generated/i18n/catalog-prefixes";
+import type { CommonPrefix, ContactAddressPrefix, ContactImportantDatesPrefix, GlossaryPrefix, LoginPagePrefix, MobileEmojiPickerPrefix, PersonRelationshipsPrefix, SettingsPagePrefix, ValidationPrefix } from "@bondery/translations/generated/i18n/catalog-prefixes";
 
 export function useContactActionMenuTranslations(): import("@bondery/translations").TranslateFn<"ContactActionMenu">;
 export function useContactActionMenuTranslations() {

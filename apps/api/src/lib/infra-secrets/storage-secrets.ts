@@ -24,14 +24,6 @@ import { API_CONTAINER_UID, LOOPBACK_IP } from "./ownership.js";
 import { ensureCaSignedCertificate } from "./private-ca.js";
 import type { CertificateNames } from "./x509.js";
 
-export const STORAGE_CERTIFICATE_RENEW_BEFORE_DAYS = 90;
-
-/**
- * Common name of the cluster certificate. `deploy/bondery/seaweedfs/security.toml` accepts gRPC
- * peers with this name only.
- */
-export const STORAGE_CERTIFICATE_COMMON_NAME = "Bondery bundled SeaweedFS";
-
 /** Compose service names. SeaweedFS nodes address each other by these names. */
 const SEAWEEDFS_NODES = [
   "seaweedfs-master",
@@ -39,6 +31,14 @@ const SEAWEEDFS_NODES = [
   "seaweedfs-filer",
   "seaweedfs-s3",
 ] as const;
+
+export const STORAGE_CERTIFICATE_RENEW_BEFORE_DAYS = 90;
+
+/**
+ * Common name of the cluster certificate. `deploy/bondery/seaweedfs/security.toml` accepts gRPC
+ * peers with this name only.
+ */
+export const STORAGE_CERTIFICATE_COMMON_NAME = "Bondery bundled SeaweedFS";
 
 export type StorageSecretPaths = {
   caCertFile: string;

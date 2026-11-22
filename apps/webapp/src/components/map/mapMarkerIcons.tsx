@@ -7,18 +7,18 @@ import { nonEmpty } from "@/lib/shared/nonEmpty";
 const PERSON_MARKER_SIZE = 34;
 const SELF_MARKER_SIZE = 34;
 
+type ClusterTier = {
+  diameter: number;
+  /** Solid Mantine branding-primary shade (not a CSS gradient). */
+  shade: (typeof BRAND_PRIMARY_SHADES)[number];
+};
+
 export const avatarRingStyle = {
   backgroundColor: "#fff",
   border: `3px solid ${BRAND_PRIMARY_COLOR}`,
   boxShadow: "0 0 0 2px #fff, 0 1px 4px rgba(0, 0, 0, 0.25)",
   opacity: 1,
 } as const;
-
-type ClusterTier = {
-  diameter: number;
-  /** Solid Mantine branding-primary shade (not a CSS gradient). */
-  shade: (typeof BRAND_PRIMARY_SHADES)[number];
-};
 
 export function getClusterTier(count: number): ClusterTier {
   if (count >= 50) {

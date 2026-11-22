@@ -1,4 +1,6 @@
 /** Average adult reading speed in words per minute. */
+const PATTERN_5C732B_RE = /\s+/;
+
 const WORDS_PER_MINUTE = 238;
 
 /**
@@ -42,7 +44,7 @@ export function getReadingTime(text: string): { minutes: number; words: number }
     // Remove ordered list markers
     .replace(/^\d+\.\s/gm, "");
 
-  const words = cleaned.split(/\s+/).filter(Boolean);
+  const words = cleaned.split(PATTERN_5C732B_RE).filter(Boolean);
   const wordCount = words.length;
   const minutes = Math.max(1, Math.ceil(wordCount / WORDS_PER_MINUTE));
 

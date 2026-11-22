@@ -28,25 +28,25 @@ type NavLinkBaseProps = {
   withDivider?: boolean;
 };
 
-export type NavLinkWithHrefProps = NavLinkBaseProps & {
+type NavLinkWithHrefProps = NavLinkBaseProps & {
   href: Href;
   navigationMode?: "navigate" | "push";
   onPress?: never;
 };
 
-export type NavLinkWithPressProps = NavLinkBaseProps & {
+type NavLinkWithPressProps = NavLinkBaseProps & {
   href?: never;
   navigationMode?: never;
   onPress: () => void;
 };
 
-export type NavLinkProps = NavLinkWithHrefProps | NavLinkWithPressProps;
+type NavLinkProps = NavLinkWithHrefProps | NavLinkWithPressProps;
 
 function isNavLinkWithHref(props: NavLinkProps): props is NavLinkWithHrefProps {
   return "href" in props && props.href !== undefined;
 }
 
-export function NavLink(props: NavLinkProps) {
+function NavLink(props: NavLinkProps) {
   const {
     accessibilityHint,
     accessibilityLabel,
@@ -78,7 +78,7 @@ export function NavLink(props: NavLinkProps) {
     }
 
     if (hasHref) {
-      const href = props.href;
+      const { href } = props;
       const mode = props.navigationMode ?? "push";
       if (mode === "navigate") {
         navigateTo(href);
@@ -161,3 +161,6 @@ export function NavLink(props: NavLinkProps) {
     </>
   );
 }
+
+export type { NavLinkProps, NavLinkWithHrefProps, NavLinkWithPressProps };
+export { NavLink };

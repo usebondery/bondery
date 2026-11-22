@@ -14,16 +14,13 @@ import { readFileSync } from "node:fs";
 
 import type { RedisOptions } from "ioredis";
 
-export const REDIS_PASSWORD_FILE_ENV = "BONDERY_PRIVATE_REDIS_PASSWORD_FILE";
-export const REDIS_TLS_CA_FILE_ENV = "BONDERY_PRIVATE_REDIS_TLS_CA_FILE";
-
-export type RedisConnectionEnv = Partial<
+type RedisConnectionEnv = Partial<
   Record<typeof REDIS_PASSWORD_FILE_ENV | typeof REDIS_TLS_CA_FILE_ENV, string>
 >;
 
-export type RedisConnectionOptions = Pick<RedisOptions, "password" | "tls">;
+type RedisConnectionOptions = Pick<RedisOptions, "password" | "tls">;
 
-export type RedisSecurityPosture = {
+type RedisSecurityPosture = {
   authenticated: boolean;
   tls: boolean;
 };
@@ -61,6 +58,11 @@ function readSecretFile(envName: string, path: string, readTextFile: ReadTextFil
   }
   return trimmed;
 }
+
+export type { RedisConnectionEnv, RedisConnectionOptions, RedisSecurityPosture };
+
+export const REDIS_PASSWORD_FILE_ENV = "BONDERY_PRIVATE_REDIS_PASSWORD_FILE";
+export const REDIS_TLS_CA_FILE_ENV = "BONDERY_PRIVATE_REDIS_TLS_CA_FILE";
 
 /** Reports whether a Redis URL plus env uses TLS and a password. Never reads secret files. */
 export function describeRedisSecurity(

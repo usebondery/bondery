@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   DropdownOption,
   DropdownOptionMenu,
@@ -14,7 +15,7 @@ import { notifications } from "@mantine/notifications";
 import { IconBrandGithub, IconChevronDown, IconMarkdown } from "@tabler/icons-react";
 import { useRef } from "react";
 
-export interface DocsCopyMenuProps {
+interface DocsCopyMenuProps {
   githubUrl: string;
   markdownUrl: string;
   pageUrl: string;
@@ -24,7 +25,7 @@ function openInNewTab(url: string) {
   window.open(url, "_blank", "noopener,noreferrer");
 }
 
-export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
+function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuProps) {
   const pending = useRef<boolean>(false);
 
   async function copyMarkdownLink() {
@@ -89,7 +90,7 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
 
   return (
     <Button.Group data-page-url={pageUrl}>
-      <Button onClick={() => void copyMarkdownLink()} type="button" variant="default">
+      <Button onClick={() => detachPromise(copyMarkdownLink())} type="button" variant="default">
         {docs.Copy.LinkLabel}
       </Button>
       <DropdownOptionMenu position="bottom-end" width={240} withinPortal>
@@ -102,7 +103,7 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
           <DropdownOption
             icon={<IconMarkdown size={16} />}
             label={docs.Copy.CopyMarkdown}
-            onSelect={() => void copyMarkdown()}
+            onSelect={() => detachPromise(copyMarkdown())}
           />
           <DropdownOption
             external
@@ -121,3 +122,6 @@ export function DocsCopyMenu({ githubUrl, markdownUrl, pageUrl }: DocsCopyMenuPr
     </Button.Group>
   );
 }
+
+export type { DocsCopyMenuProps };
+export { DocsCopyMenu };

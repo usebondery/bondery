@@ -11,8 +11,6 @@ import { nonEmpty } from "@/lib/shared/nonEmpty";
 import { ContactEmailsSection } from "./ContactEmailsSection";
 import { ContactPhonesSection } from "./ContactPhonesSection";
 
-export type { ContactInfoLabels } from "@/lib/contacts/contact-info-labels";
-
 interface ContactInfoSectionProps {
   emails: EmailEntry[];
   labels?: Partial<ContactInfoLabels>;
@@ -24,6 +22,8 @@ interface ContactInfoSectionProps {
   savingField: string | null;
   showTitle?: boolean;
 }
+
+export type { ContactInfoLabels } from "@/lib/contacts/contact-info-labels";
 
 export function ContactInfoSection({
   phones,

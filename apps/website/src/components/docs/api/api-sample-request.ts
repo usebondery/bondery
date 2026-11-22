@@ -1,23 +1,25 @@
 import { type JsonSchema, sample } from "@fumadocs/json-schema";
 
+const PRODUCTION_WORD_RE = /production/i;
+const TRAILING_SLASHES_RE = /\/+$/;
 const DEFAULT_PATH_PLACEHOLDER = "550e8400-e29b-41d4-a716-446655440000";
 
 /**
  * Fixed demo identifiers. They match the response fixtures on the same page, so a
  * copied request and the example response describe the same record.
  */
-export const PATH_PLACEHOLDERS: Readonly<Record<string, string>> = {
+const PATH_PLACEHOLDERS = {
   id: DEFAULT_PATH_PLACEHOLDER,
   relationshipId: "990e8400-e29b-41d4-a716-446655440003",
   sessionId: "aa0e8400-e29b-41d4-a716-446655440004",
   tagId: "880e8400-e29b-41d4-a716-446655440002",
-};
+} as const;
 
 /**
  * Routes that read `request.file()` and document no JSON body. The sample asks for
  * a local image instead of a body, so the copied command works as written.
  */
-export const MULTIPART_SAMPLE_ROUTES: ReadonlySet<string> = new Set([
+const MULTIPART_SAMPLE_ROUTES: ReadonlySet<string> = new Set([
   "POST /contacts/{id}/photo",
   "POST /me/photo",
 ]);
@@ -30,25 +32,25 @@ const SHORT_QUERY_VALUE = "example";
 /** Python literal indent. Matches the four-space `headers` block below it. */
 const PYTHON_INDENT = "    ";
 
-export interface SampleRequest {
+interface SampleRequest {
   curl: string;
   javascript: string;
   python: string;
 }
 
-export interface SampleRequestParameter {
+interface SampleRequestParameter {
   /** Absent only in a malformed document. Such an item is skipped. */
   name?: string;
   required?: boolean;
   schema?: unknown;
 }
 
-export interface SampleRequestParameterGroup {
+interface SampleRequestParameterGroup {
   in?: string;
   items: ReadonlyArray<SampleRequestParameter>;
 }
 
-export interface SampleRequestInput {
+interface SampleRequestInput {
   method: string;
   parameters: ReadonlyArray<SampleRequestParameterGroup>;
   path: string;
@@ -58,7 +60,7 @@ export interface SampleRequestInput {
 }
 
 /** The bundled document rewrites a single `example` into `examples.default.value`. */
-export interface SampleRequestBodyMedia {
+interface SampleRequestBodyMedia {
   example?: unknown;
   examples?: Record<string, unknown>;
   schema?: unknown;
@@ -78,7 +80,7 @@ interface RequestHeader {
 }
 
 /** True when the route takes a file field instead of a JSON body. */
-export function isMultipartSample(method: string, path: string): boolean {
+function isMultipartSample(method: string, path: string): boolean {
   return MULTIPART_SAMPLE_ROUTES.has(`${method.trim().toUpperCase()} ${path.trim()}`);
 }
 
@@ -89,7 +91,7 @@ export function isMultipartSample(method: string, path: string): boolean {
  * `Authorization`, and they resolve the URL from `servers[0]`, which is the local
  * development host. This builder reads the operation and always targets production.
  */
-export function buildSampleRequest(input: SampleRequestInput): SampleRequest | null {
+function buildSampleRequest(input: SampleRequestInput): SampleRequest | null {
   const method = input.method.trim().toUpperCase();
   const path = input.path.trim();
 
@@ -141,17 +143,22 @@ function buildUrl(input: SampleRequestInput, path: string): string {
 function resolveBaseUrl(servers: SampleRequestInput["servers"]): string {
   const list = servers ?? [];
   const production = list.find(
-    (server) => server.description !== undefined && /production/i.test(server.description),
+    (server) => server.description !== undefined && PRODUCTION_WORD_RE.test(server.description),
   );
   const chosen = production ?? list.at(-1);
   const url = chosen?.url?.trim();
 
-  return url === undefined || url.length === 0 ? FALLBACK_BASE_URL : url.replace(/\/+$/, "");
+  return url === undefined || url.length === 0
+    ? FALLBACK_BASE_URL
+    : url.replace(TRAILING_SLASHES_RE, "");
 }
 
 function fillPath(path: string): string {
   return path.replace(/\{([^{}]+)\}/g, (_match: string, name: string) => {
-    return PATH_PLACEHOLDERS[name] ?? DEFAULT_PATH_PLACEHOLDER;
+    if (name in PATH_PLACEHOLDERS) {
+      return PATH_PLACEHOLDERS[name as keyof typeof PATH_PLACEHOLDERS];
+    }
+    return DEFAULT_PATH_PLACEHOLDER;
   });
 }
 
@@ -423,10 +430,27 @@ function scalarValue(value: unknown): string {
   return "";
 }
 
-function asRecord(value: unknown): Record<string, unknown> | null {
+type JsonSchemaSampleFields = {
+  default?: unknown;
+  enum?: unknown;
+  format?: unknown;
+  type?: unknown;
+  value?: unknown;
+};
+
+function asRecord(value: unknown): JsonSchemaSampleFields | null {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     return null;
   }
 
-  return value as Record<string, unknown>;
+  return value as JsonSchemaSampleFields;
 }
+
+export type {
+  SampleRequest,
+  SampleRequestBodyMedia,
+  SampleRequestInput,
+  SampleRequestParameter,
+  SampleRequestParameterGroup,
+};
+export { buildSampleRequest, isMultipartSample, MULTIPART_SAMPLE_ROUTES, PATH_PLACEHOLDERS };

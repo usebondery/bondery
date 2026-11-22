@@ -17,7 +17,7 @@ function getMapsUrl(): string {
 }
 
 /** Structured result from geocoding a LinkedIn location string. */
-export interface GeocodeResult {
+interface GeocodeResult {
   city: string | null;
   country: string | null;
   countryCode: string | null;
@@ -57,6 +57,8 @@ function parseLinkedInLocation(location: string): { query: string; locality?: st
 
   return { locality, query };
 }
+
+export type { GeocodeResult };
 
 /**
  * Geocodes a LinkedIn-scraped location string using the Mapy.com /v1/geocode API.

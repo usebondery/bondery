@@ -5,6 +5,28 @@ import { buildLinkedinLogoUrl } from "../../../lib/storage/avatar-urls.js";
 import { type DomainContext, DomainError } from "../../_shared/context.js";
 import { domainDb } from "../../_shared/domain-db.js";
 
+function sortByActiveFirst<T extends { endDate: Date | null; startDate: Date | null }>(
+  rows: T[],
+): T[] {
+  return [...rows].sort((a, b) => {
+    const aActive = a.endDate === null;
+    const bActive = b.endDate === null;
+    if (aActive !== bActive) {
+      return aActive ? -1 : 1;
+    }
+    if (!a.startDate && !b.startDate) {
+      return 0;
+    }
+    if (!a.startDate) {
+      return 1;
+    }
+    if (!b.startDate) {
+      return -1;
+    }
+    return a.startDate > b.startDate ? -1 : 1;
+  });
+}
+
 export async function upsertLinkedInWorkHistory(
   ctx: DomainContext,
   personId: string,
@@ -72,28 +94,6 @@ export async function upsertLinkedInWorkHistory(
 
   log?.info({ count: workHistory.length, personId }, "[linkedin-data] Upsert complete");
   return { count: workHistory.length, success: true };
-}
-
-function sortByActiveFirst<T extends { endDate: Date | null; startDate: Date | null }>(
-  rows: T[],
-): T[] {
-  return [...rows].sort((a, b) => {
-    const aActive = a.endDate === null;
-    const bActive = b.endDate === null;
-    if (aActive !== bActive) {
-      return aActive ? -1 : 1;
-    }
-    if (!a.startDate && !b.startDate) {
-      return 0;
-    }
-    if (!a.startDate) {
-      return 1;
-    }
-    if (!b.startDate) {
-      return -1;
-    }
-    return a.startDate > b.startDate ? -1 : 1;
-  });
 }
 
 export async function getLinkedInData(

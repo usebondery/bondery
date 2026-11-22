@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { detachPromise } from "@bondery/helpers/async";
 import { PullSessionGuard } from "./pull-session-guard.ts";
 
 describe("pull session guard", () => {
@@ -49,9 +50,11 @@ describe("pull session guard", () => {
     let ran = false;
 
     queueMicrotask(() => {
-      void guard.runIfCurrent(priorGeneration, async () => {
-        ran = true;
-      });
+      detachPromise(
+        guard.runIfCurrent(priorGeneration, async () => {
+          ran = true;
+        }),
+      );
     });
 
     await guard.deactivateAndWait();

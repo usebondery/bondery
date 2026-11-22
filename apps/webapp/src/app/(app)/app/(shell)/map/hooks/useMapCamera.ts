@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { useDebouncedCallback } from "@mantine/hooks";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -54,32 +55,34 @@ export function useMapCamera(view: MapView) {
 
     let cancelled = false;
 
-    void (async () => {
-      const location = await readMapGeolocationIfGranted();
-      if (cancelled) {
-        return;
-      }
+    detachPromise(
+      (async () => {
+        const location = await readMapGeolocationIfGranted();
+        if (cancelled) {
+          return;
+        }
 
-      const camera: MapCamera = location
-        ? {
-            latitude: location.latitude,
-            longitude: location.longitude,
-            zoom: GRANTED_LOCATION_ZOOM,
-          }
-        : DEFAULT_MAP_CAMERA;
+        const camera: MapCamera = location
+          ? {
+              latitude: location.latitude,
+              longitude: location.longitude,
+              zoom: GRANTED_LOCATION_ZOOM,
+            }
+          : DEFAULT_MAP_CAMERA;
 
-      if (location) {
-        setGrantedSelfLocation(location);
-      }
-      setResolvedCamera(camera);
+        if (location) {
+          setGrantedSelfLocation(location);
+        }
+        setResolvedCamera(camera);
 
-      const params = new URLSearchParams(searchParams.toString());
-      applyMapCameraToSearchParams(params, camera);
-      if (!params.has("view")) {
-        params.set("view", view);
-      }
-      router.replace(routeWithQuery(pathname, params));
-    })();
+        const params = new URLSearchParams(searchParams.toString());
+        applyMapCameraToSearchParams(params, camera);
+        if (!params.has("view")) {
+          params.set("view", view);
+        }
+        router.replace(routeWithQuery(pathname, params));
+      })(),
+    );
 
     return () => {
       cancelled = true;

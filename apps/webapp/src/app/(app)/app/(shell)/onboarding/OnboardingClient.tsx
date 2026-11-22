@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import type { ImportFollowupPlatform } from "@bondery/schemas";
 import { Modal } from "@mantine/core";
@@ -68,8 +69,8 @@ function OnboardingFlowContent() {
         return (
           <StepImport
             onAwaitingExportFromModal={handleAwaitingExportFromModal}
-            onComplete={() => void finishOnboarding()}
-            onSkipImport={() => void finishOnboarding({ status: "dismissed" })}
+            onComplete={() => detachPromise(finishOnboarding())}
+            onSkipImport={() => detachPromise(finishOnboarding({ status: "dismissed" }))}
           />
         );
       default:

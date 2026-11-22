@@ -167,7 +167,7 @@ describe("peoplePickerPagedList", () => {
     );
     assert.ok(page);
     state = page;
-    const generation = state.generation;
+    const { generation } = state;
     state = applyReset(state, true);
     assert.equal(state.query, "");
     assert.equal(state.searchResults.length, 0);

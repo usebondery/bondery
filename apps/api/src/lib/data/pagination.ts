@@ -1,7 +1,4 @@
-export const DEFAULT_PAGE_LIMIT = 50;
-export const MAX_PAGE_LIMIT = 200;
-
-export interface PaginationMeta {
+interface PaginationMeta {
   hasMore: boolean;
   limit: number;
   offset: number;
@@ -10,7 +7,7 @@ export interface PaginationMeta {
   totalCount: number;
 }
 
-export interface PaginationInput {
+interface PaginationInput {
   limit?: number | string;
   offset?: number | string;
 }
@@ -22,6 +19,10 @@ function toInt(value: number | string | undefined, fallback: number): number {
   const parsed = typeof value === "string" ? Number(value) : value;
   return Number.isFinite(parsed) ? parsed : fallback;
 }
+
+export type { PaginationInput, PaginationMeta };
+export const DEFAULT_PAGE_LIMIT = 50;
+export const MAX_PAGE_LIMIT = 200;
 
 export function parsePagination(query: PaginationInput = {}): {
   limit: number;

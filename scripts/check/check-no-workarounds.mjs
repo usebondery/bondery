@@ -25,10 +25,12 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5C2B285C642B_RE = /\+(\d+)/;
+
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 
 /** Wording that marks a defect left in place. Each entry explains what to do instead. */
-export const BANNED = [
+const BANNED = [
   { label: "workaround", pattern: /\bwork[\s-]?arounds?\b/i },
   { label: "hack", pattern: /\bhack(?:s|y|ed)?\b/i },
   { label: "kludge", pattern: /\bkludge\b/i },
@@ -61,7 +63,7 @@ const EXCLUDED_PATHS = [
   /^scripts\/check\/check-no-workarounds\./,
 ];
 
-export function isCheckedPath(path) {
+function isCheckedPath(path) {
   return CHECKED_EXTENSIONS.test(path) && EXCLUDED_PATHS.every((rule) => !rule.test(path));
 }
 
@@ -69,7 +71,7 @@ export function isCheckedPath(path) {
  * @param {{ path: string, line: number, text: string }[]} addedLines in file order
  * @returns {string[]} one message per violation
  */
-export function findViolations(addedLines) {
+function findViolations(addedLines) {
   const violations = [];
   let previous = null;
   for (const entry of addedLines) {
@@ -94,7 +96,7 @@ export function findViolations(addedLines) {
 }
 
 /** Parse `git diff -U0` output into added lines with their new line numbers. */
-export function parseAddedLines(diff) {
+function parseAddedLines(diff) {
   const added = [];
   let path = null;
   let line = 0;
@@ -102,7 +104,7 @@ export function parseAddedLines(diff) {
     if (raw.startsWith("+++ ")) {
       path = raw === "+++ /dev/null" ? null : raw.slice(6);
     } else if (raw.startsWith("@@")) {
-      const match = /\+(\d+)/.exec(raw);
+      const match = PATTERN_5C2B285C642B_RE.exec(raw);
       line = match ? Number(match[1]) : 0;
     } else if (raw.startsWith("+") && path !== null) {
       added.push({ line, path, text: raw.slice(1) });
@@ -113,7 +115,7 @@ export function parseAddedLines(diff) {
 }
 
 /** Message lines that count: not git comments, and not generated trailers. */
-export function messageLines(message) {
+function messageLines(message) {
   return message
     .split("\n")
     .filter((text) => !text.startsWith("#"))
@@ -193,3 +195,5 @@ function main() {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }
+
+export { ALLOW_MARKER, BANNED, findViolations, isCheckedPath, messageLines, parseAddedLines };

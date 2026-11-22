@@ -82,7 +82,7 @@ function main() {
   function scanLocales() {
     const files = [];
     walkLocaleJson(srcLocales, files);
-    files.sort();
+    files.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     const map = new Map();
     for (const file of files) {
       map.set(file, fingerprintOf(file));
@@ -232,7 +232,7 @@ function main() {
   if (existsSync(srcLocales)) {
     try {
       // Windows often emits `rename` for atomic saves; do not filter to `change`.
-      watch(srcLocales, { recursive: true }, (eventType, filename) => {
+      watch(srcLocales, { recursive: true }, (_eventType, filename) => {
         const paths = changedPathsFromWatch(filename);
         if (paths.length === 0) {
           // Unknown path: keep the empty marker so `sync` diffs every file.
@@ -242,7 +242,6 @@ function main() {
         for (const path of paths) {
           candidates.add(path);
         }
-        void eventType;
       });
     } catch (error) {
       console.warn("[translations] fs.watch unavailable; poll-only", error);

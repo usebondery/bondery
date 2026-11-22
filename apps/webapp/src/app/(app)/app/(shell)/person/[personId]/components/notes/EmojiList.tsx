@@ -3,15 +3,15 @@
 import { Group, Paper, Stack, Text, UnstyledButton, useMantineTheme } from "@mantine/core";
 import { type Ref, useImperativeHandle, useState } from "react";
 
-export interface EmojiItem {
-  emoji: string;
-  name: string;
-}
-
 interface EmojiListProps {
   command: (item: EmojiItem) => void;
   items: EmojiItem[];
   ref?: Ref<EmojiListHandle>;
+}
+
+export interface EmojiItem {
+  emoji: string;
+  name: string;
 }
 
 export interface EmojiListHandle {

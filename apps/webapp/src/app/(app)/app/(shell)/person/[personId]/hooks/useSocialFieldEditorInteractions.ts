@@ -1,6 +1,7 @@
 "use client";
 
 import { analyzeSocialFieldInput, resolveContactSocialFieldCommit } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   isSavableSocialField,
   type RerouteSuggestion,
@@ -101,7 +102,7 @@ export function useSocialFieldEditorInteractions({
     clearCloseTimeout();
     closeTimeoutRef.current = window.setTimeout(() => {
       if (isSavableSocialField(field)) {
-        void commitAndCloseField(field);
+        detachPromise(commitAndCloseField(field));
         return;
       }
       closeField(field);
@@ -111,7 +112,7 @@ export function useSocialFieldEditorInteractions({
   const requestOpen = async (field: string) => {
     clearCloseTimeout();
 
-    const current = openFieldRef.current;
+    const { current } = openFieldRef;
     if (current && current !== field && isSavableSocialField(current)) {
       await commitField(current);
     }
@@ -123,14 +124,14 @@ export function useSocialFieldEditorInteractions({
   const requestToggle = (field: string) => {
     if (openFieldRef.current === field) {
       if (isSavableSocialField(field)) {
-        void commitAndCloseField(field);
+        detachPromise(commitAndCloseField(field));
       } else {
         closeField(field);
       }
       return;
     }
 
-    void requestOpen(field);
+    detachPromise(requestOpen(field));
   };
 
   const handleEscape = (field: SocialFieldKey) => {

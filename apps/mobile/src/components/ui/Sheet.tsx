@@ -27,9 +27,7 @@ import { Stack } from "./Stack";
 import { Text } from "./Text";
 import { TextInput } from "./TextInput";
 
-export { BottomSheetFlatList, BottomSheetScrollView };
-
-export type SheetSnapPoint = keyof typeof SHEET_SNAP_POINTS;
+type SheetSnapPoint = keyof typeof SHEET_SNAP_POINTS;
 
 type SheetActionBase = {
   disabled?: boolean;
@@ -41,9 +39,9 @@ type SheetActionBase = {
 };
 
 /** When `loading` is set, `loadingText` is required and shown on the action button. */
-export type SheetAction = SheetActionBase & ButtonLoadingProps;
+type SheetAction = SheetActionBase & ButtonLoadingProps;
 
-export type SheetSearch = {
+type SheetSearch = {
   query: string;
   onQueryChange: (query: string) => void;
   placeholder: string;
@@ -51,7 +49,7 @@ export type SheetSearch = {
   rightAction?: ReactNode;
 };
 
-export type SheetProps = {
+type SheetProps = {
   opened: boolean;
   onClose: () => void;
   /** Called after Gorhom reports the modal dismissed (animation complete). */
@@ -75,7 +73,7 @@ const ACTION_ROW_HEIGHT = 44;
 const FOOTER_TOP_PADDING = 8;
 
 /** Wraps Gorhom `useBottomSheetScrollableCreator`. Call this hook inside a `Sheet` tree. */
-export function useSheetScrollable() {
+function useSheetScrollable() {
   return useBottomSheetScrollableCreator({
     enableFooterMarginAdjustment: true,
   });
@@ -103,7 +101,7 @@ function sheetActionButtonLoadingProps(action: SheetAction): {
 
 function SheetActionButtons({ actions }: { actions: NonNullable<SheetProps["actions"]> }) {
   if (actions.length === 1) {
-    const action = actions[0];
+    const [action] = actions;
     return (
       <Button
         color={action.tone ?? "primary"}
@@ -143,7 +141,7 @@ function SheetActionButtons({ actions }: { actions: NonNullable<SheetProps["acti
  * App sheet chrome over Gorhom `BottomSheetModal`.
  * Feature files import this module. They do not import `@gorhom/bottom-sheet`.
  */
-export function Sheet({
+function Sheet({
   opened,
   onClose,
   onDismissed,
@@ -413,3 +411,6 @@ export function Sheet({
     </BottomSheetModal>
   );
 }
+
+export type { SheetAction, SheetProps, SheetSearch, SheetSnapPoint };
+export { BottomSheetFlatList, BottomSheetScrollView, Sheet, useSheetScrollable };

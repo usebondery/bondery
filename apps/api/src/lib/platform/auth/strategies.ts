@@ -25,6 +25,8 @@ import { isApiKeyBearerToken } from "./api-keys.js";
 import { resolveOAuthBearerUser, resolveRequestAuthUser } from "./resolve-request-auth.js";
 import { createVerifyServiceSecret } from "./service-secret.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 // ── Type augmentation ────────────────────────────────────────────────────────
 
 declare module "fastify" {
@@ -164,7 +166,7 @@ export function registerAuthStrategies(fastify: AppFastifyInstance): void {
  * hairpin to BONDERY_PUBLIC_API_URL. The public issuer URL is still logged.
  */
 export async function verifyAuthRuntime(fastify: AppFastifyInstance): Promise<void> {
-  const publicBaseUrl = fastify.config.BONDERY_PUBLIC_API_URL.replace(/\/+$/, "");
+  const publicBaseUrl = fastify.config.BONDERY_PUBLIC_API_URL.replace(TRAILING_SLASHES_PATTERN, "");
   const publicJwksUrl = `${publicBaseUrl}${betterAuthPath("/jwks")}`;
   const jwksPath = betterAuthPath("/jwks");
 

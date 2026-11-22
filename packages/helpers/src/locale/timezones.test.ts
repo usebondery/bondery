@@ -2,6 +2,14 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { formatTimezoneLabel, getGroupedTimezones, TIMEZONES_DATA } from "./timezones.js";
 
+const PRAG_RE = /Prag/;
+const TSCHECHIEN_RE = /Tschechien/;
+const PRAHA_RE = /Praha/;
+const ESKO_ESK_RE = /Česko|Česká/;
+const PRAGUE_RE_2 = /Prague/;
+const PRAGUE_RE = /prague/;
+const EUROPE_PRAGUE_RE = /europe\/prague/;
+
 function supportsTimeZoneDisplayNames(): boolean {
   try {
     const names = new Intl.DisplayNames(["cs-CZ"], {
@@ -21,8 +29,8 @@ describe("formatTimezoneLabel", () => {
     const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
     assert.ok(prague);
     const label = formatTimezoneLabel(prague, "de-DE");
-    assert.match(label, /Tschechien/);
-    assert.match(label, /Prag/);
+    assert.match(label, TSCHECHIEN_RE);
+    assert.match(label, PRAG_RE);
   });
 
   it("localizes the German country and falls back to Prague without timeZone DisplayNames", {
@@ -31,8 +39,8 @@ describe("formatTimezoneLabel", () => {
     const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
     assert.ok(prague);
     const label = formatTimezoneLabel(prague, "de-DE");
-    assert.match(label, /Tschechien/);
-    assert.match(label, /Prague/);
+    assert.match(label, TSCHECHIEN_RE);
+    assert.match(label, PRAGUE_RE_2);
   });
 
   it("localizes Prague to Praha on Czech when DisplayNames supports timeZone", {
@@ -41,8 +49,8 @@ describe("formatTimezoneLabel", () => {
     const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
     assert.ok(prague);
     const label = formatTimezoneLabel(prague, "cs-CZ");
-    assert.match(label, /Česko|Česká/);
-    assert.match(label, /Praha/);
+    assert.match(label, ESKO_ESK_RE);
+    assert.match(label, PRAHA_RE);
   });
 
   it("falls back to Prague on Czech when DisplayNames does not support timeZone", {
@@ -51,8 +59,8 @@ describe("formatTimezoneLabel", () => {
     const prague = TIMEZONES_DATA.find((timezone) => timezone.value === "Europe/Prague");
     assert.ok(prague);
     const label = formatTimezoneLabel(prague, "cs-CZ");
-    assert.match(label, /Česko|Česká/);
-    assert.match(label, /Prague/);
+    assert.match(label, ESKO_ESK_RE);
+    assert.match(label, PRAGUE_RE_2);
   });
 });
 
@@ -79,7 +87,7 @@ describe("getGroupedTimezones", () => {
     assert.ok(europe);
     const prague = europe.items.find((item) => item.value === "Europe/Prague");
     assert.ok(prague);
-    assert.match(prague.searchHaystack, /prague/);
-    assert.match(prague.searchHaystack, /europe\/prague/);
+    assert.match(prague.searchHaystack, PRAGUE_RE);
+    assert.match(prague.searchHaystack, EUROPE_PRAGUE_RE);
   });
 });

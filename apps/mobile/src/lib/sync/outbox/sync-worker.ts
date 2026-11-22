@@ -1,4 +1,5 @@
 import { isApiError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import type { SyncMutation, SyncPushResponse, SyncTableKey } from "@bondery/schemas/sync";
 import { mobileFetch } from "../../api/transport";
@@ -37,7 +38,7 @@ function tryBeginDrain(): boolean {
 type SyncErrorListener = (error: unknown) => void;
 const errorListeners = new Set<SyncErrorListener>();
 
-export function subscribeSyncErrors(listener: SyncErrorListener): () => void {
+function subscribeSyncErrors(listener: SyncErrorListener): () => void {
   errorListeners.add(listener);
   return () => errorListeners.delete(listener);
 }
@@ -212,13 +213,13 @@ async function runDrainPendingMutations(generation: PullSessionGeneration): Prom
   }
 }
 
-export function drainPendingMutations(
+function drainPendingMutations(
   generation: PullSessionGeneration | null = syncSessionGuard.capture(),
 ): Promise<void> {
   return syncSessionGuard.runIfCurrent(generation, runDrainPendingMutations) ?? Promise.resolve();
 }
 
-export function scheduleSyncDrain(): void {
+function scheduleSyncDrain(): void {
   const generation = syncSessionGuard.capture();
   if (generation === null || drainScheduledGeneration === generation) {
     return;
@@ -229,10 +230,12 @@ export function scheduleSyncDrain(): void {
     if (drainScheduledGeneration === generation) {
       drainScheduledGeneration = null;
     }
-    void drainPendingMutations(generation);
+    detachPromise(drainPendingMutations(generation));
   });
 }
 
-export async function pushSync(): Promise<void> {
+async function pushSync(): Promise<void> {
   await drainPendingMutations();
 }
+
+export { drainPendingMutations, pushSync, scheduleSyncDrain, subscribeSyncErrors };

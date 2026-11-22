@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   PersonChip,
@@ -248,7 +249,7 @@ export function MergeRecommendationCard({
             disabled={isDeclining}
             leftSection={<IconCheck size={16} />}
             loading={isAccepting}
-            onClick={() => void handleAccept()}
+            onClick={() => detachPromise(handleAccept())}
           >
             {t("AcceptMerge")}
           </Button>

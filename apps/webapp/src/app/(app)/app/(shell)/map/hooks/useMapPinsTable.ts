@@ -19,6 +19,34 @@ interface UseMapPinsTableOptions {
   visibleLocationPins: MapPin[];
 }
 
+function searchNeedle(tableSearch: string): string {
+  return tableSearch.trim().toLowerCase();
+}
+
+function filterAndSortPins(
+  visibleLocationPins: MapPin[],
+  tableSearch: string,
+  sortOrder: SortOrder,
+): MapPin[] {
+  const needle = searchNeedle(tableSearch);
+  const filtered = needle
+    ? visibleLocationPins.filter((pin) => pinDisplayName(pin).toLowerCase().includes(needle))
+    : visibleLocationPins;
+  return sortPins(filtered, sortOrder);
+}
+
+function filterAndSortAddressRows(
+  addressContactRows: ContactTableRow[],
+  tableSearch: string,
+  sortOrder: SortOrder,
+): ContactTableRow[] {
+  const needle = searchNeedle(tableSearch);
+  const filtered = needle
+    ? addressContactRows.filter((row) => formatContactName(row).toLowerCase().includes(needle))
+    : addressContactRows;
+  return sortPins(filtered, sortOrder);
+}
+
 /** Search, sort, selection and row actions for the pins table under the map. */
 export function useMapPinsTable({
   addressContactRows,
@@ -95,32 +123,4 @@ export function useMapPinsTable({
     someSelected,
     sortOrder,
   };
-}
-
-function searchNeedle(tableSearch: string): string {
-  return tableSearch.trim().toLowerCase();
-}
-
-function filterAndSortPins(
-  visibleLocationPins: MapPin[],
-  tableSearch: string,
-  sortOrder: SortOrder,
-): MapPin[] {
-  const needle = searchNeedle(tableSearch);
-  const filtered = needle
-    ? visibleLocationPins.filter((pin) => pinDisplayName(pin).toLowerCase().includes(needle))
-    : visibleLocationPins;
-  return sortPins(filtered, sortOrder);
-}
-
-function filterAndSortAddressRows(
-  addressContactRows: ContactTableRow[],
-  tableSearch: string,
-  sortOrder: SortOrder,
-): ContactTableRow[] {
-  const needle = searchNeedle(tableSearch);
-  const filtered = needle
-    ? addressContactRows.filter((row) => formatContactName(row).toLowerCase().includes(needle))
-    : addressContactRows;
-  return sortPins(filtered, sortOrder);
 }

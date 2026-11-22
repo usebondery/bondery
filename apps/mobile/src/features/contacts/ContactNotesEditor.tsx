@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import {
   collapsePersonMentionsFromEditor,
   expandPersonMentionsForEditor,
@@ -43,7 +44,7 @@ type SaveStatus = "idle" | "saving" | "saved" | "error";
 
 const AUTOSAVE_DELAY_MS = 1500;
 
-export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProps) {
+function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProps) {
   const router = useRouter();
   const colors = useMobileThemeColors();
 
@@ -147,7 +148,7 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
     setSaveStatus("idle");
     saveTimer.current = setTimeout(() => {
       if (pendingMarkdown.current !== null) {
-        void saveNotes(pendingMarkdown.current);
+        detachPromise(saveNotes(pendingMarkdown.current));
         pendingMarkdown.current = null;
       }
     }, AUTOSAVE_DELAY_MS);
@@ -160,7 +161,7 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
         saveTimer.current = null;
       }
       if (pendingMarkdown.current !== null) {
-        void saveNotes(pendingMarkdown.current);
+        detachPromise(saveNotes(pendingMarkdown.current));
         pendingMarkdown.current = null;
       }
     };
@@ -319,7 +320,7 @@ export function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEdi
               onDismiss={dismissPalette}
               onMentionSelect={handleMentionSelect}
               onSlashCommandSelect={(command) => {
-                void handleSlashCommandSelect(command);
+                detachPromise(handleSlashCommandSelect(command));
               }}
               slashQuery={slashState?.query ?? ""}
             />
@@ -363,3 +364,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+
+export { ContactNotesEditor };

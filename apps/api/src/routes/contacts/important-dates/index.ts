@@ -26,6 +26,10 @@ import {
   listUpcomingReminders,
 } from "../../../services/contacts/queries.js";
 
+const NOTIFY_ONE_DAY_BEFORE = 1;
+const NOTIFY_THREE_DAYS_BEFORE = 3;
+const NOTIFY_ONE_WEEK_BEFORE = 7;
+
 export const IMPORTANT_DATE_TYPES = [
   "birthday",
   "anniversary",
@@ -33,10 +37,6 @@ export const IMPORTANT_DATE_TYPES = [
   "graduation",
   "other",
 ] satisfies ImportantDateType[];
-
-const NOTIFY_ONE_DAY_BEFORE = 1;
-const NOTIFY_THREE_DAYS_BEFORE = 3;
-const NOTIFY_ONE_WEEK_BEFORE = 7;
 
 export const IMPORTANT_DATE_NOTIFY_VALUES = [
   NOTIFY_ONE_DAY_BEFORE,

@@ -15,17 +15,6 @@ import {
   BRAND_WORDMARK,
 } from "#typography.js";
 
-export type BonderyDynamicLogotypeProps = {
-  /** Optional class on the outer span. */
-  className?: string;
-  /** Icon height in pixels. Label font size scales with this. */
-  height?: number;
-  /** Label beside the icon (e.g. `"Bondery Docs"`). Omit for icon-only. */
-  text?: string;
-  /** Color scheme for icon and label. */
-  theme: "light" | "dark";
-};
-
 const TEXT_COLORS = {
   dark: "#ffffff",
   light: "#000000",
@@ -35,6 +24,17 @@ const clipContainerStyle: CSSProperties = {
   display: "inline-block",
   lineHeight: 0,
   overflow: "hidden",
+};
+
+export type BonderyDynamicLogotypeProps = {
+  /** Optional class on the outer span. */
+  className?: string;
+  /** Icon height in pixels. Label font size scales with this. */
+  height?: number;
+  /** Label beside the icon (e.g. `"Bondery Docs"`). Omit for icon-only. */
+  text?: string;
+  /** Color scheme for icon and label. */
+  theme: "light" | "dark";
 };
 
 /**

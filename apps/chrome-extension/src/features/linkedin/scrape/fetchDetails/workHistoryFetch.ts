@@ -13,11 +13,17 @@ import {
   extractProfileUrn,
   logEntityTypes,
   resolveEmploymentType,
+  type VoyagerEntity,
   voyagerFetch,
 } from "./voyagerShared";
 
+const COLLECTION_WORD_RE = /collection/i;
+const POSITION_WORD_RE = /position/i;
+const GROUP_WORD_RE = /group/i;
+const POSITION_GROUP_WORD_RE = /positiongroup/i;
+const EXPERIENCE_WORD_RE = /experience/i;
 function mapPositionEntity(
-  pos: Record<string, unknown>,
+  pos: VoyagerEntity,
   employmentTypeByUrn?: Map<string, string>,
 ): WorkEntry | null {
   const title = (pos.title ?? "") as string;
@@ -43,10 +49,8 @@ function mapPositionEntity(
 
   // Company LinkedIn identifier — try various Voyager patterns
   let companyLinkedinId: string | undefined;
-  const company = pos.company as Record<string, unknown> | undefined;
-  const miniCompany = (company?.miniCompany ?? pos.miniCompany) as
-    | Record<string, unknown>
-    | undefined;
+  const { company } = pos;
+  const miniCompany = company?.miniCompany ?? pos.miniCompany;
   const universalName = miniCompany?.universalName as string | undefined;
   if (universalName) {
     companyLinkedinId = universalName;
@@ -60,9 +64,7 @@ function mapPositionEntity(
 
   // Company logo — try nested logo / vectorImage structures
   let companyLogoUrl: string | undefined;
-  const logo = (company?.logo ?? miniCompany?.logo ?? pos.companyLogo) as
-    | Record<string, unknown>
-    | undefined;
+  const logo = company?.logo ?? miniCompany?.logo ?? pos.companyLogo;
   if (logo) {
     companyLogoUrl = extractLogoUrlFromVoyagerImage(logo);
   }
@@ -95,8 +97,8 @@ function mapPositionEntity(
  *    references to resolve nested positions from the `included` array
  */
 function extractPositionsFromApiResponse(
-  apiEntities: Record<string, unknown>[],
-  rawResponse: Record<string, unknown>,
+  apiEntities: VoyagerEntity[],
+  rawResponse: VoyagerEntity,
 ): WorkEntry[] {
   // Build a URN → name map from fsd_employmentType entities included in this response.
   // These entities look like: { entityUrn: "urn:li:fsd_employmentType:12", name: "Full-time", ... }
@@ -113,7 +115,13 @@ function extractPositionsFromApiResponse(
   // First: check if there are flat Position entities directly
   const flatPositions = apiEntities.filter((e) => {
     const t = e.$type as string | undefined;
-    return t != null && /position/i.test(t) && !/group/i.test(t) && !/collection/i.test(t);
+    return (
+      t !== null &&
+      t !== undefined &&
+      POSITION_WORD_RE.test(t) &&
+      !GROUP_WORD_RE.test(t) &&
+      !COLLECTION_WORD_RE.test(t)
+    );
   });
 
   if (flatPositions.length > 0) {
@@ -130,7 +138,7 @@ function extractPositionsFromApiResponse(
   // Second: handle PositionGroup entities
   const positionGroups = apiEntities.filter((e) => {
     const t = e.$type as string | undefined;
-    return t != null && /positiongroup/i.test(t);
+    return t !== null && t !== undefined && POSITION_GROUP_WORD_RE.test(t);
   });
 
   extLog.debug(`[linkedin][fetchDetails] Found ${positionGroups.length} PositionGroup entities`);
@@ -143,7 +151,7 @@ function extractPositionsFromApiResponse(
   }
 
   // Build a lookup of all included entities by entityUrn for resolving references
-  const entityByUrn = new Map<string, Record<string, unknown>>();
+  const entityByUrn = new Map<string, VoyagerEntity>();
   for (const e of apiEntities) {
     const urn = e.entityUrn as string | undefined;
     if (urn) {
@@ -191,9 +199,7 @@ function extractPositionsFromApiResponse(
   }
 
   // Third: also check data.elements for positions in case they're at the top level
-  const dataElements = (rawResponse.data as Record<string, unknown> | undefined)?.elements as
-    | Record<string, unknown>[]
-    | undefined;
+  const dataElements = rawResponse.data?.elements;
   if (dataElements && allEntries.length === 0) {
     extLog.debug(`[linkedin][fetchDetails] Checking data.elements (${dataElements.length} items)`);
     for (const el of dataElements) {
@@ -217,21 +223,21 @@ function extractPositionsFromApiResponse(
  *   - `positions` / `profilePositions` (direct array)
  */
 function extractNestedPositions(
-  group: Record<string, unknown>,
-  entityByUrn: Map<string, Record<string, unknown>>,
-): Record<string, unknown>[] {
-  const positions: Record<string, unknown>[] = [];
+  group: VoyagerEntity,
+  entityByUrn: Map<string, VoyagerEntity>,
+): VoyagerEntity[] {
+  const positions: VoyagerEntity[] = [];
 
   // Pattern 1: inline elements
   for (const key of Object.keys(group)) {
-    if (/position/i.test(key) && !key.startsWith("$") && !key.startsWith("*")) {
+    if (POSITION_WORD_RE.test(key) && !key.startsWith("$") && !key.startsWith("*")) {
       const val = group[key];
 
       // Could be an array of positions
       if (Array.isArray(val)) {
         for (const item of val) {
           if (item && typeof item === "object") {
-            positions.push(item as Record<string, unknown>);
+            positions.push(item as VoyagerEntity);
           }
         }
         continue;
@@ -239,20 +245,19 @@ function extractNestedPositions(
 
       // Could be an object with .elements[] or .paging.elements[]
       if (val && typeof val === "object") {
-        const obj = val as Record<string, unknown>;
-        const elements = (obj.elements ??
-          (obj.paging as Record<string, unknown> | undefined)?.elements) as unknown[] | undefined;
+        const obj = val as VoyagerEntity;
+        const elements = obj.elements ?? obj.paging?.elements;
         if (Array.isArray(elements)) {
           for (const item of elements) {
             if (item && typeof item === "object") {
-              positions.push(item as Record<string, unknown>);
+              positions.push(item);
             }
           }
           continue;
         }
 
         // Could be a single nested position object with a profilePosition
-        const profilePos = obj.profilePosition as Record<string, unknown> | undefined;
+        const profilePos = obj.profilePosition;
         if (profilePos) {
           positions.push(profilePos);
         }
@@ -262,7 +267,7 @@ function extractNestedPositions(
 
   // Pattern 2: URN references (keys starting with *)
   for (const key of Object.keys(group)) {
-    if (key.startsWith("*") && /position/i.test(key)) {
+    if (key.startsWith("*") && POSITION_WORD_RE.test(key)) {
       const refs = group[key];
       const urnList = Array.isArray(refs) ? refs : [refs];
       for (const ref of urnList) {
@@ -270,7 +275,7 @@ function extractNestedPositions(
           const resolved = entityByUrn.get(ref);
           if (resolved) {
             // The resolved entity might itself contain nested positions
-            const profilePos = resolved.profilePosition as Record<string, unknown> | undefined;
+            const profilePos = resolved.profilePosition;
             if (profilePos) {
               positions.push(profilePos);
             } else {
@@ -283,7 +288,7 @@ function extractNestedPositions(
   }
 
   if (positions.length > 0) {
-    const first = positions[0];
+    const [first] = positions;
     if (first) {
       extLog.debug(
         `[linkedin][fetchDetails] Extracted ${positions.length} nested positions from group`,
@@ -333,8 +338,7 @@ export async function fetchFullWorkHistory(
     const paths = WORK_ENDPOINTS(profileUrn);
     const responses = await Promise.all(paths.map((path) => voyagerFetch(path)));
 
-    let untitledFallback: { entries: WorkEntry[]; apiEntities: Record<string, unknown>[] } | null =
-      null;
+    let untitledFallback: { entries: WorkEntry[]; apiEntities: VoyagerEntity[] } | null = null;
 
     for (let i = 0; i < responses.length; i++) {
       const data = responses[i];
@@ -387,11 +391,12 @@ export async function fetchFullWorkHistory(
   const positionEntities = entities.filter((e) => {
     const t = e.$type as string | undefined;
     return (
-      t != null &&
-      (/position/i.test(t) || /experience/i.test(t)) &&
+      t !== null &&
+      t !== undefined &&
+      (POSITION_WORD_RE.test(t) || EXPERIENCE_WORD_RE.test(t)) &&
       // Exclude group/collection wrappers
-      !/group/i.test(t) &&
-      !/collection/i.test(t)
+      !GROUP_WORD_RE.test(t) &&
+      !COLLECTION_WORD_RE.test(t)
     );
   });
 

@@ -7,7 +7,7 @@ import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { nonEmpty } from "../../../lib/text";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
-export type GroupChipGroup = Pick<Group, "id" | "label" | "emoji" | "color"> & {
+type GroupChipGroup = Pick<Group, "id" | "label" | "emoji" | "color"> & {
   contactCount: number;
 };
 
@@ -20,12 +20,7 @@ interface GroupChipProps {
 
 const CHIP_CLASS = "flex-row items-center gap-1.5 rounded-full border px-3 py-2";
 
-export function GroupChip({
-  group,
-  onPress,
-  accessibilityLabel,
-  isClickable = true,
-}: GroupChipProps) {
+function GroupChip({ group, onPress, accessibilityLabel, isClickable = true }: GroupChipProps) {
   const colors = useMobileThemeColors();
   const { pressIn, pressOut, squeezeStyle } = usePressSqueeze("subtle");
   const label = accessibilityLabel ?? group.label;
@@ -79,3 +74,6 @@ export function GroupChip({
     </Animated.View>
   );
 }
+
+export type { GroupChipGroup };
+export { GroupChip };

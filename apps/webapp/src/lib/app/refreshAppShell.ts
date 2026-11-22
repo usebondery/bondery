@@ -3,11 +3,11 @@
 import type { UserSessionState } from "@/components/shell/UserSessionProvider";
 import { applyUserSessionFromRef } from "@/components/shell/UserSessionProvider";
 
+let refreshLayoutRef: (() => void) | null = null;
+
 export type UserSessionPatch = Partial<
   Pick<UserSessionState, "avatarUrl" | "colorScheme" | "displayName">
 >;
-
-let refreshLayoutRef: (() => void) | null = null;
 
 export function registerAppShellRefresh(refresh: () => void): () => void {
   refreshLayoutRef = refresh;

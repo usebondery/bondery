@@ -8,6 +8,7 @@ import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useMePersonQuery } from "@/lib/query/hooks/useMePerson";
 import { useOAuthProvidersQuery } from "@/lib/query/hooks/useOAuthProviders";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
+import { SETTINGS_PROFILE_SECTION_ID } from "../../settingsSectionIds";
 import { PasskeysBlock } from "./PasskeysBlock";
 import { ProviderIntegrations } from "./ProviderIntegrations";
 import { SettingsSection } from "./SettingsSection";
@@ -23,21 +24,14 @@ export function ProfileCard() {
     return null;
   }
 
-  const email = typeof settings.email === "string" ? settings.email : "";
-  const providers = Array.isArray(settings.providers) ? (settings.providers as string[]) : [];
-  const userIdentities = Array.isArray(settings.identities)
-    ? (settings.identities as Array<{
-        id: string;
-        user_id: string;
-        identity_id: string;
-        provider: string;
-      }>)
-    : [];
+  const email = settings.email ?? "";
+  const providers = settings.providers ?? [];
+  const userIdentities = settings.identities ?? [];
 
   return (
     <SettingsSection
       icon={<IconUserCircle size={20} stroke={1.5} />}
-      id="profile"
+      id={SETTINGS_PROFILE_SECTION_ID}
       title={t("Title")}
     >
       <CardSection inheritPadding py="md">

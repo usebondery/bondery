@@ -4,6 +4,12 @@ import type { S3Client } from "@aws-sdk/client-s3";
 
 import { loadTestEnv } from "./load-test-env.js";
 
+const DATABASE_URL_MUST_BE_SET_PATTERN = /DATABASE_URL must be set/;
+const POSTGRES_VERIFY_FAILED_PATTERN = /Postgres verify failed/;
+const BONDERY_PRIVATE_S3_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_S3_\* must be set/;
+const OBJECT_STORAGE_VERIFY_FAILED_PATTERN = /Object storage verify failed/;
+const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/;
+
 loadTestEnv();
 
 const { prisma } = await import("@bondery/db");
@@ -97,7 +103,7 @@ describe("postgres runtime readiness", () => {
     process.env.NODE_ENV = "development";
     delete process.env.DATABASE_URL;
 
-    await assert.rejects(() => initPostgres(), /DATABASE_URL must be set/);
+    await assert.rejects(() => initPostgres(), DATABASE_URL_MUST_BE_SET_PATTERN);
   });
 
   it("initPostgres throws when query fails in development", async () => {
@@ -107,7 +113,7 @@ describe("postgres runtime readiness", () => {
       throw new Error("connection refused");
     }) as typeof prisma.$queryRaw;
 
-    await assert.rejects(() => initPostgres(), /Postgres verify failed/);
+    await assert.rejects(() => initPostgres(), POSTGRES_VERIFY_FAILED_PATTERN);
   });
 
   it("verifyPostgres returns unhealthy when DATABASE_URL is missing outside test", async () => {
@@ -160,7 +166,7 @@ describe("object storage runtime readiness", () => {
           ...storageConfig,
           secretAccessKey: "",
         }),
-      /BONDERY_PRIVATE_S3_\* must be set/,
+      BONDERY_PRIVATE_S3_MUST_BE_SET_PATTERN,
     );
   });
 
@@ -172,7 +178,7 @@ describe("object storage runtime readiness", () => {
 
     await assert.rejects(
       () => initObjectStorage(undefined, { ...storageConfig, client }),
-      /Object storage verify failed/,
+      OBJECT_STORAGE_VERIFY_FAILED_PATTERN,
     );
   });
 
@@ -260,7 +266,10 @@ describe("redis runtime readiness", () => {
   it("initRedis throws when URL is missing in development", async () => {
     process.env.NODE_ENV = "development";
 
-    await assert.rejects(() => initRedis(undefined, ""), /BONDERY_PRIVATE_REDIS_URL must be set/);
+    await assert.rejects(
+      () => initRedis(undefined, ""),
+      BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN,
+    );
   });
 
   it("verifyRedis returns unhealthy when URL is missing outside test", async () => {

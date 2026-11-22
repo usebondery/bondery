@@ -1,11 +1,12 @@
 import type * as PageTree from "fumadocs-core/page-tree";
 import type { ReactNode } from "react";
 
+const DOCS_SLASH_PREFIX_RE = /^\/docs\//;
 /**
  * A folder that represents its own page. An index page, or a folder path from the tree
  * ref, names the folder itself.
  */
-export function folderOwnUrl(folder: PageTree.Folder): string | null {
+function folderOwnUrl(folder: PageTree.Folder): string | null {
   if (folder.index?.url) {
     return folder.index.url;
   }
@@ -29,7 +30,7 @@ export function folderOwnUrl(folder: PageTree.Folder): string | null {
  * resolves back to that page is a label-only group (the error-type groups), so it gets
  * no link. Without this check the group would link to the page the reader is already on.
  */
-export function folderUrl(folder: PageTree.Folder, ancestorUrl?: string | null): string | null {
+function folderUrl(folder: PageTree.Folder, ancestorUrl?: string | null): string | null {
   const own = folderOwnUrl(folder);
   if (own !== null) {
     return own;
@@ -65,7 +66,7 @@ function parentUrl(url: string): string {
   return parent.length > 0 ? parent : "/docs";
 }
 
-export function findFolderByPath(nodes: PageTree.Node[], pathname: string): PageTree.Folder | null {
+function findFolderByPath(nodes: PageTree.Node[], pathname: string): PageTree.Folder | null {
   for (const node of nodes) {
     if (node.type !== "folder") {
       continue;
@@ -90,14 +91,14 @@ export function findFolderByPath(nodes: PageTree.Node[], pathname: string): Page
  * The folder page has no MDX file, so `meta.json` is the only place to declare
  * the text that becomes the `<meta name="description">` tag.
  */
-export function folderDescription(folder: PageTree.Folder): string | undefined {
+function folderDescription(folder: PageTree.Folder): string | undefined {
   return typeof folder.description === "string" && folder.description.trim().length > 0
     ? folder.description
     : undefined;
 }
 
 /** Icon for a docs page or folder URL. */
-export function findDocsIcon(nodes: PageTree.Node[], url: string): ReactNode | undefined {
+function findDocsIcon(nodes: PageTree.Node[], url: string): ReactNode | undefined {
   for (const node of nodes) {
     if (node.type === "page" && node.url === url) {
       return node.icon;
@@ -117,7 +118,7 @@ export function findDocsIcon(nodes: PageTree.Node[], url: string): ReactNode | u
 }
 
 /** Folder paths that are not already a real page. `known` holds slug joins such as `contributing/guides`. */
-export function listFolderSlugs(nodes: PageTree.Node[], known: Set<string>): string[][] {
+function listFolderSlugs(nodes: PageTree.Node[], known: Set<string>): string[][] {
   const slugs: string[][] = [];
 
   function walk(list: PageTree.Node[]) {
@@ -128,7 +129,7 @@ export function listFolderSlugs(nodes: PageTree.Node[], known: Set<string>): str
 
       const url = folderUrl(node);
       if (url && url !== "/docs") {
-        const slug = url.replace(/^\/docs\//, "").split("/");
+        const slug = url.replace(DOCS_SLASH_PREFIX_RE, "").split("/");
         const key = slug.join("/");
         if (!known.has(key)) {
           slugs.push(slug);
@@ -142,3 +143,12 @@ export function listFolderSlugs(nodes: PageTree.Node[], known: Set<string>): str
   walk(nodes);
   return slugs;
 }
+
+export {
+  findDocsIcon,
+  findFolderByPath,
+  folderDescription,
+  folderOwnUrl,
+  folderUrl,
+  listFolderSlugs,
+};

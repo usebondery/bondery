@@ -2,20 +2,11 @@ import { Group, SegmentedControl, Stack, Text } from "@mantine/core";
 import { IconMoon, IconSettings, IconSun } from "@tabler/icons-react";
 import type { ReactElement, ReactNode } from "react";
 
-export type ThemePreference = "light" | "dark" | "auto";
-
 interface ThemePickerLabels {
   dark: string;
   light: string;
   system: string;
   title: ReactNode;
-}
-
-export interface ThemePickerProps {
-  className?: string;
-  labels?: Partial<ThemePickerLabels>;
-  onChange: (value: ThemePreference) => void;
-  value: ThemePreference;
 }
 
 const defaultLabels: ThemePickerLabels = {
@@ -24,6 +15,15 @@ const defaultLabels: ThemePickerLabels = {
   system: "System",
   title: "Theme",
 };
+
+export type ThemePreference = "light" | "dark" | "auto";
+
+export interface ThemePickerProps {
+  className?: string;
+  labels?: Partial<ThemePickerLabels>;
+  onChange: (value: ThemePreference) => void;
+  value: ThemePreference;
+}
 
 /**
  * Shared theme preference picker UI (light, dark, system).

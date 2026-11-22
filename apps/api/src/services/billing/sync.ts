@@ -6,7 +6,7 @@ import { getStripeClient } from "./stripe.js";
 import { getSubscriptionPeriod, isScheduledToCancel } from "./stripe-helpers.js";
 import { deletePendingSubscription, upsertSubscription } from "./subscription.js";
 
-export type SubscriptionSyncResult =
+type SubscriptionSyncResult =
   | { synced: true; source: "pending" | "stripe_api" }
   | { synced: false; reason: string };
 
@@ -29,6 +29,8 @@ function extractMirrorFromStripeSubscription(subscription: Stripe.Subscription) 
     unitAmount: price?.unit_amount ?? null,
   };
 }
+
+export type { SubscriptionSyncResult };
 
 export async function syncSubscriptionFromStripe(
   ctx: DomainContext,

@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   ActionIconButton,
   ActionIconLink,
@@ -226,7 +227,7 @@ export function ContactEmailsSection({
                   disabled={!email.value}
                   leftSection={<IconCopy size={14} />}
                   onClick={() => {
-                    void navigator.clipboard.writeText(email.value || "");
+                    detachPromise(navigator.clipboard.writeText(email.value || ""));
                     notifications.show(
                       successNotificationTemplate({
                         description: text.emailCopiedMessage,

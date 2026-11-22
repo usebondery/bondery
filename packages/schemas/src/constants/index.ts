@@ -1,3 +1,6 @@
+const BYTES_PER_KIB = 1024;
+const BYTES_PER_MIB = BYTES_PER_KIB * BYTES_PER_KIB;
+const AVATAR_MAX_MIB = 5;
 export const CONTACT_FIELD_MAX_LENGTHS = {
   addressLabel: 64,
   dateName: 50,
@@ -9,7 +12,7 @@ export const CONTACT_FIELD_MAX_LENGTHS = {
   lastName: 50,
   location: 100,
   middleName: 50,
-  notesHtml: 20000,
+  notesHtml: 20_000,
 } as const;
 
 export const CONTACT_LIMITS = {
@@ -52,10 +55,6 @@ export const CHAT_MESSAGE_MAX_ACTIVITIES = 20;
 
 /** Shortest search text the geocoder accepts. */
 export const GEOCODE_SEARCH_MIN_LENGTH = 3;
-
-const BYTES_PER_KIB = 1024;
-const BYTES_PER_MIB = BYTES_PER_KIB * BYTES_PER_KIB;
-const AVATAR_MAX_MIB = 5;
 
 export const AVATAR_UPLOAD = {
   allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"] as const,

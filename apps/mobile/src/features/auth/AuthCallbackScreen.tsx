@@ -1,4 +1,5 @@
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { parseAuthCallbackSearch } from "@bondery/helpers/auth/parse-auth-callback-search";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef } from "react";
@@ -25,7 +26,7 @@ function delay(ms: number): Promise<void> {
   });
 }
 
-export default function AuthCallbackScreen() {
+function AuthCallbackScreen() {
   const tMobileAuth = useMobileAuthTranslations();
   const tLoginPage = useLoginPageTranslations();
   const tCommon = useCommonTranslations();
@@ -140,7 +141,7 @@ export default function AuthCallbackScreen() {
       }
     };
 
-    void completeSignIn();
+    detachPromise(completeSignIn());
 
     return () => {
       active = false;
@@ -171,3 +172,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 });
+
+export default AuthCallbackScreen;

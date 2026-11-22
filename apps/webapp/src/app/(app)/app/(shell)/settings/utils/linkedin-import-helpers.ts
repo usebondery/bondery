@@ -1,15 +1,5 @@
 import type { Contact, LinkedInPreparedContact } from "@bondery/schemas";
 
-export type LinkedInImportStep = "intro" | "instructions" | "upload" | "processing" | "preview";
-
-export const LINKEDIN_STEP_PROGRESS: Record<LinkedInImportStep, number> = {
-  instructions: 30,
-  intro: 12,
-  preview: 84,
-  processing: 68,
-  upload: 50,
-};
-
 function buildImportedTitle(position: string | null, company: string | null): string | null {
   const normalizedPosition = typeof position === "string" ? position.trim() : "";
   const normalizedCompany = typeof company === "string" ? company.trim() : "";
@@ -24,6 +14,16 @@ function buildImportedTitle(position: string | null, company: string | null): st
 
   return normalizedCompany || null;
 }
+
+export type LinkedInImportStep = "intro" | "instructions" | "upload" | "processing" | "preview";
+
+export const LINKEDIN_STEP_PROGRESS: Record<LinkedInImportStep, number> = {
+  instructions: 30,
+  intro: 12,
+  preview: 84,
+  processing: 68,
+  upload: 50,
+};
 
 export function toLinkedInPreviewContact(contact: LinkedInPreparedContact): Contact {
   return {

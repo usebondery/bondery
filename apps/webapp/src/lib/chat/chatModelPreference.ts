@@ -1,5 +1,11 @@
 import type { ChatModelId } from "@bondery/schemas";
 
+const STORAGE_PREFIX = "bondery.chatModel:v1";
+
+function storageKey(sessionId: string): string {
+  return `${STORAGE_PREFIX}:${sessionId}`;
+}
+
 /**
  * Remembers the model choice per chat session.
  *
@@ -20,12 +26,6 @@ export const CHAT_MODEL_OPTIONS: readonly ChatModelOption[] = [
   { id: "anthropic/claude-haiku-5.5", version: "5.5" },
   { id: "anthropic/claude-sonnet-5.5", version: "5.5" },
 ];
-
-const STORAGE_PREFIX = "bondery.chatModel:v1";
-
-function storageKey(sessionId: string): string {
-  return `${STORAGE_PREFIX}:${sessionId}`;
-}
 
 export function isChatModelId(value: string): value is ChatModelId {
   return CHAT_MODEL_OPTIONS.some((option) => option.id === value);

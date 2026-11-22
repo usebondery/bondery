@@ -15,14 +15,14 @@ type OpenApiMeta = {
 };
 
 function docsFilePath(page: Page): string {
-  const path = page.path;
+  const { path } = page;
   if (path.endsWith(".mdx") || path.endsWith(".md")) {
     return path;
   }
   return `${path}.mdx`;
 }
 
-export function getDocsPageUrl(page: Page): string {
+function getDocsPageUrl(page: Page): string {
   return new URL(page.url, getWebsiteUrl()).href;
 }
 
@@ -59,7 +59,7 @@ function isPublicDocsPage(slugs: string[]): boolean {
   return page !== undefined && isPublishedDocsPage(page);
 }
 
-export async function getLLMText(page: Page) {
+async function getLLMText(page: Page) {
   const pageUrl = getDocsPageUrl(page);
   const sourceUrl = `${DOCS_GITHUB_BLOB_BASE}/${docsFilePath(page)}`;
   const processed = await page.data.getText("processed");
@@ -86,12 +86,12 @@ ${page.data.description ?? ""}
 ${markdown}${openApiSection}`;
 }
 
-export function getDocsGithubUrl(page: Page): string {
+function getDocsGithubUrl(page: Page): string {
   return `${DOCS_GITHUB_BLOB_BASE}/${docsFilePath(page)}`;
 }
 
 /** Public `.md` URL. `next.config.ts` rewrites it onto the internal Markdown route. */
-export function getPageMarkdownUrl(page: Page): string {
+function getPageMarkdownUrl(page: Page): string {
   if (page.slugs.length === 0) {
     return "/docs.md";
   }
@@ -99,7 +99,7 @@ export function getPageMarkdownUrl(page: Page): string {
   return `/docs/${page.slugs.join("/")}.md`;
 }
 
-export const docsLlms = llms(source, {
+const docsLlms = llms(source, {
   renderPage: (page) => getLLMText(page),
 });
 
@@ -109,7 +109,7 @@ export const docsLlms = llms(source, {
  * Node titles and descriptions come from the page tree, so hidden pages stay out
  * without a second filter.
  */
-export async function renderDocsIndex(): Promise<string> {
+async function renderDocsIndex(): Promise<string> {
   const tree = getFilteredPageTree();
   const name = typeof tree.name === "string" ? tree.name : "Docs";
   const description = typeof tree.description === "string" ? tree.description : undefined;
@@ -123,9 +123,19 @@ export async function renderDocsIndex(): Promise<string> {
 }
 
 /** `llms-full.txt`: every published page, joined. */
-export async function renderDocsFull(): Promise<string> {
+async function renderDocsFull(): Promise<string> {
   const pages = source.getPages().filter(isPublishedDocsPage);
   const rendered = await Promise.all(pages.map((page) => getLLMText(page)));
 
   return rendered.join("\n\n");
 }
+
+export {
+  docsLlms,
+  getDocsGithubUrl,
+  getDocsPageUrl,
+  getLLMText,
+  getPageMarkdownUrl,
+  renderDocsFull,
+  renderDocsIndex,
+};

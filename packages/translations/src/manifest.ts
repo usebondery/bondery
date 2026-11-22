@@ -6,6 +6,12 @@ import {
 } from "@bondery/schemas/locale/supported-locale";
 import manifestJson from "../manifest.json" with { type: "json" };
 
+const UI_GROUP_PREFIXES = ["web.", "mobile.", "extension."] as const;
+
+function isUiGroup(group: string): boolean {
+  return UI_GROUP_PREFIXES.some((prefix) => group.startsWith(prefix));
+}
+
 export type Platform = "web" | "mobile" | "website" | "extension";
 
 export interface NamespaceEntry {
@@ -48,12 +54,6 @@ export function namespacesForPlatform(platform: Platform): string[] {
  * A new screen that calls `useCommonTranslations` then cannot lose its copy.
  */
 export const BASE_NAMESPACES = ["common", "validation", "glossary"] as const;
-
-const UI_GROUP_PREFIXES = ["web.", "mobile.", "extension."] as const;
-
-function isUiGroup(group: string): boolean {
-  return UI_GROUP_PREFIXES.some((prefix) => group.startsWith(prefix));
-}
 
 /**
  * Resolve the namespaces a preload group needs.

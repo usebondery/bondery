@@ -23,8 +23,8 @@ describe("planDictationRestart", () => {
 
   it("counts every restart inside one window", () => {
     let window = createDictationRestartWindow(START);
-    window = planDictationRestart(window, "silence", START).window;
-    window = planDictationRestart(window, "silence", START + 1).window;
+    ({ window } = planDictationRestart(window, "silence", START));
+    ({ window } = planDictationRestart(window, "silence", START + 1));
     assert.equal(window.count, 2);
     assert.equal(window.startedAt, START);
   });
@@ -34,7 +34,7 @@ describe("planDictationRestart", () => {
     for (let index = 0; index < DICTATION_RESTART_CAP; index += 1) {
       const outcome = planDictationRestart(window, "silence", START + index);
       assert.equal(outcome.restart, true);
-      window = outcome.window;
+      ({ window } = outcome);
     }
 
     const capped = planDictationRestart(window, "silence", START + DICTATION_RESTART_CAP);
@@ -45,7 +45,7 @@ describe("planDictationRestart", () => {
   it("opens a fresh budget when the window expired", () => {
     let window = createDictationRestartWindow(START);
     for (let index = 0; index < DICTATION_RESTART_CAP; index += 1) {
-      window = planDictationRestart(window, "silence", START).window;
+      ({ window } = planDictationRestart(window, "silence", START));
     }
     const expiredAt = START + DICTATION_RESTART_WINDOW_MS;
     const outcome = planDictationRestart(window, "silence", expiredAt);
@@ -81,15 +81,15 @@ describe("planDictationRestart", () => {
   it("stops a repeating service drop at the cap", () => {
     let window = createDictationRestartWindow(START);
     for (let index = 0; index < DICTATION_RESTART_CAP; index += 1) {
-      window = planDictationRestart(window, "network", START + index).window;
+      ({ window } = planDictationRestart(window, "network", START + index));
     }
     const capped = planDictationRestart(window, "network", START + DICTATION_RESTART_CAP);
     assert.equal(capped.restart, false);
   });
 
   it("shares one budget between silence and a service drop", () => {
-    let window = planDictationRestart(createDictationRestartWindow(START), "network", START).window;
-    window = planDictationRestart(window, "silence", START + 1).window;
+    let { window } = planDictationRestart(createDictationRestartWindow(START), "network", START);
+    ({ window } = planDictationRestart(window, "silence", START + 1));
     assert.equal(window.count, 2);
   });
 
@@ -98,7 +98,7 @@ describe("planDictationRestart", () => {
     for (let index = 0; index < DICTATION_FAULT_RESTART_CAP; index += 1) {
       const outcome = planDictationRestart(window, "network", START, DICTATION_FAULT_RESTART_CAP);
       assert.equal(outcome.restart, true);
-      window = outcome.window;
+      ({ window } = outcome);
     }
     const capped = planDictationRestart(window, "network", START, DICTATION_FAULT_RESTART_CAP);
     assert.equal(capped.restart, false);
@@ -107,7 +107,7 @@ describe("planDictationRestart", () => {
   it("does not restart at the cap even after a long silence", () => {
     let window = createDictationRestartWindow(START);
     for (let index = 0; index < DICTATION_RESTART_CAP; index += 1) {
-      window = planDictationRestart(window, "silence", START).window;
+      ({ window } = planDictationRestart(window, "silence", START));
     }
     const justBeforeExpiry = START + DICTATION_RESTART_WINDOW_MS - 1;
     assert.equal(planDictationRestart(window, "silence", justBeforeExpiry).restart, false);
@@ -162,7 +162,7 @@ describe("decideDictationRestart", () => {
         return;
       }
       delays.push(decision.delayMs);
-      window = decision.window;
+      ({ window } = decision);
     }
     assert.deepEqual(delays, [200, 400, 800, 1600]);
 

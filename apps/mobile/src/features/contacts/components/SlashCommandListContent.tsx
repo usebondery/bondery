@@ -44,7 +44,7 @@ function SlashCommandRow({
   );
 }
 
-export function SlashCommandListContent({ query, onSelect }: SlashCommandListContentProps) {
+function SlashCommandListContent({ query, onSelect }: SlashCommandListContentProps) {
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const commands = filterSlashCommands(query);
@@ -115,3 +115,5 @@ const styles = StyleSheet.create({
     gap: 1,
   },
 });
+
+export { SlashCommandListContent };

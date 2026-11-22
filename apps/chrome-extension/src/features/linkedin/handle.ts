@@ -1,3 +1,5 @@
+const LINKEDIN_IN_HANDLE_RE = /\/in\/([^/?#]+)/i;
+const LINKEDIN_IN_PATH_RE = /\/in\/([^/]+)/i;
 /** Normalise a LinkedIn vanity handle from a slug, encoded slug, or profile URL. */
 
 export function normalizeLinkedInVanityHandle(value: string): string {
@@ -8,9 +10,9 @@ export function normalizeLinkedInVanityHandle(value: string): string {
     // Keep the trimmed value when it is not percent-encoded.
   }
 
-  const fromPath = handle.match(/\/in\/([^/?#]+)/i);
+  const fromPath = handle.match(LINKEDIN_IN_HANDLE_RE);
   if (fromPath?.[1]) {
-    handle = fromPath[1];
+    [, handle] = fromPath;
     try {
       handle = decodeURIComponent(handle);
     } catch {
@@ -33,7 +35,7 @@ export function linkedInProfileUrl(handle: string): string {
 }
 
 export function getLinkedInUsernameFromPathname(pathname: string): string | null {
-  const match = pathname.match(/\/in\/([^/]+)/i);
+  const match = pathname.match(LINKEDIN_IN_PATH_RE);
   if (!match?.[1]) {
     return null;
   }

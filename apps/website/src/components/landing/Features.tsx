@@ -5,6 +5,7 @@ import { Container } from "@mantine/core";
 import { FeatureBento } from "./features/FeatureBento";
 import { PrivacyBand } from "./features/PrivacyBand";
 import { SectionHeader } from "./features/SectionHeader";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 /**
  * Landing page features: the feature tiles and the privacy promise.
@@ -14,7 +15,7 @@ export function Features() {
     <section
       aria-labelledby="features-title"
       className="scroll-mt-header-sticky-bottom"
-      id="features"
+      id={LANDING_SECTION_IDS.features}
       style={{
         backgroundColor: "light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-8))",
       }}

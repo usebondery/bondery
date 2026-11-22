@@ -17,6 +17,22 @@ import {
 } from "../lib/auth/index.js";
 import { provisionNewUser } from "../lib/auth/provision-new-user.js";
 
+async function upsertClientResource(clientId: string, resourceId: string): Promise<void> {
+  const existing = await prisma.oauthClientResource.findFirst({ where: { clientId, resourceId } });
+  if (existing) {
+    return;
+  }
+  await prisma.oauthClientResource.create({
+    data: { clientId, id: generateId(), resourceId },
+  });
+}
+
+function extractCode(location: string): string {
+  const code = new URL(location).searchParams.get("code");
+  assert.ok(code, `expected code in ${location}`);
+  return code;
+}
+
 export const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
 export const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 export const MCP_RESOURCE = resolveMcpResourceIdentifier();
@@ -59,16 +75,6 @@ export async function createNativeSession(userId: string): Promise<string> {
   return token;
 }
 
-async function upsertClientResource(clientId: string, resourceId: string): Promise<void> {
-  const existing = await prisma.oauthClientResource.findFirst({ where: { clientId, resourceId } });
-  if (existing) {
-    return;
-  }
-  await prisma.oauthClientResource.create({
-    data: { clientId, id: generateId(), resourceId },
-  });
-}
-
 /** Public MCP test client (CIMD stand-in) linked to every MCP resource identifier. */
 export async function upsertMcpPublicClient(
   clientId: string,
@@ -106,12 +112,6 @@ export async function upsertMcpPublicClient(
 }
 
 export const CIMD_DISCOVERY_ID = CIMD_CLIENT_DISCOVERY_ID;
-
-function extractCode(location: string): string {
-  const code = new URL(location).searchParams.get("code");
-  assert.ok(code, `expected code in ${location}`);
-  return code;
-}
 
 /** Run the authorize + token exchange round trip and return an MCP access token. */
 export async function mintMcpToken(

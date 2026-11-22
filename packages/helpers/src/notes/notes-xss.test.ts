@@ -8,12 +8,23 @@ import { markdownToHtml } from "./markdownToHtml.js";
  * `onmouseover` inside a quoted `href` value, or in escaped text, is correctly not counted, while
  * an injected quote that ends the value early is.
  */
+const ON_RE = /^on/i;
+const SCRIPT_IMG_SVG_IFRAME_SPAN_RE = /<(script|img|svg|iframe|a|span)\b/i;
+const LT_RE = /&lt;/;
+const IMG_SCRIPT_RE = /<(img|script|b|i)\b/i;
+const HREF_RE = /href=/i;
+const CLICK_RE = /click/;
+const HREF_MAILTO_TEST_RE = /href="mailto:a@b\.test"/;
+const HREF_TEL_RE = /href="tel:\+420123456789"/;
+const SCRIPT_RE = /<script/i;
+const LT_SCRIPT_GT_RE = /&lt;script&gt;/;
+
 function eventHandlerAttributes(html: string): string[] {
   const names: string[] = [];
   for (const tag of html.matchAll(/<[a-z][^\s>/]*((?:\s+[^\s=>/]+(?:="[^"]*")?)*)\s*\/?>/gi)) {
     for (const attribute of (tag[1] ?? "").matchAll(/\s+([^\s=>/]+)(?:="[^"]*")?/g)) {
       const name = attribute[1] ?? "";
-      if (/^on/i.test(name)) {
+      if (ON_RE.test(name)) {
         names.push(name);
       }
     }
@@ -35,8 +46,8 @@ describe("markdownToHtml escapes raw markup", () => {
   for (const payload of PAYLOADS) {
     it(`renders ${JSON.stringify(payload)} as text`, () => {
       const html = markdownToHtml(payload);
-      assert.doesNotMatch(html, /<(script|img|svg|iframe|a|span)\b/i);
-      assert.match(html, /&lt;/);
+      assert.doesNotMatch(html, SCRIPT_IMG_SVG_IFRAME_SPAN_RE);
+      assert.match(html, LT_RE);
     });
   }
 
@@ -51,7 +62,7 @@ describe("markdownToHtml escapes raw markup", () => {
         "`<script>`",
       ].join("\n"),
     );
-    assert.doesNotMatch(html, /<(img|script|b|i)\b/i);
+    assert.doesNotMatch(html, IMG_SCRIPT_RE);
     assert.deepEqual(eventHandlerAttributes(html), []);
   });
 
@@ -79,8 +90,8 @@ describe("markdownToHtml escapes raw markup", () => {
       "/relative",
     ]) {
       const html = markdownToHtml(`[click](${url})`);
-      assert.doesNotMatch(html, /href=/i, `href survived for ${JSON.stringify(url)}`);
-      assert.match(html, /click/);
+      assert.doesNotMatch(html, HREF_RE, `href survived for ${JSON.stringify(url)}`);
+      assert.match(html, CLICK_RE);
     }
   });
 
@@ -89,8 +100,8 @@ describe("markdownToHtml escapes raw markup", () => {
       markdownToHtml("[site](https://example.com/a?b=1&c=2)"),
       '<p><a href="https://example.com/a?b=1&amp;c=2" target="_blank" rel="noopener noreferrer">site</a></p>',
     );
-    assert.match(markdownToHtml("[mail](mailto:a@b.test)"), /href="mailto:a@b\.test"/);
-    assert.match(markdownToHtml("[call](tel:+420123456789)"), /href="tel:\+420123456789"/);
+    assert.match(markdownToHtml("[mail](mailto:a@b.test)"), HREF_MAILTO_TEST_RE);
+    assert.match(markdownToHtml("[call](tel:+420123456789)"), HREF_TEL_RE);
   });
 
   it("keeps formatting and the underline tag", () => {
@@ -119,7 +130,7 @@ describe("notes round trip keeps special characters as text", () => {
   it("turns an escaped script tag back into the same text, never a tag", () => {
     const html = "<p>&lt;script&gt;alert(1)&lt;/script&gt;</p>";
     const roundTripped = markdownToHtml(htmlToMarkdown(html));
-    assert.doesNotMatch(roundTripped, /<script/i);
-    assert.match(roundTripped, /&lt;script&gt;/);
+    assert.doesNotMatch(roundTripped, SCRIPT_RE);
+    assert.match(roundTripped, LT_SCRIPT_GT_RE);
   });
 });

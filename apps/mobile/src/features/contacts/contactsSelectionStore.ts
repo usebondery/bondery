@@ -2,9 +2,9 @@ import { startTransition } from "react";
 import { create } from "zustand";
 
 /** Selections of at least this many loaded contacts clear inside a React transition. */
-export const BULK_SELECTION_TRANSITION_THRESHOLD = 20;
+const BULK_SELECTION_TRANSITION_THRESHOLD = 20;
 
-export type DragSelectionIntent = "select" | "deselect";
+type DragSelectionIntent = "select" | "deselect";
 
 function createExcludedWithMyself(myselfContactId: string | undefined): Set<string> {
   const excluded = new Set<string>();
@@ -35,7 +35,7 @@ function createEmptySelectionState() {
   };
 }
 
-export interface ContactsSelectionState {
+interface ContactsSelectionState {
   applyDragSelection: (contactIds: string[], intent: DragSelectionIntent) => void;
   deselectAllInSession: (options?: { useTransition?: boolean }) => void;
 
@@ -87,7 +87,7 @@ export interface ContactsSelectionState {
   totalCount: number;
 }
 
-export const useContactsSelection = create<ContactsSelectionState>((set, get) => ({
+const useContactsSelection = create<ContactsSelectionState>((set, get) => ({
   applyDragSelection: (contactIds, intent) => {
     if (contactIds.length === 0) {
       return;
@@ -418,7 +418,7 @@ export const useContactsSelection = create<ContactsSelectionState>((set, get) =>
 }));
 
 /** Row-level subscription: re-renders only when this contact's selected state changes. */
-export function useContactIsSelected(contactId: string): boolean {
+function useContactIsSelected(contactId: string): boolean {
   return useContactsSelection((state) => {
     if (contactId === state.myselfContactId) {
       return false;
@@ -433,11 +433,11 @@ export function useContactIsSelected(contactId: string): boolean {
 }
 
 /** Shared by rows: re-renders when selection session starts or ends. */
-export function useContactsSelectionMode(): boolean {
+function useContactsSelectionMode(): boolean {
   return useContactsSelection((state) => state.isSelectionSessionActive);
 }
 
-export function useContactsEffectiveSelectedCount(): number {
+function useContactsEffectiveSelectedCount(): number {
   return useContactsSelection((state) => {
     if (state.isAllTotalSelected) {
       return Math.max(
@@ -453,3 +453,12 @@ export function useContactsEffectiveSelectedCount(): number {
     return Array.from(state.selectedIds).filter((id) => id !== state.myselfContactId).length;
   });
 }
+
+export type { ContactsSelectionState, DragSelectionIntent };
+export {
+  BULK_SELECTION_TRANSITION_THRESHOLD,
+  useContactIsSelected,
+  useContactsEffectiveSelectedCount,
+  useContactsSelection,
+  useContactsSelectionMode,
+};

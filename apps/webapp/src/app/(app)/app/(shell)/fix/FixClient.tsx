@@ -1,6 +1,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   PersonChip,
@@ -49,7 +50,13 @@ export function FixClient() {
   const restoreMutation = useRestoreMergeRecommendationMutation();
 
   useEffect(() => {
-    if (didBootstrapRefresh.current || showDeclined || isListFetching || recommendations == null) {
+    if (
+      didBootstrapRefresh.current ||
+      showDeclined ||
+      isListFetching ||
+      recommendations === null ||
+      recommendations === undefined
+    ) {
       return;
     }
     if (recommendations.length > 0) {
@@ -57,7 +64,7 @@ export function FixClient() {
       return;
     }
     didBootstrapRefresh.current = true;
-    void syncMergeRecommendationsAfterChange(queryClient, { requestRefresh: true });
+    detachPromise(syncMergeRecommendationsAfterChange(queryClient, { requestRefresh: true }));
   }, [isListFetching, queryClient, recommendations, showDeclined]);
 
   const handleRefreshSuggestions = async () => {
@@ -129,7 +136,7 @@ export function FixClient() {
             <Button
               leftSection={<IconRefresh size={16} />}
               loading={refreshMutation.isPending}
-              onClick={() => void handleRefreshSuggestions()}
+              onClick={() => detachPromise(handleRefreshSuggestions())}
               size="md"
             >
               {t("RefreshSuggestions")}
@@ -169,7 +176,8 @@ export function FixClient() {
           <EnrichRecommendationCard eligibleCount={eligibleCount} queueStatus={queueStatus} />
         )}
 
-        {recommendations == null ? null : recommendations.length === 0 ? (
+        {recommendations === null ||
+        recommendations === undefined ? null : recommendations.length === 0 ? (
           <Paper p="md" radius="md" withBorder>
             <Text c="dimmed" size="sm">
               {showDeclined ? t("DeclinedEmpty") : t("Empty")}
@@ -195,7 +203,7 @@ export function FixClient() {
                     <Button
                       leftSection={<IconRefresh size={16} />}
                       loading={restoringIds.has(recommendation.id)}
-                      onClick={() => void handleRestore(recommendation.id)}
+                      onClick={() => detachPromise(handleRestore(recommendation.id))}
                       variant="default"
                     >
                       {t("RestoreSuggestion")}

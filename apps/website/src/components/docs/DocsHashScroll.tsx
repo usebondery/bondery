@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
 function hashId(): string | null {
-  const hash = window.location.hash;
+  const { hash } = window.location;
   if (hash.length < 2) {
     return null;
   }

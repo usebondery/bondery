@@ -8,6 +8,8 @@ import {
 } from "./config-loopback";
 import { nonEmpty } from "./text";
 
+const TRAILING_SLASHES_RE = /\/+$/;
+const API_SUFFIX_RE = /\/api$/;
 type MobileExtra = {
   apiUrl?: string;
   storageUrl?: string;
@@ -23,7 +25,7 @@ function androidLoopbackHost(): string {
   return resolveAndroidLoopbackHost(metroHostFromHostUri(Constants.expoConfig?.hostUri));
 }
 
-export function normalizeMobileUrlForDevice(urlValue: string): string {
+function normalizeMobileUrlForDevice(urlValue: string): string {
   if (!urlValue || Platform.OS !== "android") {
     return urlValue;
   }
@@ -32,21 +34,21 @@ export function normalizeMobileUrlForDevice(urlValue: string): string {
 }
 
 function normalizeApiBaseUrl(value: string): string {
-  return value.replace(/\/+$/, "").replace(/\/api$/, "");
+  return value.replace(TRAILING_SLASHES_RE, "").replace(API_SUFFIX_RE, "");
 }
 
 const extra = getExtra();
 const rawApiUrl = normalizeMobileUrlForDevice(extra.apiUrl ?? "");
 const rawStorageUrl = normalizeMobileUrlForDevice(extra.storageUrl ?? "");
 
-export const API_URL = rawApiUrl ? normalizeApiBaseUrl(rawApiUrl) : "";
-export const STORAGE_URL = rawStorageUrl.replace(/\/+$/, "");
-export const WEBSITE_URL = nonEmpty(extra.websiteUrl) ?? "https://usebondery.com";
-export const HAS_MOBILE_CONFIG = Boolean(API_URL && STORAGE_URL);
-export const SYNC_DEBUG = extra.syncDebug === "1" || extra.syncDebug === "true";
+const API_URL = rawApiUrl ? normalizeApiBaseUrl(rawApiUrl) : "";
+const STORAGE_URL = rawStorageUrl.replace(/\/+$/, "");
+const WEBSITE_URL = nonEmpty(extra.websiteUrl) ?? "https://usebondery.com";
+const HAS_MOBILE_CONFIG = Boolean(API_URL && STORAGE_URL);
+const SYNC_DEBUG = extra.syncDebug === "1" || extra.syncDebug === "true";
 
 /** UI debounce delay constants (milliseconds). Visual/layout tokens: `theme/tokens`. */
-export const DEBOUNCE_MS = {
+const DEBOUNCE_MS = {
   /** Delay for local in-memory filters (emoji picker, etc.). */
   localFilter: 200,
   /** Delay for text search inputs before triggering a server fetch. */
@@ -54,7 +56,7 @@ export const DEBOUNCE_MS = {
 } as const;
 
 /** Shared alpha values for mobile UI (press states, selection tints, etc.). */
-export const MOBILE_OPACITY = {
+const MOBILE_OPACITY = {
   /** Disabled control opacity. */
   disabled: 0.38,
   /** Pressed control opacity fallback. */
@@ -64,7 +66,7 @@ export const MOBILE_OPACITY = {
 } as const;
 
 /** UI timing constants (milliseconds). */
-export const UI_TIMING_MS = {
+const UI_TIMING_MS = {
   /** Border color transition when a text input gains or loses focus. */
   inputFocusTransition: 200,
   /** Default long-press duration before secondary actions (e.g. edit social). */
@@ -86,19 +88,19 @@ export const UI_TIMING_MS = {
 } as const;
 
 /** FlashList scroll-to-index retry behaviour. */
-export const LIST_SCROLL = {
+const LIST_SCROLL = {
   maxRetries: 3,
 } as const;
 
 /** Sheet snap points (percent of screen height) for named `ui/Sheet` sizes. */
-export const SHEET_SNAP_POINTS = {
+const SHEET_SNAP_POINTS = {
   /** Title + two-button confirm sheets (delete, etc.). */
   confirm: 32,
   selectSearch: 85,
   selectSimple: 40,
 } as const;
 
-export const INPUT_MAX_LENGTHS = {
+const INPUT_MAX_LENGTHS = {
   dateName: CONTACT_FIELD_MAX_LENGTHS.dateNote,
   firstName: CONTACT_FIELD_MAX_LENGTHS.firstName,
   headline: CONTACT_FIELD_MAX_LENGTHS.headline,
@@ -106,7 +108,7 @@ export const INPUT_MAX_LENGTHS = {
   middleName: CONTACT_FIELD_MAX_LENGTHS.middleName,
 } as const;
 
-export const LIMITS = {
+const LIMITS = {
   maxAddresses: 5,
   maxImportantDates: CONTACT_LIMITS.maxImportantDates,
 } as const;
@@ -115,23 +117,23 @@ const BYTES_PER_KIB = 1024;
 const BYTES_PER_MIB = BYTES_PER_KIB * BYTES_PER_KIB;
 const AVATAR_MAX_MIB = 5;
 
-export const AVATAR_UPLOAD = {
+const AVATAR_UPLOAD = {
   allowedMimeTypes: ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"] as const,
   maxFileSize: AVATAR_MAX_MIB * BYTES_PER_MIB,
   maxFileSizeMB: AVATAR_MAX_MIB,
 } as const;
 
 /** Wheel picker row height (matches minimum touch target). */
-export const WHEEL_PICKER_ITEM_HEIGHT = 44;
-export const WHEEL_PICKER_VISIBLE_ROWS = 5;
+const WHEEL_PICKER_ITEM_HEIGHT = 44;
+const WHEEL_PICKER_VISIBLE_ROWS = 5;
 
 /** Notes longer than this collapse behind a "read more" control. */
-export const NOTES_COLLAPSE_CHAR_THRESHOLD = 200;
+const NOTES_COLLAPSE_CHAR_THRESHOLD = 200;
 
 /** Milliseconds in one day (for relative date helpers). */
-export const MS_PER_DAY = 86_400_000;
+const MS_PER_DAY = 86_400_000;
 
-export function assertMobileConfig() {
+function assertMobileConfig() {
   if (!API_URL) {
     throw new Error("Missing BONDERY_PUBLIC_API_URL");
   }
@@ -140,3 +142,25 @@ export function assertMobileConfig() {
     throw new Error("Missing BONDERY_PUBLIC_STORAGE_URL");
   }
 }
+
+export {
+  API_URL,
+  AVATAR_UPLOAD,
+  assertMobileConfig,
+  DEBOUNCE_MS,
+  HAS_MOBILE_CONFIG,
+  INPUT_MAX_LENGTHS,
+  LIMITS,
+  LIST_SCROLL,
+  MOBILE_OPACITY,
+  MS_PER_DAY,
+  NOTES_COLLAPSE_CHAR_THRESHOLD,
+  normalizeMobileUrlForDevice,
+  SHEET_SNAP_POINTS,
+  STORAGE_URL,
+  SYNC_DEBUG,
+  UI_TIMING_MS,
+  WEBSITE_URL,
+  WHEEL_PICKER_ITEM_HEIGHT,
+  WHEEL_PICKER_VISIBLE_ROWS,
+};

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { useCallback, useEffect, useState } from "react";
 import { browser } from "wxt/browser";
 import { extLog } from "../../lib/log";
@@ -39,13 +40,14 @@ export default function PopupApp() {
   const [loginLoading, setLoginLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const checkAuthAndPreview = useCallback(async () => {
+  const checkAuthAndPreview = useCallback(async (versionResponse?: VersionCheckResponse) => {
     try {
-      // Check if an update is required before proceeding
-      const versionResponse: VersionCheckResponse = await browser.runtime.sendMessage({
-        type: "VERSION_CHECK_REQUEST",
-      });
-      if (versionResponse.payload.updateRequired) {
+      const resolvedVersion: VersionCheckResponse =
+        versionResponse ??
+        (await browser.runtime.sendMessage({
+          type: "VERSION_CHECK_REQUEST",
+        }));
+      if (resolvedVersion.payload.updateRequired) {
         setState("update-required");
         return;
       }
@@ -123,7 +125,19 @@ export default function PopupApp() {
   }, []);
 
   useEffect(() => {
-    void checkAuthAndPreview();
+    const versionRequest: Promise<VersionCheckResponse> = browser.runtime.sendMessage({
+      type: "VERSION_CHECK_REQUEST",
+    });
+
+    detachPromise(
+      versionRequest.then((versionResponse: VersionCheckResponse) => {
+        detachPromise(checkAuthAndPreview(versionResponse));
+      }),
+      (error_: unknown) => {
+        extLog.error("[popup] Init error:", error_);
+        setState("logged-out");
+      },
+    );
   }, [checkAuthAndPreview]);
 
   async function handleLogin() {
@@ -166,17 +180,17 @@ export default function PopupApp() {
   }
 
   function openBondery() {
-    void openWebappHomeTab();
+    detachPromise(openWebappHomeTab());
     window.close();
   }
 
   function openPerson(contactId: string) {
-    void openWebappPersonTab(contactId);
+    detachPromise(openWebappPersonTab(contactId));
     window.close();
   }
 
   function openPersonWithAddInteraction(contactId: string) {
-    void openWebappPersonAddInteractionTab(contactId);
+    detachPromise(openWebappPersonAddInteractionTab(contactId));
     window.close();
   }
 

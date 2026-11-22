@@ -73,11 +73,11 @@ export function KeepInTouchSelect({
   return (
     <Stack gap={4}>
       {select}
-      {formattedNextDue && (
+      {formattedNextDue ? (
         <Text c="dimmed" size="xs">
           {t("NextDue")}: {formattedNextDue}
         </Text>
-      )}
+      ) : null}
     </Stack>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { extractUsername } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { combinePhoneNumber } from "@bondery/helpers/phone";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import type { Contact, EmailEntry, ImportantDate, PhoneEntry } from "@bondery/schemas";
@@ -204,12 +205,7 @@ export function usePersonContactHandlers({
     const sourcePhones = phonesOverride ?? phones;
     const phonesToSave = sourcePhones
       .filter((phone) => phone.value && phone.value.trim() !== "")
-      .map((phone) =>
-        Object.assign({}, phone, {
-          prefix: phone.prefix || "+1",
-          value: phone.value.trim(),
-        }),
-      );
+      .map((phone) => ({ ...phone, prefix: phone.prefix || "+1", value: phone.value.trim() }));
 
     const currentPhones = Array.isArray(contact.phones) ? contact.phones : [];
     if (JSON.stringify(phonesToSave) === JSON.stringify(currentPhones)) {
@@ -408,7 +404,7 @@ export function usePersonContactHandlers({
   };
 
   const handleContactFieldBlur = (field: string, value: string) => {
-    void handleContactFieldSave(field, value);
+    detachPromise(handleContactFieldSave(field, value));
   };
 
   return {

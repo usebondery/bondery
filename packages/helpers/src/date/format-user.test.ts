@@ -12,6 +12,11 @@ import {
   formatUserTime,
 } from "./format-user.js";
 
+const PATTERN_31317C3133_RE = /11|13/;
+const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}$/;
+const PATTERN_32303236_RE = /2026/;
+const NOVEMBER_LISTOPAD_LISTOPADU_RE = /November|listopad|listopadu/i;
+
 const SAMPLE = new Date(Date.UTC(2026, 10, 13, 15, 30, 45));
 const EARLY = new Date(Date.UTC(2026, 10, 13, 8, 5, 0));
 const LOCALES = ["cs", "de", "en"] as const;
@@ -52,8 +57,8 @@ describe("formatUserDate", () => {
 
       it(`numeric ${locale} locale ${timeFormat}`, () => {
         const formatted = formatUserDate(SAMPLE, ctx(locale, "locale", timeFormat), "numeric");
-        assert.match(formatted, /2026/);
-        assert.match(formatted, /11|13/);
+        assert.match(formatted, PATTERN_32303236_RE);
+        assert.match(formatted, PATTERN_31317C3133_RE);
       });
     }
 
@@ -63,14 +68,14 @@ describe("formatUserDate", () => {
 
         it(`monthYear ${locale} ${dateFormat} ${timeFormat}`, () => {
           const formatted = formatUserDate(SAMPLE, formatCtx, "monthYear");
-          assert.match(formatted, /2026/);
-          assert.doesNotMatch(formatted, /^\d{4}-\d{2}-\d{2}$/);
+          assert.match(formatted, PATTERN_32303236_RE);
+          assert.doesNotMatch(formatted, PATTERN_5E5C647B347D_RE);
         });
 
         it(`monthYearLong ${locale} ${dateFormat} ${timeFormat}`, () => {
           const formatted = formatUserDate(SAMPLE, formatCtx, "monthYearLong");
-          assert.match(formatted, /2026/);
-          assert.match(formatted, /November|listopad|listopadu/i);
+          assert.match(formatted, PATTERN_32303236_RE);
+          assert.match(formatted, NOVEMBER_LISTOPAD_LISTOPADU_RE);
         });
       }
     }

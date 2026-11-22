@@ -3,10 +3,17 @@ import { Heading, Text } from "react-email";
 import { EmailCta } from "#shared/EmailCta.js";
 import { descriptionStyle, headingStyle, notesStyle } from "#shared/email-styles.js";
 
-export type EmailBodyCta = {
+type EmailBodyCta = {
   href: string;
   label: string;
 };
+
+function EmailNotes({ notes }: { notes: ReactNode }): ReactElement {
+  if (typeof notes === "string") {
+    return <Text style={notesStyle}>{notes}</Text>;
+  }
+  return <>{notes}</>;
+}
 
 export function EmailBody({
   children,
@@ -29,7 +36,9 @@ export function EmailBody({
       {description ? <Text style={descriptionStyle}>{description}</Text> : null}
       {children}
       {cta ? <EmailCta href={cta.href} label={cta.label} /> : null}
-      {typeof notes === "string" ? <Text style={notesStyle}>{notes}</Text> : notes}
+      {notes !== null && notes !== undefined ? <EmailNotes notes={notes} /> : null}
     </>
   );
 }
+
+export type { EmailBodyCta };

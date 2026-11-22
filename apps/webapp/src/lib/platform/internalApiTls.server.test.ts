@@ -3,6 +3,12 @@ import { describe, it } from "node:test";
 
 import { INTERNAL_API_CA_FILE_ENV, trustInternalApiCa } from "./internalApiTls.server";
 
+const CANNOT_READ_BONDERY_API_CLIENT_CA_CRT_ENOENT_API =
+  /cannot read \(\/bondery-api\/client\/ca\.crt\): ENOENT.*api:secrets/;
+const DOES_NOT_USE_HTTPS = /does not use https/;
+const NO_PEM = /no PEM/;
+const NOT_ENCRYPTED = /not encrypted/;
+
 const SYSTEM_CA = "-----BEGIN CERTIFICATE-----\nU1lTVEVN\n-----END CERTIFICATE-----";
 const API_CA = "-----BEGIN CERTIFICATE-----\nQVBJIENB\n-----END CERTIFICATE-----";
 const SECOND_CA = "-----BEGIN CERTIFICATE-----\nU0VDT05E\n-----END CERTIFICATE-----";
@@ -55,7 +61,7 @@ describe("trustInternalApiCa", () => {
           () => API_CA,
           store,
         ),
-      /does not use https/,
+      DOES_NOT_USE_HTTPS,
     );
   });
 
@@ -70,13 +76,13 @@ describe("trustInternalApiCa", () => {
           },
           store,
         ),
-      /cannot read \(\/bondery-api\/client\/ca\.crt\): ENOENT.*api:secrets/,
+      CANNOT_READ_BONDERY_API_CLIENT_CA_CRT_ENOENT_API,
     );
   });
 
   it("refuses a CA file with no certificate in it", () => {
     const { calls, store } = fakeTrustStore();
-    assert.throws(() => trustInternalApiCa(HTTPS_ENV, () => "not a pem", store), /no PEM/);
+    assert.throws(() => trustInternalApiCa(HTTPS_ENV, () => "not a pem", store), NO_PEM);
     assert.deepEqual(calls, []);
   });
 
@@ -85,7 +91,7 @@ describe("trustInternalApiCa", () => {
     const plaintext = { BONDERY_INFRA_INTERNAL_API_URL: "http://bondery-api:26631" };
     assert.match(
       trustInternalApiCa({ ...plaintext, NODE_ENV: "production" }, () => "", store).warning ?? "",
-      /not encrypted/,
+      NOT_ENCRYPTED,
     );
     assert.equal(
       trustInternalApiCa({ ...plaintext, NODE_ENV: "development" }, () => "", store).warning,

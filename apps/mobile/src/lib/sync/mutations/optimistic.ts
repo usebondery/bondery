@@ -11,7 +11,7 @@ function newId(): string {
   return generateUuid();
 }
 
-export function applyOptimisticMutation(mutation: SyncMutation): void {
+function applyOptimisticMutation(mutation: SyncMutation): void {
   const db = getSyncDatabase();
   let deletedPersonId: string | null = null;
 
@@ -418,3 +418,5 @@ function applyOptimisticTagUpdate(
     tagId,
   );
 }
+
+export { applyOptimisticMutation };

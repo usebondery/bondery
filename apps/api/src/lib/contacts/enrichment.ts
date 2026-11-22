@@ -21,7 +21,7 @@ type ChannelsAndSocialExtras = {
   signal: string | null;
 };
 
-export type FullContactExtras = ChannelsAndSocialExtras & {
+type FullContactExtras = ChannelsAndSocialExtras & {
   addresses: ContactExtrasPayload["addresses"];
 };
 
@@ -101,6 +101,8 @@ function mergeExtrasIntoContact<T extends ContactWithId>(
     addresses: extras.addresses,
   };
 }
+
+export type { FullContactExtras };
 
 /**
  * Enriches a list of contacts with channels (phones + emails), optional addresses,

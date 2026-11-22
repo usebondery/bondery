@@ -28,13 +28,13 @@ export function SettingsView({
     <Stack gap="md" mih={300} p="md">
       <PopupBrandHeader actionIcon={<IconArrowLeft />} actionTitle="Back" onActionClick={onBack} />
       <Stack gap="md" style={{ flex: 1 }}>
-        {user && (
+        {user ? (
           <UserCard
             avatarUrl={user.avatarUrl}
             name={firstNonEmpty(user.name, user.email) ?? "User"}
             subtitle={user.email || undefined}
           />
-        )}
+        ) : null}
 
         <TextInput disabled label={t("ApiServer")} value={config.apiUrl} />
 

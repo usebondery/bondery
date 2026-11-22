@@ -6,7 +6,7 @@ import { applySqlFunctions } from "./apply-sql-functions.js";
 import { backfillDefaultPhoneCountry } from "./backfills/default-phone-country.js";
 import { prisma } from "./client.js";
 
-export type ReleaseMigrateHooks = {
+type ReleaseMigrateHooks = {
   provisionOAuthClients: () => Promise<void>;
   provisionPlatformAdmins: () => Promise<void>;
 };
@@ -17,7 +17,7 @@ function resolvePrismaCliEntry(): string {
 }
 
 export async function runReleaseMigrate(hooks: ReleaseMigrateHooks): Promise<void> {
-  const databaseUrl = process.env.DATABASE_URL;
+  const databaseUrl = process.env["DATABASE_URL"];
   if (!databaseUrl) {
     throw new Error("DATABASE_URL is not set");
   }
@@ -43,3 +43,5 @@ export async function runReleaseMigrate(hooks: ReleaseMigrateHooks): Promise<voi
   await hooks.provisionOAuthClients();
   await hooks.provisionPlatformAdmins();
 }
+
+export type { ReleaseMigrateHooks };

@@ -24,6 +24,8 @@ import { oauthProviders } from "./oauth-provider-config.js";
 import { resolveUnconfiguredSocialOAuthProvider } from "./oauth-social-request.js";
 import { isMagicLinkVerifyPath } from "./redact-auth-query.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 const authServerMetadataHandler = oauthProviderAuthServerMetadata(auth);
 const openIdConfigMetadataHandler = oauthProviderOpenIdConfigMetadata(auth);
 
@@ -37,7 +39,7 @@ const MCP_CANONICAL_PRM_PATH = `${BETTER_AUTH_PROTECTED_RESOURCE_METADATA_PATH}$
  */
 function toProtectedResourceMetadataRequest(request: FastifyRequest): Request {
   const fetchRequest = toFetchRequest(request);
-  const pathname = new URL(fetchRequest.url).pathname.replace(/\/+$/, "") || "/";
+  const pathname = new URL(fetchRequest.url).pathname.replace(TRAILING_SLASHES_PATTERN, "") || "/";
   if (pathname !== MCP_CONCATENATED_PRM_PATH) {
     return fetchRequest;
   }

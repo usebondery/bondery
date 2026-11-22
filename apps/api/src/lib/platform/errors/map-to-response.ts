@@ -6,7 +6,9 @@ import { SyncConflictError } from "../../sync/conflict.js";
 import { type ErrorCode, getErrorDefinition } from "./codes.js";
 import { buildApiErrorBody, toApiErrorResponse } from "./to-api-error-response.js";
 
-export interface MappedErrorResponse {
+const FIRST_TOKEN_PATTERN = /^([^\s]+)\s+/;
+
+interface MappedErrorResponse {
   body: ApiErrorResponse;
   statusCode: number;
 }
@@ -20,7 +22,7 @@ function wrap(body: ReturnType<typeof buildApiErrorBody>): ApiErrorResponse {
 }
 
 function validationParam(message: string): string | undefined {
-  const match = message.match(/^([^\s]+)\s+/);
+  const match = message.match(FIRST_TOKEN_PATTERN);
   return match?.[1];
 }
 
@@ -28,6 +30,8 @@ function codeTypeAndStatus(code: ErrorCode): { type: ApiErrorType; status: numbe
   const definition = getErrorDefinition(code);
   return { status: definition.httpStatus, type: definition.type };
 }
+
+export type { MappedErrorResponse };
 
 export function mapErrorToResponse(
   error: FastifyError & { retryAfter?: number; code?: string },

@@ -62,22 +62,6 @@ function enableWalMode(db: SQLiteDatabase): void {
   db.execSync("PRAGMA journal_mode = WAL;");
 }
 
-/** @deprecated Use dropDomainTablesIfExist — kept for wipe on logout (tables exist). */
-function _wipeDomainTables(db: SQLiteDatabase): void {
-  db.withTransactionSync(() => {
-    for (const table of DOMAIN_TABLES) {
-      try {
-        db.execSync(`DELETE FROM ${table}`);
-      } catch {
-        // Table may not exist on schema upgrade from v1.
-      }
-    }
-    db.execSync(
-      `DELETE FROM sync_meta WHERE key NOT IN ('device_id', '${SYNC_META_KEYS.sqliteSchemaVersion}')`,
-    );
-  });
-}
-
 function createSchemaV2(db: SQLiteDatabase): void {
   db.execSync(`
     CREATE TABLE IF NOT EXISTS sync_meta (

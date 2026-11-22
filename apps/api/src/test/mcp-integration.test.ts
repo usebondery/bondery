@@ -9,6 +9,10 @@ import { after, before, describe, it } from "node:test";
 import type { FastifyInstance } from "fastify";
 import { loadTestEnv } from "./load-test-env.js";
 
+const APPLICATION_JSON_PATTERN = /application\/json/;
+const CATCH_UP_SKILL_FRONTMATTER_PATTERN = /^---\nname: catch-up\n/;
+const MCP_SERVER_NOT_CONNECTED_PATTERN = /the Bondery MCP server is not connected/;
+
 loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
@@ -90,7 +94,10 @@ describe("mCP HTTP endpoint", () => {
       String(unauthenticatedGet.headers["www-authenticate"] ?? "").includes("resource_metadata"),
       "GET",
     );
-    assert.match(String(unauthenticatedGet.headers["content-type"] ?? ""), /application\/json/);
+    assert.match(
+      String(unauthenticatedGet.headers["content-type"] ?? ""),
+      APPLICATION_JSON_PATTERN,
+    );
     assert.ok(unauthenticatedGet.body.includes("jsonrpc"));
 
     const unauthenticatedHead = await app.inject({ method: "HEAD", url: "/mcp" });
@@ -99,7 +106,10 @@ describe("mCP HTTP endpoint", () => {
       String(unauthenticatedHead.headers["www-authenticate"] ?? "").includes("resource_metadata"),
       "HEAD",
     );
-    assert.match(String(unauthenticatedHead.headers["content-type"] ?? ""), /application\/json/);
+    assert.match(
+      String(unauthenticatedHead.headers["content-type"] ?? ""),
+      APPLICATION_JSON_PATTERN,
+    );
     assert.equal(unauthenticatedHead.body, "");
 
     const accessToken = await authenticatedSession();
@@ -228,8 +238,8 @@ describe("mCP HTTP endpoint", () => {
     assert.equal(skillFile.statusCode, 200, skillFile.body);
     const skillText = (skillFile.json() as { result?: { contents?: { text?: string }[] } }).result
       ?.contents?.[0]?.text;
-    assert.match(skillText ?? "", /^---\nname: catch-up\n/);
-    assert.match(skillText ?? "", /the Bondery MCP server is not connected/);
+    assert.match(skillText ?? "", CATCH_UP_SKILL_FRONTMATTER_PATTERN);
+    assert.match(skillText ?? "", MCP_SERVER_NOT_CONNECTED_PATTERN);
   });
 
   it("rejects MCP JWTs from non-CIMD or disabled clients", async () => {

@@ -25,6 +25,7 @@ export function CountChip({
   label,
 }: CountChipProps): ReactElement {
   const useAccent = !isLoading && !disabled;
+  const content = isLoading ? <Loader color="gray" size={12} /> : children;
 
   return (
     <Chip
@@ -40,7 +41,7 @@ export function CountChip({
       tabIndex={-1}
       variant={useAccent ? "light" : "default"}
     >
-      {isLoading ? <Loader color="gray" size={12} /> : children}
+      {content}
     </Chip>
   );
 }

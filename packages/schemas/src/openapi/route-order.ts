@@ -1,4 +1,15 @@
-/**
+type OpenApiPathTier = 1 | 2 | 3 | 4 | 5;
+
+const TIER_RESOURCE_ROOT: OpenApiPathTier = 1;
+/** A fixed sub-path such as `/contacts/search`. */
+const TIER_STATIC_SUBPATH: OpenApiPathTier = 2;
+/** One item by id, such as `/contacts/{id}`. */
+const TIER_SINGLE_ITEM: OpenApiPathTier = 3;
+/** A path below an item, such as `/contacts/{id}/groups`. */
+const TIER_ITEM_SUBRESOURCE: OpenApiPathTier = 4;
+const TIER_AUXILIARY: OpenApiPathTier = 5;
+
+export type { OpenApiPathTier }; /**
  * Path segments that classify a route as tier-5 auxiliary in API documentation order.
  * First segment after the resource root (e.g. `/api/contacts/{segment}/…`).
  */
@@ -54,17 +65,6 @@ export function getHttpMethodRank(method: string): number {
   return rank === -1 ? HTTP_METHOD_ORDER.length : rank;
 }
 
-export type OpenApiPathTier = 1 | 2 | 3 | 4 | 5;
-
-const TIER_RESOURCE_ROOT: OpenApiPathTier = 1;
-/** A fixed sub-path such as `/contacts/search`. */
-const TIER_STATIC_SUBPATH: OpenApiPathTier = 2;
-/** One item by id, such as `/contacts/{id}`. */
-const TIER_SINGLE_ITEM: OpenApiPathTier = 3;
-/** A path below an item, such as `/contacts/{id}/groups`. */
-const TIER_ITEM_SUBRESOURCE: OpenApiPathTier = 4;
-const TIER_AUXILIARY: OpenApiPathTier = 5;
-
 /**
  * Classify an OpenAPI path into a documentation tier (1–5).
  * @param path - Full path e.g. `/api/contacts/{id}/groups`
@@ -85,7 +85,7 @@ export function getPathTier(path: string): OpenApiPathTier {
     return TIER_RESOURCE_ROOT;
   }
 
-  const first = afterResource[0];
+  const [first] = afterResource;
   if (!first) {
     return TIER_RESOURCE_ROOT;
   }

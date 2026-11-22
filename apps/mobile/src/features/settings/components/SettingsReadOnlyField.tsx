@@ -32,7 +32,7 @@ export function SettingsReadOnlyField({
   const colors = useMobileThemeColors();
 
   const rightSection =
-    onReload != null ? (
+    onReload !== null && onReload !== undefined ? (
       <View className="w-icon-slot items-center justify-center">
         {loading ? (
           <ActivityIndicator color={colors.textMuted} size="small" />

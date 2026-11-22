@@ -13,7 +13,7 @@ export function ChangelogIndex() {
   return (
     <>
       {releases.map((entry) => {
-        const version = entry.slugs[1];
+        const [, version] = entry.slugs;
         if (!version) {
           return null;
         }

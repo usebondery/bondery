@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   Kbd,
@@ -409,7 +410,7 @@ export function InteractionsClient() {
                 isFetchingNextPage={false}
                 isFetchNextPageError
                 onLoadMore={() => {
-                  void refetch();
+                  detachPromise(refetch());
                 }}
                 retryLabel={t("LoadMoreRetry")}
               />
@@ -447,7 +448,7 @@ export function InteractionsClient() {
                 isFetchingNextPage={isFetchingNextPage}
                 isFetchNextPageError={isFetchNextPageError}
                 onLoadMore={() => {
-                  void fetchNextPage();
+                  detachPromise(fetchNextPage());
                 }}
                 retryLabel={t("LoadMoreRetry")}
               />

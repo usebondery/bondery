@@ -23,14 +23,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   const label = getBlogCategoryTitle(category);
 
-  const descriptions: Record<string, string> = {
+  const descriptions: Record<PostCategory, string> = {
     all: blog.Descriptions.All,
     bonds: blog.Descriptions.Bonds,
     tech: blog.Descriptions.Tech,
     updates: blog.Descriptions.Updates,
   };
 
-  const description = descriptions[category] ?? descriptions.all;
+  const description =
+    category in descriptions ? descriptions[category as PostCategory] : descriptions.all;
 
   return {
     alternates: {

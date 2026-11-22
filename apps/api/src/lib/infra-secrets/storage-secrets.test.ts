@@ -14,6 +14,9 @@ import {
 } from "./storage-secrets.js";
 import { createCertificateAuthority, DAY_MS, issueServerCertificate } from "./x509.js";
 
+const CERTIFICATE_ALERT_CLOSED_PATTERN = /certificate|alert|closed/i;
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/;
+
 type Pair = { cert: string; key: string };
 
 function quietLog(): (message: string) => void {
@@ -150,7 +153,7 @@ describe("storage secrets", () => {
     const { ca, pair } = await readCluster(root);
     await assert.rejects(
       mutualHandshake({ ca, server: pair, servername: "seaweedfs-volume" }),
-      /certificate|alert|closed/i,
+      CERTIFICATE_ALERT_CLOSED_PATTERN,
     );
   });
 
@@ -175,7 +178,7 @@ describe("storage secrets", () => {
         server: pair,
         servername: "seaweedfs-volume",
       }),
-      /certificate|alert|closed/i,
+      CERTIFICATE_ALERT_CLOSED_PATTERN,
     );
   });
 
@@ -184,7 +187,7 @@ describe("storage secrets", () => {
     const { ca, pair } = await readCluster(root);
     await assert.rejects(
       mutualHandshake({ ca, client: pair, server: pair, servername: "other-storage" }),
-      /altnames|Hostname/,
+      ALTNAMES_HOSTNAME_PATTERN,
     );
   });
 

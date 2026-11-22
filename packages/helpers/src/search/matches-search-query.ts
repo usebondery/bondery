@@ -1,3 +1,5 @@
+const PATTERN_5C732B_RE = /\s+/;
+
 function levenshtein(a: string, b: string): number {
   if (a === b) {
     return 0;
@@ -33,10 +35,6 @@ function levenshtein(a: string, b: string): number {
   }
 
   return cell(rows - 1, cols - 1);
-}
-
-export function normalizeSearchText(text: string): string {
-  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 }
 
 function matchesSubsequence(query: string, target: string): boolean {
@@ -85,7 +83,7 @@ function matchesFuzzyWord(query: string, target: string): boolean {
     return false;
   }
 
-  const words = target.split(/\s+/).filter(Boolean);
+  const words = target.split(PATTERN_5C732B_RE).filter(Boolean);
   const threshold =
     query.length <= SHORT_QUERY_MAX_LENGTH ? SHORT_QUERY_WORD_DISTANCE : LONG_QUERY_WORD_DISTANCE;
 
@@ -108,6 +106,10 @@ function matchesFuzzyWord(query: string, target: string): boolean {
   }
 
   return false;
+}
+
+export function normalizeSearchText(text: string): string {
+  return text.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase().trim();
 }
 
 /**

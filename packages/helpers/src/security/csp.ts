@@ -1,59 +1,3 @@
-/**
- * Content-Security-Policy builder shared by every Next.js app.
- *
- * The builder is pure and Edge-safe: no Node built-ins, so `proxy.ts` can run
- * it on the Edge runtime.
- *
- * Both variants come from one function, so the enforced policy can never drift
- * from the report-only one. A call with `variant: "report-only"` changes
- * exactly three things and keeps every other directive:
- *
- * 1. `style-src` drops `'unsafe-inline'` and keeps the nonce.
- * 2. `base-uri` becomes `'none'`.
- * 3. `require-trusted-types-for` and `trusted-types` appear when the caller
- *    lists policy names.
- */
-
-/** Report group name shared with the `Reporting-Endpoints` header. */
-export const CSP_REPORT_GROUP = "default" as const;
-
-/** Trusted Types policy names the webapp registers at runtime. */
-export const WEBAPP_TRUSTED_TYPES_POLICIES = ["nextjs"] as const;
-
-export type CspVariant = "enforced" | "report-only";
-
-export type CspPolicyInput = {
-  /** Per-request nonce from {@link createNonce}. */
-  nonce: string;
-  variant: CspVariant;
-  /** Extra `script-src` origins, for example a first-party analytics host. */
-  scriptSrc?: readonly string[];
-  /** Extra `connect-src` origins: API, analytics, tile servers. */
-  connectSrc?: readonly string[];
-  /** Extra `img-src` origins: tile servers, favicon service, object storage. */
-  imgSrc?: readonly string[];
-  /** Extra `font-src` origins. `'self'` is always present. */
-  fontSrc?: readonly string[];
-  /**
-   * Extra `frame-src` origins, for example an embedded checkout form. The
-   * directive is omitted when this list is undefined, so an app without frames
-   * sends no `frame-src` line.
-   */
-  frameSrc?: readonly string[];
-  /** Append `'unsafe-eval'` to `script-src`. Development only. */
-  isDev?: boolean;
-  /**
-   * Absolute URL of the CSP report endpoint. Omit for a self-host install with
-   * no collector. When set, the policy gains `report-uri` and `report-to`.
-   */
-  reportEndpoint?: string;
-  /**
-   * Trusted Types policy allowlist. Report-only variant only. Leave undefined
-   * to omit the directives.
-   */
-  trustedTypes?: readonly string[];
-};
-
 function unique(values: readonly string[]): string[] {
   return [...new Set(values.filter((value) => value.length > 0))];
 }
@@ -111,3 +55,58 @@ export function buildCsp(input: CspPolicyInput): string {
 
   return directives.join("; ");
 }
+/**
+ * Content-Security-Policy builder shared by every Next.js app.
+ *
+ * The builder is pure and Edge-safe: no Node built-ins, so `proxy.ts` can run
+ * it on the Edge runtime.
+ *
+ * Both variants come from one function, so the enforced policy can never drift
+ * from the report-only one. A call with `variant: "report-only"` changes
+ * exactly three things and keeps every other directive:
+ *
+ * 1. `style-src` drops `'unsafe-inline'` and keeps the nonce.
+ * 2. `base-uri` becomes `'none'`.
+ * 3. `require-trusted-types-for` and `trusted-types` appear when the caller
+ *    lists policy names.
+ */
+
+/** Report group name shared with the `Reporting-Endpoints` header. */
+export const CSP_REPORT_GROUP = "default" as const;
+
+/** Trusted Types policy names the webapp registers at runtime. */
+export const WEBAPP_TRUSTED_TYPES_POLICIES = ["nextjs"] as const;
+
+export type CspVariant = "enforced" | "report-only";
+
+export type CspPolicyInput = {
+  /** Per-request nonce from {@link createNonce}. */
+  nonce: string;
+  variant: CspVariant;
+  /** Extra `script-src` origins, for example a first-party analytics host. */
+  scriptSrc?: readonly string[];
+  /** Extra `connect-src` origins: API, analytics, tile servers. */
+  connectSrc?: readonly string[];
+  /** Extra `img-src` origins: tile servers, favicon service, object storage. */
+  imgSrc?: readonly string[];
+  /** Extra `font-src` origins. `'self'` is always present. */
+  fontSrc?: readonly string[];
+  /**
+   * Extra `frame-src` origins, for example an embedded checkout form. The
+   * directive is omitted when this list is undefined, so an app without frames
+   * sends no `frame-src` line.
+   */
+  frameSrc?: readonly string[];
+  /** Append `'unsafe-eval'` to `script-src`. Development only. */
+  isDev?: boolean;
+  /**
+   * Absolute URL of the CSP report endpoint. Omit for a self-host install with
+   * no collector. When set, the policy gains `report-uri` and `report-to`.
+   */
+  reportEndpoint?: string;
+  /**
+   * Trusted Types policy allowlist. Report-only variant only. Leave undefined
+   * to omit the directives.
+   */
+  trustedTypes?: readonly string[];
+};

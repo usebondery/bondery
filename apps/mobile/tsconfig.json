@@ -1,32 +1,19 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "erasableSyntaxOnly": true,
-    "esModuleInterop": true,
+    "declaration": false,
+    "declarationMap": false,
     "ignoreDeprecations": "6.0",
-    "incremental": true,
+    "isolatedDeclarations": false,
     "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "noUncheckedSideEffectImports": true,
-    "noUnusedParameters": true,
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ES2020",
-    "verbatimModuleSyntax": true
+    }
   },
   "exclude": ["**/*.test.ts", "scripts/**"],
-  "extends": "expo/tsconfig.base",
+  "extends": ["expo/tsconfig.base", "@bondery/typescript-config/base.json"],
   "include": [
     "expo-env.d.ts",
     "**/*.ts",

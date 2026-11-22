@@ -1,10 +1,35 @@
-export type PersonChipSize = "sm" | "md";
+type PersonChipSize = "sm" | "md";
 
 /**
  * Single source for chip height. The bleeding avatar uses the same value, so it
  * reaches both chip edges. Badge `size` still supplies font size and padding.
  */
 const CHIP_HEIGHT_PX: Record<PersonChipSize, number> = { md: 32, sm: 26 };
+
+type PersonChipBadgeVars = () => {
+  root: { "--badge-height": string };
+};
+
+type PersonChipBadgeStyles = {
+  label: {
+    color: string | undefined;
+    fontWeight: 400;
+    overflow: "visible";
+    textTransform: "none";
+  };
+  root: {
+    cursor: "pointer" | "default";
+    opacity: number;
+    paddingInlineEnd: number | undefined;
+    paddingInlineStart: number | undefined;
+    verticalAlign: "middle";
+  };
+  section: {
+    maxHeight: "none";
+  };
+};
+
+export type { PersonChipSize };
 
 export type PersonChipSizes = {
   avatarEdgeSize: number;
@@ -30,10 +55,6 @@ export function personChipSizes(size: PersonChipSize): PersonChipSizes {
   };
 }
 
-type PersonChipBadgeVars = () => {
-  root: { "--badge-height": string };
-};
-
 /**
  * Badge `vars` resolver for this chip. Badge takes a resolver function, and
  * Mantine merges `varsResolver` output before it, so a `--badge-height` set
@@ -45,25 +66,6 @@ export function personChipBadgeVars(size: PersonChipSize): PersonChipBadgeVars {
     root: { "--badge-height": `calc(${sizes.badgeHeight}px * var(--mantine-scale))` },
   });
 }
-
-type PersonChipBadgeStyles = {
-  label: {
-    color: string | undefined;
-    fontWeight: 400;
-    overflow: "visible";
-    textTransform: "none";
-  };
-  root: {
-    cursor: "pointer" | "default";
-    opacity: number;
-    paddingInlineEnd: number | undefined;
-    paddingInlineStart: number | undefined;
-    verticalAlign: "middle";
-  };
-  section: {
-    maxHeight: "none";
-  };
-};
 
 export function personChipBadgeStyles(args: {
   avatarEdge: boolean;

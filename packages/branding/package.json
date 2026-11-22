@@ -189,7 +189,7 @@
     "react": "^19.2.7"
   },
   "scripts": {
-    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding && node scripts/copy-brand-assets.mjs",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache/tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding && node scripts/copy-brand-assets.mjs",
     "check:types": "tsc --noEmit",
     "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs branding && node scripts/copy-brand-assets.mjs",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs branding",

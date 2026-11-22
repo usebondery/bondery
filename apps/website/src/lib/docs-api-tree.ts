@@ -39,7 +39,7 @@ const GENERATED_SEGMENT = "_generated";
 const HTTP_METHODS = new Set(["DELETE", "GET", "PATCH", "POST", "PUT"]);
 
 /** HTTP method a generated docs URL ends with, or `null` for a hand-written page. */
-export function docsApiMethod(url: string): string | null {
+function docsApiMethod(url: string): string | null {
   if (!url.startsWith(`${API_REFERENCE_PREFIX}/`)) {
     return null;
   }
@@ -162,9 +162,11 @@ function decorateNodes(
  * Replace the generated `_generated` folder with readable resource groups.
  * Page titles come from `summary` in the OpenAPI spec, so they need no mapping here.
  */
-export function decorateApiTree(
+function decorateApiTree(
   nodes: PageTree.Node[],
   resolveTitle: (url: string) => string | undefined,
 ): PageTree.Node[] {
   return decorateNodes(nodes, resolveTitle);
 }
+
+export { decorateApiTree, docsApiMethod };

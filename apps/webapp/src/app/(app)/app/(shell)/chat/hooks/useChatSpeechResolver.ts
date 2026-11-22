@@ -22,19 +22,6 @@ interface SpeechTextPart {
   type: string;
 }
 
-export interface ChatSpeechResolver {
-  /** Language tag for voice matching. Follows the user locale. */
-  lang: string;
-  /**
-   * Waits for uncached chip records, then builds the spoken text.
-   *
-   * Runs on a click, never on render.
-   */
-  prepare: (parts: readonly SpeechTextPart[]) => Promise<{ lang: string; text: string }>;
-  /** Synchronous speaker. Reads only what the cache already holds. */
-  resolve: TokenSpeaker;
-}
-
 /** Distinct chip ids in one message, grouped by kind, in first-seen order. */
 function collectTokenIds(parts: readonly SpeechTextPart[]): {
   contacts: string[];
@@ -77,6 +64,19 @@ function collectTokenIds(parts: readonly SpeechTextPart[]): {
     interactions: [...interactions],
     tags: [...tags],
   };
+}
+
+export interface ChatSpeechResolver {
+  /** Language tag for voice matching. Follows the user locale. */
+  lang: string;
+  /**
+   * Waits for uncached chip records, then builds the spoken text.
+   *
+   * Runs on a click, never on render.
+   */
+  prepare: (parts: readonly SpeechTextPart[]) => Promise<{ lang: string; text: string }>;
+  /** Synchronous speaker. Reads only what the cache already holds. */
+  resolve: TokenSpeaker;
 }
 
 /**

@@ -1,5 +1,19 @@
 import type { RelationshipType } from "@bondery/schemas";
 
+function directedEnds(
+  type: RelationshipType,
+  sourcePersonId: string,
+  targetPersonId: string,
+): { sourcePersonId: string; targetPersonId: string } | null {
+  if (type === "parent" || type === "guardian") {
+    return { sourcePersonId, targetPersonId };
+  }
+  if (type === "child" || type === "dependent") {
+    return { sourcePersonId: targetPersonId, targetPersonId: sourcePersonId };
+  }
+  return null;
+}
+
 export const RELATIONSHIP_FAMILIES = ["family", "partners", "friends", "work", "other"] as const;
 
 export type RelationshipFamily = (typeof RELATIONSHIP_FAMILIES)[number];
@@ -43,20 +57,6 @@ export function relationshipFamily(type: RelationshipType): RelationshipFamily {
 /** Stable id for one visual line, independent of stored direction. */
 export function relationshipPairKey(leftId: string, rightId: string): string {
   return leftId < rightId ? `${leftId}\0${rightId}` : `${rightId}\0${leftId}`;
-}
-
-function directedEnds(
-  type: RelationshipType,
-  sourcePersonId: string,
-  targetPersonId: string,
-): { sourcePersonId: string; targetPersonId: string } | null {
-  if (type === "parent" || type === "guardian") {
-    return { sourcePersonId, targetPersonId };
-  }
-  if (type === "child" || type === "dependent") {
-    return { sourcePersonId: targetPersonId, targetPersonId: sourcePersonId };
-  }
-  return null;
 }
 
 /**

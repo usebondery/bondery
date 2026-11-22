@@ -16,7 +16,7 @@ function cell(value) {
 }
 
 function main() {
-  const reportPath = process.argv[2];
+  const [, , reportPath] = process.argv;
   // biome-ignore lint/suspicious/noUndeclaredEnvVars: GitHub Actions injects this at runtime
   const summaryPath = process.env.GITHUB_STEP_SUMMARY;
 

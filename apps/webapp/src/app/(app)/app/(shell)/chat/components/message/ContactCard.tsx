@@ -65,34 +65,34 @@ export function ContactCard({ contact, detailed }: ContactCardProps) {
               {contact.fullName}
             </Text>
 
-            {contact.headline && (
+            {contact.headline ? (
               <Group gap={4} wrap="nowrap">
                 <IconBriefcase size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" lineClamp={1} size="xs">
                   {contact.headline}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {contact.location && (
+            {contact.location ? (
               <Group gap={4} wrap="nowrap">
                 <IconMapPin size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" lineClamp={1} size="xs">
                   {contact.location}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {detailed && contact.language && (
+            {detailed && contact.language ? (
               <Group gap={4} wrap="nowrap">
                 <IconLanguage size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" size="xs">
                   {contact.language}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {contact.lastInteraction && (
+            {contact.lastInteraction ? (
               <Group gap={4} wrap="nowrap">
                 <IconCalendar size={14} style={{ flexShrink: 0, opacity: 0.6 }} />
                 <Text c="dimmed" size="xs">
@@ -101,38 +101,38 @@ export function ContactCard({ contact, detailed }: ContactCardProps) {
                   })}
                 </Text>
               </Group>
-            )}
+            ) : null}
 
-            {detailed && contact.phones && contact.phones.length > 0 && (
+            {detailed && contact.phones && contact.phones.length > 0 ? (
               <Text c="dimmed" size="xs">
                 {t("contactPhone", {
                   value: contact.phones.map((p) => `${p.prefix}${p.value}`).join(", "),
                 })}
               </Text>
-            )}
+            ) : null}
 
-            {detailed && contact.emails && contact.emails.length > 0 && (
+            {detailed && contact.emails && contact.emails.length > 0 ? (
               <Text c="dimmed" size="xs">
                 {t("contactEmail", {
                   value: contact.emails.map((e) => e.value).join(", "),
                 })}
               </Text>
-            )}
+            ) : null}
 
-            {tags.length > 0 && (
+            {tags.length > 0 ? (
               <Group gap={4} mt={2}>
                 {tags.slice(0, 5).map((tag) => (
                   <Badge key={tag} size="xs" variant="light">
                     {tag}
                   </Badge>
                 ))}
-                {tags.length > 5 && (
+                {tags.length > 5 ? (
                   <Text c="dimmed" size="xs">
                     +{tags.length - 5}
                   </Text>
-                )}
+                ) : null}
               </Group>
-            )}
+            ) : null}
           </Stack>
         </Group>
       </Paper>

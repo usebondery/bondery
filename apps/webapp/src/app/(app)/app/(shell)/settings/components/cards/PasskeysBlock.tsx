@@ -2,6 +2,7 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import { PASSKEY_LIMITS } from "@bondery/schemas";
 import { Box, Button, Group, Skeleton, Stack, Text, Tooltip } from "@mantine/core";
@@ -194,7 +195,7 @@ function PasskeyRow({
           aria-label={nameFieldLabel}
           isSaving={isSaving}
           maxLength={PASSKEY_LIMITS.nameMaxLength}
-          onBlur={() => void saveName()}
+          onBlur={() => detachPromise(saveName())}
           onChange={setName}
           size="sm"
           style={{ width: "100%" }}
@@ -225,17 +226,18 @@ export function PasskeysBlock() {
 
   useEffect(() => {
     let cancelled = false;
-    void loadVendoredAaguidCatalog()
-      .then((loaded) => {
+    detachPromise(
+      loadVendoredAaguidCatalog().then((loaded) => {
         if (!cancelled) {
           setCatalog(loaded);
         }
-      })
-      .catch(() => {
+      }),
+      () => {
         if (!cancelled) {
           setCatalog({});
         }
-      });
+      },
+    );
     return () => {
       cancelled = true;
     };
@@ -302,7 +304,7 @@ export function PasskeysBlock() {
           disabled={atLimit || !webAuthnSupported}
           leftSection={<IconPlus size={16} />}
           loading={isAdding}
-          onClick={() => void handleAdd()}
+          onClick={() => detachPromise(handleAdd())}
           size="sm"
           variant="outline"
         >
@@ -359,7 +361,7 @@ export function PasskeysBlock() {
               onRenamed={(nextName) => {
                 queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) =>
                   (current ?? []).map((item) =>
-                    item.id === passkey.id ? Object.assign({}, item, { name: nextName }) : item,
+                    item.id === passkey.id ? { ...item, name: nextName } : item,
                   ),
                 );
               }}

@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { Kbd } from "@bondery/mantine-next";
 import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.json" with {
   type: "json",
@@ -21,14 +22,21 @@ function keepServerResults<T>(_query: string, actions: readonly T[]): readonly T
   return actions;
 }
 
+type DocsSearchResultFields = {
+  breadcrumbs?: unknown;
+  content?: unknown;
+  id?: unknown;
+  type?: unknown;
+  url?: unknown;
+};
+
 function isDocsSearchResult(value: unknown): value is DocsSearchResult {
   if (typeof value !== "object" || value === null) {
     return false;
   }
 
-  const record = value as Record<string, unknown>;
-  const type = record.type;
-  const breadcrumbs = record.breadcrumbs;
+  const record = value as DocsSearchResultFields;
+  const { type, breadcrumbs } = record;
   const breadcrumbsOk =
     breadcrumbs === undefined ||
     (Array.isArray(breadcrumbs) && breadcrumbs.every((item) => typeof item === "string"));
@@ -73,38 +81,40 @@ export function DocsSearchSpotlight() {
     setResults([]);
     setLoading(true);
 
-    void fetch(`/api/search?query=${encodeURIComponent(trimmed)}`, {
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Search failed");
-        }
+    detachPromise(
+      fetch(`/api/search?query=${encodeURIComponent(trimmed)}`, {
+        signal: controller.signal,
+      })
+        .then(async (response) => {
+          if (!response.ok) {
+            throw new Error("Search failed");
+          }
 
-        const body: unknown = await response.json();
-        if (requestId.current !== id) {
-          return;
-        }
+          const body: unknown = await response.json();
+          if (requestId.current !== id) {
+            return;
+          }
 
-        if (!Array.isArray(body)) {
+          if (!Array.isArray(body)) {
+            setResults([]);
+            return;
+          }
+
+          setResults(body.filter(isDocsSearchResult));
+        })
+        .catch((error: unknown) => {
+          if (isAbortError(error) || requestId.current !== id) {
+            return;
+          }
+
           setResults([]);
-          return;
-        }
-
-        setResults(body.filter(isDocsSearchResult));
-      })
-      .catch((error: unknown) => {
-        if (isAbortError(error) || requestId.current !== id) {
-          return;
-        }
-
-        setResults([]);
-      })
-      .finally(() => {
-        if (requestId.current === id) {
-          setLoading(false);
-        }
-      });
+        })
+        .finally(() => {
+          if (requestId.current === id) {
+            setLoading(false);
+          }
+        }),
+    );
   }, 200);
 
   function handleQueryChange(next: string) {

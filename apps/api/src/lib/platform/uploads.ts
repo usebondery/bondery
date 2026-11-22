@@ -3,7 +3,7 @@ import { DomainError } from "../../domains/_shared/context.js";
 import { BYTES_PER_MIB } from "./config.js";
 import { badRequest } from "./errors/http-errors.js";
 
-export interface UploadedFile {
+interface UploadedFile {
   buffer: Buffer;
   filename: string;
   mimetype: string;
@@ -27,6 +27,8 @@ function isFileTooLarge(error: unknown): boolean {
 function formatMegabytes(bytes: number): string {
   return `${Math.round((bytes / BYTES_PER_MIB) * 10) / 10}MB`;
 }
+
+export type { UploadedFile };
 
 /**
  * Read the first file of a multipart request, capped at `maxBytes`.

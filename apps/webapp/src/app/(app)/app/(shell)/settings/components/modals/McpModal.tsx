@@ -3,6 +3,7 @@
 import { AnthropicIcon } from "@bondery/branding/react";
 import { docHref } from "@bondery/helpers";
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   ButtonLink,
   CodeBlock,
@@ -33,6 +34,8 @@ import {
   SettingsCredentialIconImg,
 } from "../cards/SettingsCredentialIconImg";
 
+const TRAILING_SLASHES = /\/+$/;
+
 const PERMISSION_SELECT_WIDTH = 172;
 
 interface McpModalProps {
@@ -41,7 +44,7 @@ interface McpModalProps {
 }
 
 function mcpServerUrl(apiBaseUrl: string): string {
-  return `${apiBaseUrl.replace(/\/+$/, "")}/mcp`;
+  return `${apiBaseUrl.replace(TRAILING_SLASHES, "")}/mcp`;
 }
 
 function mcpJsonConfig(url: string): string {
@@ -80,6 +83,53 @@ function McpClientRowIcon({ logoUri }: { logoUri: string | null }) {
       }}
       src={src}
     />
+  );
+}
+
+function McpClientRegion({
+  children,
+  consents,
+  error,
+  isError,
+  onRetry,
+  t,
+  tCommon,
+}: {
+  children: ReactNode;
+  consents: McpConsentListItem[] | undefined;
+  error: unknown;
+  isError: boolean;
+  onRetry: () => void;
+  t: TranslateFn<"SettingsPage", "AiAssistants">;
+  tCommon: TranslateFn<"common">;
+}) {
+  if (consents && consents.length > 0) {
+    return <Stack gap="sm">{children}</Stack>;
+  }
+
+  if (consents) {
+    return (
+      <Text c="dimmed" size="sm">
+        {t("EmptyTitle")}
+      </Text>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Stack gap="xs">
+        <Text size="sm">{getUserFacingError(error, tCommon)}</Text>
+        <Button onClick={onRetry} size="xs" variant="light">
+          {tCommon("actions.retry")}
+        </Button>
+      </Stack>
+    );
+  }
+
+  return (
+    <Center>
+      <Loader aria-label={tCommon("a11y.loading")} />
+    </Center>
   );
 }
 
@@ -174,7 +224,7 @@ export function McpModal({ apiBaseUrl, modalId }: McpModalProps) {
             error={consentsQuery.error}
             isError={consentsQuery.isError}
             onRetry={() => {
-              void consentsQuery.refetch();
+              detachPromise(consentsQuery.refetch());
             }}
             t={t}
             tCommon={tCommon}
@@ -190,7 +240,7 @@ export function McpModal({ apiBaseUrl, modalId }: McpModalProps) {
                   time: formatter.formatDate(new Date(consent.createdAt), "medium"),
                 })}
                 onDelete={() => {
-                  void handleRevoke(consent);
+                  detachPromise(handleRevoke(consent));
                 }}
                 stackBelowSm
               >
@@ -212,52 +262,5 @@ export function McpModal({ apiBaseUrl, modalId }: McpModalProps) {
         </Stack>
       </Stack>
     </ModalScrollLayout>
-  );
-}
-
-function McpClientRegion({
-  children,
-  consents,
-  error,
-  isError,
-  onRetry,
-  t,
-  tCommon,
-}: {
-  children: ReactNode;
-  consents: McpConsentListItem[] | undefined;
-  error: unknown;
-  isError: boolean;
-  onRetry: () => void;
-  t: TranslateFn<"SettingsPage", "AiAssistants">;
-  tCommon: TranslateFn<"common">;
-}) {
-  if (consents && consents.length > 0) {
-    return <Stack gap="sm">{children}</Stack>;
-  }
-
-  if (consents) {
-    return (
-      <Text c="dimmed" size="sm">
-        {t("EmptyTitle")}
-      </Text>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Stack gap="xs">
-        <Text size="sm">{getUserFacingError(error, tCommon)}</Text>
-        <Button onClick={onRetry} size="xs" variant="light">
-          {tCommon("actions.retry")}
-        </Button>
-      </Stack>
-    );
-  }
-
-  return (
-    <Center>
-      <Loader aria-label={tCommon("a11y.loading")} />
-    </Center>
   );
 }

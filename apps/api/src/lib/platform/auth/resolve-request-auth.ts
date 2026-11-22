@@ -14,7 +14,7 @@ import {
 import { toFetchHeaders } from "../../auth/request-headers.js";
 import { verifyBonderyAccessJwt } from "../../auth/verify-access-jwt.js";
 
-export type ResolvedAuthUser = {
+type ResolvedAuthUser = {
   email: string;
   id: string;
 };
@@ -54,6 +54,8 @@ function isTrustedOAuthClient(payload: JWTPayload): boolean {
 
   return Boolean(clientId && trustedClientIds.has(clientId));
 }
+
+export type { ResolvedAuthUser };
 
 /**
  * Verifies a resource-bound OAuth access JWT issued by this API's AS.

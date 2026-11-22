@@ -19,6 +19,12 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const DESCRIPTION_RE_2 = /^description\s*:/;
+const DESCRIPTION_RE = /^description\s*:\s*/;
+const RELEASE_NOTES_FROM_RE = /release notes from/i;
+const DOCS_CHANGELOG_MDX_RE = /^docs\/changelog\/(\d+\.\d+\.\d+)\.mdx$/;
+
 const check = createCheck("check-docs-descriptions");
 
 /** Pass band. A description in this range renders well on every surface. */
@@ -72,7 +78,7 @@ function repoPath(filePath) {
  * has no frontmatter. `block` is true for `>`/`|` scalars and indented values.
  */
 function readDescription(content) {
-  const lines = content.split(/\r?\n/);
+  const lines = content.split(PATTERN_5C723F5C6E_RE);
   if (lines[0]?.trim() !== "---") {
     return null;
   }
@@ -83,12 +89,12 @@ function readDescription(content) {
   }
 
   const frontmatter = lines.slice(1, endIndex);
-  const keyIndex = frontmatter.findIndex((line) => /^description\s*:/.test(line));
+  const keyIndex = frontmatter.findIndex((line) => DESCRIPTION_RE_2.test(line));
   if (keyIndex === -1) {
     return { block: false, value: null };
   }
 
-  const inlineValue = frontmatter[keyIndex].replace(/^description\s*:\s*/, "").trim();
+  const inlineValue = frontmatter[keyIndex].replace(DESCRIPTION_RE, "").trim();
   if (
     inlineValue === ">" ||
     inlineValue === "|" ||
@@ -107,7 +113,7 @@ function readDescription(content) {
 
 function stripQuotes(value) {
   if (value.length >= 2) {
-    const first = value[0];
+    const [first] = value;
     const last = value.at(-1);
     if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
       return value.slice(1, -1);
@@ -130,7 +136,7 @@ const COUNTED_CATEGORY_PATTERN =
   /(?:^|[^\d.])\d+\s+(new features?|fixes|changes|breaking changes?|security fixes?|dependency updates?|ci changes?|test changes?|documentation updates?)\b/i;
 
 function isGeneratedSummary(text) {
-  return COUNTED_CATEGORY_PATTERN.test(text) || /release notes from/i.test(text);
+  return COUNTED_CATEGORY_PATTERN.test(text) || RELEASE_NOTES_FROM_RE.test(text);
 }
 
 /**
@@ -141,7 +147,7 @@ function isGeneratedSummary(text) {
  * makes a description copied from another release fail.
  */
 function changelogVersionFromPath(path) {
-  const match = path.match(/^docs\/changelog\/(\d+\.\d+\.\d+)\.mdx$/);
+  const match = path.match(DOCS_CHANGELOG_MDX_RE);
   return match?.[1] ?? null;
 }
 

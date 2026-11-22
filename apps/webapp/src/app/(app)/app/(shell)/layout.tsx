@@ -27,10 +27,6 @@ import { routeAssert } from "@/lib/navigation/route/assert";
 import { routeLogin } from "@/lib/navigation/route/login";
 import { parseStoredLastExpandedWidth, parseStoredSidebarWidth } from "@/lib/shell/sidebarWidth";
 
-export const metadata: Metadata = {
-  title: WEBAPP_NAME,
-};
-
 function resolveShellDisplayName(
   displayName: string | undefined,
   fallbackName: string,
@@ -44,6 +40,10 @@ function resolveShellDisplayName(
   }
   return fallbackEmail;
 }
+
+export const metadata: Metadata = {
+  title: WEBAPP_NAME,
+};
 
 /** Authenticated product chrome: sidebar, shell providers, onboarding gate. */
 export default async function AppShellLayout({ children }: { children: React.ReactNode }) {

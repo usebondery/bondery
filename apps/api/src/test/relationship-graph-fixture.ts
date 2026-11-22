@@ -4,7 +4,7 @@ import type { PrismaClient } from "@bondery/db";
  * Fake Prisma client for relationship graph tests. `where` is applied the
  * way Postgres would, so a missing userId filter fails the test.
  */
-export type PersonSeed = {
+type PersonSeed = {
   id: string;
   userId: string;
   firstName: string;
@@ -17,7 +17,7 @@ export type PersonSeed = {
   avatarUpdatedAt: Date | null;
 };
 
-export type EdgeSeed = {
+type EdgeSeed = {
   id: string;
   userId: string;
   sourcePersonId: string;
@@ -75,6 +75,30 @@ type GraphReads = {
   work: number;
 };
 
+function isUnlinked(seededPerson: PersonSeed, edges: EdgeSeed[]): boolean {
+  return edges.every(
+    (seededEdge) =>
+      seededEdge.userId !== seededPerson.userId ||
+      (seededEdge.sourcePersonId !== seededPerson.id &&
+        seededEdge.targetPersonId !== seededPerson.id),
+  );
+}
+
+function historyMatches(
+  row: { endDate: Date | null; userId: string },
+  where: HistoryWhere | undefined,
+): boolean {
+  if (!where?.userId || row.userId !== where.userId) {
+    return false;
+  }
+  if (where.endDate === null && row.endDate !== null) {
+    return false;
+  }
+  return true;
+}
+
+export type { EdgeSeed, PersonSeed };
+
 export function personMatches(seededPerson: PersonSeed, where: PersonWhere | undefined): boolean {
   if (!where) {
     return true;
@@ -94,15 +118,6 @@ export function personMatches(seededPerson: PersonSeed, where: PersonWhere | und
   return true;
 }
 
-function isUnlinked(seededPerson: PersonSeed, edges: EdgeSeed[]): boolean {
-  return edges.every(
-    (seededEdge) =>
-      seededEdge.userId !== seededPerson.userId ||
-      (seededEdge.sourcePersonId !== seededPerson.id &&
-        seededEdge.targetPersonId !== seededPerson.id),
-  );
-}
-
 export function edgeMatches(seededEdge: EdgeSeed, where: EdgeWhere | undefined): boolean {
   if (!where?.userId || seededEdge.userId !== where.userId) {
     return false;
@@ -116,19 +131,6 @@ export function edgeMatches(seededEdge: EdgeSeed, where: EdgeWhere | undefined):
         seededEdge.sourcePersonId === clause.sourcePersonId) ||
       (clause.targetPersonId !== undefined && seededEdge.targetPersonId === clause.targetPersonId),
   );
-}
-
-function historyMatches(
-  row: { endDate: Date | null; userId: string },
-  where: HistoryWhere | undefined,
-): boolean {
-  if (!where?.userId || row.userId !== where.userId) {
-    return false;
-  }
-  if (where.endDate === null && row.endDate !== null) {
-    return false;
-  }
-  return true;
 }
 
 export function createFakeClient(seed: {

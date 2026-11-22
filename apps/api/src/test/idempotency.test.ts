@@ -25,6 +25,8 @@ import {
   waitFor,
 } from "./idempotency-test-helpers.js";
 
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 describe("idempotency hook", { concurrency: false }, () => {
   before(() => {
     installMemoryStore();
@@ -222,7 +224,10 @@ describe("idempotency route allowlist", { concurrency: false }, () => {
     const exempt = seen.filter((route) => route.idempotency === false);
     assert.equal(exempt.length, 1, JSON.stringify(seen));
     assert.deepEqual(
-      exempt.map((route) => ({ method: route.method, url: route.url.replace(/\/$/, "") })),
+      exempt.map((route) => ({
+        method: route.method,
+        url: route.url.replace(TRAILING_SLASH_PATTERN, ""),
+      })),
       [...IDEMPOTENCY_EXEMPT_ROUTES],
     );
     await app.close();

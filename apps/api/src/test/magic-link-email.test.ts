@@ -8,6 +8,16 @@ import {
 } from "../lib/notifications/transporter.js";
 import { sendMagicLinkEmail } from "../services/notifications/magic-link.js";
 
+const SECRET_TOKEN_PATTERN = /secret-token/;
+const ASKED_TO_SIGN_IN_PATTERN = /asked to sign in/;
+const SVEETECH_S_R_O_PATTERN = /Sveetech s\.r\.o\./;
+const CONTACT_PATTERN = /\/contact/;
+const DOCS_PATTERN = /\/docs/;
+const SVEETECH_PATTERN = /Sveetech/;
+const PERSON_EXAMPLE_TEST_PATTERN = /person@example\.test/;
+const MAGIC_LINK_VERIFY_PATTERN = /magic-link\/verify/;
+const EMAIL_SERVICE_NOT_CONFIGURED_PATTERN = /email_service_not_configured/;
+
 const SMTP_ENV_KEYS = [
   "BONDERY_PRIVATE_EMAIL_HOST",
   "BONDERY_PRIVATE_EMAIL_PORT",
@@ -64,7 +74,7 @@ describe("magic-link email", () => {
     assert.equal(copy.cta, "Sign in to Bondery");
     assert.equal(copy.heading, "Your sign-in link");
     assert.equal(readCopyString(bundle, "subject"), "Your Bondery sign-in link");
-    assert.match(copy.whyReceiving, /asked to sign in/);
+    assert.match(copy.whyReceiving, ASKED_TO_SIGN_IN_PATTERN);
   });
 
   it("sends via sendRenderedEmail with locale subject and no PII in logs", async () => {
@@ -101,16 +111,16 @@ describe("magic-link email", () => {
     assert.equal(sent[0]?.to, "person@example.test");
     assert.equal(sent[0]?.subject, "Váš přihlašovací odkaz do Bondery");
     assert.equal(sent[0]?.from, "Robot from Bondery <robot@usebondery.com>");
-    assert.match(sent[0]?.html ?? "", /secret-token/);
-    assert.doesNotMatch(sent[0]?.html ?? "", /Sveetech s\.r\.o\./);
-    assert.match(sent[0]?.html ?? "", /\/contact/);
-    assert.match(sent[0]?.html ?? "", /\/docs/);
-    assert.match(sent[0]?.text ?? "", /secret-token/);
-    assert.doesNotMatch(sent[0]?.text ?? "", /Sveetech/);
+    assert.match(sent[0]?.html ?? "", SECRET_TOKEN_PATTERN);
+    assert.doesNotMatch(sent[0]?.html ?? "", SVEETECH_S_R_O_PATTERN);
+    assert.match(sent[0]?.html ?? "", CONTACT_PATTERN);
+    assert.match(sent[0]?.html ?? "", DOCS_PATTERN);
+    assert.match(sent[0]?.text ?? "", SECRET_TOKEN_PATTERN);
+    assert.doesNotMatch(sent[0]?.text ?? "", SVEETECH_PATTERN);
     const serializedLogs = JSON.stringify(logRecords);
-    assert.doesNotMatch(serializedLogs, /person@example\.test/);
-    assert.doesNotMatch(serializedLogs, /secret-token/);
-    assert.doesNotMatch(serializedLogs, /magic-link\/verify/);
+    assert.doesNotMatch(serializedLogs, PERSON_EXAMPLE_TEST_PATTERN);
+    assert.doesNotMatch(serializedLogs, SECRET_TOKEN_PATTERN);
+    assert.doesNotMatch(serializedLogs, MAGIC_LINK_VERIFY_PATTERN);
   });
 
   it("throws when SMTP is not configured", async () => {
@@ -123,7 +133,7 @@ describe("magic-link email", () => {
           language: "en",
           url: "https://example.test/verify",
         }),
-      /email_service_not_configured/,
+      EMAIL_SERVICE_NOT_CONFIGURED_PATTERN,
     );
   });
 });

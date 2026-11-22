@@ -102,9 +102,10 @@ export const CONTACT_METHOD_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactType;
   emoji: string;
   label: string;
-}> = CONTACT_CHANNEL_TYPE_OPTIONS.map((option) =>
-  Object.assign({}, option, { label: option.value === "work" ? "Work" : "Home" }),
-);
+}> = CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
+  ...option,
+  label: option.value === "work" ? "Work" : "Home",
+}));
 
 export const PHONE_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactType;
@@ -122,11 +123,10 @@ export const ADDRESS_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactAddressType;
   emoji: string;
   label: string;
-}> = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) =>
-  Object.assign({}, option, {
-    label: option.value === "work" ? "Work" : option.value === "other" ? "Other" : "Home",
-  }),
-);
+}> = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
+  ...option,
+  label: option.value === "work" ? "Work" : option.value === "other" ? "Other" : "Home",
+}));
 
 /**
  * Avatar upload configuration

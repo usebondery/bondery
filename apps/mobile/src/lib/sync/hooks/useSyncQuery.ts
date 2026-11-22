@@ -136,9 +136,7 @@ export function useContactTags(contactId: string | undefined) {
     enabled: contactId !== undefined,
     queryFn: () =>
       contactId
-        ? getContactTags(contactId).map(
-            (tag): TagWithCount => Object.assign({}, tag, { contactCount: 0 }),
-          )
+        ? getContactTags(contactId).map((tag): TagWithCount => ({ ...tag, contactCount: 0 }))
         : [],
     queryKey: sqliteQueryKeys.contacts.tags(contactId ?? "disabled"),
   });
@@ -150,7 +148,7 @@ export function useContactGroups(contactId: string | undefined) {
     queryFn: () =>
       contactId
         ? getContactGroups(contactId).map(
-            (group): GroupWithCount => Object.assign({}, group, { contactCount: 0 }),
+            (group): GroupWithCount => ({ ...group, contactCount: 0 }),
           )
         : [],
     queryKey: sqliteQueryKeys.contacts.groups(contactId ?? "disabled"),

@@ -2,6 +2,21 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { sanitizeNotesHtml } from "./sanitize-notes-html.js";
 
+const REL_NOOPENER_NOREFERRER_PATTERN = /rel="noopener noreferrer"/;
+const HREF_PATTERN = /href="/;
+const HREF_TEL_PATTERN = /href="tel:/;
+const URL_POSITION_BACKGROUND_PATTERN = /url\(|position|background/i;
+const EXPRESSION_PATTERN = /expression/;
+const CLASS_LANGUAGE_TS_PATTERN = /class="language-ts"/;
+const SCRIPT_IMG_STYLE_MATH_NOSCRIPT_PATTERN = /<(script|img|style|math|noscript)/i;
+const SON_W_PATTERN = /\son\w+=/i;
+const IMG_IFRAME_SVG_OBJECT_FORM_BUTTON_PATTERN = /<(img|iframe|svg|object|form|button)/i;
+const ONERROR_ONLOAD_PATTERN = /onerror|onload/i;
+const HREF_PATTERN_2 = /href=/i;
+const CLICK_PATTERN = /click/;
+const TARGET_BLANK_PATTERN = /target="_blank"/;
+const SELF_OPENER_PATTERN = /_self|"opener"/;
+
 describe("sanitizeNotesHtml", () => {
   it("passes null and undefined through", () => {
     assert.equal(sanitizeNotesHtml(null), null);
@@ -21,8 +36,8 @@ describe("sanitizeNotesHtml", () => {
       '<img src=x onerror="alert(1)"><iframe src="https://evil.test"></iframe>' +
       "<svg onload=alert(1)></svg><object data=x></object><form action=x><button>go</button></form>";
     const result = sanitizeNotesHtml(html);
-    assert.doesNotMatch(result, /<(img|iframe|svg|object|form|button)/i);
-    assert.doesNotMatch(result, /onerror|onload/i);
+    assert.doesNotMatch(result, IMG_IFRAME_SVG_OBJECT_FORM_BUTTON_PATTERN);
+    assert.doesNotMatch(result, ONERROR_ONLOAD_PATTERN);
   });
 
   it("removes javascript: and data: link targets but keeps the link text", () => {
@@ -36,20 +51,20 @@ describe("sanitizeNotesHtml", () => {
       "/relative/path",
     ]) {
       const result = sanitizeNotesHtml(`<a href="${href}">click</a>`);
-      assert.doesNotMatch(result, /href=/i, `href survived for ${JSON.stringify(href)}`);
-      assert.match(result, /click/);
+      assert.doesNotMatch(result, HREF_PATTERN_2, `href survived for ${JSON.stringify(href)}`);
+      assert.match(result, CLICK_PATTERN);
     }
   });
 
   it("keeps http, https, mailto, and tel links and forces rel and target", () => {
     for (const href of ["https://example.com/a?b=1&c=2", "http://example.com", "mailto:a@b.test"]) {
       const result = sanitizeNotesHtml(`<a href="${href}" target="_self" rel="opener">x</a>`);
-      assert.match(result, /rel="noopener noreferrer"/);
-      assert.match(result, /target="_blank"/);
-      assert.doesNotMatch(result, /_self|"opener"/);
-      assert.match(result, /href="/);
+      assert.match(result, REL_NOOPENER_NOREFERRER_PATTERN);
+      assert.match(result, TARGET_BLANK_PATTERN);
+      assert.doesNotMatch(result, SELF_OPENER_PATTERN);
+      assert.match(result, HREF_PATTERN);
     }
-    assert.match(sanitizeNotesHtml('<a href="tel:+420123456789">call</a>'), /href="tel:/);
+    assert.match(sanitizeNotesHtml('<a href="tel:+420123456789">call</a>'), HREF_TEL_PATTERN);
   });
 
   it("drops style declarations except plain colors", () => {
@@ -60,17 +75,17 @@ describe("sanitizeNotesHtml", () => {
     const hostile = sanitizeNotesHtml(
       '<span style="color: red; background: url(javascript:alert(1)); position: fixed">x</span>',
     );
-    assert.doesNotMatch(hostile, /url\(|position|background/i);
+    assert.doesNotMatch(hostile, URL_POSITION_BACKGROUND_PATTERN);
     assert.doesNotMatch(
       sanitizeNotesHtml('<span style="color: expression(alert(1))">x</span>'),
-      /expression/,
+      EXPRESSION_PATTERN,
     );
   });
 
   it("limits class on code to language-*", () => {
     assert.match(
       sanitizeNotesHtml('<pre><code class="language-ts evil">x</code></pre>'),
-      /class="language-ts"/,
+      CLASS_LANGUAGE_TS_PATTERN,
     );
   });
 
@@ -92,8 +107,8 @@ describe("sanitizeNotesHtml", () => {
       '<noscript><p title="</noscript><img src=x onerror=alert(1)>">',
     ]) {
       const result = sanitizeNotesHtml(payload);
-      assert.doesNotMatch(result, /<(script|img|style|math|noscript)/i, payload);
-      assert.doesNotMatch(result, /\son\w+=/i, payload);
+      assert.doesNotMatch(result, SCRIPT_IMG_STYLE_MATH_NOSCRIPT_PATTERN, payload);
+      assert.doesNotMatch(result, SON_W_PATTERN, payload);
     }
   });
 

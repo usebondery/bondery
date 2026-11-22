@@ -8,6 +8,8 @@ import {
   markTrialEndingEmailSent,
 } from "../subscription.js";
 
+const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
+
 async function resolveUserEmail(userId: string): Promise<string | null> {
   const user = await prisma.user.findUnique({
     select: { email: true },
@@ -30,7 +32,7 @@ export async function handleTrialWillEnd(
   }
 
   const metadataUserId = subscription.metadata.bondery_user_id;
-  const isValidUuid = metadataUserId != null && /^[0-9a-f-]{36}$/i.test(metadataUserId);
+  const isValidUuid = metadataUserId != null && UUID_PATTERN.test(metadataUserId);
 
   let userId = isValidUuid ? metadataUserId : (existing?.userId ?? null);
   let email: string | null = null;

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Contact, Group } from "@bondery/schemas";
 import type { FlashListRef } from "@shopify/flash-list";
 import { IconSearch } from "@tabler/icons-react-native";
@@ -89,9 +90,8 @@ export function ContactsScreen() {
     myselfContactId: screenData.myselfContactId,
   });
 
-  const selectedGroupId = screenData.selectedGroupId;
+  const { selectedGroupId } = screenData;
   useEffect(() => {
-    void selectedGroupId;
     flashListRef.current?.scrollToOffset({ animated: false, offset: 0 });
   }, [selectedGroupId]);
 
@@ -184,7 +184,7 @@ export function ContactsScreen() {
           <LoadErrorCard
             description={screenData.error}
             onRetry={() => {
-              void screenData.reloadContacts();
+              detachPromise(screenData.reloadContacts());
             }}
             title={tMobileSettings("LoadErrorTitle")}
           />

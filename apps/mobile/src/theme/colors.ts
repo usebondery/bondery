@@ -6,11 +6,9 @@ import {
   BRAND_SURFACES,
 } from "@bondery/branding/colors";
 
-export { BRAND_SURFACES };
+type MobileThemeMode = "light" | "dark";
 
-export type MobileThemeMode = "light" | "dark";
-
-export interface MobileThemeColors {
+interface MobileThemeColors {
   appBackground: string;
   border: string;
   borderStrong: string;
@@ -46,10 +44,10 @@ export interface MobileThemeColors {
   warningSurface: string;
 }
 
-export const BRAND_PRIMARY = BRAND_PRIMARY_COLOR;
+const BRAND_PRIMARY = BRAND_PRIMARY_COLOR;
 
 /** Pure white — text and icons on primary-filled controls. */
-export const PRIMARY_BUTTON_TEXT = BRAND_PRIMARY_TEXT;
+const PRIMARY_BUTTON_TEXT = BRAND_PRIMARY_TEXT;
 
 /** Hex digits in the `#rgb` shorthand. */
 const SHORTHAND_HEX_DIGIT_COUNT = 3;
@@ -67,10 +65,9 @@ function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r},${g},${b},${alpha})`;
 }
 
-const dark = BRAND_SURFACES.dark;
-const light = BRAND_SURFACES.light;
+const { dark, light } = BRAND_SURFACES;
 
-export const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
+const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
   dark: {
     appBackground: dark.body,
     border: dark.border,
@@ -142,11 +139,11 @@ export const MOBILE_THEME_COLORS: Record<MobileThemeMode, MobileThemeColors> = {
 /**
  * Legacy aliases used by existing components.
  */
-export const PRIMARY_BUTTON_BACKGROUND = BRAND_PRIMARY;
-export const PRIMARY_BUTTON_BACKGROUND_HOVER = BRAND_PRIMARY_HOVER;
-export const PRIMARY_BUTTON_BACKGROUND_PRESS = BRAND_PRIMARY_PRESS;
+const PRIMARY_BUTTON_BACKGROUND = BRAND_PRIMARY;
+const PRIMARY_BUTTON_BACKGROUND_HOVER = BRAND_PRIMARY_HOVER;
+const PRIMARY_BUTTON_BACKGROUND_PRESS = BRAND_PRIMARY_PRESS;
 
-export const OAUTH_PROVIDER_COLORS = {
+const OAUTH_PROVIDER_COLORS = {
   github: {
     background: "#24292f",
     backgroundPress: "#1b1f23",
@@ -164,7 +161,7 @@ export const OAUTH_PROVIDER_COLORS = {
   },
 } as const;
 
-export const SOCIAL_BRAND_COLORS = {
+const SOCIAL_BRAND_COLORS = {
   discord: "#5865F2",
   github: "#111827",
   linkedin: "#0A66C2",
@@ -172,7 +169,7 @@ export const SOCIAL_BRAND_COLORS = {
   x: "#111827",
 } as const;
 
-export const AVATAR_COLOR_PALETTE_HEX = [
+const AVATAR_COLOR_PALETTE_HEX = [
   "#228be6", // blue
   "#15aabf", // cyan
   "#12b886", // teal
@@ -186,3 +183,17 @@ export const AVATAR_COLOR_PALETTE_HEX = [
   "#7048e8", // violet
   "#4263eb", // indigo
 ] as const;
+
+export type { MobileThemeColors, MobileThemeMode };
+export {
+  AVATAR_COLOR_PALETTE_HEX,
+  BRAND_PRIMARY,
+  BRAND_SURFACES,
+  MOBILE_THEME_COLORS,
+  OAUTH_PROVIDER_COLORS,
+  PRIMARY_BUTTON_BACKGROUND,
+  PRIMARY_BUTTON_BACKGROUND_HOVER,
+  PRIMARY_BUTTON_BACKGROUND_PRESS,
+  PRIMARY_BUTTON_TEXT,
+  SOCIAL_BRAND_COLORS,
+};

@@ -1,3 +1,18 @@
+// ─── Internal store ───────────────────────────────────────────────────────────
+
+let state: EnrichBatchState = { ...defaultState };
+
+// Separate flag so toggling it does not trigger a React re-render.
+let cancelled = false;
+
+const listeners = new Set<() => void>();
+
+function notify() {
+  for (const listener of listeners) {
+    listener();
+  }
+}
+
 /**
  * Module-level singleton store for batch LinkedIn enrichment state.
  *
@@ -46,21 +61,6 @@ export const defaultState: EnrichBatchState = {
   pendingQueueStatus: null,
   totalEligible: 0,
 };
-
-// ─── Internal store ───────────────────────────────────────────────────────────
-
-let state: EnrichBatchState = { ...defaultState };
-
-// Separate flag so toggling it does not trigger a React re-render.
-let cancelled = false;
-
-const listeners = new Set<() => void>();
-
-function notify() {
-  for (const listener of listeners) {
-    listener();
-  }
-}
 
 // ─── Public API ───────────────────────────────────────────────────────────────
 

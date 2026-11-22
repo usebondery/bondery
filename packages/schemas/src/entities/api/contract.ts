@@ -29,31 +29,35 @@ import type {
   ShareContactRequest,
 } from "./types.js";
 
-type _ApiSuccessResponse = Assert<
+export type _ApiSuccessResponse = Assert<
   IsEqual<ApiSuccessResponse, z.infer<typeof apiSuccessResponseSchema>>
 >;
-type _PhotoUploadResponse = Assert<
+export type _PhotoUploadResponse = Assert<
   IsEqual<PhotoUploadResponse, z.infer<typeof photoUploadResponseSchema>>
 >;
-type _ImageValidationResult = Assert<
+export type _ImageValidationResult = Assert<
   IsEqual<ImageValidationResult, z.infer<typeof imageValidationResultSchema>>
 >;
-type _AvatarQuality = Assert<IsEqual<AvatarQuality, z.infer<typeof avatarQualitySchema>>>;
-type _AvatarSize = Assert<IsEqual<AvatarSize, z.infer<typeof avatarSizeSchema>>>;
-type _AvatarTransformOptions = Assert<
+export type _AvatarQuality = Assert<IsEqual<AvatarQuality, z.infer<typeof avatarQualitySchema>>>;
+export type _AvatarSize = Assert<IsEqual<AvatarSize, z.infer<typeof avatarSizeSchema>>>;
+export type _AvatarTransformOptions = Assert<
   IsEqual<AvatarTransformOptions, z.infer<typeof avatarTransformOptionsSchema>>
 >;
-type _ShareContactRequest = Assert<
+export type _ShareContactRequest = Assert<
   IsEqual<ShareContactRequest, z.infer<typeof shareContactRequestSchema>>
 >;
-type _FeedbackFormInput = Assert<IsEqual<FeedbackFormInput, z.infer<typeof feedbackFormSchema>>>;
-type _AgentFeedbackRequest = Assert<
+export type _FeedbackFormInput = Assert<
+  IsEqual<FeedbackFormInput, z.infer<typeof feedbackFormSchema>>
+>;
+export type _AgentFeedbackRequest = Assert<
   IsEqual<AgentFeedbackRequest, z.infer<typeof agentFeedbackRequestSchema>>
 >;
-type _InputMaxLengths = Assert<IsEqual<InputMaxLengths, z.infer<typeof inputMaxLengthsSchema>>>;
-type _AvatarUploadConfig = Assert<
+export type _InputMaxLengths = Assert<
+  IsEqual<InputMaxLengths, z.infer<typeof inputMaxLengthsSchema>>
+>;
+export type _AvatarUploadConfig = Assert<
   IsEqual<AvatarUploadConfig, z.infer<typeof avatarUploadConfigSchema>>
 >;
-type _IntegrationProvider = Assert<
+export type _IntegrationProvider = Assert<
   IsEqual<IntegrationProvider, z.infer<typeof integrationProviderSchema>>
 >;

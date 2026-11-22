@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { NEXT_ACTION_PARAM, NEXT_ACTIONS } from "@bondery/helpers/globals/webapp-query";
 import {
   errorNotificationTemplate,
@@ -234,7 +235,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         isFetchingNextPage={isFetchingNextPage}
         isFetchNextPageError={isFetchNextPageError}
         onLoadMore={() => {
-          void fetchNextPage();
+          detachPromise(fetchNextPage());
         }}
         retryLabel={t("LoadMoreRetry")}
       />

@@ -89,7 +89,7 @@ const CYCLE_MS = 5500;
  * A chat that cycles through the questions people ask their network, each answered
  * from their own contacts. It holds still when the visitor prefers reduced motion.
  */
-export function AssistantVisual() {
+function AssistantVisual() {
   const reduceMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
 
@@ -223,3 +223,5 @@ function LoggedCard({ interaction }: { interaction: LoggedInteraction }) {
     </div>
   );
 }
+
+export { AssistantVisual };

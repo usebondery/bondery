@@ -10,6 +10,9 @@ import { fileURLToPath } from "node:url";
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 import { ALL_LOCALES as LOCALES, localesForNamespace } from "./lib/namespace-locales.mjs";
 
+const TSX_JSX_RE = /\.(tsx?|jsx?)$/;
+const FEW_MANY_ZERO_TWO_RE = /_(few|many|zero|two)$/;
+
 const check = createCheck("check-i18n-usage");
 
 const packageRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -63,7 +66,7 @@ function walk(dir, acc = []) {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry.name)) {
+    } else if (TSX_JSX_RE.test(entry.name)) {
       acc.push(full);
     }
   }
@@ -225,7 +228,7 @@ for (const locale of LOCALES) {
       missing.push(full);
     }
   }
-  missing.sort();
+  missing.sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
   console.log(`\nUsed keys missing for ${locale}: ${missing.length}`);
   for (const key of missing.slice(0, 30)) {
     console.log(`  ${key}`);
@@ -239,7 +242,7 @@ for (const locale of LOCALES) {
 }
 
 function isAllowedExtraKey(key) {
-  return /_(few|many|zero|two)$/.test(key);
+  return FEW_MANY_ZERO_TWO_RE.test(key);
 }
 
 for (const [name, entry] of Object.entries(manifest.namespaces)) {

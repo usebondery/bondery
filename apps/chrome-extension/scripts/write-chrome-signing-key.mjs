@@ -1,7 +1,8 @@
 import { writeFileSync } from "node:fs";
 
+const PEM_PRIVATE_KEY_BEGIN_RE = /^-----BEGIN [\w ]*PRIVATE KEY-----/m;
 function main() {
-  const out = process.argv[2];
+  const [, , out] = process.argv;
   if (!out) {
     console.error(
       "usage: node apps/chrome-extension/scripts/write-chrome-signing-key.mjs <pem-path>",
@@ -18,7 +19,7 @@ function main() {
   if (!raw.includes("-----BEGIN") && raw.includes("\\n")) {
     raw = raw.replaceAll("\\n", "\n");
   }
-  if (!/^-----BEGIN [\w ]*PRIVATE KEY-----/m.test(raw)) {
+  if (!PEM_PRIVATE_KEY_BEGIN_RE.test(raw)) {
     console.error("Signing key is not a PEM private key");
     process.exitCode = 1;
     return;

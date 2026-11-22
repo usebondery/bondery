@@ -13,110 +13,6 @@ type PreparedAddress = VCardPreparedContact["addresses"][0];
 const GEOCODE_BATCH_SIZE = 5;
 
 /**
- * Parses uploaded .vcf files, validates addresses via geocoding, and returns
- * normalized contacts ready for preview and import.
- *
- * Each file may contain one or more vCard entries. Invalid entries (missing first+last name)
- * are flagged but still included so the user can see them in the preview.
- *
- * Address validation runs during parse so the commit step becomes a pure DB insert:
- *  - Addresses where the street geocodes successfully are marked "valid" (city-level
- *    coordinates + confirmed street).
- *  - Addresses without a street, or whose street cannot be confirmed by the geocoder,
- *    are marked "unverifiable" and imported with city-level coordinates (or none).
- *  - No addresses are silently dropped — geocoder coverage gaps should not prevent import.
- *
- * @param files Uploaded .vcf file buffers.
- * @returns Array of prepared contacts for the import preview.
- */
-export async function parseVCardUpload(
-  files: UploadFile[],
-  defaultCountry: string | null = null,
-): Promise<VCardPreparedContact[]> {
-  if (files.length === 0) {
-    throw new Error("No files uploaded");
-  }
-
-  const contacts: VCardPreparedContact[] = [];
-
-  for (const file of files) {
-    const content = file.content.toString("utf8");
-    let parsed: ReturnType<typeof parseVCards>;
-
-    try {
-      parsed = parseVCards(content);
-    } catch (error) {
-      throw new Error(`Failed to parse ${file.fileName}: invalid vCard format`, { cause: error });
-    }
-
-    for (const entry of parsed) {
-      const draft = vCardToContactDraft(entry.card, { defaultCountry });
-      const issues: string[] = [];
-
-      const firstName = normalizeString(draft.firstName) ?? "";
-      const middleName = normalizeString(draft.middleName);
-      const lastName = normalizeString(draft.lastName);
-
-      const hasName = firstName.length > 0 || (lastName?.length ?? 0) > 0;
-      if (!hasName) {
-        issues.push("Missing first and last name");
-      }
-
-      contacts.push({
-        addresses: draft.addresses.map((addr) => ({
-          ...addr,
-          addressCountryCode: null,
-          addressFormatted: null,
-          addressStateCode: null,
-          geocodeSource: null,
-          timezone: null,
-          validity: "unverifiable" as const,
-        })),
-        avatarUri: normalizeString(draft.avatarUri),
-        emails: draft.emails,
-        facebook: normalizeString(draft.facebook),
-        firstName,
-        headline: normalizeString(draft.headline),
-        importantDates: draft.importantDates,
-        instagram: normalizeString(draft.instagram),
-        issues,
-        isValid: hasName,
-        lastName: lastName ?? "",
-        linkedin: normalizeString(draft.linkedin),
-        middleName,
-        phones: draft.phones,
-        signal: normalizeString(draft.signal),
-        tempId: crypto.randomUUID(),
-        website: normalizeString(draft.website),
-        whatsapp: normalizeString(draft.whatsapp),
-      });
-    }
-  }
-
-  // ── Geocode & validate all addresses ────────────────────────────────────────
-  type AddressJob = { contactIndex: number; addressIndex: number };
-  const jobs: AddressJob[] = contacts.flatMap((c, ci) =>
-    c.addresses.map((_, ai) => ({ addressIndex: ai, contactIndex: ci })),
-  );
-
-  for (let i = 0; i < jobs.length; i += GEOCODE_BATCH_SIZE) {
-    const batch = jobs.slice(i, i + GEOCODE_BATCH_SIZE);
-    await Promise.allSettled(
-      batch.map(async ({ contactIndex, addressIndex }) => {
-        const contact = contacts[contactIndex];
-        const addr = contact?.addresses[addressIndex];
-        if (!contact || !addr) {
-          return;
-        }
-        contact.addresses[addressIndex] = await enrichAddress(addr);
-      }),
-    );
-  }
-
-  return contacts;
-}
-
-/**
  * Geocodes and validates a single address entry.
  *
  * - If the address has both a street and a city, street validation via the geocoder
@@ -229,4 +125,108 @@ function normalizeString(value: string | null | undefined): string | null {
 
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+/**
+ * Parses uploaded .vcf files, validates addresses via geocoding, and returns
+ * normalized contacts ready for preview and import.
+ *
+ * Each file may contain one or more vCard entries. Invalid entries (missing first+last name)
+ * are flagged but still included so the user can see them in the preview.
+ *
+ * Address validation runs during parse so the commit step becomes a pure DB insert:
+ *  - Addresses where the street geocodes successfully are marked "valid" (city-level
+ *    coordinates + confirmed street).
+ *  - Addresses without a street, or whose street cannot be confirmed by the geocoder,
+ *    are marked "unverifiable" and imported with city-level coordinates (or none).
+ *  - No addresses are silently dropped — geocoder coverage gaps should not prevent import.
+ *
+ * @param files Uploaded .vcf file buffers.
+ * @returns Array of prepared contacts for the import preview.
+ */
+export async function parseVCardUpload(
+  files: UploadFile[],
+  defaultCountry: string | null = null,
+): Promise<VCardPreparedContact[]> {
+  if (files.length === 0) {
+    throw new Error("No files uploaded");
+  }
+
+  const contacts: VCardPreparedContact[] = [];
+
+  for (const file of files) {
+    const content = file.content.toString("utf8");
+    let parsed: ReturnType<typeof parseVCards>;
+
+    try {
+      parsed = parseVCards(content);
+    } catch (error) {
+      throw new Error(`Failed to parse ${file.fileName}: invalid vCard format`, { cause: error });
+    }
+
+    for (const entry of parsed) {
+      const draft = vCardToContactDraft(entry.card, { defaultCountry });
+      const issues: string[] = [];
+
+      const firstName = normalizeString(draft.firstName) ?? "";
+      const middleName = normalizeString(draft.middleName);
+      const lastName = normalizeString(draft.lastName);
+
+      const hasName = firstName.length > 0 || (lastName?.length ?? 0) > 0;
+      if (!hasName) {
+        issues.push("Missing first and last name");
+      }
+
+      contacts.push({
+        addresses: draft.addresses.map((addr) => ({
+          ...addr,
+          addressCountryCode: null,
+          addressFormatted: null,
+          addressStateCode: null,
+          geocodeSource: null,
+          timezone: null,
+          validity: "unverifiable" as const,
+        })),
+        avatarUri: normalizeString(draft.avatarUri),
+        emails: draft.emails,
+        facebook: normalizeString(draft.facebook),
+        firstName,
+        headline: normalizeString(draft.headline),
+        importantDates: draft.importantDates,
+        instagram: normalizeString(draft.instagram),
+        issues,
+        isValid: hasName,
+        lastName: lastName ?? "",
+        linkedin: normalizeString(draft.linkedin),
+        middleName,
+        phones: draft.phones,
+        signal: normalizeString(draft.signal),
+        tempId: crypto.randomUUID(),
+        website: normalizeString(draft.website),
+        whatsapp: normalizeString(draft.whatsapp),
+      });
+    }
+  }
+
+  // ── Geocode & validate all addresses ────────────────────────────────────────
+  type AddressJob = { contactIndex: number; addressIndex: number };
+  const jobs: AddressJob[] = contacts.flatMap((c, ci) =>
+    c.addresses.map((_, ai) => ({ addressIndex: ai, contactIndex: ci })),
+  );
+
+  for (let i = 0; i < jobs.length; i += GEOCODE_BATCH_SIZE) {
+    const batch = jobs.slice(i, i + GEOCODE_BATCH_SIZE);
+    await Promise.allSettled(
+      batch.map(async ({ contactIndex, addressIndex }) => {
+        const contact = contacts[contactIndex];
+        const addr = contact?.addresses[addressIndex];
+        if (!contact || !addr) {
+          return;
+        }
+        contact.addresses[addressIndex] = await enrichAddress(addr);
+      }),
+    );
+  }
+
+  return contacts;
 }

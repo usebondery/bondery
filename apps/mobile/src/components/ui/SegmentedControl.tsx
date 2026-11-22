@@ -9,13 +9,13 @@ import { InputWrapper } from "./InputWrapper";
 import { Text } from "./Text";
 import { usePressSqueeze } from "./usePressSqueeze";
 
-export type SegmentedControlItem<TValue extends string = string> = {
+type SegmentedControlItem<TValue extends string = string> = {
   label: string;
   leftSection?: ReactNode;
   value: TValue;
 };
 
-export type SegmentedControlProps<TValue extends string> = {
+type SegmentedControlProps<TValue extends string> = {
   className?: string;
   data: Array<SegmentedControlItem<TValue>>;
   description?: string;
@@ -75,7 +75,7 @@ function Segment<TValue extends string>({
   );
 }
 
-export function SegmentedControl<TValue extends string>({
+function SegmentedControl<TValue extends string>({
   className,
   data,
   description,
@@ -114,3 +114,6 @@ export function SegmentedControl<TValue extends string>({
     </InputWrapper>
   );
 }
+
+export type { SegmentedControlItem, SegmentedControlProps };
+export { SegmentedControl };

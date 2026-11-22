@@ -21,9 +21,9 @@ import {
 } from "./lock-geometry";
 
 /** Pointer position over the stage, from -1 to 1 on each axis. `null` when the pointer is away. */
-export type StagePointer = { x: number; y: number } | null;
+type StagePointer = { x: number; y: number } | null;
 
-export interface LockModelProps {
+interface LockModelProps {
   /** `false` renders the closed lock still: no close sequence, no idle motion, no tilt. */
   animated: boolean;
   /** `true` once the lock should be closed. Before that the shackle is raised and swung open. */
@@ -50,7 +50,7 @@ function easeOutCubic(t: number): number {
  * The padlock: a coated body, a satin shackle and a keyhole. Every pose is a pure function of the
  * clock, the `closed` flag and the pointer, written to the meshes inside `useFrame`.
  */
-export function LockModel({ closed, animated, pointer }: LockModelProps) {
+function LockModel({ closed, animated, pointer }: LockModelProps) {
   const rootRef = useRef<THREE.Group>(null);
   const bodyGroupRef = useRef<THREE.Group>(null);
   const shackleRef = useRef<THREE.Group>(null);
@@ -170,3 +170,6 @@ export function LockModel({ closed, animated, pointer }: LockModelProps) {
     </group>
   );
 }
+
+export type { LockModelProps, StagePointer };
+export { LockModel };

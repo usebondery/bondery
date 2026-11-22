@@ -1,10 +1,9 @@
+const BONDERY_EXPORT_AVATAR_ENTRY_PATTERN =
+  /^(?:avatars|photos)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jpg$/i;
 export const BONDERY_EXPORT_FORMAT = "bondery-export" as const;
 
 /** ZIP folder for optional contact JPEGs (`avatars/{sourcePersonId}.jpg`). */
 export const BONDERY_EXPORT_AVATARS_PREFIX = "avatars/";
-
-const BONDERY_EXPORT_AVATAR_ENTRY_PATTERN =
-  /^(?:avatars|photos)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jpg$/i;
 
 /**
  * Returns the source person id when `entryName` is `avatars/{uuid}.jpg`

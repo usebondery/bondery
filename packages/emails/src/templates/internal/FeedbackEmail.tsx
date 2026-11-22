@@ -6,6 +6,25 @@ import { EmailBody } from "#shared/EmailBody.js";
 import { EmailWrapper } from "#shared/EmailWrapper.js";
 import { descriptionStyle, EMAIL_MUTED, EMAIL_TEXT } from "#shared/email-styles.js";
 
+function FieldBlock({ label, value }: { label: string; value: string }) {
+  return (
+    <Section
+      style={{
+        backgroundColor: "#f9fafb",
+        borderRadius: "8px",
+        margin: "0 0 12px",
+        padding: "16px",
+      }}
+    >
+      <Text style={{ color: EMAIL_MUTED, fontSize: "14px", fontWeight: 600, margin: "0 0 4px" }}>
+        {label}
+      </Text>
+      <Text style={{ color: EMAIL_TEXT, fontSize: "16px", lineHeight: "24px", margin: 0 }}>
+        {value}
+      </Text>
+    </Section>
+  );
+}
 export interface FeedbackEmailCopy {
   agentActualHeading: string;
   agentExpectedHeading: string;
@@ -44,26 +63,6 @@ export interface FeedbackEmailProps extends EmailDocumentProps {
   timestamp: string;
   userEmail: string;
   userId: string;
-}
-
-function FieldBlock({ label, value }: { label: string; value: string }) {
-  return (
-    <Section
-      style={{
-        backgroundColor: "#f9fafb",
-        borderRadius: "8px",
-        margin: "0 0 12px",
-        padding: "16px",
-      }}
-    >
-      <Text style={{ color: EMAIL_MUTED, fontSize: "14px", fontWeight: 600, margin: "0 0 4px" }}>
-        {label}
-      </Text>
-      <Text style={{ color: EMAIL_TEXT, fontSize: "16px", lineHeight: "24px", margin: 0 }}>
-        {value}
-      </Text>
-    </Section>
-  );
 }
 
 export default function FeedbackEmail({

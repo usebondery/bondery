@@ -1,5 +1,16 @@
 import type { Contact, InstagramPreparedContact } from "@bondery/schemas";
 
+type ZipValidationError = "no-file" | "file-too-large" | "invalid-extension" | "invalid-mime";
+
+const ACCEPTED_ZIP_MIME_TYPES = new Set([
+  "application/zip",
+  "application/x-zip-compressed",
+  "application/x-zip",
+  "multipart/x-zip",
+  "application/octet-stream",
+  "",
+]);
+
 export const INSTAGRAM_MAX_FILE_SIZE_BYTES = 100 * 1024 * 1024;
 
 export type InstagramImportStep =
@@ -23,17 +34,6 @@ export function readNumberField(data: object | null, key: string): number {
   const value = data && key in data ? (data as Record<string, unknown>)[key] : undefined;
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
-
-type ZipValidationError = "no-file" | "file-too-large" | "invalid-extension" | "invalid-mime";
-
-const ACCEPTED_ZIP_MIME_TYPES = new Set([
-  "application/zip",
-  "application/x-zip-compressed",
-  "application/x-zip",
-  "multipart/x-zip",
-  "application/octet-stream",
-  "",
-]);
 
 export function validateInstagramZipFile(
   file: File | null,

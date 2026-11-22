@@ -1,21 +1,12 @@
 import { betterAuthPath } from "@bondery/helpers/globals/paths";
 import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 
-export const BETTER_AUTH_SIGN_IN_SOCIAL_PATH = betterAuthPath("/sign-in/social");
-export const BETTER_AUTH_LINK_SOCIAL_PATH = betterAuthPath("/link-social");
-
 function normalizePath(url: string): string {
   const path = url.split("?")[0] ?? url;
   if (path.length > 1 && path.endsWith("/")) {
     return path.slice(0, -1);
   }
   return path;
-}
-
-/** Better Auth client `signIn.social` / `linkSocial` POST paths under `/auth`. */
-export function isSocialOAuthMutationPath(url: string): boolean {
-  const path = normalizePath(url);
-  return path === BETTER_AUTH_SIGN_IN_SOCIAL_PATH || path === BETTER_AUTH_LINK_SOCIAL_PATH;
 }
 
 function readProviderId(body: unknown): OAuthProviderId | null {
@@ -29,6 +20,15 @@ function readProviderId(body: unknown): OAuthProviderId | null {
   }
 
   return null;
+}
+
+export const BETTER_AUTH_SIGN_IN_SOCIAL_PATH = betterAuthPath("/sign-in/social");
+export const BETTER_AUTH_LINK_SOCIAL_PATH = betterAuthPath("/link-social");
+
+/** Better Auth client `signIn.social` / `linkSocial` POST paths under `/auth`. */
+export function isSocialOAuthMutationPath(url: string): boolean {
+  const path = normalizePath(url);
+  return path === BETTER_AUTH_SIGN_IN_SOCIAL_PATH || path === BETTER_AUTH_LINK_SOCIAL_PATH;
 }
 
 /**

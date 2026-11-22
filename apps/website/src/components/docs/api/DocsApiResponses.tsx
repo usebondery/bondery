@@ -14,6 +14,7 @@ import {
 import { formatText } from "@/lib/i18n/message";
 import { DocsApiSchema } from "./DocsApiSchema";
 
+const EXAMPLE_LABEL_RE = /^example(\s+\S+)?$/i;
 function formatSample(sample: unknown): string {
   if (typeof sample === "string") {
     return sample;
@@ -35,11 +36,11 @@ function sampleLanguage(mediaType: string | null): "json" | "plaintext" {
  * when the spec has a single unnamed example, which adds no information here.
  */
 function exampleLabel(example: ResponseExample): string | null {
-  const label = example.label;
+  const { label } = example;
   if (typeof label !== "string" || label.length === 0) {
     return null;
   }
-  return /^example(\s+\S+)?$/i.test(label.trim()) ? null : label.trim();
+  return EXAMPLE_LABEL_RE.test(label.trim()) ? null : label.trim();
 }
 
 export function DocsApiResponses() {

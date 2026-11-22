@@ -211,4 +211,9 @@ async function main() {
   }
 }
 
-void main();
+main().then(
+  () => undefined,
+  (error) => {
+    console.error(error);
+  },
+);

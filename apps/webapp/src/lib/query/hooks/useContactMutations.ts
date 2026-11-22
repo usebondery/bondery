@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { patchAffectsMergeRecommendations } from "@bondery/helpers/contact";
 import type { Contact } from "@bondery/schemas";
 import { type QueryClient, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -33,8 +34,6 @@ import {
 } from "@/lib/query/invalidation";
 import { contactKeys, interactionKeys } from "@/lib/query/keys";
 
-export type UpdateContactPatch = Parameters<typeof updateContact>[1];
-
 function patchAffectsKeepInTouch(patch: UpdateContactPatch): boolean {
   return "lastInteraction" in patch || "keepFrequencyDays" in patch;
 }
@@ -48,6 +47,8 @@ function patchAffectsMapPins(patch: UpdateContactPatch): boolean {
     "addresses" in patch
   );
 }
+
+export type UpdateContactPatch = Parameters<typeof updateContact>[1];
 
 export async function invalidateAfterContactUpdate(
   queryClient: QueryClient,
@@ -219,7 +220,7 @@ export function useMergeContactsMutation() {
   return useMutation({
     mutationFn: mergeContacts,
     onSuccess: (data) => {
-      void invalidateAfterContactMerge(queryClient, data);
+      detachPromise(invalidateAfterContactMerge(queryClient, data));
     },
   });
 }

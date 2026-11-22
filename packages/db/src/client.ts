@@ -18,7 +18,7 @@ function resolveDatabaseUrl(): string {
 }
 
 /** Pool for the Prisma adapter. TLS comes from `DATABASE_SSL_*` (connection/database-tls.ts). */
-export function createPrismaPool(url: string): Pool {
+function createPrismaPool(url: string): Pool {
   return new Pool({ ...pgConnectionConfig(url) });
 }
 
@@ -48,7 +48,7 @@ function createPrismaClientFromPool(pool: Pool): BasePrismaClient {
   }) as unknown as BasePrismaClient;
 }
 
-export type PrismaClient = BasePrismaClient;
+type PrismaClient = BasePrismaClient;
 
 let prismaInstance: PrismaClient | null = null;
 
@@ -64,7 +64,7 @@ function ensurePrismaFromEnv(): PrismaClient {
 /**
  * Wire Prisma to an API-owned pool. Call once at boot before any queries.
  */
-export function initializePrisma(pool: Pool): PrismaClient {
+function initializePrisma(pool: Pool): PrismaClient {
   if (prismaInstance) {
     return prismaInstance;
   }
@@ -73,6 +73,9 @@ export function initializePrisma(pool: Pool): PrismaClient {
   prismaInstance = createPrismaClientFromPool(pool);
   return prismaInstance;
 }
+
+export type { PrismaClient };
+export { createPrismaPool, initializePrisma };
 
 export function getPrismaPool(): Pool | undefined {
   return globalForPrisma.pool;

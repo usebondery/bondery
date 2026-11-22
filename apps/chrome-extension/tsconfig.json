@@ -1,30 +1,23 @@
 {
   "compilerOptions": {
-    "allowUnreachableCode": false,
-    "allowUnusedLabels": false,
-    "erasableSyntaxOnly": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
-    "isolatedModules": true,
+    "declaration": false,
+    "declarationMap": false,
+    "isolatedDeclarations": false,
     "jsx": "react-jsx",
     "lib": ["ES2022", "DOM"],
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "noFallthroughCasesInSwitch": true,
-    "noImplicitOverride": true,
-    "noImplicitReturns": true,
-    "noUncheckedIndexedAccess": true,
-    "noUncheckedSideEffectImports": true,
-    "noUnusedParameters": true,
     "outDir": "./dist",
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "target": "ES2022",
     "types": ["chrome", "node"]
   },
   "exclude": ["node_modules", "dist", ".output"],
-  "extends": "./.wxt/tsconfig.json",
-  "include": ["src/**/*", "scripts/**/*", "wxt.config.ts", ".wxt/wxt.d.ts", ".wxt/types/**/*.d.ts"]
+  "extends": ["./.wxt/tsconfig.json", "@bondery/typescript-config/base.json"],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "scripts/**/*.ts",
+    "wxt.config.ts",
+    ".wxt/wxt.d.ts",
+    ".wxt/types/**/*.d.ts"
+  ]
 }

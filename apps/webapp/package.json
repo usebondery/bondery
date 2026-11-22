@@ -97,7 +97,7 @@
     "check:modal-patterns": "tsx scripts/check-modal-patterns.ts",
     "check:schemas-imports": "tsx scripts/check-schemas-imports.ts",
     "check:theme-patterns": "tsx scripts/check-theme-patterns.ts",
-    "check:types": "next typegen && node ../../scripts/dev/tsc-native.mjs --noEmit && pnpm run check:analytics-events && pnpm run check:api-fetch && pnpm run check:modal-patterns && pnpm run check:schemas-imports && pnpm run check:theme-patterns",
+    "check:types": "next typegen && node ../../scripts/dev/tsc-native.mjs --noEmit && node ../../scripts/dev/tsc-native.mjs --noEmit -p e2e && pnpm run check:analytics-events && pnpm run check:api-fetch && pnpm run check:modal-patterns && pnpm run check:schemas-imports && pnpm run check:theme-patterns",
     "copy-maplibre-worker": "node ./scripts/copy-maplibre-worker.mjs",
     "dev": "node ../../scripts/dev/portless-alias.mjs webapp && pnpm run dev:next",
     "dev:classic": "next dev --port 26632",

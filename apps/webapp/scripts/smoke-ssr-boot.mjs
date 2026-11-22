@@ -7,6 +7,8 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const BEFORE_INITIALIZATION_I = /before initialization/i;
+
 async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const webappRoot = join(__dirname, "..");
@@ -50,7 +52,7 @@ async function main() {
     const deadline = Date.now() + 30_000;
     while (Date.now() < deadline) {
       const stderr = stderrChunks.join("");
-      if (/before initialization/i.test(stderr)) {
+      if (BEFORE_INITIALIZATION_I.test(stderr)) {
         throw new Error(`SSR module init failed:\n${stderr}`);
       }
       try {
@@ -81,4 +83,9 @@ async function main() {
   }
 }
 
-void main();
+main().then(
+  () => undefined,
+  (error) => {
+    console.error(error);
+  },
+);

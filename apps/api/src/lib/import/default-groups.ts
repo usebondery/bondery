@@ -2,7 +2,7 @@ import type { InstagramImportSource } from "@bondery/schemas";
 import type { DomainContext } from "../../domains/_shared/context.js";
 import { domainDb } from "../../domains/_shared/domain-db.js";
 
-export type DefaultImportGroupKey =
+type DefaultImportGroupKey =
   | "linkedin_import"
   | "instagram_followers"
   | "instagram_following"
@@ -55,6 +55,8 @@ const DEFAULT_IMPORT_GROUPS: Record<
     label: "Mobile Contacts",
   },
 };
+
+export type { DefaultImportGroupKey };
 
 /**
  * Ensures the given default import group exists for a user and returns its id.

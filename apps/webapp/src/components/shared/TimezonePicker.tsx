@@ -70,13 +70,12 @@ export function TimezonePicker({
   const groupedOptions = (query: string) => {
     const normalized = query.trim().toLowerCase();
     return getGroupedTimezones(intlTag)
-      .map((group) =>
-        Object.assign({}, group, {
-          items: group.items.filter((item) =>
-            normalized ? item.searchHaystack.includes(normalized) : true,
-          ),
-        }),
-      )
+      .map((group) => ({
+        ...group,
+        items: group.items.filter((item) =>
+          normalized ? item.searchHaystack.includes(normalized) : true,
+        ),
+      }))
       .filter((group) => group.items.length > 0);
   };
 

@@ -7,10 +7,11 @@ import {
 import { AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET } from "./get-storage.js";
 import { createS3Client } from "./s3-client.js";
 
-export const STORAGE_BUCKETS = [AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET] as const;
+const TIMEOUT_ECONNREFUSED_ENOTFOUND_ECONNRESET_ETIMEDOUT_FETCH_FA_PATTERN =
+  /timeout|ECONNREFUSED|ENOTFOUND|ECONNRESET|ETIMEDOUT|fetch failed/i;
 
 const DEFAULT_MAX_ATTEMPTS = 10;
-const DEFAULT_RETRY_DELAY_MS = 2_000;
+const DEFAULT_RETRY_DELAY_MS = 2000;
 
 type S3ErrorShape = {
   $metadata?: { httpStatusCode?: number };
@@ -118,7 +119,7 @@ function isNotReadyError(error: unknown): boolean {
     }
 
     const message = record.message ?? "";
-    if (/timeout|ECONNREFUSED|ENOTFOUND|ECONNRESET|ETIMEDOUT|fetch failed/i.test(message)) {
+    if (TIMEOUT_ECONNREFUSED_ENOTFOUND_ECONNRESET_ETIMEDOUT_FETCH_FA_PATTERN.test(message)) {
       return true;
     }
 
@@ -148,15 +149,6 @@ function classifyHeadBucketError(error: unknown): Exclude<HeadBucketClass, "exis
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
-  });
-}
-
-export function createStorageAdminClient(): S3Client {
-  return createS3Client({
-    accessKeyId: requireEnv("BONDERY_PRIVATE_S3_ACCESS_KEY_ID"),
-    endpoint: requireEnv("BONDERY_PRIVATE_S3_ENDPOINT"),
-    region: requireEnv("BONDERY_PRIVATE_S3_REGION"),
-    secretAccessKey: requireEnv("BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY"),
   });
 }
 
@@ -250,6 +242,17 @@ async function ensureBucketPublicReadPolicy(client: S3Client, bucket: string): P
     }),
   );
   console.log(`Public read policy applied: ${bucket}`);
+}
+
+export const STORAGE_BUCKETS = [AVATARS_BUCKET, LINKEDIN_LOGOS_BUCKET] as const;
+
+export function createStorageAdminClient(): S3Client {
+  return createS3Client({
+    accessKeyId: requireEnv("BONDERY_PRIVATE_S3_ACCESS_KEY_ID"),
+    endpoint: requireEnv("BONDERY_PRIVATE_S3_ENDPOINT"),
+    region: requireEnv("BONDERY_PRIVATE_S3_REGION"),
+    secretAccessKey: requireEnv("BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY"),
+  });
 }
 
 export type EnsureStorageBucketsOptions = {

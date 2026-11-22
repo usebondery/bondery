@@ -8,6 +8,8 @@ import { after, beforeEach, describe, it } from "node:test";
 
 import { apiCertificateNames, apiSecretPaths, ensureApiSecrets } from "./api-secrets.js";
 
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/;
+
 /** An HTTPS request that trusts only `ca`, as the webapp does, to `servername`. */
 async function requestWithCa(paths: ReturnType<typeof apiSecretPaths>, servername: string) {
   const server = createServer(
@@ -75,7 +77,7 @@ describe("aPI secrets", () => {
     for (const servername of ["bondery-api", "api", "localhost"]) {
       assert.equal(await requestWithCa(paths, servername), 200);
     }
-    await assert.rejects(requestWithCa(paths, "bondery-webapp"), /altnames|Hostname/);
+    await assert.rejects(requestWithCa(paths, "bondery-webapp"), ALTNAMES_HOSTNAME_PATTERN);
     assert.ok(!(await readFile(paths.clientCaFile, "utf8")).includes("PRIVATE KEY"));
   });
 

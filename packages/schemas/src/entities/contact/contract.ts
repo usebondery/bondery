@@ -126,144 +126,158 @@ import type {
   WorkHistoryEntry,
 } from "./types.js";
 
-type _RelationshipType = Assert<IsEqual<RelationshipType, z.infer<typeof relationshipTypeSchema>>>;
-type _Contact = Assert<IsEqual<Contact, z.infer<typeof contactSchema>>>;
-type _ContactPreview = Assert<IsEqual<ContactPreview, z.infer<typeof contactPreviewSchema>>>;
-type _PersonPreview = Assert<IsEqual<PersonPreview, z.infer<typeof personPreviewSchema>>>;
-type _ContactSelectable = Assert<
+export type _RelationshipType = Assert<
+  IsEqual<RelationshipType, z.infer<typeof relationshipTypeSchema>>
+>;
+export type _Contact = Assert<IsEqual<Contact, z.infer<typeof contactSchema>>>;
+export type _ContactPreview = Assert<IsEqual<ContactPreview, z.infer<typeof contactPreviewSchema>>>;
+export type _PersonPreview = Assert<IsEqual<PersonPreview, z.infer<typeof personPreviewSchema>>>;
+export type _ContactSelectable = Assert<
   IsEqual<ContactSelectable, z.infer<typeof contactSelectableSchema>>
 >;
-type _ContactListItem = Assert<IsEqual<ContactListItem, z.infer<typeof contactListItemSchema>>>;
-type _ContactRelationship = Assert<
+export type _ContactListItem = Assert<
+  IsEqual<ContactListItem, z.infer<typeof contactListItemSchema>>
+>;
+export type _ContactRelationship = Assert<
   IsEqual<ContactRelationship, z.infer<typeof contactRelationshipSchema>>
 >;
-type _ContactRelationshipWithPeople = Assert<
+export type _ContactRelationshipWithPeople = Assert<
   IsEqual<ContactRelationshipWithPeople, z.infer<typeof contactRelationshipWithPeopleSchema>>
 >;
-type _ContactWritableFields = Assert<
+export type _ContactWritableFields = Assert<
   IsEqual<ContactWritableFields, z.infer<typeof contactWritableFieldsSchema>>
 >;
-type _CreateContactInput = Assert<
+export type _CreateContactInput = Assert<
   IsEqual<CreateContactInput, z.infer<typeof createContactApiInputSchema>>
 >;
-type _UpdateContactInput = Assert<
+export type _UpdateContactInput = Assert<
   IsEqual<UpdateContactInput, z.infer<typeof updateContactInputSchema>>
 >;
-type _CreateContactFromFullNameInput = Assert<
+export type _CreateContactFromFullNameInput = Assert<
   IsEqual<CreateContactFromFullNameInput, z.infer<typeof createContactInputSchema>>
 >;
-type _UpdateContactIdentityFormInput = Assert<
+export type _UpdateContactIdentityFormInput = Assert<
   IsEqual<UpdateContactIdentityFormInput, z.input<typeof updateContactIdentitySchema>>
 >;
-type _UpdateContactIdentityInput = Assert<
+export type _UpdateContactIdentityInput = Assert<
   IsEqual<UpdateContactIdentityInput, z.output<typeof updateContactIdentitySchema>>
 >;
-type _ContactResponse = Assert<IsEqual<ContactResponse, z.infer<typeof contactResponseSchema>>>;
-type _CreateContactResponse = Assert<
+export type _ContactResponse = Assert<
+  IsEqual<ContactResponse, z.infer<typeof contactResponseSchema>>
+>;
+export type _CreateContactResponse = Assert<
   IsEqual<CreateContactResponse, z.infer<typeof createContactResponseSchema>>
 >;
-type _MapPin = Assert<IsEqual<MapPin, z.infer<typeof mapPinSchema>>>;
-type _MapPinsResponse = Assert<IsEqual<MapPinsResponse, z.infer<typeof mapPinsResponseSchema>>>;
-type _AddressPin = Assert<IsEqual<AddressPin, z.infer<typeof mapAddressPinSchema>>>;
-type _MapAddressPinsResponse = Assert<
+export type _MapPin = Assert<IsEqual<MapPin, z.infer<typeof mapPinSchema>>>;
+export type _MapPinsResponse = Assert<
+  IsEqual<MapPinsResponse, z.infer<typeof mapPinsResponseSchema>>
+>;
+export type _AddressPin = Assert<IsEqual<AddressPin, z.infer<typeof mapAddressPinSchema>>>;
+export type _MapAddressPinsResponse = Assert<
   IsEqual<MapAddressPinsResponse, z.infer<typeof mapAddressPinsResponseSchema>>
 >;
-type _ContactsListStats = Assert<
+export type _ContactsListStats = Assert<
   IsEqual<ContactsListStats, z.infer<typeof contactsListStatsSchema>>
 >;
-type _ContactsListResponse = Assert<
+export type _ContactsListResponse = Assert<
   IsEqual<ContactsListResponse, z.infer<typeof contactsListResponseSchema>>
 >;
-type _ContactsSelectableListResponse = Assert<
+export type _ContactsSelectableListResponse = Assert<
   IsEqual<ContactsSelectableListResponse, z.infer<typeof contactsSelectableListResponseSchema>>
 >;
-type _CreateContactRelationshipInput = Assert<
+export type _CreateContactRelationshipInput = Assert<
   IsEqual<CreateContactRelationshipInput, z.infer<typeof createContactRelationshipInputSchema>>
 >;
-type _UpdateContactRelationshipInput = Assert<
+export type _UpdateContactRelationshipInput = Assert<
   IsEqual<UpdateContactRelationshipInput, z.infer<typeof updateContactRelationshipInputSchema>>
 >;
-type _ContactRelationshipsResponse = Assert<
+export type _ContactRelationshipsResponse = Assert<
   IsEqual<ContactRelationshipsResponse, z.infer<typeof contactRelationshipsResponseSchema>>
 >;
-type _RelationshipGraphNode = Assert<
+export type _RelationshipGraphNode = Assert<
   IsEqual<RelationshipGraphNode, z.infer<typeof relationshipGraphNodeSchema>>
 >;
-type _RelationshipGraphEdge = Assert<
+export type _RelationshipGraphEdge = Assert<
   IsEqual<RelationshipGraphEdge, z.infer<typeof relationshipGraphEdgeSchema>>
 >;
-type _RelationshipGraphUnlinkedPerson = Assert<
+export type _RelationshipGraphUnlinkedPerson = Assert<
   IsEqual<RelationshipGraphUnlinkedPerson, z.infer<typeof relationshipGraphUnlinkedPersonSchema>>
 >;
-type _RelationshipGraphHub = Assert<
+export type _RelationshipGraphHub = Assert<
   IsEqual<RelationshipGraphHub, z.infer<typeof relationshipGraphHubSchema>>
 >;
-type _RelationshipGraphGroup = Assert<
+export type _RelationshipGraphGroup = Assert<
   IsEqual<RelationshipGraphGroup, z.infer<typeof relationshipGraphGroupSchema>>
 >;
-type _RelationshipGraphResponse = Assert<
+export type _RelationshipGraphResponse = Assert<
   IsEqual<RelationshipGraphResponse, z.infer<typeof relationshipGraphResponseSchema>>
 >;
-type _ContactSortOrder = Assert<IsEqual<ContactSortOrder, z.infer<typeof contactSortOrderSchema>>>;
-type _ContactsFilter = Assert<IsEqual<ContactsFilter, z.infer<typeof contactsFilterSchema>>>;
-type _DeleteContactsRequest = Assert<
+export type _ContactSortOrder = Assert<
+  IsEqual<ContactSortOrder, z.infer<typeof contactSortOrderSchema>>
+>;
+export type _ContactsFilter = Assert<IsEqual<ContactsFilter, z.infer<typeof contactsFilterSchema>>>;
+export type _DeleteContactsRequest = Assert<
   IsEqual<DeleteContactsRequest, z.infer<typeof deleteContactsRequestSchema>>
 >;
-type _DeleteContactsResponse = Assert<
+export type _DeleteContactsResponse = Assert<
   IsEqual<DeleteContactsResponse, z.infer<typeof deleteContactsResponseSchema>>
 >;
-type _BySocialLookupResponse = Assert<
+export type _BySocialLookupResponse = Assert<
   IsEqual<BySocialLookupResponse, z.infer<typeof bySocialLookupResponseSchema>>
 >;
-type _DeleteContactResponse = Assert<
+export type _DeleteContactResponse = Assert<
   IsEqual<DeleteContactResponse, z.infer<typeof deleteContactResponseSchema>>
 >;
-type _WorkHistoryEntry = Assert<IsEqual<WorkHistoryEntry, z.infer<typeof workHistoryEntrySchema>>>;
-type _EducationEntry = Assert<IsEqual<EducationEntry, z.infer<typeof educationEntrySchema>>>;
-type _LinkedInDataResponse = Assert<
+export type _WorkHistoryEntry = Assert<
+  IsEqual<WorkHistoryEntry, z.infer<typeof workHistoryEntrySchema>>
+>;
+export type _EducationEntry = Assert<IsEqual<EducationEntry, z.infer<typeof educationEntrySchema>>>;
+export type _LinkedInDataResponse = Assert<
   IsEqual<LinkedInDataResponse, z.infer<typeof linkedInDataResponseSchema>>
 >;
-type _EnrichQueueStatus = Assert<
+export type _EnrichQueueStatus = Assert<
   IsEqual<EnrichQueueStatus, z.infer<typeof enrichQueueStatusSchema>>
 >;
-type _EnrichQueueItem = Assert<IsEqual<EnrichQueueItem, z.infer<typeof enrichQueueItemSchema>>>;
-type _EnrichEligibleCountResponse = Assert<
+export type _EnrichQueueItem = Assert<
+  IsEqual<EnrichQueueItem, z.infer<typeof enrichQueueItemSchema>>
+>;
+export type _EnrichEligibleCountResponse = Assert<
   IsEqual<EnrichEligibleCountResponse, z.infer<typeof enrichEligibleCountResponseSchema>>
 >;
-type _EnrichQueueCountResponse = Assert<
+export type _EnrichQueueCountResponse = Assert<
   IsEqual<EnrichQueueCountResponse, z.infer<typeof enrichQueueCountResponseSchema>>
 >;
-type _KeepInTouchCountResponse = Assert<
+export type _KeepInTouchCountResponse = Assert<
   IsEqual<KeepInTouchCountResponse, z.infer<typeof keepInTouchCountResponseSchema>>
 >;
-type _EnrichQueueStatusCounts = Assert<
+export type _EnrichQueueStatusCounts = Assert<
   IsEqual<EnrichQueueStatusCounts, z.infer<typeof enrichQueueStatusCountsSchema>>
 >;
-type _EnrichQueueInitResponse = Assert<
+export type _EnrichQueueInitResponse = Assert<
   IsEqual<EnrichQueueInitResponse, z.infer<typeof enrichQueueInitResponseSchema>>
 >;
-type _EnrichQueueNextBatchItem = Assert<
+export type _EnrichQueueNextBatchItem = Assert<
   IsEqual<EnrichQueueNextBatchItem, z.infer<typeof enrichQueueNextBatchItemSchema>>
 >;
-type _EnrichQueueNextBatchResponse = Assert<
+export type _EnrichQueueNextBatchResponse = Assert<
   IsEqual<EnrichQueueNextBatchResponse, z.infer<typeof enrichQueueNextBatchResponseSchema>>
 >;
-type _LinkedInDataUpsertResponse = Assert<
+export type _LinkedInDataUpsertResponse = Assert<
   IsEqual<LinkedInDataUpsertResponse, z.infer<typeof linkedInDataUpsertResponseSchema>>
 >;
-type _ContactRelationshipResponse = Assert<
+export type _ContactRelationshipResponse = Assert<
   IsEqual<ContactRelationshipResponse, z.infer<typeof contactRelationshipResponseSchema>>
 >;
-type _EnrichQueueInitBody = Assert<
+export type _EnrichQueueInitBody = Assert<
   IsEqual<EnrichQueueInitBody, z.infer<typeof enrichQueueInitBodySchema>>
 >;
-type _EnrichQueuePatchBody = Assert<
+export type _EnrichQueuePatchBody = Assert<
   IsEqual<EnrichQueuePatchBody, z.infer<typeof enrichQueuePatchBodySchema>>
 >;
-type _ShareableField = Assert<IsEqual<ShareableField, z.infer<typeof shareableFieldSchema>>>;
-type _ContactShareFieldPreview = Assert<
+export type _ShareableField = Assert<IsEqual<ShareableField, z.infer<typeof shareableFieldSchema>>>;
+export type _ContactShareFieldPreview = Assert<
   IsEqual<ContactShareFieldPreview, z.infer<typeof contactShareFieldPreviewSchema>>
 >;
-type _ContactSharePreviewResponse = Assert<
+export type _ContactSharePreviewResponse = Assert<
   IsEqual<ContactSharePreviewResponse, z.infer<typeof contactSharePreviewResponseSchema>>
 >;

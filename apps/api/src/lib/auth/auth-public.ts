@@ -11,10 +11,12 @@ import { API_ROUTES, BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/path
 import { buildAuthTranslations } from "./build-auth-translations.js";
 import { withLoopbackUrlAlias } from "./loopback-alias-urls.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 export const authTranslations = buildAuthTranslations();
 
 export function resolveWebappUrl(): string {
-  return (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
+  return (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(TRAILING_SLASHES_PATTERN, "");
 }
 
 /**
@@ -24,7 +26,7 @@ export function resolveWebappUrl(): string {
  * via `oauthClientResource` (see scripts/provision-oauth-clients.ts).
  */
 export function resolveApiResourceIdentifier(): string {
-  return (process.env.BONDERY_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
+  return (process.env.BONDERY_PUBLIC_API_URL ?? "").replace(TRAILING_SLASHES_PATTERN, "");
 }
 
 /**
@@ -94,7 +96,7 @@ export function resolveAuthErrorPageUrl(): string {
  * browser-facing UI, a separate concern from the issuer identity.
  */
 export function resolveBetterAuthIssuerUrl(): string {
-  const apiUrl = (process.env.BONDERY_PUBLIC_API_URL ?? "").replace(/\/+$/, "");
+  const apiUrl = (process.env.BONDERY_PUBLIC_API_URL ?? "").replace(TRAILING_SLASHES_PATTERN, "");
   if (apiUrl) {
     return apiUrl;
   }

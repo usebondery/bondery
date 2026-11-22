@@ -7,7 +7,7 @@ import { RedisSyncWakeBus } from "./redis-bus.js";
 import { createSyncWsTicketStore, type SyncWsTicketStore } from "./tickets.js";
 import type { SyncWakeBus } from "./types.js";
 
-export type SyncWakeRuntime = {
+type SyncWakeRuntime = {
   hub: SyncConnectionHub;
   bus: SyncWakeBus;
   tickets: SyncWsTicketStore;
@@ -24,6 +24,8 @@ function isWakeEnabled(): boolean {
   }
   return flag !== "0" && flag.toLowerCase() !== "false";
 }
+
+export type { SyncWakeRuntime };
 
 export function createSyncWakeRuntime(
   redis: RedisClients,

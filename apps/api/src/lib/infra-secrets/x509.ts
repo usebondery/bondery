@@ -14,17 +14,17 @@ import { randomBytes } from "node:crypto";
 import "reflect-metadata";
 import * as x509 from "@peculiar/x509";
 
-export const DAY_MS = 24 * 60 * 60 * 1000;
+const A_F_PATTERN = /^[89a-f]/;
 
 const ECDSA_KEY: EcKeyGenParams = { name: "ECDSA", namedCurve: "P-256" };
 const ECDSA_SIGNING: EcdsaParams = { hash: "SHA-256", name: "ECDSA" };
 
-export type CertificateWithKey = {
+type CertificateWithKey = {
   certificatePem: string;
   privateKeyPem: string;
 };
 
-export type CertificateNames = {
+type CertificateNames = {
   dns: string[];
   ip: string[];
 };
@@ -33,20 +33,12 @@ function selectWebCryptoProvider(): void {
   x509.cryptoProvider.set(globalThis.crypto);
 }
 
-export function toPem(label: string, der: ArrayBuffer): string {
-  const base64 = Buffer.from(der).toString("base64");
-  const lines = base64.match(/.{1,64}/g) ?? [];
-  return `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
-}
-
 /** Entropy of a certificate serial number, in bytes. */
 const SERIAL_NUMBER_BYTES = 16;
 
 /** Positive serial number: the high bit of the first byte must be clear. */
 function serialNumber(): string {
-  return randomBytes(SERIAL_NUMBER_BYTES)
-    .toString("hex")
-    .replace(/^[89a-f]/, "1");
+  return randomBytes(SERIAL_NUMBER_BYTES).toString("hex").replace(A_F_PATTERN, "1");
 }
 
 function subjectAlternativeNames(names: CertificateNames): x509.SubjectAlternativeNameExtension {
@@ -86,6 +78,29 @@ function validity(now: Date, validityDays: number): { notAfter: Date; notBefore:
     // A day of slack for clock skew between the job and the clients.
     notBefore: new Date(now.getTime() - DAY_MS),
   };
+}
+
+type CoverageCheck = {
+  /** The certificate must also allow client authentication (mutual TLS). */
+  clientAuth?: boolean;
+  names: CertificateNames;
+  now?: Date;
+  renewBeforeDays: number;
+};
+
+function allowsClientAuth(certificate: x509.X509Certificate): boolean {
+  const usages = certificate.getExtension(x509.ExtendedKeyUsageExtension)?.usages ?? [];
+  return usages.includes(x509.ExtendedKeyUsage.clientAuth);
+}
+
+export type { CertificateNames, CertificateWithKey, CoverageCheck };
+
+export const DAY_MS = 24 * 60 * 60 * 1000;
+
+export function toPem(label: string, der: ArrayBuffer): string {
+  const base64 = Buffer.from(der).toString("base64");
+  const lines = base64.match(/.{1,64}/g) ?? [];
+  return `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
 }
 
 /**
@@ -191,19 +206,6 @@ export async function issueServerCertificate(options: {
     certificatePem: certificate.toString("pem"),
     privateKeyPem: await exportPrivateKey(keys),
   };
-}
-
-export type CoverageCheck = {
-  /** The certificate must also allow client authentication (mutual TLS). */
-  clientAuth?: boolean;
-  names: CertificateNames;
-  now?: Date;
-  renewBeforeDays: number;
-};
-
-function allowsClientAuth(certificate: x509.X509Certificate): boolean {
-  const usages = certificate.getExtension(x509.ExtendedKeyUsageExtension)?.usages ?? [];
-  return usages.includes(x509.ExtendedKeyUsage.clientAuth);
 }
 
 /**

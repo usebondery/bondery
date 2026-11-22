@@ -5,13 +5,21 @@
  * never carries tool arguments, tool results, emails, phones, or notes.
  */
 
-export type ChatToolKind = "read" | "write";
+type ChatToolKind = "read" | "write";
 
-export interface ChatToolActivity {
+interface ChatToolActivity {
   displayName?: string;
   kind: ChatToolKind;
   tool: string;
 }
+
+type HardDeleteTool = (typeof HARD_DELETE_TOOLS)[number];
+
+const HARD_DELETE_TOOL_SET: ReadonlySet<string> = new Set(HARD_DELETE_TOOLS);
+
+const DISPLAY_NAME_FIELDS = ["name", "label", "title", "search"] as const;
+
+export type { ChatToolActivity, ChatToolKind, HardDeleteTool };
 
 /** Hard deletes. These pause for a confirm before `execute` runs. */
 export const HARD_DELETE_TOOLS = [
@@ -23,14 +31,8 @@ export const HARD_DELETE_TOOLS = [
   "delete_tags",
 ] as const;
 
-export type HardDeleteTool = (typeof HARD_DELETE_TOOLS)[number];
-
-const HARD_DELETE_TOOL_SET: ReadonlySet<string> = new Set(HARD_DELETE_TOOLS);
-
 export const MAX_ACTIVITY_COUNT = 20;
 export const MAX_DISPLAY_NAME_LENGTH = 80;
-
-const DISPLAY_NAME_FIELDS = ["name", "label", "title", "search"] as const;
 
 export function isHardDeleteTool(toolName: string): toolName is HardDeleteTool {
   return HARD_DELETE_TOOL_SET.has(toolName);

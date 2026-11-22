@@ -24,7 +24,7 @@ type SheetState =
 /**
  * Icon-only social link row with add / edit / remove support.
  */
-export function ContactSocialSection({
+function ContactSocialSection({
   contact,
   contactFirstName,
   onUpdateSocial,
@@ -171,3 +171,5 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {},
 });
+
+export { ContactSocialSection };

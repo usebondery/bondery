@@ -8,6 +8,10 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const TRAILING_S = /s$/;
+const TSC_DIAGNOSTIC_LINE =
+  /^(Files|Lines|Identifiers|Symbols|Types|Instantiations|Memory used|Check time|I\/O read time|Parse time|Bind time|Total time):\s+(.+)$/;
+
 const root = dirname(fileURLToPath(import.meta.url));
 const cacheDir = join(root, ".cache");
 
@@ -38,9 +42,7 @@ const experiments = [
 function parseDiagnostics(output) {
   const metrics = {};
   for (const line of output.split("\n")) {
-    const match = line.match(
-      /^(Files|Lines|Identifiers|Symbols|Types|Instantiations|Memory used|Check time|I\/O read time|Parse time|Bind time|Total time):\s+(.+)$/,
-    );
+    const match = line.match(TSC_DIAGNOSTIC_LINE);
     if (match) {
       metrics[match[1]] = match[2].trim();
     }
@@ -112,8 +114,8 @@ function runExperiment(file) {
 
   const output = `${result.stdout}\n${result.stderr}`;
   const metrics = parseDiagnostics(output);
-  const checkSeconds = Number.parseFloat((metrics["Check time"] ?? "0").replace(/s$/, ""));
-  const totalSeconds = Number.parseFloat((metrics["Total time"] ?? "0").replace(/s$/, ""));
+  const checkSeconds = Number.parseFloat((metrics["Check time"] ?? "0").replace(TRAILING_S, ""));
+  const totalSeconds = Number.parseFloat((metrics["Total time"] ?? "0").replace(TRAILING_S, ""));
   const hotFileSeconds = parseTraceHotFile(join(traceDir, "trace.json"), file);
 
   return {

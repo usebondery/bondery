@@ -82,4 +82,9 @@ async function main() {
   console.log("all ok");
 }
 
-void main();
+main().then(
+  () => undefined,
+  (error) => {
+    console.error(error);
+  },
+);

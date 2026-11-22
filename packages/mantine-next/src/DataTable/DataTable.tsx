@@ -27,8 +27,6 @@ import { SearchInput } from "#DataTable/SearchInput.js";
 import { SortMenu } from "#DataTable/SortMenu.js";
 import type { DataTableProps } from "#DataTable/types.js";
 
-export type { DataTableProps } from "#DataTable/types.js";
-
 /**
  * Generic data table component with search, sort, column visibility,
  * selection, row actions, bulk actions, and pagination.
@@ -37,6 +35,7 @@ export type { DataTableProps } from "#DataTable/types.js";
 function AllCheckedIcon({ className }: { indeterminate: boolean | undefined; className: string }) {
   return <IconChecks className={className} size={18} />;
 }
+export type { DataTableProps } from "#DataTable/types.js";
 
 export function DataTable<TRow, TSortKey extends string = string>({
   data,

@@ -1,4 +1,5 @@
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   isEmailSignInEnabled,
   isOAuthProviderEnabled,
@@ -43,7 +44,7 @@ import {
 import { loginScreenStyles as styles } from "./loginScreenStyles";
 
 const RESEND_SECONDS = 30;
-const SESSION_POLL_MS = 4_000;
+const SESSION_POLL_MS = 4000;
 
 export default function LoginScreen() {
   const colors = useMobileThemeColors();
@@ -89,9 +90,11 @@ export default function LoginScreen() {
       return;
     }
 
-    void hydrateLastLoginMethod().then(() => {
-      setLastUsedLoginMethod(client.getLastUsedLoginMethod());
-    });
+    detachPromise(
+      hydrateLastLoginMethod().then(() => {
+        setLastUsedLoginMethod(client.getLastUsedLoginMethod());
+      }),
+    );
   }, []);
 
   useEffect(() => {
@@ -105,11 +108,13 @@ export default function LoginScreen() {
   useEffect(() => {
     let cancelled = false;
 
-    void fetchOAuthProvidersBitmap().then((bitmap) => {
-      if (!cancelled) {
-        setOAuthProviders(bitmap);
-      }
-    });
+    detachPromise(
+      fetchOAuthProvidersBitmap().then((bitmap) => {
+        if (!cancelled) {
+          setOAuthProviders(bitmap);
+        }
+      }),
+    );
 
     return () => {
       cancelled = true;
@@ -136,7 +141,7 @@ export default function LoginScreen() {
 
     const timeout = setTimeout(() => {
       setResendSeconds((current) => Math.max(0, current - 1));
-    }, 1_000);
+    }, 1000);
 
     return () => {
       clearTimeout(timeout);
@@ -150,11 +155,13 @@ export default function LoginScreen() {
     }
 
     const poll = setInterval(() => {
-      void client.getSession().then(({ data }) => {
-        if (data?.session) {
-          router.replace("/contacts");
-        }
-      });
+      detachPromise(
+        client.getSession().then(({ data }) => {
+          if (data?.session) {
+            router.replace("/contacts");
+          }
+        }),
+      );
     }, SESSION_POLL_MS);
 
     return () => {
@@ -350,7 +357,7 @@ export default function LoginScreen() {
                   onBack={() => setEmailPanelOpen(false)}
                   onChangeEmail={setEmail}
                   onSubmit={() => {
-                    void submitMagicLink();
+                    detachPromise(submitMagicLink());
                   }}
                   resendSeconds={resendSeconds}
                 />
@@ -365,10 +372,10 @@ export default function LoginScreen() {
                     setEmailPanelOpen(true);
                   }}
                   onOAuth={(provider) => {
-                    void startOAuth(provider);
+                    detachPromise(startOAuth(provider));
                   }}
                   onPasskey={() => {
-                    void startPasskey();
+                    detachPromise(startPasskey());
                   }}
                   onUnavailableToast={(description) => {
                     showAuthError(tLoginPage("AuthenticationError"), description);

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { PhoneEntry } from "@bondery/schemas";
 import {
   IconCopy,
@@ -194,7 +195,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
                   id: "copy",
                   label: tContactInfo("CopyAction"),
                   onPress: () => {
-                    void copyPhoneToClipboard(phone, copyMessages);
+                    detachPromise(copyPhoneToClipboard(phone, copyMessages));
                   },
                 },
                 {
@@ -220,7 +221,7 @@ export function ContactPhonesSection({ phones, onSavePhones }: ContactPhonesSect
               ]}
               onDoublePress={() => openPhoneCall(phone, errorTitle)}
               onLongPress={() => {
-                void copyPhoneToClipboard(phone, copyMessages);
+                detachPromise(copyPhoneToClipboard(phone, copyMessages));
               }}
               onPress={() => openPhoneSms(phone, errorTitle)}
               primaryLabel={displayPhone}

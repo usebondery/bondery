@@ -11,6 +11,12 @@ import AdmZip from "adm-zip";
 import { parse as parseCsv } from "csv-parse/sync";
 import type { UploadFile } from "../../../lib/data/select-fragments.js";
 
+const UFEFF_PATTERN = /^\uFEFF/;
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//i;
+const QUERY_SUFFIX_PATTERN = /\?.*$/;
+const HASH_SUFFIX_PATTERN = /#.*$/;
+const R_N_PATTERN = /\r?\n/;
+
 const LINKEDIN_REQUIRED_HEADERS = [
   "First Name",
   "Last Name",
@@ -34,7 +40,7 @@ type RawLinkedInCsvRow = {
 };
 
 function normalizeHeader(value: string): string {
-  return value.replace(/^\uFEFF/, "").trim();
+  return value.replace(UFEFF_PATTERN, "").trim();
 }
 
 function normalizeNullableString(value: string | null | undefined): string | null {
@@ -54,7 +60,7 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
   }
 
   try {
-    const withProtocol = /^https?:\/\//i.test(fallback) ? fallback : `https://${fallback}`;
+    const withProtocol = HTTP_PROTOCOL_PATTERN.test(fallback) ? fallback : `https://${fallback}`;
     const parsed = new URL(withProtocol);
     const segments = parsed.pathname.split("/").filter(Boolean);
 
@@ -63,7 +69,9 @@ function parseLinkedInUsername(rawUrl: string): { username: string | null; norma
     const username: string | null =
       inIndex >= 0 && afterInSegment ? afterInSegment : (segments.at(-1) ?? null);
 
-    const raw = normalizeNullableString(username?.replace(/\?.*$/, "").replace(/#.*$/, ""));
+    const raw = normalizeNullableString(
+      username?.replace(QUERY_SUFFIX_PATTERN, "").replace(HASH_SUFFIX_PATTERN, ""),
+    );
 
     if (!raw) {
       return { normalizedUrl: fallback, username: null };
@@ -168,14 +176,11 @@ function validateLinkedInHeaders(headers: string[]): void {
 }
 
 function extractLinkedInCsvDataSection(csvContent: string): string {
-  const normalizedContent = csvContent.replace(/^\uFEFF/, "");
-  const lines = normalizedContent.split(/\r?\n/);
+  const normalizedContent = csvContent.replace(UFEFF_PATTERN, "");
+  const lines = normalizedContent.split(R_N_PATTERN);
 
   const headerIndex = lines.findIndex((line) => {
-    const normalizedLine = line
-      .replace(/^\uFEFF/, "")
-      .trim()
-      .toLowerCase();
+    const normalizedLine = line.replace(UFEFF_PATTERN, "").trim().toLowerCase();
     return normalizedLine === LINKEDIN_HEADER_SIGNATURE;
   });
 

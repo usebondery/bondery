@@ -1,5 +1,8 @@
 import path from "node:path";
 
+const MD_OR_MDX_EXT_RE = /\.mdx?$/i;
+const INDEX_SUFFIX_RE = /\/index$/;
+const TRAILING_SLASHES_RE = /\/+$/;
 /**
  * Rewrite links in docs Markdown so agents can follow them.
  *
@@ -24,9 +27,9 @@ const FENCE = /^\s*(`{3,}|~{3,})/;
 const SKIP_PREFIXES = ["http://", "https://", "mailto:", "tel:", "#"];
 
 /** Page slugs without the `docs/` prefix and without the file extension. */
-export type HasDocsPage = (slugs: string[]) => boolean;
+type HasDocsPage = (slugs: string[]) => boolean;
 
-export type RewriteOptions = {
+type RewriteOptions = {
   /** Source path of the page, relative to the docs root (for example `api/index.mdx`). */
   filePath: string;
   /** `true` when a docs page exists for these slugs, so the `.md` route can serve it. */
@@ -42,10 +45,8 @@ export type RewriteOptions = {
   sourceBaseUrl: string;
 };
 
-const _GITHUB_BLOB = "https://github.com/usebondery/bondery/blob/main/docs";
-
 function stripDocsSuffix(target: string): string {
-  return target.replace(/\.mdx?$/i, "").replace(/\/index$/, "");
+  return target.replace(MD_OR_MDX_EXT_RE, "").replace(INDEX_SUFFIX_RE, "");
 }
 
 function splitSuffix(href: string): [string, string] {
@@ -56,7 +57,7 @@ function splitSuffix(href: string): [string, string] {
 }
 
 function absolute(siteOrigin: string, urlPath: string): string {
-  return `${siteOrigin.replace(/\/+$/, "")}${urlPath}`;
+  return `${siteOrigin.replace(TRAILING_SLASHES_RE, "")}${urlPath}`;
 }
 
 /**
@@ -81,14 +82,14 @@ function docsPath(
   const slugs = trimmed.split("/");
 
   if (hasPage(slugs) && !isPublicPage(slugs)) {
-    return `${sourceBaseUrl.replace(/\/+$/, "")}/${trimmed}.mdx${suffix}`;
+    return `${sourceBaseUrl.replace(TRAILING_SLASHES_RE, "")}/${trimmed}.mdx${suffix}`;
   }
 
   return hasPage(slugs) ? `/docs/${trimmed}.md${suffix}` : `/docs/${trimmed}${suffix}`;
 }
 
 /** Resolve one href against the source file that holds it. */
-export function rewriteDocsHref(href: string, options: RewriteOptions): string {
+function rewriteDocsHref(href: string, options: RewriteOptions): string {
   const { filePath, hasPage, isPublicPage, siteOrigin, sourceBaseUrl } = options;
   const resolvePath = (relativePath: string, linkSuffix: string) =>
     docsPath(relativePath, linkSuffix, hasPage, isPublicPage, sourceBaseUrl);
@@ -138,8 +139,8 @@ export function rewriteDocsHref(href: string, options: RewriteOptions): string {
  * `llms.txt` is built from the page tree, which stores `page.url` — a path with
  * no origin. An agent reading the file has no host to request.
  */
-export function absolutizeDocsLinks(markdown: string, siteOrigin: string): string {
-  const origin = siteOrigin.replace(/\/+$/, "");
+function absolutizeDocsLinks(markdown: string, siteOrigin: string): string {
+  const origin = siteOrigin.replace(TRAILING_SLASHES_RE, "");
 
   // Match `/docs`, `/docs.md`, and `/docs/<slug>` link targets only.
   return markdown.replace(/\]\(\/docs(?=[).md/#?])([^)\s]*)\)/g, (_match, rest: string) => {
@@ -152,7 +153,7 @@ export function absolutizeDocsLinks(markdown: string, siteOrigin: string): strin
  *
  * Content inside a fence is an example, so it must keep the literal text.
  */
-export function rewriteDocsMarkdownLinks(markdown: string, options: RewriteOptions): string {
+function rewriteDocsMarkdownLinks(markdown: string, options: RewriteOptions): string {
   const lines = markdown.split("\n");
   let fence: string | undefined;
 
@@ -182,3 +183,6 @@ export function rewriteDocsMarkdownLinks(markdown: string, options: RewriteOptio
 
   return lines.join("\n");
 }
+
+export type { HasDocsPage, RewriteOptions };
+export { absolutizeDocsLinks, rewriteDocsHref, rewriteDocsMarkdownLinks };

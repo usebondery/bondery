@@ -17,7 +17,7 @@ import { userMessageText } from "./sessions.js";
  * inserts or charges.
  */
 
-export interface ResolvedChatTurn {
+interface ResolvedChatTurn {
   /** Charge one chat message. */
   chargeQuota: boolean;
   /** Write the user turn to the database. */
@@ -27,7 +27,7 @@ export interface ResolvedChatTurn {
 }
 
 /** The stored state a continuation is checked against. */
-export interface StoredTurnState {
+interface StoredTurnState {
   lastAssistantContent?: unknown;
   lastUserText: string;
   requestUserText: string;
@@ -37,6 +37,19 @@ function parseContent(content: unknown): ChatMessageContent {
   const parsed = chatMessageContentSchema.safeParse(content);
   return parsed.success ? parsed.data : {};
 }
+
+/** Last user message in the thread, whether or not it is the final message. */
+function findLastUserMessage(messages: UIMessage[]): UIMessage | undefined {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index]?.role === "user") {
+      return messages[index];
+    }
+  }
+
+  return undefined;
+}
+
+export type { ResolvedChatTurn, StoredTurnState };
 
 /** True when a stored turn changed CRM data, or may have changed it. */
 export function hasWriteActivity(content: unknown): boolean {
@@ -83,17 +96,6 @@ export function decideChatTurn(
       reuseAssistantRow: true,
     },
   };
-}
-
-/** Last user message in the thread, whether or not it is the final message. */
-function findLastUserMessage(messages: UIMessage[]): UIMessage | undefined {
-  for (let index = messages.length - 1; index >= 0; index -= 1) {
-    if (messages[index]?.role === "user") {
-      return messages[index];
-    }
-  }
-
-  return undefined;
 }
 
 /**

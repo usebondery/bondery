@@ -1,7 +1,8 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { ActionIconButton } from "@bondery/mantine-next";
-import type { ContactSelectable } from "@bondery/schemas";
+import type { ContactSelectable, UserSettings } from "@bondery/schemas";
 import { Group, Paper, Progress, Stack, Text, Title } from "@mantine/core";
 import { IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
@@ -19,7 +20,7 @@ import { ProgressRailItem } from "./ProgressRailItem";
 
 interface GettingStartedProgressRailProps {
   hasInteraction: boolean;
-  settingsData?: Record<string, unknown>;
+  settingsData?: UserSettings;
 
   timelineContacts: ContactSelectable[];
 
@@ -62,8 +63,6 @@ export function GettingStartedProgressRail({
   if (!state.showRail) {
     return null;
   }
-
-  const _importTask = state.tasks.find((task) => task.id === "importContacts");
 
   const awaitingPlatform = parsedSettings.importFollowupPlatform;
 
@@ -116,7 +115,7 @@ export function GettingStartedProgressRail({
             color="gray"
             icon={<IconX />}
             loading={dismissMutation.isPending}
-            onClick={() => void handleDismissRail()}
+            onClick={() => detachPromise(handleDismissRail())}
             size="sm"
             variant="subtle"
           />

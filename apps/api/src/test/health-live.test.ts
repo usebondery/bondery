@@ -3,6 +3,8 @@ import { afterEach, describe, it } from "node:test";
 
 import { loadTestEnv } from "./load-test-env.js";
 
+const D_D_D_T_PATTERN = /^\d{4}-\d{2}-\d{2}T/;
+
 describe("gET /health/live", () => {
   const originalVersion = process.env.BONDERY_INFRA_VERSION;
   const originalGitSha = process.env.BONDERY_INFRA_GIT_SHA;
@@ -29,7 +31,7 @@ describe("gET /health/live", () => {
     assert.equal(response.statusCode, 200);
     const body = response.json();
     assert.equal(body.status, "ok");
-    assert.match(body.timestamp, /^\d{4}-\d{2}-\d{2}T/);
+    assert.match(body.timestamp, D_D_D_T_PATTERN);
     assert.equal(body.extension, undefined);
     await app.close();
   });

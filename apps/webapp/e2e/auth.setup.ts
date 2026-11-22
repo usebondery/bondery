@@ -1,5 +1,8 @@
 import { expect, test as setup } from "@playwright/test";
 
+const APP_PATH_PREFIX = /\/app\//;
+const OAUTH_ERROR_QUERY = /error=oauth/;
+
 const authFile = ".auth/user.json";
 
 setup("manual GitHub login", async ({ page }) => {
@@ -10,7 +13,7 @@ setup("manual GitHub login", async ({ page }) => {
 
   // Complete GitHub sign-in in the Playwright browser window when prompted.
   try {
-    await page.waitForURL(/\/app\//, { timeout: 300_000 });
+    await page.waitForURL(APP_PATH_PREFIX, { timeout: 300_000 });
   } catch (error) {
     const url = page.url();
     if (url.includes("error=oauth")) {
@@ -31,6 +34,6 @@ setup("manual GitHub login", async ({ page }) => {
     );
   }
 
-  await expect(page).not.toHaveURL(/error=oauth/);
+  await expect(page).not.toHaveURL(OAUTH_ERROR_QUERY);
   await page.context().storageState({ path: authFile });
 });

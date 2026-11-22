@@ -72,18 +72,6 @@ function ShareContactModalTitle() {
   return <ModalTitle icon={<IconShare size={22} />} text={tShare("ModalTitle")} />;
 }
 
-export function openShareContactModal({ contact }: OpenShareContactModalParams) {
-  const modalId = createModalId("share-contact");
-
-  modals.open({
-    children: <ShareContactModalContent contact={contact} modalId={modalId} />,
-    modalId,
-    size: "lg",
-    title: <ShareContactModalTitle />,
-    trapFocus: true,
-  });
-}
-
 function contactShareFieldPreviews(contact: Contact) {
   return buildShareableFieldPreviews({
     addresses: contact.addresses,
@@ -103,35 +91,6 @@ function contactShareFieldPreviews(contact: Contact) {
     website: contact.website,
     whatsapp: contact.whatsapp,
   });
-}
-
-export interface ShareContactTexts {
-  avatarDescription: (name: string) => string;
-  avatarRequiredTooltip: string;
-  cancelButton: string;
-  errorDescription: string;
-  errorTitle: string;
-  fieldLabels: Record<ShareableField, string>;
-  invalidEmailError: string;
-  invalidEmailsError: string;
-  maxRecipientsError: string;
-  messageLabel: string;
-  messagePlaceholder: string;
-  modalTitle: string;
-  noFieldsSelectedError: string;
-  noRecipientsError: string;
-  recipientEmailLabel: string;
-  recipientEmailPlaceholder: string;
-  recipientsLabel: string;
-  recipientsPlaceholder: string;
-  requiredFieldTooltip: string;
-  selectFieldsLabel: string;
-  sendCopyCheckbox: string;
-  sendCopyTooltip: string;
-  sendingButton: string;
-  submitButton: (count: number) => string;
-  successDescription: string;
-  successTitle: string;
 }
 
 function ShareContactModalContent({ contact, modalId }: { contact: Contact; modalId: string }) {
@@ -337,4 +296,45 @@ function ShareContactModalContent({ contact, modalId }: { contact: Contact; moda
       </Stack>
     </ModalScrollLayout>
   );
+}
+
+export function openShareContactModal({ contact }: OpenShareContactModalParams) {
+  const modalId = createModalId("share-contact");
+
+  modals.open({
+    children: <ShareContactModalContent contact={contact} modalId={modalId} />,
+    modalId,
+    size: "lg",
+    title: <ShareContactModalTitle />,
+    trapFocus: true,
+  });
+}
+
+export interface ShareContactTexts {
+  avatarDescription: (name: string) => string;
+  avatarRequiredTooltip: string;
+  cancelButton: string;
+  errorDescription: string;
+  errorTitle: string;
+  fieldLabels: Record<ShareableField, string>;
+  invalidEmailError: string;
+  invalidEmailsError: string;
+  maxRecipientsError: string;
+  messageLabel: string;
+  messagePlaceholder: string;
+  modalTitle: string;
+  noFieldsSelectedError: string;
+  noRecipientsError: string;
+  recipientEmailLabel: string;
+  recipientEmailPlaceholder: string;
+  recipientsLabel: string;
+  recipientsPlaceholder: string;
+  requiredFieldTooltip: string;
+  selectFieldsLabel: string;
+  sendCopyCheckbox: string;
+  sendCopyTooltip: string;
+  sendingButton: string;
+  submitButton: (count: number) => string;
+  successDescription: string;
+  successTitle: string;
 }

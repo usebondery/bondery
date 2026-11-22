@@ -17,7 +17,7 @@ import { Avatar, type AvatarProps } from "@mantine/core";
  *   invented, but keep it harmless and plausible. Never invent a negative claim.
  * - Never render initials. Every person in a mock has a photo.
  */
-export const SAMPLE_PEOPLE = {
+const SAMPLE_PEOPLE = {
   ada: { name: "Ada Lovelace", photo: "/images/sample-people/ada-lovelace.jpg" },
   alan: { name: "Alan Turing", photo: "/images/sample-people/alan-turing.jpg" },
   grace: { name: "Grace Hopper", photo: "/images/sample-people/grace-hopper.jpg" },
@@ -31,7 +31,7 @@ export const SAMPLE_PEOPLE = {
   whitney: { name: "Whitney Wolfe Herd", photo: "/images/sample-people/whitney-wolfe-herd.jpg" },
 } as const;
 
-export type SamplePersonId = keyof typeof SAMPLE_PEOPLE;
+type SamplePersonId = keyof typeof SAMPLE_PEOPLE;
 
 const PEOPLE_COPY = {
   ada: visuals.People.Ada,
@@ -48,12 +48,12 @@ const PEOPLE_COPY = {
 } as const satisfies Record<SamplePersonId, { Headline: string }>;
 
 /** One-line description of a sample person, shown under the name in a mock. */
-export function personHeadline(id: SamplePersonId): string {
+function personHeadline(id: SamplePersonId): string {
   return PEOPLE_COPY[id].Headline;
 }
 
 /** Birthday of a sample person who has one in the demo. */
-export function personBirthday(id: "ada" | "alan"): string {
+function personBirthday(id: "ada" | "alan"): string {
   return PEOPLE_COPY[id].Birthday;
 }
 
@@ -62,8 +62,11 @@ type PersonAvatarProps = Omit<AvatarProps, "name" | "src"> & { person: SamplePer
 /**
  * A circular photo avatar for a sample person.
  */
-export function PersonAvatar({ person, ...avatarProps }: PersonAvatarProps) {
+function PersonAvatar({ person, ...avatarProps }: PersonAvatarProps) {
   const { name, photo } = SAMPLE_PEOPLE[person];
 
   return <Avatar alt={name} name={name} radius="xl" src={photo} {...avatarProps} />;
 }
+
+export type { SamplePersonId };
+export { PersonAvatar, personBirthday, personHeadline, SAMPLE_PEOPLE };

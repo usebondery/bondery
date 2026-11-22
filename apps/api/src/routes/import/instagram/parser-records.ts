@@ -12,13 +12,15 @@ import {
   normalizeUsernameFromHref,
 } from "./parser-username.js";
 
-export type InstagramStringData = {
+const UFEFF_PATTERN = /^\uFEFF/;
+
+type InstagramStringData = {
   href?: unknown;
   value?: unknown;
   timestamp?: unknown;
 };
 
-export type InstagramRelationshipItem = {
+type InstagramRelationshipItem = {
   title?: unknown;
   string_list_data?: unknown;
 };
@@ -31,26 +33,12 @@ type CloseFriendsExport = {
   relationships_close_friends?: unknown;
 };
 
-export type ParsedRecord = {
+type ParsedRecord = {
   username: string;
   connectedAt: string | null;
   connectedOnRaw: number | null;
   sources: InstagramImportSource[];
 };
-
-export const FOLLOWING_FILE_NAME = "following.json";
-export const CLOSE_FRIENDS_FILE_NAME = "close_friends.json";
-export const FOLLOWERS_FILE_PATTERN = /^followers(?:_\d+)?\.json$/i;
-
-export function normalizePath(path: string): string {
-  return path.replaceAll("\\", "/").toLowerCase();
-}
-
-export function baseName(path: string): string {
-  const normalized = normalizePath(path);
-  const chunks = normalized.split("/").filter(Boolean);
-  return chunks.at(-1) || normalized;
-}
 
 function parseTimestampToDate(timestampValue: unknown): { iso: string | null; raw: number | null } {
   if (typeof timestampValue !== "number" || !Number.isFinite(timestampValue)) {
@@ -161,6 +149,22 @@ function toMap(records: ParsedRecord[]): Map<string, ParsedRecord> {
   return map;
 }
 
+export type { InstagramRelationshipItem, InstagramStringData, ParsedRecord };
+
+export const FOLLOWING_FILE_NAME = "following.json";
+export const CLOSE_FRIENDS_FILE_NAME = "close_friends.json";
+export const FOLLOWERS_FILE_PATTERN = /^followers(?:_\d+)?\.json$/i;
+
+export function normalizePath(path: string): string {
+  return path.replaceAll("\\", "/").toLowerCase();
+}
+
+export function baseName(path: string): string {
+  const normalized = normalizePath(path);
+  const chunks = normalized.split("/").filter(Boolean);
+  return chunks.at(-1) || normalized;
+}
+
 export function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedContact[] {
   return records.map((record, index) => {
     const parsedName = parseInstagramUsername({ username: record.username });
@@ -194,10 +198,7 @@ export function toPreparedContacts(records: ParsedRecord[]): InstagramPreparedCo
 }
 
 export function parseJsonFile<T>(file: UploadFile): T {
-  const rawContent = file.content
-    .toString("utf8")
-    .replace(/^\uFEFF/, "")
-    .trim();
+  const rawContent = file.content.toString("utf8").replace(UFEFF_PATTERN, "").trim();
 
   try {
     return JSON.parse(rawContent) as T;

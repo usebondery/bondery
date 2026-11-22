@@ -10,7 +10,7 @@ interface LoadErrorRetryButtonProps {
   onPress: () => void;
 }
 
-export function LoadErrorRetryButton({ onPress }: LoadErrorRetryButtonProps) {
+function LoadErrorRetryButton({ onPress }: LoadErrorRetryButtonProps) {
   const t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
@@ -47,3 +47,5 @@ const styles = StyleSheet.create({
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
   },
 });
+
+export { LoadErrorRetryButton };

@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES, IDEMPOTENCY_KEY_HEADER } from "@bondery/helpers/globals/paths";
 import { generateId } from "@bondery/helpers/ids/generate-id";
 import {
@@ -92,13 +93,13 @@ export function useEmbeddedCheckout({
   const { stripePublishableKey } = useWebappRuntimeConfig();
 
   const handleCheckoutConfirmed = () => {
-    void invalidateSubscription(queryClient);
+    detachPromise(invalidateSubscription(queryClient));
     onSuccess?.();
     router.refresh();
   };
 
   const stopPolling = () => {
-    if (pollTimerRef.current != null) {
+    if (pollTimerRef.current !== null && pollTimerRef.current !== undefined) {
       window.clearInterval(pollTimerRef.current);
       pollTimerRef.current = null;
     }
@@ -157,7 +158,7 @@ export function useEmbeddedCheckout({
           method: "POST",
         },
       );
-      clientSecret = checkoutSession.clientSecret;
+      ({ clientSecret } = checkoutSession);
     } catch (error) {
       if (generation !== openGenerationRef.current) {
         return;
@@ -231,33 +232,35 @@ export function useEmbeddedCheckout({
 
       const started = Date.now();
       pollTimerRef.current = window.setInterval(() => {
-        void (async () => {
-          if (generation !== openGenerationRef.current) {
-            return;
-          }
-
-          if (Date.now() - started > WEBHOOK_CONFIRM_TIMEOUT_MS) {
-            return;
-          }
-
-          try {
-            const status = await getSubscriptionStatus();
-            if (generation !== openGenerationRef.current || !isCheckoutConfirmed(status)) {
+        detachPromise(
+          (async () => {
+            if (generation !== openGenerationRef.current) {
               return;
             }
 
-            closeCheckout();
-            notifications.show(
-              successNotificationTemplate({
-                description: t("successMessage"),
-                title: t("successTitle"),
-              }),
-            );
-            handleCheckoutConfirmed();
-          } catch {
-            // Keep polling while checkout is open.
-          }
-        })();
+            if (Date.now() - started > WEBHOOK_CONFIRM_TIMEOUT_MS) {
+              return;
+            }
+
+            try {
+              const status = await getSubscriptionStatus();
+              if (generation !== openGenerationRef.current || !isCheckoutConfirmed(status)) {
+                return;
+              }
+
+              closeCheckout();
+              notifications.show(
+                successNotificationTemplate({
+                  description: t("successMessage"),
+                  title: t("successTitle"),
+                }),
+              );
+              handleCheckoutConfirmed();
+            } catch {
+              // Keep polling while checkout is open.
+            }
+          })(),
+        );
       }, CHECKOUT_POLL_INTERVAL_MS);
     } catch {
       if (generation !== openGenerationRef.current) {

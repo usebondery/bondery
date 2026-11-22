@@ -11,78 +11,8 @@ function sampleAvatar(id: string): string {
   return `/dev/store-shots/${id}.jpg`;
 }
 
-/** PersonCard/PersonChip identity used by listing shots. */
-export type StoreShotPerson = ContactPreview & {
-  headline: string | null;
-  location: string | null;
-  middleName: string | null;
-};
-
 const FIXTURE_USER_ID = "00000000-0000-4000-8000-000000000099";
 const FIXTURE_STAMP = "2026-06-01T08:00:00.000Z";
-
-/**
- * Repository sample contacts and their bundled sample avatars.
- */
-export const ADA_LOVELACE: StoreShotPerson = {
-  avatar: sampleAvatar("01a03e59-202a-71ec-bf4b-8b611c9e64eb"),
-  firstName: "Ada",
-  headline: "Mathematician",
-  id: "01a03e59-202a-71ec-bf4b-8b611c9e64eb",
-  lastName: "Lovelace",
-  location: "London",
-  middleName: null,
-};
-
-export const ALAN_TURING: StoreShotPerson = {
-  avatar: sampleAvatar("01a03e59-2220-758f-94fb-4e1a73f30d58"),
-  firstName: "Alan",
-  headline: "Computer scientist",
-  id: "01a03e59-2220-758f-94fb-4e1a73f30d58",
-  lastName: "Turing",
-  location: "Manchester",
-  middleName: null,
-};
-
-export const GRACE_HOPPER: StoreShotPerson = {
-  avatar: sampleAvatar("01a03e59-2521-766e-ab8d-085f2dd423aa"),
-  firstName: "Grace",
-  headline: "Rear Admiral, US Navy",
-  id: "01a03e59-2521-766e-ab8d-085f2dd423aa",
-  lastName: "Hopper",
-  location: "Arlington, Texas",
-  middleName: null,
-};
-
-export const MARGARET_HAMILTON: StoreShotPerson = {
-  avatar: sampleAvatar("01a03e59-26b6-71df-97bc-79150869a6c0"),
-  firstName: "Margaret",
-  headline: "Software engineer, Apollo",
-  id: "01a03e59-26b6-71df-97bc-79150869a6c0",
-  lastName: "Hamilton",
-  location: "Cambridge",
-  middleName: null,
-};
-
-export const KATHERINE_JOHNSON: StoreShotPerson = {
-  avatar: sampleAvatar("01a03e59-40a2-70c1-8820-fec892f6f28e"),
-  firstName: "Katherine",
-  headline: "Mathematician, NASA",
-  id: "01a03e59-40a2-70c1-8820-fec892f6f28e",
-  lastName: "Johnson",
-  location: "Hampton",
-  middleName: null,
-};
-
-export const HEDY_LAMARR: StoreShotPerson = {
-  avatar: sampleAvatar("01a03e59-43bd-70bf-b678-1673878f566f"),
-  firstName: "Hedy",
-  headline: "Inventor and actor",
-  id: "01a03e59-43bd-70bf-b678-1673878f566f",
-  lastName: "Lamarr",
-  location: "Vienna",
-  middleName: null,
-};
 
 const STEVE_JOBS: StoreShotPerson = {
   avatar: sampleAvatar("01a03e59-23b1-727e-bd0b-e30edda99894"),
@@ -217,6 +147,76 @@ function activity(input: {
   };
 }
 
+/** PersonCard/PersonChip identity used by listing shots. */
+export type StoreShotPerson = ContactPreview & {
+  headline: string | null;
+  location: string | null;
+  middleName: string | null;
+};
+
+/**
+ * Repository sample contacts and their bundled sample avatars.
+ */
+export const ADA_LOVELACE: StoreShotPerson = {
+  avatar: sampleAvatar("01a03e59-202a-71ec-bf4b-8b611c9e64eb"),
+  firstName: "Ada",
+  headline: "Mathematician",
+  id: "01a03e59-202a-71ec-bf4b-8b611c9e64eb",
+  lastName: "Lovelace",
+  location: "London",
+  middleName: null,
+};
+
+export const ALAN_TURING: StoreShotPerson = {
+  avatar: sampleAvatar("01a03e59-2220-758f-94fb-4e1a73f30d58"),
+  firstName: "Alan",
+  headline: "Computer scientist",
+  id: "01a03e59-2220-758f-94fb-4e1a73f30d58",
+  lastName: "Turing",
+  location: "Manchester",
+  middleName: null,
+};
+
+export const GRACE_HOPPER: StoreShotPerson = {
+  avatar: sampleAvatar("01a03e59-2521-766e-ab8d-085f2dd423aa"),
+  firstName: "Grace",
+  headline: "Rear Admiral, US Navy",
+  id: "01a03e59-2521-766e-ab8d-085f2dd423aa",
+  lastName: "Hopper",
+  location: "Arlington, Texas",
+  middleName: null,
+};
+
+export const MARGARET_HAMILTON: StoreShotPerson = {
+  avatar: sampleAvatar("01a03e59-26b6-71df-97bc-79150869a6c0"),
+  firstName: "Margaret",
+  headline: "Software engineer, Apollo",
+  id: "01a03e59-26b6-71df-97bc-79150869a6c0",
+  lastName: "Hamilton",
+  location: "Cambridge",
+  middleName: null,
+};
+
+export const KATHERINE_JOHNSON: StoreShotPerson = {
+  avatar: sampleAvatar("01a03e59-40a2-70c1-8820-fec892f6f28e"),
+  firstName: "Katherine",
+  headline: "Mathematician, NASA",
+  id: "01a03e59-40a2-70c1-8820-fec892f6f28e",
+  lastName: "Johnson",
+  location: "Hampton",
+  middleName: null,
+};
+
+export const HEDY_LAMARR: StoreShotPerson = {
+  avatar: sampleAvatar("01a03e59-43bd-70bf-b678-1673878f566f"),
+  firstName: "Hedy",
+  headline: "Inventor and actor",
+  id: "01a03e59-43bd-70bf-b678-1673878f566f",
+  lastName: "Lamarr",
+  location: "Vienna",
+  middleName: null,
+};
+
 /** Three sample-contact interactions for the remember shot timeline. */
 export const STORE_SHOT_ACTIVITIES: Activity[] = [
   activity({
@@ -299,8 +299,8 @@ export const STORE_SHOT_MAP_MARKERS: PeopleMapMarker[] = [
     firstName: ADA_LOVELACE.firstName,
     id: ADA_LOVELACE.id,
     lastName: ADA_LOVELACE.lastName,
-    latitude: 51.50745,
-    longitude: -0.12777,
+    latitude: 51.507_45,
+    longitude: -0.127_77,
     name: "Ada Lovelace",
   },
   {
@@ -308,8 +308,8 @@ export const STORE_SHOT_MAP_MARKERS: PeopleMapMarker[] = [
     firstName: ALAN_TURING.firstName,
     id: ALAN_TURING.id,
     lastName: ALAN_TURING.lastName,
-    latitude: 53.47949,
-    longitude: -2.24511,
+    latitude: 53.479_49,
+    longitude: -2.245_11,
     name: "Alan Turing",
   },
   {
@@ -317,7 +317,7 @@ export const STORE_SHOT_MAP_MARKERS: PeopleMapMarker[] = [
     firstName: HEDY_LAMARR.firstName,
     id: HEDY_LAMARR.id,
     lastName: HEDY_LAMARR.lastName,
-    latitude: 48.20835,
+    latitude: 48.208_35,
     longitude: 16.3725,
     name: "Hedy Lamarr",
   },
@@ -326,8 +326,8 @@ export const STORE_SHOT_MAP_MARKERS: PeopleMapMarker[] = [
     firstName: GRACE_HOPPER.firstName,
     id: GRACE_HOPPER.id,
     lastName: GRACE_HOPPER.lastName,
-    latitude: 50.08747,
-    longitude: 14.42125,
+    latitude: 50.087_47,
+    longitude: 14.421_25,
     name: "Grace Hopper",
   },
 ];

@@ -32,6 +32,28 @@ const COLUMN_ICONS: Record<ColumnKey, ReactNode> = {
 /** Columns that start hidden until the reader opens the column menu. */
 const HIDDEN_BY_DEFAULT: ReadonlySet<ColumnKey> = new Set<ColumnKey>(["social"]);
 
+function buildDefaultVisibility(): Record<ColumnKey, boolean> {
+  const visibility = {} as Record<ColumnKey, boolean>;
+  for (const key of MAP_TABLE_COLUMN_KEYS) {
+    visibility[key] = !HIDDEN_BY_DEFAULT.has(key);
+  }
+  return visibility;
+}
+
+/** The column menu hands back the full list; only the visible flags belong in state. */
+function mergeVisibility(
+  next: SetStateAction<ColumnConfig[]>,
+  previous: Record<ColumnKey, boolean>,
+  columns: ColumnConfig[],
+): Record<ColumnKey, boolean> {
+  const resolved = typeof next === "function" ? next(columns) : next;
+  const visibility = { ...previous };
+  for (const column of resolved) {
+    visibility[column.key] = column.visible;
+  }
+  return visibility;
+}
+
 /**
  * Labels come from `useContactsTableCopy` during render, so a locale change re-renders the labels
  * without an effect that copies them into state.
@@ -62,26 +84,4 @@ export function useMapTableColumns() {
   const visibleColumns = deferredColumns.filter((column) => column.visible);
 
   return { columns, setColumns, visibleColumns };
-}
-
-function buildDefaultVisibility(): Record<ColumnKey, boolean> {
-  const visibility = {} as Record<ColumnKey, boolean>;
-  for (const key of MAP_TABLE_COLUMN_KEYS) {
-    visibility[key] = !HIDDEN_BY_DEFAULT.has(key);
-  }
-  return visibility;
-}
-
-/** The column menu hands back the full list; only the visible flags belong in state. */
-function mergeVisibility(
-  next: SetStateAction<ColumnConfig[]>,
-  previous: Record<ColumnKey, boolean>,
-  columns: ColumnConfig[],
-): Record<ColumnKey, boolean> {
-  const resolved = typeof next === "function" ? next(columns) : next;
-  const visibility = { ...previous };
-  for (const column of resolved) {
-    visibility[column.key] = column.visible;
-  }
-  return visibility;
 }

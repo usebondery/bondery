@@ -3,6 +3,7 @@ import docs from "@bondery/translations/locales/en/platform/website/WebsiteDocs.
 };
 import type { LLMsOptions } from "fumadocs-core/mdx-plugins/remark-llms";
 
+const MARKDOWN_HEADING_WITH_ANCHOR_RE = /^#{1,6}\s+(.+?)(?:\s+\[#[^\]]*\])?\s*$/m;
 /**
  * Compile-time Markdown forms for docs MDX components, used by the
  * `includeProcessedMarkdown` option in `src/lib/collections.ts`.
@@ -104,7 +105,7 @@ function indent(text: string, size: number): string {
  */
 function stepBody(state: State, info: Info, children: unknown[]): string {
   const body = flow(state, info, children);
-  const heading = /^#{1,6}\s+(.+?)(?:\s+\[#[^\]]*\])?\s*$/m.exec(body);
+  const heading = MARKDOWN_HEADING_WITH_ANCHOR_RE.exec(body);
 
   if (heading?.index !== 0) {
     return body;

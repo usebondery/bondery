@@ -24,12 +24,31 @@ Root [`biome.json`](../../../../biome.json) enforces:
 - Do not reassign a parameter; copy it into a `const` or `let` when a new value is needed
 - Collapse `else { if (…) … }` into `else if (…)`
 - Named React components are function declarations, never class components except error boundaries that implement `componentDidCatch`
+- `function` expressions and `export default function()` must have a name (`useNamedFunction`). Arrow functions and object methods are out of scope. Prefer a named declaration or an arrow, not an anonymous `function()`.
+- Prefer destructuring when a local copies a same-named property or a fixed array index (`useDestructuring`). Write `const { foo } = obj` and `const [first] = arr`, not `const foo = obj.foo` or `const first = arr[0]`.
+- Do not use the `void` operator (`noVoid`). For a promise the caller cannot await, call `detachPromise` from `@bondery/helpers/async`. Pass `onRejected` when the caller has a logger.
+- `Number#toFixed()` always takes a digit count (`useNumberToFixedDigitsArgument`). Write `.toFixed(0)`, not `.toFixed()`.
+- CSS must be Baseline newly available (`useBaseline`, `available: "newly"`). Gate other properties with `@supports`. `::selection` is allowlisted because Biome 2.6.8 still reports it.
 - Do not call `process.exit()`; set `process.exitCode` and return, or throw
 - Do not use TypeScript `enum`, `namespace`, or constructor parameter properties (`erasableSyntaxOnly` already forbids them)
 - Object literals use shorthand (`{ foo }` not `{ foo: foo }`)
 - One class per file; split implementations when a file grows a second class
 - Prefer ESM; Expo `metro.config.js` and `babel.config.js` stay CommonJS because Metro loads them that way
-- Biome domains `next`, `tailwind`, `test`, `tanstackQuery`, and `project` are `"all"` (nursery included). `noPrivateImports` is on. Drizzle stays off (Prisma is the data layer). `noUntrustedLicenses`, `useImportExtensions`, and `noUnresolvedImports` stay off (`useImportExtensions` fights Next.js; the resolver does not understand WXT `#imports`, CSS modules, or package `#` paths).
+- Biome domains `next`, `react`, `tailwind`, `test`, `tanstackQuery`, `project`, and `types` are `"all"` (nursery included). `noPrivateImports`, `noUntrustedLicenses`, `useArraySortCompare`, and `useConsistentEnumValueType` are on. Also on: `noUndeclaredVariables`, `noUselessCall`, `noUselessSplice`, `noVar`, `noForIn`, `noEqualsToNull`, `noAlert`, `noBitwiseOperators`, `useNamedFunction`. Drizzle stays off (Prisma is the data layer). The `types` domain turns on Biome’s type inference. `useDisposables`, `useRegexpExec`, and `useStrictBooleanExpressions` stay off.
+  - `javascript.globals` lists `__DEV__` for Expo. Do not add `chrome` there; the extension uses `browser` from `wxt/browser`.
+  - `noUnsafeTypeAssertion` stays **off**. It bans every `as T` except `as const`. This tree has over a thousand of those at JSON.parse, Prisma rows, OpenAPI YAML, DOM scrape, and `as unknown as` bridges. Replacing them needs a guard or a schema at each boundary, not a bulk rewrite. `noUselessTypeAssertion` already rejects assertions that do no work.
+- React domain rules that stay **on**: `noDuplicatedSpreadProps`, `noJsxLeakedDollar`, `noLeakedRender`, `noUnknownAttribute`, `useReactCompiler`, `useUniqueElementIds`.
+- Rules that stay **off** (do not enable them later without a new decision):
+  - `noJsxPropsBind` flags inline arrow functions, function expressions, and `.bind()` in JSX props. That is a legacy re-render concern. It produces noise in modern React, and more so with the React Compiler.
+  - `useReactNamingConvention` only enforces names for `createContext`, `useId`, and `useRef` results. That is cosmetic. It costs churn and does not catch bugs.
+  - `useComponentExportOnlyModules` forbids helper and constant co-exports from a component file. That is a file-layout preference. It costs churn and does not catch bugs.
+  - `noUnresolvedImports`: `tsc` already fails on unresolved imports, and it understands exports maps, paths, and custom conditions. Biome's resolver is a second implementation that tends to disagree in monorepos, and it adds a project scan to every lint run.
+  - `useImportExtensions` forces `.js` or `.ts` extensions on relative imports. That only makes sense for packages resolved with NodeNext, and there `tsc` already enforces it. For everything on the bundler preset it would add noise and fight framework tooling. Leave it off globally. Enable it only in a Node preset override if you want a lint-time autofix for those packages.
+  - `useStrictBooleanExpressions` is the Biome counterpart of typescript-eslint's `strict-boolean-expressions`. It outlaws truthiness checks on strings, numbers, and nullable values, which produces a flood of churn. `noUncheckedIndexedAccess`, `noLeakedRender`, and the floating-promise rules already cover its main bug classes.
+  - `useRegexpExec` is a stylistic preference for `exec` over `match`, with negligible bug-catching value.
+  - `useDisposables` flags disposable objects assigned to variables without `using` or `await using`. That only helps once the code actually uses explicit resource management, and the mobile and extension runtimes would need to support it. Leave it off until `using` is adopted deliberately.
+- `noUnknownAttribute` is off under `apps/website/src/components/landing/features/lock3d/**`. Those files use React Three Fiber host elements (`mesh`, `group`, `directionalLight`), whose props are Three.js fields, not DOM attributes.
+- `noBitwiseOperators` is off in the files that encode bits on purpose: Unix modes, x509 key usage, Chrome Web Store key id, djb2/RGB hashes, and vCard base64. `noAccidentalBitwiseOperators` still runs on those files.
 - Next.js apps load images with `next/image` and scripts with `next/script`
 - Put Tailwind utilities on native hosts (`div`, React Native `View`/`Text`/`Pressable`, React Email `Section`/`Text`), or inside the component that owns the look
 - Callers change a design-system component through props, not extra utility classes
@@ -49,6 +68,18 @@ Do not restate formatter choices in reviews or hand-format around them. Change `
 
 ## Isolated declarations
 
+Every app and package `tsconfig.json` extends a preset from `@bondery/typescript-config`: `base.json`, `nextjs.json`, or `react-library.json`. `nextjs.json` extends `base.json`.
+
+Mobile and the Chrome extension use an `extends` array. The vendor config is first (`expo/tsconfig.base` or `./.wxt/tsconfig.json`). `@bondery/typescript-config/base.json` is last so overlapping keys use our flags.
+
+`tsBuildInfoFile` lives only in `base.json` as `${configDir}/.cache/tsconfig.tsbuildinfo`. App and package tsconfigs do not set that path.
+
+`base.json` targets `ES2022` and sets `allowJs` to false. App tsconfigs and `nextjs.json` do not turn `allowJs` on. Expo's preset sets `allowJs` true; mobile lists our base last so the flag stays false. TypeScript programs include `.ts` and `.tsx` only. Node scripts stay `.mjs` and are not part of `tsc`. `check:tsconfig-extends` fails a tsconfig that sets `allowJs` to true.
+
+`base.json` enables `noUnusedLocals` and `noUnusedParameters`. App tsconfigs do not set a lower `target`. Unused locals are removed. Unused parameters may use a `_` prefix.
+
+`base.json` enables `noPropertyAccessFromIndexSignature`. Dot access is only for known named keys. `NodeJS.ProcessEnv` and `Record<string, T>` are index signatures, so read them with `env["NAME"]`. When the key set is closed, give it a named type or `Record<Union, T>` instead of `Record<string, T>`. Do not add extra named keys to `ProcessEnv`.
+
 Compiled workspace packages that emit `.d.ts` files enable `isolatedDeclarations` in `@bondery/typescript-config/base.json`. Every exported function, const, and class member needs an explicit type so declaration emit does not walk other files.
 
 `@bondery/schemas` turns the flag off. Zod schemas are composed with `.extend()`, `.pick()`, and `.shape`. Annotating those exports as `z.ZodType<T>` would satisfy the compiler and break composition.
@@ -60,7 +91,7 @@ Apps that do not emit declarations (`noEmit`, or `declaration: false`) keep the 
 - Import public package subpaths, not another workspace's `src/` internals.
 - Follow the compiled-package and `.js` internal-import rules in [`bondery-core`](../../bondery-core/SKILL.md).
 - Do not add barrel files merely for shorter imports; use existing package exports.
-- Read environment values through established config/env helpers. New variables must be added to the canonical environment manifest and examples, not only to `process.env` access.
+- Read environment values through established config/env helpers. New variables must be added to the canonical environment manifest and examples, not only to `process.env` access. `process.env.NAME` is a TS4111 error; use `process.env["NAME"]` or a typed config helper.
 - Keep secrets server-side and never expose them through public-prefixed variables or client bundles.
 
 ## Verification

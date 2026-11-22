@@ -65,8 +65,6 @@ const FAMILY_COLOR = {
   work: "var(--mantine-color-orange-6)",
 } as const;
 
-export type { RelationshipGraphControls };
-
 type SavedPoint = {
   pinned: boolean;
   x: number;
@@ -82,12 +80,6 @@ function edgeColor(edge: CollapsedRelationshipEdge): string {
   return FAMILY_COLOR.other;
 }
 
-export type GraphMarkerDrag = {
-  end: (id: string) => void;
-  move: (id: string, clientX: number, clientY: number) => void;
-  start: (id: string, clientX: number, clientY: number) => void;
-};
-
 type GraphHandlers = {
   onClearSelection: () => void;
   onHover: (personId: string | null) => void;
@@ -99,6 +91,14 @@ type GraphHandlers = {
   selectedEdgeKey: string | null;
   selectedHubId: string | null;
   selectedNodeId: string | null;
+};
+
+export type { RelationshipGraphControls };
+
+export type GraphMarkerDrag = {
+  end: (id: string) => void;
+  move: (id: string, clientX: number, clientY: number) => void;
+  start: (id: string, clientX: number, clientY: number) => void;
 };
 
 export function mountRelationshipGraph(input: {
@@ -170,13 +170,14 @@ export function mountRelationshipGraph(input: {
 
   const personNodes: PersonSim[] = nodes.map((personInput) => {
     const saved = positionsRef.current.get(personInput.id);
-    return Object.assign({}, personInput, {
+    return {
+      ...personInput,
       fx: saved?.pinned ? saved.x : null,
       fy: saved?.pinned ? saved.y : null,
       nodeKind: "person" as const,
       x: saved?.x ?? (personInput.myself ? width / 2 : width / 2 + (Math.random() - 0.5) * 120),
       y: saved?.y ?? (personInput.myself ? height / 2 : height / 2 + (Math.random() - 0.5) * 120),
-    });
+    };
   });
   const hubNodes: HubSimNode[] = hubs.map((hubInput) => {
     const saved = positionsRef.current.get(hubInput.id);

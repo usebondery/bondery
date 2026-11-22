@@ -178,7 +178,7 @@ async function wikiThumbnailUrl(title) {
   if (!page || page.missing || page.invalid) {
     return null;
   }
-  if (page.pageprops?.disambiguation != null) {
+  if (page.pageprops?.disambiguation !== null && page.pageprops?.disambiguation !== undefined) {
     return null;
   }
   return page.thumbnail?.source ?? null;
@@ -357,7 +357,7 @@ async function main() {
   console.log(`Attached photos: ${attached.length}`);
   if (skipped.length > 0) {
     console.log(`Skipped: ${skipped.length}`);
-    for (const line of skipped.toSorted()) {
+    for (const line of skipped.toSorted((a, b) => (a < b ? -1 : a > b ? 1 : 0))) {
       console.log(`  - ${line}`);
     }
   }

@@ -8,6 +8,9 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const IMPORT_USEMANTINECOLORSCHEME = /import\s*\{[^}]*\buseMantineColorScheme\b/;
+const USEMANTINECOLORSCHEME = /\buseMantineColorScheme\s*\(/;
+
 const report = createCheck("check-theme-patterns");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -18,8 +21,8 @@ const ALLOWED_USE_MANTINE_COLOR_SCHEME_FILES = new Set(["components/shell/ColorS
 function usesMantineColorSchemeHook(source: string): boolean {
   const withoutLineComments = source.replace(/\/\/.*$/gm, "");
   return (
-    /import\s*\{[^}]*\buseMantineColorScheme\b/.test(withoutLineComments) ||
-    /\buseMantineColorScheme\s*\(/.test(withoutLineComments)
+    IMPORT_USEMANTINECOLORSCHEME.test(withoutLineComments) ||
+    USEMANTINECOLORSCHEME.test(withoutLineComments)
   );
 }
 

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type ReactDOM from "react-dom/client";
 import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
 import type { ContentScriptContext } from "#imports";
@@ -14,7 +15,7 @@ let isInjecting = false;
 /**
  * Removes the injected button when SPA navigation lands on a different profile.
  */
-export function clearStaleButtonIfNeeded(newUsername: string | null): void {
+function clearStaleButtonIfNeeded(newUsername: string | null): void {
   if (currentUi && currentInjectedUsername !== newUsername) {
     currentUi.remove();
     currentUi = null;
@@ -104,7 +105,7 @@ function findLinkedInAnchor(): Element | null {
   return actionButtonsContainer;
 }
 
-export async function injectBonderyButton(ctx: ContentScriptContext) {
+async function injectBonderyButton(ctx: ContentScriptContext) {
   if (isInjecting) {
     return;
   }
@@ -175,7 +176,7 @@ async function mountLinkedInButton(
   }
 }
 
-export function setupObserver(ctx: ContentScriptContext) {
+function setupObserver(ctx: ContentScriptContext) {
   let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
   const observer = new MutationObserver(() => {
@@ -202,7 +203,7 @@ export function setupObserver(ctx: ContentScriptContext) {
       debounceTimer = null;
       const username = getLinkedInUsername();
       if (username && !document.querySelector("bondery-linkedin")) {
-        void injectBonderyButton(ctx);
+        detachPromise(injectBonderyButton(ctx));
       }
     }, 300);
   });
@@ -228,7 +229,7 @@ function isProfileReady(): boolean {
   return !!findProfileActionButton();
 }
 
-export function _waitForProfileReady(timeoutMs: number): Promise<void> {
+function _waitForProfileReady(timeoutMs: number): Promise<void> {
   return new Promise((resolve) => {
     if (isProfileReady()) {
       resolve();
@@ -251,3 +252,5 @@ export function _waitForProfileReady(timeoutMs: number): Promise<void> {
     observer.observe(document.body, { childList: true, subtree: true });
   });
 }
+
+export { _waitForProfileReady, clearStaleButtonIfNeeded, injectBonderyButton, setupObserver };

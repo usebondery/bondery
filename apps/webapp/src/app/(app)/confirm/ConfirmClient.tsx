@@ -2,8 +2,10 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
+import type { UserSettingsResponse } from "@bondery/schemas";
 import type { OAuthProviderId, OAuthProvidersBitmap } from "@bondery/schemas/oauth-providers";
 import { notifications } from "@mantine/notifications";
 import { useSearchParams } from "next/navigation";
@@ -69,13 +71,11 @@ function shouldOfferSocial(
 }
 
 function readBffIdentity(
-  settings: Record<string, unknown> | undefined,
+  settings: UserSettingsResponse["data"] | undefined,
   fallbackEmail: string,
 ): BffIdentity {
-  const settingsEmail = typeof settings?.email === "string" ? settings.email : "";
-  const identities = Array.isArray(settings?.identities)
-    ? (settings.identities as Array<{ user_id?: string }>)
-    : [];
+  const settingsEmail = settings?.email ?? "";
+  const identities = settings?.identities ?? [];
   return {
     // The server-side session always carries the account email. Fall back to it
     // so a failed settings read cannot leave the picker with no email method.
@@ -130,9 +130,7 @@ export function ConfirmClient({
   const magicLinkUrls = buildReconfirmMagicLinkUrls(origin, purpose, targetId);
   const settingsUrl = buildReconfirmSettingsUrl(origin, purpose, targetId);
   const bff = readBffIdentity(settingsResult?.data, accountEmail);
-  const providers = Array.isArray(settingsResult?.data?.providers)
-    ? (settingsResult.data.providers as string[])
-    : [];
+  const providers = settingsResult?.data?.providers ?? [];
   const linked = linkedProviderIds(providers);
   const allowedOAuthProviders: OAuthProviderId[] = [];
   if (shouldOfferSocial(purpose, linked, "github")) {
@@ -182,15 +180,19 @@ export function ConfirmClient({
     }
 
     returnHandledRef.current = true;
-    void (async () => {
-      const status = await checkConfirmIdentity(readBffIdentity(settingsResult.data, accountEmail));
-      if (status === "ok") {
-        window.location.assign(settingsUrl);
-        return;
-      }
-      showIdentityError(status);
-      setMethodPickerOpen(true);
-    })();
+    detachPromise(
+      (async () => {
+        const status = await checkConfirmIdentity(
+          readBffIdentity(settingsResult.data, accountEmail),
+        );
+        if (status === "ok") {
+          window.location.assign(settingsUrl);
+          return;
+        }
+        showIdentityError(status);
+        setMethodPickerOpen(true);
+      })(),
+    );
   }, [
     hasReturned,
     searchParams,
@@ -311,7 +313,7 @@ export function ConfirmClient({
       lockedEmail={showMethods ? bff.email : ""}
       oauthProviders={oauthProviders}
       onEmailSubmit={handleEmailSubmit}
-      onPasskeyClick={() => void handlePasskeyLogin()}
+      onPasskeyClick={() => detachPromise(handlePasskeyLogin())}
       onProviderClick={handleOAuthLogin}
       pollForSession={false}
       showPasskey={showMethods && passkeys.length > 0}

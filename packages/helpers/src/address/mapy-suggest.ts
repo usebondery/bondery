@@ -8,13 +8,13 @@
 
 import { formatAddressLabel, formatPlaceLabel } from "#address/address-utils.js";
 
-export interface MapSuggestionRegionalEntry {
+interface MapSuggestionRegionalEntry {
   isoCode?: string;
   name?: string;
   type?: string;
 }
 
-export interface MapSuggestionItem {
+interface MapSuggestionItem {
   label: string;
   name: string;
   position: {
@@ -209,3 +209,5 @@ export function parseMapSuggestions(rawItems: unknown[]): MapSuggestionItem[] {
   }
   return rawItems.map(parseMapSuggestionItem).filter((item) => item.label.length > 0);
 }
+
+export type { MapSuggestionItem, MapSuggestionRegionalEntry };

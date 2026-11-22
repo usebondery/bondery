@@ -1,7 +1,7 @@
 import type { PostHog } from "posthog-node";
 import { getPosthogClient } from "./posthog-client.js";
 
-export type ServerExceptionContext = {
+type ServerExceptionContext = {
   /** API error code from the catalog, for example `failed_to_process_webhook`. */
   code: string;
   method: string;
@@ -13,6 +13,8 @@ export type ServerExceptionContext = {
 
 /** Deepest `cause` chain walked before giving up. */
 const MAX_CAUSE_DEPTH = 5;
+
+export type { ServerExceptionContext };
 
 /**
  * API errors wrap the real failure in `cause` (a Prisma or Stripe error). Report the

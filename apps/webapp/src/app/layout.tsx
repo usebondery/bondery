@@ -23,16 +23,18 @@ import { buildWebappRuntimeConfigFromEnv } from "@/lib/platform/runtimeConfig.se
 import { computeColorScheme } from "@/lib/theme/computeColorScheme";
 import { resolveSsrColorScheme } from "@/lib/theme/resolveSsrColorScheme";
 
+const lexend = Lexend({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-lexend",
+});
+
+const BONDERY_RUNTIME_CONFIG_SCRIPT_ID = "bondery-runtime-config";
+
 export const metadata = rootMetadata;
 
 export const viewport: Viewport = {
   viewportFit: "cover",
 };
-
-const lexend = Lexend({
-  subsets: ["latin", "latin-ext"],
-  variable: "--font-lexend",
-});
 
 export default async function RootLayout({
   children,
@@ -66,7 +68,7 @@ export default async function RootLayout({
           forceColorScheme={colorScheme !== "auto" ? computedColorScheme : undefined}
           nonce={nonce}
         />
-        <script id="bondery-runtime-config" nonce={nonce}>
+        <script id={BONDERY_RUNTIME_CONFIG_SCRIPT_ID} nonce={nonce}>
           {`window.__BONDERY_RUNTIME_CONFIG__=${runtimeConfigJson};`}
         </script>
       </head>

@@ -34,7 +34,7 @@ function RuntimeErrorScreen({ colors, message }: { colors: MobileThemeColors; me
  * Isolated from `app/_layout.tsx` so Fast Refresh does not mix a class and the
  * route default export in one file.
  */
-export class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
+class RootErrorBoundary extends Component<RootErrorBoundaryProps, RootErrorBoundaryState> {
   lastComponentStack = "";
 
   constructor(props: RootErrorBoundaryProps) {
@@ -85,3 +85,5 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
 });
+
+export { RootErrorBoundary };

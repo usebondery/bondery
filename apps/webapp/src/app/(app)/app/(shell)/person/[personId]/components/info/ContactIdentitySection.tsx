@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import {
@@ -9,6 +10,7 @@ import {
   type EmailEntry,
   firstZodErrorMessage,
   type PhoneEntry,
+  type UpdateContactInput,
 } from "@bondery/schemas";
 import { Group, Stack } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -142,7 +144,7 @@ function usePersonNameFields(
 
   const handleBlur = (field: NameField) => {
     setFocusedField(null);
-    void saveField(field);
+    detachPromise(saveField(field));
   };
 
   return {
@@ -296,7 +298,7 @@ function usePersonProfileFields(
 
     try {
       const locationCoordinates = field === "location" ? placeCoordinatesRef.current : null;
-      const payload: Record<string, string | number | null> = {
+      const payload: UpdateContactInput = {
         [field]: value,
       };
 
@@ -332,7 +334,7 @@ function usePersonProfileFields(
 
   const handleBlur = (field: ProfileField) => {
     setFocusedField(null);
-    void saveField(field);
+    detachPromise(saveField(field));
   };
 
   return {
@@ -483,10 +485,12 @@ export function ContactIdentitySection({
               onBlur={() => handleProfileBlur("location")}
               onChange={(value) => updateProfileField("location", value)}
               onSuggestionSelect={(selected) => {
-                void savePlaceFromSuggestion(
-                  geocodeSuggestionDisplayLabel(selected),
-                  selected.latitude,
-                  selected.longitude,
+                detachPromise(
+                  savePlaceFromSuggestion(
+                    geocodeSuggestionDisplayLabel(selected),
+                    selected.latitude,
+                    selected.longitude,
+                  ),
                 );
               }}
               placeholder={locationConfig?.placeholder ?? ""}

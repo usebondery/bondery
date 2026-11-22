@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import type { SyncTableKey } from "@bondery/schemas/sync";
 import type { QueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -70,7 +71,7 @@ export function useSyncWakeInvalidation(enabled = true) {
     }
 
     const client = startSyncWakeWebClient((message) => {
-      void invalidateForAffectedTables(getQueryClient(), message.affectedTables);
+      detachPromise(invalidateForAffectedTables(getQueryClient(), message.affectedTables));
     });
 
     return () => {

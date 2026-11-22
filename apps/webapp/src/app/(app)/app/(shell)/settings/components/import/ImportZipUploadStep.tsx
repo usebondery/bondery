@@ -9,14 +9,6 @@ import type { ComponentProps, ReactNode, RefObject } from "react";
 type DropzoneAccept = NonNullable<ComponentProps<typeof Dropzone>["accept"]>;
 type DropzoneRejectHandler = NonNullable<ComponentProps<typeof Dropzone>["onReject"]>;
 
-export const IMPORT_ZIP_ACCEPT: DropzoneAccept = {
-  [MIME_TYPES.zip]: [".zip"],
-  "application/octet-stream": [".zip"],
-  "application/x-zip": [".zip"],
-  "application/x-zip-compressed": [".zip"],
-  "multipart/x-zip": [".zip"],
-};
-
 interface ImportZipUploadStepProps {
   accept: DropzoneAccept;
   backLabel: string;
@@ -34,6 +26,14 @@ interface ImportZipUploadStepProps {
   openRef: RefObject<(() => void) | null>;
   selectZipFileLabel: string;
 }
+
+export const IMPORT_ZIP_ACCEPT: DropzoneAccept = {
+  [MIME_TYPES.zip]: [".zip"],
+  "application/octet-stream": [".zip"],
+  "application/x-zip": [".zip"],
+  "application/x-zip-compressed": [".zip"],
+  "multipart/x-zip": [".zip"],
+};
 
 export function ImportZipUploadStep({
   accept,

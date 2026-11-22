@@ -4,6 +4,11 @@ import { select } from "d3";
 import type { CollapsedRelationshipEdge } from "./collapseRelationshipEdges";
 import { eachSelected } from "./eachSelected";
 
+type GraphOverlayDataset = {
+  graphId?: string;
+  graphKind?: string;
+};
+
 type PaintNode = { id: string };
 type PaintEdge = { key: string; sourcePersonId: string; targetPersonId: string };
 type PaintHub = { id: string; label: string };
@@ -237,11 +242,12 @@ export function paintRelationshipGraph(
   root.selectAll<SVGGElement, { id: string }>(".graph-hull").style("opacity", query ? 0.35 : 1);
 
   for (const element of input.markerRoot?.querySelectorAll<HTMLElement>("[data-graph-id]") ?? []) {
-    const id = element.dataset.graphId;
+    const dataset = element.dataset as GraphOverlayDataset;
+    const id = dataset.graphId;
     if (!id) {
       continue;
     }
-    const kind = element.dataset.graphKind;
+    const kind = dataset.graphKind;
     const matches = kind === "hub" ? !query || hubMatchIds.has(id) : matchIds.has(id);
     const opacity = memberOpacity(id, matches);
     element.style.opacity = String(opacity);

@@ -7,6 +7,11 @@ import {
   toApiErrorResponse,
 } from "../lib/platform/errors/to-api-error-response.js";
 
+const RETRY_THE_CALL_ONCE_PATTERN = /Retry the call once/;
+const SEARCH_CONTACTS_PATTERN = /search_contacts/;
+const CONTACT_NOT_FOUND_PATTERN = /^Contact not found\. /;
+const DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN = /\/docs\/api\/errors\/contact_not_found$/;
+
 describe("toApiErrorResponse", () => {
   it("maps DomainError 4xx with catalog code, type, message, and doc_url", () => {
     const error = new DomainError("Contact not found", 404, "contact_not_found");
@@ -16,7 +21,7 @@ describe("toApiErrorResponse", () => {
     assert.equal(body.error.message, "Contact not found");
     assert.equal(body.error.type, "not_found_error");
     assert.equal(body.error.request_id, "req-4xx");
-    assert.match(body.error.doc_url, /\/docs\/api\/errors\/contact_not_found$/);
+    assert.match(body.error.doc_url, DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN);
   });
 
   it("sanitizes DomainError 5xx to GENERIC_500_MESSAGE and keeps the catalog code", () => {
@@ -47,8 +52,8 @@ describe("toApiErrorResponse", () => {
 
     assert.equal(body.error.message, "Contact not found");
     assert.equal(typeof body.error.agent_message, "string");
-    assert.match(body.error.agent_message, /^Contact not found\. /);
-    assert.match(body.error.agent_message, /search_contacts/);
+    assert.match(body.error.agent_message, CONTACT_NOT_FOUND_PATTERN);
+    assert.match(body.error.agent_message, SEARCH_CONTACTS_PATTERN);
   });
 
   it("agent_message is never empty for a code with no specific hint", () => {
@@ -58,7 +63,7 @@ describe("toApiErrorResponse", () => {
     );
 
     assert.ok(body.error.agent_message.length > 0);
-    assert.match(body.error.agent_message, /Retry the call once/);
+    assert.match(body.error.agent_message, RETRY_THE_CALL_ONCE_PATTERN);
   });
 
   it("agent_message keeps a sanitized 500 free of the cause", () => {
@@ -68,7 +73,7 @@ describe("toApiErrorResponse", () => {
     );
 
     assert.equal(body.error.agent_message.includes("postgres"), false);
-    assert.match(body.error.agent_message, /Retry the call once/);
+    assert.match(body.error.agent_message, RETRY_THE_CALL_ONCE_PATTERN);
   });
 
   it("does not repeat a recovery step the message already states", () => {
@@ -91,8 +96,8 @@ describe("toAgentToolErrorResponse", () => {
     );
 
     assert.equal(body.error.message, body.error.agent_message);
-    assert.match(body.error.message, /search_contacts/);
-    assert.match(body.error.doc_url, /\/docs\/api\/errors\/contact_not_found$/);
+    assert.match(body.error.message, SEARCH_CONTACTS_PATTERN);
+    assert.match(body.error.doc_url, DOCS_API_ERRORS_CONTACT_NOT_FOUND_PATTERN);
   });
 
   it("keeps agent_message on an unknown error", () => {
@@ -100,6 +105,6 @@ describe("toAgentToolErrorResponse", () => {
 
     assert.equal(body.error.code, "internal_server_error");
     assert.equal(body.error.message, body.error.agent_message);
-    assert.match(body.error.agent_message, /Retry the call once/);
+    assert.match(body.error.agent_message, RETRY_THE_CALL_ONCE_PATTERN);
   });
 });

@@ -4,7 +4,7 @@ import { Collapse, Group, Stack, Text, UnstyledButton } from "@mantine/core";
 import { IconFile, IconFolder } from "@tabler/icons-react";
 import { type ReactNode, useState } from "react";
 
-export function DocsFiles({ children }: { children: ReactNode }) {
+function DocsFiles({ children }: { children: ReactNode }) {
   return <Stack gap={2}>{children}</Stack>;
 }
 
@@ -14,7 +14,7 @@ type DocsFolderProps = {
   name: string;
 };
 
-export function DocsFolder({ children, defaultOpen = false, name }: DocsFolderProps) {
+function DocsFolder({ children, defaultOpen = false, name }: DocsFolderProps) {
   const [open, setOpen] = useState(defaultOpen);
 
   return (
@@ -38,7 +38,7 @@ export function DocsFolder({ children, defaultOpen = false, name }: DocsFolderPr
   );
 }
 
-export function DocsFile({ name }: { name: string }) {
+function DocsFile({ name }: { name: string }) {
   return (
     <Group gap={6} wrap="nowrap">
       <IconFile size={16} />
@@ -46,3 +46,5 @@ export function DocsFile({ name }: { name: string }) {
     </Group>
   );
 }
+
+export { DocsFile, DocsFiles, DocsFolder };

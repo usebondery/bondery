@@ -1,5 +1,7 @@
 import { isValidUuid } from "@bondery/helpers/ids";
 
+const PURPOSE_SET = new Set<string>(RECONFIRM_PURPOSES);
+
 export const RECONFIRM_PURPOSES = [
   "add_passkey",
   "link_github",
@@ -13,8 +15,6 @@ export const RECONFIRM_PURPOSES = [
 ] as const;
 
 export type ReconfirmPurpose = (typeof RECONFIRM_PURPOSES)[number];
-
-const PURPOSE_SET = new Set<string>(RECONFIRM_PURPOSES);
 
 export function isReconfirmPurpose(value: string | null | undefined): value is ReconfirmPurpose {
   return typeof value === "string" && PURPOSE_SET.has(value);

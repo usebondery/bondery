@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+const LOGIN_PATH = /\/login/;
+
 test.describe("unauthenticated login", () => {
   test("renders /login with GitHub button on desktop", async ({ page }) => {
     await page.goto("/login");
@@ -29,7 +31,7 @@ test.describe("unauthenticated login", () => {
 
   test("blocks /app without session", async ({ page }) => {
     await page.goto("/app/home");
-    await expect(page).toHaveURL(/\/login/);
+    await expect(page).toHaveURL(LOGIN_PATH);
   });
 
   test("shows a notification for ?error=oauth", async ({ page }) => {

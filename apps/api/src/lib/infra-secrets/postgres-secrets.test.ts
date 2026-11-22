@@ -13,6 +13,9 @@ import {
 } from "./postgres-secrets.js";
 import { createCertificateAuthority, DAY_MS, issueServerCertificate } from "./x509.js";
 
+const ALTNAMES_HOSTNAME_PATTERN = /altnames|Hostname/;
+const CERTIFICATE_PATTERN = /certificate/;
+
 function quietLog(): (message: string) => void {
   return () => undefined;
 }
@@ -121,7 +124,7 @@ describe("postgres secrets", () => {
         await readFile(paths.clientCaFile, "utf8"),
         "other-db",
       ),
-      /altnames|Hostname/,
+      ALTNAMES_HOSTNAME_PATTERN,
     );
   });
 
@@ -150,7 +153,7 @@ describe("postgres secrets", () => {
         await readFile(paths.clientCaFile, "utf8"),
         "bondery-db",
       ),
-      /certificate/,
+      CERTIFICATE_PATTERN,
     );
   });
 

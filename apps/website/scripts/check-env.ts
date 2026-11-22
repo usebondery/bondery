@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const appPath = resolve(__dirname, "..");
 
-const environment = (process.env.NODE_ENV || "development") as "production" | "development";
+const environment = (process.env["NODE_ENV"] || "development") as "production" | "development";
 loadEnvConfig(appPath, environment !== "production");
 
 checkEnvVariables({

@@ -25,7 +25,7 @@ const profiles = {
 };
 
 function main() {
-  const profile = process.argv[2];
+  const [, , profile] = process.argv;
   const keys = profiles[profile];
 
   if (!keys) {

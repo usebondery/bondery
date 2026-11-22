@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const TS_TSX_RE = /\.(ts|tsx)$/;
+
 const check = createCheck("check-package-imports");
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
@@ -68,7 +70,7 @@ async function collectSourceFiles(dir) {
       if (info.isDirectory()) {
         return collectSourceFiles(fullPath);
       }
-      if (/\.(ts|tsx)$/.test(entry)) {
+      if (TS_TSX_RE.test(entry)) {
         if (fullPath.replaceAll("\\", "/").includes("/generated/")) {
           return [];
         }

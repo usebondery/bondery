@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate } from "@bondery/mantine-next";
 import { notifications } from "@mantine/notifications";
 import type { PeopleMapFocus, PeopleMapMyLocationControl } from "@/components/map/PeopleMap";
@@ -46,24 +47,26 @@ export function useMapMyLocation({ grantedSelfLocation, onFocus }: UseMapMyLocat
   };
 
   const handleMyLocation = () => {
-    void requestLocation().then((result) => {
-      if (result.ok) {
-        onFocus({
-          latitude: result.location.latitude,
-          longitude: result.location.longitude,
-          token: `self-${Date.now()}`,
-          zoom: 14,
-        });
-        return;
-      }
+    detachPromise(
+      requestLocation().then((result) => {
+        if (result.ok) {
+          onFocus({
+            latitude: result.location.latitude,
+            longitude: result.location.longitude,
+            token: `self-${Date.now()}`,
+            zoom: 14,
+          });
+          return;
+        }
 
-      notifications.show(
-        errorNotificationTemplate({
-          description: geolocationFailureMessage(result.status),
-          title: tCommon("feedback.errorTitle"),
-        }),
-      );
-    });
+        notifications.show(
+          errorNotificationTemplate({
+            description: geolocationFailureMessage(result.status),
+            title: tCommon("feedback.errorTitle"),
+          }),
+        );
+      }),
+    );
   };
 
   let myLocationDisabledTooltip: string | undefined;

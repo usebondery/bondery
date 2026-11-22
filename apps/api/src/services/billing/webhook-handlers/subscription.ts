@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { FastifyBaseLogger } from "fastify";
 import type Stripe from "stripe";
 import {
@@ -12,6 +13,8 @@ import {
   storePendingSubscription,
   upsertSubscription,
 } from "../subscription.js";
+
+const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
 
 function customerId(customer: string | Stripe.Customer | Stripe.DeletedCustomer): string {
   return typeof customer === "string" ? customer : customer.id;
@@ -63,7 +66,7 @@ export async function upsertSubscriptionFromStripe(
     );
 
   const externalId = subscription.metadata.bondery_user_id;
-  const isValidUuid = externalId != null && /^[0-9a-f-]{36}$/i.test(externalId);
+  const isValidUuid = externalId != null && UUID_PATTERN.test(externalId);
 
   let userId: string | null = isValidUuid ? externalId : null;
 
@@ -123,11 +126,11 @@ export async function upsertSubscriptionFromStripe(
   }
 
   if (options?.eventType === "customer.subscription.created") {
-    void captureSubscriptionCreate(userId, subscription, mirror);
+    detachPromise(captureSubscriptionCreate(userId, subscription, mirror));
   }
 
   if (options?.eventType === "customer.subscription.deleted") {
-    void captureSubscriptionCancel(userId, subscription, mirror);
+    detachPromise(captureSubscriptionCancel(userId, subscription, mirror));
   }
 
   log?.info(

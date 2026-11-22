@@ -64,7 +64,7 @@ export function ContactImportantDatesSection({
         hasTypeAlready &&
         currentType !== option.value;
 
-      return Object.assign({}, option, { disabled: disableUniqueType });
+      return { ...option, disabled: disableUniqueType };
     });
 
   const notifyOptions = IMPORTANT_DATE_NOTIFY_OPTIONS.map((option) => ({

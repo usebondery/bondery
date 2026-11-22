@@ -41,7 +41,7 @@ function DocsMdxH4({ children, id }: MdxHeadingProps) {
   );
 }
 
-export function getMDXComponents(components?: MDXComponents): MDXComponents {
+function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     Accordion: DocsAccordion,
     Accordions: DocsAccordions,
@@ -68,8 +68,10 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
   };
 }
 
-export const useMDXComponents = getMDXComponents;
+const useMDXComponents = getMDXComponents;
 
 declare global {
   type MDXProvidedComponents = ReturnType<typeof getMDXComponents>;
 }
+
+export { getMDXComponents, useMDXComponents };

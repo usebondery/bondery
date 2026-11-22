@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { GroupWithCount } from "@bondery/schemas";
 import { IconPlus } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
@@ -10,7 +11,6 @@ import { Select } from "../../components/ui/Select";
 import { Stack } from "../../components/ui/Stack";
 import { updateSettings } from "../../lib/api/client";
 import {
-  useCommonTranslations,
   useMobileGroupsTranslations,
   useMobileSettingsTranslations,
 } from "../../lib/i18n/generated/hooks";
@@ -33,11 +33,10 @@ import { SettingsPreviewSection } from "./components/SettingsPreviewSection";
 export function SettingsGroupsScreen() {
   const tMobileGroups = useMobileGroupsTranslations();
   const tMobileSettings = useMobileSettingsTranslations();
-  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const { data: syncedGroups, isInitialSync, refresh: refreshGroups } = useGroups();
-  const [loadError, _setLoadError] = useState<string | null>(null);
+  const [loadError] = useState<string | null>(null);
   const [isCreateOpen, setCreateOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<GroupWithCount | null>(null);
   const [previewSelectedGroupId, setPreviewSelectedGroupId] = useState<string | null>(null);
@@ -78,7 +77,7 @@ export function SettingsGroupsScreen() {
     }
 
     setGroupSortOrder(nextOrder);
-    void updateSettings({ groupSortOrder: nextOrder });
+    detachPromise(updateSettings({ groupSortOrder: nextOrder }));
   };
 
   function handleGroupCreated() {

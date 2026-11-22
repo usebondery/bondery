@@ -12,6 +12,11 @@ import {
   warnOnInsecureProductionPostgres,
 } from "./postgres-tls.js";
 
+const TLSV1_PATTERN = /^TLSv1\.[23]$/;
+const NOT_ENCRYPTED_PATTERN = /not encrypted/;
+const FORCE_RECREATE_STACK_SECRETS_DB_API_PATTERN = /--force-recreate stack-secrets db api/;
+const NOT_VERIFIED_PATTERN = /not verified/;
+
 function recordingLog() {
   const calls: { level: string; message: string }[] = [];
   return {
@@ -39,7 +44,7 @@ describe("logCertificateExpiry", () => {
     const { calls, log } = recordingLog();
     assert.equal(logCertificateExpiry(log as never, POSTGRES_CERT_WARN_DAYS - 1), "warn");
     assert.equal(logCertificateExpiry(log as never, POSTGRES_CERT_ERROR_DAYS - 1), "error");
-    assert.match(calls[0]?.message ?? "", /--force-recreate stack-secrets db api/);
+    assert.match(calls[0]?.message ?? "", FORCE_RECREATE_STACK_SECRETS_DB_API_PATTERN);
   });
 });
 
@@ -74,8 +79,8 @@ describe("warnOnInsecureProductionPostgres", () => {
     const { calls, log } = recordingLog();
     assert.equal(warnOnInsecureProductionPostgres(log as never, encryptedOnly, "production"), true);
     assert.equal(warnOnInsecureProductionPostgres(log as never, plaintext, "production"), true);
-    assert.match(calls[0]?.message ?? "", /not verified/);
-    assert.match(calls[1]?.message ?? "", /not encrypted/);
+    assert.match(calls[0]?.message ?? "", NOT_VERIFIED_PATTERN);
+    assert.match(calls[1]?.message ?? "", NOT_ENCRYPTED_PATTERN);
   });
 });
 
@@ -97,7 +102,7 @@ describe("inspectDatabaseTls against a TLS Postgres", () => {
     try {
       const inspection = await inspectDatabaseTls(pool);
       assert.equal(inspection.ssl, true);
-      assert.match(inspection.version ?? "", /^TLSv1\.[23]$/);
+      assert.match(inspection.version ?? "", TLSV1_PATTERN);
       assert.ok(inspection.cipher);
       assert.ok((inspection.certificateDaysLeft ?? 0) > POSTGRES_CERT_WARN_DAYS);
     } finally {

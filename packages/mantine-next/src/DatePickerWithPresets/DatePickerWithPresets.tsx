@@ -8,20 +8,6 @@ import { type ReactElement, useEffect, useRef } from "react";
 
 const DAYS_PER_WEEK = 7;
 
-export interface DatePickerPresetLabels {
-  lastMonth: string;
-  lastWeek: string;
-  lastYear: string;
-  today: string;
-  tomorrow: string;
-  yesterday: string;
-}
-
-export type DatePickerWithPresetsProps = Omit<DatePickerInputProps<"default">, "onDropdownOpen"> & {
-  onDropdownOpen?: () => void;
-  presetLabels: DatePickerPresetLabels;
-};
-
 function toDatePreset(value: Date) {
   const year = value.getFullYear();
   const month = `${value.getMonth() + 1}`.padStart(2, "0");
@@ -216,3 +202,17 @@ export function DatePickerWithPresets({
     />
   );
 }
+
+export interface DatePickerPresetLabels {
+  lastMonth: string;
+  lastWeek: string;
+  lastYear: string;
+  today: string;
+  tomorrow: string;
+  yesterday: string;
+}
+
+export type DatePickerWithPresetsProps = Omit<DatePickerInputProps<"default">, "onDropdownOpen"> & {
+  onDropdownOpen?: () => void;
+  presetLabels: DatePickerPresetLabels;
+};

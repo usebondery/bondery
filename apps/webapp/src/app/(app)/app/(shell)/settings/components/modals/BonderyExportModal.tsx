@@ -2,6 +2,7 @@
 "use client";
 
 import { ApiError, getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { CountChip, ModalFooter } from "@bondery/mantine-next";
 import { Alert, Button, Center, Group, Loader, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
@@ -56,7 +57,6 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
   const closeModal = () => modals.close(modalId);
 
   useEffect(() => {
-    void summaryAttempt;
     const summaryAbort = new AbortController();
     setCountsFailed(false);
     setPeople(null);
@@ -64,8 +64,8 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
     setTags(null);
     setInteractions(null);
 
-    void getExportSummary({ signal: summaryAbort.signal })
-      .then((response) => {
+    detachPromise(
+      getExportSummary({ signal: summaryAbort.signal }).then((response) => {
         if (!response) {
           setCountsFailed(true);
           return;
@@ -74,13 +74,14 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
         setGroups(response.exportSummary.groups);
         setTags(response.exportSummary.tags);
         setInteractions(response.exportSummary.interactions);
-      })
-      .catch((error: unknown) => {
+      }),
+      (error: unknown) => {
         if (error instanceof Error && error.name === "AbortError") {
           return;
         }
         setCountsFailed(true);
-      });
+      },
+    );
 
     return () => {
       summaryAbort.abort();

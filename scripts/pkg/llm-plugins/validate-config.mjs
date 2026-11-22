@@ -1,3 +1,8 @@
+const PATTERN_5E5B412D5A5D_RE = /^[A-Z]{2}$/;
+const PRICE_PRICING_TRIAL_CHECKOUT_RE = /\b(price|pricing|trial|checkout)\b/i;
+const SKILLS_Z0_SKILL_MD_RE = /^\.\/skills\/[a-z0-9-]+\/SKILL\.md$/;
+const PATTERN_5E5B5E5C7340_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 /** Shape rules for `llm-plugins/src/plugin.config.json`. */
 
 function requireString(value, label, max) {
@@ -35,7 +40,7 @@ function validatePublication(openai) {
     throw new Error("publication.countries must be an array. Use [] for no country limit.");
   }
   for (const code of countries) {
-    if (!/^[A-Z]{2}$/.test(code)) {
+    if (!PATTERN_5E5B412D5A5D_RE.test(code)) {
       throw new Error("publication.countries must use uppercase country codes.");
     }
   }
@@ -46,7 +51,7 @@ function validateCopy(openai) {
   requireString(openai.longDescription, "longDescription", 4000);
   requireString(openai.review?.commerce_description, "commerce_description");
   requireList(openai.capabilities, "capabilities", 20, 120);
-  if (/\b(price|pricing|trial|checkout)\b/i.test(openai.longDescription)) {
+  if (PRICE_PRICING_TRIAL_CHECKOUT_RE.test(openai.longDescription)) {
     throw new Error("longDescription must not mention price, trial, or checkout.");
   }
   if (!Array.isArray(openai.defaultPrompt) || openai.defaultPrompt.length !== 3) {
@@ -59,7 +64,7 @@ function validateCopy(openai) {
     }
   }
   requireString(openai.onboardingSkill, "onboardingSkill");
-  if (!/^\.\/skills\/[a-z0-9-]+\/SKILL\.md$/.test(openai.onboardingSkill)) {
+  if (!SKILLS_Z0_SKILL_MD_RE.test(openai.onboardingSkill)) {
     throw new Error("onboardingSkill must be ./skills/<name>/SKILL.md.");
   }
 }
@@ -99,7 +104,7 @@ export function validateConfig(config) {
     throw new Error("MCP types must be http and streamable-http.");
   }
   requireString(config.author?.email, "author.email", 320);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.author.email)) {
+  if (!PATTERN_5E5B5E5C7340_RE.test(config.author.email)) {
     throw new Error("author.email must be an email address.");
   }
   validateCopy(openai);

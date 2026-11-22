@@ -14,6 +14,12 @@ import type { AppFastifyInstance } from "./fastify-types.js";
 import type { RuntimeDeps } from "./runtime-deps.js";
 import { shouldSkipLiveRuntimeVerify } from "./runtime-env.js";
 
+function registerPoolShutdown(fastify: AppFastifyInstance, pool: Pool): void {
+  fastify.addHook("onClose", async () => {
+    await pool.end();
+  });
+}
+
 /**
  * Eager runtime dependency verification before listen.
  * Order: Postgres → storage → SMTP → Redis → sync wake → pg-boss jobs.
@@ -60,10 +66,4 @@ export async function initializeRuntime(fastify: AppFastifyInstance): Promise<Ru
     pool,
     redis: redis.clients,
   };
-}
-
-function registerPoolShutdown(fastify: AppFastifyInstance, pool: Pool): void {
-  fastify.addHook("onClose", async () => {
-    await pool.end();
-  });
 }

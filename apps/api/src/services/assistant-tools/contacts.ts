@@ -18,6 +18,12 @@ import {
   assistantPageSize,
 } from "./collection-cap.js";
 
+function definedPatch(value: Record<string, unknown>): UpdateContactInput {
+  return Object.fromEntries(
+    Object.entries(value).filter(([, field]) => field !== undefined),
+  ) as UpdateContactInput;
+}
+
 export const searchContactsInputSchema = z.object({
   limit: z.number().int().min(1).max(ASSISTANT_COLLECTION_CAP).optional(),
   offset: z.number().int().min(0).optional(),
@@ -63,12 +69,6 @@ export const updateContactInputSchema = contactWritableFieldsSchema.extend({
 export const deleteContactInputSchema = z.object({
   personId: z.string().uuid(),
 });
-
-function definedPatch(value: Record<string, unknown>): UpdateContactInput {
-  return Object.fromEntries(
-    Object.entries(value).filter(([, field]) => field !== undefined),
-  ) as UpdateContactInput;
-}
 
 export async function executeSearchContacts(
   ctx: DomainContext,

@@ -19,6 +19,10 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const LAST_UPDATED_RE = /^last_updated\s*:\s*(.*)$/;
+const PATTERN_5E5C647B347D_RE = /^\d{4}-\d{2}-\d{2}$/;
+
 const check = createCheck("check-docs-frontmatter");
 
 /** Directories whose pages are generated, so they carry no authored fields. */
@@ -48,7 +52,7 @@ function repoPath(filePath) {
 
 /** The frontmatter key value, or `null` when the field is absent. */
 function readLastUpdated(content) {
-  const lines = content.split(/\r?\n/);
+  const lines = content.split(PATTERN_5C723F5C6E_RE);
   if (lines[0]?.trim() !== "---") {
     return { frontmatter: false, value: null };
   }
@@ -59,7 +63,7 @@ function readLastUpdated(content) {
   }
 
   for (const line of lines.slice(1, endIndex)) {
-    const match = /^last_updated\s*:\s*(.*)$/.exec(line);
+    const match = LAST_UPDATED_RE.exec(line);
     if (match) {
       return { frontmatter: true, value: match[1].trim().replace(/^["']|["']$/g, "") };
     }
@@ -70,7 +74,7 @@ function readLastUpdated(content) {
 
 /** `true` when the value is a real calendar date in `YYYY-MM-DD` form. */
 function isCalendarDate(value) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (!PATTERN_5E5C647B347D_RE.test(value)) {
     return false;
   }
 

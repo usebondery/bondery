@@ -40,7 +40,7 @@ export function Stack({
       )}
       {...rest}
     >
-      {grow ? wrapGrowChildren(children, "column") : children}
+      {grow ? <>{wrapGrowChildren(children, "column")}</> : <>{children}</>}
     </View>
   );
 }

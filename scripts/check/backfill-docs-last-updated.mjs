@@ -17,6 +17,11 @@ import { readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const LAST_UPDATED_RE_2 = /^last_updated\s*:/;
+const LAST_UPDATED_RE = /^last_updated\s*:/m;
+const PATTERN_5E2D2D2D24_RE = /^---$/m;
+
 function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const repoRoot = join(__dirname, "../..");
@@ -67,7 +72,7 @@ function main() {
    */
   function withLastUpdated(content, date) {
     const eol = content.includes("\r\n") ? "\r\n" : "\n";
-    const lines = content.split(/\r?\n/);
+    const lines = content.split(PATTERN_5C723F5C6E_RE);
     if (lines[0]?.trim() !== "---") {
       return;
     }
@@ -77,7 +82,7 @@ function main() {
       return;
     }
 
-    if (lines.slice(1, endIndex).some((line) => /^last_updated\s*:/.test(line))) {
+    if (lines.slice(1, endIndex).some((line) => LAST_UPDATED_RE_2.test(line))) {
       return;
     }
 
@@ -116,7 +121,7 @@ function main() {
     const repoPath = relative(repoRoot, filePath).split(sep).join("/");
     const content = readFileSync(filePath, "utf8");
 
-    if (/^last_updated\s*:/m.test(content.split(/^---$/m)[1] ?? "")) {
+    if (LAST_UPDATED_RE.test(content.split(PATTERN_5E2D2D2D24_RE)[1] ?? "")) {
       skipped += 1;
       continue;
     }

@@ -9,6 +9,8 @@ import {
   SOURCE_LOCALE,
 } from "./lib/namespace-locales.mjs";
 
+const TSX_JSX_MJS_RE = /\.(tsx?|jsx?|mjs)$/;
+
 const check = createCheck("check-i18n-structure");
 
 /**
@@ -47,7 +49,7 @@ function walk(dir, acc = []) {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?|mjs)$/.test(entry.name)) {
+    } else if (TSX_JSX_MJS_RE.test(entry.name)) {
       acc.push(full);
     }
   }

@@ -1,10 +1,8 @@
 import "react-native-get-random-values";
 import "react-native-gesture-handler";
 import "../global.css";
-import { bootstrapDocumentDirectionFromStorage } from "../src/lib/i18n/documentDirection";
-
-void bootstrapDocumentDirectionFromStorage();
-
+import "../src/lib/i18n/bootstrap-document-direction";
+import { detachPromise } from "@bondery/helpers/async";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
@@ -28,21 +26,22 @@ import { useMobileThemeColors } from "../src/theme/useMobileThemeColors";
 keepNativeSplashVisible();
 
 /** Hung SecureStore only. Never treat this as logout while a cookie exists. */
-const LOCAL_CREDENTIAL_WAIT_MS = 2_000;
+const LOCAL_CREDENTIAL_WAIT_MS = 2000;
 
 function loadLocalCookieToken(onToken: (token: string | null) => void): () => void {
   let cancelled = false;
-  void readLocalAccessToken()
-    .then((token) => {
+  detachPromise(
+    readLocalAccessToken().then((token) => {
       if (!cancelled) {
         onToken(token);
       }
-    })
-    .catch(() => {
+    }),
+    () => {
       if (!cancelled) {
         onToken(null);
       }
-    });
+    },
+  );
 
   return () => {
     cancelled = true;
@@ -153,7 +152,7 @@ function ConsumeRootHardwareBack() {
 function LocaleSync() {
   const locale = useMobilePreferences((s) => s.locale);
   useEffect(() => {
-    void i18n.changeLanguage(locale);
+    detachPromise(i18n.changeLanguage(locale));
   }, [locale]);
   return null;
 }

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { CHANGELOG_URL, HELP_DOCS_URL } from "@bondery/helpers/globals/paths";
 import { IconBook, IconClipboardList } from "@tabler/icons-react-native";
 import Constants from "expo-constants";
@@ -9,10 +10,7 @@ import { Paper } from "../../components/ui/Paper";
 import { Stack } from "../../components/ui/Stack";
 import { ThemeIcon } from "../../components/ui/ThemeIcon";
 import { API_URL } from "../../lib/config";
-import {
-  useCommonTranslations,
-  useMobileSettingsTranslations,
-} from "../../lib/i18n/generated/hooks";
+import { useMobileSettingsTranslations } from "../../lib/i18n/generated/hooks";
 import { goBackOrReplace } from "../../lib/navigation/goBackOrReplace";
 import { notifications } from "../../lib/toast/notifications";
 import { MOBILE_LAYOUT } from "../../theme/tokens";
@@ -28,7 +26,6 @@ const APP_VERSION = Constants.expoConfig?.version ?? "—";
 
 export function SettingsTechnicalScreen() {
   const tMobileSettings = useMobileSettingsTranslations();
-  const _t = useCommonTranslations();
   const router = useRouter();
   const colors = useMobileThemeColors();
   const scrollBottomInset = useScrollBottomInset("stack");
@@ -44,13 +41,15 @@ export function SettingsTechnicalScreen() {
   const externalHint = tMobileSettings("External");
 
   const openDocs = () => {
-    void openExternalUrl(HELP_DOCS_URL, () => {
-      notifications.show({
-        message: tMobileSettings("OpenDocsErrorDescription"),
-        title: tMobileSettings("OpenDocsErrorHeadline"),
-        type: "error",
-      });
-    });
+    detachPromise(
+      openExternalUrl(HELP_DOCS_URL, () => {
+        notifications.show({
+          message: tMobileSettings("OpenDocsErrorDescription"),
+          title: tMobileSettings("OpenDocsErrorHeadline"),
+          type: "error",
+        });
+      }),
+    );
   };
 
   const serverStatusDescription =
@@ -120,7 +119,7 @@ export function SettingsTechnicalScreen() {
                 </ThemeIcon>
               }
               onPress={() => {
-                void openExternalUrl(CHANGELOG_URL);
+                detachPromise(openExternalUrl(CHANGELOG_URL));
               }}
             />
             <NavLink
@@ -141,7 +140,7 @@ export function SettingsTechnicalScreen() {
             label={tMobileSettings("ApiServerUrl")}
             loading={isChecking}
             onReload={() => {
-              void refresh();
+              detachPromise(refresh());
             }}
             reloadAccessibilityLabel={tMobileSettings("RecheckConnection")}
             statusDotColor={serverStatusDotColor}
@@ -153,7 +152,7 @@ export function SettingsTechnicalScreen() {
             label={tMobileSettings("AppVersion")}
             loading={isAppVersionChecking}
             onReload={() => {
-              void refreshAppVersion();
+              detachPromise(refreshAppVersion());
             }}
             reloadAccessibilityLabel={tMobileSettings("RecheckAppVersion")}
             statusDotColor={appVersionDotColor}

@@ -6,7 +6,6 @@ import type {
 } from "@/lib/speech/dictation/browserDictationTypes";
 import type {
   DictationEngine,
-  DictationErrorCode,
   DictationHandlers,
   DictationStartInput,
 } from "@/lib/speech/dictation/dictationEngine";

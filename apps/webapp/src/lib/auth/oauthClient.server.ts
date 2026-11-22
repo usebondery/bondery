@@ -9,33 +9,7 @@ import {
   resolveServerApiBaseUrl,
 } from "@/lib/api/resolveServerApiUrl";
 
-/**
- * The webapp's own OAuth-BFF client against the API's `oauth-provider` Authorization
- * Server. Independent of Better Auth's native browser session (see client.ts) — this
- * is the confidential-client credential the webapp server holds for its own RSC/BFF
- * data fetching, obtained via a real Authorization Code + PKCE exchange.
- */
-
-export type WebappSessionUser = {
-  email: string;
-  emailVerified: boolean;
-  id: string;
-  image?: string | null;
-  name: string;
-};
-
-export type WebappSessionPayload = {
-  accessToken: string;
-  accessTokenExpiresAt: number; // unix seconds
-  refreshToken: string;
-  user: WebappSessionUser;
-};
-
-export type OAuthFlowPayload = {
-  codeVerifier: string;
-  redirectTo: string | null;
-  state: string;
-};
+const TRAILING_SLASHES = /\/+$/;
 
 // `api:access` is the scope tied to the API's single canonical protected
 // resource (see apps/api/src/lib/auth/index.ts) — omitting it, or omitting
@@ -45,14 +19,18 @@ export type OAuthFlowPayload = {
 const OAUTH_SCOPE = "openid profile email offline_access api:access";
 
 function apiResourceIdentifier(): string {
-  return resolvePublicApiBaseUrl().replace(/\/+$/, "");
+  return resolvePublicApiBaseUrl().replace(TRAILING_SLASHES, "");
 }
 
 function oauthIssuerIdentifier(): string {
   return `${apiResourceIdentifier()}${BETTER_AUTH_BASE_PATH}`;
 }
-const OAUTH_FLOW_TTL_SECONDS = 10 * 60; // 10 minutes — just long enough for the AS round-trip
-const SESSION_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 30; // matches refreshTokenExpiresIn default (30 days)
+const OAUTH_FLOW_TTL_SECONDS = 10 * 60;
+
+// 10 minutes — just long enough for the AS round-trip
+const SESSION_COOKIE_TTL_SECONDS = 60 * 60 * 24 * 30;
+
+// matches refreshTokenExpiresIn default (30 days)
 
 type TokenResponse = {
   access_token: string;
@@ -81,36 +59,6 @@ function sessionEncryptionKey(): Uint8Array {
   return createHash("sha256").update(requireEnv("BONDERY_PRIVATE_WEBAPP_SESSION_SECRET")).digest();
 }
 
-export function generateCodeVerifier(): string {
-  return randomBytes(32).toString("base64url");
-}
-
-export function generateCodeChallenge(codeVerifier: string): string {
-  return createHash("sha256").update(codeVerifier).digest("base64url");
-}
-
-export function generateOAuthState(): string {
-  return randomBytes(16).toString("hex");
-}
-
-/** Builds the API's own `/oauth2/authorize` URL for the webapp's confidential client. */
-export function buildAuthorizeUrl(params: {
-  codeChallenge: string;
-  redirectUri: string;
-  state: string;
-}): string {
-  const url = new URL(joinApiUrl(resolvePublicApiBaseUrl(), betterAuthPath("/oauth2/authorize")));
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("client_id", webappOAuthClientId());
-  url.searchParams.set("redirect_uri", params.redirectUri);
-  url.searchParams.set("code_challenge", params.codeChallenge);
-  url.searchParams.set("code_challenge_method", "S256");
-  url.searchParams.set("state", params.state);
-  url.searchParams.set("scope", OAUTH_SCOPE);
-  url.searchParams.set("resource", apiResourceIdentifier());
-  return url.toString();
-}
-
 async function requestToken(body: URLSearchParams): Promise<TokenResponse | null> {
   const payload = body.toString();
   try {
@@ -125,9 +73,6 @@ async function requestToken(body: URLSearchParams): Promise<TokenResponse | null
     );
 
     if (!response.ok) {
-      if (process.env.NODE_ENV === "development") {
-        const _errorBody = await response.text();
-      }
       return null;
     }
 
@@ -135,24 +80,6 @@ async function requestToken(body: URLSearchParams): Promise<TokenResponse | null
   } catch {
     return null;
   }
-}
-
-export async function exchangeCodeForTokens(params: {
-  code: string;
-  codeVerifier: string;
-  redirectUri: string;
-}): Promise<TokenResponse | null> {
-  return requestToken(
-    new URLSearchParams({
-      client_id: webappOAuthClientId(),
-      client_secret: webappOAuthClientSecret(),
-      code: params.code,
-      code_verifier: params.codeVerifier,
-      grant_type: "authorization_code",
-      redirect_uri: params.redirectUri,
-      resource: apiResourceIdentifier(),
-    }),
-  );
 }
 
 async function requestRefreshedTokens(refreshToken: string): Promise<TokenResponse | null> {
@@ -260,6 +187,111 @@ function buildSessionPayload(
   };
 }
 
+async function encryptPayload(
+  payload: Record<string, unknown>,
+  ttlSeconds: number,
+): Promise<string> {
+  const now = Math.floor(Date.now() / 1000);
+  return new EncryptJWT(payload)
+    .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
+    .setIssuedAt(now)
+    .setExpirationTime(now + ttlSeconds)
+    .encrypt(sessionEncryptionKey());
+}
+
+async function decryptPayload<T>(token: string): Promise<T | null> {
+  try {
+    const { payload } = await jwtDecrypt(token, sessionEncryptionKey());
+    return payload as unknown as T;
+  } catch {
+    return null;
+  }
+}
+
+type CookieOptions = {
+  httpOnly: true;
+  maxAge: number;
+  path: "/";
+  sameSite: "lax";
+  secure: boolean;
+};
+
+/**
+ * The webapp's own OAuth-BFF client against the API's `oauth-provider` Authorization
+ * Server. Independent of Better Auth's native browser session (see client.ts) — this
+ * is the confidential-client credential the webapp server holds for its own RSC/BFF
+ * data fetching, obtained via a real Authorization Code + PKCE exchange.
+ */
+
+export type WebappSessionUser = {
+  email: string;
+  emailVerified: boolean;
+  id: string;
+  image?: string | null;
+  name: string;
+};
+
+export type WebappSessionPayload = {
+  accessToken: string;
+  accessTokenExpiresAt: number; // unix seconds
+  refreshToken: string;
+  user: WebappSessionUser;
+};
+
+export type OAuthFlowPayload = {
+  codeVerifier: string;
+  redirectTo: string | null;
+  state: string;
+};
+
+export function generateCodeVerifier(): string {
+  return randomBytes(32).toString("base64url");
+}
+
+export function generateCodeChallenge(codeVerifier: string): string {
+  return createHash("sha256").update(codeVerifier).digest("base64url");
+}
+
+export function generateOAuthState(): string {
+  return randomBytes(16).toString("hex");
+}
+
+/** Builds the API's own `/oauth2/authorize` URL for the webapp's confidential client. */
+export function buildAuthorizeUrl(params: {
+  codeChallenge: string;
+  redirectUri: string;
+  state: string;
+}): string {
+  const url = new URL(joinApiUrl(resolvePublicApiBaseUrl(), betterAuthPath("/oauth2/authorize")));
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("client_id", webappOAuthClientId());
+  url.searchParams.set("redirect_uri", params.redirectUri);
+  url.searchParams.set("code_challenge", params.codeChallenge);
+  url.searchParams.set("code_challenge_method", "S256");
+  url.searchParams.set("state", params.state);
+  url.searchParams.set("scope", OAUTH_SCOPE);
+  url.searchParams.set("resource", apiResourceIdentifier());
+  return url.toString();
+}
+
+export async function exchangeCodeForTokens(params: {
+  code: string;
+  codeVerifier: string;
+  redirectUri: string;
+}): Promise<TokenResponse | null> {
+  return requestToken(
+    new URLSearchParams({
+      client_id: webappOAuthClientId(),
+      client_secret: webappOAuthClientSecret(),
+      code: params.code,
+      code_verifier: params.codeVerifier,
+      grant_type: "authorization_code",
+      redirect_uri: params.redirectUri,
+      resource: apiResourceIdentifier(),
+    }),
+  );
+}
+
 /** Exchanges an authorization code for the webapp's own session payload (unencrypted). */
 export async function completeOAuthCodeExchange(params: {
   code: string;
@@ -289,27 +321,6 @@ export async function refreshSessionPayload(
   return buildSessionPayload(tokens, session.user, session.refreshToken);
 }
 
-async function encryptPayload(
-  payload: Record<string, unknown>,
-  ttlSeconds: number,
-): Promise<string> {
-  const now = Math.floor(Date.now() / 1000);
-  return new EncryptJWT(payload)
-    .setProtectedHeader({ alg: "dir", enc: "A256GCM" })
-    .setIssuedAt(now)
-    .setExpirationTime(now + ttlSeconds)
-    .encrypt(sessionEncryptionKey());
-}
-
-async function decryptPayload<T>(token: string): Promise<T | null> {
-  try {
-    const { payload } = await jwtDecrypt(token, sessionEncryptionKey());
-    return payload as unknown as T;
-  } catch {
-    return null;
-  }
-}
-
 export function encryptWebappSession(payload: WebappSessionPayload): Promise<string> {
   return encryptPayload(payload, SESSION_COOKIE_TTL_SECONDS);
 }
@@ -325,14 +336,6 @@ export function encryptOAuthFlow(payload: OAuthFlowPayload): Promise<string> {
 export function decryptOAuthFlow(token: string): Promise<OAuthFlowPayload | null> {
   return decryptPayload<OAuthFlowPayload>(token);
 }
-
-type CookieOptions = {
-  httpOnly: true;
-  maxAge: number;
-  path: "/";
-  sameSite: "lax";
-  secure: boolean;
-};
 
 export function webappSessionCookieOptions(secure: boolean): CookieOptions {
   return { httpOnly: true, maxAge: SESSION_COOKIE_TTL_SECONDS, path: "/", sameSite: "lax", secure };

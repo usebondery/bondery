@@ -34,6 +34,10 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5E5B2227605D_RE = /^["'`]/;
+const ZA_RE = /^[a-zA-Z_$][\w$]*\s*\+/;
+const MJS_GRIT_RE = /\.(?:mjs|grit)$/;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../..");
 
@@ -93,6 +97,60 @@ const SYMBOL_CALL = /\b[A-Za-z_$][\w$.]*\(\)/;
  * `fail(` covers scripts that report through `console.error` and `exit` instead of `createCheck`.
  */
 const CALLEES = ["check.add(", "fail("];
+
+/**
+ * True when the argument is a literal message. A bare identifier or a call result is skipped,
+ * because its text is not in this file.
+ *
+ * @param {string} argument
+ */
+function isLiteralMessage(argument) {
+  return PATTERN_5E5B2227605D_RE.test(argument) || ZA_RE.test(argument);
+}
+
+function repoPath(filePath) {
+  return relative(repoRoot, filePath).split(sep).join("/");
+}
+
+function main() {
+  const check = createCheck("check-diagnostic-messages");
+  let scanned = 0;
+  let judged = 0;
+  let declared = 0;
+
+  for (const dir of SCANNED_DIRS) {
+    for (const entry of readdirSync(join(repoRoot, dir))) {
+      if (!MJS_GRIT_RE.test(entry) || entry.includes(SELF_PATH) || entry.endsWith(".test.mjs")) {
+        continue;
+      }
+      scanned += 1;
+      const filePath = join(repoRoot, dir, entry);
+      const source = readFileSync(filePath, "utf8");
+      const lines = source.split("\n");
+      for (const { line, text } of findMessages(source, filePath)) {
+        if (isRemedyInValue(lines, line)) {
+          declared += 1;
+          continue;
+        }
+        judged += 1;
+        if (!hasRemedy(text)) {
+          const preview = text.length > 100 ? `${text.slice(0, 100)}…` : text;
+          check.add(
+            `${repoPath(filePath)}:${line}: diagnostic does not say how to fix it: "${preview}"
+      Name the function, file, command, or value the reader should change. Put an identifier or path in backticks so it reads as code. If the remedy is built in an interpolated value, mark the line with a note naming where.`,
+          );
+        }
+      }
+    }
+  }
+
+  const suffix = declared > 0 ? `, ${declared} declared remedy-in-value` : "";
+  check.ok(`${judged} diagnostic messages judged in ${scanned} files${suffix}`);
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main();
+}
 
 /**
  * True when the message tells the reader what to do.
@@ -241,16 +299,6 @@ export function extractArguments(source, callee) {
 }
 
 /**
- * True when the argument is a literal message. A bare identifier or a call result is skipped,
- * because its text is not in this file.
- *
- * @param {string} argument
- */
-function isLiteralMessage(argument) {
-  return /^["'`]/.test(argument) || /^[a-zA-Z_$][\w$]*\s*\+/.test(argument);
-}
-
-/**
  * Every literal diagnostic message in one file, with its line number.
  *
  * @param {string} source
@@ -298,52 +346,4 @@ export function isRemedyInValue(lines, lineNumber) {
     lines[lineNumber + 1] ?? "",
   ];
   return candidates.some((line) => REMEDY_IN_VALUE.test(line));
-}
-
-function repoPath(filePath) {
-  return relative(repoRoot, filePath).split(sep).join("/");
-}
-
-function main() {
-  const check = createCheck("check-diagnostic-messages");
-  let scanned = 0;
-  let judged = 0;
-  let declared = 0;
-
-  for (const dir of SCANNED_DIRS) {
-    for (const entry of readdirSync(join(repoRoot, dir))) {
-      if (
-        !/\.(?:mjs|grit)$/.test(entry) ||
-        entry.includes(SELF_PATH) ||
-        entry.endsWith(".test.mjs")
-      ) {
-        continue;
-      }
-      const filePath = join(repoRoot, dir, entry);
-      const source = readFileSync(filePath, "utf8");
-      const lines = source.split("\n");
-      scanned += 1;
-      for (const { line, text } of findMessages(source, filePath)) {
-        if (isRemedyInValue(lines, line)) {
-          declared += 1;
-          continue;
-        }
-        judged += 1;
-        if (!hasRemedy(text)) {
-          const preview = text.length > 100 ? `${text.slice(0, 100)}…` : text;
-          check.add(
-            `${repoPath(filePath)}:${line}: diagnostic does not say how to fix it: "${preview}"
-      Name the function, file, command, or value the reader should change. Put an identifier or path in backticks so it reads as code. If the remedy is built in an interpolated value, mark the line with a note naming where.`,
-          );
-        }
-      }
-    }
-  }
-
-  const suffix = declared > 0 ? `, ${declared} declared remedy-in-value` : "";
-  check.ok(`${judged} diagnostic messages judged in ${scanned} files${suffix}`);
-}
-
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  main();
 }

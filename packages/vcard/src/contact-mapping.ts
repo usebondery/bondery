@@ -10,6 +10,10 @@ import type {
 } from "#model.js";
 import { GEO_URI_PREFIX, TEL_URI_PREFIX } from "#uri-schemes.js";
 
+const PATTERN_5E5C2B_RE = /^\+/;
+const PATTERN_5C732B_RE = /\s+/;
+const GEO_RE = /^geo:([^,]+),(.+)$/;
+
 function normalizePreferred(pref?: number): boolean {
   return pref === 1;
 }
@@ -99,7 +103,7 @@ function mapSocialImpp(contact: Contact): VCardTextValue[] {
     entries.push({ types: ["home"], value: `whatsapp:${contact.whatsapp}` });
     entries.push({
       types: ["home"],
-      value: `https://wa.me/${contact.whatsapp.replace(/^\+/, "")}`,
+      value: `https://wa.me/${contact.whatsapp.replace(PATTERN_5E5C2B_RE, "")}`,
     });
   }
 
@@ -107,7 +111,7 @@ function mapSocialImpp(contact: Contact): VCardTextValue[] {
     entries.push({ types: ["home"], value: `signal:${contact.signal}` });
     entries.push({
       types: ["home"],
-      value: `https://signal.me/#p/${contact.signal.replace(/^\+/, "")}`,
+      value: `https://signal.me/#p/${contact.signal.replace(PATTERN_5E5C2B_RE, "")}`,
     });
   }
 
@@ -134,63 +138,6 @@ function mapSocialImpp(contact: Contact): VCardTextValue[] {
   return entries;
 }
 
-/**
- * Maps a Bondery contact into a normalized vCard model.
- *
- * @param contact Contact entity from the shared domain model.
- * @returns Normalized vCard ready for serialization or enrichment.
- */
-export function contactToVCard(contact: Contact): VCard {
-  const fullName = [contact.firstName, contact.middleName, contact.lastName]
-    .filter(Boolean)
-    .join(" ")
-    .trim();
-  const phoneEntries = Array.isArray(contact.phones) ? (contact.phones as PhoneEntry[]) : null;
-  const emailEntries = Array.isArray(contact.emails) ? (contact.emails as EmailEntry[]) : null;
-  const addressEntries = Array.isArray(contact.addresses)
-    ? (contact.addresses as ContactAddressEntry[])
-    : null;
-
-  return {
-    addresses: mapAddresses(addressEntries),
-    categories: [],
-    customProperties: contact.myself ? [{ name: "X-MYSELF", parameters: [], value: "TRUE" }] : [],
-    emails: mapEmails(emailEntries),
-    fullName,
-    geo:
-      contact.latitude !== null && contact.longitude !== null
-        ? `geo:${contact.latitude},${contact.longitude}`
-        : undefined,
-    instantMessaging: mapSocialImpp(contact),
-    keys: [],
-    kind: "individual",
-    languages: contact.language ? [{ pref: 1, types: [], value: contact.language }] : [],
-    logos: [],
-    name: buildStructuredName(contact),
-    nicknames: [],
-    notes: contact.notes ? [{ types: [], value: contact.notes }] : [],
-    organizations: [],
-    phones: mapPhones(phoneEntries),
-    photos: [],
-    productId: "-//BONDERY//NONSGML Bondery v1.0//EN",
-    raw: {
-      properties: [],
-      version: "4.0",
-      warnings: [],
-    },
-    related: contact.myself
-      ? [{ types: ["me"], value: `urn:uuid:${contact.id}`, valueType: "uri" }]
-      : [],
-    revision: contact.updatedAt,
-    roles: [],
-    sounds: [],
-    timezone: contact.timezone ? { value: contact.timezone, valueType: "text" } : undefined,
-    titles: contact.headline ? [{ types: [], value: contact.headline }] : [],
-    uid: `urn:uuid:${contact.id}`,
-    urls: contact.website ? [{ types: ["home"], value: contact.website }] : [],
-  };
-}
-
 function deriveName(card: VCard): {
   firstName: string;
   middleName: string | null;
@@ -205,7 +152,7 @@ function deriveName(card: VCard): {
   }
 
   const cleaned = cleanPersonName(card.fullName);
-  const parts = cleaned.split(/\s+/).filter(Boolean);
+  const parts = cleaned.split(PATTERN_5C732B_RE).filter(Boolean);
   const [firstName] = parts;
   if (firstName === undefined) {
     return { firstName: "", lastName: null, middleName: null };
@@ -303,7 +250,7 @@ function parseAndroidCustomDate(property: VCardProperty): {
 
   const typeCode = Number.parseInt(parts[2] ?? "1", 10);
   // More explicit handling of empty label field
-  const labelValue = parts[3];
+  const [, , , labelValue] = parts;
   const label = labelValue && labelValue.trim() !== "" ? labelValue.trim() : null;
 
   try {
@@ -324,6 +271,126 @@ function parseAndroidCustomDate(property: VCardProperty): {
   } catch {
     return null;
   }
+}
+
+/**
+ * Extracts all important dates from a vCard (birthday, anniversary, X-ANDROID-CUSTOM).
+ * Normalizes year-less dates to use epoch year 1904.
+ *
+ * @param card Parsed vCard
+ * @returns Array of important dates or null if none found
+ */
+function extractImportantDates(card: VCard): Array<{
+  type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+  date: string;
+  note: string | null;
+}> | null {
+  const dates: Array<{
+    type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
+    date: string;
+    note: string | null;
+  }> = [];
+
+  // Extract standard BDAY field
+  if (card.birthday?.value) {
+    try {
+      const normalizedDate = normalizeVCardDate(card.birthday.value);
+      const testDate = new Date(normalizedDate);
+      if (!Number.isNaN(testDate.getTime())) {
+        dates.push({
+          date: normalizedDate,
+          note: null,
+          type: "birthday",
+        });
+      }
+    } catch {
+      // Skip invalid birthday
+    }
+  }
+
+  // Extract standard ANNIVERSARY field
+  if (card.anniversary?.value) {
+    try {
+      const normalizedDate = normalizeVCardDate(card.anniversary.value);
+      const testDate = new Date(normalizedDate);
+      if (!Number.isNaN(testDate.getTime())) {
+        dates.push({
+          date: normalizedDate,
+          note: null,
+          type: "anniversary",
+        });
+      }
+    } catch {
+      // Skip invalid anniversary
+    }
+  }
+
+  // Extract X-ANDROID-CUSTOM contact_event fields
+  const androidDates = card.customProperties
+    .filter((prop) => prop.name === "X-ANDROID-CUSTOM")
+    .map((prop) => parseAndroidCustomDate(prop))
+    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
+
+  dates.push(...androidDates);
+
+  return dates.length > 0 ? dates : null;
+}
+
+/**
+ * Maps a Bondery contact into a normalized vCard model.
+ *
+ * @param contact Contact entity from the shared domain model.
+ * @returns Normalized vCard ready for serialization or enrichment.
+ */
+export function contactToVCard(contact: Contact): VCard {
+  const fullName = [contact.firstName, contact.middleName, contact.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  const phoneEntries = Array.isArray(contact.phones) ? (contact.phones as PhoneEntry[]) : null;
+  const emailEntries = Array.isArray(contact.emails) ? (contact.emails as EmailEntry[]) : null;
+  const addressEntries = Array.isArray(contact.addresses)
+    ? (contact.addresses as ContactAddressEntry[])
+    : null;
+
+  return {
+    addresses: mapAddresses(addressEntries),
+    categories: [],
+    customProperties: contact.myself ? [{ name: "X-MYSELF", parameters: [], value: "TRUE" }] : [],
+    emails: mapEmails(emailEntries),
+    fullName,
+    geo:
+      contact.latitude !== null && contact.longitude !== null
+        ? `geo:${contact.latitude},${contact.longitude}`
+        : undefined,
+    instantMessaging: mapSocialImpp(contact),
+    keys: [],
+    kind: "individual",
+    languages: contact.language ? [{ pref: 1, types: [], value: contact.language }] : [],
+    logos: [],
+    name: buildStructuredName(contact),
+    nicknames: [],
+    notes: contact.notes ? [{ types: [], value: contact.notes }] : [],
+    organizations: [],
+    phones: mapPhones(phoneEntries),
+    photos: [],
+    productId: "-//BONDERY//NONSGML Bondery v1.0//EN",
+    raw: {
+      properties: [],
+      version: "4.0",
+      warnings: [],
+    },
+    related: contact.myself
+      ? [{ types: ["me"], value: `urn:uuid:${contact.id}`, valueType: "uri" }]
+      : [],
+    revision: contact.updatedAt,
+    roles: [],
+    sounds: [],
+    timezone: contact.timezone ? { value: contact.timezone, valueType: "text" } : undefined,
+    titles: contact.headline ? [{ types: [], value: contact.headline }] : [],
+    uid: `urn:uuid:${contact.id}`,
+    urls: contact.website ? [{ types: ["home"], value: contact.website }] : [],
+  };
 }
 
 /**
@@ -352,7 +419,7 @@ export function vCardToContactDraft(
   const bestLanguage =
     card.languages.sort((left, right) => (left.pref ?? 100) - (right.pref ?? 100))[0]?.value ??
     null;
-  const geoMatch = card.geo?.match(/^geo:([^,]+),(.+)$/);
+  const geoMatch = card.geo?.match(GEO_RE);
   const imppValues = card.instantMessaging.map((entry) => entry.value);
 
   return {
@@ -418,67 +485,4 @@ export function vCardToContactDraft(
     whatsapp:
       imppValues.find((value) => value.startsWith("whatsapp:"))?.slice("whatsapp:".length) ?? null,
   };
-}
-
-/**
- * Extracts all important dates from a vCard (birthday, anniversary, X-ANDROID-CUSTOM).
- * Normalizes year-less dates to use epoch year 1904.
- *
- * @param card Parsed vCard
- * @returns Array of important dates or null if none found
- */
-function extractImportantDates(card: VCard): Array<{
-  type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
-  date: string;
-  note: string | null;
-}> | null {
-  const dates: Array<{
-    type: "birthday" | "anniversary" | "nameday" | "graduation" | "other";
-    date: string;
-    note: string | null;
-  }> = [];
-
-  // Extract standard BDAY field
-  if (card.birthday?.value) {
-    try {
-      const normalizedDate = normalizeVCardDate(card.birthday.value);
-      const testDate = new Date(normalizedDate);
-      if (!Number.isNaN(testDate.getTime())) {
-        dates.push({
-          date: normalizedDate,
-          note: null,
-          type: "birthday",
-        });
-      }
-    } catch {
-      // Skip invalid birthday
-    }
-  }
-
-  // Extract standard ANNIVERSARY field
-  if (card.anniversary?.value) {
-    try {
-      const normalizedDate = normalizeVCardDate(card.anniversary.value);
-      const testDate = new Date(normalizedDate);
-      if (!Number.isNaN(testDate.getTime())) {
-        dates.push({
-          date: normalizedDate,
-          note: null,
-          type: "anniversary",
-        });
-      }
-    } catch {
-      // Skip invalid anniversary
-    }
-  }
-
-  // Extract X-ANDROID-CUSTOM contact_event fields
-  const androidDates = card.customProperties
-    .filter((prop) => prop.name === "X-ANDROID-CUSTOM")
-    .map((prop) => parseAndroidCustomDate(prop))
-    .filter((entry): entry is NonNullable<typeof entry> => entry !== null);
-
-  dates.push(...androidDates);
-
-  return dates.length > 0 ? dates : null;
 }

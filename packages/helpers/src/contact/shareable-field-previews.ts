@@ -1,24 +1,6 @@
 import type { ShareableField } from "@bondery/schemas";
 
-export const SHAREABLE_FIELDS: ShareableField[] = [
-  "name",
-  "avatar",
-  "headline",
-  "phones",
-  "emails",
-  "location",
-  "linkedin",
-  "instagram",
-  "facebook",
-  "website",
-  "whatsapp",
-  "signal",
-  "addresses",
-  "notes",
-  "importantDates",
-];
-
-export type ShareableFieldPreviewSource = {
+type ShareableFieldPreviewSource = {
   addresses?: Array<{ addressFormatted?: string | null }> | null;
   avatar?: string | null;
   emails?: Array<{ type?: string | null; value?: string | null }> | null;
@@ -35,11 +17,6 @@ export type ShareableFieldPreviewSource = {
   signal?: string | null;
   website?: string | null;
   whatsapp?: string | null;
-};
-
-export type ShareableFieldPreview = {
-  field: ShareableField;
-  preview: string;
 };
 
 function previewForField(
@@ -120,3 +97,28 @@ export function buildShareableFieldPreviews(
     return preview ? [{ field, preview }] : [];
   });
 }
+
+export type { ShareableFieldPreviewSource };
+
+export const SHAREABLE_FIELDS: ShareableField[] = [
+  "name",
+  "avatar",
+  "headline",
+  "phones",
+  "emails",
+  "location",
+  "linkedin",
+  "instagram",
+  "facebook",
+  "website",
+  "whatsapp",
+  "signal",
+  "addresses",
+  "notes",
+  "importantDates",
+];
+
+export type ShareableFieldPreview = {
+  field: ShareableField;
+  preview: string;
+};

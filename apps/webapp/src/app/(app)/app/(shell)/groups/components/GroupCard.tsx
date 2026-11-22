@@ -61,12 +61,6 @@ interface GroupActionCardProps extends GroupCardCommonProps {
 
 type GroupCardProps = GroupEntityCardProps | GroupActionCardProps;
 
-export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "action", string> = {
-  action: "14rem",
-  default: "18rem",
-  small: "14rem",
-};
-
 // ── Shared card shell ───────────────────────────────────
 
 /**
@@ -224,6 +218,12 @@ function GroupCardMenu({
   );
 }
 
+export const GROUP_CARD_MAX_WIDTH_BY_VARIANT: Record<"default" | "small" | "action", string> = {
+  action: "14rem",
+  default: "18rem",
+  small: "14rem",
+};
+
 // ── Main component ──────────────────────────────────────
 
 export function GroupCard(props: GroupCardProps) {
@@ -271,7 +271,7 @@ export function GroupCard(props: GroupCardProps) {
 
   // ── Entity card ─────────────────────────────────────
 
-  const group = props.group;
+  const { group } = props;
   const previewContacts = group.previewContacts ?? [];
   const peopleLabel = t("ContactCount", { count: group.contactCount });
 

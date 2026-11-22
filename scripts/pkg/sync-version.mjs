@@ -17,6 +17,9 @@ import { fileURLToPath } from "node:url";
 import { parseCalver, previousProductionCalver, readGitTags, toCoreCalver } from "./calver.mjs";
 import { formatWrittenFiles, writeFormattedJson } from "./write-formatted-json.mjs";
 
+const VERSION_RE = /version:\s*"[^"]*"/;
+const VERSIONNAME_RE = /versionName\s+"[^"]*"/;
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const checkOnly = process.argv.includes("--check");
 
@@ -77,7 +80,7 @@ function updateMobileAppConfig(nativeVersion) {
   const rel = "apps/mobile/app.config.ts";
   const abs = join(root, rel);
   const content = readFileSync(abs, "utf8");
-  const pattern = /version:\s*"[^"]*"/;
+  const pattern = VERSION_RE;
   const next = `version: "${nativeVersion}"`;
   if (!pattern.test(content)) {
     throw new Error(`Could not find expo version in ${rel}`);
@@ -96,7 +99,7 @@ function updateAndroidVersionName(nativeVersion) {
   const rel = "apps/mobile/android/app/build.gradle";
   const abs = join(root, rel);
   const content = readFileSync(abs, "utf8");
-  const pattern = /versionName\s+"[^"]*"/;
+  const pattern = VERSIONNAME_RE;
   const next = `versionName "${nativeVersion}"`;
   if (!pattern.test(content)) {
     throw new Error(`Could not find versionName in ${rel}`);

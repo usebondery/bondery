@@ -41,45 +41,51 @@ import type {
   UuidParam,
 } from "./types.js";
 
-type _UuidParam = Assert<IsEqual<UuidParam, z.infer<typeof uuidParamSchema>>>;
-type _PaginationQuery = Assert<IsEqual<PaginationQuery, z.infer<typeof paginationQuerySchema>>>;
-type _SearchQuery = Assert<IsEqual<SearchQuery, z.infer<typeof searchQuerySchema>>>;
-type _AvatarTransformQuery = Assert<
+export type _UuidParam = Assert<IsEqual<UuidParam, z.infer<typeof uuidParamSchema>>>;
+export type _PaginationQuery = Assert<
+  IsEqual<PaginationQuery, z.infer<typeof paginationQuerySchema>>
+>;
+export type _SearchQuery = Assert<IsEqual<SearchQuery, z.infer<typeof searchQuerySchema>>>;
+export type _AvatarTransformQuery = Assert<
   IsEqual<AvatarTransformQuery, z.infer<typeof avatarTransformQuerySchema>>
 >;
-type _PeopleListQuery = Assert<IsEqual<PeopleListQuery, z.infer<typeof peopleListQuerySchema>>>;
-type _GeocodeSuggestQuery = Assert<
+export type _PeopleListQuery = Assert<
+  IsEqual<PeopleListQuery, z.infer<typeof peopleListQuerySchema>>
+>;
+export type _GeocodeSuggestQuery = Assert<
   IsEqual<GeocodeSuggestQuery, z.infer<typeof geocodeSuggestQuerySchema>>
 >;
-type _GeocodeTimezoneQuery = Assert<
+export type _GeocodeTimezoneQuery = Assert<
   IsEqual<GeocodeTimezoneQuery, z.infer<typeof geocodeTimezoneQuerySchema>>
 >;
-type _PreviewListQuery = Assert<IsEqual<PreviewListQuery, z.infer<typeof previewListQuerySchema>>>;
-type _InteractionsListQuery = Assert<
+export type _PreviewListQuery = Assert<
+  IsEqual<PreviewListQuery, z.infer<typeof previewListQuerySchema>>
+>;
+export type _InteractionsListQuery = Assert<
   IsEqual<InteractionsListQuery, z.infer<typeof interactionsListQuerySchema>>
 >;
-type _ChatMessagesQuery = Assert<
+export type _ChatMessagesQuery = Assert<
   IsEqual<ChatMessagesQuery, z.infer<typeof chatMessagesQuerySchema>>
 >;
-type _ChatSessionIdParam = Assert<
+export type _ChatSessionIdParam = Assert<
   IsEqual<ChatSessionIdParam, z.infer<typeof chatSessionIdParamSchema>>
 >;
-type _MergeAvatarIdentityQuery = Assert<
+export type _MergeAvatarIdentityQuery = Assert<
   IsEqual<MergeAvatarIdentityQuery, z.infer<typeof mergeAvatarIdentityQuerySchema>>
 >;
-type _MergeRecommendationsQuery = Assert<
+export type _MergeRecommendationsQuery = Assert<
   IsEqual<MergeRecommendationsQuery, z.infer<typeof mergeRecommendationsQuerySchema>>
 >;
-type _SyncPullQuery = Assert<IsEqual<SyncPullQuery, z.infer<typeof syncPullQuerySchema>>>;
-type _ContactRelationshipIdParam = Assert<
+export type _SyncPullQuery = Assert<IsEqual<SyncPullQuery, z.infer<typeof syncPullQuerySchema>>>;
+export type _ContactRelationshipIdParam = Assert<
   IsEqual<ContactRelationshipIdParam, z.infer<typeof contactRelationshipIdParamSchema>>
 >;
-type _ImportantDatesReplaceBody = Assert<
+export type _ImportantDatesReplaceBody = Assert<
   IsEqual<ImportantDatesReplaceBody, z.infer<typeof importantDatesReplaceBodySchema>>
 >;
-type _GeocodeSuggestResponseWire = Assert<
+export type _GeocodeSuggestResponseWire = Assert<
   IsEqual<GeocodeSuggestResponseWire, z.infer<typeof geocodeSuggestResponseWireSchema>>
 >;
-type _GeocodeTimezoneResponseWire = Assert<
+export type _GeocodeTimezoneResponseWire = Assert<
   IsEqual<GeocodeTimezoneResponseWire, z.infer<typeof geocodeTimezoneResponseWireSchema>>
 >;

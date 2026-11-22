@@ -7,6 +7,7 @@ import { IconArrowDown, IconTopologyStar } from "@tabler/icons-react";
 import NextImage from "next/image";
 import { PageTopSpacer } from "@/components/page-top-spacer";
 import { hrefWebappLogin } from "@/lib/navigation/href/webapp";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 const HERO_DASHBOARD_ALT = landing.Hero.ImageAlt;
 
@@ -67,7 +68,7 @@ export function Hero() {
                 </ButtonLink>
                 <ButtonLink
                   className="w-full! md:w-auto!"
-                  href="#features"
+                  href={`#${LANDING_SECTION_IDS.features}`}
                   leftSection={<IconArrowDown size={20} />}
                   size="lg"
                   variant="default"

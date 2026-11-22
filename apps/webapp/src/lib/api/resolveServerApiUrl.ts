@@ -1,11 +1,14 @@
 import { WEBAPP_INTERNAL_API_URL_ENV, WEBAPP_RUNTIME_ENV } from "@/lib/platform/runtimeConfig.env";
 
+const TRAILING_SLASHES = /\/+$/;
+const API_PATH_SUFFIX = /\/api$/;
+
 /**
  * Normalize API base URL to origin-only format.
  * Prevents accidental `/api/api/...` requests when configured with a trailing `/api`.
  */
 export function normalizeApiBaseUrl(rawUrl: string): string {
-  return rawUrl.replace(/\/+$/, "").replace(/\/api$/, "");
+  return rawUrl.replace(TRAILING_SLASHES, "").replace(API_PATH_SUFFIX, "");
 }
 
 /** Dev-only: avoid IPv6 localhost resolution for server-side Node fetches. */
@@ -14,7 +17,7 @@ export function preferIpv4LoopbackForServerFetch(url: string): string {
     const parsed = new URL(url);
     if (parsed.hostname === "localhost") {
       parsed.hostname = "127.0.0.1";
-      return parsed.toString().replace(/\/+$/, "");
+      return parsed.toString().replace(TRAILING_SLASHES, "");
     }
   } catch {
     return url;

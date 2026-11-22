@@ -81,11 +81,11 @@ export default function WelcomeApp() {
             {t("ConnectButton")}
           </Button>
 
-          {error && (
+          {error ? (
             <Text c="red" size="sm" ta="center">
               {error}
             </Text>
-          )}
+          ) : null}
 
           <Text c="dimmed" size="xs" ta="center">
             {t("SignInHint")}

@@ -1,15 +1,16 @@
+const TRAILING_SLASHES_RE = /\/+$/;
 /**
  * chrome.identity and some Node fetches fail when `localhost` resolves to
  * IPv6 `::1`. Pin loopback HTTP to 127.0.0.1. Do not use this for the RFC
  * 8707 `resource` parameter — that identifier must match `BONDERY_PUBLIC_API_URL`.
  */
 export function oauthHttpBaseUrl(apiUrl: string): string {
-  return apiUrl.replace("http://localhost:", "http://127.0.0.1:").replace(/\/+$/, "");
+  return apiUrl.replace("http://localhost:", "http://127.0.0.1:").replace(TRAILING_SLASHES_RE, "");
 }
 
 /** Canonical protected-resource identifier (RFC 8707). */
 export function oauthResourceIdentifier(apiUrl: string): string {
-  return apiUrl.replace(/\/+$/, "");
+  return apiUrl.replace(TRAILING_SLASHES_RE, "");
 }
 
 /**

@@ -13,13 +13,13 @@ import { type Ref, useEffect, useImperativeHandle, useRef, useState } from "reac
 import type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
 import { useNotesSlashCommandsTranslations } from "@/lib/i18n/generated/hooks";
 
-export type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
-
 interface SlashCommandListProps {
   command: (item: SlashCommandItem) => void;
   items: SlashCommandItem[];
   ref?: Ref<SlashCommandListHandle>;
 }
+
+export type { SlashCommandItem } from "@/lib/contacts/slash-command-types";
 
 export interface SlashCommandListHandle {
   onKeyDown: (props: { event: KeyboardEvent }) => boolean;

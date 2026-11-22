@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { DateTimeFormatContext } from "@bondery/helpers/date";
 import { getDeviceTimezone } from "@bondery/helpers/locale";
 import type { DateFormatPreference, TimeFormatPreference } from "@bondery/schemas";
@@ -115,7 +116,7 @@ export const useMobilePreferences = create<MobilePreferencesState>()(
 
           const previousDirection = dirForLocale(state.locale);
           const nextDirection = dirForLocale(locale);
-          void i18n.changeLanguage(locale);
+          detachPromise(i18n.changeLanguage(locale));
 
           if (previousDirection !== nextDirection && applyNativeTextDirection(nextDirection)) {
             reloadAppForLayoutDirection();

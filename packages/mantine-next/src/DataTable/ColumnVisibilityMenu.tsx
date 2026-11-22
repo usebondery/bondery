@@ -55,7 +55,6 @@ export function ColumnVisibilityMenu<TColumn extends SortableColumnItemColumn>({
     }),
   );
 
-  const _fixedColumns = columns.filter((col) => col.fixed);
   const visibleColumns = columns.filter((col) => col.visible && !col.fixed);
   const hiddenColumns = columns.filter((col) => !col.visible && !col.fixed);
 

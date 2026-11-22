@@ -20,6 +20,63 @@ import {
 } from "../lib/auth/index.js";
 import { provisionNewUser } from "../lib/auth/provision-new-user.js";
 
+function isJwtPayload(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function upsertClientResource(clientId: string, resourceId: string): Promise<void> {
+  const existing = await prisma.oauthClientResource.findFirst({ where: { clientId, resourceId } });
+  if (existing) {
+    return;
+  }
+  await prisma.oauthClientResource.create({
+    data: { clientId, id: generateId(), resourceId },
+  });
+}
+
+function authorizeUrlFor(
+  clientId: string,
+  params: { challenge: string; resource?: string; scope?: string; state: string },
+  fallbackScope: string,
+): string {
+  const url = new URL("http://test/auth/oauth2/authorize");
+  url.searchParams.set("response_type", "code");
+  url.searchParams.set("client_id", clientId);
+  url.searchParams.set("redirect_uri", REDIRECT_URI);
+  url.searchParams.set("code_challenge", params.challenge);
+  url.searchParams.set("code_challenge_method", "S256");
+  url.searchParams.set("state", params.state);
+  url.searchParams.set("scope", params.scope ?? fallbackScope);
+  if (params.resource !== undefined) {
+    url.searchParams.set("resource", params.resource);
+  }
+  return `${url.pathname}?${url.searchParams.toString()}`;
+}
+
+function tokenRequestBody(
+  client: { clientId: string; clientSecret?: string },
+  params: { code?: string; codeVerifier?: string; refreshToken?: string; resource?: string },
+): URLSearchParams {
+  const body = new URLSearchParams({ client_id: client.clientId });
+  if (client.clientSecret !== undefined) {
+    body.set("client_secret", client.clientSecret);
+  }
+  if (params.code !== undefined) {
+    body.set("code", params.code);
+    body.set("code_verifier", params.codeVerifier ?? "");
+    body.set("grant_type", "authorization_code");
+    body.set("redirect_uri", REDIRECT_URI);
+  }
+  if (params.refreshToken !== undefined) {
+    body.set("grant_type", "refresh_token");
+    body.set("refresh_token", params.refreshToken);
+  }
+  if (params.resource !== undefined) {
+    body.set("resource", params.resource);
+  }
+  return body;
+}
+
 export const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
 export const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 export const CLIENT_ID = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID as string;
@@ -39,10 +96,6 @@ export function generatePkcePair(): { verifier: string; challenge: string } {
   const verifier = base64url(randomBytes(32));
   const challenge = createHash("sha256").update(verifier).digest("base64url");
   return { challenge, verifier };
-}
-
-function isJwtPayload(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function decodeJwtPayload(token: string): Record<string, unknown> {
@@ -82,16 +135,6 @@ export async function createNativeSession(userId: string): Promise<string> {
   return token;
 }
 
-async function upsertClientResource(clientId: string, resourceId: string): Promise<void> {
-  const existing = await prisma.oauthClientResource.findFirst({ where: { clientId, resourceId } });
-  if (existing) {
-    return;
-  }
-  await prisma.oauthClientResource.create({
-    data: { clientId, id: generateId(), resourceId },
-  });
-}
-
 /** MCP-only public test client (CIMD stand-in). Linked only to the MCP resources. */
 export async function provisionMcpTestClient(clientId: string): Promise<void> {
   await prisma.oauthClient.upsert({
@@ -128,25 +171,6 @@ export async function provisionMcpTestClient(clientId: string): Promise<void> {
   for (const resourceId of resolveMcpResourceIdentifiers()) {
     await upsertClientResource(clientId, resourceId);
   }
-}
-
-function authorizeUrlFor(
-  clientId: string,
-  params: { challenge: string; resource?: string; scope?: string; state: string },
-  fallbackScope: string,
-): string {
-  const url = new URL("http://test/auth/oauth2/authorize");
-  url.searchParams.set("response_type", "code");
-  url.searchParams.set("client_id", clientId);
-  url.searchParams.set("redirect_uri", REDIRECT_URI);
-  url.searchParams.set("code_challenge", params.challenge);
-  url.searchParams.set("code_challenge_method", "S256");
-  url.searchParams.set("state", params.state);
-  url.searchParams.set("scope", params.scope ?? fallbackScope);
-  if (params.resource !== undefined) {
-    url.searchParams.set("resource", params.resource);
-  }
-  return `${url.pathname}?${url.searchParams.toString()}`;
 }
 
 export async function authorize(
@@ -192,30 +216,6 @@ export function isAuthorizationDenied(response: {
     return new URL(location, "http://test.invalid").searchParams.get("code") === null;
   }
   return response.statusCode !== 200;
-}
-
-function tokenRequestBody(
-  client: { clientId: string; clientSecret?: string },
-  params: { code?: string; codeVerifier?: string; refreshToken?: string; resource?: string },
-): URLSearchParams {
-  const body = new URLSearchParams({ client_id: client.clientId });
-  if (client.clientSecret !== undefined) {
-    body.set("client_secret", client.clientSecret);
-  }
-  if (params.code !== undefined) {
-    body.set("code", params.code);
-    body.set("code_verifier", params.codeVerifier ?? "");
-    body.set("grant_type", "authorization_code");
-    body.set("redirect_uri", REDIRECT_URI);
-  }
-  if (params.refreshToken !== undefined) {
-    body.set("grant_type", "refresh_token");
-    body.set("refresh_token", params.refreshToken);
-  }
-  if (params.resource !== undefined) {
-    body.set("resource", params.resource);
-  }
-  return body;
 }
 
 export async function exchangeCode(

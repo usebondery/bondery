@@ -8,7 +8,7 @@
 import { prisma } from "@bondery/db";
 import { CIMD_CLIENT_DISCOVERY_ID, resolveTrustedOAuthClientIds } from "../auth/auth-public.js";
 
-export type DisableDcrOAuthClientsResult = {
+type DisableDcrOAuthClientsResult = {
   clientIds: string[];
 };
 
@@ -26,6 +26,8 @@ function dcrOAuthClientWhere(trustedClientIds: string[]) {
     ],
   };
 }
+
+export type { DisableDcrOAuthClientsResult };
 
 export async function disableDcrOAuthClients(): Promise<DisableDcrOAuthClientsResult> {
   const trusted = resolveTrustedOAuthClientIds();

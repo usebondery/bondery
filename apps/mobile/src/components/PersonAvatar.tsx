@@ -83,7 +83,7 @@ export function PersonAvatar({
   const chainKey = `${person.id}:${sources.join("\0")}`;
   const initials = initialsOverride ?? getContactInitials(person);
   const backgroundColor = getAvatarColorHex(person);
-  const isPressable = onPress != null;
+  const isPressable = onPress !== null && onPress !== undefined;
 
   const avatar = (
     <View

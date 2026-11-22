@@ -19,22 +19,19 @@ import type { FastifyBaseLogger } from "fastify";
 
 import { logExpiringCertificate } from "./certificate-expiry.js";
 
-export const API_TLS_CERT_FILE_ENV = "BONDERY_PRIVATE_API_TLS_CERT_FILE";
-export const API_TLS_KEY_FILE_ENV = "BONDERY_PRIVATE_API_TLS_KEY_FILE";
-
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-export type ApiTlsEnv = Partial<
+type ApiTlsEnv = Partial<
   Record<typeof API_TLS_CERT_FILE_ENV | typeof API_TLS_KEY_FILE_ENV, string>
 >;
 
-export type ApiTlsConfig = {
+type ApiTlsConfig = {
   certFile: string;
   keyFile: string;
 };
 
 /** Fastify's `https` option for the API's server. */
-export type ApiTlsOptions = {
+type ApiTlsOptions = {
   cert: string;
   key: string;
   minVersion: "TLSv1.3";
@@ -44,21 +41,6 @@ type ReadTextFile = (path: string) => string;
 
 function readTextFileUtf8(path: string): string {
   return readFileSync(path, "utf8");
-}
-
-/**
- * The certificate and key files of the API's HTTPS listener. Both are required: the API has no
- * plain HTTP listener to fall back to.
- */
-export function resolveApiTlsConfig(env: ApiTlsEnv = process.env): ApiTlsConfig {
-  const certFile = env[API_TLS_CERT_FILE_ENV]?.trim();
-  const keyFile = env[API_TLS_KEY_FILE_ENV]?.trim();
-  if (!(certFile && keyFile)) {
-    throw new Error(
-      `The API serves HTTPS only. Set ${API_TLS_CERT_FILE_ENV} and ${API_TLS_KEY_FILE_ENV}. Local development: pnpm run api:secrets. Docker Compose sets both for the bundled stack.`,
-    );
-  }
-  return { certFile, keyFile };
 }
 
 function readPemFile(envName: string, path: string, readTextFile: ReadTextFile): string {
@@ -76,6 +58,26 @@ function readPemFile(envName: string, path: string, readTextFile: ReadTextFile):
     throw new Error(`${envName} points to a file with no PEM data (${path})`);
   }
   return contents;
+}
+
+export type { ApiTlsConfig, ApiTlsEnv, ApiTlsOptions };
+
+export const API_TLS_CERT_FILE_ENV = "BONDERY_PRIVATE_API_TLS_CERT_FILE";
+export const API_TLS_KEY_FILE_ENV = "BONDERY_PRIVATE_API_TLS_KEY_FILE";
+
+/**
+ * The certificate and key files of the API's HTTPS listener. Both are required: the API has no
+ * plain HTTP listener to fall back to.
+ */
+export function resolveApiTlsConfig(env: ApiTlsEnv = process.env): ApiTlsConfig {
+  const certFile = env[API_TLS_CERT_FILE_ENV]?.trim();
+  const keyFile = env[API_TLS_KEY_FILE_ENV]?.trim();
+  if (!(certFile && keyFile)) {
+    throw new Error(
+      `The API serves HTTPS only. Set ${API_TLS_CERT_FILE_ENV} and ${API_TLS_KEY_FILE_ENV}. Local development: pnpm run api:secrets. Docker Compose sets both for the bundled stack.`,
+    );
+  }
+  return { certFile, keyFile };
 }
 
 /**

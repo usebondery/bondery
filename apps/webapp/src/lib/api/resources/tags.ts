@@ -52,11 +52,11 @@ export function parseTagDetail(raw: { tag?: Tag }): Tag {
 export function buildTagMembersPath(tagId: string, params: TagMembersParams = {}): string {
   const search = new URLSearchParams();
 
-  if (params.limit != null) {
+  if (params.limit !== null && params.limit !== undefined) {
     search.set("limit", String(params.limit));
   }
 
-  if (params.offset != null) {
+  if (params.offset !== null && params.offset !== undefined) {
     search.set("offset", String(params.offset));
   }
 

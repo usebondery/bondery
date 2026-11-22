@@ -44,7 +44,7 @@ function MentionContactRow({ contact, onPress }: { contact: Contact; onPress: ()
   );
 }
 
-export function MentionContactListContent({
+function MentionContactListContent({
   contacts,
   loading,
   onSelect,
@@ -131,3 +131,5 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
 });
+
+export { MentionContactListContent };

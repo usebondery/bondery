@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { bonderyTheme } from "@bondery/mantine-next/theme";
 import { dirForLocale } from "@bondery/schemas/locale";
 import { DirectionProvider, MantineProvider, v8CssVariablesResolver } from "@mantine/core";
@@ -87,7 +88,7 @@ export function MantineWrapper({
       }
     }
 
-    void loadPreference();
+    detachPromise(loadPreference());
 
     return () => {
       mounted = false;

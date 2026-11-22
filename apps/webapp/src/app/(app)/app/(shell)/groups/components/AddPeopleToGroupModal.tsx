@@ -2,6 +2,7 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import {
   errorNotificationTemplate,
   loadingNotificationTemplate,
@@ -42,21 +43,6 @@ function AddPeopleToGroupModalTitle({ groupLabel }: { groupLabel: string }) {
       text={t("AddPeopleModal.Title", { groupLabel })}
     />
   );
-}
-
-/**
- * Opens a modal that lets user select and add contacts to the provided group.
- */
-export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
-  const modalId = createModalId("add-people-to-group");
-
-  modals.open({
-    children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
-    modalId,
-    size: "md",
-    title: <AddPeopleToGroupModalTitle groupLabel={props.groupLabel} />,
-    trapFocus: true,
-  });
 }
 
 function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroupFormProps) {
@@ -222,10 +208,25 @@ function AddPeopleToGroupForm({ groupId, groupLabel, modalId }: AddPeopleToGroup
         cancelDisabled={isSubmitting}
         cancelLabel={t("AddPeopleModal.Cancel")}
         onAction={() => {
-          void handleSubmit();
+          detachPromise(handleSubmit());
         }}
         onCancel={closeModal}
       />
     </Stack>
   );
+}
+
+/**
+ * Opens a modal that lets user select and add contacts to the provided group.
+ */
+export function openAddPeopleToGroupModal(props: AddPeopleToGroupModalProps) {
+  const modalId = createModalId("add-people-to-group");
+
+  modals.open({
+    children: <AddPeopleToGroupForm {...props} modalId={modalId} />,
+    modalId,
+    size: "md",
+    title: <AddPeopleToGroupModalTitle groupLabel={props.groupLabel} />,
+    trapFocus: true,
+  });
 }

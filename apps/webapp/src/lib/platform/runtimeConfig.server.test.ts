@@ -16,6 +16,8 @@ import {
   validateWebappRuntimeConfigAtStartup,
 } from "./runtimeConfig.server.js";
 
+const INVALID_WEBAPP_RUNTIME_CONFIG = /Invalid webapp runtime config/;
+
 describe("webapp runtime config", () => {
   it("builds a strict allowlisted config from env", () => {
     const previous = { ...process.env };
@@ -25,7 +27,7 @@ describe("webapp runtime config", () => {
     process.env[WEBAPP_RUNTIME_ENV.websiteUrl] = "https://example.com";
     process.env[WEBAPP_RUNTIME_ENV.posthogKey] = "";
     process.env[WEBAPP_RUNTIME_ENV.posthogHost] = "";
-    process.env.PRIVATE_SHOULD_NOT_LEAK = "nope";
+    process.env["PRIVATE_SHOULD_NOT_LEAK"] = "nope";
     process.env[WEBAPP_INTERNAL_API_URL_ENV] = "http://api:26631";
 
     const cfg = buildWebappRuntimeConfigFromEnv();
@@ -51,7 +53,7 @@ describe("webapp runtime config", () => {
     process.env[WEBAPP_RUNTIME_ENV.webappUrl] = "https://app.example.com";
     process.env[WEBAPP_RUNTIME_ENV.websiteUrl] = "https://example.com";
 
-    assert.throws(() => validateWebappRuntimeConfigAtStartup(), /Invalid webapp runtime config/);
+    assert.throws(() => validateWebappRuntimeConfigAtStartup(), INVALID_WEBAPP_RUNTIME_CONFIG);
 
     process.env = previous;
   });

@@ -8,6 +8,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ensureWslgDisplay } from "./ensure-wslg-display.mjs";
 
+const SETUP = /(?:^|=)setup$/;
+
 function main() {
   const webappRoot = join(dirname(fileURLToPath(import.meta.url)), "..");
   const args = process.argv.slice(2);
@@ -40,7 +42,7 @@ function main() {
       arg === "--debug" ||
       arg === "--ui" ||
       arg.includes("github-login") ||
-      /(?:^|=)setup$/.test(arg),
+      SETUP.test(arg),
   );
 
   const checks = ["check-e2e-servers.mjs"];

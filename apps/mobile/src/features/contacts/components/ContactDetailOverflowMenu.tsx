@@ -1,8 +1,5 @@
 import { IconMailForward, IconShare, IconTrash } from "@tabler/icons-react-native";
-import {
-  useCommonTranslations,
-  useMobileContactDetailTranslations,
-} from "@/lib/i18n/generated/hooks";
+import { useMobileContactDetailTranslations } from "@/lib/i18n/generated/hooks";
 import { OverflowMenu } from "../../../components/OverflowMenu";
 import type { OverflowMenuItemConfig } from "../../../components/OverflowMenuItem";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
@@ -23,7 +20,6 @@ export function ContactDetailOverflowMenu({
   onDelete,
 }: ContactDetailOverflowMenuProps) {
   const tMobileContactDetail = useMobileContactDetailTranslations();
-  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
 
   const items: OverflowMenuItemConfig[] = [

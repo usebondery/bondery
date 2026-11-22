@@ -3,8 +3,9 @@
  */
 
 import type { WorkEntry } from "../workExperience";
-import { voyagerFetch } from "./voyagerShared";
+import { type VoyagerEntity, voyagerFetch } from "./voyagerShared";
 
+const DIGITS_ONLY_RE = /^\d+$/;
 /** How deep the logo search descends into nested Voyager image objects. */
 const MAX_LOGO_SEARCH_DEPTH = 5;
 
@@ -20,10 +21,7 @@ const MAX_LOGO_SEARCH_DEPTH = 5;
  * Instead of handling each level explicitly we recurse into nested objects
  * (max depth 5) looking for the rootUrl + artifacts pattern.
  */
-export function extractLogoUrlFromVoyagerImage(
-  img: Record<string, unknown>,
-  depth = 0,
-): string | undefined {
+function extractLogoUrlFromVoyagerImage(img: VoyagerEntity, depth = 0): string | undefined {
   if (depth > MAX_LOGO_SEARCH_DEPTH) {
     return undefined;
   }
@@ -48,7 +46,7 @@ export function extractLogoUrlFromVoyagerImage(
   // com.linkedin.common.VectorImage, logoResolutionResult, etc.)
   for (const value of Object.values(img)) {
     if (value && typeof value === "object" && !Array.isArray(value)) {
-      const result = extractLogoUrlFromVoyagerImage(value as Record<string, unknown>, depth + 1);
+      const result = extractLogoUrlFromVoyagerImage(value as VoyagerEntity, depth + 1);
       if (result) {
         return result;
       }
@@ -59,9 +57,9 @@ export function extractLogoUrlFromVoyagerImage(
 }
 
 /** Checks a single entity object for any recognised logo key. */
-function extractLogoFromEntity(entity: Record<string, unknown>): string | undefined {
+function extractLogoFromEntity(entity: VoyagerEntity): string | undefined {
   for (const key of ["logo", "companyLogo", "logoV2", "logoResolutionResult"]) {
-    const logo = entity[key] as Record<string, unknown> | undefined;
+    const logo = entity[key] as VoyagerEntity | undefined;
     if (logo) {
       const url = extractLogoUrlFromVoyagerImage(logo);
       if (url) {
@@ -76,9 +74,9 @@ function extractLogoFromEntity(entity: Record<string, unknown>): string | undefi
  * Extracts a logo URL from a raw Voyager companies API response object.
  * Checks included entities, elements arrays, and single-entity response shapes.
  */
-function extractLogoFromCompanyResponse(data: Record<string, unknown>): string | undefined {
+function extractLogoFromCompanyResponse(data: VoyagerEntity): string | undefined {
   // Check included entities
-  for (const item of (data.included ?? []) as Record<string, unknown>[]) {
+  for (const item of data.included ?? []) {
     const url = extractLogoFromEntity(item);
     if (url) {
       return url;
@@ -86,8 +84,7 @@ function extractLogoFromCompanyResponse(data: Record<string, unknown>): string |
   }
 
   // Check elements array (handles { elements: [...] } or { data: { elements: [...] } })
-  const elements = ((data.data as Record<string, unknown> | undefined)?.elements ??
-    data.elements) as Record<string, unknown>[] | undefined;
+  const elements = data.data?.elements ?? data.elements;
   if (elements) {
     for (const el of elements) {
       const url = extractLogoFromEntity(el);
@@ -98,7 +95,7 @@ function extractLogoFromCompanyResponse(data: Record<string, unknown>): string |
   }
 
   // Check data.data as a single entity (e.g. q=entityUrn single result)
-  const dataData = data.data as Record<string, unknown> | undefined;
+  const dataData = data.data;
   if (dataData && typeof dataData === "object" && !Array.isArray(dataData)) {
     const url = extractLogoFromEntity(dataData);
     if (url) {
@@ -124,12 +121,12 @@ function extractLogoFromCompanyResponse(data: Record<string, unknown>): string |
  * @param universalName Optional company slug (e.g. "rohlik-group" or "960796").
  * @returns The logo URL or undefined if not found.
  */
-export async function fetchCompanyLogo(
+async function fetchCompanyLogo(
   companyUrn: string | undefined,
   universalName?: string,
 ): Promise<string | undefined> {
   // Strategy 1: query by universalName slug (only when the value is not purely numeric)
-  if (universalName && !/^\d+$/.test(universalName)) {
+  if (universalName && !DIGITS_ONLY_RE.test(universalName)) {
     const data = await voyagerFetch(
       `/voyager/api/identity/dash/companies?q=universalName&universalName=${encodeURIComponent(universalName)}`,
     );
@@ -159,8 +156,8 @@ export async function fetchCompanyLogo(
   // or from a purely numeric universalName.
   const numericId =
     companyUrn?.split(":").pop() ??
-    (universalName && /^\d+$/.test(universalName) ? universalName : undefined);
-  if (numericId && /^\d+$/.test(numericId)) {
+    (universalName && DIGITS_ONLY_RE.test(universalName) ? universalName : undefined);
+  if (numericId && DIGITS_ONLY_RE.test(numericId)) {
     const data = await voyagerFetch(`/voyager/api/organization/companies/${numericId}`);
     if (data) {
       const url = extractLogoFromCompanyResponse(data);
@@ -178,9 +175,7 @@ export async function fetchCompanyLogo(
  * of a Voyager API response. Company entities sit alongside position entities
  * in the same response, so we can extract logos without extra network requests.
  */
-export function extractCompanyLogosFromIncluded(
-  entities: Record<string, unknown>[],
-): Map<string, string> {
+function extractCompanyLogosFromIncluded(entities: VoyagerEntity[]): Map<string, string> {
   const logoMap = new Map<string, string>();
   const companyEntities = entities.filter((e) => {
     const urn = e.entityUrn as string | undefined;
@@ -192,7 +187,7 @@ export function extractCompanyLogosFromIncluded(
       continue;
     }
     for (const key of ["logo", "companyLogo", "logoV2", "logoResolutionResult"]) {
-      const logo = entity[key] as Record<string, unknown> | undefined;
+      const logo = entity[key] as VoyagerEntity | undefined;
       if (logo) {
         const url = extractLogoUrlFromVoyagerImage(logo);
         if (url) {
@@ -214,9 +209,9 @@ export function extractCompanyLogosFromIncluded(
  * 3. Falls back to batch-fetching company data for any remaining entries that have
  *    either a `companyUrn` OR a `companyLinkedinId` (slug/numeric-id).
  */
-export async function enrichWorkEntriesWithLogos(
+async function enrichWorkEntriesWithLogos(
   entries: WorkEntry[],
-  includedEntities?: Record<string, unknown>[],
+  includedEntities?: VoyagerEntity[],
   domLogos?: Map<string, string>,
   skipNetworkLogos = false,
 ): Promise<WorkEntry[]> {
@@ -228,7 +223,7 @@ export async function enrichWorkEntriesWithLogos(
             return entry;
           }
           const url = domLogos.get(entry.companyName.toLowerCase());
-          return url ? Object.assign({}, entry, { companyLogoUrl: url }) : entry;
+          return url ? { ...entry, companyLogoUrl: url } : entry;
         })
       : entries;
   // Step 1: Mine logos from the included entities (free — already in memory)
@@ -242,7 +237,7 @@ export async function enrichWorkEntriesWithLogos(
       return entry;
     }
     const logoUrl = includedLogos.get(entry.companyUrn);
-    return logoUrl ? Object.assign({}, entry, { companyLogoUrl: logoUrl }) : entry;
+    return logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry;
   });
 
   // Step 2: Batch-fetch logos for entries still missing one.
@@ -291,6 +286,13 @@ export async function enrichWorkEntriesWithLogos(
       return entry;
     }
     const logoUrl = keyToLogo.get(key);
-    return logoUrl ? Object.assign({}, entry, { companyLogoUrl: logoUrl }) : entry;
+    return logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry;
   });
 }
+
+export {
+  enrichWorkEntriesWithLogos,
+  extractCompanyLogosFromIncluded,
+  extractLogoUrlFromVoyagerImage,
+  fetchCompanyLogo,
+};

@@ -21,53 +21,31 @@ import type {
   UserSettingsResponse,
 } from "./types.js";
 
-export const colorSchemePreferenceSchema: z.ZodType<ColorSchemePreference> = z
+const colorSchemePreferenceSchema: z.ZodType<ColorSchemePreference> = z
   .enum(["light", "dark", "auto"])
   .describe("Color scheme preference");
-export const timeFormatPreferenceSchema: z.ZodType<TimeFormatPreference> = z
+const timeFormatPreferenceSchema: z.ZodType<TimeFormatPreference> = z
   .enum(["24h", "12h"])
   .describe("Clock format preference");
-export const dateFormatPreferenceSchema: z.ZodType<DateFormatPreference> = z
+const dateFormatPreferenceSchema: z.ZodType<DateFormatPreference> = z
   .enum(["locale", "mdy", "dmy", "ymd"])
   .describe("Calendar date order preference, independent of UI language");
-export const swipeActionPreferenceSchema: z.ZodType<SwipeActionPreference> = z
+const swipeActionPreferenceSchema: z.ZodType<SwipeActionPreference> = z
   .enum(["call", "message", "email"])
   .describe("Swipe action on a contact row");
-export const reminderSendHourSchema = z
+const reminderSendHourSchema = z
   .string()
   .trim()
   .regex(/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/, {
     error: "Reminder time must be in HH:MM or HH:MM:SS format",
   })
   .describe("Local time of day to send reminder emails, as `HH:MM` or `HH:MM:SS`");
-export const groupSortOrderPreferenceSchema: z.ZodType<GroupSortOrderPreference> = z
+const groupSortOrderPreferenceSchema: z.ZodType<GroupSortOrderPreference> = z
   .enum(["recent-opened", "count-desc", "count-asc", "alpha-asc", "alpha-desc"])
   .describe("Sort order for the groups list");
-export const tagSortOrderPreferenceSchema: z.ZodType<TagSortOrderPreference> = z
+const tagSortOrderPreferenceSchema: z.ZodType<TagSortOrderPreference> = z
   .enum(["count-desc", "count-asc", "alpha-asc", "alpha-desc"])
   .describe("Sort order for the tags list");
-
-export const importFollowupStatusSchema: z.ZodType<ImportFollowupStatus> = z
-  .enum(["awaiting_export", "dismissed"])
-  .describe("Onboarding import follow-up status");
-export const importFollowupPlatformSchema: z.ZodType<ImportFollowupPlatform> = z
-  .enum(["linkedin", "instagram"])
-  .describe("Social platform for the import follow-up");
-
-export const updateImportFollowupBodySchema: z.ZodType<UpdateImportFollowupBody> = z
-  .object({
-    platform: importFollowupPlatformSchema.optional(),
-    status: importFollowupStatusSchema,
-  })
-  .superRefine((body, ctx) => {
-    if (body.status === "awaiting_export" && !body.platform) {
-      ctx.addIssue({
-        code: "custom",
-        message: "platform is required when status is awaiting_export",
-        path: ["platform"],
-      });
-    }
-  });
 
 const isoCountryCodeStringSchema = z
   .string()
@@ -76,12 +54,10 @@ const isoCountryCodeStringSchema = z
   .regex(/^[A-Za-z]{2}$/, { error: "Country code must be ISO-3166 alpha-2" });
 
 /** Response/OpenAPI wire shape — no transform (Fastify serialization). */
-export const isoCountryCodeSchema = isoCountryCodeStringSchema.describe(
-  "ISO 3166-1 alpha-2 country code",
-);
+const isoCountryCodeSchema = isoCountryCodeStringSchema.describe("ISO 3166-1 alpha-2 country code");
 
 /** Request body — normalizes to uppercase. */
-export const isoCountryCodeInputSchema = isoCountryCodeStringSchema.transform((value) =>
+const isoCountryCodeInputSchema = isoCountryCodeStringSchema.transform((value) =>
   value.toUpperCase(),
 );
 
@@ -119,6 +95,40 @@ const mutableUserSettingsSchema = z.object({
   timeFormat: z.string().describe("Clock format preference"),
   timezone: z.string().nullable().describe("IANA timezone name"),
 });
+
+export {
+  colorSchemePreferenceSchema,
+  dateFormatPreferenceSchema,
+  groupSortOrderPreferenceSchema,
+  isoCountryCodeInputSchema,
+  isoCountryCodeSchema,
+  reminderSendHourSchema,
+  swipeActionPreferenceSchema,
+  tagSortOrderPreferenceSchema,
+  timeFormatPreferenceSchema,
+};
+
+export const importFollowupStatusSchema: z.ZodType<ImportFollowupStatus> = z
+  .enum(["awaiting_export", "dismissed"])
+  .describe("Onboarding import follow-up status");
+export const importFollowupPlatformSchema: z.ZodType<ImportFollowupPlatform> = z
+  .enum(["linkedin", "instagram"])
+  .describe("Social platform for the import follow-up");
+
+export const updateImportFollowupBodySchema: z.ZodType<UpdateImportFollowupBody> = z
+  .object({
+    platform: importFollowupPlatformSchema.optional(),
+    status: importFollowupStatusSchema,
+  })
+  .superRefine((body, ctx) => {
+    if (body.status === "awaiting_export" && !body.platform) {
+      ctx.addIssue({
+        code: "custom",
+        message: "platform is required when status is awaiting_export",
+        path: ["platform"],
+      });
+    }
+  });
 
 /** Wire/API user settings (GET /api/me/settings). */
 export const userSettingsSchema = z.object({

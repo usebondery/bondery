@@ -1,5 +1,11 @@
 import { API_ROUTES } from "../globals/paths.js";
 
+/** Env keys that control the CSP report URL. */
+export interface CspReportEnv {
+  BONDERY_PUBLIC_API_URL?: string;
+  BONDERY_PUBLIC_CSP_REPORT_ENABLED?: string;
+}
+
 /**
  * Resolves the CSP violation report endpoint from the public API URL.
  *
@@ -16,9 +22,7 @@ import { API_ROUTES } from "../globals/paths.js";
  * @returns Absolute report URL, or `undefined` when reporting is disabled or
  * the API URL is missing.
  */
-export function resolveCspReportEndpoint(
-  env: Record<string, string | undefined> = process.env,
-): string | undefined {
+export function resolveCspReportEndpoint(env: CspReportEnv = process.env): string | undefined {
   if (!isCspReportEnabled(env)) {
     return undefined;
   }
@@ -32,7 +36,7 @@ export function resolveCspReportEndpoint(
   try {
     // `new URL` rejects a bare host and drops any trailing slash, so the
     // endpoint is absolute and joins without a double slash.
-    origin = new URL(apiUrl).origin;
+    ({ origin } = new URL(apiUrl));
   } catch {
     return undefined;
   }
@@ -45,6 +49,6 @@ export function resolveCspReportEndpoint(
  * including unset, keeps reporting on, so a missing variable cannot silently
  * disable collection.
  */
-export function isCspReportEnabled(env: Record<string, string | undefined> = process.env): boolean {
+export function isCspReportEnabled(env: CspReportEnv = process.env): boolean {
   return env.BONDERY_PUBLIC_CSP_REPORT_ENABLED?.trim().toLowerCase() !== "false";
 }

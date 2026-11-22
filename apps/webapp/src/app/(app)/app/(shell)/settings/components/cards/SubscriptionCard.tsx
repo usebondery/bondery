@@ -8,6 +8,7 @@ import { UpgradeButton } from "@/components/shared/UpgradeButton";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { useSubscriptionQuery } from "@/lib/query/hooks/useSubscription";
+import { SETTINGS_SUBSCRIPTION_SECTION_ID } from "../../settingsSectionIds";
 import { SettingsSection } from "./SettingsSection";
 
 function SubscriptionCardContent({
@@ -28,7 +29,7 @@ function SubscriptionCardContent({
   };
 
   const formatAmount = (amountMinor: number | null, currency: string | null): string | null => {
-    if (amountMinor == null || !currency) {
+    if (amountMinor === null || amountMinor === undefined || !currency) {
       return null;
     }
     const upperCurrency = currency.toUpperCase();
@@ -62,7 +63,7 @@ function SubscriptionCardContent({
   const monthlyResetAt = formatDate(subscriptionStatus.aiMonthlyResetAt);
 
   const getSubscriptionDescription = (): { text: string; color: string } => {
-    const billingStatus = subscriptionStatus.billingStatus;
+    const { billingStatus } = subscriptionStatus;
 
     if (!isPremium) {
       if (
@@ -179,7 +180,11 @@ function SubscriptionCardContent({
     : t("FreePlan");
 
   return (
-    <SettingsSection icon={<IconCreditCard size={20} />} id="subscription" title={t("Title")}>
+    <SettingsSection
+      icon={<IconCreditCard size={20} />}
+      id={SETTINGS_SUBSCRIPTION_SECTION_ID}
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <Stack gap="md">
           <Group align="flex-start" justify="space-between">

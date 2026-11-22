@@ -113,7 +113,7 @@ export function ContactsScreenList({
           className="flex-1"
           collapsable={false}
           onLayout={(event) => {
-            const height = event.nativeEvent.layout.height;
+            const { height } = event.nativeEvent.layout;
             setListViewportHeight(height);
           }}
         >

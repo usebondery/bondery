@@ -74,18 +74,16 @@ type ButtonPropsBase = {
 };
 
 /** When `loading` is set, `loadingText` is required and shown instead of `children`. */
-export type ButtonLoadingProps =
-  | { loading?: undefined }
-  | { loading: boolean; loadingText: string };
+type ButtonLoadingProps = { loading?: undefined } | { loading: boolean; loadingText: string };
 
-export type ButtonProps = ButtonPropsBase & ButtonLoadingProps;
+type ButtonProps = ButtonPropsBase & ButtonLoadingProps;
 
 type ButtonRuntimeProps = ButtonPropsBase & {
   loading?: boolean;
   loadingText?: string;
 };
 
-export function Button(props: ButtonProps) {
+function Button(props: ButtonProps) {
   const {
     accessibilityHint,
     children,
@@ -128,8 +126,11 @@ export function Button(props: ButtonProps) {
         : colors.textOnPrimary);
   const isDimmed = inactive && !loading;
   const isPressLocked = disabled === true || loading === true;
-  const showLeftSlot = loading && rightSection == null ? true : leftSection != null;
-  const showRightSlot = rightSection != null;
+  const showLeftSlot =
+    loading && (rightSection === null || rightSection === undefined)
+      ? true
+      : leftSection !== null && leftSection !== undefined;
+  const showRightSlot = rightSection !== null && rightSection !== undefined;
   const isSpread = align === "spread" && !isSubtle;
   const isContentCentered = align === "center" && !isSubtle;
   const labelContent = loading && loadingText ? loadingText : children;
@@ -201,10 +202,10 @@ export function Button(props: ButtonProps) {
     >
       {showLeftSlot ? (
         <View className="mr-2.5 w-5 items-center justify-center">
-          {loading && rightSection == null ? (
+          {loading && (rightSection === null || rightSection === undefined) ? (
             <ActivityIndicator color={labelColor} size="small" />
           ) : (
-            leftSection
+            <>{leftSection}</>
           )}
         </View>
       ) : null}
@@ -221,7 +222,7 @@ export function Button(props: ButtonProps) {
       </Text>
       {showRightSlot ? (
         <View className={cn("w-5 shrink-0 items-center justify-center", !isSpread && "ml-2.5")}>
-          {loading ? <ActivityIndicator color={labelColor} size="small" /> : rightSection}
+          {loading ? <ActivityIndicator color={labelColor} size="small" /> : <>{rightSection}</>}
         </View>
       ) : null}
     </Pressable>
@@ -250,3 +251,6 @@ export function Button(props: ButtonProps) {
     </Animated.View>
   );
 }
+
+export type { ButtonLoadingProps, ButtonProps };
+export { Button };

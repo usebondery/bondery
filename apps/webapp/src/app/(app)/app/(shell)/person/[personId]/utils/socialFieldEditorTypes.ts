@@ -2,6 +2,15 @@ import type { ContactSocialFieldKey, SocialInputRerouteReason } from "@bondery/h
 import { parsePhoneNumber } from "@bondery/helpers/phone";
 import type { Contact } from "@bondery/schemas";
 
+const SAVABLE_FIELDS = new Set<SocialFieldKey>([
+  "linkedin",
+  "instagram",
+  "facebook",
+  "website",
+  "whatsapp",
+  "signal",
+]);
+
 export type SocialFieldKey = ContactSocialFieldKey;
 
 export interface RerouteSuggestion {
@@ -11,15 +20,6 @@ export interface RerouteSuggestion {
   toField: SocialFieldKey;
   value: string;
 }
-
-const SAVABLE_FIELDS = new Set<SocialFieldKey>([
-  "linkedin",
-  "instagram",
-  "facebook",
-  "website",
-  "whatsapp",
-  "signal",
-]);
 
 export function isSavableSocialField(field: string): field is SocialFieldKey {
   return SAVABLE_FIELDS.has(field as SocialFieldKey);

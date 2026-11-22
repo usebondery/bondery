@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
 import { API_KEY_LIMITS, type ApiKeyCreated, type ApiKeyListItem } from "@bondery/schemas";
 import { Button, CardSection, Stack, Text, Tooltip } from "@mantine/core";
@@ -18,6 +19,7 @@ import {
 } from "@/lib/query/hooks/useApiKeys";
 import { useApiKeyPermissionOptions } from "../../hooks/useApiKeyPermissionOptions";
 import { openRevokeApiKeyConfirm } from "../../settingsAuthActions";
+import { SETTINGS_API_KEYS_SECTION_ID } from "../../settingsSectionIds";
 import { openApiKeyModal } from "../modals/openApiKeyModal";
 import { SettingsCredentialCard } from "./SettingsCredentialCard";
 import { SettingsSection } from "./SettingsSection";
@@ -96,7 +98,7 @@ function ApiKeyRow({
           aria-label={t("LabelField")}
           isSaving={isSaving}
           maxLength={API_KEY_LIMITS.labelMaxLength}
-          onBlur={() => void saveLabel()}
+          onBlur={() => detachPromise(saveLabel())}
           onChange={setLabel}
           size="sm"
           style={{ width: "100%" }}
@@ -191,7 +193,7 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
         <Button
           disabled={atLimit}
           leftSection={<IconPlus size={16} />}
-          onClick={() => void openCreateModal()}
+          onClick={() => detachPromise(openCreateModal())}
           size="sm"
           variant="outline"
         >
@@ -207,7 +209,7 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
       helpDoc="api.authentication"
       helpLabel={t("DocsHelpLabel")}
       icon={<IconKey size={20} stroke={1.5} />}
-      id="api-keys"
+      id={SETTINGS_API_KEYS_SECTION_ID}
       title={t("Title")}
     >
       <CardSection inheritPadding py="md">
@@ -228,7 +230,7 @@ export function ApiKeysSection({ apiBaseUrl }: ApiKeysSectionProps) {
                   deleteAriaLabel={t("DeleteButton")}
                   key={key.id}
                   lastUsedLabel={lastUsedLabel(key.lastUsedAt)}
-                  onDelete={() => void handleDelete(key)}
+                  onDelete={() => detachPromise(handleDelete(key))}
                   onLabelUpdated={() => {
                     // no-op: the row already holds the saved label
                   }}

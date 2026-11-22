@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Group, GroupWithCount } from "@bondery/schemas";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -76,35 +77,37 @@ export function ContactEditGroupsSheet({
       setIsLoadingGroups(true);
     });
 
-    void Promise.resolve()
-      .then(() => {
-        if (cancelled) {
-          return;
-        }
+    detachPromise(
+      Promise.resolve()
+        .then(() => {
+          if (cancelled) {
+            return;
+          }
 
-        const groups = listGroups();
-        setAllGroups(groups);
-        const memberIds = new Set(getContactGroups(contactId).map((group) => group.id));
-        setInitialSelectedIds(memberIds);
-        setSelectedGroupIds(new Set(memberIds));
-      })
-      .catch(() => {
-        if (cancelled) {
-          return;
-        }
+          const groups = listGroups();
+          setAllGroups(groups);
+          const memberIds = new Set(getContactGroups(contactId).map((group) => group.id));
+          setInitialSelectedIds(memberIds);
+          setSelectedGroupIds(new Set(memberIds));
+        })
+        .catch(() => {
+          if (cancelled) {
+            return;
+          }
 
-        notifications.show({
-          message: tMobileContactDetail("GroupsLoadError"),
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
-        onOpenChange(false);
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoadingGroups(false);
-        }
-      });
+          notifications.show({
+            message: tMobileContactDetail("GroupsLoadError"),
+            title: t("feedback.errorTitle"),
+            type: "error",
+          });
+          onOpenChange(false);
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setIsLoadingGroups(false);
+          }
+        }),
+    );
 
     return () => {
       cancelled = true;

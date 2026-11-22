@@ -3,6 +3,18 @@
 import type { ColorSchemePreference } from "@bondery/schemas";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 
+const UserSessionContext = createContext<UserSessionState | null>(null);
+
+/** Module ref for refreshAppShell() to patch session without hook context. */
+let applyUserSessionRef: UserSessionState["applyUserSession"] | null = null;
+
+interface UserSessionProviderProps {
+  avatarUrl: string | null;
+  children: ReactNode;
+  colorScheme: ColorSchemePreference;
+  displayName: string;
+}
+
 export interface UserSessionState {
   applyUserSession: (
     patch: Partial<Pick<UserSessionState, "avatarUrl" | "colorScheme" | "displayName">>,
@@ -11,11 +23,6 @@ export interface UserSessionState {
   colorScheme: ColorSchemePreference;
   displayName: string;
 }
-
-const UserSessionContext = createContext<UserSessionState | null>(null);
-
-/** Module ref for refreshAppShell() to patch session without hook context. */
-let applyUserSessionRef: UserSessionState["applyUserSession"] | null = null;
 
 export function applyUserSessionFromRef(
   patch: Partial<Pick<UserSessionState, "avatarUrl" | "colorScheme" | "displayName">>,
@@ -29,13 +36,6 @@ export function useUserSession(): UserSessionState {
     throw new Error("useUserSession must be used within UserSessionProvider");
   }
   return context;
-}
-
-interface UserSessionProviderProps {
-  avatarUrl: string | null;
-  children: ReactNode;
-  colorScheme: ColorSchemePreference;
-  displayName: string;
 }
 
 export function UserSessionProvider({

@@ -8,6 +8,10 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const SOURCE_FILE_EXT_RE = /\.(tsx?|jsx?)$/;
+const FROM_SYNC_REPOSITORIES_RE = /from\s+["'][^"']*lib\/sync\/repositories\//;
+const FROM_TANSTACK_QUERY_RE = /from\s+["']@tanstack\/react-query["']/;
+const FROM_SQLITE_QUERY_CLIENT_RE = /from\s+["'][^"']*lib\/sync\/sqlite-query-client["']/;
 const report = createCheck("check-sync-patterns");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -73,7 +77,7 @@ function walk(dir: string, acc: string[] = []): string[] {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (SOURCE_FILE_EXT_RE.test(entry)) {
       acc.push(full);
     }
   }
@@ -141,7 +145,7 @@ function checkFile(absPath: string): Violation[] {
     return violations;
   }
 
-  if (/from\s+["'][^"']*lib\/sync\/repositories\//.test(content)) {
+  if (FROM_SYNC_REPOSITORIES_RE.test(content)) {
     violations.push({
       detail: "Features must not import lib/sync/repositories — use lib/domains or lib/sync/hooks",
       file: rel,
@@ -150,7 +154,7 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
-  if (/from\s+["']@tanstack\/react-query["']/.test(content)) {
+  if (FROM_TANSTACK_QUERY_RE.test(content)) {
     violations.push({
       detail:
         "Features must not import TanStack Query directly — use named hooks from lib/sync/hooks",
@@ -160,7 +164,7 @@ function checkFile(absPath: string): Violation[] {
     });
   }
 
-  if (/from\s+["'][^"']*lib\/sync\/sqlite-query-client["']/.test(content)) {
+  if (FROM_SQLITE_QUERY_CLIENT_RE.test(content)) {
     violations.push({
       detail: "Features must not access QueryClient — use named hooks from lib/sync/hooks",
       file: rel,

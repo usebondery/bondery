@@ -3,6 +3,14 @@
 import { CardSection, Divider, Group, Text } from "@mantine/core";
 import { IconDatabase } from "@tabler/icons-react";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
+import {
+  SETTINGS_DATA_MANAGEMENT_SECTION_ID,
+  SETTINGS_DELETE_ACCOUNT_SECTION_ID,
+  SETTINGS_EXPORT_SECTION_ID,
+  SETTINGS_IMPORT_SECTION_ID,
+  SETTINGS_LOGOUT_SECTION_ID,
+  SETTINGS_PRODUCT_ANALYTICS_SECTION_ID,
+} from "../../settingsSectionIds";
 import { BonderyExportSection } from "./BonderyExportSection";
 import { BonderyImportSection } from "./BonderyImportSection";
 import { DeleteAccountSection } from "./DeleteAccountSection";
@@ -21,10 +29,15 @@ export function DataManagementCard() {
   return (
     <SettingsSection
       icon={<IconDatabase size={20} stroke={1.5} />}
-      id="data-management"
+      id={SETTINGS_DATA_MANAGEMENT_SECTION_ID}
       title={t("Title")}
     >
-      <CardSection id="export" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection
+        id={SETTINGS_EXPORT_SECTION_ID}
+        inheritPadding
+        py="md"
+        style={SECTION_SCROLL_MARGIN}
+      >
         <Text fw={500} mb={4} size="sm">
           {t("Export.SectionTitle")}
         </Text>
@@ -38,7 +51,12 @@ export function DataManagementCard() {
 
       <Divider />
 
-      <CardSection id="import" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection
+        id={SETTINGS_IMPORT_SECTION_ID}
+        inheritPadding
+        py="md"
+        style={SECTION_SCROLL_MARGIN}
+      >
         <Text fw={500} mb={4} size="sm">
           {t("ImportSectionTitle")}
         </Text>
@@ -55,19 +73,34 @@ export function DataManagementCard() {
 
       <Divider />
 
-      <CardSection id="product-analytics" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection
+        id={SETTINGS_PRODUCT_ANALYTICS_SECTION_ID}
+        inheritPadding
+        py="md"
+        style={SECTION_SCROLL_MARGIN}
+      >
         <ProductAnalyticsSection />
       </CardSection>
 
       <Divider />
 
-      <CardSection id="logout" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection
+        id={SETTINGS_LOGOUT_SECTION_ID}
+        inheritPadding
+        py="md"
+        style={SECTION_SCROLL_MARGIN}
+      >
         <LogoutSection />
       </CardSection>
 
       <Divider />
 
-      <CardSection id="delete-account" inheritPadding py="md" style={SECTION_SCROLL_MARGIN}>
+      <CardSection
+        id={SETTINGS_DELETE_ACCOUNT_SECTION_ID}
+        inheritPadding
+        py="md"
+        style={SECTION_SCROLL_MARGIN}
+      >
         <DeleteAccountSection />
       </CardSection>
     </SettingsSection>

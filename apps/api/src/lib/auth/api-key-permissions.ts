@@ -5,7 +5,7 @@ import {
   type ApiKeyPermission,
 } from "@bondery/schemas";
 
-export type BaApiKeyPermissions = Record<string, ApiKeyBaAction[]>;
+type BaApiKeyPermissions = Record<string, ApiKeyBaAction[]>;
 
 function parseBaPermissions(permissions: unknown): BaApiKeyPermissions | null {
   if (!permissions) {
@@ -27,6 +27,8 @@ function parseBaPermissions(permissions: unknown): BaApiKeyPermissions | null {
 
   return parsed as BaApiKeyPermissions;
 }
+
+export type { BaApiKeyPermissions };
 
 /** Map product scope to Better Auth permissions JSON. */
 export function baPermissionsFromProduct(permission: ApiKeyPermission): BaApiKeyPermissions {

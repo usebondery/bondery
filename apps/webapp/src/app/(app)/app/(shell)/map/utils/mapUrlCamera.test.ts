@@ -60,8 +60,8 @@ describe("parseMapCameraSearchParams", () => {
 describe("applyMapCameraToSearchParams / serializeMapCamera", () => {
   it("rounds latitude/longitude to 5 decimals and zoom to 1 decimal", () => {
     const serialized = serializeMapCamera({
-      latitude: 38.123456789,
-      longitude: -9.987654321,
+      latitude: 38.123_456_789,
+      longitude: -9.987_654_321,
       zoom: 12.46,
     });
     assert.deepEqual(serialized, {
@@ -72,8 +72,8 @@ describe("applyMapCameraToSearchParams / serializeMapCamera", () => {
 
     const params = new URLSearchParams("view=locations&foo=bar&lat=1&lng=2&z=3");
     applyMapCameraToSearchParams(params, {
-      latitude: 38.123456789,
-      longitude: -9.987654321,
+      latitude: 38.123_456_789,
+      longitude: -9.987_654_321,
       zoom: 12.46,
     });
     assert.equal(params.get("view"), "locations");

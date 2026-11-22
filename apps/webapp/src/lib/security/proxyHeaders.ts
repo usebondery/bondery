@@ -7,6 +7,9 @@ import {
   WEBAPP_TRUSTED_TYPES_POLICIES,
 } from "@bondery/helpers/security";
 
+const HTTP = /^http:/;
+const HTTPS = /^https:/;
+
 /**
  * Third-party origins the webapp actually contacts. Each entry names the file
  * that needs it, so a reviewer can delete the entry that a dependency change
@@ -64,13 +67,13 @@ export function buildWebappProxyHeaders(
   env: Record<string, string | undefined> = process.env,
 ): WebappProxySecurityHeaders {
   const nonce = createNonce();
-  const isDev = env.NODE_ENV === "development";
+  const isDev = env["NODE_ENV"] === "development";
 
   const apiOrigins = unique([
-    ...originOf(env.BONDERY_PUBLIC_API_URL),
+    ...originOf(env["BONDERY_PUBLIC_API_URL"]),
     // The webapp connects to the API over WebSocket for sync wake-ups.
-    ...originOf(env.BONDERY_PUBLIC_API_URL).map((origin) =>
-      origin.replace(/^http:/, "ws:").replace(/^https:/, "wss:"),
+    ...originOf(env["BONDERY_PUBLIC_API_URL"]).map((origin) =>
+      origin.replace(HTTP, "ws:").replace(HTTPS, "wss:"),
     ),
   ]);
 
@@ -86,7 +89,7 @@ export function buildWebappProxyHeaders(
     OPEN_FREE_MAP_ORIGIN,
     // Contact avatars and LinkedIn logos (`lib/storage/avatar-urls.ts` in the API
     // builds them from `BONDERY_PUBLIC_STORAGE_URL`).
-    ...originOf(env.BONDERY_PUBLIC_STORAGE_URL),
+    ...originOf(env["BONDERY_PUBLIC_STORAGE_URL"]),
   ]);
 
   const reportEndpoint = resolveCspReportEndpoint(env);

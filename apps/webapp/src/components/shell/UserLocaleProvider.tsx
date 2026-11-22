@@ -8,6 +8,20 @@ import { I18nProvider } from "next-i18next/client";
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from "react";
 import "@/lib/i18n/loadDayjsLocales";
 
+const UserLocaleContext = createContext<UserLocaleSettings | null>(null);
+
+/** Module ref so settings mutations can patch locale without hook context. */
+let applyUserLocaleRef: UserLocaleSettings["applyUserLocale"] | null = null;
+
+interface LocaleProviderProps {
+  children: ReactNode;
+  dateFormat: DateFormatPreference;
+  locale: SupportedLocale;
+  resources: Resource;
+  timeFormat: "24h" | "12h";
+  timezone: string;
+}
+
 export interface UserLocaleSettings {
   applyUserLocale: (
     patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
@@ -17,11 +31,6 @@ export interface UserLocaleSettings {
   timeFormat: "24h" | "12h";
   timezone: string;
 }
-
-const UserLocaleContext = createContext<UserLocaleSettings | null>(null);
-
-/** Module ref so settings mutations can patch locale without hook context. */
-let applyUserLocaleRef: UserLocaleSettings["applyUserLocale"] | null = null;
 
 export function applyUserLocaleFromRef(
   patch: Partial<Pick<UserLocaleSettings, "locale" | "timezone" | "timeFormat" | "dateFormat">>,
@@ -40,15 +49,6 @@ export function useUserLocale(): UserLocaleSettings {
 /** Convenience accessor for components that only need the language code. */
 export function useCurrentLocale(): SupportedLocale {
   return useUserLocale().locale;
-}
-
-interface LocaleProviderProps {
-  children: ReactNode;
-  dateFormat: DateFormatPreference;
-  locale: SupportedLocale;
-  resources: Resource;
-  timeFormat: "24h" | "12h";
-  timezone: string;
 }
 
 /**

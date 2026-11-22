@@ -15,6 +15,7 @@ import type { ReactNode } from "react";
 import { Logo } from "@/components/Logo";
 import { siteFrameProps } from "@/components/site-shell";
 import { routeAssert } from "@/lib/navigation/route/assert";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 type LinkItem = {
   key: string;
@@ -81,8 +82,16 @@ export function Footer() {
           <Box style={{ minWidth: "200px" }}>
             <LinkGroup
               links={[
-                { href: "/#features", key: "features", title: landing.Footer.Links.Features },
-                { href: "/#pricing", key: "pricing", title: landing.Footer.Links.Pricing },
+                {
+                  href: `/#${LANDING_SECTION_IDS.features}`,
+                  key: "features",
+                  title: landing.Footer.Links.Features,
+                },
+                {
+                  href: `/#${LANDING_SECTION_IDS.pricing}`,
+                  key: "pricing",
+                  title: landing.Footer.Links.Pricing,
+                },
                 {
                   href: routeAssert(WEBSITE_ROUTES.DOCS),
                   key: "docs",

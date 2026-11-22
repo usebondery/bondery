@@ -3,7 +3,7 @@ import { useMobileThemeColors } from "../theme/useMobileThemeColors";
 import { FloatingPillRail } from "./chrome/FloatingPillRail";
 import { ActionButton } from "./ui/ActionButton";
 
-export type FloatingActionBarAction = {
+type FloatingActionBarAction = {
   id: string;
   icon: ReactNode;
   onPress: () => void;
@@ -23,7 +23,7 @@ interface FloatingActionBarProps {
 /**
  * Icon-only floating action bar for contextual batch actions (e.g. contact selection).
  */
-export function FloatingActionBar({
+function FloatingActionBar({
   actions,
   accessibilityLabel = "Selection actions",
 }: FloatingActionBarProps) {
@@ -65,3 +65,6 @@ export function FloatingActionBar({
     </FloatingPillRail>
   );
 }
+
+export type { FloatingActionBarAction };
+export { FloatingActionBar };

@@ -1,6 +1,9 @@
 import { normalizeMobileUrlForDevice, STORAGE_URL } from "../config";
 import { toCacheBustToken } from "./avatar-clock";
 
+const TRAILING_SLASHES_RE = /\/+$/;
+const LEADING_SLASHES_RE = /^\/+/;
+
 export { parseAvatarUpdatedAtFromUrl } from "./avatar-clock";
 
 export function resolveLocalContactAvatarUrl(
@@ -14,9 +17,9 @@ export function resolveLocalContactAvatarUrl(
   }
 
   const path = `${userId}/${personId}.jpg`;
-  const baseUrl = `${STORAGE_URL.replace(/\/+$/, "")}/avatars/${path}`;
+  const baseUrl = `${STORAGE_URL.replace(TRAILING_SLASHES_RE, "")}/avatars/${path}`;
   const ts = toCacheBustToken(avatarUpdatedAt);
-  const cacheBust = ts != null ? `?t=${ts}` : "";
+  const cacheBust = ts !== null ? `?t=${ts}` : "";
   return normalizeMobileUrlForDevice(`${baseUrl}${cacheBust}`);
 }
 
@@ -25,6 +28,6 @@ export function resolveStoragePublicUrl(path: string): string | null {
     return null;
   }
 
-  const url = `${STORAGE_URL.replace(/\/+$/, "")}/avatars/${path.replace(/^\/+/, "")}`;
+  const url = `${STORAGE_URL.replace(TRAILING_SLASHES_RE, "")}/avatars/${path.replace(LEADING_SLASHES_RE, "")}`;
   return normalizeMobileUrlForDevice(url);
 }

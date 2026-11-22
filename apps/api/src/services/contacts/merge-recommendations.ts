@@ -10,7 +10,7 @@ import { contactDetailSelect, mapContactDetailRecord } from "../../lib/data/pris
 import type { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { withEmptyChannels, withEmptySocials } from "./helpers.js";
 
-export type MergeRecommendationRow = {
+type MergeRecommendationRow = {
   id: string;
   left_person_id: string;
   right_person_id: string;
@@ -21,6 +21,8 @@ export type MergeRecommendationRow = {
 type MergeRecommendationsContext = Pick<DomainContext, "db" | "user"> & {
   log?: { error: (payload: unknown, message: string) => void };
 };
+
+export type { MergeRecommendationRow };
 
 export async function hydrateMergeRecommendations(
   ctx: MergeRecommendationsContext,

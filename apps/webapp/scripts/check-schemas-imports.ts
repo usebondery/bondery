@@ -8,6 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const JS_TS_EXTENSION = /\.(tsx?|jsx?)$/;
+
 const check = createCheck("check-schemas-imports");
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -43,7 +45,7 @@ function walk(dir: string, acc: string[] = []): string[] {
         continue;
       }
       walk(full, acc);
-    } else if (/\.(tsx?|jsx?)$/.test(entry)) {
+    } else if (JS_TS_EXTENSION.test(entry)) {
       acc.push(full);
     }
   }

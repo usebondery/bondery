@@ -8,6 +8,14 @@ import {
   MAGIC_LINK_SEND_WINDOW_SECONDS,
 } from "./magic-link-constants.js";
 
+function sendCountKey(emailHash: string): string {
+  return `${MAGIC_LINK_REDIS_PREFIX}send:${emailHash}`;
+}
+
+function previousIdentifierKey(emailHash: string): string {
+  return `${MAGIC_LINK_REDIS_PREFIX}prev:${emailHash}`;
+}
+
 /** SHA-256 hex of a normalized email — used only as a Redis key fragment, never logged. */
 export function hashMagicLinkEmail(email: string): string {
   return createHash("sha256").update(email.trim().toLowerCase()).digest("hex");
@@ -19,14 +27,6 @@ export function hashMagicLinkEmail(email: string): string {
  */
 export function hashMagicLinkStoredIdentifier(token: string): string {
   return createHash("sha256").update(token).digest("base64url");
-}
-
-function sendCountKey(emailHash: string): string {
-  return `${MAGIC_LINK_REDIS_PREFIX}send:${emailHash}`;
-}
-
-function previousIdentifierKey(emailHash: string): string {
-  return `${MAGIC_LINK_REDIS_PREFIX}prev:${emailHash}`;
 }
 
 /**

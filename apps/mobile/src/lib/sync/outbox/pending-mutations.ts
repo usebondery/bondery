@@ -76,16 +76,14 @@ export function listPendingMutations(limit = 50): SyncMutation[] {
   return rows.map((row) => {
     const payload = JSON.parse(row.payload_json) as Record<string, unknown>;
     const baseUpdatedAt = normalizeSyncDatetime(row.base_updated_at);
-    return Object.assign(
-      {
-        clientSequence: row.client_sequence,
-        id: row.id,
-        payload,
-        type: row.mutation_type,
-      },
-      baseUpdatedAt ? { baseUpdatedAt } : {},
-      row.entity_id ? { entityId: row.entity_id } : {},
-    ) as SyncMutation;
+    return {
+      clientSequence: row.client_sequence,
+      id: row.id,
+      payload,
+      type: row.mutation_type,
+      ...(baseUpdatedAt ? { baseUpdatedAt } : {}),
+      ...(row.entity_id ? { entityId: row.entity_id } : {}),
+    } as SyncMutation;
   });
 }
 

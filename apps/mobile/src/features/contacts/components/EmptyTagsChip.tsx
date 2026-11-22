@@ -1,12 +1,11 @@
 import { StyleSheet, Text, View } from "react-native";
-import { useCommonTranslations, useMobileTagsTranslations } from "@/lib/i18n/generated/hooks";
+import { useMobileTagsTranslations } from "@/lib/i18n/generated/hooks";
 import { MOBILE_TYPOGRAPHY } from "../../../theme/tokens";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
 /** Static placeholder chip matching {@link CreateTagChip} styling — not tappable. */
-export function EmptyTagsChip() {
+function EmptyTagsChip() {
   const tMobileTags = useMobileTagsTranslations();
-  const _t = useCommonTranslations();
   const colors = useMobileThemeColors();
   const label = tMobileTags("NoTagsYet");
 
@@ -43,3 +42,5 @@ const styles = StyleSheet.create({
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
   },
 });
+
+export { EmptyTagsChip };

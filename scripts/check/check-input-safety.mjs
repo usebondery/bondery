@@ -23,11 +23,16 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5E5C642B285C_RE = /^\d+(\.\d+)?$/;
+const REGISTER_MULTIPART_RE = /register\(\s*multipart\s*,\s*\{([\s\S]*?)\}\s*\)/;
+const FILESIZE_UPLOAD_LIMITS_DEFAULT_RE = /fileSize\s*:\s*UPLOAD_LIMITS\.default\b/;
+const BDEFAULT_RE = /\bdefault\s*:\s*([\w\s*]+?)\s*,/;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = join(__dirname, "../..");
 
 /** Largest global multipart ceiling allowed. Routes that need more name their own cap. */
-export const MAX_DEFAULT_UPLOAD_BYTES = 10 * 1024 * 1024;
+const MAX_DEFAULT_UPLOAD_BYTES = 10 * 1024 * 1024;
 
 /** A Prisma write on the people table. */
 const PEOPLE_WRITE =
@@ -40,26 +45,6 @@ const NOTES_ASSIGNMENT = /\bnotes\s*[:=]\s*(?!true\b|false\b)/;
 const NOTES_RAW_SQL = /\bSET\b[^;`]*\bnotes\b\s*=/i;
 
 const SANITIZER = "sanitizeNotesHtml";
-
-/**
- * API modules that write notes into `people` without calling the sanitizer.
- *
- * @param {{ path: string, text: string }[]} files API source files (tests excluded)
- * @returns {string[]} one message per offending file
- */
-export function findUnsanitizedNotesWriters(files) {
-  const violations = [];
-  for (const { path, text } of files) {
-    const writesPeople = PEOPLE_WRITE.test(text) && NOTES_ASSIGNMENT.test(text);
-    const writesRaw = NOTES_RAW_SQL.test(text);
-    if ((writesPeople || writesRaw) && !text.includes(SANITIZER)) {
-      violations.push(
-        `${path} writes contact notes but never calls ${SANITIZER}(). Stored notes are HTML: sanitize before every write (apps/api/src/lib/notes/sanitize-notes-html.ts).`,
-      );
-    }
-  }
-  return violations;
-}
 
 /**
  * Reads `const NAME = 5;` and `const NAME = A * B;` lines, so a size written with named units
@@ -88,7 +73,7 @@ function evaluateProduct(expression, constants, seen = new Set()) {
   let product = 1;
   for (const part of expression.split("*")) {
     const term = part.trim();
-    if (/^\d+(\.\d+)?$/.test(term)) {
+    if (PATTERN_5E5C642B285C_RE.test(term)) {
       product *= Number(term);
       continue;
     }
@@ -99,42 +84,6 @@ function evaluateProduct(expression, constants, seen = new Set()) {
     product *= evaluateProduct(definition, constants, new Set([...seen, term]));
   }
   return product;
-}
-
-/**
- * The multipart registration in `build-app.ts` must use the small shared default.
- *
- * @param {string} buildAppText source of `apps/api/src/build-app.ts`
- * @param {string} configText source of `apps/api/src/lib/platform/config.ts`
- * @returns {string[]} one message per problem
- */
-export function findMultipartCeilingViolations(buildAppText, configText) {
-  const violations = [];
-  const registration = buildAppText.match(/register\(\s*multipart\s*,\s*\{([\s\S]*?)\}\s*\)/);
-  if (!registration) {
-    violations.push(
-      "apps/api/src/build-app.ts: could not find `register(multipart, { … })`. Update this check if the registration moved.",
-    );
-  } else if (!/fileSize\s*:\s*UPLOAD_LIMITS\.default\b/.test(registration[1])) {
-    violations.push(
-      "apps/api/src/build-app.ts: multipart `fileSize` must be `UPLOAD_LIMITS.default`, not a literal. A route that needs a bigger file declares its own cap in UPLOAD_LIMITS.",
-    );
-  }
-
-  const defaultMatch = configText.match(/\bdefault\s*:\s*([\w\s*]+?)\s*,/);
-  if (!defaultMatch) {
-    violations.push(
-      "apps/api/src/lib/platform/config.ts: could not read `UPLOAD_LIMITS.default` as a number expression.",
-    );
-  } else {
-    const bytes = evaluateProduct(defaultMatch[1], readNumericConstants(configText));
-    if (!Number.isFinite(bytes) || bytes > MAX_DEFAULT_UPLOAD_BYTES) {
-      violations.push(
-        `apps/api/src/lib/platform/config.ts: UPLOAD_LIMITS.default is ${bytes} bytes. Keep the global ceiling at or below ${MAX_DEFAULT_UPLOAD_BYTES} bytes.`,
-      );
-    }
-  }
-  return violations;
 }
 
 function repoPath(filePath) {
@@ -180,3 +129,61 @@ function main() {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   main();
 }
+
+/**
+ * API modules that write notes into `people` without calling the sanitizer.
+ *
+ * @param {{ path: string, text: string }[]} files API source files (tests excluded)
+ * @returns {string[]} one message per offending file
+ */
+export function findUnsanitizedNotesWriters(files) {
+  const violations = [];
+  for (const { path, text } of files) {
+    const writesPeople = PEOPLE_WRITE.test(text) && NOTES_ASSIGNMENT.test(text);
+    const writesRaw = NOTES_RAW_SQL.test(text);
+    if ((writesPeople || writesRaw) && !text.includes(SANITIZER)) {
+      violations.push(
+        `${path} writes contact notes but never calls ${SANITIZER}(). Stored notes are HTML: sanitize before every write (apps/api/src/lib/notes/sanitize-notes-html.ts).`,
+      );
+    }
+  }
+  return violations;
+}
+
+/**
+ * The multipart registration in `build-app.ts` must use the small shared default.
+ *
+ * @param {string} buildAppText source of `apps/api/src/build-app.ts`
+ * @param {string} configText source of `apps/api/src/lib/platform/config.ts`
+ * @returns {string[]} one message per problem
+ */
+export function findMultipartCeilingViolations(buildAppText, configText) {
+  const violations = [];
+  const registration = buildAppText.match(REGISTER_MULTIPART_RE);
+  if (!registration) {
+    violations.push(
+      "apps/api/src/build-app.ts: could not find `register(multipart, { … })`. Update this check if the registration moved.",
+    );
+  } else if (!FILESIZE_UPLOAD_LIMITS_DEFAULT_RE.test(registration[1])) {
+    violations.push(
+      "apps/api/src/build-app.ts: multipart `fileSize` must be `UPLOAD_LIMITS.default`, not a literal. A route that needs a bigger file declares its own cap in UPLOAD_LIMITS.",
+    );
+  }
+
+  const defaultMatch = configText.match(BDEFAULT_RE);
+  if (!defaultMatch) {
+    violations.push(
+      "apps/api/src/lib/platform/config.ts: could not read `UPLOAD_LIMITS.default` as a number expression.",
+    );
+  } else {
+    const bytes = evaluateProduct(defaultMatch[1], readNumericConstants(configText));
+    if (!Number.isFinite(bytes) || bytes > MAX_DEFAULT_UPLOAD_BYTES) {
+      violations.push(
+        `apps/api/src/lib/platform/config.ts: UPLOAD_LIMITS.default is ${bytes} bytes. Keep the global ceiling at or below ${MAX_DEFAULT_UPLOAD_BYTES} bytes.`,
+      );
+    }
+  }
+  return violations;
+}
+
+export { MAX_DEFAULT_UPLOAD_BYTES };

@@ -11,7 +11,7 @@ import { ActionButtonShellPressable } from "../ui/ActionButtonShellPressable";
 import { EMOJI_PICKER_LAYOUT } from "./constants";
 import { EmojiPickerSheet } from "./EmojiPickerSheet";
 
-export interface EmojiPickerInputProps {
+interface EmojiPickerInputProps {
   accessibilityLabel?: string;
   compact?: boolean;
   disabled?: boolean;
@@ -41,7 +41,7 @@ const CATEGORY_TRANSLATION_KEYS: Record<EmojiCategoryName, string> = {
   Work: "Category.Work",
 };
 
-export function EmojiPickerInput({
+function EmojiPickerInput({
   value,
   onChange,
   label,
@@ -156,3 +156,6 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
 });
+
+export type { EmojiPickerInputProps };
+export { EmojiPickerInput };

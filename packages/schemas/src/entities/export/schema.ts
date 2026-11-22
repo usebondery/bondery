@@ -35,84 +35,6 @@ import {
   BONDERY_EXPORT_SCHEMA_TYPES,
 } from "./types.js";
 
-export {
-  BONDERY_EXPORT_AVATARS_PREFIX,
-  BONDERY_EXPORT_DATA_SCHEMA_TYPES,
-  BONDERY_EXPORT_FILE_ENTRIES,
-  BONDERY_EXPORT_FORMAT,
-  BONDERY_EXPORT_SCHEMA_TYPES,
-  isBonderyExportAvatarFolderPath,
-  matchBonderyExportAvatarEntry,
-} from "./types.js";
-
-export const bonderyExportFormatSchema: z.ZodType<BonderyExportFormat> =
-  z.literal(BONDERY_EXPORT_FORMAT);
-
-export const bonderyExportDataSchemaTypeSchema: z.ZodType<BonderyExportDataSchemaType> = z.enum(
-  BONDERY_EXPORT_DATA_SCHEMA_TYPES,
-);
-
-export const bonderyExportSchemaTypeSchema: z.ZodType<BonderyExportSchemaType> = z.enum(
-  BONDERY_EXPORT_SCHEMA_TYPES,
-);
-
-export const exportCountsSchema: z.ZodType<ExportCounts> = z.object({
-  groups: z.number().int().nonnegative(),
-  interactions: z.number().int().nonnegative(),
-  people: z.number().int().nonnegative(),
-  relationships: z.number().int().nonnegative(),
-  tags: z.number().int().nonnegative(),
-});
-
-export const exportSummarySchema: z.ZodType<ExportSummary> = z.object({
-  bonderyVersion: z.string().min(1).describe("Bondery version that wrote this export"),
-  groups: z.number().int().nonnegative().describe("Number of groups in the export"),
-  interactions: z.number().int().nonnegative().describe("Number of interactions in the export"),
-  people: z.number().int().nonnegative().describe("Number of contacts in the export"),
-  relationships: z.number().int().nonnegative().describe("Number of relationships in the export"),
-  tags: z.number().int().nonnegative().describe("Number of tags in the export"),
-});
-
-export const exportSummaryResponseSchema: z.ZodType<ExportSummaryResponse> = z.object({
-  exportSummary: exportSummarySchema.describe("Counts of records in a full export"),
-});
-
-export const importTypeResultSchema: z.ZodType<ImportTypeResult> = z.object({
-  inserted: z.number().int().nonnegative().describe("Number of new records written"),
-  skipped: z.number().int().nonnegative().describe("Number of records not written"),
-});
-
-export const importResultSchema: z.ZodType<ImportResult> = z.object({
-  groupMemberships: importTypeResultSchema.describe("Group membership import result"),
-  groups: importTypeResultSchema.describe("Group import result"),
-  interactions: importTypeResultSchema.describe("Interaction import result"),
-  people: importTypeResultSchema.describe("Contact import result"),
-  photos: importTypeResultSchema.describe("Photo import result"),
-  relationships: importTypeResultSchema.describe("Relationship import result"),
-  tagMemberships: importTypeResultSchema.describe("Tag membership import result"),
-  tags: importTypeResultSchema.describe("Tag import result"),
-});
-
-export const importResultResponseSchema: z.ZodType<ImportResultResponse> = z.object({
-  importResult: importResultSchema.describe("Counts of records written from this import"),
-});
-
-export const exportManifestFileEntrySchema: z.ZodType<ExportManifestFileEntry> = z.object({
-  count: z.number().int().nonnegative(),
-  name: z.string().min(1),
-  schemaType: bonderyExportDataSchemaTypeSchema,
-});
-
-export const exportManifestSchema: z.ZodType<ExportManifest> = z.object({
-  bonderyVersion: z.string().min(1),
-  counts: exportCountsSchema,
-  exportedAt: createdAtSchema,
-  files: z.array(exportManifestFileEntrySchema),
-  format: bonderyExportFormatSchema,
-  includedTypes: z.array(bonderyExportDataSchemaTypeSchema),
-  schemaType: z.literal("Manifest"),
-});
-
 const exportPhoneRecordSchema: z.ZodType<ExportPhoneRecord> = z.object({
   createdAt: createdAtSchema,
   id: z.string(),
@@ -211,6 +133,94 @@ const exportLinkedinRecordSchema: z.ZodType<ExportLinkedinRecord> = z.object({
   workHistory: z.array(exportWorkHistoryRecordSchema),
 });
 
+function exportFileEnvelopeSchema<TSchemaType extends BonderyExportDataSchemaType, TRecord>(
+  schemaType: TSchemaType,
+  recordSchema: z.ZodType<TRecord>,
+): z.ZodType<ExportFileEnvelope<TSchemaType, TRecord>> {
+  return z.object({
+    bonderyVersion: z.string().min(1),
+    records: z.array(recordSchema),
+    schemaType: z.literal(schemaType),
+  });
+}
+export {
+  BONDERY_EXPORT_AVATARS_PREFIX,
+  BONDERY_EXPORT_DATA_SCHEMA_TYPES,
+  BONDERY_EXPORT_FILE_ENTRIES,
+  BONDERY_EXPORT_FORMAT,
+  BONDERY_EXPORT_SCHEMA_TYPES,
+  isBonderyExportAvatarFolderPath,
+  matchBonderyExportAvatarEntry,
+} from "./types.js";
+
+export const bonderyExportFormatSchema: z.ZodType<BonderyExportFormat> =
+  z.literal(BONDERY_EXPORT_FORMAT);
+
+export const bonderyExportDataSchemaTypeSchema: z.ZodType<BonderyExportDataSchemaType> = z.enum(
+  BONDERY_EXPORT_DATA_SCHEMA_TYPES,
+);
+
+export const bonderyExportSchemaTypeSchema: z.ZodType<BonderyExportSchemaType> = z.enum(
+  BONDERY_EXPORT_SCHEMA_TYPES,
+);
+
+export const exportCountsSchema: z.ZodType<ExportCounts> = z.object({
+  groups: z.number().int().nonnegative(),
+  interactions: z.number().int().nonnegative(),
+  people: z.number().int().nonnegative(),
+  relationships: z.number().int().nonnegative(),
+  tags: z.number().int().nonnegative(),
+});
+
+export const exportSummarySchema: z.ZodType<ExportSummary> = z.object({
+  bonderyVersion: z.string().min(1).describe("Bondery version that wrote this export"),
+  groups: z.number().int().nonnegative().describe("Number of groups in the export"),
+  interactions: z.number().int().nonnegative().describe("Number of interactions in the export"),
+  people: z.number().int().nonnegative().describe("Number of contacts in the export"),
+  relationships: z.number().int().nonnegative().describe("Number of relationships in the export"),
+  tags: z.number().int().nonnegative().describe("Number of tags in the export"),
+});
+
+export const exportSummaryResponseSchema: z.ZodType<ExportSummaryResponse> = z.object({
+  exportSummary: exportSummarySchema.describe("Counts of records in a full export"),
+});
+
+export const importTypeResultSchema: z.ZodType<ImportTypeResult> = z.object({
+  inserted: z.number().int().nonnegative().describe("Number of new records written"),
+  skipped: z.number().int().nonnegative().describe("Number of records not written"),
+});
+
+export const importResultSchema: z.ZodType<ImportResult> = z.object({
+  groupMemberships: importTypeResultSchema.describe("Group membership import result"),
+  groups: importTypeResultSchema.describe("Group import result"),
+  interactions: importTypeResultSchema.describe("Interaction import result"),
+  people: importTypeResultSchema.describe("Contact import result"),
+  photos: importTypeResultSchema.describe("Photo import result"),
+  relationships: importTypeResultSchema.describe("Relationship import result"),
+  tagMemberships: importTypeResultSchema.describe("Tag membership import result"),
+  tags: importTypeResultSchema.describe("Tag import result"),
+});
+
+export const importResultResponseSchema: z.ZodType<ImportResultResponse> = z.object({
+  importResult: importResultSchema.describe("Counts of records written from this import"),
+});
+
+export const exportManifestFileEntrySchema: z.ZodType<ExportManifestFileEntry> = z.object({
+  count: z.number().int().nonnegative(),
+  name: z.string().min(1),
+  schemaType: bonderyExportDataSchemaTypeSchema,
+});
+
+export const exportManifestSchema: z.ZodType<ExportManifest> = z.object({
+  bonderyVersion: z.string().min(1),
+  counts: exportCountsSchema,
+  exportedAt: createdAtSchema,
+  files: z.array(exportManifestFileEntrySchema),
+  format: bonderyExportFormatSchema,
+  includedTypes: z.array(bonderyExportDataSchemaTypeSchema),
+  schemaType: z.literal("Manifest"),
+});
+
 export const exportPersonRecordSchema: z.ZodType<ExportPersonRecord> = z.object({
   addresses: z.array(exportAddressRecordSchema),
   createdAt: createdAtSchema,
@@ -282,17 +292,6 @@ export const exportRelationshipRecordSchema: z.ZodType<ExportRelationshipRecord>
   targetPersonId: z.string(),
   updatedAt: createdAtSchema,
 });
-
-function exportFileEnvelopeSchema<TSchemaType extends BonderyExportDataSchemaType, TRecord>(
-  schemaType: TSchemaType,
-  recordSchema: z.ZodType<TRecord>,
-): z.ZodType<ExportFileEnvelope<TSchemaType, TRecord>> {
-  return z.object({
-    bonderyVersion: z.string().min(1),
-    records: z.array(recordSchema),
-    schemaType: z.literal(schemaType),
-  });
-}
 
 export const exportMyselfFileSchema: z.ZodType<ExportMyselfFile> = z.object({
   bonderyVersion: z.string().min(1),

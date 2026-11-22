@@ -1,3 +1,5 @@
+import { detachPromise } from "@bondery/helpers/async";
+
 /**
  * Cookie that stores the reader's choice of code snippet, keyed by block.
  *
@@ -8,7 +10,7 @@
  * This module holds no React import, so a server component can import it without
  * a `use client` boundary. The hook lives in `useCodeBlockSnippet.ts`.
  */
-export const CODE_BLOCK_SNIPPET_COOKIE = "bondery_code_snippet";
+const CODE_BLOCK_SNIPPET_COOKIE = "bondery_code_snippet";
 
 const COOKIE_MAX_AGE_SECONDS = 31_536_000;
 
@@ -21,7 +23,7 @@ let cached: SnippetChoices | undefined;
 const listeners = new Set<() => void>();
 
 /** Returns a plain map, or an empty map for a missing or malformed cookie. */
-export function parseCodeBlockSnippets(value: string | null | undefined): SnippetChoices {
+function parseCodeBlockSnippets(value: string | null | undefined): SnippetChoices {
   if (!value) {
     return {};
   }
@@ -66,6 +68,41 @@ function notify(): void {
   }
 }
 
+type CookieStoreLike = {
+  set: (options: {
+    expires: number;
+    name: string;
+    path: string;
+    sameSite: "lax";
+    value: string;
+  }) => Promise<void>;
+};
+
+/**
+ * Cookie Store API when the browser has it, matching the webapp cookie helper.
+ * The `document.cookie` path covers a browser without `cookieStore`.
+ */
+async function writeCookie(choices: SnippetChoices): Promise<void> {
+  const value = encodeURIComponent(JSON.stringify(choices));
+  const { cookieStore } = globalThis as { cookieStore?: CookieStoreLike };
+
+  if (cookieStore) {
+    await cookieStore.set({
+      // The Cookie Store API takes a Unix timestamp in milliseconds.
+      expires: Date.now() + COOKIE_MAX_AGE_SECONDS * 1000,
+      name: CODE_BLOCK_SNIPPET_COOKIE,
+      path: "/",
+      sameSite: "lax",
+      value,
+    });
+    return;
+  }
+
+  document.cookie = `${CODE_BLOCK_SNIPPET_COOKIE}=${value}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
+}
+
+export { CODE_BLOCK_SNIPPET_COOKIE, parseCodeBlockSnippets };
+
 /** Clears the memoised cookie read. For tests, and for a cookie change made outside this module. */
 export function resetCodeBlockSnippetCache(): void {
   cached = undefined;
@@ -90,45 +127,11 @@ export function setCodeBlockSnippet(key: string, id: string): void {
   cached = choices;
 
   if (typeof document !== "undefined") {
-    void writeCookie(choices).catch(() => {
-      // Cookie write is best-effort. The in-memory cache already holds the choice.
-    });
+    // Cookie write is best-effort. The in-memory cache already holds the choice.
+    detachPromise(writeCookie(choices));
   }
 
   notify();
-}
-
-type CookieStoreLike = {
-  set: (options: {
-    expires: number;
-    name: string;
-    path: string;
-    sameSite: "lax";
-    value: string;
-  }) => Promise<void>;
-};
-
-/**
- * Cookie Store API when the browser has it, matching the webapp cookie helper.
- * The `document.cookie` path covers a browser without `cookieStore`.
- */
-async function writeCookie(choices: SnippetChoices): Promise<void> {
-  const value = encodeURIComponent(JSON.stringify(choices));
-  const cookieStore = (globalThis as { cookieStore?: CookieStoreLike }).cookieStore;
-
-  if (cookieStore) {
-    await cookieStore.set({
-      // The Cookie Store API takes a Unix timestamp in milliseconds.
-      expires: Date.now() + COOKIE_MAX_AGE_SECONDS * 1000,
-      name: CODE_BLOCK_SNIPPET_COOKIE,
-      path: "/",
-      sameSite: "lax",
-      value,
-    });
-    return;
-  }
-
-  document.cookie = `${CODE_BLOCK_SNIPPET_COOKIE}=${value}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
 }
 
 /** Registers a listener for choice changes. Returns the unsubscribe function. */

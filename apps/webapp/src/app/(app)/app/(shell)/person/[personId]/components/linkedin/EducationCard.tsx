@@ -49,24 +49,24 @@ export function EducationCard({ entry }: EducationCardProps) {
 
       <Stack gap={2} style={{ flex: 1, minWidth: 0 }}>
         {schoolNameElement}
-        {entry.degree && (
+        {entry.degree ? (
           <Text fw={600} lineClamp={1} size="sm">
             {entry.degree}
           </Text>
-        )}
-        {dateRange && (
+        ) : null}
+        {dateRange ? (
           <Text c="dimmed" size="xs">
             {dateRange}
             {duration ? ` (${duration})` : ""}
           </Text>
-        )}
-        {entry.description && (
+        ) : null}
+        {entry.description ? (
           <Spoiler hideLabel={t("ShowLess")} maxHeight={60} mt={4} showLabel={t("ShowMore")}>
             <Text c="dimmed" size="xs" style={{ whiteSpace: "pre-wrap" }}>
               {entry.description}
             </Text>
           </Spoiler>
-        )}
+        ) : null}
       </Stack>
     </Group>
   );

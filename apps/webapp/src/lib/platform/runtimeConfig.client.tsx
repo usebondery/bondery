@@ -9,8 +9,6 @@ declare global {
   }
 }
 
-export const WebappRuntimeConfigContext = createContext<WebappRuntimeConfig | null>(null);
-
 let cachedFromWindow: WebappRuntimeConfig | null = null;
 
 function readWebappRuntimeConfigFromWindow(): WebappRuntimeConfig {
@@ -30,6 +28,8 @@ function readWebappRuntimeConfigFromWindow(): WebappRuntimeConfig {
   cachedFromWindow = webappRuntimeConfigSchema.parse(raw);
   return cachedFromWindow;
 }
+
+export const WebappRuntimeConfigContext = createContext<WebappRuntimeConfig | null>(null);
 
 export function WebappRuntimeConfigProvider({
   config,

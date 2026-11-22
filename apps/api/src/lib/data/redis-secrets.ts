@@ -23,14 +23,14 @@ import {
   createSelfSignedServerCertificate,
 } from "../infra-secrets/x509.js";
 
+const CERT_VALIDITY_DAYS = 3650;
+const CERT_RENEW_BEFORE_DAYS = 30;
+const REDIS_PASSWORD_BYTES = 32;
+
 export { API_CONTAINER_UID };
 
 /** `redis` user in the official `redis` image. */
 export const REDIS_CONTAINER_UID = 999;
-
-const CERT_VALIDITY_DAYS = 3650;
-const CERT_RENEW_BEFORE_DAYS = 30;
-const REDIS_PASSWORD_BYTES = 32;
 
 export type RedisSecretPaths = {
   aclFile: string;

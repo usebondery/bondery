@@ -6,7 +6,7 @@ import { Text } from "../../../components/ui/Text";
 import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { useContactsEffectiveSelectedCount, useContactsSelection } from "../contactsSelectionStore";
 
-export function ContactsSelectionHeader() {
+function ContactsSelectionHeader() {
   const tMobileContacts = useMobileContactsTranslations();
   const t = useCommonTranslations();
   const totalCount = useContactsSelection((state) => state.totalCount);
@@ -99,3 +99,5 @@ function SelectionHeaderTextAction({
     </Animated.View>
   );
 }
+
+export { ContactsSelectionHeader };

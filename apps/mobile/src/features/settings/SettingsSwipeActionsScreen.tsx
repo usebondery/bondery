@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { getRandomExampleName } from "@bondery/helpers/name";
 import type { Contact } from "@bondery/schemas";
 import { useRouter } from "expo-router";
@@ -114,7 +115,7 @@ export function SettingsSwipeActionsScreen() {
     }
 
     setLeftSwipeAction(nextAction);
-    void updateSettings({ leftSwipeAction: nextAction });
+    detachPromise(updateSettings({ leftSwipeAction: nextAction }));
   };
 
   const handleRightSwipeChange = (nextAction: SwipeAction) => {
@@ -123,7 +124,7 @@ export function SettingsSwipeActionsScreen() {
     }
 
     setRightSwipeAction(nextAction);
-    void updateSettings({ rightSwipeAction: nextAction });
+    detachPromise(updateSettings({ rightSwipeAction: nextAction }));
   };
 
   return (

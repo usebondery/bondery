@@ -20,6 +20,9 @@ import { createRequire } from "node:module";
 import { join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+const AGENTS_CLAUDE_CURSOR_RE = /^\.(?:agents|claude|cursor)\//;
+const TSCONFIG_JSON_RE = /(?:^|\/)tsconfig[^/]*\.json$/;
+
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
 const require = createRequire(import.meta.url);
 const IS_WINDOWS = process.platform === "win32";
@@ -36,7 +39,7 @@ const CODE_AREAS = /^(?:apps|packages)\//;
  *
  * @type {{ mutatesDist?: boolean, name: string, when: (files: string[]) => boolean, command: "biome" | "node" | "pnpm", args: (files: string[], base: string) => string[] }[]}
  */
-export const CHECKS = [
+const CHECKS = [
   {
     args: (files) => ["check", "--no-errors-on-unmatched", ...files.filter(isBiomeFile)],
     command: "biome",
@@ -66,13 +69,22 @@ export const CHECKS = [
     args: () => ["run", "check:agent-files"],
     command: "pnpm",
     name: "agent-files",
-    when: (files) => files.some((file) => /^\.(?:agents|claude|cursor)\//.test(file)),
+    when: (files) => files.some((file) => AGENTS_CLAUDE_CURSOR_RE.test(file)),
   },
   {
     args: () => ["run", "check:package-imports"],
     command: "pnpm",
     name: "package-imports",
     when: (files) => files.some((file) => file.endsWith("package.json") || CODE_AREAS.test(file)),
+  },
+  {
+    args: () => ["run", "check:tsconfig-extends"],
+    command: "pnpm",
+    name: "tsconfig-extends",
+    when: (files) =>
+      files.some(
+        (file) => TSCONFIG_JSON_RE.test(file) || file.startsWith("packages/typescript-config/"),
+      ),
   },
   {
     args: () => ["run", "check:input-safety"],
@@ -143,12 +155,12 @@ function isBiomeFile(file) {
 }
 
 /** Biome config or a GritQL plugin: a change can add errors to files the diff did not touch. */
-export function isBiomeRuleFile(file) {
+function isBiomeRuleFile(file) {
   return file === "biome.json" || file.startsWith("biome/plugins/");
 }
 
 /** The checks that apply to a set of changed paths. */
-export function planChecks(files, only = null) {
+function planChecks(files, only = null) {
   return CHECKS.filter((check) => (only ? only.includes(check.name) : check.when(files)));
 }
 
@@ -390,3 +402,5 @@ async function main() {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await main();
 }
+
+export { CHECKS, isBiomeRuleFile, planChecks };

@@ -1,4 +1,5 @@
 import { buildApiErrorFromResponse } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { API_ROUTES } from "@bondery/helpers/globals/paths";
 import {
   buildSyncWsUrl,
@@ -15,7 +16,7 @@ import { ensureDeviceId } from "./outbox/pending-mutations";
 import { shouldReconnectSyncWake } from "./pull-auth";
 import { onSyncWakeEvent, onSyncWakeReconnect, setSyncPullMode } from "./pull-manager";
 
-const MIN_RECONNECT_MS = 1_000;
+const MIN_RECONNECT_MS = 1000;
 const MAX_RECONNECT_MS = 30_000;
 
 type SyncWakeClient = {
@@ -149,11 +150,11 @@ export async function startSyncWakeClient(): Promise<SyncWakeClient> {
     reconnectTimer = setTimeout(() => {
       reconnectTimer = null;
       reconnectDelay = Math.min(reconnectDelay * 2, MAX_RECONNECT_MS);
-      void connect();
+      detachPromise(connect());
     }, reconnectDelay + jitter);
   };
 
-  void connect();
+  detachPromise(connect());
 
   const client: SyncWakeClient = {
     stop: () => {

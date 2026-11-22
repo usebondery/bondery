@@ -1,3 +1,7 @@
+import localeCatalog from "../../../locale/supported-locales.json" with { type: "json" };
+
+type LocaleEntry = (typeof localeCatalog.supported)[number];
+
 export type LocaleTextDirection = "ltr" | "rtl";
 
 export interface AppLocaleMetadata {
@@ -8,8 +12,4 @@ export interface AppLocaleMetadata {
   intl: string;
   nativeName: string;
 }
-
-import localeCatalog from "../../../locale/supported-locales.json" with { type: "json" };
-
-type LocaleEntry = (typeof localeCatalog.supported)[number];
 export type SupportedLocale = LocaleEntry["code"];

@@ -37,6 +37,10 @@ const COLOR_SWATCHES = [
   ...DEFAULT_THEME.colors.orange.slice(5, 8),
 ];
 
+type GroupFormFieldErrors = {
+  emoji?: string;
+};
+
 interface EditGroupModalProps {
   groupId: string;
   initialColor: string;
@@ -47,18 +51,6 @@ interface EditGroupModalProps {
 function EditGroupModalTitle() {
   const t = useGroupsPageTranslations();
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("EditGroupModal.Title")} />;
-}
-
-export function openEditGroupModal(props: EditGroupModalProps) {
-  const modalId = createModalId("edit-group");
-
-  modals.open({
-    children: <EditGroupForm {...props} modalId={modalId} />,
-    modalId,
-    size: "md",
-    title: <EditGroupModalTitle />,
-    trapFocus: true,
-  });
 }
 
 function EditGroupForm({
@@ -134,7 +126,7 @@ function EditGroupForm({
             <EmojiPicker
               disabled={isBlocking}
               emptyLabel={t("EmojiEmptySearch")}
-              error={form.errors.emoji as string | undefined}
+              error={(form.errors as GroupFormFieldErrors).emoji}
               label={t("EmojiLabel")}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               placeholder={t("EmojiSelectPlaceholder")}
@@ -181,4 +173,16 @@ function EditGroupForm({
       </Stack>
     </form>
   );
+}
+
+export function openEditGroupModal(props: EditGroupModalProps) {
+  const modalId = createModalId("edit-group");
+
+  modals.open({
+    children: <EditGroupForm {...props} modalId={modalId} />,
+    modalId,
+    size: "md",
+    title: <EditGroupModalTitle />,
+    trapFocus: true,
+  });
 }

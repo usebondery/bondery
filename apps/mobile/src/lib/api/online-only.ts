@@ -13,6 +13,8 @@ import { API_URL, normalizeMobileUrlForDevice } from "../config";
 import { apiRequest, getBearerHeaders, mobileFetch, throwApiResponseError } from "./transport";
 import { throwTransportUnavailableError } from "./transport-unavailable-error";
 
+const CONTENT_DISPOSITION_FILENAME_RE =
+  /filename\*=UTF-8''([^;]+)|filename="([^"]+)"|filename=([^;]+)/i;
 const ALL_SHAREABLE_FIELDS: ShareableField[] = [
   "name",
   "avatar",
@@ -36,7 +38,7 @@ function parseContentDispositionFilename(header: string | null): string | null {
     return null;
   }
 
-  const match = header.match(/filename\*=UTF-8''([^;]+)|filename="([^"]+)"|filename=([^;]+)/i);
+  const match = header.match(CONTENT_DISPOSITION_FILENAME_RE);
   if (!match) {
     return null;
   }

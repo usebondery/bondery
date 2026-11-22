@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import { NextRequest } from "next/server";
 import { config, proxy } from "../../proxy.js";
 
+const WHITESPACE_RE = /\s+/;
+const CSP_NONCE_RE = /'nonce-[^']+'/;
 function requestFor(pathname: string): NextRequest {
   return new NextRequest(new URL(pathname, "https://www.example.test"));
 }
@@ -14,7 +16,7 @@ function parsePolicy(policy: string): Map<string, string[]> {
     if (trimmed.length === 0) {
       continue;
     }
-    const [name, ...sources] = trimmed.split(/\s+/);
+    const [name, ...sources] = trimmed.split(WHITESPACE_RE);
     if (name) {
       map.set(name, sources);
     }
@@ -26,7 +28,7 @@ describe("website proxy", () => {
   it("exports the Next.js config matcher, not proxyConfig", async () => {
     const module = (await import("../../proxy.js")) as Record<string, unknown>;
 
-    assert.equal(module.proxyConfig, undefined, "proxyConfig is silently ignored by Next.js");
+    assert.equal(module["proxyConfig"], undefined, "proxyConfig is silently ignored by Next.js");
     assert.equal(Array.isArray(config.matcher), true);
   });
 
@@ -87,7 +89,7 @@ describe("website proxy", () => {
     const response = proxy(requestFor("/"));
     const csp = response.headers.get("Content-Security-Policy") ?? "";
 
-    assert.match(csp, /'nonce-[^']+'/);
+    assert.match(csp, CSP_NONCE_RE);
     assert.equal(response.headers.get("X-Frame-Options"), null);
     assert.equal(response.headers.get("X-Content-Type-Options"), "nosniff");
   });

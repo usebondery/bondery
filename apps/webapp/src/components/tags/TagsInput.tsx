@@ -16,12 +16,6 @@ import { TagPill } from "@/components/tags/TagPill";
 import { useTagsInputTranslations } from "@/lib/i18n/generated/hooks";
 import "./TagsInput.css";
 
-export interface TagsInputTag {
-  color?: string | null;
-  id: string;
-  label: string;
-}
-
 interface TagsInputProps {
   /** Show the create-tag option. The person page uses this. The filter does not. */
   allowCreate?: boolean;
@@ -51,6 +45,12 @@ interface TagsInputProps {
 function appliedPillBorder(color: string | null | undefined): string {
   const borderColor = color ? `${color}66` : "var(--mantine-color-gray-4)";
   return `1px solid ${borderColor}`;
+}
+
+export interface TagsInputTag {
+  color?: string | null;
+  id: string;
+  label: string;
 }
 
 export function TagsInput({

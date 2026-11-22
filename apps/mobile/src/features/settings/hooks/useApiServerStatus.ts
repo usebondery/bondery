@@ -1,10 +1,11 @@
+import { detachPromise } from "@bondery/helpers/async";
 import * as Network from "expo-network";
 import { useFocusEffect } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { API_URL } from "../../../lib/config";
 import { isDeviceOffline, STATUS_PROBE_TIMEOUT_MS } from "./probeNetwork";
 
-export type ApiServerStatus = "checking" | "connected" | "offline" | "unreachable";
+type ApiServerStatus = "checking" | "connected" | "offline" | "unreachable";
 
 async function probeApiServer(): Promise<boolean> {
   if (!API_URL) {
@@ -32,7 +33,7 @@ async function probeApiServer(): Promise<boolean> {
   }
 }
 
-export function useApiServerStatus() {
+function useApiServerStatus() {
   const [status, setStatus] = useState<ApiServerStatus>("checking");
 
   /** Probes the server and returns the result. It sets no state. */
@@ -51,10 +52,10 @@ export function useApiServerStatus() {
 
   useEffect(() => {
     // The state starts as "checking", so the first probe needs no reset.
-    void probe().then(setStatus);
+    detachPromise(probe().then(setStatus));
 
     const subscription = Network.addNetworkStateListener(() => {
-      void refresh();
+      detachPromise(refresh());
     });
 
     return () => {
@@ -64,7 +65,7 @@ export function useApiServerStatus() {
 
   useFocusEffect(
     useCallback(() => {
-      void refresh();
+      detachPromise(refresh());
     }, [refresh]),
   );
 
@@ -74,3 +75,6 @@ export function useApiServerStatus() {
     status,
   };
 }
+
+export type { ApiServerStatus };
+export { useApiServerStatus };

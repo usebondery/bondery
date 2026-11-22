@@ -1,6 +1,8 @@
 import type { StorageAdapter } from "./adapter.js";
 import { S3Storage } from "./s3.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 let storageAdapter: StorageAdapter | null = null;
 
 function requireEnv(name: string): string {
@@ -40,7 +42,7 @@ export function resetStorageForTests(): void {
 }
 
 export function getPublicStorageBaseUrl(): string {
-  return requireEnv("BONDERY_PUBLIC_STORAGE_URL").replace(/\/+$/, "");
+  return requireEnv("BONDERY_PUBLIC_STORAGE_URL").replace(TRAILING_SLASHES_PATTERN, "");
 }
 
 export const AVATARS_BUCKET = "avatars";

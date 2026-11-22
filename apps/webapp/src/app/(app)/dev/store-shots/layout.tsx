@@ -23,7 +23,7 @@ export const viewport: Viewport = {
  * public page (no session gate — these live outside `/app`).
  */
 export default async function StoreShotsLayout({ children }: { children: ReactNode }) {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env["NODE_ENV"] === "production") {
     notFound();
   }
 

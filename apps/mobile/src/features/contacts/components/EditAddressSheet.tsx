@@ -3,6 +3,7 @@ import {
   GEOCODE_SUGGEST_DEBOUNCE_MS,
   GEOCODE_SUGGEST_MIN_QUERY_LENGTH,
 } from "@bondery/helpers/address";
+import { detachPromise } from "@bondery/helpers/async";
 import { CONTACT_ADDRESS_TYPE_OPTIONS } from "@bondery/helpers/contact";
 import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import {
@@ -86,7 +87,7 @@ function buildAddressEntry(
   };
 }
 
-export function EditAddressSheet({
+function EditAddressSheet({
   open,
   mode,
   initialEntry,
@@ -147,7 +148,9 @@ export function EditAddressSheet({
     const entry = initialEntry;
     syncEffectState(() => {
       setSuggestions([]);
-      setGeocodeStatus(entry?.latitude != null ? "geocoded" : "idle");
+      setGeocodeStatus(
+        entry?.latitude !== null && entry?.latitude !== undefined ? "geocoded" : "idle",
+      );
       setGeocodedSuggestion(null);
     });
   }, [open, initialEntry]);
@@ -212,7 +215,7 @@ export function EditAddressSheet({
 
     debounceRef.current = setTimeout(() => {
       activeQueryRef.current = trimmed;
-      void fetchSuggestions(trimmed);
+      detachPromise(fetchSuggestions(trimmed));
     }, GEOCODE_SUGGEST_DEBOUNCE_MS);
   }
 
@@ -439,3 +442,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export { EditAddressSheet };

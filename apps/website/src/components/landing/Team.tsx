@@ -5,6 +5,7 @@ import landing from "@bondery/translations/locales/en/platform/website/WebsiteLa
 import { Avatar, Card, Container, Flex, Group, Stack, Text, Title } from "@mantine/core";
 import { IconBrandLinkedin, IconBrandX } from "@tabler/icons-react";
 import { TEAM_MEMBERS, type TeamMember } from "@/data/team";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 interface TeamProps {
   title?: string;
@@ -39,7 +40,7 @@ function TeamCard({ member }: { member: TeamMember }) {
               target="_blank"
               variant="subtle"
             />
-            {member.x && (
+            {member.x ? (
               <ActionIconLink
                 ariaLabel={`${member.name} on X`}
                 color="gray"
@@ -50,7 +51,7 @@ function TeamCard({ member }: { member: TeamMember }) {
                 target="_blank"
                 variant="subtle"
               />
-            )}
+            ) : null}
           </Group>
         </Stack>
       </Group>
@@ -60,7 +61,7 @@ function TeamCard({ member }: { member: TeamMember }) {
 
 export function Team({ title }: TeamProps) {
   return (
-    <Container id="team" mb="xl" py="xl" size="lg">
+    <Container id={LANDING_SECTION_IDS.team} mb="xl" py="xl" size="lg">
       <Title fw={700} fz="1.875rem" mb="3rem" order={2} ta="center">
         {title ?? landing.Team.Title}
       </Title>

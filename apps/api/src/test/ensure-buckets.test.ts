@@ -3,6 +3,8 @@ import { describe, it } from "node:test";
 import type { S3Client } from "@aws-sdk/client-s3";
 import { ensureStorageBuckets } from "../lib/storage/ensure-buckets.js";
 
+const ENSURESTORAGEBUCKETS_FAILED_FOR_AVATARS_PATTERN = /ensureStorageBuckets failed for: avatars/;
+
 const RETRY_OPTIONS = { maxAttempts: 5, retryDelayMs: 0 } as const;
 
 function createMockClient(handlers: {
@@ -164,7 +166,7 @@ describe("ensureStorageBuckets", () => {
           client,
           ...RETRY_OPTIONS,
         }),
-      /ensureStorageBuckets failed for: avatars/,
+      ENSURESTORAGEBUCKETS_FAILED_FOR_AVATARS_PATTERN,
     );
 
     assert.equal(headCalls, 1);
@@ -211,7 +213,7 @@ describe("ensureStorageBuckets", () => {
           client,
           ...RETRY_OPTIONS,
         }),
-      /ensureStorageBuckets failed for: avatars/,
+      ENSURESTORAGEBUCKETS_FAILED_FOR_AVATARS_PATTERN,
     );
 
     assert.deepEqual(created, []);

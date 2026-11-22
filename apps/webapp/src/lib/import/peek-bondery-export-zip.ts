@@ -6,26 +6,9 @@ import {
 } from "@bondery/schemas";
 import { strFromU8, unzipSync } from "fflate";
 
+const PATTERN = /\/$/;
+
 const FOLLOWERS_JSON_PATTERN = /^followers(?:_\d+)?\.json$/;
-
-export type BonderyImportPeekKind = "instagram" | "invalid" | "linkedin" | "vcard";
-
-export class BonderyImportPeekError extends Error {
-  readonly kind: BonderyImportPeekKind;
-
-  constructor(kind: BonderyImportPeekKind, options?: ErrorOptions) {
-    super(kind, options);
-    this.kind = kind;
-    this.name = "BonderyImportPeekError";
-  }
-}
-
-export type BonderyImportPeekCounts = {
-  groups: number;
-  interactions: number;
-  people: number;
-  tags: number;
-};
 
 function normalizeZipPath(entryName: string): string {
   return entryName.replaceAll("\\", "/");
@@ -38,7 +21,7 @@ function zipBaseName(entryName: string): string {
 }
 
 function isNestedFilePath(entryName: string): boolean {
-  return normalizeZipPath(entryName).replace(/\/$/, "").includes("/");
+  return normalizeZipPath(entryName).replace(PATTERN, "").includes("/");
 }
 
 function detectForeignDump(entryNames: string[]): "instagram" | "linkedin" | "vcard" | null {
@@ -80,6 +63,25 @@ function countImportablePeople(peopleBytes: Uint8Array | undefined, fallback: nu
 
   return peopleFile.data.records.length;
 }
+
+export type BonderyImportPeekKind = "instagram" | "invalid" | "linkedin" | "vcard";
+
+export class BonderyImportPeekError extends Error {
+  readonly kind: BonderyImportPeekKind;
+
+  constructor(kind: BonderyImportPeekKind, options?: ErrorOptions) {
+    super(kind, options);
+    this.kind = kind;
+    this.name = "BonderyImportPeekError";
+  }
+}
+
+export type BonderyImportPeekCounts = {
+  groups: number;
+  interactions: number;
+  people: number;
+  tags: number;
+};
 
 /**
  * Client-side ZIP peek for Review chips and wrong-platform detection.

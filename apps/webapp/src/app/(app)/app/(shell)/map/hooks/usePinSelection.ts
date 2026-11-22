@@ -8,6 +8,46 @@ interface UsePinSelectionOptions {
   filteredPins: MapPin[];
 }
 
+function toggleSelection(current: Set<string>, id: string): Set<string> {
+  const next = new Set(current);
+  if (next.has(id)) {
+    next.delete(id);
+  } else {
+    next.add(id);
+  }
+  return next;
+}
+
+interface RangeSelectionOptions {
+  current: Set<string>;
+  currentIndex: number;
+  filteredPins: MapPin[];
+  id: string;
+  lastSelectedIndex: number;
+}
+
+/** Shift-click: select or clear every pin between the last click and this one. */
+function nextRangeSelection({
+  current,
+  currentIndex,
+  filteredPins,
+  id,
+  lastSelectedIndex,
+}: RangeSelectionOptions): Set<string> {
+  const start = Math.min(lastSelectedIndex, currentIndex);
+  const end = Math.max(lastSelectedIndex, currentIndex);
+  const next = new Set(current);
+  const shouldSelect = !current.has(id);
+  for (const pin of filteredPins.slice(start, end + 1)) {
+    if (shouldSelect) {
+      next.add(pin.id);
+    } else {
+      next.delete(pin.id);
+    }
+  }
+  return next;
+}
+
 /**
  * Row selection for the pins table: select all, toggle one, and shift-click ranges.
  * Each table view mounts its own instance, so a view switch starts with nothing selected.
@@ -62,44 +102,4 @@ export function usePinSelection({ filteredPins }: UsePinSelectionOptions) {
     selectedIds,
     someSelected,
   };
-}
-
-function toggleSelection(current: Set<string>, id: string): Set<string> {
-  const next = new Set(current);
-  if (next.has(id)) {
-    next.delete(id);
-  } else {
-    next.add(id);
-  }
-  return next;
-}
-
-interface RangeSelectionOptions {
-  current: Set<string>;
-  currentIndex: number;
-  filteredPins: MapPin[];
-  id: string;
-  lastSelectedIndex: number;
-}
-
-/** Shift-click: select or clear every pin between the last click and this one. */
-function nextRangeSelection({
-  current,
-  currentIndex,
-  filteredPins,
-  id,
-  lastSelectedIndex,
-}: RangeSelectionOptions): Set<string> {
-  const start = Math.min(lastSelectedIndex, currentIndex);
-  const end = Math.max(lastSelectedIndex, currentIndex);
-  const next = new Set(current);
-  const shouldSelect = !current.has(id);
-  for (const pin of filteredPins.slice(start, end + 1)) {
-    if (shouldSelect) {
-      next.add(pin.id);
-    } else {
-      next.delete(pin.id);
-    }
-  }
-  return next;
 }

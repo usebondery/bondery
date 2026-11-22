@@ -2,8 +2,6 @@ import { TIMEZONES_DATA } from "@bondery/helpers/locale";
 import { setClientCookie } from "@/lib/cookies/client";
 import { LOCALE_PREFS_COOKIE } from "@/lib/cookies/constants";
 
-export { LOCALE_PREFS_COOKIE };
-
 /**
  * ISO 3166-1 alpha-2 country codes (lowercase) that conventionally use
  * 12-hour (AM/PM) time format. All other countries default to 24-hour.
@@ -77,6 +75,8 @@ function normalizeTimezone(rawTimezone: string): string {
 
   return "UTC";
 }
+
+export { LOCALE_PREFS_COOKIE };
 
 /**
  * Detects the user's timezone and time format preference from the browser environment.

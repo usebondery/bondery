@@ -7,6 +7,8 @@ import { appendFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
+const BEFORE_INITIALIZATION_I = /before initialization/i;
+
 async function main() {
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const webappRoot = join(__dirname, "..");
@@ -58,7 +60,7 @@ async function main() {
   child.stderr?.on("data", (chunk) => {
     const text = String(chunk);
     stderrChunks.push(text);
-    if (/before initialization/i.test(text)) {
+    if (BEFORE_INITIALIZATION_I.test(text)) {
       log("D", "debug-ssr-routes.mjs", "TDZ stderr detected", { snippet: text.slice(0, 500) });
     }
   });
@@ -100,7 +102,7 @@ async function main() {
   }
 
   const stderr = stderrChunks.join("");
-  if (/before initialization/i.test(stderr)) {
+  if (BEFORE_INITIALIZATION_I.test(stderr)) {
     log("D", "debug-ssr-routes.mjs", "TDZ in server stderr", { stderr: stderr.slice(0, 2000) });
     console.error("TDZ detected in stderr");
     process.exitCode = 1;
@@ -110,4 +112,9 @@ async function main() {
   log("INIT", "debug-ssr-routes.mjs", "ssr route probe complete", { port });
 }
 
-void main();
+main().then(
+  () => undefined,
+  (error) => {
+    console.error(error);
+  },
+);

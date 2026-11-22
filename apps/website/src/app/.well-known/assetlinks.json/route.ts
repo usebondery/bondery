@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  */
 export function GET() {
   const links = buildAndroidAssetLinks({
-    fingerprintsCsv: process.env.BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS,
+    fingerprintsCsv: process.env["BONDERY_PUBLIC_ANDROID_SHA256_CERT_FINGERPRINTS"],
   });
 
   if (!links) {

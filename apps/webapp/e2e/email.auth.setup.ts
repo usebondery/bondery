@@ -3,6 +3,8 @@ import { expect, test as setup } from "@playwright/test";
 import { completeOnboardingIfNeeded } from "./complete-onboarding";
 import { loginWithEmail } from "./email-login";
 
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
+
 const AUTH_DIR = ".auth";
 const AUTH_FILE = ".auth/email-user.json";
 const E2E_AGENT_EMAIL = "e2e-agent@example.test";
@@ -17,7 +19,7 @@ setup("email login session", async ({ browser, page }) => {
       const reusePage = await reuse.newPage();
       try {
         await reusePage.goto("/app/home");
-        await reusePage.waitForURL(/\/app\/home(?:[/?#]|$)/, { timeout: 15_000 });
+        await reusePage.waitForURL(APP_HOME_URL, { timeout: 15_000 });
         await reuse.close();
         return;
       } catch {
@@ -30,6 +32,6 @@ setup("email login session", async ({ browser, page }) => {
 
   await loginWithEmail(page, E2E_AGENT_EMAIL);
   await completeOnboardingIfNeeded(page);
-  await expect(page).toHaveURL(/\/app\/home(?:[/?#]|$)/);
+  await expect(page).toHaveURL(APP_HOME_URL);
   await page.context().storageState({ path: AUTH_FILE });
 });

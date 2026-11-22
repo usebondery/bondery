@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { IconLogout, IconTrash } from "@tabler/icons-react-native";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -64,7 +65,7 @@ export function SettingsAccountScreen() {
 
   useEffect(() => {
     syncEffectState(() => {
-      void loadAccount();
+      detachPromise(loadAccount());
     });
   }, []);
 
@@ -118,7 +119,7 @@ export function SettingsAccountScreen() {
   };
 
   const confirmDeleteAccount = () => {
-    void runDeleteAccount();
+    detachPromise(runDeleteAccount());
   };
 
   return (
@@ -145,7 +146,7 @@ export function SettingsAccountScreen() {
             isLoading={isLoading}
             loadingMinHeight={120}
             onRetry={() => {
-              void loadAccount();
+              detachPromise(loadAccount());
             }}
           >
             <SettingsAccountProfileCard
@@ -163,7 +164,7 @@ export function SettingsAccountScreen() {
                 color="neutral"
                 disabled={pendingAction !== null}
                 onPress={() => {
-                  void handleLogout();
+                  detachPromise(handleLogout());
                 }}
                 rightSection={<IconLogout color={colors.textSecondary} size={16} />}
                 variant="outline"

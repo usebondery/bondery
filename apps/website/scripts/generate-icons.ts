@@ -3,6 +3,7 @@ import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { generateIcons } from "@bondery/branding/icon-generator";
+import { detachPromise } from "@bondery/helpers/async";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -56,7 +57,7 @@ async function main(): Promise<void> {
   }
 }
 
-void main().catch((error: unknown) => {
+detachPromise(main(), (error: unknown) => {
   console.error(error);
   process.exitCode = 1;
 });

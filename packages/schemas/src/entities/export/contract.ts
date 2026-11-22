@@ -33,33 +33,37 @@ import type {
   ImportTypeResult,
 } from "./types.js";
 
-type _BonderyExportFormat = Assert<
+export type _BonderyExportFormat = Assert<
   IsEqual<BonderyExportFormat, z.infer<typeof bonderyExportFormatSchema>>
 >;
-type _ExportCounts = Assert<IsEqual<ExportCounts, z.infer<typeof exportCountsSchema>>>;
-type _ExportSummary = Assert<IsEqual<ExportSummary, z.infer<typeof exportSummarySchema>>>;
-type _ExportSummaryResponse = Assert<
+export type _ExportCounts = Assert<IsEqual<ExportCounts, z.infer<typeof exportCountsSchema>>>;
+export type _ExportSummary = Assert<IsEqual<ExportSummary, z.infer<typeof exportSummarySchema>>>;
+export type _ExportSummaryResponse = Assert<
   IsEqual<ExportSummaryResponse, z.infer<typeof exportSummaryResponseSchema>>
 >;
-type _ExportManifest = Assert<IsEqual<ExportManifest, z.infer<typeof exportManifestSchema>>>;
-type _ExportPersonRecord = Assert<
+export type _ExportManifest = Assert<IsEqual<ExportManifest, z.infer<typeof exportManifestSchema>>>;
+export type _ExportPersonRecord = Assert<
   IsEqual<ExportPersonRecord, z.infer<typeof exportPersonRecordSchema>>
 >;
-type _ExportGroupRecord = Assert<
+export type _ExportGroupRecord = Assert<
   IsEqual<ExportGroupRecord, z.infer<typeof exportGroupRecordSchema>>
 >;
-type _ExportTagRecord = Assert<IsEqual<ExportTagRecord, z.infer<typeof exportTagRecordSchema>>>;
-type _ExportMembershipRecord = Assert<
+export type _ExportTagRecord = Assert<
+  IsEqual<ExportTagRecord, z.infer<typeof exportTagRecordSchema>>
+>;
+export type _ExportMembershipRecord = Assert<
   IsEqual<ExportMembershipRecord, z.infer<typeof exportMembershipRecordSchema>>
 >;
-type _ExportInteractionRecord = Assert<
+export type _ExportInteractionRecord = Assert<
   IsEqual<ExportInteractionRecord, z.infer<typeof exportInteractionRecordSchema>>
 >;
-type _ExportRelationshipRecord = Assert<
+export type _ExportRelationshipRecord = Assert<
   IsEqual<ExportRelationshipRecord, z.infer<typeof exportRelationshipRecordSchema>>
 >;
-type _ImportTypeResult = Assert<IsEqual<ImportTypeResult, z.infer<typeof importTypeResultSchema>>>;
-type _ImportResult = Assert<IsEqual<ImportResult, z.infer<typeof importResultSchema>>>;
-type _ImportResultResponse = Assert<
+export type _ImportTypeResult = Assert<
+  IsEqual<ImportTypeResult, z.infer<typeof importTypeResultSchema>>
+>;
+export type _ImportResult = Assert<IsEqual<ImportResult, z.infer<typeof importResultSchema>>>;
+export type _ImportResultResponse = Assert<
   IsEqual<ImportResultResponse, z.infer<typeof importResultResponseSchema>>
 >;

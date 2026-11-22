@@ -2,6 +2,10 @@ import { formatAddressLabel } from "@bondery/helpers/address";
 import type { Contact, ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import { firstNonEmpty } from "@/lib/shared/nonEmpty";
 
+function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
+  return entries;
+}
+
 export interface EditableAddress extends ContactAddressEntry {
   id: string;
 }
@@ -37,10 +41,6 @@ export function applyGeocodedSuggestion(
   return { ...suggestion, type };
 }
 
-function normalizeAddressTypes(entries: ContactAddressEntry[]): ContactAddressEntry[] {
-  return entries;
-}
-
 export function toEditableAddresses(contact: Contact): EditableAddress[] {
   const existing = Array.isArray(contact.addresses)
     ? (contact.addresses as ContactAddressEntry[])
@@ -56,7 +56,8 @@ export function toEditableAddresses(contact: Contact): EditableAddress[] {
         postalCode: address.addressPostalCode,
         state: address.addressState,
       });
-      return Object.assign({}, address, {
+      return {
+        ...address,
         id: `${address.type}-${index}`,
         type: address.type,
         value:
@@ -67,7 +68,7 @@ export function toEditableAddresses(contact: Contact): EditableAddress[] {
             address.addressLine1,
             contact.location,
           ) ?? "",
-      });
+      };
     });
   }
 

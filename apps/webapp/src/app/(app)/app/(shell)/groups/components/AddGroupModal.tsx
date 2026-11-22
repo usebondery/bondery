@@ -66,6 +66,10 @@ function getRandomColor(): string {
   );
 }
 
+type GroupFormFieldErrors = {
+  emoji?: string;
+};
+
 interface OpenAddGroupModalOptions {
   initialLabel?: string;
   initialSelectedIds?: string[];
@@ -76,26 +80,6 @@ interface OpenAddGroupModalOptions {
 function AddGroupModalTitle() {
   const t = useGroupsPageTranslations();
   return <ModalTitle icon={<IconUsersGroup size={24} />} text={t("AddGroupModal.Title")} />;
-}
-
-export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
-  const modalId = createModalId("add-group");
-
-  modals.open({
-    children: (
-      <AddGroupForm
-        initialLabel={options.initialLabel}
-        initialSelectedIds={options.initialSelectedIds}
-        modalId={modalId}
-        onCreated={options.onCreated}
-        repeatable={options.repeatable}
-      />
-    ),
-    modalId,
-    size: "md",
-    title: <AddGroupModalTitle />,
-    trapFocus: true,
-  });
 }
 
 const NO_SELECTED_IDS: string[] = [];
@@ -234,7 +218,7 @@ function AddGroupForm({
             <EmojiPicker
               disabled={isBlocking}
               emptyLabel={t("EmojiEmptySearch")}
-              error={form.errors.emoji as string | undefined}
+              error={(form.errors as GroupFormFieldErrors).emoji}
               label={t("EmojiLabel")}
               onChange={(emoji) => form.setFieldValue("emoji", emoji)}
               placeholder={t("EmojiSelectPlaceholder")}
@@ -323,4 +307,24 @@ function AddGroupForm({
       </Stack>
     </form>
   );
+}
+
+export function openAddGroupModal(options: OpenAddGroupModalOptions = {}) {
+  const modalId = createModalId("add-group");
+
+  modals.open({
+    children: (
+      <AddGroupForm
+        initialLabel={options.initialLabel}
+        initialSelectedIds={options.initialSelectedIds}
+        modalId={modalId}
+        onCreated={options.onCreated}
+        repeatable={options.repeatable}
+      />
+    ),
+    modalId,
+    size: "md",
+    title: <AddGroupModalTitle />,
+    trapFocus: true,
+  });
 }

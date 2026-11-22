@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import { detachPromise } from "@bondery/helpers/async";
 import GithubSlugger from "github-slugger";
 import {
   type FileObject,
@@ -13,6 +14,9 @@ import { glob } from "tinyglobby";
 
 import { createCheck } from "../../../scripts/check/check-report.mjs";
 
+const MDX_EXT_RE = /\.mdx$/;
+const MARKDOWN_HEADING_RE = /^#{1,6}\s+(.+?)\s*$/;
+const DOCS_URL_RE = /^\/docs(?:\/|$)/;
 const report = createCheck("check-docs-mdx");
 
 const DOCS_DIR = join(process.cwd(), "../../docs");
@@ -22,7 +26,7 @@ function isDocsPath(filePath: string): boolean {
 }
 
 function filePathToSlugs(filePath: string): string[] {
-  const rel = relative(DOCS_DIR, filePath).replace(/\.mdx$/, "");
+  const rel = relative(DOCS_DIR, filePath).replace(MDX_EXT_RE, "");
   if (rel === "index") {
     return [];
   }
@@ -84,7 +88,7 @@ function getHeadingsFromRaw(content: string): string[] {
       }
     }
 
-    const heading = line.match(/^#{1,6}\s+(.+?)\s*$/);
+    const heading = line.match(MARKDOWN_HEADING_RE);
     if (!heading) {
       continue;
     }
@@ -131,7 +135,7 @@ async function checkLinks() {
 
   scanned.fallbackUrls.push({
     meta: {},
-    url: /^\/docs(?:\/|$)/,
+    url: DOCS_URL_RE,
   });
 
   console.log(`Collected ${scanned.urls.size} URLs, ${scanned.fallbackUrls.length} fallbacks.`);

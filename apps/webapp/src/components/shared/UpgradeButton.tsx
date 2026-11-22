@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import type { ButtonProps } from "@mantine/core";
 import { Button, Modal, Tooltip } from "@mantine/core";
 import { IconSparkles } from "@tabler/icons-react";
@@ -28,7 +29,7 @@ export function UpgradeButton({ onSuccess, ...rest }: UpgradeButtonProps) {
       disabled={!upgradesEnabled}
       leftSection={<IconSparkles size={16} />}
       loading={isLoading}
-      onClick={() => void openCheckout()}
+      onClick={() => detachPromise(openCheckout())}
       {...rest}
     >
       {t("upgradeToPremium")}

@@ -8,6 +8,9 @@ import {
 import type { StorageAdapter, StoragePutOptions } from "./adapter.js";
 import { createS3Client, type S3ConnectionConfig } from "./s3-client.js";
 
+const LEADING_SLASHES_PATTERN = /^\/+/;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 function isStorageObjectMissingError(error: unknown): boolean {
   if (!error || typeof error !== "object") {
     return false;
@@ -54,7 +57,7 @@ export class S3Storage implements StorageAdapter {
         Body: data,
         Bucket: bucket,
         ContentType: opts?.contentType,
-        Key: key.replace(/^\/+/, ""),
+        Key: key.replace(LEADING_SLASHES_PATTERN, ""),
       }),
     );
   }
@@ -64,7 +67,7 @@ export class S3Storage implements StorageAdapter {
       const response = await this.client.send(
         new GetObjectCommand({
           Bucket: bucket,
-          Key: key.replace(/^\/+/, ""),
+          Key: key.replace(LEADING_SLASHES_PATTERN, ""),
         }),
       );
       return await streamToBuffer(response.Body);
@@ -81,7 +84,7 @@ export class S3Storage implements StorageAdapter {
       await this.client.send(
         new DeleteObjectCommand({
           Bucket: bucket,
-          Key: key.replace(/^\/+/, ""),
+          Key: key.replace(LEADING_SLASHES_PATTERN, ""),
         }),
       );
     } catch (error) {
@@ -93,8 +96,8 @@ export class S3Storage implements StorageAdapter {
   }
 
   getPublicUrl(bucket: string, key: string): string {
-    const normalizedKey = key.replace(/^\/+/, "");
-    return `${this.config.publicBaseUrl.replace(/\/$/, "")}/${bucket}/${normalizedKey}`;
+    const normalizedKey = key.replace(LEADING_SLASHES_PATTERN, "");
+    return `${this.config.publicBaseUrl.replace(TRAILING_SLASH_PATTERN, "")}/${bucket}/${normalizedKey}`;
   }
 
   async listKeys(bucket: string, prefix: string): Promise<string[]> {

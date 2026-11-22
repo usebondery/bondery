@@ -12,7 +12,7 @@ type NestedApiErrorJson = {
   };
 };
 
-export type ParsedApiErrorFields = {
+type ParsedApiErrorFields = {
   code: string | null;
   type: ApiErrorType | null;
   developerMessage: string | null;
@@ -56,6 +56,8 @@ const EMPTY_FIELDS: ParsedApiErrorFields = {
   requestId: null,
   type: null,
 };
+
+export type { ParsedApiErrorFields };
 
 export function extractApiErrorFields(text: string): ParsedApiErrorFields {
   try {

@@ -8,6 +8,22 @@ import type { ChatHydratedMessage } from "@/lib/api/resources/chat";
 import { useChatPageTranslations } from "@/lib/i18n/generated/hooks";
 import { ChatMessage } from "../message/ChatMessage";
 
+function ChatThreadFooter({ children }: { children: ReactNode }) {
+  return (
+    <Box
+      px="xl"
+      py="md"
+      style={{
+        backgroundColor: "var(--mantine-color-body)",
+        paddingBottom: "calc(var(--mantine-spacing-md) + env(safe-area-inset-bottom, 0px))",
+        paddingInline: "calc(var(--mantine-spacing-md) + var(--mantine-spacing-xl))",
+      }}
+    >
+      <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>{children}</Box>
+    </Box>
+  );
+}
+
 /**
  * Thread body: the new-chat hero, or the message list with the composer footer.
  *
@@ -170,21 +186,5 @@ export function ChatThreadView({
       </Box>
       <ChatThreadFooter>{composer}</ChatThreadFooter>
     </>
-  );
-}
-
-function ChatThreadFooter({ children }: { children: ReactNode }) {
-  return (
-    <Box
-      px="xl"
-      py="md"
-      style={{
-        backgroundColor: "var(--mantine-color-body)",
-        paddingBottom: "calc(var(--mantine-spacing-md) + env(safe-area-inset-bottom, 0px))",
-        paddingInline: "calc(var(--mantine-spacing-md) + var(--mantine-spacing-xl))",
-      }}
-    >
-      <Box style={{ margin: "0 auto", maxWidth: 800, width: "100%" }}>{children}</Box>
-    </Box>
   );
 }

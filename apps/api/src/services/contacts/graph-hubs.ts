@@ -1,12 +1,6 @@
 import type { RelationshipGraphGroup, RelationshipGraphHub } from "@bondery/schemas";
 import { buildLinkedinLogoUrl } from "../../lib/storage/avatar-urls.js";
 
-/** Company and school circles. They do not count toward the person cap. */
-export const RELATIONSHIP_GRAPH_HUB_CAP = 40;
-
-/** Group circles drawn behind the people. */
-export const RELATIONSHIP_GRAPH_GROUP_HULL_CAP = 8;
-
 const LEGAL_SUFFIXES = new Set([
   "co",
   "corp",
@@ -26,20 +20,20 @@ const LEGAL_SUFFIXES = new Set([
 const COMBINING_MARKS = /\p{M}/gu;
 const NOT_NAME_CHAR = /[^\p{L}\p{N}\s]/gu;
 
-export type WorkHistoryRow = {
+type WorkHistoryRow = {
   companyLinkedinId: string | null;
   companyName: string;
   endDate: Date | null;
   personId: string;
 };
 
-export type EducationHistoryRow = {
+type EducationHistoryRow = {
   personId: string;
   schoolLinkedinId: string | null;
   schoolName: string;
 };
 
-export type GraphGroupInput = {
+type GraphGroupInput = {
   color: string | null;
   emoji: string | null;
   id: string;
@@ -49,65 +43,12 @@ export type GraphGroupInput = {
 
 type HubKind = RelationshipGraphHub["kind"];
 
-/**
- * Trim, strip diacritics, and fold one trailing legal token.
- * Returns null when the name has no letters or digits left.
- */
-export function normalizeHubName(raw: string): string | null {
-  const stripped = raw.trim().normalize("NFD").replace(COMBINING_MARKS, "");
-  const lowered = stripped.toLowerCase().replaceAll("&", " ");
-  const collapsed = lowered.replace(NOT_NAME_CHAR, "").replace(/\s+/g, " ").trim();
-  if (!collapsed) {
-    return null;
-  }
-  const words = collapsed.split(" ");
-  if (words[0] === "the") {
-    words.shift();
-  }
-  const last = words.at(-1);
-  if (last && LEGAL_SUFFIXES.has(last)) {
-    words.pop();
-  }
-  const name = words.join(" ").trim();
-  return name.length > 0 ? name : null;
-}
-
 function linkedinId(value: string | null): string | null {
   if (value === null) {
     return null;
   }
   const trimmed = value.trim();
   return trimmed.length > 0 ? trimmed : null;
-}
-
-export function companyHubKey(row: {
-  companyLinkedinId: string | null;
-  companyName: string;
-}): string | null {
-  const id = linkedinId(row.companyLinkedinId);
-  if (id) {
-    return `company:li:${id}`;
-  }
-  const name = normalizeHubName(row.companyName);
-  if (!name) {
-    return null;
-  }
-  return `company:name:${name}`;
-}
-
-export function schoolHubKey(row: {
-  schoolLinkedinId: string | null;
-  schoolName: string;
-}): string | null {
-  const id = linkedinId(row.schoolLinkedinId);
-  if (id) {
-    return `school:li:${id}`;
-  }
-  const name = normalizeHubName(row.schoolName);
-  if (!name) {
-    return null;
-  }
-  return `school:name:${name}`;
 }
 
 function chooseLabel(names: readonly string[]): string {
@@ -154,6 +95,77 @@ function addMember(
   }
   bucket.names.push(input.rawName);
   bucket.people.add(input.personId);
+}
+
+type PlacedHubs = {
+  hubs: RelationshipGraphHub[];
+  personIds: string[];
+  truncated: boolean;
+};
+
+const HUB_LINKEDIN_MARK = ":li:";
+
+const MIN_GROUP_HUB_PERSON_COUNT = 3;
+
+export type { EducationHistoryRow, GraphGroupInput, PlacedHubs, WorkHistoryRow };
+
+/** Company and school circles. They do not count toward the person cap. */
+export const RELATIONSHIP_GRAPH_HUB_CAP = 40;
+
+/** Group circles drawn behind the people. */
+export const RELATIONSHIP_GRAPH_GROUP_HULL_CAP = 8;
+
+/**
+ * Trim, strip diacritics, and fold one trailing legal token.
+ * Returns null when the name has no letters or digits left.
+ */
+export function normalizeHubName(raw: string): string | null {
+  const stripped = raw.trim().normalize("NFD").replace(COMBINING_MARKS, "");
+  const lowered = stripped.toLowerCase().replaceAll("&", " ");
+  const collapsed = lowered.replace(NOT_NAME_CHAR, "").replace(/\s+/g, " ").trim();
+  if (!collapsed) {
+    return null;
+  }
+  const words = collapsed.split(" ");
+  if (words[0] === "the") {
+    words.shift();
+  }
+  const last = words.at(-1);
+  if (last && LEGAL_SUFFIXES.has(last)) {
+    words.pop();
+  }
+  const name = words.join(" ").trim();
+  return name.length > 0 ? name : null;
+}
+
+export function companyHubKey(row: {
+  companyLinkedinId: string | null;
+  companyName: string;
+}): string | null {
+  const id = linkedinId(row.companyLinkedinId);
+  if (id) {
+    return `company:li:${id}`;
+  }
+  const name = normalizeHubName(row.companyName);
+  if (!name) {
+    return null;
+  }
+  return `company:name:${name}`;
+}
+
+export function schoolHubKey(row: {
+  schoolLinkedinId: string | null;
+  schoolName: string;
+}): string | null {
+  const id = linkedinId(row.schoolLinkedinId);
+  if (id) {
+    return `school:li:${id}`;
+  }
+  const name = normalizeHubName(row.schoolName);
+  if (!name) {
+    return null;
+  }
+  return `school:name:${name}`;
 }
 
 /**
@@ -213,12 +225,6 @@ export function buildHubBuckets(
   });
   return hubs;
 }
-
-export type PlacedHubs = {
-  hubs: RelationshipGraphHub[];
-  personIds: string[];
-  truncated: boolean;
-};
 
 /**
  * Relationship people stay first. Hub-only people fill the remaining person slots,
@@ -329,8 +335,6 @@ export function placeGroupMembersOnCanvas(input: {
   return { personIds, truncated };
 }
 
-const HUB_LINKEDIN_MARK = ":li:";
-
 /** Logo URL for a hub whose id carries a LinkedIn company or school id. */
 export function withHubLogos(userId: string, hubs: RelationshipGraphHub[]): RelationshipGraphHub[] {
   return hubs.map((hub) => {
@@ -345,8 +349,6 @@ export function withHubLogos(userId: string, hubs: RelationshipGraphHub[]): Rela
     return { ...hub, logoUrl: buildLinkedinLogoUrl(userId, hubLinkedinId) };
   });
 }
-
-const MIN_GROUP_HUB_PERSON_COUNT = 3;
 
 /** Groups with at least three people on the canvas. Largest membership, then id. */
 export function selectGraphGroups(input: {

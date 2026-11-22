@@ -3,6 +3,10 @@ import { Dropzone } from "@mantine/dropzone";
 import { IconFileZip, IconUpload, IconX } from "@tabler/icons-react";
 import type { ReactElement, ReactNode } from "react";
 
+const DEFAULT_ACCEPT_ICON = <IconUpload size={52} stroke={1.5} />;
+const DEFAULT_REJECT_ICON = <IconX size={52} stroke={1.5} />;
+const DEFAULT_IDLE_ICON = <IconFileZip size={52} stroke={1.5} />;
+
 export interface DropzoneContentProps {
   acceptIcon?: ReactNode;
   description?: string;
@@ -11,10 +15,6 @@ export interface DropzoneContentProps {
   rejectIcon?: ReactNode;
   title: string;
 }
-
-const DEFAULT_ACCEPT_ICON = <IconUpload size={52} stroke={1.5} />;
-const DEFAULT_REJECT_ICON = <IconX size={52} stroke={1.5} />;
-const DEFAULT_IDLE_ICON = <IconFileZip size={52} stroke={1.5} />;
 
 export function DropzoneContent({
   acceptIcon = DEFAULT_ACCEPT_ICON,

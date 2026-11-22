@@ -182,7 +182,10 @@ async function main(): Promise<void> {
   await writeFile(sourcePath, stringifySortedRecord(source), "utf8");
 }
 
-void main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+main().then(
+  () => undefined,
+  (error) => {
+    console.error(error);
+    process.exitCode = 1;
+  },
+);

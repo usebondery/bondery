@@ -17,6 +17,14 @@ import { consumeStepUpToken, mintStepUpToken } from "../lib/auth/step-up-redis.j
 import { requireRedisCommands, shutdownRedis } from "../lib/data/redis.js";
 import { loadTestEnv } from "./load-test-env.js";
 
+const AUTH_START_PATTERN = /\/auth\/start/;
+const NEWLINE_OR_COMMA_PATTERN = /[\n,]/;
+const CALLBACKURL_PATTERN = /callbackURL=/;
+const CONFIRM_ACTION_DELETE_ACCOUNT_PATTERN = /\/confirm\?action=delete_account/;
+const LOGIN_PATTERN = /\/login/;
+const CONFIRM_ACTION_DELETE_ACCOUNT_HAS_RETURNED_PATTERN =
+  /\/confirm\?action=delete_account&has_returned=1/;
+
 loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
@@ -42,7 +50,7 @@ function cookieHeaderFromSetCookie(header: string | string[] | undefined): strin
     return "";
   }
   return raw
-    .split(/[\n,]/)
+    .split(NEWLINE_OR_COMMA_PATTERN)
     .map((part) => part.trim().split(";")[0]?.trim())
     .filter((part): part is string => Boolean(part) && part.includes("="))
     .join("; ");
@@ -154,8 +162,8 @@ describe("me step-up", () => {
     const sendResponse = await postMagicLink(email, RECONFIRM_CALLBACK_URL, RECONFIRM_CALLBACK_URL);
     assert.equal(sendResponse.statusCode, 200, sendResponse.body);
     assert.ok(lastSend?.url);
-    assert.match(lastSend.url, /callbackURL=/);
-    assert.doesNotMatch(decodeURIComponent(lastSend.url), /\/auth\/start/);
+    assert.match(lastSend.url, CALLBACKURL_PATTERN);
+    assert.doesNotMatch(decodeURIComponent(lastSend.url), AUTH_START_PATTERN);
   });
 
   it("accepts a confirm-page reconfirm callbackURL on magic-link send", async () => {
@@ -167,10 +175,10 @@ describe("me step-up", () => {
     );
     assert.equal(sendResponse.statusCode, 200, sendResponse.body);
     assert.ok(lastSend?.url);
-    assert.match(lastSend.url, /callbackURL=/);
-    assert.match(decodeURIComponent(lastSend.url), /\/confirm\?action=delete_account/);
-    assert.doesNotMatch(decodeURIComponent(lastSend.url), /\/auth\/start/);
-    assert.doesNotMatch(decodeURIComponent(lastSend.url), /\/login/);
+    assert.match(lastSend.url, CALLBACKURL_PATTERN);
+    assert.match(decodeURIComponent(lastSend.url), CONFIRM_ACTION_DELETE_ACCOUNT_PATTERN);
+    assert.doesNotMatch(decodeURIComponent(lastSend.url), AUTH_START_PATTERN);
+    assert.doesNotMatch(decodeURIComponent(lastSend.url), LOGIN_PATTERN);
   });
 
   it("accepts a confirm-page has_returned callbackURL on magic-link send", async () => {
@@ -182,12 +190,12 @@ describe("me step-up", () => {
     );
     assert.equal(sendResponse.statusCode, 200, sendResponse.body);
     assert.ok(lastSend?.url);
-    assert.match(lastSend.url, /callbackURL=/);
+    assert.match(lastSend.url, CALLBACKURL_PATTERN);
     assert.match(
       decodeURIComponent(lastSend.url),
-      /\/confirm\?action=delete_account&has_returned=1/,
+      CONFIRM_ACTION_DELETE_ACCOUNT_HAS_RETURNED_PATTERN,
     );
-    assert.doesNotMatch(decodeURIComponent(lastSend.url), /\/auth\/start/);
+    assert.doesNotMatch(decodeURIComponent(lastSend.url), AUTH_START_PATTERN);
   });
 
   it("mints a token for a fresh session cookie", async () => {

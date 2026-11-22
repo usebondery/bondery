@@ -1,6 +1,6 @@
 import type { PrismaClient } from "@bondery/db";
 
-export interface RankedPerson {
+interface RankedPerson {
   id: string;
   rank: number;
 }
@@ -14,6 +14,8 @@ type SearchPeopleOptions = {
 
 /** Matches `search_people_ids` / `count_search_people_ids` default threshold. */
 const PEOPLE_SEARCH_WORD_SIMILARITY_THRESHOLD = 0.3;
+
+export type { RankedPerson };
 
 /**
  * Fuzzy people search via `search_people_ids` (pg_trgm word_similarity).

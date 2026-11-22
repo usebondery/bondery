@@ -17,31 +17,6 @@ function caseFields(item, keys) {
   return object(keys.map((key) => [key, item[key]]));
 }
 
-export function claudeManifest(config, version) {
-  const { links } = config;
-  return object([
-    ["author", author(config)],
-    ["description", config.description],
-    ["displayName", config.displayName],
-    ["documentationUrl", links.documentation],
-    ["homepage", links.homepage],
-    ["icon", "./assets/icon.png"],
-    ["keywords", config.keywords],
-    ["license", config.license],
-    ["name", config.name],
-    ["privacyPolicyUrl", links.privacy],
-    ["repository", config.repository],
-    ["supportUrl", links.support],
-    ["termsOfServiceUrl", links.terms],
-    ["version", version],
-  ]);
-}
-
-export function claudeMcp(config) {
-  const server = mcpServer(config, config.hosts.claude.mcpType, []);
-  return object([["mcpServers", object([[config.mcp.serverName, server]])]]);
-}
-
 function openAiInterfaceFields(config, brandColor) {
   const host = config.hosts.openai;
   const { links } = config;
@@ -89,6 +64,31 @@ function openAiReview(host) {
     ["commerce", host.review.commerce],
     ["commerce_description", host.review.commerce_description],
   ]);
+}
+
+export function claudeManifest(config, version) {
+  const { links } = config;
+  return object([
+    ["author", author(config)],
+    ["description", config.description],
+    ["displayName", config.displayName],
+    ["documentationUrl", links.documentation],
+    ["homepage", links.homepage],
+    ["icon", "./assets/icon.png"],
+    ["keywords", config.keywords],
+    ["license", config.license],
+    ["name", config.name],
+    ["privacyPolicyUrl", links.privacy],
+    ["repository", config.repository],
+    ["supportUrl", links.support],
+    ["termsOfServiceUrl", links.terms],
+    ["version", version],
+  ]);
+}
+
+export function claudeMcp(config) {
+  const server = mcpServer(config, config.hosts.claude.mcpType, []);
+  return object([["mcpServers", object([[config.mcp.serverName, server]])]]);
 }
 
 export function openAiManifest(config, version, brandColor) {

@@ -11,8 +11,6 @@ const SOCIAL_PLATFORMS: SocialPlatform[] = [
   "signal",
 ];
 
-export type { SocialPlatform };
-
 type SocialsShape = {
   linkedin: string | null;
   instagram: string | null;
@@ -40,6 +38,8 @@ function asSocialPlatform(value: string): SocialPlatform | null {
 
   return null;
 }
+
+export type { SocialPlatform };
 
 /** Loads normalized socials rows and merges them into contact-shaped objects. */
 export async function attachContactSocials<T extends ContactWithId>(

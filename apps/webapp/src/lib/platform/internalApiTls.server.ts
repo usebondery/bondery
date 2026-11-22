@@ -16,20 +16,11 @@ import { getCACertificates, setDefaultCACertificates } from "node:tls";
 
 import { WEBAPP_INTERNAL_API_URL_ENV } from "@/lib/platform/runtimeConfig.env";
 
-export const INTERNAL_API_CA_FILE_ENV = "BONDERY_INFRA_INTERNAL_API_CA_FILE";
-
 const PEM_CERTIFICATE = /-----BEGIN CERTIFICATE-----[\s\S]+?-----END CERTIFICATE-----/g;
 
 type TrustStore = {
   getCACertificates: (type?: "default") => string[];
   setDefaultCACertificates: (certificates: string[]) => void;
-};
-
-export type InternalApiTlsOutcome = {
-  /** The CA file now trusted, or null when none is configured. */
-  caFile: string | null;
-  /** Set when a production webapp calls the API without TLS. */
-  warning: string | null;
 };
 
 function readCaFile(path: string, readTextFile: (filePath: string) => string): string[] {
@@ -53,6 +44,15 @@ function readCaFile(path: string, readTextFile: (filePath: string) => string): s
   }
   return certificates;
 }
+
+export const INTERNAL_API_CA_FILE_ENV = "BONDERY_INFRA_INTERNAL_API_CA_FILE";
+
+export type InternalApiTlsOutcome = {
+  /** The CA file now trusted, or null when none is configured. */
+  caFile: string | null;
+  /** Set when a production webapp calls the API without TLS. */
+  warning: string | null;
+};
 
 /**
  * Adds the internal API CA to Node's default trust store. Throws when the CA file cannot be
@@ -80,7 +80,7 @@ export function trustInternalApiCa(
   }
 
   const warning =
-    env.NODE_ENV === "production" && internalUrl.startsWith("http://")
+    env["NODE_ENV"] === "production" && internalUrl.startsWith("http://")
       ? `${WEBAPP_INTERNAL_API_URL_ENV} uses http://, so server-side calls to the API (tokens, user data) are not encrypted. Use the API's internal HTTPS listener. See https://docs.usebondery.com/deploy/configuration#internal-api-tls`
       : null;
 

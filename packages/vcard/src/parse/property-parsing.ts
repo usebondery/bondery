@@ -11,26 +11,6 @@ import type {
 } from "#model.js";
 import { TEL_URI_PREFIX } from "#uri-schemes.js";
 
-export function getParameter(property: VCardProperty, name: string): VCardParameter | undefined {
-  return property.parameters.find((parameter) => parameter.name === name);
-}
-
-export function getParameterValues(property: VCardProperty, name: string): string[] {
-  return property.parameters
-    .filter((parameter) => parameter.name === name)
-    .flatMap((parameter) => parameter.values)
-    .map((value) => value.trim())
-    .filter(Boolean);
-}
-
-export function decodeTextValue(value: string): string {
-  return value
-    .replace(/\\n/gi, "\n")
-    .replace(/\\,/g, ",")
-    .replace(/\\;/g, ";")
-    .replace(/\\\\/g, "\\");
-}
-
 function splitEscaped(value: string, separator: string): string[] {
   const parts: string[] = [];
   let current = "";
@@ -215,4 +195,24 @@ export function parseRelated(property: VCardProperty): VCardRelated {
     value: decodeTextValue(property.value),
     valueType,
   };
+}
+
+export function getParameter(property: VCardProperty, name: string): VCardParameter | undefined {
+  return property.parameters.find((parameter) => parameter.name === name);
+}
+
+export function getParameterValues(property: VCardProperty, name: string): string[] {
+  return property.parameters
+    .filter((parameter) => parameter.name === name)
+    .flatMap((parameter) => parameter.values)
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+export function decodeTextValue(value: string): string {
+  return value
+    .replace(/\\n/gi, "\n")
+    .replace(/\\,/g, ",")
+    .replace(/\\;/g, ";")
+    .replace(/\\\\/g, "\\");
 }

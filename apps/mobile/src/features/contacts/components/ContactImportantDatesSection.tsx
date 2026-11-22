@@ -49,7 +49,7 @@ function notifyLabel(
   return null;
 }
 
-export function ContactImportantDatesSection({
+function ContactImportantDatesSection({
   dates,
   contactFirstName,
   onSaveDates,
@@ -269,3 +269,5 @@ const styles = StyleSheet.create({
     fontSize: MOBILE_TYPOGRAPHY.fontSize.caption,
   },
 });
+
+export { ContactImportantDatesSection };

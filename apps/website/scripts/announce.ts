@@ -30,15 +30,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { getReadingTime } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import { loadEnvConfig } from "@next/env";
 import { getCategoryConfig } from "@/lib/blog/categories";
 import { allPostMeta } from "../content/blog/metadata";
 import { postDiscordAnnouncement } from "./lib/discord";
 import { postRedditAnnouncement, type RedditConfig } from "./lib/reddit";
 
+const TRAILING_SLASH_RE = /\/$/;
 loadEnvConfig(
   `${path.dirname(fileURLToPath(import.meta.url))}/..`,
-  process.env.NODE_ENV !== "production",
+  process.env["NODE_ENV"] !== "production",
 );
 
 // ---------------------------------------------------------------------------
@@ -101,13 +103,13 @@ async function main(): Promise<void> {
     return;
   }
 
-  const websiteUrl = process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(/\/$/, "");
-  const discordWebhookUrl = process.env.BONDERY_OPS_DISCORD_WEBHOOK_URL ?? "";
+  const websiteUrl = process.env["BONDERY_PUBLIC_WEBSITE_URL"]?.replace(TRAILING_SLASH_RE, "");
+  const discordWebhookUrl = process.env["BONDERY_OPS_DISCORD_WEBHOOK_URL"] ?? "";
   const redditConfig: RedditConfig = {
-    clientId: process.env.BONDERY_OPS_REDDIT_CLIENT_ID ?? "",
-    clientSecret: process.env.BONDERY_OPS_REDDIT_CLIENT_SECRET ?? "",
-    password: process.env.BONDERY_OPS_REDDIT_PASSWORD ?? "",
-    username: process.env.BONDERY_OPS_REDDIT_USERNAME ?? "",
+    clientId: process.env["BONDERY_OPS_REDDIT_CLIENT_ID"] ?? "",
+    clientSecret: process.env["BONDERY_OPS_REDDIT_CLIENT_SECRET"] ?? "",
+    password: process.env["BONDERY_OPS_REDDIT_PASSWORD"] ?? "",
+    username: process.env["BONDERY_OPS_REDDIT_USERNAME"] ?? "",
   };
 
   // ---------------------------------------------------------------------------
@@ -223,4 +225,4 @@ async function main(): Promise<void> {
   console.log("Announcement complete.");
 }
 
-void main();
+detachPromise(main());

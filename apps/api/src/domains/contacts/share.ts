@@ -26,7 +26,7 @@ import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 import type { DomainContext } from "../_shared/context.js";
 import { domainDb } from "../_shared/domain-db.js";
 
-export type ShareContactInput = {
+type ShareContactInput = {
   message?: string;
   personId: string;
   recipientEmails: string[];
@@ -46,19 +46,6 @@ type EnrichedContact = FullContactExtras & {
 
 function unnamedContactFallback(): string {
   return "Unnamed contact";
-}
-
-export function buildContactSharePreview(
-  personId: string,
-  source: ShareableFieldPreviewSource,
-): ContactSharePreviewResponse {
-  const contactName =
-    [source.firstName, source.lastName].filter(Boolean).join(" ") || unnamedContactFallback();
-  return {
-    availableFields: buildShareableFieldPreviews(source),
-    contactId: personId,
-    contactName,
-  };
 }
 
 function sharePreviewSource(
@@ -121,6 +108,21 @@ async function loadEnrichedShareContact(ctx: ShareContext, personId: string) {
   }));
 
   return { enriched, importantDates };
+}
+
+export type { ShareContactInput };
+
+export function buildContactSharePreview(
+  personId: string,
+  source: ShareableFieldPreviewSource,
+): ContactSharePreviewResponse {
+  const contactName =
+    [source.firstName, source.lastName].filter(Boolean).join(" ") || unnamedContactFallback();
+  return {
+    availableFields: buildShareableFieldPreviews(source),
+    contactId: personId,
+    contactName,
+  };
 }
 
 /**

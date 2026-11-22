@@ -3,6 +3,7 @@
  * Handles AI chat assistant streaming responses
  */
 
+import { detachPromise } from "@bondery/helpers/async";
 import type { ChatModelId, ChatTurnIntent } from "@bondery/schemas";
 import { chatRequestSchema } from "@bondery/schemas";
 import { standardErrorResponses } from "@bondery/schemas/http/responses";
@@ -226,14 +227,14 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
             }
 
             markWriteInterrupted(tracker);
-            void persistOnce("incomplete");
+            detachPromise(persistOnce("incomplete"));
           },
         });
       } catch (error) {
         request.log.error(error, "Chat stream failed");
       }
 
-      void persistAssistant;
+      detachPromise(persistAssistant);
     },
   );
 };

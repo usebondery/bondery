@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { IconCheck } from "@tabler/icons-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -38,7 +39,7 @@ interface ImportantDateWheelPickerSheetProps {
   opened: boolean;
 }
 
-export function ImportantDateWheelPickerSheet({
+function ImportantDateWheelPickerSheet({
   opened: open,
   initialIso,
   defaultWithoutYear = false,
@@ -98,10 +99,12 @@ export function ImportantDateWheelPickerSheet({
   function handleDone() {
     const iso = toImportantDateIso(wheelValue);
     onConfirm(iso);
-    void AccessibilityInfo.announceForAccessibility(
-      tMobileContactIdentity("DateSetAnnouncement").replace(
-        "{date}",
-        formatImportantDate(iso, formatCtx),
+    detachPromise(
+      AccessibilityInfo.announceForAccessibility(
+        tMobileContactIdentity("DateSetAnnouncement").replace(
+          "{date}",
+          formatImportantDate(iso, formatCtx),
+        ),
       ),
     );
     onCancel();
@@ -109,10 +112,12 @@ export function ImportantDateWheelPickerSheet({
 
   function handleWithoutYearToggle(checked: boolean) {
     updateWheelValue({ withoutYear: checked });
-    void AccessibilityInfo.announceForAccessibility(
-      checked
-        ? tMobileContactIdentity("YearHiddenAnnouncement")
-        : tMobileContactIdentity("YearShownAnnouncement"),
+    detachPromise(
+      AccessibilityInfo.announceForAccessibility(
+        checked
+          ? tMobileContactIdentity("YearHiddenAnnouncement")
+          : tMobileContactIdentity("YearShownAnnouncement"),
+      ),
     );
   }
 
@@ -216,3 +221,5 @@ const styles = StyleSheet.create({
     minHeight: CHECKBOX_ROW_MIN_HEIGHT,
   },
 });
+
+export { ImportantDateWheelPickerSheet };

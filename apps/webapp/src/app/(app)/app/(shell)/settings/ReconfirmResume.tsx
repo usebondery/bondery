@@ -1,8 +1,9 @@
 "use client";
 
 import { getAuthUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
-import type { ApiKeyListItem, McpConsentListItem } from "@bondery/schemas";
+import type { ApiKeyListItem, McpConsentListItem, UserIdentity } from "@bondery/schemas";
 import type { TranslateFn } from "@bondery/translations";
 import { notifications } from "@mantine/notifications";
 import { type QueryClient, useQueryClient } from "@tanstack/react-query";
@@ -47,115 +48,9 @@ function stripReconfirmFromLocation(): void {
   window.history.replaceState(null, "", next);
 }
 
-export function ReconfirmResume() {
-  const purposeRef = useRef<ReconfirmPurpose | null | undefined>(undefined);
-  const targetRef = useRef<string | null>(null);
-  const openedRef = useRef(false);
-  const tProfile = useSettingsPageTranslations("Profile");
-  const tData = useSettingsPageTranslations("DataManagement");
-  const tIntegration = useSettingsPageTranslations("Integration");
-  const tApiKeys = useSettingsPageTranslations("ApiKeys");
-  const tAiAssistants = useSettingsPageTranslations("AiAssistants");
-  const tCommon = useCommonTranslations();
-  const queryClient = useQueryClient();
-  const { data: settingsResult } = useSettingsQuery();
-  const deleteAccountMutation = useDeleteAccountMutation();
-  const deleteApiKeyMutation = useDeleteApiKeyMutation();
-  const revokeMcpConsentMutation = useRevokeMcpConsentMutation();
-
-  useEffect(() => {
-    if (purposeRef.current !== undefined) {
-      return;
-    }
-    const params = new URL(window.location.href).searchParams;
-    purposeRef.current = parseReconfirmPurpose(params.get(CONFIRM_ACTION_PARAM));
-    targetRef.current = parseConfirmTarget(params.get(CONFIRM_TARGET_PARAM));
-    stripReconfirmFromLocation();
-  }, []);
-
-  useEffect(() => {
-    const purpose = purposeRef.current;
-    if (!purpose || openedRef.current || !settingsResult?.data) {
-      return;
-    }
-    openedRef.current = true;
-
-    const settings = settingsResult.data;
-    const identities = Array.isArray(settings.identities)
-      ? (settings.identities as Array<{
-          id: string;
-          identity_id: string;
-          provider: string;
-          user_id: string;
-        }>)
-      : [];
-    const providers = Array.isArray(settings.providers) ? (settings.providers as string[]) : [];
-    const email = typeof settings.email === "string" ? settings.email : "";
-    const bffUserId = identities[0]?.user_id ?? null;
-    const confirmUrl = buildReconfirmCallbackUrl(
-      window.location.origin,
-      purpose,
-      targetRef.current,
-    );
-
-    void (async () => {
-      const ba = await getBetterAuthSessionIdentity();
-      const match = baIdentityMatchesBff({
-        baEmail: ba?.email ?? null,
-        baUserId: ba?.id ?? null,
-        bffEmail: email,
-        bffUserId,
-      });
-      const fresh = await isBetterAuthSessionFresh();
-      if (!match || !fresh) {
-        window.location.assign(confirmUrl);
-        return;
-      }
-
-      try {
-        await runResumedAction({
-          deleteAccount: (token) => deleteAccountMutation.mutateAsync(token),
-          identities,
-          providers,
-          purpose,
-          queryClient,
-          revokeApiKey: (id, token) => deleteApiKeyMutation.mutateAsync({ id, stepUpToken: token }),
-          revokeMcpConsent: (id, token) =>
-            revokeMcpConsentMutation.mutateAsync({ id, stepUpToken: token }),
-          tAiAssistants,
-          tApiKeys,
-          targetId: targetRef.current,
-          tCommon,
-          tData,
-          tIntegration,
-          tProfile,
-        });
-      } catch (error) {
-        if (isSessionStaleError(error)) {
-          window.location.assign(confirmUrl);
-        }
-      }
-    })();
-  }, [
-    deleteAccountMutation,
-    deleteApiKeyMutation,
-    queryClient,
-    revokeMcpConsentMutation,
-    settingsResult,
-    tAiAssistants,
-    tApiKeys,
-    tCommon,
-    tData,
-    tIntegration,
-    tProfile,
-  ]);
-
-  return null;
-}
-
 async function runResumedAction(options: {
   deleteAccount: (token: string) => Promise<void>;
-  identities: Array<{ id: string; identity_id: string; provider: string; user_id: string }>;
+  identities: UserIdentity[];
   providers: string[];
   purpose: ReconfirmPurpose;
   queryClient: QueryClient;
@@ -223,7 +118,7 @@ async function runResumedAction(options: {
           provider === "github" ? options.tIntegration("GitHub") : options.tIntegration("LinkedIn"),
         identities: options.identities,
         onUnlinked: (unlinked) => {
-          void invalidateSettings(options.queryClient);
+          detachPromise(invalidateSettings(options.queryClient));
           notifications.show(
             successNotificationTemplate({
               description: options.tIntegration("UnlinkSuccess", { provider: unlinked }),
@@ -291,4 +186,106 @@ async function runResumedAction(options: {
       return _exhaustive;
     }
   }
+}
+
+export function ReconfirmResume() {
+  const purposeRef = useRef<ReconfirmPurpose | null | undefined>(undefined);
+  const targetRef = useRef<string | null>(null);
+  const openedRef = useRef(false);
+  const tProfile = useSettingsPageTranslations("Profile");
+  const tData = useSettingsPageTranslations("DataManagement");
+  const tIntegration = useSettingsPageTranslations("Integration");
+  const tApiKeys = useSettingsPageTranslations("ApiKeys");
+  const tAiAssistants = useSettingsPageTranslations("AiAssistants");
+  const tCommon = useCommonTranslations();
+  const queryClient = useQueryClient();
+  const { data: settingsResult } = useSettingsQuery();
+  const deleteAccountMutation = useDeleteAccountMutation();
+  const deleteApiKeyMutation = useDeleteApiKeyMutation();
+  const revokeMcpConsentMutation = useRevokeMcpConsentMutation();
+
+  useEffect(() => {
+    if (purposeRef.current !== undefined) {
+      return;
+    }
+    const params = new URL(window.location.href).searchParams;
+    purposeRef.current = parseReconfirmPurpose(params.get(CONFIRM_ACTION_PARAM));
+    targetRef.current = parseConfirmTarget(params.get(CONFIRM_TARGET_PARAM));
+    stripReconfirmFromLocation();
+  }, []);
+
+  useEffect(() => {
+    const purpose = purposeRef.current;
+    if (!purpose || openedRef.current || !settingsResult?.data) {
+      return;
+    }
+    openedRef.current = true;
+
+    const settings = settingsResult.data;
+    const identities = settings.identities ?? [];
+    const providers = settings.providers ?? [];
+    const email = settings.email ?? "";
+    const bffUserId = identities[0]?.user_id ?? null;
+    const confirmUrl = buildReconfirmCallbackUrl(
+      window.location.origin,
+      purpose,
+      targetRef.current,
+    );
+
+    detachPromise(
+      (async () => {
+        const ba = await getBetterAuthSessionIdentity();
+        const match = baIdentityMatchesBff({
+          baEmail: ba?.email ?? null,
+          baUserId: ba?.id ?? null,
+          bffEmail: email,
+          bffUserId,
+        });
+        const fresh = await isBetterAuthSessionFresh();
+        if (!match || !fresh) {
+          window.location.assign(confirmUrl);
+          return;
+        }
+
+        try {
+          await runResumedAction({
+            deleteAccount: (token) => deleteAccountMutation.mutateAsync(token),
+            identities,
+            providers,
+            purpose,
+            queryClient,
+            revokeApiKey: (id, token) =>
+              deleteApiKeyMutation.mutateAsync({ id, stepUpToken: token }),
+            revokeMcpConsent: (id, token) =>
+              revokeMcpConsentMutation.mutateAsync({ id, stepUpToken: token }),
+            tAiAssistants,
+            tApiKeys,
+            targetId: targetRef.current,
+            tCommon,
+            tData,
+            tIntegration,
+            tProfile,
+          });
+        } catch (error) {
+          if (isSessionStaleError(error)) {
+            window.location.assign(confirmUrl);
+          }
+        }
+      })(),
+    );
+  }, [
+    deleteAccountMutation,
+    deleteApiKeyMutation,
+    queryClient,
+    revokeMcpConsentMutation,
+    settingsResult,
+    tAiAssistants,
+    tApiKeys,
+    tCommon,
+    tData,
+    tIntegration,
+    tProfile,
+  ]);
+
+  return null;
 }

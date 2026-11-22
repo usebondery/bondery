@@ -1,6 +1,32 @@
 import type { DateFormatPreference, TimeFormatPreference } from "#entities/settings/types.js";
 import { intlTagForLocale } from "./supported-locale/schema.js";
 
+const DATE_FORMAT_VALUES = ["locale", "mdy", "dmy", "ymd"] as const;
+const TIME_FORMAT_VALUES = ["24h", "12h"] as const;
+const AMBIGUOUS_NUMERIC_DATE = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/;
+
+type NumericDateOrder = "mdy" | "dmy" | "ymd";
+
+function joinNumericDate(
+  order: NumericDateOrder,
+  month: string,
+  day: string,
+  year: string,
+): string {
+  const sep = order === "ymd" ? "-" : "/";
+  const parts =
+    order === "mdy"
+      ? [month, day, year]
+      : order === "dmy"
+        ? [day, month, year]
+        : [year, month, day];
+  return parts.join(sep);
+}
+
+function pad2(value: string): string {
+  return value.padStart(2, "0");
+}
+
 export type TextDirection = "ltr" | "rtl";
 
 /** Maps catalog `dir` to a document direction. */
@@ -8,16 +34,12 @@ export function directionFromDirField(dir: "ltr" | "rtl" | null | undefined): Te
   return dir === "rtl" ? "rtl" : "ltr";
 }
 
-const DATE_FORMAT_VALUES = ["locale", "mdy", "dmy", "ymd"] as const;
-
 export function coerceDateFormatPreference(raw: string | null | undefined): DateFormatPreference {
   if (raw && (DATE_FORMAT_VALUES as readonly string[]).includes(raw)) {
     return raw as DateFormatPreference;
   }
   return "locale";
 }
-
-const TIME_FORMAT_VALUES = ["24h", "12h"] as const;
 
 export function coerceTimeFormatPreference(raw: string | null | undefined): TimeFormatPreference {
   if (raw && (TIME_FORMAT_VALUES as readonly string[]).includes(raw)) {
@@ -44,28 +66,6 @@ export interface FormatOrderedDateOptions {
   dateFormat: DateFormatPreference;
   intlLocaleTag: string;
   timeZone?: string;
-}
-
-type NumericDateOrder = "mdy" | "dmy" | "ymd";
-
-function joinNumericDate(
-  order: NumericDateOrder,
-  month: string,
-  day: string,
-  year: string,
-): string {
-  const sep = order === "ymd" ? "-" : "/";
-  const parts =
-    order === "mdy"
-      ? [month, day, year]
-      : order === "dmy"
-        ? [day, month, year]
-        : [year, month, day];
-  return parts.join(sep);
-}
-
-function pad2(value: string): string {
-  return value.padStart(2, "0");
 }
 
 /**
@@ -133,8 +133,6 @@ export function fontStackForLocale(locale: string | null | undefined): LocaleFon
       return null;
   }
 }
-
-const AMBIGUOUS_NUMERIC_DATE = /^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/;
 
 /**
  * Parses `MM/DD/YYYY` or `DD/MM/YYYY` when the user chose an order preference.

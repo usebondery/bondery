@@ -101,7 +101,7 @@ function NotifyBellIcon({ muted, color }: { muted: boolean; color: string }) {
   );
 }
 
-export function EditImportantDateSheet({
+function EditImportantDateSheet({
   open,
   mode,
   initialEntry,
@@ -406,3 +406,5 @@ const styles = StyleSheet.create({
     width: 16,
   },
 });
+
+export { EditImportantDateSheet };

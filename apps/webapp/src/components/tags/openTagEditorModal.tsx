@@ -63,7 +63,7 @@ const COLOR_SWATCHES = [
 ];
 
 function randomHexColor() {
-  return `#${Math.floor(Math.random() * 0xffffff)
+  return `#${Math.floor(Math.random() * 0xff_ff_ff)
     .toString(16)
     .padStart(6, "0")}`;
 }
@@ -167,7 +167,7 @@ function TagEditorModalBody({
     const map = new Map(pickerContacts.map((contact) => [contact.id, contact]));
     return ids
       .map((id) => map.get(id))
-      .filter((contact): contact is ContactSelectable => contact != null)
+      .filter((contact): contact is ContactSelectable => contact !== null && contact !== undefined)
       .slice(0, 3)
       .map((contact) => ({
         avatar: contact.avatar,

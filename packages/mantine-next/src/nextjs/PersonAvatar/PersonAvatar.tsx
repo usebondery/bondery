@@ -41,9 +41,7 @@ export function PersonAvatar({
     />
   );
 
-  return (
-    <PersonAvatarTooltip person={person}>
-      {isClickable ? <Link href={hrefAssert(resolvedHref)}>{avatar}</Link> : avatar}
-    </PersonAvatarTooltip>
-  );
+  const markedUp = isClickable ? <Link href={hrefAssert(resolvedHref)}>{avatar}</Link> : avatar;
+
+  return <PersonAvatarTooltip person={person}>{markedUp}</PersonAvatarTooltip>;
 }

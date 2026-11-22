@@ -13,6 +13,14 @@ import {
   renderOpenAiTree,
 } from "./build-llm-plugins.mjs";
 
+const CATCH_UP_RE = /`catch-up`/;
+const SHARE_PERSON_RE = /`share-person`/;
+const CONNECT_THE_BONDERY_PLUGIN_IN_CHATGPT_RE =
+  /connect the Bondery plugin in ChatGPT or Codex and sign in/;
+const SIGNED_OUT_RE = /- \*\*Signed out:\*\*/;
+const INSTALL_THE_BONDERY_PLUGIN_IN_CHATGPT_RE = /Install the Bondery plugin in ChatGPT or Codex/;
+const THE_BONDERY_MCP_SERVER_IS_NOT_RE = /the Bondery MCP server is not connected/;
+
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const FIXTURE_VERSION = "0.0.0-fixture";
 const SKILLS = ["catch-up", "get-to-know", "onboarding", "reach-out", "remember", "share-person"];
@@ -67,8 +75,8 @@ describe("llm plugin build", () => {
     assert.equal(iface.composerIconDark, "./assets/icon.png");
     assert.equal(iface.onboardingSkill, "./skills/onboarding/SKILL.md");
     assert.deepEqual(manifest.extensions["com.openai"].publication.countries, []);
-    assert.match(openai.get("skills/onboarding/SKILL.md").toString("utf8"), /`catch-up`/);
-    assert.match(openai.get("skills/onboarding/SKILL.md").toString("utf8"), /`share-person`/);
+    assert.match(openai.get("skills/onboarding/SKILL.md").toString("utf8"), CATCH_UP_RE);
+    assert.match(openai.get("skills/onboarding/SKILL.md").toString("utf8"), SHARE_PERSON_RE);
   });
 
   it("keeps the OpenAI subtitle within 30 characters", () => {
@@ -87,11 +95,11 @@ describe("llm plugin build", () => {
     }
     const skill = openai.get("skills/catch-up/SKILL.md").toString("utf8");
     assert.equal(skill.includes("llm-plugin-connect"), false);
-    assert.match(skill, /connect the Bondery plugin in ChatGPT or Codex and sign in/);
-    assert.match(skill, /- \*\*Signed out:\*\*/);
+    assert.match(skill, CONNECT_THE_BONDERY_PLUGIN_IN_CHATGPT_RE);
+    assert.match(skill, SIGNED_OUT_RE);
     const readme = openai.get("README.md").toString("utf8");
     assert.equal(readme.includes("llm-plugin-connect"), false);
-    assert.match(readme, /Install the Bondery plugin in ChatGPT or Codex/);
+    assert.match(readme, INSTALL_THE_BONDERY_PLUGIN_IN_CHATGPT_RE);
   });
 
   it("keeps Claude out of the OpenAI tree", () => {
@@ -111,7 +119,7 @@ describe("llm plugin build", () => {
     for (const [rel, body] of mcpSkills) {
       assert.equal(body.includes("llm-plugin-connect"), false, rel);
       assert.equal(body.includes("Claude"), false, rel);
-      assert.match(body, /the Bondery MCP server is not connected/, rel);
+      assert.match(body, THE_BONDERY_MCP_SERVER_IS_NOT_RE, rel);
     }
     const pluginSkill = openai.get("skills/catch-up/SKILL.md").toString("utf8");
     const before = pluginSkill.slice(0, pluginSkill.indexOf("- **Not connected:**"));

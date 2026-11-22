@@ -12,6 +12,7 @@ import { i18n } from "@better-auth/i18n";
 import { mcp } from "@better-auth/mcp";
 import { passkey } from "@better-auth/passkey";
 import { prisma } from "@bondery/db";
+import { detachPromise } from "@bondery/helpers/async";
 import { PLATFORM_ADMIN_ROLE, PLATFORM_USER_ROLE } from "@bondery/helpers/auth/platform-admin";
 import { resolveCookieDomain } from "@bondery/helpers/auth/resolve-cookie-domain";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
@@ -126,17 +127,17 @@ export function createBonderyAuth() {
 
             const signup_method = resolveSignupMethodFromProviderId(account.providerId);
 
-            void import("../../services/analytics/posthog-capture.js")
-              .then(({ captureProductEvent }) =>
-                captureProductEvent(
-                  { user: { email: user.email, id: user.id } },
-                  "signup_flow:user_create",
-                  { signup_method },
-                ),
-              )
-              .catch(() => {
-                // captureProductEvent is best-effort during signup
-              });
+            // captureProductEvent is best-effort during signup
+            detachPromise(
+              import("../../services/analytics/posthog-capture.js").then(
+                ({ captureProductEvent }) =>
+                  captureProductEvent(
+                    { user: { email: user.email, id: user.id } },
+                    "signup_flow:user_create",
+                    { signup_method },
+                  ),
+              ),
+            );
           },
         },
       },
@@ -151,31 +152,33 @@ export function createBonderyAuth() {
               userId: user.id,
             });
 
-            void import("../../services/notifications/welcome.js")
-              .then(({ sendWelcomeEmailIfNeeded }) =>
-                sendWelcomeEmailIfNeeded({
-                  email: user.email,
-                  language: locale,
-                  userId: user.id,
-                  userName: user.name,
-                }),
-              )
-              .catch(() => {
+            detachPromise(
+              import("../../services/notifications/welcome.js").then(
+                ({ sendWelcomeEmailIfNeeded }) =>
+                  sendWelcomeEmailIfNeeded({
+                    email: user.email,
+                    language: locale,
+                    userId: user.id,
+                    userName: user.name,
+                  }),
+              ),
+              () => {
                 // sendWelcomeEmailIfNeeded logs failures internally
-              });
+              },
+            );
 
             if (isMagicLinkSignupContext(ctx)) {
-              void import("../../services/analytics/posthog-capture.js")
-                .then(({ captureProductEvent }) =>
-                  captureProductEvent(
-                    { user: { email: user.email, id: user.id } },
-                    "signup_flow:user_create",
-                    { signup_method: SIGNUP_METHOD.email },
-                  ),
-                )
-                .catch(() => {
-                  // captureProductEvent is best-effort during signup
-                });
+              // captureProductEvent is best-effort during signup
+              detachPromise(
+                import("../../services/analytics/posthog-capture.js").then(
+                  ({ captureProductEvent }) =>
+                    captureProductEvent(
+                      { user: { email: user.email, id: user.id } },
+                      "signup_flow:user_create",
+                      { signup_method: SIGNUP_METHOD.email },
+                    ),
+                ),
+              );
             }
           },
           before: async (user) => {

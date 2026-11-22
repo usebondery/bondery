@@ -1,5 +1,10 @@
 import type { EnvVarDef, ExampleProfile } from "./manifest-types.js";
 
+/** True when a public URL example is Portless local (`.test` or classic `.localhost`). */
+function isPortlessLocalPublicUrl(value: string): boolean {
+  return value.includes("usebondery.test") || value.includes("localhost");
+}
+
 /** Operator-facing sections in `deploy/bondery/.env.example` (order matters). */
 export const DEPLOY_GROUP_ORDER = [
   "Image tags",
@@ -73,11 +78,6 @@ export function resolveExampleValue(entry: EnvVarDef, profile: ExampleProfile): 
     }
   }
   return value;
-}
-
-/** True when a public URL example is Portless local (`.test` or classic `.localhost`). */
-function isPortlessLocalPublicUrl(value: string): boolean {
-  return value.includes("usebondery.test") || value.includes("localhost");
 }
 
 /** Sort deploy example rows by DEPLOY_GROUP_ORDER then key. */

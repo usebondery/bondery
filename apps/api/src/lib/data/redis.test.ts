@@ -8,6 +8,8 @@ import {
   shutdownRedis,
 } from "./redis.js";
 
+const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL must be set/;
+
 describe("redis shared clients", () => {
   it("returns undefined when BONDERY_PRIVATE_REDIS_URL is unset", () => {
     const previous = process.env.BONDERY_PRIVATE_REDIS_URL;
@@ -33,7 +35,7 @@ describe("redis shared clients", () => {
     resetRedisClientsForTests();
 
     try {
-      assert.throws(() => requireRedisCommands(), /BONDERY_PRIVATE_REDIS_URL must be set/);
+      assert.throws(() => requireRedisCommands(), BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN);
     } finally {
       if (previous === undefined) {
         delete process.env.BONDERY_PRIVATE_REDIS_URL;

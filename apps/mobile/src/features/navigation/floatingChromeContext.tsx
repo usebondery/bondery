@@ -1,6 +1,6 @@
 import { createContext, type ReactNode, useContext, useState } from "react";
 
-export type FloatingActionBarSlot = "contacts-selection" | null;
+type FloatingActionBarSlot = "contacts-selection" | null;
 
 interface FloatingChromeContextValue {
   actionBarSlot: FloatingActionBarSlot;
@@ -10,7 +10,7 @@ interface FloatingChromeContextValue {
 
 const FloatingChromeContext = createContext<FloatingChromeContextValue | null>(null);
 
-export function FloatingChromeProvider({ children }: { children: ReactNode }) {
+function FloatingChromeProvider({ children }: { children: ReactNode }) {
   const [actionBarSlot, setActionBarSlotState] = useState<FloatingActionBarSlot>(null);
 
   function setActionBarSlot(slot: FloatingActionBarSlot) {
@@ -30,7 +30,7 @@ export function FloatingChromeProvider({ children }: { children: ReactNode }) {
   return <FloatingChromeContext.Provider value={value}>{children}</FloatingChromeContext.Provider>;
 }
 
-export function useFloatingChrome() {
+function useFloatingChrome() {
   const context = useContext(FloatingChromeContext);
 
   if (!context) {
@@ -39,3 +39,6 @@ export function useFloatingChrome() {
 
   return context;
 }
+
+export type { FloatingActionBarSlot };
+export { FloatingChromeProvider, useFloatingChrome };

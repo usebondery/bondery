@@ -8,6 +8,10 @@ import {
   resolveRedisConnectionOptions,
 } from "./redis-connection-options.js";
 
+const REDISS_PATTERN = /rediss:\/\//;
+const NOT_BOTH_PATTERN = /not both/;
+const EMPTY_FILE_PATTERN = /empty file/;
+
 const FILES: Record<string, string> = {
   "/secrets/ca.crt": "-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----\n",
   "/secrets/empty": "  \n",
@@ -48,7 +52,7 @@ describe("resolveRedisConnectionOptions", () => {
           { [REDIS_TLS_CA_FILE_ENV]: "/secrets/ca.crt" },
           readFake,
         ),
-      /rediss:\/\//,
+      REDISS_PATTERN,
     );
   });
 
@@ -60,7 +64,7 @@ describe("resolveRedisConnectionOptions", () => {
           { [REDIS_PASSWORD_FILE_ENV]: "/secrets/password" },
           readFake,
         ),
-      /not both/,
+      NOT_BOTH_PATTERN,
     );
   });
 
@@ -81,7 +85,7 @@ describe("resolveRedisConnectionOptions", () => {
           { [REDIS_PASSWORD_FILE_ENV]: "/secrets/empty" },
           readFake,
         ),
-      /empty file/,
+      EMPTY_FILE_PATTERN,
     );
   });
 });

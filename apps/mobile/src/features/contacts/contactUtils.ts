@@ -13,8 +13,6 @@ import { nonEmpty } from "../../lib/text";
 import { AVATAR_COLOR_PALETTE_HEX } from "../../theme/colors";
 import { formatImportantDate, isYearlessDate, resolveDateLocale } from "./importantDateUtils";
 
-export { formatContactName };
-
 type PersonNameFields = {
   firstName?: string | null;
   lastName?: string | null;
@@ -23,7 +21,7 @@ type PersonNameFields = {
 /**
  * Returns 2 initials (first + last name) for an avatar, matching the webapp behaviour.
  */
-export function getContactInitials(contact: PersonNameFields): string {
+function getContactInitials(contact: PersonNameFields): string {
   const first = contact.firstName?.trim().charAt(0).toUpperCase() ?? "";
   const last = contact.lastName?.trim().charAt(0).toUpperCase() ?? "";
   return first + last || first || "#";
@@ -49,9 +47,7 @@ function getAvatarHash(first: string | null | undefined, last: string | null | u
  * Returns a deterministic hex color for a contact avatar, using the same
  * hash algorithm and palette as the webapp's getAvatarColorFromName.
  */
-export function getAvatarColorHex(
-  contact: PersonNameFields,
-): (typeof AVATAR_COLOR_PALETTE_HEX)[number] {
+function getAvatarColorHex(contact: PersonNameFields): (typeof AVATAR_COLOR_PALETTE_HEX)[number] {
   const hash = getAvatarHash(contact.firstName, contact.lastName);
   // The hash is a non-negative integer, so the index is always in range; the fallback only satisfies the checker.
   return (
@@ -87,29 +83,29 @@ function parseEmails(emails: Contact["emails"]): EmailEntry[] {
   });
 }
 
-export function getPrimaryPhone(contact: Contact): string | null {
+function getPrimaryPhone(contact: Contact): string | null {
   const phone =
     parsePhones(contact.phones).find((entry) => entry.preferred) || parsePhones(contact.phones)[0];
 
   return phone?.value || null;
 }
 
-export function getPrimaryPhoneEntry(contact: Contact): PhoneEntry | null {
+function getPrimaryPhoneEntry(contact: Contact): PhoneEntry | null {
   const phones = parseContactPhones(contact);
   return phones.find((entry) => entry.preferred) ?? phones[0] ?? null;
 }
 
-export function getPrimaryEmail(contact: Contact): string | null {
+function getPrimaryEmail(contact: Contact): string | null {
   const email = getPrimaryEmailEntry(contact);
   return nonEmpty(email?.value) ?? null;
 }
 
-export function getPrimaryEmailEntry(contact: Contact): EmailEntry | null {
+function getPrimaryEmailEntry(contact: Contact): EmailEntry | null {
   const emails = parseContactEmails(contact);
   return emails.find((entry) => entry.preferred) ?? emails[0] ?? null;
 }
 
-export function contactMatchesQuery(contact: Contact, query: string): boolean {
+function contactMatchesQuery(contact: Contact, query: string): boolean {
   const normalizedQuery = query.trim().toLowerCase();
 
   if (!normalizedQuery) {
@@ -122,13 +118,13 @@ export function contactMatchesQuery(contact: Contact, query: string): boolean {
 }
 
 /** Whole days elapsed since an ISO date string (local calendar day diff). */
-export function daysSince(dateStr: string): number {
+function daysSince(dateStr: string): number {
   return Math.floor((Date.now() - new Date(dateStr).getTime()) / MS_PER_DAY);
 }
 
 const DAYS_PER_WEEK = 7;
 
-export function formatRelativeDate(dateStr: string): string {
+function formatRelativeDate(dateStr: string): string {
   const diffDays = daysSince(dateStr);
   if (diffDays === 0) {
     return "Today";
@@ -151,7 +147,7 @@ export function formatRelativeDate(dateStr: string): string {
   return `${years} year${years > 1 ? "s" : ""} ago`;
 }
 
-export function formatAbsoluteDate(dateStr: string): string {
+function formatAbsoluteDate(dateStr: string): string {
   const ctx = mobileDateTimeFormatContext(useMobilePreferences.getState());
 
   if (isYearlessDate(dateStr)) {
@@ -162,7 +158,7 @@ export function formatAbsoluteDate(dateStr: string): string {
 }
 
 /** Relative timestamp for notes "last edited" — fine-grained for recent edits, shared day logic beyond. */
-export function formatRelativeEditedAt(dateStr: string): string {
+function formatRelativeEditedAt(dateStr: string): string {
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const diffMin = Math.floor(diffMs / 60_000);
   if (diffMin < 1) {
@@ -200,18 +196,18 @@ function parseAddresses(addresses: Contact["addresses"]): ContactAddressEntry[] 
   });
 }
 
-export function getContactAddresses(contact: Contact): ContactAddressEntry[] {
+function getContactAddresses(contact: Contact): ContactAddressEntry[] {
   return parseAddresses(contact.addresses).filter(
     (address) => formatDisplayAddress(address).length > 0,
   );
 }
 
-export function formatDisplayPhone(phone: PhoneEntry): string {
+function formatDisplayPhone(phone: PhoneEntry): string {
   const combined = combinePhoneNumber(phone.prefix || "+1", phone.value);
   return formatPhoneNumber(combined) || combined;
 }
 
-export function formatDisplayAddress(address: ContactAddressEntry): string {
+function formatDisplayAddress(address: ContactAddressEntry): string {
   if (address.addressFormatted?.trim()) {
     return address.addressFormatted.trim();
   }
@@ -232,7 +228,7 @@ export function formatDisplayAddress(address: ContactAddressEntry): string {
   return address.value.trim();
 }
 
-export interface AddressCardLines {
+interface AddressCardLines {
   cityLine: string;
   countryCode: string | null;
   countryName: string | null;
@@ -253,7 +249,7 @@ function getCountryDisplayName(countryCode: string | null | undefined): string |
   }
 }
 
-export function formatAddressCardLines(address: ContactAddressEntry): AddressCardLines {
+function formatAddressCardLines(address: ContactAddressEntry): AddressCardLines {
   const streetParts = [address.addressLine1?.trim(), address.addressLine2?.trim()].filter(
     Boolean,
   ) as string[];
@@ -281,15 +277,38 @@ export function formatAddressCardLines(address: ContactAddressEntry): AddressCar
   };
 }
 
-export function formatContactLocation(contact: Contact): string | null {
+function formatContactLocation(contact: Contact): string | null {
   const abbreviated = abbreviateLocationCountry(contact.location);
   return abbreviated || null;
 }
 
-export function parseContactPhones(contact: Contact): PhoneEntry[] {
+function parseContactPhones(contact: Contact): PhoneEntry[] {
   return parsePhones(contact.phones).filter((phone) => phone.value.trim().length > 0);
 }
 
-export function parseContactEmails(contact: Contact): EmailEntry[] {
+function parseContactEmails(contact: Contact): EmailEntry[] {
   return parseEmails(contact.emails).filter((email) => email.value.trim().length > 0);
 }
+
+export type { AddressCardLines };
+export {
+  contactMatchesQuery,
+  daysSince,
+  formatAbsoluteDate,
+  formatAddressCardLines,
+  formatContactLocation,
+  formatContactName,
+  formatDisplayAddress,
+  formatDisplayPhone,
+  formatRelativeDate,
+  formatRelativeEditedAt,
+  getAvatarColorHex,
+  getContactAddresses,
+  getContactInitials,
+  getPrimaryEmail,
+  getPrimaryEmailEntry,
+  getPrimaryPhone,
+  getPrimaryPhoneEntry,
+  parseContactEmails,
+  parseContactPhones,
+};

@@ -6,6 +6,7 @@ import "fastify";
 import "./fastify-plugin-types.js";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { detachPromise } from "@bondery/helpers/async";
 import { checkEnvVariables } from "@bondery/helpers/env";
 import { readBuildMetadata } from "@bondery/helpers/infra/build-metadata";
 import { buildApp } from "./build-app.js";
@@ -57,6 +58,6 @@ async function start() {
   }
 }
 
-export { buildApp, buildServer };
+detachPromise(start());
 
-void start();
+export { buildApp, buildServer };

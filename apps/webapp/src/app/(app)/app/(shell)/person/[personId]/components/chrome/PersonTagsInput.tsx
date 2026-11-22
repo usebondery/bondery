@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { errorNotificationTemplate, warningNotificationTemplate } from "@bondery/mantine-next";
 import { notifications } from "@mantine/notifications";
 import { useRef } from "react";
@@ -56,26 +57,28 @@ export function PersonTagsInput({ personId }: PersonTagsInputProps) {
 
     addInFlightRef.current.add(tag.id);
 
-    void addTagMutation.mutateAsync(tag.id).then(
-      () => {
-        addInFlightRef.current.delete(tag.id);
-      },
-      () => {
-        addInFlightRef.current.delete(tag.id);
-        notifications.show(
-          errorNotificationTemplate({
-            description: t("AddError"),
-            title: t("AddError"),
-          }),
-        );
-      },
+    detachPromise(
+      addTagMutation.mutateAsync(tag.id).then(
+        () => {
+          addInFlightRef.current.delete(tag.id);
+        },
+        () => {
+          addInFlightRef.current.delete(tag.id);
+          notifications.show(
+            errorNotificationTemplate({
+              description: t("AddError"),
+              title: t("AddError"),
+            }),
+          );
+        },
+      ),
     );
 
     return true;
   };
 
   const handleRemoveTag = (tagId: string) => {
-    void removeTagMutation.mutateAsync(tagId).catch(() => {
+    detachPromise(removeTagMutation.mutateAsync(tagId), () => {
       notifications.show(
         errorNotificationTemplate({
           description: t("RemoveError"),

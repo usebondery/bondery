@@ -12,11 +12,11 @@ import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { loadFormattedInteractions } from "./format.js";
 import { buildInteractionListWhere } from "./list-where.js";
 
-export type { InteractionsListQuery };
-
 type ServiceLog = {
   error: (payload: unknown, message: string) => void;
 };
+
+export type { InteractionsListQuery };
 
 export async function listInteractions(
   ctx: DomainContext,

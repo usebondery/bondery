@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { type ReactNode, useEffect, useState } from "react";
 
 type KeyboardModule = typeof import("react-native-keyboard-controller");
@@ -13,15 +14,16 @@ export function KeyboardRoot({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
 
-    void import("react-native-keyboard-controller")
-      .then((mod) => {
+    detachPromise(
+      import("react-native-keyboard-controller").then((mod) => {
         if (!cancelled) {
           setKeyboardModule(mod);
         }
-      })
-      .catch(() => {
+      }),
+      () => {
         // Keyboard-controller is optional. Children render without KeyboardProvider.
-      });
+      },
+    );
 
     return () => {
       cancelled = true;

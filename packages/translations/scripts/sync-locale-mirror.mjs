@@ -32,7 +32,7 @@ function main() {
     }
 
     try {
-      const mode = fs.lstatSync(target).mode;
+      const { mode } = fs.lstatSync(target);
       if ((mode & 0o200) === 0) {
         fs.chmodSync(target, mode | 0o200);
       }

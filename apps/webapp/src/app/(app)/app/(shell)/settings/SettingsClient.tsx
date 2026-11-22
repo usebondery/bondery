@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { Stack } from "@mantine/core";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -74,15 +75,16 @@ export function SettingsClient() {
 
   useEffect(() => {
     let cancelled = false;
-    void syncSubscription()
-      .then(async () => {
+    detachPromise(
+      syncSubscription().then(async () => {
         if (!cancelled) {
           await invalidateSubscription(queryClient);
         }
-      })
-      .catch(() => {
+      }),
+      () => {
         // Settings already rendered from the DB mirror.
-      });
+      },
+    );
     return () => {
       cancelled = true;
     };

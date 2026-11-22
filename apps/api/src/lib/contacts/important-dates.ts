@@ -1,5 +1,8 @@
 import type { ImportantDateType } from "@bondery/schemas";
 
+/** Years are zero-padded to four digits in an ISO calendar date. */
+const ISO_YEAR_DIGITS = 4;
+
 export const IMPORTANT_DATE_SELECT = `
   id,
   user_id,
@@ -72,9 +75,6 @@ export function toImportantDateFromPrisma(row: {
     user_id: row.userId,
   });
 }
-
-/** Years are zero-padded to four digits in an ISO calendar date. */
-const ISO_YEAR_DIGITS = 4;
 
 export function toIsoDateKey(value: string): string | null {
   const dateOnly = value.slice(0, 10);

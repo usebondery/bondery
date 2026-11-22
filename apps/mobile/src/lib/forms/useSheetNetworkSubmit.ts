@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { useState } from "react";
 import type { FieldValues, UseFormHandleSubmit } from "react-hook-form";
 
@@ -21,21 +22,23 @@ export function useSheetNetworkSubmit<TFieldValues extends FieldValues, TResult>
 
   function submit() {
     setIsSubmitting(true);
-    void handleSubmit(async (values) => {
-      try {
-        const result = await perform(values);
-        onClose();
-        onSuccess?.(result);
-      } catch (error) {
-        onError?.(error);
-      }
-    })()
-      .catch(() => {
-        // RHF validation failed — sheet stays open.
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-      });
+    detachPromise(
+      handleSubmit(async (values) => {
+        try {
+          const result = await perform(values);
+          onClose();
+          onSuccess?.(result);
+        } catch (error) {
+          onError?.(error);
+        }
+      })()
+        .catch(() => {
+          // RHF validation failed — sheet stays open.
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+        }),
+    );
   }
 
   return { isSubmitting, submit };

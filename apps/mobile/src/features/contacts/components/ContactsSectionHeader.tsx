@@ -6,7 +6,7 @@ interface ContactsSectionHeaderProps {
   title: string;
 }
 
-export function ContactsSectionHeader({ title }: ContactsSectionHeaderProps) {
+function ContactsSectionHeader({ title }: ContactsSectionHeaderProps) {
   const colors = useMobileThemeColors();
 
   return (
@@ -33,3 +33,5 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
 });
+
+export { ContactsSectionHeader };

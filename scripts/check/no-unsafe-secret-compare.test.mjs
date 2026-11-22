@@ -14,6 +14,8 @@ import { dirname, join } from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
+const CONSTANTTIMEEQUAL_RE = /constantTimeEqual/;
+
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const pluginPath = join(repoRoot, "biome", "plugins", "no-unsafe-secret-compare.grit");
 const biomeBin = createRequire(join(repoRoot, "package.json")).resolve("@biomejs/biome/bin/biome");
@@ -121,7 +123,7 @@ before(() => {
     if (diagnostic.category !== "plugin") {
       continue;
     }
-    assert.match(diagnostic.message, /constantTimeEqual/, "plugin failed to run");
+    assert.match(diagnostic.message, CONSTANTTIMEEQUAL_RE, "plugin failed to run");
     const file = diagnostic.location.path.replaceAll("\\", "/");
     counts.set(file, (counts.get(file) ?? 0) + 1);
   }

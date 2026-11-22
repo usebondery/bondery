@@ -1,5 +1,8 @@
 import { getTimeZones } from "@vvo/tzdb";
 
+const ZA_RE = /^[A-Za-z]{2}$/;
+const PATTERN_5E5C647B337D_RE = /^\d{3}$/;
+
 const regionNamesByLocale = new Map<string, Intl.DisplayNames>();
 /** `null` records a locale whose runtime rejects `type: "timeZone"`, so the throw happens once. */
 const timeZoneNamesByLocale = new Map<string, Intl.DisplayNames | null>();
@@ -29,46 +32,13 @@ function regionDisplayNames(locale: string): Intl.DisplayNames | undefined {
 
 function normalizeRegionCode(regionCode: string): string | undefined {
   const code = regionCode.trim();
-  if (/^[A-Za-z]{2}$/.test(code)) {
+  if (ZA_RE.test(code)) {
     return code.toUpperCase();
   }
-  if (/^\d{3}$/.test(code)) {
+  if (PATTERN_5E5C647B337D_RE.test(code)) {
     return code;
   }
   return undefined;
-}
-
-/** Localized country or UN M.49 region name. Falls back to undefined when Intl has no name. */
-export function displayRegionName(regionCode: string, locale: string): string | undefined {
-  const code = normalizeRegionCode(regionCode);
-  if (!code) {
-    return undefined;
-  }
-
-  const names = regionDisplayNames(locale);
-  if (!names) {
-    return undefined;
-  }
-
-  try {
-    const name = names.of(code);
-    if (!name || name === code) {
-      return undefined;
-    }
-    return name;
-  } catch {
-    return undefined;
-  }
-}
-
-/** Localized continent group label. UTC and unknown groups stay as stored. */
-export function displayContinentName(continent: string, locale: string): string {
-  const regionCode = CONTINENT_REGION_CODES[continent];
-  if (!regionCode) {
-    return continent;
-  }
-
-  return displayRegionName(regionCode, locale) ?? continent;
 }
 
 /**
@@ -123,6 +93,39 @@ function englishTimeZoneCity(iana: string): string | undefined {
     return "UTC";
   }
   return englishCityIndex().get(iana);
+}
+
+/** Localized country or UN M.49 region name. Falls back to undefined when Intl has no name. */
+export function displayRegionName(regionCode: string, locale: string): string | undefined {
+  const code = normalizeRegionCode(regionCode);
+  if (!code) {
+    return undefined;
+  }
+
+  const names = regionDisplayNames(locale);
+  if (!names) {
+    return undefined;
+  }
+
+  try {
+    const name = names.of(code);
+    if (!name || name === code) {
+      return undefined;
+    }
+    return name;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Localized continent group label. UTC and unknown groups stay as stored. */
+export function displayContinentName(continent: string, locale: string): string {
+  const regionCode = CONTINENT_REGION_CODES[continent];
+  if (!regionCode) {
+    return continent;
+  }
+
+  return displayRegionName(regionCode, locale) ?? continent;
 }
 
 /**

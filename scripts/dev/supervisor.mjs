@@ -26,6 +26,16 @@ import { DEV_PORTS, DEV_URLS } from "@bondery/schemas/constants/dev-ports";
 
 import { killDevPort } from "./kill-dev-port.mjs";
 
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+const PATTERN_5E5B5C774023_RE = /^[\w@#./:=+-]+$/;
+
+function asUnknown(value) {
+  return value;
+}
+
 const IS_WINDOWS = process.platform === "win32";
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const tempDir = resolve(repoRoot, ".temp");
@@ -63,7 +73,7 @@ const ALL_DEV_PORTS = Object.values(TASK_INFO).map((entry) => entry.port);
  * @returns {string}
  */
 function shellQuote(value) {
-  return /^[\w@#./:=+-]+$/.test(value) ? value : `"${value.replaceAll('"', '""')}"`;
+  return PATTERN_5E5B5C774023_RE.test(value) ? value : `"${value.replaceAll('"', '""')}"`;
 }
 
 /**
@@ -209,7 +219,7 @@ function portsForTasks(tasks) {
  * @returns {{ label: string, tasks: string[] }}
  */
 function parseTarget(argv) {
-  const first = argv[0];
+  const [first] = argv;
   if (!first) {
     console.error(
       `Usage: node scripts/dev/supervisor.mjs <${Object.keys(TARGETS).join("|")}|task,task...>`,

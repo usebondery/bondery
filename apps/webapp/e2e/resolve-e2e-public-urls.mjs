@@ -12,10 +12,35 @@ import { dirname, resolve } from "node:path";
 import tls from "node:tls";
 import { fileURLToPath } from "node:url";
 
+const PATTERN = /^[\d.]+$/;
+
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
 
 const API_PUBLIC_URL = "BONDERY_PUBLIC_API_URL";
 const WEBAPP_PUBLIC_URL = "BONDERY_PUBLIC_WEBAPP_URL";
+
+function requirePublicUrl(name) {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(
+      `${name} is missing after loading API env. Set it in apps/api/.env.development.local ` +
+        "or in the process environment.",
+    );
+  }
+
+  let url;
+  try {
+    url = new URL(value);
+  } catch (error) {
+    throw new Error(`${name} is not a valid URL: ${value}`, { cause: error });
+  }
+
+  if (!url.hostname) {
+    throw new Error(`${name} has no hostname: ${value}`);
+  }
+
+  return url;
+}
 
 /**
  * Let Node's `fetch` trust the Portless dev certificate authority.
@@ -50,29 +75,6 @@ export function loadE2eAuthEnv() {
   }
 }
 
-function requirePublicUrl(name) {
-  const value = process.env[name];
-  if (!value) {
-    throw new Error(
-      `${name} is missing after loading API env. Set it in apps/api/.env.development.local ` +
-        "or in the process environment.",
-    );
-  }
-
-  let url;
-  try {
-    url = new URL(value);
-  } catch (error) {
-    throw new Error(`${name} is not a valid URL: ${value}`, { cause: error });
-  }
-
-  if (!url.hostname) {
-    throw new Error(`${name} has no hostname: ${value}`);
-  }
-
-  return url;
-}
-
 /**
  * The shared parent domain of two hosts, or null when they are different sites.
  *
@@ -88,7 +90,7 @@ export function sharedSite(a, b) {
   if (a === b) {
     return a;
   }
-  const isNamed = (host) => host.includes(".") && !/^[\d.]+$/.test(host) && !host.includes(":");
+  const isNamed = (host) => host.includes(".") && !PATTERN.test(host) && !host.includes(":");
   if (!isNamed(a) || !isNamed(b)) {
     return null;
   }

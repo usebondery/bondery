@@ -2,6 +2,10 @@ import path from "node:path";
 import { GITHUB_BLOB_BASE } from "@bondery/helpers";
 import type { Link, List, ListItem, Parent, Root, RootContent } from "mdast";
 
+const INDEX_SUFFIX_RE = /\/index$/;
+const MD_OR_MDX_EXT_RE = /\.mdx?$/;
+const RELATED_HEADING_RE = /^related\b/i;
+const LEADING_SEPARATOR_RE = /^[\s—–\-:|=]+/;
 type MdxAttribute = {
   name: string;
   type: "mdxJsxAttribute";
@@ -29,7 +33,7 @@ function plainText(node: Parent | Link | ListItem | undefined): string {
 }
 
 function isRelatedHeading(node: RootContent): boolean {
-  return node.type === "heading" && /^related\b/i.test(plainText(node).trim());
+  return node.type === "heading" && RELATED_HEADING_RE.test(plainText(node).trim());
 }
 
 function linksIn(item: ListItem): Link[] {
@@ -58,7 +62,7 @@ function descriptionAfter(item: ListItem, link: Link): string {
     .slice(start + 1)
     .map((node) => plainText(node as Parent))
     .join("");
-  const cleaned = rest.replace(/^[\s—–\-:|=]+/, "").trim();
+  const cleaned = rest.replace(LEADING_SEPARATOR_RE, "").trim();
   return cleaned;
 }
 
@@ -82,7 +86,7 @@ function docsHref(href: string, filePath: string | undefined): string {
   }
 
   if (href.startsWith("/docs/")) {
-    return href.replace(/\.mdx?$/, "").replace(/\/index$/, "");
+    return href.replace(MD_OR_MDX_EXT_RE, "").replace(INDEX_SUFFIX_RE, "");
   }
   if (href.startsWith("/")) {
     return href;
@@ -99,8 +103,8 @@ function docsHref(href: string, filePath: string | undefined): string {
   }
   const urlPath = relative
     .replace(/\\/g, "/")
-    .replace(/\.mdx?$/, "")
-    .replace(/\/index$/, "");
+    .replace(MD_OR_MDX_EXT_RE, "")
+    .replace(INDEX_SUFFIX_RE, "");
   if (urlPath.length === 0) {
     return "/docs";
   }

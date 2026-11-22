@@ -18,6 +18,10 @@ import { mergeContactsRequestSchema } from "@bondery/schemas";
 
 import { mergeRecommendationsQuerySchema } from "@bondery/schemas/http";
 
+const HTTP_PROTOCOL_PATTERN = /^https?:\/\//;
+const WWW_PREFIX_PATTERN = /^www\./;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 // ── Constants ────────────────────────────────────────────────────
 
 export const MERGEABLE_SCALAR_FIELDS = {
@@ -138,11 +142,11 @@ export function normalizeSocialHandle(value: string | null | undefined): string 
 
     .toLowerCase()
 
-    .replace(/^https?:\/\//, "")
+    .replace(HTTP_PROTOCOL_PATTERN, "")
 
-    .replace(/^www\./, "")
+    .replace(WWW_PREFIX_PATTERN, "")
 
-    .replace(/\/$/, "");
+    .replace(TRAILING_SLASH_PATTERN, "");
 }
 
 export function toFullNameKey(person: { first_name: string; last_name: string | null }): string {

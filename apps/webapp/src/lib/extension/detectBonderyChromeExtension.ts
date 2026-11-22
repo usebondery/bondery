@@ -1,12 +1,12 @@
+const EXTENSION_PING_TYPE = "BONDERY_EXTENSION_PING";
+const EXTENSION_PONG_TYPE = "BONDERY_EXTENSION_PONG";
+
 export type ExtensionInstallState = "installed" | "not_installed";
 
 export interface ExtensionDetectionResult {
   state: ExtensionInstallState;
   version: string | null;
 }
-
-const EXTENSION_PING_TYPE = "BONDERY_EXTENSION_PING";
-const EXTENSION_PONG_TYPE = "BONDERY_EXTENSION_PONG";
 
 /**
  * Detects whether the Bondery Chrome extension is installed and active

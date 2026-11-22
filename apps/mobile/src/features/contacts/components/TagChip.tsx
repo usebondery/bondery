@@ -9,7 +9,7 @@ import { usePressSqueeze } from "../../../components/ui/usePressSqueeze";
 import { nonEmpty } from "../../../lib/text";
 import { useMobileThemeColors } from "../../../theme/useMobileThemeColors";
 
-export type TagChipTag = Pick<Tag, "id" | "label" | "color">;
+type TagChipTag = Pick<Tag, "id" | "label" | "color">;
 
 interface TagChipProps {
   accessibilityLabel?: string;
@@ -22,7 +22,7 @@ interface TagChipProps {
 
 const CHIP_CLASS = "flex-row items-center gap-1.5 rounded-full px-3 py-2";
 
-export function TagChip({
+function TagChip({
   tag,
   onPress,
   isSelected = false,
@@ -91,3 +91,6 @@ export function TagChip({
     </Animated.View>
   );
 }
+
+export type { TagChipTag };
+export { TagChip };

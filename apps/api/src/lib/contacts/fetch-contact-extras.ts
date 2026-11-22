@@ -2,7 +2,7 @@ import type { PrismaClient } from "@bondery/db";
 import type { ContactAddressEntry, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { getContactExtrasWithDb } from "../data/contact-rpc.js";
 
-export type ContactExtrasPayload = {
+type ContactExtrasPayload = {
   phones: PhoneEntry[];
   emails: EmailEntry[];
   addresses: ContactAddressEntry[];
@@ -127,6 +127,8 @@ function parseAddressEntry(value: unknown): ContactAddressEntry | null {
 function nullableString(value: unknown): string | null {
   return typeof value === "string" && value.length > 0 ? value : null;
 }
+
+export type { ContactExtrasPayload };
 
 /** Parses RPC JSON shape v1 into a per-person extras map. Exported for unit tests. */
 export function parseContactExtrasRpcResult(raw: unknown): Map<string, ContactExtrasPayload> {

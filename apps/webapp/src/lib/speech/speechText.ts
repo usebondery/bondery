@@ -1,22 +1,11 @@
 import { type InlineToken, parseInlineTokens } from "@bondery/helpers";
 import { parseContentBlocks } from "@/lib/chat/contentBlocks";
 
-/**
- * Turns one inline token into spoken words.
- *
- * Return `null` when the record behind the token is unknown. The builder then
- * skips the token and keeps the rest of the sentence.
- */
-export type TokenSpeaker = (token: InlineToken) => string | null;
-
 /** Text parts of a chat message. A part without `text` is not speakable. */
 interface SpeechTextPart {
   text?: string;
   type: string;
 }
-
-/** Chrome stops an utterance after roughly 15 seconds. 180 characters stay below it. */
-export const SPEECH_CHUNK_TARGET_LENGTH = 180;
 
 const BOLD_MARKER_RE = /\*\*/g;
 const WIRE_TOKEN_RE = /\[\[bp:[^\]]+\]\]/g;
@@ -85,27 +74,6 @@ function speakParagraph(paragraph: string, resolve: TokenSpeaker): string {
 }
 
 /**
- * Builds the text a voice reads for one message.
- *
- * The builder is pure. It takes no React state and no query client. Each
- * paragraph ends with a pause. The result is `""` when nothing is speakable,
- * which hides the speak button.
- */
-export function toSpeechText(parts: readonly SpeechTextPart[], resolve: TokenSpeaker): string {
-  const sentences: string[] = [];
-
-  for (const paragraph of speechParagraphs(parts)) {
-    const spoken = speakParagraph(paragraph, resolve);
-    if (!spoken) {
-      continue;
-    }
-    sentences.push(SENTENCE_END_RE.test(spoken) ? spoken : `${spoken}.`);
-  }
-
-  return sentences.join(" ");
-}
-
-/**
  * Probe speaker for the enable check.
  *
  * Chips always count, because the message holds a chip. Text counts when it
@@ -131,16 +99,6 @@ function PROBE_TOKEN(token: InlineToken) {
 
 const PLACEHOLDER_SPEECH = "x";
 
-/**
- * True when the message holds something a voice can read.
- *
- * Cheap enough for every render. Use it to decide whether the speak button
- * exists at all.
- */
-export function hasSpeakableText(parts: readonly SpeechTextPart[]): boolean {
-  return toSpeechText(parts, PROBE_TOKEN).length > 0;
-}
-
 /** Cuts one over-long sentence on word boundaries. A single long word stays whole. */
 function splitLongSentence(sentence: string): string[] {
   const chunks: string[] = [];
@@ -161,6 +119,48 @@ function splitLongSentence(sentence: string): string[] {
   }
 
   return chunks;
+}
+
+/**
+ * Turns one inline token into spoken words.
+ *
+ * Return `null` when the record behind the token is unknown. The builder then
+ * skips the token and keeps the rest of the sentence.
+ */
+export type TokenSpeaker = (token: InlineToken) => string | null;
+
+/** Chrome stops an utterance after roughly 15 seconds. 180 characters stay below it. */
+export const SPEECH_CHUNK_TARGET_LENGTH = 180;
+
+/**
+ * Builds the text a voice reads for one message.
+ *
+ * The builder is pure. It takes no React state and no query client. Each
+ * paragraph ends with a pause. The result is `""` when nothing is speakable,
+ * which hides the speak button.
+ */
+export function toSpeechText(parts: readonly SpeechTextPart[], resolve: TokenSpeaker): string {
+  const sentences: string[] = [];
+
+  for (const paragraph of speechParagraphs(parts)) {
+    const spoken = speakParagraph(paragraph, resolve);
+    if (!spoken) {
+      continue;
+    }
+    sentences.push(SENTENCE_END_RE.test(spoken) ? spoken : `${spoken}.`);
+  }
+
+  return sentences.join(" ");
+}
+
+/**
+ * True when the message holds something a voice can read.
+ *
+ * Cheap enough for every render. Use it to decide whether the speak button
+ * exists at all.
+ */
+export function hasSpeakableText(parts: readonly SpeechTextPart[]): boolean {
+  return toSpeechText(parts, PROBE_TOKEN).length > 0;
 }
 
 /**

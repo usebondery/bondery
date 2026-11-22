@@ -20,6 +20,14 @@ import {
   warnOnInsecureProductionStorage,
 } from "./storage-tls.js";
 
+const CERTIFICATE_PATTERN = /certificate/i;
+const DOES_NOT_USE_TLS_PATTERN = /does not use TLS/;
+const CANNOT_READ_PATTERN = /cannot read/;
+const NO_PEM_CERTIFICATE_PATTERN = /no PEM certificate/;
+const MUST_START_WITH_HTTPS_PATTERN = /must start with https/;
+const NOT_A_VALID_URL_PATTERN = /not a valid URL/;
+const TLSV1_PATTERN = /^TLSv1\.[23]$/;
+
 const CREDENTIALS = { accessKeyId: "test", region: "eu-central-1", secretAccessKey: "test" };
 
 function recordingLog() {
@@ -118,20 +126,20 @@ describe("s3 client TLS", () => {
   });
 
   it("refuses the endpoint without the CA file (system CAs only)", async () => {
-    await assert.rejects(headBucket(`https://localhost:${port}`, {}), /certificate/i);
+    await assert.rejects(headBucket(`https://localhost:${port}`, {}), CERTIFICATE_PATTERN);
   });
 
   it("refuses the endpoint when the CA file holds another CA", async () => {
     await assert.rejects(
       headBucket(`https://localhost:${port}`, { [S3_TLS_CA_FILE_ENV]: otherCaFile }),
-      /certificate/i,
+      CERTIFICATE_PATTERN,
     );
   });
 
   it("refuses a CA file with a plaintext endpoint", () => {
     assert.throws(
       () => resolveS3TrustedCa("http://localhost:8333", { [S3_TLS_CA_FILE_ENV]: caFile }),
-      /does not use TLS/,
+      DOES_NOT_USE_TLS_PATTERN,
     );
   });
 
@@ -141,18 +149,18 @@ describe("s3 client TLS", () => {
         resolveS3TrustedCa("https://localhost:8443", {
           [S3_TLS_CA_FILE_ENV]: join(dir, "missing.crt"),
         }),
-      /cannot read/,
+      CANNOT_READ_PATTERN,
     );
     assert.throws(
       () =>
         resolveS3TrustedCa("https://localhost:8443", { [S3_TLS_CA_FILE_ENV]: "ca.crt" }, () => ""),
-      /no PEM certificate/,
+      NO_PEM_CERTIFICATE_PATTERN,
     );
   });
 
   it("rejects an endpoint that is not an http(s) URL", () => {
-    assert.throws(() => describeS3Security("localhost:8333", {}), /must start with https/);
-    assert.throws(() => describeS3Security("not a url", {}), /not a valid URL/);
+    assert.throws(() => describeS3Security("localhost:8333", {}), MUST_START_WITH_HTTPS_PATTERN);
+    assert.throws(() => describeS3Security("not a url", {}), NOT_A_VALID_URL_PATTERN);
   });
 
   it("describes the connection without reading files", () => {
@@ -171,7 +179,7 @@ describe("s3 client TLS", () => {
       [S3_TLS_CA_FILE_ENV]: caFile,
     });
     assert.equal(inspection.tls, true);
-    assert.match(inspection.version ?? "", /^TLSv1\.[23]$/);
+    assert.match(inspection.version ?? "", TLSV1_PATTERN);
     assert.ok(inspection.certificateDaysLeft !== null && inspection.certificateDaysLeft >= 29);
 
     assert.deepEqual(await inspectObjectStorageTls("http://localhost:8333", {}), {
@@ -181,7 +189,7 @@ describe("s3 client TLS", () => {
     });
     await assert.rejects(
       inspectObjectStorageTls(`https://localhost:${port}`, { [S3_TLS_CA_FILE_ENV]: otherCaFile }),
-      /certificate/i,
+      CERTIFICATE_PATTERN,
     );
   });
 

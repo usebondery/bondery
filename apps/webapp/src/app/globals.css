@@ -63,8 +63,7 @@
 
 /* Task list: eliminate all native list markers — NodeView renders its own row layout */
 .tiptap ul[data-type="taskList"],
-.tiptap ul[data-type="taskList"] li,
-.tiptap ul[data-type="taskList"] li::marker {
+.tiptap ul[data-type="taskList"] li {
   padding-inline-start: 0;
   margin-inline-start: 0;
   list-style: none;

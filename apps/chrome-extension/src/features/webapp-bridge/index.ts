@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { browser } from "wxt/browser";
 import { extLog } from "../../lib/log";
 
@@ -31,7 +32,7 @@ export function installWebappBridge(): void {
         },
         targetOrigin,
       );
-      void browser.runtime.sendMessage({ type: "AUTH_STATUS_REQUEST" }).catch(() => {
+      detachPromise(browser.runtime.sendMessage({ type: "AUTH_STATUS_REQUEST" }), () => {
         /* Wake the service worker; ping itself does not need a reply. */
       });
       return;

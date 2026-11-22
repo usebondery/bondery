@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { Tag, TagWithCount } from "@bondery/schemas";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -87,35 +88,37 @@ export function ContactEditTagsSheet({
       setIsLoadingTags(true);
     });
 
-    void Promise.resolve()
-      .then(() => {
-        if (cancelled) {
-          return;
-        }
+    detachPromise(
+      Promise.resolve()
+        .then(() => {
+          if (cancelled) {
+            return;
+          }
 
-        const tags = listTags();
-        setAllTags(tags);
-        const memberIds = new Set(getContactTags(contactId).map((tag) => tag.id));
-        setInitialSelectedIds(memberIds);
-        setSelectedTagIds(new Set(memberIds));
-      })
-      .catch(() => {
-        if (cancelled) {
-          return;
-        }
+          const tags = listTags();
+          setAllTags(tags);
+          const memberIds = new Set(getContactTags(contactId).map((tag) => tag.id));
+          setInitialSelectedIds(memberIds);
+          setSelectedTagIds(new Set(memberIds));
+        })
+        .catch(() => {
+          if (cancelled) {
+            return;
+          }
 
-        notifications.show({
-          message: tMobileContactDetail("TagsLoadError"),
-          title: t("feedback.errorTitle"),
-          type: "error",
-        });
-        onOpenChange(false);
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsLoadingTags(false);
-        }
-      });
+          notifications.show({
+            message: tMobileContactDetail("TagsLoadError"),
+            title: t("feedback.errorTitle"),
+            type: "error",
+          });
+          onOpenChange(false);
+        })
+        .finally(() => {
+          if (!cancelled) {
+            setIsLoadingTags(false);
+          }
+        }),
+    );
 
     return () => {
       cancelled = true;

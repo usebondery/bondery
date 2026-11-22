@@ -1,11 +1,12 @@
 import { extLog } from "../../../lib/log";
 import { firstNonEmpty, nonEmpty } from "../../../lib/text";
+
 /**
  * Instagram GraphQL network interceptor (MAIN world).
  * Communicates with the content script via window.postMessage.
  */
-export const INSTAGRAM_NETWORK_MESSAGE_TYPE = "BONDERY_IG_NETWORK_META";
-export const INSTAGRAM_NETWORK_MESSAGE_SOURCE = "bondery-instagram-network-interceptor";
+const INSTAGRAM_NETWORK_MESSAGE_TYPE = "BONDERY_IG_NETWORK_META";
+const INSTAGRAM_NETWORK_MESSAGE_SOURCE = "bondery-instagram-network-interceptor";
 
 const TARGET_FRIENDLY_NAME = "PolarisProfilePageContentQuery";
 
@@ -21,9 +22,10 @@ interface GraphqlUserNode {
   profile_pic_url?: string;
   username?: string;
   zip?: string;
+  [key: string]: unknown;
 }
 
-export interface NetworkMetaPayload {
+interface NetworkMetaPayload {
   addressStreet: string;
   category: string;
   cityName: string;
@@ -93,7 +95,7 @@ function extractProfileMetaFromResponse(jsonString: string): NetworkMetaPayload 
         return null;
       }
 
-      const record = obj as Record<string, unknown>;
+      const record = obj as GraphqlUserNode;
 
       if (
         record.username &&
@@ -102,7 +104,7 @@ function extractProfileMetaFromResponse(jsonString: string): NetworkMetaPayload 
           record.biography !== undefined ||
           record.profile_pic_url !== undefined)
       ) {
-        return record as unknown as GraphqlUserNode;
+        return record;
       }
 
       for (const key of Object.keys(record)) {
@@ -175,7 +177,7 @@ function isTargetRequest(
   return false;
 }
 
-export function installInstagramNetworkInterceptor(): void {
+function installInstagramNetworkInterceptor(): void {
   const OriginalXHR = window.XMLHttpRequest;
 
   // biome-ignore lint/correctness/noComponentHookFactories: constructor that replaces window.XMLHttpRequest, not a React component
@@ -298,3 +300,10 @@ export function installInstagramNetworkInterceptor(): void {
 
   extLog.debug("[instagram] Network interceptor initialized");
 }
+
+export type { NetworkMetaPayload };
+export {
+  INSTAGRAM_NETWORK_MESSAGE_SOURCE,
+  INSTAGRAM_NETWORK_MESSAGE_TYPE,
+  installInstagramNetworkInterceptor,
+};

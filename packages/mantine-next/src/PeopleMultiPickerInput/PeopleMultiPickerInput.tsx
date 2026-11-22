@@ -114,32 +114,6 @@ function ReadonlySelectedPeoplePills({
   );
 }
 
-/**
- * Controlled multi-select input for picking contacts by id.
- * Keeps `selectedIds` order when rendering chips and appending new selections,
- * supports searching available contacts, and allows removing selections via chip clear or backspace.
- *
- * When `onSearch` is provided, typing triggers a debounced server-side search
- * instead of filtering the local `contacts` array, allowing the picker to find
- * contacts that were not included in the initial prefetch.
- *
- * `isReadonly` renders the same chip field without search, dropdown, or removal.
- */
-export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps): ReactElement {
-  if (props.isReadonly) {
-    return (
-      <ReadonlySelectedPeoplePills
-        contacts={props.contacts}
-        disabled={props.disabled}
-        error={props.error}
-        selectedIds={props.selectedIds}
-      />
-    );
-  }
-
-  return <EditablePeopleMultiPickerInput {...props} />;
-}
-
 function EditablePeopleMultiPickerInput({
   contacts,
   contactsHasMore = false,
@@ -279,7 +253,7 @@ function EditablePeopleMultiPickerInput({
               <PillsInput.Field
                 disabled={disabled}
                 onChange={(event) => {
-                  const value = event.currentTarget.value;
+                  const { value } = event.currentTarget;
                   setQuery(value);
                   contactsCombobox.openDropdown();
                   contactsCombobox.updateSelectedOptionIndex("active");
@@ -327,4 +301,30 @@ function EditablePeopleMultiPickerInput({
       </Combobox.Dropdown>
     </Combobox>
   );
+}
+
+/**
+ * Controlled multi-select input for picking contacts by id.
+ * Keeps `selectedIds` order when rendering chips and appending new selections,
+ * supports searching available contacts, and allows removing selections via chip clear or backspace.
+ *
+ * When `onSearch` is provided, typing triggers a debounced server-side search
+ * instead of filtering the local `contacts` array, allowing the picker to find
+ * contacts that were not included in the initial prefetch.
+ *
+ * `isReadonly` renders the same chip field without search, dropdown, or removal.
+ */
+export function PeopleMultiPickerInput(props: PeopleMultiPickerInputProps): ReactElement {
+  if (props.isReadonly) {
+    return (
+      <ReadonlySelectedPeoplePills
+        contacts={props.contacts}
+        disabled={props.disabled}
+        error={props.error}
+        selectedIds={props.selectedIds}
+      />
+    );
+  }
+
+  return <EditablePeopleMultiPickerInput {...props} />;
 }

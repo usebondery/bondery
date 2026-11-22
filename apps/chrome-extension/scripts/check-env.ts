@@ -6,8 +6,8 @@ import { assertDistinctFirstPartyOAuthClientIds } from "@bondery/helpers/env/oau
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const environment = (process.env.NODE_ENV || "development") as "production" | "development";
-const isCi = process.env.GITHUB_ACTIONS === "true" || process.env.CI === "true";
+const environment = (process.env["NODE_ENV"] || "development") as "production" | "development";
+const isCi = process.env["GITHUB_ACTIONS"] === "true" || process.env["CI"] === "true";
 
 const requiredVars = [...getRequiredVarsForTarget("chrome-extension", environment)];
 
@@ -27,6 +27,6 @@ checkEnvVariables({
 });
 
 assertDistinctFirstPartyOAuthClientIds(
-  process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
-  process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+  process.env["BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
+  process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"],
 );

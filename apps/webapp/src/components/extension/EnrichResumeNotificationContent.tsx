@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { Button, Group, Text } from "@mantine/core";
 import { IconPlayerPlayFilled, IconTrash } from "@tabler/icons-react";
 import { useSyncExternalStore } from "react";
@@ -21,7 +22,7 @@ export function EnrichResumeNotificationContent() {
   }
 
   const handleResume = () => {
-    void resume(pendingQueueStatus);
+    detachPromise(resume(pendingQueueStatus));
   };
   const handleDiscard = async () => {
     await discard();

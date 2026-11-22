@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import { CONFIRM_ACTION_PARAM } from "@/lib/auth/reconfirm";
 import { useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
+import { SETTINGS_APPS_SECTION_ID } from "../../settingsSectionIds";
 import { openMcpModal } from "../modals/openMcpModal";
 import { ProviderIntegrations } from "./ProviderIntegrations";
 import { SettingsSection } from "./SettingsSection";
@@ -79,18 +80,15 @@ export function AppsCard({ apiBaseUrl, suppressMcpHashOpen }: AppsCardProps) {
     return null;
   }
 
-  const providers = Array.isArray(settings.providers) ? (settings.providers as string[]) : [];
-  const userIdentities = Array.isArray(settings.identities)
-    ? (settings.identities as Array<{
-        id: string;
-        identity_id: string;
-        provider: string;
-        user_id: string;
-      }>)
-    : [];
+  const providers = settings.providers ?? [];
+  const userIdentities = settings.identities ?? [];
 
   return (
-    <SettingsSection icon={<IconApps size={20} stroke={1.5} />} id="apps" title={t("Title")}>
+    <SettingsSection
+      icon={<IconApps size={20} stroke={1.5} />}
+      id={SETTINGS_APPS_SECTION_ID}
+      title={t("Title")}
+    >
       <CardSection inheritPadding py="md">
         <ProviderIntegrations
           apiBaseUrl={apiBaseUrl}

@@ -1,13 +1,14 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { resolveToCanonicalTimezone } from "@bondery/helpers/locale";
 import {
   errorNotificationTemplate,
   ModalTitle,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Contact, ContactAddressEntry } from "@bondery/schemas";
+import type { Contact, UpdateContactInput } from "@bondery/schemas";
 import type { TranslateFn } from "@bondery/translations";
 import { Text } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
@@ -54,14 +55,6 @@ export function usePersonAddressSave({
     setSavingField("address");
 
     if (payload.locationOnly && payload.suggestedLocation) {
-      const addressEntries = payload.addresses;
-      const preferredAddress =
-        addressEntries.length > 0
-          ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
-          : null;
-      const _locationAddress =
-        addressEntries.find((entry) => entry.value === payload.suggestedLocation?.location) ??
-        preferredAddress;
       try {
         await updateContactMutation.mutateAsync({
           latitude: payload.suggestedLocation.latitude,
@@ -88,7 +81,7 @@ export function usePersonAddressSave({
 
         const lat = payload.suggestedLocation?.latitude;
         const lon = payload.suggestedLocation?.longitude;
-        if (lat != null && lon != null) {
+        if (lat !== null && lat !== undefined && lon !== null && lon !== undefined) {
           openStandardConfirmModal({
             cancelLabel: tAddress("LocationUpdateCancel"),
             confirmLabel: tAddress("LocationUpdateConfirm"),
@@ -152,18 +145,6 @@ export function usePersonAddressSave({
     try {
       await updateContactMutation.mutateAsync({ addresses: payload.addresses });
 
-      const addressEntries = payload.addresses;
-
-      const preferredAddress =
-        addressEntries.length > 0
-          ? addressEntries.find((entry) => entry.type === "home") || addressEntries[0]
-          : null;
-
-      const _locationAddress = payload.suggestedLocation
-        ? (addressEntries.find((entry) => entry.value === payload.suggestedLocation?.location) ??
-          preferredAddress)
-        : preferredAddress;
-
       setContact((previous) => {
         if (!previous) {
           return previous;
@@ -189,14 +170,14 @@ export function usePersonAddressSave({
             const lon = payload.suggestedLocation?.longitude;
 
             let canonicalTimezone: string | null = null;
-            if (lat != null && lon != null) {
+            if (lat !== null && lat !== undefined && lon !== null && lon !== undefined) {
               const rawTz = await fetchTimezoneForCoordinates(lat, lon).catch(() => null);
               if (rawTz) {
                 canonicalTimezone = resolveToCanonicalTimezone(rawTz);
               }
             }
 
-            const locationPatch: Record<string, unknown> = {
+            const locationPatch: UpdateContactInput = {
               latitude: lat,
               location: payload.suggestedLocation?.location,
               longitude: lon,
@@ -237,7 +218,7 @@ export function usePersonAddressSave({
         };
 
         if (payload.forceLocation) {
-          void applyLocationUpdate();
+          detachPromise(applyLocationUpdate());
         } else {
           openStandardConfirmModal({
             cancelLabel: tAddress("LocationUpdateCancel"),

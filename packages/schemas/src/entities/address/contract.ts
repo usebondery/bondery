@@ -27,42 +27,42 @@ import type {
   ReplaceAddressesInput,
 } from "./types.js";
 
-type _ContactAddressType = Assert<
+export type _ContactAddressType = Assert<
   IsEqual<ContactAddressType, z.infer<typeof contactAddressTypeSchema>>
 >;
-type _ContactAddressGranularity = Assert<
+export type _ContactAddressGranularity = Assert<
   IsEqual<ContactAddressGranularity, z.infer<typeof contactAddressGranularitySchema>>
 >;
-type _ContactAddressGeocodeSource = Assert<
+export type _ContactAddressGeocodeSource = Assert<
   IsEqual<ContactAddressGeocodeSource, z.infer<typeof contactAddressGeocodeSourceSchema>>
 >;
-type _ContactAddressConfidence = Assert<
+export type _ContactAddressConfidence = Assert<
   IsEqual<ContactAddressConfidence, z.infer<typeof contactAddressConfidenceSchema>>
 >;
-type _ContactAddressRead = Assert<
+export type _ContactAddressRead = Assert<
   IsEqual<ContactAddressRead, z.infer<typeof contactAddressReadSchema>>
 >;
-type _ContactAddressSheetInput = Assert<
+export type _ContactAddressSheetInput = Assert<
   IsEqual<ContactAddressSheetInput, z.input<typeof contactAddressSheetSchema>>
 >;
-type _ContactAddressSheetOutput = Assert<
+export type _ContactAddressSheetOutput = Assert<
   IsEqual<ContactAddressSheetOutput, z.output<typeof contactAddressSheetSchema>>
 >;
-type _ContactAddressEntryInput = Assert<
+export type _ContactAddressEntryInput = Assert<
   IsEqual<ContactAddressEntryInput, z.input<typeof contactAddressEntrySchema>>
 >;
-type _ContactAddressEntryOutput = Assert<
+export type _ContactAddressEntryOutput = Assert<
   IsEqual<ContactAddressEntryOutput, z.output<typeof contactAddressEntrySchema>>
 >;
-type _ContactAddressEntry = Assert<
+export type _ContactAddressEntry = Assert<
   IsEqual<ContactAddressEntry, z.output<typeof contactAddressEntrySchema>>
 >;
-type _GeocodeSuggestAddressInput = Assert<
+export type _GeocodeSuggestAddressInput = Assert<
   IsEqual<GeocodeSuggestAddressInput, z.input<typeof geocodeSuggestAddressSchema>>
 >;
-type _GeocodeSuggestAddressOutput = Assert<
+export type _GeocodeSuggestAddressOutput = Assert<
   IsEqual<GeocodeSuggestAddressOutput, z.output<typeof geocodeSuggestAddressSchema>>
 >;
-type _ReplaceAddressesInput = Assert<
+export type _ReplaceAddressesInput = Assert<
   IsEqual<ReplaceAddressesInput, z.output<typeof replaceAddressesSchema>>
 >;

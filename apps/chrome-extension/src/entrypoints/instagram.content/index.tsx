@@ -6,6 +6,7 @@
  */
 
 import { parseInstagramUsername, SOCIAL_PLATFORM_URL_DETAILS } from "@bondery/helpers";
+import { detachPromise } from "@bondery/helpers/async";
 import type ReactDOM from "react-dom/client";
 import { browser } from "wxt/browser";
 import type { ShadowRootContentScriptUi } from "wxt/utils/content-script-ui/shadow-root";
@@ -20,70 +21,7 @@ import { extLog } from "../../lib/log";
 import { firstNonEmpty, nonEmpty } from "../../lib/text";
 import { renderInShadowRoot } from "../../lib/ui";
 
-export default defineContentScript({
-  cssInjectionMode: "ui",
-
-  async main(ctx) {
-    // Safety check: only run on Instagram
-    if (!window.location.hostname.includes(SOCIAL_PLATFORM_URL_DETAILS.instagram.domain)) {
-      return;
-    }
-
-    extLog.debug("Bondery Extension: Initializing Instagram integration");
-
-    // Inject the network interceptor script into MAIN world immediately
-    // This needs to happen at document_start to intercept all network requests
-    try {
-      await injectScript("/instagram-interceptor.js", {
-        keepInDom: true,
-      });
-      extLog.debug("Bondery Extension: Network interceptor injected");
-    } catch (error) {
-      extLog.error("Bondery Extension: Failed to inject network interceptor:", error);
-    }
-
-    // Install network response listener for intercepted data
-    installInstagramNetworkResponseListener();
-
-    // Wait for DOM to be ready before injecting UI
-    if (document.readyState === "loading") {
-      await new Promise<void>((resolve) => {
-        document.addEventListener("DOMContentLoaded", () => resolve());
-      });
-    }
-
-    // Initial injection attempt
-    void injectBonderyButton(ctx);
-
-    // Setup observer for SPA navigation
-    const _observer = setupObserver(ctx);
-
-    // Retry injection after delay
-    ctx.setTimeout(() => {
-      void injectBonderyButton(ctx);
-    }, 2000);
-
-    // Listen for URL changes (SPA navigation)
-    let lastUrl = window.location.href;
-    const _urlCheckInterval = ctx.setInterval(() => {
-      if (window.location.href !== lastUrl) {
-        lastUrl = window.location.href;
-        ctx.setTimeout(() => {
-          void injectBonderyButton(ctx);
-        }, 1000);
-      }
-    }, 500);
-
-    // Listen for profile scrape requests from background
-    browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
-      if (message?.type === "GET_SCRAPED_PROFILE") {
-        sendResponse(getInstagramSnapshot());
-      }
-    });
-  },
-  matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
-  runAt: "document_start",
-});
+const SINGLE_PATH_SEGMENT_RE = /^\/([^/]+)\/?$/;
 
 // ─── Network Interceptor Communication ───────────────────────────────────────
 
@@ -118,7 +56,7 @@ function installInstagramNetworkResponseListener() {
       return;
     }
 
-    const data = event.data;
+    const { data } = event;
     if (
       !data ||
       data.type !== INSTAGRAM_NETWORK_MESSAGE_TYPE ||
@@ -190,8 +128,8 @@ function getInstagramSnapshot() {
 }
 
 function getInstagramUsername(): string | null {
-  const pathname = window.location.pathname;
-  const match = pathname.match(/^\/([^/]+)\/?$/);
+  const { pathname } = window.location;
+  const match = pathname.match(SINGLE_PATH_SEGMENT_RE);
 
   if (
     match?.[1] &&
@@ -281,3 +219,68 @@ function setupObserver(ctx: ContentScriptContext) {
 
   return observer;
 }
+
+export default defineContentScript({
+  cssInjectionMode: "ui",
+
+  async main(ctx) {
+    // Safety check: only run on Instagram
+    if (!window.location.hostname.includes(SOCIAL_PLATFORM_URL_DETAILS.instagram.domain)) {
+      return;
+    }
+
+    extLog.debug("Bondery Extension: Initializing Instagram integration");
+
+    // Inject the network interceptor script into MAIN world immediately
+    // This needs to happen at document_start to intercept all network requests
+    try {
+      await injectScript("/instagram-interceptor.js", {
+        keepInDom: true,
+      });
+      extLog.debug("Bondery Extension: Network interceptor injected");
+    } catch (error) {
+      extLog.error("Bondery Extension: Failed to inject network interceptor:", error);
+    }
+
+    // Install network response listener for intercepted data
+    installInstagramNetworkResponseListener();
+
+    // Wait for DOM to be ready before injecting UI
+    if (document.readyState === "loading") {
+      await new Promise<void>((resolve) => {
+        document.addEventListener("DOMContentLoaded", () => resolve());
+      });
+    }
+
+    // Initial injection attempt
+    void injectBonderyButton(ctx);
+
+    // Setup observer for SPA navigation
+    setupObserver(ctx);
+
+    // Retry injection after delay
+    ctx.setTimeout(() => {
+      void injectBonderyButton(ctx);
+    }, 2000);
+
+    // Listen for URL changes (SPA navigation)
+    let lastUrl = window.location.href;
+    ctx.setInterval(() => {
+      if (window.location.href !== lastUrl) {
+        lastUrl = window.location.href;
+        ctx.setTimeout(() => {
+          void injectBonderyButton(ctx);
+        }, 1000);
+      }
+    }, 500);
+
+    // Listen for profile scrape requests from background
+    browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+      if (message?.type === "GET_SCRAPED_PROFILE") {
+        sendResponse(getInstagramSnapshot());
+      }
+    });
+  },
+  matches: ["https://www.instagram.com/*", "https://instagram.com/*"],
+  runAt: "document_start",
+});

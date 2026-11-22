@@ -1,3 +1,7 @@
+interface MicrophonePermissionDescriptor {
+  name: "microphone";
+}
+
 /**
  * Reads the microphone permission state without a prompt.
  *
@@ -6,10 +10,6 @@
  * `null` is a normal result: Safari does not expose this query.
  */
 export type DictationPermissionState = PermissionState | null;
-
-interface MicrophonePermissionDescriptor {
-  name: "microphone";
-}
 
 /**
  * Queries the microphone permission.

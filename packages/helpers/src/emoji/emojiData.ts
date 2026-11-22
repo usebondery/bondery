@@ -376,22 +376,6 @@ const CATEGORY_OVERRIDES: Record<string, EmojiCategoryName> = {
   "🧠": "Humans",
 };
 
-export const CATEGORY_ORDER: EmojiCategoryName[] = [
-  "Humans",
-  "Work",
-  "Celebrations",
-  "Sports",
-  "Travel",
-  "Animals",
-  "Buildings",
-  "Nature",
-  "Food",
-  "Activities",
-  "Hearts",
-  "Objects",
-  "Miscellaneous",
-];
-
 const getBaseCategoryByIndex = (index: number): EmojiCategoryName => {
   const range = BASE_CATEGORY_RANGES.find((item) => index >= item.start && index < item.end);
   return range?.name ?? "Miscellaneous";
@@ -420,6 +404,22 @@ EMOJI_LIST.forEach((emojiData, index) => {
 
   grouped[targetCategory].push(emojiData);
 });
+
+export const CATEGORY_ORDER: EmojiCategoryName[] = [
+  "Humans",
+  "Work",
+  "Celebrations",
+  "Sports",
+  "Travel",
+  "Animals",
+  "Buildings",
+  "Nature",
+  "Food",
+  "Activities",
+  "Hearts",
+  "Objects",
+  "Miscellaneous",
+];
 
 export const EMOJI_CATEGORIES: Record<string, EmojiData[]> = CATEGORY_ORDER.reduce<
   Record<string, EmojiData[]>

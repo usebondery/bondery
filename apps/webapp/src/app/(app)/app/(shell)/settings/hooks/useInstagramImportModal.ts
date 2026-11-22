@@ -230,7 +230,9 @@ export function useInstagramImportModal({
 
     setIsImporting(true);
     setImportProgress({ current: 0, total: selectedContacts.length });
-    const isFirstImport = settingsResult?.data?.importCompletedAt == null;
+    const isFirstImport =
+      settingsResult?.data?.importCompletedAt === null ||
+      settingsResult?.data?.importCompletedAt === undefined;
 
     let totalImported = 0;
     let totalUpdated = 0;

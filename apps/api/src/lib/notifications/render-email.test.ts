@@ -4,6 +4,14 @@ import { EMAIL_PREVIEW_MAX_CHARS, MagicLinkEmail, ReminderDigestEmail } from "@b
 import { defaultMagicLinkCopy } from "@bondery/emails/fixtures/default-copy";
 import { renderEmailParts } from "./render-email.js";
 
+const SIGN_IN_TO_BONDERY_PATTERN = /Sign in to Bondery/;
+const SVEETECH_PATTERN = /Sveetech/;
+const NINETY_ONE_X_PATTERN = /x{91}/;
+const MANAGE_THESE_NOTIFICATIONS_IN_BONDERY_PATTERN = /Manage these notifications in Bondery/;
+const EXPIRES_IN_MINUTES_PATTERN = /Expires in 15 minutes/;
+const MANAGE_THESE_NOTIFICATIONS_PATTERN = /Manage these notifications/;
+const SECRET_TOKEN_PATTERN = /secret-token/;
+
 describe("renderEmailParts", () => {
   it("sends HTML plus plaintext without legal identity on transactional mail", async () => {
     const url = "https://api.example.test/auth/magic-link/verify?token=secret-token";
@@ -15,12 +23,12 @@ describe("renderEmailParts", () => {
       }),
     );
 
-    assert.match(html, /Expires in 15 minutes/);
-    assert.doesNotMatch(html, /Sveetech/);
-    assert.doesNotMatch(html, /Manage these notifications/);
-    assert.match(text, /secret-token/);
-    assert.match(text, /Sign in to Bondery/);
-    assert.doesNotMatch(text, /Sveetech/);
+    assert.match(html, EXPIRES_IN_MINUTES_PATTERN);
+    assert.doesNotMatch(html, SVEETECH_PATTERN);
+    assert.doesNotMatch(html, MANAGE_THESE_NOTIFICATIONS_PATTERN);
+    assert.match(text, SECRET_TOKEN_PATTERN);
+    assert.match(text, SIGN_IN_TO_BONDERY_PATTERN);
+    assert.doesNotMatch(text, SVEETECH_PATTERN);
   });
 
   it("clips inbox preview to 90 characters", async () => {
@@ -31,7 +39,7 @@ describe("renderEmailParts", () => {
       }),
     );
 
-    assert.doesNotMatch(html, /x{91}/);
+    assert.doesNotMatch(html, NINETY_ONE_X_PATTERN);
     assert.match(html, new RegExp(`x{${EMAIL_PREVIEW_MAX_CHARS - 1}}…`));
   });
 
@@ -44,9 +52,9 @@ describe("renderEmailParts", () => {
       }),
     );
 
-    assert.match(html, /Manage these notifications in Bondery/);
-    assert.match(text, /Manage these notifications in Bondery/);
-    assert.doesNotMatch(html, /Sveetech/);
-    assert.doesNotMatch(text, /Sveetech/);
+    assert.match(html, MANAGE_THESE_NOTIFICATIONS_IN_BONDERY_PATTERN);
+    assert.match(text, MANAGE_THESE_NOTIFICATIONS_IN_BONDERY_PATTERN);
+    assert.doesNotMatch(html, SVEETECH_PATTERN);
+    assert.doesNotMatch(text, SVEETECH_PATTERN);
   });
 });

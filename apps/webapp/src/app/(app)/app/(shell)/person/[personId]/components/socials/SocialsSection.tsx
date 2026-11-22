@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import type { Contact, EmailEntry, PhoneEntry } from "@bondery/schemas";
 import { Button, Group } from "@mantine/core";
 import {
@@ -13,7 +14,6 @@ import {
   IconWorld,
 } from "@tabler/icons-react";
 import {
-  useCommonTranslations,
   useContactInfoTranslations,
   useSocialsTranslations,
   useValidationTranslations,
@@ -48,7 +48,6 @@ export function SocialsSection({
 }: SocialsSectionProps) {
   const t = useSocialsTranslations();
   const tContactInfo = useContactInfoTranslations();
-  const _tCommon = useCommonTranslations();
   const tVal = useValidationTranslations();
   const contactInfoLabels = useContactInfoLabels();
   const { getSocialActionTooltip } = useSocialActionTooltips();
@@ -184,7 +183,7 @@ export function SocialsSection({
           icon={<IconPhone />}
           isOpen={editor.openField === "phone"}
           onCancelClose={editor.clearCloseTimeout}
-          onHoverOpen={(field) => void editor.requestOpen(field)}
+          onHoverOpen={(field) => detachPromise(editor.requestOpen(field))}
           onLinkClick={() => editor.closeField("phone")}
           onScheduleClose={editor.scheduleCloseField}
           tooltipLabel={getSocialActionTooltip("phone", contact.firstName)}
@@ -203,7 +202,7 @@ export function SocialsSection({
           icon={<IconMail />}
           isOpen={editor.openField === "email"}
           onCancelClose={editor.clearCloseTimeout}
-          onHoverOpen={(field) => void editor.requestOpen(field)}
+          onHoverOpen={(field) => detachPromise(editor.requestOpen(field))}
           onLinkClick={() => editor.closeField("email")}
           onScheduleClose={editor.scheduleCloseField}
           tooltipLabel={getSocialActionTooltip("email", contact.firstName)}

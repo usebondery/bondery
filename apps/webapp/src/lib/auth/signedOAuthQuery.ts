@@ -1,4 +1,3 @@
-const _SIGNED_QUERY_ISSUED_AT_PARAM = "ba_iat";
 const SIGNED_QUERY_PARAMETER_NAME_PARAM = "ba_param";
 
 function getSignedOAuthQueryParameterNames(params: URLSearchParams): Set<string> | undefined {

@@ -2,7 +2,7 @@ import type { ContactAddressEntry, ContactAddressType } from "@bondery/schemas";
 import { formatAddressLabel } from "#address/address-utils.js";
 import type { MapSuggestionItem, MapSuggestionRegionalEntry } from "#address/mapy-suggest.js";
 
-export interface SuggestionToContactAddressOptions {
+interface SuggestionToContactAddressOptions {
   label?: string | null;
   timezone?: string | null;
   type?: ContactAddressType;
@@ -194,3 +194,5 @@ export function buildManualContactAddress(input: {
     value: trimmedValue,
   };
 }
+
+export type { SuggestionToContactAddressOptions };

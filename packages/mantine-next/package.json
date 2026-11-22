@@ -741,7 +741,7 @@
   },
   "private": true,
   "scripts": {
-    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs mantine-next",
+    "build": "node ../../scripts/pkg/clean-dist.mjs dist tsconfig.tsbuildinfo .cache/tsconfig.tsbuildinfo && tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs mantine-next",
     "check:types": "tsc --noEmit",
     "compile": "tsc && node ../../scripts/pkg/rewrite-package-hash-imports-in-dist.mjs mantine-next",
     "dev": "node ../../scripts/pkg/tsc-watch-and-rewrite.mjs mantine-next",

@@ -2,6 +2,7 @@
 "use client";
 
 import { BonderyDynamicLogotype } from "@bondery/branding/react";
+import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_NAME, WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { ActionIconButton, AnchorLink } from "@bondery/mantine-next";
 import {
@@ -41,11 +42,6 @@ import { NavigationSidebarContent } from "./NavigationSidebar";
 import { PeopleSearchSpotlight } from "./PeopleSearchSpotlight";
 import { ShellMainFooterHost, ShellMainFooterProvider } from "./ShellMainFooter";
 
-export {
-  SIDEBAR_COLLAPSED_WIDTH,
-  SIDEBAR_DEFAULT_EXPANDED_WIDTH as SIDEBAR_EXPANDED_WIDTH,
-} from "@/lib/shell/sidebarWidth";
-
 const APP_SHELL_NAVBAR_ID = "app-shell-navbar";
 const APP_SHELL_MENU_BUTTON_ID = "app-shell-menu-button";
 /** Header chrome (~xl ActionIcon) plus iOS/PWA safe-area inset. */
@@ -64,12 +60,15 @@ interface AppShellWrapperProps {
 }
 
 function persistSidebarWidths(width: number, lastExpandedWidth: number) {
-  void setClientCookie(SIDEBAR_WIDTH_COOKIE_NAME, String(width)).catch(() => {
+  detachPromise(setClientCookie(SIDEBAR_WIDTH_COOKIE_NAME, String(width)), () => {
     // no-op: cookie writes can fail in restrictive browsers
   });
-  void setClientCookie(SIDEBAR_LAST_EXPANDED_COOKIE_NAME, String(lastExpandedWidth)).catch(() => {
-    // no-op: cookie writes can fail in restrictive browsers
-  });
+  detachPromise(
+    setClientCookie(SIDEBAR_LAST_EXPANDED_COOKIE_NAME, String(lastExpandedWidth)),
+    () => {
+      // no-op: cookie writes can fail in restrictive browsers
+    },
+  );
 }
 
 function AppShellMobileHeader({
@@ -128,6 +127,11 @@ function AppShellMobileHeader({
     </AppShellHeader>
   );
 }
+
+export {
+  SIDEBAR_COLLAPSED_WIDTH,
+  SIDEBAR_DEFAULT_EXPANDED_WIDTH as SIDEBAR_EXPANDED_WIDTH,
+} from "@/lib/shell/sidebarWidth";
 
 export function AppShellWrapper({
   children,
@@ -253,7 +257,7 @@ export function AppShellWrapper({
     if (!isBelowSm) {
       return;
     }
-    const target = event.target;
+    const { target } = event;
     if (!(target instanceof Element)) {
       return;
     }

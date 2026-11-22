@@ -11,16 +11,12 @@ import {
   parseShortcutKeys,
   successNotificationTemplate,
 } from "@bondery/mantine-next";
-import type { Activity, InteractionParticipant, PersonPreview } from "@bondery/schemas";
-import {
-  useCommonTranslations,
-  useHomePageTranslations,
-  useInteractionsPageTranslations,
-} from "@/lib/i18n/generated/hooks";
-import { nonEmpty } from "@/lib/shared/nonEmpty";
-
-type ActivityParticipantRef = string | InteractionParticipant;
-
+import type {
+  Activity,
+  InteractionParticipant,
+  PersonPreview,
+  UserSettingsResponse,
+} from "@bondery/schemas";
 import { Button, Group, Paper, SimpleGrid, Stack, Text, Title, Tooltip } from "@mantine/core";
 import { useHotkeys } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
@@ -33,7 +29,6 @@ import {
   IconUserPlus,
 } from "@tabler/icons-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { openNewActivityModal } from "@/app/(app)/app/(shell)/interactions/components/NewActivityModal";
 import { openAddContactModal } from "@/app/(app)/app/(shell)/people/components/modals/AddContactModal";
 import { GettingStartedRailSlot } from "@/components/home/GettingStartedRailSlot";
@@ -44,6 +39,11 @@ import { openStandardConfirmModal } from "@/components/modals/openStandardConfir
 import { PageHeader } from "@/components/shell/PageHeader";
 import { PageWrapper } from "@/components/shell/PageWrapper";
 import { peopleSearchActions } from "@/components/shell/PeopleSearchSpotlight";
+import {
+  useCommonTranslations,
+  useHomePageTranslations,
+  useInteractionsPageTranslations,
+} from "@/lib/i18n/generated/hooks";
 import { useDateFormatter as useFormatter } from "@/lib/i18n/useDateFormatter";
 import { setOptimisticDocumentTitle } from "@/lib/metadata/navigationTitleStore";
 import { optimisticPersonDocumentTitle } from "@/lib/metadata/optimisticTitles";
@@ -65,9 +65,15 @@ import {
   useDeleteInteractionMutation,
 } from "@/lib/query/hooks/useInteractions";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
+import { nonEmpty } from "@/lib/shared/nonEmpty";
 
-export function HomeClient({ initialSettings }: { initialSettings?: Record<string, unknown> }) {
-  const _router = useRouter();
+type ActivityParticipantRef = string | InteractionParticipant;
+
+export function HomeClient({
+  initialSettings,
+}: {
+  initialSettings?: UserSettingsResponse["data"];
+}) {
   const { navigateWithTitle } = useNavigateWithTitle();
   const t = useHomePageTranslations();
   const timelineT = useInteractionsPageTranslations();
@@ -278,7 +284,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
           initialSettings={initialSettings}
           settingsData={settingsResult?.data}
           settingsReady={settingsReady}
-          statsReady={stats != null}
+          statsReady={stats !== null && stats !== undefined}
           timelineContacts={timelineContacts ?? []}
           totalContacts={stats?.totalContacts ?? 0}
         />
@@ -322,7 +328,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
               </Tooltip>
             </Group>
 
-            {compactActivities == null ? null : compactActivities.length === 0 ? (
+            {compactActivities === null ||
+            compactActivities === undefined ? null : compactActivities.length === 0 ? (
               <Paper p="md" radius="md" withBorder>
                 <Text c="dimmed" size="sm">
                   {timelineT("NoActivitiesFound")}
@@ -359,7 +366,7 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 </Tooltip>
               </Group>
 
-              {reminders == null ? null : reminders.length === 0 ? (
+              {reminders === null || reminders === undefined ? null : reminders.length === 0 ? (
                 <Paper p="md" radius="md" withBorder>
                   <Text c="dimmed" size="sm">
                     {t("NoUpcomingReminders")}
@@ -404,7 +411,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 </Tooltip>
               </Group>
 
-              {recentlyAdded == null ? null : recentlyAdded.length === 0 ? (
+              {recentlyAdded === null ||
+              recentlyAdded === undefined ? null : recentlyAdded.length === 0 ? (
                 <Paper p="md" radius="md" withBorder>
                   <Text c="dimmed" size="sm">
                     {t("NoRecentlyAdded")}
@@ -449,7 +457,8 @@ export function HomeClient({ initialSettings }: { initialSettings?: Record<strin
                 </Tooltip>
               </Group>
 
-              {recentlyInteracted == null ? null : recentlyInteracted.length === 0 ? (
+              {recentlyInteracted === null ||
+              recentlyInteracted === undefined ? null : recentlyInteracted.length === 0 ? (
                 <Paper p="md" radius="md" withBorder>
                   <Text c="dimmed" size="sm">
                     {t("NoRecentlyInteracted")}

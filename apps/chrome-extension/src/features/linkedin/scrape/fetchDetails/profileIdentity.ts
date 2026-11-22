@@ -8,7 +8,13 @@ import {
   type SduiIdentity,
   splitName,
 } from "../sduiProfile";
+import type { VoyagerEntity } from "./voyagerShared";
 
+const PROFILE_URN_KIND_RE = /fsd_profile|fs_profile/;
+const PRIVACY_OR_PROFILE_CARD_RE = /PrivacySettings|ProfileCard/i;
+const PRIVACY_PROFILE_OR_MINI_RE = /PrivacySettings|ProfileCard|MiniProfile/i;
+const PRIVACY_SETTINGS_RE = /PrivacySettings/i;
+const PROFILE_ABOUT_RE = /profile\.About|ProfileAbout|AboutTopLevel/i;
 /** How deep `findExpandableText` descends into nested Voyager objects. */
 const MAX_EXPANDABLE_TEXT_DEPTH = 8;
 
@@ -28,7 +34,7 @@ function localizedString(value: unknown): string | undefined {
     return undefined;
   }
 
-  const record = value as Record<string, unknown>;
+  const record = value as VoyagerEntity;
   if (typeof record.text === "string" && record.text.trim()) {
     return record.text.trim();
   }
@@ -36,9 +42,9 @@ function localizedString(value: unknown): string | undefined {
     return record.value.trim();
   }
 
-  const localized = record.localized;
+  const { localized } = record;
   if (localized && typeof localized === "object") {
-    for (const entry of Object.values(localized as Record<string, unknown>)) {
+    for (const entry of Object.values(localized as VoyagerEntity)) {
       if (typeof entry === "string" && entry.trim()) {
         return entry.trim();
       }
@@ -53,13 +59,10 @@ function vectorImageUrl(value: unknown): string | undefined {
     return undefined;
   }
 
-  const record = value as Record<string, unknown>;
+  const record = value as VoyagerEntity;
   const vector =
-    record.vectorImage && typeof record.vectorImage === "object"
-      ? (record.vectorImage as Record<string, unknown>)
-      : record;
-  const rootUrl = vector.rootUrl;
-  const artifacts = vector.artifacts;
+    record.vectorImage && typeof record.vectorImage === "object" ? record.vectorImage : record;
+  const { rootUrl, artifacts } = vector;
   if (typeof rootUrl !== "string" || !Array.isArray(artifacts) || artifacts.length === 0) {
     return undefined;
   }
@@ -70,28 +73,26 @@ function vectorImageUrl(value: unknown): string | undefined {
     if (!artifact || typeof artifact !== "object") {
       continue;
     }
-    const item = artifact as Record<string, unknown>;
-    if (typeof item.fileIdentifyingUrlPathSegment !== "string") {
+    if (typeof artifact.fileIdentifyingUrlPathSegment !== "string") {
       continue;
     }
-    const width = typeof item.width === "number" ? item.width : 0;
+    const width = typeof artifact.width === "number" ? artifact.width : 0;
     if (width >= bestWidth) {
       bestWidth = width;
-      bestSegment = item.fileIdentifyingUrlPathSegment;
+      bestSegment = artifact.fileIdentifyingUrlPathSegment;
     }
   }
 
   return bestSegment ? `${rootUrl}${bestSegment}` : undefined;
 }
 
-function photoFromProfileEntity(entity: Record<string, unknown>): string | undefined {
+function photoFromProfileEntity(entity: VoyagerEntity): string | undefined {
   const picture = entity.profilePicture;
   if (picture && typeof picture === "object") {
-    const pic = picture as Record<string, unknown>;
     const fromPicture =
-      vectorImageUrl(pic) ??
-      vectorImageUrl(pic.displayImageReference) ??
-      vectorImageUrl(pic.displayImageReferenceResolutionResult);
+      vectorImageUrl(picture) ??
+      vectorImageUrl(picture.displayImageReference) ??
+      vectorImageUrl(picture.displayImageReferenceResolutionResult);
     if (fromPicture) {
       return fromPicture;
     }
@@ -100,10 +101,7 @@ function photoFromProfileEntity(entity: Record<string, unknown>): string | undef
   return vectorImageUrl(entity.picture);
 }
 
-function identityFromProfileEntity(
-  entity: Record<string, unknown>,
-  handle: string,
-): SduiIdentity | null {
+function identityFromProfileEntity(entity: VoyagerEntity, handle: string): SduiIdentity | null {
   const firstName = localizedString(entity.firstName);
   const lastName = localizedString(entity.lastName);
   const middleName = localizedString(entity.middleName);
@@ -143,7 +141,7 @@ function identityFromProfileEntity(
 }
 
 function entityMatchesProfile(
-  entity: Record<string, unknown>,
+  entity: VoyagerEntity,
   username: string,
   profileUrn: string | null,
 ): boolean {
@@ -159,20 +157,20 @@ function entityMatchesProfile(
  * Reads first/last name from Voyager Profile or MiniProfile entities.
  * Skips vanity slugs so we never treat `jakub-žemlička-50779a201` as a name.
  */
-export function extractVoyagerIdentity(
-  entities: Record<string, unknown>[],
+function extractVoyagerIdentity(
+  entities: VoyagerEntity[],
   username: string,
   profileUrn: string | null,
 ): SduiIdentity | null {
   const normalizedUsername = username.normalize("NFC");
-  const candidates: Record<string, unknown>[] = [];
+  const candidates: VoyagerEntity[] = [];
 
   for (const entity of entities) {
     const type = typeof entity.$type === "string" ? entity.$type : undefined;
     if (!type?.includes("identity.profile.Profile") && !type?.includes("MiniProfile")) {
       continue;
     }
-    if (/PrivacySettings|ProfileCard/i.test(type)) {
+    if (PRIVACY_OR_PROFILE_CARD_RE.test(type)) {
       continue;
     }
     if (entityMatchesProfile(entity, normalizedUsername, profileUrn)) {
@@ -186,7 +184,7 @@ export function extractVoyagerIdentity(
       if (!type?.includes("identity.profile.Profile") && !type?.includes("MiniProfile")) {
         continue;
       }
-      if (/PrivacySettings|ProfileCard/i.test(type)) {
+      if (PRIVACY_OR_PROFILE_CARD_RE.test(type)) {
         continue;
       }
       candidates.push(entity);
@@ -207,7 +205,7 @@ function firstLocaleValue(value: unknown): string | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
   }
-  for (const entry of Object.values(value as Record<string, unknown>)) {
+  for (const entry of Object.values(value as VoyagerEntity)) {
     if (typeof entry === "string" && entry.trim()) {
       return entry.trim();
     }
@@ -215,16 +213,15 @@ function firstLocaleValue(value: unknown): string | undefined {
   return undefined;
 }
 
-function bioFromProfileEntity(entity: Record<string, unknown>): string | undefined {
+function bioFromProfileEntity(entity: VoyagerEntity): string | undefined {
   const stateful = entity.profileStatefulProfileFields;
   let nested: string | undefined;
   if (stateful && typeof stateful === "object" && !Array.isArray(stateful)) {
-    const fields = stateful as Record<string, unknown>;
     nested =
-      localizedString(fields.summary) ??
-      localizedString(fields.plainTextSummary) ??
-      localizedString(fields.about) ??
-      firstLocaleValue(fields.multiLocaleSummary);
+      localizedString(stateful.summary) ??
+      localizedString(stateful.plainTextSummary) ??
+      localizedString(stateful.about) ??
+      firstLocaleValue(stateful.multiLocaleSummary);
   }
   return (
     localizedString(entity.summary) ??
@@ -239,15 +236,15 @@ function isProfileEntityType(type: unknown, urn: unknown): boolean {
   if (
     typeof type === "string" &&
     type.includes("identity.profile.Profile") &&
-    !/PrivacySettings|ProfileCard|MiniProfile/i.test(type)
+    !PRIVACY_PROFILE_OR_MINI_RE.test(type)
   ) {
     return true;
   }
-  return !type && typeof urn === "string" && /fsd_profile|fs_profile/.test(urn);
+  return !type && typeof urn === "string" && PROFILE_URN_KIND_RE.test(urn);
 }
 
 function isBioProfileCandidate(
-  entity: Record<string, unknown>,
+  entity: VoyagerEntity,
   username: string,
   profileUrn: string | null,
 ): boolean {
@@ -257,17 +254,17 @@ function isBioProfileCandidate(
   return entityMatchesProfile(entity, username, profileUrn);
 }
 
-function entityLooksLikeAbout(entity: Record<string, unknown>): boolean {
+function entityLooksLikeAbout(entity: VoyagerEntity): boolean {
   const type = typeof entity.$type === "string" ? entity.$type : "";
   const id = `${entity.$id ?? ""} ${entity.entityUrn ?? ""}`;
-  if (/PrivacySettings|ProfileCard/i.test(type) || /PrivacySettings/i.test(id)) {
+  if (PRIVACY_OR_PROFILE_CARD_RE.test(type) || PRIVACY_SETTINGS_RE.test(id)) {
     return false;
   }
-  return /profile\.About|ProfileAbout|AboutTopLevel/i.test(`${type} ${id}`);
+  return PROFILE_ABOUT_RE.test(`${type} ${id}`);
 }
 
 function findExpandableText(value: unknown, depth = 0): string | undefined {
-  if (value == null || depth > MAX_EXPANDABLE_TEXT_DEPTH) {
+  if (value === null || value === undefined || depth > MAX_EXPANDABLE_TEXT_DEPTH) {
     return undefined;
   }
   if (typeof value !== "object") {
@@ -283,10 +280,10 @@ function findExpandableText(value: unknown, depth = 0): string | undefined {
     return undefined;
   }
 
-  const record = value as Record<string, unknown>;
+  const record = value as VoyagerEntity;
   const expandable = record.expandableTextComponent ?? record.expandableText;
   if (expandable && typeof expandable === "object") {
-    const box = expandable as Record<string, unknown>;
+    const box = expandable as VoyagerEntity;
     const text =
       localizedString(box.description) ?? localizedString(box.text) ?? localizedString(box.caption);
     if (text && text.length > MIN_ABOUT_TEXT_LENGTH) {
@@ -303,7 +300,7 @@ function findExpandableText(value: unknown, depth = 0): string | undefined {
   return undefined;
 }
 
-function bioFromAboutEntity(entity: Record<string, unknown>): string | undefined {
+function bioFromAboutEntity(entity: VoyagerEntity): string | undefined {
   return (
     localizedString(entity.text) ??
     localizedString(entity.summary) ??
@@ -316,8 +313,8 @@ function bioFromAboutEntity(entity: Record<string, unknown>): string | undefined
  * Reads the About / summary text from Voyager Profile or About entities.
  * Background enrich tabs often never mount the SDUI About card.
  */
-export function extractVoyagerBio(
-  entities: Record<string, unknown>[],
+function extractVoyagerBio(
+  entities: VoyagerEntity[],
   username: string,
   profileUrn: string | null,
 ): string | undefined {
@@ -365,3 +362,5 @@ export function extractVoyagerBio(
 
   return undefined;
 }
+
+export { extractVoyagerBio, extractVoyagerIdentity };

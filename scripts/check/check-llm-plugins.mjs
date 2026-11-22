@@ -13,6 +13,10 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const FA_RE = /^#[0-9a-fA-F]{6}$/;
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const CM_JT_RE = /\.[cm]?[jt]s$/;
+
 const check = createCheck("check-llm-plugins");
 
 /**
@@ -234,7 +238,7 @@ function checkManifest(host) {
   }
   const brandColor = iface.brandColor ?? "";
   const sameBrand = iface.brandColor === iface.brandColorDark;
-  if (!/^#[0-9a-fA-F]{6}$/.test(brandColor) || !sameBrand) {
+  if (!FA_RE.test(brandColor) || !sameBrand) {
     check.add(`${label}: brandColor and brandColorDark must be the same #RRGGBB brand color.`);
   }
   if (iface.onboardingSkill !== "./skills/onboarding/SKILL.md") {
@@ -330,7 +334,7 @@ function checkOpenAiShape(host) {
 }
 
 function readFrontmatterField(source, field) {
-  const lines = source.split(/\r?\n/);
+  const lines = source.split(PATTERN_5C723F5C6E_RE);
   if (lines[0]?.trim() !== "---") {
     return null;
   }
@@ -445,7 +449,7 @@ function checkTree(host) {
     if (base.endsWith(".pem") || base.endsWith(".key")) {
       check.add(`${rel} looks like a key file in the bundle. Remove it from the plugin source.`);
     }
-    if (/\.[cm]?[jt]s$/.test(base)) {
+    if (CM_JT_RE.test(base)) {
       check.add(`${rel} is a script. The plugin ships content only, so remove it.`);
     }
     const source = readFileSync(file, "utf8");

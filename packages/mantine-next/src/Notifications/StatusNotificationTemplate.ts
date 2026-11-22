@@ -1,11 +1,5 @@
 import type { ReactNode } from "react";
 
-export interface StatusNotificationTemplateProps {
-  id: string;
-  message: ReactNode;
-  title: string;
-}
-
 type StatusNotificationPayload = {
   autoClose: false;
   color: "blue";
@@ -16,6 +10,12 @@ type StatusNotificationPayload = {
   title: string;
   withCloseButton: false;
 };
+
+export interface StatusNotificationTemplateProps {
+  id: string;
+  message: ReactNode;
+  title: string;
+}
 
 /**
  * Builds a notification payload for persistent status/progress indicators.

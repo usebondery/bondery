@@ -1,4 +1,5 @@
 import { type Prisma, type PrismaClient, prisma } from "@bondery/db";
+import { detachPromise } from "@bondery/helpers/async";
 import type { SyncChange, SyncEmitMeta, SyncTableKey, SyncWakeEvent } from "@bondery/schemas/sync";
 import { allocateServerSequences } from "./idempotency.js";
 import { getSyncWakeRuntime, notifySyncWake } from "./wake/index.js";
@@ -42,7 +43,7 @@ export async function emitSyncBatch(
   });
 
   if (getSyncWakeRuntime()) {
-    void notifySyncWake(userId, syncWakeEventFromChanges(serverSequence, changes, meta));
+    detachPromise(notifySyncWake(userId, syncWakeEventFromChanges(serverSequence, changes, meta)));
   }
 
   return serverSequence;

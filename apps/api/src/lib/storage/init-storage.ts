@@ -9,11 +9,11 @@ import {
 import { STORAGE_BUCKETS } from "./ensure-buckets.js";
 import { createS3Client, type S3ConnectionConfig } from "./s3-client.js";
 
-export type StorageInitConfig = S3ConnectionConfig & {
+type StorageInitConfig = S3ConnectionConfig & {
   client?: S3Client;
 };
 
-export type StorageReadiness = {
+type StorageReadiness = {
   configured: boolean;
   error?: string;
   latencyMs?: number;
@@ -105,6 +105,8 @@ async function runStorageVerify(config: StorageInitConfig): Promise<StorageReadi
   };
   return storageReadiness;
 }
+
+export type { StorageInitConfig, StorageReadiness };
 
 export function getStorageReadiness(): StorageReadiness {
   return storageReadiness ?? UNCONFIGURED_READINESS;

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { shareContactEmailSchema } from "@bondery/schemas";
 import { IconPlus, IconSend, IconX } from "@tabler/icons-react-native";
 import {
@@ -50,7 +51,7 @@ type ShareEmailFormValues = {
   message?: string;
 };
 
-export function ShareContactEmailSheet({
+function ShareContactEmailSheet({
   open,
   contactId,
   contactName,
@@ -303,7 +304,7 @@ function ShareContactEmailSheetContent({
             if (!canSend) {
               return;
             }
-            void handleSend(recipients);
+            detachPromise(handleSend(recipients));
           },
           tone: "primary",
           variant: "filled",
@@ -505,3 +506,5 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
 });
+
+export { ShareContactEmailSheet };

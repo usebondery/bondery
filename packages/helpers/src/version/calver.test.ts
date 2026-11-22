@@ -16,6 +16,10 @@ import {
   toNpm,
 } from "./calver.js";
 
+const INVALID_CALVER_RE = /Invalid CalVer/;
+const NO_PREVIOUS_RE = /No previous/;
+const NO_NAMED_RC_RE = /No named RC/;
+
 describe("parseCalver", () => {
   it("parses production CalVer", () => {
     assert.deepEqual(parseCalver("1.9.1"), { major: 1, minor: 9, patch: 1, rc: null });
@@ -27,10 +31,10 @@ describe("parseCalver", () => {
   });
 
   it("rejects rc.0, Chrome 4-part, and 1.9.1.rc-1", () => {
-    assert.throws(() => parseCalver("1.9.1-rc.0"), /Invalid CalVer/);
-    assert.throws(() => parseCalver("1.9.1.1"), /Invalid CalVer/);
-    assert.throws(() => parseCalver("1.9.1.rc-1"), /Invalid CalVer/);
-    assert.throws(() => parseCalver("1.9.1-beta.1"), /Invalid CalVer/);
+    assert.throws(() => parseCalver("1.9.1-rc.0"), INVALID_CALVER_RE);
+    assert.throws(() => parseCalver("1.9.1.1"), INVALID_CALVER_RE);
+    assert.throws(() => parseCalver("1.9.1.rc-1"), INVALID_CALVER_RE);
+    assert.throws(() => parseCalver("1.9.1-beta.1"), INVALID_CALVER_RE);
   });
 });
 
@@ -67,7 +71,7 @@ describe("previousProductionCalver", () => {
   });
 
   it("fails when no production tags remain", () => {
-    assert.throws(() => previousProductionCalver(["v1.9.1-rc.1"], "1.9.1-rc.1"), /No previous/);
+    assert.throws(() => previousProductionCalver(["v1.9.1-rc.1"], "1.9.1-rc.1"), NO_PREVIOUS_RE);
   });
 });
 
@@ -98,7 +102,7 @@ describe("highestNamedRc", () => {
   });
 
   it("fails when no named RC exists for that CalVer", () => {
-    assert.throws(() => highestNamedRc(["v1.9.2", "v1.9.1-rc.1"], "1.9.2"), /No named RC/);
+    assert.throws(() => highestNamedRc(["v1.9.2", "v1.9.1-rc.1"], "1.9.2"), NO_NAMED_RC_RE);
   });
 });
 

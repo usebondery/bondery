@@ -6,13 +6,13 @@ import { notFound } from "next/navigation";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 import { getPageImage, source } from "@/lib/source";
 
-export const revalidate = false;
+const revalidate = false;
 
 type RouteContext = {
   params: Promise<{ slug: string[] }>;
 };
 
-export async function GET(_req: Request, context: RouteContext) {
+async function GET(_req: Request, context: RouteContext) {
   const { slug } = await context.params;
   const page = source.getPage(slug.slice(0, -1));
   if (!page) {
@@ -24,7 +24,7 @@ export async function GET(_req: Request, context: RouteContext) {
   );
 }
 
-export function generateStaticParams() {
+function generateStaticParams() {
   return source
     .getPages()
     .map((page) => ({
@@ -32,3 +32,5 @@ export function generateStaticParams() {
     }))
     .filter(({ slug }) => !(slug[0] === "api" && slug[1] === "errors"));
 }
+
+export { GET, generateStaticParams, revalidate };

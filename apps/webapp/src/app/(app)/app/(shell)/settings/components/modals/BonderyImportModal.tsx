@@ -1,6 +1,7 @@
 "use client";
 
 import { ApiError, getUserFacingError } from "@bondery/helpers/api";
+import { detachPromise } from "@bondery/helpers/async";
 import { CountChip, ModalFooter, ModalTitle } from "@bondery/mantine-next";
 import { Alert, Group, Stack, Text } from "@mantine/core";
 import type { FileRejection } from "@mantine/dropzone";
@@ -205,11 +206,11 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
   };
 
   const handleDrop = (files: File[]) => {
-    const file = files[0];
+    const [file] = files;
     if (!file) {
       return;
     }
-    void checkFile(file);
+    detachPromise(checkFile(file));
   };
 
   const handleReject = (rejections: FileRejection[]) => {
@@ -252,7 +253,8 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
       const settingsData = settingsQuery.data?.data as
         | { importCompletedAt?: string | null }
         | undefined;
-      const isFirstImport = settingsData?.importCompletedAt == null;
+      const isFirstImport =
+        settingsData?.importCompletedAt === null || settingsData?.importCompletedAt === undefined;
       captureImportComplete("bondery_export", result.people.inserted, isFirstImport);
       setPhase("finished");
     } catch (error) {
@@ -410,7 +412,7 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
           backLabel={tCommon("actions.back")}
           cancelLabel={tCommon("actions.cancel")}
           onAction={() => {
-            void handleImport();
+            detachPromise(handleImport());
           }}
           onBack={() => {
             clearError();

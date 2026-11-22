@@ -11,9 +11,9 @@ import { useCodeBlockPlatform } from "#CodeBlock/useCodeBlockPlatform.js";
 import { useCodeBlockSnippet } from "#CodeBlock/useCodeBlockSnippet.js";
 import { CopyButton } from "#CopyButton/index.js";
 
-export type CodeBlockPlatform = "windows" | "macos" | "linux";
+type CodeBlockPlatform = "windows" | "macos" | "linux";
 
-export interface CodeBlockSnippet {
+interface CodeBlockSnippet {
   code: string;
   icon: ReactNode;
   id: string;
@@ -30,50 +30,6 @@ interface CodeBlockBaseProps {
   copiedLabel?: string;
   copyLabel?: string;
 }
-
-export interface CodeBlockSingleProps extends CodeBlockBaseProps {
-  code: string;
-  /** Pre-rendered highlight. Replaces `CodeHighlight` when set. Copy still uses `code`. */
-  content?: ReactNode;
-  defaultSnippetId?: never;
-  icon: ReactNode;
-  label?: string;
-  language: string;
-  platforms?: never;
-  snippets?: never;
-}
-
-export interface CodeBlockMultiProps extends CodeBlockBaseProps {
-  code?: never;
-  defaultSnippetId?: string;
-  icon?: never;
-  label?: never;
-  language?: never;
-  platforms?: never;
-  /**
-   * Shared key for the reader's tab choice. Blocks with the same key follow one
-   * choice across pages. Omit it to keep each block independent.
-   */
-  preferenceKey?: string;
-  snippets: CodeBlockSnippet[];
-}
-
-export interface CodeBlockPlatformsProps extends CodeBlockBaseProps {
-  code?: never;
-  content?: never;
-  defaultSnippetId?: never;
-  icon?: never;
-  label?: never;
-  language?: never;
-  /**
-   * One command per desktop OS. Labels, marks, order, and the shared tab choice
-   * come from this component, so callers pass code only.
-   */
-  platforms: Partial<Record<CodeBlockPlatform, string>>;
-  snippets?: never;
-}
-
-export type CodeBlockProps = CodeBlockSingleProps | CodeBlockMultiProps | CodeBlockPlatformsProps;
 
 /** Tab order is fixed so the same control looks identical on every page. */
 const PLATFORM_ORDER: readonly CodeBlockPlatform[] = ["windows", "macos", "linux"];
@@ -125,7 +81,7 @@ function PlatformMark({ platform }: { platform: CodeBlockPlatform }) {
  * Mantine shows the one that matches the color scheme, so a dark logo never sits
  * on a dark surface. Callers pass it as a snippet `icon`.
  */
-export function BrandMark({ name }: { name: BrandMarkName }): ReactElement {
+function BrandMark({ name }: { name: BrandMarkName }): ReactElement {
   if (name in THEMED_BRAND_MARKS) {
     const themed = THEMED_BRAND_MARKS[name as keyof typeof THEMED_BRAND_MARKS];
 
@@ -244,63 +200,6 @@ function CodeBlockShell({
 }
 
 /**
- * Syntax-highlighted code with icon + label header and copy button.
- * Supports a single snippet, switchable snippets (`snippets`), or one command per desktop OS
- * (`platforms`). The platform form owns its labels, marks, order, and the shared tab choice.
- */
-export function CodeBlock(props: CodeBlockProps): ReactElement {
-  const copyLabel = props.copyLabel ?? "Copy";
-  const copiedLabel = props.copiedLabel ?? "Copied!";
-
-  if (props.platforms) {
-    return (
-      <PlatformCodeBlock
-        className={props.className}
-        copiedLabel={copiedLabel}
-        copyLabel={copyLabel}
-        platforms={props.platforms}
-      />
-    );
-  }
-
-  if (props.snippets) {
-    return (
-      <MultiCodeBlock
-        className={props.className}
-        copiedLabel={copiedLabel}
-        copyLabel={copyLabel}
-        defaultSnippetId={props.defaultSnippetId}
-        preferenceKey={props.preferenceKey}
-        snippets={props.snippets}
-      />
-    );
-  }
-
-  const displayLabel = (props.label ?? props.language).toUpperCase();
-
-  return (
-    <CodeBlockShell
-      className={props.className}
-      code={props.code}
-      content={props.content}
-      copiedLabel={copiedLabel}
-      copyLabel={copyLabel}
-      headerLeft={
-        <Group gap={6} wrap="nowrap">
-          <Box component="span" style={{ display: "flex", flexShrink: 0 }}>
-            {props.icon}
-          </Box>
-          <Text c="dimmed" fw={500} size="xs" tt="uppercase">
-            {displayLabel}
-          </Text>
-        </Group>
-      }
-      language={props.language}
-    />
-  );
-}
-
-/**
  * Platform tabs. The choice is stored in a cookie, so every block on the page and
  * every later page switches together. Until someone picks a tab, each block follows
  * the detected OS.
@@ -409,3 +308,109 @@ function MultiCodeBlock({
     />
   );
 }
+
+interface CodeBlockMultiProps extends CodeBlockBaseProps {
+  code?: never;
+  defaultSnippetId?: string;
+  icon?: never;
+  label?: never;
+  language?: never;
+  platforms?: never;
+  /**
+   * Shared key for the reader's tab choice. Blocks with the same key follow one
+   * choice across pages. Omit it to keep each block independent.
+   */
+  preferenceKey?: string;
+  snippets: CodeBlockSnippet[];
+}
+
+interface CodeBlockPlatformsProps extends CodeBlockBaseProps {
+  code?: never;
+  content?: never;
+  defaultSnippetId?: never;
+  icon?: never;
+  label?: never;
+  language?: never;
+  /**
+   * One command per desktop OS. Labels, marks, order, and the shared tab choice
+   * come from this component, so callers pass code only.
+   */
+  platforms: Partial<Record<CodeBlockPlatform, string>>;
+  snippets?: never;
+}
+
+export type { CodeBlockMultiProps, CodeBlockPlatformsProps };
+
+/**
+ * Syntax-highlighted code with icon + label header and copy button.
+ * Supports a single snippet, switchable snippets (`snippets`), or one command per desktop OS
+ * (`platforms`). The platform form owns its labels, marks, order, and the shared tab choice.
+ */
+export function CodeBlock(props: CodeBlockProps): ReactElement {
+  const copyLabel = props.copyLabel ?? "Copy";
+  const copiedLabel = props.copiedLabel ?? "Copied!";
+
+  if (props.platforms) {
+    return (
+      <PlatformCodeBlock
+        className={props.className}
+        copiedLabel={copiedLabel}
+        copyLabel={copyLabel}
+        platforms={props.platforms}
+      />
+    );
+  }
+
+  if (props.snippets) {
+    return (
+      <MultiCodeBlock
+        className={props.className}
+        copiedLabel={copiedLabel}
+        copyLabel={copyLabel}
+        defaultSnippetId={props.defaultSnippetId}
+        preferenceKey={props.preferenceKey}
+        snippets={props.snippets}
+      />
+    );
+  }
+
+  const displayLabel = (props.label ?? props.language).toUpperCase();
+
+  return (
+    <CodeBlockShell
+      className={props.className}
+      code={props.code}
+      content={props.content}
+      copiedLabel={copiedLabel}
+      copyLabel={copyLabel}
+      headerLeft={
+        <Group gap={6} wrap="nowrap">
+          <Box component="span" style={{ display: "flex", flexShrink: 0 }}>
+            {props.icon}
+          </Box>
+          <Text c="dimmed" fw={500} size="xs" tt="uppercase">
+            {displayLabel}
+          </Text>
+        </Group>
+      }
+      language={props.language}
+    />
+  );
+}
+
+export type { CodeBlockPlatform, CodeBlockSnippet };
+export { BrandMark };
+
+export interface CodeBlockSingleProps extends CodeBlockBaseProps {
+  code: string;
+  /** Pre-rendered highlight. Replaces `CodeHighlight` when set. Copy still uses `code`. */
+  content?: ReactNode;
+  defaultSnippetId?: never;
+  icon: ReactNode;
+  label?: string;
+  language: string;
+  platforms?: never;
+  snippets?: never;
+}
+
+export type CodeBlockProps = CodeBlockSingleProps | CodeBlockMultiProps | CodeBlockPlatformsProps;

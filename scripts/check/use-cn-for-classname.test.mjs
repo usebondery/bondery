@@ -14,6 +14,8 @@ import { dirname, join } from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 
+const CN_RE = /cn\(\)/;
+
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const pluginPath = join(repoRoot, "biome", "plugins", "use-cn-for-classname.grit");
 const biomeBin = createRequire(join(repoRoot, "package.json")).resolve("@biomejs/biome/bin/biome");
@@ -91,7 +93,7 @@ before(() => {
     if (diagnostic.category !== "plugin") {
       continue;
     }
-    assert.match(diagnostic.message, /cn\(\)/, "plugin failed to run");
+    assert.match(diagnostic.message, CN_RE, "plugin failed to run");
     const line = diagnostic.location.start.line;
     counts.set(line, (counts.get(line) ?? 0) + 1);
   }

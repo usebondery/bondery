@@ -9,9 +9,9 @@ import { useRouter } from "next/navigation";
 import { getTabForUrl } from "@/lib/docs-nav";
 import { routeAssert } from "@/lib/navigation/route/assert";
 
-export type DocsTabIcon = "book" | "server" | "code" | "tool";
+type DocsTabIcon = "book" | "server" | "code" | "tool";
 
-export type DocsTab = {
+type DocsTab = {
   icon: DocsTabIcon;
   key: string;
   title: string;
@@ -44,7 +44,7 @@ function tabIcon(icon: DocsTabIcon, size: number) {
 }
 
 /** Section switcher. The closed control shows the current section. */
-export function DocsTabs({ pathname, tabs }: DocsTabsProps) {
+function DocsTabs({ pathname, tabs }: DocsTabsProps) {
   const router = useRouter();
   const active = tabs.find((tab) => isTabKeyActive(tab.key, pathname)) ?? tabs[0];
 
@@ -79,3 +79,6 @@ export function DocsTabs({ pathname, tabs }: DocsTabsProps) {
     />
   );
 }
+
+export type { DocsTab, DocsTabIcon };
+export { DocsTabs };

@@ -24,7 +24,7 @@ function textFile(files, rel) {
   return body;
 }
 
-export function skillBodies(files) {
+function skillBodies(files) {
   return [...files.entries()]
     .filter(
       ([rel, body]) =>
@@ -34,7 +34,7 @@ export function skillBodies(files) {
 }
 
 /** Replace the connect block, markers included, with `replacement`. */
-export function applyConnectBlock(source, replacement) {
+function applyConnectBlock(source, replacement) {
   if (typeof source !== "string") {
     throw new Error("Connect source must be a string.");
   }
@@ -93,6 +93,8 @@ function renderHost(label, config, files, version, manifestRel, manifest, mcpRel
   assertCleanTree(tree, label);
   return tree;
 }
+
+export { applyConnectBlock, skillBodies };
 
 export function renderClaudeTree(config, files, version) {
   return renderHost(

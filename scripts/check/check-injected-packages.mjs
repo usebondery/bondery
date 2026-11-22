@@ -29,6 +29,9 @@ import { fileURLToPath } from "node:url";
 
 import { createCheck } from "./check-report.mjs";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const PATTERN_5C2F2B24_RE = /\/+$/;
+
 const check = createCheck("check-injected-packages");
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
@@ -65,7 +68,7 @@ function patternBody(pattern) {
   if (body.startsWith("/")) {
     body = body.slice(1);
   }
-  body = body.replace(/\/+$/, "");
+  body = body.replace(PATTERN_5C2F2B24_RE, "");
   if (body.endsWith("/**")) {
     body = body.slice(0, -3);
   }
@@ -117,7 +120,7 @@ function isAllowedRepoPattern(body) {
 }
 
 function readIgnoreRules(filePath) {
-  return readFileSync(filePath, "utf8").split(/\r?\n/);
+  return readFileSync(filePath, "utf8").split(PATTERN_5C723F5C6E_RE);
 }
 
 function checkRootGitignore() {
@@ -181,7 +184,7 @@ function checkIgnoredPathsOnDisk() {
     if (raw.length === 0) {
       continue;
     }
-    const repoPath = raw.replace(/\\/g, "/").replace(/\/+$/, "");
+    const repoPath = raw.replace(/\\/g, "/").replace(PATTERN_5C2F2B24_RE, "");
     const parts = repoPath.split("/");
     if (parts[0] !== "packages" || parts.length < 3) {
       check.add(`${repoPath} is gitignored inside packages/. ${HINT}`);

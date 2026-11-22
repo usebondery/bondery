@@ -1,3 +1,4 @@
+const LEADING_SLASHES_RE = /^\/+/;
 export const AUTH_SCHEME = "bondery";
 
 /**
@@ -8,7 +9,7 @@ export const AUTH_SCHEME = "bondery";
  * non-http(s) URLs whose origin is trusted (`bondery://`).
  */
 export function buildNativeAuthDeepLink(scheme: string, path: string): string {
-  const normalized = path.replace(/^\/+/, "");
+  const normalized = path.replace(LEADING_SLASHES_RE, "");
   return `${scheme}://${normalized}`;
 }
 

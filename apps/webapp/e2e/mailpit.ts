@@ -7,6 +7,8 @@
 
 import { expect } from "@playwright/test";
 
+const PATTERN = /[\s"'<>]/;
+
 const MAILPIT_BASE_URL = "http://127.0.0.1:26641";
 const VERIFY_PATH = "/auth/magic-link/verify";
 
@@ -38,7 +40,7 @@ function extractVerifyUrl(content: string): string | undefined {
   }
 
   let end = pathIndex + VERIFY_PATH.length;
-  while (end < decoded.length && !/[\s"'<>]/.test(decoded[end] ?? "")) {
+  while (end < decoded.length && !PATTERN.test(decoded[end] ?? "")) {
     end += 1;
   }
 
@@ -67,7 +69,7 @@ async function findMagicLinkVerifyUrl(
     return rightTime - leftTime;
   });
 
-  const afterMs = receivedAfter ? receivedAfter.getTime() - 5_000 : undefined;
+  const afterMs = receivedAfter ? receivedAfter.getTime() - 5000 : undefined;
 
   for (const summary of messages) {
     if (afterMs !== undefined && summary.Created) {

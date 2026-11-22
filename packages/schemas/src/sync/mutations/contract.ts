@@ -6,8 +6,10 @@ import type {
 } from "./schema.js";
 import type { ContactReplaceImportantDatesPayload, SyncMutationType } from "./types.js";
 
-type _SyncMutationType = Assert<IsEqual<SyncMutationType, z.infer<typeof syncMutationTypeSchema>>>;
-type _ContactReplaceImportantDatesPayload = Assert<
+export type _SyncMutationType = Assert<
+  IsEqual<SyncMutationType, z.infer<typeof syncMutationTypeSchema>>
+>;
+export type _ContactReplaceImportantDatesPayload = Assert<
   IsEqual<
     ContactReplaceImportantDatesPayload,
     z.infer<typeof contactReplaceImportantDatesPayloadSchema>

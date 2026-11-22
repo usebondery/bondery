@@ -24,16 +24,15 @@ const CA_VALIDITY_YEARS = 20;
 const CERTIFICATE_VALIDITY_YEARS = 10;
 const CA_VALIDITY_DAYS = CA_VALIDITY_YEARS * DAYS_PER_YEAR;
 const CA_RENEW_BEFORE_DAYS = DAYS_PER_YEAR;
-export const CERTIFICATE_VALIDITY_DAYS = CERTIFICATE_VALIDITY_YEARS * DAYS_PER_YEAR;
 
-export type CaSignedCertificatePaths = {
+type CaSignedCertificatePaths = {
   caCertFile: string;
   caKeyFile: string;
   certFile: string;
   keyFile: string;
 };
 
-export type EnsureCaSignedCertificateOptions = {
+type EnsureCaSignedCertificateOptions = {
   authorityCommonName: string;
   certificateCommonName: string;
   /** The certificate also authenticates its holder as a client (mutual TLS). */
@@ -47,7 +46,7 @@ export type EnsureCaSignedCertificateOptions = {
   renewBeforeDays: number;
 };
 
-export type EnsureCaSignedCertificateResult = {
+type EnsureCaSignedCertificateResult = {
   authority: CertificateWithKey;
   authorityGenerated: boolean;
   certificateGenerated: boolean;
@@ -92,6 +91,13 @@ async function certificateReplacementReason(
     }) ?? (await certificateIssuerMismatch(certificate.certificatePem, authority.certificatePem))
   );
 }
+
+export type {
+  CaSignedCertificatePaths,
+  EnsureCaSignedCertificateOptions,
+  EnsureCaSignedCertificateResult,
+};
+export const CERTIFICATE_VALIDITY_DAYS = CERTIFICATE_VALIDITY_YEARS * DAYS_PER_YEAR;
 
 export async function ensureCaSignedCertificate(
   options: EnsureCaSignedCertificateOptions,

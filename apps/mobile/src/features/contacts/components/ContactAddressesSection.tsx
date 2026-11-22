@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { countryCodeToFlagEmoji } from "@bondery/helpers/locale";
 import type { ContactAddressEntry } from "@bondery/schemas";
 import {
@@ -40,7 +41,13 @@ interface ContactAddressesSectionProps {
 function buildNativeMapsUrl(address: ContactAddressEntry): string {
   const label = formatDisplayAddress(address);
   const { latitude: lat, longitude: lon } = address;
-  const hasCoords = lat != null && lon != null && !Number.isNaN(lat) && !Number.isNaN(lon);
+  const hasCoords =
+    lat !== null &&
+    lat !== undefined &&
+    lon !== null &&
+    lon !== undefined &&
+    !Number.isNaN(lat) &&
+    !Number.isNaN(lon);
 
   if (Platform.OS === "ios") {
     return hasCoords
@@ -57,10 +64,7 @@ function formatAddressAccessibilityLabel(lines: ReturnType<typeof formatAddressC
   return [lines.streetLine, lines.cityLine, lines.countryName].filter(Boolean).join(", ");
 }
 
-export function ContactAddressesSection({
-  addresses,
-  onSaveAddresses,
-}: ContactAddressesSectionProps) {
+function ContactAddressesSection({ addresses, onSaveAddresses }: ContactAddressesSectionProps) {
   const tContactAddress = useContactAddressTranslations();
   const tContactInfo = useContactInfoTranslations();
   const t = useCommonTranslations();
@@ -217,7 +221,7 @@ export function ContactAddressesSection({
               icon: <IconCopy size={16} stroke={colors.iconPrimary} />,
               id: "copy",
               label: tContactAddress("CopyAction"),
-              onPress: () => void copyAddress(address),
+              onPress: () => detachPromise(copyAddress(address)),
             },
             {
               icon: <IconTrash size={16} stroke={colors.dangerAccent} />,
@@ -269,7 +273,7 @@ export function ContactAddressesSection({
               }
               menuAccessibilityLabel={tContactAddress("ActionsLabel")}
               menuItems={menuItems}
-              onLongPress={() => void copyAddress(address)}
+              onLongPress={() => detachPromise(copyAddress(address))}
               onPress={() => openInMaps(address)}
               primaryLabel={accessibilityAddressLabel || address.value}
               type={address.type}
@@ -330,3 +334,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+
+export { ContactAddressesSection };

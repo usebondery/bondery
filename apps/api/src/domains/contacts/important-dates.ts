@@ -11,7 +11,7 @@ import { domainDb } from "../_shared/domain-db.js";
 import { isUniqueViolation, toSyncRow } from "../_shared/prisma-helpers.js";
 import { captureCurrentSyncTxid } from "../_shared/with-txid.js";
 
-export interface ReplaceImportantDateInput {
+interface ReplaceImportantDateInput {
   date: string;
   id?: string;
   note?: string | null;
@@ -45,6 +45,8 @@ function toImportantDateFromRow(row: {
     user_id: String(sync.user_id),
   });
 }
+
+export type { ReplaceImportantDateInput };
 
 export async function replaceImportantDates(
   ctx: DomainContext,

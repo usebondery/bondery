@@ -1,9 +1,9 @@
 import { MOBILE_LAYOUT } from "../../theme/layout";
 
-export type ActionButtonSize = "lg" | "md" | "sm";
+type ActionButtonSize = "lg" | "md" | "sm";
 
 /** Outer height for md controls (`TextInput` `min-h-[44px]`, square input-adjacent buttons). */
-export const CONTROL_HEIGHT_MD_PX = MOBILE_LAYOUT.touchTarget;
+const CONTROL_HEIGHT_MD_PX = MOBILE_LAYOUT.touchTarget;
 
 const ACTION_BUTTON_SIZE_PX: Record<ActionButtonSize, number> = {
   lg: MOBILE_LAYOUT.touchTargetLarge,
@@ -17,18 +17,27 @@ const ACTION_BUTTON_ICON_SIZE_PX: Record<ActionButtonSize, number> = {
   sm: 16,
 };
 
-export function getActionButtonSizePx(size: ActionButtonSize): number {
+function getActionButtonSizePx(size: ActionButtonSize): number {
   return ACTION_BUTTON_SIZE_PX[size];
 }
 
 /** Shared control outer height (md matches `MOBILE_LAYOUT.touchTarget`). */
-export function getControlHeightPx(size: ActionButtonSize = "md"): number {
+function getControlHeightPx(size: ActionButtonSize = "md"): number {
   return getActionButtonSizePx(size);
 }
 
-export function getActionButtonIconSize(size: ActionButtonSize): number {
+function getActionButtonIconSize(size: ActionButtonSize): number {
   return ACTION_BUTTON_ICON_SIZE_PX[size];
 }
 
 /** Default chrome tab / selection action size. */
-export const ACTION_BUTTON_SIZE_MD_PX = ACTION_BUTTON_SIZE_PX.md;
+const ACTION_BUTTON_SIZE_MD_PX = ACTION_BUTTON_SIZE_PX.md;
+
+export type { ActionButtonSize };
+export {
+  ACTION_BUTTON_SIZE_MD_PX,
+  CONTROL_HEIGHT_MD_PX,
+  getActionButtonIconSize,
+  getActionButtonSizePx,
+  getControlHeightPx,
+};

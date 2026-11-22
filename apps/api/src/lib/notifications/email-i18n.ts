@@ -14,18 +14,9 @@ import {
 import { loadNamespace } from "@bondery/translations/loader";
 import { orIfBlank } from "../platform/blank-text.js";
 
-export type EmailCopyValues = Record<string, string | number | boolean | null | undefined>;
+type EmailCopyValues = Record<string, string | number | boolean | null | undefined>;
 
-export type EmailFormatContext = DateTimeFormatContext & { locale: SupportedLocale };
-
-export function defaultEmailFormatContext(): EmailFormatContext {
-  return {
-    dateFormat: "locale",
-    locale: DEFAULT_LOCALE,
-    timeFormat: "24h",
-    timeZone: "UTC",
-  };
-}
+type EmailFormatContext = DateTimeFormatContext & { locale: SupportedLocale };
 
 function contextFromSettingsRow(row: {
   dateFormat: string | null;
@@ -38,6 +29,17 @@ function contextFromSettingsRow(row: {
     locale: coerceSupportedLocale(row.language) ?? DEFAULT_LOCALE,
     timeFormat: coerceTimeFormatPreference(row.timeFormat),
     timeZone: orIfBlank(row.timezone, "UTC"),
+  };
+}
+
+export type { EmailCopyValues, EmailFormatContext };
+
+export function defaultEmailFormatContext(): EmailFormatContext {
+  return {
+    dateFormat: "locale",
+    locale: DEFAULT_LOCALE,
+    timeFormat: "24h",
+    timeZone: "UTC",
   };
 }
 

@@ -11,6 +11,11 @@ import {
 } from "@/components/shared/SearchableComboboxItem";
 import classes from "./SearchableComboboxPicker.module.css";
 
+const styles = {
+  dropdown: classes["dropdown"] ?? "",
+  optionsScroll: classes["optionsScroll"] ?? "",
+};
+
 const OPTIONS_MAX_HEIGHT = 240;
 
 export { selectedComboboxOptionStyle } from "@/components/shared/SearchableComboboxItem";
@@ -142,7 +147,7 @@ export function SearchableComboboxPicker({
         </Combobox.Target>
 
         <Combobox.Dropdown
-          classNames={{ dropdown: classes.dropdown }}
+          classNames={{ dropdown: styles.dropdown }}
           styles={{
             dropdown: {
               "--combobox-option-active-bg": "var(--mantine-color-branding-primary-filled-hover)",
@@ -158,7 +163,7 @@ export function SearchableComboboxPicker({
           />
           <Combobox.Options>
             <ScrollArea.Autosize
-              className={classes.optionsScroll}
+              className={styles.optionsScroll}
               mah={OPTIONS_MAX_HEIGHT}
               offsetScrollbars={false}
               scrollbars="y"

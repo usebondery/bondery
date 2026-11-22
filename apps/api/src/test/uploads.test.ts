@@ -6,6 +6,9 @@ import { AVATAR_UPLOAD, UPLOAD_LIMITS } from "../lib/platform/config.js";
 import { mapErrorToResponse } from "../lib/platform/errors/map-to-response.js";
 import { readUploadedFile } from "../lib/platform/uploads.js";
 
+const MB_PATTERN = /5MB/;
+const FILE_TOO_LARGE_MAXIMUM_SIZE_IS_PATTERN = /File too large\. Maximum size is/;
+
 const SMALL_CAP = 1024;
 
 async function buildApp(): Promise<{ address: string; app: FastifyInstance }> {
@@ -66,7 +69,7 @@ describe("multipart upload caps", { concurrency: false }, () => {
     assert.equal(response.status, 413);
     const body = (await response.json()) as { error: { code: string; message: string } };
     assert.equal(body.error.code, "validation_error");
-    assert.match(body.error.message, /File too large\. Maximum size is/);
+    assert.match(body.error.message, FILE_TOO_LARGE_MAXIMUM_SIZE_IS_PATTERN);
   });
 
   it("rejects an image over 5 MB, the avatar limit, not at the old 100 MB ceiling", async () => {
@@ -74,7 +77,7 @@ describe("multipart upload caps", { concurrency: false }, () => {
     assert.equal(response.status, 413);
     const body = (await response.json()) as { error: { code: string; message: string } };
     assert.equal(body.error.code, "validation_error");
-    assert.match(body.error.message, /5MB/);
+    assert.match(body.error.message, MB_PATTERN);
   });
 
   it("refuses a disallowed MIME type before reading the body", async () => {

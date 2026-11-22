@@ -1,4 +1,5 @@
 import type { Prisma } from "@bondery/db";
+import { detachPromise } from "@bondery/helpers/async";
 import type {
   AvatarTransformOptions,
   CreateInteractionInput,
@@ -19,11 +20,7 @@ import { persistSyncChanges } from "../../lib/sync/persist-changes.js";
 import { maybeCaptureActivation } from "../analytics/maybe-capture-activation.js";
 import { loadFormattedInteraction } from "./format.js";
 
-export type FormattedInteraction = NonNullable<
-  Awaited<ReturnType<typeof loadFormattedInteraction>>
->;
-
-export { loadFormattedInteraction, mapInteractionParticipant } from "./format.js";
+type FormattedInteraction = NonNullable<Awaited<ReturnType<typeof loadFormattedInteraction>>>;
 
 async function requireOwnedInteraction(ctx: DomainContext, interactionId: string) {
   const db = domainDb(ctx);
@@ -111,6 +108,9 @@ async function syncLastInteractionForExistingParticipants(
   await persistPeopleLastInteractionChanges(ctx, personIds);
 }
 
+export { loadFormattedInteraction, mapInteractionParticipant } from "./format.js";
+export type { FormattedInteraction };
+
 export async function createInteraction(
   ctx: DomainContext,
   input: CreateInteractionInput,
@@ -147,7 +147,7 @@ export async function createInteraction(
     throw internal("interaction_interaction_was_created_but_could_not_be");
   }
 
-  void maybeCaptureActivation(ctx, "first_interaction");
+  detachPromise(maybeCaptureActivation(ctx, "first_interaction"));
 
   return formatted;
 }

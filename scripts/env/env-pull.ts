@@ -18,6 +18,8 @@ import { createCliLogger } from "@bondery/helpers/cli";
 import { getSyncableEnvVars, parseEnvContent } from "../../packages/helpers/src/env/index.ts";
 import { upsertEnvAssignments } from "./env-upsert.js";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(__dirname, "../..");
 const log = createCliLogger("env:pull");
@@ -71,7 +73,7 @@ function resolveInfisicalExecutable(): { command: string; shell: boolean } {
   }
 
   const where = spawnSync("cmd", ["/c", "where", "infisical.cmd"], { encoding: "utf-8" });
-  const cmdPath = where.stdout?.trim().split(/\r?\n/)[0]?.trim();
+  const cmdPath = where.stdout?.trim().split(PATTERN_5C723F5C6E_RE)[0]?.trim();
   if (cmdPath) {
     const exe = join(dirname(cmdPath), "node_modules", "@infisical", "cli", "bin", "infisical.exe");
     if (existsSync(exe)) {

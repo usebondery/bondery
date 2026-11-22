@@ -8,11 +8,132 @@ import type { Redis } from "ioredis";
 import { URLS } from "./config.js";
 import type { AppFastifyInstance } from "./fastify-types.js";
 
+const TIME_WINDOW_PATTERN = /^(\d+) (second|seconds|minute|minutes)$/;
+const DIGITS_ONLY_PATTERN = /^\d+$/;
+const TRAILING_SLASH_PATTERN = /\/$/;
+
 const DEFAULT_MAX_REQUESTS = 300;
 const DEFAULT_WINDOW = "60 seconds";
 const DEFAULT_WINDOW_SECONDS = 60;
 /** Hex characters of the bearer-token hash kept in the MCP rate-limit key. */
 const BEARER_FINGERPRINT_LENGTH = 16;
+
+/**
+ * Policy names follow the tier object.
+ * `csp_report` and `not_found` share quota 60 and window 60.
+ */
+const POLICY_NAME_BY_TIER = new WeakMap<object, string>([
+  [AI_TIER, "ai"],
+  [CSP_REPORT_TIER, "csp_report"],
+  [ENRICH_TIER, "enrich"],
+  [EXPORT_TIER, "export"],
+  [GEOCODE_TIER, "geocode"],
+  [HEALTH_TIER, "health"],
+  [IMPORT_TIER, "import"],
+  [MCP_TIER, "mcp"],
+  [NOT_FOUND_TIER, "not_found"],
+]);
+
+function timeWindowToSeconds(timeWindow: unknown): number {
+  if (typeof timeWindow === "number" && Number.isFinite(timeWindow) && timeWindow >= 0) {
+    return Math.trunc(timeWindow / 1000);
+  }
+  if (typeof timeWindow !== "string") {
+    return DEFAULT_WINDOW_SECONDS;
+  }
+
+  const match = TIME_WINDOW_PATTERN.exec(timeWindow);
+  if (!match?.[1] || !match[2]) {
+    return DEFAULT_WINDOW_SECONDS;
+  }
+
+  const amount = Number(match[1]);
+  if (match[2] === "minute" || match[2] === "minutes") {
+    return amount * 60;
+  }
+  return amount;
+}
+
+function quoteStructuredString(value: string): string {
+  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
+}
+
+function formatDraftRateLimitHeaders(input: {
+  limit: number;
+  name: string;
+  remaining: number;
+  resetSeconds: number;
+  windowSeconds: number;
+}): { policy: string; rateLimit: string } {
+  const quotedName = quoteStructuredString(input.name);
+  return {
+    policy: `${quotedName};q=${input.limit};w=${input.windowSeconds}`,
+    rateLimit: `${quotedName};r=${input.remaining};t=${input.resetSeconds}`,
+  };
+}
+
+function readNonNegativeIntegerHeader(reply: FastifyReply, name: string): number | undefined {
+  const raw = reply.getHeader(name);
+  const value = Array.isArray(raw) ? raw[0] : raw;
+  if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
+    return value;
+  }
+  if (typeof value === "string" && DIGITS_ONLY_PATTERN.test(value)) {
+    return Number(value);
+  }
+  return undefined;
+}
+
+function resolveDraftPolicy(request: FastifyRequest): { name: string; windowSeconds: number } {
+  const rateLimit = request.routeOptions.config?.rateLimit;
+  if (typeof rateLimit !== "object" || rateLimit === null) {
+    return { name: "default", windowSeconds: DEFAULT_WINDOW_SECONDS };
+  }
+
+  const timeWindow = "timeWindow" in rateLimit ? rateLimit.timeWindow : undefined;
+  return {
+    name: POLICY_NAME_BY_TIER.get(rateLimit) ?? "default",
+    windowSeconds: timeWindowToSeconds(timeWindow),
+  };
+}
+
+function applyDraftRateLimitHeaders(request: FastifyRequest, reply: FastifyReply): void {
+  const limit = readNonNegativeIntegerHeader(reply, "x-ratelimit-limit");
+  if (limit === undefined) {
+    return;
+  }
+
+  const remaining = readNonNegativeIntegerHeader(reply, "x-ratelimit-remaining");
+  const resetSeconds = readNonNegativeIntegerHeader(reply, "x-ratelimit-reset");
+  if (remaining === undefined || resetSeconds === undefined) {
+    return;
+  }
+
+  const policy = resolveDraftPolicy(request);
+  const headers = formatDraftRateLimitHeaders({
+    limit,
+    name: policy.name,
+    remaining: reply.statusCode === 429 ? 0 : remaining,
+    resetSeconds,
+    windowSeconds: policy.windowSeconds,
+  });
+  reply.header("RateLimit", headers.rateLimit);
+  reply.header("RateLimit-Policy", headers.policy);
+}
+
+function notFoundHandler(request: FastifyRequest, reply: FastifyReply): void {
+  const website = (URLS.website ?? "https://usebondery.com").replace(TRAILING_SLASH_PATTERN, "");
+  reply.status(404).send({
+    error: {
+      agent_message: buildAgentMessage("not_found", "Not found"),
+      code: "not_found",
+      doc_url: getErrorDocUrl("not_found", website),
+      message: "Not found",
+      request_id: request.id,
+      type: "not_found_error",
+    },
+  });
+}
 
 export const AI_TIER = {
   max: 20,
@@ -77,109 +198,6 @@ export const MCP_TIER = {
 } as const;
 
 /**
- * Policy names follow the tier object.
- * `csp_report` and `not_found` share quota 60 and window 60.
- */
-const POLICY_NAME_BY_TIER = new WeakMap<object, string>([
-  [AI_TIER, "ai"],
-  [CSP_REPORT_TIER, "csp_report"],
-  [ENRICH_TIER, "enrich"],
-  [EXPORT_TIER, "export"],
-  [GEOCODE_TIER, "geocode"],
-  [HEALTH_TIER, "health"],
-  [IMPORT_TIER, "import"],
-  [MCP_TIER, "mcp"],
-  [NOT_FOUND_TIER, "not_found"],
-]);
-
-function timeWindowToSeconds(timeWindow: unknown): number {
-  if (typeof timeWindow === "number" && Number.isFinite(timeWindow) && timeWindow >= 0) {
-    return Math.trunc(timeWindow / 1000);
-  }
-  if (typeof timeWindow !== "string") {
-    return DEFAULT_WINDOW_SECONDS;
-  }
-
-  const match = /^(\d+) (second|seconds|minute|minutes)$/.exec(timeWindow);
-  if (!match?.[1] || !match[2]) {
-    return DEFAULT_WINDOW_SECONDS;
-  }
-
-  const amount = Number(match[1]);
-  if (match[2] === "minute" || match[2] === "minutes") {
-    return amount * 60;
-  }
-  return amount;
-}
-
-function quoteStructuredString(value: string): string {
-  return `"${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
-}
-
-function formatDraftRateLimitHeaders(input: {
-  limit: number;
-  name: string;
-  remaining: number;
-  resetSeconds: number;
-  windowSeconds: number;
-}): { policy: string; rateLimit: string } {
-  const quotedName = quoteStructuredString(input.name);
-  return {
-    policy: `${quotedName};q=${input.limit};w=${input.windowSeconds}`,
-    rateLimit: `${quotedName};r=${input.remaining};t=${input.resetSeconds}`,
-  };
-}
-
-function readNonNegativeIntegerHeader(reply: FastifyReply, name: string): number | undefined {
-  const raw = reply.getHeader(name);
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  if (typeof value === "number" && Number.isInteger(value) && value >= 0) {
-    return value;
-  }
-  if (typeof value === "string" && /^\d+$/.test(value)) {
-    return Number(value);
-  }
-  return undefined;
-}
-
-function resolveDraftPolicy(request: FastifyRequest): { name: string; windowSeconds: number } {
-  const rateLimit = request.routeOptions.config?.rateLimit;
-  if (typeof rateLimit !== "object" || rateLimit === null) {
-    return { name: "default", windowSeconds: DEFAULT_WINDOW_SECONDS };
-  }
-
-  const timeWindow = "timeWindow" in rateLimit ? rateLimit.timeWindow : undefined;
-  return {
-    name: POLICY_NAME_BY_TIER.get(rateLimit) ?? "default",
-    windowSeconds: timeWindowToSeconds(timeWindow),
-  };
-}
-
-function applyDraftRateLimitHeaders(request: FastifyRequest, reply: FastifyReply): void {
-  const limit = readNonNegativeIntegerHeader(reply, "x-ratelimit-limit");
-  if (limit === undefined) {
-    return;
-  }
-
-  const remaining = readNonNegativeIntegerHeader(reply, "x-ratelimit-remaining");
-  const resetSeconds = readNonNegativeIntegerHeader(reply, "x-ratelimit-reset");
-  if (remaining === undefined || resetSeconds === undefined) {
-    return;
-  }
-
-  const policy = resolveDraftPolicy(request);
-  const headers = formatDraftRateLimitHeaders({
-    limit,
-    name: policy.name,
-    remaining: reply.statusCode === 429 ? 0 : remaining,
-    resetSeconds,
-    windowSeconds: policy.windowSeconds,
-  });
-  reply.header("RateLimit", headers.rateLimit);
-  reply.header("RateLimit-Policy", headers.policy);
-}
-
-/**
  * Adds draft-ietf-httpapi-ratelimit-headers-11 fields from the plugin headers.
  * Do not set `enableDraftSpec`. That option emits the 2021 header names.
  */
@@ -231,20 +249,6 @@ export async function registerRateLimit(fastify: AppFastifyInstance, redis: Redi
 
   await fastify.register(fastifyRateLimit, options);
   registerDraftRateLimitHeaders(fastify);
-}
-
-function notFoundHandler(request: FastifyRequest, reply: FastifyReply): void {
-  const website = (URLS.website ?? "https://usebondery.com").replace(/\/$/, "");
-  reply.status(404).send({
-    error: {
-      agent_message: buildAgentMessage("not_found", "Not found"),
-      code: "not_found",
-      doc_url: getErrorDocUrl("not_found", website),
-      message: "Not found",
-      request_id: request.id,
-      type: "not_found_error",
-    },
-  });
 }
 
 export function registerDefaultNotFoundHandler(fastify: AppFastifyInstance): void {

@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { browser } from "wxt/browser";
 import { enrichPersonFromLinkedIn } from "../../lib/api/domains/contacts";
 import { isAuthenticated } from "../../lib/auth";
@@ -73,15 +74,15 @@ function scheduleEnrichTriggerOnTab(tabId: number, requestId: string): void {
     if (updatedTabId !== tabId || changeInfo.status !== "complete") {
       return;
     }
-    void tryTrigger("tab-complete");
+    detachPromise(tryTrigger("tab-complete"));
   };
 
   browser.tabs.onUpdated.addListener(onUpdated);
   enrichTabListeners.set(tabId, onUpdated);
 
-  void tryTrigger("immediate");
-  for (const delay of [400, 1000, 2000, 4000, 7000, 12000]) {
-    setTimeout(() => void tryTrigger(`retry-${delay}ms`), delay);
+  detachPromise(tryTrigger("immediate"));
+  for (const delay of [400, 1000, 2000, 4000, 7000, 12_000]) {
+    setTimeout(() => detachPromise(tryTrigger(`retry-${delay}ms`)), delay);
   }
 }
 
@@ -115,7 +116,7 @@ export async function clearPendingEnrich(reason?: string): Promise<void> {
   const { senderTabId, linkedinTabId, requestId } = backgroundState.pendingEnrich;
   backgroundState.pendingEnrich = null;
   removeEnrichTabListener(linkedinTabId);
-  void persistPendingEnrich();
+  detachPromise(persistPendingEnrich());
 
   try {
     await browser.alarms.clear("enrich-timeout");

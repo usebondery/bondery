@@ -1,5 +1,6 @@
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { HelpButton, PersonChip } from "@bondery/mantine-next";
 import { Box, Button, Group, Loader, Paper, Progress, Stack, Text, Tooltip } from "@mantine/core";
 import {
@@ -49,7 +50,7 @@ export function EnrichRecommendationCard({
 
   const handleResume = () => {
     if (pendingQueueStatus) {
-      void resume(pendingQueueStatus);
+      detachPromise(resume(pendingQueueStatus));
     }
   };
   const handleDiscard = async () => {
@@ -94,14 +95,14 @@ export function EnrichRecommendationCard({
             </Group>
           </Group>
 
-          {isRunning && currentPerson && (
+          {isRunning && currentPerson ? (
             <Group align="center" gap="xs" wrap="nowrap">
               <Text c="dimmed" size="xs" style={{ whiteSpace: "nowrap" }}>
                 {t("CurrentlyEnriching")}
               </Text>
               <PersonChip isClickable openInNewTab person={currentPerson} size="sm" />
             </Group>
-          )}
+          ) : null}
 
           {isRunning ? (
             <Tooltip disabled={!isPausing} label={t("PausingTooltip")}>
@@ -146,9 +147,9 @@ export function EnrichRecommendationCard({
           )}
         </Group>
 
-        {isRunning && totalEligible > 0 && (
+        {isRunning && totalEligible > 0 ? (
           <Progress color="blue" size="md" value={((completed + failed) / totalEligible) * 100} />
-        )}
+        ) : null}
       </Stack>
     </Paper>
   );

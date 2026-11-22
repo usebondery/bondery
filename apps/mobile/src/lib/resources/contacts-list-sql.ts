@@ -1,4 +1,4 @@
-export type ContactsListParams = {
+type ContactsListParams = {
   query?: string;
   limit?: number;
   offset?: number;
@@ -6,21 +6,21 @@ export type ContactsListParams = {
   groupId?: string;
 };
 
-export type ContactsListQuery = {
+type ContactsListQuery = {
   fromClause: string;
   whereClause: string;
   params: (string | number)[];
 };
 
-export type ContactsListSql = {
+type ContactsListSql = {
   sql: string;
   params: (string | number)[];
 };
 
-export const CONTACTS_LIST_ORDER_BY = "ORDER BY p.first_name ASC, p.last_name ASC";
+const CONTACTS_LIST_ORDER_BY = "ORDER BY p.first_name ASC, p.last_name ASC";
 
 /** Lean people columns for list rows. Omits `notes` and `notes_updated_at`. */
-export const CONTACTS_LIST_COLUMNS = [
+const CONTACTS_LIST_COLUMNS = [
   "p.id",
   "p.user_id",
   "p.first_name",
@@ -41,7 +41,7 @@ export const CONTACTS_LIST_COLUMNS = [
   "p.gis_point",
 ].join(", ");
 
-export function buildContactsListQuery(
+function buildContactsListQuery(
   options: Pick<ContactsListParams, "query" | "excludeMyself" | "groupId">,
 ): ContactsListQuery {
   const query = options.query?.trim() ?? "";
@@ -75,10 +75,10 @@ export function buildContactsListQuery(
 /**
  * List rows omit notes columns. Map them to null so a lean SQLite row is still a valid Contact.
  */
-export function listContactNotesFields(row: {
-  notes?: string | null;
-  notes_updated_at?: string | null;
-}): { notes: string | null; notesUpdatedAt: string | null } {
+function listContactNotesFields(row: { notes?: string | null; notes_updated_at?: string | null }): {
+  notes: string | null;
+  notesUpdatedAt: string | null;
+} {
   return {
     notes: row.notes ?? null,
     notesUpdatedAt: row.notes_updated_at ?? null,
@@ -113,19 +113,17 @@ function assembleSelectSql(selectClause: string, options: ContactsListParams): C
 }
 
 /** Full list SELECT (lean columns + FROM/WHERE + optional LIMIT). */
-export function buildContactsListSelectSql(options: ContactsListParams): ContactsListSql {
+function buildContactsListSelectSql(options: ContactsListParams): ContactsListSql {
   return assembleSelectSql(`SELECT DISTINCT ${CONTACTS_LIST_COLUMNS}`, options);
 }
 
 /** Id-only SELECT using the same FROM/WHERE/ORDER BY/LIMIT as the list query. */
-export function buildContactIdsSelectSql(options: ContactsListParams): ContactsListSql {
+function buildContactIdsSelectSql(options: ContactsListParams): ContactsListSql {
   return assembleSelectSql("SELECT DISTINCT p.id", options);
 }
 
 /** Name fields for a known id list. Null when there are no ids to query. */
-export function buildContactNamesByIdsSelectSql(
-  personIds: readonly string[],
-): ContactsListSql | null {
+function buildContactNamesByIdsSelectSql(personIds: readonly string[]): ContactsListSql | null {
   const params: string[] = [];
   const seen = new Set<string>();
 
@@ -147,3 +145,14 @@ export function buildContactNamesByIdsSelectSql(
     sql: `SELECT id, first_name, middle_name, last_name FROM people WHERE id IN (${placeholders})`,
   };
 }
+
+export type { ContactsListParams, ContactsListQuery, ContactsListSql };
+export {
+  buildContactIdsSelectSql,
+  buildContactNamesByIdsSelectSql,
+  buildContactsListQuery,
+  buildContactsListSelectSql,
+  CONTACTS_LIST_COLUMNS,
+  CONTACTS_LIST_ORDER_BY,
+  listContactNotesFields,
+};

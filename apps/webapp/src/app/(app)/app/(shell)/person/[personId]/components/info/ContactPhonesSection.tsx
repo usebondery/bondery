@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { detachPromise } from "@bondery/helpers/async";
 import { getTelephoneReactMaskExpression, parsePhoneNumber } from "@bondery/helpers/phone";
 import {
   ActionIconButton,
@@ -258,7 +259,9 @@ export function ContactPhonesSection({
                   disabled={!phone.value}
                   leftSection={<IconCopy size={14} />}
                   onClick={() => {
-                    void navigator.clipboard.writeText(`${phone.prefix || ""}${phone.value || ""}`);
+                    detachPromise(
+                      navigator.clipboard.writeText(`${phone.prefix || ""}${phone.value || ""}`),
+                    );
                     notifications.show(
                       successNotificationTemplate({
                         description: text.phoneCopiedMessage,

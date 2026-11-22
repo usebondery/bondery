@@ -33,7 +33,7 @@ export function PersonAvatarTooltip({
   opened,
   clipRoot,
 }: PersonAvatarTooltipProps): ReactElement {
-  const clipped = clipRoot != null;
+  const clipped = clipRoot !== null && clipRoot !== undefined;
   return (
     <Tooltip
       closeDelay={50}

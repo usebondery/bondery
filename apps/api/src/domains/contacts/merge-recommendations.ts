@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type {
   MergeRecommendationReason,
   MergeRecommendationsCountResponse,
@@ -85,7 +86,7 @@ export async function refreshMergeRecommendations(
 
 /** Fire-and-forget recompute after mutations that affect merge matching. */
 export function scheduleMergeRecommendationsRefresh(ctx: DomainContext): void {
-  void refreshMergeRecommendations(ctx).catch((error) => {
+  detachPromise(refreshMergeRecommendations(ctx), (error) => {
     ctx.log?.error({ error }, "Failed to refresh merge recommendations after mutation");
   });
 }

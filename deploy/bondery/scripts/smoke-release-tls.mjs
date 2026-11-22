@@ -307,7 +307,7 @@ export function assertApiHttpsOnly({ compose, fail }) {
  * a path, and the answers that mean "reached the service".
  */
 export const TRAEFIK_TRANSPORTS = {
-  api: { accepted: ["status 200"], path: "/health/live", port: 26642 },
+  api: { accepted: ["status 200"], path: "/health/live", port: 26_642 },
   // Unsigned ListBuckets: 403 with S3 Error XML is the gateway speaking S3.
   storage: { accepted: ["status 200", "status 403"], path: "/", port: 8443 },
 };

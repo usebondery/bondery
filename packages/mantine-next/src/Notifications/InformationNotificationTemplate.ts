@@ -1,13 +1,6 @@
 import { IconInfoCircle } from "@tabler/icons-react";
 import { createElement, type ReactNode } from "react";
 
-export interface InformationNotificationTemplateProps {
-  description: string;
-  icon?: ReactNode;
-  radius?: string | number;
-  title: string;
-}
-
 type InformationNotificationPayload = {
   color: "blue";
   icon: ReactNode;
@@ -16,6 +9,13 @@ type InformationNotificationPayload = {
   radius: string | number;
   title: string;
 };
+
+export interface InformationNotificationTemplateProps {
+  description: string;
+  icon?: ReactNode;
+  radius?: string | number;
+  title: string;
+}
 
 /** Builds a consistent information notification payload. */
 export function informationNotificationTemplate({

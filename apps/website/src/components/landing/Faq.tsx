@@ -11,6 +11,7 @@ import {
   Stack,
   Title,
 } from "@mantine/core";
+import { LANDING_SECTION_IDS } from "./sectionIds";
 
 type FaqItem = {
   question: string;
@@ -23,12 +24,12 @@ type FaqProps = {
   items: readonly FaqItem[];
 };
 
-export function Faq({ items }: FaqProps) {
+function Faq({ items }: FaqProps) {
   return (
     <Container
       bg="var(--mantine-color-body)"
       fluid
-      id="faq"
+      id={LANDING_SECTION_IDS.faq}
       px="0"
       py={{
         base: "calc(var(--mantine-spacing-lg) * 2)",
@@ -77,3 +78,5 @@ function renderAnswerWithDocsLink(answer: string, href: string, label: string) {
     </>
   );
 }
+
+export { Faq };

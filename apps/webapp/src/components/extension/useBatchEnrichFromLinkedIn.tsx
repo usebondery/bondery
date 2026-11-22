@@ -129,7 +129,7 @@ export function useBatchEnrichFromLinkedIn() {
     let totalEligible: number;
     try {
       const init = await initEnrichQueue({});
-      totalEligible = init.totalEligible;
+      ({ totalEligible } = init);
     } catch (error) {
       setState({ isLoading: false });
       notifications.show(
@@ -222,7 +222,7 @@ export function useBatchEnrichFromLinkedIn() {
     let totalEligible: number;
     try {
       const init = await initEnrichQueue({ personId: contactId });
-      totalEligible = init.totalEligible;
+      ({ totalEligible } = init);
     } catch (error) {
       setState({ isLoading: false });
       notifications.show(

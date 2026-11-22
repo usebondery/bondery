@@ -9,6 +9,9 @@ import {
 } from "./intl-format.js";
 import { APP_LOCALE_METADATA, dirForLocale } from "./supported-locale/schema.js";
 
+const PATTERN_2D752D2E2A2D_RE = /-u-.*-u-/;
+const YU_GOTHIC_RE = /Yu Gothic/;
+
 describe("dirForLocale", () => {
   it("returns ltr for every shipped catalog locale", () => {
     for (const entry of APP_LOCALE_METADATA) {
@@ -32,7 +35,7 @@ describe("directionFromDirField", () => {
 describe("buildIntlLocaleTag", () => {
   it("pins calendar, digits, and hour cycle in one extension", () => {
     assert.equal(buildIntlLocaleTag("en", "12h"), "en-US-u-ca-gregory-hc-h12-nu-latn");
-    assert.doesNotMatch(buildIntlLocaleTag("en", "12h"), /-u-.*-u-/);
+    assert.doesNotMatch(buildIntlLocaleTag("en", "12h"), PATTERN_2D752D2E2A2D_RE);
   });
 });
 
@@ -85,7 +88,7 @@ describe("parseAmbiguousNumericDate", () => {
 
 describe("fontStackForLocale", () => {
   it("returns script stacks for future locales", () => {
-    assert.match(fontStackForLocale("ja") ?? "", /Yu Gothic/);
+    assert.match(fontStackForLocale("ja") ?? "", YU_GOTHIC_RE);
     assert.equal(fontStackForLocale("en"), null);
   });
 });

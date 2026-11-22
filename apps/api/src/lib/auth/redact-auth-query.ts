@@ -2,8 +2,10 @@
  * Strips plaintext magic-link tokens from logged URLs.
  * Better Auth puts the verify token in the query string.
  */
+
+const TOKEN_QUERY_PARAM_PATTERN = /[?&]token=/i;
 export function redactSensitiveAuthQuery(url: string): string {
-  if (!/[?&]token=/i.test(url)) {
+  if (!TOKEN_QUERY_PARAM_PATTERN.test(url)) {
     return url;
   }
 

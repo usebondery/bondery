@@ -11,7 +11,7 @@
  */
 import { prisma } from "@bondery/db";
 
-export type ActiveReviewer = {
+type ActiveReviewer = {
   id: string;
   label: string;
   userId: string;
@@ -44,6 +44,8 @@ const REVIEWER_SELECT = {
   id: true,
   reviewerAccess: { select: { expiresAt: true, id: true, label: true, revokedAt: true } },
 } as const;
+
+export type { ActiveReviewer };
 
 /**
  * Resolve an active reviewer grant for a submitted sign-in address.

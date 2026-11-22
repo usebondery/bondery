@@ -9,7 +9,7 @@ export function isSessionCreatedAtFresh(
   nowMs = Date.now(),
   freshAgeSeconds = SESSION_FRESH_AGE_SECONDS,
 ): boolean {
-  if (createdAt == null) {
+  if (createdAt === null || createdAt === undefined) {
     return false;
   }
 

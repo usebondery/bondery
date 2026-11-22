@@ -6,6 +6,10 @@ import { after, describe, it } from "node:test";
 
 import { findDrift } from "../dev/sync-agent-files.mjs";
 
+const MISSING_MISSING_MD_RE = /missing .*missing\.md/;
+const CHANGED_KEEP_MD_RE = /changed .*keep\.md/;
+const EXTRA_EXTRA_MD_RE = /extra .*extra\.md/;
+
 const root = mkdtempSync(join(tmpdir(), "agent-files-"));
 after(() => rmSync(root, { force: true, recursive: true }));
 
@@ -29,8 +33,8 @@ describe("findDrift", () => {
     const source = tree("b-src", { "keep.md": "new", "missing.md": "m" });
     const target = tree("b-dst", { "extra.md": "e", "keep.md": "old" });
     const drift = findDrift(source, target).join("\n");
-    assert.match(drift, /missing .*missing\.md/);
-    assert.match(drift, /changed .*keep\.md/);
-    assert.match(drift, /extra .*extra\.md/);
+    assert.match(drift, MISSING_MISSING_MD_RE);
+    assert.match(drift, CHANGED_KEEP_MD_RE);
+    assert.match(drift, EXTRA_EXTRA_MD_RE);
   });
 });

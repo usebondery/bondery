@@ -1,3 +1,5 @@
+const PATTERN_5C2F24_RE = /\/$/;
+
 export { agentRecoveryHint, buildAgentMessage } from "./agent-messages.js";
 export {
   API_ERROR_CODE_ENTRIES,
@@ -17,6 +19,6 @@ export {
 export { API_ERROR_TYPES, type ApiErrorType } from "./api-error-types.js";
 
 export function getErrorDocUrl(code: string, websiteBaseUrl: string): string {
-  const base = websiteBaseUrl.replace(/\/$/, "");
+  const base = websiteBaseUrl.replace(PATTERN_5C2F24_RE, "");
   return `${base}/docs/api/errors/${code}`;
 }

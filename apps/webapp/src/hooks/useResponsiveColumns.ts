@@ -119,7 +119,7 @@ export function useResponsiveColumns(
     }
 
     const observer = new ResizeObserver((entries) => {
-      const entry = entries[0];
+      const [entry] = entries;
       if (!entry) {
         return;
       }
@@ -191,7 +191,7 @@ export function useResponsiveColumns(
         if (!(RESPONSIVE_HIDE_ORDER as string[]).includes(col.key)) {
           continue;
         }
-        const key = col.key;
+        const { key } = col;
         const before = effectiveColumns.find((c) => c.key === key);
         const wasVisible = before?.visible ?? false;
         const isNowVisible = col.visible;

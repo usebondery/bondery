@@ -42,6 +42,8 @@ import { expect, type Page, test } from "@playwright/test";
 import { completeOnboardingIfNeeded } from "./complete-onboarding";
 import { loginWithEmail } from "./email-login";
 
+const APP_HOME_URL = /\/app\/home(?:[/?#]|$)/;
+
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "../../..");
 const sampleZipPath = join(
   repoRoot,
@@ -146,7 +148,7 @@ async function preparePreferences(page: Page): Promise<void> {
 
 async function waitForDashboard(page: Page, contacts: number): Promise<void> {
   await page.goto("/app/home");
-  await expect(page).toHaveURL(/\/app\/home(?:[/?#]|$)/);
+  await expect(page).toHaveURL(APP_HOME_URL);
   await expect(page.locator("html")).toHaveAttribute("data-mantine-color-scheme", "dark");
 
   // Stat cards show the contact count once the stats query resolves.

@@ -8,6 +8,10 @@ import {
 } from "../lib/notifications/transporter.js";
 import { loadTestEnv } from "./load-test-env.js";
 
+const ISO_DATE_2026_07_29_PATTERN = /2026-07-29/;
+const YEAR_2026_PATTERN = /2026/;
+const SMTP_DOWN_PATTERN = /smtp down/;
+
 loadTestEnv();
 
 const { prisma } = await import("@bondery/db");
@@ -105,8 +109,8 @@ describe("sendOneUserDigest", () => {
     );
 
     assert.equal(result.ok, true, result.ok ? undefined : result.error);
-    assert.doesNotMatch(capturedSubject, /2026-07-29/);
-    assert.match(capturedSubject, /2026/);
+    assert.doesNotMatch(capturedSubject, ISO_DATE_2026_07_29_PATTERN);
+    assert.match(capturedSubject, YEAR_2026_PATTERN);
   });
 
   it("does not log or advance when SMTP fails", async () => {
@@ -128,7 +132,7 @@ describe("sendOneUserDigest", () => {
     const result = await sendOneUserDigest(reminderUser, buildCtx());
 
     assert.equal(result.ok, false);
-    assert.match(result.ok ? "" : result.error, /smtp down/);
+    assert.match(result.ok ? "" : result.error, SMTP_DOWN_PATTERN);
     assert.equal(created, false);
     assert.equal(advanced, false);
   });

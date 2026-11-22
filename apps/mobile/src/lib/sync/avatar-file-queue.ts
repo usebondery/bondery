@@ -1,6 +1,6 @@
-export type AvatarFileAction = "download" | "delete" | "keep";
+type AvatarFileAction = "download" | "delete" | "keep";
 
-export type AvatarFileRow = {
+type AvatarFileRow = {
   id: string;
   user_id: string;
   has_avatar: number;
@@ -8,7 +8,7 @@ export type AvatarFileRow = {
   avatar_local_updated_at: string | null;
 };
 
-export type AvatarFs = {
+type AvatarFs = {
   copyFromUri(personId: string, sourceUri: string): Promise<void>;
   deleteDir(): void;
   deleteFile(personId: string): void;
@@ -17,12 +17,12 @@ export type AvatarFs = {
   fileUri(personId: string): string | null;
 };
 
-export type AvatarSqlite = {
+type AvatarSqlite = {
   getAllSync: (sql: string, ...params: unknown[]) => AvatarFileRow[];
   runSync: (sql: string, ...params: unknown[]) => unknown;
 };
 
-export type AvatarRemoteUrlFn = (
+type AvatarRemoteUrlFn = (
   userId: string,
   personId: string,
   hasAvatar: boolean,
@@ -34,7 +34,7 @@ const AVATAR_DOWNLOAD_CONCURRENCY = 4;
 const pendingUpserts = new Set<string>();
 const pendingDeletes = new Set<string>();
 
-export function decideAvatarFileAction(input: {
+function decideAvatarFileAction(input: {
   fileExists: boolean;
   hasAvatar: boolean;
   avatarUpdatedAt: string | null;
@@ -49,22 +49,22 @@ export function decideAvatarFileAction(input: {
   return "keep";
 }
 
-export function notePeopleAvatarUpsert(personId: string): void {
+function notePeopleAvatarUpsert(personId: string): void {
   pendingDeletes.delete(personId);
   pendingUpserts.add(personId);
 }
 
-export function notePeopleAvatarDelete(personId: string): void {
+function notePeopleAvatarDelete(personId: string): void {
   pendingUpserts.delete(personId);
   pendingDeletes.add(personId);
 }
 
-export function clearPendingAvatarJobs(): void {
+function clearPendingAvatarJobs(): void {
   pendingUpserts.clear();
   pendingDeletes.clear();
 }
 
-export function resetPendingAvatarJobsForTests(): void {
+function resetPendingAvatarJobsForTests(): void {
   clearPendingAvatarJobs();
 }
 
@@ -110,7 +110,7 @@ function markAvatarLocalClock(
  * Apply file downloads/deletes collected during people materialize.
  * Runs after the SQLite transaction so network I/O cannot hold the lock.
  */
-export async function runAvatarFileQueue(input: {
+async function runAvatarFileQueue(input: {
   db: AvatarSqlite;
   fs: AvatarFs;
   resolveRemoteUrl: AvatarRemoteUrlFn;
@@ -175,3 +175,13 @@ export async function runAvatarFileQueue(input: {
   await runPool(downloads, AVATAR_DOWNLOAD_CONCURRENCY);
   return changed || downloadedIds.size > 0;
 }
+
+export type { AvatarFileAction, AvatarFileRow, AvatarFs, AvatarRemoteUrlFn, AvatarSqlite };
+export {
+  clearPendingAvatarJobs,
+  decideAvatarFileAction,
+  notePeopleAvatarDelete,
+  notePeopleAvatarUpsert,
+  resetPendingAvatarJobsForTests,
+  runAvatarFileQueue,
+};

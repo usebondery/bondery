@@ -43,7 +43,7 @@ export function Group({
       )}
       {...rest}
     >
-      {grow ? wrapGrowChildren(children, "row") : children}
+      {grow ? <>{wrapGrowChildren(children, "row")}</> : <>{children}</>}
     </View>
   );
 }

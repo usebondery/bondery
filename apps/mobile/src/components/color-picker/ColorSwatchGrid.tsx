@@ -10,7 +10,7 @@ interface ColorSwatchGridProps {
   value: string;
 }
 
-export function ColorSwatchGrid({ value, onSelect }: ColorSwatchGridProps) {
+function ColorSwatchGrid({ value, onSelect }: ColorSwatchGridProps) {
   const colors = useMobileThemeColors();
   const selectedHex = normalizeHex(value);
 
@@ -73,3 +73,5 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
 });
+
+export { ColorSwatchGrid };

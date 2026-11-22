@@ -22,6 +22,29 @@ interface MapPinsTableProps {
   visibleColumns: ColumnConfig[];
 }
 
+/** Address category badge in front of the formatted address. */
+function renderAddressLocationCell(contact: ContactTableRow) {
+  const type = contact._addressType;
+  const address = contact.location ? contact.location : "—";
+  return (
+    <Group gap={6} style={{ minWidth: 0 }} wrap="nowrap">
+      <Badge
+        color={ADDRESS_TYPE_COLOR[type ?? "other"] ?? "gray"}
+        size="xs"
+        style={{ flexShrink: 0 }}
+        variant="light"
+      >
+        {type}
+      </Badge>
+      <Tooltip label={address}>
+        <Text lineClamp={1} size="sm">
+          {address}
+        </Text>
+      </Tooltip>
+    </Group>
+  );
+}
+
 /** Table of the pins currently visible on the map, for the locations or addresses view. */
 export function MapPinsTable({
   columns,
@@ -84,28 +107,5 @@ export function MapPinsTable({
         visibleColumns={visibleColumns}
       />
     </Paper>
-  );
-}
-
-/** Address category badge in front of the formatted address. */
-function renderAddressLocationCell(contact: ContactTableRow) {
-  const type = contact._addressType;
-  const address = contact.location ? contact.location : "—";
-  return (
-    <Group gap={6} style={{ minWidth: 0 }} wrap="nowrap">
-      <Badge
-        color={ADDRESS_TYPE_COLOR[type ?? "other"] ?? "gray"}
-        size="xs"
-        style={{ flexShrink: 0 }}
-        variant="light"
-      >
-        {type}
-      </Badge>
-      <Tooltip label={address}>
-        <Text lineClamp={1} size="sm">
-          {address}
-        </Text>
-      </Tooltip>
-    </Group>
   );
 }

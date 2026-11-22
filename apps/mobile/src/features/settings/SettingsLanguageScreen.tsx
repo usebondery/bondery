@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import { formatClockTime, formatUserDate } from "@bondery/helpers/date";
 import {
   APP_LANGUAGES_DATA,
@@ -135,7 +136,7 @@ export function SettingsLanguageScreen() {
 
   useEffect(() => {
     syncEffectState(() => {
-      void loadSettings();
+      detachPromise(loadSettings());
     });
   }, [loadSettings]);
 
@@ -318,7 +319,7 @@ export function SettingsLanguageScreen() {
           isLoading={isLoading}
           loadingMinHeight={120}
           onRetry={() => {
-            void loadSettings();
+            detachPromise(loadSettings());
           }}
         >
           <Stack gap="lg">
@@ -326,7 +327,7 @@ export function SettingsLanguageScreen() {
               data={localeOptions}
               label={tMobileSettings("LanguageSelectLabel")}
               onChange={(nextLocale) => {
-                void handleLocaleChange(nextLocale);
+                detachPromise(handleLocaleChange(nextLocale));
               }}
               value={locale}
             />
@@ -336,7 +337,7 @@ export function SettingsLanguageScreen() {
               emptySearchLabel={t("feedback.noResults")}
               label={tMobileSettings("TimezoneSelectLabel")}
               onChange={(nextTimezone) => {
-                void handleTimezoneChange(nextTimezone);
+                detachPromise(handleTimezoneChange(nextTimezone));
               }}
               searchable="auto"
               searchPlaceholder={tSettingsPage("Profile.TimezoneSearch")}
@@ -347,7 +348,7 @@ export function SettingsLanguageScreen() {
               data={dateFormatOptions}
               label={tMobileSettings("DateFormatSelectLabel")}
               onChange={(nextDateFormat) => {
-                void handleDateFormatChange(nextDateFormat as DateFormatPreference);
+                detachPromise(handleDateFormatChange(nextDateFormat as DateFormatPreference));
               }}
               value={dateFormat}
             />
@@ -356,7 +357,7 @@ export function SettingsLanguageScreen() {
               data={timeFormatOptions}
               label={tMobileSettings("TimeFormatSelectLabel")}
               onChange={(nextTimeFormat) => {
-                void handleTimeFormatChange(nextTimeFormat);
+                detachPromise(handleTimeFormatChange(nextTimeFormat));
               }}
               value={timeFormat}
             />
@@ -367,7 +368,7 @@ export function SettingsLanguageScreen() {
               label={tSettingsPage("Preferences.ReminderTime")}
               leadingIcon={<IconBell size={18} stroke={colors.iconSecondary} />}
               onChange={(nextReminderSendHour) => {
-                void handleReminderSendHourChange(nextReminderSendHour);
+                detachPromise(handleReminderSendHourChange(nextReminderSendHour));
               }}
               value={reminderSendHour}
             />

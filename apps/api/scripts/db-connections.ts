@@ -6,7 +6,8 @@
 // downgrade it, so these rules reject it.
 
 /** The module that implements the rules. It alone may set TLS options by hand. */
-export const DATABASE_TLS_MODULE = "packages/db/src/connection/database-tls.ts";
+
+const TRAILING_OPEN_PAREN_PATTERN = /\s*\($/;
 
 const PG_IMPORT = /from\s+["'](?:pg|pg-boss)["']|require\(\s*["'](?:pg|pg-boss)["']\s*\)/;
 const CONSTRUCTOR = /\bnew\s+(?:pg\.)?(?:Pool|Client|PgBoss)\s*\(/g;
@@ -16,7 +17,7 @@ const INSECURE_TLS = /rejectUnauthorized\s*:\s*false/;
 /** libpq TLS parameters that Prisma's schema engine ignores without an error. */
 const LIBPQ_TLS_IN_URL = /[?&](?:sslmode=verify-(?:full|ca)|sslrootcert=)/;
 
-export type DbConnectionViolation = {
+type DbConnectionViolation = {
   line: number;
   message: string;
 };
@@ -24,6 +25,9 @@ export type DbConnectionViolation = {
 function lineOf(source: string, index: number): number {
   return source.slice(0, index).split("\n").length;
 }
+
+export type { DbConnectionViolation };
+export const DATABASE_TLS_MODULE = "packages/db/src/connection/database-tls.ts";
 
 /** Violations in one source file. `path` is repo-relative with forward slashes. */
 export function findDbConnectionViolations(source: string, path: string): DbConnectionViolation[] {
@@ -38,7 +42,7 @@ export function findDbConnectionViolations(source: string, path: string): DbConn
       if (!CONFIGURED_ARGUMENT.test(source.slice(argumentsStart))) {
         violations.push({
           line: lineOf(source, match.index ?? 0),
-          message: `${match[0].replace(/\s*\($/, "")} must take { ...pgConnectionConfig(url) } from @bondery/db, so TLS comes from DATABASE_SSL_*`,
+          message: `${match[0].replace(TRAILING_OPEN_PAREN_PATTERN, "")} must take { ...pgConnectionConfig(url) } from @bondery/db, so TLS comes from DATABASE_SSL_*`,
         });
       }
     }

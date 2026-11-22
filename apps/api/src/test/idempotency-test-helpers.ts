@@ -11,19 +11,13 @@ import { loadTestEnv } from "./load-test-env.js";
 
 loadTestEnv();
 
-export const { prisma } = await import("@bondery/db");
-
-export const USER_ID = "018f5c3a-7b2e-7c1a-8d4e-000000000001";
-
-export type StoredRow = {
+type StoredRow = {
   body: unknown;
   hash: string;
   omitted: boolean;
   status: "complete" | "processing";
   statusCode: number | null;
 };
-
-export const store = new Map<string, StoredRow>();
 let originalQueryRaw: PrismaClient["$queryRaw"] | undefined;
 
 function realQueryRaw(): PrismaClient["$queryRaw"] {
@@ -32,6 +26,14 @@ function realQueryRaw(): PrismaClient["$queryRaw"] {
   }
   return originalQueryRaw;
 }
+
+export type { StoredRow };
+
+export const { prisma } = await import("@bondery/db");
+
+export const USER_ID = "018f5c3a-7b2e-7c1a-8d4e-000000000001";
+
+export const store = new Map<string, StoredRow>();
 
 export function installMemoryStore(): void {
   realQueryRaw();

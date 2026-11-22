@@ -17,6 +17,13 @@ import type { MagicLinkSendPayload } from "../lib/auth/send-magic-link.js";
 import { requireRedisCommands, shutdownRedis } from "../lib/data/redis.js";
 import { loadTestEnv } from "./load-test-env.js";
 
+const S_BETTER_AUTH_SESSION_TOKEN_PATTERN = /(?:^|,\s*)(?:better-auth\.)?session_token=([^;]+)/i;
+const TOO_MANY_REQUESTS_PATTERN = /TOO_MANY_REQUESTS/;
+const SESSION_TOKEN_PATTERN = /session_token=([^;]+)/i;
+const ERROR_INVALID_TOKEN_PATTERN = /error=INVALID_TOKEN/;
+const MAGIC_LINK_VERIFY_PATTERN = /\/magic-link\/verify\?/;
+const TOKEN_QUERY_PARAM_PATTERN = /[?&]token=/;
+
 loadTestEnv();
 
 const { createTestApp } = await import("./create-test-app.js");
@@ -56,12 +63,12 @@ function extractSetCookieHeader(header: string | string[] | undefined): string {
 
 function extractSessionTokenFromSetCookie(header: string | string[] | undefined): string | null {
   const raw = extractSetCookieHeader(header);
-  const match = /(?:^|,\s*)(?:better-auth\.)?session_token=([^;]+)/i.exec(raw);
+  const match = S_BETTER_AUTH_SESSION_TOKEN_PATTERN.exec(raw);
   if (match?.[1]) {
     return decodeURIComponent(match[1]);
   }
 
-  const fallback = /session_token=([^;]+)/i.exec(raw);
+  const fallback = SESSION_TOKEN_PATTERN.exec(raw);
   return fallback?.[1] ? decodeURIComponent(fallback[1]) : null;
 }
 
@@ -260,7 +267,7 @@ describe("magic-link auth", () => {
     const second = await getVerify(lastSend.url, email);
     assert.equal(second.statusCode, 302);
     const location = String(second.headers.location ?? "");
-    assert.match(location, /error=INVALID_TOKEN/);
+    assert.match(location, ERROR_INVALID_TOKEN_PATTERN);
   });
 
   it("signs an existing GitHub-linked user in without creating an Account", async () => {
@@ -330,7 +337,7 @@ describe("magic-link auth", () => {
 
     const stale = await getVerify(firstUrl, email);
     assert.equal(stale.statusCode, 302);
-    assert.match(String(stale.headers.location ?? ""), /error=INVALID_TOKEN/);
+    assert.match(String(stale.headers.location ?? ""), ERROR_INVALID_TOKEN_PATTERN);
 
     const fresh = await getVerify(secondUrl, email);
     assert.equal(fresh.statusCode, 302);
@@ -361,8 +368,8 @@ describe("magic-link auth", () => {
     const body = response.json() as { redirect?: boolean; status?: boolean; url?: string };
     assert.equal(body.status, true);
     assert.equal(body.redirect, true);
-    assert.match(body.url ?? "", /\/magic-link\/verify\?/);
-    assert.match(body.url ?? "", /[?&]token=/);
+    assert.match(body.url ?? "", MAGIC_LINK_VERIFY_PATTERN);
+    assert.match(body.url ?? "", TOKEN_QUERY_PARAM_PATTERN);
     assert.ok(body.url);
 
     const verifyResponse = await getVerify(body.url, email);
@@ -447,6 +454,6 @@ describe("magic-link auth", () => {
 
     const blocked = await postMagicLink(email);
     assert.equal(blocked.statusCode, 429);
-    assert.match(blocked.body, /TOO_MANY_REQUESTS/);
+    assert.match(blocked.body, TOO_MANY_REQUESTS_PATTERN);
   });
 });

@@ -1,6 +1,7 @@
 // biome-ignore-all lint/nursery/useReactCompiler: intentional ref sync and controlled local state for React Compiler
 "use client";
 
+import { getUserFacingError } from "@bondery/helpers/api";
 import {
   DescribedSelect,
   errorNotificationTemplate,
@@ -16,21 +17,17 @@ import {
   type InteractionType,
   interactionFormSchema,
 } from "@bondery/schemas";
-import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
-
-type ActivityParticipantRef = string | { id: string };
-
-import { getUserFacingError } from "@bondery/helpers/api";
 import { Avatar, Button, Flex, SimpleGrid, Stack, Text, Textarea, TextInput } from "@mantine/core";
 import { schemaResolver, useForm } from "@mantine/form";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { IconCalendarPlus, IconCheck } from "@tabler/icons-react";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { DatePickerWithPresets } from "@/components/interactions/DatePickerWithPresets";
 import { captureEvent } from "@/lib/analytics/client";
 import { ACTIVITY_TYPE_OPTIONS, getActivityTypeConfig } from "@/lib/contacts/activityTypes";
 import { searchContactsPage } from "@/lib/contacts/searchContacts";
+import { useCommonTranslations, useInteractionsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useInteractionTypeLabel } from "@/lib/i18n/useInteractionTypeLabel";
 import {
   createModalId,
@@ -51,6 +48,12 @@ import {
 } from "@/lib/query/hooks/useInteractions";
 import { openAddContactModal } from "../../people/components/modals/AddContactModal";
 import classes from "./NewActivityModal.module.css";
+
+type ActivityParticipantRef = string | { id: string };
+
+type ActivityFormFieldErrors = {
+  participantIds?: ReactNode;
+};
 
 interface OpenNewActivityModalParams {
   activity?: Activity | null;
@@ -344,7 +347,7 @@ function NewActivityForm({
             contacts={pickerContacts}
             contactsHasMore={contactsHasMore}
             disabled={isBlocking}
-            error={form.errors.participantIds}
+            error={(form.errors as ActivityFormFieldErrors).participantIds}
             inputRef={participantsInputRef}
             loadingMoreLabel={t("LoadingMoreLabel")}
             loadMoreErrorLabel={t("LoadMorePickerError")}
@@ -385,7 +388,7 @@ function NewActivityForm({
           </Button>
         </Stack>
 
-        <Flex className={classes.grid}>
+        <Flex className={classes["grid"]}>
           <Stack gap="xs" style={{ gridArea: "notes" }}>
             <Text fw={500} size="sm">
               {t("Note")}

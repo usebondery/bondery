@@ -8,7 +8,7 @@ import { prismaCliUrl } from "./src/connection/database-tls.ts";
 const packageRoot = fileURLToPath(new URL(".", import.meta.url));
 config({ path: resolve(packageRoot, ".env.local") });
 
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env["DATABASE_URL"];
 if (!databaseUrl) {
   throw new Error("DATABASE_URL is not set");
 }

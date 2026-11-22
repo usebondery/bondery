@@ -10,6 +10,8 @@ import {
  *
  * @deprecated Prefer `normalizePhoneInput` or `normalizePhoneParts`.
  */
+const PATTERN_285C647B337D_RE = /(\d{3})(\d{3})(\d{4})/;
+
 export function parsePhoneNumber(
   phoneNumber: string | null | undefined,
   defaultCountry?: string | null,
@@ -55,7 +57,7 @@ export function formatPhoneNumber(phoneNumber: string, defaultCountry?: string |
   const { dialCode, number } = parsed;
 
   // Simple formatting: add spaces every 3-4 digits
-  const formatted = number.replace(/(\d{3})(\d{3})(\d{4})/, "$1 $2 $3");
+  const formatted = number.replace(PATTERN_285C647B337D_RE, "$1 $2 $3");
 
   return `${dialCode} ${formatted}`;
 }

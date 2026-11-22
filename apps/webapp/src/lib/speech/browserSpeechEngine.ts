@@ -176,7 +176,7 @@ function createBrowserSpeechEngine(): SpeechEngine {
 
       generation += 1;
       stopTracking();
-      lang = input.lang;
+      ({ lang } = input);
       chunks = splitSpeechText(input.text);
 
       synth.cancel();

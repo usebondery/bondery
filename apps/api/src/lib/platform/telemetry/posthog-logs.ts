@@ -24,6 +24,8 @@ import {
 import { isTestEnvironment } from "../runtime-env.js";
 import { FilteringLogRecordProcessor } from "./filter-log-processor.js";
 
+const TRAILING_SLASHES_PATTERN = /\/+$/;
+
 const DEFAULT_POSTHOG_HOST = "https://eu.i.posthog.com";
 const SERVICE_NAME = "bondery-api";
 
@@ -31,7 +33,7 @@ let loggerProvider: LoggerProvider | null = null;
 
 function createPosthogExporter(projectToken: string): LogRecordExporter {
   const host = (process.env.BONDERY_PUBLIC_POSTHOG_HOST || DEFAULT_POSTHOG_HOST).replace(
-    /\/+$/,
+    TRAILING_SLASHES_PATTERN,
     "",
   );
 

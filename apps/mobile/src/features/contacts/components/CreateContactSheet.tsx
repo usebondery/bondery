@@ -25,7 +25,7 @@ interface CreateContactSheetProps {
 /**
  * Bottom sheet for creating a contact from a single full-name field.
  */
-export function CreateContactSheet({ open, onOpenChange }: CreateContactSheetProps) {
+function CreateContactSheet({ open, onOpenChange }: CreateContactSheetProps) {
   const tMobileCreateContact = useMobileCreateContactTranslations();
   const { openContact } = useAppNavigation();
   const colors = useMobileThemeColors();
@@ -152,3 +152,5 @@ const styles = StyleSheet.create({
     fontWeight: MOBILE_TYPOGRAPHY.fontWeight.semibold,
   },
 });
+
+export { CreateContactSheet };

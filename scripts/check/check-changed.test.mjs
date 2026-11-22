@@ -44,4 +44,10 @@ describe("planChecks", () => {
   it("honours --only", () => {
     assert.deepEqual(names(["apps/api/src/main.ts"], ["biome"]), ["biome"]);
   });
+
+  it("checks tsconfig extends for a tsconfig path and not for an unrelated md file", () => {
+    assert.ok(names(["apps/webapp/tsconfig.json"]).includes("tsconfig-extends"));
+    assert.ok(names(["packages/typescript-config/base.json"]).includes("tsconfig-extends"));
+    assert.ok(!names(["README.md"]).includes("tsconfig-extends"));
+  });
 });

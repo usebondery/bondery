@@ -1,24 +1,7 @@
 import { SUPPORTED_LOCALES, type SupportedLocale } from "@bondery/translations";
 import { loadNamespace } from "@bondery/translations/loader";
 
-/** Curated Better Auth codes shipped in `common.errors.auth`. */
-export const AUTH_ERROR_CODES = [
-  "CREDENTIAL_ACCOUNT_NOT_FOUND",
-  "EMAIL_NOT_VERIFIED",
-  "EMAIL_SEND_FAILED",
-  "FAILED_TO_CREATE_SESSION",
-  "FAILED_TO_CREATE_USER",
-  "INVALID_EMAIL_OR_PASSWORD",
-  "INVALID_PASSWORD",
-  "INVALID_TOKEN",
-  "SESSION_EXPIRED",
-  "SOCIAL_ACCOUNT_ALREADY_LINKED",
-  "TOKEN_EXPIRED",
-  "TOO_MANY_REQUESTS",
-  "USER_NOT_FOUND",
-] as const;
-
-export type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number];
+type AuthErrorCode = (typeof AUTH_ERROR_CODES)[number];
 
 type CommonErrors = {
   errors?: {
@@ -40,6 +23,25 @@ function readAuthErrors(lng: SupportedLocale): Record<string, string> {
 
   return Object.fromEntries(entries);
 }
+
+export type { AuthErrorCode };
+
+/** Curated Better Auth codes shipped in `common.errors.auth`. */
+export const AUTH_ERROR_CODES = [
+  "CREDENTIAL_ACCOUNT_NOT_FOUND",
+  "EMAIL_NOT_VERIFIED",
+  "EMAIL_SEND_FAILED",
+  "FAILED_TO_CREATE_SESSION",
+  "FAILED_TO_CREATE_USER",
+  "INVALID_EMAIL_OR_PASSWORD",
+  "INVALID_PASSWORD",
+  "INVALID_TOKEN",
+  "SESSION_EXPIRED",
+  "SOCIAL_ACCOUNT_ALREADY_LINKED",
+  "TOKEN_EXPIRED",
+  "TOO_MANY_REQUESTS",
+  "USER_NOT_FOUND",
+] as const;
 
 /**
  * Builds the static translation map expected by `@better-auth/i18n` from

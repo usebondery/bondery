@@ -20,7 +20,7 @@ function validateCreateGroup(values: CreateGroupFormValues): Record<string, stri
 
   const errors: Record<string, string> = {};
   for (const issue of result.error.issues) {
-    const field = issue.path[0];
+    const [field] = issue.path;
     if (typeof field === "string" && !errors[field]) {
       errors[field] = issue.message;
     }

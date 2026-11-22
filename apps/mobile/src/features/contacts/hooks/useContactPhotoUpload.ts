@@ -92,7 +92,7 @@ export function useContactPhotoUpload({
       return;
     }
 
-    const asset = result.assets[0];
+    const [asset] = result.assets;
     const mimeType = asset.mimeType ?? "image/jpeg";
 
     if (

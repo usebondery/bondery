@@ -10,14 +10,6 @@ const DEFAULT_VISIBLE_COLUMNS: ColumnKey[] = [
   "social",
 ];
 
-/**
- * Skeleton for the People page header.
- * Import Contacts (~148px) + Add Person (~120px).
- */
-export function PeoplePageHeaderSkeleton() {
-  return <PageHeaderSkeleton primaryActionWidth={120} secondaryActionWidth={148} />;
-}
-
 interface PeopleTableSkeletonProps {
   /**
    * Visible column keys in display order.
@@ -93,6 +85,14 @@ function ColumnCellSkeleton({ col }: { col: ColumnKey }) {
     default:
       return <Skeleton height={14} mx="md" radius="sm" width={90} />;
   }
+}
+
+/**
+ * Skeleton for the People page header.
+ * Import Contacts (~148px) + Add Person (~120px).
+ */
+export function PeoplePageHeaderSkeleton() {
+  return <PageHeaderSkeleton primaryActionWidth={120} secondaryActionWidth={148} />;
 }
 
 /**

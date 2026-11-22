@@ -10,16 +10,6 @@ import type {
 
 const optionalTrimmedString = nullableTrimmedStringSchema();
 
-export const contactAddressTypeSchema = z
-  .enum(["home", "work", "other"])
-  .describe("Address category");
-
-export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
-
-export const contactAddressGeocodeSourceSchema = z.enum(["mapy.com", "manual"]);
-
-export const contactAddressConfidenceSchema = z.enum(["verified", "unverifiable"]);
-
 const addressCoreInputSchema = z.object({
   label: z
     .string()
@@ -100,3 +90,13 @@ export const replaceAddressesSchema = z
   .max(CONTACT_LIMITS.maxAddresses, {
     error: `Maximum of ${CONTACT_LIMITS.maxAddresses} addresses allowed`,
   }) satisfies z.ZodType<ReplaceAddressesInput>;
+
+export const contactAddressTypeSchema = z
+  .enum(["home", "work", "other"])
+  .describe("Address category");
+
+export const contactAddressGranularitySchema = z.enum(["address", "city", "state", "country"]);
+
+export const contactAddressGeocodeSourceSchema = z.enum(["mapy.com", "manual"]);
+
+export const contactAddressConfidenceSchema = z.enum(["verified", "unverifiable"]);

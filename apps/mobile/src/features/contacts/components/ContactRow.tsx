@@ -42,7 +42,7 @@ const SWIPE_ACTION_ICON_SIZE = 22;
 const DISABLED_ROW_OPACITY = 0.45;
 const CONTACT_ROW_HEIGHT = 56;
 
-export function ContactRow({
+function ContactRow({
   contact,
   selected,
   selectionMode,
@@ -209,3 +209,5 @@ const styles = StyleSheet.create({
     width: MOBILE_LAYOUT.avatar.list,
   },
 });
+
+export { ContactRow };

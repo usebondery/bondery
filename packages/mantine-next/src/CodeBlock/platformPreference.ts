@@ -1,3 +1,4 @@
+import { detachPromise } from "@bondery/helpers/async";
 import type { CodeBlockPlatform } from "#CodeBlock/CodeBlock.js";
 
 /**
@@ -10,7 +11,7 @@ import type { CodeBlockPlatform } from "#CodeBlock/CodeBlock.js";
  * This module holds no React import, so a server component can import it without
  * a `use client` boundary. The hook lives in `useCodeBlockPlatform.ts`.
  */
-export const CODE_BLOCK_PLATFORM_COOKIE = "bondery_code_platform";
+const CODE_BLOCK_PLATFORM_COOKIE = "bondery_code_platform";
 
 const COOKIE_MAX_AGE_SECONDS = 31_536_000;
 
@@ -22,7 +23,7 @@ let cached: CodeBlockPlatform | null | undefined;
 const listeners = new Set<() => void>();
 
 /** Returns the platform for a cookie value, or `null` for anything else. */
-export function parseCodeBlockPlatform(value: string | null | undefined): CodeBlockPlatform | null {
+function parseCodeBlockPlatform(value: string | null | undefined): CodeBlockPlatform | null {
   if (!value || !PLATFORMS.includes(value)) {
     return null;
   }
@@ -50,6 +51,40 @@ function notify(): void {
   }
 }
 
+type CookieStoreLike = {
+  set: (options: {
+    expires: number;
+    name: string;
+    path: string;
+    sameSite: "lax";
+    value: string;
+  }) => Promise<void>;
+};
+
+/**
+ * Cookie Store API when the browser has it, matching the webapp cookie helper.
+ * The `document.cookie` path covers a browser without `cookieStore`.
+ */
+async function writeCookie(platform: CodeBlockPlatform): Promise<void> {
+  const { cookieStore } = globalThis as { cookieStore?: CookieStoreLike };
+
+  if (cookieStore) {
+    await cookieStore.set({
+      // The Cookie Store API takes a Unix timestamp in milliseconds.
+      expires: Date.now() + COOKIE_MAX_AGE_SECONDS * 1000,
+      name: CODE_BLOCK_PLATFORM_COOKIE,
+      path: "/",
+      sameSite: "lax",
+      value: platform,
+    });
+    return;
+  }
+
+  document.cookie = `${CODE_BLOCK_PLATFORM_COOKIE}=${platform}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
+}
+
+export { CODE_BLOCK_PLATFORM_COOKIE, parseCodeBlockPlatform };
+
 /** Clears the memoised cookie read. For tests, and for a cookie change made outside this module. */
 export function resetCodeBlockPlatformCache(): void {
   cached = undefined;
@@ -68,44 +103,11 @@ export function setCodeBlockPlatform(platform: CodeBlockPlatform): void {
   cached = platform;
 
   if (typeof document !== "undefined") {
-    void writeCookie(platform).catch(() => {
-      // Cookie write is best-effort. The in-memory cache already holds the choice.
-    });
+    // Cookie write is best-effort. The in-memory cache already holds the choice.
+    detachPromise(writeCookie(platform));
   }
 
   notify();
-}
-
-type CookieStoreLike = {
-  set: (options: {
-    expires: number;
-    name: string;
-    path: string;
-    sameSite: "lax";
-    value: string;
-  }) => Promise<void>;
-};
-
-/**
- * Cookie Store API when the browser has it, matching the webapp cookie helper.
- * The `document.cookie` path covers a browser without `cookieStore`.
- */
-async function writeCookie(platform: CodeBlockPlatform): Promise<void> {
-  const cookieStore = (globalThis as { cookieStore?: CookieStoreLike }).cookieStore;
-
-  if (cookieStore) {
-    await cookieStore.set({
-      // The Cookie Store API takes a Unix timestamp in milliseconds.
-      expires: Date.now() + COOKIE_MAX_AGE_SECONDS * 1000,
-      name: CODE_BLOCK_PLATFORM_COOKIE,
-      path: "/",
-      sameSite: "lax",
-      value: platform,
-    });
-    return;
-  }
-
-  document.cookie = `${CODE_BLOCK_PLATFORM_COOKIE}=${platform}; path=/; max-age=${COOKIE_MAX_AGE_SECONDS}; samesite=lax`;
 }
 
 /** Registers a listener for choice changes. Returns the unsubscribe function. */

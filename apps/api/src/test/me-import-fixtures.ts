@@ -2,6 +2,52 @@ import { generateExportZip } from "../domains/me/export.js";
 import { aliceFixture } from "./me-import-alice-fixture.js";
 import { ALICE_ID, BOB_ID, BONDERY_VERSION, NOW } from "./me-import-constants.js";
 
+type QueryArgs = { where?: { myself?: boolean; userId?: string } };
+
+function createWriter<T extends Record<string, unknown>>(
+  store: T[],
+  getKeys: (row: T) => string[],
+  onWrite: () => void,
+) {
+  function wouldSkip(row: T): boolean {
+    const keys = new Set(getKeys(row));
+    return store.some((existing) => getKeys(existing).some((key) => keys.has(key)));
+  }
+
+  return {
+    createMany: async ({ data, skipDuplicates }: { data: T[]; skipDuplicates?: boolean }) => {
+      let count = 0;
+      for (const row of data) {
+        if (skipDuplicates && wouldSkip(row)) {
+          continue;
+        }
+        store.push(row);
+        onWrite();
+        count += 1;
+      }
+      return { count };
+    },
+    createManyAndReturn: async ({
+      data,
+      skipDuplicates,
+    }: {
+      data: T[];
+      skipDuplicates?: boolean;
+    }) => {
+      const inserted: T[] = [];
+      for (const row of data) {
+        if (skipDuplicates && wouldSkip(row)) {
+          continue;
+        }
+        store.push(row);
+        onWrite();
+        inserted.push(row);
+      }
+      return inserted;
+    },
+  };
+}
+
 export {
   ALICE_ID,
   BOB_ID,
@@ -14,8 +60,6 @@ export {
   RELATIONSHIP_ID,
   TAG_ID,
 } from "./me-import-constants.js";
-
-type QueryArgs = { where?: { myself?: boolean; userId?: string } };
 
 export function createExportDb(fixture: {
   groupMemberships?: Array<Record<string, unknown>>;
@@ -62,50 +106,6 @@ export function createExportDb(fixture: {
     tag: {
       count: async () => tags.length,
       findMany: async () => tags,
-    },
-  };
-}
-
-function createWriter<T extends Record<string, unknown>>(
-  store: T[],
-  getKeys: (row: T) => string[],
-  onWrite: () => void,
-) {
-  function wouldSkip(row: T): boolean {
-    const keys = new Set(getKeys(row));
-    return store.some((existing) => getKeys(existing).some((key) => keys.has(key)));
-  }
-
-  return {
-    createMany: async ({ data, skipDuplicates }: { data: T[]; skipDuplicates?: boolean }) => {
-      let count = 0;
-      for (const row of data) {
-        if (skipDuplicates && wouldSkip(row)) {
-          continue;
-        }
-        store.push(row);
-        onWrite();
-        count += 1;
-      }
-      return { count };
-    },
-    createManyAndReturn: async ({
-      data,
-      skipDuplicates,
-    }: {
-      data: T[];
-      skipDuplicates?: boolean;
-    }) => {
-      const inserted: T[] = [];
-      for (const row of data) {
-        if (skipDuplicates && wouldSkip(row)) {
-          continue;
-        }
-        store.push(row);
-        onWrite();
-        inserted.push(row);
-      }
-      return inserted;
     },
   };
 }

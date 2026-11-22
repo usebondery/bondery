@@ -17,7 +17,7 @@ import { extractAvatarOptions } from "../../lib/data/select-fragments.js";
 import { internal, notFound } from "../../lib/platform/errors/http-errors.js";
 import { resolveContactAvatarUrl } from "../../lib/storage/avatar-urls.js";
 
-export type PreviewListQuery = AvatarTransformQuery & {
+type PreviewListQuery = AvatarTransformQuery & {
   previewLimit?: number | string;
 };
 
@@ -48,6 +48,8 @@ function peopleListOrderBy(sort: PeopleListQuery["sort"]): Prisma.PeopleOrderByW
 }
 
 const DEFAULT_TAG_PREVIEW_LIMIT = 3;
+
+export type { PreviewListQuery };
 
 export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
   const { user } = ctx;
@@ -138,10 +140,7 @@ export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
       ? (pIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return Object.assign({}, baseTag, {
-      contactCount: countMap.get(row.id) ?? 0,
-      previewContacts,
-    });
+    return { ...baseTag, contactCount: countMap.get(row.id) ?? 0, previewContacts };
   });
 
   return {
@@ -271,19 +270,18 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     totalCount = count;
   }
 
-  const enrichedContacts = contacts.map((c) =>
-    Object.assign({}, c, {
-      avatar: resolveContactAvatarUrl(
-        user.id,
-        {
-          avatarUpdatedAt: c.avatarUpdatedAt,
-          hasAvatar: c.hasAvatar,
-          id: c.id,
-        },
-        avatarOptions,
-      ),
-    }),
-  );
+  const enrichedContacts = contacts.map((c) => ({
+    ...c,
+    avatar: resolveContactAvatarUrl(
+      user.id,
+      {
+        avatarUpdatedAt: c.avatarUpdatedAt,
+        hasAvatar: c.hasAvatar,
+        id: c.id,
+      },
+      avatarOptions,
+    ),
+  }));
 
   const pagination = buildPaginationMeta({
     itemCount: enrichedContacts.length,

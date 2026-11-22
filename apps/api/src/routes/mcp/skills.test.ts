@@ -3,6 +3,10 @@ import { describe, it } from "node:test";
 import { createMcpHandler, McpServer } from "@modelcontextprotocol/server";
 import { loadMcpSkills } from "./skills.js";
 
+const DATA_M_PATTERN = /^data: (.*)$/m;
+const NNAME_CATCH_UP_N_PATTERN = /^---\nname: catch-up\n/;
+const THE_BONDERY_MCP_SERVER_IS_NOT_CONNECTED_PATTERN = /the Bondery MCP server is not connected/;
+
 const SKILLS = ["catch-up", "get-to-know", "onboarding", "reach-out", "remember", "share-person"];
 const PROTOCOL_VERSION = "2026-07-28";
 
@@ -44,7 +48,7 @@ async function rpc(method: string, params: Record<string, unknown> = {}): Promis
   );
   const body = await response.text();
   assert.equal(response.status, 200, body);
-  const json = body.startsWith("{") ? body : (/^data: (.*)$/m.exec(body)?.[1] ?? "");
+  const json = body.startsWith("{") ? body : (DATA_M_PATTERN.exec(body)?.[1] ?? "");
   const message = JSON.parse(json) as { error?: unknown; result?: unknown };
   assert.equal(message.error, undefined, body);
   return message.result;
@@ -81,7 +85,7 @@ describe("mCP skills", () => {
       uri: "skill://bondery/catch-up/SKILL.md",
     })) as { contents: { text?: string }[] };
     const text = result.contents[0]?.text ?? "";
-    assert.match(text, /^---\nname: catch-up\n/);
-    assert.match(text, /the Bondery MCP server is not connected/);
+    assert.match(text, NNAME_CATCH_UP_N_PATTERN);
+    assert.match(text, THE_BONDERY_MCP_SERVER_IS_NOT_CONNECTED_PATTERN);
   });
 });

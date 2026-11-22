@@ -32,6 +32,46 @@ import type {
   VCardPreparedContact,
 } from "./types.js";
 
+const vcardPreparedPhoneSchema = z.object({
+  preferred: z.boolean().describe("True when this is the contact's primary phone number"),
+  prefix: z.string().describe("Country calling code, digits only"),
+  type: channelTypeSchema.describe("Phone category, such as home or work"),
+  value: z.string().describe("Phone number in local or international form"),
+});
+
+const vcardPreparedEmailSchema = z.object({
+  preferred: z.boolean().describe("True when this is the contact's primary email address"),
+  type: channelTypeSchema.describe("Email category, such as home or work"),
+  value: z.string().describe("Email address"),
+});
+
+const vcardPreparedAddressSchema = z.object({
+  addressCity: z.string().nullable().describe("City name"),
+  addressCountry: z.string().nullable().describe("Country name"),
+  addressCountryCode: z.string().nullable().describe("ISO 3166-1 alpha-2 country code"),
+  addressFormatted: z.string().nullable().describe("Full address on one line"),
+  addressLine1: z.string().nullable().describe("Street and house number"),
+  addressLine2: z.string().nullable().describe("Second address line, such as a unit"),
+  addressPostalCode: z.string().nullable().describe("Postal or ZIP code"),
+  addressState: z.string().nullable().describe("State or region name"),
+  addressStateCode: z.string().nullable().describe("State or region code"),
+  geocodeSource: z.literal("mapy.com").nullable().describe("How the coordinates were resolved"),
+  latitude: z.number().nullable().describe("Latitude in decimal degrees"),
+  longitude: z.number().nullable().describe("Longitude in decimal degrees"),
+  preferred: z.boolean().describe("True when this is the contact's primary address"),
+  timezone: z.string().nullable().describe("IANA timezone name for this address"),
+  type: contactAddressTypeSchema.describe("Address category"),
+  validity: z
+    .enum(["valid", "unverifiable", "invalid"])
+    .describe("Whether the geocoder verified this address"),
+  value: z.string().describe("Display value of the address"),
+});
+
+const vcardPreparedImportantDateSchema = z.object({
+  date: z.string().describe("Date in `YYYY-MM-DD` form"),
+  note: z.string().nullable().describe("Free-text note for this date"),
+  type: importantDateTypeSchema.describe("Kind of important date, such as birthday or anniversary"),
+});
 export const scrapedWorkHistoryEntrySchema = z.object({
   companyLinkedinId: z.string().optional().describe("LinkedIn company identifier"),
   companyLogoUrl: z.string().optional().describe("Company logo image URL"),
@@ -203,47 +243,6 @@ export const instagramImportCommitResponseSchema = z.object({
   skippedCount: z.number().describe("Number of contacts skipped"),
   updatedCount: z.number().describe("Number of existing contacts updated"),
 }) satisfies z.ZodType<InstagramImportCommitResponse>;
-
-const vcardPreparedPhoneSchema = z.object({
-  preferred: z.boolean().describe("True when this is the contact's primary phone number"),
-  prefix: z.string().describe("Country calling code, digits only"),
-  type: channelTypeSchema.describe("Phone category, such as home or work"),
-  value: z.string().describe("Phone number in local or international form"),
-});
-
-const vcardPreparedEmailSchema = z.object({
-  preferred: z.boolean().describe("True when this is the contact's primary email address"),
-  type: channelTypeSchema.describe("Email category, such as home or work"),
-  value: z.string().describe("Email address"),
-});
-
-const vcardPreparedAddressSchema = z.object({
-  addressCity: z.string().nullable().describe("City name"),
-  addressCountry: z.string().nullable().describe("Country name"),
-  addressCountryCode: z.string().nullable().describe("ISO 3166-1 alpha-2 country code"),
-  addressFormatted: z.string().nullable().describe("Full address on one line"),
-  addressLine1: z.string().nullable().describe("Street and house number"),
-  addressLine2: z.string().nullable().describe("Second address line, such as a unit"),
-  addressPostalCode: z.string().nullable().describe("Postal or ZIP code"),
-  addressState: z.string().nullable().describe("State or region name"),
-  addressStateCode: z.string().nullable().describe("State or region code"),
-  geocodeSource: z.literal("mapy.com").nullable().describe("How the coordinates were resolved"),
-  latitude: z.number().nullable().describe("Latitude in decimal degrees"),
-  longitude: z.number().nullable().describe("Longitude in decimal degrees"),
-  preferred: z.boolean().describe("True when this is the contact's primary address"),
-  timezone: z.string().nullable().describe("IANA timezone name for this address"),
-  type: contactAddressTypeSchema.describe("Address category"),
-  validity: z
-    .enum(["valid", "unverifiable", "invalid"])
-    .describe("Whether the geocoder verified this address"),
-  value: z.string().describe("Display value of the address"),
-});
-
-const vcardPreparedImportantDateSchema = z.object({
-  date: z.string().describe("Date in `YYYY-MM-DD` form"),
-  note: z.string().nullable().describe("Free-text note for this date"),
-  type: importantDateTypeSchema.describe("Kind of important date, such as birthday or anniversary"),
-});
 
 export const vcardPreparedContactSchema = z.object({
   addresses: z.array(vcardPreparedAddressSchema).describe("Postal addresses from the vCard"),

@@ -6,6 +6,11 @@
  */
 import { execSync } from "node:child_process";
 
+const PATTERN_5C723F5C6E_RE = /\r?\n/;
+const LISTENING_RE_2 = /LISTENING/i;
+const PATTERN_5C732B_RE = /\s+/;
+const LISTENING_RE = /LISTENING\s+(\d+)\s*$/i;
+
 const IS_WINDOWS = process.platform === "win32";
 
 const DEFAULT_PATTERNS_BY_PORT = {
@@ -38,13 +43,13 @@ function portListeners(port) {
     const out = run("netstat -ano", { ignoreError: true });
     const suffix = `:${port}`;
     return out
-      .split(/\r?\n/)
+      .split(PATTERN_5C723F5C6E_RE)
       .map((line) => line.trim())
       .filter((line) => {
-        if (!/LISTENING/i.test(line)) {
+        if (!LISTENING_RE_2.test(line)) {
           return false;
         }
-        const parts = line.split(/\s+/);
+        const parts = line.split(PATTERN_5C732B_RE);
         const local = parts[1] ?? "";
         return local.endsWith(suffix);
       })
@@ -63,7 +68,7 @@ function portListeners(port) {
 function windowsListeningPids(port) {
   const pids = new Set();
   for (const line of portListeners(port).split("\n")) {
-    const match = line.trim().match(/LISTENING\s+(\d+)\s*$/i);
+    const match = line.trim().match(LISTENING_RE);
     if (match && match[1] !== "0") {
       pids.add(match[1]);
     }
@@ -103,7 +108,7 @@ function killWindowsPort(port, log, quiet) {
  * @param {{ patterns?: string[], quiet?: boolean }} [options]
  * @returns {boolean} true when the port is free afterward
  */
-export function killDevPort(port, { patterns = [], quiet = false } = {}) {
+function killDevPort(port, { patterns = [], quiet = false } = {}) {
   const log = quiet
     ? () => {
         // Caller asked for no output.
@@ -147,7 +152,7 @@ export function killDevPort(port, { patterns = [], quiet = false } = {}) {
 
 function parsePortArg(value) {
   const port = Number(value);
-  if (!Number.isInteger(port) || port < 1 || port > 65535) {
+  if (!Number.isInteger(port) || port < 1 || port > 65_535) {
     throw new Error(`Invalid port: ${value}`);
   }
   return port;
@@ -174,3 +179,5 @@ function main() {
 if (process.argv[1]?.endsWith("kill-dev-port.mjs")) {
   main();
 }
+
+export { killDevPort };

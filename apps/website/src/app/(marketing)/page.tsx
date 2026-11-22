@@ -5,6 +5,8 @@ import { JsonLd } from "@/lib/seo/json-ld";
 import { getCspNonce } from "@/lib/seo/nonce";
 import { buildFaqSchema, FAQ_ITEMS } from "@/lib/seo/schemas/faq";
 
+const JSON_LD_ID_FAQ = "schema-faq";
+
 export const metadata: Metadata = {
   alternates: {
     canonical: WEBSITE_ROUTES.HOME,
@@ -20,7 +22,7 @@ export default async function Home() {
       <Features />
       <Pricing />
       <Faq items={FAQ_ITEMS} />
-      <JsonLd data={buildFaqSchema(FAQ_ITEMS)} id="schema-faq" nonce={nonce} />
+      <JsonLd data={buildFaqSchema(FAQ_ITEMS)} id={JSON_LD_ID_FAQ} nonce={nonce} />
       <CallToAction />
     </>
   );
