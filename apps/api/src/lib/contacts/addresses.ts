@@ -130,13 +130,13 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
       throw new Error(`addresses[${index}] must be an object`);
     }
 
-    const maybeValue = (item as Record<string, unknown>).value;
+    const maybeValue = (item as Record<string, unknown>)["value"];
     if (typeof maybeValue !== "string" || maybeValue.trim().length === 0) {
       throw new Error(`addresses[${index}].value is required`);
     }
 
-    const maybeLatitude = (item as Record<string, unknown>).latitude;
-    const maybeLongitude = (item as Record<string, unknown>).longitude;
+    const maybeLatitude = (item as Record<string, unknown>)["latitude"];
+    const maybeLongitude = (item as Record<string, unknown>)["longitude"];
 
     const latitude = parseCoordinateValue(maybeLatitude);
     const longitude = parseCoordinateValue(maybeLongitude);
@@ -149,31 +149,39 @@ export function parseAddressEntries(input: unknown): ContactAddressEntry[] {
       return trimmed.length > 0 ? trimmed : null;
     };
 
-    const countryCode = normalizeNullableText((item as Record<string, unknown>).addressCountryCode);
+    const countryCode = normalizeNullableText(
+      (item as Record<string, unknown>)["addressCountryCode"],
+    );
     const normalizedCoordinates = normalizeCoordinatePair(latitude, longitude, countryCode);
 
     return {
-      addressCity: normalizeNullableText((item as Record<string, unknown>).addressCity),
-      addressCountry: normalizeNullableText((item as Record<string, unknown>).addressCountry),
+      addressCity: normalizeNullableText((item as Record<string, unknown>)["addressCity"]),
+      addressCountry: normalizeNullableText((item as Record<string, unknown>)["addressCountry"]),
       addressCountryCode: countryCode,
-      addressFormatted: normalizeNullableText((item as Record<string, unknown>).addressFormatted),
+      addressFormatted: normalizeNullableText(
+        (item as Record<string, unknown>)["addressFormatted"],
+      ),
       addressGeocodeSource: normalizeNullableText(
-        (item as Record<string, unknown>).addressGeocodeSource,
+        (item as Record<string, unknown>)["addressGeocodeSource"],
       ) as ContactAddressEntry["addressGeocodeSource"],
       addressGranularity: normalizeAddressGranularity(
-        (item as Record<string, unknown>).addressGranularity,
+        (item as Record<string, unknown>)["addressGranularity"],
       ),
-      addressLine1: normalizeNullableText((item as Record<string, unknown>).addressLine1),
-      addressLine2: normalizeNullableText((item as Record<string, unknown>).addressLine2),
-      addressPostalCode: normalizeNullableText((item as Record<string, unknown>).addressPostalCode),
-      addressState: normalizeNullableText((item as Record<string, unknown>).addressState),
-      addressStateCode: normalizeNullableText((item as Record<string, unknown>).addressStateCode),
+      addressLine1: normalizeNullableText((item as Record<string, unknown>)["addressLine1"]),
+      addressLine2: normalizeNullableText((item as Record<string, unknown>)["addressLine2"]),
+      addressPostalCode: normalizeNullableText(
+        (item as Record<string, unknown>)["addressPostalCode"],
+      ),
+      addressState: normalizeNullableText((item as Record<string, unknown>)["addressState"]),
+      addressStateCode: normalizeNullableText(
+        (item as Record<string, unknown>)["addressStateCode"],
+      ),
       geocodeConfidence: null,
-      label: normalizeNullableText((item as Record<string, unknown>).label),
+      label: normalizeNullableText((item as Record<string, unknown>)["label"]),
       latitude: normalizedCoordinates.latitude,
       longitude: normalizedCoordinates.longitude,
-      timezone: normalizeNullableText((item as Record<string, unknown>).timezone),
-      type: normalizeAddressType((item as Record<string, unknown>).type),
+      timezone: normalizeNullableText((item as Record<string, unknown>)["timezone"]),
+      type: normalizeAddressType((item as Record<string, unknown>)["type"]),
       value: maybeValue.trim(),
     } as ContactAddressEntry;
   });

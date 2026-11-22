@@ -43,7 +43,7 @@ export const syncWsRoutes: AppRoutePlugin = async (fastify): Promise<void> => {
       websocket: true,
     },
     async (socket, request) => {
-      const origin = request.headers.origin;
+      const { origin } = request.headers;
       if (!isAllowedOrigin(origin, allowedOrigins)) {
         socket.close(1008, "origin not allowed");
         return;

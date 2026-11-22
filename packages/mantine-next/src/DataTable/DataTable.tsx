@@ -35,6 +35,7 @@ import type { DataTableProps } from "#DataTable/types.js";
 function AllCheckedIcon({ className }: { indeterminate: boolean | undefined; className: string }) {
   return <IconChecks className={className} size={18} />;
 }
+
 export type { DataTableProps } from "#DataTable/types.js";
 
 export function DataTable<TRow, TSortKey extends string = string>({
@@ -248,7 +249,7 @@ export function DataTable<TRow, TSortKey extends string = string>({
   // --- Header controls ---
   const hasHeaderControls =
     onSearchChange !== undefined ||
-    toolbarExtra != null ||
+    (toolbarExtra !== null && toolbarExtra !== undefined) ||
     onColumnsChange !== undefined ||
     (sortOptions && currentSort && onSortChange);
 

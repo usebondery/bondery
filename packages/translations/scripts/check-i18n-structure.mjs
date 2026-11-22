@@ -93,8 +93,10 @@ for (const locale of LOCALES) {
   const localeFiles = new Set(walkJson(path.join(localesRoot, locale)));
   const missing = [...enFiles]
     .filter((file) => !englishOnlyFiles.has(file) && !localeFiles.has(file))
-    .sort();
-  const extra = [...localeFiles].filter((file) => !enFiles.has(file)).sort();
+    .sort((left, right) => left.localeCompare(right));
+  const extra = [...localeFiles]
+    .filter((file) => !enFiles.has(file))
+    .sort((left, right) => left.localeCompare(right));
   for (const file of localeFiles) {
     if (englishOnlyFiles.has(file)) {
       fail(

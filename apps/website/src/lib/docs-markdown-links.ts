@@ -143,9 +143,10 @@ function absolutizeDocsLinks(markdown: string, siteOrigin: string): string {
   const origin = siteOrigin.replace(TRAILING_SLASHES_RE, "");
 
   // Match `/docs`, `/docs.md`, and `/docs/<slug>` link targets only.
-  return markdown.replace(/\]\(\/docs(?=[).md/#?])([^)\s]*)\)/g, (_match, rest: string) => {
-    return `](${origin}/docs${rest})`;
-  });
+  return markdown.replace(
+    /\]\(\/docs(?=[).md/#?])([^)\s]*)\)/g,
+    (_match, rest: string) => `](${origin}/docs${rest})`,
+  );
 }
 
 /**

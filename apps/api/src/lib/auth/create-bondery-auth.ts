@@ -68,7 +68,7 @@ import { touchPasskeyLastUsed } from "./touch-passkey-last-used.js";
 
 export function createBonderyAuth() {
   const betterAuthSecrets = resolveBetterAuthSecrets();
-  const crossSubdomainCookieDomain = resolveCookieDomain(process.env.BONDERY_PUBLIC_WEBAPP_URL);
+  const crossSubdomainCookieDomain = resolveCookieDomain(process.env["BONDERY_PUBLIC_WEBAPP_URL"]);
   const webAuthnRpConfig = resolveWebAuthnRpConfig();
 
   return betterAuth({
@@ -335,7 +335,7 @@ export function createBonderyAuth() {
       // Inject tests share one client IP (Better Auth cannot read Fastify's
       // remoteAddress), so the default per-path bucket 429s `test:auth` when
       // files run in parallel against real Redis. Production keeps defaults.
-      ...(process.env.NODE_ENV === "test" ? { max: 10_000, window: 10 } : {}),
+      ...(process.env["NODE_ENV"] === "test" ? { max: 10_000, window: 10 } : {}),
     },
     secondaryStorage: createBetterAuthSecondaryStorage(),
     secrets: betterAuthSecrets,

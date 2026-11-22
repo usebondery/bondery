@@ -1,7 +1,7 @@
 export type CheckReport = {
-  add(message: string): void;
-  failIfNeeded(): void;
-  ok(detail?: string): void;
+  add: (message: string) => void;
+  failIfNeeded: () => void;
+  ok: (detail?: string) => void;
   readonly violations: string[];
 };
 

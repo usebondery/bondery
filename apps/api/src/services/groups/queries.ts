@@ -139,15 +139,20 @@ export async function listGroups(ctx: GroupListContext, query?: PreviewListQuery
     }
   }
 
-  const groupsWithCounts: GroupWithCount[] = groupRows.map((row) => {
+  const groupsWithCounts: GroupWithCount[] = [];
+  for (const row of groupRows) {
     const baseGroup = toGroupDto(row);
     const previewIds = includePreview ? (previewMap.get(row.id) ?? []) : [];
     const previewContacts = includePreview
       ? (previewIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return { ...baseGroup, contactCount: countMap.get(row.id) ?? 0, previewContacts };
-  });
+    groupsWithCounts.push({
+      ...baseGroup,
+      contactCount: countMap.get(row.id) ?? 0,
+      previewContacts,
+    });
+  }
 
   return {
     groups: groupsWithCounts,
@@ -258,19 +263,24 @@ export async function listGroupMembers(
     });
   } catch (error) {
     log?.error({ err: error }, "Failed to attach contact channels/social media for group contacts");
-    enrichedContacts = contacts.map((contact) => ({
-      ...contact,
-      addresses: [],
-      avatar: null,
-      emails: [],
-      facebook: null,
-      instagram: null,
-      linkedin: null,
-      phones: [],
-      signal: null,
-      website: null,
-      whatsapp: null,
-    }));
+    const fallbackContacts: typeof contacts = [];
+    for (const contact of contacts) {
+      const next = {
+        ...contact,
+        addresses: [],
+        avatar: null,
+        emails: [],
+        facebook: null,
+        instagram: null,
+        linkedin: null,
+        phones: [],
+        signal: null,
+        website: null,
+        whatsapp: null,
+      };
+      fallbackContacts.push(next);
+    }
+    enrichedContacts = fallbackContacts;
   }
 
   const pagination = buildPaginationMeta({

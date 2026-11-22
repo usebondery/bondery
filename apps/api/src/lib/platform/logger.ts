@@ -17,7 +17,7 @@ const require = createRequire(import.meta.url);
 const { pino } = require("pino") as { pino: typeof createPino };
 
 const logger = pino({
-  level: process.env.LOG_LEVEL || "info",
+  level: process.env["LOG_LEVEL"] || "info",
 });
 
 export default logger;

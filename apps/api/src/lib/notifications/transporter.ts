@@ -133,7 +133,7 @@ function isLoopbackSmtpHost(host: string): boolean {
 }
 
 function isProductionEnvironment(): boolean {
-  return process.env.NODE_ENV === "production";
+  return process.env["NODE_ENV"] === "production";
 }
 
 function assertDevelopmentSmtpIsLoopback(config: EmailConfig): void {
@@ -291,11 +291,11 @@ export function emailConfigFromEnv(env: {
 }
 
 export function emailConfigFromNodeEnv(env: NodeJS.ProcessEnv = process.env): EmailConfig | null {
-  const host = env.BONDERY_PRIVATE_EMAIL_HOST;
-  const user = env.BONDERY_PRIVATE_EMAIL_USER;
-  const pass = env.BONDERY_PRIVATE_EMAIL_PASS;
-  const fromAddress = env.BONDERY_PRIVATE_EMAIL_ADDRESS;
-  const replyToAddress = env.BONDERY_PRIVATE_EMAIL_REPLY_TO;
+  const host = env["BONDERY_PRIVATE_EMAIL_HOST"];
+  const user = env["BONDERY_PRIVATE_EMAIL_USER"];
+  const pass = env["BONDERY_PRIVATE_EMAIL_PASS"];
+  const fromAddress = env["BONDERY_PRIVATE_EMAIL_ADDRESS"];
+  const replyToAddress = env["BONDERY_PRIVATE_EMAIL_REPLY_TO"];
   if (!host || !user || !pass || !fromAddress || !replyToAddress) {
     return null;
   }
@@ -303,7 +303,7 @@ export function emailConfigFromNodeEnv(env: NodeJS.ProcessEnv = process.env): Em
     fromAddress,
     host,
     pass,
-    port: Number(env.BONDERY_PRIVATE_EMAIL_PORT ?? 587),
+    port: Number(env["BONDERY_PRIVATE_EMAIL_PORT"] ?? 587),
     replyToAddress,
     user,
   };

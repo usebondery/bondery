@@ -1,4 +1,3 @@
-import { detachPromise } from "@bondery/helpers/async";
 import { IconCheck } from "@tabler/icons-react-native";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -99,12 +98,10 @@ function ImportantDateWheelPickerSheet({
   function handleDone() {
     const iso = toImportantDateIso(wheelValue);
     onConfirm(iso);
-    detachPromise(
-      AccessibilityInfo.announceForAccessibility(
-        tMobileContactIdentity("DateSetAnnouncement").replace(
-          "{date}",
-          formatImportantDate(iso, formatCtx),
-        ),
+    AccessibilityInfo.announceForAccessibility(
+      tMobileContactIdentity("DateSetAnnouncement").replace(
+        "{date}",
+        formatImportantDate(iso, formatCtx),
       ),
     );
     onCancel();
@@ -112,12 +109,10 @@ function ImportantDateWheelPickerSheet({
 
   function handleWithoutYearToggle(checked: boolean) {
     updateWheelValue({ withoutYear: checked });
-    detachPromise(
-      AccessibilityInfo.announceForAccessibility(
-        checked
-          ? tMobileContactIdentity("YearHiddenAnnouncement")
-          : tMobileContactIdentity("YearShownAnnouncement"),
-      ),
+    AccessibilityInfo.announceForAccessibility(
+      checked
+        ? tMobileContactIdentity("YearHiddenAnnouncement")
+        : tMobileContactIdentity("YearShownAnnouncement"),
     );
   }
 

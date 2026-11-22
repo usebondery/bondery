@@ -277,11 +277,12 @@ export function useContactsDragSelection({
     setIsDragging(false);
   }, [stopDragFrameLoop]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       stopDragFrameLoop();
-    };
-  }, [stopDragFrameLoop]);
+    },
+    [stopDragFrameLoop],
+  );
 
   const gesture = useMemo(
     () =>

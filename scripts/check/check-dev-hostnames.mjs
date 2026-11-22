@@ -200,7 +200,7 @@ function checkEnvExamples() {
       }
       const source = read(fullPath);
       for (const match of source.matchAll(/https?:\/\/[a-z0-9.-]*usebondery\.test/gi)) {
-        const hostname = new URL(match[0]).hostname;
+        const { hostname } = new URL(match[0]);
         if (!EXPECTED_HOSTS.includes(hostname) && !seen.has(`${repoPath(fullPath)}:${hostname}`)) {
           seen.add(`${repoPath(fullPath)}:${hostname}`);
           check.add(

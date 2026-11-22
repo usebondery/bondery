@@ -42,15 +42,15 @@ describe("isLoopbackHostname", () => {
 
 describe("resolveMcpResourceIdentifiers", () => {
   function withApiUrl(url: string, run: () => void) {
-    const previous = process.env.BONDERY_PUBLIC_API_URL;
-    process.env.BONDERY_PUBLIC_API_URL = url;
+    const previous = process.env["BONDERY_PUBLIC_API_URL"];
+    process.env["BONDERY_PUBLIC_API_URL"] = url;
     try {
       run();
     } finally {
       if (previous === undefined) {
-        delete process.env.BONDERY_PUBLIC_API_URL;
+        delete process.env["BONDERY_PUBLIC_API_URL"];
       } else {
-        process.env.BONDERY_PUBLIC_API_URL = previous;
+        process.env["BONDERY_PUBLIC_API_URL"] = previous;
       }
     }
   }

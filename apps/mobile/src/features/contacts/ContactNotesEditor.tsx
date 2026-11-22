@@ -154,17 +154,15 @@ function ContactNotesEditor({ id, isMyselfMode = false }: ContactNotesEditorProp
     }, AUTOSAVE_DELAY_MS);
   }
 
-  useFocusEffect(() => {
-    return () => {
-      if (saveTimer.current) {
-        clearTimeout(saveTimer.current);
-        saveTimer.current = null;
-      }
-      if (pendingMarkdown.current !== null) {
-        detachPromise(saveNotes(pendingMarkdown.current));
-        pendingMarkdown.current = null;
-      }
-    };
+  useFocusEffect(() => () => {
+    if (saveTimer.current) {
+      clearTimeout(saveTimer.current);
+      saveTimer.current = null;
+    }
+    if (pendingMarkdown.current !== null) {
+      detachPromise(saveNotes(pendingMarkdown.current));
+      pendingMarkdown.current = null;
+    }
   });
 
   function dismissPalette() {

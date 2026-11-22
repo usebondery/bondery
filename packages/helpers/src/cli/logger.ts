@@ -47,7 +47,7 @@ export type CliLogger = {
   info: (message: string) => void;
   step: (current: number, total: number, message: string) => void;
   success: (message: string) => void;
-  table: (rows: Array<Record<string, string | number>>) => void;
+  table: (rows: Record<string, string | number>[]) => void;
   warn: (message: string) => void;
 };
 
@@ -72,7 +72,7 @@ export function createCliLogger(_scope?: string): CliLogger {
     success(message: string) {
       write("success", message);
     },
-    table(rows: Array<Record<string, string | number>>) {
+    table(rows: Record<string, string | number>[]) {
       if (rows.length === 0) {
         return;
       }

@@ -12,8 +12,8 @@ const BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN = /BONDERY_PRIVATE_REDIS_URL
 
 describe("redis shared clients", () => {
   it("returns undefined when BONDERY_PRIVATE_REDIS_URL is unset", () => {
-    const previous = process.env.BONDERY_PRIVATE_REDIS_URL;
-    delete process.env.BONDERY_PRIVATE_REDIS_URL;
+    const previous = process.env["BONDERY_PRIVATE_REDIS_URL"];
+    delete process.env["BONDERY_PRIVATE_REDIS_URL"];
     resetRedisClientsForTests();
 
     try {
@@ -21,26 +21,26 @@ describe("redis shared clients", () => {
       assert.equal(getRedisSubscriber(), undefined);
     } finally {
       if (previous === undefined) {
-        delete process.env.BONDERY_PRIVATE_REDIS_URL;
+        delete process.env["BONDERY_PRIVATE_REDIS_URL"];
       } else {
-        process.env.BONDERY_PRIVATE_REDIS_URL = previous;
+        process.env["BONDERY_PRIVATE_REDIS_URL"] = previous;
       }
       resetRedisClientsForTests();
     }
   });
 
   it("requireRedisCommands throws when BONDERY_PRIVATE_REDIS_URL is unset", () => {
-    const previous = process.env.BONDERY_PRIVATE_REDIS_URL;
-    delete process.env.BONDERY_PRIVATE_REDIS_URL;
+    const previous = process.env["BONDERY_PRIVATE_REDIS_URL"];
+    delete process.env["BONDERY_PRIVATE_REDIS_URL"];
     resetRedisClientsForTests();
 
     try {
       assert.throws(() => requireRedisCommands(), BONDERY_PRIVATE_REDIS_URL_MUST_BE_SET_PATTERN);
     } finally {
       if (previous === undefined) {
-        delete process.env.BONDERY_PRIVATE_REDIS_URL;
+        delete process.env["BONDERY_PRIVATE_REDIS_URL"];
       } else {
-        process.env.BONDERY_PRIVATE_REDIS_URL = previous;
+        process.env["BONDERY_PRIVATE_REDIS_URL"] = previous;
       }
       resetRedisClientsForTests();
     }

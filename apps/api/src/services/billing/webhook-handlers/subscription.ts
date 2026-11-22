@@ -35,7 +35,7 @@ function customerEmail(
 export function extractMirrorFromStripeSubscription(
   subscription: Stripe.Subscription,
 ): SubscriptionMirrorFields {
-  const item = subscription.items.data[0];
+  const [item] = subscription.items.data;
   const price = item?.price;
   const product = price?.product;
   const productName =
@@ -60,13 +60,14 @@ export async function upsertSubscriptionFromStripe(
   options?: { eventType?: string },
 ): Promise<void> {
   const email =
-    subscription.metadata.email ??
+    subscription.metadata["email"] ??
     customerEmail(
       typeof subscription.customer === "string" ? null : (subscription.customer as Stripe.Customer),
     );
 
-  const externalId = subscription.metadata.bondery_user_id;
-  const isValidUuid = externalId != null && UUID_PATTERN.test(externalId);
+  const externalId = subscription.metadata["bondery_user_id"];
+  const isValidUuid =
+    externalId !== null && externalId !== undefined && UUID_PATTERN.test(externalId);
 
   let userId: string | null = isValidUuid ? externalId : null;
 

@@ -10,13 +10,13 @@ import { loadTestEnv } from "./load-test-env.js";
 const require = createRequire(import.meta.url);
 const { version: packageVersion } = require("../../package.json") as { version: string };
 
-const originalInfraVersion = process.env.BONDERY_INFRA_VERSION;
+const originalInfraVersion = process.env["BONDERY_INFRA_VERSION"];
 
 afterEach(() => {
   if (originalInfraVersion === undefined) {
-    delete process.env.BONDERY_INFRA_VERSION;
+    delete process.env["BONDERY_INFRA_VERSION"];
   } else {
-    process.env.BONDERY_INFRA_VERSION = originalInfraVersion;
+    process.env["BONDERY_INFRA_VERSION"] = originalInfraVersion;
   }
 });
 
@@ -27,7 +27,7 @@ function advertisedLatestVersion(): string {
 describe("gET /mobile/manifest", () => {
   it("returns latestVersion without auth", async () => {
     loadTestEnv();
-    delete process.env.BONDERY_INFRA_VERSION;
+    delete process.env["BONDERY_INFRA_VERSION"];
 
     const { createTestApp } = await import("./create-test-app.js");
     const app = await createTestApp();

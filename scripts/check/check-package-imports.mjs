@@ -51,7 +51,7 @@ function collectViolations(code, filePath) {
   for (const pattern of [EXTENSIONLESS_RELATIVE, EXTENSIONLESS_DYNAMIC]) {
     pattern.lastIndex = 0;
     for (const match of code.matchAll(pattern)) {
-      const specifier = match[1];
+      const [, specifier] = match;
       if (isExtensionlessRelative(specifier)) {
         violations.push({ filePath, specifier });
       }

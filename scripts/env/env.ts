@@ -35,7 +35,13 @@ import {
 import { infraPinCalver } from "../../packages/helpers/src/version/calver.ts";
 import { readGitTags } from "../pkg/calver.mjs";
 import { writeDeployExample } from "./env-deploy-example.js";
-import { compareAscii, formatEnvFile, quoteEnvValue, sortEnvRows } from "./env-file-format.js";
+import {
+  compareAscii,
+  type EnvFileVar,
+  formatEnvFile,
+  quoteEnvValue,
+  sortEnvRows,
+} from "./env-file-format.js";
 import { mobilePublicUrl } from "./env-mobile.js";
 import { writeOpsExample } from "./env-ops-example.js";
 import { writePlausibleExample } from "./env-plausible-example.js";
@@ -195,15 +201,16 @@ function writeExamples(dryRun) {
     log.info(`${dryRun ? "Would write" : "Wrote"} ${examplePath}`);
 
     if (target.productionExampleFile) {
-      const prodRows = rows.map((r) => {
+      const prodRows: EnvFileVar[] = [];
+      for (const r of rows) {
         const entry = ENV_MANIFEST.find(
           (e) =>
             e.canonical === r.key ||
             e.targets.some((t) => (t.runtimeName ?? e.canonical) === r.key),
         );
         const value = entry ? resolveExampleValue(entry, "production") : r.value;
-        return { ...r, value };
-      });
+        prodRows.push({ ...r, value });
+      }
       const prodPath = join(repoRoot, target.productionExampleFile);
       if (!dryRun) {
         writeFileSync(

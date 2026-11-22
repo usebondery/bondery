@@ -33,7 +33,7 @@ describe("syncConnectionHub", () => {
     });
 
     assert.equal(socket.sent.length, 1);
-    const sent = socket.sent[0];
+    const [sent] = socket.sent;
     assert.ok(sent);
     const payload = JSON.parse(sent);
     assert.equal(payload.type, "sync.batch");

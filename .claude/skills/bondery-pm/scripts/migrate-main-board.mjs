@@ -1,12 +1,16 @@
 #!/usr/bin/env node
-const BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE = /\b(bug|fix\b|broken|regression|crash|doesn'?t work)\b/i;
+const BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE =
+  /\b(bug|fix\b|broken|regression|crash|doesn'?t work)\b/i;
 const ISO_SOC_TAX_LEGAL_GDPR_LLC_RE = /\b(ISO|SOC|tax|legal|GDPR|LLC)\b/i;
 const SPIKE_EVALUATE_RESEARCH_ADR_RE = /\b(spike|evaluate|research|ADR)\b/i;
-const UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE = /\b(upgrade|deps|compose|docker|traefik|env manifest|changelog|smoke|rls|migration tests)\b/i;
-const OUTCOME_NSANITY_CHECK_NNOTES_NROADMAP_RE = /^Outcome\n([\s\S]*?)(?:\nSanity check|\nNotes|\nRoadmap|$)/;
+const UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE =
+  /\b(upgrade|deps|compose|docker|traefik|env manifest|changelog|smoke|rls|migration tests)\b/i;
+const OUTCOME_NSANITY_CHECK_NNOTES_NROADMAP_RE =
+  /^Outcome\n([\s\S]*?)(?:\nSanity check|\nNotes|\nRoadmap|$)/;
 const PATTERN_5C2E24_RE = /\.$/;
 const LLC_ISO_TRUSTPILOT_DUNS_GDPR_SOC_RE = /^(LLC|ISO\s*\d+|Trustpilot|DUNS|GDPR|SOC\s*2?)$/i;
-const LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE = /\b(let|users?|enable|fix|reduce|improve|ship|secure|file|publish|migrate|create|after|export|import|obtain|register|transfer|evaluate|research|connect|add|remove|upgrade|deploy|document)\b/i;
+const LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE =
+  /\b(let|users?|enable|fix|reduce|improve|ship|secure|file|publish|migrate|create|after|export|import|obtain|register|transfer|evaluate|research|connect|add|remove|upgrade|deploy|document)\b/i;
 const PATTERN_5C732B_RE = /\s+/;
 const DOCS_MD_DOCUMENTATION_RE = /docs\/|\.md|documentation/i;
 const APPS_MOBILE_MOBILE_RE = /apps\/mobile|Mobile:/i;
@@ -113,10 +117,7 @@ export function inferTypePrefix(item, labelIds) {
   const text = `${name} ${desc}`;
   const labels = new Set(labelIds);
 
-  if (
-    labels.has(LABELS.legacyBugs) ||
-    BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE.test(name)
-  ) {
+  if (labels.has(LABELS.legacyBugs) || BUG_FIX_BROKEN_REGRESSION_CRASH_DOESN_RE.test(name)) {
     return "Bug";
   }
   if (labels.has(LABELS.legacyBigFeatures) || ROADMAP_RE.test(text)) {
@@ -137,11 +138,7 @@ export function inferTypePrefix(item, labelIds) {
   if (ENGINEERING_SUBTASK_RE.test(name)) {
     return "Chore";
   }
-  if (
-    UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE.test(
-      name,
-    )
-  ) {
+  if (UPGRADE_DEPS_COMPOSE_DOCKER_TRAEFIK_ENV_RE.test(name)) {
     return "Chore";
   }
   return "Chore";
@@ -180,10 +177,7 @@ export function isOutcomeOrientedTitle(body) {
     return false;
   }
   const words = title.split(PATTERN_5C732B_RE);
-  const hasOutcomeVerb =
-    LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE.test(
-      title,
-    );
+  const hasOutcomeVerb = LET_USERS_ENABLE_FIX_REDUCE_IMPROVE_RE.test(title);
   if (words.length <= 3 && !hasOutcomeVerb && title.length < 24) {
     return false;
   }

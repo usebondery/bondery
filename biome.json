@@ -369,10 +369,34 @@
         "useCollapsedElseIf": "error",
         "useCollapsedIf": "error",
         "useComponentExportOnlyModules": "off",
+        "useConsistentArrayType": {
+          "level": "error",
+          "options": {
+            "syntax": "shorthand"
+          }
+        },
+        "useConsistentArrowReturn": {
+          "level": "error",
+          "options": {
+            "style": "asNeeded"
+          }
+        },
         "useConsistentBuiltinInstantiation": "error",
         "useConsistentCurlyBraces": "error",
         "useConsistentEnumValueType": "error",
         "useConsistentGraphqlDescriptions": "error",
+        "useConsistentMemberAccessibility": {
+          "level": "error",
+          "options": {
+            "accessibility": "noPublic"
+          }
+        },
+        "useConsistentMethodSignatures": {
+          "level": "error",
+          "options": {
+            "style": "property"
+          }
+        },
         "useConsistentObjectDefinitions": {
           "level": "error",
           "options": {
@@ -408,7 +432,8 @@
         "useTestHooksOnTop": "error",
         "useThisInClassMethods": "error",
         "useThrowNewError": "error",
-        "useThrowOnlyError": "error"
+        "useThrowOnlyError": "error",
+        "useVarsOnTop": "error"
       },
       "suspicious": {
         "noAlert": "error",
@@ -484,6 +509,7 @@
         "useDeprecatedDate": "error",
         "useErrorMessage": "error",
         "useExpect": "error",
+        "useGuardForIn": "error",
         "useNumberToFixedDigitsArgument": "error",
         "useStrictMode": "error"
       }
@@ -773,6 +799,16 @@
                 "withinDescribe": "test"
               }
             }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/translations/src/i18n-types.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConsistentMethodSignatures": "off"
           }
         }
       }

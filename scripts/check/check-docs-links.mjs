@@ -108,7 +108,7 @@ function main() {
       usedIds.add(match[1]);
     }
     for (const match of content.matchAll(/\bhelpDoc=\{([^}]+)\}/g)) {
-      const expr = match[1];
+      const [, expr] = match;
       for (const idMatch of expr.matchAll(/"([^"]+)"/g)) {
         if (idMatch[1].includes(".")) {
           usedIds.add(idMatch[1]);

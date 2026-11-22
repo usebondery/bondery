@@ -6,7 +6,7 @@ export function readWebAuthnCredentialId(clientData: unknown): string | undefine
     return undefined;
   }
 
-  const id = (clientData as { id?: unknown }).id;
+  const { id } = clientData as { id?: unknown };
   if (typeof id !== "string") {
     return undefined;
   }

@@ -73,7 +73,7 @@ describe("s3 client TLS", () => {
     });
     const address = server.address();
     assert.ok(address && typeof address === "object");
-    port = address.port;
+    ({ port } = address);
   });
 
   after(async () => {

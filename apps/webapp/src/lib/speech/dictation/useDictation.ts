@@ -9,13 +9,11 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import type { DictationAvailability } from "@/lib/speech/dictation/dictationAvailability";
 import { resolveDictationAvailability } from "@/lib/speech/dictation/dictationAvailability";
 import type { DictationErrorCode, DictationResult } from "@/lib/speech/dictation/dictationEngine";
 import { getDictationEngine } from "@/lib/speech/dictation/dictationEngine";
 import {
   createDictationEngineHandlers,
-  type DictationStatus,
   isLiveStatus,
   statusForError,
 } from "@/lib/speech/dictation/dictationHandlers";
@@ -36,6 +34,12 @@ import {
   type DictationSession,
   sessionInterimPreview,
 } from "@/lib/speech/dictation/dictationSession";
+import type {
+  DictationAvailability,
+  DictationStatus,
+  UseDictationOptions,
+  UseDictationResult,
+} from "@/lib/speech/dictation/useDictation-types";
 
 /** A `stop()` that never reports `onend` must not keep the control spinning. */
 const FINALIZE_GUARD_MS = 1500;
@@ -46,46 +50,13 @@ const subscribeToNothing = () => () => undefined;
 /** The server has no recognizer and has not run the browser check. */
 const getServerAvailability = (): null => null;
 
-export type { DictationAvailability, DictationStatus };
-
-/** Live selection of the field. */
-export interface DictationSelection {
-  end: number;
-  start: number;
-}
-
-export interface UseDictationOptions {
-  /** A running reply blocks dictation. */
-  disabled: boolean;
-  /** BCP 47 tag for the recognizer. */
-  lang: string;
-  /** Reads the field selection. Must not prompt and must not throw. */
-  readSelection: () => DictationSelection | null;
-  /** Changing this value ends the session. It combines the route and the new-chat counter. */
-  resetKey: string;
-  /** Puts the caret back after a write. */
-  restoreCaret: (index: number) => void;
-  setValue: (value: string) => void;
-  value: string;
-}
-
-export interface UseDictationResult {
-  /** True while a session holds the microphone. */
-  active: boolean;
-  /** `null` until the browser check has run. */
-  availability: DictationAvailability | null;
-  /** Ends a live session and keeps the text. Called on submit and on a manual edit. */
-  cancel: () => void;
-  clearError: () => void;
-  /** One error per failure. The button shows a toast, then calls `clearError`. */
-  error: DictationErrorCode | null;
-  /** The current guess. Empty when the recognizer holds none. */
-  interimText: string;
-  /** True until the speech route is known. The control shows a loader. */
-  pending: boolean;
-  status: DictationStatus;
-  toggle: () => void;
-}
+export type {
+  DictationAvailability,
+  DictationSelection,
+  DictationStatus,
+  UseDictationOptions,
+  UseDictationResult,
+} from "@/lib/speech/dictation/useDictation-types";
 
 /**
  * Dictation session for the chat composer.
@@ -505,14 +476,15 @@ export function useDictation({
   }, [endSession, lang, resetKey]);
 
   // A route change unmounts the composer. No capture outlives it.
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       startTokenRef.current += 1;
       clearRestartTimer();
       engine.abort();
       sessionRef.current = null;
-    };
-  }, [clearRestartTimer, engine]);
+    },
+    [clearRestartTimer, engine],
+  );
 
   return {
     active: isLiveStatus(status),

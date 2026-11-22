@@ -1,0 +1,47 @@
+---
+title: "ADR 0032: Redis mutual TLS"
+hidden: true
+last_updated: 2026-11-22
+description: Bundled Redis requires a client certificate with TLS and the ACL password, so a neighbor on the private network cannot connect with the password alone.
+---
+
+# ADR 0032: Redis mutual TLS
+
+**Status:** Accepted
+**Date:** 2026-11-22
+
+## Context
+
+Redis holds sessions (Better Auth secondary storage), magic-link tokens, step-up tokens, WebSocket tickets, and rate-limit counters. It runs on the private `internal` network with the API, Postgres, and SeaweedFS. TLS plus a password still let any of those processes connect if they learn the password. SeaweedFS already uses mutual TLS between its nodes ([ADR 0030](./0030-object-storage-tls.mdx)). This hop is client to server, so the certificate roles are split.
+
+## Decision
+
+1. **Bundled Redis requires a client certificate** (`tls-auth-clients yes`) and still requires the ACL password. TLS 1.3 only. The plaintext port stays off.
+2. **Its own CA.** The server certificate is serverAuth only. The API client certificate and the healthcheck client certificate are clientAuth only. The Redis container does not hold the API client key. The API does not hold the server key or the CA key.
+3. **Volumes:** `redis-tls-ca`, `redis-tls-server`, `redis-tls-client`. The old `redis-secrets` volume is mounted only into `stack-secrets`, read-only, so the first boot can keep the password. After the CA exists, deleting the new password generates a new one and does not restore the legacy file.
+4. **External Redis is unchanged:** `rediss://`, verified certificate, password. Client certificate files are optional and must be set as a pair (`BONDERY_PRIVATE_REDIS_TLS_CERT_FILE` and `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE`).
+5. **Local development uses the same server flags.** `pnpm run setup:dev` writes the cert and key paths. The dev container bind-mounts only `server/`.
+6. **Compose checks and the release smoke** enforce the server flags and the refusals.
+7. **Expiry is visible.** The API logs the server certificate and, when present, the client certificate. It warns at 90 days and errors at 14 days.
+
+## Findings that shaped the details
+
+| Finding | Consequence |
+|---|---|
+| `redis:8.10` accepts `--tls-port`, `--tls-ca-cert-file`, `--tls-auth-clients`, `--tls-protocols`, `--tls-ciphersuites`, and `--tls-prefer-server-ciphers` at startup (`redis-server --help` lists only usage; flags load without an unknown-option error) | Compose sets them directly; no wrapper script |
+| Node `redis` clients and `redis-cli` negotiate TLS 1.3 | Redis serves TLS 1.3 only; no TLS 1.2 floor unlike Postgres ([ADR 0029](./0029-postgres-tls.mdx), where the Prisma schema engine on Windows cannot negotiate TLS 1.3) |
+| The healthcheck runs inside the Redis container | It uses a dedicated healthcheck client certificate in `redis-tls-server`, not the API client key |
+
+## Not covered
+
+Managed Redis that cannot require a client certificate.
+
+## Rollout
+
+One deploy, no operator action for Compose. On the next `docker compose up`, `stack-secrets` creates a private Redis CA and the certificates in new `redis-tls-*` volumes, keeps the current password, and Redis restarts once. Redis data stays. Sessions stay because the password is kept and Postgres also stores sessions. Local developers run `pnpm run setup:dev` once.
+
+## Consequences
+
+- Positive: a neighbor container that reaches Redis cannot connect with the password alone.
+- Negative: local development and external Redis operators must set client certificate files when the server requires them.
+- Neutral: the legacy `redis-secrets` volume remains for one-time password import only; it is not mounted on Redis or the API.

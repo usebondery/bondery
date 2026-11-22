@@ -66,7 +66,7 @@ function walk(dir: string) {
       addCode(m[1], 500, "internal");
     }
     for (const m of content.matchAll(new RegExp(`code:\\s*"(${CODE})"`, "g"))) {
-      const code = m[1];
+      const [, code] = m;
       if (code === "rate_limit_exceeded") {
         addCode(code, 429, "rateLimit");
       }

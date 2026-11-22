@@ -64,10 +64,10 @@ export function isOAuthCredentialPairIncomplete(
 export function resolveOAuthProviderSnapshot(
   env: NodeJS.ProcessEnv = process.env,
 ): OAuthProviderSnapshot {
-  const githubId = env.BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID;
-  const githubSecret = env.BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET;
-  const linkedinId = env.BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID;
-  const linkedinSecret = env.BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_SECRET;
+  const githubId = env["BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_ID"];
+  const githubSecret = env["BONDERY_PRIVATE_AUTH_GITHUB_CLIENT_SECRET"];
+  const linkedinId = env["BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_ID"];
+  const linkedinSecret = env["BONDERY_PRIVATE_AUTH_LINKEDIN_CLIENT_SECRET"];
 
   const githubPair = configuredPair(githubId, githubSecret);
   const linkedinPair = configuredPair(linkedinId, linkedinSecret);
@@ -95,7 +95,7 @@ export function resolveOAuthProviderSnapshot(
 }
 
 /** Frozen public bitmap — booleans only, no secrets. */
-export const oauthProviders = snapshot.oauthProviders;
+export const { oauthProviders } = snapshot;
 
 /** Better Auth `socialProviders` — omit unconfigured IdPs entirely. */
 export const oauthSocialProviders = snapshot.socialProviders;

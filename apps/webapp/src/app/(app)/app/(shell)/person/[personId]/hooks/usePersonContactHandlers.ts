@@ -203,9 +203,17 @@ export function usePersonContactHandlers({
     }
 
     const sourcePhones = phonesOverride ?? phones;
-    const phonesToSave = sourcePhones
-      .filter((phone) => phone.value && phone.value.trim() !== "")
-      .map((phone) => ({ ...phone, prefix: phone.prefix || "+1", value: phone.value.trim() }));
+    const phonesToSave: PhoneEntry[] = [];
+    for (const phone of sourcePhones) {
+      if (!phone.value || phone.value.trim() === "") {
+        continue;
+      }
+      phonesToSave.push({
+        ...phone,
+        prefix: phone.prefix || "+1",
+        value: phone.value.trim(),
+      });
+    }
 
     const currentPhones = Array.isArray(contact.phones) ? contact.phones : [];
     if (JSON.stringify(phonesToSave) === JSON.stringify(currentPhones)) {

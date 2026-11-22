@@ -143,7 +143,7 @@ export async function commitVCardImport(
           validAddresses.find((address) => address.type === "home") ??
           validAddresses[0];
 
-        if (!picked || picked.latitude == null || picked.longitude == null) {
+        if (!picked || picked.latitude === null || picked.longitude === null) {
           return;
         }
 
@@ -257,7 +257,7 @@ export async function commitVCardImport(
   const avatarUploads = contactPersonPairs
     .filter(({ contact }) => contact.avatarUri)
     .map(async ({ contact, personId }) => {
-      const avatarUri = contact.avatarUri;
+      const { avatarUri } = contact;
       if (!avatarUri) {
         return;
       }
@@ -271,8 +271,7 @@ export async function commitVCardImport(
           if (!decoded) {
             return;
           }
-          buffer = decoded.buffer;
-          contentType = decoded.contentType;
+          ({ buffer, contentType } = decoded);
         } else if (avatarUri.startsWith("http")) {
           const response = await fetch(avatarUri);
           if (!response.ok) {

@@ -115,11 +115,12 @@ export function useEmbeddedCheckout({
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       closeCheckout();
-    };
-  }, [closeCheckout]);
+    },
+    [closeCheckout],
+  );
 
   const showCheckoutError = () => {
     notifications.show(

@@ -57,7 +57,7 @@ function sortJson(value: unknown): unknown {
     const record = value as Record<string, unknown>;
     return Object.fromEntries(
       Object.keys(record)
-        .sort()
+        .sort((left, right) => left.localeCompare(right))
         .map((key) => [key, sortJson(record[key])]),
     );
   }
@@ -65,7 +65,7 @@ function sortJson(value: unknown): unknown {
 }
 
 function getMcpHmacSecret(): string {
-  const secret = process.env.BONDERY_PRIVATE_SERVICE_SECRET;
+  const secret = process.env["BONDERY_PRIVATE_SERVICE_SECRET"];
   return typeof secret === "string" ? secret : "";
 }
 
@@ -142,8 +142,7 @@ export function verifyMcpDeleteRequestState(params: {
   if (parts.length !== REQUEST_STATE_SEGMENT_COUNT || parts[0] !== REQUEST_STATE_VERSION) {
     return { ok: false };
   }
-  const payloadB64 = parts[1];
-  const signatureB64 = parts[2];
+  const [, payloadB64, signatureB64] = parts;
   if (!payloadB64 || !signatureB64) {
     return { ok: false };
   }
@@ -161,20 +160,20 @@ export function verifyMcpDeleteRequestState(params: {
     return { ok: false };
   }
   const record = payload as Record<string, unknown>;
-  if (typeof record.args !== "string" || typeof record.exp !== "number") {
+  if (typeof record["args"] !== "string" || typeof record["exp"] !== "number") {
     return { ok: false };
   }
-  if (typeof record.sub !== "string" || typeof record.tool !== "string") {
+  if (typeof record["sub"] !== "string" || typeof record["tool"] !== "string") {
     return { ok: false };
   }
   const nowSeconds = Math.floor((params.nowMs ?? Date.now()) / 1000);
-  if (record.exp < nowSeconds) {
+  if (record["exp"] < nowSeconds) {
     return { ok: false };
   }
-  if (record.sub !== params.userId || record.tool !== params.toolName) {
+  if (record["sub"] !== params.userId || record["tool"] !== params.toolName) {
     return { ok: false };
   }
-  if (record.args !== canonicalMcpToolArgs(params.args)) {
+  if (record["args"] !== canonicalMcpToolArgs(params["args"])) {
     return { ok: false };
   }
   return { ok: true };

@@ -1036,16 +1036,27 @@ async function resetPreviousSampleContacts() {
 }
 
 async function main() {
-  const uniqueSeeds = UNIQUE_CONTACTS.map((seed, index) => ({
-    ...seed,
-    index,
-    skipLinkedin: false,
-  }));
-  const duplicateSeeds = DUPLICATE_CONTACTS.map((seed, index) => ({
-    ...seed,
-    index: uniqueSeeds.length + index,
-    skipLinkedin: true,
-  }));
+  /** @typedef {(typeof UNIQUE_CONTACTS)[number] | (typeof DUPLICATE_CONTACTS)[number]} SampleContactBase */
+  /** @typedef {SampleContactBase & { index: number, skipLinkedin: boolean }} SampleContactSeed */
+
+  /** @type {SampleContactSeed[]} */
+  const uniqueSeeds = [];
+  for (const [index, seed] of UNIQUE_CONTACTS.entries()) {
+    uniqueSeeds.push({
+      ...seed,
+      index,
+      skipLinkedin: false,
+    });
+  }
+  /** @type {SampleContactSeed[]} */
+  const duplicateSeeds = [];
+  for (const [index, seed] of DUPLICATE_CONTACTS.entries()) {
+    duplicateSeeds.push({
+      ...seed,
+      index: uniqueSeeds.length + index,
+      skipLinkedin: true,
+    });
+  }
   const allSeeds = [...uniqueSeeds, ...duplicateSeeds];
   if (allSeeds.length !== 70) {
     throw new Error(`Expected 70 contact seeds, got ${allSeeds.length}`);

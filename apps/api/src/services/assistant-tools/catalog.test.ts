@@ -20,7 +20,7 @@ function mcpRegisteredToolNames(): string[] {
       names.push(match[1]);
     }
   }
-  return names.toSorted();
+  return names.toSorted((left, right) => left.localeCompare(right));
 }
 
 describe("assistant tool catalog", () => {
@@ -32,6 +32,9 @@ describe("assistant tool catalog", () => {
     const tools = createChatTools({
       user: { email: "a@b.c", id: "11111111-1111-4111-8111-111111111111" },
     });
-    assert.deepEqual(Object.keys(tools).toSorted(), [...ASSISTANT_TOOL_NAMES]);
+    assert.deepEqual(
+      Object.keys(tools).toSorted((left, right) => left.localeCompare(right)),
+      [...ASSISTANT_TOOL_NAMES],
+    );
   });
 });

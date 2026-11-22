@@ -19,7 +19,7 @@ const BLOCKED_PATH_PREFIXES = [
 ] as const;
 
 type SearchParamsLike = {
-  get(name: string): string | null;
+  get: (name: string) => string | null;
 };
 
 function narrowSafeReturnPath(path: string): SafeAppReturnPath | null {
@@ -121,14 +121,16 @@ export function getClientReturnPathForLogin(): SafeAppReturnPath | null {
   return captureReturnPath(captureClientReturnPath());
 }
 
-export function getRequestReturnPath(headersList: { get(name: string): string | null }): string {
+export function getRequestReturnPath(headersList: {
+  get: (name: string) => string | null;
+}): string {
   const pathname = headersList.get(REQUEST_PATHNAME_HEADER) ?? "";
   const search = headersList.get(REQUEST_SEARCH_HEADER) ?? "";
   return buildPathWithSearch(pathname, search);
 }
 
 export function getRequestReturnPathForLogin(headersList: {
-  get(name: string): string | null;
+  get: (name: string) => string | null;
 }): SafeAppReturnPath | null {
   return captureReturnPath(getRequestReturnPath(headersList));
 }

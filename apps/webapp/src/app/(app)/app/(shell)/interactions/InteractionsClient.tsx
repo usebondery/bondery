@@ -138,8 +138,8 @@ export function InteractionsClient() {
 
   const contactsById = new Map(contacts.map((contact) => [contact.id, contact]));
 
-  const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
+  const resolveParticipants = (activity: Activity): PersonPreview[] =>
+    (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
 
@@ -163,7 +163,6 @@ export function InteractionsClient() {
         },
       ];
     });
-  };
 
   const handleActivityClick = (activity: Activity) => {
     openNewActivityModal({

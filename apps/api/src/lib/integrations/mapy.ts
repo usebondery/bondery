@@ -9,11 +9,11 @@ const GEOCODE_CACHE_TTL_DAYS = 180;
 
 /** Read at call time — env is populated by @fastify/env after module load. */
 function getMapsKey(): string {
-  return process.env.BONDERY_PRIVATE_MAPS_KEY || "";
+  return process.env["BONDERY_PRIVATE_MAPS_KEY"] || "";
 }
 
 function getMapsUrl(): string {
-  return process.env.BONDERY_PUBLIC_MAPS_URL || MAPS_BASE_URL;
+  return process.env["BONDERY_PUBLIC_MAPS_URL"] || MAPS_BASE_URL;
 }
 
 /** Structured result from geocoding a LinkedIn location string. */
@@ -106,8 +106,8 @@ export async function geocodeLinkedInLocation(location: string): Promise<Geocode
       return null;
     }
 
-    const item = items[0];
-    const position = item.position;
+    const [item] = items;
+    const { position } = item;
 
     if (!position || typeof position.lat !== "number" || typeof position.lon !== "number") {
       return null;
@@ -231,8 +231,8 @@ export async function validateStreetAddress(
       return null;
     }
 
-    const item = items[0];
-    const position = item.position;
+    const [item] = items;
+    const { position } = item;
 
     if (!position || typeof position.lat !== "number" || typeof position.lon !== "number") {
       return null;
@@ -335,7 +335,7 @@ export async function cachedGeocodeLinkedInLocation(
         return null;
       }
 
-      if (cached.lat == null || cached.lon == null || cached.locationEwkt == null) {
+      if (cached.lat === null || cached.lon === null || cached.locationEwkt === null) {
         return null;
       }
 

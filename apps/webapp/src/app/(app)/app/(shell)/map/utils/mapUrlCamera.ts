@@ -28,7 +28,7 @@ function roundTo(value: number, decimals: number): number {
 
 /** Minimal shape shared by `URLSearchParams` and Next `ReadonlyURLSearchParams`. */
 interface ReadonlyURLSearchParamsLike {
-  get(name: string): string | null;
+  get: (name: string) => string | null;
 }
 export interface MapUrlCamera {
   latitude: number;

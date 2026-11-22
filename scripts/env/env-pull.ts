@@ -239,7 +239,7 @@ function main() {
 
   upsertEnvAssignments(ROOT_ENV, updates);
   log.success(`Updated ${Object.keys(updates).length} key(s) in .env.local`);
-  for (const key of Object.keys(updates).sort()) {
+  for (const key of Object.keys(updates).sort((left, right) => left.localeCompare(right))) {
     log.info(`  ${key}`);
   }
 

@@ -108,7 +108,7 @@ function hostOf(value: unknown): string | undefined {
 function compactLegacy(raw: Record<string, unknown>): CompactedCspViolation {
   return {
     blockedOriginPath: toOriginAndPath(raw["blocked-uri"]),
-    disposition: capString(raw.disposition, MAX_DISPOSITION_LENGTH),
+    disposition: capString(raw["disposition"], MAX_DISPOSITION_LENGTH),
     documentPath: toPath(raw["document-uri"]),
     effectiveDirective: capString(raw["effective-directive"], MAX_DIRECTIVE_LENGTH),
     lineNumber: toLineNumber(raw["line-number"]),
@@ -118,12 +118,12 @@ function compactLegacy(raw: Record<string, unknown>): CompactedCspViolation {
 
 function compactReportingApi(raw: Record<string, unknown>): CompactedCspViolation {
   return {
-    blockedOriginPath: toOriginAndPath(raw.blockedURL),
-    disposition: capString(raw.disposition, MAX_DISPOSITION_LENGTH),
-    documentPath: toPath(raw.documentURL),
-    effectiveDirective: capString(raw.effectiveDirective, MAX_DIRECTIVE_LENGTH),
-    lineNumber: toLineNumber(raw.lineNumber),
-    sourceFile: toPath(raw.sourceFile),
+    blockedOriginPath: toOriginAndPath(raw["blockedURL"]),
+    disposition: capString(raw["disposition"], MAX_DISPOSITION_LENGTH),
+    documentPath: toPath(raw["documentURL"]),
+    effectiveDirective: capString(raw["effectiveDirective"], MAX_DIRECTIVE_LENGTH),
+    lineNumber: toLineNumber(raw["lineNumber"]),
+    sourceFile: toPath(raw["sourceFile"]),
   };
 }
 
@@ -164,11 +164,11 @@ export function compactCspReport(
         continue;
       }
       // A browser batches other report types into the same array.
-      if (entry.type !== undefined && entry.type !== "csp-violation") {
+      if (entry["type"] !== undefined && entry["type"] !== "csp-violation") {
         continue;
       }
-      const raw = isRecord(entry.body) ? entry.body : entry;
-      documentHost ??= hostOf(raw.documentURL);
+      const raw = isRecord(entry["body"]) ? entry["body"] : entry;
+      documentHost ??= hostOf(raw["documentURL"]);
       violations.push(compactReportingApi(raw));
       if (violations.length >= MAX_VIOLATIONS) {
         break;

@@ -174,13 +174,14 @@ export function useSpeechReader(messageId: string, prepare: SpeechPrepare): UseS
 
   // A closed session or a route change unmounts the message. Speech then stops
   // instead of resuming later on another page.
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (state.messageId === messageId) {
         cancel();
       }
-    };
-  }, [messageId]);
+    },
+    [messageId],
+  );
 
   return {
     error: isOwner ? snapshot.error : null,

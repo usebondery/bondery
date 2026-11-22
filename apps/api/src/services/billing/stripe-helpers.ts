@@ -9,14 +9,14 @@ export function isScheduledToCancel(subscription: {
   cancel_at: number | null;
   cancel_at_period_end: boolean;
 }): boolean {
-  return subscription.cancel_at_period_end || subscription.cancel_at != null;
+  return subscription.cancel_at_period_end || subscription.cancel_at !== null;
 }
 
 export function getSubscriptionPeriod(subscription: Stripe.Subscription): {
   currentPeriodEnd: Date | null;
   currentPeriodStart: Date | null;
 } {
-  const item = subscription.items.data[0];
+  const [item] = subscription.items.data;
   if (!item) {
     return { currentPeriodEnd: null, currentPeriodStart: null };
   }

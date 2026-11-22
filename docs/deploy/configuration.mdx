@@ -2,7 +2,7 @@
 title: Configuration
 description: Set the BONDERY_* variables that the stack reads. Copy the generated env example, fill in the core secrets, then review each optional service.
 icon: AdjustmentsHorizontal
-last_updated: 2026-11-04
+last_updated: 2026-11-22
 ---
 
 ## Core secrets
@@ -19,15 +19,25 @@ Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/
 
 ### Redis
 
-Redis stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*`: sessions and verification records, dual-written with Postgres). Because it holds session data, Redis always requires **TLS and a password**.
+Redis stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*`: sessions and verification records, dual-written with Postgres). Because it holds session data, Redis always requires **TLS, a password, and a client certificate** on the bundled service.
 
-**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service checks the `redis-secrets` volume. When the password or the TLS certificate is missing, it creates it. It keeps existing ones. Redis then accepts only TLS connections with that password, and the API connects with:
+**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service checks the `redis-tls-*` volumes. When the CA, certificates, or password are missing, it creates them. It keeps existing ones. Redis then accepts only TLS 1.3 connections with a client certificate and the password, and the API connects with:
 
 | Variable | Value that Compose sets |
 |----------|-------------------------|
 | `BONDERY_PRIVATE_REDIS_URL` | `rediss://${BONDERY_INFRA_TRAEFIK_PREFIX}-redis:6379` |
 | `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` | `/bondery-redis/client/password` |
-| `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` | `/bondery-redis/client/ca.crt` (the pinned Redis certificate) |
+| `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` | `/bondery-redis/client/ca.crt` (the Redis CA, not the server leaf) |
+| `BONDERY_PRIVATE_REDIS_TLS_CERT_FILE` | `/bondery-redis/client/tls.crt` |
+| `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE` | `/bondery-redis/client/tls.key` |
+
+Each volume holds only what its consumer needs:
+
+| Volume | Holds | Mounted by |
+|--------|-------|------------|
+| `redis-tls-ca` | CA key and certificate | `stack-secrets` only |
+| `redis-tls-server` | Server key, server certificate, healthcheck client certificate, ACL | `redis` (read-only) |
+| `redis-tls-client` | CA certificate, API client key and certificate, password | `api` (read-only) |
 
 An older `.env` that still has `BONDERY_PRIVATE_REDIS_URL=redis://redis:6379` is safe to keep. Compose overrides it. Your Redis data volume stays as it is.
 
@@ -40,6 +50,9 @@ BONDERY_PRIVATE_REDIS_URL=rediss://redis.example.com:6380
 BONDERY_PRIVATE_REDIS_PASSWORD_FILE=/run/secrets/redis_password
 # Only for a private CA; publicly trusted certificates need nothing:
 BONDERY_PRIVATE_REDIS_TLS_CA_FILE=/run/secrets/redis_ca.pem
+# Only when that Redis requires a client certificate; set both or neither:
+BONDERY_PRIVATE_REDIS_TLS_CERT_FILE=/run/secrets/redis_client.crt
+BONDERY_PRIVATE_REDIS_TLS_KEY_FILE=/run/secrets/redis_client.key
 ```
 
 The API still starts with a `redis://` URL or without a password, but in production it logs a warning on every boot until you fix it.

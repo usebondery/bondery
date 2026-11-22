@@ -32,7 +32,7 @@ const SERVICE_NAME = "bondery-api";
 let loggerProvider: LoggerProvider | null = null;
 
 function createPosthogExporter(projectToken: string): LogRecordExporter {
-  const host = (process.env.BONDERY_PUBLIC_POSTHOG_HOST || DEFAULT_POSTHOG_HOST).replace(
+  const host = (process.env["BONDERY_PUBLIC_POSTHOG_HOST"] || DEFAULT_POSTHOG_HOST).replace(
     TRAILING_SLASHES_PATTERN,
     "",
   );
@@ -54,7 +54,7 @@ export function startPosthogLogs(exporter?: LogRecordExporter): boolean {
     return true;
   }
 
-  const projectToken = process.env.BONDERY_PUBLIC_POSTHOG_KEY ?? "";
+  const projectToken = process.env["BONDERY_PUBLIC_POSTHOG_KEY"] ?? "";
   if (!exporter && (!projectToken || isTestEnvironment())) {
     return false;
   }
@@ -68,7 +68,7 @@ export function startPosthogLogs(exporter?: LogRecordExporter): boolean {
       ),
     ],
     resource: resourceFromAttributes({
-      "deployment.environment.name": process.env.NODE_ENV || "development",
+      "deployment.environment.name": process.env["NODE_ENV"] || "development",
       "service.name": SERVICE_NAME,
       ...(version ? { "service.version": version } : {}),
       ...(gitSha ? { "vcs.ref.head.revision": gitSha } : {}),

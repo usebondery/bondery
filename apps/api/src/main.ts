@@ -20,7 +20,7 @@ import {
 import { getApiRequiredEnvVars } from "./lib/platform/required-env.js";
 
 function assertRequiredEnvAtStartup(): void {
-  const environment = (process.env.NODE_ENV || "development") as "production" | "development";
+  const environment = (process.env["NODE_ENV"] || "development") as "production" | "development";
   const appPath = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
   checkEnvVariables({
@@ -36,7 +36,7 @@ async function start() {
   assertRequiredEnvAtStartup();
 
   const { app: server, tls } = await buildServer();
-  const environment = process.env.NODE_ENV || "development";
+  const environment = process.env["NODE_ENV"] || "development";
   const { port, host } = resolveListenAddress(server.config, environment);
   const isDevelopment = environment === "development";
 

@@ -50,7 +50,7 @@ export function registerShareMcpTools(
           selectedFields: input.selectedFields,
         };
         if (input.message !== undefined) {
-          confirmArgs.message = input.message;
+          confirmArgs["message"] = input["message"];
         }
         return confirmMcpAction({
           args: confirmArgs,

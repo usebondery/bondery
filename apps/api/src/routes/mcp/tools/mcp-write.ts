@@ -6,7 +6,7 @@ import { type McpToolRunResult, runMcpTool } from "./json.js";
 import { isMcpWriteToolName } from "./mcp-write-name.js";
 
 function grantedScopes(claims: JWTPayload): string[] {
-  return typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
+  return typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
 }
 
 export { isMcpWriteToolName };

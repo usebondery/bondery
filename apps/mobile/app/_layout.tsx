@@ -79,11 +79,13 @@ function RootNavigator() {
     return loadLocalCookieToken(setCookieToken);
   }, [isAuthenticated]);
 
-  useEffect(() => {
-    return subscribeLocalSessionEnded(() => {
-      setCookieToken(null);
-    });
-  }, []);
+  useEffect(
+    () =>
+      subscribeLocalSessionEnded(() => {
+        setCookieToken(null);
+      }),
+    [],
+  );
 
   useEffect(() => {
     if (isReady) {

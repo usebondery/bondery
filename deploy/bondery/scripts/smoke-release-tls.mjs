@@ -11,6 +11,100 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
+const HTTP_NODES = ["seaweedfs-master:9333", "seaweedfs-volume:8080", "seaweedfs-filer:8888"];
+const GRPC_NODES = [
+  "seaweedfs-master:19333",
+  "seaweedfs-volume:18080",
+  "seaweedfs-filer:18888",
+  "seaweedfs-s3:18333",
+];
+const INLINE_PEM_CERT_RE = / {10}-----BEGIN CERTIFICATE-----[\s\S]+? {10}-----END CERTIFICATE-----/;
+const LEADING_TEN_SPACES_RE = /^ {10}/;
+const API_TRANSPORT_FILE_RE = /-api-transport\.yml$/;
+const POSTGRES_NO_ENCRYPTION_RE = /no encryption/;
+const POSTGRES_CERT_VERIFY_FAILED_RE = /certificate verify failed/i;
+
+/**
+ * @param {unknown} value
+ * @returns {unknown}
+ */
+function asUnknown(value) {
+  return value;
+}
+
+/** The probe result: the last stdout line, or an empty object (which fails every check). */
+function parseLastJsonLine(stdout) {
+  try {
+    return asUnknown(JSON.parse(stdout.trim().split("\n").at(-1) ?? "{}"));
+  } catch {
+    return {};
+  }
+}
+
+/** Blocks the smoke for `ms` milliseconds. */
+function pause(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+/** @param {{ stdout?: string; stderr?: string; status?: number | null }} result */
+function shellOutput(result) {
+  return `${result.stdout ?? ""}${result.stderr ?? ""}`;
+}
+
+/** @param {{ stdout?: string; status?: number | null }} result */
+function answeredPong(result) {
+  return result.status === 0 && (result.stdout ?? "").includes("PONG");
+}
+
+/**
+ * @param {{ compose: Function; fail: Function }} context
+ * @param {(result: { stdout?: string; stderr?: string; status?: number | null }) => string} output
+ */
+function assertRedisUntrustedClientCert({ compose, fail }, output) {
+  const opensslProbe = compose(
+    `exec -T redis sh -c 'command -v openssl >/dev/null 2>&1 && echo yes || echo no'`,
+  );
+  if (!(opensslProbe.stdout ?? "").trim().endsWith("yes")) {
+    console.log(
+      "Redis mutual TLS: skipped untrusted client certificate probe (openssl missing in image)",
+    );
+    return;
+  }
+  const untrusted = compose(
+    `exec -T redis sh -c 'TMP=$(mktemp -d); openssl req -x509 -newkey rsa:2048 -keyout "$TMP/key.pem" -out "$TMP/cert.pem" -days 1 -nodes -subj /CN=wrong 2>/dev/null; REDISCLI_AUTH="$(cat /bondery-redis/server/password)" redis-cli --tls --cert "$TMP/cert.pem" --key "$TMP/key.pem" --cacert /bondery-redis/server/ca.crt -h localhost -p 6379 ping; ec=$?; rm -rf "$TMP"; exit $ec'`,
+  );
+  if (answeredPong(untrusted)) {
+    fail("Redis accepted a client certificate not signed by its CA", output(untrusted));
+  }
+}
+
+/** The Docker health status of the api container, from `docker compose ps --format json`. */
+function apiHealth(compose) {
+  const lines = (compose("ps --format json api").stdout ?? "").split("\n").filter(Boolean);
+  for (const line of lines) {
+    try {
+      const row = JSON.parse(line);
+      if (row.Service === "api") {
+        return row.Health ?? "";
+      }
+    } catch {
+      // A line that is not JSON is ignored.
+    }
+  }
+  return "";
+}
+
+/** Runs inside the api container: one HTTPS request that trusts only the given CA. */
+const TRANSPORT_CA_PROBE = (host, port, path, ca) => `
+import { request } from "node:https";
+const req = request(
+  { ca: ${JSON.stringify(ca)}, host: ${JSON.stringify(host)}, path: ${JSON.stringify(path)}, port: ${port}, servername: ${JSON.stringify(host)} },
+  (res) => { console.log(\`status \${res.statusCode}\`); res.resume(); },
+);
+req.on("error", (error) => console.log(\`error \${error.code ?? error.message}\`));
+req.end();
+`;
+
 /**
  * Probes run inside the S3 gateway container, which has curl and the cluster certificate.
  * Each line prints `<name> <curl exit code> <http code>`.
@@ -30,14 +124,6 @@ for node in seaweedfs-master:19333 seaweedfs-volume:18080 seaweedfs-filer:18888 
   probe "grpc-plaintext-$node" --http2-prior-knowledge http://$node/
 done
 `;
-
-const HTTP_NODES = ["seaweedfs-master:9333", "seaweedfs-volume:8080", "seaweedfs-filer:8888"];
-const GRPC_NODES = [
-  "seaweedfs-master:19333",
-  "seaweedfs-volume:18080",
-  "seaweedfs-filer:18888",
-  "seaweedfs-s3:18333",
-];
 
 /**
  * What the probes found wrong. A probe counts as accepted when curl completed and the server did
@@ -136,23 +222,6 @@ console.log(JSON.stringify({
   untrusted: await probe(internal),
 }));
 `;
-
-/**
- * @param {unknown} value
- * @returns {unknown}
- */
-function asUnknown(value) {
-  return value;
-}
-
-/** The probe result: the last stdout line, or an empty object (which fails every check). */
-function parseLastJsonLine(stdout) {
-  try {
-    return asUnknown(JSON.parse(stdout.trim().split("\n").at(-1) ?? "{}"));
-  } catch {
-    return {};
-  }
-}
 
 /**
  * What the internal API TLS probes found wrong.
@@ -254,27 +323,6 @@ export function apiHttpsOnlyFailures(results) {
   return failures;
 }
 
-/** Blocks the smoke for `ms` milliseconds. */
-function pause(ms) {
-  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
-}
-
-/** The Docker health status of the api container, from `docker compose ps --format json`. */
-function apiHealth(compose) {
-  const lines = (compose("ps --format json api").stdout ?? "").split("\n").filter(Boolean);
-  for (const line of lines) {
-    try {
-      const row = JSON.parse(line);
-      if (row.Service === "api") {
-        return row.Health ?? "";
-      }
-    } catch {
-      // A line that is not JSON is ignored.
-    }
-  }
-  return "";
-}
-
 /**
  * The API serves HTTPS only (docs/adr/0031-internal-api-tls.mdx):
  * - the container healthcheck, which also uses HTTPS and the API CA, reports healthy;
@@ -312,17 +360,6 @@ export const TRAEFIK_TRANSPORTS = {
   storage: { accepted: ["status 200", "status 403"], path: "/", port: 8443 },
 };
 
-/** Runs inside the api container: one HTTPS request that trusts only the given CA. */
-const TRANSPORT_CA_PROBE = (host, port, path, ca) => `
-import { request } from "node:https";
-const req = request(
-  { ca: ${JSON.stringify(ca)}, host: ${JSON.stringify(host)}, path: ${JSON.stringify(path)}, port: ${port}, servername: ${JSON.stringify(host)} },
-  (res) => { console.log(\`status \${res.statusCode}\`); res.resume(); },
-);
-req.on("error", (error) => console.log(\`error \${error.code ?? error.message}\`));
-req.end();
-`;
-
 /**
  * What a published serversTransport file gets wrong for `name` (<prefix>-<service>). Returns the
  * CA it holds too.
@@ -337,11 +374,9 @@ export function traefikTransportFailures(yaml, name) {
   if (!new RegExp(`^ {6}serverName: ${name}$`, "m").test(yaml)) {
     failures.push(`serverName is not ${name}`);
   }
-  const ca = (yaml.match(
-    / {10}-----BEGIN CERTIFICATE-----[\s\S]+? {10}-----END CERTIFICATE-----/,
-  ) ?? [""])[0]
+  const ca = (yaml.match(INLINE_PEM_CERT_RE) ?? [""])[0]
     .split("\n")
-    .map((line) => line.replace(/^ {10}/, ""))
+    .map((line) => line.replace(LEADING_TEN_SPACES_RE, ""))
     .join("\n");
   if (!ca) {
     failures.push(`no inline CA certificate in rootCAs of ${name}`);
@@ -365,7 +400,7 @@ export function assertTraefikTransport({ compose, fail, dynamicDir }) {
     );
     return;
   }
-  const prefix = apiFile.replace(/-api-transport\.yml$/, "");
+  const prefix = apiFile.replace(API_TRANSPORT_FILE_RE, "");
   for (const [service, check] of Object.entries(TRAEFIK_TRANSPORTS)) {
     const name = `${prefix}-${service}`;
     const file = `${name}-transport.yml`;
@@ -424,7 +459,7 @@ export function assertPostgresTls({ compose, fail }) {
     "host=localhost user=postgres dbname=bondery sslmode=disable connect_timeout=5",
     "select 1",
   );
-  if (plaintext.status === 0 || !/no encryption/.test(output(plaintext))) {
+  if (plaintext.status === 0 || !POSTGRES_NO_ENCRYPTION_RE.test(output(plaintext))) {
     fail("Postgres accepted a plaintext TCP connection", output(plaintext));
   }
 
@@ -433,7 +468,7 @@ export function assertPostgresTls({ compose, fail }) {
     "select 1",
   );
   // A refusal for any other reason (a broken command, a wrong password) proves nothing here.
-  if (untrusted.status === 0 || !/certificate verify failed/i.test(output(untrusted))) {
+  if (untrusted.status === 0 || !POSTGRES_CERT_VERIFY_FAILED_RE.test(output(untrusted))) {
     fail(
       "Postgres did not refuse a client that does not trust the stack CA with a certificate error",
       output(untrusted),
@@ -443,4 +478,37 @@ export function assertPostgresTls({ compose, fail }) {
   console.log(
     `Postgres TLS: ${total} client connections on TLS; plaintext and untrusted CA refused`,
   );
+}
+
+/**
+ * Bundled Redis requires mutual TLS (docs/adr/0032-redis-mtls.mdx):
+ * - redis-cli with the healthcheck client certificate, CA, and password must answer PONG;
+ * - the same command without a client certificate must fail;
+ * - a plaintext ping must fail;
+ * - a client certificate the Redis CA did not sign must fail when openssl is available.
+ */
+export function assertRedisMutualTls({ compose, fail }) {
+  const output = shellOutput;
+
+  const withCert = compose(
+    `exec -T redis sh -c 'REDISCLI_AUTH="$(cat /bondery-redis/server/password)" redis-cli --tls --cert /bondery-redis/server/healthcheck.crt --key /bondery-redis/server/healthcheck.key --cacert /bondery-redis/server/ca.crt -h localhost -p 6379 ping'`,
+  );
+  if (!answeredPong(withCert)) {
+    fail("Redis did not answer PONG with the healthcheck client certificate", output(withCert));
+  }
+
+  const withoutCert = compose(
+    `exec -T redis sh -c 'REDISCLI_AUTH="$(cat /bondery-redis/server/password)" redis-cli --tls --cacert /bondery-redis/server/ca.crt -h localhost -p 6379 ping'`,
+  );
+  if (answeredPong(withoutCert)) {
+    fail("Redis accepted a TLS connection without a client certificate", output(withoutCert));
+  }
+
+  const plaintext = compose(`exec -T redis sh -c 'redis-cli -h localhost -p 6379 ping'`);
+  if (answeredPong(plaintext)) {
+    fail("Redis answered a plaintext ping", output(plaintext));
+  }
+
+  assertRedisUntrustedClientCert({ compose, fail }, output);
+  console.log("Redis mutual TLS: healthcheck cert accepted; plaintext and password-only refused");
 }

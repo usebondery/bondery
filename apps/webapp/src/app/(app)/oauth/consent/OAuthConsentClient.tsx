@@ -2,7 +2,11 @@
 
 import { detachPromise } from "@bondery/helpers/async";
 import { BETTER_AUTH_BASE_PATH } from "@bondery/helpers/globals/paths";
-import { DescribedSelect, errorNotificationTemplate } from "@bondery/mantine-next";
+import {
+  DescribedSelect,
+  type DescribedSelectOption,
+  errorNotificationTemplate,
+} from "@bondery/mantine-next";
 import { Alert, Button, Group, Stack, Text, ThemeIcon, Title } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons-react";
@@ -138,14 +142,17 @@ export function OAuthConsentClient({
   const oauthQuery = buildSignedOAuthQuery(searchParams.toString()) ?? "";
   const requestedScopes = authDetails ? splitScopes(authDetails.scope) : [];
   const canOfferWrite = requestedScopes.includes("mcp:write");
-  const permissionOptions = mcpAccessOptions({
+  const permissionOptions: DescribedSelectOption[] = [];
+  for (const option of mcpAccessOptions({
     fullDescription: t("PermissionFullDescription"),
     fullLabel: t("PermissionFullLabel"),
     readDescription: t("PermissionReadDescription"),
     readLabel: t("PermissionReadLabel"),
-  }).map((option) =>
-    option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
-  );
+  })) {
+    permissionOptions.push(
+      option.value === "full" && !canOfferWrite ? { ...option, disabled: true } : option,
+    );
+  }
 
   const fetchDetails = async () => {
     if (!oauthQuery) {

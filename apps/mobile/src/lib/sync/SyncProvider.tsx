@@ -68,18 +68,20 @@ function SyncProvider({ children }: SyncProviderProps) {
     setConflictCount(0);
   }
 
-  useEffect(() => {
-    return subscribeLocalSessionEnded(() => {
-      detachPromise(
-        (async () => {
-          await unregisterSyncBackgroundTask();
-          stopSyncWakeClient();
-          await resetLocalSyncState();
-          clearReadyState();
-        })(),
-      );
-    });
-  }, []);
+  useEffect(
+    () =>
+      subscribeLocalSessionEnded(() => {
+        detachPromise(
+          (async () => {
+            await unregisterSyncBackgroundTask();
+            stopSyncWakeClient();
+            await resetLocalSyncState();
+            clearReadyState();
+          })(),
+        );
+      }),
+    [],
+  );
 
   useEffect(() => {
     let active = true;

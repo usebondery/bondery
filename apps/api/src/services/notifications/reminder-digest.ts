@@ -139,7 +139,7 @@ export async function sendOneUserDigest(
         formattedHeadingDate,
         manageNotificationsUrl: appSettingsUrl(),
         reminders: user.reminders.map((reminder) => {
-          const type = reminder.type;
+          const { type } = reminder;
           const typeLabel = copy.dateTypes[type];
           return {
             date: reminder.date,

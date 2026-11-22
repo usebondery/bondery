@@ -231,11 +231,13 @@ export async function getContactGroups(
     countMap.set(item.groupId, current + 1);
   }
 
-  const groupsWithCounts: GroupWithCount[] = groups.map((group) =>
-    Object.assign({}, toGroupDto(group), {
+  const groupsWithCounts: GroupWithCount[] = [];
+  for (const group of groups) {
+    groupsWithCounts.push({
+      ...toGroupDto(group),
       contactCount: countMap.get(group.id) ?? 0,
-    }),
-  );
+    });
+  }
 
   return { groups: groupsWithCounts };
 }

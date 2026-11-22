@@ -146,7 +146,7 @@ describe("aPI HTTPS server", () => {
       socket.send("hello over wss");
     });
     await app.listen({ host: "127.0.0.1", port: 0 });
-    port = (app.server.address() as AddressInfo).port;
+    ({ port } = app.server.address() as AddressInfo);
   });
 
   after(async () => {

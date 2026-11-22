@@ -94,7 +94,7 @@ export function registerExtensionVersionCheck(fastify: AppFastifyInstance): void
     }
 
     // Mobile, webapp server, and extension OAuth flows authenticate with Bearer.
-    const authorization = request.headers.authorization;
+    const { authorization } = request.headers;
     if (typeof authorization === "string" && authorization.startsWith("Bearer ")) {
       return;
     }

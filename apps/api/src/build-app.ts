@@ -95,7 +95,7 @@ export type BuildAppOptions = {
 
 export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastifyInstance> {
   registerOpenApiComponentSchemas();
-  const environment = process.env.NODE_ENV || "development";
+  const environment = process.env["NODE_ENV"] || "development";
   const fastify = Fastify({
     https: options.https ?? null,
     logger: getLoggerConfig(environment),
@@ -112,7 +112,7 @@ export async function buildApp(options: BuildAppOptions = {}): Promise<AppFastif
   fastify.setSerializerCompiler(serializerCompiler);
 
   fastify.setSchemaErrorFormatter((errors, dataVar) => {
-    const first = errors[0];
+    const [first] = errors;
     const field = first?.instancePath
       ? first.instancePath.replace(LEADING_SLASH_PATTERN, "").replace(/\//g, ".")
       : dataVar;

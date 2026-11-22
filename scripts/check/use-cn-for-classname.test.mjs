@@ -94,7 +94,7 @@ before(() => {
       continue;
     }
     assert.match(diagnostic.message, CN_RE, "plugin failed to run");
-    const line = diagnostic.location.start.line;
+    const { line } = diagnostic.location.start;
     counts.set(line, (counts.get(line) ?? 0) + 1);
   }
 });

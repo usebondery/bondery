@@ -242,7 +242,7 @@ function buildGraph(input: {
     nodes.unshift(toNode(input.userId, input.selfPerson, input.avatarOptions));
   }
 
-  let truncated = input.truncated;
+  let { truncated } = input;
   const hubs = input.hubs.flatMap((hub) => {
     const personIds = hub.personIds.filter((personId) => seen.has(personId));
     if (personIds.length < 2) {
@@ -315,7 +315,7 @@ async function getGlobalGraph(
   ]);
 
   const capped = capEdges(edgeRows);
-  let truncated = capped.truncated;
+  let { truncated } = capped;
   let relationshipIds = orderedPersonIds(capped.rows);
   if (relationshipIds.length > RELATIONSHIP_GRAPH_NODE_CAP) {
     truncated = true;
@@ -413,7 +413,7 @@ async function getFocusedGraph(
   ]);
 
   const capped = capEdges(edgeRows);
-  let truncated = capped.truncated;
+  let { truncated } = capped;
   let personIds = orderedPersonIds(capped.rows, focusId);
   if (personIds.length > RELATIONSHIP_GRAPH_NODE_CAP) {
     truncated = true;

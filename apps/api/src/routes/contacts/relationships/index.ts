@@ -3,7 +3,6 @@
  * Handles creation, retrieval, and deletion of relationships between contacts.
  */
 
-import type { RelationshipType } from "@bondery/schemas";
 import {
   contactRelationshipResponseSchema,
   contactRelationshipsResponseSchema,
@@ -29,24 +28,6 @@ import type { AppFastifyInstance } from "../../../lib/platform/fastify-types.js"
 import { withCreatedResponse, withOkResponse } from "../../../lib/platform/openapi/responses.js";
 import { withDomainRoute } from "../../../lib/platform/with-domain-route.js";
 import { listContactRelationships } from "../../../services/contacts/queries-detail.js";
-
-const RELATIONSHIP_TYPES: RelationshipType[] = [
-  "parent",
-  "child",
-  "spouse",
-  "partner",
-  "sibling",
-  "friend",
-  "colleague",
-  "neighbor",
-  "guardian",
-  "dependent",
-  "other",
-] satisfies RelationshipType[];
-
-function _isRelationshipType(value: string): value is RelationshipType {
-  return RELATIONSHIP_TYPES.includes(value as RelationshipType);
-}
 
 export function registerRelationshipRoutes(fastify: AppFastifyInstance): void {
   fastify.get(

@@ -57,7 +57,7 @@ export async function inspectDatabaseTls(
       ssl: boolean;
       version: string | null;
     }>("select ssl, version, cipher from pg_stat_ssl where pid = pg_backend_pid()");
-    const row = rows[0];
+    const [row] = rows;
     return {
       certificateDaysLeft: row?.ssl ? peerCertificateDaysLeft(client, now) : null,
       cipher: row?.cipher ?? null,
@@ -85,7 +85,7 @@ export function logCertificateExpiry(
 export function warnOnInsecureProductionPostgres(
   log: Pick<FastifyBaseLogger, "warn">,
   description: DatabaseTlsDescription,
-  nodeEnv: string | undefined = process.env.NODE_ENV,
+  nodeEnv: string | undefined = process.env["NODE_ENV"],
 ): boolean {
   if (nodeEnv !== "production" || description.authenticated) {
     return false;

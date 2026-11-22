@@ -88,7 +88,7 @@ function serializeFastifyBody(body: unknown, contentType: string | undefined): s
 }
 
 function applyResolvedClientIp(request: FastifyRequest): void {
-  const ip = request.ip;
+  const { ip } = request;
   if (!ip) {
     return;
   }

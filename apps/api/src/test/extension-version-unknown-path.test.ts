@@ -12,7 +12,7 @@ import { registerExtensionVersionCheck } from "../lib/extension/version-check.js
  * `MIN_EXTENSION_VERSION` must be non-default for the hook to do anything, so
  * it is set here and restored afterwards.
  */
-const originalMin = process.env.BONDERY_PUBLIC_MIN_EXTENSION_VERSION;
+const originalMin = process.env["BONDERY_PUBLIC_MIN_EXTENSION_VERSION"];
 
 describe("extension version check on unknown paths", () => {
   let app: FastifyInstance;
@@ -33,9 +33,9 @@ describe("extension version check on unknown paths", () => {
   after(async () => {
     await app.close();
     if (originalMin === undefined) {
-      delete process.env.BONDERY_PUBLIC_MIN_EXTENSION_VERSION;
+      delete process.env["BONDERY_PUBLIC_MIN_EXTENSION_VERSION"];
     } else {
-      process.env.BONDERY_PUBLIC_MIN_EXTENSION_VERSION = originalMin;
+      process.env["BONDERY_PUBLIC_MIN_EXTENSION_VERSION"] = originalMin;
     }
   });
 

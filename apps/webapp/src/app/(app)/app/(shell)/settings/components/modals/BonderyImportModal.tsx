@@ -118,12 +118,13 @@ export function BonderyImportModal({ modalId }: BonderyImportModalProps) {
     });
   }, [modalId, t]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       cancelledRef.current = true;
       abortRef.current?.abort();
-    };
-  }, []);
+    },
+    [],
+  );
 
   const showUploadError = phase === "upload" && errorMessage !== null;
   const showReviewError = phase === "review" && errorMessage !== null;

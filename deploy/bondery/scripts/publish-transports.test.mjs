@@ -13,6 +13,17 @@ const API_CA =
 const STORAGE_CA =
   "-----BEGIN CERTIFICATE-----\nMIIBdzCCAR2gAwIBAgIUU1RP\nU3RvcmFnZSBDQQ==\n-----END CERTIFICATE-----\n";
 
+const API_TRANSPORT_NAME_RE = /^ {4}bondery-beta-api:$/m;
+const API_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-api$/m;
+const API_CA_INLINE_RE =
+  /^ {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUAPI$/m;
+const STORAGE_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-storage$/m;
+const STORAGE_CA_INLINE_RE = /^ {10}MIIBdzCCAR2gAwIBAgIUU1RP$/m;
+const PREFIX_CHARSET_ERROR_RE = /lowercase letters, digits, and dashes/;
+const UNKNOWN_SERVICE_RE = /unknown service/;
+const NO_CERTIFICATE_RE = /has no certificate/;
+const DYNAMIC_DIR_ERROR_RE = /BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR/;
+
 describe("publish-transports.sh", () => {
   let root;
   let apiCa;
@@ -45,15 +56,12 @@ describe("publish-transports.sh", () => {
     const result = run("bondery-beta");
     assert.equal(result.status, 0, result.stderr);
     const api = await readFile(join(dynamicDir, "bondery-beta-api-transport.yml"), "utf8");
-    assert.match(api, /^ {4}bondery-beta-api:$/m);
-    assert.match(api, /^ {6}serverName: bondery-beta-api$/m);
-    assert.match(
-      api,
-      /^ {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUAPI$/m,
-    );
+    assert.match(api, API_TRANSPORT_NAME_RE);
+    assert.match(api, API_SERVER_NAME_RE);
+    assert.match(api, API_CA_INLINE_RE);
     const storage = await readFile(join(dynamicDir, "bondery-beta-storage-transport.yml"), "utf8");
-    assert.match(storage, /^ {6}serverName: bondery-beta-storage$/m);
-    assert.match(storage, /^ {10}MIIBdzCCAR2gAwIBAgIUU1RP$/m);
+    assert.match(storage, STORAGE_SERVER_NAME_RE);
+    assert.match(storage, STORAGE_CA_INLINE_RE);
     assert.deepEqual((await readdir(dynamicDir)).sort(), [
       "acme.json",
       "bondery-beta-api-transport.yml",
@@ -75,23 +83,23 @@ describe("publish-transports.sh", () => {
     for (const prefix of ["../evil", "Bondery", "a b", "-x", "a:b"]) {
       const result = run(prefix);
       assert.notEqual(result.status, 0, prefix);
-      assert.match(result.stderr, /lowercase letters, digits, and dashes/);
+      assert.match(result.stderr, PREFIX_CHARSET_ERROR_RE);
     }
   });
 
   it("publishes only known services", () => {
     const result = run("bondery", [dynamicDir, `../../etc/evil=${apiCa}`]);
     assert.notEqual(result.status, 0);
-    assert.match(result.stderr, /unknown service/);
+    assert.match(result.stderr, UNKNOWN_SERVICE_RE);
   });
 
   it("fails loudly without a CA or without Traefik's folder", () => {
     const noCa = run("bondery", [dynamicDir, `api=${join(root, "missing.crt")}`]);
     assert.notEqual(noCa.status, 0);
-    assert.match(noCa.stderr, /has no certificate/);
+    assert.match(noCa.stderr, NO_CERTIFICATE_RE);
 
     const noFolder = run("bondery", [join(root, "no-traefik"), `api=${apiCa}`]);
     assert.notEqual(noFolder.status, 0);
-    assert.match(noFolder.stderr, /BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR/);
+    assert.match(noFolder.stderr, DYNAMIC_DIR_ERROR_RE);
   });
 });

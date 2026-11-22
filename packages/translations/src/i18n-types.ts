@@ -37,6 +37,7 @@ type SubtreeAtPrefix<T, Prefix extends string | undefined> = Prefix extends stri
       : never
     : never
   : T;
+
 export type * from "./generated/i18n/catalog-prefixes.js";
 export type { NamespacePrefixes } from "./generated/i18n/catalog-prefixes.js";
 export type { Catalog } from "./generated/i18n/catalog-types.js";

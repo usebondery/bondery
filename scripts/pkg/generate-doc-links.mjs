@@ -91,7 +91,7 @@ function main() {
     return;
   }
 
-  const sortedIds = [...entries.keys()].sort();
+  const sortedIds = [...entries.keys()].sort((left, right) => left.localeCompare(right));
   const lines = sortedIds.map((id) => {
     const entry = entries.get(id);
     const pathPart = `path: ${JSON.stringify(entry.path)}`;

@@ -130,9 +130,8 @@ function PersonChip({
   };
 
   const searchInputRef = useRef<HTMLInputElement | null>(null);
-  const matchQuery = (candidate: PersonChipIdentity, query: string) => {
-    return getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
-  };
+  const matchQuery = (candidate: PersonChipIdentity, query: string) =>
+    getDisplayName(candidate).toLowerCase().includes(query.toLowerCase());
 
   const {
     canLoadMore,

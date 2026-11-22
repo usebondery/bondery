@@ -225,12 +225,10 @@ function MergeWithModal({
     rightContact?.lastInteraction,
   );
 
-  const conflictResolutions = (() => {
-    return {
-      ...conflictChoices,
-      ...(autoLastInteractionChoice ? { lastInteraction: autoLastInteractionChoice } : {}),
-    };
-  })();
+  const conflictResolutions = (() => ({
+    ...conflictChoices,
+    ...(autoLastInteractionChoice ? { lastInteraction: autoLastInteractionChoice } : {}),
+  }))();
   const goToResolve = () => {
     if (!leftPersonId || !rightPersonId) {
       notifications.show(

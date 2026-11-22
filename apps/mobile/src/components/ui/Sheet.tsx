@@ -233,13 +233,14 @@ function Sheet({
     };
   }, [isLocked, opened]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (searchFocusTimerRef.current) {
         clearTimeout(searchFocusTimerRef.current);
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   function handleDismiss() {
     if (isLockedRef.current && openedRef.current && !dismissByParentRef.current) {

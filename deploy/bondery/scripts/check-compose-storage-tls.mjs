@@ -23,6 +23,39 @@ const S3_ENDPOINT_LINE =
   /^\s+BONDERY_PRIVATE_S3_ENDPOINT: https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage:8443\s*$/;
 const TLS_WRAPPER_ENTRYPOINT =
   /entrypoint:\s*\[\s*"\/bin\/sh",\s*"\/etc\/bondery\/tls-entrypoint\.sh",/;
+const HASH_COMMENT_RE = /#.*$/;
+const TOML_HEADER_RE = /^\[([^\]]+)\]$/;
+const TOML_PAIR_RE = /^([A-Za-z0-9_]+)\s*=\s*(.+)$/;
+const TOML_QUOTED_VALUE_RE = /^"(.*)"$/;
+const S3_ENDPOINT_KEY_RE = /^\s+BONDERY_PRIVATE_S3_ENDPOINT:/;
+const STORAGE_TLS_CA_OR_CLUSTER_VOLUME_RE = /storage-tls-(?:ca|cluster):/;
+const STACK_SECRETS_COMPLETED_RE =
+  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
+const STORAGE_TMPFS_RE = /tmpfs:\s*\n\s*- \/run\/bondery-storage/;
+const STORAGE_TLS_CA_OR_CLIENT_VOLUME_RE = /storage-tls-(?:ca|client):/;
+const TLS_HEALTH_HTTPS_RE = /tls-health\.sh",\s*"https:\/\//;
+const VOLUME_IP_RE = /command: "volume [^"]*-ip=seaweedfs-volume/;
+const S3_HTTPS_PORT_RE = /-port\.https=8443/;
+const S3_CERT_FILE_RE = /-cert\.file=\/run\/bondery-storage\/tls\/tls\.crt/;
+const S3_KEY_FILE_RE = /-key\.file=\/run\/bondery-storage\/tls\/tls\.key/;
+const WEED_S3_EXEC_RE = /exec su-exec seaweed weed s3/;
+const ICEBERG_PORT_OFF_RE = /-port\.iceberg=0/;
+const STORAGE_KEY_INSTALL_RE = /install -o seaweed -g seaweed -m 0600 [^\n]*tls\.key/;
+const S3_READY_CACERT_RE = /--cacert [^\n]*https:\/\/localhost:8443\//;
+const TRAEFIK_STORAGE_PORT_8443_RE = /-storage\.loadbalancer\.server\.port=8443"/;
+const TRAEFIK_STORAGE_SCHEME_HTTPS_RE = /-storage\.loadbalancer\.server\.scheme=https"/;
+const TRAEFIK_STORAGE_HTTP_PORT_8333_RE = /loadbalancer\.server\.port=8333/;
+const TRAEFIK_STORAGE_PUBLIC_METHODS_RE =
+  /-storage\.rule=Host\(`[^`]+`\) && \(Method\(`GET`\) \|\| Method\(`HEAD`\) \|\| Method\(`OPTIONS`\)\)"/;
+const TRAEFIK_DROP_COOKIE_RE = /-storage-public-read\.headers\.customrequestheaders\.Cookie="/;
+const TRAEFIK_DROP_AUTHORIZATION_RE =
+  /-storage-public-read\.headers\.customrequestheaders\.Authorization="/;
+const TRAEFIK_TRANSPORT_COMPLETED_RE =
+  /traefik-transport:\s*\n\s*condition:\s*service_completed_successfully/;
+const STORAGE_CERTIFICATE_COMMON_NAME_RE = /STORAGE_CERTIFICATE_COMMON_NAME = "([^"]+)"/;
+const DEV_S3_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:8443:8443"/;
+const PUBLIC_S3_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:8443"/;
+const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!reset/;
 
 /**
  * Minimal reader for seaweedfs/security.toml: `[section]` headers and `key = value` lines.
@@ -33,16 +66,16 @@ function readToml(source) {
   const sections = new Map([["", new Map()]]);
   let current = sections.get("");
   for (const rawLine of source.split("\n")) {
-    const line = rawLine.replace(/#.*$/, "").trim();
-    const header = line.match(/^\[([^\]]+)\]$/);
+    const line = rawLine.replace(HASH_COMMENT_RE, "").trim();
+    const header = line.match(TOML_HEADER_RE);
     if (header) {
       current = new Map();
       sections.set(header[1], current);
       continue;
     }
-    const pair = line.match(/^([A-Za-z0-9_]+)\s*=\s*(.+)$/);
+    const pair = line.match(TOML_PAIR_RE);
     if (pair && current) {
-      current.set(pair[1], pair[2].replace(/^"(.*)"$/, "$1"));
+      current.set(pair[1], pair[2].replace(TOML_QUOTED_VALUE_RE, "$1"));
     }
   }
   return sections;
@@ -75,9 +108,7 @@ export function checkStorageTls({ root, serviceBlock }) {
       }
     }
     // The api environment and the ensure-storage-buckets pre_start hook both set the endpoint.
-    const endpointLines = apiBlock
-      .split("\n")
-      .filter((line) => /^\s+BONDERY_PRIVATE_S3_ENDPOINT:/.test(line));
+    const endpointLines = apiBlock.split("\n").filter((line) => S3_ENDPOINT_KEY_RE.test(line));
     if (endpointLines.length === 0 || endpointLines.some((line) => !S3_ENDPOINT_LINE.test(line))) {
       fail(
         "api BONDERY_PRIVATE_S3_ENDPOINT must be https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443 (TLS, not overridable from .env)",
@@ -95,7 +126,7 @@ export function checkStorageTls({ root, serviceBlock }) {
     if (!apiBlock.includes("- storage-tls-client:/bondery-storage/client:ro")) {
       fail("api must mount storage-tls-client read-only");
     }
-    if (/storage-tls-(?:ca|cluster):/.test(apiBlock)) {
+    if (STORAGE_TLS_CA_OR_CLUSTER_VOLUME_RE.test(apiBlock)) {
       fail("api must not mount the storage CA or cluster key volumes");
     }
   }
@@ -115,12 +146,12 @@ export function checkStorageTls({ root, serviceBlock }) {
       if (!TLS_WRAPPER_ENTRYPOINT.test(block)) {
         fail(`${name} must start through seaweedfs/tls-entrypoint.sh`);
       }
-      if (!/stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/.test(block)) {
+      if (!STACK_SECRETS_COMPLETED_RE.test(block)) {
         fail(
           `${name} must depends_on stack-secrets with condition: service_completed_successfully`,
         );
       }
-      if (!/tmpfs:\s*\n\s*- \/run\/bondery-storage/.test(block)) {
+      if (!STORAGE_TMPFS_RE.test(block)) {
         fail(`${name} must copy the TLS key into a tmpfs at /run/bondery-storage`);
       }
       for (const mount of [
@@ -132,41 +163,35 @@ export function checkStorageTls({ root, serviceBlock }) {
           fail(`${name} must mount ${mount.slice(2)}`);
         }
       }
-      if (/storage-tls-(?:ca|client):/.test(block)) {
+      if (STORAGE_TLS_CA_OR_CLIENT_VOLUME_RE.test(block)) {
         fail(`${name} must not mount the storage CA or client volumes`);
       }
-      if (name !== "seaweedfs-s3" && !/tls-health\.sh",\s*"https:\/\//.test(block)) {
+      if (name !== "seaweedfs-s3" && !TLS_HEALTH_HTTPS_RE.test(block)) {
         fail(`${name} healthcheck must probe HTTPS through seaweedfs/tls-health.sh`);
       }
     }
-    if (!/command: "volume [^"]*-ip=seaweedfs-volume/.test(seaweedText)) {
+    if (!VOLUME_IP_RE.test(seaweedText)) {
       fail("seaweedfs-volume must register as -ip=seaweedfs-volume, a name the certificate covers");
     }
 
     const entrypoint = readFileSync(resolve(root, "seaweedfs/entrypoint.sh"), "utf8");
     for (const [pattern, message] of [
-      [/-port\.https=8443/, "seaweedfs/entrypoint.sh must serve the API on HTTPS 8443"],
-      [
-        /-cert\.file=\/run\/bondery-storage\/tls\/tls\.crt/,
-        "seaweedfs/entrypoint.sh must serve the cluster certificate",
-      ],
-      [
-        /-key\.file=\/run\/bondery-storage\/tls\/tls\.key/,
-        "seaweedfs/entrypoint.sh must set -key.file",
-      ],
-      [/exec su-exec seaweed weed s3/, "seaweedfs/entrypoint.sh must run the gateway as seaweed"],
-      [/-port\.iceberg=0/, "seaweedfs/entrypoint.sh must keep the plaintext Iceberg catalog off"],
+      [S3_HTTPS_PORT_RE, "seaweedfs/entrypoint.sh must serve the API on HTTPS 8443"],
+      [S3_CERT_FILE_RE, "seaweedfs/entrypoint.sh must serve the cluster certificate"],
+      [S3_KEY_FILE_RE, "seaweedfs/entrypoint.sh must set -key.file"],
+      [WEED_S3_EXEC_RE, "seaweedfs/entrypoint.sh must run the gateway as seaweed"],
+      [ICEBERG_PORT_OFF_RE, "seaweedfs/entrypoint.sh must keep the plaintext Iceberg catalog off"],
     ]) {
       if (!pattern.test(entrypoint)) {
         fail(message);
       }
     }
     const wrapper = readFileSync(resolve(root, "seaweedfs/tls-entrypoint.sh"), "utf8");
-    if (!/install -o seaweed -g seaweed -m 0600 [^\n]*tls\.key/.test(wrapper)) {
+    if (!STORAGE_KEY_INSTALL_RE.test(wrapper)) {
       fail("seaweedfs/tls-entrypoint.sh must copy the key with mode 0600 owned by seaweed");
     }
     const ready = readFileSync(resolve(root, "seaweedfs/s3-ready.sh"), "utf8");
-    if (!/--cacert [^\n]*https:\/\/localhost:8443\//.test(ready)) {
+    if (!S3_READY_CACERT_RE.test(ready)) {
       fail("seaweedfs/s3-ready.sh must check the HTTPS listener against the storage CA");
     }
   }
@@ -183,31 +208,28 @@ export function checkStorageTls({ root, serviceBlock }) {
     }
     const P = "\\$\\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\\}";
     for (const [pattern, message, expected = true] of [
-      [/-storage\.loadbalancer\.server\.port=8443"/, "Traefik must forward to the HTTPS port 8443"],
-      [/-storage\.loadbalancer\.server\.scheme=https"/, "Traefik must use scheme https"],
+      [TRAEFIK_STORAGE_PORT_8443_RE, "Traefik must forward to the HTTPS port 8443"],
+      [TRAEFIK_STORAGE_SCHEME_HTTPS_RE, "Traefik must use scheme https"],
       [
         new RegExp(`-storage\\.loadbalancer\\.serverstransport=${P}-storage@file"`),
         "Traefik must verify the storage CA with the published transport (<prefix>-storage@file)",
       ],
-      [/loadbalancer\.server\.port=8333/, "Traefik must not forward to the HTTP port 8333", false],
+      [TRAEFIK_STORAGE_HTTP_PORT_8333_RE, "Traefik must not forward to the HTTP port 8333", false],
       [
-        /-storage\.rule=Host\(`[^`]+`\) && \(Method\(`GET`\) \|\| Method\(`HEAD`\) \|\| Method\(`OPTIONS`\)\)"/,
+        TRAEFIK_STORAGE_PUBLIC_METHODS_RE,
         "the public storage router must match GET, HEAD, and OPTIONS only",
       ],
       [
         new RegExp(`-storage\\.middlewares=${P}-storage-public-read"`),
         "the public storage router must use the <prefix>-storage-public-read middleware",
       ],
+      [TRAEFIK_DROP_COOKIE_RE, "the public-read middleware must drop the Cookie header"],
       [
-        /-storage-public-read\.headers\.customrequestheaders\.Cookie="/,
-        "the public-read middleware must drop the Cookie header",
-      ],
-      [
-        /-storage-public-read\.headers\.customrequestheaders\.Authorization="/,
+        TRAEFIK_DROP_AUTHORIZATION_RE,
         "the public-read middleware must drop the Authorization header",
       ],
       [
-        /traefik-transport:\s*\n\s*condition:\s*service_completed_successfully/,
+        TRAEFIK_TRANSPORT_COMPLETED_RE,
         "seaweedfs-s3 must depends_on traefik-transport with condition: service_completed_successfully",
       ],
     ]) {
@@ -230,7 +252,7 @@ export function checkStorageTls({ root, serviceBlock }) {
       resolve(root, "../../apps/api/src/lib/infra-secrets/storage-secrets.ts"),
       "utf8",
     );
-    const commonName = secretsSource.match(/STORAGE_CERTIFICATE_COMMON_NAME = "([^"]+)"/)?.[1];
+    const commonName = secretsSource.match(STORAGE_CERTIFICATE_COMMON_NAME_RE)?.[1];
     if (!commonName) {
       fail("cannot find STORAGE_CERTIFICATE_COMMON_NAME in storage-secrets.ts");
     }
@@ -290,13 +312,13 @@ export function checkStorageTls({ root, serviceBlock }) {
         fail(`${name} must mount the dev cluster certificate from .temp/storage-secrets`);
       }
     }
-    if (!/- "127\.0\.0\.1:8443:8443"/.test(devText)) {
+    if (!DEV_S3_LOOPBACK_PORT_RE.test(devText)) {
       fail("seaweedfs-s3 must publish HTTPS 8443 on 127.0.0.1 only");
     }
-    if (/- "(?:0\.0\.0\.0:)?\d+:8443"/.test(devText)) {
+    if (PUBLIC_S3_PORT_RE.test(devText)) {
       fail("seaweedfs-s3 must not publish 8443 on all interfaces");
     }
-    if (/security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!reset/.test(devText)) {
+    if (DEV_TLS_RESET_RE.test(devText)) {
       fail("the dev overlay must keep security.toml and the TLS wrapper");
     }
   }

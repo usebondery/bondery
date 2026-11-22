@@ -260,7 +260,7 @@ function applyOptimisticContactChannels(
     });
   }
 
-  const socialFields: Array<[string, string | null | undefined]> = [
+  const socialFields: [string, string | null | undefined][] = [
     ["linkedin", patch.linkedin],
     ["instagram", patch.instagram],
     ["whatsapp", patch.whatsapp],

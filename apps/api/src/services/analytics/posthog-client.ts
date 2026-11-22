@@ -16,21 +16,26 @@ export function scrubExceptionEvent(event: EventMessage | null): EventMessage | 
     return event;
   }
 
-  const exceptions = event.properties?.$exception_list;
+  const exceptions = event.properties?.["$exception_list"];
   if (!Array.isArray(exceptions)) {
     return event;
+  }
+
+  const exceptionList: unknown[] = [];
+  for (const exception of exceptions) {
+    const value = (exception as { value?: unknown } | null)?.value;
+    exceptionList.push(
+      typeof value === "string"
+        ? { ...(exception as object), value: scrubEmails(value) }
+        : exception,
+    );
   }
 
   return {
     ...event,
     properties: {
       ...event.properties,
-      $exception_list: exceptions.map((exception: unknown) => {
-        const value = (exception as { value?: unknown } | null)?.value;
-        return typeof value === "string"
-          ? Object.assign({}, exception as object, { value: scrubEmails(value) })
-          : exception;
-      }),
+      $exception_list: exceptionList,
     },
   };
 }
@@ -47,7 +52,7 @@ export function getPosthogClient(): PostHog | null {
     return client;
   }
 
-  const key = process.env.BONDERY_PUBLIC_POSTHOG_KEY ?? "";
+  const key = process.env["BONDERY_PUBLIC_POSTHOG_KEY"] ?? "";
   client =
     key && !isTestEnvironment()
       ? new PostHog(key, {
@@ -55,7 +60,7 @@ export function getPosthogClient(): PostHog | null {
           enableExceptionAutocapture: true,
           flushAt: 1,
           flushInterval: 0,
-          host: process.env.BONDERY_PUBLIC_POSTHOG_HOST || DEFAULT_POSTHOG_HOST,
+          host: process.env["BONDERY_PUBLIC_POSTHOG_HOST"] || DEFAULT_POSTHOG_HOST,
         })
       : null;
 

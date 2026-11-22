@@ -85,7 +85,7 @@ describe("rewriteMcpToolErrors", () => {
       },
     };
     assert.equal(rewriteMcpToolErrors(payload, REQUEST_ID), true);
-    const text = payload.result.content[0].text;
+    const { text } = payload.result.content[0];
     assert.match(text, VALIDATION_ERROR_PATTERN);
     assert.match(text, DOC_URL_PATTERN);
     assert.equal(

@@ -15,7 +15,10 @@ describe("syncWakeEventFromChanges", () => {
     );
 
     assert.equal(event.serverSequence, 12);
-    assert.deepEqual(event.affectedTables.toSorted(), ["people", "people_tags"]);
+    assert.deepEqual(
+      event.affectedTables.toSorted((left, right) => left.localeCompare(right)),
+      ["people", "people_tags"],
+    );
     assert.equal(event.sourceDeviceId, "device-1");
   });
 

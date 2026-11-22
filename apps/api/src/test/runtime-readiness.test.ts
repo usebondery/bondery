@@ -57,9 +57,9 @@ type EnvSnapshot = {
 
 function snapshotEnv(): EnvSnapshot {
   return {
-    databaseUrl: process.env.DATABASE_URL,
-    nodeEnv: process.env.NODE_ENV,
-    redisUrl: process.env.BONDERY_PRIVATE_REDIS_URL,
+    databaseUrl: process.env["DATABASE_URL"],
+    nodeEnv: process.env["NODE_ENV"],
+    redisUrl: process.env["BONDERY_PRIVATE_REDIS_URL"],
   };
 }
 
@@ -90,8 +90,8 @@ describe("postgres runtime readiness", () => {
   });
 
   it("initPostgres skips verify when DATABASE_URL is missing in test", async () => {
-    process.env.NODE_ENV = "test";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "test";
+    delete process.env["DATABASE_URL"];
 
     const readiness = await initPostgres();
 
@@ -100,15 +100,15 @@ describe("postgres runtime readiness", () => {
   });
 
   it("initPostgres throws when DATABASE_URL is missing in development", async () => {
-    process.env.NODE_ENV = "development";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "development";
+    delete process.env["DATABASE_URL"];
 
     await assert.rejects(() => initPostgres(), DATABASE_URL_MUST_BE_SET_PATTERN);
   });
 
   it("initPostgres throws when query fails in development", async () => {
-    process.env.NODE_ENV = "development";
-    process.env.DATABASE_URL = "postgresql://user:pass@127.0.0.1:5432/bondery";
+    process.env["NODE_ENV"] = "development";
+    process.env["DATABASE_URL"] = "postgresql://user:pass@127.0.0.1:5432/bondery";
     prisma.$queryRaw = (async () => {
       throw new Error("connection refused");
     }) as typeof prisma.$queryRaw;
@@ -117,8 +117,8 @@ describe("postgres runtime readiness", () => {
   });
 
   it("verifyPostgres returns unhealthy when DATABASE_URL is missing outside test", async () => {
-    process.env.NODE_ENV = "development";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "development";
+    delete process.env["DATABASE_URL"];
 
     const readiness = await verifyPostgres();
 
@@ -128,8 +128,8 @@ describe("postgres runtime readiness", () => {
   });
 
   it("probePostgres delegates to verifyPostgres", async () => {
-    process.env.NODE_ENV = "test";
-    delete process.env.DATABASE_URL;
+    process.env["NODE_ENV"] = "test";
+    delete process.env["DATABASE_URL"];
 
     const result = await probePostgres();
 
@@ -146,7 +146,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("initObjectStorage skips verify when S3 env is incomplete in test", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
 
     const readiness = await initObjectStorage(undefined, {
       ...storageConfig,
@@ -158,7 +158,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("initObjectStorage throws when S3 env is incomplete in development", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     await assert.rejects(
       () =>
@@ -171,7 +171,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("initObjectStorage throws when HeadBucket fails", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     const client = createMockHeadBucketClient(() => {
       throw new Error("NotFound");
     });
@@ -183,7 +183,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("initObjectStorage succeeds when HeadBucket succeeds without a /status server", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     const client = createMockHeadBucketClient(async () => {
       // HeadBucket succeeds: the bucket is already present.
     });
@@ -195,7 +195,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("verifyObjectStorage succeeds when HeadBucket succeeds without a /status server", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
     const client = createMockHeadBucketClient(async () => {
       // HeadBucket succeeds: the bucket is already present.
     });
@@ -207,7 +207,7 @@ describe("object storage runtime readiness", () => {
   });
 
   it("verifyObjectStorage returns unhealthy when config is incomplete outside test", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     const readiness = await verifyObjectStorage({
       ...storageConfig,
@@ -230,15 +230,15 @@ describe("prisma pool injection", () => {
   });
 
   it("initializePrisma wires an explicit pool", async () => {
-    process.env.NODE_ENV = "test";
-    process.env.DATABASE_URL = "postgresql://user:pass@127.0.0.1:5432/bondery";
+    process.env["NODE_ENV"] = "test";
+    process.env["DATABASE_URL"] = "postgresql://user:pass@127.0.0.1:5432/bondery";
 
     const { createPrismaPool, getPrismaPool, initializePrisma, resetPrismaForTests } = await import(
       "@bondery/db"
     );
     resetPrismaForTests();
 
-    const pool = createPrismaPool(process.env.DATABASE_URL);
+    const pool = createPrismaPool(process.env["DATABASE_URL"]);
     initializePrisma(pool);
 
     assert.equal(getPrismaPool(), pool);
@@ -254,7 +254,7 @@ describe("redis runtime readiness", () => {
   });
 
   it("initRedis skips verify when URL is missing in test", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
 
     const result = await initRedis(undefined, "");
 
@@ -264,7 +264,7 @@ describe("redis runtime readiness", () => {
   });
 
   it("initRedis throws when URL is missing in development", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     await assert.rejects(
       () => initRedis(undefined, ""),
@@ -273,7 +273,7 @@ describe("redis runtime readiness", () => {
   });
 
   it("verifyRedis returns unhealthy when URL is missing outside test", async () => {
-    process.env.NODE_ENV = "development";
+    process.env["NODE_ENV"] = "development";
 
     const readiness = await verifyRedis("");
 
@@ -283,7 +283,7 @@ describe("redis runtime readiness", () => {
   });
 
   it("probeRedis delegates to verifyRedis", async () => {
-    process.env.NODE_ENV = "test";
+    process.env["NODE_ENV"] = "test";
 
     const result = await probeRedis("");
 

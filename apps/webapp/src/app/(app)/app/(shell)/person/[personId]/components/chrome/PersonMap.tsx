@@ -14,17 +14,15 @@ interface PersonMapProps {
 export function PersonMap({ latitude, longitude, name, avatarUrl }: PersonMapProps) {
   const t = useMapCommonTranslations();
 
-  const markers = (() => {
-    return [
-      {
-        avatarUrl,
-        id: "person",
-        latitude,
-        longitude,
-        name,
-      },
-    ];
-  })();
+  const markers = (() => [
+    {
+      avatarUrl,
+      id: "person",
+      latitude,
+      longitude,
+      name,
+    },
+  ])();
 
   return (
     <Stack gap="sm">

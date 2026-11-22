@@ -1,7 +1,16 @@
+import { readFileSync } from "node:fs";
+
 import { getPrismaPool, prisma } from "@bondery/db";
 import type { FastifyBaseLogger } from "fastify";
 import { revokeEndedReviewerGrants } from "../bootstrap/revoke-expired-reviewers.js";
 import { inspectDatabaseTls, logCertificateExpiry } from "../data/postgres-tls.js";
+import { REDIS_TLS_CERT_FILE_ENV } from "../data/redis-connection-options.js";
+import {
+  inspectRedisTls,
+  logRedisClientCertificateExpiry,
+  logRedisServerCertificateExpiry,
+} from "../data/redis-tls.js";
+import { certificateDaysLeft as redisCertificateDaysLeft } from "../infra-secrets/x509.js";
 import {
   apiCertificateDaysLeft,
   logApiCertificateExpiry,
@@ -25,7 +34,7 @@ async function checkPostgresCertificate(log: FastifyBaseLogger): Promise<void> {
 }
 
 async function checkObjectStorageCertificate(log: FastifyBaseLogger): Promise<void> {
-  const endpoint = process.env.BONDERY_PRIVATE_S3_ENDPOINT?.trim();
+  const endpoint = process.env["BONDERY_PRIVATE_S3_ENDPOINT"]?.trim();
   if (!endpoint) {
     log.warn("Object storage TLS certificate check skipped: no BONDERY_PRIVATE_S3_ENDPOINT");
     return;
@@ -40,9 +49,35 @@ async function checkObjectStorageCertificate(log: FastifyBaseLogger): Promise<vo
 }
 
 async function checkApiCertificate(log: FastifyBaseLogger): Promise<void> {
-  const certificateDaysLeft = apiCertificateDaysLeft(resolveApiTlsConfig());
-  if (!logApiCertificateExpiry(log, certificateDaysLeft)) {
-    log.info({ certificateDaysLeft }, "API TLS certificate check complete");
+  const apiDaysLeft = apiCertificateDaysLeft(resolveApiTlsConfig());
+  if (!logApiCertificateExpiry(log, apiDaysLeft)) {
+    log.info({ certificateDaysLeft: apiDaysLeft }, "API TLS certificate check complete");
+  }
+}
+
+async function checkRedisCertificates(log: FastifyBaseLogger): Promise<void> {
+  const redisUrl = process.env["BONDERY_PRIVATE_REDIS_URL"]?.trim();
+  if (!redisUrl) {
+    log.warn("Redis TLS certificate check skipped: no BONDERY_PRIVATE_REDIS_URL");
+    return;
+  }
+  const inspection = await inspectRedisTls(redisUrl);
+  const serverLogged = logRedisServerCertificateExpiry(log, inspection.certificateDaysLeft);
+  const certFile = process.env[REDIS_TLS_CERT_FILE_ENV]?.trim();
+  let clientLogged: "error" | "warn" | null = null;
+  if (certFile) {
+    const clientDaysLeft = redisCertificateDaysLeft(readFileSync(certFile, "utf8"));
+    clientLogged = logRedisClientCertificateExpiry(log, clientDaysLeft);
+  }
+  if (!serverLogged && !clientLogged) {
+    log.info(
+      {
+        certificateDaysLeft: inspection.certificateDaysLeft,
+        mutualTls: inspection.mutualTls,
+        tls: inspection.tls,
+      },
+      "Redis TLS certificate check complete",
+    );
   }
 }
 
@@ -68,7 +103,7 @@ export async function runReviewerAccessSweep(log: FastifyBaseLogger): Promise<vo
 }
 
 /**
- * Daily certificate check for Postgres, object storage, and the API's HTTPS listener.
+ * Daily certificate check for Postgres, object storage, Redis, and the API HTTPS listener.
  * A stack that is not redeployed for months still warns 90 days and 14 days before a
  * certificate expires. One failed check does not skip the others.
  */
@@ -77,6 +112,7 @@ export async function runTlsCertificateCheck(log: FastifyBaseLogger): Promise<vo
     checkPostgresCertificate(log),
     checkObjectStorageCertificate(log),
     checkApiCertificate(log),
+    checkRedisCertificates(log),
   ]);
   const failures = results
     .filter((result): result is PromiseRejectedResult => result.status === "rejected")

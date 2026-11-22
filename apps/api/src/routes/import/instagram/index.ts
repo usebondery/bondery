@@ -124,12 +124,14 @@ export const instagramImportRoutes: AppRoutePlugin = async (fastify) => {
           }
         }
 
-        const contactsWithExistingState = contacts.map((contact) => {
+        const contactsWithExistingState: InstagramParseResponse["contacts"] = [];
+        for (const contact of contacts) {
           const normalizedHandle = contact.instagramUsername.trim().toLowerCase();
-          return Object.assign({}, contact, {
+          contactsWithExistingState.push({
+            ...contact,
             alreadyExists: normalizedHandle.length > 0 && existingHandleSet.has(normalizedHandle),
           });
-        });
+        }
 
         const response: InstagramParseResponse = {
           contacts: contactsWithExistingState,

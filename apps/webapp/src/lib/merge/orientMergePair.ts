@@ -4,9 +4,10 @@ export function swapMergeConflictChoices(
   choices: Partial<Record<MergeConflictField, MergeConflictChoice>>,
 ): Partial<Record<MergeConflictField, MergeConflictChoice>> {
   const swapped: Partial<Record<MergeConflictField, MergeConflictChoice>> = {};
-  for (const [field, choice] of Object.entries(choices) as Array<
-    [MergeConflictField, MergeConflictChoice]
-  >) {
+  for (const [field, choice] of Object.entries(choices) as [
+    MergeConflictField,
+    MergeConflictChoice,
+  ][]) {
     swapped[field] = choice === "left" ? "right" : "left";
   }
   return swapped;

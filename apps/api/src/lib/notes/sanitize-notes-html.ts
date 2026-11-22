@@ -93,20 +93,20 @@ const OPTIONS: IOptions = {
   disallowedTagsMode: "discard",
   transformTags: {
     a: (tagName, attribs) => {
-      const href = (attribs.href ?? "").trim();
+      const href = (attribs["href"] ?? "").trim();
       const next: Record<string, string> = {
         rel: "noopener noreferrer",
         target: "_blank",
       };
       if (ABSOLUTE_LINK.test(href)) {
-        next.href = href;
+        next["href"] = href;
       }
       return { attribs: next, tagName };
     },
     input: (tagName, attribs) => {
       const next: Record<string, string> = { type: "checkbox" };
-      if (attribs.checked !== undefined) {
-        next.checked = "";
+      if (attribs["checked"] !== undefined) {
+        next["checked"] = "";
       }
       return { attribs: next, tagName };
     },

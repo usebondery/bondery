@@ -60,7 +60,7 @@ for (const file of collectRouteFiles(routesRoot)) {
 
   const schemaBlocks = [...content.matchAll(ROUTE_METHOD_RE)];
   for (const match of schemaBlocks) {
-    const block = match[0];
+    const [block] = match;
     if (!block.includes("response:")) {
       violations.push(`${routeRel}: route schema missing response block`);
     }

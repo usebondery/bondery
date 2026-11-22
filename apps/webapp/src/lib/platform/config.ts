@@ -99,13 +99,23 @@ export const RELATIONSHIP_TYPE_OPTIONS: ReadonlyArray<{
 ] as const;
 
 export const CONTACT_METHOD_TYPE_OPTIONS: ReadonlyArray<{
-  value: ContactType;
   emoji: string;
   label: string;
-}> = CONTACT_CHANNEL_TYPE_OPTIONS.map((option) => ({
-  ...option,
-  label: option.value === "work" ? "Work" : "Home",
-}));
+  value: ContactType;
+}> = (() => {
+  const options: Array<{
+    emoji: string;
+    label: string;
+    value: ContactType;
+  }> = [];
+  for (const option of CONTACT_CHANNEL_TYPE_OPTIONS) {
+    options.push({
+      ...option,
+      label: option.value === "work" ? "Work" : "Home",
+    });
+  }
+  return options;
+})();
 
 export const PHONE_TYPE_OPTIONS: ReadonlyArray<{
   value: ContactType;
@@ -120,13 +130,23 @@ export const EMAIL_TYPE_OPTIONS: ReadonlyArray<{
 }> = CONTACT_METHOD_TYPE_OPTIONS;
 
 export const ADDRESS_TYPE_OPTIONS: ReadonlyArray<{
-  value: ContactAddressType;
   emoji: string;
   label: string;
-}> = CONTACT_ADDRESS_TYPE_OPTIONS.map((option) => ({
-  ...option,
-  label: option.value === "work" ? "Work" : option.value === "other" ? "Other" : "Home",
-}));
+  value: ContactAddressType;
+}> = (() => {
+  const options: Array<{
+    emoji: string;
+    label: string;
+    value: ContactAddressType;
+  }> = [];
+  for (const option of CONTACT_ADDRESS_TYPE_OPTIONS) {
+    options.push({
+      ...option,
+      label: option.value === "work" ? "Work" : option.value === "other" ? "Other" : "Home",
+    });
+  }
+  return options;
+})();
 
 /**
  * Avatar upload configuration

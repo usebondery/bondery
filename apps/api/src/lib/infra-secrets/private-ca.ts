@@ -1,7 +1,8 @@
 /**
- * A private CA and the one certificate it signs, kept on disk by the `stack-secrets` job.
- * Postgres (postgres-secrets.ts) and SeaweedFS (storage-secrets.ts) each get their own CA, so a
- * client that trusts one service's CA trusts nothing else in the stack.
+ * Private CAs and the certificates they sign, kept on disk by the `stack-secrets` job.
+ * Postgres (postgres-secrets.ts), Redis (redis-secrets.ts), SeaweedFS (storage-secrets.ts), and
+ * the API (api-secrets.ts) each get their own CA, so a client that trusts one service's CA trusts
+ * nothing else in the stack.
  *
  * Idempotent: it keeps a valid CA and certificate. It replaces the CA when it is missing,
  * unparsable, or expires within a year, and it reissues the certificate when it is missing,
@@ -16,6 +17,7 @@ import {
   certificateCoverageReason,
   certificateIssuerMismatch,
   createCertificateAuthority,
+  issueClientCertificate,
   issueServerCertificate,
 } from "./x509.js";
 
@@ -28,6 +30,11 @@ const CA_RENEW_BEFORE_DAYS = DAYS_PER_YEAR;
 type CaSignedCertificatePaths = {
   caCertFile: string;
   caKeyFile: string;
+  certFile: string;
+  keyFile: string;
+};
+
+type ClientCertificatePaths = {
   certFile: string;
   keyFile: string;
 };
@@ -54,6 +61,24 @@ type EnsureCaSignedCertificateResult = {
   replacedExisting: boolean;
 };
 
+type EnsureClientCertificateOptions = {
+  authority: CertificateWithKey;
+  commonName: string;
+  /** Service name in log lines, for example "Redis API client". */
+  label: string;
+  log: (message: string) => void;
+  names: CertificateNames;
+  now?: Date;
+  paths: ClientCertificatePaths;
+  renewBeforeDays: number;
+};
+
+type EnsureClientCertificateResult = {
+  certificateGenerated: boolean;
+  /** An older certificate was replaced, so a running process still has the old one. */
+  replacedExisting: boolean;
+};
+
 async function readPair(certFile: string, keyFile: string): Promise<CertificateWithKey | null> {
   const certificatePem = await readOptional(certFile);
   const privateKeyPem = await readOptional(keyFile);
@@ -74,7 +99,7 @@ function authorityReplacementReason(
   });
 }
 
-async function certificateReplacementReason(
+async function serverCertificateReplacementReason(
   certificate: CertificateWithKey | null,
   authority: CertificateWithKey,
   options: EnsureCaSignedCertificateOptions,
@@ -92,10 +117,31 @@ async function certificateReplacementReason(
   );
 }
 
+async function clientCertificateReplacementReason(
+  certificate: CertificateWithKey | null,
+  authority: CertificateWithKey,
+  options: EnsureClientCertificateOptions,
+): Promise<string | null> {
+  if (!certificate) {
+    return "certificate is missing";
+  }
+  return (
+    certificateCoverageReason(certificate.certificatePem, {
+      clientOnly: true,
+      names: options.names,
+      now: options.now,
+      renewBeforeDays: options.renewBeforeDays,
+    }) ?? (await certificateIssuerMismatch(certificate.certificatePem, authority.certificatePem))
+  );
+}
+
 export type {
   CaSignedCertificatePaths,
+  ClientCertificatePaths,
   EnsureCaSignedCertificateOptions,
   EnsureCaSignedCertificateResult,
+  EnsureClientCertificateOptions,
+  EnsureClientCertificateResult,
 };
 export const CERTIFICATE_VALIDITY_DAYS = CERTIFICATE_VALIDITY_YEARS * DAYS_PER_YEAR;
 
@@ -119,7 +165,7 @@ export async function ensureCaSignedCertificate(
   }
 
   const existing = await readPair(paths.certFile, paths.keyFile);
-  const reason = await certificateReplacementReason(existing, authority, options);
+  const reason = await serverCertificateReplacementReason(existing, authority, options);
   const certificateGenerated = reason !== null;
   if (certificateGenerated) {
     const issued = await issueServerCertificate({
@@ -139,6 +185,32 @@ export async function ensureCaSignedCertificate(
   return {
     authority,
     authorityGenerated,
+    certificateGenerated,
+    replacedExisting: certificateGenerated && existing !== null,
+  };
+}
+
+/** Reissues a client-only certificate when it is missing, invalid, or signed by another CA. */
+export async function ensureClientCertificate(
+  options: EnsureClientCertificateOptions,
+): Promise<EnsureClientCertificateResult> {
+  const existing = await readPair(options.paths.certFile, options.paths.keyFile);
+  const reason = await clientCertificateReplacementReason(existing, options.authority, options);
+  const certificateGenerated = reason !== null;
+  if (certificateGenerated) {
+    const issued = await issueClientCertificate({
+      authority: options.authority,
+      commonName: options.commonName,
+      names: options.names,
+      now: options.now,
+      validityDays: CERTIFICATE_VALIDITY_DAYS,
+    });
+    await writeAtomic(options.paths.keyFile, issued.privateKeyPem, 0o600);
+    await writeAtomic(options.paths.certFile, issued.certificatePem, 0o644);
+    const names = [...options.names.dns, ...options.names.ip].join(", ");
+    options.log(`Generated a new ${options.label} TLS certificate (${reason}) for ${names}`);
+  }
+  return {
     certificateGenerated,
     replacedExisting: certificateGenerated && existing !== null,
   };

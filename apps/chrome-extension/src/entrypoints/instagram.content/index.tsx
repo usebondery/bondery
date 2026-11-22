@@ -208,7 +208,7 @@ function setupObserver(ctx: ContentScriptContext) {
     }
     const username = getInstagramUsername();
     if (username && !document.querySelector("bondery-instagram")) {
-      void injectBonderyButton(ctx);
+      detachPromise(injectBonderyButton(ctx));
     }
   });
 
@@ -253,14 +253,14 @@ export default defineContentScript({
     }
 
     // Initial injection attempt
-    void injectBonderyButton(ctx);
+    detachPromise(injectBonderyButton(ctx));
 
     // Setup observer for SPA navigation
     setupObserver(ctx);
 
     // Retry injection after delay
     ctx.setTimeout(() => {
-      void injectBonderyButton(ctx);
+      detachPromise(injectBonderyButton(ctx));
     }, 2000);
 
     // Listen for URL changes (SPA navigation)
@@ -269,7 +269,7 @@ export default defineContentScript({
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
         ctx.setTimeout(() => {
-          void injectBonderyButton(ctx);
+          detachPromise(injectBonderyButton(ctx));
         }, 1000);
       }
     }, 500);

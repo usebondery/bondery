@@ -22,7 +22,7 @@ export interface CspReportEnv {
  * @returns Absolute report URL, or `undefined` when reporting is disabled or
  * the API URL is missing.
  */
-export function resolveCspReportEndpoint(env: CspReportEnv = process.env): string | undefined {
+export function resolveCspReportEndpoint(env: CspReportEnv = {}): string | undefined {
   if (!isCspReportEnabled(env)) {
     return undefined;
   }
@@ -49,6 +49,6 @@ export function resolveCspReportEndpoint(env: CspReportEnv = process.env): strin
  * including unset, keeps reporting on, so a missing variable cannot silently
  * disable collection.
  */
-export function isCspReportEnabled(env: CspReportEnv = process.env): boolean {
+export function isCspReportEnabled(env: CspReportEnv = {}): boolean {
   return env.BONDERY_PUBLIC_CSP_REPORT_ENABLED?.trim().toLowerCase() !== "false";
 }

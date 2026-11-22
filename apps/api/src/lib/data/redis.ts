@@ -21,6 +21,7 @@ import {
   describeRedisSecurity,
   resolveRedisConnectionOptions,
 } from "./redis-connection-options.js";
+import { logRedisTls } from "./redis-tls.js";
 
 type RedisReadiness = {
   configured: boolean;
@@ -52,7 +53,7 @@ let subscriberClient: Redis | null = null;
 let redisReadiness: RedisReadiness | null = null;
 
 function trimRedisUrl(redisUrl?: string): string {
-  return (redisUrl ?? process.env.BONDERY_PRIVATE_REDIS_URL ?? "").trim();
+  return (redisUrl ?? process.env["BONDERY_PRIVATE_REDIS_URL"] ?? "").trim();
 }
 
 function createRedisClient(url: string): Redis {
@@ -188,7 +189,7 @@ async function runRedisVerify(
  * but the operator sees what to fix on every boot.
  */
 function warnOnInsecureProductionRedis(log: FastifyBaseLogger | undefined, redisUrl: string): void {
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env["NODE_ENV"] !== "production") {
     return;
   }
   const posture = describeRedisSecurity(redisUrl);
@@ -205,7 +206,7 @@ async function quitClient(client: Redis | null): Promise<void> {
   if (!client) {
     return;
   }
-  const status = client.status;
+  const { status } = client;
   if (status === "end" || status === "close") {
     return;
   }
@@ -307,6 +308,9 @@ export async function initRedis(
   const readiness = await runRedisVerify(trimmed);
   if (readiness.ok) {
     log?.info({ latencyMs: readiness.latencyMs }, "Redis verified");
+    if (log) {
+      await logRedisTls(log, trimmed);
+    }
   } else {
     log?.error({ error: readiness.error, latencyMs: readiness.latencyMs }, "Redis verify failed");
     throw new Error(`Redis verify failed: ${readiness.error ?? "unknown"}`);

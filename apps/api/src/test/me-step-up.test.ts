@@ -30,7 +30,7 @@ loadTestEnv();
 const { createTestApp } = await import("./create-test-app.js");
 const { setMagicLinkSendCaptureForTests } = await import("../lib/auth/send-magic-link.js");
 
-const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
+const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
 const LOGIN_CALLBACK_URL = `${WEBAPP_URL}/auth/start`;
 const LOGIN_ERROR_CALLBACK_URL = `${WEBAPP_URL}/login`;
 const RECONFIRM_CALLBACK_URL = `${WEBAPP_URL}/app/settings?action=delete_account`;
@@ -307,7 +307,7 @@ describe("me step-up", () => {
       url: "/me/step-up",
     });
     assert.equal(mint.statusCode, 201, mint.body);
-    const token = (JSON.parse(mint.body) as { token: string }).token;
+    const { token } = JSON.parse(mint.body) as { token: string };
 
     const firstDelete = await app.inject({
       headers: {
@@ -382,7 +382,7 @@ describe("me step-up", () => {
       url: "/me/step-up",
     });
     assert.equal(mint.statusCode, 201, mint.body);
-    const token = (JSON.parse(mint.body) as { token: string }).token;
+    const { token } = JSON.parse(mint.body) as { token: string };
 
     const created = await app.inject({
       headers: {

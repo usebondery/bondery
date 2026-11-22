@@ -25,8 +25,7 @@ function registerPoolShutdown(fastify: AppFastifyInstance, pool: Pool): void {
  * Order: Postgres → storage → SMTP → Redis → sync wake → pg-boss jobs.
  */
 export async function initializeRuntime(fastify: AppFastifyInstance): Promise<RuntimeDeps> {
-  const log = fastify.log;
-  const config = fastify.config;
+  const { config, log } = fastify;
 
   bindDatabaseUrl(config.DATABASE_URL);
   const databaseUrl = requireDatabaseUrl();

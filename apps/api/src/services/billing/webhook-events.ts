@@ -7,7 +7,7 @@ export async function isStripeWebhookEventProcessed(eventId: string): Promise<bo
       select: { eventId: true },
       where: { eventId },
     });
-    return row != null;
+    return row !== null;
   } catch (error) {
     throw internal("failed_to_process_webhook", error);
   }

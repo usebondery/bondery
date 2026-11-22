@@ -62,7 +62,7 @@ export function parseBetterAuthSecretsString(raw: string): BetterAuthSecretVersi
 export function resolveBetterAuthSecrets(
   env: NodeJS.ProcessEnv = process.env,
 ): BetterAuthSecretVersion[] {
-  const raw = env.BONDERY_PRIVATE_BETTER_AUTH_SECRETS;
+  const raw = env["BONDERY_PRIVATE_BETTER_AUTH_SECRETS"];
   if (!raw?.trim()) {
     throw new Error(
       "Missing BONDERY_PRIVATE_BETTER_AUTH_SECRETS (format: version:secret[,version:secret...])",

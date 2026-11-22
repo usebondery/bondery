@@ -50,8 +50,8 @@ function splitContainerStyle(containerStyle: StyleProp<ViewStyle>) {
     return { fillsWrapper: false, innerContainerStyle: undefined, wrapperStyle: undefined };
   }
 
-  const wrapperEntries: Array<[string, unknown]> = [];
-  const innerEntries: Array<[string, unknown]> = [];
+  const wrapperEntries: [string, unknown][] = [];
+  const innerEntries: [string, unknown][] = [];
 
   for (const [key, value] of Object.entries(flat)) {
     if (value === null || value === undefined) {

@@ -101,9 +101,7 @@ export async function registerAuthRoutes(fastify: FastifyInstance): Promise<void
   // OAuth JSON stays on the discovery documents above. Unauthenticated GET /mcp
   // after this hop is 401 + RFC 9728 WWW-Authenticate.
   const mcpUrl = `${CANONICAL_ORIGIN}${API_ROUTES.MCP}`;
-  fastify.get(API_ROUTES.WELL_KNOWN_MCP, async (_request, reply) => {
-    return reply.redirect(mcpUrl, 308);
-  });
+  fastify.get(API_ROUTES.WELL_KNOWN_MCP, async (_request, reply) => reply.redirect(mcpUrl, 308));
 
   fastify.route({
     async handler(request, reply) {

@@ -20,7 +20,7 @@ import { disableDcrOAuthClients } from "./disable-dcr-oauth-clients.js";
 const TRAILING_SLASHES_PATTERN = /\/+$/;
 
 function resolveWebappOrigin(): string {
-  const origin = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(
+  const origin = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(
     TRAILING_SLASHES_PATTERN,
     "",
   );
@@ -31,7 +31,7 @@ function resolveWebappOrigin(): string {
 }
 
 function resolveExtensionRedirectUris(): string[] {
-  const extensionId = process.env.BONDERY_INFRA_CHROME_EXTENSION_ID?.trim();
+  const extensionId = process.env["BONDERY_INFRA_CHROME_EXTENSION_ID"]?.trim();
   if (!extensionId) {
     throw new Error("BONDERY_INFRA_CHROME_EXTENSION_ID is not set");
   }
@@ -76,8 +76,8 @@ export function hashOAuthClientSecret(secret: string): string {
 }
 
 export async function provisionWebappClient(resourceId: string | readonly string[]): Promise<void> {
-  const clientId = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID?.trim();
-  const clientSecret = process.env.BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET?.trim();
+  const clientId = process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"]?.trim();
+  const clientSecret = process.env["BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET"]?.trim();
   if (!clientId || !clientSecret) {
     throw new Error(
       "BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID and BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET must both be set",
@@ -134,7 +134,7 @@ export async function provisionWebappClient(resourceId: string | readonly string
 export async function provisionExtensionClient(
   resourceId: string | readonly string[],
 ): Promise<void> {
-  const clientId = process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID?.trim();
+  const clientId = process.env["BONDERY_PUBLIC_OAUTH_CLIENT_ID"]?.trim();
   if (!clientId) {
     throw new Error("BONDERY_PUBLIC_OAUTH_CLIENT_ID is not set");
   }
@@ -183,7 +183,7 @@ export async function provisionExtensionClient(
 
 export async function resolveResourceId(): Promise<string> {
   const identifiers = resolveApiResourceIdentifiers();
-  const canonical = identifiers[0];
+  const [canonical] = identifiers;
   if (!canonical) {
     throw new Error("BONDERY_PUBLIC_API_URL is not set");
   }
@@ -214,7 +214,7 @@ export async function resolveResourceId(): Promise<string> {
  */
 export async function upsertMcpResources(): Promise<string> {
   const identifiers = resolveMcpResourceIdentifiers();
-  const canonical = identifiers[0];
+  const [canonical] = identifiers;
   if (!canonical) {
     throw new Error("BONDERY_PUBLIC_API_URL is not set");
   }
@@ -240,8 +240,8 @@ export async function upsertMcpResources(): Promise<string> {
 
 export async function provisionOAuthClients(): Promise<void> {
   assertDistinctFirstPartyOAuthClientIds(
-    process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
-    process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+    process.env["BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
+    process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"],
   );
   await resolveResourceId();
   await upsertMcpResources();

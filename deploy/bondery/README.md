@@ -6,7 +6,7 @@ The marketing website is **not** in this stack — see [`deploy/ops`](../ops/) (
 
 Local development:
 
-- Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636, TLS + password like the stack; secrets in `.temp/redis-secrets`)
+- Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636, mutual TLS like the stack; secrets in `.temp/redis-secrets`)
 - Postgres: **`deploy/bondery/docker-compose.dev-db.yml`** or `packages/db` migrations — not this Compose file
 
 Docs: [docs/deploy/installation.mdx](../../docs/deploy/installation.mdx) · [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx) · [docs/contributing/api-container.mdx](../../docs/contributing/api-container.mdx)
@@ -46,8 +46,8 @@ Point your proxy at those ports with [`proxy/Caddyfile`](proxy/Caddyfile) or [`p
 | ------------------- | --------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `webapp`            | `ghcr.io/usebondery/webapp` | 26632                     | Liveness `/health/live`                                                                                                                                                                                                     |
 | `api`               | `ghcr.io/usebondery/api`    | 26642 HTTPS               | Better Auth + Prisma; waits for Redis + Postgres + SeaweedFS                                                                                                                                                                |
-| `redis`             | `redis:8.10`                | internal                  | TLS only + password. AOF + volume `redis-data`                                                                                                                                                                              |
-| `stack-secrets`     | `ghcr.io/usebondery/api`    | none                      | One-shot. Creates the Redis password and certificate, and the Postgres, storage, and API CAs and certificates, when missing                                                                                                 |
+| `redis`             | `redis:8.10`                | internal                  | Mutual TLS + password. AOF + volume `redis-data`                                                                                                                                                                            |
+| `stack-secrets`     | `ghcr.io/usebondery/api`    | none                      | One-shot. Creates the Redis CA and certificates (`redis-tls-*` volumes), and the Postgres, storage, and API CAs and certificates, when missing                                                                              |
 | `traefik-transport` | `busybox:1.37`              | none                      | One-shot. Writes `${prefix}-api-transport.yml` and `-storage-transport.yml` (the CAs) into Traefik's folder (Dokploy's, or `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR`), so Traefik reaches the API and storage over verified HTTPS |
 | `db`                | `postgis/postgis:17-3.5`    | `127.0.0.1:5432`          | Named volume `postgres-data`. Loopback only (SSH tunnels). Second stack: `BONDERY_INFRA_POSTGRES_HOST_PORT=5433`                                                                                                            |
 | `seaweedfs-*`       | SeaweedFS                   | 8443 HTTPS (API, Traefik) | S3 creds from `.env` → rendered at startup (`seaweedfs/entrypoint.sh`). Mutual TLS between nodes (`seaweedfs/security.toml`)                                                                                                |
@@ -112,11 +112,11 @@ A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bonder
 
 1. Do **not** start this compose Redis (or omit compose entirely).
 2. Run `ghcr.io/usebondery/api:<semver>` alone with your secrets.
-3. Set `BONDERY_PRIVATE_REDIS_URL` to your managed Redis. It must use TLS (`rediss://…`) and a password. For a private CA or a password file, set `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` / `BONDERY_PRIVATE_REDIS_PASSWORD_FILE`.
+3. Set `BONDERY_PRIVATE_REDIS_URL` to your managed Redis. It must use TLS (`rediss://…`) and a password. For a private CA or a password file, set `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` / `BONDERY_PRIVATE_REDIS_PASSWORD_FILE`. Set client certificate files only when that Redis requires them.
 
 ## Security
 
-- Redis requires TLS and a password. `redis-secrets` creates both on first start; rotation: [docs/deploy/secrets.mdx](../../docs/deploy/secrets.mdx#redis_password_and_certificate).
+- Redis requires mutual TLS and a password. `stack-secrets` creates the `redis-tls-ca`, `redis-tls-server`, and `redis-tls-client` volumes on first start; rotation: [docs/deploy/secrets.mdx](../../docs/deploy/secrets.mdx#redis_password_and_certificate).
 - Never expose Redis or Postgres to the public internet. Compose publishes Postgres on `127.0.0.1` only; do not change that bind to `0.0.0.0`.
 - API secrets (`BONDERY_PRIVATE_*`) load only into the `api` service (`env_file`). Webapp receives an explicit allowlist.
 

@@ -47,12 +47,12 @@ interface SampleRequestParameter {
 
 interface SampleRequestParameterGroup {
   in?: string;
-  items: ReadonlyArray<SampleRequestParameter>;
+  items: readonly SampleRequestParameter[];
 }
 
 interface SampleRequestInput {
   method: string;
-  parameters: ReadonlyArray<SampleRequestParameterGroup>;
+  parameters: readonly SampleRequestParameterGroup[];
   path: string;
   requestBody?: { content: Record<string, SampleRequestBodyMedia> };
   security: ReadonlyArray<ReadonlyArray<{ key: string }>>;

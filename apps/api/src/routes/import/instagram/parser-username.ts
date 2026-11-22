@@ -83,7 +83,7 @@ function splitCompactUsernameToken(token: string): [string, string] | null {
   }
 
   candidates.sort((a, b) => b.score - a.score);
-  const best = candidates[0];
+  const [best] = candidates;
   if (!best) {
     return null;
   }

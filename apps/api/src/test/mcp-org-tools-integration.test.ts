@@ -37,7 +37,7 @@ describe("mCP org tool isolation", () => {
 
   it("scopes org writes behind mcp:write and isolates groups, tags, and relationships", async () => {
     const { app } = suite;
-    const { otherToken, ownerId, ownerSession, ownerToken } = await suite.twoUsers();
+    const { otherId, otherToken, ownerId, ownerSession, ownerToken } = await suite.twoUsers();
     const readToken = await suite.readTokenFor(ownerSession);
 
     const writeDenied = await callTool(app, readToken, "create_group", {

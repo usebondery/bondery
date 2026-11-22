@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 const MOBI_ANDROID_IPHONE_IPAD_I = /Mobi|Android|iPhone|iPad/i;
 
 interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
+  prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 

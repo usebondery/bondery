@@ -240,13 +240,16 @@ async function enrichEducationWithLogos(
     }),
   );
 
-  return withDomLogos.map((entry) => {
+  const withNetworkLogos: EducationEntry[] = [];
+  for (const entry of withDomLogos) {
     if (entry.schoolLogoUrl || !entry.schoolLinkedinId) {
-      return entry;
+      withNetworkLogos.push(entry);
+      continue;
     }
     const url = idToLogo.get(entry.schoolLinkedinId);
-    return url ? { ...entry, schoolLogoUrl: url } : entry;
-  });
+    withNetworkLogos.push(url ? { ...entry, schoolLogoUrl: url } : entry);
+  }
+  return withNetworkLogos;
 }
 
 /** Endpoints to try for education history (in priority order). */

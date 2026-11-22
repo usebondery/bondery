@@ -58,9 +58,7 @@ export function useContactsSelectionListSync({
     });
   }, [contactIds, myselfContactId, pruneSelectionToKnownContactIds]);
 
-  useFocusEffect(() => {
-    return () => {
-      exitSelectionMode();
-    };
+  useFocusEffect(() => () => {
+    exitSelectionMode();
   });
 }

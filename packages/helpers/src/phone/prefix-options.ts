@@ -9,7 +9,7 @@ export function compareTelephonePrefixByDialDigits(a: string, b: string): number
   return dialDigits(a).localeCompare(dialDigits(b));
 }
 
-export const TELEPHONE_PREFIX_OPTIONS: ReadonlyArray<TelephonePrefixOption> = Array.from(
+export const TELEPHONE_PREFIX_OPTIONS: readonly TelephonePrefixOption[] = Array.from(
   (() => {
     const map = new Map<string, TelephonePrefixOption>();
 

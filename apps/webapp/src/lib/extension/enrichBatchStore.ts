@@ -1,18 +1,3 @@
-// ─── Internal store ───────────────────────────────────────────────────────────
-
-let state: EnrichBatchState = { ...defaultState };
-
-// Separate flag so toggling it does not trigger a React re-render.
-let cancelled = false;
-
-const listeners = new Set<() => void>();
-
-function notify() {
-  for (const listener of listeners) {
-    listener();
-  }
-}
-
 /**
  * Module-level singleton store for batch LinkedIn enrichment state.
  *
@@ -23,7 +8,7 @@ function notify() {
  * Compatible with React 18's `useSyncExternalStore`.
  */
 
-export interface EnrichBatchState {
+interface EnrichBatchState {
   completed: number;
   /** The contact currently being enriched, or null between contacts. */
   currentPerson: {
@@ -51,7 +36,7 @@ export interface EnrichBatchState {
   totalEligible: number;
 }
 
-export const defaultState: EnrichBatchState = {
+const defaultState: EnrichBatchState = {
   completed: 0,
   currentPerson: null,
   failed: 0,
@@ -62,20 +47,31 @@ export const defaultState: EnrichBatchState = {
   totalEligible: 0,
 };
 
-// ─── Public API ───────────────────────────────────────────────────────────────
+let state: EnrichBatchState = { ...defaultState };
+
+// Separate flag so toggling it does not trigger a React re-render.
+let cancelled = false;
+
+const listeners = new Set<() => void>();
+
+function notify() {
+  for (const listener of listeners) {
+    listener();
+  }
+}
 
 /**
  * Returns a snapshot of the current state.
  * Pass directly to `useSyncExternalStore` as the `getSnapshot` argument.
  */
-export function getState(): EnrichBatchState {
+function getState(): EnrichBatchState {
   return state;
 }
 
 /**
  * Merges a partial state update and notifies all subscribers.
  */
-export function setState(patch: Partial<EnrichBatchState>): void {
+function setState(patch: Partial<EnrichBatchState>): void {
   state = { ...state, ...patch };
   notify();
 }
@@ -83,7 +79,7 @@ export function setState(patch: Partial<EnrichBatchState>): void {
 /**
  * Resets the store to `defaultState` and clears the cancelled flag.
  */
-export function resetState(): void {
+function resetState(): void {
   state = { ...defaultState };
   cancelled = false;
   notify();
@@ -93,18 +89,18 @@ export function resetState(): void {
  * Subscribe to state changes. Returns an unsubscribe function.
  * Pass directly to `useSyncExternalStore` as the `subscribe` argument.
  */
-export function subscribe(listener: () => void): () => void {
+function subscribe(listener: () => void): () => void {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
 /** Returns true if the current run has been cancelled. */
-export function isCancelled(): boolean {
+function isCancelled(): boolean {
   return cancelled;
 }
 
 /** Sets the cancelled flag without triggering a re-render. */
-export function setCancelled(value: boolean): void {
+function setCancelled(value: boolean): void {
   cancelled = value;
 }
 
@@ -112,7 +108,19 @@ export function setCancelled(value: boolean): void {
  * Sets the pending queue status detected on page load (interrupted run).
  * Pass `null` to clear it once the user resumes or discards.
  */
-export function setPendingQueueStatus(status: EnrichBatchState["pendingQueueStatus"]): void {
+function setPendingQueueStatus(status: EnrichBatchState["pendingQueueStatus"]): void {
   state = { ...state, pendingQueueStatus: status };
   notify();
 }
+
+export type { EnrichBatchState };
+export {
+  defaultState,
+  getState,
+  isCancelled,
+  resetState,
+  setCancelled,
+  setPendingQueueStatus,
+  setState,
+  subscribe,
+};

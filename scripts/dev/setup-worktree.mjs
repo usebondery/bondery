@@ -12,7 +12,8 @@
  *   2. seeds root `.env.local` from the primary checkout (keeps locally invented secrets)
  *   3. pulls the shared secrets from Infisical over it (`pnpm run env:pull`)
  *   4. generates the per-app env files (`pnpm run env`)
- *   5. seeds the CodeGraph index from the primary checkout, when that checkout has one
+ *   5. ensures a CodeGraph index — copies from the primary checkout when one exists, otherwise
+ *      runs `codegraph init --yes` on the primary (or this checkout when it is the primary)
  *   6. builds the workspace packages so typecheck and the pre-commit hook work
  *
  * Steps 3 to 6 warn instead of failing, so a missing `infisical login` or CodeGraph CLI never
@@ -51,43 +52,71 @@ async function main() {
 
   const primaryRoot = findPrimaryRoot();
 
-  const primaryIndex = primaryRoot ? join(primaryRoot, ".codegraph", "codegraph.db") : null;
   const worktreeIndex = join(repoRoot, ".codegraph", "codegraph.db");
 
   /**
-   * Give this worktree the CodeGraph index of the primary checkout.
+   * Copy a CodeGraph index from `sourceRoot` into this worktree.
    *
    * The database is gitignored, so a new worktree has `.codegraph/` without it and CodeGraph reports
-   * "not indexed". Copying and syncing takes about a minute; a fresh index takes far longer. Only an
-   * index the developer already chose to build is copied. The copy uses SQLite's backup API, not a
-   * file copy, because the primary database is live (WAL mode) and a raw copy can be inconsistent.
+   * "not indexed". Copying and syncing takes about a minute; a fresh index takes far longer. The copy
+   * uses SQLite's backup API, not a file copy, because the primary database is live (WAL mode) and a
+   * raw copy can be inconsistent.
    */
-  async function seedCodeGraph() {
-    if (existsSync(worktreeIndex)) {
-      console.log("CodeGraph index already present");
-      return;
-    }
-    if (!primaryIndex || primaryRoot === repoRoot || !existsSync(primaryIndex)) {
-      console.log("Primary checkout has no CodeGraph index; skipping");
-      return;
+  async function copyCodeGraphFrom(sourceRoot) {
+    const sourceIndex = join(sourceRoot, ".codegraph", "codegraph.db");
+    if (!existsSync(sourceIndex)) {
+      return false;
     }
     mkdirSync(dirname(worktreeIndex), { recursive: true });
-    const source = new DatabaseSync(primaryIndex, { readOnly: true });
+    const source = new DatabaseSync(sourceIndex, { readOnly: true });
     try {
       await backup(source, worktreeIndex);
     } finally {
       source.close();
     }
-    console.log(`Copied the CodeGraph index from ${primaryRoot}`);
+    console.log(`Copied the CodeGraph index from ${sourceRoot}`);
     run("codegraph", ["sync", "."], { optional: true });
+    return true;
   }
 
-  const needsCodeGraph = Boolean(
-    primaryIndex &&
-      primaryRoot !== repoRoot &&
-      existsSync(primaryIndex) &&
-      !existsSync(worktreeIndex),
-  );
+  function primaryCodeGraphDb() {
+    return primaryRoot ? join(primaryRoot, ".codegraph", "codegraph.db") : null;
+  }
+
+  /** Build the index in `initRoot` when no primary copy exists. */
+  function initCodeGraph(initRoot) {
+    console.log(`No CodeGraph index to copy; running codegraph init in ${initRoot}`);
+    return run("codegraph", ["init", "--yes", "."], { cwd: initRoot, optional: true });
+  }
+
+  /**
+   * Ensure this worktree has a CodeGraph index. Prefer copying from the primary checkout; otherwise
+   * build one on the primary (so later worktrees can copy) or on this checkout when it is the primary.
+   */
+  async function ensureCodeGraph() {
+    if (existsSync(worktreeIndex)) {
+      console.log("CodeGraph index already present");
+      return;
+    }
+
+    const primaryDb = primaryCodeGraphDb();
+    if (primaryRoot && primaryRoot !== repoRoot && primaryDb && existsSync(primaryDb)) {
+      await copyCodeGraphFrom(primaryRoot);
+      return;
+    }
+
+    const initRoot = primaryRoot ?? repoRoot;
+    const initDb = join(initRoot, ".codegraph", "codegraph.db");
+    if (!existsSync(initDb) && !initCodeGraph(initRoot)) {
+      return;
+    }
+
+    if (initRoot !== repoRoot) {
+      await copyCodeGraphFrom(initRoot);
+    }
+  }
+
+  const needsCodeGraph = !existsSync(worktreeIndex);
 
   if (
     ifNeeded &&
@@ -97,8 +126,8 @@ async function main() {
   ) {
     // Dependencies and env files exist. A worktree set up before CodeGraph seeding still needs it.
     if (needsCodeGraph) {
-      step("Seed CodeGraph index");
-      await seedCodeGraph();
+      step("Ensure CodeGraph index");
+      await ensureCodeGraph();
     }
     return;
   }
@@ -107,9 +136,9 @@ async function main() {
     console.log(`\n[worktree-setup] ${title}`);
   }
 
-  function run(command, args, { optional = false, env = {} } = {}) {
+  function run(command, args, { optional = false, env = {}, cwd = repoRoot } = {}) {
     const result = spawnSync(command, args, {
-      cwd: repoRoot,
+      cwd,
       env: { ...process.env, ...env },
       shell,
       stdio: "inherit",
@@ -187,8 +216,8 @@ async function main() {
   step("Generate per-app env files");
   run("pnpm", ["run", "env"], { optional: true });
 
-  step("Seed CodeGraph index");
-  await seedCodeGraph();
+  step("Ensure CodeGraph index");
+  await ensureCodeGraph();
 
   step("Build workspace packages");
   run("pnpm", ["turbo", "run", "build", "--filter=./packages/*"], {

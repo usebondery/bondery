@@ -11,7 +11,7 @@ type SubscriptionSyncResult =
   | { synced: false; reason: string };
 
 function extractMirrorFromStripeSubscription(subscription: Stripe.Subscription) {
-  const item = subscription.items.data[0];
+  const [item] = subscription.items.data;
   const price = item?.price;
   const product = price?.product;
   const productName =
@@ -36,7 +36,7 @@ export async function syncSubscriptionFromStripe(
   ctx: DomainContext,
 ): Promise<SubscriptionSyncResult> {
   const { user, log } = ctx;
-  const email = user.email;
+  const { email } = user;
 
   if (email) {
     const pending = await prisma.pendingSubscription.findUnique({

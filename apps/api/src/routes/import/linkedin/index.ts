@@ -109,12 +109,14 @@ export const linkedInImportRoutes: AppRoutePlugin = async (fastify) => {
           }
         }
 
-        const contactsWithExistingState = contacts.map((contact) => {
+        const contactsWithExistingState: LinkedInParseResponse["contacts"] = [];
+        for (const contact of contacts) {
           const normalizedHandle = contact.linkedinUsername.trim().toLowerCase();
-          return Object.assign({}, contact, {
+          contactsWithExistingState.push({
+            ...contact,
             alreadyExists: normalizedHandle.length > 0 && existingHandleSet.has(normalizedHandle),
           });
-        });
+        }
 
         const response: LinkedInParseResponse = {
           contacts: contactsWithExistingState,

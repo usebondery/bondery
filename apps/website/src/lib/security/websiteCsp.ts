@@ -50,7 +50,10 @@ export function buildWebsiteCsp(): WebsiteCsp {
   const nonce = createNonce();
   const isDev = process.env["NODE_ENV"] === "development";
   const plausibleOrigin = getPlausibleCspOrigin();
-  const reportEndpoint = resolveCspReportEndpoint();
+  const reportEndpoint = resolveCspReportEndpoint({
+    BONDERY_PUBLIC_API_URL: process.env["BONDERY_PUBLIC_API_URL"],
+    BONDERY_PUBLIC_CSP_REPORT_ENABLED: process.env["BONDERY_PUBLIC_CSP_REPORT_ENABLED"],
+  });
 
   const shared = {
     connectSrc: ["https://api.github.com", plausibleOrigin],

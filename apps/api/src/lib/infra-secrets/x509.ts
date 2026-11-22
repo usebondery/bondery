@@ -83,6 +83,8 @@ function validity(now: Date, validityDays: number): { notAfter: Date; notBefore:
 type CoverageCheck = {
   /** The certificate must also allow client authentication (mutual TLS). */
   clientAuth?: boolean;
+  /** The certificate must allow client authentication only, not server authentication. */
+  clientOnly?: boolean;
   names: CertificateNames;
   now?: Date;
   renewBeforeDays: number;
@@ -91,6 +93,11 @@ type CoverageCheck = {
 function allowsClientAuth(certificate: x509.X509Certificate): boolean {
   const usages = certificate.getExtension(x509.ExtendedKeyUsageExtension)?.usages ?? [];
   return usages.includes(x509.ExtendedKeyUsage.clientAuth);
+}
+
+function allowsServerAuth(certificate: x509.X509Certificate): boolean {
+  const usages = certificate.getExtension(x509.ExtendedKeyUsageExtension)?.usages ?? [];
+  return usages.includes(x509.ExtendedKeyUsage.serverAuth);
 }
 
 export type { CertificateNames, CertificateWithKey, CoverageCheck };
@@ -103,41 +110,7 @@ export function toPem(label: string, der: ArrayBuffer): string {
   return `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
 }
 
-/**
- * Self-signed server certificate that clients pin as their only trusted CA. Used for Redis,
- * where the API is the only client.
- */
-export async function createSelfSignedServerCertificate(options: {
-  commonName: string;
-  names: CertificateNames;
-  now?: Date;
-  validityDays: number;
-}): Promise<CertificateWithKey> {
-  const keys = await generateKeys();
-  const certificate = await x509.X509CertificateGenerator.createSelfSigned({
-    extensions: [
-      new x509.BasicConstraintsExtension(true, undefined, true),
-      new x509.KeyUsagesExtension(
-        x509.KeyUsageFlags.digitalSignature | x509.KeyUsageFlags.keyCertSign,
-        true,
-      ),
-      new x509.ExtendedKeyUsageExtension([x509.ExtendedKeyUsage.serverAuth]),
-      subjectAlternativeNames(options.names),
-      await x509.SubjectKeyIdentifierExtension.create(keys.publicKey),
-    ],
-    keys,
-    name: `CN=${options.commonName}`,
-    ...validity(options.now ?? new Date(), options.validityDays),
-    serialNumber: serialNumber(),
-    signingAlgorithm: ECDSA_SIGNING,
-  });
-  return {
-    certificatePem: certificate.toString("pem"),
-    privateKeyPem: await exportPrivateKey(keys),
-  };
-}
-
-/** Private certificate authority. It signs server certificates and nothing else. */
+/** Private certificate authority. It signs end-entity certificates. */
 export async function createCertificateAuthority(options: {
   commonName: string;
   now?: Date;
@@ -159,6 +132,40 @@ export async function createCertificateAuthority(options: {
     ...validity(options.now ?? new Date(), options.validityDays),
     serialNumber: serialNumber(),
     signingAlgorithm: ECDSA_SIGNING,
+  });
+  return {
+    certificatePem: certificate.toString("pem"),
+    privateKeyPem: await exportPrivateKey(keys),
+  };
+}
+
+/** End-entity certificate signed by `authority`. Client authentication only. */
+export async function issueClientCertificate(options: {
+  authority: CertificateWithKey;
+  commonName: string;
+  names: CertificateNames;
+  now?: Date;
+  validityDays: number;
+}): Promise<CertificateWithKey> {
+  const keys = await generateKeys();
+  const authorityCertificate = new x509.X509Certificate(options.authority.certificatePem);
+  const authorityKey = await importPrivateKey(options.authority.privateKeyPem);
+  const certificate = await x509.X509CertificateGenerator.create({
+    extensions: [
+      new x509.BasicConstraintsExtension(false, undefined, true),
+      new x509.KeyUsagesExtension(x509.KeyUsageFlags.digitalSignature, true),
+      new x509.ExtendedKeyUsageExtension([x509.ExtendedKeyUsage.clientAuth]),
+      subjectAlternativeNames(options.names),
+      await x509.SubjectKeyIdentifierExtension.create(keys.publicKey),
+      await x509.AuthorityKeyIdentifierExtension.create(authorityCertificate),
+    ],
+    issuer: authorityCertificate.subject,
+    publicKey: keys.publicKey,
+    serialNumber: serialNumber(),
+    signingAlgorithm: ECDSA_SIGNING,
+    signingKey: authorityKey,
+    subject: `CN=${options.commonName}`,
+    ...validity(options.now ?? new Date(), options.validityDays),
   });
   return {
     certificatePem: certificate.toString("pem"),
@@ -216,9 +223,10 @@ export function certificateCoverageReason(
   certificatePem: string,
   check: CoverageCheck,
 ):
+  | "certificate allows server authentication"
   | "certificate cannot be parsed"
-  | "certificate expires soon"
   | "certificate does not allow client authentication"
+  | "certificate expires soon"
   | `certificate does not cover ${string}`
   | null {
   selectWebCryptoProvider();
@@ -242,6 +250,15 @@ export function certificateCoverageReason(
   ];
   if (missing.length > 0) {
     return `certificate does not cover ${missing.join(", ")}`;
+  }
+  if (check.clientOnly) {
+    if (!allowsClientAuth(certificate)) {
+      return "certificate does not allow client authentication";
+    }
+    if (allowsServerAuth(certificate)) {
+      return "certificate allows server authentication";
+    }
+    return null;
   }
   if (check.clientAuth && !allowsClientAuth(certificate)) {
     return "certificate does not allow client authentication";

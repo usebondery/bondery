@@ -88,11 +88,12 @@ export function BonderyExportModal({ modalId }: BonderyExportModalProps) {
     };
   }, [summaryAttempt]);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       abortRef.current?.abort();
-    };
-  }, []);
+    },
+    [],
+  );
 
   const isEmptyAccount = people === 0 && groups === 0 && tags === 0 && interactions === 0;
 

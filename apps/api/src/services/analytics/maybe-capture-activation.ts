@@ -40,7 +40,7 @@ export async function maybeCaptureActivation(
         select: { importCompletedAt: true },
         where: { userId: user.id },
       });
-      isFirst = settings?.importCompletedAt != null;
+      isFirst = settings?.importCompletedAt !== null && settings?.importCompletedAt !== undefined;
       break;
     }
   }

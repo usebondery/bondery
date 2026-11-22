@@ -95,11 +95,11 @@ export function isAllowedRequestOrigin(
 /** Shared env-derived allowlist for CORS, Better Auth trustedOrigins, and WS origin checks. */
 export function resolveRuntimeTrustedOrigins(): string[] {
   return resolveTrustedOrigins({
-    allowLocalDevOrigins: process.env.NODE_ENV !== "production",
-    chromeExtensionId: process.env.BONDERY_INFRA_CHROME_EXTENSION_ID,
-    extraAllowedOrigins: process.env.BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS,
-    webappUrl: process.env.BONDERY_PUBLIC_WEBAPP_URL,
-    websiteUrl: process.env.BONDERY_PUBLIC_WEBSITE_URL,
+    allowLocalDevOrigins: process.env["NODE_ENV"] !== "production",
+    chromeExtensionId: process.env["BONDERY_INFRA_CHROME_EXTENSION_ID"],
+    extraAllowedOrigins: process.env["BONDERY_PUBLIC_EXTRA_ALLOWED_ORIGINS"],
+    webappUrl: process.env["BONDERY_PUBLIC_WEBAPP_URL"],
+    websiteUrl: process.env["BONDERY_PUBLIC_WEBSITE_URL"],
   });
 }
 

@@ -48,9 +48,10 @@ export function expandPersonMentionsForEditor(
  * `[@Name](bp://person/UUID)` → `[[bp:person:UUID]]`
  */
 export function collapsePersonMentionsFromEditor(markdown: string): string {
-  return markdown.replace(BP_PERSON_LINK_RE, (_, _display: string, id: string) => {
-    return `[[bp:person:${id}]]`;
-  });
+  return markdown.replace(
+    BP_PERSON_LINK_RE,
+    (_, _display: string, id: string) => `[[bp:person:${id}]]`,
+  );
 }
 
 /**

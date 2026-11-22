@@ -118,8 +118,8 @@ export function HomeClient({
       .slice(0, 5);
   })();
 
-  const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
+  const resolveParticipants = (activity: Activity): PersonPreview[] =>
+    (activity.participants ?? []).flatMap((participant: ActivityParticipantRef) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
 
@@ -143,7 +143,6 @@ export function HomeClient({
         },
       ];
     });
-  };
 
   const handleActivityOpen = (activity: Activity) => {
     openNewActivityModal({

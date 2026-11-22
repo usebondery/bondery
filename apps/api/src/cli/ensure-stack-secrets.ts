@@ -6,8 +6,10 @@
  * HTTPS listener (lib/infra-secrets/api-secrets.ts).
  *
  * - Compose job `stack-secrets` (no arguments): writes into the volumes mounted at
- *   /bondery-redis, /bondery-postgres/{ca,server,client}, /bondery-storage/{ca,cluster,client}
- *   and /bondery-api/{ca,server,client}. Certificates cover `${BONDERY_INFRA_TRAEFIK_PREFIX}-redis`,
+ *   /bondery-redis/{ca,server,client}, /bondery-postgres/{ca,server,client},
+ *   /bondery-storage/{ca,cluster,client} and /bondery-api/{ca,server,client}. When
+ *   /bondery-redis-legacy exists, Redis keeps that volume's password on the first run.
+ *   Certificates cover `${BONDERY_INFRA_TRAEFIK_PREFIX}-redis`,
  *   `-db`, `-storage` and `-api`, the hostnames clients connect to.
  * - Local development: `--only postgres --local-dev --dir <folder>` (`pnpm run postgres:secrets`)
  *   writes into a host folder that deploy/bondery/docker-compose.dev-db.yml mounts.
@@ -17,6 +19,7 @@
  *   an alias).
  */
 
+import { access } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { ensureRedisSecrets } from "../lib/data/redis-secrets.js";
@@ -26,6 +29,7 @@ import { ensureStorageSecrets } from "../lib/infra-secrets/storage-secrets.js";
 
 type SecretsOptions = {
   chownToContainerUsers: boolean;
+  legacyRoot?: string;
   localDev: boolean;
   log: (message: string) => void;
   prefix: string;
@@ -61,9 +65,14 @@ const JOBS = {
     mount: "/bondery-redis",
     run: async (options) => {
       const result = await ensureRedisSecrets(options);
-      return result.certificateGenerated || result.passwordGenerated;
+      return (
+        result.authorityGenerated ||
+        result.clientCertificatesGenerated ||
+        result.passwordGenerated ||
+        result.serverCertificateGenerated
+      );
     },
-    unchanged: "existing password and certificate are valid",
+    unchanged: "existing password and certificates are valid",
   },
   storage: {
     mount: "/bondery-storage",
@@ -90,6 +99,21 @@ function readValue(args: string[], flag: string): string | undefined {
   return value;
 }
 
+const REDIS_LEGACY_MOUNT = "/bondery-redis-legacy";
+
+async function resolveLegacyRedisRoot(localDev: boolean): Promise<string | undefined> {
+  let root: string | undefined;
+  if (!localDev) {
+    try {
+      await access(REDIS_LEGACY_MOUNT);
+      root = REDIS_LEGACY_MOUNT;
+    } catch {
+      // A new install has no legacy volume.
+    }
+  }
+  return root;
+}
+
 function readServices(args: string[]): Service[] {
   const only = readValue(args, "--only");
   if (!only) {
@@ -113,14 +137,17 @@ async function main(): Promise<void> {
   if (dir && services.length !== 1) {
     throw new Error(`--dir needs --only ${SERVICES.join("|")}`);
   }
-  const prefix = process.env.BONDERY_INFRA_TRAEFIK_PREFIX?.trim() || "bondery";
+  const prefix = process.env["BONDERY_INFRA_TRAEFIK_PREFIX"]?.trim() || "bondery";
   const chownToContainerUsers = !localDev && process.getuid?.() === 0;
+
+  const legacyRedisRoot = await resolveLegacyRedisRoot(localDev);
 
   for (const service of services) {
     const job = JOBS[service];
     const log = (message: string) => console.log(`stack-secrets ${service}: ${message}`);
     const changed = await job.run({
       chownToContainerUsers,
+      legacyRoot: service === "redis" ? legacyRedisRoot : undefined,
       localDev,
       log,
       prefix,

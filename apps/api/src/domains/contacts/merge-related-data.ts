@@ -89,7 +89,7 @@ export async function mergeContactSocials(
     handle: string;
     connectedAt: Date | null;
   }> = [];
-  const socialUpdatePromises: Array<Promise<unknown>> = [];
+  const socialUpdatePromises: Promise<unknown>[] = [];
 
   for (const [field, platform] of Object.entries(MERGEABLE_SOCIAL_FIELDS)) {
     const leftSocial = leftSocialByPlatform.get(platform);

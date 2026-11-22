@@ -147,7 +147,7 @@ for (const [path, methods] of Object.entries(spec.paths ?? {})) {
   }
 }
 
-const unique = [...new Set(missingDescriptions)].sort();
+const unique = [...new Set(missingDescriptions)].sort((left, right) => left.localeCompare(right));
 
 for (const path of unique.slice(0, MAX_REPORTED)) {
   check.add(`${path}: missing description`);

@@ -130,7 +130,7 @@ export function rewriteMcpToolErrors(payload: unknown, requestId: string): boole
     return false;
   }
   const message = payload as JsonRpcPayload;
-  const result = message.result;
+  const { result } = message;
   if (result?.isError !== true) {
     return false;
   }
@@ -138,7 +138,7 @@ export function rewriteMcpToolErrors(payload: unknown, requestId: string): boole
   if (!Array.isArray(blocks) || blocks.length === 0) {
     return false;
   }
-  const first = blocks[0];
+  const [first] = blocks;
   if (!first || typeof first.text !== "string") {
     return false;
   }

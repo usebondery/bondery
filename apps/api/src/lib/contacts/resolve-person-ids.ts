@@ -84,7 +84,7 @@ export async function resolveContactPersonIds(
         db,
         userId,
         search,
-        10000,
+        10_000,
         0,
         {
           tagIds,

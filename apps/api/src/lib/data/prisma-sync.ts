@@ -108,7 +108,7 @@ export async function fetchSyncChildIds(
     column: "person_id",
     value: personId,
   });
-  return rows.map((row) => String(row.id));
+  return rows.map((row) => String(row["id"]));
 }
 
 export async function fetchSyncPersonRow(
@@ -119,7 +119,7 @@ export async function fetchSyncPersonRow(
   const rows = await client.$queryRaw<Record<string, unknown>[]>`
     SELECT * FROM people WHERE user_id = ${userId}::uuid AND id = ${personId}::uuid LIMIT 1
   `;
-  const row = rows[0];
+  const [row] = rows;
   return row ? serializeRawRow(row) : null;
 }
 
@@ -134,7 +134,7 @@ export async function fetchSyncGroupRow(
     WHERE user_id = ${userId}::uuid AND id = ${groupId}::uuid
     LIMIT 1
   `;
-  const row = rows[0];
+  const [row] = rows;
   return row ? serializeRawRow(row) : null;
 }
 

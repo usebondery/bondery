@@ -17,6 +17,7 @@ import {
   assertApiHttpsOnly,
   assertApiInternalTls,
   assertPostgresTls,
+  assertRedisMutualTls,
   assertStorageTls,
   assertTraefikTransport,
 } from "./smoke-release-tls.mjs";
@@ -56,6 +57,10 @@ const DEFAULT_IMAGES = {
   api: "ghcr.io/usebondery/api",
   webapp: "ghcr.io/usebondery/webapp",
 };
+
+const ENV_QUOTE_NEEDED_RE = /[\s#="'\\]/;
+const HTTP_200_RE = /HTTP\/[\d.]+ 200/;
+const HTTP_403_RE = /HTTP\/[\d.]+ 403/;
 
 /** Compose interpolates the process environment over `--env-file`. Infisical staging must not win. */
 let smokeImageTag = "";
@@ -134,7 +139,7 @@ function parseEnvValue(raw) {
 }
 
 function formatEnvLine(key, value) {
-  if (/[\s#="'\\]/.test(value)) {
+  if (ENV_QUOTE_NEEDED_RE.test(value)) {
     return `${key}="${value.replace(/\\/g, "\\\\").replace(/"/g, '\\"')}"`;
   }
   return `${key}=${value}`;
@@ -380,8 +385,8 @@ function assertS3GatewaySpeaksS3() {
   }
 
   const speaksS3 =
-    (/HTTP\/[\d.]+ 200/.test(out) && out.includes("ListAllMyBucketsResult")) ||
-    (/HTTP\/[\d.]+ 403/.test(out) && out.includes("<Error"));
+    (HTTP_200_RE.test(out) && out.includes("ListAllMyBucketsResult")) ||
+    (HTTP_403_RE.test(out) && out.includes("<Error"));
   if (!speaksS3) {
     console.error(
       "S3 gateway did not speak S3 XML (expected 200 ListAllMyBucketsResult or 403 Error):\n",
@@ -449,6 +454,7 @@ function smokeApi(useLocalImages) {
   assertApiHttpsOnly(tls);
   assertTraefikTransport({ ...tls, dynamicDir: TRAEFIK_DYNAMIC_DIR });
   assertPostgresTls(tls);
+  assertRedisMutualTls(tls);
   assertStorageTls(tls);
 }
 

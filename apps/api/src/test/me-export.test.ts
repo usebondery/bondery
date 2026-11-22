@@ -34,13 +34,13 @@ function iso(date: Date): string {
 }
 
 function createTrackingDb(fixture: {
-  groupMemberships?: Array<Record<string, unknown>>;
-  groups?: Array<Record<string, unknown>>;
-  interactions?: Array<Record<string, unknown>>;
-  people?: Array<Record<string, unknown>>;
-  relationships?: Array<Record<string, unknown>>;
-  tagMemberships?: Array<Record<string, unknown>>;
-  tags?: Array<Record<string, unknown>>;
+  groupMemberships?: Record<string, unknown>[];
+  groups?: Record<string, unknown>[];
+  interactions?: Record<string, unknown>[];
+  people?: Record<string, unknown>[];
+  relationships?: Record<string, unknown>[];
+  tagMemberships?: Record<string, unknown>[];
+  tags?: Record<string, unknown>[];
 }) {
   const calls: Array<{ method: string; userId?: string }> = [];
 
@@ -391,7 +391,7 @@ describe("generateExportZip", () => {
     assert.equal(peopleFile.schemaType, "People");
     assert.equal(peopleFile.records.length, 1);
 
-    const person = peopleFile.records[0];
+    const [person] = peopleFile.records;
     assert.equal(person?.id, PERSON_ID);
     assert.equal(person?.hasAvatar, true);
     assert.equal(person?.phones[0]?.value, "123456789");
@@ -454,7 +454,7 @@ describe("generateExportZip", () => {
 
   it("writes the myself person to myself.json not people.json", async () => {
     const fixture = populatedFixture();
-    const ada = fixture.people[0];
+    const [ada] = fixture.people;
     assert.ok(ada);
     fixture.people = [
       ada,

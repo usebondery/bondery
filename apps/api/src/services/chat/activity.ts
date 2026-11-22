@@ -13,16 +13,7 @@ interface ChatToolActivity {
   tool: string;
 }
 
-type HardDeleteTool = (typeof HARD_DELETE_TOOLS)[number];
-
-const HARD_DELETE_TOOL_SET: ReadonlySet<string> = new Set(HARD_DELETE_TOOLS);
-
-const DISPLAY_NAME_FIELDS = ["name", "label", "title", "search"] as const;
-
-export type { ChatToolActivity, ChatToolKind, HardDeleteTool };
-
-/** Hard deletes. These pause for a confirm before `execute` runs. */
-export const HARD_DELETE_TOOLS = [
+const HARD_DELETE_TOOLS = [
   "delete_contact",
   "delete_group",
   "delete_interaction",
@@ -31,15 +22,22 @@ export const HARD_DELETE_TOOLS = [
   "delete_tags",
 ] as const;
 
-export const MAX_ACTIVITY_COUNT = 20;
-export const MAX_DISPLAY_NAME_LENGTH = 80;
+type HardDeleteTool = (typeof HARD_DELETE_TOOLS)[number];
 
-export function isHardDeleteTool(toolName: string): toolName is HardDeleteTool {
+const HARD_DELETE_TOOL_SET: ReadonlySet<string> = new Set(HARD_DELETE_TOOLS);
+
+const DISPLAY_NAME_FIELDS = ["name", "label", "title", "search"] as const;
+
+const MAX_ACTIVITY_COUNT = 20;
+const MAX_DISPLAY_NAME_LENGTH = 80;
+
+/** Hard deletes. These pause for a confirm before `execute` runs. */
+function isHardDeleteTool(toolName: string): toolName is HardDeleteTool {
   return HARD_DELETE_TOOL_SET.has(toolName);
 }
 
 /** `get_*` and `search_*` read. Everything else writes. */
-export function resolveToolKind(toolName: string): ChatToolKind {
+function resolveToolKind(toolName: string): ChatToolKind {
   return toolName.startsWith("get_") || toolName.startsWith("search_") ? "read" : "write";
 }
 
@@ -47,7 +45,7 @@ export function resolveToolKind(toolName: string): ChatToolKind {
  * Reads one short label from tool input or output. Only the allowlisted string
  * fields are read, so ids, emails, phones, and notes never reach the database.
  */
-export function resolveToolDisplayName(payload: unknown): string | undefined {
+function resolveToolDisplayName(payload: unknown): string | undefined {
   if (!payload || typeof payload !== "object") {
     return undefined;
   }
@@ -67,10 +65,21 @@ export function resolveToolDisplayName(payload: unknown): string | undefined {
   return undefined;
 }
 
-export function buildToolActivity(toolName: string, payload: unknown): ChatToolActivity {
+function buildToolActivity(toolName: string, payload: unknown): ChatToolActivity {
   const displayName = resolveToolDisplayName(payload);
 
   return displayName
     ? { displayName, kind: resolveToolKind(toolName), tool: toolName }
     : { kind: resolveToolKind(toolName), tool: toolName };
 }
+
+export type { ChatToolActivity, ChatToolKind, HardDeleteTool };
+export {
+  buildToolActivity,
+  HARD_DELETE_TOOLS,
+  isHardDeleteTool,
+  MAX_ACTIVITY_COUNT,
+  MAX_DISPLAY_NAME_LENGTH,
+  resolveToolDisplayName,
+  resolveToolKind,
+};

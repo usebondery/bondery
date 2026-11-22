@@ -33,7 +33,7 @@ function walk(dir: string) {
 }
 
 walk(apiSrc);
-for (const code of [...codes].sort()) {
+for (const code of [...codes].sort((left, right) => left.localeCompare(right))) {
   console.log(code);
 }
 console.error(`count: ${codes.size}`);

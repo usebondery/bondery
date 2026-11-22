@@ -88,7 +88,7 @@ export function runChatAgent(
       }
     },
     onToolExecutionEnd: (event) => {
-      const toolName = event.toolCall.toolName;
+      const { toolName } = event.toolCall;
       tracker.inFlight.delete(toolName);
 
       if (event.toolOutput.type !== "tool-result") {
@@ -102,7 +102,7 @@ export function runChatAgent(
       tracker.inputs.delete(toolName);
     },
     onToolExecutionStart: (event) => {
-      const toolName = event.toolCall.toolName;
+      const { toolName } = event.toolCall;
       tracker.inFlight.add(toolName);
       tracker.inputs.set(toolName, event.toolCall.input);
     },

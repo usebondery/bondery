@@ -33,10 +33,10 @@ const { resolveResourceId, provisionWebappClient } = await import(
   "../lib/bootstrap/provision-oauth-clients.js"
 );
 
-const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
+const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
 const CALLBACK_URL = `${WEBAPP_URL}/auth/start`;
 const ERROR_CALLBACK_URL = `${WEBAPP_URL}/login`;
-const CLIENT_ID = process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID as string;
+const CLIENT_ID = process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"] as string;
 const RESOURCE = resolveApiResourceIdentifier();
 const OAUTH_SCOPE = "openid profile email offline_access api:access";
 

@@ -127,13 +127,14 @@ export function useChatSessionsRefreshOnStreamEnd(
   const onStreamCompleteRef = useRef(onStreamComplete);
   onStreamCompleteRef.current = onStreamComplete;
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (titleRefreshTimerRef.current) {
         clearTimeout(titleRefreshTimerRef.current);
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   useEffect(() => {
     const inFlight = status === "submitted" || status === "streaming";

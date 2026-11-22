@@ -78,10 +78,11 @@ function authInfoFromClaims(request: Request, claims: JWTPayload, email: string)
   const token = authorization.startsWith(BEARER_PREFIX)
     ? authorization.slice(BEARER_PREFIX.length).trim()
     : "";
-  const scopes = typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
+  const scopes =
+    typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
   const clientId =
-    (typeof claims.client_id === "string" && claims.client_id) ||
-    (typeof claims.azp === "string" && claims.azp) ||
+    (typeof claims["client_id"] === "string" && claims["client_id"]) ||
+    (typeof claims["azp"] === "string" && claims["azp"]) ||
     "";
   return {
     clientId,
@@ -126,7 +127,7 @@ async function resolveMcpToolName(request: Request): Promise<string | null> {
 }
 
 function grantedScopes(claims: JWTPayload): string[] {
-  return typeof claims.scope === "string" ? claims.scope.split(" ").filter(Boolean) : [];
+  return typeof claims["scope"] === "string" ? claims["scope"].split(" ").filter(Boolean) : [];
 }
 
 const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
@@ -139,7 +140,7 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
   if (!userId) {
     return new Response(
       JSON.stringify({
-        error: { code: -32000, message: "invalid_token" },
+        error: { code: -32_000, message: "invalid_token" },
         id: null,
         jsonrpc: "2.0",
       }),
@@ -154,7 +155,7 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
   if (!user?.email) {
     return new Response(
       JSON.stringify({
-        error: { code: -32000, message: "invalid_token" },
+        error: { code: -32_000, message: "invalid_token" },
         id: null,
         jsonrpc: "2.0",
       }),
@@ -170,9 +171,9 @@ const mcpAuthHandler = createBonderyMcpAuthHandler(async (request, claims) => {
 const MCP_POST_ONLY_HEADERS = { Allow: "POST" } as const;
 
 /** Authenticated GET/HEAD stay POST-only. Missing/invalid Bearer uses the same 401 as POST. */
-const mcpProbeHandler = createBonderyMcpAuthHandler(async () => {
-  return new Response(null, { headers: MCP_POST_ONLY_HEADERS, status: 405 });
-});
+const mcpProbeHandler = createBonderyMcpAuthHandler(
+  async () => new Response(null, { headers: MCP_POST_ONLY_HEADERS, status: 405 }),
+);
 
 function fetchResponseForMcpProbe(method: string, response: Response): Response {
   if (method !== "HEAD") {
@@ -216,7 +217,7 @@ export const mcpRoutes: AppRoutePlugin = async (fastify) => {
     url: "/",
   });
 
-  fastify.delete("/", { schema: { hide: true } }, async (_request, reply) => {
-    return reply.header("Allow", "POST").code(405).send();
-  });
+  fastify.delete("/", { schema: { hide: true } }, async (_request, reply) =>
+    reply.header("Allow", "POST").code(405).send(),
+  );
 };

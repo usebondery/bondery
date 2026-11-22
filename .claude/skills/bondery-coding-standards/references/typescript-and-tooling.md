@@ -25,16 +25,28 @@ Root [`biome.json`](../../../../biome.json) enforces:
 - Collapse `else { if (…) … }` into `else if (…)`
 - Named React components are function declarations, never class components except error boundaries that implement `componentDidCatch`
 - `function` expressions and `export default function()` must have a name (`useNamedFunction`). Arrow functions and object methods are out of scope. Prefer a named declaration or an arrow, not an anonymous `function()`.
-- Prefer destructuring when a local copies a same-named property or a fixed array index (`useDestructuring`). Write `const { foo } = obj` and `const [first] = arr`, not `const foo = obj.foo` or `const first = arr[0]`.
-- Do not use the `void` operator (`noVoid`). For a promise the caller cannot await, call `detachPromise` from `@bondery/helpers/async`. Pass `onRejected` when the caller has a logger.
+- Prefer destructuring when a local copies a same-named property or a fixed array index (`useDestructuring`). Write `const { foo } = obj` and `const [first] = arr`, not `const foo = obj.foo` or `const first = arr[0]`. Regex groups: `const [block] = match` and `const [, name] = match`.
+- Do not compare with `== null` or `!= null` (`noEqualsToNull`). Write `=== null` / `!== null`. If undefined is also in the domain, write `value === null || value === undefined` or `value !== null && value !== undefined`.
+- `Array#sort` and `toSorted` take a compare function (`useArraySortCompare`). Strings: `(left, right) => left.localeCompare(right)`. Numbers: `(left, right) => left - right`.
+- Put every non-export declaration above the first export (`useExportsLast`). Directives and imports stay at the top. If a later helper is a dependency of an earlier export, declare it first, then `export { … }` at the end. Do not duplicate a declaration to satisfy the rule.
+- Hoist a `/.../` inside a function to a module-level `const NAME = /.../` after imports (`useTopLevelRegex`). Skip `g` and `y` flags. Do not hoist a regex that must be new each call. Keep `new RegExp` when the pattern is interpolated.
+- Keep import statements first after directives and file comments (`useImportsFirst`).
+- Do not use the `void` operator (`noVoid`). For a promise the caller cannot await, call `detachPromise` from `@bondery/helpers/async`. Pass `onRejected` when the caller has a logger. A `.mjs` or plain `.js` file that cannot import helpers uses `.then(() => undefined, onRejected)`.
 - `Number#toFixed()` always takes a digit count (`useNumberToFixedDigitsArgument`). Write `.toFixed(0)`, not `.toFixed()`.
 - CSS must be Baseline newly available (`useBaseline`, `available: "newly"`). Gate other properties with `@supports`. `::selection` is allowlisted because Biome 2.6.8 still reports it.
+- Group digits in long numbers (`useNumericSeparators`). Prefer object spread over `Object.assign` (`useObjectSpread`). Scripts that are not ESM modules keep `"use strict"` (`useStrictMode`). JSDoc block lines use one asterisk (`useSingleJsDocAsterisk`).
+- Write array types as `T[]` and `readonly T[]`, not `Array<T>` or `ReadonlyArray<T>` (`useConsistentArrayType`, `syntax: "shorthand"`). Wrap unions and function types: `(string | number)[]`.
+- Arrow functions that only `return` a value omit the braces (`useConsistentArrowReturn`, `style: "asNeeded"`). Keep a block when the body has a directive, a comment, or a bare `return`.
+- Do not write `public` on class members (`useConsistentMemberAccessibility`, `accessibility: "noPublic"`). Default accessibility is public. Keep `private` and `protected`.
+- Interface and type-alias call members use property syntax (`useConsistentMethodSignatures`, `style: "property"`): `fn: (arg: T) => R`, not `fn(arg: T): R`. Property form is contravariant under `strictFunctionTypes`. One exception: `packages/translations/src/i18n-types.ts` keeps a method-form `bivarianceHack` so `t as LooseTranslateFn` still overlaps i18next overloads. That file turns the rule off in `biome.json`.
+- `var` is an error (`noVar`). `useVarsOnTop` stays on so a `var` that slips through must still sit at the top of its scope.
+- `for-in` is an error (`noForIn`). Prefer `for...of` or `Object.keys` / `Object.entries`. `useGuardForIn` stays on so a `for-in` that exists must still wrap the body in `if (Object.hasOwn(obj, key))`.
 - Do not call `process.exit()`; set `process.exitCode` and return, or throw
 - Do not use TypeScript `enum`, `namespace`, or constructor parameter properties (`erasableSyntaxOnly` already forbids them)
 - Object literals use shorthand (`{ foo }` not `{ foo: foo }`)
 - One class per file; split implementations when a file grows a second class
 - Prefer ESM; Expo `metro.config.js` and `babel.config.js` stay CommonJS because Metro loads them that way
-- Biome domains `next`, `react`, `tailwind`, `test`, `tanstackQuery`, `project`, and `types` are `"all"` (nursery included). `noPrivateImports`, `noUntrustedLicenses`, `useArraySortCompare`, and `useConsistentEnumValueType` are on. Also on: `noUndeclaredVariables`, `noUselessCall`, `noUselessSplice`, `noVar`, `noForIn`, `noEqualsToNull`, `noAlert`, `noBitwiseOperators`, `useNamedFunction`. Drizzle stays off (Prisma is the data layer). The `types` domain turns on Biome’s type inference. `useDisposables`, `useRegexpExec`, and `useStrictBooleanExpressions` stay off.
+- Biome domains `next`, `react`, `tailwind`, `test`, `tanstackQuery`, `project`, and `types` are `"all"` (nursery included). `noPrivateImports`, `noUntrustedLicenses`, `useArraySortCompare`, and `useConsistentEnumValueType` are on. Also on: `noUndeclaredVariables`, `noUselessCall`, `noUselessSplice`, `noVar`, `useVarsOnTop`, `noForIn`, `useGuardForIn`, `noEqualsToNull`, `noAlert`, `noBitwiseOperators`, `useNamedFunction`, `useConsistentArrayType`, `useConsistentArrowReturn`, `useConsistentMemberAccessibility`, `useConsistentMethodSignatures`. Drizzle stays off (Prisma is the data layer). The `types` domain turns on Biome’s type inference. `useDisposables`, `useRegexpExec`, and `useStrictBooleanExpressions` stay off.
   - `javascript.globals` lists `__DEV__` for Expo. Do not add `chrome` there; the extension uses `browser` from `wxt/browser`.
   - `noUnsafeTypeAssertion` stays **off**. It bans every `as T` except `as const`. This tree has over a thousand of those at JSON.parse, Prisma rows, OpenAPI YAML, DOM scrape, and `as unknown as` bridges. Replacing them needs a guard or a schema at each boundary, not a bulk rewrite. `noUselessTypeAssertion` already rejects assertions that do no work.
 - React domain rules that stay **on**: `noDuplicatedSpreadProps`, `noJsxLeakedDollar`, `noLeakedRender`, `noUnknownAttribute`, `useReactCompiler`, `useUniqueElementIds`.
@@ -55,7 +67,7 @@ Root [`biome.json`](../../../../biome.json) enforces:
 - Named `@theme` tokens replace arbitrary Tailwind values (`w-[320px]`) and raw palette classes (`text-gray-700`)
 - Node tests use `it()`; Playwright specs use `test()`; titles start in lowercase; `expect()` stays outside `if` / `?:` / `&&`
 - CSS colors use `rgb()` / `hsl()` / `oklch()` / named colors, not hex
-- Do not spread inside `map()` / `flatMap()` callbacks; build a new object with `Object.assign({}, item, extra)` or `item.concat(...)` so originals stay unchanged
+- Do not spread inside `map()` / `flatMap()` callbacks (`noMapSpread`). `Object.assign` is also an error (`useObjectSpread`). Build a new array with `for...of` and `push({ ...item, extra })`, or `item.concat(...)` for arrays, so originals stay unchanged
 - Await the value first, then update shared state (`const delta = await get(); total += delta`)
 - Empty blocks must contain a comment that states why they are empty, or be replaced with real handling
 - `className` joins go through `cn()` from the `cn` package. Biome plugin
@@ -107,6 +119,8 @@ For full CI parity:
 ```bash
 pnpm exec biome ci .
 ```
+
+`pnpm run check:changed` runs `biome check` (errors fail; warnings do not). CI `pnpm exec biome ci .` fails on warnings too. `noExcessiveLinesPerFunction` is warn. Do not split large functions unless a task asks for it.
 
 Do not use root `pnpm run lint` for verification; it runs `biome check --write .` and mutates files. Route type checks, package consumers, tests, and boundary checks through [`bondery-verification-loop`](../../bondery-verification-loop/SKILL.md).
 

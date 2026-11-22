@@ -32,11 +32,12 @@ function useMarkerDrag(
 ) {
   const moved = useRef(false);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       setDragCursor(false);
-    };
-  }, []);
+    },
+    [],
+  );
 
   function onPointerDown(event: ReactPointerEvent<HTMLButtonElement>) {
     if (event.button !== 0) {

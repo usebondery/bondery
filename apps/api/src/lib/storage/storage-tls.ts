@@ -21,7 +21,7 @@ import {
 } from "./s3-client.js";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-const HANDSHAKE_TIMEOUT_MS = 5_000;
+const HANDSHAKE_TIMEOUT_MS = 5000;
 
 export type StorageTlsInspection = {
   /** Days until the presented certificate expires; null without TLS. */
@@ -87,7 +87,7 @@ export function logStorageCertificateExpiry(
 export function warnOnInsecureProductionStorage(
   log: Pick<FastifyBaseLogger, "warn">,
   endpoint: string,
-  nodeEnv: string | undefined = process.env.NODE_ENV,
+  nodeEnv: string | undefined = process.env["NODE_ENV"],
 ): boolean {
   if (nodeEnv !== "production" || describeS3Security(endpoint).tls) {
     return false;

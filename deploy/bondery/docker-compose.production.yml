@@ -35,11 +35,12 @@ include:
 
 services:
   # One-shot job: creates the secrets of the bundled services on first start and keeps them
-  # afterwards: the Redis password and TLS certificate, the Postgres CA and TLS certificate, and
-  # the SeaweedFS CA and cluster certificate, and the CA and certificate of the API's internal
-  # HTTPS listener. Existing installs upgrade with no action. Each Postgres, storage, and API
-  # volume holds only what its consumer needs: ca (this job), server (db or api) or cluster
-  # (SeaweedFS nodes), client (the service that connects).
+  # afterwards: the Redis CA and TLS certificates, the Postgres CA and TLS certificate, and the
+  # SeaweedFS CA and cluster certificate, and the CA and certificate of the API's internal HTTPS
+  # listener. Existing installs upgrade with no action. Each Postgres, Redis, storage, and API
+  # volume holds only what its consumer needs: ca (this job), server (db, redis, or api) or cluster
+  # (SeaweedFS nodes), client (the service that connects). The legacy redis-secrets volume is read
+  # only so the first boot can keep the previous password.
   stack-secrets:
     command:
       - node
@@ -52,7 +53,10 @@ services:
     restart: "no"
     user: "0:0"
     volumes:
-      - redis-secrets:/bondery-redis
+      - redis-tls-ca:/bondery-redis/ca
+      - redis-tls-server:/bondery-redis/server
+      - redis-tls-client:/bondery-redis/client
+      - redis-secrets:/bondery-redis-legacy:ro
       - postgres-tls-ca:/bondery-postgres/ca
       - postgres-tls-server:/bondery-postgres/server
       - postgres-tls-client:/bondery-postgres/client
@@ -95,7 +99,7 @@ services:
         bind:
           create_host_path: false
 
-  # Redis accepts TLS only (no plaintext port) and requires the password from users.acl.
+  # Redis accepts TLS only (no plaintext port), mutual TLS, and requires the password from users.acl.
   redis:
     command:
       - redis-server
@@ -112,8 +116,16 @@ services:
       - /bondery-redis/server/tls.crt
       - --tls-key-file
       - /bondery-redis/server/tls.key
+      - --tls-ca-cert-file
+      - /bondery-redis/server/ca.crt
       - --tls-auth-clients
-      - "no"
+      - "yes"
+      - --tls-protocols
+      - TLSv1.3
+      - --tls-ciphersuites
+      - TLS_AES_128_GCM_SHA256:TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256
+      - --tls-prefer-server-ciphers
+      - "yes"
       - --aclfile
       - /bondery-redis/server/users.acl
     depends_on:
@@ -126,7 +138,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'REDISCLI_AUTH="$$(cat /bondery-redis/client/password)" redis-cli --tls --cacert /bondery-redis/client/ca.crt -h localhost -p 6379 ping | grep -q PONG',
+          'REDISCLI_AUTH="$$(cat /bondery-redis/server/password)" redis-cli --tls --cert /bondery-redis/server/healthcheck.crt --key /bondery-redis/server/healthcheck.key --cacert /bondery-redis/server/ca.crt -h localhost -p 6379 ping | grep -q PONG',
         ]
       timeout: 3s
     image: redis:8.10
@@ -137,7 +149,7 @@ services:
     restart: unless-stopped
     volumes:
       - redis-data:/data
-      - redis-secrets:/bondery-redis:ro
+      - redis-tls-server:/bondery-redis/server:ro
 
   api:
     depends_on:
@@ -162,11 +174,13 @@ services:
       API_PORT: "26642"
       BONDERY_PRIVATE_API_TLS_CERT_FILE: /bondery-api/server/tls.crt
       BONDERY_PRIVATE_API_TLS_KEY_FILE: /bondery-api/server/tls.key
-      # Bundled Redis only: TLS + password from the redis-secrets volume. Compose always sets
-      # this URL; a BONDERY_PRIVATE_REDIS_URL in .env does not apply to this stack.
+      # Bundled Redis only: mutual TLS + password from the redis-tls-client volume. Compose always
+      # sets this URL; a BONDERY_PRIVATE_REDIS_URL in .env does not apply to this stack.
       BONDERY_PRIVATE_REDIS_URL: rediss://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379
       BONDERY_PRIVATE_REDIS_PASSWORD_FILE: /bondery-redis/client/password
       BONDERY_PRIVATE_REDIS_TLS_CA_FILE: /bondery-redis/client/ca.crt
+      BONDERY_PRIVATE_REDIS_TLS_CERT_FILE: /bondery-redis/client/tls.crt
+      BONDERY_PRIVATE_REDIS_TLS_KEY_FILE: /bondery-redis/client/tls.key
       # Bundled Postgres only: TLS verified against the stack CA from the stack-secrets job.
       # Compose always sets these; DATABASE_SSL_* in .env does not apply to this stack.
       DATABASE_SSL_MODE: verify-full
@@ -237,7 +251,7 @@ services:
           - ${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api
     restart: unless-stopped
     volumes:
-      - redis-secrets:/bondery-redis:ro
+      - redis-tls-client:/bondery-redis/client:ro
       - postgres-tls-client:/bondery-postgres/client:ro
       - storage-tls-client:/bondery-storage/client:ro
       - api-tls-server:/bondery-api/server:ro
@@ -304,6 +318,10 @@ networks:
 volumes:
   redis-data: {}
   redis-secrets: {}
+  # Written by the stack-secrets job. ca: the job only. server: redis. client: api.
+  redis-tls-ca: {}
+  redis-tls-server: {}
+  redis-tls-client: {}
   # Written by the stack-secrets job. ca: the job only. server: the API only (its key). client:
   # the webapp only (the CA certificate it trusts).
   api-tls-ca: {}

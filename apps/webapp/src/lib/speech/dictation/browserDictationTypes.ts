@@ -41,7 +41,7 @@ export interface BrowserSpeechRecognitionErrorEvent extends Event {
 }
 
 export interface BrowserSpeechRecognition {
-  abort(): void;
+  abort: () => void;
   continuous: boolean;
   interimResults: boolean;
   lang: string;
@@ -52,8 +52,8 @@ export interface BrowserSpeechRecognition {
   onstart: ((event: Event) => void) | null;
   /** When true, recognition stays on the device. Older browsers ignore it. */
   processLocally?: boolean;
-  start(): void;
-  stop(): void;
+  start: () => void;
+  stop: () => void;
 }
 
 export interface BrowserSpeechRecognitionConstructor {

@@ -21,7 +21,40 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { checkApiTls } from "./check-compose-api-tls.mjs";
 import { checkPostgresTls } from "./check-compose-postgres-tls.mjs";
+import { checkRedisTls } from "./check-compose-redis-tls.mjs";
 import { checkStorageTls } from "./check-compose-storage-tls.mjs";
+
+const COMPOSE_VERSION_RE = /v?(\d+)\.(\d+)\.(\d+)/;
+const INCLUDE_KEY_RE = /^\s*include:\s*$/m;
+const S3_STATUS_PROBE_RE = /8333\/status/;
+const S3_ACCESS_KEY_ID_RE = /BONDERY_PRIVATE_S3_ACCESS_KEY_ID/;
+const HARDCODED_STORAGE_ROUTER_RE = /traefik\.http\.routers\.bondery-storage/;
+const SERVICE_BLOCK_NEXT_RE = /^ {2}[a-zA-Z0-9_-]+:\s*$/m;
+const ENV_FILE_RE = /^\s*env_file:/m;
+const TRAEFIK_ENABLE_RE = /traefik\.enable=true/;
+const HARDCODED_WEBAPP_ROUTER_RE = /traefik\.http\.routers\.bondery-webapp/;
+const INTERNAL_API_URL_PREFIX_RE =
+  /BONDERY_INFRA_INTERNAL_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/;
+const WEBAPP_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-webapp/;
+const PUBLIC_API_URL_RE = /BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/;
+const HARDCODED_API_ROUTER_RE = /traefik\.http\.routers\.bondery-api/;
+const DOKPLOY_NETWORK_RE = /dokploy-network/;
+const INTERNAL_NETWORK_RE = /internal/;
+const API_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api/;
+const S3_ENDPOINT_PREFIX_RE =
+  /BONDERY_PRIVATE_S3_ENDPOINT:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/;
+const DATABASE_URL_PREFIX_RE = /DATABASE_URL:.*\$\{BONDERY_INFRA_TRAEFIK_PREFIX/;
+const DB_HEALTHY_RE = /db:\s*\n\s*condition:\s*service_healthy/;
+const KONG_HEALTHY_RE = /kong:\s*\n\s*condition:\s*service_healthy/;
+const PRE_START_RE = /pre_start:/m;
+const TRAEFIK_LABEL_RE = /traefik\./;
+const REDIS_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis/;
+const HEALTHCHECK_RE = /healthcheck:/m;
+const DB_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-db/;
+const POSTGRES_HOST_PORT_RE = /127\.0\.0\.1:\$\{BONDERY_INFRA_POSTGRES_HOST_PORT:-5432\}:5432/;
+const PUBLIC_POSTGRES_BIND_RE = /ports:[\s\S]*["']0\.0\.0\.0:/;
+const WILDCARD_POSTGRES_BIND_RE = /ports:[\s\S]*["']\*:/;
+const STORAGE_NETWORK_ALIAS_RE = /BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage/;
 
 function main() {
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -36,7 +69,7 @@ function main() {
   const MIN_COMPOSE_VERSION = [2, 38, 0];
 
   function parseComposeVersion(output) {
-    const match = output.match(/v?(\d+)\.(\d+)\.(\d+)/);
+    const match = output.match(COMPOSE_VERSION_RE);
     if (!match) {
       return null;
     }
@@ -76,7 +109,7 @@ function main() {
     );
   }
 
-  if (!/^\s*include:\s*$/m.test(mainText) || !mainText.includes("docker-compose.postgres.yml")) {
+  if (!INCLUDE_KEY_RE.test(mainText) || !mainText.includes("docker-compose.postgres.yml")) {
     errors.push("docker-compose.yml must include path: docker-compose.postgres.yml");
   }
 
@@ -101,18 +134,18 @@ function main() {
     errors.push("seaweedfs-s3 must mount and healthcheck seaweedfs/s3-ready.sh");
   }
 
-  if (/8333\/status/.test(seaweedText)) {
+  if (S3_STATUS_PROBE_RE.test(seaweedText)) {
     errors.push("seaweedfs-s3 healthcheck must not probe GET /status (empty 200 is not S3-ready)");
   }
 
-  if (!/BONDERY_PRIVATE_S3_ACCESS_KEY_ID/.test(seaweedText)) {
+  if (!S3_ACCESS_KEY_ID_RE.test(seaweedText)) {
     errors.push("seaweedfs-s3 must pass BONDERY_PRIVATE_S3_ACCESS_KEY_ID from compose env");
   }
 
   if (!seaweedText.includes("BONDERY_INFRA_TRAEFIK_PREFIX")) {
     errors.push("seaweedfs-s3 Traefik router names must interpolate BONDERY_INFRA_TRAEFIK_PREFIX");
   }
-  if (/traefik\.http\.routers\.bondery-storage/.test(seaweedText)) {
+  if (HARDCODED_STORAGE_ROUTER_RE.test(seaweedText)) {
     errors.push("seaweedfs-s3 Traefik router names must not be hardcoded as bondery-storage");
   }
 
@@ -128,7 +161,7 @@ function main() {
       return "";
     }
     const rest = source.slice(start + 1);
-    const next = rest.search(/^ {2}[a-zA-Z0-9_-]+:\s*$/m);
+    const next = rest.search(SERVICE_BLOCK_NEXT_RE);
     return next === -1 ? source.slice(start) : source.slice(start, start + 1 + next);
   }
 
@@ -144,7 +177,7 @@ function main() {
   ]);
 
   if (webapp) {
-    if (/^\s*env_file:/m.test(webapp)) {
+    if (ENV_FILE_RE.test(webapp)) {
       errors.push(
         "webapp must not use env_file (would load API PRIVATE_* / BONDERY_PRIVATE_* secrets)",
       );
@@ -163,13 +196,13 @@ function main() {
     if (!webapp.includes("BONDERY_INFRA_WEBAPP_DOMAIN")) {
       errors.push("webapp must define a Traefik Host() rule using BONDERY_INFRA_WEBAPP_DOMAIN");
     }
-    if (!/traefik\.enable=true/.test(webapp)) {
+    if (!TRAEFIK_ENABLE_RE.test(webapp)) {
       errors.push("webapp must enable Traefik (traefik.enable=true)");
     }
     if (!webapp.includes("BONDERY_INFRA_TRAEFIK_PREFIX")) {
       errors.push("webapp Traefik router names must interpolate BONDERY_INFRA_TRAEFIK_PREFIX");
     }
-    if (/traefik\.http\.routers\.bondery-webapp/.test(webapp)) {
+    if (HARDCODED_WEBAPP_ROUTER_RE.test(webapp)) {
       errors.push("webapp Traefik router names must not be hardcoded as bondery-webapp");
     }
     if (!webapp.includes("BONDERY_INFRA_INTERNAL_API_URL")) {
@@ -180,19 +213,17 @@ function main() {
         "webapp must not use http://api:26631 — that DNS name collides on shared dokploy-network",
       );
     }
-    if (
-      !/BONDERY_INFRA_INTERNAL_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/.test(webapp)
-    ) {
+    if (!INTERNAL_API_URL_PREFIX_RE.test(webapp)) {
       errors.push(
         "webapp must derive BONDERY_INFRA_INTERNAL_API_URL from BONDERY_INFRA_TRAEFIK_PREFIX",
       );
     }
-    if (!/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-webapp/.test(webapp)) {
+    if (!WEBAPP_NETWORK_ALIAS_RE.test(webapp)) {
       errors.push(
         "webapp must publish a unique dokploy-network alias from BONDERY_INFRA_TRAEFIK_PREFIX",
       );
     }
-    if (!/BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/.test(webapp)) {
+    if (!PUBLIC_API_URL_RE.test(webapp)) {
       errors.push(
         "webapp must derive BONDERY_PUBLIC_API_URL from https:// + BONDERY_INFRA_API_DOMAIN",
       );
@@ -203,7 +234,7 @@ function main() {
     if (!api.includes("BONDERY_INFRA_API_DOMAIN")) {
       errors.push("api must define a Traefik Host() rule using BONDERY_INFRA_API_DOMAIN");
     }
-    if (!/BONDERY_PUBLIC_API_URL:\s*https:\/\/\$\{BONDERY_INFRA_API_DOMAIN/.test(api)) {
+    if (!PUBLIC_API_URL_RE.test(api)) {
       errors.push(
         "api must derive BONDERY_PUBLIC_API_URL from https:// + BONDERY_INFRA_API_DOMAIN",
       );
@@ -214,19 +245,19 @@ function main() {
     if (!api.includes("DATABASE_URL:")) {
       errors.push("api must set DATABASE_URL for Prisma");
     }
-    if (!/traefik\.enable=true/.test(api)) {
+    if (!TRAEFIK_ENABLE_RE.test(api)) {
       errors.push("api must enable Traefik (traefik.enable=true)");
     }
     if (!api.includes("BONDERY_INFRA_TRAEFIK_PREFIX")) {
       errors.push("api Traefik router names must interpolate BONDERY_INFRA_TRAEFIK_PREFIX");
     }
-    if (/traefik\.http\.routers\.bondery-api/.test(api)) {
+    if (HARDCODED_API_ROUTER_RE.test(api)) {
       errors.push("api Traefik router names must not be hardcoded as bondery-api");
     }
-    if (!/dokploy-network/.test(api) || !/internal/.test(api)) {
+    if (!DOKPLOY_NETWORK_RE.test(api) || !INTERNAL_NETWORK_RE.test(api)) {
       errors.push("api must join both dokploy-network and internal");
     }
-    if (!/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api/.test(api)) {
+    if (!API_NETWORK_ALIAS_RE.test(api)) {
       errors.push(
         "api must publish a unique dokploy-network alias from BONDERY_INFRA_TRAEFIK_PREFIX",
       );
@@ -236,22 +267,22 @@ function main() {
         "api must not use http://seaweedfs-s3:8333 — that DNS name collides on shared dokploy-network",
       );
     }
-    if (!/BONDERY_PRIVATE_S3_ENDPOINT:\s*https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX/.test(api)) {
+    if (!S3_ENDPOINT_PREFIX_RE.test(api)) {
       errors.push("api must derive BONDERY_PRIVATE_S3_ENDPOINT from BONDERY_INFRA_TRAEFIK_PREFIX");
     }
     if (api.includes("@db:5432")) {
       errors.push("api must not use DATABASE_URL host db — use BONDERY_INFRA_TRAEFIK_PREFIX-db");
     }
-    if (!/DATABASE_URL:.*\$\{BONDERY_INFRA_TRAEFIK_PREFIX/.test(api)) {
+    if (!DATABASE_URL_PREFIX_RE.test(api)) {
       errors.push("api must derive DATABASE_URL host from BONDERY_INFRA_TRAEFIK_PREFIX");
     }
-    if (!/db:\s*\n\s*condition:\s*service_healthy/.test(api)) {
+    if (!DB_HEALTHY_RE.test(api)) {
       errors.push("api must depends_on db with condition: service_healthy");
     }
-    if (/kong:\s*\n\s*condition:\s*service_healthy/.test(api)) {
+    if (KONG_HEALTHY_RE.test(api)) {
       errors.push("api must not depends_on kong (Supabase stack removed)");
     }
-    if (!/pre_start:/m.test(api)) {
+    if (!PRE_START_RE.test(api)) {
       errors.push("api must define pre_start init containers");
     }
     if (!api.includes("apps/api/dist/cli/release-migrate.js")) {
@@ -263,152 +294,52 @@ function main() {
   }
 
   if (redis) {
-    if (/traefik\./.test(redis)) {
+    if (TRAEFIK_LABEL_RE.test(redis)) {
       errors.push("redis must not carry Traefik labels");
     }
-    if (/dokploy-network/.test(redis)) {
+    if (DOKPLOY_NETWORK_RE.test(redis)) {
       errors.push("redis must not join dokploy-network");
     }
-    if (!/internal/.test(redis)) {
+    if (!INTERNAL_NETWORK_RE.test(redis)) {
       errors.push("redis must join the private internal network");
     }
-    if (!/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis/.test(redis)) {
+    if (!REDIS_NETWORK_ALIAS_RE.test(redis)) {
       errors.push("redis must publish a unique internal alias from BONDERY_INFRA_TRAEFIK_PREFIX");
     }
   }
 
-  /**
-   * Every Redis in every product stack variant requires TLS and authentication
-   * (bondery-security: "Redis: TLS and authentication"). The variants are copies, so check each.
-   */
-  function checkRedisTlsAndAuth(label, source) {
-    const fail = (message) => {
-      errors.push(`${label}: ${message}`);
-    };
-    const redisBlock = serviceBlock("redis", source);
-    const apiBlock = serviceBlock("api", source);
-    const secretsBlock = serviceBlock("stack-secrets", source);
-    if (!(redisBlock && apiBlock && secretsBlock)) {
-      return;
-    }
-
-    if (!/- --port\s*\n\s*- "0"/.test(redisBlock)) {
-      fail('redis must disable the plaintext port (--port "0")');
-    }
-    if (!/- --tls-port\s*\n\s*- "6379"/.test(redisBlock)) {
-      fail('redis must serve TLS on 6379 (--tls-port "6379")');
-    }
-    for (const flag of ["--tls-cert-file", "--tls-key-file", "--aclfile"]) {
-      if (!redisBlock.includes(`- ${flag}`)) {
-        fail(`redis must set ${flag} from the redis-secrets volume`);
-      }
-    }
-    if (/requirepass|--protected-mode\s*\n\s*- "?no/.test(redisBlock)) {
-      fail("redis must authenticate through the ACL file, not requirepass or protected-mode no");
-    }
-    if (!/stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/.test(redisBlock)) {
-      fail("redis must depends_on stack-secrets with condition: service_completed_successfully");
-    }
-    if (!/redis-cli --tls --cacert/.test(redisBlock) || !redisBlock.includes("REDISCLI_AUTH")) {
-      fail("redis healthcheck must connect with TLS and the password");
-    }
-    if (!secretsBlock.includes("apps/api/dist/cli/ensure-stack-secrets.js")) {
-      fail("stack-secrets must run the ensure-stack-secrets CLI");
-    }
-    if (!/network_mode:\s*none/.test(secretsBlock)) {
-      fail("stack-secrets must run without a network (network_mode: none)");
-    }
-    if (!secretsBlock.includes("- redis-secrets:/bondery-redis")) {
-      fail("stack-secrets must mount the redis-secrets volume");
-    }
-
-    if (
-      !/BONDERY_PRIVATE_REDIS_URL: rediss:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-redis:6379\s*$/m.test(
-        apiBlock,
-      )
-    ) {
-      fail(
-        "api BONDERY_PRIVATE_REDIS_URL must be rediss://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-redis:6379 (TLS, not overridable from .env)",
-      );
-    }
-    if (!apiBlock.includes("BONDERY_PRIVATE_REDIS_PASSWORD_FILE: /bondery-redis/client/password")) {
-      fail("api must read the Redis password from BONDERY_PRIVATE_REDIS_PASSWORD_FILE");
-    }
-    if (!apiBlock.includes("BONDERY_PRIVATE_REDIS_TLS_CA_FILE: /bondery-redis/client/ca.crt")) {
-      fail("api must pin the Redis certificate with BONDERY_PRIVATE_REDIS_TLS_CA_FILE");
-    }
-    if (!apiBlock.includes("- redis-secrets:/bondery-redis:ro")) {
-      fail("api must mount the redis-secrets volume read-only");
-    }
-  }
-
-  for (const file of [
-    "docker-compose.yml",
-    "docker-compose.production.yml",
-    "docker-compose.self-hosted.yml",
-  ]) {
-    checkRedisTlsAndAuth(file, readFileSync(resolve(root, file), "utf8"));
-  }
+  errors.push(...checkRedisTls({ root, serviceBlock }));
   errors.push(...checkPostgresTls({ postgresText, root, serviceBlock }));
   errors.push(...checkStorageTls({ root, serviceBlock }));
   errors.push(...checkApiTls({ root, serviceBlock }));
 
-  /** Local dev Redis has the same TLS and password rules, and only listens on loopback. */
-  {
-    const label = "docker-compose.dev-redis.yml";
-    const devText = readFileSync(resolve(root, label), "utf8");
-    const fail = (message) => {
-      errors.push(`${label}: ${message}`);
-    };
-    if (!/- --port\s*\n\s*- "0"/.test(devText)) {
-      fail('redis must disable the plaintext port (--port "0")');
-    }
-    if (!/- --tls-port\s*\n\s*- "6379"/.test(devText)) {
-      fail('redis must serve TLS on 6379 (--tls-port "6379")');
-    }
-    for (const flag of ["--tls-cert-file", "--tls-key-file", "--aclfile"]) {
-      if (!devText.includes(`- ${flag}`)) {
-        fail(`redis must set ${flag}`);
-      }
-    }
-    if (!/redis-cli --tls --cacert/.test(devText) || !devText.includes("REDISCLI_AUTH")) {
-      fail("redis healthcheck must connect with TLS and the password");
-    }
-    if (!/- "127\.0\.0\.1:26636:6379"/.test(devText)) {
-      fail("redis must publish 26636 on 127.0.0.1 only");
-    }
-    if (/- "(?:0\.0\.0\.0:)?\d+:6379"/.test(devText)) {
-      fail("redis must not publish a port on all interfaces");
-    }
-  }
-
   if (db) {
-    if (/traefik\./.test(db)) {
+    if (TRAEFIK_LABEL_RE.test(db)) {
       errors.push("db must not carry Traefik labels");
     }
-    if (/dokploy-network/.test(db)) {
+    if (DOKPLOY_NETWORK_RE.test(db)) {
       errors.push("db must not join dokploy-network");
     }
-    if (!/internal/.test(db)) {
+    if (!INTERNAL_NETWORK_RE.test(db)) {
       errors.push("db must join the private internal network");
     }
-    if (!/healthcheck:/m.test(db)) {
+    if (!HEALTHCHECK_RE.test(db)) {
       errors.push("db must define a healthcheck");
     }
-    if (!/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-db/.test(db)) {
+    if (!DB_NETWORK_ALIAS_RE.test(db)) {
       errors.push("db must publish a unique internal alias from BONDERY_INFRA_TRAEFIK_PREFIX");
     }
-    if (!/127\.0\.0\.1:\$\{BONDERY_INFRA_POSTGRES_HOST_PORT:-5432\}:5432/.test(db)) {
+    if (!POSTGRES_HOST_PORT_RE.test(db)) {
       errors.push(
         "db must publish 127.0.0.1 and interpolate BONDERY_INFRA_POSTGRES_HOST_PORT (default 5432)",
       );
     }
-    if (/ports:[\s\S]*["']0\.0\.0\.0:/.test(db) || /ports:[\s\S]*["']\*:/.test(db)) {
+    if (PUBLIC_POSTGRES_BIND_RE.test(db) || WILDCARD_POSTGRES_BIND_RE.test(db)) {
       errors.push("db must not publish Postgres on a public interface");
     }
   }
 
-  if (s3 && !/BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-storage/.test(s3)) {
+  if (s3 && !STORAGE_NETWORK_ALIAS_RE.test(s3)) {
     errors.push(
       "seaweedfs-s3 must publish a unique dokploy-network alias from BONDERY_INFRA_TRAEFIK_PREFIX",
     );

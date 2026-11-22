@@ -140,6 +140,28 @@ export const API_SECRET_ENTRIES: EnvVarDef[] = [
     targets: [t("api")],
   },
   {
+    canonical: "BONDERY_PRIVATE_REDIS_TLS_CERT_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional PEM certificate the API presents to Redis. Compose sets it for the bundled Redis. Local dev path, relative to apps/api",
+    exampleValue: "../../.temp/redis-secrets/client/tls.crt",
+    group: "Redis",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PRIVATE_REDIS_TLS_KEY_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional PEM private key for the Redis client certificate. Compose sets it for the bundled Redis. Local dev path, relative to apps/api",
+    exampleValue: "../../.temp/redis-secrets/client/tls.key",
+    group: "Redis",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
     canonical: "BONDERY_PRIVATE_STRIPE_SECRET_KEY",
     deployExample: {
       group: "Stripe",

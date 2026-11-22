@@ -89,8 +89,8 @@ describe("warnOnInsecureProductionPostgres", () => {
  * BONDERY_DEV_TLS_TEST_CA_FILE (see packages/db/src/connection/database-tls.test.ts) to run it.
  */
 describe("inspectDatabaseTls against a TLS Postgres", () => {
-  const url = process.env.BONDERY_DEV_TLS_TEST_DATABASE_URL;
-  const caFile = process.env.BONDERY_DEV_TLS_TEST_CA_FILE;
+  const url = process.env["BONDERY_DEV_TLS_TEST_DATABASE_URL"];
+  const caFile = process.env["BONDERY_DEV_TLS_TEST_CA_FILE"];
 
   it("reports the negotiated TLS session and the certificate expiry", {
     skip: !url || !caFile,

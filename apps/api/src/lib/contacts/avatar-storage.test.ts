@@ -79,7 +79,7 @@ describe("setContactHasAvatar", () => {
 
     await setContactHasAvatar(db as PrismaClient, USER_ID, LEFT_ID, true);
 
-    const data = (calls[0] as { data: { hasAvatar: boolean; avatarUpdatedAt: Date | null } }).data;
+    const { data } = calls[0] as { data: { hasAvatar: boolean; avatarUpdatedAt: Date | null } };
     assert.equal(data.hasAvatar, true);
     assert.equal(data.avatarUpdatedAt instanceof Date, true);
   });
@@ -96,7 +96,7 @@ describe("setContactHasAvatar", () => {
 
     await setContactHasAvatar(db as PrismaClient, USER_ID, LEFT_ID, false);
 
-    const data = (calls[0] as { data: { hasAvatar: boolean; avatarUpdatedAt: Date | null } }).data;
+    const { data } = calls[0] as { data: { hasAvatar: boolean; avatarUpdatedAt: Date | null } };
     assert.equal(data.hasAvatar, false);
     assert.equal(data.avatarUpdatedAt, null);
   });

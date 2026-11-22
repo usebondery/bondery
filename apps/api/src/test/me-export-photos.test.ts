@@ -17,7 +17,7 @@ const NOW = new Date("2026-08-19T15:04:05.000Z");
 const BONDERY_VERSION = "1.9.1";
 const CREATED_AT = new Date("2026-01-01T00:00:00.000Z");
 
-function createExportDb(people: Array<Record<string, unknown>>) {
+function createExportDb(people: Record<string, unknown>[]) {
   return {
     group: { findMany: async () => [] },
     interaction: { findMany: async () => [] },

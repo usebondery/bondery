@@ -7,6 +7,7 @@ import { geocodeSuggestionDisplayLabel } from "@bondery/helpers/geocode";
 import {
   ActionIconButton,
   DescribedSelect,
+  type DescribedSelectOption,
   errorNotificationTemplate,
 } from "@bondery/mantine-next";
 import {
@@ -107,8 +108,13 @@ export function ContactAddressSection({ contact, isSaving, onSave }: ContactAddr
     });
   }, [contact.addresses, contact.location, contact.latitude, contact.longitude, contact]);
 
-  const getTypeData = (_currentType?: ContactAddressType) =>
-    typeOptions.map((option) => ({ ...option, disabled: false }));
+  const getTypeData = (_currentType?: ContactAddressType): DescribedSelectOption[] => {
+    const options: DescribedSelectOption[] = [];
+    for (const option of typeOptions) {
+      options.push({ ...option, disabled: false });
+    }
+    return options;
+  };
 
   const canAddMore = addresses.length < CONTACT_LIMITS.maxAddresses;
   const preferredAddressId = addresses[0]?.id;

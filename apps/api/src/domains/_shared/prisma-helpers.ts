@@ -25,7 +25,7 @@ export function isCheckViolation(error: unknown): boolean {
 }
 
 export function toIso(value: Date | string | null | undefined): string | null {
-  if (value == null) {
+  if (value === null || value === undefined) {
     return null;
   }
   return value instanceof Date ? value.toISOString() : value;

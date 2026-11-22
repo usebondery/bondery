@@ -232,13 +232,15 @@ async function enrichWorkEntriesWithLogos(
     : new Map<string, string>();
 
   // Apply included logos (keyed by companyUrn)
-  const withIncludedLogos = withDomLogos.map((entry) => {
+  const withIncludedLogos: WorkEntry[] = [];
+  for (const entry of withDomLogos) {
     if (entry.companyLogoUrl || !entry.companyUrn) {
-      return entry;
+      withIncludedLogos.push(entry);
+      continue;
     }
     const logoUrl = includedLogos.get(entry.companyUrn);
-    return logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry;
-  });
+    withIncludedLogos.push(logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry);
+  }
 
   // Step 2: Batch-fetch logos for entries still missing one.
   type FetchTask = { key: string; urn: string | undefined; linkedInId: string | undefined };
@@ -276,18 +278,22 @@ async function enrichWorkEntriesWithLogos(
     }),
   );
 
-  return withIncludedLogos.map((entry) => {
+  const withNetworkLogos: WorkEntry[] = [];
+  for (const entry of withIncludedLogos) {
     if (entry.companyLogoUrl) {
-      return entry;
+      withNetworkLogos.push(entry);
+      continue;
     }
     const key =
       entry.companyUrn ?? (entry.companyLinkedinId ? `id:${entry.companyLinkedinId}` : null);
     if (!key) {
-      return entry;
+      withNetworkLogos.push(entry);
+      continue;
     }
     const logoUrl = keyToLogo.get(key);
-    return logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry;
-  });
+    withNetworkLogos.push(logoUrl ? { ...entry, companyLogoUrl: logoUrl } : entry);
+  }
+  return withNetworkLogos;
 }
 
 export {

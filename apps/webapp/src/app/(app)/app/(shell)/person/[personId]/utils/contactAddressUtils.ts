@@ -47,7 +47,8 @@ export function toEditableAddresses(contact: Contact): EditableAddress[] {
     : [];
 
   if (existing.length > 0) {
-    return normalizeAddressTypes(existing).map((address, index) => {
+    const editable: EditableAddress[] = [];
+    for (const [index, address] of normalizeAddressTypes(existing).entries()) {
       const computedValue = formatAddressLabel({
         addressLine1: address.addressLine1,
         addressLine2: address.addressLine2,
@@ -56,7 +57,7 @@ export function toEditableAddresses(contact: Contact): EditableAddress[] {
         postalCode: address.addressPostalCode,
         state: address.addressState,
       });
-      return {
+      editable.push({
         ...address,
         id: `${address.type}-${index}`,
         type: address.type,
@@ -68,8 +69,9 @@ export function toEditableAddresses(contact: Contact): EditableAddress[] {
             address.addressLine1,
             contact.location,
           ) ?? "",
-      };
-    });
+      });
+    }
+    return editable;
   }
 
   return [];

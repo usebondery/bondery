@@ -86,10 +86,12 @@ export function hasToolApprovalDecision(messages: UIMessage[]): boolean {
   return messages.some(
     (message) =>
       message.role === "assistant" &&
-      message.parts.some(
-        (part) =>
-          isToolPart(part) &&
-          (part as { approval?: { approved?: unknown } }).approval?.approved != null,
-      ),
+      message.parts.some((part) => {
+        if (!isToolPart(part)) {
+          return false;
+        }
+        const approved = (part as { approval?: { approved?: unknown } }).approval?.approved;
+        return approved !== null && approved !== undefined;
+      }),
   );
 }

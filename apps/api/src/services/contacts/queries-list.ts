@@ -13,9 +13,8 @@ import { buildPeopleListPagination, queryPeoplePage } from "./query-people-page.
 type ContactListContext = Pick<DomainContext, "db" | "user"> & { log?: ServiceLog };
 
 export async function listContacts(ctx: ContactListContext, query: PeopleListQuery) {
-  const { user } = ctx;
+  const { log, user } = ctx;
   const db = domainDb(ctx as DomainContext);
-  const log = ctx.log;
   const avatarOptions = extractAvatarOptions(query);
 
   const now = new Date();

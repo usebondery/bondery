@@ -53,6 +53,17 @@ const WEBAPP_LINES = [
   ],
 ];
 
+const API_TLS_CA_VOLUME_RE = /api-tls-ca:/;
+const API_PLAIN_HTTP_RE = /26631|API_TLS_PORT|http:\/\/127\.0\.0\.1/;
+const STACK_SECRETS_COMPLETED_RE =
+  /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
+const API_TLS_CA_OR_SERVER_VOLUME_RE = /api-tls-(?:ca|server):/;
+const VOLUMES_RESET_RE = /volumes: !reset \[\]/;
+const PREFIX_CHARSET_RE = /\*\[!a-z0-9-\]\*/;
+const API_OR_STORAGE_CASE_RE = /^\s+api \| storage\) ;;$/m;
+const TRANSPORT_TARGET_RE = /target="\$DYNAMIC_DIR\/\$name-transport\.yml"/;
+const ATOMIC_MV_RE = /mv -f "\$staging" "\$target"/;
+
 /**
  * The job that publishes the API and storage serversTransports writes into Traefik's dynamic
  * folder, so it stays minimal: [pattern, message, expected match (default true)].
@@ -88,7 +99,7 @@ const TRANSPORT_JOB_RULES = [
     false,
   ],
   [
-    /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/,
+    STACK_SECRETS_COMPLETED_RE,
     "traefik-transport must depends_on stack-secrets with condition: service_completed_successfully",
   ],
 ];
@@ -144,7 +155,7 @@ const RULES = [
   ],
   [
     "api",
-    (block) => !/api-tls-ca:/.test(block),
+    (block) => !API_TLS_CA_VOLUME_RE.test(block),
     "api must not mount the API CA key volume (api-tls-ca)",
   ],
   [
@@ -154,12 +165,12 @@ const RULES = [
   ],
   [
     "api",
-    (block) => !/26631|API_TLS_PORT|http:\/\/127\.0\.0\.1/.test(block),
+    (block) => !API_PLAIN_HTTP_RE.test(block),
     "api must not use the retired plain HTTP port 26631 or API_TLS_PORT: the API serves HTTPS only",
   ],
   [
     "api",
-    (block) => /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/.test(block),
+    (block) => STACK_SECRETS_COMPLETED_RE.test(block),
     "api must depends_on stack-secrets with condition: service_completed_successfully",
   ],
   ...WEBAPP_LINES.map(([pattern, message]) => ["webapp", (block) => pattern.test(block), message]),
@@ -170,7 +181,7 @@ const RULES = [
   ],
   [
     "webapp",
-    (block) => !/api-tls-(?:ca|server):/.test(block),
+    (block) => !API_TLS_CA_OR_SERVER_VOLUME_RE.test(block),
     "webapp must not mount the API CA or server key volumes",
   ],
   ...TRANSPORT_JOB_RULES.map(([pattern, message, expected = true]) => [
@@ -214,7 +225,7 @@ export function checkApiTls({ root, serviceBlock }) {
   const overrideLabel = "docker-compose.override.yml.example";
   const overrideText = readFileSync(resolve(root, overrideLabel), "utf8");
   const overrideBlock = serviceBlock("traefik-transport", overrideText);
-  if (!(overrideBlock && /volumes: !reset \[\]/.test(overrideBlock))) {
+  if (!(overrideBlock && VOLUMES_RESET_RE.test(overrideBlock))) {
     errors.push(`${overrideLabel}: traefik-transport must drop its volumes (volumes: !reset [])`);
   }
   for (const [, mapping] of overrideText.matchAll(/^\s+- "([^"]+:\d+)"\s*$/gm)) {
@@ -227,13 +238,10 @@ export function checkApiTls({ root, serviceBlock }) {
 
   const script = readFileSync(resolve(root, "traefik/publish-transports.sh"), "utf8");
   for (const [pattern, message] of [
-    [/\*\[!a-z0-9-\]\*/, "must reject a prefix outside [a-z0-9-]"],
-    [/^\s+api \| storage\) ;;$/m, "must publish only the api and storage transports"],
-    [
-      /target="\$DYNAMIC_DIR\/\$name-transport\.yml"/,
-      "must write only <prefix>-<service>-transport.yml",
-    ],
-    [/mv -f "\$staging" "\$target"/, "must replace a file atomically (staging file, then mv)"],
+    [PREFIX_CHARSET_RE, "must reject a prefix outside [a-z0-9-]"],
+    [API_OR_STORAGE_CASE_RE, "must publish only the api and storage transports"],
+    [TRANSPORT_TARGET_RE, "must write only <prefix>-<service>-transport.yml"],
+    [ATOMIC_MV_RE, "must replace a file atomically (staging file, then mv)"],
   ]) {
     if (!pattern.test(script)) {
       errors.push(`traefik/publish-transports.sh ${message}`);

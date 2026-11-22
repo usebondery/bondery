@@ -45,12 +45,12 @@ function restoreSmtpEnv(snapshot: SmtpEnvSnapshot): void {
 }
 
 function setConfiguredSmtpEnv(): void {
-  process.env.BONDERY_PRIVATE_EMAIL_HOST = "smtp.example.com";
-  process.env.BONDERY_PRIVATE_EMAIL_PORT = "587";
-  process.env.BONDERY_PRIVATE_EMAIL_USER = "user";
-  process.env.BONDERY_PRIVATE_EMAIL_PASS = "secret";
-  process.env.BONDERY_PRIVATE_EMAIL_ADDRESS = "robot@usebondery.com";
-  process.env.BONDERY_PRIVATE_EMAIL_REPLY_TO = "team@usebondery.com";
+  process.env["BONDERY_PRIVATE_EMAIL_HOST"] = "smtp.example.com";
+  process.env["BONDERY_PRIVATE_EMAIL_PORT"] = "587";
+  process.env["BONDERY_PRIVATE_EMAIL_USER"] = "user";
+  process.env["BONDERY_PRIVATE_EMAIL_PASS"] = "secret";
+  process.env["BONDERY_PRIVATE_EMAIL_ADDRESS"] = "robot@usebondery.com";
+  process.env["BONDERY_PRIVATE_EMAIL_REPLY_TO"] = "team@usebondery.com";
 }
 
 function clearSmtpEnv(): void {

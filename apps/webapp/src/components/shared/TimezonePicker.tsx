@@ -4,6 +4,7 @@
 import {
   formatOffset,
   formatTimezoneLabel,
+  type GroupedTimezoneGroup,
   getGroupedTimezones,
   TIMEZONES_DATA,
 } from "@bondery/helpers/locale";
@@ -69,14 +70,17 @@ export function TimezonePicker({
 
   const groupedOptions = (query: string) => {
     const normalized = query.trim().toLowerCase();
-    return getGroupedTimezones(intlTag)
-      .map((group) => ({
-        ...group,
-        items: group.items.filter((item) =>
-          normalized ? item.searchHaystack.includes(normalized) : true,
-        ),
-      }))
-      .filter((group) => group.items.length > 0);
+    const groups: GroupedTimezoneGroup[] = [];
+    for (const group of getGroupedTimezones(intlTag)) {
+      const items = group.items.filter((item) =>
+        normalized ? item.searchHaystack.includes(normalized) : true,
+      );
+      if (items.length === 0) {
+        continue;
+      }
+      groups.push({ ...group, items });
+    }
+    return groups;
   };
 
   return (

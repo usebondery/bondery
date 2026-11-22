@@ -13,6 +13,7 @@ import { copyFileSync, existsSync, readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createCliLogger } from "@bondery/helpers/cli";
+import { DEV_REDIS_URL } from "@bondery/schemas/constants/dev-ports";
 import { EXAMPLE_POSTGRES_PASSWORD } from "../../packages/helpers/src/env/index.ts";
 import { upsertEnvAssignments } from "../env/env-upsert.js";
 
@@ -98,18 +99,28 @@ const LEGACY_LOCAL_REDIS_URL = "redis://127.0.0.1:26636";
 function seedRedisTls(envPath: string) {
   const content = readFileSync(envPath, "utf-8");
   const url = readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_URL");
-  if (url && url !== LEGACY_LOCAL_REDIS_URL) {
+  if (url && url !== LEGACY_LOCAL_REDIS_URL && url !== DEV_REDIS_URL) {
     return; // a remote or custom Redis: leave it alone
   }
 
-  const updates: Record<string, string> = {
-    BONDERY_PRIVATE_REDIS_URL: "rediss://127.0.0.1:26636",
-  };
+  const updates: Record<string, string> = {};
+  if (!url || url === LEGACY_LOCAL_REDIS_URL) {
+    updates.BONDERY_PRIVATE_REDIS_URL = DEV_REDIS_URL;
+  }
   if (!readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_PASSWORD_FILE")) {
     updates.BONDERY_PRIVATE_REDIS_PASSWORD_FILE = "../../.temp/redis-secrets/client/password";
   }
   if (!readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_TLS_CA_FILE")) {
     updates.BONDERY_PRIVATE_REDIS_TLS_CA_FILE = "../../.temp/redis-secrets/client/ca.crt";
+  }
+  if (!readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_TLS_CERT_FILE")) {
+    updates.BONDERY_PRIVATE_REDIS_TLS_CERT_FILE = "../../.temp/redis-secrets/client/tls.crt";
+  }
+  if (!readEnvAssignment(content, "BONDERY_PRIVATE_REDIS_TLS_KEY_FILE")) {
+    updates.BONDERY_PRIVATE_REDIS_TLS_KEY_FILE = "../../.temp/redis-secrets/client/tls.key";
+  }
+  if (Object.keys(updates).length === 0) {
+    return;
   }
 
   upsertEnvAssignments(envPath, updates);

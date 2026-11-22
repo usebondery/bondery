@@ -22,8 +22,9 @@ export interface ContactSocialPlatformConfig {
   renderIcon: (color: string) => ReactNode;
 }
 
-export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] =
-  CONTACT_SOCIAL_FIELD_KEYS.map((key) => {
+export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] = (() => {
+  const platforms: ContactSocialPlatformConfig[] = [];
+  for (const key of CONTACT_SOCIAL_FIELD_KEYS) {
     const color = CONTACT_SOCIAL_BRAND_COLORS[key];
 
     const configs: Record<
@@ -62,8 +63,10 @@ export const CONTACT_SOCIAL_PLATFORMS: ContactSocialPlatformConfig[] =
       },
     };
 
-    return { ...configs[key], color, key };
-  });
+    platforms.push({ ...configs[key], color, key });
+  }
+  return platforms;
+})();
 
 export function getContactSocialPlatform(key: ContactSocialFieldKey): ContactSocialPlatformConfig {
   const platform = CONTACT_SOCIAL_PLATFORMS.find((item) => item.key === key);

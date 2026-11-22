@@ -222,13 +222,13 @@ export default function ContactsTableV2({
     : null;
 
   const effectiveMenuActions: MenuAction[] = [
-    ...(menuActions || []),
+    ...(menuActions ?? []),
     ...standardMenuActions,
     ...(standardDeleteMenuAction ? [standardDeleteMenuAction] : []),
   ];
   const effectiveBulkSelectionActions: BulkSelectionAction[] = [
     ...standardBulkSelectionActions,
-    ...(bulkSelectionActions || []),
+    ...(bulkSelectionActions ?? []),
     ...(standardDeleteBulkAction ? [standardDeleteBulkAction] : []),
   ];
 

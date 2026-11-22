@@ -50,9 +50,10 @@ export const MERGEABLE_SCALAR_FIELDS = {
   timezone: "timezone",
 } as const;
 
-export const MERGEABLE_SET_FIELDS: Array<
-  Extract<MergeConflictField, "phones" | "emails" | "importantDates">
-> = ["phones", "emails", "importantDates"];
+export const MERGEABLE_SET_FIELDS: Extract<
+  MergeConflictField,
+  "phones" | "emails" | "importantDates"
+>[] = ["phones", "emails", "importantDates"];
 
 export const MERGEABLE_SOCIAL_FIELDS: Record<
   Extract<

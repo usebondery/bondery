@@ -6,19 +6,19 @@ import { loadTestEnv } from "./load-test-env.js";
 const D_D_D_T_PATTERN = /^\d{4}-\d{2}-\d{2}T/;
 
 describe("gET /health/live", () => {
-  const originalVersion = process.env.BONDERY_INFRA_VERSION;
-  const originalGitSha = process.env.BONDERY_INFRA_GIT_SHA;
+  const originalVersion = process.env["BONDERY_INFRA_VERSION"];
+  const originalGitSha = process.env["BONDERY_INFRA_GIT_SHA"];
 
   afterEach(() => {
     if (originalVersion === undefined) {
-      delete process.env.BONDERY_INFRA_VERSION;
+      delete process.env["BONDERY_INFRA_VERSION"];
     } else {
-      process.env.BONDERY_INFRA_VERSION = originalVersion;
+      process.env["BONDERY_INFRA_VERSION"] = originalVersion;
     }
     if (originalGitSha === undefined) {
-      delete process.env.BONDERY_INFRA_GIT_SHA;
+      delete process.env["BONDERY_INFRA_GIT_SHA"];
     } else {
-      process.env.BONDERY_INFRA_GIT_SHA = originalGitSha;
+      process.env["BONDERY_INFRA_GIT_SHA"] = originalGitSha;
     }
   });
 
@@ -38,8 +38,8 @@ describe("gET /health/live", () => {
 
   it("includes optional build metadata when env vars are set", async () => {
     loadTestEnv();
-    process.env.BONDERY_INFRA_VERSION = "1.8.0-test";
-    process.env.BONDERY_INFRA_GIT_SHA = "abc1234";
+    process.env["BONDERY_INFRA_VERSION"] = "1.8.0-test";
+    process.env["BONDERY_INFRA_GIT_SHA"] = "abc1234";
 
     const { createTestApp } = await import("./create-test-app.js");
     const app = await createTestApp();

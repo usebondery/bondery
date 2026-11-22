@@ -11,13 +11,15 @@ export function listTags(): TagWithCount[] {
   const db = getSyncDatabase();
   const rows = db.getAllSync<TagRow>(`SELECT * FROM tags ${TAGS_ORDER_BY_LABEL}`);
 
-  return rows.map((row) => {
+  const tags: TagWithCount[] = [];
+  for (const row of rows) {
     const countRow = db.getFirstSync<{ count: number }>(
       "SELECT COUNT(*) as count FROM people_tags WHERE tag_id = ?",
       row.id,
     );
-    return { ...mapTagRow(row), contactCount: countRow?.count ?? 0 };
-  });
+    tags.push({ ...mapTagRow(row), contactCount: countRow?.count ?? 0 });
+  }
+  return tags;
 }
 
 export function getTag(tagId: string): Tag | null {

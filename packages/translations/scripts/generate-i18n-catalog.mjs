@@ -111,7 +111,7 @@ function generateI18nCatalog() {
   }
 
   const catalogEntries = Object.keys(manifest.namespaces)
-    .sort()
+    .sort((left, right) => left.localeCompare(right))
     .map((namespace) => `  ${JSON.stringify(namespace)}: ${catalogTypeName(namespace)};`)
     .join("\n");
 

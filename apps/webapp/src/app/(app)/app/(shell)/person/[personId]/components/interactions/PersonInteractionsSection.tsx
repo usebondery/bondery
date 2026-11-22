@@ -61,9 +61,7 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     (candidate) => candidate.id !== personId,
   );
 
-  const contactsById = (() => {
-    return new Map([[contact.id, contact]]);
-  })();
+  const contactsById = (() => new Map([[contact.id, contact]]))();
 
   const sortedActivities = [...activities].sort(
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
@@ -108,8 +106,8 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
     });
   };
 
-  const resolveParticipants = (activity: Activity): PersonPreview[] => {
-    return (activity.participants ?? []).flatMap((participant) => {
+  const resolveParticipants = (activity: Activity): PersonPreview[] =>
+    (activity.participants ?? []).flatMap((participant) => {
       const participantId = typeof participant === "string" ? participant : participant.id;
       const knownContact = contactsById.get(participantId);
       if (knownContact) {
@@ -130,7 +128,6 @@ export function PersonInteractionsSection({ personId, contact }: PersonInteracti
         },
       ];
     });
-  };
 
   const handleDelete = (activity: Activity) => {
     openStandardConfirmModal({

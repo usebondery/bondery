@@ -33,8 +33,9 @@ export const DEV_PORTS = {
 
 /**
  * Local Redis URL when `pnpm run start:redis` is running. TLS only, like every Redis (see the
- * bondery-security skill). The API also needs BONDERY_PRIVATE_REDIS_PASSWORD_FILE and
- * BONDERY_PRIVATE_REDIS_TLS_CA_FILE.
+ * bondery-security skill). The API also needs BONDERY_PRIVATE_REDIS_PASSWORD_FILE,
+ * BONDERY_PRIVATE_REDIS_TLS_CA_FILE, BONDERY_PRIVATE_REDIS_TLS_CERT_FILE, and
+ * BONDERY_PRIVATE_REDIS_TLS_KEY_FILE.
  */
 export const DEV_REDIS_URL = `rediss://127.0.0.1:${DEV_PORTS.REDIS}` as const;
 

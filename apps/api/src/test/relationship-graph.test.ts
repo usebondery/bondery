@@ -78,7 +78,10 @@ describe("getRelationshipGraph", () => {
     assert.equal(nodeIds.includes(personB), false);
     assert.equal(nodeIds.includes(unlinkedB), false);
     assert.equal(edgeIds.includes("edge-b"), false);
-    assert.deepEqual(nodeIds.sort(), [neighborA, neighborB, personA].sort());
+    assert.deepEqual(
+      nodeIds.sort((left, right) => left.localeCompare(right)),
+      [neighborA, neighborB, personA].sort((left, right) => left.localeCompare(right)),
+    );
     assert.equal(result.graph.unlinkedCount, 1);
     assert.deepEqual(
       result.graph.unlinked.map((row) => row.id),
@@ -102,7 +105,10 @@ describe("getRelationshipGraph", () => {
     const result = await getRelationshipGraph(caller(client, userA), { focus: personA });
     const edgeIds = result.graph.edges.map((row) => row.id);
 
-    assert.deepEqual(edgeIds.sort(), ["edge-a-neighbor", "edge-a-other"].sort());
+    assert.deepEqual(
+      edgeIds.sort((left, right) => left.localeCompare(right)),
+      ["edge-a-neighbor", "edge-a-other"].sort((left, right) => left.localeCompare(right)),
+    );
     assert.equal(edgeIds.includes("edge-neighbors"), false);
     assert.equal(result.graph.unlinkedCount, 1);
     assert.deepEqual(result.graph.unlinked, []);
@@ -136,7 +142,10 @@ describe("getRelationshipGraph", () => {
     );
 
     const focused = await getRelationshipGraph(caller(seeded, userA), { focus: "ada" });
-    assert.deepEqual(focused.graph.nodes.map((node) => node.id).sort(), ["ada", "bea", "me"]);
+    assert.deepEqual(
+      focused.graph.nodes.map((node) => node.id).sort((left, right) => left.localeCompare(right)),
+      ["ada", "bea", "me"],
+    );
     assert.deepEqual(
       focused.graph.edges.map((row) => row.id),
       ["edge-friends"],
@@ -248,11 +257,10 @@ describe("getRelationshipGraph", () => {
     const result = await getRelationshipGraph(caller(seeded, userA), { hubs: "1" });
     const hubIds = result.graph.hubs.map((row) => row.id);
 
-    assert.deepEqual(hubIds.sort(), [
-      "company:name:acme",
-      "company:name:past",
-      "school:name:state university",
-    ]);
+    assert.deepEqual(
+      hubIds.sort((left, right) => left.localeCompare(right)),
+      ["company:name:acme", "company:name:past", "school:name:state university"],
+    );
     const company = result.graph.hubs.find((row) => row.kind === "company");
     const school = result.graph.hubs.find((row) => row.kind === "school");
     assert.deepEqual(company?.personIds, ["ada", "bea"]);
@@ -301,7 +309,10 @@ describe("getRelationshipGraph", () => {
       hubs: "1",
     });
 
-    assert.deepEqual(result.graph.nodes.map((node) => node.id).sort(), ["ada", "bea"]);
+    assert.deepEqual(
+      result.graph.nodes.map((node) => node.id).sort((left, right) => left.localeCompare(right)),
+      ["ada", "bea"],
+    );
     assert.deepEqual(
       result.graph.edges.map((row) => row.id),
       ["edge-focus"],
@@ -343,7 +354,10 @@ describe("getRelationshipGraph", () => {
     });
     const result = await getRelationshipGraph(caller(seeded, userA), { groups: "1" });
 
-    assert.deepEqual(result.graph.nodes.map((node) => node.id).sort(), ["ada", "bea", "cam"]);
+    assert.deepEqual(
+      result.graph.nodes.map((node) => node.id).sort((left, right) => left.localeCompare(right)),
+      ["ada", "bea", "cam"],
+    );
     assert.equal(result.graph.groups.length, 1);
     assert.deepEqual(result.graph.groups[0]?.personIds, ["ada", "bea", "cam"]);
     assert.deepEqual(result.graph.edges, []);

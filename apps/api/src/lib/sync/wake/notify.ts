@@ -18,7 +18,7 @@ type SyncWakeRuntime = {
 let runtime: SyncWakeRuntime | null = null;
 
 function isWakeEnabled(): boolean {
-  const flag = process.env.SYNC_WAKE_ENABLED;
+  const flag = process.env["SYNC_WAKE_ENABLED"];
   if (flag === undefined) {
     return true;
   }

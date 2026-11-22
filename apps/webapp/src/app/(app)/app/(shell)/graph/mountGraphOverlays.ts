@@ -106,7 +106,12 @@ export function mountGraphOverlays(input: {
         const points: [number, number][] = [];
         for (const personId of row.personIds) {
           const node = nodeById.get(personId);
-          if (node?.x == null || node.y == null) {
+          if (
+            node?.x === null ||
+            node?.x === undefined ||
+            node.y === null ||
+            node.y === undefined
+          ) {
             continue;
           }
           points.push([node.x, node.y]);

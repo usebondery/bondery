@@ -30,7 +30,7 @@ describe("error response smoke", () => {
 
     const { createTestApp } = await import("./create-test-app.js");
     const app = await createTestApp();
-    const expected = `${process.env.BONDERY_PUBLIC_WEBSITE_URL?.replace(TRAILING_SLASHES_PATTERN, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
+    const expected = `${process.env["BONDERY_PUBLIC_WEBSITE_URL"]?.replace(TRAILING_SLASHES_PATTERN, "")}${WEBSITE_ROUTES.DOCS_API_REFERENCE}`;
 
     for (const url of [API_ROUTES.API_REFERENCE, API_ROUTES.DOCS_API]) {
       for (const method of ["GET", "HEAD"] as const) {

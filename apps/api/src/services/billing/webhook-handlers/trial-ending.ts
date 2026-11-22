@@ -31,8 +31,9 @@ export async function handleTrialWillEnd(
     return;
   }
 
-  const metadataUserId = subscription.metadata.bondery_user_id;
-  const isValidUuid = metadataUserId != null && UUID_PATTERN.test(metadataUserId);
+  const metadataUserId = subscription.metadata["bondery_user_id"];
+  const isValidUuid =
+    metadataUserId !== null && metadataUserId !== undefined && UUID_PATTERN.test(metadataUserId);
 
   let userId = isValidUuid ? metadataUserId : (existing?.userId ?? null);
   let email: string | null = null;

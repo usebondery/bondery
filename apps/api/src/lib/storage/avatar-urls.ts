@@ -2,7 +2,7 @@ import type { AvatarTransformOptions } from "@bondery/schemas";
 import { AVATARS_BUCKET, getStorage, LINKEDIN_LOGOS_BUCKET } from "./get-storage.js";
 
 function toCacheBustToken(value: Date | string | null | undefined): number | null {
-  if (value == null) {
+  if (value === null || value === undefined) {
     return null;
   }
   const ts = value instanceof Date ? value.getTime() : Date.parse(value);
@@ -20,7 +20,7 @@ export function buildContactAvatarUrl(
   let baseUrl = storage.getPublicUrl(AVATARS_BUCKET, path);
 
   const ts = toCacheBustToken(avatarUpdatedAt);
-  if (ts != null) {
+  if (ts !== null) {
     const sep = baseUrl.includes("?") ? "&" : "?";
     baseUrl = `${baseUrl}${sep}t=${ts}`;
   }

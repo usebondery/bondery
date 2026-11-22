@@ -56,16 +56,19 @@ export function ContactImportantDatesSection({
     value: option.value,
   }));
 
-  const getTypeOptionsFor = (currentType: ImportantDateType | null) =>
-    typeOptions.map((option) => {
+  const getTypeOptionsFor = (currentType: ImportantDateType | null) => {
+    const options: Array<(typeof typeOptions)[number] & { disabled: boolean }> = [];
+    for (const option of typeOptions) {
       const hasTypeAlready = localDates.some((dateItem) => dateItem.type === option.value);
       const disableUniqueType =
         (option.value === "birthday" || option.value === "nameday") &&
         hasTypeAlready &&
         currentType !== option.value;
 
-      return { ...option, disabled: disableUniqueType };
-    });
+      options.push({ ...option, disabled: disableUniqueType });
+    }
+    return options;
+  };
 
   const notifyOptions = IMPORTANT_DATE_NOTIFY_OPTIONS.map((option) => ({
     label:

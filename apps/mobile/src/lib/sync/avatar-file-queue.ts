@@ -9,12 +9,12 @@ type AvatarFileRow = {
 };
 
 type AvatarFs = {
-  copyFromUri(personId: string, sourceUri: string): Promise<void>;
-  deleteDir(): void;
-  deleteFile(personId: string): void;
-  download(personId: string, url: string): Promise<void>;
-  fileExists(personId: string): boolean;
-  fileUri(personId: string): string | null;
+  copyFromUri: (personId: string, sourceUri: string) => Promise<void>;
+  deleteDir: () => void;
+  deleteFile: (personId: string) => void;
+  download: (personId: string, url: string) => Promise<void>;
+  fileExists: (personId: string) => boolean;
+  fileUri: (personId: string) => string | null;
 };
 
 type AvatarSqlite = {

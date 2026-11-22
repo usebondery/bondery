@@ -1,110 +1,127 @@
 /**
- * Creates the password and TLS certificate that protect the bundled Compose Redis.
+ * Creates the password, CA, and TLS certificates that protect the bundled Compose Redis.
  *
- * The `redis-secrets` one-shot Compose service runs this before Redis starts. It writes into
- * a shared volume:
+ * The `stack-secrets` job runs this before Redis starts. Each directory is its own volume:
  *
- * - `server/` (Redis user only): `tls.crt`, `tls.key`, `users.acl` (SHA-256 of the password)
- * - `client/` (API user only): `password`, `ca.crt` (the pinned Redis certificate)
+ * - `ca/`: `ca.crt`, `ca.key` (CA key stays here only)
+ * - `server/` (Redis user only): `tls.crt`, `tls.key`, `ca.crt`, `healthcheck.crt`,
+ *   `healthcheck.key`, `users.acl`, `password`
+ * - `client/` (API user only): `ca.crt`, `tls.crt`, `tls.key`, `password`, `server.crt`
  *
- * It is idempotent. Existing secrets stay. It creates only what is missing, and it replaces the
- * certificate when it expires soon or does not cover the Redis hostnames. So an existing
- * install gets protected Redis on its next `docker compose up` without operator action.
+ * It is idempotent. Existing secrets stay. The bundled Redis requires mutual TLS: the server
+ * certificate is serverAuth only, and the API and healthcheck each get a separate clientAuth
+ * certificate signed by the Redis CA.
  */
 
 import { createHash, randomBytes } from "node:crypto";
-import { chmod, chown, mkdir, readFile } from "node:fs/promises";
+import { chmod, chown, mkdir } from "node:fs/promises";
 import { join } from "node:path";
 
 import { readOptional, writeAtomic } from "../infra-secrets/files.js";
 import { API_CONTAINER_UID, LOOPBACK_IP } from "../infra-secrets/ownership.js";
-import {
-  certificateCoverageReason,
-  createSelfSignedServerCertificate,
-} from "../infra-secrets/x509.js";
+import { ensureCaSignedCertificate, ensureClientCertificate } from "../infra-secrets/private-ca.js";
+import type { CertificateNames } from "../infra-secrets/x509.js";
 
-const CERT_VALIDITY_DAYS = 3650;
-const CERT_RENEW_BEFORE_DAYS = 30;
 const REDIS_PASSWORD_BYTES = 32;
+
+function generateRedisPassword(): string {
+  return randomBytes(REDIS_PASSWORD_BYTES).toString("base64url");
+}
+
+async function resolveRedisPassword(
+  paths: RedisSecretPaths,
+  legacyRoot: string | undefined,
+  log: (message: string) => void,
+): Promise<{ password: string; passwordGenerated: boolean }> {
+  // Keep client/password. Else copy the legacy password when the CA is not on disk yet.
+  // After the CA exists, a missing password is a new password, so rotation does not restore
+  // the legacy file.
+  const existingPassword = (await readOptional(paths.clientPasswordFile))?.trim();
+  if (existingPassword) {
+    return { password: existingPassword, passwordGenerated: false };
+  }
+
+  const caExists = (await readOptional(paths.caCertFile)) !== null;
+  if (!caExists && legacyRoot) {
+    const legacyPassword = (await readOptional(join(legacyRoot, "client", "password")))?.trim();
+    if (legacyPassword) {
+      log("Kept the existing Redis password");
+      return { password: legacyPassword, passwordGenerated: false };
+    }
+  }
+
+  const password = generateRedisPassword();
+  log("Generated a new Redis password");
+  return { password, passwordGenerated: true };
+}
 
 export { API_CONTAINER_UID };
 
 /** `redis` user in the official `redis` image. */
 export const REDIS_CONTAINER_UID = 999;
 
+export const REDIS_SERVER_RENEW_BEFORE_DAYS = 90;
+export const REDIS_CLIENT_RENEW_BEFORE_DAYS = 90;
+
 export type RedisSecretPaths = {
   aclFile: string;
-  caFile: string;
+  caCertFile: string;
+  caDir: string;
+  caKeyFile: string;
+  clientCaFile: string;
+  clientCertFile: string;
   clientDir: string;
-  passwordFile: string;
+  clientKeyFile: string;
+  clientPasswordFile: string;
+  clientServerCertFile: string;
+  healthcheckCertFile: string;
+  healthcheckKeyFile: string;
+  serverCaFile: string;
   serverCertFile: string;
   serverDir: string;
   serverKeyFile: string;
+  serverPasswordFile: string;
 };
 
 export function redisSecretPaths(root: string): RedisSecretPaths {
+  const caDir = join(root, "ca");
   const serverDir = join(root, "server");
   const clientDir = join(root, "client");
   return {
     aclFile: join(serverDir, "users.acl"),
-    caFile: join(clientDir, "ca.crt"),
+    caCertFile: join(caDir, "ca.crt"),
+    caDir,
+    caKeyFile: join(caDir, "ca.key"),
+    clientCaFile: join(clientDir, "ca.crt"),
+    clientCertFile: join(clientDir, "tls.crt"),
     clientDir,
-    passwordFile: join(clientDir, "password"),
+    clientKeyFile: join(clientDir, "tls.key"),
+    clientPasswordFile: join(clientDir, "password"),
+    clientServerCertFile: join(clientDir, "server.crt"),
+    healthcheckCertFile: join(serverDir, "healthcheck.crt"),
+    healthcheckKeyFile: join(serverDir, "healthcheck.key"),
+    serverCaFile: join(serverDir, "ca.crt"),
     serverCertFile: join(serverDir, "tls.crt"),
     serverDir,
     serverKeyFile: join(serverDir, "tls.key"),
+    serverPasswordFile: join(serverDir, "password"),
   };
 }
 
 /** Hostnames the API and the Redis healthcheck use to reach Redis. */
-export function redisCertificateHostnames(prefix: string): string[] {
-  const names = new Set(["redis", "localhost"]);
+export function redisCertificateNames(prefix: string): CertificateNames {
+  const dns = new Set(["redis", "localhost"]);
   const trimmedPrefix = prefix.trim();
   if (trimmedPrefix) {
-    names.add(`${trimmedPrefix}-redis`);
+    dns.add(`${trimmedPrefix}-redis`);
   }
-  return [...names];
+  return { dns: [...dns], ip: [LOOPBACK_IP] };
 }
 
 /** Redis ACL line for the default user. Stores only the SHA-256 of the password. */
 export function buildRedisAclFile(password: string): string {
   const digest = createHash("sha256").update(password, "utf8").digest("hex");
   return `user default on #${digest} ~* &* +@all\n`;
-}
-
-export function generateRedisPassword(): string {
-  return randomBytes(REDIS_PASSWORD_BYTES).toString("base64url");
-}
-
-export type RedisCertificate = {
-  certificatePem: string;
-  privateKeyPem: string;
-};
-
-/** Self-signed ECDSA P-256 certificate. The API pins it as its only trusted CA for Redis. */
-export function generateRedisCertificate(
-  hostnames: string[],
-  now: Date = new Date(),
-): Promise<RedisCertificate> {
-  return createSelfSignedServerCertificate({
-    commonName: "Bondery bundled Redis",
-    names: { dns: hostnames, ip: [LOOPBACK_IP] },
-    now,
-    validityDays: CERT_VALIDITY_DAYS,
-  });
-}
-
-/** Why an existing certificate must be replaced, or null when it is still good. */
-export function certificateReplacementReason(
-  certificatePem: string,
-  hostnames: string[],
-  now: Date = new Date(),
-): string | null {
-  return certificateCoverageReason(certificatePem, {
-    names: { dns: hostnames, ip: [] },
-    now,
-    renewBeforeDays: CERT_RENEW_BEFORE_DAYS,
-  });
 }
 
 export type EnsureRedisSecretsOptions = {
@@ -116,6 +133,8 @@ export type EnsureRedisSecretsOptions = {
    * Never use this for a deployed stack.
    */
   localDev?: boolean;
+  /** Old single-volume layout (`/bondery-redis-legacy` in Compose). Ignored when absent. */
+  legacyRoot?: string;
   log: (message: string) => void;
   now?: Date;
   prefix: string;
@@ -123,54 +142,98 @@ export type EnsureRedisSecretsOptions = {
 };
 
 export type EnsureRedisSecretsResult = {
-  certificateGenerated: boolean;
+  authorityGenerated: boolean;
+  clientCertificatesGenerated: boolean;
   passwordGenerated: boolean;
+  serverCertificateGenerated: boolean;
 };
 
 export async function ensureRedisSecrets(
   options: EnsureRedisSecretsOptions,
 ): Promise<EnsureRedisSecretsResult> {
   const paths = redisSecretPaths(options.root);
-  const hostnames = redisCertificateHostnames(options.prefix);
-  const dirMode = options.localDev ? 0o755 : 0o700;
+  const privateDirMode = options.localDev ? 0o755 : 0o700;
   const secretMode = options.localDev ? 0o644 : 0o600;
+  const clientSecretMode = 0o600;
 
-  await mkdir(paths.serverDir, { mode: dirMode, recursive: true });
-  await mkdir(paths.clientDir, { mode: dirMode, recursive: true });
+  await mkdir(paths.caDir, { mode: privateDirMode, recursive: true });
+  await mkdir(paths.serverDir, { mode: privateDirMode, recursive: true });
+  await mkdir(paths.clientDir, { mode: privateDirMode, recursive: true });
 
-  const existingPassword = (await readOptional(paths.passwordFile))?.trim();
-  const password = existingPassword || generateRedisPassword();
-  const passwordGenerated = !existingPassword;
-  if (passwordGenerated) {
-    await writeAtomic(paths.passwordFile, `${password}\n`, secretMode);
-    options.log("Generated a new Redis password");
-  }
+  const { password, passwordGenerated } = await resolveRedisPassword(
+    paths,
+    options.legacyRoot,
+    options.log,
+  );
+  await writeAtomic(paths.clientPasswordFile, `${password}\n`, clientSecretMode);
   await writeAtomic(paths.aclFile, buildRedisAclFile(password), secretMode);
+  await writeAtomic(paths.serverPasswordFile, `${password}\n`, secretMode);
 
-  const existingCertificate = await readOptional(paths.serverCertFile);
-  const existingKey = await readOptional(paths.serverKeyFile);
-  const replacementReason =
-    existingCertificate && existingKey
-      ? certificateReplacementReason(existingCertificate, hostnames, options.now)
-      : "certificate is missing";
-  const certificateGenerated = replacementReason !== null;
-  if (certificateGenerated) {
-    const certificate = await generateRedisCertificate(hostnames, options.now);
-    await writeAtomic(paths.serverKeyFile, certificate.privateKeyPem, secretMode);
-    await writeAtomic(paths.serverCertFile, certificate.certificatePem, 0o644);
+  const {
+    authority,
+    authorityGenerated,
+    certificateGenerated: serverCertificateGenerated,
+    replacedExisting: serverReplaced,
+  } = await ensureCaSignedCertificate({
+    authorityCommonName: "Bondery bundled Redis CA",
+    certificateCommonName: "Bondery bundled Redis",
+    label: "Redis",
+    log: options.log,
+    names: redisCertificateNames(options.prefix),
+    now: options.now,
+    paths: {
+      caCertFile: paths.caCertFile,
+      caKeyFile: paths.caKeyFile,
+      certFile: paths.serverCertFile,
+      keyFile: paths.serverKeyFile,
+    },
+    renewBeforeDays: REDIS_SERVER_RENEW_BEFORE_DAYS,
+  });
+
+  const apiClient = await ensureClientCertificate({
+    authority,
+    commonName: "Bondery API Redis client",
+    label: "Redis API client",
+    log: options.log,
+    names: { dns: ["redis-client-api"], ip: [] },
+    now: options.now,
+    paths: {
+      certFile: paths.clientCertFile,
+      keyFile: paths.clientKeyFile,
+    },
+    renewBeforeDays: REDIS_CLIENT_RENEW_BEFORE_DAYS,
+  });
+
+  const healthcheckClient = await ensureClientCertificate({
+    authority,
+    commonName: "Bondery Redis healthcheck",
+    label: "Redis healthcheck client",
+    log: options.log,
+    names: { dns: ["redis-client-healthcheck"], ip: [] },
+    now: options.now,
+    paths: {
+      certFile: paths.healthcheckCertFile,
+      keyFile: paths.healthcheckKeyFile,
+    },
+    renewBeforeDays: REDIS_CLIENT_RENEW_BEFORE_DAYS,
+  });
+
+  const clientCertificatesGenerated =
+    apiClient.certificateGenerated || healthcheckClient.certificateGenerated;
+
+  // Redis verifies client certificates against the CA; the API trusts the CA, not the server leaf.
+  const serverCertificatePem = (await readOptional(paths.serverCertFile)) ?? "";
+  await writeAtomic(paths.serverCaFile, authority.certificatePem, 0o644);
+  await writeAtomic(paths.clientCaFile, authority.certificatePem, 0o644);
+  await writeAtomic(paths.clientServerCertFile, serverCertificatePem, 0o644);
+
+  if (serverReplaced || apiClient.replacedExisting || healthcheckClient.replacedExisting) {
     options.log(
-      `Generated a new Redis TLS certificate (${replacementReason}) for ${hostnames.join(", ")}`,
+      options.localDev
+        ? "A running Redis keeps the old certificate. Load the new one: pnpm run start:redis"
+        : "A running Redis keeps the old certificate. Load the new one: docker compose up -d --force-recreate redis api",
     );
-    if (existingCertificate) {
-      options.log(
-        options.localDev
-          ? "A running Redis keeps the old certificate. Load the new one: pnpm run start:redis"
-          : "A running Redis keeps the old certificate. Load the new one: docker compose up -d --force-recreate redis api",
-      );
-    }
   }
-  const certificatePem = await readFile(paths.serverCertFile, "utf8");
-  await writeAtomic(paths.caFile, certificatePem, 0o644);
 
   if (options.chownToContainerUsers) {
     for (const path of [
@@ -178,15 +241,47 @@ export async function ensureRedisSecrets(
       paths.aclFile,
       paths.serverCertFile,
       paths.serverKeyFile,
+      paths.serverCaFile,
+      paths.healthcheckCertFile,
+      paths.healthcheckKeyFile,
+      paths.serverPasswordFile,
     ]) {
       await chown(path, REDIS_CONTAINER_UID, REDIS_CONTAINER_UID);
     }
-    for (const path of [paths.clientDir, paths.passwordFile, paths.caFile]) {
+    for (const path of [
+      paths.clientDir,
+      paths.clientPasswordFile,
+      paths.clientCaFile,
+      paths.clientCertFile,
+      paths.clientKeyFile,
+      paths.clientServerCertFile,
+    ]) {
       await chown(path, API_CONTAINER_UID, API_CONTAINER_UID);
     }
   }
-  await chmod(paths.serverDir, dirMode);
-  await chmod(paths.clientDir, dirMode);
 
-  return { certificateGenerated, passwordGenerated };
+  await chmod(paths.caDir, privateDirMode);
+  await chmod(paths.serverDir, privateDirMode);
+  await chmod(paths.clientDir, privateDirMode);
+  if (options.localDev) {
+    await chmod(paths.serverKeyFile, 0o644);
+    await chmod(paths.healthcheckKeyFile, 0o644);
+    await chmod(paths.aclFile, 0o644);
+    await chmod(paths.serverPasswordFile, 0o644);
+    await chmod(paths.clientKeyFile, clientSecretMode);
+    await chmod(paths.clientPasswordFile, clientSecretMode);
+    await chmod(paths.caKeyFile, clientSecretMode);
+  } else {
+    await chmod(paths.serverKeyFile, 0o600);
+    await chmod(paths.healthcheckKeyFile, 0o600);
+    await chmod(paths.clientKeyFile, 0o600);
+    await chmod(paths.clientPasswordFile, 0o600);
+  }
+
+  return {
+    authorityGenerated,
+    clientCertificatesGenerated,
+    passwordGenerated,
+    serverCertificateGenerated,
+  };
 }

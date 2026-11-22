@@ -123,7 +123,7 @@ function checkFile(
     if (rules.banDomainErrorMissingCode) {
       const match = line.match(NEW_DOMAINERROR_PATTERN);
       if (match) {
-        const args = match[1];
+        const [, args] = match;
         const argCount = args.split(",").length;
         if (argCount < DOMAIN_ERROR_REQUIRED_ARG_COUNT) {
           violations.push(`${loc}: DomainError missing required code argument`);

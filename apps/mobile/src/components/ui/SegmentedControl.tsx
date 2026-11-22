@@ -17,7 +17,7 @@ type SegmentedControlItem<TValue extends string = string> = {
 
 type SegmentedControlProps<TValue extends string> = {
   className?: string;
-  data: Array<SegmentedControlItem<TValue>>;
+  data: SegmentedControlItem<TValue>[];
   description?: string;
   errorMessage?: string;
   label?: string;

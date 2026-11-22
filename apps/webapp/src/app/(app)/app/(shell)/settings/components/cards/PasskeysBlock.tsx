@@ -257,8 +257,8 @@ export function PasskeysBlock() {
       neverUsed: t("Passkeys.NeverUsed"),
     });
 
-  const runCeremony = async () => {
-    return runAddPasskeyCeremony({
+  const runCeremony = async () =>
+    runAddPasskeyCeremony({
       authClient,
       catalog,
       createErrorDescription: t("Passkeys.CreateErrorDescription"),
@@ -268,7 +268,6 @@ export function PasskeysBlock() {
       queryClient,
       tCommon,
     });
-  };
 
   const handleAdd = async () => {
     if (atLimit || !webAuthnSupported || isAdding) {
@@ -359,11 +358,13 @@ export function PasskeysBlock() {
                 );
               }}
               onRenamed={(nextName) => {
-                queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) =>
-                  (current ?? []).map((item) =>
-                    item.id === passkey.id ? { ...item, name: nextName } : item,
-                  ),
-                );
+                queryClient.setQueryData<PasskeyRecord[]>(settingsKeys.passkeys(), (current) => {
+                  const next: PasskeyRecord[] = [];
+                  for (const item of current ?? []) {
+                    next.push(item.id === passkey.id ? { ...item, name: nextName } : item);
+                  }
+                  return next;
+                });
               }}
               passkey={passkey}
             />

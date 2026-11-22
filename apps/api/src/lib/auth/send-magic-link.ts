@@ -48,7 +48,7 @@ export type { MagicLinkSendPayload };
 export function setMagicLinkSendCaptureForTests(
   capture: ((payload: MagicLinkSendPayload) => void) | null,
 ): void {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env["NODE_ENV"] === "production") {
     throw new Error("setMagicLinkSendCaptureForTests is not available in production");
   }
   sendCaptureForTests = capture;

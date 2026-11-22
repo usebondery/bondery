@@ -56,7 +56,7 @@ export async function resolveGroupMemberPersonIds(
         db,
         userId,
         search,
-        10000,
+        10_000,
         0,
         { groupId },
       );

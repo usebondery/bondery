@@ -56,7 +56,7 @@ export function patchOpenApiErrorSchemas(spec: OpenApiSpec): void {
           continue;
         }
 
-        const example = jsonContent.example;
+        const { example } = jsonContent;
         if (example && typeof example === "object" && example !== null && "contact" in example) {
           jsonContent.schema = { $ref: "#/components/schemas/SyncConflictError" };
         } else {

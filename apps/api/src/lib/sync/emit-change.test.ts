@@ -6,11 +6,11 @@ import { emitSyncBatch } from "./emit-change.js";
 
 describe("emitSyncBatch", () => {
   it("writes multiple changelog rows under one server sequence", async () => {
-    const inserted: Array<Record<string, unknown>> = [];
+    const inserted: Record<string, unknown>[] = [];
     const db = {
       $queryRaw: async () => [{ allocate_sync_server_sequence: 7n }],
       syncChangeLog: {
-        createMany: async ({ data }: { data: Array<Record<string, unknown>> }) => {
+        createMany: async ({ data }: { data: Record<string, unknown>[] }) => {
           inserted.push(...data);
           return { count: data.length };
         },

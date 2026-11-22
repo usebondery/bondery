@@ -170,7 +170,10 @@ describe("mCP HTTP endpoint", () => {
       toolsCursor = toolsResult.result?.nextCursor;
     } while (toolsCursor);
 
-    assert.deepEqual(listedTools.map((tool) => tool.name).toSorted(), [...ASSISTANT_TOOL_NAMES]);
+    assert.deepEqual(
+      listedTools.map((tool) => tool.name).toSorted((left, right) => left.localeCompare(right)),
+      [...ASSISTANT_TOOL_NAMES],
+    );
 
     for (const tool of listedTools) {
       assert.equal(typeof tool.title, "string", tool.name);
@@ -202,7 +205,10 @@ describe("mCP HTTP endpoint", () => {
     const promptNames = (
       prompts.json() as { result?: { prompts?: { name: string }[] } }
     ).result?.prompts?.map((prompt) => prompt.name);
-    assert.deepEqual(promptNames?.toSorted(), EXPECTED_PROMPTS);
+    assert.deepEqual(
+      promptNames?.toSorted((left, right) => left.localeCompare(right)),
+      EXPECTED_PROMPTS,
+    );
 
     const skills = await app.inject({
       headers: mcpHeaders(accessToken, { "mcp-method": "skills/list" }),

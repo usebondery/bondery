@@ -58,12 +58,12 @@ export interface DictationStartInput {
  */
 export interface DictationEngine {
   /** Drop at once. No trailing result may arrive after this call. */
-  abort(): void;
-  isSupported(): boolean;
-  setHandlers(handlers: DictationHandlers): void;
-  start(input: DictationStartInput): void;
+  abort: () => void;
+  isSupported: () => boolean;
+  setHandlers: (handlers: DictationHandlers) => void;
+  start: (input: DictationStartInput) => void;
   /** Finish gracefully. Let the trailing final result arrive. */
-  stop(): void;
+  stop: () => void;
 }
 
 /** Returns the active engine. This function is the whole provider swap point. */

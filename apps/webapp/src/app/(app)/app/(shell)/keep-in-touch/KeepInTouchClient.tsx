@@ -110,19 +110,16 @@ export function KeepInTouchClient({ endDate }: KeepInTouchClientProps) {
     if (!all) {
       return;
     }
-    return all
-      .filter((c) => {
-        const nextDue = computeNextDueDate(c.lastInteraction, c.keepFrequencyDays);
-        if (!nextDue) {
-          return true;
-        }
-        if (nextDue <= new Date()) {
-          return true;
-        }
-        return nextDue <= new Date(`${endDate}T23:59:59`);
-      })
-      .map((c) => ({ ...c, daysUntilDue: computeDaysUntilDue(c) }))
-      .sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+    const dueContacts: Array<Contact & { daysUntilDue: number }> = [];
+    for (const c of all) {
+      const nextDue = computeNextDueDate(c.lastInteraction, c.keepFrequencyDays);
+      if (nextDue && nextDue > new Date() && nextDue > new Date(`${endDate}T23:59:59`)) {
+        continue;
+      }
+      dueContacts.push({ ...c, daysUntilDue: computeDaysUntilDue(c) });
+    }
+    dueContacts.sort((a, b) => a.daysUntilDue - b.daysUntilDue);
+    return dueContacts;
   })();
 
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());

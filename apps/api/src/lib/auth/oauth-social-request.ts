@@ -14,7 +14,7 @@ function readProviderId(body: unknown): OAuthProviderId | null {
     return null;
   }
 
-  const provider = (body as Record<string, unknown>).provider;
+  const { provider } = body as Record<string, unknown>;
   if (provider === "github" || provider === "linkedin") {
     return provider;
   }

@@ -177,4 +177,7 @@ async function checkLinks() {
   report.ok(`${files.length} files, ${scanned.urls.size} routes`);
 }
 
-void checkLinks();
+detachPromise(checkLinks(), (error: unknown) => {
+  console.error(error);
+  process.exitCode = 1;
+});

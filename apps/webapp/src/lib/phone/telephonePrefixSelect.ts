@@ -26,11 +26,12 @@ function matchesPrefixQuery(option: TelephonePrefixOption, query: string): boole
  * Mantine renders `label` in the closed input, so the label must be the dial
  * prefix. Country names stay searchable through `filterTelephonePrefixOptions`.
  */
-export const TELEPHONE_PREFIX_SELECT_DATA: ReadonlyArray<ComboboxItem> =
-  TELEPHONE_PREFIX_OPTIONS.map((option) => ({
+export const TELEPHONE_PREFIX_SELECT_DATA: readonly ComboboxItem[] = TELEPHONE_PREFIX_OPTIONS.map(
+  (option) => ({
     label: option.displayPrefix,
     value: option.value,
-  }));
+  }),
+);
 
 export function findTelephonePrefixSelectOption(value: string): TelephonePrefixOption | undefined {
   return OPTION_BY_VALUE.get(value);

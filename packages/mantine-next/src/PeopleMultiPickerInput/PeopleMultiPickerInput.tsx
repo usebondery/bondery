@@ -136,9 +136,8 @@ function EditablePeopleMultiPickerInput({
   const selectedIdSet = new Set(selectedIds);
   const filterAvailable = (contact: ContactSelectable) =>
     !selectedIdSet.has(contact.id) && !contact.myself;
-  const matchQuery = (contact: ContactSelectable, query: string) => {
-    return formatContactName(contact).toLowerCase().includes(query.toLowerCase());
-  };
+  const matchQuery = (contact: ContactSelectable, query: string) =>
+    formatContactName(contact).toLowerCase().includes(query.toLowerCase());
 
   const {
     canLoadMore,

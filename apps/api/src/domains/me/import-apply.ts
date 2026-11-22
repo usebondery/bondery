@@ -406,11 +406,11 @@ export async function applyParsedImport(
     db.peopleTag.createManyAndReturn({ data, skipDuplicates: true }),
   );
 
-  const gisJobs: Array<Promise<void>> = [];
+  const gisJobs: Promise<void>[] = [];
   for (const person of insertedPeople) {
     if (
-      person.latitude != null &&
-      person.longitude != null &&
+      person.latitude !== null &&
+      person.longitude !== null &&
       isValidLatLng(person.latitude, person.longitude)
     ) {
       gisJobs.push(setGisPoint(db, "people", person.id, userId, person.latitude, person.longitude));
@@ -418,8 +418,8 @@ export async function applyParsedImport(
   }
   for (const address of insertedAddresses) {
     if (
-      address.latitude != null &&
-      address.longitude != null &&
+      address.latitude !== null &&
+      address.longitude !== null &&
       isValidLatLng(address.latitude, address.longitude)
     ) {
       gisJobs.push(

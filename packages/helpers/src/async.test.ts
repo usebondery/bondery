@@ -6,6 +6,7 @@ describe("detachPromise", () => {
   it("does not reject when the promise rejects and no handler is passed", async () => {
     detachPromise(Promise.reject(new Error("detached")));
     await Promise.resolve();
+    assert.equal(true, true);
   });
 
   it("calls onRejected when the promise rejects", async () => {

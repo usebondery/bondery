@@ -38,7 +38,7 @@ export function passkeyLimit() {
       before: [
         {
           handler: createAuthMiddleware(async (ctx) => {
-            const query = ctx.query;
+            const { query } = ctx;
             if (!query || typeof query !== "object") {
               return;
             }
@@ -66,7 +66,7 @@ export function passkeyLimit() {
                   where: { token },
                 });
                 if (row && row.expiresAt > new Date()) {
-                  userId = row.userId;
+                  ({ userId } = row);
                 }
               }
             }

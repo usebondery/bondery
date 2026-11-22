@@ -143,7 +143,7 @@ export async function rpcCheckAndIncrementAiMessages(
     SELECT allowed, messages_used, reset_at
     FROM check_and_increment_ai_messages(${userId}::uuid, ${limit}::int, ${isPremium}::boolean)
   `;
-  const row = rows[0];
+  const [row] = rows;
   if (!row) {
     throw new Error("check_and_increment_ai_messages returned no row");
   }

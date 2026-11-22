@@ -33,7 +33,7 @@ function extractCode(location: string): string {
   return code;
 }
 
-export const WEBAPP_URL = (process.env.BONDERY_PUBLIC_WEBAPP_URL ?? "").replace(/\/+$/, "");
+export const WEBAPP_URL = (process.env["BONDERY_PUBLIC_WEBAPP_URL"] ?? "").replace(/\/+$/, "");
 export const REDIRECT_URI = `${WEBAPP_URL}/auth/oauth-callback`;
 export const MCP_RESOURCE = resolveMcpResourceIdentifier();
 export const MCP_SCOPE = "openid profile email offline_access mcp:read mcp:write";
@@ -213,7 +213,7 @@ export function mcpCallResult(response: { json: () => unknown }) {
 export function mcpStructuredContent(response: {
   json: () => unknown;
 }): Record<string, unknown> | undefined {
-  const content = mcpCallResult(response)?.structuredContent;
+  const content = mcpCallResult(response)?.["structuredContent"];
   if (!content || typeof content !== "object" || Array.isArray(content)) {
     return undefined;
   }

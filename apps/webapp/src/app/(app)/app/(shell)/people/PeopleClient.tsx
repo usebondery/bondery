@@ -73,10 +73,12 @@ function applyColumnVisibility(
     return defaults;
   }
   const savedMap = new Map(saved.map((e) => [e.key, e.visible]));
-  return defaults.map((col) => {
+  const merged: Omit<ColumnConfig, "icon">[] = [];
+  for (const col of defaults) {
     const visible = savedMap.get(col.key);
-    return visible === undefined ? col : { ...col, visible };
-  });
+    merged.push(visible === undefined ? col : { ...col, visible });
+  }
+  return merged;
 }
 
 /**
@@ -147,12 +149,16 @@ export function PeopleClient({ savedColumnVisibility }: PeopleClientProps) {
   // Initial state is derived from the server-resolved cookie prop so the server
   // HTML already has the correct columns — no mount-time localStorage read,
   // no layout shift.
-  const [columns, setColumns] = useState<ColumnConfig[]>(() =>
-    applyColumnVisibility(savedColumnVisibility, columnLabels).map((col) => ({
-      ...col,
-      icon: columnIcons[col.key],
-    })),
-  );
+  const [columns, setColumns] = useState<ColumnConfig[]>(() => {
+    const nextColumns: ColumnConfig[] = [];
+    for (const col of applyColumnVisibility(savedColumnVisibility, columnLabels)) {
+      nextColumns.push({
+        ...col,
+        icon: columnIcons[col.key],
+      });
+    }
+    return nextColumns;
+  });
 
   useEffect(() => {
     setColumns((prev) =>

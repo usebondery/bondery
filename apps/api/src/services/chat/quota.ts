@@ -111,7 +111,7 @@ export async function checkChatQuota(
     const rawResetAt = settings?.aiMessagesMonthResetAt ?? null;
 
     const periodExpired =
-      rawResetAt != null && Date.now() > rawResetAt.getTime() + 30 * 24 * 60 * 60 * 1000;
+      rawResetAt !== null && Date.now() > rawResetAt.getTime() + 30 * 24 * 60 * 60 * 1000;
 
     const messagesUsed = periodExpired ? 0 : rawUsed;
     const resetAt =

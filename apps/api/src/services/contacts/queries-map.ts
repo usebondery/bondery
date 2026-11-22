@@ -102,7 +102,7 @@ export async function getMapPins(ctx: ContactMapContext, query: MapBoundsQuery) 
     firstName: row.first_name,
     headline: row.headline,
     id: row.id,
-    lastInteraction: row.last_interaction == null ? null : toIsoString(row.last_interaction),
+    lastInteraction: row.last_interaction === null ? null : toIsoString(row.last_interaction),
     lastName: row.last_name,
     latitude: row.latitude,
     location: row.location,

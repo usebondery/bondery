@@ -1,4 +1,3 @@
-import { detachPromise } from "@bondery/helpers/async";
 import { shareContactEmailSchema } from "@bondery/schemas";
 import { IconPlus, IconSend, IconX } from "@tabler/icons-react-native";
 import {
@@ -304,7 +303,7 @@ function ShareContactEmailSheetContent({
             if (!canSend) {
               return;
             }
-            detachPromise(handleSend(recipients));
+            handleSend(recipients);
           },
           tone: "primary",
           variant: "filled",

@@ -16,8 +16,8 @@ import { loadTestEnv } from "./load-test-env.js";
 const WEBHOOK_SECRET = "whsec_stripe_webhook_integration_test";
 
 loadTestEnv();
-process.env.BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET = WEBHOOK_SECRET;
-process.env.BONDERY_PRIVATE_STRIPE_SECRET_KEY ??= "sk_test_stripe_webhook_integration_test";
+process.env["BONDERY_PRIVATE_STRIPE_WEBHOOK_SECRET"] = WEBHOOK_SECRET;
+process.env["BONDERY_PRIVATE_STRIPE_SECRET_KEY"] ??= "sk_test_stripe_webhook_integration_test";
 
 const { createTestApp } = await import("./create-test-app.js");
 

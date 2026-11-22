@@ -27,7 +27,7 @@ export async function listInteractions(
   const { user } = ctx;
   const { limit, offset } = parsePagination(query);
   const avatarOptions = extractAvatarOptions(query);
-  const contactId = query.contactId;
+  const { contactId } = query;
   const search = normalizeSearch(query.search);
 
   if (contactId) {

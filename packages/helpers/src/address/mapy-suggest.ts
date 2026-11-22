@@ -26,6 +26,55 @@ interface MapSuggestionItem {
   zip: string | null;
 }
 
+type RawRegionalEntry = {
+  isoCode?: unknown;
+  name?: unknown;
+  type?: unknown;
+};
+
+type RawPositionObject = {
+  lat?: unknown;
+  lng?: unknown;
+  lon?: unknown;
+  x?: unknown;
+  y?: unknown;
+};
+
+type RawMapySuggestItem = {
+  label?: unknown;
+  name?: unknown;
+  position?: unknown;
+  regionalStructure?: unknown;
+  type?: unknown;
+  zip?: unknown;
+};
+
+function toRawMapySuggestItem(raw: unknown): RawMapySuggestItem | null {
+  if (raw === null || raw === undefined || typeof raw !== "object") {
+    return null;
+  }
+  return raw as RawMapySuggestItem;
+}
+
+function toRawRegionalEntries(value: unknown): Array<RawRegionalEntry | null | undefined> {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+  const entries: Array<RawRegionalEntry | null | undefined> = [];
+  for (const entry of value) {
+    if (entry === null || entry === undefined) {
+      entries.push(entry);
+      continue;
+    }
+    if (typeof entry !== "object") {
+      entries.push(undefined);
+      continue;
+    }
+    entries.push(entry as RawRegionalEntry);
+  }
+  return entries;
+}
+
 function isValidCoordinate(lat: number, lon: number): boolean {
   return (
     Number.isFinite(lat) &&
@@ -95,29 +144,25 @@ function normalizeCoordinates(
  * produces a display label using the shared formatting helpers.
  */
 function buildLabelFromRawItem(raw: unknown): string {
-  const item = raw as Record<string, unknown> | null | undefined;
+  const item = toRawMapySuggestItem(raw);
   const name = String(item?.name || "").trim();
   if (!name) {
     return "";
   }
 
-  const regional: unknown[] = Array.isArray(item?.regionalStructure) ? item.regionalStructure : [];
+  const regional = toRawRegionalEntries(item?.regionalStructure);
 
-  const municipality = (regional as Array<Record<string, unknown>>).find(
-    (e) => e.type === "regional.municipality",
-  );
+  const municipality = regional.find((entry) => entry?.type === "regional.municipality");
   const city = (municipality?.name as string | undefined) ?? null;
 
   let state: string | null = null;
-  for (const entry of regional as Array<Record<string, unknown>>) {
-    if (entry.type === "regional.region" || entry.type === "regional.county") {
+  for (const entry of regional) {
+    if (entry?.type === "regional.region" || entry?.type === "regional.county") {
       state = (entry.name as string | undefined) ?? state;
     }
   }
 
-  const countryEntry = (regional as Array<Record<string, unknown>>).find(
-    (e) => e.type === "regional.country",
-  );
+  const countryEntry = regional.find((entry) => entry?.type === "regional.country");
   const countryCode: string | null = (countryEntry?.isoCode as string | undefined) ?? null;
 
   const itemType = String(item?.type || "");
@@ -145,16 +190,14 @@ function buildLabelFromRawItem(raw: unknown): string {
 /**
  * Parses a single raw Mapy.com suggest item into a {@link MapSuggestionItem}.
  */
-export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
-  const item = raw as Record<string, unknown> | null | undefined;
+function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
+  const item = toRawMapySuggestItem(raw);
   const position = item?.position;
   let lat: number | null = null;
   let lon: number | null = null;
-  const regionalStructure = Array.isArray(item?.regionalStructure) ? item.regionalStructure : [];
+  const regionalStructure = toRawRegionalEntries(item?.regionalStructure);
   const countryIso = String(
-    (regionalStructure as Array<Record<string, unknown> | null | undefined>).find(
-      (entry) => entry?.type === "regional.country",
-    )?.isoCode || "",
+    regionalStructure.find((entry) => entry?.type === "regional.country")?.isoCode || "",
   ).toUpperCase();
 
   if (Array.isArray(position) && position.length >= 2) {
@@ -163,17 +206,15 @@ export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
 
     const normalized = normalizeCoordinates(first, second, countryIso);
     if (normalized) {
-      lat = normalized.lat;
-      lon = normalized.lon;
+      ({ lat, lon } = normalized);
     }
   } else if (position && typeof position === "object") {
-    const pos = position as Record<string, unknown>;
+    const pos = position as RawPositionObject;
     const first = Number(pos.lon ?? pos.lng ?? pos.x ?? pos.lat);
     const second = Number(pos.lat ?? pos.y ?? pos.lon ?? pos.lng);
     const normalized = normalizeCoordinates(first, second, countryIso);
     if (normalized) {
-      lat = normalized.lat;
-      lon = normalized.lon;
+      ({ lat, lon } = normalized);
     }
   }
 
@@ -186,15 +227,11 @@ export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
       lat: Number.isFinite(lat) ? lat : null,
       lon: Number.isFinite(lon) ? lon : null,
     },
-    regionalStructure: Array.isArray(item?.regionalStructure)
-      ? (item.regionalStructure as Array<Record<string, unknown> | null | undefined>).map(
-          (entry) => ({
-            isoCode: entry?.isoCode ? String(entry.isoCode) : undefined,
-            name: entry?.name ? String(entry.name) : undefined,
-            type: entry?.type ? String(entry.type) : undefined,
-          }),
-        )
-      : [],
+    regionalStructure: regionalStructure.map((entry) => ({
+      isoCode: entry?.isoCode ? String(entry.isoCode) : undefined,
+      name: entry?.name ? String(entry.name) : undefined,
+      type: entry?.type ? String(entry.type) : undefined,
+    })),
     type: String(item?.type || "regional.address"),
     zip: item?.zip ? String(item.zip) : null,
   };
@@ -203,7 +240,7 @@ export function parseMapSuggestionItem(raw: unknown): MapSuggestionItem {
 /**
  * Parses an array of raw Mapy.com suggest items, filtering out empty labels.
  */
-export function parseMapSuggestions(rawItems: unknown[]): MapSuggestionItem[] {
+function parseMapSuggestions(rawItems: unknown[]): MapSuggestionItem[] {
   if (!Array.isArray(rawItems)) {
     return [];
   }
@@ -211,3 +248,4 @@ export function parseMapSuggestions(rawItems: unknown[]): MapSuggestionItem[] {
 }
 
 export type { MapSuggestionItem, MapSuggestionRegionalEntry };
+export { parseMapSuggestionItem, parseMapSuggestions };

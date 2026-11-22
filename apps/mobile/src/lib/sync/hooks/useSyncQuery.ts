@@ -134,10 +134,16 @@ export function useContactsList(params: ContactsListParams) {
 export function useContactTags(contactId: string | undefined) {
   return useSyncQuery({
     enabled: contactId !== undefined,
-    queryFn: () =>
-      contactId
-        ? getContactTags(contactId).map((tag): TagWithCount => ({ ...tag, contactCount: 0 }))
-        : [],
+    queryFn: () => {
+      if (!contactId) {
+        return [];
+      }
+      const tags: TagWithCount[] = [];
+      for (const tag of getContactTags(contactId)) {
+        tags.push({ ...tag, contactCount: 0 });
+      }
+      return tags;
+    },
     queryKey: sqliteQueryKeys.contacts.tags(contactId ?? "disabled"),
   });
 }
@@ -145,12 +151,16 @@ export function useContactTags(contactId: string | undefined) {
 export function useContactGroups(contactId: string | undefined) {
   return useSyncQuery({
     enabled: contactId !== undefined,
-    queryFn: () =>
-      contactId
-        ? getContactGroups(contactId).map(
-            (group): GroupWithCount => ({ ...group, contactCount: 0 }),
-          )
-        : [],
+    queryFn: () => {
+      if (!contactId) {
+        return [];
+      }
+      const groups: GroupWithCount[] = [];
+      for (const group of getContactGroups(contactId)) {
+        groups.push({ ...group, contactCount: 0 });
+      }
+      return groups;
+    },
     queryKey: sqliteQueryKeys.contacts.groups(contactId ?? "disabled"),
   });
 }

@@ -146,5 +146,8 @@ export async function loadFormattedInteractions(
 
   return interactionIds
     .map((id) => byId.get(id))
-    .filter((interaction): interaction is NonNullable<typeof interaction> => interaction != null);
+    .filter(
+      (interaction): interaction is NonNullable<typeof interaction> =>
+        interaction !== null && interaction !== undefined,
+    );
 }

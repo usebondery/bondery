@@ -48,20 +48,20 @@ Each var has `secret: boolean`, `requiredIn`, `targets`, and `exampleValue`.
 
 Canonical stack: `deploy/bondery/docker-compose.yml` + `docker-compose.postgres.yml`.
 
-| Service         | Secrets                                                               | Network                        |
-| --------------- | --------------------------------------------------------------------- | ------------------------------ |
-| `api`           | `env_file: .env` (all secrets)                                        | `dokploy-network` + `internal` |
-| `webapp`        | Explicit env only (no `env_file`)                                     | `dokploy-network`              |
-| `db`            | Postgres password                                                     | `internal` only                |
-| `redis`         | Password (ACL file) + TLS certificate from the `redis-secrets` volume | `internal` only                |
-| `redis-secrets` | Creates the Redis password and certificate (one-shot, no network)     | none                           |
-| `migrate`       | Same as API                                                           | `internal`                     |
+| Service         | Secrets                                                          | Network                        |
+| --------------- | ---------------------------------------------------------------- | ------------------------------ |
+| `api`           | `env_file: .env` (all secrets)                                   | `dokploy-network` + `internal` |
+| `webapp`        | Explicit env only (no `env_file`)                                | `dokploy-network`              |
+| `db`            | Postgres password                                                | `internal` only                |
+| `redis`         | Password (ACL file) + server certificate from `redis-tls-server` | `internal` only                |
+| `stack-secrets` | Creates the Redis CA, certificates, and password (one-shot)      | none                           |
+| `migrate`       | Same as API                                                      | `internal`                     |
 
 **Policy lint:** `deploy/bondery/scripts/check-compose.mjs`:
 
 - Webapp must not use `env_file` or reference `PRIVATE_*` (except PostHog allowlist)
 - Redis/db must not join `dokploy-network` or get Traefik labels
-- Redis must require TLS and a password in every stack variant, and the API must connect with both (see [Redis: TLS and authentication](#redis-tls-and-authentication-required))
+- Redis must require TLS, mutual TLS on the bundled service, and a password in every stack variant, and the API must connect with all three (see [Redis: TLS and authentication](#redis-tls-and-authentication-required))
 - API must depend on db healthy + migrate success + redis healthy
 
 **Migrate gate:** `packages/db/scripts/release-migrate.ts` — `prisma migrate deploy` → SQL functions → OAuth client provision. Never runs on `docker compose up` alone.
@@ -70,34 +70,36 @@ Canonical stack: `deploy/bondery/docker-compose.yml` + `docker-compose.postgres.
 
 ## Redis: TLS and authentication (required)
 
-Redis holds session data (Better Auth secondary storage), magic-link and step-up tokens, WebSocket tickets, and rate-limit counters. A private Docker network is not enough protection. **Every Redis that Bondery deploys or connects to must require TLS and authentication.** This applies to the bundled Compose Redis, to an external or managed Redis, and to any new Redis instance or stack variant added later.
+Redis holds session data (Better Auth secondary storage), magic-link and step-up tokens, WebSocket tickets, and rate-limit counters. A private Docker network is not enough protection. **Every Redis that Bondery deploys or connects to must require TLS and authentication.** The bundled Redis also requires a client certificate (`tls-auth-clients yes`). This applies to the bundled Compose Redis, to an external or managed Redis, and to any new Redis instance or stack variant added later. Design record: `docs/adr/0032-redis-mtls.mdx`.
 
 Rules:
 
-1. **TLS only.** Redis serves `--tls-port` and disables the plaintext port (`--port 0`). Clients use `rediss://`.
-2. **Verify the certificate.** Clients pin a CA (`BONDERY_PRIVATE_REDIS_TLS_CA_FILE`) or use a publicly trusted certificate. Never set `rejectUnauthorized: false` or skip hostname checks.
-3. **Authenticate.** Use a strong random password (32+ bytes) through an ACL file or a managed-Redis user. Do not use `requirepass` on the command line, and never set `protected-mode no` on an unauthenticated server.
-4. **Secrets in files, not in Compose text.** Pass the password with `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` (volume or Docker secret) or inside `BONDERY_PRIVATE_REDIS_URL` from the secret store. Never commit it, and never put it in an image.
-5. **No public exposure.** Redis stays on the private `internal` network. No host `ports:` and no Traefik labels.
-6. **Upgrades must stay seamless.** A security change to Redis must not need operator action on existing installs. Generate missing secrets automatically (as the `stack-secrets` job does) and keep existing data.
+1. **TLS only.** Redis serves `--tls-port` and disables the plaintext port (`--port 0`). Clients use `rediss://`. The bundled Redis serves TLS 1.3 only.
+2. **Verify the certificate.** Clients trust a CA (`BONDERY_PRIVATE_REDIS_TLS_CA_FILE`) or a publicly trusted certificate. Never set `rejectUnauthorized: false` or skip hostname checks.
+3. **Client certificate on the bundled Redis.** Redis sets `--tls-auth-clients yes`. The API and the healthcheck each use a client certificate from the Redis CA. Set `BONDERY_PRIVATE_REDIS_TLS_CERT_FILE` and `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE` as a pair on external Redis when that server requires them.
+4. **Authenticate.** Use a strong random password (32+ bytes) through an ACL file or a managed-Redis user. Do not use `requirepass` on the command line, and never set `protected-mode no` on an unauthenticated server.
+5. **Secrets in files, not in Compose text.** Pass the password with `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` (volume or Docker secret) or inside `BONDERY_PRIVATE_REDIS_URL` from the secret store. Never commit it, and never put it in an image.
+6. **No public exposure.** Redis stays on the private `internal` network. No host `ports:` and no Traefik labels.
+7. **Upgrades must stay seamless.** A security change to Redis must not need operator action on existing installs. Generate missing secrets automatically (as the `stack-secrets` job does) and keep existing data.
 
-There is no exception for local development. `deploy/bondery/docker-compose.dev-redis.yml` follows the same rules, so the API's TLS and password path runs on every developer machine. `pnpm run start:redis` creates the secrets in `.temp/redis-secrets` with the same code as the Compose job (`ensure-redis-secrets.ts --local-dev`), and the dev port binds to `127.0.0.1` only.
+There is no exception for local development. `deploy/bondery/docker-compose.dev-redis.yml` follows the same rules, so the API's TLS, client certificate, and password path runs on every developer machine. `pnpm run start:redis` creates the secrets in `.temp/redis-secrets` with the same code as the Compose job (`ensure-redis-secrets.ts --local-dev`), and the dev port binds to `127.0.0.1` only.
 
 How the bundled stack does it:
 
-| Part                                                                                                                                                  | Where                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Password + self-signed ECDSA certificate (SANs `redis`, `${prefix}-redis`, `localhost`), created once, kept after that, renewed 30 days before expiry | `apps/api/src/lib/data/redis-secrets.ts`, CLI `apps/api/src/cli/ensure-stack-secrets.ts` (alias `ensure-redis-secrets.ts`), Compose service `stack-secrets` |
-| Redis stores only the SHA-256 of the password                                                                                                         | `server/users.acl` in the `redis-secrets` volume                                                                                                            |
-| File ownership: `server/` belongs to the Redis user (999), `client/` to the API user (1001), both `0700`                                              | `ensureRedisSecrets()`                                                                                                                                      |
-| API reads the password and pinned CA from files                                                                                                       | `apps/api/src/lib/data/redis-connection-options.ts`                                                                                                         |
-| Compose always sets `rediss://${prefix}-redis:6379`. A stale `redis://` value in `.env` or Infisical does not apply                                   | `deploy/bondery/docker-compose*.yml`                                                                                                                        |
-| Production API logs a warning at boot when Redis has no TLS or no password                                                                            | `warnOnInsecureProductionRedis()` in `lib/data/redis.ts`                                                                                                    |
-| CI fails when a stack variant or the dev Redis drops TLS or auth, or the dev port leaves loopback                                                     | `checkRedisTlsAndAuth()` and the dev block in `deploy/bondery/scripts/check-compose.mjs`                                                                    |
+| Part                                                                                                                                                                       | Where                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| CA + server certificate (serverAuth) + API client certificate (clientAuth) + healthcheck client certificate, 10-year leaves, 20-year CA, reissued within 90 days of expiry | `apps/api/src/lib/infra-secrets/redis-tls.ts`, CLI `apps/api/src/cli/ensure-stack-secrets.ts`, Compose service `stack-secrets`   |
+| Volumes: `redis-tls-ca` (job), `redis-tls-server` (redis), `redis-tls-client` (api); legacy `redis-secrets` read-only on the job for the first password                    | `deploy/bondery/docker-compose*.yml`                                                                                             |
+| Redis stores only the SHA-256 of the password                                                                                                                              | `server/users.acl` in `redis-tls-server`                                                                                         |
+| File ownership: `server/` belongs to the Redis user (999), `client/` to the API user (1001), both `0700`                                                                   | `ensureRedisSecrets()`                                                                                                           |
+| API reads the password, CA, and client certificate from files                                                                                                              | `apps/api/src/lib/data/redis-connection-options.ts`                                                                              |
+| Compose always sets `rediss://${prefix}-redis:6379` plus cert and key paths. A stale `redis://` value in `.env` or Infisical does not apply                                | `deploy/bondery/docker-compose*.yml`                                                                                             |
+| Production API logs a warning at boot when Redis has no TLS or no password                                                                                                 | `warnOnInsecureProductionRedis()` in `lib/data/redis.ts`                                                                         |
+| CI fails when a stack variant or the dev Redis drops TLS, mutual TLS, or auth, or the dev port leaves loopback                                                             | `checkRedisTlsAndAuth()` and the dev block in `deploy/bondery/scripts/check-compose.mjs`; release smoke `assertRedisMutualTls()` |
 
-Rotation: see `docs/deploy/secrets.mdx` (delete the files in the `redis-secrets` volume, then recreate `stack-secrets`, `redis`, and `api`).
+Rotation: see `docs/deploy/secrets.mdx` (delete certificate or password files in the `redis-tls-*` volumes, or delete the CA to replace it, then recreate `stack-secrets`, `redis`, and `api`).
 
-**Review trigger:** a new Redis client, a new Redis service, a Compose variant, or a change to `createRedisClient()` options. Confirm TLS, certificate verification, and auth are still on.
+**Review trigger:** a new Redis client, a new Redis service, a Compose variant, or a change to `createRedisClient()` options. Confirm TLS, certificate verification, password auth, and that a new client presents the client certificate when the cert and key files are set. Confirm a Compose change keeps `tls-auth-clients yes`.
 
 ## Postgres: TLS (required)
 
@@ -238,7 +240,7 @@ node deploy/bondery/scripts/check-compose.mjs
 - [ ] Examples regenerated (automatic on commit when `manifest.ts` changes; CI `env --check` as safety net)
 - [ ] Webapp compose service has no `env_file` with private secrets
 - [ ] Redis required in production for rate limiting
-- [ ] Every Redis requires TLS (`rediss://`, verified certificate) and a password; `check-compose.mjs` passes
+- [ ] Every Redis requires TLS (`rediss://`, verified certificate), a password, and bundled mutual TLS; `check-compose.mjs` passes
 - [ ] Migrations run via `release-migrate` before app traffic
 - [ ] No secrets in committed example files (placeholder values only)
 - [ ] Rotation documented in `docs/deploy/secrets.mdx` if applicable

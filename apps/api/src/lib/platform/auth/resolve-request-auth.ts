@@ -48,8 +48,8 @@ function isTrustedOAuthClient(payload: JWTPayload): boolean {
   }
 
   const clientId =
-    (typeof payload.client_id === "string" && payload.client_id) ||
-    (typeof payload.azp === "string" && payload.azp) ||
+    (typeof payload["client_id"] === "string" && payload["client_id"]) ||
+    (typeof payload["azp"] === "string" && payload["azp"]) ||
     null;
 
   return Boolean(clientId && trustedClientIds.has(clientId));

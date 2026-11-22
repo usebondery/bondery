@@ -5,15 +5,20 @@ import {
   describeRedisSecurity,
   REDIS_PASSWORD_FILE_ENV,
   REDIS_TLS_CA_FILE_ENV,
+  REDIS_TLS_CERT_FILE_ENV,
+  REDIS_TLS_KEY_FILE_ENV,
   resolveRedisConnectionOptions,
 } from "./redis-connection-options.js";
 
 const REDISS_PATTERN = /rediss:\/\//;
 const NOT_BOTH_PATTERN = /not both/;
 const EMPTY_FILE_PATTERN = /empty file/;
+const BOTH_CERT_FILES_PATTERN = /Set both/;
 
 const FILES: Record<string, string> = {
   "/secrets/ca.crt": "-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----\n",
+  "/secrets/client.crt": "-----BEGIN CERTIFICATE-----\nclient\n-----END CERTIFICATE-----\n",
+  "/secrets/client.key": "-----BEGIN PRIVATE KEY-----\nkey\n-----END PRIVATE KEY-----\n",
   "/secrets/empty": "  \n",
   "/secrets/password": "s3cret\n",
 };
@@ -41,7 +46,30 @@ describe("resolveRedisConnectionOptions", () => {
       readFake,
     );
     assert.equal(options.password, "s3cret");
-    assert.deepEqual(options.tls, { ca: readFake("/secrets/ca.crt").trim() });
+    assert.deepEqual(options.tls, {
+      ca: readFake("/secrets/ca.crt").trim(),
+      minVersion: "TLSv1.2",
+      rejectUnauthorized: true,
+    });
+  });
+
+  it("adds client cert and key when both files are set", () => {
+    const options = resolveRedisConnectionOptions(
+      "rediss://bondery-redis:6379",
+      {
+        [REDIS_TLS_CA_FILE_ENV]: "/secrets/ca.crt",
+        [REDIS_TLS_CERT_FILE_ENV]: "/secrets/client.crt",
+        [REDIS_TLS_KEY_FILE_ENV]: "/secrets/client.key",
+      },
+      readFake,
+    );
+    assert.deepEqual(options.tls, {
+      ca: readFake("/secrets/ca.crt").trim(),
+      cert: readFake("/secrets/client.crt").trim(),
+      key: readFake("/secrets/client.key").trim(),
+      minVersion: "TLSv1.2",
+      rejectUnauthorized: true,
+    });
   });
 
   it("rejects a CA file on a URL without TLS", () => {
@@ -53,6 +81,42 @@ describe("resolveRedisConnectionOptions", () => {
           readFake,
         ),
       REDISS_PATTERN,
+    );
+  });
+
+  it("rejects client cert files on a URL without TLS", () => {
+    assert.throws(
+      () =>
+        resolveRedisConnectionOptions(
+          "redis://redis:6379",
+          {
+            [REDIS_TLS_CERT_FILE_ENV]: "/secrets/client.crt",
+            [REDIS_TLS_KEY_FILE_ENV]: "/secrets/client.key",
+          },
+          readFake,
+        ),
+      REDISS_PATTERN,
+    );
+  });
+
+  it("rejects when only one client cert file is set", () => {
+    assert.throws(
+      () =>
+        resolveRedisConnectionOptions(
+          "rediss://redis:6379",
+          { [REDIS_TLS_CERT_FILE_ENV]: "/secrets/client.crt" },
+          readFake,
+        ),
+      BOTH_CERT_FILES_PATTERN,
+    );
+    assert.throws(
+      () =>
+        resolveRedisConnectionOptions(
+          "rediss://redis:6379",
+          { [REDIS_TLS_KEY_FILE_ENV]: "/secrets/client.key" },
+          readFake,
+        ),
+      BOTH_CERT_FILES_PATTERN,
     );
   });
 
@@ -94,6 +158,7 @@ describe("describeRedisSecurity", () => {
   it("flags plain, unauthenticated Redis", () => {
     assert.deepEqual(describeRedisSecurity("redis://redis:6379", {}), {
       authenticated: false,
+      mutualTls: false,
       tls: false,
     });
   });
@@ -101,13 +166,30 @@ describe("describeRedisSecurity", () => {
   it("accepts a password from the URL or from a file", () => {
     assert.deepEqual(describeRedisSecurity("rediss://:pw@redis:6379", {}), {
       authenticated: true,
+      mutualTls: false,
       tls: true,
     });
     assert.deepEqual(
       describeRedisSecurity("rediss://redis:6379", {
         [REDIS_PASSWORD_FILE_ENV]: "/secrets/password",
       }),
-      { authenticated: true, tls: true },
+      { authenticated: true, mutualTls: false, tls: true },
+    );
+  });
+
+  it("reports mutualTls when both cert file env vars are set", () => {
+    assert.deepEqual(
+      describeRedisSecurity("rediss://redis:6379", {
+        [REDIS_TLS_CERT_FILE_ENV]: "/secrets/client.crt",
+        [REDIS_TLS_KEY_FILE_ENV]: "/secrets/client.key",
+      }),
+      { authenticated: false, mutualTls: true, tls: true },
+    );
+    assert.deepEqual(
+      describeRedisSecurity("rediss://redis:6379", {
+        [REDIS_TLS_CERT_FILE_ENV]: "/secrets/client.crt",
+      }),
+      { authenticated: false, mutualTls: false, tls: true },
     );
   });
 });

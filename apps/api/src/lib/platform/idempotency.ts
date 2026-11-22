@@ -198,7 +198,7 @@ async function claimIdempotencyKey(
       ${IDEMPOTENCY_LEASE_SECONDS}::int
     )
   `;
-  const row = rows[0];
+  const [row] = rows;
   if (!row) {
     throw new Error("claim_idempotency_key returned no row");
   }
@@ -270,7 +270,7 @@ export function registerIdempotency(fastify: FastifyInstance): void {
       );
     }
 
-    const userId = decision.userId;
+    const { userId } = decision;
     const { pathname, rawQuery } = splitRequestUrl(request.url);
     const requestHash = buildIdempotencyFingerprint({
       bodySha256: bodyHashes.get(request) ?? EMPTY_BODY_SHA256,

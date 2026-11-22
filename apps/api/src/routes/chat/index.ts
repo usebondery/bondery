@@ -164,7 +164,7 @@ export const chatRoutes: AppRoutePlugin = async (fastify) => {
         }
         persisted = true;
 
-        let text = tracker.text;
+        let { text } = tracker;
         if (!text) {
           text = await Promise.resolve(result.text).catch(() => "");
         }

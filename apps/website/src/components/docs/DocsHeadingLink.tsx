@@ -19,13 +19,14 @@ export function DocsHeadingLink({ id }: DocsHeadingLinkProps) {
   const [copied, setCopied] = useState(false);
   const resetTimer = useRef<number | null>(null);
 
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
       if (resetTimer.current !== null) {
         window.clearTimeout(resetTimer.current);
       }
-    };
-  }, []);
+    },
+    [],
+  );
 
   function handleClick() {
     const url = `${location.origin}${location.pathname}#${id}`;

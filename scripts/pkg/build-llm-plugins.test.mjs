@@ -54,7 +54,7 @@ describe("llm plugin build", () => {
     const openaiMcp = json(openai, "mcp.json");
     assert.equal(claudeMcp.mcpServers.bondery.type, "http");
     assert.equal(openaiMcp.mcpServers.bondery.type, "streamable-http");
-    const auth = openaiMcp.mcpServers.bondery.extensions["com.openai"].auth;
+    const { auth } = openaiMcp.mcpServers.bondery.extensions["com.openai"];
     assert.equal(auth.type, "oauth");
     assert.equal(auth.client.mode, "cimd");
     assert.equal(Object.hasOwn(auth, "clientSecret"), false);
@@ -132,7 +132,7 @@ describe("llm plugin build", () => {
   });
 
   it("matches the current Claude manifest, MCP file, and skill bytes", () => {
-    const version = JSON.parse(readFileSync(join(root, "package.json"), "utf8")).version;
+    const { version } = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
     const release = renderClaudeTree(config, files, version);
     assert.ok(
       release

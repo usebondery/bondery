@@ -33,7 +33,7 @@ for (const entry of readdirSync(toolsDir)) {
   const registrations = [...content.matchAll(TOOL_NAME_RE)];
   for (let index = 0; index < registrations.length; index += 1) {
     const match = registrations[index];
-    const name = match[1];
+    const [, name] = match;
     if (!ALLOWED_NAME_RE.test(name)) {
       check.add(
         `${entry}: invalid MCP tool name "${name}" (use create|get|update|delete|search_*)`,
@@ -41,7 +41,7 @@ for (const entry of readdirSync(toolsDir)) {
       continue;
     }
 
-    const verb = name.split("_")[0];
+    const [verb] = name.split("_");
     const sliceStart = match.index ?? 0;
     const sliceEnd = registrations[index + 1]?.index ?? content.length;
     const block = content.slice(sliceStart, sliceEnd);

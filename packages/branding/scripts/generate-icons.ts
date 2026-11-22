@@ -64,7 +64,7 @@ export async function generateIcons(options: GenerateIconsOptions): Promise<void
       if (icon.format === "svg") {
         nextBytes = readFileSync(svgPath);
       } else {
-        const size = icon.size;
+        const { size } = icon;
         if (!size) {
           console.error(`❌ Size is required for ${icon.format} format`);
           process.exitCode = 1;

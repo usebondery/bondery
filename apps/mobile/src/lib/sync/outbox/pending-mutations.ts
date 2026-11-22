@@ -73,18 +73,20 @@ export function listPendingMutations(limit = 50): SyncMutation[] {
     limit,
   );
 
-  return rows.map((row) => {
+  const mutations: SyncMutation[] = [];
+  for (const row of rows) {
     const payload = JSON.parse(row.payload_json) as Record<string, unknown>;
     const baseUpdatedAt = normalizeSyncDatetime(row.base_updated_at);
-    return {
+    mutations.push({
       clientSequence: row.client_sequence,
       id: row.id,
       payload,
       type: row.mutation_type,
       ...(baseUpdatedAt ? { baseUpdatedAt } : {}),
       ...(row.entity_id ? { entityId: row.entity_id } : {}),
-    } as SyncMutation;
-  });
+    } as SyncMutation);
+  }
+  return mutations;
 }
 
 export function markMutationApplied(mutationId: string): void {

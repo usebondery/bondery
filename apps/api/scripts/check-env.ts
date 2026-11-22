@@ -15,7 +15,7 @@ import { getApiRequiredEnvVars } from "../src/lib/platform/required-env.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const environment = (process.env.NODE_ENV || "development") as "production" | "development";
+const environment = (process.env["NODE_ENV"] || "development") as "production" | "development";
 
 const fromManifest = getRequiredVarsForTarget("api", environment);
 const fromModule = [...getApiRequiredEnvVars(environment)];
@@ -60,7 +60,7 @@ const bootDevExpected = [
     ...getRequiredVarsForTarget("api", "development"),
     ...getBootIncludeExtraVarNames("api", "development"),
   ]),
-].sort();
+].sort((left, right) => left.localeCompare(right));
 
 if (!sameSet(bootDevNames, bootDevExpected)) {
   console.error("API boot-env name drift vs manifest (development):");
@@ -102,6 +102,6 @@ checkEnvVariables({
 });
 
 assertDistinctFirstPartyOAuthClientIds(
-  process.env.BONDERY_PUBLIC_OAUTH_CLIENT_ID,
-  process.env.BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID,
+  process.env["BONDERY_PUBLIC_OAUTH_CLIENT_ID"],
+  process.env["BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID"],
 );

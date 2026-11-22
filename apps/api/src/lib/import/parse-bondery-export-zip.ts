@@ -183,7 +183,7 @@ export function parseBonderyExportZip(
   const entryNames: string[] = [];
 
   for (const entry of entries) {
-    const entryName = entry.entryName;
+    const { entryName } = entry;
     entryNames.push(entryName);
 
     if (isUnsafeZipPath(entryName)) {

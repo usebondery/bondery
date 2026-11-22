@@ -133,15 +133,20 @@ export async function listTags(ctx: TagListContext, query?: PreviewListQuery) {
     }
   }
 
-  const tagsWithCounts: TagWithCount[] = tagRows.map((row) => {
+  const tagsWithCounts: TagWithCount[] = [];
+  for (const row of tagRows) {
     const baseTag = toTagDto(row);
     const pIds = includePreview ? (previewMap.get(row.id) ?? []) : [];
     const previewContacts = includePreview
       ? (pIds.map((id) => previewContactsById.get(id)).filter(Boolean) as ContactPreview[])
       : undefined;
 
-    return { ...baseTag, contactCount: countMap.get(row.id) ?? 0, previewContacts };
-  });
+    tagsWithCounts.push({
+      ...baseTag,
+      contactCount: countMap.get(row.id) ?? 0,
+      previewContacts,
+    });
+  }
 
   return {
     tags: tagsWithCounts,
@@ -270,18 +275,21 @@ export async function listTagMembers(ctx: TagListContext, tagId: string, query: 
     totalCount = count;
   }
 
-  const enrichedContacts = contacts.map((c) => ({
-    ...c,
-    avatar: resolveContactAvatarUrl(
-      user.id,
-      {
-        avatarUpdatedAt: c.avatarUpdatedAt,
-        hasAvatar: c.hasAvatar,
-        id: c.id,
-      },
-      avatarOptions,
-    ),
-  }));
+  const enrichedContacts: Array<(typeof contacts)[number] & { avatar: string | null }> = [];
+  for (const c of contacts) {
+    enrichedContacts.push({
+      ...c,
+      avatar: resolveContactAvatarUrl(
+        user.id,
+        {
+          avatarUpdatedAt: c.avatarUpdatedAt,
+          hasAvatar: c.hasAvatar,
+          id: c.id,
+        },
+        avatarOptions,
+      ),
+    });
+  }
 
   const pagination = buildPaginationMeta({
     itemCount: enrichedContacts.length,

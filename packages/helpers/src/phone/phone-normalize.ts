@@ -115,7 +115,7 @@ function stripNationalTrunkZero(nationalDigits: string, countryCode: string | nu
 
 function validateNationalLength(dialDigits: string, nationalDigits: string): boolean {
   const rule = NATIONAL_LENGTH_BY_DIAL[dialDigits] ?? DEFAULT_NATIONAL_LENGTH;
-  const length = nationalDigits.length;
+  const { length } = nationalDigits;
   return length >= rule.min && length <= rule.max;
 }
 

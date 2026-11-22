@@ -6,8 +6,10 @@
  *
  * - `BONDERY_PRIVATE_REDIS_PASSWORD_FILE`: file that holds the Redis password.
  * - `BONDERY_PRIVATE_REDIS_TLS_CA_FILE`: PEM certificate(s) to trust for the Redis TLS connection.
+ * - `BONDERY_PRIVATE_REDIS_TLS_CERT_FILE`: optional client certificate the API presents (mutual TLS).
+ * - `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE`: optional client private key for mutual TLS.
  *
- * The bundled Compose stack sets both files (see `deploy/bondery/docker-compose.yml`).
+ * The bundled Compose stack sets all files (see `deploy/bondery/docker-compose.yml`).
  */
 
 import { readFileSync } from "node:fs";
@@ -15,13 +17,20 @@ import { readFileSync } from "node:fs";
 import type { RedisOptions } from "ioredis";
 
 type RedisConnectionEnv = Partial<
-  Record<typeof REDIS_PASSWORD_FILE_ENV | typeof REDIS_TLS_CA_FILE_ENV, string>
+  Record<
+    | typeof REDIS_PASSWORD_FILE_ENV
+    | typeof REDIS_TLS_CA_FILE_ENV
+    | typeof REDIS_TLS_CERT_FILE_ENV
+    | typeof REDIS_TLS_KEY_FILE_ENV,
+    string
+  >
 >;
 
 type RedisConnectionOptions = Pick<RedisOptions, "password" | "tls">;
 
 type RedisSecurityPosture = {
   authenticated: boolean;
+  mutualTls: boolean;
   tls: boolean;
 };
 
@@ -38,6 +47,14 @@ function parseRedisUrl(redisUrl: string): URL {
     throw new Error(
       "BONDERY_PRIVATE_REDIS_URL is not a valid URL (expected redis:// or rediss://)",
       { cause: error },
+    );
+  }
+}
+
+function assertRedissUrl(url: URL, envNames: string): void {
+  if (url.protocol !== "rediss:") {
+    throw new Error(
+      `${envNames} is set, but BONDERY_PRIVATE_REDIS_URL does not use TLS. Use rediss://`,
     );
   }
 }
@@ -63,15 +80,20 @@ export type { RedisConnectionEnv, RedisConnectionOptions, RedisSecurityPosture }
 
 export const REDIS_PASSWORD_FILE_ENV = "BONDERY_PRIVATE_REDIS_PASSWORD_FILE";
 export const REDIS_TLS_CA_FILE_ENV = "BONDERY_PRIVATE_REDIS_TLS_CA_FILE";
+export const REDIS_TLS_CERT_FILE_ENV = "BONDERY_PRIVATE_REDIS_TLS_CERT_FILE";
+export const REDIS_TLS_KEY_FILE_ENV = "BONDERY_PRIVATE_REDIS_TLS_KEY_FILE";
 
-/** Reports whether a Redis URL plus env uses TLS and a password. Never reads secret files. */
+/** Reports whether a Redis URL plus env uses TLS, a password, and mutual TLS. Never reads secret files. */
 export function describeRedisSecurity(
   redisUrl: string,
   env: RedisConnectionEnv = process.env,
 ): RedisSecurityPosture {
   const url = parseRedisUrl(redisUrl);
+  const certFile = env[REDIS_TLS_CERT_FILE_ENV]?.trim();
+  const keyFile = env[REDIS_TLS_KEY_FILE_ENV]?.trim();
   return {
     authenticated: Boolean(url.password) || Boolean(env[REDIS_PASSWORD_FILE_ENV]?.trim()),
+    mutualTls: Boolean(certFile) && Boolean(keyFile),
     tls: url.protocol === "rediss:",
   };
 }
@@ -98,14 +120,36 @@ export function resolveRedisConnectionOptions(
     options.password = readSecretFile(REDIS_PASSWORD_FILE_ENV, passwordFile, readTextFile);
   }
 
-  const caFile = env[REDIS_TLS_CA_FILE_ENV]?.trim();
-  if (caFile) {
-    if (url.protocol !== "rediss:") {
+  const certFile = env[REDIS_TLS_CERT_FILE_ENV]?.trim();
+  const keyFile = env[REDIS_TLS_KEY_FILE_ENV]?.trim();
+  if (certFile || keyFile) {
+    assertRedissUrl(url, `${REDIS_TLS_CERT_FILE_ENV} or ${REDIS_TLS_KEY_FILE_ENV}`);
+    if (!certFile || !keyFile) {
       throw new Error(
-        `${REDIS_TLS_CA_FILE_ENV} is set, but BONDERY_PRIVATE_REDIS_URL does not use TLS. Use rediss://`,
+        `Set both ${REDIS_TLS_CERT_FILE_ENV} and ${REDIS_TLS_KEY_FILE_ENV}, or unset both`,
       );
     }
-    options.tls = { ca: readSecretFile(REDIS_TLS_CA_FILE_ENV, caFile, readTextFile) };
+  }
+
+  const caFile = env[REDIS_TLS_CA_FILE_ENV]?.trim();
+  if (caFile) {
+    assertRedissUrl(url, REDIS_TLS_CA_FILE_ENV);
+    options.tls = {
+      ca: readSecretFile(REDIS_TLS_CA_FILE_ENV, caFile, readTextFile),
+      minVersion: "TLSv1.2",
+      rejectUnauthorized: true,
+    };
+  }
+
+  if (certFile && keyFile) {
+    const baseTls = options.tls ?? { minVersion: "TLSv1.2" as const, rejectUnauthorized: true };
+    options.tls = {
+      ...baseTls,
+      cert: readSecretFile(REDIS_TLS_CERT_FILE_ENV, certFile, readTextFile),
+      key: readSecretFile(REDIS_TLS_KEY_FILE_ENV, keyFile, readTextFile),
+      minVersion: "TLSv1.2",
+      rejectUnauthorized: true,
+    };
   }
 
   return options;

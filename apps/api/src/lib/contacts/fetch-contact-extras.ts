@@ -58,14 +58,14 @@ function parsePhoneEntry(value: unknown): PhoneEntry | null {
     return null;
   }
   const row = value as Record<string, unknown>;
-  if (typeof row.prefix !== "string" || typeof row.value !== "string") {
+  if (typeof row["prefix"] !== "string" || typeof row["value"] !== "string") {
     return null;
   }
   return {
-    preferred: row.preferred === true,
-    prefix: row.prefix,
-    type: normalizeContactType(row.type),
-    value: row.value,
+    preferred: row["preferred"] === true,
+    prefix: row["prefix"],
+    type: normalizeContactType(row["type"]),
+    value: row["value"],
   };
 }
 
@@ -74,13 +74,13 @@ function parseEmailEntry(value: unknown): EmailEntry | null {
     return null;
   }
   const row = value as Record<string, unknown>;
-  if (typeof row.value !== "string") {
+  if (typeof row["value"] !== "string") {
     return null;
   }
   return {
-    preferred: row.preferred === true,
-    type: normalizeContactType(row.type),
-    value: row.value,
+    preferred: row["preferred"] === true,
+    type: normalizeContactType(row["type"]),
+    value: row["value"],
   };
 }
 
@@ -89,38 +89,40 @@ function parseAddressEntry(value: unknown): ContactAddressEntry | null {
     return null;
   }
   const row = value as Record<string, unknown>;
-  if (typeof row.value !== "string") {
+  if (typeof row["value"] !== "string") {
     return null;
   }
 
-  const latitude = typeof row.latitude === "number" ? row.latitude : null;
-  const longitude = typeof row.longitude === "number" ? row.longitude : null;
+  const latitude = typeof row["latitude"] === "number" ? row["latitude"] : null;
+  const longitude = typeof row["longitude"] === "number" ? row["longitude"] : null;
 
   return {
-    addressCity: typeof row.addressCity === "string" ? row.addressCity : null,
-    addressCountry: typeof row.addressCountry === "string" ? row.addressCountry : null,
-    addressCountryCode: typeof row.addressCountryCode === "string" ? row.addressCountryCode : null,
-    addressFormatted: typeof row.addressFormatted === "string" ? row.addressFormatted : null,
+    addressCity: typeof row["addressCity"] === "string" ? row["addressCity"] : null,
+    addressCountry: typeof row["addressCountry"] === "string" ? row["addressCountry"] : null,
+    addressCountryCode:
+      typeof row["addressCountryCode"] === "string" ? row["addressCountryCode"] : null,
+    addressFormatted: typeof row["addressFormatted"] === "string" ? row["addressFormatted"] : null,
     addressGeocodeSource:
-      row.addressGeocodeSource === "mapy.com" || row.addressGeocodeSource === "manual"
-        ? row.addressGeocodeSource
+      row["addressGeocodeSource"] === "mapy.com" || row["addressGeocodeSource"] === "manual"
+        ? row["addressGeocodeSource"]
         : null,
-    addressGranularity: normalizeAddressGranularity(row.addressGranularity),
-    addressLine1: typeof row.addressLine1 === "string" ? row.addressLine1 : null,
-    addressLine2: typeof row.addressLine2 === "string" ? row.addressLine2 : null,
-    addressPostalCode: typeof row.addressPostalCode === "string" ? row.addressPostalCode : null,
-    addressState: typeof row.addressState === "string" ? row.addressState : null,
-    addressStateCode: typeof row.addressStateCode === "string" ? row.addressStateCode : null,
+    addressGranularity: normalizeAddressGranularity(row["addressGranularity"]),
+    addressLine1: typeof row["addressLine1"] === "string" ? row["addressLine1"] : null,
+    addressLine2: typeof row["addressLine2"] === "string" ? row["addressLine2"] : null,
+    addressPostalCode:
+      typeof row["addressPostalCode"] === "string" ? row["addressPostalCode"] : null,
+    addressState: typeof row["addressState"] === "string" ? row["addressState"] : null,
+    addressStateCode: typeof row["addressStateCode"] === "string" ? row["addressStateCode"] : null,
     geocodeConfidence:
-      row.geocodeConfidence === "verified" || row.geocodeConfidence === "unverifiable"
-        ? row.geocodeConfidence
+      row["geocodeConfidence"] === "verified" || row["geocodeConfidence"] === "unverifiable"
+        ? row["geocodeConfidence"]
         : null,
-    label: typeof row.label === "string" ? row.label : null,
+    label: typeof row["label"] === "string" ? row["label"] : null,
     latitude,
     longitude,
-    timezone: typeof row.timezone === "string" ? row.timezone : null,
-    type: normalizeAddressType(row.type),
-    value: row.value,
+    timezone: typeof row["timezone"] === "string" ? row["timezone"] : null,
+    type: normalizeAddressType(row["type"]),
+    value: row["value"],
   };
 }
 
@@ -144,14 +146,14 @@ export function parseContactExtrasRpcResult(raw: unknown): Map<string, ContactEx
     }
 
     const row = payload as Record<string, unknown>;
-    const phones = Array.isArray(row.phones)
-      ? row.phones.map(parsePhoneEntry).filter((entry): entry is PhoneEntry => entry !== null)
+    const phones = Array.isArray(row["phones"])
+      ? row["phones"].map(parsePhoneEntry).filter((entry): entry is PhoneEntry => entry !== null)
       : [];
-    const emails = Array.isArray(row.emails)
-      ? row.emails.map(parseEmailEntry).filter((entry): entry is EmailEntry => entry !== null)
+    const emails = Array.isArray(row["emails"])
+      ? row["emails"].map(parseEmailEntry).filter((entry): entry is EmailEntry => entry !== null)
       : [];
-    const addresses = Array.isArray(row.addresses)
-      ? row.addresses
+    const addresses = Array.isArray(row["addresses"])
+      ? row["addresses"]
           .map(parseAddressEntry)
           .filter((entry): entry is ContactAddressEntry => entry !== null)
       : [];
@@ -159,13 +161,13 @@ export function parseContactExtrasRpcResult(raw: unknown): Map<string, ContactEx
     map.set(personId, {
       addresses,
       emails,
-      facebook: nullableString(row.facebook),
-      instagram: nullableString(row.instagram),
-      linkedin: nullableString(row.linkedin),
+      facebook: nullableString(row["facebook"]),
+      instagram: nullableString(row["instagram"]),
+      linkedin: nullableString(row["linkedin"]),
       phones,
-      signal: nullableString(row.signal),
-      website: nullableString(row.website),
-      whatsapp: nullableString(row.whatsapp),
+      signal: nullableString(row["signal"]),
+      website: nullableString(row["website"]),
+      whatsapp: nullableString(row["whatsapp"]),
     });
   }
 

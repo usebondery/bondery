@@ -1,13 +1,10 @@
 import { DEV_PORTS } from "@bondery/schemas/constants/dev-ports";
 import type { EnvTargetWrite, SyncTargetConfig, TargetId } from "./manifest-types.js";
 
-const PATTERN_5C2F24_RE = /\/$/;
+const TRAILING_SLASH_RE = /\/$/;
 const LOCAL_POSTGRES_DB = "bondery";
 const LOCAL_POSTGRES_HOST = "127.0.0.1";
-
 const LOCAL_POSTGRES_USER = "postgres";
-const LOCAL_POSTGRES_DB = "bondery";
-const LOCAL_POSTGRES_HOST = "127.0.0.1";
 
 /** Where `pnpm run env:development` / `pnpm run env:production` write per-app local files */
 export const SYNC_TARGETS: SyncTargetConfig[] = [
@@ -55,7 +52,8 @@ export const SYNC_TARGETS: SyncTargetConfig[] = [
 export function t(id: TargetId, runtimeName?: string): EnvTargetWrite {
   return runtimeName ? { id, runtimeName } : { id };
 }
-export const EXAMPLE_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-password";
+
+export const EXAMPLE_POSTGRES_PASSWORD: string = "your-super-secret-and-long-postgres-password";
 
 /** Bundled local Postgres URL for `pnpm run env` derivation (matches `docker-compose.dev-db.yml`). */
 export function buildLocalPostgresDatabaseUrl(password: string): string {
@@ -63,24 +61,7 @@ export function buildLocalPostgresDatabaseUrl(password: string): string {
 }
 
 export function applyTransform(transform: EnvTargetWrite["transform"], value: string): string {
-  const base = value.replace(PATTERN_5C2F24_RE, "");
-  if (transform === "webapp-auth-callback") {
-    return `${base}/auth/callback`;
-  }
-  if (transform === "local-postgres-database-url") {
-    return buildLocalPostgresDatabaseUrl(value);
-  }
-  return value;
-}
-export const EXAMPLE_POSTGRES_PASSWORD = "your-super-secret-and-long-postgres-password";
-
-/** Bundled local Postgres URL for `pnpm run env` derivation (matches `docker-compose.dev-db.yml`). */
-export function buildLocalPostgresDatabaseUrl(password: string): string {
-  return `postgresql://${LOCAL_POSTGRES_USER}:${encodeURIComponent(password)}@${LOCAL_POSTGRES_HOST}:${DEV_PORTS.POSTGRES}/${LOCAL_POSTGRES_DB}`;
-}
-
-export function applyTransform(transform: EnvTargetWrite["transform"], value: string): string {
-  const base = value.replace(PATTERN_5C2F24_RE, "");
+  const base = value.replace(TRAILING_SLASH_RE, "");
   if (transform === "webapp-auth-callback") {
     return `${base}/auth/callback`;
   }

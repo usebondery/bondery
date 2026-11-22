@@ -72,7 +72,7 @@ export default function ReminderDigestEmail({
   websiteUrl,
 }: ReminderDigestEmailProps): JSX.Element {
   const count = reminders.length;
-  const first = reminders[0];
+  const [first] = reminders;
   const heading =
     count === 1 ? copy.headingOne : copy.headingMany.replace("{{count}}", String(count));
   const description = copy.description.replace("{{headingDate}}", formattedHeadingDate);

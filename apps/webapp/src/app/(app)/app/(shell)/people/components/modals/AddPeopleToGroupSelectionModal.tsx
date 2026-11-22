@@ -150,9 +150,8 @@ function AddPeopleToGroupSelectionForm({
     );
 
     const intersection = memberships.reduce<Set<string>>(
-      (sharedGroupIds, membershipSet) => {
-        return new Set(Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId)));
-      },
+      (sharedGroupIds, membershipSet) =>
+        new Set(Array.from(sharedGroupIds).filter((groupId) => membershipSet.has(groupId))),
       memberships[0] ? new Set(memberships[0]) : new Set(),
     );
 

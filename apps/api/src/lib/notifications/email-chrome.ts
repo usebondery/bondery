@@ -13,12 +13,12 @@ function stripTrailingSlash(value: string): string {
 }
 
 export function resolveAppOrigin(): string {
-  const fromEnv = process.env.BONDERY_PUBLIC_WEBAPP_URL?.trim();
+  const fromEnv = process.env["BONDERY_PUBLIC_WEBAPP_URL"]?.trim();
   return stripTrailingSlash(fromEnv || PRODUCTION_WEBAPP);
 }
 
 export function resolveWebsiteOrigin(): string {
-  const fromEnv = process.env.BONDERY_PUBLIC_WEBSITE_URL?.trim();
+  const fromEnv = process.env["BONDERY_PUBLIC_WEBSITE_URL"]?.trim();
   return stripTrailingSlash(fromEnv || PRODUCTION_WEBSITE);
 }
 

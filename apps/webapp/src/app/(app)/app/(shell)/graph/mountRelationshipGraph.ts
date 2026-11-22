@@ -44,7 +44,13 @@ function dragPointForPerson(
     const points: [number, number][] = [];
     for (const memberId of group.personIds) {
       const member = nodeById.get(memberId);
-      if (member?.x == null || member.y == null) {
+      if (
+        member === undefined ||
+        member.x === null ||
+        member.x === undefined ||
+        member.y === null ||
+        member.y === undefined
+      ) {
         continue;
       }
       points.push([member.x, member.y]);
@@ -168,17 +174,18 @@ export function mountRelationshipGraph(input: {
     .attr("d", "M 0 0 L 10 5 L 0 10 z")
     .attr("fill", "context-stroke");
 
-  const personNodes: PersonSim[] = nodes.map((personInput) => {
+  const personNodes: PersonSim[] = [];
+  for (const personInput of nodes) {
     const saved = positionsRef.current.get(personInput.id);
-    return {
+    personNodes.push({
       ...personInput,
       fx: saved?.pinned ? saved.x : null,
       fy: saved?.pinned ? saved.y : null,
       nodeKind: "person" as const,
       x: saved?.x ?? (personInput.myself ? width / 2 : width / 2 + (Math.random() - 0.5) * 120),
       y: saved?.y ?? (personInput.myself ? height / 2 : height / 2 + (Math.random() - 0.5) * 120),
-    };
-  });
+    });
+  }
   const hubNodes: HubSimNode[] = hubs.map((hubInput) => {
     const saved = positionsRef.current.get(hubInput.id);
     return {
@@ -294,7 +301,7 @@ export function mountRelationshipGraph(input: {
 
   let currentTransform: ZoomTransform = zoomIdentity;
   const markerHost = document.createElement("div");
-  markerHost.dataset.graphMarkers = "true";
+  markerHost.dataset["graphMarkers"] = "true";
   markerHost.style.position = "absolute";
   markerHost.style.left = "0";
   markerHost.style.top = "0";
@@ -327,13 +334,13 @@ export function mountRelationshipGraph(input: {
     }
     const byId = new Map<string, HTMLElement>();
     for (const element of target.querySelectorAll<HTMLElement>("[data-graph-id]")) {
-      const id = element.dataset.graphId;
+      const id = element.dataset["graphId"];
       if (id) {
         byId.set(id, element);
       }
     }
     for (const row of simNodes) {
-      if (row.x == null || row.y == null) {
+      if (row.x === null || row.x === undefined || row.y === null || row.y === undefined) {
         continue;
       }
       const element = byId.get(row.id);
@@ -377,8 +384,7 @@ export function mountRelationshipGraph(input: {
     let [x, y] = toSim(clientX, clientY);
     if (row.nodeKind === "person") {
       const next = dragPointForPerson(row.id, x, y, groups, nodeById);
-      x = next.x;
-      y = next.y;
+      ({ x, y } = next);
     }
     row.fx = x;
     row.fy = y;
@@ -433,7 +439,7 @@ export function mountRelationshipGraph(input: {
       if (event.type === "wheel") {
         return true;
       }
-      const target = event.target;
+      const { target } = event;
       return target instanceof Element && target.classList.contains("graph-background");
     })
     .on("start", (event) => {
