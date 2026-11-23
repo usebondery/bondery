@@ -89,6 +89,36 @@ Keep comparisons **plain** — no dunking on competitors by name in primary mark
 
 ---
 
+## User research insights
+
+Learned from talking to users. These are the frictions we heard, not opinions. Keep them as evidence for copy decisions, and date a new one when it arrives.
+
+### 1. People already keep a manual contact list
+
+What we heard:
+
+- **Finance and business students** run many coffee chats. Some keep their own spreadsheet: who they met, when, their LinkedIn, and their company.
+- **A one-person sales team** kept a simple spreadsheet for its agents.
+- **Other people** write who they met, or follow-up reminders, in phone notes.
+
+What it means: these people already pay the cost of a contact list. The problem is not that they do not track contacts. It is that a spreadsheet or phone notes is a poor place for a person.
+
+**Proposition:** Your contacts deserve a better place than a spreadsheet or phone notes.
+
+**Landing tile:** "Better than a spreadsheet". Show a spreadsheet with plain columns, then the same person in Bondery with a photo, a role, and history.
+
+### 2. A CRM fails when it needs discipline
+
+What we heard: a CRM or PRM is too manual. It relies on the user remembering to write things down, and most people stop.
+
+What it means: the data must update from the tools people already use, not from a habit they must keep.
+
+**How we cover it:** Bondery syncs from the integrations themselves, instead of asking for manually written data. Contacts arrive from LinkedIn and Instagram through the extension, and imports, and later refresh from the sources they came from.
+
+**Claim guardrails:** sync today is user-triggered re-enrichment plus imports. Do not write "updates itself" or "automatic" until the docs say so. See the guardrails under the UVP in [positioning.md](./positioning.md#unique-value-proposition-uvp).
+
+---
+
 ## User groups
 
 Three primary groups, one secondary. Lead copy with the **job**, not the feature.

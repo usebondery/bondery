@@ -23,6 +23,28 @@ export const BRAND_PRIMARY_HOVER: (typeof BRAND_PRIMARY_SHADES)[6] = BRAND_PRIMA
 export const BRAND_PRIMARY_PRESS: (typeof BRAND_PRIMARY_SHADES)[7] = BRAND_PRIMARY_SHADES[7];
 export const BRAND_PRIMARY_TEXT = "#ffffff";
 
+/**
+ * Third-party brand colours.
+ *
+ * These are the owners' own colours, used only to name a real integration. Change a value
+ * here when the owner publishes a new mark, not at the call site.
+ */
+
+/** Anthropic / Claude brand orange. */
+export const ANTHROPIC_BRAND_COLOR = "#D97757";
+
+/** GitHub brand black. */
+export const GITHUB_BRAND_COLOR = "#181717";
+
+/** Hover state for a GitHub-branded button: the brand black lifted slightly. */
+export const GITHUB_BRAND_HOVER = "#2f2f2f";
+
+/** Neutral dark tile that the white MCP, Hermes, and OpenClaw marks sit on. */
+export const DARK_TILE_COLOR = "#16181D";
+
+/** ChatGPT tile surface. The OpenAI mark is drawn in black on top of it. */
+export const CHATGPT_TILE_COLOR = "#FFFFFF";
+
 export interface BrandSurfaceColors {
   /** `--mantine-color-body` */
   body: string;

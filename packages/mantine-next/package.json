@@ -474,6 +474,18 @@
       "node": "./dist/nextjs/ButtonLink/ButtonLink.js",
       "types": "./src/nextjs/ButtonLink/ButtonLink.tsx"
     },
+    "./nextjs/BrandTileLink": {
+      "default": "./dist/nextjs/BrandTileLink/index.js",
+      "import": "./dist/nextjs/BrandTileLink/index.js",
+      "node": "./dist/nextjs/BrandTileLink/index.js",
+      "types": "./src/nextjs/BrandTileLink/index.ts"
+    },
+    "./nextjs/BrandTileLink/BrandTileLink": {
+      "default": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "import": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "node": "./dist/nextjs/BrandTileLink/BrandTileLink.js",
+      "types": "./src/nextjs/BrandTileLink/BrandTileLink.tsx"
+    },
     "./nextjs/NextLink": {
       "default": "./dist/nextjs/NextLink.js",
       "import": "./dist/nextjs/NextLink.js",

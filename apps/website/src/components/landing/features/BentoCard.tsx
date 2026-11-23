@@ -39,19 +39,22 @@ export function BentoCard({
         withBorder
       >
         <div className="flex flex-col gap-3 p-6 md:p-7">
-          <Group gap="sm" justify="space-between" wrap="nowrap">
-            <ThemeIcon radius="md" size={36} variant="light">
-              <TileIcon size={20} stroke={1.75} />
-            </ThemeIcon>
+          {/* Icon and title share a row, so the eye reads them as one heading. */}
+          <Group align="center" gap="sm" justify="space-between" wrap="nowrap">
+            <Group align="center" gap="sm" style={{ minWidth: 0 }} wrap="nowrap">
+              <ThemeIcon radius="md" size={36} style={{ flexShrink: 0 }} variant="light">
+                <TileIcon size={20} stroke={1.75} />
+              </ThemeIcon>
+              <Title fw={700} fz="1.25rem" lh={1.375} order={3}>
+                {title}
+              </Title>
+            </Group>
             {badge ? (
               <Badge radius="xl" size="sm" tt="none" variant="outline">
                 {badge}
               </Badge>
             ) : null}
           </Group>
-          <Title fw={700} fz="1.25rem" lh={1.375} order={3}>
-            {title}
-          </Title>
           <Text c="dimmed" size="sm" style={{ textWrap: "pretty" }}>
             {description}
           </Text>
