@@ -23,7 +23,9 @@
     "retry": "Försök igen",
     "save": "Spara",
     "saveChanges": "Spara ändringar",
-    "select": "Markera"
+    "select": "Markera",
+    "viewContacts": "Visa kontakter",
+    "viewMergedContact": "Visa sammanslagen kontakt"
   },
   "app": {
     "description": "Det personliga CRM:et med öppen källkod för starkare relationer."

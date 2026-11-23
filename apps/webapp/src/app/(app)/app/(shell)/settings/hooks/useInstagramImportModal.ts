@@ -1,17 +1,14 @@
 "use client";
 
 import { getUserFacingError } from "@bondery/helpers/api";
-import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
+import { errorNotificationTemplate } from "@bondery/mantine-next";
 import type { InstagramImportStrategy, InstagramPreparedContact } from "@bondery/schemas";
 import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import { notifications } from "@mantine/notifications";
-import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
-import { routeAssert } from "@/lib/navigation/route/assert";
 import {
   useCommitInstagramImportMutation,
   useParseInstagramImportMutation,
@@ -44,7 +41,6 @@ export function useInstagramImportModal({
 }: UseInstagramImportModalParams) {
   const tCommon = useCommonTranslations();
   const t = useSettingsPageTranslations("DataManagement.InstagramImport");
-  const router = useRouter();
   const parseImport = useParseInstagramImportMutation();
   const commitImport = useCommitInstagramImportMutation();
   const followupMutation = useUpdateImportFollowupMutation();
@@ -90,11 +86,18 @@ export function useInstagramImportModal({
   const [strategy, setStrategy] = useState<InstagramImportStrategy>("following_and_followers");
   const [parsedContacts, setParsedContacts] = useState<InstagramPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [finishedStats, setFinishedStats] = useState<{
+    imported: number;
+    updated: number;
+    skipped: number;
+  } | null>(null);
   const openRef = useRef<(() => void) | null>(null);
 
   const previewContacts = parsedContacts
     .filter((contact) => contact.isValid)
     .map(toInstagramPreviewContact);
+
+  const importedContacts = previewContacts.filter((contact) => selectedIds.has(contact.id));
 
   const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
 
@@ -259,29 +262,22 @@ export function useInstagramImportModal({
         });
       }
 
-      notifications.show(
-        successNotificationTemplate({
-          description: t("ImportSuccess", {
-            imported: totalImported,
-            skipped: totalSkipped,
-            updated: totalUpdated,
-          }),
-          title: t("SuccessTitle"),
-        }),
-      );
-
       captureImportComplete("instagram", totalImported + totalUpdated, isFirstImport);
 
-      closeModal();
-
       if (onSuccess) {
+        closeModal();
         onSuccess({
           imported: totalImported,
           skipped: totalSkipped,
           updated: totalUpdated,
         });
       } else {
-        router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        setFinishedStats({
+          imported: totalImported,
+          skipped: totalSkipped,
+          updated: totalUpdated,
+        });
+        setStep("finished");
       }
     } catch (error) {
       notifications.show(
@@ -300,11 +296,13 @@ export function useInstagramImportModal({
     allSelected,
     alreadyExistsCount,
     closeModal,
+    finishedStats,
     handleImport,
     handleRequestedExport,
     handleToggleAll,
     handleToggleOne,
     handleZipDrop,
+    importedContacts,
     importProgress,
     importStrategyOptions,
     invalidContactsCount,

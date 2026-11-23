@@ -38,6 +38,14 @@ const VOLUME_IP_RE = /command: "volume [^"]*-ip=seaweedfs-volume/;
 const S3_HTTPS_PORT_RE = /-port\.https=8443/;
 const S3_CERT_FILE_RE = /-cert\.file=\/run\/bondery-storage\/tls\/tls\.crt/;
 const S3_KEY_FILE_RE = /-key\.file=\/run\/bondery-storage\/tls\/tls\.key/;
+/** The gateway requires a client certificate from the storage CA (mutual TLS). */
+const S3_VERIFY_CLIENT_CERT_RE = /-tlsVerifyClientCert(\s|$)/;
+const S3_CLIENT_CA_FILE_RE = /-cacert\.file=\/run\/bondery-storage\/tls\/ca\.crt/;
+const STORAGE_CLIENT_CERT_ENV_LINE =
+  /^\s+BONDERY_PRIVATE_S3_TLS_CERT_FILE: \/bondery-storage\/client\/tls\.crt\s*$/;
+const STORAGE_CLIENT_KEY_ENV_LINE =
+  /^\s+BONDERY_PRIVATE_S3_TLS_KEY_FILE: \/bondery-storage\/client\/tls\.key\s*$/;
+const STORAGE_API_KEY_MOUNT_RE = /storage-tls-traefik:\/bondery-storage\/traefik/;
 const WEED_S3_EXEC_RE = /exec su-exec seaweed weed s3/;
 const ICEBERG_PORT_OFF_RE = /-port\.iceberg=0/;
 const STORAGE_KEY_INSTALL_RE = /install -o seaweed -g seaweed -m 0600 [^\n]*tls\.key/;
@@ -56,6 +64,19 @@ const STORAGE_CERTIFICATE_COMMON_NAME_RE = /STORAGE_CERTIFICATE_COMMON_NAME = "(
 const DEV_S3_LOOPBACK_PORT_RE = /- "127\.0\.0\.1:8443:8443"/;
 const PUBLIC_S3_PORT_RE = /- "(?:0\.0\.0\.0:)?\d+:8443"/;
 const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!reset/;
+
+/** The transport job must publish the storage client certificate, inlined rather than by path. */
+const TRANSPORT_STORAGE_CLIENT_CERT_RE = /dirname "\$ca_file"\)\/tls\.crt/;
+const TRANSPORT_CLIENT_CERT_BLOCK_RE = /echo " +certificates:"/;
+const TRANSPORT_INLINE_CERT_RE = /inline_pem "\$cert_file" CERTIFICATE/;
+const TRANSPORT_INLINE_KEY_RE = /inline_pem "\$key_file" "PRIVATE KEY"/;
+const TRANSPORT_FILE_MODE_RE = /chmod 0600 "\$staging"/;
+
+/** The example proxy configurations must reach the gateway, which requires a client certificate. */
+const CADDY_CLIENT_CERT_RE =
+  /tls_client_auth \/etc\/caddy\/bondery-storage\/tls\.crt \/etc\/caddy\/bondery-storage\/tls\.key/;
+const NGINX_CLIENT_CERT_RE = /proxy_ssl_certificate \/etc\/nginx\/bondery-storage\/tls\.crt;/;
+const NGINX_CLIENT_KEY_RE = /proxy_ssl_certificate_key \/etc\/nginx\/bondery-storage\/tls\.key;/;
 
 /**
  * Minimal reader for seaweedfs/security.toml: `[section]` headers and `key = value` lines.
@@ -102,6 +123,7 @@ export function checkStorageTls({ root, serviceBlock }) {
       "- storage-tls-ca:/bondery-storage/ca",
       "- storage-tls-cluster:/bondery-storage/cluster",
       "- storage-tls-client:/bondery-storage/client",
+      "- storage-tls-traefik:/bondery-storage/traefik",
     ]) {
       if (!secretsBlock.includes(mount)) {
         fail(`stack-secrets must mount ${mount.slice(2)}`);
@@ -114,17 +136,37 @@ export function checkStorageTls({ root, serviceBlock }) {
         "api BONDERY_PRIVATE_S3_ENDPOINT must be https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443 (TLS, not overridable from .env)",
       );
     }
-    // Every environment that sets the endpoint (api and its pre_start hook) also sets the CA.
+    // Every environment that sets the endpoint (api and its pre_start hook) also sets the CA and,
+    // because the gateway requires one, the client certificate pair.
+    const requiredLines = Math.max(endpointLines.length, 1);
     const caLines = apiBlock.match(
       /^\s+BONDERY_PRIVATE_S3_TLS_CA_FILE: \/bondery-storage\/client\/ca\.crt\s*$/gm,
     );
-    if ((caLines?.length ?? 0) < Math.max(endpointLines.length, 1)) {
+    if ((caLines?.length ?? 0) < requiredLines) {
       fail(
         "api (and each pre_start hook that sets the endpoint) must trust the storage CA: BONDERY_PRIVATE_S3_TLS_CA_FILE: /bondery-storage/client/ca.crt",
       );
     }
+    for (const [pattern, message] of [
+      [
+        STORAGE_CLIENT_CERT_ENV_LINE,
+        "api must present its storage client certificate: BONDERY_PRIVATE_S3_TLS_CERT_FILE: /bondery-storage/client/tls.crt",
+      ],
+      [
+        STORAGE_CLIENT_KEY_ENV_LINE,
+        "api must present its storage client key: BONDERY_PRIVATE_S3_TLS_KEY_FILE: /bondery-storage/client/tls.key",
+      ],
+    ]) {
+      const lines = apiBlock.match(new RegExp(pattern.source, "gm"));
+      if ((lines?.length ?? 0) < requiredLines) {
+        fail(message);
+      }
+    }
     if (!apiBlock.includes("- storage-tls-client:/bondery-storage/client:ro")) {
       fail("api must mount storage-tls-client read-only");
+    }
+    if (STORAGE_API_KEY_MOUNT_RE.test(apiBlock)) {
+      fail("api must not mount the Traefik client certificate volume (storage-tls-traefik)");
     }
     if (STORAGE_TLS_CA_OR_CLUSTER_VOLUME_RE.test(apiBlock)) {
       fail("api must not mount the storage CA or cluster key volumes");
@@ -179,6 +221,14 @@ export function checkStorageTls({ root, serviceBlock }) {
       [S3_HTTPS_PORT_RE, "seaweedfs/entrypoint.sh must serve the API on HTTPS 8443"],
       [S3_CERT_FILE_RE, "seaweedfs/entrypoint.sh must serve the cluster certificate"],
       [S3_KEY_FILE_RE, "seaweedfs/entrypoint.sh must set -key.file"],
+      [
+        S3_VERIFY_CLIENT_CERT_RE,
+        "seaweedfs/entrypoint.sh must require a client certificate on 8443 (-tlsVerifyClientCert)",
+      ],
+      [
+        S3_CLIENT_CA_FILE_RE,
+        "seaweedfs/entrypoint.sh must verify client certificates against the storage CA (-cacert.file)",
+      ],
       [WEED_S3_EXEC_RE, "seaweedfs/entrypoint.sh must run the gateway as seaweed"],
       [ICEBERG_PORT_OFF_RE, "seaweedfs/entrypoint.sh must keep the plaintext Iceberg catalog off"],
     ]) {
@@ -198,7 +248,8 @@ export function checkStorageTls({ root, serviceBlock }) {
 
   /**
    * The public storage domain: Traefik forwards reads over HTTPS (8443), verifies the storage CA
-   * with the published transport, and drops cookies and credentials.
+   * with the published transport, and drops cookies and credentials. The gateway requires a client
+   * certificate, so the transport must carry one, and it must come from the Traefik-only volume.
    */
   function checkStoragePublicRoute() {
     const label = "docker-compose.seaweedfs.yml";
@@ -296,6 +347,66 @@ export function checkStorageTls({ root, serviceBlock }) {
     }
   }
 
+  /**
+   * The transport job writes Traefik's configuration for the storage route. The gateway requires a
+   * client certificate, so the published transport must carry one, and it must read it from the
+   * Traefik-only volume rather than the API's.
+   */
+  function checkTransportJobClientCertificate() {
+    const label = "traefik/publish-transports.sh";
+    const script = readFileSync(resolve(root, label), "utf8");
+    for (const [pattern, message] of [
+      [
+        TRANSPORT_STORAGE_CLIENT_CERT_RE,
+        "must read the storage client certificate from the Traefik-only volume path",
+      ],
+      [TRANSPORT_CLIENT_CERT_BLOCK_RE, "must set a client certificate on the storage transport"],
+      [
+        TRANSPORT_INLINE_CERT_RE,
+        "must inline the client certificate, not a path Traefik cannot read",
+      ],
+      [
+        TRANSPORT_INLINE_KEY_RE,
+        "must inline the client private key, not a path Traefik cannot read",
+      ],
+      [TRANSPORT_FILE_MODE_RE, "must write the transport file with mode 0600 (it holds a key)"],
+    ]) {
+      if (!pattern.test(script)) {
+        errors.push(`${label}: ${message}`);
+      }
+    }
+  }
+
+  /**
+   * The example proxy configurations reach the gateway, which requires a client certificate.
+   * A proxy without one cannot serve the storage domain, so both examples must carry it.
+   */
+  function checkExampleProxies() {
+    const rules = [
+      [
+        "proxy/Caddyfile",
+        CADDY_CLIENT_CERT_RE,
+        "must present the storage client certificate (tls_client_auth)",
+      ],
+      [
+        "proxy/nginx.conf",
+        NGINX_CLIENT_CERT_RE,
+        "must present the storage client certificate (proxy_ssl_certificate)",
+      ],
+      [
+        "proxy/nginx.conf",
+        NGINX_CLIENT_KEY_RE,
+        "must present the storage client key (proxy_ssl_certificate_key)",
+      ],
+    ];
+    for (const [file, pattern, message] of rules) {
+      const source = readFileSync(resolve(root, file), "utf8");
+      if (!pattern.test(source)) {
+        errors.push(`${file}: ${message}`);
+      }
+    }
+  }
+
   /** Local dev SeaweedFS keeps TLS and publishes the HTTPS listener on loopback only. */
   function checkDevOverlay() {
     const label = "docker-compose.seaweedfs.dev.yml";
@@ -329,6 +440,8 @@ export function checkStorageTls({ root, serviceBlock }) {
   checkStorageTlsNodes();
   checkStoragePublicRoute();
   checkSecurityToml();
+  checkTransportJobClientCertificate();
+  checkExampleProxies();
   checkDevOverlay();
 
   return errors;

@@ -27,4 +27,4 @@ Prefer a Biome rule for any code-structure rule (native rules first, GritQL plug
 
 ## Agent files: one source
 
-Edit agent definitions in `.agents/agents/` and skills in `.agents/skills/`. Never edit `.claude/agents/`, `.claude/skills/` or `.cursor/agents/`: they are generated mirrors so Claude Code (including inside Orca) and Cursor see the same files. Pre-commit runs `pnpm run agents:sync` and stages the mirrors; `check:agent-files` fails on drift in `check:changed` and CI.
+Edit agent definitions in `.agents/agents/`, skills in `.agents/skills/`, and team MCP servers in `.agents/mcp/mcp.json`. Never edit `.claude/agents/`, `.claude/skills/`, `.cursor/agents/`, `.mcp.json`, or `.cursor/mcp.json`: they are generated mirrors so Claude Code (including inside Orca) and Cursor see the same files. Pre-commit runs `pnpm run agents:sync` and stages the mirrors; `check:agent-files` fails on drift in `check:changed` and CI. Plane MCP is stdio via `scripts/dev/plane-mcp-stdio.mjs` and reads `.agents/mcp/plane.env.local` (gitignored; seed from `plane.env.local.example` or `pnpm run setup:worktree`).

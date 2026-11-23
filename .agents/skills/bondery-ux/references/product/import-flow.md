@@ -25,15 +25,17 @@ Imperative openers in `settings/components/modals/open*ImportModal.tsx`. Body co
 - `LinkedInImportModal.tsx` / `InstagramImportModal.tsx`
 - Shared steps: `ImportIntroStep`, `ImportZipUploadStep`, `ImportModalProcessingSteps`, preview + selection hooks
 
-**Typical LinkedIn steps:** intro → instructions → upload → parse preview (select rows) → commit → success.
+**Typical LinkedIn steps:** intro → instructions → upload → parse preview (select rows) → commit → finished.
 
 **Blocking:** While parsing or committing — `useModalBlocking`, hide X, disable fields ([modals.md](../desktop/modals.md)).
+
+**Finished step:** `ImportFinishedStep` stays inside the dialog and shows the imported rows. The primary action is **View contacts** (`common.actions.viewContacts`), which closes the dialog and opens `/app/people`. The secondary action is **Close** (`common.a11y.close`), which closes the dialog and keeps the current page. Do not navigate on its own, and do not show a success toast: the step is the confirmation. Onboarding passes `onSuccess`, so that path still closes and reports inline.
 
 **Selection:** `useImportContactSelection` — searchable preview table, select all / deselect, load-more if paginated parse results.
 
 **Commit:** Batched via `SOCIAL_IMPORT_COMMIT_BATCH_SIZE`; progress step during commit.
 
-**Success:** Stats `{ imported, updated, skipped }` — onboarding shows inline success; Settings may toast + navigate.
+**Success:** Stats `{ imported, updated, skipped }` — onboarding shows inline success; Settings keeps the dialog open on the finished step (imported rows, **View contacts**, **Close**).
 
 ---
 
@@ -41,9 +43,9 @@ Imperative openers in `settings/components/modals/open*ImportModal.tsx`. Body co
 
 Imperative opener: `openBonderyImportModal({ entryPoint })`. Size `lg` (same as Instagram/vCard).
 
-**Steps:** intro (“How Bondery JSON import works”) → upload ZIP → client peek (`fflate`) → review file counts → `POST /me/import` → finished in the modal.
+**Steps:** intro (“How Bondery JSON import works”) → upload ZIP → client peek (`fflate`) → review file counts → `POST /me/import` → finished in the modal (count chips, **View contacts**, **Close**).
 
-**Not used:** row picker, type checkboxes, `useImportContactSelection`, `ContactsTable` preview, LinkedIn/Instagram instructions, success toast, navigate to People.
+**Not used:** row picker, type checkboxes, `useImportContactSelection`, `ContactsTable` preview, LinkedIn/Instagram instructions, success toast.
 
 **Blocking:** While checking or importing — `useModalBlocking`. Cancel remains available during check/import (abort).
 

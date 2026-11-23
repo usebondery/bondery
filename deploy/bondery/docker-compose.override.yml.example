@@ -7,8 +7,9 @@
 # proxy configs: deploy/bondery/proxy/ (see docs/deploy/reverse-proxy.mdx).
 #
 # Every port binds to 127.0.0.1 only: nothing in the stack speaks to the internet directly, so
-# visitors always reach it through your proxy's HTTPS. The API and storage ports are HTTPS with
-# private CAs; export them for your proxy with scripts/api-ca.sh and scripts/storage-ca.sh.
+# visitors always reach it through your proxy's HTTPS. The API port is HTTPS with a private CA;
+# export it for your proxy with scripts/api-ca.sh. The storage gateway is HTTPS with a private CA
+# and requires a client certificate, so use `scripts/storage-ca.sh --client-dir <folder>`.
 #
 # You still need: docker network create dokploy-network
 # (services declare that network for Traefik-compatible labels; labels are inert without Traefik.)
@@ -17,7 +18,7 @@ services:
   # HTTPS (TLS 1.3), verified with the API CA as the host name "<prefix>-api".
   api:
     ports:
-      - "127.0.0.1:26642:26642"
+      - "127.0.0.1:26631:26631"
 
   # Plain HTTP on loopback: your proxy terminates TLS for the webapp on this host.
   webapp:

@@ -4,6 +4,7 @@ import {
   resolveCspReportEndpoint,
   WEBAPP_TRUSTED_TYPES_POLICIES,
 } from "@bondery/helpers/security";
+import { getApiUrl, getCspReportEnabled, getPlausibleHost, isDevelopment } from "@/lib/env";
 
 /**
  * Self-hosted Plausible origin for the analytics script.
@@ -12,7 +13,7 @@ import {
  * production default keeps the policy valid when the var is unset.
  */
 function getPlausibleCspOrigin(): string {
-  const host = process.env["BONDERY_PUBLIC_PLAUSIBLE_HOST"]?.trim();
+  const host = getPlausibleHost();
   if (host) {
     try {
       return new URL(host).origin;
@@ -48,11 +49,11 @@ export type WebsiteCsp = {
  */
 export function buildWebsiteCsp(): WebsiteCsp {
   const nonce = createNonce();
-  const isDev = process.env["NODE_ENV"] === "development";
+  const isDev = isDevelopment();
   const plausibleOrigin = getPlausibleCspOrigin();
   const reportEndpoint = resolveCspReportEndpoint({
-    BONDERY_PUBLIC_API_URL: process.env["BONDERY_PUBLIC_API_URL"],
-    BONDERY_PUBLIC_CSP_REPORT_ENABLED: process.env["BONDERY_PUBLIC_CSP_REPORT_ENABLED"],
+    BONDERY_PUBLIC_API_URL: getApiUrl(),
+    BONDERY_PUBLIC_CSP_REPORT_ENABLED: getCspReportEnabled(),
   });
 
   const shared = {

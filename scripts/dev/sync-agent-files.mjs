@@ -1,11 +1,13 @@
 /**
- * Mirror agent definitions and skills from `.agents/` into every coding tool's folder.
+ * Mirror agent definitions, skills, and MCP config from `.agents/` into each coding tool's paths.
  *
- * `.agents/` is the one place to edit. Each tool only reads its own folder:
+ * `.agents/` is the one place to edit. Each tool only reads its own folder or file:
  *
  *   .agents/agents/*.md   -> .claude/agents/  (Claude Code, also inside Orca)
  *                         -> .cursor/agents/  (Cursor)
  *   .agents/skills/<name> -> .claude/skills/  (Claude Code; Codex and Cursor read .agents/skills)
+ *   .agents/mcp/mcp.json  -> .mcp.json        (Claude Code project MCP)
+ *                         -> .cursor/mcp.json (Cursor project MCP)
  *
  * Mirrors are committed so a fresh clone works in every tool without a setup step. Git stores
  * identical files once, so the copies cost almost nothing.
@@ -24,11 +26,19 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { parse as parseYaml } from "yaml";
 
 const ROOT = join(fileURLToPath(new URL(".", import.meta.url)), "../..");
+
+const MCP_SOURCE = ".agents/mcp/mcp.json";
+const MCP_TARGETS = [
+  { format: "claude", path: ".mcp.json" },
+  { format: "cursor", path: ".cursor/mcp.json" },
+];
 
 function listFiles(dir) {
   if (!existsSync(dir)) {
@@ -49,7 +59,7 @@ function listFiles(dir) {
 function relativeFiles(dir) {
   return listFiles(dir)
     .map((file) => relative(dir, file).split(sep).join("/"))
-    .sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    .sort((a, b) => a.localeCompare(b));
 }
 
 /** Each source folder and the folders that must mirror it exactly. */
@@ -88,6 +98,98 @@ function writeMirror(sourceDir, targetDir) {
   cpSync(sourceDir, targetDir, { recursive: true });
 }
 
+function readMcpSource() {
+  const sourcePath = join(ROOT, MCP_SOURCE);
+  if (!existsSync(sourcePath)) {
+    throw new Error(`missing ${MCP_SOURCE}`);
+  }
+  const parsed = parseYaml(readFileSync(sourcePath, "utf8"));
+  if (typeof parsed !== "object" || parsed === null || !("mcpServers" in parsed)) {
+    throw new Error(`${MCP_SOURCE} must contain mcpServers`);
+  }
+  return parsed;
+}
+
+/** @param {Record<string, unknown>} config */
+function prepareClaudeMcp(config) {
+  const out = structuredClone(config);
+  for (const server of Object.values(out.mcpServers ?? {})) {
+    if (typeof server !== "object" || server === null) {
+      continue;
+    }
+    if ("url" in server && !("command" in server) && !("type" in server)) {
+      server.type = "http";
+    }
+    if ("command" in server && !("url" in server) && !("type" in server)) {
+      server.type = "stdio";
+    }
+  }
+  return out;
+}
+
+const PLANE_MCP_STDIO_ARG = "scripts/dev/plane-mcp-stdio.mjs";
+
+/** @param {unknown} server */
+function expandCursorStdioPaths(server) {
+  if (typeof server !== "object" || server === null || !Array.isArray(server.args)) {
+    return;
+  }
+  server.args = server.args.map((arg) =>
+    arg === PLANE_MCP_STDIO_ARG ? `\${workspaceFolder}/${PLANE_MCP_STDIO_ARG}` : arg,
+  );
+}
+
+/** Cursor rejects `type` on remote URL servers (Plane MCP docs). */
+/** @param {Record<string, unknown>} config */
+function prepareCursorMcp(config) {
+  const out = structuredClone(config);
+  for (const server of Object.values(out.mcpServers ?? {})) {
+    if (typeof server !== "object" || server === null) {
+      continue;
+    }
+    if ("url" in server && !("command" in server) && "type" in server) {
+      delete server.type;
+    }
+    expandCursorStdioPaths(server);
+  }
+  return out;
+}
+
+function formatMcpJson(config) {
+  return `${JSON.stringify(config, null, 2)}\n`;
+}
+
+function renderMcpTarget(format) {
+  const source = /** @type {Record<string, unknown>} */ (readMcpSource());
+  const prepared = format === "claude" ? prepareClaudeMcp(source) : prepareCursorMcp(source);
+  return formatMcpJson(prepared);
+}
+
+function findMcpDrift() {
+  const drift = [];
+  for (const { path: targetPath, format } of MCP_TARGETS) {
+    const full = join(ROOT, targetPath);
+    const expected = renderMcpTarget(format);
+    if (!existsSync(full)) {
+      drift.push(`missing ${targetPath}`);
+      continue;
+    }
+    const actual = readFileSync(full, "utf8");
+    if (actual !== expected) {
+      drift.push(`changed ${targetPath}`);
+    }
+  }
+  return drift;
+}
+
+function writeMcpMirrors() {
+  for (const { path: targetPath, format } of MCP_TARGETS) {
+    const full = join(ROOT, targetPath);
+    mkdirSync(dirname(full), { recursive: true });
+    writeFileSync(full, renderMcpTarget(format));
+  }
+}
+
 function main() {
   const check = process.argv.includes("--check");
   const stage = process.argv.includes("--stage");
@@ -95,7 +197,7 @@ function main() {
   if (check) {
     const drift = MIRRORS.flatMap(({ source, targets }) =>
       targets.flatMap((target) => findDrift(join(ROOT, source), join(ROOT, target))),
-    );
+    ).concat(findMcpDrift());
     if (drift.length > 0) {
       console.error("check-agent-files: failed\n");
       for (const line of drift) {
@@ -114,8 +216,12 @@ function main() {
       writeMirror(join(ROOT, source), join(ROOT, target));
     }
   }
+  writeMcpMirrors();
   if (stage) {
-    const paths = MIRRORS.flatMap(({ targets }) => targets);
+    const paths = [
+      ...MIRRORS.flatMap(({ targets }) => targets),
+      ...MCP_TARGETS.map(({ path }) => path),
+    ];
     execFileSync("git", ["add", "--all", "--", ...paths], { cwd: ROOT, stdio: "inherit" });
   }
   console.log("agents:sync: mirrors written");
@@ -125,4 +231,4 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   main();
 }
 
-export { findDrift, MIRRORS };
+export { findDrift, findMcpDrift, MCP_TARGETS, MIRRORS, prepareClaudeMcp, prepareCursorMcp };

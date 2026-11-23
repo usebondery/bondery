@@ -4,8 +4,9 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, it } from "node:test";
 
-import { findDrift } from "../dev/sync-agent-files.mjs";
+import { findDrift, prepareClaudeMcp, prepareCursorMcp } from "../dev/sync-agent-files.mjs";
 
+const PLANE_WRAPPER = "scripts/dev/plane-mcp-stdio.mjs";
 const MISSING_MISSING_MD_RE = /missing .*missing\.md/;
 const CHANGED_KEEP_MD_RE = /changed .*keep\.md/;
 const EXTRA_EXTRA_MD_RE = /extra .*extra\.md/;
@@ -27,6 +28,44 @@ describe("findDrift", () => {
     const source = tree("a-src", { "x/SKILL.md": "one" });
     const target = tree("a-dst", { "x/SKILL.md": "one" });
     assert.deepEqual(findDrift(source, target), []);
+  });
+
+  it("adds type http on Claude remote MCP entries", () => {
+    const config = {
+      mcpServers: {
+        local: { args: ["mcp"], command: "pnx" },
+        plane: { url: "https://mcp.plane.so/http/mcp" },
+      },
+    };
+    const out = prepareClaudeMcp(config);
+    assert.equal(out.mcpServers.plane.type, "http");
+    assert.equal(out.mcpServers.local.type, "stdio");
+  });
+
+  it("expands Plane wrapper path for Cursor", () => {
+    const config = {
+      mcpServers: {
+        plane: {
+          args: [PLANE_WRAPPER],
+          command: "node",
+          type: "stdio",
+        },
+      },
+    };
+    const out = prepareCursorMcp(config);
+    assert.equal(out.mcpServers.plane.args[0], `\${workspaceFolder}/${PLANE_WRAPPER}`);
+  });
+
+  it("removes type from Cursor remote MCP entries", () => {
+    const config = {
+      mcpServers: {
+        local: { args: ["mcp"], command: "pnx", type: "stdio" },
+        plane: { type: "http", url: "https://mcp.plane.so/http/mcp" },
+      },
+    };
+    const out = prepareCursorMcp(config);
+    assert.equal(out.mcpServers.plane.type, undefined);
+    assert.equal(out.mcpServers.local.type, "stdio");
   });
 
   it("reports missing, changed and extra files", () => {

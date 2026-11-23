@@ -3,14 +3,14 @@ import type { MetadataRoute } from "next";
 import { connection } from "next/server";
 import { getAllPosts } from "@/app/blog/_lib";
 import { BLOG_CATEGORIES } from "@/lib/blog/categories";
-import { getWebsiteUrl } from "@/lib/config";
 import { listFolderSlugs } from "@/lib/docs-folders";
 import { isPublishedDocsPage } from "@/lib/docs-visibility";
+import { getWebsiteUrl, requireEnv } from "@/lib/env";
 import { getFilteredPageTree, source } from "@/lib/source";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   await connection();
-  const origin = getWebsiteUrl();
+  const origin = requireEnv("BONDERY_PUBLIC_WEBSITE_URL", getWebsiteUrl());
   const now = new Date();
 
   const blogCategoryEntries: MetadataRoute.Sitemap = BLOG_CATEGORIES.map((cat) => ({

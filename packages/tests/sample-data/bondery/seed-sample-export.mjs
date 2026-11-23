@@ -5,7 +5,7 @@
  * Usage:
  *   BONDERY_API_KEY=bondery_key_… node packages/tests/sample-data/bondery/seed-sample-export.mjs
  *
- * Defaults to the local API (https://127.0.0.1:26642, trusting the dev API CA).
+ * Defaults to the local API (https://127.0.0.1:26631, trusting the dev API CA).
  */
 
 import { randomUUID } from "node:crypto";

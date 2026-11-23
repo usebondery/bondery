@@ -42,6 +42,28 @@ export const STORAGE_ENTRIES: EnvVarDef[] = [
     targets: [t("api")],
   },
   {
+    canonical: "BONDERY_PRIVATE_S3_TLS_CERT_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional. PEM client certificate the API presents to the S3 endpoint (mutual TLS; https:// only, set with BONDERY_PRIVATE_S3_TLS_KEY_FILE). Compose sets it for the bundled SeaweedFS gateway, which requires one. External S3 that does not ask for a client certificate: leave it unset",
+    exampleValue: "../../.temp/storage-secrets/client/tls.crt",
+    group: "Storage",
+    requiredIn: [],
+    secret: false,
+    targets: [t("api")],
+  },
+  {
+    canonical: "BONDERY_PRIVATE_S3_TLS_KEY_FILE",
+    deployExample: { include: false },
+    description:
+      "Optional. PEM private key for BONDERY_PRIVATE_S3_TLS_CERT_FILE (mutual TLS). Compose sets it for the bundled SeaweedFS gateway. Set both variables or neither",
+    exampleValue: "../../.temp/storage-secrets/client/tls.key",
+    group: "Storage",
+    requiredIn: [],
+    secret: true,
+    targets: [t("api")],
+  },
+  {
     canonical: "BONDERY_PRIVATE_S3_REGION",
     deployExample: { group: "Storage", include: true, value: "eu-central-1" },
     description: "S3 region accepted by SeaweedFS (any value).",

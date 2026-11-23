@@ -27,7 +27,7 @@ function fakeTrustStore() {
 }
 
 const HTTPS_ENV = {
-  BONDERY_INFRA_INTERNAL_API_URL: "https://bondery-api:26642",
+  BONDERY_INFRA_INTERNAL_API_URL: "https://bondery-api:26631",
   [INTERNAL_API_CA_FILE_ENV]: "/bondery-api/client/ca.crt",
 };
 

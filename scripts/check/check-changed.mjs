@@ -66,6 +66,27 @@ const CHECKS = [
       files.some((file) => file.startsWith("scripts/check/") || file.startsWith("biome/plugins/")),
   },
   {
+    args: () => ["run", "test:sample-data"],
+    command: "pnpm",
+    name: "sample-data",
+    when: (files) => files.some((file) => file.startsWith("packages/tests/sample-data/")),
+  },
+  {
+    // The importer tests read the sample corpus and the API import code, so both can break them.
+    args: () => ["run", "test:importers"],
+    command: "pnpm",
+    name: "importer-tests",
+    when: (files) =>
+      files.some(
+        (file) =>
+          file.startsWith("packages/tests/importers/") ||
+          file.startsWith("packages/tests/sample-data/") ||
+          file.startsWith("apps/api/src/routes/import/") ||
+          file.startsWith("apps/api/src/domains/import/") ||
+          file.startsWith("apps/api/src/lib/integrations/mapy.ts"),
+      ),
+  },
+  {
     args: () => ["run", "check:agent-files"],
     command: "pnpm",
     name: "agent-files",

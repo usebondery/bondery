@@ -1,16 +1,16 @@
 .optionsScroll {
   --combobox-padding: calc(0.25rem * var(--mantine-scale));
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .optionsScroll .mantine-ScrollArea-viewport,
 .optionsScroll .mantine-ScrollArea-content {
   box-sizing: border-box;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
 }
 
 .optionsScroll .mantine-ScrollArea-content {
@@ -20,9 +20,9 @@
 .optionsScroll .mantine-Combobox-option {
   box-sizing: border-box;
   display: block;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   overflow: hidden;
 }
 
@@ -67,6 +67,6 @@
 }
 
 .dropdown:has(.optionsScroll) .mantine-Combobox-options {
-  width: 100%;
+  inline-size: 100%;
   padding-inline-end: 0;
 }

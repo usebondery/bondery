@@ -16,6 +16,37 @@ function getMapsUrl(): string {
   return process.env["BONDERY_PUBLIC_MAPS_URL"] || MAPS_BASE_URL;
 }
 
+/**
+ * The geocoding calls an address-enriching import needs.
+ *
+ * A vCard import resolves every address through Mapy.com, so the parse depends on network access
+ * and an API key. A test injects a deterministic stand-in through `setGeocoderForTests`.
+ */
+type Geocoder = {
+  cachedGeocodeLocation: (location: string) => Promise<CachedGeocodeResult | null>;
+  timezoneForCoordinates: (lat: number, lon: number) => Promise<string | null>;
+  validateStreet: (query: string, expectedCity: string) => Promise<GeocodeResult | null>;
+};
+
+const defaultGeocoder: Geocoder = {
+  cachedGeocodeLocation: (location) => cachedGeocodeLinkedInLocation(location),
+  timezoneForCoordinates: (lat, lon) => getTimezoneForCoordinates(lat, lon),
+  validateStreet: (query, expectedCity) => validateStreetAddress(query, expectedCity),
+};
+
+let activeGeocoder: Geocoder | null = null;
+
+/** The process geocoder. Production leaves the default, which calls Mapy.com. */
+function getGeocoder(): Geocoder {
+  activeGeocoder ??= defaultGeocoder;
+  return activeGeocoder;
+}
+
+/** Test hook: inject a geocoder, or `null` to restore the Mapy.com client. */
+function setGeocoderForTests(geocoder: Geocoder | null): void {
+  activeGeocoder = geocoder;
+}
+
 /** Structured result from geocoding a LinkedIn location string. */
 interface GeocodeResult {
   city: string | null;
@@ -433,3 +464,6 @@ export async function cachedGeocodeLinkedInLocation(
 
   return { geo, timezone };
 }
+
+export type { Geocoder };
+export { getGeocoder, setGeocoderForTests };

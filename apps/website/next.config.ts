@@ -14,8 +14,9 @@ const monorepoRoot = path.join(appDir, "../..");
  * otherwise derive from the real path of local `next`.
  */
 function resolvePnpmStorePath(): string | undefined {
-  if (process.env["PNPM_STORE_DIR"]) {
-    return process.env["PNPM_STORE_DIR"];
+  const fromEnv = process.env["PNPM_STORE_DIR"];
+  if (fromEnv) {
+    return fromEnv;
   }
   try {
     const nextReal = fs.realpathSync(path.join(appDir, "node_modules", "next"));

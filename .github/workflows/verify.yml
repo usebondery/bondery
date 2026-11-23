@@ -251,6 +251,15 @@ jobs:
       - name: Webapp runtime config tests
         run: pnpm run test:webapp:runtime-config
 
+      # The importers read the sample corpus and the API import code. These run on every pull
+      # request because a parser regression silently drops contacts, which no type check catches.
+      - name: Importer tests
+        run: pnpm run test:importers
+
+      # The fixture structure and the anonymizer guarantees, next to the corpus they guard.
+      - name: Sample data tests
+        run: pnpm run test:sample-data
+
       - name: API sync unit tests
         run: pnpm run test:api:sync
 

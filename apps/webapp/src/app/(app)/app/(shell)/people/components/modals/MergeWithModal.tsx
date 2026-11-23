@@ -8,7 +8,6 @@ import {
   loadingNotificationTemplate,
   ModalTitle,
   type PeoplePickerOnSearch,
-  successNotificationTemplate,
 } from "@bondery/mantine-next";
 import type {
   Contact,
@@ -26,6 +25,7 @@ import { useEffect, useRef, useState } from "react";
 import { getMergeAvatarIdentity } from "@/lib/api/domains/contacts";
 import { useCommonTranslations, useMergeWithModalTranslations } from "@/lib/i18n/generated/hooks";
 import { bothHaveDefinedAvatars, hasMergeAvatarChoice } from "@/lib/merge/hasMergeAvatarChoice";
+import { showMergeSuccessNotification } from "@/lib/merge/showMergeSuccessNotification";
 import { createModalId, useModalDismiss } from "@/lib/modals";
 import { routePerson } from "@/lib/navigation/route/person";
 import { useMergeContactsMutation } from "@/lib/query/hooks/useContactMutations";
@@ -296,18 +296,21 @@ function MergeWithModal({
 
       mergeRequestsCompleted.add(requestKey);
       notifications.hide(loadingNotificationId);
-      notifications.show(
-        successNotificationTemplate({
-          description: t("MergeSuccess"),
-          title: t("SuccessTitle"),
-        }),
-      );
 
       closeModalSync();
       onSuccess?.();
       if (redirectToMergedPerson) {
         router.push(routePerson(result.personId));
+        return;
       }
+
+      showMergeSuccessNotification({
+        actionLabel: tCommon("actions.viewMergedContact"),
+        description: t("MergeSuccess"),
+        navigate: (personId) => router.push(routePerson(personId)),
+        personId: result.personId,
+        title: t("SuccessTitle"),
+      });
     } catch (error) {
       notifications.hide(loadingNotificationId);
       notifications.show(

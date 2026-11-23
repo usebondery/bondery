@@ -16,6 +16,7 @@ import { logExpiringCertificate } from "../platform/certificate-expiry.js";
 import {
   describeS3Security,
   parseS3Endpoint,
+  resolveS3ClientCertificate,
   resolveS3TrustedCa,
   type S3ConnectionEnv,
 } from "./s3-client.js";
@@ -41,6 +42,9 @@ export async function inspectObjectStorageTls(
     return { certificateDaysLeft: null, tls: false, version: null };
   }
   const ca = resolveS3TrustedCa(endpoint, env);
+  // Present the client certificate too, so the report describes the session the S3 client makes.
+  // A gateway that requires one would otherwise reject the probe and hide the TLS version.
+  const client = resolveS3ClientCertificate(endpoint, env);
   const host = url.hostname.replace(/^\[|\]$/g, "");
   return new Promise((resolve, reject) => {
     const socket = connect(
@@ -50,6 +54,7 @@ export async function inspectObjectStorageTls(
         // SNI takes host names only; Node still checks an IP against the certificate.
         ...(isIP(host) ? {} : { servername: host }),
         ...(ca ? { ca } : {}),
+        ...(client ? { cert: client.cert, key: client.key } : {}),
       },
       () => {
         const expiresAt = Date.parse(socket.getPeerCertificate().valid_to);
@@ -112,6 +117,7 @@ export async function reportObjectStorageTls(
     log.info(
       {
         certificateDaysLeft: inspection.certificateDaysLeft,
+        mutualTls: posture.mutualTls,
         privateCa: posture.privateCa,
         tls: inspection.tls,
         tlsVersion: inspection.version,

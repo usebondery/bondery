@@ -78,9 +78,13 @@ const JOBS = {
     mount: "/bondery-storage",
     run: async (options) => {
       const result = await ensureStorageSecrets(options);
-      return result.authorityGenerated || result.certificateGenerated;
+      return (
+        result.authorityGenerated ||
+        result.certificateGenerated ||
+        result.clientCertificatesGenerated
+      );
     },
-    unchanged: "existing CA and certificate are valid",
+    unchanged: "existing CA and certificates are valid",
   },
 } satisfies Record<string, SecretsJob>;
 

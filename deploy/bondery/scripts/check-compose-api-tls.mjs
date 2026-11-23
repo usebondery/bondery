@@ -26,8 +26,13 @@ const STACK_FILES = [
 ];
 
 /** Exact `environment:` lines, so a default or .env interpolation cannot weaken them. */
+const API_PORT = "26631";
+
 const API_LINES = [
-  [/^\s+API_PORT: "26642"\s*$/m, 'api must set API_PORT: "26642" (its only listener, HTTPS)'],
+  [
+    new RegExp(`^\\s+API_PORT: "${API_PORT}"\\s*$`, "m"),
+    `api must set API_PORT: "${API_PORT}" (its only listener, HTTPS)`,
+  ],
   [
     /^\s+BONDERY_PRIVATE_API_TLS_CERT_FILE: \/bondery-api\/server\/tls\.crt\s*$/m,
     "api must serve HTTPS with BONDERY_PRIVATE_API_TLS_CERT_FILE: /bondery-api/server/tls.crt",
@@ -39,13 +44,17 @@ const API_LINES = [
 ];
 
 /** The healthcheck uses the HTTPS listener too, and verifies it against the API CA. */
-const API_HEALTHCHECK =
-  /require\('node:https'\)\.get\(\{ca:require\('node:fs'\)\.readFileSync\('\/bondery-api\/client\/ca\.crt'\),host:'127\.0\.0\.1',path:'\/health\/live',port:26642\}/;
+const API_HEALTHCHECK = new RegExp(
+  String.raw`require\('node:https'\)\.get\(\{ca:require\('node:fs'\)\.readFileSync\('\/bondery-api\/client\/ca\.crt'\),host:'127\.0\.0\.1',path:'\/health\/live',port:${API_PORT}\}`,
+);
 
 const WEBAPP_LINES = [
   [
-    /^\s+BONDERY_INFRA_INTERNAL_API_URL: https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api:26642\s*$/m,
-    "webapp BONDERY_INFRA_INTERNAL_API_URL must be the internal HTTPS listener: https:// + the BONDERY_INFRA_TRAEFIK_PREFIX api alias + :26642",
+    new RegExp(
+      String.raw`^\s+BONDERY_INFRA_INTERNAL_API_URL: https:\/\/\$\{BONDERY_INFRA_TRAEFIK_PREFIX:-bondery\}-api:${API_PORT}\s*$`,
+      "m",
+    ),
+    `webapp BONDERY_INFRA_INTERNAL_API_URL must be the internal HTTPS listener: https:// + the BONDERY_INFRA_TRAEFIK_PREFIX api alias + :${API_PORT}`,
   ],
   [
     /^\s+BONDERY_INFRA_INTERNAL_API_CA_FILE: \/bondery-api\/client\/ca\.crt\s*$/m,
@@ -54,7 +63,11 @@ const WEBAPP_LINES = [
 ];
 
 const API_TLS_CA_VOLUME_RE = /api-tls-ca:/;
-const API_PLAIN_HTTP_RE = /26631|API_TLS_PORT|http:\/\/127\.0\.0\.1/;
+/**
+ * The API serves HTTPS only: the retired plaintext listener used `API_TLS_PORT` and a loopback
+ * `http://` healthcheck. The port number itself is now the HTTPS listener.
+ */
+const API_PLAIN_HTTP_RE = /API_TLS_PORT|http:\/\/127\.0\.0\.1/;
 const STACK_SECRETS_COMPLETED_RE =
   /stack-secrets:\s*\n\s*condition:\s*service_completed_successfully/;
 const API_TLS_CA_OR_SERVER_VOLUME_RE = /api-tls-(?:ca|server):/;
@@ -82,8 +95,13 @@ const TRANSPORT_JOB_RULES = [
     "traefik-transport must mount api-tls-client read-only",
   ],
   [
+    /^\s+- storage-tls-traefik:\/bondery-storage\/traefik:ro\s*$/m,
+    "traefik-transport must mount storage-tls-traefik read-only (its own client certificate)",
+  ],
+  [
     /^\s+- storage-tls-client:\/bondery-storage\/client:ro\s*$/m,
-    "traefik-transport must mount storage-tls-client read-only",
+    "traefik-transport must not mount the API's storage client volume",
+    false,
   ],
   [
     /^\s+- \.\/traefik\/publish-transports\.sh:\/bondery\/publish-transports\.sh:ro\s*$/m,
@@ -107,8 +125,8 @@ const TRANSPORT_JOB_RULES = [
 /** Traefik forwards to the HTTPS listener and verifies it with the published transport. */
 const API_LABEL_RULES = [
   [
-    /-api\.loadbalancer\.server\.port=26642"/,
-    "api Traefik service must forward to the HTTPS listener (loadbalancer.server.port=26642)",
+    new RegExp(`-api\\.loadbalancer\\.server\\.port=${API_PORT}"`),
+    `api Traefik service must forward to the HTTPS listener (loadbalancer.server.port=${API_PORT})`,
   ],
   [
     /-api\.loadbalancer\.server\.scheme=https"/,
@@ -119,8 +137,10 @@ const API_LABEL_RULES = [
     "api Traefik service must use the published serversTransport (<prefix>-api@file)",
   ],
   [
-    /loadbalancer\.server\.port=26631/,
-    "api Traefik service must not forward to the HTTP port 26631",
+    // Traefik speaks TLS to the API only. A second scheme or a plaintext backend URL would
+    // reintroduce the hop this design removed.
+    /loadbalancer\.server\.scheme=http"/,
+    "api Traefik service must not forward over plaintext http",
     false,
   ],
   [
@@ -161,12 +181,12 @@ const RULES = [
   [
     "api",
     (block) => API_HEALTHCHECK.test(block),
-    "api healthcheck must request https://127.0.0.1:26642/health/live and verify the API CA",
+    `api healthcheck must request https://127.0.0.1:${API_PORT}/health/live and verify the API CA`,
   ],
   [
     "api",
     (block) => !API_PLAIN_HTTP_RE.test(block),
-    "api must not use the retired plain HTTP port 26631 or API_TLS_PORT: the API serves HTTPS only",
+    "api must not use API_TLS_PORT or a loopback http:// healthcheck: the API serves HTTPS only",
   ],
   [
     "api",

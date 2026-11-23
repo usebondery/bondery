@@ -53,16 +53,18 @@ services:
       - storage-tls-ca:/bondery-storage/ca
       - storage-tls-cluster:/bondery-storage/cluster
       - storage-tls-client:/bondery-storage/client
+      - storage-tls-traefik:/bondery-storage/traefik
       - api-tls-ca:/bondery-api/ca
       - api-tls-server:/bondery-api/server
       - api-tls-client:/bondery-api/client
 
   # One-shot job: lets Traefik reach the API and the storage gateway over verified HTTPS. It writes
   # ${BONDERY_INFRA_TRAEFIK_PREFIX}-api-transport.yml and -storage-transport.yml (serversTransports
-  # with the private CAs) into the folder Traefik's file provider watches; the api and seaweedfs-s3
-  # labels reference them. The folder is Dokploy's unless BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR names
-  # another one. A pinned busybox image runs a script from git, with no network, no capabilities,
-  # and a read-only root filesystem. Hosts without Traefik: see docker-compose.override.yml.example.
+  # with the private CAs and the storage client certificate) into the folder Traefik's file
+  # provider watches; the api and seaweedfs-s3 labels reference them. The folder is Dokploy's
+  # unless BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR names another one. A pinned busybox image runs a
+  # script from git, with no network, no capabilities, and a read-only root filesystem. Hosts
+  # without Traefik: see docker-compose.override.yml.example.
   traefik-transport:
     cap_drop:
       - ALL
@@ -81,7 +83,7 @@ services:
     user: "0:0"
     volumes:
       - api-tls-client:/bondery-api/client:ro
-      - storage-tls-client:/bondery-storage/client:ro
+      - storage-tls-traefik:/bondery-storage/traefik:ro
       - ./traefik/publish-transports.sh:/bondery/publish-transports.sh:ro
       - type: bind
         source: ${BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR:-/etc/dokploy/traefik/dynamic}
@@ -159,9 +161,9 @@ services:
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
       BONDERY_PUBLIC_WEBAPP_URL: https://${BONDERY_INFRA_WEBAPP_DOMAIN:?BONDERY_INFRA_WEBAPP_DOMAIN must be set}
       BONDERY_PUBLIC_WEBSITE_URL: https://${BONDERY_INFRA_WEBSITE_DOMAIN:?BONDERY_INFRA_WEBSITE_DOMAIN must be set}
-      # The API serves HTTPS only, on 26642: Traefik, the webapp's server side, and the
+      # The API serves HTTPS only, on 26631: Traefik, the webapp's server side, and the
       # healthcheck. There is no plain HTTP port.
-      API_PORT: "26642"
+      API_PORT: "26631"
       BONDERY_PRIVATE_API_TLS_CERT_FILE: /bondery-api/server/tls.crt
       BONDERY_PRIVATE_API_TLS_KEY_FILE: /bondery-api/server/tls.key
       # Bundled Redis only: mutual TLS + password from the redis-tls-client volume. Compose always
@@ -176,10 +178,13 @@ services:
       DATABASE_SSL_MODE: verify-full
       DATABASE_SSL_ROOT_CERT_FILE: /bondery-postgres/client/ca.crt
       DATABASE_URL: postgresql://postgres:${BONDERY_PRIVATE_POSTGRES_PASSWORD:?BONDERY_PRIVATE_POSTGRES_PASSWORD must be set}@${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-db:5432/bondery
-      # Bundled SeaweedFS only: HTTPS verified against the storage CA from the stack-secrets job.
-      # Compose always sets these; BONDERY_PRIVATE_S3_* in .env does not change them.
+      # Bundled SeaweedFS only: HTTPS verified against the storage CA from the stack-secrets job,
+      # with the API's own client certificate (mutual TLS). Compose always sets these;
+      # BONDERY_PRIVATE_S3_* in .env does not change them.
       BONDERY_PRIVATE_S3_ENDPOINT: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443
       BONDERY_PRIVATE_S3_TLS_CA_FILE: /bondery-storage/client/ca.crt
+      BONDERY_PRIVATE_S3_TLS_CERT_FILE: /bondery-storage/client/tls.crt
+      BONDERY_PRIVATE_S3_TLS_KEY_FILE: /bondery-storage/client/tls.key
       BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
       BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
       BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
@@ -195,7 +200,7 @@ services:
           "CMD",
           "node",
           "-e",
-          "require('node:https').get({ca:require('node:fs').readFileSync('/bondery-api/client/ca.crt'),host:'127.0.0.1',path:'/health/live',port:26642},(r)=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
+          "require('node:https').get({ca:require('node:fs').readFileSync('/bondery-api/client/ca.crt'),host:'127.0.0.1',path:'/health/live',port:26631},(r)=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))",
         ]
       timeout: 5s
     image: ghcr.io/usebondery/api:${BONDERY_INFRA_VERSION:-production}
@@ -217,6 +222,8 @@ services:
         environment:
           BONDERY_PRIVATE_S3_ENDPOINT: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-storage:8443
           BONDERY_PRIVATE_S3_TLS_CA_FILE: /bondery-storage/client/ca.crt
+          BONDERY_PRIVATE_S3_TLS_CERT_FILE: /bondery-storage/client/tls.crt
+          BONDERY_PRIVATE_S3_TLS_KEY_FILE: /bondery-storage/client/tls.key
           BONDERY_PRIVATE_S3_REGION: ${BONDERY_PRIVATE_S3_REGION:-eu-central-1}
           BONDERY_PRIVATE_S3_ACCESS_KEY_ID: ${BONDERY_PRIVATE_S3_ACCESS_KEY_ID:?BONDERY_PRIVATE_S3_ACCESS_KEY_ID must be set}
           BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY: ${BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY:?BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY must be set}
@@ -229,7 +236,7 @@ services:
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.tls.certResolver=letsencrypt"
       - "traefik.http.routers.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.service=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api"
       # Traefik forwards over HTTPS and verifies the API CA (traefik-transport job above).
-      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.port=26642"
+      - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.port=26631"
       - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.server.scheme=https"
       - "traefik.http.services.${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api.loadbalancer.serverstransport=${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api@file"
     networks:
@@ -255,7 +262,7 @@ services:
     environment:
       # Server-side calls to the API use its internal HTTPS listener, verified against the API CA
       # from the stack-secrets job. Compose always sets these; .env does not change them.
-      BONDERY_INFRA_INTERNAL_API_URL: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api:26642
+      BONDERY_INFRA_INTERNAL_API_URL: https://${BONDERY_INFRA_TRAEFIK_PREFIX:-bondery}-api:26631
       BONDERY_INFRA_INTERNAL_API_CA_FILE: /bondery-api/client/ca.crt
       BONDERY_PUBLIC_API_URL: https://${BONDERY_INFRA_API_DOMAIN:?BONDERY_INFRA_API_DOMAIN must be set}
       BONDERY_PUBLIC_CSP_REPORT_ENABLED: ${BONDERY_PUBLIC_CSP_REPORT_ENABLED:-true}

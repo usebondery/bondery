@@ -20,9 +20,18 @@ type InstagramStringData = {
   timestamp?: unknown;
 };
 
+type InstagramLabelValue = {
+  label?: unknown;
+  value?: unknown;
+};
+
 type InstagramRelationshipItem = {
   title?: unknown;
   string_list_data?: unknown;
+  /** `close_friends.json` puts the follow timestamp on the record. */
+  timestamp?: unknown;
+  /** `close_friends.json` names the person here instead of in `title` or `string_list_data`. */
+  label_values?: unknown;
 };
 
 type FollowingExport = {
@@ -32,7 +41,6 @@ type FollowingExport = {
 type CloseFriendsExport = {
   relationships_close_friends?: unknown;
 };
-
 type ParsedRecord = {
   username: string;
   connectedAt: string | null;
@@ -99,6 +107,64 @@ function ensureFollowersArray(input: unknown, fileLabel: string): InstagramRelat
   ) as InstagramRelationshipItem[];
 }
 
+/**
+ * Reads the close-friends list from either shape the exporter writes.
+ *
+ * `close_friends.json` is a bare array today, the same shape as `followers_*.json`. Older exports
+ * wrap it in `{ "relationships_close_friends": [...] }`, the shape `following.json` uses. Both must
+ * parse, because the file shape changed without notice and a user may still hold either.
+ */
+function ensureCloseFriendsArray(input: unknown, fileLabel: string): InstagramRelationshipItem[] {
+  if (Array.isArray(input)) {
+    return ensureFollowersArray(input, fileLabel);
+  }
+
+  return ensureRelationshipArray(input, "relationships_close_friends", fileLabel);
+}
+
+/**
+ * Reads the person named by a `label_values` entry.
+ *
+ * A close-friend record has no `title` and no `string_list_data`. It names the account in
+ * `label_values` as `Username`, `Name`, and `URL` entries instead. `Username` is the reliable one:
+ * the exporter leaves `URL` empty on most records.
+ */
+function handleFromLabelValues(input: unknown): {
+  name: string;
+  urlHandle: string | null;
+  username: string;
+} {
+  if (!Array.isArray(input)) {
+    return { name: "", urlHandle: null, username: "" };
+  }
+
+  let name = "";
+  let urlHandle: string | null = null;
+  let username = "";
+
+  for (const raw of input) {
+    if (raw === null || typeof raw !== "object") {
+      continue;
+    }
+    const entry = raw as InstagramLabelValue;
+    const label = typeof entry.label === "string" ? entry.label.toLowerCase() : "";
+    const value = typeof entry.value === "string" ? entry.value : "";
+    if (value === "") {
+      continue;
+    }
+
+    if (label === "username") {
+      username = value;
+    } else if (label === "name") {
+      name = value;
+    } else if (label === "url") {
+      urlHandle = normalizeUsernameFromHref(value);
+    }
+  }
+
+  return { name, urlHandle, username };
+}
+
 function parseRelationshipItem(item: InstagramRelationshipItem): ParsedRecord | null {
   const title = typeof item.title === "string" ? item.title : "";
   const stringData = toStringListData(item.string_list_data);
@@ -110,15 +176,22 @@ function parseRelationshipItem(item: InstagramRelationshipItem): ParsedRecord | 
   const titleHandle = normalizeHandle(title);
   const valueHandle = normalizeHandle(value);
   const hrefHandle = href ? normalizeUsernameFromHref(href) : null;
+  const labelled = handleFromLabelValues(item.label_values);
+  const labelHandle = normalizeHandle(labelled.username);
+  const labelUrlHandle = labelled.urlHandle === null ? null : normalizeHandle(labelled.urlHandle);
 
-  const username = firstNonBlank(titleHandle, valueHandle, hrefHandle) ?? "";
+  // A close-friend record carries its handle in `label_values`, so that source comes first.
+  const username =
+    firstNonBlank(labelHandle, titleHandle, valueHandle, hrefHandle, labelUrlHandle) ?? "";
   const normalizedUsername = normalizeHandle(username);
 
   if (!normalizedUsername) {
     return null;
   }
 
-  const { iso, raw } = parseTimestampToDate(primary.timestamp);
+  // `close_friends` puts the follow timestamp on the record, not inside `string_list_data`.
+  const rawTimestamp = typeof item.timestamp === "number" ? item.timestamp : primary.timestamp;
+  const { iso, raw } = parseTimestampToDate(rawTimestamp);
 
   return {
     connectedAt: iso,
@@ -243,12 +316,8 @@ export function parseCloseFriendsRecords(files: UploadFile[]): ParsedRecord[] {
     throw new Error(`${CLOSE_FRIENDS_FILE_NAME} was not found in uploaded files`);
   }
 
-  const payload = parseJsonFile<CloseFriendsExport>(closeFriendsFile);
-  const entries = ensureRelationshipArray(
-    payload,
-    "relationships_close_friends",
-    CLOSE_FRIENDS_FILE_NAME,
-  );
+  const payload = parseJsonFile<CloseFriendsExport | InstagramRelationshipItem[]>(closeFriendsFile);
+  const entries = ensureCloseFriendsArray(payload, CLOSE_FRIENDS_FILE_NAME);
 
   const parsed = entries
     .map(parseRelationshipItem)
@@ -355,10 +424,19 @@ export function buildStrategyRecords(
     return deduplicateRecords(mutuals);
   }
 
+  // A close friend may also appear in following or followers. The close-friends membership is the
+  // reason for this import, so its source must survive: dropping it would file the person under
+  // "Instagram: Following" instead of "Instagram: Close Friends".
   const closeFriendsWithTimestamp = closeFriendsRecords.map((record) => {
+    const sources = Array.from(new Set([...record.sources, "close_friends" as const]));
     const followingRecord = followingByUsername.get(record.username);
     if (followingRecord?.connectedOnRaw) {
-      return followingRecord;
+      return {
+        ...record,
+        connectedAt: followingRecord.connectedAt,
+        connectedOnRaw: followingRecord.connectedOnRaw,
+        sources,
+      };
     }
 
     const followerRecord = followersByUsername.get(record.username);
@@ -367,10 +445,11 @@ export function buildStrategyRecords(
         ...record,
         connectedAt: followerRecord.connectedAt,
         connectedOnRaw: followerRecord.connectedOnRaw,
+        sources,
       };
     }
 
-    return record;
+    return { ...record, sources };
   });
 
   return deduplicateRecords(closeFriendsWithTimestamp);

@@ -23,7 +23,9 @@
     "retry": "Prøv igjen",
     "save": "Lagre",
     "saveChanges": "Lagre endringer",
-    "select": "Velg"
+    "select": "Velg",
+    "viewContacts": "Se kontakter",
+    "viewMergedContact": "Se sammenslått kontakt"
   },
   "app": {
     "description": "Den personlige CRM-en med åpen kildekode, for bedre bånd."

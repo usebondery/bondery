@@ -3,11 +3,7 @@
 import { getUserFacingError } from "@bondery/helpers/api";
 import { detachPromise } from "@bondery/helpers/async";
 import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
-import {
-  errorNotificationTemplate,
-  ModalTitle,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
+import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import type { LinkedInPreparedContact } from "@bondery/schemas";
 import { SOCIAL_IMPORT_COMMIT_BATCH_SIZE } from "@bondery/schemas/constants";
 import { MIME_TYPES } from "@mantine/dropzone";
@@ -18,6 +14,7 @@ import { IconBrandLinkedin } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect, useRef, useState } from "react";
+import ContactsTable from "@/components/contacts/ContactsTableV2";
 import { captureImportComplete } from "@/lib/analytics/imports";
 import { useCommonTranslations, useSettingsPageTranslations } from "@/lib/i18n/generated/hooks";
 import { useModalDismiss } from "@/lib/modals";
@@ -36,6 +33,7 @@ import {
   sortLinkedInContactsForPreview,
   toLinkedInPreviewContact,
 } from "../../utils/linkedin-import-helpers";
+import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
 import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
 import { ImportZipUploadStep } from "../import/ImportZipUploadStep";
@@ -86,11 +84,18 @@ export function LinkedInImportModal({
   } | null>(null);
   const [parsedContacts, setParsedContacts] = useState<LinkedInPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [finishedStats, setFinishedStats] = useState<{
+    imported: number;
+    updated: number;
+    skipped: number;
+  } | null>(null);
   const openRef = useRef<(() => void) | null>(null);
 
   const previewContacts = parsedContacts
     .filter((contact) => contact.isValid)
     .map(toLinkedInPreviewContact);
+
+  const importedContacts = previewContacts.filter((contact) => selectedIds.has(contact.id));
 
   const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
 
@@ -146,7 +151,7 @@ export function LinkedInImportModal({
     modals.updateModal({
       modalId,
       size:
-        step === "preview" && !isImporting
+        (step === "preview" || step === "finished") && !isImporting
           ? "80rem"
           : step === "intro" ||
               step === "instructions" ||
@@ -247,29 +252,22 @@ export function LinkedInImportModal({
         });
       }
 
-      notifications.show(
-        successNotificationTemplate({
-          description: t("ImportSuccess", {
-            imported: totalImported,
-            skipped: totalSkipped,
-            updated: totalUpdated,
-          }),
-          title: t("SuccessTitle"),
-        }),
-      );
-
       captureImportComplete("linkedin", totalImported + totalUpdated, isFirstImport);
 
-      closeModal();
-
       if (onSuccess) {
+        closeModal();
         onSuccess({
           imported: totalImported,
           skipped: totalSkipped,
           updated: totalUpdated,
         });
       } else {
-        router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        setFinishedStats({
+          imported: totalImported,
+          skipped: totalSkipped,
+          updated: totalUpdated,
+        });
+        setStep("finished");
       }
     } catch (error) {
       notifications.show(
@@ -378,6 +376,33 @@ export function LinkedInImportModal({
         })}
         importingTitle={t("ImportingTitle")}
         total={importProgress.total}
+      />,
+    );
+  }
+
+  if (step === "finished") {
+    return renderWithNavigationProgress(
+      <ImportFinishedStep
+        closeLabel={tCommon("a11y.close")}
+        description={finishedStats ? t("ImportSuccess", finishedStats) : undefined}
+        onClose={closeModal}
+        onViewContacts={() => {
+          closeModal();
+          router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        }}
+        overview={
+          importedContacts.length > 0 ? (
+            <ContactsTable
+              contacts={importedContacts}
+              disableNameLink
+              noContactsFound={t("NoContactsFound")}
+              noContactsMatchSearch={t("NoContactsMatchSearch")}
+              visibleColumns={["name", "headline", "social"]}
+            />
+          ) : undefined
+        }
+        title={t("SuccessTitle")}
+        viewContactsLabel={tCommon("actions.viewContacts")}
       />,
     );
   }

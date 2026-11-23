@@ -16,7 +16,7 @@ Follow the dependency chain: **Postgres → Redis → Mailpit → (optional) Sea
 | api | [https://api.usebondery.test](https://api.usebondery.test) |
 | Mailpit UI | [https://mail.usebondery.test](https://mail.usebondery.test) |
 
-Apps still listen on fixed loopback ports behind the proxy: website `26630`, webapp `26632`, and the API `26642`. The API serves **HTTPS only**, like the deployed stack: Portless forwards to it over HTTPS, the webapp's server side calls `https://127.0.0.1:26642` and trusts the dev API CA, and a phone reaches it through `tailscale serve` (see the mobile section). It has no plain HTTP port. `dev:classic` serves the webapp and website on their loopback ports. Do not open raw `http://localhost:2663x` for daily web work.
+Apps still listen on fixed loopback ports behind the proxy: website `26630`, webapp `26632`, and the API `26631`. The API serves **HTTPS only**, like the deployed stack: Portless forwards to it over HTTPS, the webapp's server side calls `https://127.0.0.1:26631` and trusts the dev API CA, and a phone reaches it through `tailscale serve` (see the mobile section). It has no plain HTTP port. `dev:classic` serves the webapp and website on their loopback ports. Do not open raw `http://localhost:2663x` for daily web work.
 
 Aliases use `PORTLESS_TLD=test` and are stored with `pid 0`, so they survive a dev server restart and the hosts file stays complete. Each app's `dev` script re-registers its own alias, then starts the server. Mailpit SMTP stays on `127.0.0.1:26640` (not Portless).
 
@@ -160,13 +160,15 @@ Expect HTTP 403 and S3 `Error` XML from both commands. Empty 200 on `/status` is
 
 Stop with `pnpm run stop:seaweedfs`.
 
-Set in `.env.local` (see `.env.local.example`; `pnpm run setup:dev` adds the last two):
+Set in `.env.local` (see `.env.local.example`; `pnpm run setup:dev` migrates the first to the loopback gateway and adds the last three):
 
 ```text
 BONDERY_PUBLIC_STORAGE_URL=http://127.0.0.1:8333
 BONDERY_PRIVATE_S3_ENDPOINT=https://127.0.0.1:8443
 BONDERY_PRIVATE_S3_TLS_CA_FILE=../../.temp/storage-secrets/client/ca.crt
 ```
+
+The public URL is the gateway's plain HTTP port, because browsers do not send the client certificate the gateway requires on `8443`. A Tailscale name from phone testing is stale: only a phone on the tailnet can resolve it.
 
 An older setup used `http://127.0.0.1:8333` for the API. Run `pnpm run setup:dev` once, then `pnpm run env`, `pnpm run stop:seaweedfs`, and `pnpm run start:seaweedfs`; your files stay.
 
@@ -285,7 +287,7 @@ cd apps/api
 pnpm run dev
 ```
 
-`dev` registers the API alias, then starts the server on `https://127.0.0.1:26642`, with the certificate that `pnpm run api:secrets` creates. Open [https://api.usebondery.test](https://api.usebondery.test). The API binds loopback only in development; set `API_HOST=0.0.0.0` only when something outside this machine's loopback must reach it (for example Tailscale on the Windows host with the API in WSL2).
+`dev` registers the API alias, then starts the server on `https://127.0.0.1:26631`, with the certificate that `pnpm run api:secrets` creates. Open [https://api.usebondery.test](https://api.usebondery.test). The API binds loopback only in development; set `API_HOST=0.0.0.0` only when something outside this machine's loopback must reach it (for example Tailscale on the Windows host with the API in WSL2).
 
 ---
 
@@ -300,7 +302,7 @@ Filled by `pnpm run env` into `apps/webapp/.env.development.local` — see [Envi
 
 The webapp is itself a confidential OAuth client of the API's authorization server. See [Authentication](./auth.mdx) for env vars, bootstrap commands, and troubleshooting.
 
-For SSR, server fetches call the API's HTTPS listener on loopback, like the deployed stack: `BONDERY_INFRA_INTERNAL_API_URL=https://127.0.0.1:26642` with `BONDERY_INFRA_INTERNAL_API_CA_FILE`. The browser still uses `BONDERY_PUBLIC_API_URL` (Portless). `pnpm run setup:dev` sets these lines and runs `pnpm run api:secrets`, which creates the API CA and certificate in `.temp/api-secrets` (git-ignored). If the API or webapp says it cannot read a file there, run `pnpm run api:secrets` and restart `pnpm run dev`.
+For SSR, server fetches call the API's HTTPS listener on loopback, like the deployed stack: `BONDERY_INFRA_INTERNAL_API_URL=https://127.0.0.1:26631` with `BONDERY_INFRA_INTERNAL_API_CA_FILE`. The browser still uses `BONDERY_PUBLIC_API_URL` (Portless). `pnpm run setup:dev` sets these lines and runs `pnpm run api:secrets`, which creates the API CA and certificate in `.temp/api-secrets` (git-ignored). If the API or webapp says it cannot read a file there, run `pnpm run api:secrets` and restart `pnpm run dev`.
 
 ### Start
 
@@ -380,7 +382,7 @@ The API serves HTTPS only, with a certificate from the private dev CA. A phone o
    pnpm run dev:mobile-api
    ```
 
-   It runs `tailscale serve` for `https://<machine>.<tailnet>.ts.net:26642`, which forwards to the API on loopback, and writes that URL to `BONDERY_DEV_MOBILE_API_URL` in `.env.local`.
+   It runs `tailscale serve` for `https://<machine>.<tailnet>.ts.net:26631`, which forwards to the API on loopback, and writes that URL to `BONDERY_DEV_MOBILE_API_URL` in `.env.local`.
 3. Run `pnpm run env`. The mobile app gets the Tailscale URL as its API URL; the webapp and the API keep `https://api.usebondery.test`, so web development keeps working at the same time.
 4. Start the app (below). Stop publishing with `pnpm run dev:mobile-api -- --off`, then `pnpm run env`.
 
@@ -391,7 +393,7 @@ cd apps/mobile
 pnpm exec expo start --host lan
 ```
 
-**Social sign-in on a phone.** OAuth providers redirect to the API's own URL. To test GitHub or LinkedIn sign-in on a phone, set `BONDERY_PUBLIC_API_URL` in `.env.local` to the Tailscale URL as well, register `https://<machine>.<tailnet>.ts.net:26642/auth/callback/github` in your OAuth app, run `pnpm run env`, and restart the API. Switch back to `https://api.usebondery.test` for web development.
+**Social sign-in on a phone.** OAuth providers redirect to the API's own URL. To test GitHub or LinkedIn sign-in on a phone, set `BONDERY_PUBLIC_API_URL` in `.env.local` to the Tailscale URL as well, register `https://<machine>.<tailnet>.ts.net:26631/auth/callback/github` in your OAuth app, run `pnpm run env`, and restart the API. Switch back to `https://api.usebondery.test` for web development.
 
 **WSL2:** With Tailscale on the Windows host and the API in WSL2, set `API_HOST=0.0.0.0` in `.env.local`, so the Windows side can reach the API.
 
@@ -456,6 +458,66 @@ See also [Sync architecture (mobile)](sync-architecture.mdx) and [apps/mobile/RE
 </Steps>
 
 ---
+
+## Remote desktop (Orca or SSH) on a laptop
+
+When you work from another machine, the editor is only a window. Two things decide whether `https://app.usebondery.test` loads:
+
+1. **Where the browser renders.** A remote Orca session pairs the laptop to `orca-serve` on this PC. The GUI and its browser pane run **on the laptop**. Portless binds `127.0.0.1:443` on this PC, so the laptop cannot reach it by loopback.
+2. **Where the CA is trusted.** `pnpm exec portless trust` writes the CA into this PC's trust store only. The laptop has its own store. A browser there reports `ERR_CERT_AUTHORITY_INVALID`, even though `curl` on this PC succeeds. That difference is the cause of the confusing "Connection isn't secure" message: the terminal is on the PC, the browser is not.
+
+The laptop needs two things: the `.test` hostnames pointing at this PC's Tailscale address, and the Portless CA in its own Windows root store.
+
+### Preferred: Tailscale name, no SSH server
+
+```bash
+# On the PC, from the repo root
+pnpm run dev:remote-laptop
+```
+
+It prints the resolved name and writes a ready-to-run script:
+
+```text
+Tailscale name : sveetya-desktop-wsl.tailb35e0c.ts.net  (from tailscale status)
+Address        : 100.125.211.35
+Wrote a ready-to-run script: .temp/connect-laptop.ps1
+```
+
+Copy `.temp/connect-laptop.ps1` to the laptop, then run it in an **elevated** PowerShell. If your policy blocks local scripts, add `-ExecutionPolicy Bypass`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\connect-laptop.ps1
+```
+
+The script writes one hosts block between `BONDERY-REMOTE-PORTLESS` markers, checks the CA's SHA-256 against the build, and imports the CA into `CurrentUser\Root`. It installs nothing else. Re-running it replaces the block instead of appending, so it is safe to repeat after the Tailscale address changes.
+
+Then **fully quit and reopen Orca on the laptop**, so the browser pane re-reads the root store. Open `https://usebondery.test/`.
+
+The name comes from `BONDERY_DEV_MOBILE_API_URL` in `.env.local` when set (that is what `pnpm run dev:mobile-api` writes for phone testing), otherwise from `tailscale status --json`. Override either with `BONDERY_DEV_TAILSCALE_HOST`. Without a name the script stops and lists how to provide one.
+
+### Alternative: SSH tunnel
+
+Use this when you want the laptop's `127.0.0.1:443` forwarded rather than its hosts file pointed at Tailscale:
+
+```powershell
+# On the laptop, elevated PowerShell, repo checkout
+.\scripts\dev\connect-remote-portless.ps1
+```
+
+It needs an SSH server on this PC. Check first, because Ubuntu on WSL ships without one:
+
+```bash
+systemctl is-active ssh      # inactive and openssh-server absent => install it first
+sudo apt-get install -y openssh-server && sudo systemctl enable --now ssh
+```
+
+Keep the window open while you browse; Ctrl+C stops the tunnel.
+
+### What does not work
+
+- **Restarting WSL to pick up trust.** The trust lives on the laptop. Restarting this PC changes nothing and risks losing a machine you cannot physically reach.
+- **`browser.certificate.proceed` from the laptop.** Orca refuses it by design: "Only someone at the desktop can accept a certificate warning in its browser."
+- **Fixing only `~/.pki/nssdb` on this PC.** On a remote session the browser is not here. The NSS database on this PC does matter for a browser running *inside* WSL, so install `p11-kit-modules` if you want NSS to see `/etc/ssl/certs`.
 
 ## Running everything at once
 
@@ -534,7 +596,7 @@ URL and port registry: [architecture.mdx](architecture.mdx#apps). Hostnames: `DE
 | Mailpit SMTP | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | port `26640` | `pnpm run start:mailpit` |
 | Mailpit UI | [`deploy/bondery/docker-compose.dev-mail.yml`](../../deploy/bondery/docker-compose.dev-mail.yml) | [https://mail.usebondery.test](https://mail.usebondery.test) (loopback `26641`) | `pnpm run start:mailpit` |
 | SeaweedFS | [`deploy/bondery/docker-compose.seaweedfs.yml`](../../deploy/bondery/docker-compose.seaweedfs.yml) | S3 API `https://127.0.0.1:8443`, public reads [http://127.0.0.1:8333](http://127.0.0.1:8333) | `pnpm run start:seaweedfs` |
-| `api` | [`apps/api`](../../apps/api) | [https://api.usebondery.test](https://api.usebondery.test) (loopback `26642`, HTTPS only) | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
+| `api` | [`apps/api`](../../apps/api) | [https://api.usebondery.test](https://api.usebondery.test) (loopback `26631`, HTTPS only) | `pnpm run dev:api` or `pnpm run dev:webapp-api` |
 | `webapp` | [`apps/webapp`](../../apps/webapp) | [https://app.usebondery.test](https://app.usebondery.test) (loopback `26632`) | `pnpm run dev:webapp` or `pnpm run dev:webapp-api` |
 | `website` | [`apps/website`](../../apps/website) | [https://usebondery.test](https://usebondery.test) (loopback `26630`) | `pnpm --filter website run dev` |
 | `mobile` | [`apps/mobile`](../../apps/mobile) | Metro `http://localhost:26634` | `pnpm run dev:mobile` |

@@ -33,6 +33,34 @@ Do not add success notifications (toasts, banners, snackbars, modals) when the u
 
 ---
 
+## Offer a way to the result when it is not on screen
+
+When a create or update succeeds and the user stays where they were, the result
+is invisible. Add an **action** to the success notification that opens it.
+
+This is not a repeat of the confirmation. The toast says what happened; the
+action is the shortcut to the thing that changed.
+
+| Operation                               | Action                  |
+| --------------------------------------- | ----------------------- |
+| Merge two contacts                      | **View merged contact** |
+| Create a record while staying on a list | **View {record}**       |
+| Duplicate a record                      | **View copy**           |
+
+Rules:
+
+- **Name the destination.** "View merged contact", not "Open" or "Details".
+- **Skip it when you navigate.** If the flow already opens the result, the destination is the confirmation. Do not navigate and also show an action.
+- **One action.** A second action turns the toast into a menu. Offer recovery in the error toast instead.
+- **Keep the toast short-lived.** The action is a convenience, never the only path. The record stays reachable from its list.
+
+**Implementation:** pass `action` to `successNotificationTemplate` (or any
+`@bondery/mantine-next` notification template). The action renders below the
+description. `loadingNotificationTemplate` takes no action: it is replaced by a
+success or error notification that carries it.
+
+---
+
 ## Implementation
 
 - **Mobile:** `notifications` from `apps/mobile/src/lib/toast/notifications` for errors and invisible successes only.

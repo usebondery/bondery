@@ -5,7 +5,9 @@
 # Listeners:
 # - 8443 HTTPS with the cluster certificate: the API (BONDERY_PRIVATE_S3_ENDPOINT) and Traefik,
 #   which serves the public storage domain and verifies the storage CA (traefik-transport job).
-# - 8333 HTTP: the healthcheck and local development (public reads on 127.0.0.1).
+#   Both callers present a client certificate from the storage CA (`-tlsVerifyClientCert`), so only
+#   a caller the stack issued a certificate to can read or write objects.
+# - 8333 HTTP: the container healthcheck and local development only. It is not published.
 # The Iceberg REST catalog is off: Bondery does not use it, and it would listen in plaintext.
 set -eu
 
@@ -49,5 +51,7 @@ exec su-exec seaweed weed s3 \
   -port.https=8443 \
   -cert.file=/run/bondery-storage/tls/tls.crt \
   -key.file=/run/bondery-storage/tls/tls.key \
+  -cacert.file=/run/bondery-storage/tls/ca.crt \
+  -tlsVerifyClientCert \
   -port.iceberg=0 \
   -config="$CONFIG"

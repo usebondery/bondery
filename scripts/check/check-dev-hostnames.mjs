@@ -146,6 +146,8 @@ function checkRemotePortlessScript() {
   const files = [
     "scripts/dev/connect-remote-portless.mjs",
     "scripts/dev/connect-remote-portless.ps1",
+    // The no-SSH laptop path derives its hosts block from DEV_URLS too.
+    "scripts/dev/connect-remote-laptop.mjs",
   ];
   for (const relativePath of files) {
     const filePath = join(ROOT, relativePath);

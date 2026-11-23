@@ -23,7 +23,9 @@
     "retry": "Yeniden dene",
     "save": "Kaydet",
     "saveChanges": "Değişiklikleri kaydet",
-    "select": "Seç"
+    "select": "Seç",
+    "viewContacts": "Kişileri görüntüle",
+    "viewMergedContact": "Birleştirilen kişiyi görüntüle"
   },
   "app": {
     "description": "Daha iyi bağlar kurmak için açık kaynak kişisel PRM."

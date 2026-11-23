@@ -23,7 +23,9 @@
     "retry": "Újra",
     "save": "Mentés",
     "saveChanges": "Változtatások mentése",
-    "select": "Kijelölés"
+    "select": "Kijelölés",
+    "viewContacts": "Kapcsolatok megtekintése",
+    "viewMergedContact": "Összevont kapcsolat megtekintése"
   },
   "app": {
     "description": "Nyílt forráskódú személyes PRM a jobb kapcsolatok építéséhez."

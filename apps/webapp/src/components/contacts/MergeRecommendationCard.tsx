@@ -2,20 +2,16 @@
 
 import { getUserFacingError } from "@bondery/helpers/api";
 import { detachPromise } from "@bondery/helpers/async";
-import {
-  errorNotificationTemplate,
-  PersonChip,
-  successNotificationTemplate,
-} from "@bondery/mantine-next";
+import { errorNotificationTemplate, successNotificationTemplate } from "@bondery/mantine-next";
 import type {
   Contact,
   MergeConflictChoice,
   MergeConflictField,
   MergeRecommendation,
 } from "@bondery/schemas";
-import { Button, Group, Paper, Text, Tooltip } from "@mantine/core";
+import { Button } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { IconCheck, IconUsers, IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from "@tabler/icons-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { openMergeWithModal } from "@/app/(app)/app/(shell)/people/components/modals/MergeWithModal";
@@ -29,9 +25,11 @@ import {
   useMergeWithModalTranslations,
 } from "@/lib/i18n/generated/hooks";
 import { orientMergePair } from "@/lib/merge/orientMergePair";
+import { showMergeSuccessNotification } from "@/lib/merge/showMergeSuccessNotification";
 import { routePerson } from "@/lib/navigation/route/person";
 import { useMergeContactsMutation } from "@/lib/query/hooks/useContactMutations";
 import { useDeclineMergeRecommendationMutation } from "@/lib/query/hooks/useMergeRecommendations";
+import { RecommendationCard } from "./RecommendationCard";
 
 interface MergeRecommendationCardProps {
   contacts: Contact[];
@@ -167,16 +165,19 @@ export function MergeRecommendationCard({
         throw new Error(tMerge("MergeFailed"));
       }
 
-      notifications.show(
-        successNotificationTemplate({
-          description: tMerge("MergeSuccess"),
-          title: t("SuccessTitle"),
-        }),
-      );
       onAccepted?.();
       if (redirectAfterMerge) {
         router.push(routePerson(result.personId));
+        return;
       }
+
+      showMergeSuccessNotification({
+        actionLabel: tCommon("actions.viewMergedContact"),
+        description: tMerge("MergeSuccess"),
+        navigate: (personId) => router.push(routePerson(personId)),
+        personId: result.personId,
+        title: t("SuccessTitle"),
+      });
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
@@ -213,29 +214,10 @@ export function MergeRecommendationCard({
   };
 
   return (
-    <Paper
-      p="md"
-      radius="md"
-      style={{ borderLeft: "2px solid var(--mantine-color-yellow-6)" }}
-      withBorder
-    >
-      <Group align="center" justify="space-between" wrap="nowrap">
-        <Group align="center" wrap="nowrap">
-          <Tooltip label={t("PossibleDuplicateTooltip")}>
-            <Group align="center" gap={4} style={{ cursor: "default" }} wrap="nowrap">
-              <IconUsers color="var(--mantine-color-yellow-6)" size={14} />
-              <Text c="yellow.6" fw={600} size="sm">
-                {t("PossibleDuplicateBadge")}
-              </Text>
-            </Group>
-          </Tooltip>
-          <PersonChip isClickable person={recommendation.leftPerson} prefetch={false} />
-          <Text c="dimmed" fw={500} size="sm">
-            {tMerge("MergeWithLabel")}
-          </Text>
-          <PersonChip isClickable person={recommendation.rightPerson} prefetch={false} />
-        </Group>
-        <Group>
+    <RecommendationCard
+      accent="yellow"
+      actions={
+        <>
           <Button
             disabled={isAccepting}
             leftSection={<IconX size={16} />}
@@ -251,10 +233,11 @@ export function MergeRecommendationCard({
             loading={isAccepting}
             onClick={() => detachPromise(handleAccept())}
           >
-            {t("AcceptMerge")}
+            {tMerge("Merge")}
           </Button>
-        </Group>
-      </Group>
-    </Paper>
+        </>
+      }
+      recommendation={recommendation}
+    />
   );
 }

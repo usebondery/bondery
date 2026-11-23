@@ -23,7 +23,9 @@
     "retry": "Zkusit znovu",
     "save": "Save",
     "saveChanges": "Save changes",
-    "select": "Vybrat"
+    "select": "Vybrat",
+    "viewContacts": "Zobrazit kontakty",
+    "viewMergedContact": "Zobrazit sloučený kontakt"
   },
   "app": {
     "description": "Open-source osobní CRM pro budování lepších vazeb."

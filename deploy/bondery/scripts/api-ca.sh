@@ -1,5 +1,5 @@
 #!/bin/sh
-# Print the CA certificate of the API's HTTPS listener (port 26642), for a reverse proxy that is
+# Print the CA certificate of the API's HTTPS listener (port 26631), for a reverse proxy that is
 # not Dokploy's Traefik. See docs/deploy/reverse-proxy.mdx.
 #
 #   deploy/bondery/scripts/api-ca.sh > /etc/caddy/bondery-api-ca.crt

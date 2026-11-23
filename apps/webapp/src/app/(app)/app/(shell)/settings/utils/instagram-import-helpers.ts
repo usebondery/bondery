@@ -19,9 +19,11 @@ export type InstagramImportStep =
   | "upload"
   | "strategy"
   | "processing"
-  | "preview";
+  | "preview"
+  | "finished";
 
 export const INSTAGRAM_STEP_PROGRESS: Record<InstagramImportStep, number> = {
+  finished: 100,
   instructions: 24,
   intro: 10,
   preview: 84,

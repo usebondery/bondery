@@ -1,13 +1,13 @@
 .list {
   position: relative;
-  border-left: 2px solid transparent;
+  border-inline-start: 2px solid transparent;
 }
 
 .list::before {
   position: absolute;
   inset-block: 0;
-  left: -2px;
-  width: 2px;
+  inset-inline-start: -2px;
+  inline-size: 2px;
   content: "";
   background: var(--mantine-color-default-border);
   border-radius: 999px;
@@ -42,10 +42,10 @@
 
 .indicator {
   position: absolute;
-  top: 0;
-  left: -2px;
+  inset-block-start: 0;
+  inset-inline-start: -2px;
   z-index: 1;
-  width: 2px;
+  inline-size: 2px;
   background: var(--mantine-primary-color-filled);
   border-radius: 999px;
   transition:

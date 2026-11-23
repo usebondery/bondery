@@ -1,19 +1,25 @@
 "use client";
 
 import { detachPromise } from "@bondery/helpers/async";
+import { WEBAPP_ROUTES } from "@bondery/helpers/globals/paths";
 import { errorNotificationTemplate, ModalTitle } from "@bondery/mantine-next";
 import { List, ListItem, Stack, Text } from "@mantine/core";
 import { modals } from "@mantine/modals";
 import { notifications } from "@mantine/notifications";
 import { NavigationProgress } from "@mantine/nprogress";
 import { IconBrandInstagram } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import type { JSX } from "react";
 import { useEffect } from "react";
+import ContactsTable from "@/components/contacts/ContactsTableV2";
+import { useCommonTranslations } from "@/lib/i18n/generated/hooks";
+import { routeAssert } from "@/lib/navigation/route/assert";
 import { useInstagramImportModal } from "../../hooks/useInstagramImportModal";
 import {
   INSTAGRAM_MAX_FILE_SIZE_BYTES,
   type InstagramImportStep,
 } from "../../utils/instagram-import-helpers";
+import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
 import { ImportProcessingStep, ImportProgressStep } from "../import/ImportModalProcessingSteps";
 import { IMPORT_ZIP_ACCEPT, ImportZipUploadStep } from "../import/ImportZipUploadStep";
@@ -40,6 +46,7 @@ export function InstagramImportModal({
     allSelected,
     alreadyExistsCount,
     closeModal,
+    finishedStats,
     handleImport,
     handleRequestedExport,
     handleToggleAll,
@@ -47,6 +54,7 @@ export function InstagramImportModal({
     handleZipDrop,
     importProgress,
     importStrategyOptions,
+    importedContacts,
     invalidContactsCount,
     isImporting,
     isOnboardingFlow,
@@ -67,6 +75,9 @@ export function InstagramImportModal({
     validContactsCount,
   } = useInstagramImportModal({ initialStep, modalId, onAwaitingExport, onSuccess });
 
+  const tCommon = useCommonTranslations();
+  const router = useRouter();
+
   const renderWithNavigationProgress = (content: JSX.Element) => (
     <>
       {showNavigationProgress ? <NavigationProgress /> : null}
@@ -77,12 +88,12 @@ export function InstagramImportModal({
   useEffect(() => {
     modals.updateModal({
       modalId,
-      size: "lg",
+      size: step === "finished" ? "80rem" : "lg",
       title: (
         <ModalTitle icon={<IconBrandInstagram size={20} stroke={1.5} />} text={t("ModalTitle")} />
       ),
     });
-  }, [modalId, t]);
+  }, [modalId, step, t]);
 
   if (step === "intro") {
     return renderWithNavigationProgress(
@@ -221,6 +232,33 @@ export function InstagramImportModal({
         })}
         importingTitle={t("ImportingTitle")}
         total={importProgress.total}
+      />,
+    );
+  }
+
+  if (step === "finished") {
+    return renderWithNavigationProgress(
+      <ImportFinishedStep
+        closeLabel={tCommon("a11y.close")}
+        description={finishedStats ? t("ImportSuccess", finishedStats) : undefined}
+        onClose={closeModal}
+        onViewContacts={() => {
+          closeModal();
+          router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        }}
+        overview={
+          importedContacts.length > 0 ? (
+            <ContactsTable
+              contacts={importedContacts}
+              disableNameLink
+              noContactsFound={t("NoContactsFound")}
+              noContactsMatchSearch={t("NoContactsMatchSearch")}
+              visibleColumns={["name", "social"]}
+            />
+          ) : undefined
+        }
+        title={t("SuccessTitle")}
+        viewContactsLabel={tCommon("actions.viewContacts")}
       />,
     );
   }

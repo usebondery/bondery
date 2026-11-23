@@ -23,7 +23,9 @@
     "retry": "Opnieuw proberen",
     "save": "Opslaan",
     "saveChanges": "Wijzigingen opslaan",
-    "select": "Selecteren"
+    "select": "Selecteren",
+    "viewContacts": "Contacten bekijken",
+    "viewMergedContact": "Samengevoegd contact bekijken"
   },
   "app": {
     "description": "Het open-source persoonlijke CRM om betere banden op te bouwen."

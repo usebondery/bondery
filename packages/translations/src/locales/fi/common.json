@@ -23,7 +23,9 @@
     "retry": "Yritä uudelleen",
     "save": "Tallenna",
     "saveChanges": "Tallenna muutokset",
-    "select": "Valitse"
+    "select": "Valitse",
+    "viewContacts": "Näytä yhteystiedot",
+    "viewMergedContact": "Näytä yhdistetty yhteystieto"
   },
   "app": {
     "description": "Avoimen lähdekoodin henkilökohtainen PRM parempien suhteiden rakentamiseen."

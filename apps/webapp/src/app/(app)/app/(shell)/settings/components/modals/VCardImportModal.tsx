@@ -9,7 +9,6 @@ import {
   ModalFooter,
   ModalScrollLayout,
   ModalTitle,
-  successNotificationTemplate,
   warningNotificationTemplate,
 } from "@bondery/mantine-next";
 import type { Contact, VCardPreparedContact } from "@bondery/schemas";
@@ -52,11 +51,13 @@ import {
 } from "@/lib/query/hooks/useImports";
 import { useSettingsQuery } from "@/lib/query/hooks/useSettings";
 import { useImporterNavigationProgress } from "../../hooks/useImporterNavigationProgress";
+import { ImportFinishedStep } from "../import/ImportFinishedStep";
 import { ImportIntroStep } from "../import/ImportIntroStep";
 
-type Step = "intro" | "instructions" | "upload" | "processing" | "preview";
+type Step = "intro" | "instructions" | "upload" | "processing" | "preview" | "finished";
 
 const STEP_PROGRESS: Record<Step, number> = {
+  finished: 100,
   instructions: 30,
   intro: 12,
   preview: 84,
@@ -134,10 +135,16 @@ export function VCardImportModal({
   } | null>(null);
   const [parsedContacts, setParsedContacts] = useState<VCardPreparedContact[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [finishedStats, setFinishedStats] = useState<{
+    imported: number;
+    skipped: number;
+  } | null>(null);
   const openRef = useRef<(() => void) | null>(null);
   const lastSelectedIndexRef = useRef<number | null>(null);
 
   const previewContacts = parsedContacts.filter((contact) => contact.isValid).map(toPreviewContact);
+
+  const importedContacts = previewContacts.filter((contact) => selectedIds.has(contact.id));
 
   const validContactsCount = parsedContacts.filter((contact) => contact.isValid).length;
 
@@ -168,7 +175,7 @@ export function VCardImportModal({
     modals.updateModal({
       modalId,
       size:
-        step === "preview" && !isImporting
+        (step === "preview" || step === "finished") && !isImporting
           ? "80rem"
           : step === "intro" ||
               step === "instructions" ||
@@ -308,20 +315,10 @@ export function VCardImportModal({
         });
       }
 
-      notifications.show(
-        successNotificationTemplate({
-          description: t("ImportSuccess", {
-            imported: totalImported,
-            skipped: totalSkipped,
-          }),
-          title: t("SuccessTitle"),
-        }),
-      );
-
       captureImportComplete("vcard", totalImported, isFirstImport);
 
-      closeModal();
-      router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+      setFinishedStats({ imported: totalImported, skipped: totalSkipped });
+      setStep("finished");
     } catch (error) {
       notifications.show(
         errorNotificationTemplate({
@@ -470,6 +467,33 @@ export function VCardImportModal({
           </Stack>
         </Center>
       </Stack>,
+    );
+  }
+
+  if (step === "finished") {
+    return renderWithNavigationProgress(
+      <ImportFinishedStep
+        closeLabel={tCommon("a11y.close")}
+        description={finishedStats ? t("ImportSuccess", finishedStats) : undefined}
+        onClose={closeModal}
+        onViewContacts={() => {
+          closeModal();
+          router.push(routeAssert(WEBAPP_ROUTES.PEOPLE));
+        }}
+        overview={
+          importedContacts.length > 0 ? (
+            <ContactsTable
+              contacts={importedContacts}
+              disableNameLink
+              noContactsFound={t("NoContactsFound")}
+              noContactsMatchSearch={t("NoContactsMatchSearch")}
+              visibleColumns={["name", "headline", "phone", "email"]}
+            />
+          ) : undefined
+        }
+        title={t("SuccessTitle")}
+        viewContactsLabel={tCommon("actions.viewContacts")}
+      />,
     );
   }
 

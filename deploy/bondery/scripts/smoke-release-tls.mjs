@@ -20,6 +20,11 @@ const GRPC_NODES = [
 ];
 const INLINE_PEM_CERT_RE = / {10}-----BEGIN CERTIFICATE-----[\s\S]+? {10}-----END CERTIFICATE-----/;
 const LEADING_TEN_SPACES_RE = /^ {10}/;
+/** Transport file structure: the client certificate block and its inline private key. */
+const TRANSPORT_CLIENT_CERTS_RE = /^ {6}certificates:$/m;
+const TRANSPORT_CLIENT_KEY_RE = /^ {10}key: \|$/m;
+const TRANSPORT_PRIVATE_KEY_RE = /-----BEGIN PRIVATE KEY-----/;
+const TRANSPORT_ROOT_CAS_RE = /^ {6}rootCAs:$/m;
 const API_TRANSPORT_FILE_RE = /-api-transport\.yml$/;
 const POSTGRES_NO_ENCRYPTION_RE = /no encryption/;
 const POSTGRES_CERT_VERIFY_FAILED_RE = /certificate verify failed/i;
@@ -94,11 +99,28 @@ function apiHealth(compose) {
   return "";
 }
 
-/** Runs inside the api container: one HTTPS request that trusts only the given CA. */
-const TRANSPORT_CA_PROBE = (host, port, path, ca) => `
+/**
+ * Runs inside the api container: one HTTPS request that trusts only the given CA, and presents a
+ * client certificate when the service requires one.
+ */
+const TRANSPORT_CA_PROBE = (host, port, path, ca, client) => `
+import { readFileSync } from "node:fs";
 import { request } from "node:https";
+${
+  client
+    ? `const cert = readFileSync(${JSON.stringify(client.cert)});
+const key = readFileSync(${JSON.stringify(client.key)});`
+    : ""
+}
 const req = request(
-  { ca: ${JSON.stringify(ca)}, host: ${JSON.stringify(host)}, path: ${JSON.stringify(path)}, port: ${port}, servername: ${JSON.stringify(host)} },
+  {
+    ca: ${JSON.stringify(ca)},
+    ...(${client ? "{ cert, key }" : "{}"}),
+    host: ${JSON.stringify(host)},
+    path: ${JSON.stringify(path)},
+    port: ${port},
+    servername: ${JSON.stringify(host)},
+  },
   (res) => { console.log(\`status \${res.statusCode}\`); res.resume(); },
 );
 req.on("error", (error) => console.log(\`error \${error.code ?? error.message}\`));
@@ -112,8 +134,9 @@ req.end();
 export const STORAGE_TLS_PROBES = `
 T=/run/bondery-storage/tls
 probe() { name=$1; shift; code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 "$@" 2>/dev/null); echo "$name $? $code"; }
-probe gateway-https --cacert $T/ca.crt https://seaweedfs-s3:8443/
-probe gateway-untrusted https://seaweedfs-s3:8443/
+probe gateway-https --cacert $T/ca.crt --cert $T/tls.crt --key $T/tls.key https://seaweedfs-s3:8443/
+probe gateway-untrusted --cert $T/tls.crt --key $T/tls.key https://seaweedfs-s3:8443/
+probe gateway-no-client-cert --cacert $T/ca.crt https://seaweedfs-s3:8443/
 for url in seaweedfs-master:9333/cluster/status seaweedfs-volume:8080/healthz seaweedfs-filer:8888/; do
   node=\${url%%/*}
   probe "http-plaintext-$node" http://$url
@@ -147,6 +170,9 @@ export function storageTlsFailures(probeOutput) {
   if (accepted("gateway-untrusted")) {
     failures.push("the S3 gateway HTTPS listener passed verification without the storage CA");
   }
+  if (accepted("gateway-no-client-cert")) {
+    failures.push("the S3 gateway accepted HTTPS without a client certificate");
+  }
   for (const node of HTTP_NODES) {
     if (accepted(`http-plaintext-${node}`)) {
       failures.push(`${node} answered plaintext HTTP`);
@@ -167,9 +193,11 @@ export function storageTlsFailures(probeOutput) {
 }
 
 /**
- * Object storage is TLS-only (docs/deploy/configuration.mdx#object-storage-tls):
- * - the API reached the gateway over HTTPS with the storage CA (its boot report says so);
- * - the gateway's HTTPS listener verifies against the storage CA and nothing else;
+ * Object storage is mutual TLS (docs/deploy/configuration.mdx#object-storage-tls):
+ * - the API reached the gateway over HTTPS with the storage CA and its own client certificate
+ *   (its boot report says so);
+ * - the gateway's HTTPS listener verifies against the storage CA and nothing else, and refuses a
+ *   client without a certificate;
  * - every node refuses plaintext HTTP and HTTPS without a client certificate, and accepts the
  *   cluster certificate;
  * - no gRPC port answers plaintext.
@@ -179,8 +207,17 @@ export function assertStorageTls({ compose, fail }) {
   const report = (logs.stdout ?? "")
     .split("\n")
     .find((line) => line.includes("Object storage connection security"));
-  if (!(report?.includes('"tls":true') && report.includes('"privateCa":true'))) {
-    fail("The API did not report a TLS connection to object storage with the storage CA", report);
+  if (
+    !(
+      report?.includes('"tls":true') &&
+      report.includes('"privateCa":true') &&
+      report.includes('"mutualTls":true')
+    )
+  ) {
+    fail(
+      "The API did not report a TLS connection to object storage with the storage CA and its client certificate",
+      report,
+    );
   }
 
   const probes = compose("exec -T seaweedfs-s3 sh -s", STORAGE_TLS_PROBES);
@@ -192,7 +229,9 @@ export function assertStorageTls({ compose, fail }) {
     );
   }
 
-  console.log("Object storage TLS: API on HTTPS; nodes refuse plaintext and unauthenticated peers");
+  console.log(
+    "Object storage mutual TLS: API and Traefik present certificates; gateway and nodes refuse plaintext and unidentified clients",
+  );
 }
 
 /**
@@ -278,7 +317,7 @@ export function assertApiInternalTls({ compose, fail }) {
 
 /**
  * Runs inside the api container. Prints one JSON object: `status <code>` or `error <code>` for
- * HTTPS with the API CA, plaintext on the HTTPS port, and the retired plain HTTP port 26631.
+ * HTTPS with the API CA, and for plaintext on the same port, which must be refused.
  */
 export const API_HTTPS_ONLY_PROBES = `
 import { readFileSync } from "node:fs";
@@ -296,15 +335,14 @@ const probe = (send, options) =>
     req.end();
   });
 console.log(JSON.stringify({
-  https: await probe(httpsRequest, { agent: false, ca, port: 26642 }),
-  plaintextOnHttpsPort: await probe(httpRequest, { agent: false, port: 26642 }),
-  retiredHttpPort: await probe(httpRequest, { agent: false, port: 26631 }),
+  https: await probe(httpsRequest, { agent: false, ca, port: 26631 }),
+  plaintextOnHttpsPort: await probe(httpRequest, { agent: false, port: 26631 }),
 }));
 `;
 
 /**
  * What the HTTPS-only probes found wrong.
- * @param {{ https?: string; plaintextOnHttpsPort?: string; retiredHttpPort?: string }} results
+ * @param {{ https?: string; plaintextOnHttpsPort?: string }} results
  * @returns {string[]}
  */
 export function apiHttpsOnlyFailures(results) {
@@ -315,19 +353,13 @@ export function apiHttpsOnlyFailures(results) {
   if (!results.plaintextOnHttpsPort?.startsWith("error")) {
     failures.push(`the HTTPS port answered plaintext HTTP (${results.plaintextOnHttpsPort})`);
   }
-  if (results.retiredHttpPort !== "error ECONNREFUSED") {
-    failures.push(
-      `something still listens on the plain HTTP port 26631 (${results.retiredHttpPort})`,
-    );
-  }
   return failures;
 }
 
 /**
  * The API serves HTTPS only (docs/adr/0031-internal-api-tls.mdx):
  * - the container healthcheck, which also uses HTTPS and the API CA, reports healthy;
- * - HTTPS with the API CA answers; plaintext on the HTTPS port is refused;
- * - nothing listens on the retired plain HTTP port 26631.
+ * - HTTPS with the API CA answers; plaintext on the same port is refused.
  */
 export function assertApiHttpsOnly({ compose, fail }) {
   let health = apiHealth(compose);
@@ -346,27 +378,37 @@ export function assertApiHttpsOnly({ compose, fail }) {
   if (failures.length > 0) {
     fail(`API HTTPS only: ${failures.join("; ")}`, `${probes.stdout ?? ""}${probes.stderr ?? ""}`);
   }
-  console.log("API HTTPS only: healthcheck healthy over HTTPS; plaintext and port 26631 refused");
+  console.log("API HTTPS only: healthcheck healthy over HTTPS; plaintext refused on the API port");
 }
 
 /**
  * The services the traefik-transport job publishes a serversTransport for, and how a client that
  * trusts only the published CA proves it verifies that service: the port of its HTTPS listener,
- * a path, and the answers that mean "reached the service".
+ * a path, and the answers that mean "reached the service". The storage gateway also requires a
+ * client certificate, so the probe presents the API's own certificate from its mounted volume.
  */
 export const TRAEFIK_TRANSPORTS = {
-  api: { accepted: ["status 200"], path: "/health/live", port: 26_642 },
+  api: { accepted: ["status 200"], path: "/health/live", port: 26_631 },
   // Unsigned ListBuckets: 403 with S3 Error XML is the gateway speaking S3.
-  storage: { accepted: ["status 200", "status 403"], path: "/", port: 8443 },
+  storage: {
+    accepted: ["status 200", "status 403"],
+    clientCertificate: {
+      cert: "/bondery-storage/client/tls.crt",
+      key: "/bondery-storage/client/tls.key",
+    },
+    path: "/",
+    port: 8443,
+  },
 };
 
 /**
  * What a published serversTransport file gets wrong for `name` (<prefix>-<service>). Returns the
- * CA it holds too.
+ * CA it holds too. A service whose gateway requires a client certificate must carry one.
  * @param {string} yaml
  * @param {string} name
+ * @param {{ clientCertificate?: unknown }} [check]
  */
-export function traefikTransportFailures(yaml, name) {
+export function traefikTransportFailures(yaml, name, check = {}) {
   const failures = [];
   if (!new RegExp(`^ {4}${name}:$`, "m").test(yaml)) {
     failures.push(`no serversTransport named ${name}`);
@@ -374,7 +416,19 @@ export function traefikTransportFailures(yaml, name) {
   if (!new RegExp(`^ {6}serverName: ${name}$`, "m").test(yaml)) {
     failures.push(`serverName is not ${name}`);
   }
-  const ca = (yaml.match(INLINE_PEM_CERT_RE) ?? [""])[0]
+  if (check.clientCertificate) {
+    // Data bytes, not a path: Traefik does not mount the Bondery volumes.
+    if (!TRANSPORT_CLIENT_CERTS_RE.test(yaml)) {
+      failures.push(`${name} transport has no client certificate, but its gateway requires one`);
+    }
+    if (!TRANSPORT_CLIENT_KEY_RE.test(yaml) || !TRANSPORT_PRIVATE_KEY_RE.test(yaml)) {
+      failures.push(`${name} transport has no inline client private key`);
+    }
+  }
+  // The CA is the block after `rootCAs:`. Reading from there keeps it distinct from the client
+  // certificate, which is also an inline PEM block.
+  const rootCas = yaml.split(TRANSPORT_ROOT_CAS_RE)[1] ?? "";
+  const ca = (rootCas.match(INLINE_PEM_CERT_RE) ?? [""])[0]
     .split("\n")
     .map((line) => line.replace(LEADING_TEN_SPACES_RE, ""))
     .join("\n");
@@ -409,14 +463,14 @@ export function assertTraefikTransport({ compose, fail, dynamicDir }) {
       return;
     }
     const yaml = readFileSync(join(dynamicDir, file), "utf8");
-    const { ca, failures } = traefikTransportFailures(yaml, name);
+    const { ca, failures } = traefikTransportFailures(yaml, name, check);
     if (failures.length > 0) {
       fail(`Traefik serversTransport: ${failures.join("; ")}`, yaml);
       return;
     }
     const probe = compose(
       "exec -T api node --input-type=module -",
-      TRANSPORT_CA_PROBE(name, check.port, check.path, ca),
+      TRANSPORT_CA_PROBE(name, check.port, check.path, ca, check.clientCertificate),
     );
     const outcome = (probe.stdout ?? "").trim();
     if (!check.accepted.includes(outcome)) {

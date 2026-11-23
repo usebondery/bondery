@@ -171,7 +171,10 @@ volumes:
   seaweedfs-master-data: {}
   seaweedfs-volume-data: {}
   # Written by the stack-secrets job (docker-compose.yml). ca: the job only. cluster: the
-  # SeaweedFS nodes only. client: the API only (the CA certificate it trusts).
+  # SeaweedFS nodes only. client: the API only (its CA and its own client certificate).
+  # traefik: the traefik-transport job only, a second client certificate, so the API key and the
+  # Traefik key never share a volume.
   storage-tls-ca: {}
   storage-tls-cluster: {}
   storage-tls-client: {}
+  storage-tls-traefik: {}

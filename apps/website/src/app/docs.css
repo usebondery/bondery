@@ -13,15 +13,15 @@
 .docsPageDescription,
 .docsPageFoot,
 .docsPageHead {
-  min-width: 0;
-  max-width: var(--docs-measure);
+  min-inline-size: 0;
+  max-inline-size: var(--docs-measure);
 }
 
 /* The prose box takes the whole column. Each direct child limits itself to
    `--docs-measure` for a readable line length, except a code block, which is full
    width by default. Give one a `max-width` through its `className` to narrow it. */
 .docsProse {
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .docsProse a.pressableCard,
@@ -42,7 +42,7 @@
 /* Narrow a code block that holds one short command, so it does not stretch to the
    full column. Pass it as `className` on `<PlatformCode>`. */
 .docsCodeNarrow {
-  max-width: 34rem;
+  max-inline-size: 34rem;
 }
 
 /* Docs cards grid. Columns live here, not in a responsive `cols` prop, because
@@ -115,7 +115,7 @@
    default, so long commands stay readable. Give one a `max-width` through its
    `className` when it should stay narrow. */
 .docsRhythm.docsRhythm > *:not([data-code-block]) {
-  max-width: var(--docs-measure);
+  max-inline-size: var(--docs-measure);
 }
 
 /* Default gap between body blocks. */
@@ -159,28 +159,28 @@
 
 .docsSteps .docsStep {
   position: relative;
-  /* A grid item defaults to `min-width: auto`, so it refuses to shrink below its
-     content and the `minmax(0, 1fr)` above has no effect without this. */
-  min-width: 0;
+  /* A grid item defaults to an automatic minimum size, so it refuses to shrink
+     below its content and the `minmax(0, 1fr)` above has no effect without this. */
+  min-inline-size: 0;
 }
 
 /* The body takes the rest of the row, so a full-width code block fills the step.
    Without this the flex item shrinks to its content and leaves the column empty. */
 .docsSteps .docsStepBody {
   flex: 1 1 auto;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .docsSteps .docsStep:not(:last-child)::after {
   position: absolute;
-  top: var(--docs-step-marker);
-  bottom: calc(-1 * var(--docs-step-gap));
-  left: calc(var(--docs-step-marker) / 2);
-  width: 2px;
+  inset-block-start: var(--docs-step-marker);
+  inset-block-end: calc(-1 * var(--docs-step-gap));
+  inset-inline-start: calc(var(--docs-step-marker) / 2);
+  inline-size: 2px;
+  margin-inline-start: -1px;
   content: "";
   background: var(--mantine-color-default-border);
   border-radius: 999px;
-  transform: translateX(-50%);
 }
 
 /* Sidebar column keeps the header and footer side gap. `75em` is the Mantine `lg`
@@ -210,7 +210,7 @@
   }
 
   .docsPageWithRail > * {
-    min-width: 0;
+    min-inline-size: 0;
   }
 
   .docsPageRail {

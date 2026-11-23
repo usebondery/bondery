@@ -282,6 +282,8 @@ export type CommonCatalog = {
     save: string;
     saveChanges: string;
     select: string;
+    viewContacts: string;
+    viewMergedContact: string;
   };
   app: {
     description: string;

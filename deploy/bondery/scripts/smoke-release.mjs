@@ -29,7 +29,7 @@ const TRAEFIK_DYNAMIC_DIR = resolve(BONDERY_DIR, ".smoke-traefik-dynamic");
 /** The API CA, exported from the api container, so the host can verify the API's HTTPS port. */
 const API_CA_FILE = resolve(BONDERY_DIR, ".smoke-api-ca.crt");
 /** The API serves HTTPS only (docs/adr/0031-internal-api-tls.mdx). */
-const API_HEALTH_BASE = "https://127.0.0.1:26642/health";
+const API_HEALTH_BASE = "https://127.0.0.1:26631/health";
 
 const SMOKE_DOMAINS = {
   BONDERY_INFRA_API_DOMAIN: "api.example-smoke.test",
@@ -210,7 +210,7 @@ function runCompose(command) {
   }
 }
 
-/** `curl` arguments that trust the API CA, for https://127.0.0.1:26642 URLs. */
+/** `curl` arguments that trust the API CA, for https://127.0.0.1:26631 URLs. */
 function curlTrust(url) {
   return url.startsWith(API_HEALTH_BASE) ? `--cacert "${API_CA_FILE}" ` : "";
 }
@@ -352,7 +352,7 @@ function writeOverride(targetService, targetImageName, imageTag, useLocalImages)
   if (targetService === "webapp") {
     override += `  webapp:\n    image: ${image}\n${pullPolicy}    ports:\n      - "26632:26632"\n`;
   } else {
-    override += `  api:\n    image: ${image}\n${pullPolicy}    ports:\n      - "127.0.0.1:26642:26642"\n`;
+    override += `  api:\n    image: ${image}\n${pullPolicy}    ports:\n      - "127.0.0.1:26631:26631"\n`;
   }
   override += `  db:\n    ports:\n      - "127.0.0.1:54322:5432"\n`;
   override += `  seaweedfs-s3:\n    ports:\n      - "8333:8333"\n`;
@@ -429,7 +429,7 @@ function smokeWebapp(useLocalImages) {
     process.exitCode = 1;
     return;
   }
-  if (body.stdout.includes("api:26631") || body.stdout.includes(":26642")) {
+  if (body.stdout.includes("api:26631") || body.stdout.includes(":26631")) {
     console.error("INTERNAL URL LEAKED into runtime-config.json");
     process.exitCode = 1;
     return;

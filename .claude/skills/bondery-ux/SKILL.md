@@ -88,6 +88,7 @@ For API contracts (pagination `hasMore`, transport, sync), see the `bondery-api`
 - [ ] Destructive actions have confirmation per [destructive-actions.md](references/common/destructive-actions.md)
 - [ ] Repetitive create modals: Create more switch per create-more.md (or explicit `repeatable: false`)
 - [ ] Create more ON shows a success toast even when the OFF path navigates and skips one
+- [ ] A write whose result is not on screen offers an action to open it (for example "View merged contact") — see [feedback-and-confirmations.md](references/common/feedback-and-confirmations.md)
 - [ ] Mobile hub/list navigation uses shared in-flight guard — no raw `router.push` on settings rows; see [navigation.md](references/mobile/navigation.md)
 - [ ] Web modal inputs are full width on `base`. Side-by-side fields start at `sm` only — see [modals.md](references/desktop/modals.md)
 - [ ] Start and end date fields cannot cross. The other field disables days outside the bound, and the input shows the selected day. See [date-inputs.md](references/desktop/date-inputs.md)

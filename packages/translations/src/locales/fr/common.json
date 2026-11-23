@@ -23,7 +23,9 @@
     "retry": "Réessayer",
     "save": "Enregistrer",
     "saveChanges": "Enregistrer les modifications",
-    "select": "Sélectionner"
+    "select": "Sélectionner",
+    "viewContacts": "Voir les contacts",
+    "viewMergedContact": "Voir le contact fusionné"
   },
   "app": {
     "description": "Le CRM personnel open source pour de meilleurs liens."

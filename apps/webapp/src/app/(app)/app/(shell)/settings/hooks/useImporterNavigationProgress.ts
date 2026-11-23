@@ -48,7 +48,13 @@ export function useImporterNavigationProgress<TStep extends string>({
       return;
     }
 
-    nprogress.set(clamp(stepProgress[step] ?? 0, 0, 100));
+    const stepValue = clamp(stepProgress[step] ?? 0, 0, 100);
+    if (stepValue >= 100) {
+      // The import finished but the dialog stays open, so hide the bar instead of pinning it.
+      nprogress.complete();
+      return;
+    }
+    nprogress.set(stepValue);
   }, [
     step,
     stepProgress,

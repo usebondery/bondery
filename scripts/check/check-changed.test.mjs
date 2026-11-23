@@ -29,6 +29,25 @@ describe("planChecks", () => {
     assert.ok(names(["scripts/check/check-changed.mjs"]).includes("check-script-tests"));
   });
 
+  it("tests the sample-data tooling when the fixture corpus changes", () => {
+    assert.ok(names(["packages/tests/sample-data/anonymize.mjs"]).includes("sample-data"));
+    assert.ok(
+      names(["packages/tests/sample-data/base-contact-values.json"]).includes("sample-data"),
+    );
+    assert.ok(!names(["apps/api/src/main.ts"]).includes("sample-data"));
+  });
+
+  it("runs the importer tests when a parser, a commit step, or the corpus changes", () => {
+    assert.ok(names(["packages/tests/importers/commit.test.ts"]).includes("importer-tests"));
+    assert.ok(
+      names(["packages/tests/sample-data/samsung/contacts.vcf"]).includes("importer-tests"),
+    );
+    assert.ok(names(["apps/api/src/routes/import/vcard/parser.ts"]).includes("importer-tests"));
+    assert.ok(names(["apps/api/src/domains/import/linkedin.ts"]).includes("importer-tests"));
+    assert.ok(names(["apps/api/src/lib/integrations/mapy.ts"]).includes("importer-tests"));
+    assert.ok(!names(["apps/api/src/routes/tags/index.ts"]).includes("importer-tests"));
+  });
+
   it("lints and tests when a Biome plugin changes", () => {
     const plan = names(["biome/plugins/no-unsafe-secret-compare.grit"]);
     assert.ok(plan.includes("biome"));

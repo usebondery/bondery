@@ -23,7 +23,9 @@
     "retry": "Tentar novamente",
     "save": "Guardar",
     "saveChanges": "Guardar alterações",
-    "select": "Selecionar"
+    "select": "Selecionar",
+    "viewContacts": "Ver contactos",
+    "viewMergedContact": "Ver contacto fundido"
   },
   "app": {
     "description": "O CRM pessoal de código aberto para criar melhores ligações."

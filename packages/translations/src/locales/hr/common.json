@@ -23,7 +23,9 @@
     "retry": "Pokušati ponovno",
     "save": "Spremiti",
     "saveChanges": "Spremiti promjene",
-    "select": "Odabrati"
+    "select": "Odabrati",
+    "viewContacts": "Prikaži kontakte",
+    "viewMergedContact": "Prikaži spojeni kontakt"
   },
   "app": {
     "description": "Otvoreni osobni CRM za jače veze."

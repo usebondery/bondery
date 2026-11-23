@@ -95,17 +95,17 @@ describe("aPI TLS config", () => {
 
 describe("aPI listen address", () => {
   it("binds loopback in development and all interfaces elsewhere", () => {
-    const config = { API_HOST: "", API_PORT: 26_642 };
+    const config = { API_HOST: "", API_PORT: 26_631 };
     assert.deepEqual(resolveListenAddress(config, "development"), {
       host: "127.0.0.1",
-      port: 26_642,
+      port: 26_631,
     });
-    assert.deepEqual(resolveListenAddress(config, "production"), { host: "0.0.0.0", port: 26_642 });
+    assert.deepEqual(resolveListenAddress(config, "production"), { host: "0.0.0.0", port: 26_631 });
   });
 
   it("keeps an explicit API_HOST", () => {
     assert.equal(
-      resolveListenAddress({ API_HOST: "0.0.0.0", API_PORT: 26_642 }, "development").host,
+      resolveListenAddress({ API_HOST: "0.0.0.0", API_PORT: 26_631 }, "development").host,
       "0.0.0.0",
     );
   });

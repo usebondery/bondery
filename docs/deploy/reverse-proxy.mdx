@@ -5,11 +5,11 @@ icon: ArrowsExchange
 last_updated: 2026-11-19
 ---
 
-Visitors always reach Bondery over HTTPS at your proxy. Behind the proxy, the stack serves the API and the storage gateway on HTTPS ports with private certificate authorities, which the one-shot `stack-secrets` service creates. The proxy checks those certificates, so the hop from the proxy to the stack is encrypted and authenticated too.
+Visitors always reach Bondery over HTTPS at your proxy. Behind the proxy, the stack serves the API and the storage gateway on HTTPS ports with private certificate authorities, which the one-shot `stack-secrets` service creates. The proxy checks those certificates, so the hop from the proxy to the stack is encrypted and authenticated too. The storage gateway also checks the proxy's client certificate.
 
 | Upstream | Port | TLS | Name to verify |
 |----------|------|-----|----------------|
-| API (WebSocket sync included) | `26642` | HTTPS, API CA | `${BONDERY_INFRA_TRAEFIK_PREFIX}-api` |
+| API (WebSocket sync included) | `26631` | HTTPS, API CA | `${BONDERY_INFRA_TRAEFIK_PREFIX}-api` |
 | Storage gateway (public reads) | `8443` | HTTPS, storage CA | `${BONDERY_INFRA_TRAEFIK_PREFIX}-storage` |
 | Webapp | `26632` | HTTP, on the same host only | none |
 
@@ -38,12 +38,14 @@ Run the stack without Traefik and let your proxy reach it on `127.0.0.1`:
    docker compose up -d
    ```
 
-2. Export the two CAs for your proxy. Do it again only if you replace a CA:
+2. Export what your proxy needs. Do it again only if you replace a CA. The API needs only the CA. The storage gateway requires a **client certificate**, so the proxy needs the CA, a certificate, and a key:
 
    ```bash
    sh scripts/api-ca.sh > /etc/caddy/bondery-api-ca.crt
-   sh scripts/storage-ca.sh > /etc/caddy/bondery-storage-ca.crt
+   sh scripts/storage-ca.sh --client-dir /etc/caddy/bondery-storage
    ```
+
+   `storage-ca.sh` without `--client-dir` still prints the CA alone, which is enough for an S3 backup tool that reads through the public storage domain. The client certificate it exports is the API's own, because the API container already mounts the storage client volume. If your proxy runs elsewhere, ask for a certificate from the storage CA yourself; never copy the CA private key off the host.
 
 3. Use the ready-made configuration and set your domains:
    - Caddy: [`deploy/bondery/proxy/Caddyfile`](../../deploy/bondery/proxy/Caddyfile). It reads the domains from the same variables as `.env`, and gets the public certificates itself.
@@ -52,6 +54,7 @@ Run the stack without Traefik and let your proxy reach it on `127.0.0.1`:
 Both configurations:
 
 - verify the API and the storage gateway against their CAs, by the names in the table above, and require TLS 1.3;
+- present the storage client certificate to the gateway, which refuses a caller without one;
 - pass WebSocket upgrades to the API (sync);
 - serve the storage domain for reads only (`GET`, `HEAD`, `OPTIONS`) and drop the `Cookie` and `Authorization` headers there, because public images never need them;
 - allow uploads up to 100 MB on the API, the largest import Bondery accepts.
@@ -60,7 +63,8 @@ Both configurations:
 
 If you use something else (HAProxy, a Cloudflare Tunnel, a load balancer), keep the same rules:
 
-- Connect to `26642` and `8443` over HTTPS, trust only the exported CA, and verify the name from the table. Never turn verification off.
+- Connect to `26631` and `8443` over HTTPS, trust only the exported CA, and verify the name from the table. Never turn verification off.
+- Present a client certificate from the storage CA to `8443`. The gateway requires one, so a proxy that cannot send one cannot serve the storage domain.
 - Pass WebSocket upgrades to the API.
 - Set `X-Forwarded-For` to the address of the visitor only. Never pass on an `X-Forwarded-For` that the visitor sent: the API rate-limits sign-in by that address. Traefik and Caddy do this by default; in nginx, use `$remote_addr`, not `$proxy_add_x_forwarded_for`.
 - Limit the storage domain to reads, and do not forward cookies or credentials to it.

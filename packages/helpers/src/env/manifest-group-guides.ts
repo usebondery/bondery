@@ -28,7 +28,7 @@ export const ENV_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = {
   ],
   "Public URLs": [
     "Local web stack uses Portless HTTPS (website/webapp/api).",
-    "Webapp SSR calls the API's HTTPS listener: BONDERY_INFRA_INTERNAL_API_URL=https://127.0.0.1:26642 with BONDERY_INFRA_INTERNAL_API_CA_FILE (pnpm run api:secrets creates the CA; the browser still uses the public API URL).",
+    "Webapp SSR calls the API's HTTPS listener: BONDERY_INFRA_INTERNAL_API_URL=https://127.0.0.1:26631 with BONDERY_INFRA_INTERNAL_API_CA_FILE (pnpm run api:secrets creates the CA; the browser still uses the public API URL).",
   ],
   Storage: [
     "Local dev: bundled SeaweedFS defaults below are fine.",

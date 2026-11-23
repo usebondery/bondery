@@ -23,7 +23,9 @@
     "retry": "Reîncerca",
     "save": "Salva",
     "saveChanges": "Salva modificările",
-    "select": "Selecta"
+    "select": "Selecta",
+    "viewContacts": "Vezi contactele",
+    "viewMergedContact": "Vezi contactul unificat"
   },
   "app": {
     "description": "CRM-ul personal open source pentru legături mai puternice."

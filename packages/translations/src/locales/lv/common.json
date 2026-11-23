@@ -23,7 +23,9 @@
     "retry": "Mēģināt vēlreiz",
     "save": "Saglabāt",
     "saveChanges": "Saglabāt izmaiņas",
-    "select": "Atlasīt"
+    "select": "Atlasīt",
+    "viewContacts": "Skatīt kontaktus",
+    "viewMergedContact": "Skatīt apvienoto kontaktu"
   },
   "app": {
     "description": "Atvērtā pirmkoda personaīgais CRM labāku saistību veidošanai."

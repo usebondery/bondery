@@ -2,11 +2,7 @@ import { formatAddressLabel } from "@bondery/helpers";
 import type { VCardPreparedContact } from "@bondery/schemas";
 import { parseVCards, vCardToContactDraft } from "@bondery/vcard";
 import type { UploadFile } from "../../../lib/data/select-fragments.js";
-import {
-  cachedGeocodeLinkedInLocation,
-  getTimezoneForCoordinates,
-  validateStreetAddress,
-} from "../../../lib/integrations/mapy.js";
+import { getGeocoder } from "../../../lib/integrations/mapy.js";
 
 type PreparedAddress = VCardPreparedContact["addresses"][0];
 
@@ -28,6 +24,7 @@ const GEOCODE_BATCH_SIZE = 5;
  * - If geocoding fails entirely, the address is returned as-is with `"unverifiable"`.
  */
 async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
+  const geocoder = getGeocoder();
   const {
     addressLine1: street,
     addressCity: city,
@@ -38,12 +35,12 @@ async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
   // ── Phase 1: Street validation (required when street is present) ─────────────
   if (street && city) {
     const streetQuery = [street, city, state, country].filter(Boolean).join(", ");
-    const streetResult = await validateStreetAddress(streetQuery, city);
+    const streetResult = await geocoder.validateStreet(streetQuery, city);
 
     if (streetResult) {
       // Geocoder found the address — use its normalised fields instead of the
       // vCard's values (which may have bad postal codes or non-standard numbering).
-      const timezone = await getTimezoneForCoordinates(streetResult.lat, streetResult.lon);
+      const timezone = await geocoder.timezoneForCoordinates(streetResult.lat, streetResult.lon);
 
       const addressFormatted = formatAddressLabel({
         addressLine1: streetResult.name,
@@ -92,7 +89,7 @@ async function enrichAddress(addr: PreparedAddress): Promise<PreparedAddress> {
       }
       seen.add(key);
 
-      const result = await cachedGeocodeLinkedInLocation(candidate);
+      const result = await geocoder.cachedGeocodeLocation(candidate);
       if (!result) {
         continue;
       }

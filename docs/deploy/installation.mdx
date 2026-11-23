@@ -40,12 +40,12 @@ docker compose up -d
   posix={`cp docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
 sh scripts/api-ca.sh > api-ca.crt
-curl -sf --cacert api-ca.crt https://127.0.0.1:26642/health/live
+curl -sf --cacert api-ca.crt https://127.0.0.1:26631/health/live
 curl -sf http://127.0.0.1:26632/health/live`}
   windows={`Copy-Item docker-compose.override.yml.example docker-compose.override.yml
 docker compose up -d
 docker compose exec -T webapp cat /bondery-api/client/ca.crt > api-ca.crt
-curl.exe -sf --cacert api-ca.crt https://127.0.0.1:26642/health/live
+curl.exe -sf --cacert api-ca.crt https://127.0.0.1:26631/health/live
 curl.exe -sf http://127.0.0.1:26632/health/live`}
 />
 

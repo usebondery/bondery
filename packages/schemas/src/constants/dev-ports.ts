@@ -11,7 +11,7 @@ export const DEV_PORTS = {
   /** Reserved: internal admin / one-off dev utilities */
   ADMIN: 26_638,
   /** The API's only listener, HTTPS (Portless, the webapp's server side, `tailscale serve`) */
-  API: 26_642,
+  API: 26_631,
   EMAIL_PREVIEW: 26_639,
   EXTENSION: 26_633,
   /** Local Mailpit SMTP (`deploy/bondery/docker-compose.dev-mail.yml`) */

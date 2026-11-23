@@ -1,0 +1,102 @@
+/*
+  Recommendation card layout, shared by the merge, enrich, and hidden cards.
+
+  Mobile — badge, then the people centred, then two equal action buttons:
+    Duplicate
+          {person}
+          merge with
+          {person}
+    [  Decline  ] [  Merge  ]
+
+  Desktop — badge on its own line, then one row of people with the actions in
+  that same row on the right, as this card looked before the responsive work:
+    Duplicate
+    {person} merge with {person}              [ Decline ] [ Merge ]
+
+  The switch is a viewport query, matching the pre-redesign card and Mantine's
+  own `sm` breakpoint. `48em` is the literal value of `theme.breakpoints.sm`;
+  custom properties are not valid in a media query.
+
+  Truncation is prevented on the buttons, not the names. A Button never shrinks,
+  because Mantine clips a Button label rather than wrapping it. When the card is
+  too narrow for a full name, the PersonChip ellipsizes instead: a shortened
+  name is readable, a shortened "Merge" is not.
+*/
+.layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-sm);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+  min-inline-size: 0;
+}
+
+/* Mobile: person, "merge with", person, centred as a block. */
+.people {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-xs);
+  align-items: center;
+}
+
+/*
+  Mobile: the two actions share the row at half width each.
+
+  `min-inline-size: fit-content` keeps a Button from being narrower than its
+  label. When a long locale cannot fit in half the row, that button grows
+  instead of truncating and the other gives up the difference.
+*/
+.actions {
+  display: flex;
+  gap: var(--mantine-spacing-sm);
+}
+
+.actions > * {
+  flex: 1 1 0;
+  min-inline-size: fit-content;
+}
+
+@media (min-width: 48em) {
+  .layout {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  /* Desktop: person, "merge with", person stay on one line, left aligned. */
+  .people {
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: var(--mantine-spacing-xs);
+    align-items: center;
+    min-inline-size: 0;
+  }
+
+  /* Only the chips may shrink, so a narrow window ellipsizes a name. */
+  .people > :first-child,
+  .people > :last-child {
+    min-inline-size: 0;
+    overflow: hidden;
+  }
+
+  /* "merge with" keeps its full width and never wraps. */
+  .people > :not(:first-child, :last-child) {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  /* Desktop: actions hug their labels on the right and never shrink. */
+  .actions {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    padding-inline-start: var(--mantine-spacing-sm);
+  }
+
+  .actions > * {
+    flex: 0 0 auto;
+  }
+}

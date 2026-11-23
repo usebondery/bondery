@@ -23,7 +23,9 @@
     "retry": "Proovi uuesti",
     "save": "Salvesta",
     "saveChanges": "Salvesta muudatused",
-    "select": "Vali"
+    "select": "Vali",
+    "viewContacts": "Vaata kontakte",
+    "viewMergedContact": "Vaata ühendatud kontakti"
   },
   "app": {
     "description": "Avatud lähtekoodiga isiklik CRM paremate sidemete jaoks."

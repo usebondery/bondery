@@ -23,7 +23,9 @@
     "retry": "Spróbuj ponownie",
     "save": "Zapisz",
     "saveChanges": "Zapisz zmiany",
-    "select": "Wybierz"
+    "select": "Wybierz",
+    "viewContacts": "Zobacz kontakty",
+    "viewMergedContact": "Zobacz scalony kontakt"
   },
   "app": {
     "description": "Otwartoźródłowe PRM do budowania lepszych relacji."

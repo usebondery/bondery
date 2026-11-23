@@ -62,18 +62,18 @@ describe("resolveMcpResourceIdentifiers", () => {
   });
 
   it("keeps the HTTPS Tailscale URL of a phone-dev API as it is", () => {
-    withApiUrl("https://dev-host.tailnet.ts.net:26642", () => {
+    withApiUrl("https://dev-host.tailnet.ts.net:26631", () => {
       assert.deepEqual(resolveMcpResourceIdentifiers(), [
-        "https://dev-host.tailnet.ts.net:26642/mcp",
+        "https://dev-host.tailnet.ts.net:26631/mcp",
       ]);
     });
   });
 
   it("pairs a loopback MCP resource with its alias", () => {
-    withApiUrl("https://localhost:26642", () => {
+    withApiUrl("https://localhost:26631", () => {
       assert.deepEqual(resolveMcpResourceIdentifiers(), [
-        "https://localhost:26642/mcp",
-        "https://127.0.0.1:26642/mcp",
+        "https://localhost:26631/mcp",
+        "https://127.0.0.1:26631/mcp",
       ]);
     });
   });

@@ -25,7 +25,9 @@ export default interface Resources {
       "retry": "Retry",
       "save": "Save",
       "saveChanges": "Save changes",
-      "select": "Select"
+      "select": "Select",
+      "viewContacts": "View contacts",
+      "viewMergedContact": "View merged contact"
     },
     "app": {
       "description": "The open-source personal CRM for building better bonds."

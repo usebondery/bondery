@@ -1,7 +1,7 @@
 /**
  * TLS for the API's only listener (docs/deploy/configuration.mdx#internal-api-tls).
  *
- * The API serves HTTPS and nothing else, on API_PORT (default 26642), with TLS 1.3 and a
+ * The API serves HTTPS and nothing else, on API_PORT (default 26631), with TLS 1.3 and a
  * certificate from the stack's private API CA. Every caller reaches it over TLS: Traefik or
  * another reverse proxy (all public traffic), the webapp's server side, the container
  * healthcheck, and in local development Portless and `tailscale serve`. Requests carry bearer

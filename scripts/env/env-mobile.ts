@@ -14,7 +14,7 @@ const MOBILE_LOOPBACK_URLS: Partial<Record<string, string>> = {
 };
 
 const MOBILE_DEV_API_URL_KEY = "BONDERY_DEV_MOBILE_API_URL";
-const MOBILE_EXAMPLE_API_URL = "https://your-machine.your-tailnet.ts.net:26642";
+const MOBILE_EXAMPLE_API_URL = "https://your-machine.your-tailnet.ts.net:26631";
 
 /**
  * The value the mobile target gets for `canonical`. `value` is the root (or example) value;

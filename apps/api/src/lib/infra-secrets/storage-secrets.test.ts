@@ -7,8 +7,10 @@ import { connect, createServer } from "node:tls";
 
 import {
   ensureStorageSecrets,
+  STORAGE_API_CLIENT_COMMON_NAME,
   STORAGE_CERTIFICATE_COMMON_NAME,
   STORAGE_CERTIFICATE_RENEW_BEFORE_DAYS,
+  STORAGE_TRAEFIK_CLIENT_COMMON_NAME,
   storageCertificateNames,
   storageSecretPaths,
 } from "./storage-secrets.js";
@@ -140,12 +142,45 @@ describe("storage secrets", () => {
     }
   });
 
-  it("gives the API the CA only", async () => {
+  it("gives the API and Traefik each their own client certificate, and neither the other's key", async () => {
     await ensure({});
     const paths = storageSecretPaths(root);
     const clientCa = await readFile(paths.clientCaFile, "utf8");
     assert.equal(clientCa, await readFile(paths.caCertFile, "utf8"));
     assert.ok(!clientCa.includes("PRIVATE KEY"));
+
+    // Both client certificates chain to the same CA, so the gateway accepts either one.
+    const { ca } = await readCluster(root);
+    const apiPair = {
+      cert: await readFile(paths.apiClientCertFile, "utf8"),
+      key: await readFile(paths.clientKeyFile, "utf8"),
+    };
+    const traefikPair = {
+      cert: await readFile(paths.traefikCertFile, "utf8"),
+      key: await readFile(paths.traefikKeyFile, "utf8"),
+    };
+    assert.notEqual(apiPair.cert, traefikPair.cert);
+    assert.equal(await readFile(paths.traefikCaFile, "utf8"), ca);
+
+    const server = await readCluster(root);
+    assert.equal(
+      await mutualHandshake({
+        ca,
+        client: apiPair,
+        server: server.pair,
+        servername: "seaweedfs-s3",
+      }),
+      STORAGE_API_CLIENT_COMMON_NAME,
+    );
+    assert.equal(
+      await mutualHandshake({
+        ca,
+        client: traefikPair,
+        server: server.pair,
+        servername: "seaweedfs-s3",
+      }),
+      STORAGE_TRAEFIK_CLIENT_COMMON_NAME,
+    );
   });
 
   it("refuses a node without a client certificate", async () => {
@@ -192,9 +227,17 @@ describe("storage secrets", () => {
   });
 
   it("keeps a valid CA and certificate on later runs", async () => {
-    assert.deepEqual(await ensure({}), { authorityGenerated: true, certificateGenerated: true });
+    assert.deepEqual(await ensure({}), {
+      authorityGenerated: true,
+      certificateGenerated: true,
+      clientCertificatesGenerated: true,
+    });
     const before = await readCluster(root);
-    assert.deepEqual(await ensure({}), { authorityGenerated: false, certificateGenerated: false });
+    assert.deepEqual(await ensure({}), {
+      authorityGenerated: false,
+      certificateGenerated: false,
+      clientCertificatesGenerated: false,
+    });
     assert.deepEqual(await readCluster(root), before);
   });
 
@@ -208,9 +251,14 @@ describe("storage secrets", () => {
       },
       prefix: "bondery-beta",
     });
-    assert.deepEqual(result, { authorityGenerated: false, certificateGenerated: true });
+    assert.deepEqual(result, {
+      authorityGenerated: false,
+      certificateGenerated: true,
+      clientCertificatesGenerated: false,
+    });
     assert.ok(messages.some((message) => message.includes("does not cover bondery-beta-storage")));
-    assert.ok(messages.some((message) => message.includes("--force-recreate seaweedfs-master")));
+    const restartHint = messages.find((message) => message.includes("--force-recreate"));
+    assert.ok(restartHint?.includes("seaweedfs-master"), "the hint names the nodes to recreate");
     const { ca, pair } = await readCluster(root);
     assert.equal(ca, caBefore);
     await mutualHandshake({ ca, client: pair, server: pair, servername: "bondery-beta-storage" });
@@ -244,19 +292,25 @@ describe("storage secrets", () => {
 
   it("reissues the certificate before it expires", async () => {
     await ensure({});
+    // The client certificates share the same validity, so they are reissued in the same run.
     const later = new Date(
       Date.now() + (10 * 365 - STORAGE_CERTIFICATE_RENEW_BEFORE_DAYS + 1) * DAY_MS,
     );
     assert.deepEqual(await ensure({ now: later }), {
       authorityGenerated: false,
       certificateGenerated: true,
+      clientCertificatesGenerated: true,
     });
   });
 
   it("reissues the certificate and refreshes every CA copy when the CA is replaced", async () => {
     await ensure({});
     await rm(storageSecretPaths(root).caKeyFile);
-    assert.deepEqual(await ensure({}), { authorityGenerated: true, certificateGenerated: true });
+    assert.deepEqual(await ensure({}), {
+      authorityGenerated: true,
+      certificateGenerated: true,
+      clientCertificatesGenerated: true,
+    });
     const paths = storageSecretPaths(root);
     const ca = await readFile(paths.caCertFile, "utf8");
     assert.equal(await readFile(paths.clusterCaFile, "utf8"), ca);

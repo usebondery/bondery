@@ -1,3 +1,8 @@
+export type {
+  NotificationAction,
+  NotificationPayload,
+  NotificationTemplateProps,
+} from "#Notifications/buildNotificationPayload.js";
 export {
   type ErrorNotificationTemplateProps,
   errorNotificationTemplate,

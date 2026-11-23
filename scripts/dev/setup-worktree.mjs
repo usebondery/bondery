@@ -27,6 +27,8 @@ import { dirname, join, resolve } from "node:path";
 import { backup, DatabaseSync } from "node:sqlite";
 import { fileURLToPath } from "node:url";
 
+import { seedPlaneMcpEnv } from "./plane-mcp-env.mjs";
+
 async function main() {
   const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
   const shell = process.platform === "win32";
@@ -170,6 +172,9 @@ async function main() {
   } else {
     console.log("No primary .env.local to copy; env:pull will create one from the example");
   }
+
+  step("Seed Plane MCP env");
+  seedPlaneMcpEnv(repoRoot, primaryRoot);
 
   /**
    * Keys the developer sets for local dev that Infisical holds production values for. env:pull would

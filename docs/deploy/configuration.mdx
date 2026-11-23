@@ -141,13 +141,13 @@ Two callers reach the API across the Docker network: Traefik, which forwards eve
 | `api-tls-server` | API key and certificate | `api` (read-only) |
 | `api-tls-client` | CA certificate | `webapp`, `api` for its healthcheck, `traefik-transport` (read-only) |
 
-The API serves **HTTPS only**, WebSocket sync included, on port `26642` (TLS 1.3). It has no plain HTTP port. Both callers check the certificate against the API CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-api`; so does the container healthcheck, on `127.0.0.1`. Compose sets, so `.env` cannot weaken them:
+The API serves **HTTPS only**, WebSocket sync included, on port `26631` (TLS 1.3). It has no plain HTTP port. Both callers check the certificate against the API CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-api`; so does the container healthcheck, on `127.0.0.1`. Compose sets, so `.env` cannot weaken them:
 
 | Service | Variable | Value that Compose sets |
 |---------|----------|-------------------------|
-| `api` | `API_PORT` | `26642` |
+| `api` | `API_PORT` | `26631` |
 | `api` | `BONDERY_PRIVATE_API_TLS_CERT_FILE` / `_KEY_FILE` | `/bondery-api/server/tls.crt` / `tls.key` |
-| `webapp` | `BONDERY_INFRA_INTERNAL_API_URL` | `https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26642` |
+| `webapp` | `BONDERY_INFRA_INTERNAL_API_URL` | `https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631` |
 | `webapp` | `BONDERY_INFRA_INTERNAL_API_CA_FILE` | `/bondery-api/client/ca.crt` |
 
 The webapp adds the CA to the certificates it trusts once, at startup, so every server-side call uses it. It refuses to start when the CA file is unreadable, or set for an `http://` internal URL.
@@ -208,23 +208,26 @@ On every deploy, `api` `pre_start` runs `release-migrate` (schema, functions, OA
 
 ### Object storage TLS
 
-Uploads hold contact photos and the files you import. Every connection that carries them uses **TLS**: the API to the S3 gateway, and the SeaweedFS nodes to each other.
+Uploads hold contact photos and the files you import. Every connection that carries them uses **TLS**, and every connection into the S3 gateway also identifies the caller with a **client certificate** (mutual TLS).
 
-**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service creates a private storage CA and one cluster certificate signed by it, and keeps them afterwards:
+**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service creates a private storage CA, one cluster certificate signed by it, and two client certificates, and keeps them afterwards:
 
 | Volume | Holds | Mounted by |
 |--------|-------|------------|
 | `storage-tls-ca` | CA key and certificate | `stack-secrets` only |
 | `storage-tls-cluster` | Cluster key and certificate, CA certificate | the four `seaweedfs-*` services (read-only) |
-| `storage-tls-client` | CA certificate | `api` (read-only) |
+| `storage-tls-client` | CA certificate, API client key and certificate | `api` (read-only) |
+| `storage-tls-traefik` | CA certificate, Traefik client key and certificate | `traefik-transport` (read-only) |
 
-- **API to gateway.** The gateway serves the API on HTTPS port `8443`. The API checks the certificate against the storage CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-storage`. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT` and `BONDERY_PRIVATE_S3_TLS_CA_FILE`, so `.env` cannot weaken them.
+The two client certificates keep the secrets apart: the job that writes into Traefik's configuration never sees the API key, and the API never sees Traefik's. Each certificate has its own common name, so the gateway's access log names the caller.
+
+- **API to gateway.** The gateway serves the API on HTTPS port `8443` and requires a client certificate signed by the storage CA. The API checks the certificate against the storage CA and the hostname `${BONDERY_INFRA_TRAEFIK_PREFIX}-storage`, and presents its own certificate. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT`, `BONDERY_PRIVATE_S3_TLS_CA_FILE`, `BONDERY_PRIVATE_S3_TLS_CERT_FILE`, and `BONDERY_PRIVATE_S3_TLS_KEY_FILE`, so `.env` cannot weaken them.
 - **Between nodes.** `deploy/bondery/seaweedfs/security.toml` turns on mutual TLS: master, volume, filer, and gateway accept gRPC and HTTP only from a peer that presents the cluster certificate. File chunks between the gateway and the volume server travel over this HTTPS. The nodes refuse plaintext.
-- **Public reads.** Traefik serves `BONDERY_INFRA_STORAGE_DOMAIN` with its Let's Encrypt certificate and forwards to the gateway on HTTPS `8443`, verified with the storage CA through the published transport. That route takes reads only (`GET`, `HEAD`, `OPTIONS`) and drops the `Cookie` and `Authorization` headers: the session cookie of the parent domain would otherwise reach SeaweedFS with every image request. HTTP `8333` stays for the healthcheck and local development.
+- **Public reads.** Traefik serves `BONDERY_INFRA_STORAGE_DOMAIN` with its Let's Encrypt certificate and forwards to the gateway on HTTPS `8443`, verified with the storage CA through the published transport, which also carries Traefik's client certificate. That route takes reads only (`GET`, `HEAD`, `OPTIONS`) and drops the `Cookie` and `Authorization` headers: the session cookie of the parent domain would otherwise reach SeaweedFS with every image request. HTTP `8333` stays for the healthcheck and local development.
 
 All listeners use TLS 1.3.
 
-**External S3** (AWS S3, Cloudflare R2, Backblaze B2, or MinIO). Run the API image alone (see [API container](../contributing/api-container.mdx)) with an `https://` endpoint. A publicly trusted certificate needs nothing more. For a private CA, set `BONDERY_PRIVATE_S3_TLS_CA_FILE` to its PEM file; the API then trusts only that file. The API refuses a CA file with an `http://` endpoint, and in production it warns on every boot when the endpoint is `http://`.
+**External S3** (AWS S3, Cloudflare R2, Backblaze B2, or MinIO). Run the API image alone (see [API container](../contributing/api-container.mdx)) with an `https://` endpoint. A publicly trusted certificate needs nothing more. For a private CA, set `BONDERY_PRIVATE_S3_TLS_CA_FILE` to its PEM file; the API then trusts only that file. If that provider requires a client certificate, also set `BONDERY_PRIVATE_S3_TLS_CERT_FILE` and `BONDERY_PRIVATE_S3_TLS_KEY_FILE`; set the pair or neither. The API refuses these variables with an `http://` endpoint, and in production it warns on every boot when the endpoint is `http://`.
 
 **Certificate expiry.** The API logs the TLS version and the days left on the gateway certificate at boot, and checks it daily with the Postgres certificate. It warns 90 days before expiry and logs an error 14 days before. See [Object storage TLS certificate](./secrets.mdx#storage_tls_certificate) to renew it.
 

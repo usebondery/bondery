@@ -53,7 +53,7 @@ export const envSchema = {
     },
     // The API's only listener, HTTPS (lib/platform/api-tls.ts).
     API_PORT: {
-      default: 26_642,
+      default: 26_631,
       type: "number",
     },
     BONDERY_PRIVATE_ANTHROPIC_API_KEY: {

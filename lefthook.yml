@@ -24,9 +24,12 @@ pre-commit:
       glob:
         - ".agents/agents/**"
         - ".agents/skills/**"
+        - ".agents/mcp/**"
         - ".claude/agents/**"
         - ".claude/skills/**"
         - ".cursor/agents/**"
+        - ".mcp.json"
+        - ".cursor/mcp.json"
       run: node scripts/dev/sync-agent-files.mjs --stage
 commit-msg:
   commands:

@@ -1,10 +1,10 @@
 /**
  * Publish the local API to your tailnet for the mobile app (docs/contributing/local-setup.mdx).
  *
- * The API serves HTTPS only, on 127.0.0.1:26642, with a certificate from the private dev API CA.
+ * The API serves HTTPS only, on 127.0.0.1:26631, with a certificate from the private dev API CA.
  * A phone or an emulator can neither resolve the Portless name (api.usebondery.test) nor trust
  * that CA. `tailscale serve` gives the API a name with a public certificate on your tailnet,
- * https://<machine>.<tailnet>.ts.net:26642, and forwards to the API over loopback. It does not
+ * https://<machine>.<tailnet>.ts.net:26631, and forwards to the API over loopback. It does not
  * check the API's certificate on that hop, which never leaves this machine.
  *
  * The URL goes into BONDERY_DEV_MOBILE_API_URL in .env.local; `pnpm run env` gives it to the

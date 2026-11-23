@@ -17,6 +17,7 @@ import {
   logApiCertificateExpiry,
   resolveListenAddress,
 } from "./lib/platform/api-tls.js";
+import logger from "./lib/platform/logger.js";
 import { getApiRequiredEnvVars } from "./lib/platform/required-env.js";
 
 function assertRequiredEnvAtStartup(): void {
@@ -58,6 +59,11 @@ async function start() {
   }
 }
 
-detachPromise(start());
+detachPromise(start(), (error) => {
+  // A rejection reaches no Fastify logger, because `server` does not exist yet when
+  // `buildServer()` throws. Log through the shared logger and fail the process.
+  logger.error(error);
+  process.exitCode = 1;
+});
 
 export { buildApp, buildServer };

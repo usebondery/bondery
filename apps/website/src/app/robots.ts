@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { connection } from "next/server";
-import { getWebsiteUrl } from "@/lib/config";
+import { getWebsiteUrl, requireEnv } from "@/lib/env";
 
 /** Search, citation, and user-fetch crawlers we allow to index public marketing/docs content. */
 const CITATION_AND_SEARCH_BOTS = [
@@ -29,7 +29,7 @@ const TRAINING_AND_DATASET_BOTS = [
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   await connection();
-  const origin = getWebsiteUrl();
+  const origin = requireEnv("BONDERY_PUBLIC_WEBSITE_URL", getWebsiteUrl());
 
   return {
     rules: [

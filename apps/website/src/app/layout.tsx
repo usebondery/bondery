@@ -6,6 +6,7 @@ import { ColorSchemeScript } from "@mantine/core";
 import { Lexend } from "next/font/google";
 import PlausibleProvider from "next-plausible";
 import { WEBSITE_URL } from "@/lib/config";
+import { getPlausibleDomain, getPlausibleHost, isDevelopment } from "@/lib/env";
 import { SITE_DESCRIPTION, SITE_TITLE } from "@/lib/seo/copy";
 import { JsonLd } from "@/lib/seo/json-ld";
 import { getCspNonce } from "@/lib/seo/nonce";
@@ -53,8 +54,8 @@ const lexend = Lexend({
   variable: "--font-lexend",
 });
 
-const plausibleDomain = process.env["BONDERY_PUBLIC_PLAUSIBLE_DOMAIN"];
-const plausibleHost = process.env["BONDERY_PUBLIC_PLAUSIBLE_HOST"];
+const plausibleDomain = getPlausibleDomain();
+const plausibleHost = getPlausibleHost();
 const analyticsEnabled = Boolean(plausibleDomain && plausibleHost);
 
 const JSON_LD_ID_ORGANIZATION = "schema-organization";
@@ -89,7 +90,7 @@ async function RootLayout({
           <PlausibleProvider
             enabled={analyticsEnabled}
             init={{
-              captureOnLocalhost: process.env["NODE_ENV"] === "development",
+              captureOnLocalhost: isDevelopment(),
             }}
             scriptProps={
               { "data-domain": plausibleDomain } as NonNullable<

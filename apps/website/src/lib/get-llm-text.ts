@@ -1,8 +1,8 @@
 import { DOCS_GITHUB_BLOB_BASE } from "@bondery/helpers";
 import { llms } from "fumadocs-core/source";
-import { getWebsiteUrl } from "@/lib/config";
 import { absolutizeDocsLinks, rewriteDocsMarkdownLinks } from "@/lib/docs-markdown-links";
 import { isPublishedDocsPage } from "@/lib/docs-visibility";
+import { getWebsiteUrl, requireEnv } from "@/lib/env";
 import { loadOpenApiDocument } from "@/lib/openapi";
 import { openApiPageMarkdown } from "@/lib/openapi-markdown";
 import type { Page } from "@/lib/source";
@@ -22,8 +22,16 @@ function docsFilePath(page: Page): string {
   return `${path}.mdx`;
 }
 
+/**
+ * Marketing origin for absolute links. Required here: every caller emits a URL
+ * an agent must be able to follow.
+ */
+function websiteOrigin(): string {
+  return requireEnv("BONDERY_PUBLIC_WEBSITE_URL", getWebsiteUrl());
+}
+
 function getDocsPageUrl(page: Page): string {
-  return new URL(page.url, getWebsiteUrl()).href;
+  return new URL(page.url, websiteOrigin()).href;
 }
 
 /**
@@ -70,7 +78,7 @@ async function getLLMText(page: Page) {
     filePath: page.path,
     hasPage: hasDocsPage,
     isPublicPage: isPublicDocsPage,
-    siteOrigin: getWebsiteUrl(),
+    siteOrigin: websiteOrigin(),
     sourceBaseUrl: DOCS_GITHUB_BLOB_BASE,
   });
 
@@ -119,7 +127,7 @@ async function renderDocsIndex(): Promise<string> {
   );
 
   // `llms.txt` links are root-relative; an agent needs the host to request them.
-  return absolutizeDocsLinks(index, getWebsiteUrl());
+  return absolutizeDocsLinks(index, websiteOrigin());
 }
 
 /** `llms-full.txt`: every published page, joined. */

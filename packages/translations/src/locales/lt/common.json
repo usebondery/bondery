@@ -23,7 +23,9 @@
     "retry": "Bandyti dar kartą",
     "save": "Išsaugoti",
     "saveChanges": "Išsaugoti pakeitimus",
-    "select": "Pasirinkti"
+    "select": "Pasirinkti",
+    "viewContacts": "Peržiūrėti kontaktus",
+    "viewMergedContact": "Peržiūrėti sujungtą kontaktą"
   },
   "app": {
     "description": "Atviro kodo asmeninis PRM geresniems ryšiams kurti."

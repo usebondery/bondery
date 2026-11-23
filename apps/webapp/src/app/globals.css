@@ -46,8 +46,8 @@
 
 /* Editor placeholder: rendered via Tiptap Placeholder extension (text set in JS config) */
 .tiptap p.is-editor-empty:first-child::before {
-  float: left;
-  height: 0;
+  float: inline-start;
+  block-size: 0;
   color: var(--mantine-color-placeholder);
   pointer-events: none;
   content: attr(data-placeholder);
@@ -80,9 +80,10 @@
 
 .tiptap ul[data-type="taskList"] .mantine-Checkbox-icon {
   position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  inset-block-start: 50%;
+  inset-inline: 0;
+  margin-inline: auto;
+  transform: translateY(-50%);
 }
 
 /*

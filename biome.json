@@ -36,6 +36,7 @@
       "!**/.source",
       "!.claude/agents",
       "!.claude/skills",
+      "!.mcp.json",
       "!.agents/skills/*",
       ".agents/skills/bondery-*",
       "!llm-plugins/claude",
@@ -635,8 +636,35 @@
       "includes": ["apps/website/**"],
       "linter": {
         "rules": {
+          "correctness": {
+            "noProcessGlobal": "error"
+          },
           "nursery": {
             "useReactCompiler": "error"
+          },
+          "style": {
+            "noProcessEnv": "error"
+          }
+        }
+      }
+    },
+    {
+      "includes": [
+        "apps/website/src/lib/env.ts",
+        "apps/website/next.config.ts",
+        "apps/website/scripts/**",
+        "apps/website/src/app/blog/_lib/server-utils.ts",
+        "apps/website/src/app/(marketing)/blog/_lib/server-utils.ts",
+        "apps/website/src/app/openapi.yaml/route.ts",
+        "apps/website/src/lib/platform/validateWebsiteStartup.node.ts"
+      ],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noProcessGlobal": "off"
+          },
+          "style": {
+            "noProcessEnv": "off"
           }
         }
       }
@@ -783,6 +811,9 @@
         "rules": {
           "style": {
             "noMagicNumbers": "off"
+          },
+          "suspicious": {
+            "useAwait": "off"
           }
         }
       }

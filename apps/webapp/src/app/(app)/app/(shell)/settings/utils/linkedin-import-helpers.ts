@@ -15,9 +15,16 @@ function buildImportedTitle(position: string | null, company: string | null): st
   return normalizedCompany || null;
 }
 
-export type LinkedInImportStep = "intro" | "instructions" | "upload" | "processing" | "preview";
+export type LinkedInImportStep =
+  | "intro"
+  | "instructions"
+  | "upload"
+  | "processing"
+  | "preview"
+  | "finished";
 
 export const LINKEDIN_STEP_PROGRESS: Record<LinkedInImportStep, number> = {
+  finished: 100,
   instructions: 30,
   intro: 12,
   preview: 84,

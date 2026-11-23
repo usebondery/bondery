@@ -18,7 +18,7 @@ const PATTERN_5E5C642B24_RE = /^\d+$/;
 
 const IS_WINDOWS = process.platform === "win32";
 
-const ports = [26_630, 26_632, 26_642];
+const ports = [26_630, 26_632, 26_631];
 
 /**
  * Command-line fragments for dev processes that hold no port.

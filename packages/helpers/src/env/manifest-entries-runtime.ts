@@ -106,8 +106,8 @@ export const RUNTIME_ENTRIES: EnvVarDef[] = [
   {
     canonical: "BONDERY_INFRA_INTERNAL_API_URL",
     description:
-      "Webapp SSR/BFF API base URL: the API's HTTPS listener (Compose: https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26642). Browser clients keep using BONDERY_PUBLIC_API_URL. Local dev: https://127.0.0.1:26642",
-    exampleValue: "https://127.0.0.1:26642",
+      "Webapp SSR/BFF API base URL: the API's HTTPS listener (Compose: https://${BONDERY_INFRA_TRAEFIK_PREFIX}-api:26631). Browser clients keep using BONDERY_PUBLIC_API_URL. Local dev: https://127.0.0.1:26631",
+    exampleValue: "https://127.0.0.1:26631",
     group: "Infra",
     requiredIn: [],
     secret: false,
@@ -219,7 +219,18 @@ export const RUNTIME_ENTRIES: EnvVarDef[] = [
   {
     canonical: "BONDERY_DEV_MOBILE_API_URL",
     description:
-      "Optional. HTTPS URL of the dev API for the mobile app, over Tailscale: https://<machine>.<tailnet>.ts.net:26642. pnpm run dev:mobile-api sets it; pnpm run env gives it to the mobile app as BONDERY_PUBLIC_API_URL. Phones and emulators cannot use the Portless URL",
+      "Optional. HTTPS URL of the dev API for the mobile app, over Tailscale: https://<machine>.<tailnet>.ts.net:26631. pnpm run dev:mobile-api sets it; pnpm run env gives it to the mobile app as BONDERY_PUBLIC_API_URL. Phones and emulators cannot use the Portless URL",
+    exampleValue: "",
+    group: "Local dev (contributor)",
+    requiredIn: [],
+    secret: false,
+    targets: [],
+    turboAffectsCache: false,
+  },
+  {
+    canonical: "BONDERY_DEV_TAILSCALE_HOST",
+    description:
+      "Optional. Tailscale MagicDNS name of this PC, for pnpm run dev:remote-laptop: <machine>.<tailnet>.ts.net. Set it when neither BONDERY_DEV_MOBILE_API_URL nor tailscale status has the name",
     exampleValue: "",
     group: "Local dev (contributor)",
     requiredIn: [],
