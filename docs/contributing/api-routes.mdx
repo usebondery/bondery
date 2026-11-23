@@ -277,7 +277,7 @@ Existing query modules: `services/contacts/queries.ts`, `services/tags/queries.t
 
 ## Container deployment (GHCR + Dokploy)
 
-The API runs as a long-lived Node process in Docker, not serverless. See [API container (GHCR)](./api-container.mdx).
+The API runs as a long-lived Node process in Docker, not serverless. The image is `ghcr.io/usebondery/api`, published by CI. Deploy it with the full Compose stack: [Deployment topology](./dokploy.mdx).
 
 Build pipeline:
 

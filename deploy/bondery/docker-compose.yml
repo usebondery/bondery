@@ -2,8 +2,9 @@
 # Local laptop Redis: deploy/bondery/docker-compose.dev-redis.yml (port 26636) — do not use this file for DX.
 # Local laptop Postgres: deploy/bondery/docker-compose.dev-db.yml or packages/db migrations.
 #
-# Advanced external Redis: run the API image alone with BONDERY_PRIVATE_REDIS_URL set to your host.
-# See README.md and docs/deploy/api-container.md.
+# Redis is part of this stack. There is no external Redis: the API trusts only the client
+# certificate that stack-secrets issues for the bundled service.
+# See README.md and docs/deploy/installation.mdx.
 #
 # Prerequisite (Traefik / Dokploy): docker network create dokploy-network
 # Host-port self-host (no Traefik): copy docker-compose.override.yml.example → docker-compose.override.yml

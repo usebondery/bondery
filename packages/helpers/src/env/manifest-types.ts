@@ -109,7 +109,7 @@ export type EnvVarDef = {
  * - BONDERY_PUBLIC_WEBAPP_OAUTH_CLIENT_ID, BONDERY_PRIVATE_WEBAPP_OAUTH_CLIENT_SECRET,
  *   BONDERY_PRIVATE_WEBAPP_SESSION_SECRET — invented per dev machine; run setup:dev / provision:oauth-clients
  * - BONDERY_PRIVATE_BETTER_AUTH_SECRETS — can be shared or per-env; team policy
- * - BONDERY_PRIVATE_REDIS_URL — local Docker Redis unless using shared remote Redis
+ * - BONDERY_PRIVATE_REDIS_URL — local Docker Redis; deploys use the bundled service that Compose sets
  * - BONDERY_DEV_* — local API boot toggles only
  * - BONDERY_INFRA_* (except INTERNAL_API_URL) — deploy hostnames / image tags, not local pull
  * Portless public URLs (BONDERY_PUBLIC_API/WEBAPP/WEBSITE_URL) are team-shared in Infisical development.

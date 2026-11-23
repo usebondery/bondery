@@ -70,7 +70,9 @@ export const DEPLOY_GROUP_GUIDES: Readonly<Record<string, readonly string[]>> = 
   "Public hostnames": [
     "Traefik Host() rules use these; Compose derives https://… URLs for the apps (no scheme here).",
   ],
-  Redis: ["Bundled Redis (default). Advanced: run API alone with a managed Redis URL."],
+  Redis: [
+    "Bundled Redis only. The API trusts the client certificate that stack-secrets issues; there is no external Redis.",
+  ],
   Storage: [
     "S3 credentials are rendered into SeaweedFS at container start (see deploy/bondery/seaweedfs/entrypoint.sh).",
     "Production secret key: openssl rand -hex 32   # BONDERY_PRIVATE_S3_SECRET_ACCESS_KEY",

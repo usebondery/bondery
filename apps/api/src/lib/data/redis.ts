@@ -185,7 +185,7 @@ async function runRedisVerify(
 
 /**
  * Production Redis must use TLS and a password (see the bondery-security skill).
- * The API still starts so that an upgrade never takes down an external Redis setup,
+ * The API still starts so that a misconfigured stack still answers health checks,
  * but the operator sees what to fix on every boot.
  */
 function warnOnInsecureProductionRedis(log: FastifyBaseLogger | undefined, redisUrl: string): void {

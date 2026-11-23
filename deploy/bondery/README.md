@@ -9,7 +9,7 @@ Local development:
 - Redis: **`deploy/bondery/docker-compose.dev-redis.yml`** (`pnpm run start:redis`, port 26636, mutual TLS like the stack; secrets in `.temp/redis-secrets`)
 - Postgres: **`deploy/bondery/docker-compose.dev-db.yml`** or `packages/db` migrations — not this Compose file
 
-Docs: [docs/deploy/installation.mdx](../../docs/deploy/installation.mdx) · [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx) · [docs/contributing/api-container.mdx](../../docs/contributing/api-container.mdx)
+Docs: [docs/deploy/installation.mdx](../../docs/deploy/installation.mdx) · [docs/deploy/configuration.mdx](../../docs/deploy/configuration.mdx) · [docs/contributing/dokploy.mdx](../../docs/contributing/dokploy.mdx)
 
 ## Quick start
 
@@ -108,11 +108,9 @@ node deploy/bondery/scripts/smoke-release.mjs --service api --tag 1.7.5
 
 A second stack on the same Traefik must set `BONDERY_INFRA_TRAEFIK_PREFIX=bondery-beta` in Infisical **staging** (beta sync). Infisical **production** should be `bondery` or omitted (compose default). Same router names on one Traefik overwrite production HTTPS routes. The same-host beta stack must also set `BONDERY_INFRA_POSTGRES_HOST_PORT=5433` so it does not steal production's `127.0.0.1:5432`.
 
-## Advanced: external Redis
+## Advanced: external Postgres
 
-1. Do **not** start this compose Redis (or omit compose entirely).
-2. Run `ghcr.io/usebondery/api:<semver>` alone with your secrets.
-3. Set `BONDERY_PRIVATE_REDIS_URL` to your managed Redis. It must use TLS (`rediss://…`) and a password. For a private CA or a password file, set `BONDERY_PRIVATE_REDIS_TLS_CA_FILE` / `BONDERY_PRIVATE_REDIS_PASSWORD_FILE`. Set client certificate files only when that Redis requires them.
+Redis is always the bundled service. Compose sets every Redis variable, so an operator value in `.env` has no effect. Run the full stack instead of the API image alone. To use a managed Postgres, add the `docker-compose.external-postgres.yml` overlay (see [Configuration](../../docs/deploy/configuration.mdx#postgres-tls)).
 
 ## Security
 

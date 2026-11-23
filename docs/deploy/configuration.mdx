@@ -2,7 +2,7 @@
 title: Configuration
 description: Set the BONDERY_* variables that the stack reads. Copy the generated env example, fill in the core secrets, then review each optional service.
 icon: AdjustmentsHorizontal
-last_updated: 2026-11-22
+last_updated: 2026-11-23
 ---
 
 ## Core secrets
@@ -15,13 +15,16 @@ Operators configure the stack with **`BONDERY_*`** names. Copy [`deploy/bondery/
 | `BONDERY_PRIVATE_POSTGRES_PASSWORD` | Postgres password (compose `db` service) |
 | `BONDERY_INFRA_POSTGRES_HOST_PORT` | Optional. Host loopback port for Compose Postgres (`127.0.0.1`). Default `5432`. A second stack on the same VPS must use another port (beta: `5433`). |
 | `BONDERY_PRIVATE_API_KEY_PEPPER` | API key hashing pepper |
-| `BONDERY_PRIVATE_REDIS_URL` | Compose sets it for you. Do not put it in `.env`. See [Redis](#redis). |
 
 ### Redis
 
-Redis stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*`: sessions and verification records, dual-written with Postgres). Because it holds session data, Redis always requires **TLS, a password, and a client certificate** on the bundled service.
+Redis stores rate-limit counters, sync wake pub/sub, WebSocket tickets (`sync:ws-ticket:*`), and Better Auth secondary storage (`bondery:auth:*`: sessions and verification records, dual-written with Postgres). Because it holds session data, Redis requires **TLS, a password, and a client certificate**.
 
-**Default stack.** You do not configure anything. On each `docker compose up`, the one-shot `stack-secrets` service checks the `redis-tls-*` volumes. When the CA, certificates, or password are missing, it creates them. It keeps existing ones. Redis then accepts only TLS 1.3 connections with a client certificate and the password, and the API connects with:
+**The stack runs its own Redis.** Compose sets every Redis variable and ignores a value in `.env`, so the API connects to the bundled service. That service accepts only a caller with a certificate from its own CA.
+
+A Redis that you operate is not supported. It needs your own CA, a server certificate, and a client certificate for the API. Most managed Redis offerings cannot require a client certificate at all. Other services on the host could also share such a Redis with your sessions. Run the full Compose stack, not the API image alone.
+
+**You do not configure anything.** On each `docker compose up`, the one-shot `stack-secrets` service checks the `redis-tls-*` volumes. When the CA, certificates, or password are missing, it creates them. It keeps existing ones. Redis then accepts only TLS 1.3 connections with a client certificate and the password, and the API connects with:
 
 | Variable | Value that Compose sets |
 |----------|-------------------------|
@@ -40,22 +43,6 @@ Each volume holds only what its consumer needs:
 | `redis-tls-client` | CA certificate, API client key and certificate, password | `api` (read-only) |
 
 An older `.env` that still has `BONDERY_PRIVATE_REDIS_URL=redis://redis:6379` is safe to keep. Compose overrides it. Your Redis data volume stays as it is.
-
-**External Redis.** Run the API image alone (see [API container](../contributing/api-container.mdx)) and point it at a Redis that requires TLS and a password:
-
-```bash
-BONDERY_PRIVATE_REDIS_URL=rediss://:<password>@redis.example.com:6380
-# Or keep the password out of the URL:
-BONDERY_PRIVATE_REDIS_URL=rediss://redis.example.com:6380
-BONDERY_PRIVATE_REDIS_PASSWORD_FILE=/run/secrets/redis_password
-# Only for a private CA; publicly trusted certificates need nothing:
-BONDERY_PRIVATE_REDIS_TLS_CA_FILE=/run/secrets/redis_ca.pem
-# Only when that Redis requires a client certificate; set both or neither:
-BONDERY_PRIVATE_REDIS_TLS_CERT_FILE=/run/secrets/redis_client.crt
-BONDERY_PRIVATE_REDIS_TLS_KEY_FILE=/run/secrets/redis_client.key
-```
-
-The API still starts with a `redis://` URL or without a password, but in production it logs a warning on every boot until you fix it.
 
 ### Postgres TLS
 
@@ -156,7 +143,7 @@ The webapp adds the CA to the certificates it trusts once, at startup, so every 
 
 **Your own setup.**
 - Without Traefik's folder the `traefik-transport` service fails on purpose, so a missing setup is loud. Another Traefik (Coolify, your own): set `BONDERY_INFRA_TRAEFIK_DYNAMIC_DIR` to the folder its file provider watches. Caddy, nginx, or no proxy yet: use `docker-compose.override.yml.example`, which turns the job off and binds every port to `127.0.0.1`. See [Reverse proxy](./reverse-proxy.mdx).
-- The API does not start without the two certificate variables. If you run the API image on its own, give it a certificate and key, and point your proxy and the webapp at `https://`. For a private CA, set `BONDERY_INFRA_INTERNAL_API_CA_FILE` on the webapp. A platform that only forwards plain HTTP to a container `PORT` cannot run the API.
+- The API does not start without the two certificate variables. Compose always sets them. A platform that only forwards plain HTTP to a container `PORT` cannot run the API.
 
 **Certificate expiry.** The API logs the days left on its certificate at boot and checks it daily with the Postgres and storage certificates. It warns 90 days before expiry and logs an error 14 days before. See [Internal API TLS certificate](./secrets.mdx#api_tls_certificate) to renew it.
 
@@ -227,7 +214,7 @@ The two client certificates keep the secrets apart: the job that writes into Tra
 
 All listeners use TLS 1.3.
 
-**External S3** (AWS S3, Cloudflare R2, Backblaze B2, or MinIO). Run the API image alone (see [API container](../contributing/api-container.mdx)) with an `https://` endpoint. A publicly trusted certificate needs nothing more. For a private CA, set `BONDERY_PRIVATE_S3_TLS_CA_FILE` to its PEM file; the API then trusts only that file. If that provider requires a client certificate, also set `BONDERY_PRIVATE_S3_TLS_CERT_FILE` and `BONDERY_PRIVATE_S3_TLS_KEY_FILE`; set the pair or neither. The API refuses these variables with an `http://` endpoint, and in production it warns on every boot when the endpoint is `http://`.
+**External S3** (AWS S3, Cloudflare R2, Backblaze B2, or MinIO) is not supported in this stack. Compose sets `BONDERY_PRIVATE_S3_ENDPOINT` and the storage certificate files, and `.env` cannot override them, because the stack also publishes the storage CA and its client certificate to Traefik. The API image alone can reach other S3 endpoints, but nothing in this stack does.
 
 **Certificate expiry.** The API logs the TLS version and the days left on the gateway certificate at boot, and checks it daily with the Postgres certificate. It warns 90 days before expiry and logs an error 14 days before. See [Object storage TLS certificate](./secrets.mdx#storage_tls_certificate) to renew it.
 

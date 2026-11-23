@@ -1,0 +1,48 @@
+---
+title: "ADR 0033: Bundled Redis only"
+hidden: true
+last_updated: 2026-11-23
+description: The stack supports only its bundled Redis. An external Redis would need its own CA, certificates, and a client certificate, and could be shared.
+---
+
+# ADR 0033: Bundled Redis only
+
+**Status:** Accepted
+**Date:** 2026-11-23
+
+## Context
+
+[ADR 0032](./0032-redis-mtls.mdx) moved the bundled Redis to mutual TLS. The API and the healthcheck each present a client certificate from the Redis CA, and the server refuses a caller with only the password. The API still accepted an external Redis: `BONDERY_PRIVATE_REDIS_URL`, with an optional password file, CA file, and client certificate pair.
+
+The docs offered that path as an advanced setup. `docs/contributing/api-container.mdx` and a section in the deployment configuration told an operator to run the API image alone against a managed Redis.
+
+The support cost does not pay off:
+
+1. **Certificate setup is the operator's job.** An external Redis must carry a CA, a server certificate, and a client certificate for the API. That is the same work that `stack-secrets` does automatically for the bundled service, on a server the stack does not control. Most managed Redis offerings cannot require a client certificate at all, so the common path is to weaken the requirement.
+2. **The Redis CA becomes a shared trust anchor.** A Redis that other services use must trust certificates from outside this stack, or those services must receive a certificate from the Bondery CA. Either direction widens who can reach session data.
+3. **Redis holds sessions.** It stores Better Auth secondary storage, magic-link and step-up tokens, WebSocket tickets, and rate-limit counters. A Redis shared with an unrelated service is an authorization boundary that this stack cannot verify.
+4. **Two shapes for one deployment.** The self-host docs cover one Compose stack. A second, partially documented shape that runs the API alone made the deployment story harder to follow, and it is also blocked for platforms that forward plain HTTP to the container ([ADR 0031](./0031-internal-api-tls.mdx)).
+
+## Decision
+
+1. **Redis is always the bundled Compose service.** The API connects to `${BONDERY_INFRA_TRAEFIK_PREFIX}-redis` with the password, CA, and client certificate that `stack-secrets` creates.
+2. **No supported external Redis.** Compose sets every Redis variable in `environment:`, which takes precedence over `env_file: .env`. An operator value in `.env` has no effect, so a self-hoster cannot silently point the API at another host.
+3. **The public docs state the reason once.** Operators read why in [Configuration → Redis](../../docs/deploy/configuration.mdx#redis). They are not sent to an ADR.
+4. **Delete `docs/contributing/api-container.mdx`.** It existed to run the API image against an external Redis. The self-host pages and [Dokploy deployment](../../docs/contributing/dokploy.mdx) own deployment. Container tagging details stay in [`.github/workflows/README.md`](../../.github/workflows/README.md) and the `bondery-release` skill.
+5. **The env variables stay in the schema.** `BONDERY_PRIVATE_REDIS_URL`, `BONDERY_PRIVATE_REDIS_PASSWORD_FILE`, `BONDERY_PRIVATE_REDIS_TLS_CA_FILE`, and the client certificate pair remain, because Compose sets them and local development uses the same path. This decision removes a documented deployment shape, not the connection options.
+6. **An external Postgres stays supported.** `docker-compose.external-postgres.yml` remains. Postgres TLS verifies the server only, so it needs no client certificate from this stack.
+
+## Alternatives
+
+- **Keep external Redis with optional client certificates.** Rejected. The common case is a managed Redis without client certificate support, so the path that works is the one that weakens the requirement from ADR 0032.
+- **Ship a script that issues a client certificate for a foreign Redis.** Rejected. It spreads the Bondery Redis CA to a host the stack does not manage, and it cannot be tested without that host.
+- **Keep the page as a build-and-tag reference.** Rejected. Image tags, GHCR visibility, and release promotion belong to the release documentation, and they are already there. The page's remaining content was the external Redis setup.
+
+## Consequences
+
+- Positive: one Redis shape. The certificate chain, the CA, and the password have one owner, and an operator cannot accidentally connect the API to a shared Redis.
+- Positive: the self-host docs match the stack. There is one deployment path, the full Compose stack.
+- Negative: an operator who already pointed the API at a managed Redis must move to the bundled service. The Compose stack is the replacement, and it creates the secrets on first start.
+- Negative: a managed Redis that does require a client certificate would work mechanically. The API reads a URL, a password file, a CA file, and a certificate pair, and `.env` cannot override them only inside the Compose stack. Outside Compose the code path still works. This decision removes the advertised shape, not the capability.
+- Neutral: Redis data from a former external instance is disposable. Rate-limit counters, WebSocket tickets, and sync-wake messages reset, and sessions survive because Postgres also stores them.
+- Neutral: the connection options keep their client certificate support, so a future decision to re-enable an external Redis would not need new code.

@@ -134,6 +134,16 @@ const nextConfig: NextConfig = {
         source: "/docs/deploy/get-started",
       },
       {
+        destination: "/docs/deploy/installation",
+        permanent: true,
+        source: "/docs/contributing/api-container",
+      },
+      {
+        destination: "/docs/deploy/installation",
+        permanent: true,
+        source: "/docs/contributing/api-container.md",
+      },
+      {
         destination: "/docs/apps/mcp",
         permanent: true,
         source: "/docs/apps/mcp-server",

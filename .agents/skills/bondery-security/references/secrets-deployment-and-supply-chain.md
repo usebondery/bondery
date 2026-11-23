@@ -61,7 +61,7 @@ Canonical stack: `deploy/bondery/docker-compose.yml` + `docker-compose.postgres.
 
 - Webapp must not use `env_file` or reference `PRIVATE_*` (except PostHog allowlist)
 - Redis/db must not join `dokploy-network` or get Traefik labels
-- Redis must require TLS, mutual TLS on the bundled service, and a password in every stack variant, and the API must connect with all three (see [Redis: TLS and authentication](#redis-tls-and-authentication-required))
+- Redis must require TLS, mutual TLS, and a password in every stack variant, and the API must connect with all three (see [Redis: TLS and authentication](#redis-tls-and-authentication-required))
 - API must depend on db healthy + migrate success + redis healthy
 
 **Migrate gate:** `packages/db/scripts/release-migrate.ts` — `prisma migrate deploy` → SQL functions → OAuth client provision. Never runs on `docker compose up` alone.
@@ -70,13 +70,13 @@ Canonical stack: `deploy/bondery/docker-compose.yml` + `docker-compose.postgres.
 
 ## Redis: TLS and authentication (required)
 
-Redis holds session data (Better Auth secondary storage), magic-link and step-up tokens, WebSocket tickets, and rate-limit counters. A private Docker network is not enough protection. **Every Redis that Bondery deploys or connects to must require TLS and authentication.** The bundled Redis also requires a client certificate (`tls-auth-clients yes`). This applies to the bundled Compose Redis, to an external or managed Redis, and to any new Redis instance or stack variant added later. Design record: `docs/adr/0032-redis-mtls.mdx`.
+Redis holds session data (Better Auth secondary storage), magic-link and step-up tokens, WebSocket tickets, and rate-limit counters. A private Docker network is not enough protection. **Every Redis that Bondery deploys must require TLS, authentication, and a client certificate.** Redis is always the bundled Compose service. **There is no external Redis, and it is not supported.** A Redis outside the stack would need its own CA, a server certificate, and a client certificate for the API, and it could be shared with other services on the host. Do not add a supported path for one. Design record: `docs/adr/0032-redis-mtls.mdx`.
 
 Rules:
 
-1. **TLS only.** Redis serves `--tls-port` and disables the plaintext port (`--port 0`). Clients use `rediss://`. The bundled Redis serves TLS 1.3 only.
-2. **Verify the certificate.** Clients trust a CA (`BONDERY_PRIVATE_REDIS_TLS_CA_FILE`) or a publicly trusted certificate. Never set `rejectUnauthorized: false` or skip hostname checks.
-3. **Client certificate on the bundled Redis.** Redis sets `--tls-auth-clients yes`. The API and the healthcheck each use a client certificate from the Redis CA. Set `BONDERY_PRIVATE_REDIS_TLS_CERT_FILE` and `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE` as a pair on external Redis when that server requires them.
+1. **TLS only.** Redis serves `--tls-port` and disables the plaintext port (`--port 0`). Clients use `rediss://`. Redis serves TLS 1.3 only.
+2. **Verify the certificate.** Clients trust the Redis CA (`BONDERY_PRIVATE_REDIS_TLS_CA_FILE`). Never set `rejectUnauthorized: false` or skip hostname checks.
+3. **Client certificate.** Redis sets `--tls-auth-clients yes`. The API and the healthcheck each use a client certificate from the Redis CA, through `BONDERY_PRIVATE_REDIS_TLS_CERT_FILE` and `BONDERY_PRIVATE_REDIS_TLS_KEY_FILE`. Compose sets them, and `.env` cannot override them.
 4. **Authenticate.** Use a strong random password (32+ bytes) through an ACL file or a managed-Redis user. Do not use `requirepass` on the command line, and never set `protected-mode no` on an unauthenticated server.
 5. **Secrets in files, not in Compose text.** Pass the password with `BONDERY_PRIVATE_REDIS_PASSWORD_FILE` (volume or Docker secret) or inside `BONDERY_PRIVATE_REDIS_URL` from the secret store. Never commit it, and never put it in an image.
 6. **No public exposure.** Redis stays on the private `internal` network. No host `ports:` and no Traefik labels.

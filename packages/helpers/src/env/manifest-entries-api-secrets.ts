@@ -110,7 +110,7 @@ export const API_SECRET_ENTRIES: EnvVarDef[] = [
     // Compose sets the bundled TLS URL itself; an operator value in .env does not apply.
     deployExample: { include: false },
     description:
-      "Redis connection URL. Deployed Redis must use TLS (rediss://) and a password; local dev Redis on loopback is the only exception",
+      "Redis connection URL. Compose sets the bundled TLS URL for deploys; local dev Redis on loopback is the other case",
     exampleValue: "rediss://127.0.0.1:26636",
     group: "Redis",
     requiredIn: ["development", "production"],
