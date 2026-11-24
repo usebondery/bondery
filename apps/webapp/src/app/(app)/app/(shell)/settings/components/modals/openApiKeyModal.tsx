@@ -53,9 +53,10 @@ function ApiKeyModalBody({ modalId, onCreated, apiBaseUrl }: ApiKeyModalBodyProp
   useEffect(() => {
     modals.updateModal({
       modalId,
-      size: step === "reveal" ? "lg" : "md",
+      // One width for both steps, so the dialog does not jump when the key is revealed.
+      size: "md",
     });
-  }, [modalId, step]);
+  }, [modalId]);
 
   const handleCreate = async () => {
     if (!canCreate) {
