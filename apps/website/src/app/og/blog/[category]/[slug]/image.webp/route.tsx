@@ -3,8 +3,6 @@ import { notFound } from "next/navigation";
 import { getAllSlugs, getPostMeta } from "@/app/(marketing)/blog/_lib";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 
-const revalidate = false;
-
 type RouteContext = {
   params: Promise<{ category: string; slug: string }>;
 };
@@ -23,4 +21,5 @@ function generateStaticParams() {
   return getAllSlugs();
 }
 
-export { GET, generateStaticParams, revalidate };
+export { GET, generateStaticParams };
+export const revalidate = false;

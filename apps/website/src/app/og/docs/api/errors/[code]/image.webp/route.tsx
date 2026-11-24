@@ -7,8 +7,6 @@ import { notFound } from "next/navigation";
 import { formatText } from "@/lib/i18n/message";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 
-const revalidate = false;
-
 type RouteContext = {
   params: Promise<{ code: string }>;
 };
@@ -28,4 +26,5 @@ function generateStaticParams() {
   return API_ERROR_CODES.map((code) => ({ code }));
 }
 
-export { GET, generateStaticParams, revalidate };
+export { GET, generateStaticParams };
+export const revalidate = false;

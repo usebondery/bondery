@@ -6,8 +6,6 @@ import { notFound } from "next/navigation";
 import { createOgImageResponse } from "@/lib/og/imageResponse";
 import { getPageImage, source } from "@/lib/source";
 
-const revalidate = false;
-
 type RouteContext = {
   params: Promise<{ slug: string[] }>;
 };
@@ -33,4 +31,5 @@ function generateStaticParams() {
     .filter(({ slug }) => !(slug[0] === "api" && slug[1] === "errors"));
 }
 
-export { GET, generateStaticParams, revalidate };
+export { GET, generateStaticParams };
+export const revalidate = false;
