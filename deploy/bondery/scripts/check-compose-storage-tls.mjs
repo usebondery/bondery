@@ -69,9 +69,12 @@ const DEV_TLS_RESET_RE = /security\.toml:[^\n]*!reset|tls-entrypoint\.sh[^\n]*!r
  * The transport job must publish the storage client certificate as a PATH Traefik can read.
  *
  * A `serversTransport` accepts `certFile` and `keyFile`. It has no inline `cert` field: inlining
- * makes Traefik reject the whole file with "field not found, node: cert", which drops the router,
- * and the public domain then answers with Traefik's own 404. The job copies the material into
- * Traefik's dynamic folder, which it does mount, and references it from there.
+ * the pair makes Traefik reject the whole file with "field not found, node: cert". The job copies
+ * the material into Traefik's dynamic folder, which it does mount, and references it from there.
+ *
+ * The CA stays inline under `rootCAs`, which the schema does accept. Traefik fails SILENTLY when a
+ * `rootCAs` path is unreadable: no error line, and every route using that transport answers 500.
+ * A CA holds no private key, so keeping it in the file removes one way to get this wrong.
  */
 const TRANSPORT_STORAGE_CLIENT_CERT_SOURCE_RE = /dirname "\$ca_file"\)\/tls\.crt/;
 const TRANSPORT_CLIENT_CERT_BLOCK_RE = /echo " +certificates:"/;
@@ -79,8 +82,10 @@ const TRANSPORT_CERT_FILE_RE = /echo " +- certFile: \$DYNAMIC_DIR\/\$name-client
 const TRANSPORT_KEY_FILE_RE = /echo " +keyFile: \$DYNAMIC_DIR\/\$name-client\.key"/;
 const TRANSPORT_COPY_CERT_RE = /copy_pem "\$cert_file" CERTIFICATE/;
 const TRANSPORT_COPY_KEY_RE = /copy_pem "\$key_file" "PRIVATE KEY"/;
-/** An inline PEM block in the transport body is the regression this check exists to catch. */
-const TRANSPORT_INLINE_PEM_FORBIDDEN_RE = /echo "[^"]*-( cert|key): \|"/;
+/** The CA is inlined into rootCAs, not copied to a path Traefik might fail to resolve. */
+const TRANSPORT_ROOT_CA_INLINE_RE = /inline_pem "\$ca_file" CERTIFICATE/;
+/** An inline client cert or key is the regression this check exists to catch. */
+const TRANSPORT_INLINE_CLIENT_PAIR_FORBIDDEN_RE = /echo "[^"]*-( cert|key): \|"/;
 const TRANSPORT_FILE_MODE_RE = /chmod 0600 "\$staging"/;
 
 /** The example proxy configurations must reach the gateway, which requires a client certificate. */
@@ -383,15 +388,19 @@ export function checkStorageTls({ root, serviceBlock }) {
         TRANSPORT_COPY_KEY_RE,
         "must copy the client key into Traefik's dynamic folder, the only place Traefik reads",
       ],
+      [
+        TRANSPORT_ROOT_CA_INLINE_RE,
+        "must inline the CA under rootCAs: a rootCAs path that Traefik cannot read fails silently",
+      ],
       [TRANSPORT_FILE_MODE_RE, "must write the transport file with mode 0600 (it holds a key)"],
     ]) {
       if (!pattern.test(script)) {
         errors.push(`${label}: ${message}`);
       }
     }
-    if (TRANSPORT_INLINE_PEM_FORBIDDEN_RE.test(script)) {
+    if (TRANSPORT_INLINE_CLIENT_PAIR_FORBIDDEN_RE.test(script)) {
       errors.push(
-        `${label}: must not inline a cert or key. A serversTransport has no inline \`cert\` field, so Traefik rejects the file with "field not found, node: cert" and drops the router.`,
+        `${label}: must not inline the client cert or key. A serversTransport has no inline \`cert\` field, so Traefik rejects the file with "field not found, node: cert" and drops the router.`,
       );
     }
   }

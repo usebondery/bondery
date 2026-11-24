@@ -28,7 +28,11 @@ const STORAGE_SERVER_NAME_RE = /^ {6}serverName: bondery-beta-storage$/m;
  */
 const STORAGE_CERT_FILE_RE = /^ {8}- certFile: .*bondery-beta-storage-client\.crt$/m;
 const STORAGE_KEY_FILE_RE = /^ {10}keyFile: .*bondery-beta-storage-client\.key$/m;
-const INLINE_PEM_RE = /^\s*(cert|key): \|/m;
+/** The CA is inline under rootCAs: a rootCAs path that Traefik cannot read fails silently. */
+const STORAGE_ROOT_CA_INLINE_RE =
+  /^ {6}rootCAs:\n {8}- \|\n {10}-----BEGIN CERTIFICATE-----\n {10}MIIBdzCCAR2gAwIBAgIUU1RP$/m;
+/** Only the client pair is forbidden inline: a serversTransport has no inline `cert` field. */
+const INLINE_CERT_KEY_RE = /^\s+(?:- )?cert: \||^\s+key: \|/m;
 
 /** Every file path the transport YAML references, in the forms the job writes. */
 const REFERENCED_PATH_RE = /(?:- |certFile: |keyFile: )(\/[^\s]+)/g;
@@ -114,20 +118,33 @@ describe("publish-transports.sh", requiresSh, () => {
     assert.match(storage, STORAGE_CERT_FILE_RE);
     assert.match(storage, STORAGE_KEY_FILE_RE);
     assert.equal(
-      INLINE_PEM_RE.test(storage),
+      INLINE_CERT_KEY_RE.test(storage),
       false,
       "an inline cert/key pair is not part of the serversTransport schema",
     );
-    assert.equal(storage.includes("-----BEGIN"), false, "no PEM data belongs in the transport");
+    assert.equal(
+      storage.includes("BEGIN PRIVATE KEY"),
+      false,
+      "the key must be a path, never inline data",
+    );
   });
 
-  it("copies the certificate material into the folder Traefik reads", async () => {
+  it("inlines the CA under rootCAs, because a rootCAs path fails silently", async () => {
     const result = run("bondery-beta");
     assert.equal(result.status, 0, result.stderr);
+    const storage = await readFile(join(dynamicDir, "bondery-beta-storage-transport.yml"), "utf8");
 
-    const ca = await readFile(join(dynamicDir, "bondery-beta-storage-ca.crt"), "utf8");
-    assert.match(ca, BEGIN_CERTIFICATE_RE);
-    assert.match(ca, STORAGE_CA_BODY_RE);
+    assert.match(storage, STORAGE_ROOT_CA_INLINE_RE);
+    assert.equal(
+      storage.includes("bondery-beta-storage-ca.crt"),
+      false,
+      "the CA is inline, so the job must not also copy it into the watched folder",
+    );
+  });
+
+  it("copies the client certificate material into the folder Traefik reads", async () => {
+    const result = run("bondery-beta");
+    assert.equal(result.status, 0, result.stderr);
 
     const cert = await readFile(join(dynamicDir, "bondery-beta-storage-client.crt"), "utf8");
     assert.match(cert, BEGIN_CERTIFICATE_RE);
@@ -142,17 +159,22 @@ describe("publish-transports.sh", requiresSh, () => {
     const result = run("bondery-beta");
     assert.equal(result.status, 0, result.stderr);
 
-    for (const service of ["api", "storage"]) {
+    const referencedPaths = async (service) => {
       const transport = await readFile(
         join(dynamicDir, `bondery-beta-${service}-transport.yml`),
         "utf8",
       );
-      const referenced = [...transport.matchAll(REFERENCED_PATH_RE)].map((match) => match[1]);
-      assert.ok(referenced.length > 0, `${service} transport references at least one file`);
-      for (const path of referenced) {
-        // A dangling path is exactly the failure that took the beta storage router down.
-        await stat(path);
-      }
+      return [...transport.matchAll(REFERENCED_PATH_RE)].map((match) => match[1]);
+    };
+
+    // The API transport is fully inline (CA only), so it names no file.
+    assert.deepEqual(await referencedPaths("api"), []);
+    // The storage transport names its client certificate and key, and both must exist: a dangling
+    // path is exactly the failure that took the beta storage router down.
+    const storagePaths = await referencedPaths("storage");
+    assert.equal(storagePaths.length, 2);
+    for (const path of storagePaths) {
+      await stat(path);
     }
   });
 
@@ -175,7 +197,6 @@ describe("publish-transports.sh", requiresSh, () => {
     assert.equal(await permissionsOf("bondery-beta-mode-storage-transport.yml"), "600");
     assert.equal(await permissionsOf("bondery-beta-mode-storage-client.key"), "600");
     assert.equal(await permissionsOf("bondery-beta-mode-storage-client.crt"), "644");
-    assert.equal(await permissionsOf("bondery-beta-mode-storage-ca.crt"), "644");
   });
 
   it("leaves up-to-date files alone, so Traefik does not reload", async () => {
@@ -194,9 +215,7 @@ describe("publish-transports.sh", requiresSh, () => {
       name.startsWith("bondery-isolation"),
     );
     assert.deepEqual(written.sort(), [
-      "bondery-isolation-api-ca.crt",
       "bondery-isolation-api-transport.yml",
-      "bondery-isolation-storage-ca.crt",
       "bondery-isolation-storage-client.crt",
       "bondery-isolation-storage-client.key",
       "bondery-isolation-storage-transport.yml",
