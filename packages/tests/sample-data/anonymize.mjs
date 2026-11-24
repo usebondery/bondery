@@ -24,10 +24,21 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 /**
+ * Extracts a ZIP into `dir`.
+ *
+ * `adm-zip` resolves through this workspace package. The scripts used to shell out to `unzip`,
+ * which Windows lacks, then to `tar`, which GNU tar cannot read a ZIP with on Linux CI.
+ */
+async function extractZip(zipPath, dir) {
+  const { default: AdmZip } = await import("adm-zip");
+  await mkdir(dir, { recursive: true });
+  new AdmZip(zipPath).extractAllTo(dir, true);
+}
+
+/**
  * Writes the rewritten Instagram files back as one ZIP.
  *
- * `adm-zip` resolves through this workspace package. The scripts used to shell out to `zip`,
- * which does not exist on Windows, so every ZIP fixture test failed there.
+ * Same library as the read path, so one implementation serves every platform.
  */
 async function writeZip(outputPath, files) {
   const { default: AdmZip } = await import("adm-zip");
@@ -608,8 +619,7 @@ async function anonymizeInstagram(inputPath, outputPath, baseData) {
   try {
     await mkdir(sourceDir, { recursive: true });
     await mkdir(outputDir, { recursive: true });
-    // `tar` (bsdtar) reads ZIP and ships with Windows and macOS; `unzip` does not exist on Windows.
-    await execFileAsync("tar", ["-xf", inputPath, "-C", sourceDir]);
+    await extractZip(inputPath, sourceDir);
     const entries = await readdir(sourceDir, { recursive: true, withFileTypes: true });
     const files = entries.filter((entry) => entry.isFile());
     if (files.length === 0) {

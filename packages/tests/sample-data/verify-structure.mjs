@@ -18,14 +18,10 @@
  * `--structure-only` skips the value checks. Re-anonymizing a fixture cannot prove value freshness,
  * because the input already holds substitute values.
  */
-import { execFile } from "node:child_process";
 import { mkdir, mkdtemp, readdir, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { promisify } from "node:util";
-
-const execFileAsync = promisify(execFile);
 
 /** Properties that identify the exporting application, not the person. */
 const UNCHANGED_PROPERTIES = new Set(["BEGIN", "END", "PRODID", "VERSION"]);
@@ -208,10 +204,11 @@ function checkVcf(sourceText, fixtureText, { structureOnly = false } = {}) {
 }
 
 async function unzip(zipPath, dir) {
-  // `tar` (bsdtar) reads ZIP and ships with Windows and macOS; `unzip` does not exist on Windows.
-  // Unlike `unzip -d`, `tar` does not create the target directory.
+  // `adm-zip` resolves through this workspace package and reads ZIP on every platform. Shelling
+  // out does not work: `unzip` is absent on Windows and GNU tar cannot read a ZIP on Linux.
+  const { default: AdmZip } = await import("adm-zip");
   await mkdir(dir, { recursive: true });
-  await execFileAsync("tar", ["-xf", zipPath, "-C", dir]);
+  new AdmZip(zipPath).extractAllTo(dir, true);
 }
 
 /** Every JSON file in the archive, keyed by relative path. */

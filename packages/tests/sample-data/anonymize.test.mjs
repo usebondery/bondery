@@ -40,16 +40,15 @@ async function anonymize(kind, input, output) {
 }
 
 /**
- * Reads one entry from a ZIP. Uses `tar`, which ships with Windows and macOS; `unzip` does not.
+ * Reads one entry from a ZIP with `adm-zip`, which works on every platform. Shelling out does not:
+ * `unzip` is absent on Windows and GNU tar cannot read a ZIP on Linux CI.
  * @returns {Promise<unknown>} Parsed JSON. Callers narrow it before use.
  */
 async function readZipEntry(zipPath, name) {
-  const { stdout } = await execFileAsync("tar", ["-xOf", zipPath, name], {
-    encoding: "buffer",
-    maxBuffer: 32 * 1024 * 1024,
-  });
-  assert.ok(stdout.length > 0, `${name} missing from ${zipPath}`);
-  return asUnknown(JSON.parse(stdout.toString("utf8")));
+  const { default: AdmZip } = await import("adm-zip");
+  const entry = new AdmZip(zipPath).getEntry(name);
+  assert.ok(entry, `${name} missing from ${zipPath}`);
+  return asUnknown(JSON.parse(entry.getData().toString("utf8")));
 }
 
 describe("anonymize instagram", () => {
