@@ -33,7 +33,33 @@ function quoteEnvValue(value) {
 
 const SHARED_DOKPLOY_CONFIG_KEYS = ["BONDERY_OPS_DOKPLOY_HOST", "BONDERY_OPS_DOKPLOY_API_KEY"];
 
-/** @typedef {{ host: string; apiKey: string; composeId: string; deployWebhook: string; target: string; webhookKey: string }} DokployConfig */
+/**
+ * @typedef {{ host: string; apiKey: string; composeId: string; deployWebhook: string; target: string; webhookKey: string }} DokployConfig
+ */
+
+/**
+ * One shape for "here is the data" or "here is why it failed".
+ *
+ * Helpers return a result and never touch `process.exitCode`, so a test asserts on the value
+ * instead of stubbing `process.exit`. Only `main` reports and sets the exit code, once, at the
+ * edge: a command that fails midway through a sequence of calls would otherwise leave the process
+ * marked failed for a reason no caller can see.
+ *
+ * @template T
+ * @param {T} value
+ * @returns {{ ok: true; value: T }}
+ */
+function ok(value) {
+  return { ok: true, value };
+}
+
+/**
+ * @param {string[]} problems lines to print, already prefixed for the operator
+ * @returns {{ ok: false; problems: string[] }}
+ */
+function failed(problems) {
+  return { ok: false, problems };
+}
 
 /**
  * @param {string} target
@@ -46,7 +72,7 @@ function isDokploySyncTarget(target) {
 /**
  * @param {Record<string, string | undefined>} env
  * @param {keyof typeof DOKPLOY_SYNC_TARGETS} target
- * @returns {DokployConfig}
+ * @returns {{ ok: true; value: DokployConfig } | { ok: false; problems: string[] }}
  */
 function readDokployConfig(env, target) {
   const targetConfig = DOKPLOY_SYNC_TARGETS[target];
@@ -65,24 +91,20 @@ function readDokployConfig(env, target) {
   }
 
   if (missing.length > 0) {
-    console.error(
+    return failed([
       `sync-infisical-to-dokploy: missing required Infisical keys for target "${target}":`,
-    );
-    for (const key of missing) {
-      console.error(`  - ${key}`);
-    }
-    process.exitCode = 1;
-    return;
+      ...missing.map((key) => `  - ${key}`),
+    ]);
   }
 
-  return {
+  return ok({
     apiKey: env.BONDERY_OPS_DOKPLOY_API_KEY.trim(),
     composeId,
     deployWebhook: env[targetConfig.webhookKey]?.trim() ?? "",
     host: env.BONDERY_OPS_DOKPLOY_HOST.trim().replace(TRAILING_SLASH_RE, ""),
     target,
     webhookKey: targetConfig.webhookKey,
-  };
+  });
 }
 
 /**
@@ -90,6 +112,7 @@ function readDokployConfig(env, target) {
  *
  * @param {Record<string, string | undefined>} env
  * @param {keyof typeof DOKPLOY_SYNC_TARGETS} target
+ * @returns {{ ok: true; value: { rows: Array<{ key: string; value: string }>; uploadKeys: string[] } } | { ok: false; problems: string[] }}
  */
 function buildUploadPayload(env, target) {
   const payloadTarget = resolveDokploySyncPayloadTarget(target);
@@ -103,28 +126,22 @@ function buildUploadPayload(env, target) {
   );
 
   if (missingRequired.length > 0) {
-    console.error(
+    return failed([
       `sync-infisical-to-dokploy: missing required production values for target "${target}" (payload ${payloadTarget}):`,
-    );
-    for (const key of missingRequired) {
-      console.error(`  - ${key}`);
-    }
-    process.exitCode = 1;
-    return;
+      ...missingRequired.map((key) => `  - ${key}`),
+    ]);
   }
 
   const uploadKeys = rows.map((row) => row.key);
   for (const configKey of OPS_DOKPLOY_SYNC_CONFIG_KEYS) {
     if (uploadKeys.includes(configKey)) {
-      console.error(
+      return failed([
         `sync-infisical-to-dokploy: internal error — config key ${configKey} in upload payload`,
-      );
-      process.exitCode = 1;
-      return;
+      ]);
     }
   }
 
-  return { rows, uploadKeys };
+  return ok({ rows, uploadKeys });
 }
 
 /** @deprecated Use buildUploadPayload */
@@ -167,6 +184,7 @@ function mergeOpsEnv(existingEnv, rows, quote) {
 
 /**
  * @param {DokployConfig} config
+ * @returns {Promise<{ ok: true; value: string | null | undefined } | { ok: false; problems: string[] }>}
  */
 async function fetchComposeEnv(config) {
   const url = new URL("/api/compose.one", config.host);
@@ -180,19 +198,18 @@ async function fetchComposeEnv(config) {
 
   if (!response.ok) {
     const body = await response.text();
-    console.error(`sync-infisical-to-dokploy: compose.one failed (${response.status}): ${body}`);
-    process.exitCode = 1;
-    return;
+    return failed([`sync-infisical-to-dokploy: compose.one failed (${response.status}): ${body}`]);
   }
 
   const data = await response.json();
   const env = data?.env ?? data?.result?.data?.env;
-  return typeof env === "string" || env === null ? env : undefined;
+  return ok(typeof env === "string" || env === null ? env : undefined);
 }
 
 /**
  * @param {DokployConfig} config
  * @param {string} envPayload
+ * @returns {Promise<{ ok: true } | { ok: false; problems: string[] }>}
  */
 async function saveComposeEnv(config, envPayload) {
   const response = await fetch(new URL("/api/compose.saveEnvironment", config.host), {
@@ -209,11 +226,12 @@ async function saveComposeEnv(config, envPayload) {
 
   if (!response.ok) {
     const body = await response.text();
-    console.error(
+    return failed([
       `sync-infisical-to-dokploy: compose.saveEnvironment failed (${response.status}): ${body}`,
-    );
-    process.exitCode = 1;
+    ]);
   }
+
+  return ok(undefined);
 }
 
 /**
@@ -242,6 +260,7 @@ function buildDeployWebhookPayload(repository, pathSentinels, branch = "release"
  * @param {string} repository
  * @param {readonly string[]} pathSentinels
  * @param {string} [branch]
+ * @returns {Promise<{ ok: true } | { ok: false; problems: string[] }>}
  */
 async function triggerDeployWebhook(webhookUrl, repository, pathSentinels, branch) {
   const response = await fetch(webhookUrl, {
@@ -255,9 +274,12 @@ async function triggerDeployWebhook(webhookUrl, repository, pathSentinels, branc
 
   if (!response.ok) {
     const body = await response.text();
-    console.error(`sync-infisical-to-dokploy: deploy webhook failed (${response.status}): ${body}`);
-    process.exitCode = 1;
+    return failed([
+      `sync-infisical-to-dokploy: deploy webhook failed (${response.status}): ${body}`,
+    ]);
   }
+
+  return ok(undefined);
 }
 
 function parseArgs(argv) {
@@ -280,27 +302,58 @@ function parseArgs(argv) {
   return { dryRun, redeploy, target };
 }
 
+/**
+ * Prints the problems of a failed result and reports failure. Every early return in `main` goes
+ * through here, so the exit code is set in one place.
+ *
+ * @param {{ ok: false; problems: string[] }} result
+ */
+function reportFailure(result) {
+  for (const line of result.problems) {
+    console.error(line);
+  }
+  process.exitCode = 1;
+}
+
 async function main() {
   const args = parseArgs(process.argv.slice(2));
 
   if (args.target === "ops") {
-    console.error("sync-infisical-to-dokploy: --target ops was renamed to --target website");
-    process.exitCode = 1;
+    reportFailure(
+      failed(["sync-infisical-to-dokploy: --target ops was renamed to --target website"]),
+    );
     return;
   }
 
   if (!isDokploySyncTarget(args.target)) {
-    console.error(
-      "sync-infisical-to-dokploy: --target must be website, website-beta, plausible, services, or services-beta",
+    reportFailure(
+      failed([
+        "sync-infisical-to-dokploy: --target must be website, website-beta, plausible, services, or services-beta",
+      ]),
     );
-    process.exitCode = 1;
     return;
   }
 
-  const config = readDokployConfig(process.env, args.target);
-  const { rows, uploadKeys } = buildUploadPayload(process.env, args.target);
-  const existingEnv = args.dryRun ? null : await fetchComposeEnv(config);
-  const envPayload = mergeComposeEnv(existingEnv, rows, quoteEnvValue);
+  const configResult = readDokployConfig(process.env, args.target);
+  if (!configResult.ok) {
+    reportFailure(configResult);
+    return;
+  }
+  const config = configResult.value;
+
+  const payloadResult = buildUploadPayload(process.env, args.target);
+  if (!payloadResult.ok) {
+    reportFailure(payloadResult);
+    return;
+  }
+  const { rows, uploadKeys } = payloadResult.value;
+
+  const existingEnvResult = args.dryRun ? ok(null) : await fetchComposeEnv(config);
+  if (!existingEnvResult.ok) {
+    reportFailure(existingEnvResult);
+    return;
+  }
+  const envPayload = mergeComposeEnv(existingEnvResult.value, rows, quoteEnvValue);
 
   console.log(`sync-infisical-to-dokploy: target ${args.target}, upload keys:`);
   for (const key of uploadKeys) {
@@ -312,15 +365,20 @@ async function main() {
     return;
   }
 
-  await saveComposeEnv(config, envPayload);
+  const saved = await saveComposeEnv(config, envPayload);
+  if (!saved.ok) {
+    reportFailure(saved);
+    return;
+  }
   console.log("sync-infisical-to-dokploy: saved compose environment");
 
   if (args.redeploy) {
     if (!config.deployWebhook) {
-      console.error(
-        `sync-infisical-to-dokploy: --redeploy requires ${config.webhookKey} in Infisical`,
+      reportFailure(
+        failed([
+          `sync-infisical-to-dokploy: --redeploy requires ${config.webhookKey} in Infisical`,
+        ]),
       );
-      process.exitCode = 1;
       return;
     }
 
@@ -329,7 +387,16 @@ async function main() {
       process.env.GITHUB_REPOSITORY ?? "usebondery/bondery";
     const pathSentinels = DOKPLOY_SYNC_TARGETS[args.target].webhookPathSentinels;
     const webhookBranch = getDokploySyncWebhookBranch(args.target);
-    await triggerDeployWebhook(config.deployWebhook, repository, pathSentinels, webhookBranch);
+    const triggered = await triggerDeployWebhook(
+      config.deployWebhook,
+      repository,
+      pathSentinels,
+      webhookBranch,
+    );
+    if (!triggered.ok) {
+      reportFailure(triggered);
+      return;
+    }
     console.log("sync-infisical-to-dokploy: triggered deploy webhook");
   }
 }
